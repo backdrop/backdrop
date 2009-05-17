@@ -159,7 +159,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: views uk Ukrainian translation\n"
 "POT-Creation-Date: 2009-05-17 14:10+0300\n"
-"PO-Revision-Date: 2009-05-17 14:16+0300\n"
+"PO-Revision-Date: 2009-05-17 15:29+0300\n"
 "Last-Translator: Andriy Podanenko <podarok@ua.fm>\n"
 "Language-Team: uk <podarok@ua.fm>\n"
 "MIME-Version: 1.0\n"
@@ -171,11 +171,11 @@ msgstr ""
 
 #: views.module:644
 msgid "Broken handler @table.@field"
-msgstr ""
+msgstr "Втрачено handler @table.@field"
 
 #: views.module:762
 msgid "Skipping broken view @view"
-msgstr ""
+msgstr "Пропущено поломаний view @view"
 
 #: views.module:814;854
 #: includes/admin.inc:114;232;232;646
@@ -212,7 +212,7 @@ msgstr "Views"
 
 #: views.module:162
 msgid "Ajax callback for view loading."
-msgstr ""
+msgstr "Ajax callback для завантаження view."
 
 #: views.module:0
 msgid "views"
@@ -224,7 +224,7 @@ msgstr ""
 
 #: views_ui.module:258
 msgid "Changes cannot be made to a locked view."
-msgstr ""
+msgstr "Зміни не можуть бути зроблені до заблокованого вигляду."
 
 #: views_ui.module:28
 msgid "Views are customized lists of content on your system; they are highly configurable and give you control over how lists of content are presented."
@@ -282,7 +282,7 @@ msgstr "views_ui"
 
 #: views.info:0
 msgid "Create customized lists and queries from your database."
-msgstr ""
+msgstr "Створення видозмінених виглядів і запитів з Вашої Бази Даних"
 
 #: views_ui.info:0
 msgid "Views UI"
@@ -290,7 +290,7 @@ msgstr "Views UI"
 
 #: views_ui.info:0
 msgid "Administrative interface to views. Without this module, you cannot create or edit your views."
-msgstr ""
+msgstr "Адміністративний інтерфейс для виглядів. Без цього модуля Ви не зможете створювати або змінювати Ваші вигляди."
 
 #: docs/docs.php:90;97
 msgid "Example table"
@@ -298,7 +298,7 @@ msgstr "Таблиця приклад"
 
 #: docs/docs.php:98
 msgid "Example table contains example content and can be related to nodes."
-msgstr ""
+msgstr "Таблиця прикладів відображає варіанти і може бути застосована для матеріалів."
 
 #: docs/docs.php:122
 msgid "Example content"
@@ -306,7 +306,7 @@ msgstr "Матеріал приклад"
 
 #: docs/docs.php:123
 msgid "Some example content that references a node."
-msgstr ""
+msgstr "Деякі приклади, пов'язані з матеріалами"
 
 #: docs/docs.php:131
 msgid "Example node"
@@ -330,11 +330,11 @@ msgstr "Просто поле з просто цифр."
 
 #: docs/docs.php:172
 msgid "Boolean field"
-msgstr ""
+msgstr "Булеве поле"
 
 #: docs/docs.php:173
 msgid "Just an on/off field."
-msgstr ""
+msgstr "Просто поле так/ні, 1/0, ввімкнено/вимкнено"
 
 #: docs/docs.php:180
 #: modules/node.views.inc:159;167
@@ -344,15 +344,15 @@ msgstr "Оприлюднений"
 
 #: docs/docs.php:190
 msgid "Timestamp field"
-msgstr ""
+msgstr "Поле моменту часу"
 
 #: docs/docs.php:191
 msgid "Just a timestamp field."
-msgstr ""
+msgstr "Просто поле для часу"
 
 #: docs/docs.php:262
 msgid "Emulates the default Drupal front page; you may set the default home page path to this view to make it your front page."
-msgstr ""
+msgstr "Емулює базову головну сторінку Друпал; Ви можете встановити базовою сторінкою сайту цей вигляд, щоб спробувати різні модифікації головної сторінки"
 
 #: docs/docs.php:263
 msgid "default"
@@ -361,7 +361,7 @@ msgstr "за замовчуванням"
 #: docs/docs.php:272
 #: includes/plugins.inc:25
 msgid "Defaults"
-msgstr ""
+msgstr "Базове"
 
 #: docs/docs.php:361
 #: includes/plugins.inc:39;47
@@ -375,7 +375,7 @@ msgstr "RSS стрічка"
 
 #: docs/docs.php:484
 msgid "Front page feed"
-msgstr ""
+msgstr "Стрічка головної сторінки"
 
 #: handlers/views_handler_argument.inc:102
 #: modules/translation/views_handler_relationship_translation.inc:23
@@ -402,7 +402,7 @@ msgstr ""
 
 #: handlers/views_handler_argument.inc:146
 msgid "Wildcard"
-msgstr ""
+msgstr "Джокер"
 
 #: handlers/views_handler_argument.inc:149
 msgid "If this value is received as an argument, the argument will be ignored; i.e, \"all values\""
@@ -410,7 +410,7 @@ msgstr ""
 
 #: handlers/views_handler_argument.inc:155
 msgid "Wildcard title"
-msgstr ""
+msgstr "Джокер назви"
 
 #: handlers/views_handler_argument.inc:158
 msgid "The title to use for the wildcard in substitutions elsewhere."
@@ -418,15 +418,15 @@ msgstr ""
 
 #: handlers/views_handler_argument.inc:181
 msgid "Validator options"
-msgstr ""
+msgstr "Параметри перевірки"
 
 #: handlers/views_handler_argument.inc:186
 msgid "Validator"
-msgstr ""
+msgstr "Перевірка"
 
 #: handlers/views_handler_argument.inc:190
 msgid "<Basic validation>"
-msgstr ""
+msgstr "<Базова перевірка>"
 
 #: handlers/views_handler_argument.inc:229
 msgid "Action to take if argument does not validate"
@@ -462,7 +462,7 @@ msgstr ""
 
 #: handlers/views_handler_argument.inc:320
 msgid "Default argument type"
-msgstr ""
+msgstr "Базовий тип аргумента"
 
 #: handlers/views_handler_argument.inc:744
 #: handlers/views_handler_field.inc:599
@@ -482,7 +482,7 @@ msgstr ""
 
 #: handlers/views_handler_argument_date.inc:29
 msgid "Current date"
-msgstr ""
+msgstr "Теперішня дата"
 
 #: handlers/views_handler_argument_date.inc:30
 msgid "Current node's creation time"
@@ -495,7 +495,7 @@ msgstr ""
 #: handlers/views_handler_argument_many_to_one.inc:45
 #: handlers/views_handler_argument_numeric.inc:30
 msgid "Allow multiple terms per argument."
-msgstr ""
+msgstr "Дозволити багато термінів на аргумент"
 
 #: handlers/views_handler_argument_many_to_one.inc:46
 msgid "If selected, users can enter multiple arguments in the form of 1+2+3 (for OR) or 1,2,3 (for AND)."
@@ -504,7 +504,7 @@ msgstr ""
 #: handlers/views_handler_argument_many_to_one.inc:53
 #: handlers/views_handler_argument_string.inc:95
 msgid "Allow multiple arguments to work together."
-msgstr ""
+msgstr "Дозволити багато аргументів в спільній роботі"
 
 #: handlers/views_handler_argument_many_to_one.inc:54
 #: handlers/views_handler_argument_string.inc:96
@@ -525,7 +525,7 @@ msgstr "Без категорії"
 #: handlers/views_handler_argument_many_to_one.inc:113
 #: handlers/views_handler_argument_numeric.inc:61
 msgid "Invalid input"
-msgstr ""
+msgstr "Некоректний ввід"
 
 #: handlers/views_handler_argument_null.inc:21
 msgid "Fail basic validation if any argument is given"
@@ -565,7 +565,7 @@ msgstr ""
 
 #: handlers/views_handler_argument_string.inc:60
 msgid "Case"
-msgstr ""
+msgstr "Вибір"
 
 #: handlers/views_handler_argument_string.inc:61
 msgid "When printing the argument result, how to transform the case."
@@ -577,23 +577,23 @@ msgstr ""
 
 #: handlers/views_handler_argument_string.inc:64;78
 msgid "Upper case"
-msgstr ""
+msgstr "Великі літери"
 
 #: handlers/views_handler_argument_string.inc:65;79
 msgid "Lower case"
-msgstr ""
+msgstr "Малі літери"
 
 #: handlers/views_handler_argument_string.inc:66;80
 msgid "Capitalize first letter"
-msgstr ""
+msgstr "Виправлення першої букви"
 
 #: handlers/views_handler_argument_string.inc:67;81
 msgid "Capitalize each word"
-msgstr ""
+msgstr "Виправлення першої літери в кожному слові"
 
 #: handlers/views_handler_argument_string.inc:74
 msgid "Case in path"
-msgstr ""
+msgstr "Вибір в шляху"
 
 #: handlers/views_handler_argument_string.inc:75
 msgid "When printing url paths, how to transform the of the argument. Do not use this unless with Postgres as it uses case sensitive comparisons."
@@ -735,7 +735,7 @@ msgstr ""
 
 #: handlers/views_handler_field.inc:338
 msgid "Strip HTML tags"
-msgstr ""
+msgstr "Обмежувати теги HTML"
 
 #: handlers/views_handler_field.inc:339
 msgid "If checked, all HTML tags will be stripped."
@@ -743,7 +743,7 @@ msgstr ""
 
 #: handlers/views_handler_field.inc:349
 msgid "Field can contain HTML"
-msgstr ""
+msgstr "Поле може сприймати HTML"
 
 #: handlers/views_handler_field.inc:350
 msgid "If checked, HTML corrector will be run to ensure tags are properly closed after trimming."
@@ -751,27 +751,27 @@ msgstr ""
 
 #: handlers/views_handler_field_boolean.inc:25
 msgid "Output format"
-msgstr ""
+msgstr "Вихідний формат"
 
 #: handlers/views_handler_field_boolean.inc:27
 msgid "Yes/No"
-msgstr ""
+msgstr "Так/Ні"
 
 #: handlers/views_handler_field_boolean.inc:28
 msgid "True/False"
-msgstr ""
+msgstr "True/False"
 
 #: handlers/views_handler_field_boolean.inc:29
 msgid "On/Off"
-msgstr ""
+msgstr "Ввімкнено/Вимкнено"
 
 #: handlers/views_handler_field_boolean.inc:35
 msgid "Reverse"
-msgstr ""
+msgstr "Реверс"
 
 #: handlers/views_handler_field_boolean.inc:36
 msgid "If checked, true will be displayed as false."
-msgstr ""
+msgstr "Відмічене - TRUE буде відображене як FALSE"
 
 #: handlers/views_handler_field_boolean.inc:50
 #: handlers/views_handler_filter_boolean_operator.inc:43
@@ -799,17 +799,17 @@ msgstr "Так"
 #: handlers/views_handler_field_boolean.inc:52
 #: handlers/views_handler_filter_boolean_operator.inc:52
 msgid "False"
-msgstr ""
+msgstr "False"
 
 #: handlers/views_handler_field_boolean.inc:54
 #: handlers/views_handler_filter_boolean_operator.inc:46
 msgid "On"
-msgstr ""
+msgstr "Ввімкнено"
 
 #: handlers/views_handler_field_boolean.inc:54
 #: handlers/views_handler_filter_boolean_operator.inc:46
 msgid "Off"
-msgstr ""
+msgstr "Вимкнено"
 
 #: handlers/views_handler_field_date.inc:24
 msgid "Date format"
@@ -821,7 +821,7 @@ msgstr "Власна"
 
 #: handlers/views_handler_field_date.inc:30
 msgid "Time ago"
-msgstr ""
+msgstr "Часу назад"
 
 #: handlers/views_handler_field_date.inc:31
 msgid "Time ago (with \"ago\" appended)"
@@ -829,7 +829,7 @@ msgstr ""
 
 #: handlers/views_handler_field_date.inc:37
 msgid "Custom date format"
-msgstr ""
+msgstr "Свій формат часу"
 
 #: handlers/views_handler_field_date.inc:38
 msgid "If \"Custom\", see <a href=\"http://us.php.net/manual/en/function.date.php\" target=\"_blank\">the PHP docs</a> for date formats. If \"Time ago\" this is the the number of different units to display, which defaults to two."
@@ -841,7 +841,7 @@ msgstr "%time тому"
 
 #: handlers/views_handler_field_numeric.inc:32
 msgid "Round"
-msgstr ""
+msgstr "Округлення"
 
 #: handlers/views_handler_field_numeric.inc:33
 msgid "If checked, the number will be rounded."
@@ -849,7 +849,7 @@ msgstr ""
 
 #: handlers/views_handler_field_numeric.inc:38
 msgid "Precision"
-msgstr ""
+msgstr "Точність"
 
 #: handlers/views_handler_field_numeric.inc:40
 msgid "Specify how many digits to print after the decimal point."
@@ -873,7 +873,7 @@ msgstr ""
 
 #: handlers/views_handler_field_numeric.inc:62
 msgid "Prefix"
-msgstr ""
+msgstr "Префікс"
 
 #: handlers/views_handler_field_numeric.inc:64
 msgid "Text to put before the number, such as currency symbol."
@@ -881,7 +881,7 @@ msgstr ""
 
 #: handlers/views_handler_field_numeric.inc:68
 msgid "Suffix"
-msgstr ""
+msgstr "Суфікс"
 
 #: handlers/views_handler_field_numeric.inc:70
 msgid "Text to put after the number, such as currency symbol."
@@ -891,28 +891,28 @@ msgstr ""
 #: modules/aggregator/views_plugin_row_aggregator_rss.inc:23
 #: modules/node/views_plugin_row_node_rss.inc:30
 msgid "Display type"
-msgstr ""
+msgstr "Тип відображення"
 
 #: handlers/views_handler_field_prerender_list.inc:31
 #: plugins/views_plugin_style_list.inc:33
 msgid "Unordered list"
-msgstr ""
+msgstr "Ненумерований список"
 
 #: handlers/views_handler_field_prerender_list.inc:32
 #: plugins/views_plugin_style_list.inc:33
 msgid "Ordered list"
-msgstr ""
+msgstr "Нумерований список"
 
 #: handlers/views_handler_field_prerender_list.inc:33
 msgid "Simple separator"
-msgstr ""
+msgstr "Простий розділювач"
 
 #: handlers/views_handler_field_prerender_list.inc:40
 #: includes/admin.inc:3010
 #: plugins/views_plugin_row_fields.inc:47
 #: plugins/views_plugin_style_summary_unformatted.inc:30
 msgid "Separator"
-msgstr ""
+msgstr "Розділювач"
 
 #: handlers/views_handler_field_prerender_list.inc:48
 msgid "Empty list text"
@@ -930,11 +930,11 @@ msgstr ""
 
 #: handlers/views_handler_filter.inc:136
 msgid "Operator"
-msgstr ""
+msgstr "Оператор"
 
 #: handlers/views_handler_filter.inc:201
 msgid "Expose"
-msgstr ""
+msgstr "Показувати фільтр"
 
 #: handlers/views_handler_filter.inc:206
 msgid "This item is currently not exposed. If you <strong>expose</strong> it, users will be able to change the filter as they view it."
@@ -990,7 +990,7 @@ msgstr ""
 
 #: handlers/views_handler_filter.inc:347
 msgid "Remember"
-msgstr ""
+msgstr "Запам'ятати"
 
 #: handlers/views_handler_filter.inc:348
 msgid "Remember the last setting the user gave this filter."
@@ -1019,11 +1019,11 @@ msgstr ""
 #: handlers/views_handler_filter_numeric.inc:247
 #: handlers/views_handler_filter_string.inc:111
 msgid "exposed"
-msgstr ""
+msgstr "відображено"
 
 #: handlers/views_handler_filter_date.inc:24
 msgid "Value type"
-msgstr ""
+msgstr "Тип значення"
 
 #: handlers/views_handler_filter_date.inc:26
 msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
