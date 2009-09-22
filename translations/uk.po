@@ -3,46 +3,46 @@
 # Ukrainian translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  views.module,v 1.332 2009/04/08 16:11:51 merlinofchaos
-#  admin.inc,v 1.154 2009/04/07 20:48:28 merlinofchaos
+#  views.module,v 1.338 2009/06/03 00:01:00 merlinofchaos
+#  admin.inc,v 1.160 2009/06/10 22:01:31 merlinofchaos
 #  views_ui.module,v 1.109 2009/01/30 00:56:01 merlinofchaos
-#  views_export.module,v 1.4 2009/04/08 16:11:51 merlinofchaos
+#  views_export.module,v 1.6 2009/06/02 19:36:25 merlinofchaos
 #  views.info,v 1.7 2007/08/12 06:52:14 merlinofchaos
 #  views_ui.info,v 1.10 2008/01/09 00:05:08 merlinofchaos
 #  views_export.info,v 1.1 2008/06/12 16:17:25 merlinofchaos
-#  plugins.inc,v 1.152 2009/01/07 23:31:12 merlinofchaos
-#  convert.inc,v 1.14 2009/04/07 23:21:00 merlinofchaos
-#  theme.inc,v 1.72 2009/04/08 04:24:52 merlinofchaos
-#  docs.php,v 1.13 2009/02/06 21:56:36 merlinofchaos
-#  node.views.inc,v 1.93 2009/04/08 20:54:57 merlinofchaos
+#  plugins.inc,v 1.154 2009/06/02 20:22:19 merlinofchaos
+#  convert.inc,v 1.15 2009/06/02 20:31:00 merlinofchaos
+#  theme.inc,v 1.76 2009/06/02 20:28:52 merlinofchaos
+#  docs.php,v 1.15 2009/06/01 23:33:37 merlinofchaos
+#  node.views.inc,v 1.96 2009/06/03 02:16:48 merlinofchaos
 #  upload.views.inc,v 1.15 2008/11/24 19:58:31 merlinofchaos
-#  views_handler_argument.inc,v 1.7 2009/02/20 20:12:38 merlinofchaos
+#  views_handler_argument.inc,v 1.8 2009/06/02 19:38:33 merlinofchaos
 #  views_handler_relationship_translation.inc,v 1.1 2008/09/30 22:07:15 merlinofchaos
-#  aggregator.views.inc,v 1.2 2009/04/07 23:07:31 merlinofchaos
+#  aggregator.views.inc,v 1.3 2009/06/02 19:46:06 merlinofchaos
 #  comment.views.inc,v 1.32 2009/04/08 06:38:41 merlinofchaos
-#  views_plugin_display.inc,v 1.20 2009/04/07 22:48:04 merlinofchaos
-#  views_plugin_display_page.inc,v 1.5 2009/01/27 18:40:31 merlinofchaos
-#  views_handler_field.inc,v 1.14 2009/04/08 05:23:56 merlinofchaos
-#  views_handler_filter.inc,v 1.6 2009/04/07 23:05:29 merlinofchaos
-#  views_handler_relationship.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
+#  views_plugin_display.inc,v 1.24 2009/06/10 22:01:31 merlinofchaos
+#  views_plugin_display_page.inc,v 1.7 2009/06/02 20:37:15 merlinofchaos
+#  views_handler_field.inc,v 1.19 2009/06/03 19:55:52 merlinofchaos
+#  views_handler_filter.inc,v 1.9 2009/06/03 00:05:05 merlinofchaos
+#  views_handler_relationship.inc,v 1.3 2009/06/04 20:09:26 merlinofchaos
 #  views_handler_sort.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
 #  views_handler_argument_date.inc,v 1.3 2009/03/24 22:28:26 merlinofchaos
 #  views_handler_argument_many_to_one.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
 #  views_handler_argument_numeric.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
 #  views_handler_argument_string.inc,v 1.4 2009/01/07 21:30:31 merlinofchaos
-#  taxonomy.views.inc,v 1.50 2009/01/08 00:36:02 merlinofchaos
+#  taxonomy.views.inc,v 1.54 2009/06/05 01:26:35 merlinofchaos
 #  views_handler_argument_null.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
-#  view.inc,v 1.151 2009/02/18 01:41:34 merlinofchaos
+#  view.inc,v 1.159 2009/06/04 18:40:45 merlinofchaos
 #  views_handler_field_boolean.inc,v 1.2 2009/01/30 00:01:41 merlinofchaos
-#  views_handler_filter_boolean_operator.inc,v 1.3 2008/11/24 19:58:30 merlinofchaos
-#  views_handler_filter_in_operator.inc,v 1.6 2009/01/31 19:38:59 merlinofchaos
+#  views_handler_filter_boolean_operator.inc,v 1.4 2009/06/01 21:41:31 merlinofchaos
+#  views_handler_filter_in_operator.inc,v 1.10 2009/06/10 22:04:57 merlinofchaos
 #  views_handler_filter_node_tnid.inc,v 1.1 2008/12/02 16:34:24 merlinofchaos
-#  views_plugin_display_attachment.inc,v 1.3 2009/01/06 04:45:39 merlinofchaos
-#  views_handler_field_date.inc,v 1.2 2009/02/21 23:36:42 merlinofchaos
+#  views_plugin_display_attachment.inc,v 1.4 2009/05/20 02:53:30 merlinofchaos
+#  views_handler_field_date.inc,v 1.3 2009/06/02 18:20:18 merlinofchaos
 #  views_handler_field_numeric.inc,v 1.5 2009/04/07 22:59:14 merlinofchaos
 #  views_handler_field_prerender_list.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
 #  views_plugin_row_aggregator_rss.inc,v 1.1 2009/01/07 19:38:08 merlinofchaos
-#  views_plugin_row_node_rss.inc,v 1.6 2009/04/07 22:02:40 merlinofchaos
+#  views_plugin_row_node_rss.inc,v 1.7 2009/06/02 20:14:43 merlinofchaos
 #  views_plugin_style_list.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_plugin_row_fields.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_plugin_style_summary_unformatted.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
@@ -51,33 +51,39 @@
 #  views_handler_field_accesslog_path.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_handler_filter_numeric.inc,v 1.7 2009/03/25 17:29:33 merlinofchaos
 #  views_handler_filter_string.inc,v 1.7 2009/01/27 20:40:29 merlinofchaos
+#  views_handler_filter_history_user_timestamp.inc,v 1.2 2009/06/02 19:10:40 merlinofchaos
 #  views_handler_filter_date.inc,v 1.3 2008/11/26 19:01:44 merlinofchaos
 #  views_handler_filter_equality.inc,v 1.2 2008/09/10 01:08:06 merlinofchaos
-#  views_handler_filter_many_to_one.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
+#  views_handler_filter_many_to_one.inc,v 1.2 2009/06/01 21:29:11 merlinofchaos
+#  views_handler_filter_term_node_tid_depth.inc,v 1.1 2009/06/05 01:26:35 merlinofchaos
 #  system.views.inc,v 1.7 2008/09/03 19:21:29 merlinofchaos
 #  views_plugin_access.inc,v 1.1 2008/09/08 22:50:17 merlinofchaos
+#  views_plugin_cache.inc,v 1.2 2009/06/03 23:39:52 merlinofchaos
 #  views_handler_field_search_score.inc,v 1.2 2009/02/23 23:30:38 merlinofchaos
 #  views_plugin_style_table.inc,v 1.5 2008/10/15 22:25:36 merlinofchaos
 #  views_handler_sort_date.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
 #  views_handler_sort_formula.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos
-#  views_plugin_style.inc,v 1.5 2009/03/24 22:22:11 merlinofchaos
-#  user.views.inc,v 1.56 2009/02/06 20:54:53 merlinofchaos
+#  views_plugin_style.inc,v 1.6 2009/06/01 23:34:55 merlinofchaos
+#  user.views.inc,v 1.57 2009/06/02 20:18:26 merlinofchaos
 #  statistics.views.inc,v 1.9 2008/10/28 20:21:37 merlinofchaos
-#  views_plugin_display_block.inc,v 1.2 2008/11/19 19:50:54 merlinofchaos
-#  views_plugin_display_feed.inc,v 1.3 2008/09/30 18:52:15 merlinofchaos
+#  views_plugin_cache_none.inc,v 1.2 2009/06/03 23:39:52 merlinofchaos
+#  views_plugin_display_block.inc,v 1.4 2009/06/01 21:38:44 merlinofchaos
+#  views_plugin_display_feed.inc,v 1.4 2009/05/20 02:53:30 merlinofchaos
 #  book.views.inc,v 1.5 2008/12/02 19:37:08 merlinofchaos
-#  views_plugin_row.inc,v 1.3 2009/04/11 17:18:58 merlinofchaos
-#  ajax.inc,v 1.19 2008/09/22 20:50:58 merlinofchaos
+#  views_plugin_row.inc,v 1.4 2009/06/01 23:34:55 merlinofchaos
+#  ajax.inc,v 1.20 2009/06/01 23:12:22 merlinofchaos
 #  analyze.inc,v 1.1 2008/10/28 22:50:00 merlinofchaos
 #  form.inc,v 1.10 2008/06/25 21:10:10 merlinofchaos
-#  handlers.inc,v 1.109 2009/04/10 20:22:54 merlinofchaos
+#  handlers.inc,v 1.114 2009/06/04 20:20:45 merlinofchaos
 #  views_plugin_access_role.inc,v 1.2 2009/01/07 23:31:13 merlinofchaos
 #  views_plugin_access_perm.inc,v 1.3 2009/01/07 23:31:13 merlinofchaos
 #  ajax.js,v 1.25 2009/03/24 23:03:32 merlinofchaos
-#  ajax_view.js,v 1.17 2009/03/25 00:11:25 merlinofchaos
-#  tabs.js,v 1.3 2008/03/30 15:58:26 merlinofchaos
+#  ajax_view.js,v 1.18 2009/06/02 19:30:44 merlinofchaos
+#  tabs.js,v 1.4 2009/06/02 17:12:13 merlinofchaos
+#  views_handler_field_contact_link.inc,v 1.1 2009/06/01 21:55:36 merlinofchaos
 #  views_handler_argument_term_node_tid_depth.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  locale.views.inc,v 1.1 2009/02/23 22:20:04 merlinofchaos
+#  contact.views.inc,v 1.1 2009/06/01 21:55:36 merlinofchaos
 #  views_handler_filter_locale_group.inc,v 1.1 2009/02/20 23:02:09 merlinofchaos
 #  views_handler_filter_locale_version.inc,v 1.1 2009/02/20 23:02:09 merlinofchaos
 #  translation.views.inc,v 1.8 2009/01/07 23:13:46 merlinofchaos
@@ -87,18 +93,19 @@
 #  poll.views.inc,v 1.4 2008/12/03 19:10:21 merlinofchaos
 #  profile.views.inc,v 1.9 2008/09/24 21:21:21 merlinofchaos
 #  search.views.inc,v 1.17 2009/02/23 23:30:38 merlinofchaos
-#  views_plugin_argument_validate_taxonomy_term.inc,v 1.4 2009/04/08 05:10:07 merlinofchaos
+#  views_plugin_argument_validate_taxonomy_term.inc,v 1.5 2009/06/02 18:36:36 merlinofchaos
 #  views_handler_filter_term_node_tid.inc,v 1.8 2009/04/07 23:21:01 merlinofchaos
 #  views_handler_filter_upload_fid.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
-#  views.views.inc,v 1.6 2009/01/30 00:01:41 merlinofchaos
-#  views_handler_argument_comment_user_uid.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
-#  views_handler_argument_user_uid.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
+#  views.views.inc,v 1.7 2009/06/02 17:29:26 merlinofchaos
+#  views_handler_field_aggregator_category.inc,v 1.1 2009/06/02 19:46:06 merlinofchaos
 #  views_handler_field_comment.inc,v 1.5 2009/02/10 20:37:49 merlinofchaos
 #  views_handler_field_node_new_comments.inc,v 1.6 2009/04/07 23:02:07 merlinofchaos
-#  views_handler_field_node.inc,v 1.3 2009/01/30 00:01:42 merlinofchaos
+#  views_handler_field_node.inc,v 1.4 2009/06/02 20:54:38 merlinofchaos
 #  views_handler_field_file.inc,v 1.3 2009/01/30 00:01:42 merlinofchaos
 #  views_handler_field_taxonomy.inc,v 1.3 2009/01/30 00:01:42 merlinofchaos
 #  views_handler_field_user.inc,v 1.3 2009/01/30 00:01:42 merlinofchaos
+#  views_handler_argument_comment_user_uid.inc,v 1.2 2009/06/02 18:50:56 merlinofchaos
+#  views_handler_argument_user_uid.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_handler_field_comment_link.inc,v 1.2 2008/09/10 00:16:14 merlinofchaos
 #  views_handler_field_locale_link_edit.inc,v 1.1 2009/02/20 23:02:09 merlinofchaos
 #  views_handler_field_node_link.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
@@ -121,11 +128,11 @@
 #  views_handler_argument_node_language.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
 #  views_handler_argument_node_language.inc,v 1.1 2008/09/30 22:07:15 merlinofchaos
 #  views_handler_argument_dates_various.inc,v 1.4 2009/01/08 00:25:19 merlinofchaos
-#  views_handler_argument_node_type.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
+#  views_handler_argument_node_type.inc,v 1.2 2009/06/02 17:57:48 merlinofchaos
 #  views_handler_field_history_user_timestamp.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
 #  views_handler_field_node_revision_link_revert.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
-#  views_handler_filter_node_type.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
-#  views_plugin_argument_validate_node.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos
+#  views_handler_filter_node_type.inc,v 1.2 2009/06/02 17:57:48 merlinofchaos
+#  views_plugin_argument_validate_node.inc,v 1.2 2009/06/10 22:04:57 merlinofchaos
 #  views_handler_filter_search.inc,v 1.5 2009/04/10 19:32:19 merlinofchaos
 #  views_plugin_row_search_view.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_handler_argument_file_fid.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
@@ -142,33 +149,31 @@
 #  views_plugin_argument_default_user.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_plugin_argument_validate_user.inc,v 1.2 2009/02/17 23:32:33 merlinofchaos
 #  views_plugin_access_none.inc,v 1.1 2008/09/08 22:50:17 merlinofchaos
-#  views_plugin_argument_default.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
+#  views_plugin_argument_default.inc,v 1.2 2009/06/01 23:34:55 merlinofchaos
 #  views_plugin_argument_default_php.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
-#  views_plugin_argument_validate.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
+#  views_plugin_argument_validate.inc,v 1.2 2009/06/01 23:34:55 merlinofchaos
 #  views_plugin_argument_validate_php.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
+#  views_plugin_cache_time.inc,v 1.2 2009/06/03 23:39:52 merlinofchaos
 #  views_plugin_style_summary.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_plugin_style_grid.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos
 #  views_plugin_style_rss.inc,v 1.2 2008/12/02 00:02:06 merlinofchaos
-#  views-more.tpl.php,v 1.2 2008/04/11 08:46:26 merlinofchaos
 #  views-ui-edit-item.tpl.php,v 1.9 2008/08/08 16:57:44 merlinofchaos
 #  views-ui-edit-tab.tpl.php,v 1.11 2008/08/08 16:57:44 merlinofchaos
 #  views-ui-edit-view.tpl.php,v 1.10 2009/04/07 23:05:29 merlinofchaos
 #  views-ui-list-views.tpl.php,v 1.6 2008/10/28 18:11:43 merlinofchaos
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: views uk Ukrainian Translation\n"
-"POT-Creation-Date: 2009-05-25 13:53+0300\n"
-"PO-Revision-Date: 2009-05-25 13:55+0200\n"
-"Last-Translator: podarok <podarok@ua.fm>\n"
-"Language-Team: uk <podarok@ua.fm>\n"
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2009-09-22 11:58+0300\n"
+"PO-Revision-Date: 2009-09-22 11:58+0300\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Ukrainian <EMAIL@ADDRESS>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
-"X-Poedit-Language: Ukrainian\n"
-"X-Poedit-Country: UKRAINE\n"
-"X-Poedit-SourceCharset: utf-8\n"
 
 #: views.module:644
 msgid "Broken handler @table.@field"
@@ -178,20 +183,15 @@ msgstr "Втрачено handler @table.@field"
 msgid "Skipping broken view @view"
 msgstr "Пропущено поломаний view @view"
 
-#: views.module:814;854
-#: includes/admin.inc:114;232;232;646
+#: views.module:814;854 includes/admin.inc:114;232;232;646
 msgid "Overridden"
 msgstr "Пріоритетно"
 
-#: views.module:817;850
-#: views_ui.module:282
-#: includes/admin.inc:113;231;231;613;794
+#: views.module:817;850 views_ui.module:282 includes/admin.inc:113;231;231;613;796
 msgid "Default"
 msgstr "Стандартний (default)"
 
-#: views.module:964
-#: includes/admin.inc:311
-#: views_export/views_export.module:117
+#: views.module:973 includes/admin.inc:311 views_export/views_export.module:117
 msgid "Apply"
 msgstr "Застосувати"
 
@@ -203,11 +203,7 @@ msgstr "доступ до всіх виглядів"
 msgid "administer views"
 msgstr "адмініструвати вигляди"
 
-#: views.module:158
-#: views_ui.module:26
-#: views.info:0;0
-#: views_ui.info:0
-#: views_export/views_export.info:0
+#: views.module:158 views_ui.module:26 views.info:0;0 views_ui.info:0 views_export/views_export.info:0
 msgid "Views"
 msgstr "Views"
 
@@ -225,24 +221,23 @@ msgstr ""
 
 #: views_ui.module:258
 msgid "Changes cannot be made to a locked view."
-msgstr "Зміни не можуть бути зроблені до заблокованого вигляду."
+msgstr ""
+"Зміни не можуть бути зроблені до "
+"заблокованого вигляду."
 
 #: views_ui.module:28
 msgid "Views are customized lists of content on your system; they are highly configurable and give you control over how lists of content are presented."
 msgstr ""
 
-#: views_ui.module:32
-#: includes/plugins.inc:135
+#: views_ui.module:32 includes/plugins.inc:135
 msgid "List"
 msgstr "Список"
 
-#: views_ui.module:38
-#: includes/admin.inc:1206;1206;2193
+#: views_ui.module:38 includes/admin.inc:1208;1208;2205
 msgid "Add"
 msgstr "Додати"
 
-#: views_ui.module:43
-#: includes/admin.inc:752
+#: views_ui.module:43 includes/admin.inc:753
 msgid "Import"
 msgstr "Імпортувати"
 
@@ -254,8 +249,7 @@ msgstr "Утиліти"
 msgid "Basic"
 msgstr "Базовий"
 
-#: views_ui.module:63
-#: includes/convert.inc:30
+#: views_ui.module:63 includes/convert.inc:30
 msgid "Convert"
 msgstr "Конвертування"
 
@@ -271,9 +265,7 @@ msgstr "Стерти view"
 msgid "Convert view"
 msgstr "Конвертація view"
 
-#: views_ui.module:113
-#: includes/admin.inc:109
-#: theme/theme.inc:91
+#: views_ui.module:113 includes/admin.inc:109 theme/theme.inc:92
 msgid "Edit"
 msgstr "Редагувати"
 
@@ -283,7 +275,9 @@ msgstr "views_ui"
 
 #: views.info:0
 msgid "Create customized lists and queries from your database."
-msgstr "Створення видозмінених виглядів і запитів з Вашої Бази Даних"
+msgstr ""
+"Створення видозмінених виглядів і "
+"запитів з Вашої Бази Даних"
 
 #: views_ui.info:0
 msgid "Views UI"
@@ -291,7 +285,11 @@ msgstr "Views UI"
 
 #: views_ui.info:0
 msgid "Administrative interface to views. Without this module, you cannot create or edit your views."
-msgstr "Адміністративний інтерфейс для виглядів. Без цього модуля Ви не зможете створювати або змінювати Ваші вигляди."
+msgstr ""
+"Адміністративний інтерфейс для "
+"виглядів. Без цього модуля Ви не "
+"зможете створювати або змінювати Ваші "
+"вигляди."
 
 #: docs/docs.php:90;97
 msgid "Example table"
@@ -299,7 +297,10 @@ msgstr "Таблиця приклад"
 
 #: docs/docs.php:98
 msgid "Example table contains example content and can be related to nodes."
-msgstr "Таблиця прикладів відображає варіанти і може бути застосована для матеріалів."
+msgstr ""
+"Таблиця прикладів відображає "
+"варіанти і може бути застосована для "
+"матеріалів."
 
 #: docs/docs.php:122
 msgid "Example content"
@@ -307,7 +308,9 @@ msgstr "Матеріал приклад"
 
 #: docs/docs.php:123
 msgid "Some example content that references a node."
-msgstr "Деякі приклади, пов'язані з матеріалами"
+msgstr ""
+"Деякі приклади, пов'язані з "
+"матеріалами"
 
 #: docs/docs.php:131
 msgid "Example node"
@@ -335,11 +338,11 @@ msgstr "Булеве поле"
 
 #: docs/docs.php:173
 msgid "Just an on/off field."
-msgstr "Просто поле так/ні, 1/0, ввімкнено/вимкнено"
+msgstr ""
+"Просто поле так/ні, 1/0, "
+"ввімкнено/вимкнено"
 
-#: docs/docs.php:180
-#: modules/node.views.inc:159;167
-#: modules/upload.views.inc:82
+#: docs/docs.php:180 modules/node.views.inc:159;167 modules/upload.views.inc:82
 msgid "Published"
 msgstr "Оприлюднений"
 
@@ -351,133 +354,130 @@ msgstr "Поле моменту часу"
 msgid "Just a timestamp field."
 msgstr "Просто поле для часу"
 
-#: docs/docs.php:262
+#: docs/docs.php:272
 msgid "Emulates the default Drupal front page; you may set the default home page path to this view to make it your front page."
-msgstr "Емулює базову головну сторінку Друпал; Ви можете встановити базовою сторінкою сайту цей вигляд, щоб спробувати різні модифікації головної сторінки"
+msgstr ""
+"Емулює базову головну сторінку "
+"Друпал; Ви можете встановити базовою "
+"сторінкою сайту цей вигляд, щоб "
+"спробувати різні модифікації "
+"головної сторінки"
 
-#: docs/docs.php:263
+#: docs/docs.php:273
 msgid "default"
 msgstr "за замовчуванням"
 
-#: docs/docs.php:272
-#: includes/plugins.inc:25
+#: docs/docs.php:282 includes/plugins.inc:25
 msgid "Defaults"
 msgstr "Базове"
 
-#: docs/docs.php:361
-#: includes/plugins.inc:39;47
+#: docs/docs.php:371 includes/plugins.inc:39;47
 msgid "Page"
 msgstr "Сторінка"
 
-#: docs/docs.php:416
-#: includes/plugins.inc:72;80
+#: docs/docs.php:426 includes/plugins.inc:72;80
 msgid "Feed"
 msgstr "RSS стрічка"
 
-#: docs/docs.php:484
+#: docs/docs.php:494
 msgid "Front page feed"
 msgstr "Стрічка головної сторінки"
 
-#: handlers/views_handler_argument.inc:102
-#: modules/translation/views_handler_relationship_translation.inc:23
+#: handlers/views_handler_argument.inc:102 modules/translation/views_handler_relationship_translation.inc:23
 msgid "All"
 msgstr "Усе"
 
-#: handlers/views_handler_argument.inc:119
-#: includes/admin.inc:288;407
-#: modules/aggregator.views.inc:40;172
-#: modules/comment.views.inc:44
-#: modules/node.views.inc:85;417
-#: plugins/views_plugin_display.inc:592
-#: plugins/views_plugin_display_page.inc:291;375
+#: handlers/views_handler_argument.inc:120 includes/admin.inc:288;407 modules/aggregator.views.inc:40;172 modules/comment.views.inc:44 modules/node.views.inc:85;471 plugins/views_plugin_display.inc:630 plugins/views_plugin_display_page.inc:293;377
 msgid "Title"
 msgstr "Назва"
 
-#: handlers/views_handler_argument.inc:121
+#: handlers/views_handler_argument.inc:122
 msgid "The title to use when this argument is present. It will override the title of the view and titles from previous arguments. You can use percent substitution here to replace with argument titles. Use \"%1\" for the first argument, \"%2\" for the second, etc."
 msgstr ""
 
-#: handlers/views_handler_argument.inc:134
+#: handlers/views_handler_argument.inc:129
+msgid "Breadcrumb"
+msgstr ""
+
+#: handlers/views_handler_argument.inc:131
+msgid "The Breadcrumb title to use when this argument is present. If no breadcrumb is setted here, default Title values will be used, see \"Title\" for percent substitutions."
+msgstr ""
+
+#: handlers/views_handler_argument.inc:144
 msgid "Action to take if argument is not present"
 msgstr ""
 
-#: handlers/views_handler_argument.inc:146
+#: handlers/views_handler_argument.inc:156
 msgid "Wildcard"
 msgstr "Джокер"
 
-#: handlers/views_handler_argument.inc:149
+#: handlers/views_handler_argument.inc:159
 msgid "If this value is received as an argument, the argument will be ignored; i.e, \"all values\""
 msgstr ""
 
-#: handlers/views_handler_argument.inc:155
+#: handlers/views_handler_argument.inc:165
 msgid "Wildcard title"
 msgstr "Джокер назви"
 
-#: handlers/views_handler_argument.inc:158
+#: handlers/views_handler_argument.inc:168
 msgid "The title to use for the wildcard in substitutions elsewhere."
 msgstr ""
 
-#: handlers/views_handler_argument.inc:181
+#: handlers/views_handler_argument.inc:191
 msgid "Validator options"
 msgstr "Параметри перевірки"
 
-#: handlers/views_handler_argument.inc:186
+#: handlers/views_handler_argument.inc:196
 msgid "Validator"
 msgstr "Перевірка"
 
-#: handlers/views_handler_argument.inc:190
+#: handlers/views_handler_argument.inc:200
 msgid "<Basic validation>"
 msgstr "<Базова перевірка>"
 
-#: handlers/views_handler_argument.inc:229
+#: handlers/views_handler_argument.inc:239
 msgid "Action to take if argument does not validate"
 msgstr ""
 
-#: handlers/views_handler_argument.inc:248
+#: handlers/views_handler_argument.inc:258
 msgid "Display all values"
 msgstr "Показувати всі значення"
 
-#: handlers/views_handler_argument.inc:253
+#: handlers/views_handler_argument.inc:263
 msgid "Hide view / Page not found (404)"
-msgstr "Сховати вигляд / Сторінку не знайдено (404)"
+msgstr ""
+"Сховати вигляд / Сторінку не знайдено "
+"(404)"
 
-#: handlers/views_handler_argument.inc:258
+#: handlers/views_handler_argument.inc:268
 msgid "Display empty text"
 msgstr "Відображати пустий текст"
 
-#: handlers/views_handler_argument.inc:263
+#: handlers/views_handler_argument.inc:273
 msgid "Summary, sorted ascending"
 msgstr "Сумарно, сортування пряме"
 
-#: handlers/views_handler_argument.inc:270
+#: handlers/views_handler_argument.inc:280
 msgid "Summary, sorted descending"
 msgstr "Сумарно, сортування зворотнє"
 
-#: handlers/views_handler_argument.inc:277
+#: handlers/views_handler_argument.inc:287
 msgid "Provide default argument"
 msgstr "Вказати аргумент по замовчуванню"
 
-#: handlers/views_handler_argument.inc:310
+#: handlers/views_handler_argument.inc:320
 msgid "Provide default argument options"
 msgstr ""
 
-#: handlers/views_handler_argument.inc:320
+#: handlers/views_handler_argument.inc:330
 msgid "Default argument type"
 msgstr "Базовий тип аргумента"
 
-#: handlers/views_handler_argument.inc:744
-#: handlers/views_handler_field.inc:599
-#: handlers/views_handler_filter.inc:593
-#: handlers/views_handler_relationship.inc:133
-#: handlers/views_handler_sort.inc:66
+#: handlers/views_handler_argument.inc:754 handlers/views_handler_field.inc:625 handlers/views_handler_filter.inc:593 handlers/views_handler_relationship.inc:133 handlers/views_handler_sort.inc:66
 msgid "Broken/missing handler"
-msgstr ""
+msgstr "Пошкоджена/відсутня оболонка"
 
-#: handlers/views_handler_argument.inc:752
-#: handlers/views_handler_field.inc:607
-#: handlers/views_handler_filter.inc:601
-#: handlers/views_handler_relationship.inc:141
-#: handlers/views_handler_sort.inc:74
+#: handlers/views_handler_argument.inc:762 handlers/views_handler_field.inc:633 handlers/views_handler_filter.inc:601 handlers/views_handler_relationship.inc:141 handlers/views_handler_sort.inc:74
 msgid "The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item."
 msgstr ""
 
@@ -493,8 +493,7 @@ msgstr ""
 msgid "Current node's update time"
 msgstr ""
 
-#: handlers/views_handler_argument_many_to_one.inc:45
-#: handlers/views_handler_argument_numeric.inc:30
+#: handlers/views_handler_argument_many_to_one.inc:45 handlers/views_handler_argument_numeric.inc:30
 msgid "Allow multiple terms per argument."
 msgstr "Дозволити багато термінів на аргумент"
 
@@ -502,29 +501,25 @@ msgstr "Дозволити багато термінів на аргумент"
 msgid "If selected, users can enter multiple arguments in the form of 1+2+3 (for OR) or 1,2,3 (for AND)."
 msgstr ""
 
-#: handlers/views_handler_argument_many_to_one.inc:53
-#: handlers/views_handler_argument_string.inc:95
+#: handlers/views_handler_argument_many_to_one.inc:53 handlers/views_handler_argument_string.inc:95
 msgid "Allow multiple arguments to work together."
-msgstr "Дозволити багато аргументів в спільній роботі"
+msgstr ""
+"Дозволити багато аргументів в "
+"спільній роботі"
 
-#: handlers/views_handler_argument_many_to_one.inc:54
-#: handlers/views_handler_argument_string.inc:96
+#: handlers/views_handler_argument_many_to_one.inc:54 handlers/views_handler_argument_string.inc:96
 msgid "If selected, multiple instances of this argument can work together, as though multiple terms were supplied to the same argument. This setting is not compatible with the \"Reduce duplicates\" setting."
 msgstr ""
 
-#: handlers/views_handler_argument_many_to_one.inc:60
-#: handlers/views_handler_argument_string.inc:102
+#: handlers/views_handler_argument_many_to_one.inc:60 handlers/views_handler_argument_string.inc:102
 msgid "Do not display items with no value in summary"
 msgstr ""
 
-#: handlers/views_handler_argument_many_to_one.inc:95;109
-#: handlers/views_handler_argument_numeric.inc:45;57
-#: modules/taxonomy.views.inc:133;212;296
+#: handlers/views_handler_argument_many_to_one.inc:95;109 handlers/views_handler_argument_numeric.inc:45;57 modules/taxonomy.views.inc:133;212;301
 msgid "Uncategorized"
 msgstr "Без категорії"
 
-#: handlers/views_handler_argument_many_to_one.inc:113
-#: handlers/views_handler_argument_numeric.inc:61
+#: handlers/views_handler_argument_many_to_one.inc:113 handlers/views_handler_argument_numeric.inc:61
 msgid "Invalid input"
 msgstr "Некоректний ввід"
 
@@ -590,7 +585,9 @@ msgstr "Виправлення першої букви"
 
 #: handlers/views_handler_argument_string.inc:67;81
 msgid "Capitalize each word"
-msgstr "Виправлення першої літери в кожному слові"
+msgstr ""
+"Виправлення першої літери в кожному "
+"слові"
 
 #: handlers/views_handler_argument_string.inc:74
 msgid "Case in path"
@@ -604,150 +601,168 @@ msgstr ""
 msgid "Transform spaces to dashes in URL"
 msgstr ""
 
-#: handlers/views_handler_field.inc:173
-#: handlers/views_handler_filter.inc:322
-#: handlers/views_handler_relationship.inc:78
+#: handlers/views_handler_field.inc:174 handlers/views_handler_filter.inc:322 handlers/views_handler_relationship.inc:78
 msgid "Label"
 msgstr "Заголовок"
 
-#: handlers/views_handler_field.inc:175
+#: handlers/views_handler_field.inc:176
 msgid "The label for this field that will be displayed to end users if the style requires it."
 msgstr ""
 
-#: handlers/views_handler_field.inc:179
+#: handlers/views_handler_field.inc:180
 msgid "Exclude from display"
-msgstr ""
+msgstr "Прибрати з показу"
 
-#: handlers/views_handler_field.inc:181
+#: handlers/views_handler_field.inc:182
 msgid "Check this box to not display this field, but still load it in the view.  Use this option to not show a grouping field in each record, or when doing advanced theming."
 msgstr ""
 
-#: handlers/views_handler_field.inc:188
+#: handlers/views_handler_field.inc:189
 msgid "Rewrite the output of this field"
 msgstr ""
 
-#: handlers/views_handler_field.inc:189
+#: handlers/views_handler_field.inc:190
 msgid "If checked, you can alter the output of this field by specifying a string of text with replacement tokens that can use any existing field output."
 msgstr ""
 
-#: handlers/views_handler_field.inc:194
+#: handlers/views_handler_field.inc:195
 msgid "Text"
 msgstr "Текст"
 
-#: handlers/views_handler_field.inc:197
+#: handlers/views_handler_field.inc:198
 msgid "The text to display for this field. You may include HTML. You may enter data from this view as per the \"Replacement patterns\" below."
 msgstr ""
 
-#: handlers/views_handler_field.inc:206
+#: handlers/views_handler_field.inc:207
 msgid "Output this field as a link"
 msgstr "Вивід даного поля в вигляді посилання"
 
-#: handlers/views_handler_field.inc:207
+#: handlers/views_handler_field.inc:208
 msgid "If checked, this field will be made into a link. The destination must be given below."
 msgstr ""
 
-#: handlers/views_handler_field.inc:211
+#: handlers/views_handler_field.inc:212
 msgid "Link path"
 msgstr "Шлях посилання"
 
-#: handlers/views_handler_field.inc:214
+#: handlers/views_handler_field.inc:215
 msgid "The Drupal path or absolute URL for this link. You may enter data from this view as per the \"Replacement patterns\" below."
 msgstr ""
 
-#: handlers/views_handler_field.inc:221
+#: handlers/views_handler_field.inc:222
+msgid "Link class"
+msgstr ""
+
+#: handlers/views_handler_field.inc:225
+msgid "The CSS class to apply to the link."
+msgstr ""
+
+#: handlers/views_handler_field.inc:232
 msgid "Alt text"
 msgstr "Альтернативний текст"
 
-#: handlers/views_handler_field.inc:224
+#: handlers/views_handler_field.inc:235
 msgid "Text to place as \"alt\" text which most browsers display as a tooltip when hovering over the link."
 msgstr ""
 
-#: handlers/views_handler_field.inc:231
+#: handlers/views_handler_field.inc:242
 msgid "Prefix text"
 msgstr "Текст-префікс"
 
-#: handlers/views_handler_field.inc:234
+#: handlers/views_handler_field.inc:245
 msgid "Any text to display before this link. You may include HTML."
 msgstr ""
 
-#: handlers/views_handler_field.inc:241
+#: handlers/views_handler_field.inc:252
 msgid "Suffix text"
 msgstr "Текст-суфікс"
 
-#: handlers/views_handler_field.inc:244
+#: handlers/views_handler_field.inc:255
 msgid "Any text to display after this link. You may include HTML."
 msgstr ""
 
-#: handlers/views_handler_field.inc:254
-#: includes/plugins.inc:173
-#: includes/view.inc:1911
+#: handlers/views_handler_field.inc:265 includes/plugins.inc:173 includes/view.inc:1958
 msgid "Fields"
 msgstr "Поля"
 
-#: handlers/views_handler_field.inc:262
-#: includes/admin.inc:491
-#: includes/view.inc:1918
+#: handlers/views_handler_field.inc:273 includes/admin.inc:491 includes/view.inc:1965
 msgid "Arguments"
 msgstr "Аргументи"
 
-#: handlers/views_handler_field.inc:266
+#: handlers/views_handler_field.inc:277
 msgid "<p>You must add some additional fields to this display before using this field. These fields may be marked as <em>Exclude from display</em> if you prefer. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>"
 msgstr ""
 
-#: handlers/views_handler_field.inc:269
+#: handlers/views_handler_field.inc:280
 msgid "<p>The following substitution patterns are available for this display. Use the pattern shown on the left to display the value indicated on the right. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>"
 msgstr ""
 
-#: handlers/views_handler_field.inc:288
+#: handlers/views_handler_field.inc:299
 msgid "Replacement patterns"
 msgstr "Шаблони заміни"
 
-#: handlers/views_handler_field.inc:298
+#: handlers/views_handler_field.inc:309
 msgid "Trim this field to a maximum length"
-msgstr "Скоротити це поле до максимальної довжини"
+msgstr ""
+"Скоротити це поле до максимальної "
+"довжини"
 
-#: handlers/views_handler_field.inc:299
+#: handlers/views_handler_field.inc:310
 msgid "If checked, this field be trimmed to a maximum length in characters."
 msgstr ""
 
-#: handlers/views_handler_field.inc:304
+#: handlers/views_handler_field.inc:315
 msgid "Maximum length"
 msgstr "Максимальна довжина"
 
-#: handlers/views_handler_field.inc:307
+#: handlers/views_handler_field.inc:318
 msgid "The maximum number of characters his field can be."
 msgstr ""
+"Максимальна кількість символів в "
+"полі."
 
-#: handlers/views_handler_field.inc:316
+#: handlers/views_handler_field.inc:327
 msgid "Trim only on a word boundary"
-msgstr ""
+msgstr "Обрізати тільки слова на межі"
 
-#: handlers/views_handler_field.inc:317
+#: handlers/views_handler_field.inc:328
 msgid "If checked, this field be trimmed only on a word boundary. This is guaranteed to be the maximum characters stated or less. If there are no word boundaries this could trim a field to nothing."
 msgstr ""
 
-#: handlers/views_handler_field.inc:327
+#: handlers/views_handler_field.inc:338
 msgid "Add an ellipsis"
-msgstr ""
+msgstr "Додати три крапки"
 
-#: handlers/views_handler_field.inc:328
+#: handlers/views_handler_field.inc:339
 msgid "If checked, a \"...\" will be added if a field was trimmed."
 msgstr ""
 
-#: handlers/views_handler_field.inc:338
+#: handlers/views_handler_field.inc:349
 msgid "Strip HTML tags"
 msgstr "Обмежувати теги HTML"
 
-#: handlers/views_handler_field.inc:339
+#: handlers/views_handler_field.inc:350
 msgid "If checked, all HTML tags will be stripped."
 msgstr ""
 
-#: handlers/views_handler_field.inc:349
+#: handlers/views_handler_field.inc:360
 msgid "Field can contain HTML"
 msgstr "Поле може сприймати HTML"
 
-#: handlers/views_handler_field.inc:350
+#: handlers/views_handler_field.inc:361
 msgid "If checked, HTML corrector will be run to ensure tags are properly closed after trimming."
+msgstr ""
+
+#: handlers/views_handler_field.inc:658
+msgid "File size display"
+msgstr ""
+
+#: handlers/views_handler_field.inc:661
+msgid "Formatted (in KB or MB)"
+msgstr ""
+
+#: handlers/views_handler_field.inc:662
+msgid "Raw bytes"
 msgstr ""
 
 #: handlers/views_handler_field_boolean.inc:25
@@ -774,41 +789,27 @@ msgstr "Реверс"
 msgid "If checked, true will be displayed as false."
 msgstr "Відмічене - TRUE буде відображене як FALSE"
 
-#: handlers/views_handler_field_boolean.inc:50
-#: handlers/views_handler_filter_boolean_operator.inc:43
-#: handlers/views_handler_filter_in_operator.inc:25
-#: modules/translation/views_handler_filter_node_tnid.inc:25
-#: plugins/views_plugin_display.inc:633;642;659;667;717;803;1207
-#: plugins/views_plugin_display_attachment.inc:63;69
+#: handlers/views_handler_field_boolean.inc:50 handlers/views_handler_filter_boolean_operator.inc:43 handlers/views_handler_filter_in_operator.inc:36 modules/translation/views_handler_filter_node_tnid.inc:25 plugins/views_plugin_display.inc:671;680;697;705;774;860;1343 plugins/views_plugin_display_attachment.inc:63;69
 msgid "Yes"
 msgstr "Так"
 
-#: handlers/views_handler_field_boolean.inc:50
-#: handlers/views_handler_filter_boolean_operator.inc:43
-#: handlers/views_handler_filter_in_operator.inc:25
-#: modules/translation/views_handler_filter_node_tnid.inc:26
-#: plugins/views_plugin_display.inc:633;642;659;667;717;803;811;1207
-#: plugins/views_plugin_display_attachment.inc:63;69
+#: handlers/views_handler_field_boolean.inc:50 handlers/views_handler_filter_boolean_operator.inc:43 handlers/views_handler_filter_in_operator.inc:36 modules/translation/views_handler_filter_node_tnid.inc:26 plugins/views_plugin_display.inc:671;680;697;705;774;860;868;1343 plugins/views_plugin_display_attachment.inc:63;69
 msgid "No"
 msgstr "Ні"
 
-#: handlers/views_handler_field_boolean.inc:52
-#: handlers/views_handler_filter_boolean_operator.inc:20;52
+#: handlers/views_handler_field_boolean.inc:52 handlers/views_handler_filter_boolean_operator.inc:20;52
 msgid "True"
 msgstr "Так"
 
-#: handlers/views_handler_field_boolean.inc:52
-#: handlers/views_handler_filter_boolean_operator.inc:52
+#: handlers/views_handler_field_boolean.inc:52 handlers/views_handler_filter_boolean_operator.inc:52
 msgid "False"
 msgstr "False"
 
-#: handlers/views_handler_field_boolean.inc:54
-#: handlers/views_handler_filter_boolean_operator.inc:46
+#: handlers/views_handler_field_boolean.inc:54 handlers/views_handler_filter_boolean_operator.inc:46
 msgid "On"
 msgstr "Ввімкнено"
 
-#: handlers/views_handler_field_boolean.inc:54
-#: handlers/views_handler_filter_boolean_operator.inc:46
+#: handlers/views_handler_field_boolean.inc:54 handlers/views_handler_filter_boolean_operator.inc:46
 msgid "Off"
 msgstr "Вимкнено"
 
@@ -828,15 +829,23 @@ msgstr "Часу назад"
 msgid "Time ago (with \"ago\" appended)"
 msgstr ""
 
-#: handlers/views_handler_field_date.inc:37
+#: handlers/views_handler_field_date.inc:32
+msgid "Time span (future dates start with - )"
+msgstr ""
+
+#: handlers/views_handler_field_date.inc:33
+msgid "Time span (with \"ago/hence\" appended)"
+msgstr ""
+
+#: handlers/views_handler_field_date.inc:39
 msgid "Custom date format"
 msgstr "Свій формат часу"
 
-#: handlers/views_handler_field_date.inc:38
+#: handlers/views_handler_field_date.inc:40
 msgid "If \"Custom\", see <a href=\"http://us.php.net/manual/en/function.date.php\" target=\"_blank\">the PHP docs</a> for date formats. If \"Time ago\" this is the the number of different units to display, which defaults to two."
 msgstr ""
 
-#: handlers/views_handler_field_date.inc:56
+#: handlers/views_handler_field_date.inc:63
 msgid "%time ago"
 msgstr "%time тому"
 
@@ -888,19 +897,15 @@ msgstr "Суфікс"
 msgid "Text to put after the number, such as currency symbol."
 msgstr ""
 
-#: handlers/views_handler_field_prerender_list.inc:29
-#: modules/aggregator/views_plugin_row_aggregator_rss.inc:23
-#: modules/node/views_plugin_row_node_rss.inc:30
+#: handlers/views_handler_field_prerender_list.inc:29 modules/aggregator/views_plugin_row_aggregator_rss.inc:23 modules/node/views_plugin_row_node_rss.inc:30
 msgid "Display type"
 msgstr "Тип відображення"
 
-#: handlers/views_handler_field_prerender_list.inc:31
-#: plugins/views_plugin_style_list.inc:33
+#: handlers/views_handler_field_prerender_list.inc:31 plugins/views_plugin_style_list.inc:33
 msgid "Unordered list"
 msgstr "Ненумерований список"
 
-#: handlers/views_handler_field_prerender_list.inc:32
-#: plugins/views_plugin_style_list.inc:33
+#: handlers/views_handler_field_prerender_list.inc:32 plugins/views_plugin_style_list.inc:33
 msgid "Ordered list"
 msgstr "Нумерований список"
 
@@ -908,10 +913,7 @@ msgstr "Нумерований список"
 msgid "Simple separator"
 msgstr "Простий розділювач"
 
-#: handlers/views_handler_field_prerender_list.inc:40
-#: includes/admin.inc:3010
-#: plugins/views_plugin_row_fields.inc:47
-#: plugins/views_plugin_style_summary_unformatted.inc:30
+#: handlers/views_handler_field_prerender_list.inc:40 includes/admin.inc:3033 plugins/views_plugin_row_fields.inc:47 plugins/views_plugin_style_summary_unformatted.inc:30
 msgid "Separator"
 msgstr "Розділювач"
 
@@ -922,10 +924,10 @@ msgstr "Текст, коли пустий список"
 #: handlers/views_handler_field_prerender_list.inc:50
 msgid "If the list is empty, you may enter text here that will be displayed."
 msgstr ""
+"Якщо список порожній, Ви можете ввести "
+"текст тут і його буде відображено."
 
-#: handlers/views_handler_field_url.inc:24
-#: modules/aggregator/views_handler_field_aggregator_title_link.inc:28
-#: modules/statistics/views_handler_field_accesslog_path.inc:31
+#: handlers/views_handler_field_url.inc:24 modules/aggregator/views_handler_field_aggregator_title_link.inc:28 modules/statistics/views_handler_field_accesslog_path.inc:31
 msgid "Display as link"
 msgstr "Відображати як посилання"
 
@@ -1005,20 +1007,19 @@ msgstr ""
 msgid "This identifier is not allowed."
 msgstr "Ідентифікатор недозволено"
 
-#: handlers/views_handler_filter.inc:465
-#: includes/admin.inc:2744
+#: handlers/views_handler_filter.inc:465 handlers/views_handler_filter_boolean_operator.inc:93 includes/admin.inc:2757
 msgid "<Any>"
 msgstr "<любе>"
 
-#: handlers/views_handler_filter.inc:465
-#: includes/admin.inc:2744
+#: handlers/views_handler_filter.inc:465 includes/admin.inc:2757
 msgid "- Any -"
 msgstr "- любе -"
 
-#: handlers/views_handler_filter_boolean_operator.inc:97
-#: handlers/views_handler_filter_in_operator.inc:175
-#: handlers/views_handler_filter_numeric.inc:247
-#: handlers/views_handler_filter_string.inc:111
+#: handlers/views_handler_filter_boolean_operator.inc:99
+msgid "You must select a value unless this is an optional exposed filter."
+msgstr ""
+
+#: handlers/views_handler_filter_boolean_operator.inc:105 handlers/views_handler_filter_in_operator.inc:276 handlers/views_handler_filter_numeric.inc:247 handlers/views_handler_filter_string.inc:111 modules/node/views_handler_filter_history_user_timestamp.inc:68
 msgid "exposed"
 msgstr "відображено"
 
@@ -1038,21 +1039,15 @@ msgstr ""
 msgid "Invalid date format."
 msgstr "Некоректний формат дати"
 
-#: handlers/views_handler_filter_equality.inc:15
-#: handlers/views_handler_filter_numeric.inc:38
-#: handlers/views_handler_filter_string.inc:28
+#: handlers/views_handler_filter_equality.inc:15 handlers/views_handler_filter_numeric.inc:38 handlers/views_handler_filter_string.inc:28
 msgid "Is equal to"
 msgstr "Дорівнює до"
 
-#: handlers/views_handler_filter_equality.inc:16
-#: handlers/views_handler_filter_numeric.inc:44
-#: handlers/views_handler_filter_string.inc:34
+#: handlers/views_handler_filter_equality.inc:16 handlers/views_handler_filter_numeric.inc:44 handlers/views_handler_filter_string.inc:34
 msgid "Is not equal to"
 msgstr "Не дорівнює до"
 
-#: handlers/views_handler_filter_equality.inc:26
-#: handlers/views_handler_filter_numeric.inc:148;163
-#: handlers/views_handler_filter_string.inc:170
+#: handlers/views_handler_filter_equality.inc:26 handlers/views_handler_filter_numeric.inc:148;163 handlers/views_handler_filter_string.inc:170
 msgid "Value"
 msgstr "Значення"
 
@@ -1060,36 +1055,77 @@ msgstr "Значення"
 msgid "Options"
 msgstr "Опції (варіанти)"
 
-#: handlers/views_handler_filter_in_operator.inc:37
+#: handlers/views_handler_filter_in_operator.inc:49
 msgid "Limit list to selected items"
-msgstr ""
+msgstr "Ліміт списку обраних пунктів"
 
-#: handlers/views_handler_filter_in_operator.inc:38
+#: handlers/views_handler_filter_in_operator.inc:50
 msgid "If checked, the only items presented to the user will be the ones selected here."
 msgstr ""
 
-#: handlers/views_handler_filter_in_operator.inc:57
-#: handlers/views_handler_filter_many_to_one.inc:32
+#: handlers/views_handler_filter_in_operator.inc:72 handlers/views_handler_filter_many_to_one.inc:30 modules/taxonomy/views_handler_filter_term_node_tid_depth.inc:12
 msgid "Is one of"
 msgstr "Один з"
 
-#: handlers/views_handler_filter_in_operator.inc:58
+#: handlers/views_handler_filter_in_operator.inc:73
+msgid "in"
+msgstr ""
+
+#: handlers/views_handler_filter_in_operator.inc:74 handlers/views_handler_filter_many_to_one.inc:32;40 handlers/views_handler_filter_numeric.inc:40 handlers/views_handler_filter_string.inc:29
+msgid "="
+msgstr "="
+
+#: handlers/views_handler_filter_in_operator.inc:79
 msgid "Is not one of"
 msgstr "Жоден з"
 
-#: handlers/views_handler_filter_in_operator.inc:193
-#: modules/system.views.inc:209
-#: plugins/views_plugin_access.inc:55
+#: handlers/views_handler_filter_in_operator.inc:80
+msgid "not in"
+msgstr ""
+
+#: handlers/views_handler_filter_in_operator.inc:81 handlers/views_handler_filter_many_to_one.inc:48
+msgid "<>"
+msgstr ""
+
+#: handlers/views_handler_filter_in_operator.inc:90 handlers/views_handler_filter_many_to_one.inc:58 handlers/views_handler_filter_numeric.inc:79 handlers/views_handler_filter_string.inc:80
+msgid "Is empty (NULL)"
+msgstr "Пусто (NULL)"
+
+#: handlers/views_handler_filter_in_operator.inc:92 handlers/views_handler_filter_many_to_one.inc:60 handlers/views_handler_filter_numeric.inc:81 handlers/views_handler_filter_string.inc:82
+msgid "empty"
+msgstr "пусто"
+
+#: handlers/views_handler_filter_in_operator.inc:96 handlers/views_handler_filter_many_to_one.inc:64 handlers/views_handler_filter_numeric.inc:85 handlers/views_handler_filter_string.inc:86
+msgid "Is not empty (NULL)"
+msgstr "Не пусто (NOT NULL)"
+
+#: handlers/views_handler_filter_in_operator.inc:98 handlers/views_handler_filter_many_to_one.inc:66 handlers/views_handler_filter_numeric.inc:87 handlers/views_handler_filter_string.inc:88
+msgid "not empty"
+msgstr "не пусто"
+
+#: handlers/views_handler_filter_in_operator.inc:301 modules/system.views.inc:209 plugins/views_plugin_access.inc:55 plugins/views_plugin_cache.inc:50
 msgid "Unknown"
 msgstr "Невідоме"
 
-#: handlers/views_handler_filter_many_to_one.inc:33
+#: handlers/views_handler_filter_many_to_one.inc:31
+msgid "or"
+msgstr "або"
+
+#: handlers/views_handler_filter_many_to_one.inc:38
 msgid "Is all of"
 msgstr "З всіма"
 
-#: handlers/views_handler_filter_many_to_one.inc:34
+#: handlers/views_handler_filter_many_to_one.inc:39
+msgid "and"
+msgstr "і"
+
+#: handlers/views_handler_filter_many_to_one.inc:46
 msgid "Is none of"
 msgstr "Без жодного"
+
+#: handlers/views_handler_filter_many_to_one.inc:47
+msgid "not"
+msgstr ""
 
 #: handlers/views_handler_filter_numeric.inc:26
 msgid "Is less than"
@@ -1107,13 +1143,7 @@ msgstr "Менше-рівне до"
 msgid "<="
 msgstr "<="
 
-#: handlers/views_handler_filter_numeric.inc:40
-#: handlers/views_handler_filter_string.inc:29
-msgid "="
-msgstr "="
-
-#: handlers/views_handler_filter_numeric.inc:46
-#: handlers/views_handler_filter_string.inc:35
+#: handlers/views_handler_filter_numeric.inc:46 handlers/views_handler_filter_string.inc:35
 msgid "!="
 msgstr "!="
 
@@ -1148,26 +1178,6 @@ msgstr "Поза межами"
 #: handlers/views_handler_filter_numeric.inc:70
 msgid "not between"
 msgstr "оза межами"
-
-#: handlers/views_handler_filter_numeric.inc:79
-#: handlers/views_handler_filter_string.inc:80
-msgid "Is empty (NULL)"
-msgstr "Пусто (NULL)"
-
-#: handlers/views_handler_filter_numeric.inc:81
-#: handlers/views_handler_filter_string.inc:82
-msgid "empty"
-msgstr "пусто"
-
-#: handlers/views_handler_filter_numeric.inc:85
-#: handlers/views_handler_filter_string.inc:86
-msgid "Is not empty (NULL)"
-msgstr "Не пусто (NOT NULL)"
-
-#: handlers/views_handler_filter_numeric.inc:87
-#: handlers/views_handler_filter_string.inc:88
-msgid "not empty"
-msgstr "не пусто"
 
 #: handlers/views_handler_filter_numeric.inc:175
 msgid "Min"
@@ -1265,15 +1275,11 @@ msgstr "спад"
 msgid "Sort order"
 msgstr "Сортування"
 
-#: handlers/views_handler_sort.inc:55
-#: modules/search/views_handler_field_search_score.inc:37
-#: plugins/views_plugin_style_table.inc:149
+#: handlers/views_handler_sort.inc:55 modules/search/views_handler_field_search_score.inc:37 plugins/views_plugin_style_table.inc:149
 msgid "Ascending"
 msgstr "Зростання"
 
-#: handlers/views_handler_sort.inc:55
-#: modules/search/views_handler_field_search_score.inc:37
-#: plugins/views_plugin_style_table.inc:149
+#: handlers/views_handler_sort.inc:55 modules/search/views_handler_field_search_score.inc:37 plugins/views_plugin_style_table.inc:149
 msgid "Descending"
 msgstr "Спадання"
 
@@ -1319,20 +1325,20 @@ msgstr ""
 
 #: includes/admin.inc:39
 msgid "If you install the advanced help module from !href, Views will provide more and better help. <a href=\"@hide\">Hide this message.</a>"
-msgstr "Проінсталювавши advanced help модуль із !href, Views буде описано краще. <a href=\"@hide\">Сховати.</a>"
+msgstr ""
+"Проінсталювавши advanced help модуль із !href, "
+"Views буде описано краще. <a "
+"href=\"@hide\">Сховати.</a>"
 
 #: includes/admin.inc:55;318
 msgid "Reset"
 msgstr "Повернути"
 
-#: includes/admin.inc:110;1006
-#: theme/theme.inc:98
-#: views_export/views_export.module:129
+#: includes/admin.inc:110;1008 theme/theme.inc:99 views_export/views_export.module:129
 msgid "Export"
 msgstr "Експортувати"
 
-#: includes/admin.inc:111;1011
-#: theme/theme.inc:103
+#: includes/admin.inc:111;1013 theme/theme.inc:104
 msgid "Clone"
 msgstr "Клонування"
 
@@ -1340,8 +1346,7 @@ msgstr "Клонування"
 msgid "Revert"
 msgstr "Відновити"
 
-#: includes/admin.inc:114;654;875
-#: includes/convert.inc:35;108
+#: includes/admin.inc:114;654;877 includes/convert.inc:35;108
 msgid "Delete"
 msgstr "Стерти"
 
@@ -1357,25 +1362,27 @@ msgstr "Увімкнути"
 msgid "Warning! Broken view!"
 msgstr ""
 
-#: includes/admin.inc:143
-#: includes/view.inc:1714
+#: includes/admin.inc:143 includes/view.inc:1761
 msgid "Broken"
 msgstr "Пошкоджено"
 
 #: includes/admin.inc:205
 msgid "Install the advanced help module for the getting started"
-msgstr "Проінсталюйте модуль advanced help для початку роботи"
+msgstr ""
+"Проінсталюйте модуль advanced help для "
+"початку роботи"
 
 #: includes/admin.inc:208
 msgid "Not sure what to do? Try the \"!getting-started\" page."
-msgstr "Не впевнені що робити?? Спробуйте \"!getting-started\" сторінку."
+msgstr ""
+"Не впевнені що робити?? Спробуйте "
+"\"!getting-started\" сторінку."
 
-#: includes/admin.inc:222;229;2159
+#: includes/admin.inc:222;229;2161
 msgid "<All>"
 msgstr "<Всі>"
 
-#: includes/admin.inc:223
-#: plugins/views_plugin_style.inc:76
+#: includes/admin.inc:223 plugins/views_plugin_style.inc:91
 msgid "<None>"
 msgstr "<Нічого>"
 
@@ -1383,19 +1390,15 @@ msgstr "<Нічого>"
 msgid "Storage"
 msgstr "Зберігання"
 
-#: includes/admin.inc:230;230
-#: includes/view.inc:1208;1258
+#: includes/admin.inc:230;230 includes/view.inc:1254;1304
 msgid "Normal"
 msgstr "Нормально"
 
-#: includes/admin.inc:244;291
-#: modules/node.views.inc:140
-#: plugins/views_plugin_display_page.inc:279
+#: includes/admin.inc:244;291 modules/node.views.inc:140 plugins/views_plugin_display_page.inc:281
 msgid "Type"
 msgstr "Тип"
 
-#: includes/admin.inc:262;289;1091
-#: views_export/views_export.module:147
+#: includes/admin.inc:262;289;1093 views_export/views_export.module:147
 msgid "Tag"
 msgstr "Таг"
 
@@ -1407,26 +1410,15 @@ msgstr "Відображення"
 msgid "Sort by"
 msgstr "Сортувати за"
 
-#: includes/admin.inc:287
-#: modules/system.views.inc:69
-#: modules/user.views.inc:59;80
-#: plugins/views_plugin_display.inc:580
+#: includes/admin.inc:287 modules/system.views.inc:69 modules/user.views.inc:59;80 plugins/views_plugin_display.inc:618
 msgid "Name"
 msgstr "Ім'я"
 
-#: includes/admin.inc:290;415
-#: modules/statistics.views.inc:149
-#: modules/system.views.inc:88
-#: plugins/views_plugin_display_page.inc:208
+#: includes/admin.inc:290;415 modules/statistics.views.inc:149 modules/system.views.inc:88 plugins/views_plugin_display_page.inc:208
 msgid "Path"
 msgstr "Шлях"
 
-#: includes/admin.inc:292
-#: includes/convert.inc:21
-#: modules/aggregator.views.inc:230
-#: modules/upload.views.inc:56
-#: plugins/views_plugin_display_page.inc:299;383
-#: views_export/views_export.module:147
+#: includes/admin.inc:292 includes/convert.inc:21 modules/aggregator.views.inc:230 modules/upload.views.inc:56 plugins/views_plugin_display_page.inc:301;385 views_export/views_export.module:147
 msgid "Description"
 msgstr "Опис"
 
@@ -1452,7 +1444,7 @@ msgstr ""
 
 #: includes/admin.inc:401
 msgid "[@time ms]"
-msgstr ""
+msgstr "[@time мсек]"
 
 #: includes/admin.inc:404
 msgid "Other queries"
@@ -1464,23 +1456,23 @@ msgstr "Цей вигляд немає шляху"
 
 #: includes/admin.inc:417
 msgid "Query build time"
-msgstr ""
+msgstr "Час побудови запиту"
 
 #: includes/admin.inc:417;418;419
 msgid "@time ms"
-msgstr ""
+msgstr "@time мсек"
 
 #: includes/admin.inc:418
 msgid "Query execute time"
-msgstr ""
+msgstr "Час виконання запиту"
 
 #: includes/admin.inc:419
 msgid "View render time"
-msgstr ""
+msgstr "Переглянути час рендерингу"
 
 #: includes/admin.inc:425
 msgid "No query was run"
-msgstr ""
+msgstr "Немає запущених запитів"
 
 #: includes/admin.inc:432
 msgid "Unable to preview due to validation errors."
@@ -1500,10 +1492,9 @@ msgstr "Переглянути"
 
 #: includes/admin.inc:537
 msgid "Clone view %view"
-msgstr ""
+msgstr "Копія view %view"
 
-#: includes/admin.inc:550;741
-#: includes/convert.inc:20
+#: includes/admin.inc:550;741 includes/convert.inc:20
 msgid "View name"
 msgstr "Ім'я Вигляду"
 
@@ -1511,19 +1502,19 @@ msgstr "Ім'я Вигляду"
 msgid "This is the unique name of the view. It must contain only alphanumeric characters and underscores; it is used to identify the view internally and to generate unique theming template names for this view. If overriding a module provided view, the name must not be changed or instead a new view will be created."
 msgstr ""
 
-#: includes/admin.inc:560;1854
+#: includes/admin.inc:560;1856
 msgid "View description"
 msgstr "Опис Вигляду"
 
-#: includes/admin.inc:561;1855
+#: includes/admin.inc:561;1857
 msgid "This description will appear on the Views administrative UI to tell you what the view is about."
 msgstr ""
 
-#: includes/admin.inc:567;1861
+#: includes/admin.inc:567;1863
 msgid "View tag"
 msgstr "Тег Вигляду"
 
-#: includes/admin.inc:568;1862
+#: includes/admin.inc:568;1864
 msgid "Enter an optional tag for this view; it is used only to help sort views on the administrative page."
 msgstr ""
 
@@ -1539,7 +1530,7 @@ msgstr ""
 msgid "Next"
 msgstr "Наступне"
 
-#: includes/admin.inc:608;786
+#: includes/admin.inc:608;788
 msgid "View name must be alphanumeric or underscores only."
 msgstr ""
 
@@ -1555,8 +1546,7 @@ msgstr ""
 msgid "Reverting the view will delete the view that is in the database, reverting it to the original default view. Any changes you have made will be lost and cannot be recovered."
 msgstr ""
 
-#: includes/admin.inc:652
-#: includes/convert.inc:105
+#: includes/admin.inc:652 includes/convert.inc:105
 msgid "Are you sure you want to delete the view %name?"
 msgstr ""
 
@@ -1564,14 +1554,13 @@ msgstr ""
 msgid "Deleting a view cannot be undone."
 msgstr ""
 
-#: includes/admin.inc:662;698;868;1357
-#: includes/convert.inc:109
+#: includes/admin.inc:662;698;870;1359 includes/convert.inc:109
 msgid "Cancel"
 msgstr "Скасувати"
 
 #: includes/admin.inc:671
 msgid "The view has been deleted."
-msgstr ""
+msgstr "View видалено."
 
 #: includes/admin.inc:683
 msgid "There is no lock on view %view to break."
@@ -1587,7 +1576,7 @@ msgstr ""
 
 #: includes/admin.inc:697
 msgid "Break lock"
-msgstr ""
+msgstr "Перервати блокування"
 
 #: includes/admin.inc:707
 msgid "The lock has been broken and you may now edit this view."
@@ -1605,353 +1594,339 @@ msgstr ""
 msgid "Paste view code here"
 msgstr "Вставити код Вигляду сюди"
 
-#: includes/admin.inc:769
+#: includes/admin.inc:771
 msgid "Unable to interpret view code."
 msgstr "Неможливо інтерпретувати код Вигляду"
 
-#: includes/admin.inc:777
+#: includes/admin.inc:779
 msgid "You are importing a view created in Views version 1. You may need to adjust some parameters to work correctly in version 2."
 msgstr ""
 
-#: includes/admin.inc:780
+#: includes/admin.inc:782
 msgid "That view is not compatible with this version of Views."
 msgstr ""
 
-#: includes/admin.inc:795
+#: includes/admin.inc:797
 msgid "A view by that name already exists; please choose a different name"
 msgstr ""
 
-#: includes/admin.inc:804
+#: includes/admin.inc:806
 msgid "Display plugin @plugin is not available."
 msgstr ""
 
-#: includes/admin.inc:811
+#: includes/admin.inc:813
 msgid "Style plugin @plugin is not available."
 msgstr ""
 
-#: includes/admin.inc:817
+#: includes/admin.inc:819
 msgid "Row plugin @plugin is not available."
 msgstr ""
 
-#: includes/admin.inc:827
+#: includes/admin.inc:829
 msgid "@type handler @table.@field is not available."
 msgstr ""
 
-#: includes/admin.inc:840
+#: includes/admin.inc:842
 msgid "Unable to import view."
 msgstr ""
 
-#: includes/admin.inc:861;889
+#: includes/admin.inc:863;891
 msgid "Save"
 msgstr "Зберегти"
 
-#: includes/admin.inc:913
+#: includes/admin.inc:915
 msgid "The view has been saved."
 msgstr ""
 
-#: includes/admin.inc:957
+#: includes/admin.inc:959
 msgid "Unknown or missing table name"
 msgstr ""
 
-#: includes/admin.inc:962
+#: includes/admin.inc:964
 msgid "Click on an item to edit that item's details."
 msgstr ""
 
-#: includes/admin.inc:965
+#: includes/admin.inc:967
 msgid "This view has a broken default display and cannot be used."
 msgstr ""
 
-#: includes/admin.inc:1007
-#: theme/theme.inc:99
+#: includes/admin.inc:1009 theme/theme.inc:100
 msgid "Export this view"
 msgstr "Експортувати вигляд"
 
-#: includes/admin.inc:1012
-#: theme/theme.inc:104
+#: includes/admin.inc:1014 theme/theme.inc:105
 msgid "Create a copy of this view"
 msgstr "Створити копію даного вигляду"
 
-#: includes/admin.inc:1023
-msgid "View \"!display\""
+#: includes/admin.inc:1025
+msgid "View \"@display\""
 msgstr ""
 
-#: includes/admin.inc:1024
+#: includes/admin.inc:1026
 msgid "Go to the real page for this display"
 msgstr ""
 
-#: includes/admin.inc:1090;3044
-#: includes/plugins.inc:218
-#: plugins/views_plugin_display.inc:587;704;723
-#: plugins/views_plugin_display_attachment.inc:90
-#: plugins/views_plugin_display_block.inc:73
-#: plugins/views_plugin_display_feed.inc:108
-#: plugins/views_plugin_display_page.inc:199
+#: includes/admin.inc:1092;3067 includes/plugins.inc:218;245 plugins/views_plugin_cache_none.inc:11 plugins/views_plugin_display.inc:625;761;780 plugins/views_plugin_display_attachment.inc:90 plugins/views_plugin_display_block.inc:73 plugins/views_plugin_display_feed.inc:108 plugins/views_plugin_display_page.inc:199
 msgid "None"
 msgstr "Немає"
 
-#: includes/admin.inc:1168
+#: includes/admin.inc:1170
 msgid "Invalid"
 msgstr "Некоректно"
 
-#: includes/admin.inc:1169
+#: includes/admin.inc:1171
 msgid "Error: Display @display refers to a plugin named '@plugin', but that plugin doesn't exist!"
 msgstr ""
 
-#: includes/admin.inc:1204;1204
+#: includes/admin.inc:1206;1206
 msgid "Rearrange"
 msgstr "Пересортувати"
 
-#: includes/admin.inc:1244;2244;2420;2488;2573
+#: includes/admin.inc:1246;2256;2432;2500;2585
 msgid "Error: handler for @table > @field doesn't exist!"
 msgstr ""
 
-#: includes/admin.inc:1263;1263;1272
+#: includes/admin.inc:1265;1265;1274
 msgid "Settings"
 msgstr "Налаштування"
 
-#: includes/admin.inc:1268
-#: plugins/views_plugin_display.inc:598;616
+#: includes/admin.inc:1270 plugins/views_plugin_display.inc:636;654
 msgid "Missing style plugin"
 msgstr "Загублено додаток стилю"
 
-#: includes/admin.inc:1272
-#: plugins/views_plugin_display.inc:611;626
+#: includes/admin.inc:1274 plugins/views_plugin_display.inc:649;664
 msgid "Change settings for this style"
 msgstr ""
 
-#: includes/admin.inc:1275
+#: includes/admin.inc:1277
 msgid "&nbsp; Style: !style"
-msgstr ""
+msgstr "&nbsp; Стиль: !style"
 
-#: includes/admin.inc:1306
+#: includes/admin.inc:1308
 msgid "Invalid display id found while regenerating tabs"
 msgstr ""
 
-#: includes/admin.inc:1339
+#: includes/admin.inc:1341
 msgid "Update"
 msgstr "Оновити"
 
-#: includes/admin.inc:1357
+#: includes/admin.inc:1359
 msgid "Ok"
 msgstr "Ok"
 
-#: includes/admin.inc:1628
+#: includes/admin.inc:1630
 msgid "Unable to initialize default display"
 msgstr ""
 
-#: includes/admin.inc:1660
+#: includes/admin.inc:1662
 msgid "Add display"
 msgstr "Додати відображення"
 
-#: includes/admin.inc:1700
+#: includes/admin.inc:1702
 msgid "Remove display"
 msgstr "Видалити відображення"
 
-#: includes/admin.inc:1711
+#: includes/admin.inc:1713
 msgid "Restore display"
 msgstr "Відновити відображення"
 
-#: includes/admin.inc:1783
+#: includes/admin.inc:1785
 msgid "Analyze"
 msgstr "Аналіз"
 
-#: includes/admin.inc:1795
+#: includes/admin.inc:1797
 msgid "View analysis"
 msgstr "Аналізування Вигляду"
 
-#: includes/admin.inc:1849
+#: includes/admin.inc:1851
 msgid "View details"
 msgstr "Деталі Вигляду"
 
-#: includes/admin.inc:1890;1944;1999;2145;2237;2413;2481;2566
+#: includes/admin.inc:1892;1946;2001;2147;2249;2425;2493;2578
 msgid "Invalid display id @display"
 msgstr ""
 
-#: includes/admin.inc:1948
+#: includes/admin.inc:1950
 msgid "Configure @type"
 msgstr "Конфігурування @type"
 
-#: includes/admin.inc:2003
+#: includes/admin.inc:2005
 msgid "Rearrange @type"
 msgstr "Пересортування @type"
 
-#: includes/admin.inc:2046
+#: includes/admin.inc:2048
 msgid "Broken field @id"
 msgstr "Втрачене поле @id"
 
-#: includes/admin.inc:2086;2095;2329
+#: includes/admin.inc:2088;2097;2341
 msgid "Remove"
 msgstr "Видалити"
 
-#: includes/admin.inc:2086;2086
+#: includes/admin.inc:2088;2088
 msgid "Remove this item"
 msgstr "Видалити цей елемент"
 
-#: includes/admin.inc:2092
+#: includes/admin.inc:2094
 msgid "No fields available."
 msgstr "Недоступні поля"
 
-#: includes/admin.inc:2095
-#: modules/book.views.inc:57
-#: modules/taxonomy.views.inc:139
-#: modules/upload.views.inc:91
-#: plugins/views_plugin_display_page.inc:339
+#: includes/admin.inc:2097 modules/book.views.inc:57 modules/taxonomy.views.inc:139 modules/upload.views.inc:91 plugins/views_plugin_display_page.inc:341
 msgid "Weight"
 msgstr "Вага"
 
-#: includes/admin.inc:2151
+#: includes/admin.inc:2153
 msgid "Add @type"
 msgstr "Додати @type"
 
-#: includes/admin.inc:2162
+#: includes/admin.inc:2164
 msgid "Groups"
 msgstr "Групи"
 
-#: includes/admin.inc:2181
+#: includes/admin.inc:2190
 msgid "!group: !field"
 msgstr "!group: !field"
 
-#: includes/admin.inc:2190
+#: includes/admin.inc:2202
 msgid "There are no @types available to add."
 msgstr ""
 
-#: includes/admin.inc:2287
-#: plugins/views_plugin_row.inc:65
+#: includes/admin.inc:2299 plugins/views_plugin_row.inc:76
 msgid "Do not use a relationship"
 msgstr ""
 
-#: includes/admin.inc:2302
-#: includes/view.inc:1942;1943
-#: plugins/views_plugin_row.inc:74
+#: includes/admin.inc:2314 includes/view.inc:1989;1990 plugins/views_plugin_row.inc:85
 msgid "Relationship"
 msgstr "Зв'язок"
 
-#: includes/admin.inc:2315
+#: includes/admin.inc:2327
 msgid "Configure @type %item"
 msgstr ""
 
-#: includes/admin.inc:2428
+#: includes/admin.inc:2440
 msgid "Configure extra settings for @type %item"
 msgstr ""
 
-#: includes/admin.inc:2493
+#: includes/admin.inc:2505
 msgid "Change summary style for @type %item"
 msgstr ""
 
-#: includes/admin.inc:2516;2530
+#: includes/admin.inc:2528;2542
 msgid "Internal error: broken plugin."
 msgstr ""
 
-#: includes/admin.inc:2580
+#: includes/admin.inc:2592
 msgid "Configure summary style for @type %item"
 msgstr ""
 
-#: includes/admin.inc:2672
+#: includes/admin.inc:2684
 msgid "Clear Views' cache"
 msgstr "Очистити кеш"
 
-#: includes/admin.inc:2678
+#: includes/admin.inc:2690
 msgid "Add Views signature to all SQL queries"
 msgstr ""
 
-#: includes/admin.inc:2679
+#: includes/admin.inc:2691
 msgid "All Views-generated queries will include a special 'VIEWS' = 'VIEWS' string in the WHERE clause. This makes identifying Views queries in database server logs simpler, but should only be used when troubleshooting."
 msgstr ""
 
-#: includes/admin.inc:2685
+#: includes/admin.inc:2697
 msgid "Disable views data caching"
 msgstr ""
 
-#: includes/admin.inc:2686
+#: includes/admin.inc:2698
 msgid "Views caches data about tables, modules and views available, to increase performance. By checking this box, Views will skip this cache and always rebuild this data when needed. This can have a serious performance impact on your site."
 msgstr ""
 
-#: includes/admin.inc:2692
+#: includes/admin.inc:2704
 msgid "Ignore missing advanced help module"
 msgstr ""
 
-#: includes/admin.inc:2693
+#: includes/admin.inc:2705
 msgid "Views uses the advanced help module to provide help text; if this module is not present Views will complain, unless this setting is checked."
 msgstr ""
 
-#: includes/admin.inc:2699
+#: includes/admin.inc:2711
 msgid "Show query above live preview"
 msgstr ""
 
-#: includes/admin.inc:2700
+#: includes/admin.inc:2712
 msgid "The live preview feature will show you the output of the view you're creating, as well as the view. Check here to show the query and other information above the view; leave this unchecked to show that information below the view."
 msgstr ""
 
-#: includes/admin.inc:2706
+#: includes/admin.inc:2718
 msgid "Show other queries run during render during live preview"
 msgstr ""
 
-#: includes/admin.inc:2707
+#: includes/admin.inc:2719
 msgid "Drupal has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."
 msgstr ""
 
-#: includes/admin.inc:2713
+#: includes/admin.inc:2725
 msgid "Do not show hover links over views"
 msgstr ""
 
-#: includes/admin.inc:2714
+#: includes/admin.inc:2726
 msgid "To make it easier to administrate your views, Views provides 'hover' links to take you to the edit and export screen of a view whenever the view is used. This can be distracting on some themes, though; if it is problematic, you can turn it off here."
 msgstr ""
 
-#: includes/admin.inc:2720
+#: includes/admin.inc:2732
 msgid "Enable views performance statistics via the Devel module"
 msgstr ""
 
-#: includes/admin.inc:2721
+#: includes/admin.inc:2733
 msgid "Check this to enable some Views query and performance statistics <em>if Devel is installed</em>."
 msgstr ""
 
-#: includes/admin.inc:2727
+#: includes/admin.inc:2739
 msgid "Disable javascript with Views"
 msgstr ""
 
-#: includes/admin.inc:2728
+#: includes/admin.inc:2740
 msgid "If you are having problems with the javascript, you can disable it here; the Views UI should degrade and still be usable without javascript, it just not as good."
 msgstr ""
 
-#: includes/admin.inc:2736
+#: includes/admin.inc:2745
+msgid "Watchdog"
+msgstr "Вартовий"
+
+#: includes/admin.inc:2749
 msgid "Page region to output performance statistics"
 msgstr ""
 
-#: includes/admin.inc:2743
+#: includes/admin.inc:2756
 msgid "Label for \"Any\" value on optional single-select exposed filters"
 msgstr ""
 
-#: includes/admin.inc:2756
+#: includes/admin.inc:2769
 msgid "The cache has been cleared."
-msgstr ""
+msgstr "Кеш - очищено!"
 
-#: includes/admin.inc:2922
+#: includes/admin.inc:2945
 msgid "Error: missing @component"
 msgstr ""
 
-#: includes/admin.inc:3008
-#: includes/view.inc:1913
+#: includes/admin.inc:3031 includes/view.inc:1960
 msgid "Field"
 msgstr "Поле"
 
-#: includes/admin.inc:3009
+#: includes/admin.inc:3032
 msgid "Column"
-msgstr ""
+msgstr "Стовпець"
 
-#: includes/admin.inc:3012
+#: includes/admin.inc:3035
 msgid "Sortable"
-msgstr ""
+msgstr "Сортується"
 
-#: includes/admin.inc:3016
+#: includes/admin.inc:3039
 msgid "Default sort"
-msgstr ""
+msgstr "Базове сортування"
 
-#: includes/ajax.inc:82
+#: includes/ajax.inc:89
 msgid "Server reports invalid input error."
 msgstr ""
 
-#: includes/ajax.inc:83
+#: includes/ajax.inc:90
 msgid "Error"
 msgstr "Помилка"
 
@@ -1973,7 +1948,7 @@ msgstr "Дії"
 
 #: includes/convert.inc:33
 msgid "Converted"
-msgstr ""
+msgstr "Конвертовано"
 
 #: includes/convert.inc:68
 msgid "The table below lists Views version 1 views that are stored in the database. You can either convert them to work in Views version 2, or delete them. The views are convertible only if there is no Views 2 view with the same name."
@@ -1981,11 +1956,11 @@ msgstr ""
 
 #: includes/convert.inc:79
 msgid "Unable to find view."
-msgstr ""
+msgstr "Неможливо знайти view"
 
 #: includes/convert.inc:89
 msgid "Unable to convert view."
-msgstr ""
+msgstr "Неможливо перетворити view"
 
 #: includes/convert.inc:107
 msgid "This action cannot be undone."
@@ -1993,11 +1968,15 @@ msgstr "Цю дію не можна буде скасувати."
 
 #: includes/convert.inc:117
 msgid "The view has been deleted"
-msgstr ""
+msgstr "View видалено."
 
 #: includes/form.inc:249
 msgid "Validation error, please try again. If this error persists, please contact the site administrator."
-msgstr "Помилка при перевірці значення, будь-ласка, спробуйте ще. Якщо помилка повториться, повідомте адміністратора сайту."
+msgstr ""
+"Помилка при перевірці значення, "
+"будь-ласка, спробуйте ще. Якщо помилка "
+"повториться, повідомте "
+"адміністратора сайту."
 
 #: includes/handlers.inc:43
 msgid "Handler @handler include tried to loop infinitely!"
@@ -2005,11 +1984,11 @@ msgstr ""
 
 #: includes/handlers.inc:270
 msgid "!group: !title"
-msgstr ""
+msgstr "!group: !title"
 
 #: includes/handlers.inc:521
 msgid "Reduce duplicates"
-msgstr ""
+msgstr "Зменшення дублів"
 
 #: includes/handlers.inc:522
 msgid "This filter can cause items that have more than one of the selected options to appear as duplicate results. If this filter causes duplicate results to occur, this checkbox can reduce those duplicates; however, the more terms it has to search for, the less performant the query will be, so use this with caution."
@@ -2037,7 +2016,9 @@ msgstr "Причіплений файл"
 
 #: includes/plugins.inc:65
 msgid "Attachments added to other displays to achieve multiple views in the same view."
-msgstr "Додатки додаються до інших виглядів для збору кількох VIEW в один."
+msgstr ""
+"Додатки додаються до інших виглядів "
+"для збору кількох VIEW в один."
 
 #: includes/plugins.inc:73
 msgid "Display the view as a feed, such as an RSS feed."
@@ -2053,19 +2034,19 @@ msgstr ""
 
 #: includes/plugins.inc:104
 msgid "HTML List"
-msgstr ""
+msgstr "Список HTML"
 
 #: includes/plugins.inc:105
 msgid "Displays rows as an HTML list."
-msgstr ""
+msgstr "Показувати рядки як HTML-список."
 
 #: includes/plugins.inc:114
 msgid "Grid"
-msgstr ""
+msgstr "Сітка"
 
 #: includes/plugins.inc:115
 msgid "Displays rows in a grid."
-msgstr ""
+msgstr "Відображає рядків у сітці."
 
 #: includes/plugins.inc:124
 msgid "Table"
@@ -2073,23 +2054,27 @@ msgstr "Таблиця"
 
 #: includes/plugins.inc:125
 msgid "Displays rows in a table."
-msgstr ""
+msgstr "Показувати рядки в таблиці"
 
 #: includes/plugins.inc:136
 msgid "Displays the default summary as a list."
 msgstr ""
+"Відображає стандартне резюме у "
+"вигляді списку."
 
 #: includes/plugins.inc:145
 msgid "Displays the summary unformatted, with option for one after another or inline."
 msgstr ""
+"Відображає сумарно, неформатовано, з "
+"опцією для одного за одним або в лінію."
 
 #: includes/plugins.inc:154
 msgid "RSS Feed"
-msgstr ""
+msgstr "RSS потік"
 
 #: includes/plugins.inc:155
 msgid "Generates an RSS feed from a view."
-msgstr ""
+msgstr "Ґенерує RSS-стрічку з view."
 
 #: includes/plugins.inc:174
 msgid "Displays the fields with an optional template."
@@ -2097,7 +2082,7 @@ msgstr ""
 
 #: includes/plugins.inc:187
 msgid "Fixed entry"
-msgstr ""
+msgstr "Фіксований запис"
 
 #: includes/plugins.inc:191;203
 msgid "PHP Code"
@@ -2105,14 +2090,13 @@ msgstr "Код PHP"
 
 #: includes/plugins.inc:207
 msgid "Numeric"
-msgstr ""
+msgstr "Цифрова"
 
 #: includes/plugins.inc:219
 msgid "Will be available to all users."
 msgstr ""
 
-#: includes/plugins.inc:224
-#: plugins/views_plugin_access_role.inc:40
+#: includes/plugins.inc:224 plugins/views_plugin_access_role.inc:40
 msgid "Role"
 msgstr "Роль"
 
@@ -2120,8 +2104,7 @@ msgstr "Роль"
 msgid "Access will be granted to users with any of the specified roles."
 msgstr ""
 
-#: includes/plugins.inc:231
-#: plugins/views_plugin_access_perm.inc:35
+#: includes/plugins.inc:231 plugins/views_plugin_access_perm.inc:35
 msgid "Permission"
 msgstr "Повноваження"
 
@@ -2129,74 +2112,85 @@ msgstr "Повноваження"
 msgid "Access will be granted to users with the specified permission string."
 msgstr ""
 
-#: includes/view.inc:263
+#: includes/plugins.inc:246
+msgid "No caching of Views data."
+msgstr ""
+
+#: includes/plugins.inc:251
+msgid "Time-based"
+msgstr ""
+
+#: includes/plugins.inc:252
+msgid "Simple time-based caching of data."
+msgstr ""
+
+#: includes/view.inc:266
 msgid "set_display() called with invalid display id @display."
 msgstr ""
 
-#: includes/view.inc:1104
+#: includes/view.inc:1150
 msgid "Home"
 msgstr "Головна"
 
-#: includes/view.inc:1912
+#: includes/view.inc:1959
 msgid "fields"
 msgstr "поля"
 
-#: includes/view.inc:1914
+#: includes/view.inc:1961
 msgid "field"
 msgstr "поле"
 
-#: includes/view.inc:1919
+#: includes/view.inc:1966
 msgid "arguments"
 msgstr "аргументи"
 
-#: includes/view.inc:1920;1921
+#: includes/view.inc:1967;1968
 msgid "Argument"
 msgstr "Аргумент"
 
-#: includes/view.inc:1925
+#: includes/view.inc:1972
 msgid "Sort criteria"
 msgstr "Критерій сортування"
 
-#: includes/view.inc:1926
+#: includes/view.inc:1973
 msgid "sort criteria"
 msgstr "критерій сортування"
 
-#: includes/view.inc:1927
+#: includes/view.inc:1974
 msgid "Sort criterion"
 msgstr "Критерій сортування"
 
-#: includes/view.inc:1928
+#: includes/view.inc:1975
 msgid "sort criterion"
 msgstr "критерій сортування"
 
-#: includes/view.inc:1932
+#: includes/view.inc:1979
 msgid "Filters"
 msgstr "Фільтри"
 
-#: includes/view.inc:1933
+#: includes/view.inc:1980
 msgid "filters"
 msgstr "фільтри"
 
-#: includes/view.inc:1934
+#: includes/view.inc:1981
 msgid "Filter"
 msgstr "Фільтрація"
 
-#: includes/view.inc:1935
+#: includes/view.inc:1982
 msgid "filter"
 msgstr "фільтр"
 
-#: includes/view.inc:1940
+#: includes/view.inc:1987
 msgid "Relationships"
 msgstr "Зв'язки"
 
-#: includes/view.inc:1941
+#: includes/view.inc:1988
 msgid "relationships"
 msgstr "зв'язки"
 
-#: js/ajax.js:0;0;0;0;0;0;0
-#: js/ajax_view.js:0;0
+#: js/ajax.js:0;0;0;0;0;0;0 js/ajax_view.js:0;0
 msgid "An error occurred at @path."
-msgstr ""
+msgstr "Помилка на @path."
 
 #: js/tabs.js:0
 msgid "jQuery UI Tabs: Mismatching fragment identifier."
@@ -2210,9 +2204,9 @@ msgstr ""
 msgid "Aggregator"
 msgstr "Підбірка новин"
 
-#: modules/aggregator.views.inc:31;299
+#: modules/aggregator.views.inc:31;370
 msgid "Aggregator item"
-msgstr ""
+msgstr "Агрегатор пункту"
 
 #: modules/aggregator.views.inc:32
 msgid "Aggregator items are imported from external RSS and Atom news feeds."
@@ -2222,8 +2216,7 @@ msgstr ""
 msgid "The title of the aggregator item."
 msgstr ""
 
-#: modules/aggregator.views.inc:59;191
-#: modules/node.views.inc:246
+#: modules/aggregator.views.inc:59;191 modules/node.views.inc:246 modules/contact/views_handler_field_contact_link.inc:21
 msgid "Link"
 msgstr "Посилання"
 
@@ -2231,8 +2224,7 @@ msgstr "Посилання"
 msgid "The link to the original source URL of the item."
 msgstr ""
 
-#: modules/aggregator.views.inc:76
-#: modules/comment.views.inc:95
+#: modules/aggregator.views.inc:76 modules/comment.views.inc:95
 msgid "Author"
 msgstr "Автор"
 
@@ -2240,9 +2232,7 @@ msgstr "Автор"
 msgid "The author of the original imported item."
 msgstr ""
 
-#: modules/aggregator.views.inc:97
-#: modules/comment.views.inc:63
-#: modules/node.views.inc:362
+#: modules/aggregator.views.inc:97 modules/comment.views.inc:63 modules/node.views.inc:416
 msgid "Body"
 msgstr "Тіло"
 
@@ -2250,8 +2240,7 @@ msgstr "Тіло"
 msgid "The actual content of the imported item."
 msgstr ""
 
-#: modules/aggregator.views.inc:112
-#: modules/statistics.views.inc:231
+#: modules/aggregator.views.inc:112 modules/statistics.views.inc:231
 msgid "Timestamp"
 msgstr "Час"
 
@@ -2261,11 +2250,11 @@ msgstr ""
 
 #: modules/aggregator.views.inc:135
 msgid "Aggregator feed"
-msgstr ""
+msgstr "Стрічка збиральника"
 
 #: modules/aggregator.views.inc:147
 msgid "Feed ID"
-msgstr ""
+msgstr "Feed ID"
 
 #: modules/aggregator.views.inc:148
 msgid "The unique ID of the aggregator feed."
@@ -2273,15 +2262,15 @@ msgstr ""
 
 #: modules/aggregator.views.inc:173
 msgid "The title of the aggregator feed."
-msgstr ""
+msgstr "Заголовок агрегатора пункту."
 
 #: modules/aggregator.views.inc:192
 msgid "The link to the source URL of the feed."
-msgstr ""
+msgstr "Посилання на URL каналу."
 
 #: modules/aggregator.views.inc:209
 msgid "Last checked"
-msgstr ""
+msgstr "Востаннє перевірено"
 
 #: modules/aggregator.views.inc:210
 msgid "The date the feed was last checked for new content."
@@ -2293,13 +2282,33 @@ msgstr ""
 
 #: modules/aggregator.views.inc:245
 msgid "Last modified"
-msgstr ""
+msgstr "Востаннє змінено"
 
 #: modules/aggregator.views.inc:246
 msgid "The date of the most recent new content onf the feed."
 msgstr ""
 
-#: modules/aggregator.views.inc:300
+#: modules/aggregator.views.inc:277
+msgid "Aggregator category"
+msgstr ""
+
+#: modules/aggregator.views.inc:289
+msgid "Category ID"
+msgstr ""
+
+#: modules/aggregator.views.inc:290
+msgid "The unique ID of the aggregator category."
+msgstr ""
+
+#: modules/aggregator.views.inc:310
+msgid "Category"
+msgstr "Категорія"
+
+#: modules/aggregator.views.inc:311
+msgid "The title of the aggregator category."
+msgstr ""
+
+#: modules/aggregator.views.inc:371
 msgid "Display the aggregator item using the data from the original source."
 msgstr ""
 
@@ -2319,11 +2328,9 @@ msgstr ""
 msgid "The weight of the book page."
 msgstr ""
 
-#: modules/book.views.inc:69
-#: modules/comment.views.inc:211
-#: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:24
+#: modules/book.views.inc:69 modules/comment.views.inc:211 modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:24 modules/taxonomy/views_handler_filter_term_node_tid_depth.inc:29
 msgid "Depth"
-msgstr ""
+msgstr "Глибина"
 
 #: modules/book.views.inc:70
 msgid "The depth of the book page in the hierarchy; top level books have a depth of 1."
@@ -2337,8 +2344,7 @@ msgstr "Ієрархія"
 msgid "The order of pages in the book hierarchy. If you want the exactly right order, remember to sort by weight, too."
 msgstr ""
 
-#: modules/book.views.inc:110
-#: modules/taxonomy.views.inc:263
+#: modules/book.views.inc:110 modules/taxonomy.views.inc:264
 msgid "Parent"
 msgstr "Попередник"
 
@@ -2357,14 +2363,16 @@ msgstr "Коментар"
 #: modules/comment.views.inc:27
 msgid "Comments are responses to node content."
 msgstr ""
+"Коментарі є відгуками на матеріал "
+"вмісту."
 
 #: modules/comment.views.inc:45
 msgid "The title of the comment."
-msgstr ""
+msgstr "Тема коментаря"
 
 #: modules/comment.views.inc:64
 msgid "The text of the comment."
-msgstr ""
+msgstr "Текст коментаря"
 
 #: modules/comment.views.inc:76
 msgid "ID"
@@ -2372,7 +2380,7 @@ msgstr "Ідентифікатор"
 
 #: modules/comment.views.inc:77
 msgid "The comment ID of the field"
-msgstr ""
+msgstr "ID коментаря поля"
 
 #: modules/comment.views.inc:96
 msgid "The name of the comment's author. Can be rendered as a link to the author's homepage."
@@ -2380,16 +2388,15 @@ msgstr ""
 
 #: modules/comment.views.inc:114
 msgid "Author's website"
-msgstr ""
+msgstr "Сайт автора"
 
 #: modules/comment.views.inc:115
 msgid "The website address of the comment's author. Can be rendered as a link. Will be empty if the author is a registered user."
 msgstr ""
 
-#: modules/comment.views.inc:133
-#: modules/node.views.inc:108
+#: modules/comment.views.inc:133 modules/node.views.inc:108
 msgid "Post date"
-msgstr ""
+msgstr "Дата публікації"
 
 #: modules/comment.views.inc:134
 msgid "Date and time of when the comment was posted."
@@ -2397,41 +2404,35 @@ msgstr ""
 
 #: modules/comment.views.inc:149
 msgid "In moderation"
-msgstr ""
+msgstr "В модерації"
 
 #: modules/comment.views.inc:150
 msgid "Whether or not the comment is currently in moderation."
 msgstr ""
 
-#: modules/comment.views.inc:157
-#: modules/node.views.inc:206;215
+#: modules/comment.views.inc:157 modules/node.views.inc:206;215
 msgid "Moderated"
-msgstr ""
+msgstr "Модеровано"
 
 #: modules/comment.views.inc:168
 msgid "View link"
-msgstr ""
+msgstr "Показати посилання"
 
 #: modules/comment.views.inc:169
 msgid "Provide a simple link to view the comment."
 msgstr ""
 
-#: modules/comment.views.inc:177
-#: modules/locale.views.inc:123
-#: modules/node.views.inc:254
-#: modules/user.views.inc:209
+#: modules/comment.views.inc:177 modules/locale.views.inc:123 modules/node.views.inc:254 modules/user.views.inc:225
 msgid "Edit link"
-msgstr ""
+msgstr "Посилання на редагування"
 
 #: modules/comment.views.inc:178
 msgid "Provide a simple link to edit the comment."
 msgstr ""
 
-#: modules/comment.views.inc:186
-#: modules/node.views.inc:262;476
-#: modules/user.views.inc:217
+#: modules/comment.views.inc:186 modules/node.views.inc:262;563 modules/user.views.inc:233
 msgid "Delete link"
-msgstr ""
+msgstr "Посилання на видалення"
 
 #: modules/comment.views.inc:187
 msgid "Provide a simple link to delete the comment."
@@ -2439,7 +2440,7 @@ msgstr ""
 
 #: modules/comment.views.inc:195
 msgid "Reply-to link"
-msgstr ""
+msgstr "Посилання відповіді"
 
 #: modules/comment.views.inc:196
 msgid "Provide a simple link to reply to the comment."
@@ -2447,7 +2448,7 @@ msgstr ""
 
 #: modules/comment.views.inc:203
 msgid "Node link"
-msgstr ""
+msgstr "Посилання матеріалу"
 
 #: modules/comment.views.inc:204
 msgid "Display the standard comment link used on regular nodes."
@@ -2465,9 +2466,7 @@ msgstr "Напрям"
 msgid "Sort by the threaded order. This will keep child comments together with their parents."
 msgstr ""
 
-#: modules/comment.views.inc:223;229;264
-#: modules/node.views.inc:24;29;90;361;376;488;620;631;644
-#: modules/upload.views.inc:43
+#: modules/comment.views.inc:223;229;264 modules/node.views.inc:24;29;90;415;430;600;734;745;758 modules/upload.views.inc:43
 msgid "Node"
 msgstr "Матеріал"
 
@@ -2475,20 +2474,17 @@ msgstr "Матеріал"
 msgid "The node the comment is a reply to."
 msgstr ""
 
-#: modules/comment.views.inc:234;240
-#: modules/node.views.inc:349
-#: modules/statistics.views.inc:204
-#: modules/user.views.inc:23;27;226;317
+#: modules/comment.views.inc:234;240 modules/node.views.inc:403 modules/statistics.views.inc:204 modules/user.views.inc:23;27;242;333
 msgid "User"
 msgstr "Користувач"
 
 #: modules/comment.views.inc:235
 msgid "The User ID of the comment's author."
-msgstr ""
+msgstr "ID користувача-автора коментаря"
 
 #: modules/comment.views.inc:245
 msgid "Parent CID"
-msgstr ""
+msgstr "Батьківська CID"
 
 #: modules/comment.views.inc:246
 msgid "The Comment ID of the parent comment."
@@ -2496,11 +2492,11 @@ msgstr ""
 
 #: modules/comment.views.inc:251;256
 msgid "Parent comment"
-msgstr ""
+msgstr "Батьківський коментар"
 
 #: modules/comment.views.inc:252
 msgid "The parent comment."
-msgstr ""
+msgstr "Батьківський коментар."
 
 #: modules/comment.views.inc:278
 msgid "Last comment time"
@@ -2528,7 +2524,7 @@ msgstr ""
 
 #: modules/comment.views.inc:326
 msgid "Updated/commented date"
-msgstr ""
+msgstr "Дата оновлення/коментування"
 
 #: modules/comment.views.inc:327
 msgid "The most recent of last comment posted or node updated time."
@@ -2536,7 +2532,7 @@ msgstr ""
 
 #: modules/comment.views.inc:350
 msgid "New comments"
-msgstr ""
+msgstr "Новий коментар"
 
 #: modules/comment.views.inc:351
 msgid "The number of new comments on the node."
@@ -2564,11 +2560,19 @@ msgstr ""
 
 #: modules/comment.views.inc:412
 msgid "Display the comment as RSS."
+msgstr "Показати коментарі у форматі RSS."
+
+#: modules/contact.views.inc:11
+msgid "Link to contact page"
+msgstr ""
+
+#: modules/contact.views.inc:12
+msgid "Provide a simple link to the user contact page."
 msgstr ""
 
 #: modules/locale.views.inc:23;28;55;75;92;105;121
 msgid "Locale source"
-msgstr ""
+msgstr "Локальне джерело"
 
 #: modules/locale.views.inc:29
 msgid "A source string for translation, in English or the default site language."
@@ -2576,11 +2580,11 @@ msgstr ""
 
 #: modules/locale.views.inc:34
 msgid "LID"
-msgstr ""
+msgstr "LID"
 
 #: modules/locale.views.inc:35
 msgid "The ID of the source string."
-msgstr ""
+msgstr "ID початкового джерела."
 
 #: modules/locale.views.inc:56
 msgid "Location"
@@ -2590,8 +2594,7 @@ msgstr "Розташування"
 msgid "A description of the location or context of the string."
 msgstr ""
 
-#: modules/locale.views.inc:76
-#: modules/locale/views_handler_filter_locale_group.inc:10
+#: modules/locale.views.inc:76 modules/locale/views_handler_filter_locale_group.inc:10
 msgid "Group"
 msgstr "Група"
 
@@ -2605,10 +2608,9 @@ msgstr "Джерело"
 
 #: modules/locale.views.inc:94
 msgid "The full original string."
-msgstr ""
+msgstr "Повний оригінальний текст."
 
-#: modules/locale.views.inc:106
-#: modules/locale/views_handler_filter_locale_version.inc:10
+#: modules/locale.views.inc:106 modules/locale/views_handler_filter_locale_version.inc:10
 msgid "Version"
 msgstr "Версія"
 
@@ -2632,10 +2634,7 @@ msgstr "Переклад"
 msgid "The full translation string."
 msgstr ""
 
-#: modules/locale.views.inc:160
-#: modules/translation.views.inc:32
-#: modules/locale/views_handler_filter_locale_language.inc:10
-#: modules/translation/views_handler_filter_node_language.inc:9
+#: modules/locale.views.inc:160 modules/translation.views.inc:32 modules/user.views.inc:113 modules/locale/views_handler_filter_locale_language.inc:10 modules/translation/views_handler_filter_node_language.inc:9
 msgid "Language"
 msgstr "Мова"
 
@@ -2645,15 +2644,15 @@ msgstr ""
 
 #: modules/locale.views.inc:176
 msgid "Singular LID"
-msgstr ""
+msgstr "Одинична LID"
 
 #: modules/locale.views.inc:177
 msgid "The ID of the parent translation."
-msgstr ""
+msgstr "ID батьківського перекладу."
 
 #: modules/locale.views.inc:186;194
 msgid "Plural"
-msgstr ""
+msgstr "Множина"
 
 #: modules/locale.views.inc:187
 msgid "Whether or not the translation is plural."
@@ -2662,24 +2661,26 @@ msgstr ""
 #: modules/node.views.inc:30
 msgid "Nodes are a Drupal site's primary content."
 msgstr ""
+"Матеріал є основним вмістом сайтів на "
+"Drupal."
 
 #: modules/node.views.inc:57
 msgid "Nid"
-msgstr ""
+msgstr "Nid"
 
 #: modules/node.views.inc:58
 msgid "The node ID of the node."
-msgstr ""
+msgstr "Ідентифікатор матеріалу"
 
-#: modules/node.views.inc:86;418
+#: modules/node.views.inc:86;472
 msgid "The title of the node."
-msgstr ""
+msgstr "Тема матеріалу"
 
 #: modules/node.views.inc:109
 msgid "The date the node was posted."
 msgstr ""
 
-#: modules/node.views.inc:124
+#: modules/node.views.inc:124;325
 msgid "Updated date"
 msgstr "Дата оновлення"
 
@@ -2697,7 +2698,7 @@ msgstr ""
 
 #: modules/node.views.inc:177;182
 msgid "Published or admin"
-msgstr ""
+msgstr "Опубліковано або адміністування"
 
 #: modules/node.views.inc:178
 msgid "Filters out unpublished nodes if the current user cannot view them."
@@ -2735,137 +2736,189 @@ msgstr ""
 msgid "Provide a simple link to delete the node."
 msgstr ""
 
-#: modules/node.views.inc:271;452
-#: modules/user.views.inc:129
+#: modules/node.views.inc:271;506 modules/user.views.inc:145
 msgid "Created date"
 msgstr "Дата створення"
 
-#: modules/node.views.inc:272
+#: modules/node.views.inc:272;326
 msgid "In the form of CCYYMMDD."
 msgstr ""
 
 #: modules/node.views.inc:280
 msgid "Created year + month"
-msgstr ""
+msgstr "Рік створення + місяць"
 
-#: modules/node.views.inc:281
+#: modules/node.views.inc:281;335
 msgid "In the form of YYYYMM."
-msgstr ""
+msgstr "У форматі РРРРММ."
 
 #: modules/node.views.inc:289
 msgid "Created year"
-msgstr ""
+msgstr "Рік створення"
 
-#: modules/node.views.inc:290
+#: modules/node.views.inc:290;344
 msgid "In the form of YYYY."
-msgstr ""
+msgstr "У форматі РРРР."
 
 #: modules/node.views.inc:298
 msgid "Created month"
-msgstr ""
+msgstr "Місяць створення"
 
-#: modules/node.views.inc:299
+#: modules/node.views.inc:299;353
 msgid "In the form of MM (01 - 12)."
-msgstr ""
+msgstr "У форматі ММ(01 - 12)."
 
 #: modules/node.views.inc:307
 msgid "Created day"
-msgstr ""
+msgstr "День створення"
 
-#: modules/node.views.inc:308
+#: modules/node.views.inc:308;362
 msgid "In the form of DD (01 - 31)."
-msgstr ""
+msgstr "У форматі ДД (01 - 31)."
 
 #: modules/node.views.inc:316
 msgid "Created week"
-msgstr ""
+msgstr "Тиждень створення"
 
-#: modules/node.views.inc:317
+#: modules/node.views.inc:317;371
 msgid "In the form of WW (01 - 53)."
+msgstr "У форматі ТТ (01 - 53)."
+
+#: modules/node.views.inc:334
+msgid "Updated year + month"
 msgstr ""
 
-#: modules/node.views.inc:329;334
+#: modules/node.views.inc:343
+msgid "Updated year"
+msgstr ""
+
+#: modules/node.views.inc:352
+msgid "Updated month"
+msgstr ""
+
+#: modules/node.views.inc:361
+msgid "Updated day"
+msgstr ""
+
+#: modules/node.views.inc:370
+msgid "Updated week"
+msgstr ""
+
+#: modules/node.views.inc:383;388
 msgid "Node revision"
-msgstr ""
+msgstr "Ревізія матеріалу"
 
-#: modules/node.views.inc:335
+#: modules/node.views.inc:389
 msgid "Node revisions are a history of changes to nodes."
-msgstr ""
+msgstr "Ревізія матеріалів це історія змін."
 
-#: modules/node.views.inc:350
+#: modules/node.views.inc:404
 msgid "Relate a node revision to the user who created the revision."
 msgstr ""
+"Відносити матеріал до користувача, "
+"який створив ревізію."
 
-#: modules/node.views.inc:355
+#: modules/node.views.inc:409
 msgid "user"
 msgstr "користувач"
 
-#: modules/node.views.inc:363
+#: modules/node.views.inc:417
 msgid "The actual, full data in the body field; this may not be valid data on all node types."
 msgstr ""
 
-#: modules/node.views.inc:377
-#: modules/node/views_plugin_row_node_view.inc:52
+#: modules/node.views.inc:431 modules/node/views_plugin_row_node_view.inc:52
 msgid "Teaser"
 msgstr "Анонс"
 
-#: modules/node.views.inc:378
+#: modules/node.views.inc:432
 msgid "The stored teaser field. This may not be valid or useful data on all node types."
 msgstr ""
 
-#: modules/node.views.inc:391
+#: modules/node.views.inc:445
 msgid "Vid"
-msgstr ""
+msgstr "Vid"
 
-#: modules/node.views.inc:392
+#: modules/node.views.inc:446
 msgid "The revision ID of the node revision."
-msgstr ""
+msgstr "Ідентифікатор версії матеріалу"
 
-#: modules/node.views.inc:438
+#: modules/node.views.inc:492
 msgid "Log message"
 msgstr "Повідомлення в системний журнал"
 
-#: modules/node.views.inc:439
+#: modules/node.views.inc:493
 msgid "The log message entered when the revision was created."
 msgstr ""
 
-#: modules/node.views.inc:453
+#: modules/node.views.inc:507
 msgid "The date the node revision was created."
 msgstr ""
 
-#: modules/node.views.inc:468
-msgid "Revert link"
+#: modules/node.views.inc:522
+msgid "Input format id"
 msgstr ""
 
-#: modules/node.views.inc:469
+#: modules/node.views.inc:523
+msgid "The numeric input format of the node revision. !default means the default input format."
+msgstr ""
+
+#: modules/node.views.inc:545
+msgid "Input format"
+msgstr "Формат вводу"
+
+#: modules/node.views.inc:546
+msgid "The name of the input format of the node revision."
+msgstr ""
+
+#: modules/node.views.inc:555
+msgid "Revert link"
+msgstr "Посилання повернення"
+
+#: modules/node.views.inc:556
 msgid "Provide a simple link to revert to the revision."
 msgstr ""
 
-#: modules/node.views.inc:477
+#: modules/node.views.inc:564
 msgid "Provide a simple link to delete the node revision."
 msgstr ""
 
-#: modules/node.views.inc:504
-msgid "Has new content"
+#: modules/node.views.inc:574
+msgid "Node access"
 msgstr ""
 
-#: modules/node.views.inc:507
+#: modules/node.views.inc:586 plugins/views_plugin_display.inc:719
+msgid "Access"
+msgstr "ДОступ"
+
+#: modules/node.views.inc:587
+msgid "Filter by access."
+msgstr ""
+
+#: modules/node.views.inc:590
+msgid "Filter for nodes by view access. <strong>Not necessary if you are using node as your base table.</strong>"
+msgstr ""
+
+#: modules/node.views.inc:616 modules/node/views_handler_filter_history_user_timestamp.inc:23
+msgid "Has new content"
+msgstr "Має новий вміст"
+
+#: modules/node.views.inc:619
 msgid "Show a marker if the node has new or updated content."
 msgstr ""
 
-#: modules/node.views.inc:510
+#: modules/node.views.inc:622
 msgid "Show only nodes that have new content."
 msgstr ""
 
-#: modules/node.views.inc:621;632
+#: modules/node.views.inc:735;746
 msgid "Display the node with standard node view."
-msgstr ""
+msgstr "Показує матеріал з стандартним view."
 
-#: modules/node.views.inc:651
+#: modules/node.views.inc:765
 msgid "Node ID from URL"
-msgstr ""
+msgstr "ID матеріалу з URL"
 
-#: modules/node.views.inc:718
+#: modules/node.views.inc:832
 msgid "Display %display has no access control but does not contain a filter for published nodes."
 msgstr ""
 
@@ -2873,8 +2926,7 @@ msgstr ""
 msgid "Poll"
 msgstr "Опитування"
 
-#: modules/poll.views.inc:35;43
-#: modules/user.views.inc:177;186
+#: modules/poll.views.inc:35;43 modules/user.views.inc:193;202
 msgid "Active"
 msgstr "Активний"
 
@@ -2888,35 +2940,39 @@ msgstr "Профіль"
 
 #: modules/profile.views.inc:100
 msgid "@field-name"
-msgstr ""
+msgstr "@назва поля"
 
 #: modules/profile.views.inc:107
 msgid "Profile textfield"
 msgstr ""
+"Однорядкове поле введення тексту "
+"профілю"
 
 #: modules/profile.views.inc:126
 msgid "Profile textarea"
 msgstr ""
+"Багаторядкове поле введення тексту "
+"профілю"
 
 #: modules/profile.views.inc:142
 msgid "Profile checkbox"
-msgstr ""
+msgstr "Чекбокс профілю"
 
 #: modules/profile.views.inc:159
 msgid "Profile URL"
-msgstr ""
+msgstr "URL профілю"
 
 #: modules/profile.views.inc:175
 msgid "Profile selection"
-msgstr ""
+msgstr "Вибір профілю"
 
 #: modules/profile.views.inc:195
 msgid "Profile freeform list %field-name."
-msgstr ""
+msgstr "Profile freeform list %field-name."
 
 #: modules/profile.views.inc:207
 msgid "Profile date %field-name."
-msgstr ""
+msgstr "Профіль датою %field-name."
 
 #: modules/search.views.inc:23;86;104;167
 msgid "Search"
@@ -2932,7 +2988,7 @@ msgstr ""
 
 #: modules/search.views.inc:93
 msgid "Links from"
-msgstr ""
+msgstr "Посилання з"
 
 #: modules/search.views.inc:94
 msgid "Other nodes that are linked from the node."
@@ -2940,7 +2996,7 @@ msgstr ""
 
 #: modules/search.views.inc:111
 msgid "Links to"
-msgstr ""
+msgstr "Посилання на"
 
 #: modules/search.views.inc:112
 msgid "Other nodes that link to the node."
@@ -2948,19 +3004,21 @@ msgstr ""
 
 #: modules/search.views.inc:123
 msgid "Search Terms"
-msgstr ""
+msgstr "Пошукові терміни"
 
 #: modules/search.views.inc:124
 msgid "The terms to search for."
-msgstr ""
+msgstr "Терміни для пошуку."
 
 #: modules/search.views.inc:168
 msgid "Display the results with standard search view."
 msgstr ""
+"Відображає результати пошуку з "
+"стандартним view."
 
 #: modules/statistics.views.inc:24
 msgid "Node statistics"
-msgstr ""
+msgstr "Статистика матеріалів"
 
 #: modules/statistics.views.inc:36
 msgid "Total views"
@@ -2980,7 +3038,7 @@ msgstr ""
 
 #: modules/statistics.views.inc:70
 msgid "Most recent view"
-msgstr ""
+msgstr "Найбільш переглядове"
 
 #: modules/statistics.views.inc:71
 msgid "The most recent time the node has been viewed."
@@ -2988,7 +3046,7 @@ msgstr ""
 
 #: modules/statistics.views.inc:89;94
 msgid "Access log"
-msgstr ""
+msgstr "Лоґ доступу"
 
 #: modules/statistics.views.inc:95
 msgid "Stores site access information."
@@ -2996,7 +3054,7 @@ msgstr ""
 
 #: modules/statistics.views.inc:109
 msgid "Session ID"
-msgstr ""
+msgstr "ID сесії"
 
 #: modules/statistics.views.inc:110
 msgid "Browser session ID of user that visited page."
@@ -3008,11 +3066,14 @@ msgstr "Назва сторінки"
 
 #: modules/statistics.views.inc:130
 msgid "Title of page visited."
-msgstr ""
+msgstr "Заголовок відвідуваної сторінки."
 
 #: modules/statistics.views.inc:150
 msgid "Internal path to page visited (relative to Drupal root.)"
-msgstr "Внутрішній шлях до відвідуваної сторінки (відносно папки, де встановлено Drupal)."
+msgstr ""
+"Внутрішній шлях до відвідуваної "
+"сторінки (відносно папки, де "
+"встановлено Drupal)."
 
 #: modules/statistics.views.inc:169
 msgid "Referrer"
@@ -3020,7 +3081,7 @@ msgstr "Джерело"
 
 #: modules/statistics.views.inc:170
 msgid "Referrer URI."
-msgstr ""
+msgstr "URI реферала."
 
 #: modules/statistics.views.inc:185
 msgid "Hostname"
@@ -3036,7 +3097,7 @@ msgstr ""
 
 #: modules/statistics.views.inc:215
 msgid "Timer"
-msgstr ""
+msgstr "Таймер"
 
 #: modules/statistics.views.inc:216
 msgid "Time in milliseconds that the page took to load."
@@ -3056,27 +3117,27 @@ msgstr ""
 
 #: modules/system.views.inc:49
 msgid "File ID"
-msgstr ""
+msgstr "ID файлу"
 
 #: modules/system.views.inc:50
 msgid "The ID of the file."
-msgstr ""
+msgstr "ID файлу."
 
 #: modules/system.views.inc:70
 msgid "The name of the file."
-msgstr ""
+msgstr "Ім'я файлу"
 
 #: modules/system.views.inc:89
 msgid "The path of the file."
-msgstr ""
+msgstr "Шлях до файлу."
 
 #: modules/system.views.inc:107
 msgid "Mime type"
-msgstr ""
+msgstr "MIME Тип"
 
 #: modules/system.views.inc:108
 msgid "The mime type of the file."
-msgstr ""
+msgstr "Mime-тип файлу."
 
 #: modules/system.views.inc:126
 msgid "Size"
@@ -3084,7 +3145,7 @@ msgstr "Розмір"
 
 #: modules/system.views.inc:127
 msgid "The size of the file."
-msgstr ""
+msgstr "Розмір файлу"
 
 #: modules/system.views.inc:142
 msgid "Status"
@@ -3092,15 +3153,15 @@ msgstr "Статус"
 
 #: modules/system.views.inc:143
 msgid "The status of the file."
-msgstr ""
+msgstr "Статус файлу."
 
 #: modules/system.views.inc:158
 msgid "Upload date"
-msgstr ""
+msgstr "Дата завантаження"
 
 #: modules/system.views.inc:159
 msgid "The date the file was uploaded."
-msgstr ""
+msgstr "Дата завантаження."
 
 #: modules/system.views.inc:204
 msgid "Temporary"
@@ -3108,9 +3169,9 @@ msgstr "Тимчасово"
 
 #: modules/system.views.inc:205
 msgid "Permanent"
-msgstr "Постійно"
+msgstr "Постійна"
 
-#: modules/taxonomy.views.inc:24;67;156;174;230;270;307;318
+#: modules/taxonomy.views.inc:24;67;156;174;231;275;312;326
 msgid "Taxonomy"
 msgstr "Таксономія"
 
@@ -3138,8 +3199,7 @@ msgstr "Термін"
 msgid "Taxonomy terms are attached to nodes."
 msgstr ""
 
-#: modules/taxonomy.views.inc:96;200
-#: modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:35
+#: modules/taxonomy.views.inc:96;200 modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:35
 msgid "Term ID"
 msgstr "ID терміну"
 
@@ -3157,18 +3217,17 @@ msgstr ""
 
 #: modules/taxonomy.views.inc:140
 msgid "The term weight field"
-msgstr ""
+msgstr "Термі напівжирного поля"
 
 #: modules/taxonomy.views.inc:152
 msgid "Term description"
-msgstr ""
+msgstr "Опис терміна"
 
 #: modules/taxonomy.views.inc:153
 msgid "The description associated with a taxonomy term."
 msgstr ""
 
-#: modules/taxonomy.views.inc:164
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:39
+#: modules/taxonomy.views.inc:164 modules/taxonomy/views_handler_filter_term_node_tid.inc:39
 msgid "Vocabulary"
 msgstr "Словник"
 
@@ -3184,39 +3243,43 @@ msgstr "Всі терміни"
 msgid "Display all taxonomy terms associated with a node from specified vocabularies."
 msgstr ""
 
-#: modules/taxonomy.views.inc:258
+#: modules/taxonomy.views.inc:259
 msgid "Parent term"
 msgstr "Терм-попередник"
 
-#: modules/taxonomy.views.inc:259
+#: modules/taxonomy.views.inc:260
 msgid "The parent term of the term. This can produce duplicate entries if you are using a vocabulary that allows multiple parents."
 msgstr ""
 
-#: modules/taxonomy.views.inc:291
-msgid "Term synonym"
-msgstr ""
+#: modules/taxonomy.views.inc:267
+msgid "The parent term of the term."
+msgstr "Терм-попередник"
 
-#: modules/taxonomy.views.inc:292
+#: modules/taxonomy.views.inc:296
+msgid "Term synonym"
+msgstr "Термін синонім"
+
+#: modules/taxonomy.views.inc:297
 msgid "Term synonyms may be used to find terms by alternate names."
 msgstr ""
 
-#: modules/taxonomy.views.inc:308
+#: modules/taxonomy.views.inc:313
 msgid "Term ID (with depth)"
 msgstr ""
 
-#: modules/taxonomy.views.inc:309
+#: modules/taxonomy.views.inc:314
 msgid "The depth filter is more complex, so provides fewer options."
 msgstr ""
 
-#: modules/taxonomy.views.inc:319
+#: modules/taxonomy.views.inc:327
 msgid "Term ID depth modifier"
 msgstr ""
 
-#: modules/taxonomy.views.inc:320
+#: modules/taxonomy.views.inc:328
 msgid "Allows the \"depth\" for Taxonomy: Term ID (with depth) to be modified via an additional argument."
 msgstr ""
 
-#: modules/taxonomy.views.inc:376
+#: modules/taxonomy.views.inc:387
 msgid "Taxonomy term"
 msgstr "Термін таксономії"
 
@@ -3230,7 +3293,7 @@ msgstr ""
 
 #: modules/translation.views.inc:49
 msgid "Translation set node ID"
-msgstr ""
+msgstr "Задати ID перекладу матеріалу"
 
 #: modules/translation.views.inc:50
 msgid "The ID of the translation set the content belongs to."
@@ -3294,7 +3357,7 @@ msgstr ""
 
 #: modules/upload.views.inc:74
 msgid "Listed"
-msgstr ""
+msgstr "Списком"
 
 #: modules/upload.views.inc:75
 msgid "Whether or not the file is marked to be listed."
@@ -3312,8 +3375,7 @@ msgstr "Вкладені файли"
 msgid "All files attached to a node with upload.module."
 msgstr ""
 
-#: modules/upload.views.inc:122
-#: modules/upload/views_handler_filter_upload_fid.inc:10
+#: modules/upload.views.inc:122 modules/upload/views_handler_filter_upload_fid.inc:10
 msgid "Has attached files"
 msgstr "Присутні вкладені файли"
 
@@ -3335,11 +3397,11 @@ msgstr ""
 
 #: modules/user.views.inc:48
 msgid "Uid"
-msgstr ""
+msgstr "Uid"
 
 #: modules/user.views.inc:49
 msgid "The user ID"
-msgstr ""
+msgstr "ID користувача"
 
 #: modules/user.views.inc:70
 msgid "Current"
@@ -3351,7 +3413,7 @@ msgstr ""
 
 #: modules/user.views.inc:81
 msgid "The user or author name."
-msgstr ""
+msgstr "Користувач або ім’я автора"
 
 #: modules/user.views.inc:97
 msgid "E-mail"
@@ -3361,75 +3423,81 @@ msgstr "Адреса e-mail"
 msgid "Email address for a given user. This field is normally not shown to users, so be cautious when using it."
 msgstr ""
 
-#: modules/user.views.inc:113
+#: modules/user.views.inc:114
+msgid "Language of the user"
+msgstr ""
+
+#: modules/user.views.inc:129
 msgid "Picture"
 msgstr "Аватар"
 
-#: modules/user.views.inc:114
+#: modules/user.views.inc:130
 msgid "The user's picture, if allowed."
 msgstr ""
+"Зображення користувача. якщо "
+"дозволено."
 
-#: modules/user.views.inc:122
+#: modules/user.views.inc:138
 msgid "Has Avatar"
 msgstr "Має Аватар"
 
-#: modules/user.views.inc:130
+#: modules/user.views.inc:146
 msgid "The date the user was created."
-msgstr ""
+msgstr "Дата створення користувача."
 
-#: modules/user.views.inc:145
+#: modules/user.views.inc:161
 msgid "Last access"
 msgstr "Останній вхід"
 
-#: modules/user.views.inc:146
+#: modules/user.views.inc:162
 msgid "The user's last access date."
-msgstr ""
+msgstr "Дата останнього візиту користувача."
 
-#: modules/user.views.inc:161
+#: modules/user.views.inc:177
 msgid "Last login"
 msgstr "Останній вхід"
 
-#: modules/user.views.inc:162
-msgid "The user's last login date."
-msgstr ""
-
 #: modules/user.views.inc:178
+msgid "The user's last login date."
+msgstr "Остання дата входу користувача"
+
+#: modules/user.views.inc:194
 msgid "Whether a user is active or blocked."
 msgstr ""
 
-#: modules/user.views.inc:196
+#: modules/user.views.inc:212
 msgid "Signature"
 msgstr "Підпис"
 
-#: modules/user.views.inc:197
+#: modules/user.views.inc:213
 msgid "The user's signature."
 msgstr "Підпис користувача"
 
-#: modules/user.views.inc:210
+#: modules/user.views.inc:226
 msgid "Provide a simple link to edit the user."
 msgstr ""
 
-#: modules/user.views.inc:218
+#: modules/user.views.inc:234
 msgid "Provide a simple link to delete the user."
 msgstr ""
 
-#: modules/user.views.inc:247
+#: modules/user.views.inc:263
 msgid "Roles"
 msgstr "Ролі"
 
-#: modules/user.views.inc:248
+#: modules/user.views.inc:264
 msgid "Roles that a user belongs to."
 msgstr ""
 
-#: modules/user.views.inc:260
+#: modules/user.views.inc:276
 msgid "No role"
-msgstr ""
+msgstr "Без ролі"
 
-#: modules/user.views.inc:303
+#: modules/user.views.inc:319
 msgid "User ID from URL"
 msgstr ""
 
-#: modules/user.views.inc:309
+#: modules/user.views.inc:325
 msgid "User ID from logged in user"
 msgstr ""
 
@@ -3461,72 +3529,65 @@ msgstr "Свій текст"
 msgid "Provide custom text or link."
 msgstr "Занзачити свій текст або посилання"
 
-#: modules/aggregator/views_plugin_row_aggregator_rss.inc:25
-#: modules/node/views_plugin_row_node_rss.inc:32
+#: modules/views.views.inc:48
+msgid "View result counter"
+msgstr ""
+
+#: modules/views.views.inc:49
+msgid "Displays the actual position of the view result"
+msgstr ""
+
+#: modules/aggregator/views_handler_field_aggregator_category.inc:29
+msgid "Link this field to its aggregator category page"
+msgstr ""
+
+#: modules/aggregator/views_handler_field_aggregator_category.inc:30 modules/comment/views_handler_field_comment.inc:31 modules/comment/views_handler_field_node_new_comments.inc:26 modules/node/views_handler_field_node.inc:33 modules/system/views_handler_field_file.inc:30 modules/taxonomy/views_handler_field_taxonomy.inc:34 modules/user/views_handler_field_user.inc:31
+msgid "This will override any other link you have set."
+msgstr ""
+
+#: modules/aggregator/views_plugin_row_aggregator_rss.inc:25 modules/node/views_plugin_row_node_rss.inc:32
 msgid "Full text"
 msgstr "Повний текст"
 
-#: modules/aggregator/views_plugin_row_aggregator_rss.inc:26
-#: modules/node/views_plugin_row_node_rss.inc:33
+#: modules/aggregator/views_plugin_row_aggregator_rss.inc:26 modules/node/views_plugin_row_node_rss.inc:33
 msgid "Title plus teaser"
 msgstr "Назва плюс анонс"
 
-#: modules/aggregator/views_plugin_row_aggregator_rss.inc:27
-#: modules/node/views_plugin_row_node_rss.inc:34
+#: modules/aggregator/views_plugin_row_aggregator_rss.inc:27 modules/node/views_plugin_row_node_rss.inc:34
 msgid "Title only"
 msgstr "Тільки назва"
 
-#: modules/aggregator/views_plugin_row_aggregator_rss.inc:28
-#: modules/node/views_plugin_row_node_rss.inc:35
+#: modules/aggregator/views_plugin_row_aggregator_rss.inc:28 modules/node/views_plugin_row_node_rss.inc:35
 msgid "Use default RSS settings"
 msgstr ""
+"Використовувати стандартні "
+"налаштування RSS"
 
-#: modules/comment/views_handler_argument_comment_user_uid.inc:11
-#: modules/user/views_handler_argument_user_uid.inc:17
+#: modules/comment/views_handler_argument_comment_user_uid.inc:11 modules/user/views_handler_argument_user_uid.inc:17
 msgid "Anonymous"
 msgstr "Гість"
 
 #: modules/comment/views_handler_argument_comment_user_uid.inc:17
 msgid "No user"
-msgstr ""
+msgstr "Нема користувача"
 
 #: modules/comment/views_handler_field_comment.inc:30
 msgid "Link this field to its comment"
 msgstr ""
 
-#: modules/comment/views_handler_field_comment.inc:31
-#: modules/comment/views_handler_field_node_new_comments.inc:26
-#: modules/node/views_handler_field_node.inc:33
-#: modules/system/views_handler_field_file.inc:30
-#: modules/taxonomy/views_handler_field_taxonomy.inc:34
-#: modules/user/views_handler_field_user.inc:31
-msgid "This will override any other link you have set."
-msgstr ""
-
-#: modules/comment/views_handler_field_comment_link.inc:23
-#: modules/locale/views_handler_field_locale_link_edit.inc:25
-#: modules/node/views_handler_field_node_link.inc:24
-#: modules/user/views_handler_field_user_link.inc:22
+#: modules/comment/views_handler_field_comment_link.inc:23 modules/locale/views_handler_field_locale_link_edit.inc:25 modules/node/views_handler_field_node_link.inc:24 modules/user/views_handler_field_user_link.inc:22
 msgid "Text to display"
 msgstr "Текст для відображення"
 
-#: modules/comment/views_handler_field_comment_link.inc:34
-#: modules/node/views_handler_field_node_link.inc:35
-#: modules/user/views_handler_field_user_link.inc:38
+#: modules/comment/views_handler_field_comment_link.inc:34 modules/node/views_handler_field_node_link.inc:35 modules/user/views_handler_field_user_link.inc:38
 msgid "view"
 msgstr "перегляд"
 
-#: modules/comment/views_handler_field_comment_link_delete.inc:12
-#: modules/node/views_handler_field_node_link_delete.inc:26
-#: modules/node/views_handler_field_node_revision_link_delete.inc:35
-#: modules/user/views_handler_field_user_link_delete.inc:13
+#: modules/comment/views_handler_field_comment_link_delete.inc:12 modules/node/views_handler_field_node_link_delete.inc:26 modules/node/views_handler_field_node_revision_link_delete.inc:35 modules/user/views_handler_field_user_link_delete.inc:13
 msgid "delete"
 msgstr "стерти"
 
-#: modules/comment/views_handler_field_comment_link_edit.inc:21
-#: modules/locale/views_handler_field_locale_link_edit.inc:41
-#: modules/node/views_handler_field_node_link_edit.inc:26
-#: modules/user/views_handler_field_user_link_edit.inc:13
+#: modules/comment/views_handler_field_comment_link_edit.inc:21 modules/locale/views_handler_field_locale_link_edit.inc:41 modules/node/views_handler_field_node_link_edit.inc:26 modules/user/views_handler_field_user_link_edit.inc:13
 msgid "edit"
 msgstr "редагувати"
 
@@ -3542,18 +3603,15 @@ msgstr ""
 msgid "Link this field to its user or an author's homepage"
 msgstr ""
 
-#: modules/comment/views_handler_field_node_comment.inc:12
-#: modules/comment/views_handler_filter_node_comment.inc:10
+#: modules/comment/views_handler_field_node_comment.inc:12 modules/comment/views_handler_filter_node_comment.inc:10
 msgid "Disabled"
 msgstr "Вимкнено"
 
-#: modules/comment/views_handler_field_node_comment.inc:14
-#: modules/comment/views_handler_filter_node_comment.inc:11
+#: modules/comment/views_handler_field_node_comment.inc:14 modules/comment/views_handler_filter_node_comment.inc:11
 msgid "Read only"
 msgstr "Тільки для читання"
 
-#: modules/comment/views_handler_field_node_comment.inc:16
-#: modules/comment/views_handler_filter_node_comment.inc:12
+#: modules/comment/views_handler_field_node_comment.inc:16 modules/comment/views_handler_filter_node_comment.inc:12
 msgid "Read/Write"
 msgstr "Читати/Писати"
 
@@ -3564,36 +3622,52 @@ msgstr ""
 #: modules/comment/views_handler_field_node_new_comments.inc:31
 msgid "Display nothing if no new comments"
 msgstr ""
+"Не відображає нічого, за відсутності "
+"коментарів"
 
-#: modules/comment/views_plugin_row_comment_view.inc:21
-#: modules/node/views_plugin_row_node_view.inc:64
+#: modules/comment/views_plugin_row_comment_view.inc:21 modules/node/views_plugin_row_node_view.inc:64
 msgid "Display links"
 msgstr "Відображення посилань"
+
+#: modules/contact/views_handler_field_contact_link.inc:17
+msgid "Type of link"
+msgstr ""
+
+#: modules/contact/views_handler_field_contact_link.inc:22
+msgid "Icon"
+msgstr "Іконка"
+
+#: modules/contact/views_handler_field_contact_link.inc:25
+msgid "Link label"
+msgstr ""
+
+#: modules/contact/views_handler_field_contact_link.inc:27
+msgid "contact"
+msgstr "контакт"
+
+#: modules/contact/views_handler_field_contact_link.inc:42;45
+msgid "Contact %user"
+msgstr ""
 
 #: modules/locale/views_handler_argument_locale_group.inc:32
 msgid "Unknown group"
 msgstr "Невідома група"
 
-#: modules/locale/views_handler_argument_locale_language.inc:30
-#: modules/node/views_handler_argument_node_language.inc:29
-#: modules/translation/views_handler_argument_node_language.inc:29
+#: modules/locale/views_handler_argument_locale_language.inc:30 modules/node/views_handler_argument_node_language.inc:29 modules/translation/views_handler_argument_node_language.inc:29
 msgid "Unknown language"
 msgstr "Невідома мова"
 
-#: modules/locale/views_handler_filter_locale_language.inc:11
-#: modules/translation/views_handler_filter_node_language.inc:10
+#: modules/locale/views_handler_filter_locale_language.inc:11 modules/translation/views_handler_filter_node_language.inc:10
 msgid "Current user's language"
 msgstr "Теперішня мова користувача"
 
-#: modules/locale/views_handler_filter_locale_language.inc:11
-#: modules/translation/views_handler_filter_node_language.inc:10
+#: modules/locale/views_handler_filter_locale_language.inc:11 modules/translation/views_handler_filter_node_language.inc:10
 msgid "Default site language"
 msgstr "Базова мова сайту"
 
-#: modules/locale/views_handler_filter_locale_language.inc:11
-#: modules/translation/views_handler_filter_node_language.inc:10
+#: modules/locale/views_handler_filter_locale_language.inc:11 modules/translation/views_handler_filter_node_language.inc:10
 msgid "No language"
-msgstr ""
+msgstr "Нема мови"
 
 #: modules/locale/views_handler_filter_locale_version.inc:12
 msgid "Current installed version"
@@ -3605,7 +3679,7 @@ msgstr "Тиждень @week"
 
 #: modules/node/views_handler_argument_node_type.inc:30
 msgid "Unknown node type"
-msgstr ""
+msgstr "Невідомий тип матеріалу"
 
 #: modules/node/views_handler_field_history_user_timestamp.inc:32
 msgid "Check for new comments as well"
@@ -3635,8 +3709,7 @@ msgstr ""
 msgid "Validate user has access to the node"
 msgstr ""
 
-#: modules/node/views_plugin_argument_validate_node.inc:47
-#: modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:33
+#: modules/node/views_plugin_argument_validate_node.inc:47 modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:33
 msgid "Argument type"
 msgstr "Тип аргументу"
 
@@ -3658,19 +3731,19 @@ msgstr "Повний матеріал"
 
 #: modules/node/views_plugin_row_node_view.inc:59
 msgid "Build mode"
-msgstr ""
+msgstr "Створення режиму"
 
 #: modules/node/views_plugin_row_node_view.inc:69
 msgid "Display node comments"
-msgstr ""
+msgstr "Відображає коментарі до матеріалу"
 
 #: modules/search/views_handler_field_search_score.inc:21
 msgid "No alternate"
-msgstr ""
+msgstr "нема альтернативних"
 
 #: modules/search/views_handler_field_search_score.inc:28
 msgid "Alternative sort"
-msgstr ""
+msgstr "Альтернативне сортування"
 
 #: modules/search/views_handler_field_search_score.inc:29
 msgid "If no search is performed and this field does not appear, pick an alternative default table sort field."
@@ -3682,15 +3755,15 @@ msgstr ""
 
 #: modules/search/views_handler_filter_search.inc:23
 msgid "On empty input"
-msgstr ""
+msgstr "На порожньому полі"
 
 #: modules/search/views_handler_filter_search.inc:26
 msgid "Show All"
-msgstr ""
+msgstr "Показати все"
 
 #: modules/search/views_handler_filter_search.inc:27
 msgid "Show None"
-msgstr ""
+msgstr "Не позувати нічого"
 
 #: modules/search/views_handler_filter_search.inc:42
 msgid "Enter the terms you wish to search for."
@@ -3698,7 +3771,10 @@ msgstr "Впишіть слова для пошуку."
 
 #: modules/search/views_handler_filter_search.inc:60
 msgid "You must include at least one positive keyword with @count characters or more."
-msgstr "Вам необхідно вказати хоча б одне ключове слово, що містить не менше @count символів."
+msgstr ""
+"Вам необхідно вказати хоча б одне "
+"ключове слово, що містить не менше @count "
+"символів."
 
 #: modules/search/views_handler_filter_search.inc:64
 msgid "Search for either of the two terms with uppercase <strong>OR</strong>. For example, <strong>cats OR dogs</strong>."
@@ -3706,40 +3782,35 @@ msgstr ""
 
 #: modules/search/views_plugin_row_search_view.inc:23
 msgid "Display score"
-msgstr ""
+msgstr "Відображає оцінку"
 
 #: modules/system/views_handler_argument_file_fid.inc:13
 msgid "No title"
-msgstr ""
+msgstr "Без заголовку"
 
-#: modules/system/views_handler_field_file.inc:29
-#: modules/upload/views_handler_field_upload_description.inc:24
-#: modules/upload/views_handler_field_upload_fid.inc:25
+#: modules/system/views_handler_field_file.inc:29 modules/upload/views_handler_field_upload_description.inc:24 modules/upload/views_handler_field_upload_fid.inc:25
 msgid "Link this field to download the file"
 msgstr ""
 
-#: modules/taxonomy/views_handler_argument_taxonomy.inc:18
-#: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:125
+#: modules/taxonomy/views_handler_argument_taxonomy.inc:18 modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:125
 msgid "No name"
-msgstr ""
+msgstr "Без імені"
 
-#: modules/taxonomy/views_handler_argument_term_node_tid.inc:17
-#: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:38
+#: modules/taxonomy/views_handler_argument_term_node_tid.inc:17 modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:38
 msgid "Set the breadcrumb for the term parents"
 msgstr ""
 
-#: modules/taxonomy/views_handler_argument_term_node_tid.inc:18
-#: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:39
+#: modules/taxonomy/views_handler_argument_term_node_tid.inc:18 modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:39
 msgid "If selected, the breadcrumb trail will include all parent terms, each one linking to this view. Note that this only works if just one term was received."
 msgstr ""
 
-#: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:26
+#: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:26 modules/taxonomy/views_handler_filter_term_node_tid_depth.inc:31
 msgid "The depth will match nodes tagged with terms in the hierarchy. For example, if you have the term \"fruit\" and a child term \"apple\", with a depth of 1 (or higher) then filtering for the term \"fruit\" will get nodes that are tagged with \"apple\" as well as \"fruit\". If negative, the reverse is true; searching for \"apple\" will also pick up nodes tagged with \"fruit\" if depth is -1 (or lower)."
 msgstr ""
 
 #: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:31
 msgid "Allow multiple terms per argument"
-msgstr ""
+msgstr "Дозволити багато термінів на аргумент"
 
 #: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:32
 msgid "If selected, users can enter multiple arguments in the form of 1+2+3. Due to the number of JOINs it would require, AND will be treated as OR with this argument."
@@ -3747,7 +3818,7 @@ msgstr ""
 
 #: modules/taxonomy/views_handler_argument_vocabulary_vid.inc:15
 msgid "No vocabulary"
-msgstr ""
+msgstr "Без словника"
 
 #: modules/taxonomy/views_handler_field_taxonomy.inc:33
 msgid "Link this field to its taxonomy term page"
@@ -3759,10 +3830,9 @@ msgstr ""
 
 #: modules/taxonomy/views_handler_field_term_node_tid.inc:41
 msgid "Limit terms by vocabulary"
-msgstr ""
+msgstr "Ліміт термінів словника"
 
-#: modules/taxonomy/views_handler_field_term_node_tid.inc:55
-#: modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:23
+#: modules/taxonomy/views_handler_field_term_node_tid.inc:55 modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:23
 msgid "Vocabularies"
 msgstr "Словники"
 
@@ -3871,7 +3941,7 @@ msgstr "До користувача"
 
 #: modules/user/views_handler_field_user_mail.inc:21
 msgid "With a mailto:"
-msgstr ""
+msgstr "З mailto:"
 
 #: modules/user/views_handler_field_user_name.inc:30
 msgid "Overwrite the value to display for anonymous users"
@@ -3887,7 +3957,7 @@ msgstr ""
 
 #: modules/user/views_handler_filter_user_current.inc:10
 msgid "Is the logged in user"
-msgstr ""
+msgstr "Залоґований користувач"
 
 #: modules/user/views_handler_filter_user_name.inc:28
 msgid "Usernames"
@@ -3946,7 +4016,7 @@ msgstr ""
 
 #: plugins/views_plugin_access_role.inc:21
 msgid "No role(s) selected"
-msgstr ""
+msgstr "Жодної ролі(ролей не обрано)"
 
 #: plugins/views_plugin_access_role.inc:24
 msgid "Multiple roles"
@@ -3960,11 +4030,11 @@ msgstr ""
 msgid "You must select at least one role if type is \"by role\""
 msgstr ""
 
-#: plugins/views_plugin_argument_default.inc:32
+#: plugins/views_plugin_argument_default.inc:42
 msgid "Default argument"
 msgstr "Базовий аргумент"
 
-#: plugins/views_plugin_argument_default.inc:54
+#: plugins/views_plugin_argument_default.inc:64
 msgid "Note: you do not have permission to modify this. If you change the default argument type, this setting will be lost and you will NOT be able to get it back."
 msgstr ""
 
@@ -3976,7 +4046,7 @@ msgstr ""
 msgid "Enter PHP code that returns a value to use for this argument. Do not use &lt;?php ?&gt;. You must return only a single value for just this argument."
 msgstr ""
 
-#: plugins/views_plugin_argument_validate.inc:43
+#: plugins/views_plugin_argument_validate.inc:52
 msgid "Note: you do not have permission to modify this. If you change the validator, this setting will be lost and you will NOT be able to get it back."
 msgstr ""
 
@@ -3988,436 +4058,485 @@ msgstr ""
 msgid "Enter PHP code that returns TRUE or FALSE. No return is the same as FALSE, so be SURE to return something if you do not want to declare the argument invalid. Do not use &lt;?php ?&gt;. The argument to validate will be \"$argument\" and the view will be \"$view\". You may change the argument by setting \"$handler->argument\"."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:558
+#: plugins/views_plugin_cache_time.inc:16
+msgid "Never cache"
+msgstr ""
+
+#: plugins/views_plugin_cache_time.inc:20
+msgid "Query results"
+msgstr ""
+
+#: plugins/views_plugin_cache_time.inc:21
+msgid "The length of time raw query results should be cached."
+msgstr ""
+
+#: plugins/views_plugin_cache_time.inc:27
+msgid "Rendered output"
+msgstr ""
+
+#: plugins/views_plugin_cache_time.inc:28
+msgid "The length of time rendered HTML output should be cached."
+msgstr ""
+
+#: plugins/views_plugin_display.inc:596
 msgid "Broken field"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:575
+#: plugins/views_plugin_display.inc:613
 msgid "Basic settings"
 msgstr "Базові параметри"
 
-#: plugins/views_plugin_display.inc:582
+#: plugins/views_plugin_display.inc:620
 msgid "Change the name of this display."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:594
+#: plugins/views_plugin_display.inc:632
 msgid "Change the title that this display will use."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:604
+#: plugins/views_plugin_display.inc:642
 msgid "Style"
 msgstr "Стиль"
 
-#: plugins/views_plugin_display.inc:606
+#: plugins/views_plugin_display.inc:644
 msgid "Change the style plugin."
 msgstr "Змінити додаток стилю"
 
-#: plugins/views_plugin_display.inc:620
+#: plugins/views_plugin_display.inc:658
 msgid "Row style"
 msgstr "Рядковий стиль"
 
-#: plugins/views_plugin_display.inc:622
+#: plugins/views_plugin_display.inc:660
 msgid "Change the row plugin."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:632
+#: plugins/views_plugin_display.inc:670
 msgid "Use AJAX"
 msgstr "Використовувати AJAX"
 
-#: plugins/views_plugin_display.inc:634
+#: plugins/views_plugin_display.inc:672
 msgid "Change whether or not this display will use AJAX."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:641
+#: plugins/views_plugin_display.inc:679
 msgid "Use pager"
 msgstr "Використовувати сторінковість"
 
-#: plugins/views_plugin_display.inc:642
+#: plugins/views_plugin_display.inc:680
 msgid "Mini"
 msgstr "Міні"
 
-#: plugins/views_plugin_display.inc:643
+#: plugins/views_plugin_display.inc:681
 msgid "Change this display's pager setting."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:650;822
+#: plugins/views_plugin_display.inc:688;879
 msgid "Items per page"
 msgstr "Елементів на сторінку"
 
-#: plugins/views_plugin_display.inc:650;822
-#: plugins/views_plugin_style_summary.inc:43
+#: plugins/views_plugin_display.inc:688;879 plugins/views_plugin_style_summary.inc:43
 msgid "Items to display"
 msgstr "Відображати елементів"
 
-#: plugins/views_plugin_display.inc:651
+#: plugins/views_plugin_display.inc:689
 msgid "Unlimited"
 msgstr "Необмежений"
 
-#: plugins/views_plugin_display.inc:652
+#: plugins/views_plugin_display.inc:690
 msgid "Change how many items to display."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:658
+#: plugins/views_plugin_display.inc:696
 msgid "More link"
 msgstr "Посилання \"ще(далі)\""
 
-#: plugins/views_plugin_display.inc:660
+#: plugins/views_plugin_display.inc:698
 msgid "Specify whether this display will provide a \"more\" link."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:666;849
+#: plugins/views_plugin_display.inc:704;913
 msgid "Distinct"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:668;846
+#: plugins/views_plugin_display.inc:706;910
 msgid "Display only distinct items, without duplicates."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:681
-msgid "Access"
-msgstr "ДОступ"
-
-#: plugins/views_plugin_display.inc:683
+#: plugins/views_plugin_display.inc:721
 msgid "Specify access control type for this display."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:687
+#: plugins/views_plugin_display.inc:725
 msgid "Change settings for this access type."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:707
+#: plugins/views_plugin_display.inc:738;961 plugins/views_plugin_display_block.inc:94
+msgid "Caching"
+msgstr ""
+
+#: plugins/views_plugin_display.inc:740
+msgid "Specify caching type for this display."
+msgstr ""
+
+#: plugins/views_plugin_display.inc:744
+msgid "Change settings for this caching type."
+msgstr ""
+
+#: plugins/views_plugin_display.inc:764
 msgid "Link display"
 msgstr "Відображення посилання"
 
-#: plugins/views_plugin_display.inc:709
+#: plugins/views_plugin_display.inc:766
 msgid "Specify which display this display will link to."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:716
+#: plugins/views_plugin_display.inc:773
 msgid "Exposed form in block"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:718
+#: plugins/views_plugin_display.inc:775
 msgid "Allow the exposed form to appear in a block instead of the view."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:721;897
+#: plugins/views_plugin_display.inc:778;1002
 msgid "Header"
 msgstr "Заголовок"
 
-#: plugins/views_plugin_display.inc:721;913
+#: plugins/views_plugin_display.inc:778;1018
 msgid "Footer"
 msgstr "Нижній колонтитул"
 
-#: plugins/views_plugin_display.inc:721;929
+#: plugins/views_plugin_display.inc:778;1034
 msgid "Empty text"
 msgstr "Пустий текст"
 
-#: plugins/views_plugin_display.inc:737
+#: plugins/views_plugin_display.inc:794
 msgid "Unknown/missing format"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:745
+#: plugins/views_plugin_display.inc:802
 msgid "Change this display's !name."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:751
+#: plugins/views_plugin_display.inc:808
 msgid "Theme"
 msgstr "Тема"
 
-#: plugins/views_plugin_display.inc:752
+#: plugins/views_plugin_display.inc:809
 msgid "Information"
 msgstr "Інформація"
 
-#: plugins/views_plugin_display.inc:753
+#: plugins/views_plugin_display.inc:810
 msgid "Get information on how to theme this display"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:779
+#: plugins/views_plugin_display.inc:836
 msgid "The name of this display"
 msgstr "Ім'я відображення"
 
-#: plugins/views_plugin_display.inc:782
+#: plugins/views_plugin_display.inc:839
 msgid "This title will appear only in the administrative interface for the View."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:787
+#: plugins/views_plugin_display.inc:844
 msgid "The title of this view"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:790
+#: plugins/views_plugin_display.inc:847
 msgid "This title will be displayed with the view, wherever titles are normally displayed; i.e, as the page title, block title, etc."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:795
+#: plugins/views_plugin_display.inc:852
 msgid "Use AJAX when available to load this view"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:799
+#: plugins/views_plugin_display.inc:856
 msgid "If set, this view will use an AJAX mechanism for paging, table sorting and exposed filters. This means the entire page will not refresh. It is not recommended that you use this if this view is the main content of the page as it will prevent deep linking to specific pages, but it is very useful for side content."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:808
+#: plugins/views_plugin_display.inc:865
 msgid "Use a pager for this view"
-msgstr "Використовувати розбиття по сторінках для цього вигляду"
+msgstr ""
+"Використовувати розбиття по "
+"сторінках для цього вигляду"
 
-#: plugins/views_plugin_display.inc:811
+#: plugins/views_plugin_display.inc:868
 msgid "Full pager"
 msgstr "Повний стиль"
 
-#: plugins/views_plugin_display.inc:811
+#: plugins/views_plugin_display.inc:868
 msgid "Mini pager"
 msgstr "Міні стиль"
 
-#: plugins/views_plugin_display.inc:816
+#: plugins/views_plugin_display.inc:873
 msgid "Pager element"
 msgstr "Розбиття по сторінках"
 
-#: plugins/views_plugin_display.inc:817
+#: plugins/views_plugin_display.inc:874
 msgid "Unless you're experiencing problems with pagers related to this view, you should leave this at 0. If using multiple pagers on one page you may need to set this number to a higher value so as not to conflict within the ?page= array. Large values will add a lot of commas to your URLs, so avoid if possible."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:826
+#: plugins/views_plugin_display.inc:883
 msgid "The number of items to display per page. Enter 0 for no limit."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:831
+#: plugins/views_plugin_display.inc:888
 msgid "Offset"
 msgstr "Зміщення"
 
-#: plugins/views_plugin_display.inc:832
+#: plugins/views_plugin_display.inc:889
 msgid "The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed. Offset can not be used if items to display is 0; instead use a very large number there."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:837
+#: plugins/views_plugin_display.inc:894
 msgid "Add a more link to the bottom of the display."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:840
+#: plugins/views_plugin_display.inc:897
 msgid "Create more link"
 msgstr "Створити посилання \"далі(ще)\""
 
-#: plugins/views_plugin_display.inc:841
+#: plugins/views_plugin_display.inc:898
 msgid "This will add a more link to the bottom of this view, which will link to the page view. If you have more than one page view, the link will point to the display specified in 'Link display' above."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:850
+#: plugins/views_plugin_display.inc:901
+msgid "Text to use for the more link."
+msgstr ""
+
+#: plugins/views_plugin_display.inc:904
+msgid "More link text"
+msgstr ""
+
+#: plugins/views_plugin_display.inc:905
+msgid "The text to display for the more link."
+msgstr ""
+
+#: plugins/views_plugin_display.inc:914
 msgid "This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:855
+#: plugins/views_plugin_display.inc:919
 msgid "Access restrictions"
 msgstr "Обмеження доступу"
 
-#: plugins/views_plugin_display.inc:874;954
+#: plugins/views_plugin_display.inc:938;980;1059
 msgid "You may also adjust the !settings for the currently selected style by clicking on the icon."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:874;954;999
+#: plugins/views_plugin_display.inc:938;980;1059;1104
 msgid "settings"
 msgstr "налаштування"
 
-#: plugins/views_plugin_display.inc:882
+#: plugins/views_plugin_display.inc:946
 msgid "Access options"
 msgstr "Параметри доступу"
 
-#: plugins/views_plugin_display.inc:900;916
+#: plugins/views_plugin_display.inc:987
+msgid "Caching options"
+msgstr ""
+
+#: plugins/views_plugin_display.inc:1005;1021
 msgid "Display even if view has no result"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:907
+#: plugins/views_plugin_display.inc:1012
 msgid "Text to display at the top of the view. May contain an explanation or links or whatever you like. Optional."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:923
+#: plugins/views_plugin_display.inc:1028
 msgid "Text to display beneath the view. May contain an explanation or links or whatever you like. Optional."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:934
+#: plugins/views_plugin_display.inc:1039
 msgid "Text to display if the view has no results. Optional."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:940
+#: plugins/views_plugin_display.inc:1045
 msgid "How should this view be styled"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:946
+#: plugins/views_plugin_display.inc:1051
 msgid "If the style you choose has settings, be sure to click the settings button that will appear next to it in the View summary."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:960
+#: plugins/views_plugin_display.inc:1065
 msgid "Style options"
 msgstr "Параметри стилю"
 
-#: plugins/views_plugin_display.inc:971
+#: plugins/views_plugin_display.inc:1076
 msgid "Row style options"
 msgstr "Параметри стилю рядка"
 
-#: plugins/views_plugin_display.inc:986
+#: plugins/views_plugin_display.inc:1091
 msgid "How should each row in this view be styled"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:999
+#: plugins/views_plugin_display.inc:1104
 msgid "You may also adjust the !settings for the currently selected row style by clicking on the icon."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1005
+#: plugins/views_plugin_display.inc:1110
 msgid "Which display to use for path"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1014
+#: plugins/views_plugin_display.inc:1119
 msgid "Which display to use to get this display's path for things like summary links, rss feed links, more links, etc."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1019
+#: plugins/views_plugin_display.inc:1124
 msgid "Theming information"
 msgstr "Інформація для розробки тем"
 
-#: plugins/views_plugin_display.inc:1027
+#: plugins/views_plugin_display.inc:1143
 msgid "Display output"
 msgstr "Відображення виводу"
 
-#: plugins/views_plugin_display.inc:1031
+#: plugins/views_plugin_display.inc:1147
 msgid "Alternative display output"
 msgstr "Альтернативний стиль відображення"
 
-#: plugins/views_plugin_display.inc:1038
+#: plugins/views_plugin_display.inc:1154
 msgid "Style output"
 msgstr "Стиль виводу"
 
-#: plugins/views_plugin_display.inc:1042
+#: plugins/views_plugin_display.inc:1158
 msgid "Alternative style"
 msgstr "Альтернативний стиль"
 
-#: plugins/views_plugin_display.inc:1049
+#: plugins/views_plugin_display.inc:1165
 msgid "Row style output"
 msgstr "Стиль виводу - в рядок"
 
-#: plugins/views_plugin_display.inc:1053
+#: plugins/views_plugin_display.inc:1169
 msgid "Alternative row style"
 msgstr "Альтернативний стиль рядка"
 
-#: plugins/views_plugin_display.inc:1061
+#: plugins/views_plugin_display.inc:1177
 msgid "Field @field (ID: @id)"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1069
+#: plugins/views_plugin_display.inc:1185
 msgid "This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1084
+#: plugins/views_plugin_display.inc:1204
+msgid "Change theme"
+msgstr ""
+
+#: plugins/views_plugin_display.inc:1220
 msgid "Rescan template files"
 msgstr "Перечитати файли шаблона"
 
-#: plugins/views_plugin_display.inc:1090
+#: plugins/views_plugin_display.inc:1226
 msgid "<strong>Important!</strong> When adding, removing, or renaming template files, it is necessary to make Drupal aware of the changes by making it rescan the files on your system. By clicking this button you clear Drupal's theme registry and thereby trigger this rescanning process. The highlighted templates above will then reflect the new state of your system."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1096
+#: plugins/views_plugin_display.inc:1232
 msgid "Theming information (display)"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1097;1124;1153;1182
+#: plugins/views_plugin_display.inc:1233;1260;1289;1318
 msgid "Back to !info."
 msgstr "Повернутись до !info"
 
-#: plugins/views_plugin_display.inc:1097;1124;1153;1182
+#: plugins/views_plugin_display.inc:1233;1260;1289;1318
 msgid "theming information"
-msgstr ""
+msgstr "Інформація для розробки тем"
 
-#: plugins/views_plugin_display.inc:1100
+#: plugins/views_plugin_display.inc:1236
 msgid "This display has no theming information"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1103
+#: plugins/views_plugin_display.inc:1239
 msgid "This is the default theme template used for this display."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1109
+#: plugins/views_plugin_display.inc:1245
 msgid "This is an alternative template for this display."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1123
+#: plugins/views_plugin_display.inc:1259
 msgid "Theming information (style)"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1129
+#: plugins/views_plugin_display.inc:1265
 msgid "This display has no style theming information"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1132
+#: plugins/views_plugin_display.inc:1268
 msgid "This is the default theme template used for this style."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1138
+#: plugins/views_plugin_display.inc:1274
 msgid "This is an alternative template for this style."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1152;1181
+#: plugins/views_plugin_display.inc:1288;1317
 msgid "Theming information (row style)"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1158
+#: plugins/views_plugin_display.inc:1294
 msgid "This display has no row style theming information"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1161;1184
+#: plugins/views_plugin_display.inc:1297;1320
 msgid "This is the default theme template used for this row style."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1167
+#: plugins/views_plugin_display.inc:1303
 msgid "This is an alternative template for this row style."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1199
+#: plugins/views_plugin_display.inc:1335
 msgid "Put the exposed form in a block"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1203
+#: plugins/views_plugin_display.inc:1339
 msgid "If set, any exposed widgets will not appear with this view. Instead, a block will be made available to the Drupal block administration system, and the exposed form will appear there. Note that this block must be enabled manually, Views will not enable it for you."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1238
+#: plugins/views_plugin_display.inc:1373
 msgid "File found in folder @template-path"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1242
+#: plugins/views_plugin_display.inc:1377
 msgid "(File not found, in folder @template-path)"
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1399
+#: plugins/views_plugin_display.inc:1570
 msgid "Override"
 msgstr "Переназначити"
 
-#: plugins/views_plugin_display.inc:1404
+#: plugins/views_plugin_display.inc:1575
 msgid "Status: using default values."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1408
+#: plugins/views_plugin_display.inc:1579
 msgid "Update default display"
 msgstr "Оновити базове відображення"
 
-#: plugins/views_plugin_display.inc:1413
+#: plugins/views_plugin_display.inc:1584
 msgid "Use default"
 msgstr "Використовувати базове"
 
-#: plugins/views_plugin_display.inc:1418
+#: plugins/views_plugin_display.inc:1589
 msgid "Status: using overridden values."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1639
+#: plugins/views_plugin_display.inc:1809
 msgid "Display \"@display\" uses fields but there are none defined for it or all are excluded."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1644
+#: plugins/views_plugin_display.inc:1814
 msgid "Display \"@display\" uses a path but the path is undefined."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1650
+#: plugins/views_plugin_display.inc:1820
 msgid "Display \"@display\" has an invalid style plugin."
 msgstr ""
 
-#: plugins/views_plugin_display.inc:1682
+#: plugins/views_plugin_display.inc:1852
 msgid "Exposed form: @view-@display_id"
 msgstr "Відображена форма: @view-@display_id"
 
@@ -4449,13 +4568,11 @@ msgstr "Залежність відображених фільтрів"
 msgid "Position"
 msgstr "Позиція"
 
-#: plugins/views_plugin_display_attachment.inc:80
-#: plugins/views_plugin_display_feed.inc:98
+#: plugins/views_plugin_display_attachment.inc:80 plugins/views_plugin_display_feed.inc:98
 msgid "Multiple displays"
 msgstr "Сукупність відображень"
 
-#: plugins/views_plugin_display_attachment.inc:95;136
-#: plugins/views_plugin_display_feed.inc:113;140
+#: plugins/views_plugin_display_attachment.inc:95;136 plugins/views_plugin_display_feed.inc:113;140
 msgid "Attach to"
 msgstr "Приєднати до"
 
@@ -4491,47 +4608,47 @@ msgstr "Параметри Блоку"
 msgid "Admin"
 msgstr "Адмін"
 
-#: plugins/views_plugin_display_block.inc:106
+#: plugins/views_plugin_display_block.inc:104
 msgid "Do not cache"
 msgstr "Не кешувати"
 
-#: plugins/views_plugin_display_block.inc:107
+#: plugins/views_plugin_display_block.inc:105
 msgid "Cache once for everything (global)"
 msgstr "Кеш разово для всього (глобально)"
 
-#: plugins/views_plugin_display_block.inc:108
+#: plugins/views_plugin_display_block.inc:106
 msgid "Per page"
 msgstr "Для сторінки"
 
-#: plugins/views_plugin_display_block.inc:109
+#: plugins/views_plugin_display_block.inc:107
 msgid "Per role"
 msgstr "Для ролі"
 
-#: plugins/views_plugin_display_block.inc:110
+#: plugins/views_plugin_display_block.inc:108
 msgid "Per role per page"
 msgstr "Для ролі і для сторінки"
 
-#: plugins/views_plugin_display_block.inc:111
+#: plugins/views_plugin_display_block.inc:109
 msgid "Per user"
 msgstr "Для користувача"
 
-#: plugins/views_plugin_display_block.inc:112
+#: plugins/views_plugin_display_block.inc:110
 msgid "Per user per page"
 msgstr "Для користувача і для сторінки"
 
-#: plugins/views_plugin_display_block.inc:137
+#: plugins/views_plugin_display_block.inc:135
 msgid "Block admin description"
 msgstr ""
 
-#: plugins/views_plugin_display_block.inc:140
+#: plugins/views_plugin_display_block.inc:138
 msgid "This will appear as the name of this block in administer >> site building >> blocks."
 msgstr ""
 
-#: plugins/views_plugin_display_block.inc:145
+#: plugins/views_plugin_display_block.inc:143
 msgid "Block caching type"
 msgstr ""
 
-#: plugins/views_plugin_display_block.inc:149
+#: plugins/views_plugin_display_block.inc:147
 msgid "This sets the default status for Drupal's built-in block caching method; this requires that caching be turned on in block administration, and be careful because you have little control over when this cache is flushed."
 msgstr ""
 
@@ -4571,7 +4688,7 @@ msgstr "Нормально: @title"
 msgid "Tab: @title"
 msgstr "Закладка: @title"
 
-#: plugins/views_plugin_display_page.inc:236;319
+#: plugins/views_plugin_display_page.inc:236;321
 msgid "Menu"
 msgstr "Меню"
 
@@ -4587,111 +4704,111 @@ msgstr ""
 msgid "This view will be displayed by visiting this path on your site. You may use \"%\" in your URL to represent values that will be used for arguments: For example, \"node/%/feed\"."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:265
+#: plugins/views_plugin_display_page.inc:267
 msgid "Menu item entry"
 msgstr "Пункт елемента меню"
 
-#: plugins/views_plugin_display_page.inc:282
+#: plugins/views_plugin_display_page.inc:284
 msgid "No menu entry"
 msgstr "Без пункта меню"
 
-#: plugins/views_plugin_display_page.inc:283
+#: plugins/views_plugin_display_page.inc:285
 msgid "Normal menu entry"
 msgstr "Нормальний пункт меню"
 
-#: plugins/views_plugin_display_page.inc:284;370
+#: plugins/views_plugin_display_page.inc:286;372
 msgid "Menu tab"
 msgstr "Закладки меню"
 
-#: plugins/views_plugin_display_page.inc:285
+#: plugins/views_plugin_display_page.inc:287
 msgid "Default menu tab"
 msgstr "Базові закладки меню"
 
-#: plugins/views_plugin_display_page.inc:294
+#: plugins/views_plugin_display_page.inc:296
 msgid "If set to normal or tab, enter the text to use for the menu item."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:302
+#: plugins/views_plugin_display_page.inc:304
 msgid "If set to normal or tab, enter the text to use for the menu item's description."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:309
+#: plugins/views_plugin_display_page.inc:311
 msgid "Warning: Changing this item's menu will not work reliably in Drupal 6.4 or earlier. Please upgrade your copy of Drupal at !url."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:323
+#: plugins/views_plugin_display_page.inc:325
 msgid "Insert item into an available menu."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:334
+#: plugins/views_plugin_display_page.inc:336
 msgid "Menu selection requires the activation of menu module."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:342
+#: plugins/views_plugin_display_page.inc:344
 msgid "The lower the weight the higher/further left it will appear."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:348
+#: plugins/views_plugin_display_page.inc:350
 msgid "Default tab options"
 msgstr "Базові параметри закладки"
 
-#: plugins/views_plugin_display_page.inc:357
+#: plugins/views_plugin_display_page.inc:359
 msgid "When providing a menu item as a tab, Drupal needs to know what the parent menu item of that tab will be. Sometimes the parent will already exist, but other times you will need to have one created. The path of a parent item will always be the same path with the last part left off. i.e, if the path to this view is <em>foo/bar/baz</em>, the parent path would be <em>foo/bar</em>."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:368
+#: plugins/views_plugin_display_page.inc:370
 msgid "Parent menu item"
 msgstr "Батьківський елемент меню"
 
-#: plugins/views_plugin_display_page.inc:370
+#: plugins/views_plugin_display_page.inc:372
 msgid "Already exists"
 msgstr "Вже наявне"
 
-#: plugins/views_plugin_display_page.inc:370
+#: plugins/views_plugin_display_page.inc:372
 msgid "Normal menu item"
 msgstr "Нормальний елемент меню"
 
-#: plugins/views_plugin_display_page.inc:378
+#: plugins/views_plugin_display_page.inc:380
 msgid "If creating a parent menu item, enter the title of the item."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:386
+#: plugins/views_plugin_display_page.inc:388
 msgid "If creating a parent menu item, enter the description of the item."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:392
+#: plugins/views_plugin_display_page.inc:394
 msgid "Tab weight"
 msgstr "Вага закладки"
 
-#: plugins/views_plugin_display_page.inc:396
+#: plugins/views_plugin_display_page.inc:398
 msgid "If the parent menu item is a tab, enter the weight of the tab. The lower the number, the more to the left it will be."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:410
+#: plugins/views_plugin_display_page.inc:412
 msgid "\"$arg\" is no longer supported. Use % instead."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:414
+#: plugins/views_plugin_display_page.inc:416
 msgid "\"%\" may not be used for the first segment of a path."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:424
+#: plugins/views_plugin_display_page.inc:426
 msgid "Views cannot create normal menu items for paths with a % in them."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:431
+#: plugins/views_plugin_display_page.inc:433
 msgid "A display whose path ends with a % cannot be a tab."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:436
+#: plugins/views_plugin_display_page.inc:438
 msgid "Title is required for this menu type."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:467
+#: plugins/views_plugin_display_page.inc:469
 msgid "Display @display is set to use a menu but the menu title is not set."
 msgstr ""
 
-#: plugins/views_plugin_display_page.inc:473
+#: plugins/views_plugin_display_page.inc:475
 msgid "Display @display is set to use a parent menu but the parent menu title is not set."
 msgstr ""
 
@@ -4707,15 +4824,15 @@ msgstr ""
 msgid "The separator may be placed between inline fields to keep them from squishing up next to each other. You can use HTML in this field."
 msgstr ""
 
-#: plugins/views_plugin_style.inc:91
+#: plugins/views_plugin_style.inc:106
 msgid "Grouping field"
 msgstr "Групуюче поле"
 
-#: plugins/views_plugin_style.inc:94
+#: plugins/views_plugin_style.inc:109
 msgid "You may optionally specify a field by which to group the records. Leave blank to not group."
 msgstr ""
 
-#: plugins/views_plugin_style.inc:191
+#: plugins/views_plugin_style.inc:206
 msgid "Style @style requires a row style but the row plugin is invalid."
 msgstr ""
 
@@ -4765,7 +4882,9 @@ msgstr ""
 
 #: plugins/views_plugin_style_summary_unformatted.inc:26
 msgid "Display items inline"
-msgstr "Відображення елементів без розділювачів"
+msgstr ""
+"Відображення елементів без "
+"розділювачів"
 
 #: plugins/views_plugin_style_table.inc:126
 msgid "You need at least one field before you can configure your table settings"
@@ -4794,10 +4913,6 @@ msgstr ""
 #: plugins/views_plugin_style_table.inc:237
 msgid "Place fields into columns; you may combine multiple fields into the same column. If you do, the separator in the column specified will be used to separate the fields. Check the sortable box to make that column click sortable, and check the default sort radio to determine which column will be sorted by default, if any. You may control column order and field labels in the fields section."
 msgstr ""
-
-#: theme/views-more.tpl.php:15
-msgid "more"
-msgstr "докладніше"
 
 #: theme/views-ui-edit-item.tpl.php:32
 msgid "The style selected does not utilize fields."
@@ -4843,29 +4958,31 @@ msgstr "Заголовок: @title"
 msgid "Path: !path"
 msgstr "Шлях: !path"
 
-#: theme/theme.inc:92
+#: theme/theme.inc:93
 msgid "Edit this view"
 msgstr "Правити вигляд"
 
-#: theme/theme.inc:323
+#: theme/theme.inc:325
 msgid "sort by @s"
 msgstr "сортувати за @s"
 
-#: theme/theme.inc:600
+#: theme/theme.inc:603
 msgid "‹‹"
 msgstr "‹‹"
 
-#: theme/theme.inc:605
+#: theme/theme.inc:608
 msgid "››"
 msgstr "››"
 
-#: theme/theme.inc:618
+#: theme/theme.inc:621
 msgid "@current of @max"
 msgstr ""
 
 #: views_export/views_export.module:77
 msgid "There are no views to be exported at this time."
-msgstr "Наразі відсутні Вигляди для експортування"
+msgstr ""
+"Наразі відсутні Вигляди для "
+"експортування"
 
 #: views_export/views_export.module:109
 msgid "Show only these tags"
@@ -4879,11 +4996,23 @@ msgstr "Ім'я модуля"
 msgid "Enter the module name to export code to."
 msgstr ""
 
-#: views_export/views_export.module:205
+#: views_export/views_export.module:194
+msgid "name = @module Export Module\n"
+msgstr ""
+
+#: views_export/views_export.module:195
+msgid "description = Exports some views of @module\n"
+msgstr ""
+
+#: views_export/views_export.module:201
+msgid "Put this in @module.info in your modules/@module directory"
+msgstr ""
+
+#: views_export/views_export.module:227
 msgid "Put this in @module.module in your modules/@module directory"
 msgstr ""
 
-#: views_export/views_export.module:218
+#: views_export/views_export.module:240
 msgid "Put this in @module.views_default.inc in your modules/@module directory or modules/@module/includes directory"
 msgstr ""
 
