@@ -1,0 +1,298 @@
+<?php
+// $Id$
+/**
+ * @file views.install
+ * Contains install and update functions for Views.
+ */
+
+function views_install() {
+  if ($GLOBALS['db_type'] == 'pgsql') {
+    db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
+    db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
+    db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
+  }
+  drupal_install_schema('views');
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'views'");
+}
+
+function views_uninstall() {
+  drupal_uninstall_schema('views');
+}
+
+/**
+ * Implementation of hook_schemea
+ */
+function views_schema() {
+  // Currently, schema 1 is the only schema we have. As we make updates,
+  // we might either create a new schema 2 or make adjustments here.
+  return views_schema_1();
+}
+
+/**
+ * Views 2's initial schema; separated for the purposes of updates.
+ */
+function views_schema_1() {
+  $schema['views_view'] = array(
+    'description' => 'Stores the general data for a view.',
+    'fields' => array(
+      'vid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The view ID of the field, defined by the database.',
+        'no export' => TRUE,
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'default' => '',
+        'not null' => TRUE,
+        'description' => 'The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores.',
+      ),
+      'description' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'default' => '',
+        'description' => 'A description of the view for the admin interface.',
+      ),
+      'tag' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'default' => '',
+        'description' => 'A tag used to group/sort views in the admin interface',
+      ),
+      'view_php' => array(
+        'type' => 'blob',
+        'description' => 'A chunk of PHP code that can be used to provide modifications to the view prior to building.',
+      ),
+      'base_table' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'default' => '',
+        'not null' => TRUE,
+        'description' => 'What table this view is based on, such as node, user, comment, or term.',
+      ),
+      'is_cacheable' => array(
+        'type' => 'int',
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'A boolean to indicate whether or not this view may have its query cached.',
+      ),
+    ),
+    'primary key' => array('vid'),
+    'unique keys' => array('name' => array('name')),
+  );
+
+  $schema['views_display'] = array(
+    'description' => 'Stores information about each display attached to a view.',
+    'fields' => array(
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The view this display is attached to.',
+        'no export' => TRUE,
+      ),
+      'id' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'default' => '',
+        'not null' => TRUE,
+        'description' => 'An identifier for this display; usually generated from the display_plugin, so should be something like page or page_1 or block_2, etc.',
+      ),
+      'display_title' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'default' => '',
+        'not null' => TRUE,
+        'description' => 'The title of the display, viewable by the administrator.',
+      ),
+      'display_plugin' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'default' => '',
+        'not null' => TRUE,
+        'description' => 'The type of the display. Usually page, block or embed, but is pluggable so may be other things.',
+      ),
+      'position' => array(
+        'type' => 'int',
+        'default' => 0,
+        'description' => 'The order in which this display is loaded.',
+      ),
+      'display_options' => array(
+        'type' => 'blob',
+        'description' => 'A serialized array of options for this display; it contains options that are generally only pertinent to that display plugin type.',
+        'serialize' => TRUE,
+        'serialized default' => 'a:0:{}',
+      ),
+    ),
+    'indexes' => array('vid' => array('vid', 'position')),
+  );
+
+  $schema['cache_views'] = drupal_get_schema_unprocessed('system', 'cache');
+  
+  $schema['cache_views_data'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_views_data']['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+  $schema['cache_views_data']['fields']['serialized']['default'] = 1;
+
+
+  $schema['views_object_cache'] = array(
+    'description' => 'A special cache used to store objects that are being edited; it serves to save state in an ordinarily stateless environment.',
+    'fields' => array(
+      'sid' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'description' => 'The session ID this cache object belongs to.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'description' => 'The name of the view this cache is attached to.',
+      ),
+      'obj' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'description' => 'The name of the object this cache is attached to; this essentially represents the owner so that several sub-systems can use this cache.',
+      ),
+      'updated' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The time this cache was created or updated.',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Serialized data being stored.',
+        'serialize' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'sid_obj_name' => array('sid', 'obj', 'name'),
+      'updated' => array('updated'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Update a site to Drupal 6! Contains a bit of special code to detect
+ * if you've been running a beta version or something.
+ */
+function views_update_6000() {
+  $ret = array();
+  if (db_table_exists('views_view')) {
+    return $ret;
+  }
+
+  // This has the beneficial effect of wiping out any Views 1 cache at the
+  // same time; not wiping that cache could easily cause problems with Views 2.
+  if (db_table_exists('cache_views')) {
+    db_drop_table($ret, 'cache_views');
+  }
+
+  // This is mostly the same as drupal_install_schema, but it forces
+  // views_schema_1 rather than the default schema. This will be important
+  // if we have table updates.
+  $schema = views_schema_1();
+  _drupal_initialize_schema('views', $schema);
+
+  foreach ($schema as $name => $table) {
+    db_create_table($ret, $name, $table);
+  }
+  return $ret;
+}
+
+function views_update_6001() {
+  $ret = array();
+  $result = db_query("SELECT * FROM {blocks} WHERE module = 'views' AND delta LIKE '\$exp%'");
+  while ($block = db_fetch_object($result)) {
+    $new = strtr($block->delta, '$', '-');
+    $ret[] = update_sql("UPDATE {blocks} SET delta = '" . db_escape_string($new) . "' WHERE module = 'views' AND delta = '" . db_escape_string($block->delta) . "'");
+  }
+  $ret[] = update_sql("UPDATE {blocks} SET delta = CONCAT(delta, '-block_1') WHERE module = 'views'");
+
+  return $ret;
+}
+
+// NOTE: Update 6002 removed because it did not always work.
+/**
+ * Add missing unique key.
+ */
+function views_update_6003() {
+  $ret = array();
+
+  db_add_unique_key($ret, 'views_view', 'name', array('name'));
+
+  return $ret;
+}
+
+/**
+ * Enlarge the views_object_cache.data column to prevent truncation and JS
+ * errors.
+ */
+function views_update_6004() {
+  $ret = array();
+
+  $new_field = array(
+    'type' => 'text',
+    'size' => 'big',
+    'description' => 'Serialized data being stored.',
+    'serialize' => TRUE,
+  );
+
+  // Drop and re-add this field because there is a bug in
+  // db_change_field that causes this to fail when trying to cast the data.
+  db_drop_field($ret, 'views_object_cache', 'data');
+  db_add_field($ret, 'views_object_cache', 'data', $new_field);
+
+  return $ret;
+}
+
+/**
+ * Enlarge the base_table column
+ */
+function views_update_6005() {
+  $ret = array();
+  
+  $new_field = array(
+    'type' => 'varchar',
+    'length' => '64',
+    'default' => '',
+    'not null' => TRUE,
+    'description' => 'What table this view is based on, such as node, user, comment, or term.',
+  );
+  db_change_field($ret, 'views_view', 'base_table', 'base_table', $new_field);
+  return $ret;
+}
+
+/**
+ * Add the cache_views_data table to support standard caching.
+ */
+function views_update_6006() {
+  $ret = array();
+  
+  $table = drupal_get_schema_unprocessed('system', 'cache');
+  $table['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+  $table['fields']['serialized']['default'] = 1;
+
+  db_create_table($ret, 'cache_views_data', $table);
+
+  return $ret;
+}
+
+/**
+ * Add aggregate function to PostgreSQL so GROUP BY can be used to force only
+ * one result to be returned for each item.
+ */
+function views_update_6007() {
+  $ret = array();
+  if ($GLOBALS['db_type'] == 'pgsql') {
+    $ret[] = update_sql('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
+    $ret[] = update_sql("DROP AGGREGATE IF EXISTS first(anyelement)");
+    $ret[] = update_sql("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
+  }
+  return $ret;
+}
