@@ -71,6 +71,7 @@ Views 3.x-dev
     o #536994 by dboulet: Store result in variables for use in unformatted style.
     o #458194 by voxpelli: Add first and last row classes to table style.
     o #254895: Add form to clean up Views 1 tables.
+    o #363516 by dagmar: Validate the uniqueness of exposed filter identifiers.
 
 Views 2.6
   Bugs fixed:

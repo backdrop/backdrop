@@ -1846,6 +1846,22 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
+   * Check if the provided identifier is unique.
+   */ 
+  function is_identifier_unique($id, $identifier) {   
+    foreach (views_object_types() as $type => $info) {
+      foreach ($this->get_handlers($type) as $key => $handler) {
+        if ($handler->can_expose() && $handler->is_exposed()) {
+          if ($id != $key && $identifier == $handler->options['expose']['identifier']) {
+            return FALSE;
+          }
+        }
+      }
+    }
+    return TRUE;
+  }
+
+  /**
    * Provide the block system with any exposed widget blocks for this display.
    */
   function get_special_blocks() {
