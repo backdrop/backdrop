@@ -3,6 +3,7 @@ CHANGELOG for Views 2 for Drupal 6
 Views 3.x-7.x-dev
     o #580320 by chaps2: Allow "always use more link" setting.
     o #363516 by dagmar: Validate the uniqueness of exposed filter identifiers.
+    o #480162 by dereine: Count whitespace fields as empty for hiding labels.
 
 Views 3.x-6.x-dev
   Bug fixes:

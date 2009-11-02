@@ -492,7 +492,7 @@ class views_handler_field extends views_handler {
    * each item to be handled individually.
    */
   function render_text($alter) {
-    $value = $this->last_render;
+    $value = trim($this->last_render);
     if ($this->options['hide_empty'] && empty($value) && ($value !== 0 || $this->options['empty_zero'])) {
       return '';
     }
