@@ -624,8 +624,19 @@ class views_plugin_display extends views_plugin {
    * This output is returned as an array.
    */
   function options_summary(&$categories, &$options) {
-    $categories['basic'] = array(
-      'title' => t('Basic settings'),
+    $categories = array(
+      'basic' => array(
+        'title' => t('Basic settings'),
+      ),
+      'advanced' => array(
+        'title' => t('Advanced settings'),
+      ),
+      'style' => array(
+        'title' => t('Style settings'),
+      ),
+      'exposed' => array(
+        'title' => t('Exposed form'),
+      ),
     );
 
     $options['display_title'] = array(
@@ -653,7 +664,7 @@ class views_plugin_display extends views_plugin {
     $style = '';
 
     $options['style_plugin'] = array(
-      'category' => 'basic',
+      'category' => 'style',
       'title' => t('Style'),
       'value' => $style_title,
       'desc' => t('Change the style plugin.'),
@@ -669,7 +680,7 @@ class views_plugin_display extends views_plugin {
       $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin['title'];
 
       $options['row_plugin'] = array(
-        'category' => 'basic',
+        'category' => 'style',
         'title' => t('Row style'),
         'value' => $row_title,
         'desc' => t('Change the row plugin.'),
@@ -681,7 +692,7 @@ class views_plugin_display extends views_plugin {
     }
     if (!empty($this->definition['use ajax'])) {
       $options['use_ajax'] = array(
-        'category' => 'basic',
+        'category' => 'advanced',
         'title' => t('Use AJAX'),
         'value' => $this->get_option('use_ajax') ? t('Yes') : t('No'),
         'desc' => t('Change whether or not this display will use AJAX.'),
@@ -715,7 +726,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['distinct'] = array(
-      'category' => 'basic',
+      'category' => 'advanced',
       'title' => t('Distinct'),
       'value' => $this->get_option('distinct') ? t('Yes') : t('No'),
       'desc' => t('Display only distinct items, without duplicates.'),
@@ -749,7 +760,7 @@ class views_plugin_display extends views_plugin {
     $cache_str = $cache_plugin->summary_title();
 
     $options['cache'] = array(
-      'category' => 'basic',
+      'category' => 'advanced',
       'title' => t('Caching'),
       'value' => $cache_str,
       'desc' => t('Specify caching type for this display.'),
@@ -784,7 +795,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['exposed_block'] = array(
-      'category' => 'basic',
+      'category' => 'exposed',
       'title' => t('Exposed form in block'),
       'value' => $this->get_option('exposed_block') ? t('Yes') : t('No'),
       'desc' => t('Allow the exposed form to appear in a block instead of the view.'),
@@ -810,7 +821,7 @@ class views_plugin_display extends views_plugin {
       }
 
       $options[$type] = array(
-        'category' => 'basic',
+        'category' => 'style',
         'title' => $name,
         'value' => $field,
         'desc' => t("Change this display's !name.", array('!name' => strtolower($name))),
@@ -818,7 +829,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['analyze-theme'] = array(
-      'category' => 'basic',
+      'category' => 'style',
       'title' => t('Theme'),
       'value' => t('Information'),
       'desc' => t('Get information on how to theme this display'),
@@ -1847,8 +1858,8 @@ class views_plugin_display extends views_plugin {
 
   /**
    * Check if the provided identifier is unique.
-   */ 
-  function is_identifier_unique($id, $identifier) {   
+   */
+  function is_identifier_unique($id, $identifier) {
     foreach (views_object_types() as $type => $info) {
       foreach ($this->get_handlers($type) as $key => $handler) {
         if ($handler->can_expose() && $handler->is_exposed()) {
