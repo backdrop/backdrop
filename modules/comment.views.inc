@@ -196,7 +196,7 @@ function comment_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_date',
     ),
-  );
+  );  
 
   // status (approved or not)
   $data['comment']['status'] = array(
@@ -321,7 +321,7 @@ function comment_views_data() {
   $data['node_comment_statistics']['table']['join'] = array(
     //...to the node table
     'node' => array(
-      'type' => 'INNER',
+      'type' => 'INNER',      
       'left_field' => 'nid',
       'field' => 'nid',
      ),
