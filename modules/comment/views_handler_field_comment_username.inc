@@ -34,7 +34,9 @@ class views_handler_field_comment_username extends views_handler_field {
       $account->name = $values->{$this->field_alias};
       $account->homepage = $values->{$this->aliases['homepage']};
 
-      return theme('username', $account);
+      return theme('username', array(
+        'account' => $account
+      ));
     }
     else {
       return $data;

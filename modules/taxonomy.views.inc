@@ -13,17 +13,17 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function taxonomy_views_data() {
   $data = array();
 
   // ----------------------------------------------------------------------
-  // vocabulary table
+  // taxonomy_vocabulary table
 
-  $data['vocabulary']['table']['group']  = t('Taxonomy');
+  $data['taxonomy_vocabulary']['table']['group']  = t('Taxonomy');
 
-  $data['vocabulary']['table']['join'] = array(
+  $data['taxonomy_vocabulary']['table']['join'] = array(
     // vocabulary links to term_data directly via vid.
     'term_data' => array(
       'left_field' => 'vid',
@@ -44,7 +44,7 @@ function taxonomy_views_data() {
   );
 
   // vocabulary name
-  $data['vocabulary']['name'] = array(
+  $data['taxonomy_vocabulary']['name'] = array(
     'title' => t('Vocabulary name'), // The item it appears as on the UI,
     'field' => array(
       'help' => t('Name of the vocabulary a term is a member of. This will be the vocabulary that whichever term the "Taxonomy: Term" field is; and can similarly cause duplicates.'),
@@ -52,7 +52,15 @@ function taxonomy_views_data() {
       'click sortable' => TRUE,
     ),
   );
-  $data['vocabulary']['vid'] = array(
+  $data['taxonomy_vocabulary']['machine_name'] = array(
+    'title' => t('Vocabulary machine name'), // The item it appears as on the UI,
+    'field' => array(
+      'help' => t('Machine-Name of the vocabulary a term is a member of. This will be the vocabulary that whichever term the "Taxonomy: Term" field is; and can similarly cause duplicates.'),
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+  );
+  $data['taxonomy_vocabulary']['vid'] = array(
     'title' => t('Vocabulary ID'), // The item it appears as on the UI,
     'help' => t('The taxonomy vocabulary ID'),
     'argument' => array(
@@ -154,7 +162,7 @@ function taxonomy_views_data() {
       'field' => 'description', // the real field
       'group' => t('Taxonomy'), // The group it appears in on the UI,
       'handler' => 'views_handler_field_markup',
-      'format' => FILTER_FORMAT_DEFAULT,
+      'format' => filter_default_format(),
     ),
   );
 
@@ -265,7 +273,7 @@ function taxonomy_views_data() {
     'argument' => array(
       'help' => t('The parent term of the term.'),
       'handler' => 'views_handler_argument_numeric',
-    ),    
+    ),
   );
 
   // ----------------------------------------------------------------------
@@ -304,7 +312,7 @@ function taxonomy_views_data() {
 }
 
 /**
- * Implementation of hook_views_data_alter().
+ * Implements hook_views_data_alter().
  */
 function taxonomy_views_data_alter(&$data) {
   $data['node']['term_node_tid'] = array(
@@ -343,54 +351,26 @@ function taxonomy_views_data_alter(&$data) {
 }
 
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function taxonomy_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/taxonomy',
-    ),
-    'handlers' => array(
-      'views_handler_argument_term_node_tid_depth' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_term_node_tid_depth_modifier' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_taxonomy' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_vocabulary_vid' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_term_node_tid' => array(
-        'parent' => 'views_handler_argument_many_to_one',
-      ),
-      'views_handler_field_term_node_tid' => array(
-        'parent' => 'views_handler_field_prerender_list',
-      ),
-      'views_handler_field_taxonomy' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_filter_vocabulary_vid' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-      'views_handler_filter_term_node_tid' => array(
-        'parent' => 'views_handler_filter_many_to_one',
-      ),
-      'views_handler_filter_term_node_tid_depth' => array(
-        'parent' => 'views_handler_filter_term_node_tid',
-      ),
-      'views_handler_relationship_node_term_data' => array(
-        'parent' => 'views_handler_relationship',
-      ),
-    ),
+    'views_handler_argument_term_node_tid_depth_modifier',
+    'views_handler_argument_taxonomy',
+    'views_handler_argument_vocabulary_vid',
+    'views_handler_argument_term_node_tid',
+    'views_handler_field_term_node_tid',
+    'views_handler_field_taxonomy',
+    'views_handler_filter_vocabulary_vid',
+    'views_handler_filter_term_node_tid',
+    'views_handler_filter_term_node_tid_depth',
+    'views_handler_relationship',
   );
 }
 
 /**
- * Implementation of hook_views_plugins
+ * Implements hook_views_plugins
  */
 function taxonomy_views_plugins() {
   return array(
@@ -399,7 +379,7 @@ function taxonomy_views_plugins() {
       'taxonomy_term' => array(
         'title' => t('Taxonomy term'),
         'handler' => 'views_plugin_argument_validate_taxonomy_term',
-        'path' => drupal_get_path('module', 'views') . '/modules/taxonomy',
+        'path' => drupal_get_path('module', 'views') . '/modules/taxonomy', // not necessary for most modules
       ),
     ),
   );

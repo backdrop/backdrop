@@ -132,18 +132,22 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
 
   function query() {
     $this->ensure_my_table();
-
-    $where = "$this->table_alias.$this->real_field ";
+    $field = "$this->table_alias.$this->real_field";
 
     if (empty($this->value)) {
-      $where .= '= 0';
+
       if ($this->accept_null) {
-        $where = '(' . $where . " OR $this->table_alias.$this->real_field IS NULL)";
+        $or = db_or()
+          ->condition($field, 0, '=')
+          ->condition($field, NULL, 'IS NULL');
+        $this->query->add_where($this->options['group'], $or);
+      }
+      else {
+        $this->query->add_where($this->options['group'], $field, 0, '=');
       }
     }
     else {
-      $where .= '<> 0';
+      $this->query->add_where($this->options['group'], $field, 0, '<>');
     }
-    $this->query->add_where($this->options['group'], $where);
   }
 }

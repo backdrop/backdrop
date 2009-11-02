@@ -58,14 +58,13 @@ Each plugin will be registered with an identifier for the plugin, plus a fairly 
       ),
 </code>
 
-Of particular interest is the <em>path</em> directive, which works a little differently from handler registration; each plugin must define its own path, rather than relying on a global info for the paths. Also, there is an optional <em>parent</em> directive which is automatically filled in to be the base parent for the plugin type. Usually this is enough, but if your plugin derives from something other than the base, it must be filled in. For example:
+Of particular interest is the <em>path</em> directive, which works a little differently from handler registration; each plugin must define its own path, rather than relying on a global info for the paths. For example:
 
 <code>
       'feed' => array(
         'title' => t('Feed'),
         'help' => t('Display the view as a feed, such as an RSS feed.'),
         'handler' => 'views_plugin_display_feed',
-        'parent' => 'page', // so it knows to load the page plugin .inc file
         'uses hook menu' => TRUE,
         'use ajax' => FALSE,
         'use pager' => FALSE,
@@ -75,6 +74,6 @@ Of particular interest is the <em>path</em> directive, which works a little diff
       ),
 </code>
 
-Note that unlike handler registration, where parentage is referred to by object name, with plugins it is referred to by the unique plugin identifier. Please be sure to prefix your plugin identifiers with your module name to ensure namespace safety; after all, two different modules could try to implement the 'grid2' plugin, and that would cause one plugin to completely fail.
+Please be sure to prefix your plugin identifiers with your module name to ensure namespace safety; after all, two different modules could try to implement the 'grid2' plugin, and that would cause one plugin to completely fail.
 
 ...TODO: Finish this document....

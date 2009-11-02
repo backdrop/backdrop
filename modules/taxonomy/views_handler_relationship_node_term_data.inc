@@ -44,7 +44,7 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
 
     if (!empty($this->options['required']) || !array_filter($this->options['vids'])) {
       $term_node = $this->query->add_table('term_node', $this->relationship);
-      $def['left_table'] = $term_node;
+      $def['left_table'] = 'term_node';
       $def['left_field'] = 'tid';
       $def['field'] = 'tid';
       if (!empty($this->options['required'])) {
@@ -58,7 +58,7 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
       $def['field'] = 'revision';
       // fapi ensures vids are safe here.
       $vids = implode(', ', array_filter($this->options['vids']));
-      $def['table formula'] = "(SELECT td.*, tn.vid AS revision FROM {term_data} td INNER JOIN {term_node} tn ON tn.tid = td.tid WHERE td.vid IN ($vids))";
+      $def['table formula'] = "(SELECT td.*, tn.vid AS revision FROM {taxonomy_term_data} td INNER JOIN {taxonomy_term_node} tn ON tn.tid = td.tid WHERE td.vid IN ($vids))";
     }
 
     $join = new views_join();

@@ -58,6 +58,7 @@ class views_plugin_row_fields extends views_plugin_row {
       '#default_value' => $this->options['hide_empty'],
       '#description' => t('Do not display fields, labels or markup for fields that are empty.'),
     );
+
   }
 
   /**

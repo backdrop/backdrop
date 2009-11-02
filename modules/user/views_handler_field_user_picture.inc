@@ -18,6 +18,6 @@ class views_handler_field_user_picture extends views_handler_field {
     $account->name = $values->{$this->aliases['name']};
     $account->picture = $values->{$this->field_alias};
 
-    return theme('user_picture', $account);
+    return theme('user_picture', array('account' => $account));
   }
 }

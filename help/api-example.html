@@ -5,13 +5,13 @@ For the new table defined by the Node example module to be understood by the vie
 <pre>
 &lt;?php
 /**
- * Implementation of hook_views_api().
+ * Implements hook_views_api().
  *
- * This tells drupal that there is Views integration file named 
- * module-name.views.inc 
+ * This tells drupal that there is Views integration file named
+ * module-name.views.inc
  */
 function node_example_views_api() {
-  // Note that you can include 'path' in this array so that your views.inc 
+  // Note that you can include 'path' in this array so that your views.inc
   // file can be stored in a different location.
   return array(
     'api' => 2.0
@@ -24,7 +24,7 @@ Below is the contents of a simple node_example.views.inc file that allows you to
 
 <pre>
 &lt;?php
-// $Id$ 
+// $Id$
 
 /**
  * This file is used to tell the views module about the new node_example table.
@@ -120,7 +120,7 @@ With this configuration you always pull out of the database, data for every sing
 
 <h3>Type/relationship extension</h3>
 
-When your tables have first class data, you will often need to have own View types and View relationships defined.  With the current node_example table this isn't required although I try to justify it below on an efficiency basis. See [[http://groups.drupal.org/node/17236#comment-58980|this discussion]] as to why it isn't justified. 
+When your tables have first class data, you will often need to have own View types and View relationships defined.  With the current node_example table this isn't required although I try to justify it below on an efficiency basis. See [[http://groups.drupal.org/node/17236#comment-58980|this discussion]] as to why it isn't justified.
 
 Pulling data out of the database for every node when you only want data for the new Example node type is inefficient.  To reduce the initial data extraction to just that relating to the new Example nodes requires that you make the node_example table the base table.  This can be done by adding the following code into the node_example.views.inc file just before the 'return $data;'
 
@@ -132,7 +132,7 @@ Pulling data out of the database for every node when you only want data for the 
   //  Use node_example as a new base table
   //     by creating a new views type called 'Node example'
   //  This allows it to be selected as the 'view type'
-  //          when you initially add a new view. 
+  //          when you initially add a new view.
   $data['node_example']['table']['base'] = array(
     'field' => 'vid',
     'title' => t('Node example'),

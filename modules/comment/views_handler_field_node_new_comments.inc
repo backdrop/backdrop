@@ -7,7 +7,7 @@
 class views_handler_field_node_new_comments extends views_handler_field_numeric {
   function init(&$view, $options) {
     parent::init($view, $options);
-    
+
     // translate an older setting:
     if (!empty($options['no_empty'])) {
       $this->options['hide_empty'] = TRUE;

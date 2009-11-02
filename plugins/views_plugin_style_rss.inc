@@ -30,7 +30,7 @@ class views_plugin_style_rss extends views_plugin_style {
         $this->view->feed_icon = '';
       }
 
-      $this->view->feed_icon .= theme('feed_icon', $url, $title);
+      $this->view->feed_icon .= theme('feed_icon', array('url' => $url, 'title' => $title));
       drupal_add_link(array(
         'rel' => 'alternate',
         'type' => 'application/rss+xml',
@@ -77,7 +77,7 @@ class views_plugin_style_rss extends views_plugin_style {
 
   function render() {
     if (empty($this->row_plugin)) {
-      vpr('views_plugin_style_default: Missing row plugin');
+      debug('views_plugin_style_default: Missing row plugin');
       return;
     }
     $rows = '';
@@ -99,6 +99,11 @@ class views_plugin_style_rss extends views_plugin_style {
       $rows .= $this->row_plugin->render($row);
     }
 
-    return theme($this->theme_functions(), $this->view, $this->options, $rows);
+    return theme($this->theme_functions(),
+      array(
+        'view' => $this->view,
+        'options' => $this->options,
+        'rows' => $rows
+      ));
   }
 }

@@ -53,7 +53,7 @@ class views_handler_field_user_name extends views_handler_field_user {
       }
       elseif (!empty($this->options['link_to_user'])) {
         $account->name = $values->{$this->field_alias};
-        return theme('username', $account);
+        return theme('username', array('account' => $account));
       }
     }
     // Otherwise, there's no special handling, so return the data directly.

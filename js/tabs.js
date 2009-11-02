@@ -9,9 +9,9 @@
 (function($) {
 
    // if the UI scope is not availalable, add it
-  $.ui = $.ui || {};
+  $.viewsUi = $.viewsUi || {};
 
-  $.fn.tabs = function(initial, options) {
+  $.fn.viewsTabs = function(initial, options) {
     if (initial && initial.constructor == Object) { // shift arguments
       options = initial;
       initial = null;
@@ -22,21 +22,21 @@
     initial = initial && initial.constructor == Number && --initial || 0;
 
     return this.each(function() {
-    new $.ui.tabs(this, $.extend(options, { initial: initial }));
+    new $.viewsUi.tabs(this, $.extend(options, { initial: initial }));
     });
   };
 
   // chainable tabs methods
-  $.each(['add', 'remove', 'enable', 'disable', 'click', 'load'], function(i, method) {
-    $.fn[method + 'Tab'] = function() {
+  $.each(['Add', 'Remove', 'Enable', 'Disable', 'Click', 'Load'], function(i, method) {
+    $.fn['views' + method + 'Tab'] = function() {
       var args = arguments;
       return this.each(function() {
-        var instance = $.ui.tabs.instances[this.UI_TABS_UUID];
-        instance[method].apply(instance, args);
+        var instance = $.viewsUi.tabs.instances[this.UI_TABS_UUID];
+        instance[method.toLowerCase()].apply(instance, args);
       });
     };
   });
-  $.fn.selectedTab = function(returnElement) {
+  $.fn.viewsSelectedTab = function(returnElement) {
     var selected;
     if (returnElement) {
 
@@ -46,7 +46,7 @@
     return selected;
   };
 
-  $.ui.tabs = function(el, options) {
+  $.viewsUi.tabs = function(el, options) {
 
     this.source = el;
 
@@ -97,16 +97,16 @@
     this.tabify(true);
 
     // save instance for later
-    var uuid = 'instance-' + $.ui.tabs.prototype.count++;
-    $.ui.tabs.instances[uuid] = this;
+    var uuid = 'instance-' + $.viewsUi.tabs.prototype.count++;
+    $.viewsUi.tabs.instances[uuid] = this;
     this.source['UI_TABS_UUID'] = uuid;
 
   };
 
   // static
-  $.ui.tabs.instances = {};
+  $.viewsUi.tabs.instances = {};
 
-  $.extend($.ui.tabs.prototype, {
+  $.extend($.viewsUi.tabs.prototype, {
     animating: false,
     count: 0,
     tabify: function(init) {

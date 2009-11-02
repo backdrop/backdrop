@@ -6,8 +6,7 @@
  */
 class views_handler_sort_random extends views_handler_sort {
   function query() {
-    global $db_type;
-    switch ($db_type) {
+    switch (db_driver()) {
       case 'mysql':
       case 'mysqli':
         $formula = 'RAND()';

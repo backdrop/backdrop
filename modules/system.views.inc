@@ -14,29 +14,29 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function system_views_data() {
   $data = array();
 
   // ----------------------------------------------------------------------
-  // files table
+  // file table
 
-  $data['files']['table']['group']  = t('File');
+  $data['file']['table']['group']  = t('File');
 
   // Advertise this table as a possible base table
-  $data['files']['table']['base'] = array(
+  $data['file']['table']['base'] = array(
     'field' => 'fid',
     'title' => t('File'),
     'help' => t("Files maintained by Drupal and various modules."),
   );
 
-  // The files table does not inherently join to the node table,
+  // The file table does not inherently join to the node table,
   // but may things (such as upload.module) can add relationships
   // that allow file fields to be used.
 
   // For other base tables, explain how we join
-  $data['files']['table']['join'] = array(
+  $data['file']['table']['join'] = array(
     'users' => array(
       // direct join to the users table via 'uid' field.
       'left_field' => 'uid',
@@ -45,7 +45,7 @@ function system_views_data() {
   );
 
   // fid
-  $data['files']['fid'] = array(
+  $data['file']['fid'] = array(
     'title' => t('File ID'),
     'help' => t('The ID of the file.'),
     'field' => array(
@@ -65,7 +65,7 @@ function system_views_data() {
   );
 
   // filename
-  $data['files']['filename'] = array(
+  $data['file']['filename'] = array(
     'title' => t('Name'),
     'help' => t('The name of the file.'),
     'field' => array(
@@ -83,8 +83,8 @@ function system_views_data() {
     ),
   );
 
-  // filepath
-  $data['files']['filepath'] = array(
+  // uri
+  $data['file']['uri'] = array(
     'title' => t('Path'),
     'help' => t('The path of the file.'),
     'field' => array(
@@ -103,7 +103,7 @@ function system_views_data() {
   );
 
   // filemime
-  $data['files']['filemime'] = array(
+  $data['file']['filemime'] = array(
     'title' => t('Mime type'),
     'help' => t('The mime type of the file.'),
     'field' => array(
@@ -122,7 +122,7 @@ function system_views_data() {
   );
 
   // filesize
-  $data['files']['filesize'] = array(
+  $data['file']['filesize'] = array(
     'title' => t('Size'),
     'help' => t('The size of the file.'),
     'field' => array(
@@ -138,7 +138,7 @@ function system_views_data() {
   );
 
   // status
-  $data['files']['status'] = array(
+  $data['file']['status'] = array(
     'title' => t('Status'),
     'help' => t('The status of the file.'),
     'field' => array(
@@ -154,7 +154,7 @@ function system_views_data() {
   );
 
   // timestamp field
-  $data['files']['timestamp'] = array(
+  $data['file']['timestamp'] = array(
     'title' => t('Upload date'),
     'help' => t('The date the file was uploaded.'),
     'field' => array(
@@ -174,34 +174,21 @@ function system_views_data() {
 }
 
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function system_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/system',
-    ),
-    'handlers' => array(
-      'views_handler_field_file' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_file_status' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_filter_file_status' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-      'views_handler_argument_file_fid' => array(
-        'parent' => 'views_handler_argument',
-      ),
-    ),
+    'views_handler_field_file',
+    'views_handler_field_file_status',
+    'views_handler_filter_file_status',
+    'views_handler_argument_file_fid',
   );
 }
 
 function _views_file_status($choice = NULL) {
   $status = array(
-    FILE_STATUS_TEMPORARY => t('Temporary'),
+    0 => t('Temporary'),
     FILE_STATUS_PERMANENT => t('Permanent'),
   );
 

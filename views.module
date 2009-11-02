@@ -17,16 +17,16 @@ function views_api_version() {
 }
 
 /**
- * Implementation of hook_theme(). Register views theming functions.
+ * Implement hook_theme(). Register views theming functions.
  */
 function views_theme() {
   $path = drupal_get_path('module', 'views');
-  require_once "./$path/theme/theme.inc";
+  include_once $path . '/theme/theme.inc';
 
   // Some quasi clever array merging here.
   $base = array(
     'file' => 'theme.inc',
-    'path' => "$path/theme",
+    'path' => $path . '/theme',
   );
 
   // Our extra version of pager from pager.inc
@@ -60,7 +60,7 @@ function views_theme() {
           'arguments' => $arguments[$type],
         );
 
-        $include = './' . $def['theme path'] . '/' . $def['theme file'];
+        $include = DRUPAL_ROOT . '/' . $def['theme path'] . '/' . $def['theme file'];
         if (file_exists($include)) {
           require_once $include;
         }
@@ -118,7 +118,7 @@ function views_preprocess_node(&$vars) {
   if (!empty($vars['node']->view) && !empty($vars['node']->view->name)) {
     $vars['view'] = &$vars['node']->view;
     $vars['template_files'][] = 'node-view-' . $vars['node']->view->name;
-    if(!empty($vars['node']->view->current_display)) {
+    if (!empty($vars['node']->view->current_display)) {
       $vars['template_files'][] = 'node-view-' . $vars['node']->view->name . '-' . $vars['node']->view->current_display;
     }
   }
@@ -133,21 +133,30 @@ function views_preprocess_comment(&$vars) {
   if (!empty($vars['node']->view) && !empty($vars['node']->view->name)) {
     $vars['view'] = &$vars['node']->view;
     $vars['template_files'][] = 'comment-view-' . $vars['node']->view->name;
-    if(!empty($vars['node']->view->current_display)) {
+    if (!empty($vars['node']->view->current_display)) {
       $vars['template_files'][] = 'comment-view-' . $vars['node']->view->name . '-' . $vars['node']->view->current_display;
     }
   }
 }
 
 /*
- * Implementation of hook_perm()
+ * Implement hook_permission().
  */
-function views_perm() {
-  return array('access all views', 'administer views');
+function views_permission() {
+  return array(
+    'administer views' => array(
+      'title' => t('Administer views'),
+      'description' => t('Access the views administration pages.'),
+    ),
+    'access all views' => array(
+      'title' => t('Access all views'),
+      'description' => t('Bypass access control when accessing views.'),
+    ),
+  );
 }
 
 /**
- * Implementation of hook_menu().
+ * Implement hook_menu().
  */
 function views_menu() {
   // Any event which causes a menu_rebuild could potentially mean that the
@@ -159,23 +168,22 @@ function views_menu() {
     'page callback' => 'views_ajax',
     'access callback' => TRUE,
     'description' => 'Ajax callback for view loading.',
-    'file' => 'includes/ajax.inc',
     'type' => MENU_CALLBACK,
   );
-  // Path is not admin/build/views due to menu complications with the wildcards from
+  // Path is not admin/structure/views due to menu complications with the wildcards from
   // the generic ajax callback.
   $items['admin/views/ajax/autocomplete/user'] = array(
     'page callback' => 'views_ajax_autocomplete_user',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
-    'file' => 'includes/ajax.inc',
     'type' => MENU_CALLBACK,
+    'file' => 'includes/ajax.inc',
   );
   return $items;
 }
 
 /**
- * Implementation of hook_menu_alter().
+ * Implement hook_menu_alter().
  */
 function views_menu_alter(&$callbacks) {
   $our_paths = array();
@@ -293,107 +301,108 @@ function views_page() {
 }
 
 /**
- * Implementation of hook_block
+ * Implement hook_block_list().
  */
-function views_block($op = 'list', $delta = 0, $edit = array()) {
-  switch ($op) {
-    case 'list':
-      $items = array();
-      $views = views_get_all_views();
-      foreach ($views as $view) {
-        // disabled views get nothing.
-        if (!empty($view->disabled)) {
-          continue;
-        }
+function views_block_list() {
+  $items = array();
+  $views = views_get_all_views();
+  foreach ($views as $view) {
+    // disabled views get nothing.
+    if (!empty($view->disabled)) {
+      continue;
+    }
 
-        $view->init_display();
-        foreach ($view->display as $display_id => $display) {
+    $view->init_display();
+    foreach ($view->display as $display_id => $display) {
 
-          if (isset($display->handler) && !empty($display->handler->definition['uses hook block'])) {
-            $result = $display->handler->execute_hook_block();
-            if (is_array($result)) {
-              $items = array_merge($items, $result);
-            }
-          }
-
-          if (isset($display->handler) && $display->handler->get_option('exposed_block')) {
-            $result = $display->handler->get_special_blocks();
-            if (is_array($result)) {
-              $items = array_merge($items, $result);
-            }
-          }
+      if (isset($display->handler) && !empty($display->handler->definition['uses hook block'])) {
+        $result = $display->handler->execute_hook_block_list();
+        if (is_array($result)) {
+          $items = array_merge($items, $result);
         }
       }
 
-      // block.module has a delta length limit of 32, but our deltas can
-      // unfortunately be longer because view names can be 32 and display IDs
-      // can also be 32. So for very long deltas, change to md5 hashes.
-      $hashes = array();
-
-      // get the keys because we're modifying the array and we don't want to
-      // confuse PHP too much.
-      $keys = array_keys($items);
-      foreach ($keys as $delta) {
-        if (strlen($delta) >= 32) {
-          $hash = md5($delta);
-          $hashes[$hash] = $delta;
-          $items[$hash] = $items[$delta];
-          unset($items[$delta]);
+      if (isset($display->handler) && $display->handler->get_option('exposed_block')) {
+        $result = $display->handler->get_special_blocks();
+        if (is_array($result)) {
+          $items = array_merge($items, $result);
         }
       }
+    }
+  }
 
-      variable_set('views_block_hashes', $hashes);
-      // Save memory: Destroy those views.
-      foreach ($views as $view) {
-        $view->destroy();
-      }
+  // block.module has a delta length limit of 32, but our deltas can
+  // unfortunately be longer because view names can be 32 and display IDs
+  // can also be 32. So for very long deltas, change to md5 hashes.
+  $hashes = array();
 
-      return $items;
-    case 'view':
-      $start = views_microtime();
-      // if this is 32, this should be an md5 hash.
-      if (strlen($delta) == 32) {
-        $hashes = variable_get('views_block_hashes', array());
-        if (!empty($hashes[$delta])) {
-          $delta = $hashes[$delta];
-        }
-      }
+  // get the keys because we're modifying the array and we don't want to
+  // confuse PHP too much.
+  $keys = array_keys($items);
+  foreach ($keys as $delta) {
+    if (strlen($delta) >= 32) {
+      $hash = md5($delta);
+      $hashes[$hash] = $delta;
+      $items[$hash] = $items[$delta];
+      unset($items[$delta]);
+    }
+  }
 
-      // This indicates it's a special one.
-      if (substr($delta, 0, 1) == '-') {
-        list($nothing, $type, $name, $display_id) = explode('-', $delta);
-        // Put the - back on.
-        $type = '-' . $type;
-        if ($view = views_get_view($name)) {
-          if ($view->access($display_id)) {
-            $view->set_display($display_id);
-            if (isset($view->display_handler)) {
-              $output = $view->display_handler->view_special_blocks($type);
-              $view->destroy();
-              return $output;
-            }
-          }
-          $view->destroy();
-        }
-      }
+  variable_set('views_block_hashes', $hashes);
+  // Save memory: Destroy those views.
+  foreach ($views as $view) {
+    $view->destroy();
+  }
 
-      list($name, $display_id) = explode('-', $delta);
-      // Load the view
-      if ($view = views_get_view($name)) {
-        if ($view->access($display_id)) {
-          $output = $view->execute_display($display_id);
-          vpr("Block $view->name execute time: " . (views_microtime() - $start) * 1000 . "ms");
+  return $items;
+}
+
+/**
+ * Implement hook_block_view().
+ */
+function views_block_view($delta) {
+  $start = microtime(TRUE);
+  // if this is 32, this should be an md5 hash.
+  if (strlen($delta) == 32) {
+    $hashes = variable_get('views_block_hashes', array());
+    if (!empty($hashes[$delta])) {
+      $delta = $hashes[$delta];
+    }
+  }
+
+  // This indicates it's a special one.
+  if (substr($delta, 0, 1) == '-') {
+    list($nothing, $type, $name, $display_id) = explode('-', $delta);
+    // Put the - back on.
+    $type = '-' . $type;
+    if ($view = views_get_view($name)) {
+      if ($view->access($display_id)) {
+        $view->set_display($display_id);
+        if (isset($view->display_handler)) {
+          $output = $view->display_handler->view_special_blocks($type);
           $view->destroy();
           return $output;
         }
-        $view->destroy();
       }
-      break;
+      $view->destroy();
+    }
+  }
+
+  list($name, $display_id) = explode('-', $delta);
+  // Load the view
+  if ($view = views_get_view($name)) {
+    if ($view->access($display_id)) {
+      $output = $view->execute_display($display_id);
+      debug("Block $view->name execute time: " . (microtime(TRUE) - $start) * 1000 . "ms");
+      $view->destroy();
+      return $output;
+    }
+    $view->destroy();
   }
 }
 
 /**
- * Implementation of hook_flush_caches().
+ * Implement hook_flush_caches().
  */
 function views_flush_caches() {
   return array('cache_views', 'cache_views_data');
@@ -403,7 +412,7 @@ function views_flush_caches() {
  * Invalidate the views cache, forcing a rebuild on the next grab of table data.
  */
 function views_invalidate_cache() {
-  cache_clear_all('*', 'cache_views', true);
+  cache_clear_all('*', 'cache_views', TRUE);
 }
 
 /**
@@ -506,12 +515,7 @@ function &views_get_current_view() {
  * Include views .inc files as necessary.
  */
 function views_include($file) {
-  static $used = array();
-  if (!isset($used[$file])) {
-    require_once './' . drupal_get_path('module', 'views') . "/includes/$file.inc";
-  }
-
-  $used[$file] = TRUE;
+  module_load_include('inc', 'views', "includes/$file");
 }
 
 /**
@@ -519,8 +523,8 @@ function views_include($file) {
  */
 function views_module_include($file) {
   foreach (views_get_module_apis() as $module => $info) {
-    if (file_exists("./$info[path]/$module.$file")) {
-      require_once "./$info[path]/$module.$file";
+    if (file_exists(DRUPAL_ROOT . "/$info[path]/$module.$file")) {
+      require_once DRUPAL_ROOT . "/$info[path]/$module.$file";
     }
   }
 }
@@ -533,12 +537,8 @@ function views_get_module_apis() {
   if (!isset($cache)) {
     $cache = array();
     foreach (module_implements('views_api') as $module) {
-      $function = $module . '_views_api';
-      $info = $function();
+      $info = module_invoke($module, 'views_api');
       if (isset($info['api']) && $info['api'] == 2.000) {
-        if (!isset($info['path'])) {
-          $info['path'] = drupal_get_path('module', $module);
-        }
         $cache[$module] = $info;
       }
     }
@@ -555,7 +555,7 @@ function views_add_css($file) {
   // and we don't want to generate duplicate cache files.
   // TODO: at some point investigate adding some files unconditionally and
   // allowing preprocess.
-  drupal_add_css(drupal_get_path('module', 'views') . "/css/$file.css", 'module', 'all', FALSE);
+  drupal_add_css(drupal_get_path('module', 'views') . "/css/$file.css", array('preprocess' => FALSE));
 }
 
 /**
@@ -567,10 +567,14 @@ function views_add_js($file) {
     return;
   }
 
-  static $base = TRUE;
+  static $base = TRUE, $ajax = TRUE;
   if ($base) {
     drupal_add_js(drupal_get_path('module', 'views') . "/js/base.js");
     $base = FALSE;
+  }
+  if ($ajax && $file == 'ajax') {
+    drupal_add_js('misc/ajax.js', array('weight' => -1));
+    $ajax = TRUE;
   }
   drupal_add_js(drupal_get_path('module', 'views') . "/js/$file.js");
 }
@@ -638,7 +642,7 @@ function views_get_handler($table, $field, $key) {
     return _views_prepare_handler($data[$field][$key], $data, $field);
   }
   // DEBUG -- identify missing handlers
-  vpr("Missing handler: $table $field $key");
+  debug("Missing handler: $table $field $key");
   $broken = array(
     'title' => t('Broken handler @table.@field', array('@table' => $table, '@field' => $field)),
     'handler' => 'views_handler_' . $key . '_broken',
@@ -671,6 +675,7 @@ function views_fetch_plugin_data($type = NULL, $plugin = NULL) {
  * Get a handler for a plugin
  */
 function views_get_plugin($type, $plugin) {
+  views_include('handlers');
   $definition = views_fetch_plugin_data($type, $plugin);
   if (!empty($definition)) {
     return _views_create_handler($definition, $type);
@@ -861,33 +866,6 @@ function views_get_view($name, $reset = FALSE) {
 // Views debug helper functions
 
 /**
- * Provide debug output for Views. This relies on devel.module
- */
-function views_debug($message) {
-  if (module_exists('devel') && variable_get('views_devel_output', FALSE) && user_access('access devel information')) {
-    if (is_string($message)) {
-      $output = $message;
-    }
-    else {
-      $output = var_export($message, TRUE);
-    }
-    if (variable_get('views_devel_region', 'footer') != 'watchdog') {
-      drupal_set_content(variable_get('views_devel_region', 'footer'), '<pre>' . $output . '</pre>');
-    }
-    else {
-      watchdog('views_logging', '<pre>' . $output . '</pre>');
-    }
-  }
-}
-
-/**
- * Shortcut to views_debug()
- */
-function vpr($message) {
-  views_debug($message);
-}
-
-/**
  * Debug messages
  */
 function vsm($message) {
@@ -922,7 +900,7 @@ function vpr_trace() {
  *
  * Be sure that $view and $display are references.
  */
-function views_exposed_form(&$form_state) {
+function views_exposed_form($form, &$form_state) {
   // Don't show the form when batch operations are in progress.
   $batch =& batch_get();
   if (!empty($batch)) {
@@ -956,21 +934,23 @@ function views_exposed_form(&$form_state) {
     );
   }
 
-  // Go through each filter and let it generate its info.
-  foreach ($view->filter as $id => $filter) {
-    $view->filter[$id]->exposed_form($form, $form_state);
-    if ($info = $view->filter[$id]->exposed_info()) {
-      $form['#info']['filter-' . $id] = $info;
+  // Go through each handler and let it generate its exposed widget.
+  foreach ($view->display_handler->handlers as $type => $value) {
+    foreach ($view->$type as $id => $handler) {
+      if ($handler->can_expose() && $handler->is_exposed()) {
+        $handler->exposed_form($form, $form_state);
+        if ($info = $handler->exposed_info()) {
+          $form['#info']["$type-$id"] = $info;
+        }
+      }
     }
   }
-
-  // @todo deal with exposed sorts
 
   $form['submit'] = array(
     '#name' => '', // prevent from showing up in $_GET.
     '#type' => 'submit',
     '#value' => t('Apply'),
-    '#id' => form_clean_id('edit-submit-' . $view->name),
+    '#id' => drupal_html_id('edit-submit-' . $view->name),
   );
 
   $form['#action'] = url($view->get_url());
@@ -1054,25 +1034,8 @@ function views_exposed_form_cache($views_name, $display_name, $form_output = NUL
  * Build a list of theme function names for use most everywhere.
  */
 function views_theme_functions($hook, $view, $display = NULL) {
-  require_once './' . drupal_get_path('module', 'views') . "/theme/theme.inc";
+  require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'views') . "/theme/theme.inc";
   return _views_theme_functions($hook, $view, $display);
-}
-
-/**
- * Views' replacement for drupal_get_form so that we can do more with
- * less.
- *
- * Items that can be set on the form_state include:
- * - input: The source of input. If unset this will be $_POST.
- * - no_redirect: Absolutely do not redirect the form even if instructed
- *   to do so.
- * - rerender: If no_redirect is set and the form was successfully submitted,
- *   rerender the form. Otherwise it will just return.
- *
- */
-function drupal_build_form($form_id, &$form_state) {
-  views_include('form');
-  return _drupal_build_form($form_id, $form_state);
 }
 
 /**
@@ -1081,11 +1044,11 @@ function drupal_build_form($form_id, &$form_state) {
 function views_views_query_substitutions($view) {
   global $language;
   return array(
-    '***CURRENT_VERSION***' => VERSION,
-    '***CURRENT_TIME***' => time(),
-    '***CURRENT_LANGUAGE***' => $language->language,
-    '***DEFAULT_LANGUAGE***' => language_default('language'),
-    '***NO_LANGUAGE***' => '',
+    ':views-current-version' => VERSION,
+    ':views-current-time' => REQUEST_TIME,
+    ':views-current-language' => $language->language,
+    ':views-default-language' => language_default('language'),
+    ':views-no-language' => '',
   );
 }
 
@@ -1140,10 +1103,10 @@ function views_var_export($var, $prefix = '', $init = TRUE) {
       $output .= ')';
     }
   }
-  else if (is_bool($var)) {
+  elseif (is_bool($var)) {
     $output = $var ? 'TRUE' : 'FALSE';
   }
-  else if (is_string($var) && strpos($var, "\n") !== FALSE) {
+  elseif (is_string($var) && strpos($var, "\n") !== FALSE) {
     // Replace line breaks in strings with a token for replacement
     // at the very end. This protects multi-line strings from
     // unintentional indentation.
@@ -1173,7 +1136,7 @@ function views_css_safe($string) {
 }
 
 /**
- * Implementation of hook_views_exportables().
+ * Implement hook_views_exportables().
  */
 function views_views_exportables($op = 'list', $views = NULL, $name = 'foo') {
   $all_views = views_get_all_views();
@@ -1194,12 +1157,12 @@ function views_views_exportables($op = 'list', $views = NULL, $name = 'foo') {
 
   if ($op == 'export') {
     $code = "/**\n";
-    $code .= " * Implementation of hook_views_default_views().\n";
+    $code .= " * Implement hook_views_default_views().\n";
     $code .= " */\n";
     $code .= "function " . $name . "_views_default_views() {\n";
     foreach ($views as $view => $truth) {
       $code .= "  /*\n";
-      $code .= "   * View ". var_export($all_views[$view]->name, TRUE) ."\n";
+      $code .= "   * View " . var_export($all_views[$view]->name, TRUE) . "\n";
       $code .= "   */\n";
       $code .= $all_views[$view]->export('  ');
       $code .= '  $views[$view->name] = $view;' . "\n\n";
@@ -1212,9 +1175,24 @@ function views_views_exportables($op = 'list', $views = NULL, $name = 'foo') {
 }
 
 /**
- * Microtime helper function to return a float time value (php4 & php5 safe).
+ * Process callback to add dependency to form items.
+ *
+ * Usage:
+ *
+ * On any form item, add
+ * - @code '#process' => 'views_process_dependency' @endcode
+ * - @code '#dependency' => array('id-of-form-without-the-#' => array(list, of, values, that, make, this, gadget, visible)); @endcode
  */
-function views_microtime() {
-  list($usec, $sec) = explode(' ', microtime());
-  return (float)$sec + (float)$usec;
+function views_process_dependency($element) {
+  if (isset($element['#dependency'])) {
+    if (!isset($element['#dependency_count'])) {
+      $element['#dependency_count'] = 1;
+    }
+    views_add_js('dependent');
+    $options['viewsAjax']['formRelationships'][$element['#id']] = array('num' => $element['#dependency_count'], 'values' => $element['#dependency']);
+    drupal_add_js($options, 'setting');
+  }
+
+  return $element;
 }
+

@@ -14,12 +14,12 @@ class views_plugin_row_comment_rss extends views_plugin_row {
     global $base_url;
 
     // Load the specified comment:
-    $comment = _comment_load($row->cid);
+    $comment = comment_load($row->cid);
 
     $item = new stdClass();
     $item->title = $comment->subject;
     $item->link = url('node/' . $comment->nid, array('absolute' => TRUE, 'fragment' => 'comment-' . $comment->cid));
-    $item->description = check_markup($comment->comment, $comment->format, FALSE);
+    $item->description = check_markup($comment->comment, $comment->format);
     $item->elements = array(
       array('key' => 'pubDate', 'value' => gmdate('r', $comment->timestamp)),
       array('key' => 'dc:creator', 'value' => $comment->name),
@@ -37,6 +37,10 @@ class views_plugin_row_comment_rss extends views_plugin_row {
       }
     }
 
-    return theme($this->theme_functions(), $this->view, $this->options, $item);
+    return theme($this->theme_functions(), array(
+      'view' => $this->view,
+      'options' => $this->options,
+      'row' => $item
+    ));
   }
 }

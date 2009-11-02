@@ -7,20 +7,20 @@
  *
  * To your $form item definition add:
  * - '#process' => array('views_process_dependency'),
- * - Add '#dependency' => array('id-of-form-item' => array(list, of, values, that, 
+ * - Add '#dependency' => array('id-of-form-item' => array(list, of, values, that,
      make, this, item, show),
  *
  * Special considerations:
  * - radios are harder. Because Drupal doesn't give radio groups individual ids,
- *   use 'radio:name-of-radio' 
+ *   use 'radio:name-of-radio'
  *
- * - Checkboxes don't have their own id, so you need to add one in a div 
+ * - Checkboxes don't have their own id, so you need to add one in a div
  *   around the checkboxes via #prefix and #suffix. You actually need to add TWO
  *   divs because it's the parent that gets hidden. Also be sure to retain the
- *   'expand_checkboxes' in the #process array, because the views process will
+ *   'form_process_checkboxes' in the #process array, because the views process will
  *   override it.
  */
-
+(function ($) {
 Drupal.Views = Drupal.Views || {};
 
 Drupal.Views.dependent = { bindings: {}, activeBindings: {}, activeTriggers: [] };
@@ -38,7 +38,7 @@ Drupal.Views.dependent.inArray = function(array, search_term) {
 }
 
 
-Drupal.Views.dependent.autoAttach = function() {
+Drupal.Views.dependent.autoAttach = function(settings) {
   // Clear active bindings and triggers.
   for (i in Drupal.Views.dependent.activeTriggers) {
     jQuery(Drupal.Views.dependent.activeTriggers[i]).unbind('change');
@@ -47,20 +47,20 @@ Drupal.Views.dependent.autoAttach = function() {
   Drupal.Views.dependent.activeBindings = {};
   Drupal.Views.dependent.bindings = {};
 
-  if (!Drupal.settings.viewsAjax) {
+  if (!settings.viewsAjax) {
     return;
   }
 
   // Iterate through all relationships
-  for (id in Drupal.settings.viewsAjax.formRelationships) {
+  for (id in settings.viewsAjax.formRelationships) {
 
-    // Drupal.Views.dependent.activeBindings[id] is a boolean, 
+    // Drupal.Views.dependent.activeBindings[id] is a boolean,
     // whether the binding is active or not.  Defaults to no.
     Drupal.Views.dependent.activeBindings[id] = 0;
     // Iterate through all possible values
-    for(bind_id in Drupal.settings.viewsAjax.formRelationships[id].values) {
+    for(bind_id in settings.viewsAjax.formRelationships[id].values) {
       // This creates a backward relationship.  The bind_id is the ID
-      // of the element which needs to change in order for the id to hide or become shown.  
+      // of the element which needs to change in order for the id to hide or become shown.
       // The id is the ID of the item which will be conditionally hidden or shown.
       // Here we're setting the bindings for the bind
       // id to be an empty array if it doesn't already have bindings to it
@@ -70,7 +70,7 @@ Drupal.Views.dependent.autoAttach = function() {
       // Add this ID
       Drupal.Views.dependent.bindings[bind_id].push(id);
       // Big long if statement.
-      // Drupal.settings.viewsAjax.formRelationships[id].values[bind_id] holds the possible values
+      // settings.viewsAjax.formRelationships[id].values[bind_id] holds the possible values
 
       if (bind_id.substring(0, 6) == 'radio:') {
         var trigger_id = "input[name='" + bind_id.substring(6) + "']";
@@ -93,14 +93,14 @@ Drupal.Views.dependent.autoAttach = function() {
           switch (jQuery(trigger).attr('type')) {
             case 'checkbox':
               var val = jQuery(trigger).attr('checked') || 0;
-              
+
               if (val) {
                 $(trigger).parent().removeClass('hidden-options').addClass('expanded-options');
               }
               else {
                 $(trigger).parent().removeClass('expanded-options').addClass('hidden-options');
               }
-              
+
               break;
             default:
               var val = jQuery(trigger).val();
@@ -128,7 +128,7 @@ Drupal.Views.dependent.autoAttach = function() {
               Drupal.Views.dependent.activeBindings[id] = {};
             }
 
-            if (Drupal.Views.dependent.inArray(Drupal.settings.viewsAjax.formRelationships[id].values[bind_id], val)) {
+            if (Drupal.Views.dependent.inArray(settings.viewsAjax.formRelationships[id].values[bind_id], val)) {
               Drupal.Views.dependent.activeBindings[id][bind_id] = 'bind';
             }
             else {
@@ -142,10 +142,10 @@ Drupal.Views.dependent.autoAttach = function() {
 
             var object = jQuery('#' + id + '-wrapper');
             if (!object.size()) {
-              object = jQuery('#' + id).parent();
+              object = jQuery('#' + id).parents('.form-item:first');
             }
 
-            if (Drupal.settings.viewsAjax.formRelationships[id].num <= len) {
+            if (settings.viewsAjax.formRelationships[id].num <= len) {
               // Show if the element if criteria is matched
               object.show(0);
               object.addClass('dependent-options');
@@ -170,22 +170,26 @@ Drupal.Views.dependent.autoAttach = function() {
   }
 }
 
-Drupal.behaviors.viewsDependent = function (context) {
-  Drupal.Views.dependent.autoAttach();
+Drupal.behaviors.viewsDependent = {
+  attach: function (context, settings) {
+    Drupal.Views.dependent.autoAttach(settings);
+    
+    // Really large sets of fields are too slow with the above method, so this
+    // is a sort of hacked one that's faster but much less flexible.
+    $("select.views-master-dependent", context)
+      .once('views-processed')
+      .change(function() {
+        var val = $(this).val();
+        if (val == 'all') {
+          $('.views-dependent-all').show();
+        }
+        else {
+          $('.views-dependent-all').hide();
+          $('.views-dependent-' + val).show();
+        }
+      })
+      .trigger('change');
+  }
+};
 
-  // Really large sets of fields are too slow with the above method, so this
-  // is a sort of hacked one that's faster but much less flexible.
-  $("select.views-master-dependent:not(.views-processed)")
-    .addClass('views-processed')
-    .change(function() {
-      var val = $(this).val();
-      if (val == 'all') {
-        $('.views-dependent-all').show(0);
-      }
-      else {
-        $('.views-dependent-all').hide(0);
-        $('.views-dependent-' + val).show(0);
-      }
-    })
-    .trigger('change');
-}
+})(jQuery);

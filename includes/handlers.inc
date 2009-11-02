@@ -9,12 +9,13 @@
  * Instantiate and construct a new handler
  */
 function _views_create_handler($definition, $type = 'handler') {
-//  vpr('Instantiating handler ' . $definition['handler']);
+//  debug('Instantiating handler ' . $definition['handler']);
   if (empty($definition['handler'])) {
     return;
   }
 
-  if (!class_exists($definition['handler']) && !views_include_handler($definition, $type)) {
+  // class_exists will automatically load the code file.
+  if (!class_exists($definition['handler'])) {
     return;
   }
 
@@ -24,61 +25,6 @@ function _views_create_handler($definition, $type = 'handler') {
   $handler->construct();
 
   return $handler;
-}
-
-/**
- * Attempt to find the include file for a given handler from its definition.
- *
- * This will also attempt to include all parents, though we're maxing the
- * parent chain to 10 to prevent infinite loops.
- */
-function views_include_handler($definition, $type, $count = 0) {
-  // Do not proceed if the class already exists.
-  if (isset($definition['handler']) && class_exists($definition['handler'])) {
-    return TRUE;
-  }
-
-  // simple infinite loop prevention.
-  if ($count > 10) {
-    vpr(t('Handler @handler include tried to loop infinitely!', array('@handler' => $definition['handler'])));
-    return FALSE;
-  }
-
-  if (!isset($definition['path'])) {
-    if ($type == 'handler') {
-      $definition += views_fetch_handler_data($definition['handler']);
-    }
-    else {
-      $definition += views_fetch_plugin_data($type, $definition['handler']);
-    }
-  }
-
-  if (!empty($definition['parent'])) {
-    if ($type == 'handler') {
-      $parent = views_fetch_handler_data($definition['parent']);
-    }
-    else {
-      $parent = views_fetch_plugin_data($type, $definition['parent']);
-    }
-
-    if ($parent) {
-      $rc = views_include_handler($parent, $type, $count + 1);
-      // If the parent chain cannot be included, don't try; this will
-      // help alleviate problems with modules with cross dependencies.
-      if (!$rc) {
-        return FALSE;
-      }
-    }
-  }
-
-  if (isset($definition['path']) && $definition['file']) {
-    $filename = './' . $definition['path'] . '/' . $definition['file'];
-    if (file_exists($filename)) {
-      require_once $filename;
-    }
-  }
-
-  return class_exists($definition['handler']);
 }
 
 /**
@@ -92,7 +38,7 @@ function _views_prepare_handler($definition, $data, $field) {
         $definition[$key] = $data[$field][$key];
       }
       // Then if that doesn't work, check the table level
-      else if (!empty($data['table'][$key])) {
+      elseif (!empty($data['table'][$key])) {
         $definition[$key] = $data['table'][$key];
       }
     }
@@ -107,17 +53,17 @@ function _views_prepare_handler($definition, $data, $field) {
 function views_fetch_handler_data($handler = NULL) {
   static $cache = NULL;
   if (!isset($cache)) {
-    $start = views_microtime();
+    $start = microtime(TRUE);
 
     $cache = views_discover_handlers();
 
-    vpr('Views handlers build time: ' . (views_microtime() - $start) * 1000 . ' ms');
+    debug('Views handlers build time: ' . (microtime(TRUE) - $start) * 1000 . ' ms');
   }
 
   if (!$handler) {
     return $cache;
   }
-  else if (isset($cache[$handler])) {
+  elseif (isset($cache[$handler])) {
     return $cache[$handler];
   }
 
@@ -134,30 +80,16 @@ function views_discover_handlers() {
   $cache = array();
   // Get handlers from all modules.
   foreach (module_implements('views_handlers') as $module) {
-    $function = $module . '_views_handlers';
-    $result = $function();
+    $result = module_invoke($module, 'views_handlers');
     if (!is_array($result)) {
       continue;
     }
 
-    $module_dir = isset($result['info']['module']) ? $result['info']['module'] : $module;
-    $path = isset($result['info']['path']) ? $result['info']['path'] : drupal_get_path('module', $module_dir);
-
-    foreach ($result['handlers'] as $handler => $def) {
-      if (!isset($def['module'])) {
-        $def['module'] = $module_dir;
-      }
-      if (!isset($def['path'])) {
-        $def['path'] = $path;
-      }
-      if (!isset($def['file'])) {
-        $def['file'] = "$handler.inc";
-      }
-      if (!isset($def['handler'])) {
-        $def['handler'] = $handler;
-      }
-      // merge the new data in
-      $cache[$handler] = $def;
+    foreach ($result['handlers'] as $handler) {
+      $cache[$handler] = array(
+        'module' => $module,
+        'handler' => $handler,
+      );
     }
   }
   return $cache;
@@ -197,7 +129,7 @@ function views_get_table_join($table, $base_table) {
     return $handler;
   }
   // DEBUG -- identify missing handlers
-  vpr("Missing join: $table $base_table");
+  debug("Missing join: $table $base_table");
 }
 
 /**
@@ -314,35 +246,137 @@ class views_handler extends views_object {
   function extra_options_submit($form, &$form_state) { }
 
   /**
+   * Determine if a handler can be exposed.
+   */
+  function can_expose() { return FALSE; }
+
+  /**
    * Set new exposed option defaults when exposed setting is flipped
    * on.
    */
   function expose_options() { }
+
   /**
-   * Render our chunk of the exposed filter form when selecting
+   * Get information about the exposed form for the form renderer.
+   */
+  function exposed_info() { }
+
+  /**
+   * Render our chunk of the exposed handler form when selecting
    */
   function exposed_form(&$form, &$form_state) { }
 
   /**
-   * Validate the exposed filter form
+   * Validate the exposed handler form
    */
   function exposed_validate(&$form, &$form_state) { }
 
   /**
-   * Submit the exposed filter form
+   * Submit the exposed handler form
    */
   function exposed_submit(&$form, &$form_state) { }
 
   /**
-   * Get information about the exposed form for the form renderer.
+   * Overridable form for exposed handler options.
    *
-   * @return
-   *   An array with the following keys:
-   *   - operator: The $form key of the operator. Set to NULL if no operator.
-   *   - value: The $form key of the value. Set to NULL if no value.
-   *   - label: The label to use for this piece.
+   * If overridden, it is best to call the parent or re-implement
+   * the stuff here.
+   *
+   * Many handlers will need to override this in order to provide options
+   * that are nicely tailored to the given filter.
    */
-  function exposed_info() { }
+  function expose_form(&$form, &$form_state) {
+    $form['expose']['start_left'] = array(
+      '#markup' => '<div class="views-left-50">',
+    );
+
+    $this->expose_form_left($form, $form_state);
+
+    $form['expose']['end_left'] = array(
+      '#markup' => '</div>',
+    );
+
+    $form['expose']['start_checkboxes'] = array(
+      '#markup' => '<div class="form-checkboxes views-left-40 clearfix">',
+    );
+
+    $this->expose_form_right($form, $form_state);
+
+    $form['expose']['end_checkboxes'] = array(
+      '#markup' => '</div>',
+    );
+  }
+
+  function expose_form_left(&$form, &$form_state) { }
+
+  function expose_form_right(&$form, &$form_state){ }
+
+  /**
+   * Validate the options form.
+   */
+  function expose_validate($form, &$form_state) { }
+
+  /**
+   * Perform any necessary changes to the form exposes prior to storage.
+   * There is no need for this function to actually store the data.
+   */
+  function expose_submit($form, &$form_state) { }
+
+    /**
+   * Shortcut to display the expose/hide button.
+   */
+  function show_expose_button(&$form, &$form_state) {
+    $form['expose_button'] = array(
+      '#prefix' => '<div class="views-expose clearfix">',
+      '#suffix' => '</div>',
+    );
+    if (empty($this->options['exposed'])) {
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Expose'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description">' . t('This item is currently not exposed. If you <strong>expose</strong> it, users will be able to change the filter as they view it.') . '</div>',
+      );
+    }
+    else {
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Hide'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description">' . t('This item is currently exposed. If you <strong>hide</strong> it, users will not be able to change the filter as they view it.') . '</div>',      );
+    }
+  }
+
+  /**
+   * Shortcut to display the exposed options form.
+   */
+  function show_expose_form(&$form, &$form_state) {
+    if (empty($this->options['exposed'])) {
+      return;
+    }
+
+    $form['expose'] = array(
+      '#prefix' => '<div class="views-expose-options clearfix">',
+      '#suffix' => '</div>',
+    );
+    $this->expose_form($form, $form_state);
+
+    // When we click the expose button, we add new gadgets to the form but they
+    // have no data in $_POST so their defaults get wiped out. This prevents
+    // these defaults from getting wiped out. This setting will only be TRUE
+    // during a 2nd pass rerender.
+    if (!empty($form_state['force_expose_options'])) {
+      foreach (element_children($form['expose']) as $id) {
+        if (isset($form['expose'][$id]['#default_value']) && !isset($form['expose'][$id]['#value'])) {
+          $form['expose'][$id]['#value'] = $form['expose'][$id]['#default_value'];
+        }
+      }
+    }
+  }
 
  /**
   * Check whether current user has access to this handler.
@@ -440,7 +474,7 @@ class views_handler extends views_object {
   }
 
   /**
-   * Take input from exposed filters and assign to this handler, if necessary.
+   * Take input from exposed handlers and assign to this handler, if necessary.
    */
   function accept_exposed_input($input) { return TRUE; }
 
@@ -468,7 +502,7 @@ class views_handler extends views_object {
 
     $join = views_get_table_join($this->table, $base_table);
     if ($join) {
-      return drupal_clone($join);
+      return clone $join;
     }
   }
 
@@ -568,7 +602,7 @@ class views_many_to_one_helper {
 
     // Cycle through the joins. This isn't as error-safe as the normal
     // ensure_path logic. Perhaps it should be.
-    $r_join = drupal_clone($join);
+    $r_join = clone $join;
     while ($r_join->left_table != $base_table) {
       $r_join = views_get_table_join($r_join->left_table, $base_table);
     }
@@ -740,32 +774,26 @@ class views_many_to_one_helper {
       $options['group'] = 0;
     }
 
-    $placeholder = !empty($this->handler->definition['numeric']) ? '%d' : "'%s'";
-
     if ($operator == 'not') {
-      $this->handler->query->add_where($options['group'], "$field IS NULL");
+      $this->handler->query->add_where($options['group'], $field, NULL, 'IS NULL');
     }
-    else if ($operator == 'or' && empty($options['reduce_duplicates'])) {
+    elseif ($operator == 'or' && empty($options['reduce_duplicates'])) {
       if (count($this->handler->value) > 1) {
-        $replace = array_fill(0, sizeof($this->handler->value), $placeholder);
-        $in = '(' . implode(", ", $replace) . ')';
-        $this->handler->query->add_where($options['group'], "$field IN $in", $this->handler->value);
+        $this->handler->query->add_where($options['group'], $field, $this->handler->value, 'IN');
       }
       else {
-        $this->handler->query->add_where($options['group'], "$field = $placeholder", $this->handler->value);
+        $this->handler->query->add_where($options['group'], $field, $this->handler->value);
       }
     }
     else {
       $field = $this->handler->real_field;
-      $clauses = array();
+      $clause = $operator == 'or' ? db_or() : db_and();
       foreach ($this->handler->table_aliases as $value => $alias) {
-        $clauses[] = "$alias.$field = $placeholder";
+        $clause->condition("$alias.$field", $this->handler->value);
       }
 
-      $group = empty($options['group']) ? 0 : $options['group'];
-
       // implode on either AND or OR.
-      $this->handler->query->add_where($group, implode(' ' . strtoupper($operator) . ' ', $clauses), $this->handler->value);
+      $this->handler->query->add_where($options['group'], $clause);
     }
   }
 }
@@ -806,7 +834,7 @@ function views_break_phrase($str, $filter = NULL) {
     $filter->operator = 'or';
     $filter->value = preg_split('/[+ ]/', $str);
   }
-  else if (preg_match('/^([0-9]+,)*[0-9]+$/', $str)) {
+  elseif (preg_match('/^([0-9]+,)*[0-9]+$/', $str)) {
     $filter->operator = 'and';
     $filter->value = explode(',', $str);
   }
@@ -841,14 +869,14 @@ function views_get_timezone() {
   }
 
   // set up the database timezone
-  if (in_array($GLOBALS['db_type'], array('mysql', 'mysqli', 'pgsql'))) {
+  if (in_array(db_driver(), array('mysql', 'mysqli', 'pgsql'))) {
     $offset = '+00:00';
-    static $already_set = false;
+    static $already_set = FALSE;
     if (!$already_set) {
-      if ($GLOBALS['db_type'] == 'pgsql') {
+      if (db_driver() == 'pgsql') {
         db_query("SET TIME ZONE INTERVAL '$offset' HOUR TO MINUTE");
       }
-      elseif ($GLOBALS['db_type'] == 'mysqli' || version_compare(mysql_get_server_info(), '4.1.3', '>=')) {
+      elseif (db_driver() == 'mysql') {
         db_query("SET @@session.time_zone = '$offset'");
       }
 
@@ -874,7 +902,7 @@ function views_get_timezone() {
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
-  $db_type = $GLOBALS['db_type'];
+  $db_type = db_driver();
   $offset = $set_offset !== NULL ? $set_offset : views_get_timezone();
   switch ($db_type) {
     case 'mysql':
@@ -922,7 +950,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_format($format, $field, $field_type = 'int', $set_offset = NULL) {
-  $db_type = $GLOBALS['db_type'];
+  $db_type = db_driver();
   $field = views_date_sql_field($field, $field_type, $set_offset);
   switch ($db_type) {
     case 'mysql':
@@ -968,7 +996,7 @@ function views_date_sql_format($format, $field, $field_type = 'int', $set_offset
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set_offset = NULL) {
-  $db_type = $GLOBALS['db_type'];
+  $db_type = db_driver();
   $field = views_date_sql_field($field, $field_type, $set_offset);
 
   // Note there is no space after FROM to avoid db_rewrite problems
@@ -1019,130 +1047,55 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
 }
 
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function views_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/handlers',
-    ),
-    'handlers' => array(
-      // argument handlers
-      'views_handler_argument' => array(
-        'parent' => 'views_handler',
-      ),
-      'views_handler_argument_numeric' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_formula' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_date' => array(
-        'parent' => 'views_handler_argument_formula',
-      ),
-      'views_handler_argument_string' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_many_to_one' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_null' => array(
-        'parent' => 'views_handler_argument',
-      ),
+    // argument handlers
+    'views_handler_argument',
+    'views_handler_argument_numeric',
+    'views_handler_argument_formula',
+    'views_handler_argument_date',
+    'views_handler_argument_string',
+    'views_handler_argument_many_to_one',
+    'views_handler_argument_null',
 
-      // field handlers
-      'views_handler_field' => array(
-        'parent' => 'views_handler',
-      ),
-      'views_handler_field_date' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_boolean' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_markup' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_xss' => array(
-        'parent' => 'views_handler_field',
-        'file' => 'views_handler_field.inc',
-      ),
-      'views_handler_field_url' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_file_size' => array(
-        'parent' => 'views_handler_field',
-        'file' => 'views_handler_field.inc',
-      ),
-      'views_handler_field_prerender_list' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_numeric' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_custom' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_counter' => array(
-        'parent' => 'views_handler_field',
-      ),
+    // field handlers
+    'views_handler_field',
+    'views_handler_field_date',
+    'views_handler_field_boolean',
+    'views_handler_field_markup',
+    'views_handler_field_xss',
+    'views_handler_field_url',
+    'views_handler_field_file_size',
+    'views_handler_field_prerender_list',
+    'views_handler_field_numeric',
+    'views_handler_field_custom',
+    'views_handler_field_counter',
 
-      // filter handlers
-      'views_handler_filter' => array(
-        'parent' => 'views_handler',
-      ),
-      'views_handler_filter_equality' => array(
-        'parent' => 'views_handler_filter',
-      ),
-      'views_handler_filter_string' => array(
-        'parent' => 'views_handler_filter',
-      ),
-      'views_handler_filter_boolean_operator' => array(
-        'parent' => 'views_handler_filter',
-      ),
-      'views_handler_filter_boolean_operator_string' => array(
-        'parent' => 'views_handler_filter_boolean_operator',
-      ),
-      'views_handler_filter_in_operator' => array(
-        'parent' => 'views_handler_filter',
-      ),
-      'views_handler_filter_numeric' => array(
-        'parent' => 'views_handler_filter',
-      ),
-      'views_handler_filter_float' => array(
-        'parent' => 'views_handler_filter_numeric',
-      ),
-      'views_handler_filter_date' => array(
-        'parent' => 'views_handler_filter_numeric',
-      ),
-      'views_handler_filter_many_to_one' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
+    // filter handlers
+    'views_handler_filter',
+    'views_handler_filter_equality',
+    'views_handler_filter_string',
+    'views_handler_filter_boolean_operator',
+    'views_handler_filter_boolean_operator_string',
+    'views_handler_filter_in_operator',
+    'views_handler_filter_numeric',
+    'views_handler_filter_float',
+    'views_handler_filter_date',
+    'views_handler_filter_many_to_one',
 
-      // relationship handlers
-      'views_handler_relationship' => array(
-        'parent' => 'views_handler',
-      ),
+    // relationship handlers
+    'views_handler_relationship',
 
 
-      // sort handlers
-      'views_handler_sort' => array(
-        'parent' => 'views_handler',
-      ),
-      'views_handler_sort_formula' => array(
-        'parent' => 'views_handler_sort',
-      ),
-      'views_handler_sort_date' => array(
-        'parent' => 'views_handler_sort',
-      ),
-      'views_handler_sort_menu_hierarchy' => array(
-        'parent' => 'views_handler_sort',
-      ),
-      'views_handler_sort_random' => array(
-        'parent' => 'views_handler_sort',
-      ),
-    ),
+    // sort handlers
+    'views_handler_sort',
+    'views_handler_sort_formula',
+    'views_handler_sort_date',
+    'views_handler_sort_menu_hierarchy',
+    'views_handler_sort_random',
   );
 }
 
@@ -1214,7 +1167,7 @@ class views_join {
       $this->extra = $extra;
       $this->type = strtoupper($type);
     }
-    else if (!empty($this->definition)) {
+    elseif (!empty($this->definition)) {
       // if no arguments, construct from definition.
       // These four must exist or it will throw notices.
       $this->table = $this->definition['table'];
@@ -1235,7 +1188,7 @@ class views_join {
   /**
    * Build the SQL for the join this object represents.
    */
-  function join($table, &$query) {
+  function join_data($table, $query) {
     if (empty($this->definition['table formula'])) {
       $right_table = "{" . $this->table . "}";
     }
@@ -1252,7 +1205,8 @@ class views_join {
       $left_field = $this->left_field;
     }
 
-    $output = " $this->type JOIN $right_table $table[alias] ON $left_field = $table[alias].$this->field";
+    $condition = "$left_field = $table[alias].$this->field";
+
     // Tack on the extra.
     if (isset($this->extra)) {
       if (is_array($this->extra)) {
@@ -1295,18 +1249,18 @@ class views_join {
 
         if ($extras) {
           if (count($extras) == 1) {
-            $output .= ' AND ' . array_shift($extras);
+            $condition .= ' AND ' . array_shift($extras);
           }
           else {
-            $output .= ' AND (' . implode(' ' . $this->extra_type . ' ', $extras) . ')';
+            $condition .= ' AND (' . implode(' ' . $this->extra_type . ' ', $extras) . ')';
           }
         }
       }
-      else if ($this->extra && is_string($this->extra)) {
-        $output .= " AND ($this->extra)";
+      elseif ($this->extra && is_string($this->extra)) {
+        $condition .= " AND ($this->extra)";
       }
     }
-    return $output;
+    return array('table' => $table['table'], 'alias' => $table['alias'], 'condition' => $condition);
   }
 
   /**
@@ -1319,15 +1273,15 @@ class views_join {
       $output = array();
       foreach ($input as $value) {
         if (empty($info['numeric'])) {
-          $output[] = db_escape_string($value);
+          $output[] = Database::getConnection()->quote($value);
         }
         else {
           $output[] = intval($value);
         }
       }
     }
-    else if (empty($info['numeric'])) {
-      $output = db_escape_string($input);
+    elseif (empty($info['numeric'])) {
+      $output = Database::getConnection()->quote($input);
     }
     else {
       $output = intval($input);
@@ -1344,7 +1298,7 @@ class views_join {
 // Declare API compatibility on behalf of core modules:
 
 /**
- * Implementation of hook_views_api().
+ * Implements hook_views_api().
  *
  * This one is used as the base to reduce errors when updating.
  */

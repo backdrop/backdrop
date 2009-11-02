@@ -132,7 +132,7 @@ class views_tabset {
     }
 
     drupal_alter('views_tabset', $this);
-    return theme('views_tabset', $this->tabs, $this->extra, $this->selected);
+    return theme('views_tabset', array('tabs' => $this->tabs, 'extra' => $this->extra, 'selected' => $this->selected));
   }
 }
 
@@ -157,7 +157,7 @@ class views_tab {
    * Generate HTML output for a tab.
    */
   function render() {
-    return theme('views_tab', $this->body);
+    return theme('views_tab', array('body' => $this->body));
   }
 }
 
@@ -166,7 +166,10 @@ class views_tab {
  *
  * @todo Turn this into a template.
  */
-function theme_views_tabset($tabs, $extra = NULL, $selected = NULL) {
+function theme_views_tabset($variables) {
+  $tabs = $variables['tabs'];
+  $extra = isset($variables['extra']) ? $variables['extra'] : NULL;
+  $selected = isset($variables['selected']) ? $variables['selected'] : NULL;
   $link_output = "<div class=\"views-tabs\"><ul id=\"views-tabset\">\n";
   $tab_output = "<div class=\"views-tab-area\">\n";
 
@@ -182,12 +185,12 @@ function theme_views_tabset($tabs, $extra = NULL, $selected = NULL) {
 
   $link_output .= "</div>\n";
   $tab_output .= "</div>\n";
-  return '<div class="views-tabset clear-block">' . $link_output . $tab_output . '</div>';
+  return '<div class="views-tabset clearfix">' . $link_output . $tab_output . '</div>';
 }
 
 /**
  * Theme a simple tab.
  */
-function theme_views_tab($body) {
-  return $body;
+function theme_views_tab($variables) {
+  return $variables['body'];
 }

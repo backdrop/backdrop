@@ -53,6 +53,10 @@ class views_plugin_style_summary extends views_plugin_style {
       // @todo: Include separator as an option.
       $rows[] = $row;
     }
+    
+    // TODO: Verify that this works. $this->theme_functions() seems
+    // like it should return an array!
+    // TODO: Convert to D7 theme signature.
     return theme($this->theme_functions(), $this->view, $this->options, $rows);
   }
 }

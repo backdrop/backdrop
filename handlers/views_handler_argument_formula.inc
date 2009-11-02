@@ -50,6 +50,6 @@ class views_handler_argument_formula extends views_handler_argument {
     // Now that our table is secure, get our formula.
     $formula = $this->get_formula();
 
-    $this->query->add_where(0, "$formula = '%s'", $this->argument);
+    $this->query->add_where(0, $formula, $this->argument);
   }
 }

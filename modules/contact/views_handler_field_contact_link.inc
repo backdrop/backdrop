@@ -48,7 +48,9 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
     }
 
     if ($this->options['link_display'] == 'icon') {
-      return l(theme('image', 'misc/forum-new.png'), 'user/'. $account->uid .'/contact', array('html' => TRUE, 'attributes' => array('title' => t('Contact %user', array('%user' => $account->name)))));
+      return l(theme('image', array(
+        'path' => 'misc/forum-new.png'
+      )), 'user/'. $account->uid .'/contact', array('html' => TRUE, 'attributes' => array('title' => t('Contact %user', array('%user' => $account->name)))));
     }
     else {
       return l($this->options['text'], 'user/'. $account->uid .'/contact', array('attributes' => array('title' => t('Contact %user', array('%user' => $account->name)))));

@@ -143,8 +143,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Views 6.x-2.x\n"
-"POT-Creation-Date: 2009-05-27 15:41+0200\n"
-"PO-Revision-Date: 2009-05-27 15:55+0100\n"
+"POT-Creation-Date: 2009-03-17 11:11+0100\n"
+"PO-Revision-Date: 2009-03-20 04:31+0100\n"
 "Last-Translator: Magnus Gunnarsson <seals@passagen.se>\n"
 "Language-Team: drupalsverige.se\n"
 "MIME-Version: 1.0\n"
@@ -163,20 +163,20 @@ msgstr "Trasig hanterare @table.@field"
 msgid "Skipping broken view @view"
 msgstr "Hoppar över trasig vy @view"
 
-#: views.module:814;854
-#: includes/admin.inc:114;232;232;646
+#: views.module:809;849
+#: includes/admin.inc:114;232;232;645
 msgid "Overridden"
 msgstr "Åsidosatt"
 
-#: views.module:817;850
+#: views.module:812;845
 #: views_ui.module:282
-#: includes/admin.inc:113;231;231;613;794
+#: includes/admin.inc:113;231;231;612;793
 msgid "Default"
 msgstr "Förvald"
 
-#: views.module:964
+#: views.module:959
 #: includes/admin.inc:311
-#: views_export/views_export.module:117
+#: views_export/views_export.module:116
 msgid "Apply"
 msgstr "Verkställ"
 
@@ -222,12 +222,12 @@ msgid "List"
 msgstr "Visa"
 
 #: views_ui.module:38
-#: includes/admin.inc:1206;1206;2193
+#: includes/admin.inc:1205;1205;2192
 msgid "Add"
 msgstr "Lägg till"
 
 #: views_ui.module:43
-#: includes/admin.inc:752
+#: includes/admin.inc:751
 msgid "Import"
 msgstr "Importera"
 
@@ -265,6 +265,90 @@ msgstr "Redigera"
 #: views_ui.module:0
 msgid "views_ui"
 msgstr "views_ui"
+
+#: views.install:31
+msgid "Stores the general data for a view."
+msgstr "Lagrar allmän data för en vy."
+
+#: views.install:37
+msgid "The view ID of the field, defined by the database."
+msgstr "Vyns ID för fältet, definierad av databasen."
+
+#: views.install:45
+msgid "The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores."
+msgstr "Unikt namn på denna vy. Detta är det primära fältet som vyer laddas från, och används så att vyer kan vara interna och inte nödvändigtvis i databasen. Får bara vara alfanumeriska tecken samt understreck."
+
+#: views.install:51
+msgid "A description of the view for the admin interface."
+msgstr "En beskrivning av din vy för det administrativa gränssnittet."
+
+#: views.install:57
+msgid "A tag used to group/sort views in the admin interface"
+msgstr "Ett märke som används för att gruppera/sortera vyer i det administrativa gränssnittet."
+
+#: views.install:61
+msgid "A chunk of PHP code that can be used to provide modifications to the view prior to building."
+msgstr "Ett stycke PHP-kod som kan användas för att modifiera en vy innan uppbyggnad."
+
+#: views.install:68
+msgid "What table this view is based on, such as node, user, comment, or term."
+msgstr "Vilken tabell denna vy är baserad på, som node, user, comment eller term."
+
+#: views.install:74
+msgid "A boolean to indicate whether or not this view may have its query cached."
+msgstr "En boolesk som indikerar huruvida denna vy kan ha sin databasfråga cachad eller inte."
+
+#: views.install:82
+msgid "Stores information about each display attached to a view."
+msgstr "Lagrar information om varje visning bifogad till en vy."
+
+#: views.install:89
+msgid "The view this display is attached to."
+msgstr "Vyn denna visning är bifogad till."
+
+#: views.install:97
+msgid "An identifier for this display; usually generated from the display_plugin, so should be something like page or page_1 or block_2, etc."
+msgstr "En identifierare för denna visning. Vanligtvis genererad från display_plugin, och bör vara något som liknar page eller page_1 eller block_2 osv."
+
+#: views.install:104
+msgid "The title of the display, viewable by the administrator."
+msgstr "Titeln på denna visning, synligt för administratören."
+
+#: views.install:111
+msgid "The type of the display. Usually page, block or embed, but is pluggable so may be other things."
+msgstr "Typen av visning. Vanligtvis sida, block eller inbäddad, men det är inpluggbart så det kan vara andra saker."
+
+#: views.install:116
+msgid "The order in which this display is loaded."
+msgstr "Ordningen i vilken denna visning är laddad."
+
+#: views.install:120
+msgid "A serialized array of options for this display; it contains options that are generally only pertinent to that display plugin type."
+msgstr "En serialiserad lista av alternativ för denna visning. Den innehåller alternativ som generellt bara är relevanta för plugintypen till denna visning."
+
+#: views.install:131
+msgid "A special cache used to store objects that are being edited; it serves to save state in an ordinarily stateless environment."
+msgstr "En speciell cache som används till att lagra objekt som blir redigerade. Den agerar för att spara tillståndet i en normalt tillståndslös miljö."
+
+#: views.install:136
+msgid "The session ID this cache object belongs to."
+msgstr "Sessionsens ID denna cachen tillhör."
+
+#: views.install:141
+msgid "The name of the view this cache is attached to."
+msgstr "Namnet på den vy denna cache är bifogad till."
+
+#: views.install:146
+msgid "The name of the object this cache is attached to; this essentially represents the owner so that several sub-systems can use this cache."
+msgstr "Namnet på objektet denna cache är bifogad till. Detta representerar i huvudsak ägaren så att flera undersystem kan använda denna cache."
+
+#: views.install:153
+msgid "The time this cache was created or updated."
+msgstr "Tidpunkten då denna cache skapades eller uppdaterades."
+
+#: views.install:158;219
+msgid "Serialized data being stored."
+msgstr "Serialiserad data som lagras."
 
 #: views.info:0
 msgid "Create customized lists and queries from your database."
@@ -451,16 +535,16 @@ msgid "Default argument type"
 msgstr "Förvald argumentstyp"
 
 #: handlers/views_handler_argument.inc:744
-#: handlers/views_handler_field.inc:599
-#: handlers/views_handler_filter.inc:593
+#: handlers/views_handler_field.inc:574
+#: handlers/views_handler_filter.inc:592
 #: handlers/views_handler_relationship.inc:133
 #: handlers/views_handler_sort.inc:66
 msgid "Broken/missing handler"
 msgstr "Trasig/saknad hanterare"
 
 #: handlers/views_handler_argument.inc:752
-#: handlers/views_handler_field.inc:607
-#: handlers/views_handler_filter.inc:601
+#: handlers/views_handler_field.inc:582
+#: handlers/views_handler_filter.inc:600
 #: handlers/views_handler_relationship.inc:141
 #: handlers/views_handler_sort.inc:74
 msgid "The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item."
@@ -518,8 +602,9 @@ msgid "Fail basic validation if any argument is given"
 msgstr "Misslyckas med grundläggande godkännande om ett argument är givet."
 
 #: handlers/views_handler_argument_null.inc:23
+#, fuzzy
 msgid "By checking this field, you can use this to make sure views with more arguments than necessary fail validation."
-msgstr "Genom att kryssa för detta fält kan du använda detta för att säkerställa att vyer med fler argument än nödvändigt misslyckas med validering."
+msgstr "Genom att kryssa för detta fält kan du använda detta för att säkerställa att vyer med fler argument än nödvändigt misslyckas med godkännandet."
 
 #: handlers/views_handler_argument_numeric.inc:31
 msgid "If selected, users can enter multiple arguments in the form of 1+2+3 or 1,2,3."
@@ -589,149 +674,141 @@ msgstr "Hur bokstävers skiftläge ändras när URL-sökvägar för argumentet s
 msgid "Transform spaces to dashes in URL"
 msgstr "Ändra mellanslag till bindestreck i URL:er"
 
-#: handlers/views_handler_field.inc:173
+#: handlers/views_handler_field.inc:172
 #: handlers/views_handler_filter.inc:322
 #: handlers/views_handler_relationship.inc:78
 msgid "Label"
 msgstr "Etikett"
 
-#: handlers/views_handler_field.inc:175
+#: handlers/views_handler_field.inc:174
 msgid "The label for this field that will be displayed to end users if the style requires it."
 msgstr "Etiketten för detta fält som visas för slutanvändare om stilen kräver det."
 
-#: handlers/views_handler_field.inc:179
+#: handlers/views_handler_field.inc:178
 msgid "Exclude from display"
 msgstr "Exkludera från visning."
 
-#: handlers/views_handler_field.inc:181
+#: handlers/views_handler_field.inc:180
 msgid "Check this box to not display this field, but still load it in the view.  Use this option to not show a grouping field in each record, or when doing advanced theming."
 msgstr "Kryssa i denna ruta för att inte visa detta fält, men ändå ladda det i din vy. Använd detta alternativ för att inte visa ett grupperande fält i varje resultat, eller när du håller på med avancerade anpassningar av teman."
 
-#: handlers/views_handler_field.inc:188
+#: handlers/views_handler_field.inc:187
 msgid "Rewrite the output of this field"
 msgstr "Återskapa utmatningen av detta fält"
 
-#: handlers/views_handler_field.inc:189
+#: handlers/views_handler_field.inc:188
 msgid "If checked, you can alter the output of this field by specifying a string of text with replacement tokens that can use any existing field output."
 msgstr "Om ikryssat, så kan du påverka utmatningen för detta fält genom att specificera en textsträng med ersättningssymboler som kan använda vilket existerande utmatningsformat som helst."
 
-#: handlers/views_handler_field.inc:194
+#: handlers/views_handler_field.inc:193
 msgid "Text"
 msgstr "Text"
 
-#: handlers/views_handler_field.inc:197
+#: handlers/views_handler_field.inc:196
 msgid "The text to display for this field. You may include HTML. You may enter data from this view as per the \"Replacement patterns\" below."
 msgstr "Texten som visas för detta fält. Du kan använda HTML. Du kan ange data från denna vy som enligt \"Mönster för ersättning\" nedan."
 
-#: handlers/views_handler_field.inc:206
+#: handlers/views_handler_field.inc:205
 msgid "Output this field as a link"
 msgstr "Mata ut detta fält som en länk"
 
-#: handlers/views_handler_field.inc:207
+#: handlers/views_handler_field.inc:206
 msgid "If checked, this field will be made into a link. The destination must be given below."
 msgstr "Om ikryssat, detta fält kommer att göras till en länk. Destinationen måste anges nedan."
 
-#: handlers/views_handler_field.inc:211
+#: handlers/views_handler_field.inc:210
 msgid "Link path"
 msgstr "Sökväg för länk"
 
-#: handlers/views_handler_field.inc:214
+#: handlers/views_handler_field.inc:213
 msgid "The Drupal path or absolute URL for this link. You may enter data from this view as per the \"Replacement patterns\" below."
 msgstr "Drupals sökväg eller fullständig URL för denna länk. Du kan ange data från denna vyn som enligt \"Mönster för ersättning\" nedan."
 
-#: handlers/views_handler_field.inc:221
+#: handlers/views_handler_field.inc:220
 msgid "Alt text"
 msgstr "Alternativ text"
 
-#: handlers/views_handler_field.inc:224
+#: handlers/views_handler_field.inc:223
 msgid "Text to place as \"alt\" text which most browsers display as a tooltip when hovering over the link."
 msgstr "Text att placeras som \"alternativ\" text, som de flesta webbläsare visar som ett verktygstips när man svävar över länken."
 
-#: handlers/views_handler_field.inc:231
+#: handlers/views_handler_field.inc:230
 msgid "Prefix text"
 msgstr "Text för prefix"
 
-#: handlers/views_handler_field.inc:234
+#: handlers/views_handler_field.inc:233
 msgid "Any text to display before this link. You may include HTML."
 msgstr "En text att visas före denna länk. Du kan använda HTML."
 
-#: handlers/views_handler_field.inc:241
+#: handlers/views_handler_field.inc:240
 msgid "Suffix text"
 msgstr "Text för suffix"
 
-#: handlers/views_handler_field.inc:244
+#: handlers/views_handler_field.inc:243
 msgid "Any text to display after this link. You may include HTML."
 msgstr "En text att visas efter denna länk. Du kan använda HTML."
 
-#: handlers/views_handler_field.inc:254
+#: handlers/views_handler_field.inc:253
 #: includes/plugins.inc:173
-#: includes/view.inc:1923
+#: includes/view.inc:1911
 msgid "Fields"
 msgstr "Fält"
 
-#: handlers/views_handler_field.inc:262
+#: handlers/views_handler_field.inc:261
 #: includes/admin.inc:491
-#: includes/view.inc:1930
+#: includes/view.inc:1918
 msgid "Arguments"
 msgstr "Argument"
 
-#: handlers/views_handler_field.inc:266
+#: handlers/views_handler_field.inc:265
 msgid "<p>You must add some additional fields to this display before using this field. These fields may be marked as <em>Exclude from display</em> if you prefer. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>"
 msgstr "<p>Du måste lägga till några ytterligare fält till denna visning innan du kan använda fältet. Detta fält kan markeras som <em>Exkludera från visning</em> om du föredrar det. Observera att i på grund av ordningen för renderingen kan du inte använda fält som kommer efter detta fält. Om du behöver ett fält som inte visas här kan du omorganisera fälten.</p>"
 
-#: handlers/views_handler_field.inc:269
+#: handlers/views_handler_field.inc:268
 msgid "<p>The following substitution patterns are available for this display. Use the pattern shown on the left to display the value indicated on the right. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>"
 msgstr "<p>Följande ersättningsmönster finns tillgängliga för denna visning. Använd mönstret som visas till vänster för att visa värdet som indikeras till höger. Observera att på grund av ordningen för renderingen kan du inte använda fält som kommer efter detta fält. Om du vill använda ett fält som inte visas här kan du omorganisera dina fält.</p>"
 
-#: handlers/views_handler_field.inc:288
+#: handlers/views_handler_field.inc:287
 msgid "Replacement patterns"
 msgstr "Mönster för ersättning"
 
-#: handlers/views_handler_field.inc:298
+#: handlers/views_handler_field.inc:297
 msgid "Trim this field to a maximum length"
 msgstr "Korta ned detta fält till en maximal storlek"
 
-#: handlers/views_handler_field.inc:299
+#: handlers/views_handler_field.inc:298
 msgid "If checked, this field be trimmed to a maximum length in characters."
 msgstr "Om ikryssat kommer detta fält att kortas ned till en maximal längd av bokstäver."
 
-#: handlers/views_handler_field.inc:304
+#: handlers/views_handler_field.inc:303
 msgid "Maximum length"
 msgstr "Maximal längd"
 
-#: handlers/views_handler_field.inc:307
+#: handlers/views_handler_field.inc:306
 msgid "The maximum number of characters his field can be."
 msgstr "Maximalt antal bokstäver som detta fält får vara."
 
-#: handlers/views_handler_field.inc:316
+#: handlers/views_handler_field.inc:315
 msgid "Trim only on a word boundary"
 msgstr "Korta endast ned beroende på ordgräns"
 
-#: handlers/views_handler_field.inc:317
+#: handlers/views_handler_field.inc:316
 msgid "If checked, this field be trimmed only on a word boundary. This is guaranteed to be the maximum characters stated or less. If there are no word boundaries this could trim a field to nothing."
 msgstr "Om ikryssat kommer detta fält att kortas ned enbart beroende på en ordgräns. Detta är garanterat att vara maximalt antal bokstäver eller färre. Om det inte finns några ordgränser kan detta korta ned fältet till ingentin."
 
-#: handlers/views_handler_field.inc:327
+#: handlers/views_handler_field.inc:326
 msgid "Add an ellipsis"
 msgstr "Lägg till en ellips"
 
-#: handlers/views_handler_field.inc:328
+#: handlers/views_handler_field.inc:327
 msgid "If checked, a \"...\" will be added if a field was trimmed."
 msgstr "Om ikryssat, kommer \"...\" att läggas till om ett fält kortades ned."
 
-#: handlers/views_handler_field.inc:338
-msgid "Strip HTML tags"
-msgstr "Ta bort HTML-taggar"
-
-#: handlers/views_handler_field.inc:339
-msgid "If checked, all HTML tags will be stripped."
-msgstr "Om ikryssad, kommer alla HTML-taggar att tas bort."
-
-#: handlers/views_handler_field.inc:349
+#: handlers/views_handler_field.inc:337
 msgid "Field can contain HTML"
 msgstr "Fält kan innehålla HTML"
 
-#: handlers/views_handler_field.inc:350
+#: handlers/views_handler_field.inc:338
 msgid "If checked, HTML corrector will be run to ensure tags are properly closed after trimming."
 msgstr "Om ikryssat kommer korrigeraren för HTML att köras för att säkerställa att alla taggar är stängda på ett riktigt sätt efter att de kortats ned."
 
@@ -809,19 +886,15 @@ msgstr "Anpassat"
 msgid "Time ago"
 msgstr "Tid sedan"
 
-#: handlers/views_handler_field_date.inc:31
-msgid "Time ago (with \"ago\" appended)"
-msgstr "Tid sedan (med \"sedan\" bifogat)"
-
-#: handlers/views_handler_field_date.inc:37
+#: handlers/views_handler_field_date.inc:36
 msgid "Custom date format"
 msgstr "Anpassat datumformat"
 
-#: handlers/views_handler_field_date.inc:38
+#: handlers/views_handler_field_date.inc:37
 msgid "If \"Custom\", see <a href=\"http://us.php.net/manual/en/function.date.php\" target=\"_blank\">the PHP docs</a> for date formats. If \"Time ago\" this is the the number of different units to display, which defaults to two."
 msgstr "Om \"Anpassad\", se <a href=\"http://us.php.net/manual/en/function.date.php\" target=\"_blank\">dokumentationen om PHP</a> för datumformat. Om \"Tid sedan\" blir detta antalet olika enheter att visa, där två är standard."
 
-#: handlers/views_handler_field_date.inc:56
+#: handlers/views_handler_field_date.inc:53
 msgid "%time ago"
 msgstr "%time sedan"
 
@@ -875,7 +948,7 @@ msgstr "Text att sätta efter numret, såsom en valutasymbol."
 
 #: handlers/views_handler_field_prerender_list.inc:29
 #: modules/aggregator/views_plugin_row_aggregator_rss.inc:23
-#: modules/node/views_plugin_row_node_rss.inc:30
+#: modules/node/views_plugin_row_node_rss.inc:24
 msgid "Display type"
 msgstr "Typ av visning"
 
@@ -894,7 +967,7 @@ msgid "Simple separator"
 msgstr "Enkel avskiljare"
 
 #: handlers/views_handler_field_prerender_list.inc:40
-#: includes/admin.inc:3010
+#: includes/admin.inc:3001
 #: plugins/views_plugin_row_fields.inc:47
 #: plugins/views_plugin_style_summary_unformatted.inc:30
 msgid "Separator"
@@ -991,14 +1064,8 @@ msgid "This identifier is not allowed."
 msgstr "Denna identifierare är inte tillåten."
 
 #: handlers/views_handler_filter.inc:465
-#: includes/admin.inc:2744
 msgid "<Any>"
 msgstr "<Vilken som helst>"
-
-#: handlers/views_handler_filter.inc:465
-#: includes/admin.inc:2744
-msgid "- Any -"
-msgstr "- Valfri -"
 
 #: handlers/views_handler_filter_boolean_operator.inc:97
 #: handlers/views_handler_filter_in_operator.inc:175
@@ -1251,13 +1318,11 @@ msgid "Sort order"
 msgstr "Sorteringsordning"
 
 #: handlers/views_handler_sort.inc:55
-#: modules/search/views_handler_field_search_score.inc:37
 #: plugins/views_plugin_style_table.inc:149
 msgid "Ascending"
 msgstr "Stigande"
 
 #: handlers/views_handler_sort.inc:55
-#: modules/search/views_handler_field_search_score.inc:37
 #: plugins/views_plugin_style_table.inc:149
 msgid "Descending"
 msgstr "Fallande"
@@ -1310,22 +1375,22 @@ msgstr "Om du installerar modulen Advanced Help från !href, kan Views erbjuda m
 msgid "Reset"
 msgstr "Återställ"
 
-#: includes/admin.inc:110;1006
+#: includes/admin.inc:110;1005
 #: theme/theme.inc:98
-#: views_export/views_export.module:129
+#: views_export/views_export.module:128
 msgid "Export"
 msgstr "Exportera"
 
-#: includes/admin.inc:111;1011
+#: includes/admin.inc:111;1010
 #: theme/theme.inc:103
 msgid "Clone"
 msgstr "Klona"
 
-#: includes/admin.inc:114;649
+#: includes/admin.inc:114;648
 msgid "Revert"
 msgstr "Återställ"
 
-#: includes/admin.inc:114;654;875
+#: includes/admin.inc:114;653;874
 #: includes/convert.inc:35;108
 msgid "Delete"
 msgstr "Ta bort"
@@ -1343,7 +1408,7 @@ msgid "Warning! Broken view!"
 msgstr "Varning! Trasig vy!"
 
 #: includes/admin.inc:143
-#: includes/view.inc:1726
+#: includes/view.inc:1714
 msgid "Broken"
 msgstr "Trasig"
 
@@ -1355,7 +1420,7 @@ msgstr "Installera modulen Advanced Help för starthjälp"
 msgid "Not sure what to do? Try the \"!getting-started\" page."
 msgstr "Osäker på vad du ska göra? Testa sidan \"!getting-started\"."
 
-#: includes/admin.inc:222;229;2159
+#: includes/admin.inc:222;229;2158
 msgid "<All>"
 msgstr "<Alla>"
 
@@ -1369,7 +1434,7 @@ msgid "Storage"
 msgstr "Lager"
 
 #: includes/admin.inc:230;230
-#: includes/view.inc:1220;1270
+#: includes/view.inc:1208;1258
 msgid "Normal"
 msgstr "Normal"
 
@@ -1379,8 +1444,8 @@ msgstr "Normal"
 msgid "Type"
 msgstr "Typ"
 
-#: includes/admin.inc:262;289;1091
-#: views_export/views_export.module:147
+#: includes/admin.inc:262;289;1090
+#: views_export/views_export.module:146
 msgid "Tag"
 msgstr "Märke"
 
@@ -1411,7 +1476,7 @@ msgstr "Sökväg"
 #: modules/aggregator.views.inc:230
 #: modules/upload.views.inc:56
 #: plugins/views_plugin_display_page.inc:299;383
-#: views_export/views_export.module:147
+#: views_export/views_export.module:146
 msgid "Description"
 msgstr "Beskrivning"
 
@@ -1487,7 +1552,7 @@ msgstr "Förhandsvisa"
 msgid "Clone view %view"
 msgstr "Klona vyn %view"
 
-#: includes/admin.inc:550;741
+#: includes/admin.inc:550;740
 #: includes/convert.inc:20
 msgid "View name"
 msgstr "Namn på vyn"
@@ -1496,175 +1561,175 @@ msgstr "Namn på vyn"
 msgid "This is the unique name of the view. It must contain only alphanumeric characters and underscores; it is used to identify the view internally and to generate unique theming template names for this view. If overriding a module provided view, the name must not be changed or instead a new view will be created."
 msgstr "Detta är det unika namnet på vyn. Det måste bestå av alfanumeriska tecken och understreck. Det används för att indentifiera vyn internt och för att generera unika namn på temamallar för den här vyn. Om du åsidosätter en av modulen tillhandahållen vy så får du inte ändra namnet annars kommer en ny vy att skapas."
 
-#: includes/admin.inc:560;1854
+#: includes/admin.inc:559;1853
 msgid "View description"
 msgstr "Beskrivning av vyn"
 
-#: includes/admin.inc:561;1855
+#: includes/admin.inc:560;1854
 msgid "This description will appear on the Views administrative UI to tell you what the view is about."
 msgstr "Den här beskrivningen kommer att visas på vyns administrativa UI för att beskriva vad vyn handlar om."
 
-#: includes/admin.inc:567;1861
+#: includes/admin.inc:566;1860
 msgid "View tag"
 msgstr "Märke för vyn"
 
-#: includes/admin.inc:568;1862
+#: includes/admin.inc:567;1861
 msgid "Enter an optional tag for this view; it is used only to help sort views on the administrative page."
 msgstr "Skriv in ett valfritt märke för den här vyn. Den används endast som hjälp vid sortering av vyer på administrationssidan."
 
-#: includes/admin.inc:580
+#: includes/admin.inc:579
 msgid "View type"
 msgstr "Typ av vy"
 
-#: includes/admin.inc:581
+#: includes/admin.inc:580
 msgid "The view type is the primary table for which information is being retrieved. The view type controls what arguments, fields, sort criteria and filters are available, so once this is set it <strong>cannot be changed</strong>."
 msgstr "Typen av vy är den primära tabellen för vilken information hämtas. Den kontrollerar vilka argument, fält, sorteringskriterier och filter som finns tillgängliga. Så när du ställt in detta <strong>kan den inte ändras</strong>."
 
-#: includes/admin.inc:592
+#: includes/admin.inc:591
 msgid "Next"
 msgstr "Nästa"
 
-#: includes/admin.inc:608;786
+#: includes/admin.inc:607;785
 msgid "View name must be alphanumeric or underscores only."
 msgstr "Namnet på vyn får enbart bestå av vara alfanumeriskt tecken eller understreck."
 
-#: includes/admin.inc:614
+#: includes/admin.inc:613
 msgid "You must use a unique name for this view."
 msgstr "Du måste använda ett unikt namn för denna vy."
 
-#: includes/admin.inc:647
+#: includes/admin.inc:646
 msgid "Are you sure you want to revert the view %name?"
 msgstr "Är du säker på att du vill återställa vyn %name?"
 
-#: includes/admin.inc:648
+#: includes/admin.inc:647
 msgid "Reverting the view will delete the view that is in the database, reverting it to the original default view. Any changes you have made will be lost and cannot be recovered."
 msgstr "Att återställa vyn kommer att ta bort vyn som finns i databasen, och återgå den till den ursprungliga standardvyn. Alla ändringar du har gjort kommer att försvinna och kan inte återskapas."
 
-#: includes/admin.inc:652
+#: includes/admin.inc:651
 #: includes/convert.inc:105
 msgid "Are you sure you want to delete the view %name?"
 msgstr "Är du säker på att du vill radera vyn %name?"
 
-#: includes/admin.inc:653
+#: includes/admin.inc:652
 msgid "Deleting a view cannot be undone."
 msgstr "Raderingen av en vy kan inte ångras."
 
-#: includes/admin.inc:662;698;868;1357
+#: includes/admin.inc:661;697;867;1356
 #: includes/convert.inc:109
 msgid "Cancel"
 msgstr "Avbryt"
 
-#: includes/admin.inc:671
+#: includes/admin.inc:670
 msgid "The view has been deleted."
 msgstr "Vyn har raderats"
 
-#: includes/admin.inc:683
+#: includes/admin.inc:682
 msgid "There is no lock on view %view to break."
 msgstr "Det finns inget lås på vyn %view att öppna."
 
-#: includes/admin.inc:693
+#: includes/admin.inc:692
 msgid "Are you sure you want to break the lock on view %name?"
 msgstr "Är du säker på att du vill öppna låset på vyn %name?"
 
-#: includes/admin.inc:696
+#: includes/admin.inc:695
 msgid "By breaking this lock, any unsaved changes made by !user will be lost!"
 msgstr "Genom att öppna låset, kommer alla osparade ändringar gjord av !user att förloras!"
 
-#: includes/admin.inc:697
+#: includes/admin.inc:696
 msgid "Break lock"
 msgstr "Öppna lås"
 
-#: includes/admin.inc:707
+#: includes/admin.inc:706
 msgid "The lock has been broken and you may now edit this view."
 msgstr "Låsningen har öppnats och du kan nu redigera den här vyn."
 
-#: includes/admin.inc:714
+#: includes/admin.inc:713
 msgid "Edit view %view"
 msgstr "Redigera vyn %view"
 
-#: includes/admin.inc:742
+#: includes/admin.inc:741
 msgid "Enter the name to use for this view if it is different from the source view. Leave blank to use the name of the view."
 msgstr "Ange namnet som skall användas för denna vy om det är annorlunda mot källvyn. Lämna blankt för att använda namnet på vyn."
 
-#: includes/admin.inc:747
+#: includes/admin.inc:746
 msgid "Paste view code here"
 msgstr "Klistra in vykod här"
 
-#: includes/admin.inc:769
+#: includes/admin.inc:768
 msgid "Unable to interpret view code."
 msgstr "Kunde inte tolka vykoden."
 
-#: includes/admin.inc:777
+#: includes/admin.inc:776
 msgid "You are importing a view created in Views version 1. You may need to adjust some parameters to work correctly in version 2."
 msgstr "Du importerar en vy som skapade i version 1 av Views. Du kan behöva justera några parametrar för att de ska fungera korrekt i version 2."
 
-#: includes/admin.inc:780
+#: includes/admin.inc:779
 msgid "That view is not compatible with this version of Views."
 msgstr "Denna vy är inte kompatibel med denna version av Views."
 
-#: includes/admin.inc:795
+#: includes/admin.inc:794
 msgid "A view by that name already exists; please choose a different name"
 msgstr "En vy med det namn finns redan. Välj ett annat namn."
 
-#: includes/admin.inc:804
+#: includes/admin.inc:803
 msgid "Display plugin @plugin is not available."
 msgstr "Visningsplugin @plugin är inte tillgängligt."
 
-#: includes/admin.inc:811
+#: includes/admin.inc:810
 msgid "Style plugin @plugin is not available."
 msgstr "Stilplugin @plugin är inte tillgängligt."
 
-#: includes/admin.inc:817
+#: includes/admin.inc:816
 msgid "Row plugin @plugin is not available."
 msgstr "Radplugin @plugin är inte tillgängligt."
 
-#: includes/admin.inc:827
+#: includes/admin.inc:826
 msgid "@type handler @table.@field is not available."
 msgstr "@type hanterare @table.@field är inte tillgänglig."
 
-#: includes/admin.inc:840
+#: includes/admin.inc:839
 msgid "Unable to import view."
 msgstr "Kunde inte importera vy."
 
-#: includes/admin.inc:861;889
+#: includes/admin.inc:860;888
 msgid "Save"
 msgstr "Spara"
 
-#: includes/admin.inc:913
+#: includes/admin.inc:912
 msgid "The view has been saved."
 msgstr "Vyn har sparats."
 
-#: includes/admin.inc:957
+#: includes/admin.inc:956
 msgid "Unknown or missing table name"
 msgstr "Okänt eller saknat tabellnamn"
 
-#: includes/admin.inc:962
+#: includes/admin.inc:961
 msgid "Click on an item to edit that item's details."
 msgstr "Klicka på ett alternativ för att redigera dess detaljer."
 
-#: includes/admin.inc:965
+#: includes/admin.inc:964
 msgid "This view has a broken default display and cannot be used."
 msgstr "Denna vy har en trasig standardvisning och kan inte användas."
 
-#: includes/admin.inc:1007
+#: includes/admin.inc:1006
 #: theme/theme.inc:99
 msgid "Export this view"
 msgstr "Exportera denna vy"
 
-#: includes/admin.inc:1012
+#: includes/admin.inc:1011
 #: theme/theme.inc:104
 msgid "Create a copy of this view"
 msgstr "Skapa en kopia av denna vy"
 
-#: includes/admin.inc:1023
-msgid "View \"@display\""
-msgstr "Visa \"@display\""
+#: includes/admin.inc:1022
+msgid "View \"!display\""
+msgstr "Visa \"!display\""
 
-#: includes/admin.inc:1024
+#: includes/admin.inc:1023
 msgid "Go to the real page for this display"
 msgstr "Gå till den riktiga sidan för denna visning"
 
-#: includes/admin.inc:1090;3044
+#: includes/admin.inc:1089;3035
 #: includes/plugins.inc:218
 #: plugins/views_plugin_display.inc:587;704;723
 #: plugins/views_plugin_display_attachment.inc:90
@@ -1674,109 +1739,109 @@ msgstr "Gå till den riktiga sidan för denna visning"
 msgid "None"
 msgstr "Ingen"
 
-#: includes/admin.inc:1168
+#: includes/admin.inc:1167
 msgid "Invalid"
 msgstr "Ogiltig"
 
-#: includes/admin.inc:1169
+#: includes/admin.inc:1168
 msgid "Error: Display @display refers to a plugin named '@plugin', but that plugin doesn't exist!"
 msgstr "Fel: Visningen @display refererar till ett plugin som heter \"@plugin\", men det pluginet existerar inte!"
 
-#: includes/admin.inc:1204;1204
+#: includes/admin.inc:1203;1203
 msgid "Rearrange"
 msgstr "Ordna om"
 
-#: includes/admin.inc:1244;2244;2420;2488;2573
+#: includes/admin.inc:1243;2243;2418;2486;2571
 msgid "Error: handler for @table > @field doesn't exist!"
 msgstr "Fel: hanteraren för @table > @field existerar inte!"
 
-#: includes/admin.inc:1263;1263;1272
+#: includes/admin.inc:1262;1262;1271
 msgid "Settings"
 msgstr "Inställningar"
 
-#: includes/admin.inc:1268
+#: includes/admin.inc:1267
 #: plugins/views_plugin_display.inc:598;616
 msgid "Missing style plugin"
 msgstr "Stilplugin saknas"
 
-#: includes/admin.inc:1272
+#: includes/admin.inc:1271
 #: plugins/views_plugin_display.inc:611;626
 msgid "Change settings for this style"
 msgstr "Ändra inställningar för denna stil"
 
-#: includes/admin.inc:1275
+#: includes/admin.inc:1274
 msgid "&nbsp; Style: !style"
 msgstr "&nbsp; Style: !style"
 
-#: includes/admin.inc:1306
+#: includes/admin.inc:1305
 msgid "Invalid display id found while regenerating tabs"
 msgstr "Ogiltigt ID för visning hittades när flikar regenerades"
 
-#: includes/admin.inc:1339
+#: includes/admin.inc:1338
 msgid "Update"
 msgstr "Uppdatera"
 
-#: includes/admin.inc:1357
+#: includes/admin.inc:1356
 msgid "Ok"
 msgstr "Ok"
 
-#: includes/admin.inc:1628
+#: includes/admin.inc:1627
 msgid "Unable to initialize default display"
 msgstr "Kunde inte initialisera den förvalda visningen"
 
-#: includes/admin.inc:1660
+#: includes/admin.inc:1659
 msgid "Add display"
 msgstr "Lägg till visning"
 
-#: includes/admin.inc:1700
+#: includes/admin.inc:1699
 msgid "Remove display"
 msgstr "Ta bort visning"
 
-#: includes/admin.inc:1711
+#: includes/admin.inc:1710
 msgid "Restore display"
 msgstr "Återställ visning"
 
-#: includes/admin.inc:1783
+#: includes/admin.inc:1782
 msgid "Analyze"
 msgstr "Analysera"
 
-#: includes/admin.inc:1795
+#: includes/admin.inc:1794
 msgid "View analysis"
 msgstr "Visa analyser"
 
-#: includes/admin.inc:1849
+#: includes/admin.inc:1848
 msgid "View details"
 msgstr "Visa detaljer"
 
-#: includes/admin.inc:1890;1944;1999;2145;2237;2413;2481;2566
+#: includes/admin.inc:1889;1943;1998;2144;2236;2411;2479;2564
 msgid "Invalid display id @display"
 msgstr "Ogiltig ID för visningen @display"
 
-#: includes/admin.inc:1948
+#: includes/admin.inc:1947
 msgid "Configure @type"
 msgstr "Konfigurera @type"
 
-#: includes/admin.inc:2003
+#: includes/admin.inc:2002
 msgid "Rearrange @type"
 msgstr "Arrangera om @type"
 
-#: includes/admin.inc:2046
+#: includes/admin.inc:2045
 msgid "Broken field @id"
 msgstr "Trasigt fält @id"
 
-#: includes/admin.inc:2086;2095;2329
+#: includes/admin.inc:2085;2094;2327
 msgid "Remove"
 msgstr "Ta bort"
 
-#: includes/admin.inc:2086;2086
+#: includes/admin.inc:2085;2085
 msgid "Remove this item"
 msgstr "Ta bort detta alternativ"
 
-#: includes/admin.inc:2092
+#: includes/admin.inc:2091
 msgid "No fields available."
 msgstr "Inga fält tillgängliga."
 
-#: includes/admin.inc:2095
+#: includes/admin.inc:2094
 #: modules/book.views.inc:57
 #: modules/taxonomy.views.inc:139
 #: modules/upload.views.inc:91
@@ -1784,151 +1849,145 @@ msgstr "Inga fält tillgängliga."
 msgid "Weight"
 msgstr "Vikt"
 
-#: includes/admin.inc:2151
+#: includes/admin.inc:2150
 msgid "Add @type"
 msgstr "Lägg till @type"
 
-#: includes/admin.inc:2162
+#: includes/admin.inc:2161
 msgid "Groups"
 msgstr "Grupper"
 
-#: includes/admin.inc:2181
+#: includes/admin.inc:2180
 msgid "!group: !field"
 msgstr "!group: !field"
 
-#: includes/admin.inc:2190
+#: includes/admin.inc:2189
 msgid "There are no @types available to add."
 msgstr "Det finns inga @types tillgängliga att lägga till."
 
-#: includes/admin.inc:2287
-#: plugins/views_plugin_row.inc:65
+#: includes/admin.inc:2286
 msgid "Do not use a relationship"
 msgstr "Använd inte en relation"
 
-#: includes/admin.inc:2302
-#: includes/view.inc:1954;1955
-#: plugins/views_plugin_row.inc:74
+#: includes/admin.inc:2300
+#: includes/view.inc:1942;1943
 msgid "Relationship"
 msgstr "Relationer"
 
-#: includes/admin.inc:2315
+#: includes/admin.inc:2313
 msgid "Configure @type %item"
 msgstr "Konfigurera @type %item"
 
-#: includes/admin.inc:2428
+#: includes/admin.inc:2426
 msgid "Configure extra settings for @type %item"
 msgstr "Konfigurera extra inställningar för @type %item"
 
-#: includes/admin.inc:2493
+#: includes/admin.inc:2491
 msgid "Change summary style for @type %item"
 msgstr "Ändra stil för summering av @type %item"
 
-#: includes/admin.inc:2516;2530
+#: includes/admin.inc:2514;2528
 msgid "Internal error: broken plugin."
 msgstr "Internt fel: trasig plugin."
 
-#: includes/admin.inc:2580
+#: includes/admin.inc:2578
 msgid "Configure summary style for @type %item"
 msgstr "Konfigurera stil för summering av @type %item"
 
-#: includes/admin.inc:2672
+#: includes/admin.inc:2670
 msgid "Clear Views' cache"
 msgstr "Töm Views cache"
 
-#: includes/admin.inc:2678
+#: includes/admin.inc:2676
 msgid "Add Views signature to all SQL queries"
 msgstr "Lägg till Views signatur till alla SQL-frågor"
 
-#: includes/admin.inc:2679
+#: includes/admin.inc:2677
 msgid "All Views-generated queries will include a special 'VIEWS' = 'VIEWS' string in the WHERE clause. This makes identifying Views queries in database server logs simpler, but should only be used when troubleshooting."
 msgstr "Alla Viewsgenererade frågor kommer inkludera en speciell 'VIEWS' = 'VIEWS'-sträng i WHERE-satsen. Detta gör det lättare att identifiera Views frågor i databasens loggar, men bör endast användas vid felsökning."
 
-#: includes/admin.inc:2685
+#: includes/admin.inc:2683
 msgid "Disable views data caching"
 msgstr "Inaktivera views cachning av data"
 
-#: includes/admin.inc:2686
+#: includes/admin.inc:2684
 msgid "Views caches data about tables, modules and views available, to increase performance. By checking this box, Views will skip this cache and always rebuild this data when needed. This can have a serious performance impact on your site."
 msgstr "Views cachar data om tillgängliga tabeller, moduler och vyer, för att öka prestanda. Genom att kryssa i denna ruta kommer Views hoppa över denna cache och alltid bygga om sin data vid behov. Detta kan allvarligt påverka din webbplats prestanda."
 
-#: includes/admin.inc:2692
+#: includes/admin.inc:2690
 msgid "Ignore missing advanced help module"
 msgstr "Ignorera avsaknad av modulen Advanced Help"
 
-#: includes/admin.inc:2693
+#: includes/admin.inc:2691
 msgid "Views uses the advanced help module to provide help text; if this module is not present Views will complain, unless this setting is checked."
 msgstr "Views använder modulen Advanced Help för att erhålla hjälptext. Om denna modul inte finns närvarande kommer Views att klaga, såvida inte denna inställning är ikryssad."
 
-#: includes/admin.inc:2699
+#: includes/admin.inc:2697
 msgid "Show query above live preview"
 msgstr "Visa databasfråga ovanför den direkta förhandsgranskningen"
 
-#: includes/admin.inc:2700
+#: includes/admin.inc:2698
 msgid "The live preview feature will show you the output of the view you're creating, as well as the view. Check here to show the query and other information above the view; leave this unchecked to show that information below the view."
 msgstr "Funktionen för den direkta förhandsgranskningen kommer att visa dig utmatningen för vyn som du skapar, och även vyn. Klicka här för att visa databasfrågan och annan information ovanför vyn. Lämna detta ej ikryssat för att visa den informationen nedanför vyn."
 
-#: includes/admin.inc:2706
+#: includes/admin.inc:2704
 msgid "Show other queries run during render during live preview"
 msgstr "Visa andra databasfrågor som körs under renderingen vid direkta förhandstitten"
 
-#: includes/admin.inc:2707
+#: includes/admin.inc:2705
 msgid "Drupal has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."
 msgstr "Drupal har potentialen att köra många databasfrågor under tiden som en vy renderas. Kryssas denna ruta för visas varje databasfråga som körs under renderingen av vyn som en del av den direkta förhandstidden."
 
-#: includes/admin.inc:2713
+#: includes/admin.inc:2711
 msgid "Do not show hover links over views"
 msgstr "Visa inte hovrande länkar över vyer"
 
-#: includes/admin.inc:2714
+#: includes/admin.inc:2712
 msgid "To make it easier to administrate your views, Views provides 'hover' links to take you to the edit and export screen of a view whenever the view is used. This can be distracting on some themes, though; if it is problematic, you can turn it off here."
 msgstr "För att göra det enklare att administrera din vy så erbjuder Views \"hovrande\" länkar för att ta dig till redigerings- och exportskärmen för en vy när den används. Detta kan vara distraherande på några teman. Om detta ställer till med problem kan du stänga av det här."
 
-#: includes/admin.inc:2720
+#: includes/admin.inc:2718
 msgid "Enable views performance statistics via the Devel module"
 msgstr "Aktivera views statitistik för prestanda via modulen Devel"
 
-#: includes/admin.inc:2721
+#: includes/admin.inc:2719
 msgid "Check this to enable some Views query and performance statistics <em>if Devel is installed</em>."
 msgstr "Kryssa i detta för att aktivera några databasfrågor i Views och statistik över prestanda <em>om modulen Devel är installerad</em>."
 
-#: includes/admin.inc:2727
+#: includes/admin.inc:2725
 msgid "Disable javascript with Views"
 msgstr "Avaktivera JavaScript för Views"
 
-#: includes/admin.inc:2728
+#: includes/admin.inc:2726
 msgid "If you are having problems with the javascript, you can disable it here; the Views UI should degrade and still be usable without javascript, it just not as good."
 msgstr "Om du upplever problem med JavaScript kan du avaktivera det här. Views UI bör nedgraderas och fortfarande fungera utan JavasScript, dock inte lika bra."
 
-#: includes/admin.inc:2736
+#: includes/admin.inc:2734
 msgid "Page region to output performance statistics"
 msgstr "Sidområde att skriva ut prestandastatistik till"
 
-#: includes/admin.inc:2743
-msgid "Label for \"Any\" value on optional single-select exposed filters"
-msgstr "Etikett för värdet \"Valfri\" på valfria exponerade filter för enskilda val"
-
-#: includes/admin.inc:2756
+#: includes/admin.inc:2747
 msgid "The cache has been cleared."
 msgstr "Cachen har tömts."
 
-#: includes/admin.inc:2922
+#: includes/admin.inc:2913
 msgid "Error: missing @component"
 msgstr "Fel: saknad @component"
 
-#: includes/admin.inc:3008
-#: includes/view.inc:1925
+#: includes/admin.inc:2999
+#: includes/view.inc:1913
 msgid "Field"
 msgstr "Fält"
 
-#: includes/admin.inc:3009
+#: includes/admin.inc:3000
 msgid "Column"
 msgstr "Kolumn"
 
-#: includes/admin.inc:3012
+#: includes/admin.inc:3003
 msgid "Sortable"
 msgstr "Sorteringsbar"
 
-#: includes/admin.inc:3016
+#: includes/admin.inc:3007
 msgid "Default sort"
 msgstr "Förvald sortering"
 
@@ -2114,67 +2173,67 @@ msgstr "Rättighet"
 msgid "Access will be granted to users with the specified permission string."
 msgstr "Åtkomst kommer att ges till användare med den specificerade strängen för rättighet."
 
-#: includes/view.inc:266
+#: includes/view.inc:263
 msgid "set_display() called with invalid display id @display."
 msgstr "set_display() anropad med ogiltigt ID för visningen @display."
 
-#: includes/view.inc:1116
+#: includes/view.inc:1104
 msgid "Home"
 msgstr "Hem"
 
-#: includes/view.inc:1924
+#: includes/view.inc:1912
 msgid "fields"
 msgstr "fält"
 
-#: includes/view.inc:1926
+#: includes/view.inc:1914
 msgid "field"
 msgstr "fält"
 
-#: includes/view.inc:1931
+#: includes/view.inc:1919
 msgid "arguments"
 msgstr "argument"
 
-#: includes/view.inc:1932;1933
+#: includes/view.inc:1920;1921
 msgid "Argument"
 msgstr "Argument"
 
-#: includes/view.inc:1937
+#: includes/view.inc:1925
 msgid "Sort criteria"
 msgstr "Sorteringskriterier"
 
-#: includes/view.inc:1938
+#: includes/view.inc:1926
 msgid "sort criteria"
 msgstr "sorteringskriterier"
 
-#: includes/view.inc:1939
+#: includes/view.inc:1927
 msgid "Sort criterion"
 msgstr "Sorteringskriterium"
 
-#: includes/view.inc:1940
+#: includes/view.inc:1928
 msgid "sort criterion"
 msgstr "sorteringskriterium"
 
-#: includes/view.inc:1944
+#: includes/view.inc:1932
 msgid "Filters"
 msgstr "Filtrering"
 
-#: includes/view.inc:1945
+#: includes/view.inc:1933
 msgid "filters"
 msgstr "filter"
 
-#: includes/view.inc:1946
+#: includes/view.inc:1934
 msgid "Filter"
 msgstr "Filter"
 
-#: includes/view.inc:1947
+#: includes/view.inc:1935
 msgid "filter"
 msgstr "filter"
 
-#: includes/view.inc:1952
+#: includes/view.inc:1940
 msgid "Relationships"
 msgstr "Relationer"
 
-#: includes/view.inc:1953
+#: includes/view.inc:1941
 msgid "relationships"
 msgstr "relationer"
 
@@ -2305,7 +2364,7 @@ msgid "The weight of the book page."
 msgstr "Vikten på boksidan."
 
 #: modules/book.views.inc:69
-#: modules/comment.views.inc:211
+#: modules/comment.views.inc:203
 #: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:24
 msgid "Depth"
 msgstr "Djup"
@@ -2335,7 +2394,7 @@ msgstr "Överliggande nod för boken."
 msgid "Book parent"
 msgstr "Överliggande bok"
 
-#: modules/comment.views.inc:22;26;400;411
+#: modules/comment.views.inc:22;26;391;402
 msgid "Comment"
 msgstr "Kommentar"
 
@@ -2402,7 +2461,6 @@ msgid "Provide a simple link to view the comment."
 msgstr "Tillhandahåll en enkel länk för att visa kommentaren."
 
 #: modules/comment.views.inc:177
-#: modules/locale.views.inc:123
 #: modules/node.views.inc:254
 #: modules/user.views.inc:209
 msgid "Edit link"
@@ -2430,220 +2488,118 @@ msgstr "Länk för att svara till"
 msgid "Provide a simple link to reply to the comment."
 msgstr "Tillhandahåll en enkel länk för att besvara kommentaren."
 
-#: modules/comment.views.inc:203
-msgid "Node link"
-msgstr "Länk för noden"
-
 #: modules/comment.views.inc:204
-msgid "Display the standard comment link used on regular nodes."
-msgstr "Visa förvald kommentarslänk som används på vanliga noder."
-
-#: modules/comment.views.inc:212
 msgid "Display the depth of the comment if it is threaded."
 msgstr "Visa djupet på kommentaren om den är trådad."
 
-#: modules/comment.views.inc:216
+#: modules/comment.views.inc:208
 msgid "Thread"
 msgstr "Tråd"
 
-#: modules/comment.views.inc:217
+#: modules/comment.views.inc:209
 msgid "Sort by the threaded order. This will keep child comments together with their parents."
 msgstr "Sortera baserat på trådad ordning. Detta upprätthåller underliggande kommentarer tillsammans med överliggande."
 
-#: modules/comment.views.inc:223;229;264
+#: modules/comment.views.inc:215;221;256
 #: modules/node.views.inc:24;29;90;361;376;488;620;631;644
 #: modules/upload.views.inc:43
 msgid "Node"
 msgstr "Nod"
 
-#: modules/comment.views.inc:224
+#: modules/comment.views.inc:216
 msgid "The node the comment is a reply to."
 msgstr "Noden som kommentaren är ett svar på."
 
-#: modules/comment.views.inc:234;240
+#: modules/comment.views.inc:226;232
 #: modules/node.views.inc:349
 #: modules/statistics.views.inc:204
 #: modules/user.views.inc:23;27;226;317
 msgid "User"
 msgstr "Användare"
 
-#: modules/comment.views.inc:235
+#: modules/comment.views.inc:227
 msgid "The User ID of the comment's author."
 msgstr "Användarens ID för författaren till kommentaren."
 
-#: modules/comment.views.inc:245
+#: modules/comment.views.inc:237
 msgid "Parent CID"
 msgstr "Överliggande CID"
 
-#: modules/comment.views.inc:246
+#: modules/comment.views.inc:238
 msgid "The Comment ID of the parent comment."
 msgstr "Den överliggande kommentarens ID."
 
-#: modules/comment.views.inc:251;256
+#: modules/comment.views.inc:243;248
 msgid "Parent comment"
 msgstr "Överliggande kommentar"
 
-#: modules/comment.views.inc:252
+#: modules/comment.views.inc:244
 msgid "The parent comment."
 msgstr "Den överliggande kommentaren."
 
-#: modules/comment.views.inc:278
+#: modules/comment.views.inc:269
 msgid "Last comment time"
 msgstr "Tid för senaste kommentar"
 
-#: modules/comment.views.inc:279
+#: modules/comment.views.inc:270
 msgid "Date and time of when the last comment was posted."
 msgstr "Datum och tid för när den senaste kommentaren lades in."
 
-#: modules/comment.views.inc:294
+#: modules/comment.views.inc:285
 msgid "Last comment author"
 msgstr "Senaste kommentarens författare"
 
-#: modules/comment.views.inc:295
+#: modules/comment.views.inc:286
 msgid "The name of the author of the last posted comment."
 msgstr "Namnet på författaren för den senast inlagda kommentaren."
 
-#: modules/comment.views.inc:307
+#: modules/comment.views.inc:298
 msgid "Comment count"
 msgstr "Antal kommentarer"
 
-#: modules/comment.views.inc:308
+#: modules/comment.views.inc:299
 msgid "The number of comments a node has."
 msgstr "Antal kommentarer en nod har."
 
-#: modules/comment.views.inc:326
+#: modules/comment.views.inc:317
 msgid "Updated/commented date"
 msgstr "Datum för uppdaterad/kommenterad"
 
-#: modules/comment.views.inc:327
+#: modules/comment.views.inc:318
 msgid "The most recent of last comment posted or node updated time."
 msgstr "Den senast inlagda kommentaren eller tid för uppdatering av noden."
 
-#: modules/comment.views.inc:350
+#: modules/comment.views.inc:341
 msgid "New comments"
 msgstr "Nya kommentarer"
 
-#: modules/comment.views.inc:351
+#: modules/comment.views.inc:342
 msgid "The number of new comments on the node."
 msgstr "Antalet nya kommentarer till noden."
 
-#: modules/comment.views.inc:359
+#: modules/comment.views.inc:350
 msgid "Comment status"
 msgstr "Status för kommenterar"
 
-#: modules/comment.views.inc:360
+#: modules/comment.views.inc:351
 msgid "Whether comments are enabled or disabled on the node."
 msgstr "Huruvida kommentarer är aktiverade på noden eller ej."
 
-#: modules/comment.views.inc:374
+#: modules/comment.views.inc:365
 msgid "User posted or commented"
 msgstr "Användare skrev eller kommenterade"
 
-#: modules/comment.views.inc:375
+#: modules/comment.views.inc:366
 msgid "Display nodes only if a user posted the node or commented on the node."
 msgstr "Visar noder enbart om en användare lagt in en nod eller kommenterat på den."
 
-#: modules/comment.views.inc:401
+#: modules/comment.views.inc:392
 msgid "Display the comment with standard comment view."
 msgstr "Visa kommentarer med standardvy för kommentarer."
 
-#: modules/comment.views.inc:412
+#: modules/comment.views.inc:403
 msgid "Display the comment as RSS."
 msgstr "Visa kommentarer som RSS."
-
-#: modules/locale.views.inc:23;28;55;75;92;105;121
-msgid "Locale source"
-msgstr "Källa för språk"
-
-#: modules/locale.views.inc:29
-msgid "A source string for translation, in English or the default site language."
-msgstr "En källsträng för översättning, på engelska eller åt det förvalda språket för webbplatsen."
-
-#: modules/locale.views.inc:34
-msgid "LID"
-msgstr "LID"
-
-#: modules/locale.views.inc:35
-msgid "The ID of the source string."
-msgstr "ID för källsträngen."
-
-#: modules/locale.views.inc:56
-msgid "Location"
-msgstr "Plats"
-
-#: modules/locale.views.inc:57
-msgid "A description of the location or context of the string."
-msgstr "En beskrivning av lokaliseringen eller innehållet av strängen."
-
-#: modules/locale.views.inc:76
-#: modules/locale/views_handler_filter_locale_group.inc:10
-msgid "Group"
-msgstr "Grupp"
-
-#: modules/locale.views.inc:77
-msgid "The group the translation is in."
-msgstr "Gruppen som översättningen finns i."
-
-#: modules/locale.views.inc:93
-msgid "Source"
-msgstr "Källa"
-
-#: modules/locale.views.inc:94
-msgid "The full original string."
-msgstr "Den fullständiga originalsträngen."
-
-#: modules/locale.views.inc:106
-#: modules/locale/views_handler_filter_locale_version.inc:10
-msgid "Version"
-msgstr "Version"
-
-#: modules/locale.views.inc:107
-msgid "The version of Drupal core that this string is for."
-msgstr "Version av Drupals kärna som denna sträng tillhör."
-
-#: modules/locale.views.inc:124
-msgid "Provide a simple link to edit the translations."
-msgstr "Tillhandahåll en enkel länk för att redigera översättningarna."
-
-#: modules/locale.views.inc:134;146;159;175;185
-#, fuzzy
-msgid "Locale target"
-msgstr "Källa för lokalisering"
-
-#: modules/locale.views.inc:147
-msgid "Translation"
-msgstr "Översättning"
-
-#: modules/locale.views.inc:148
-msgid "The full translation string."
-msgstr "Den fullständiga strängen strängen för översättning."
-
-#: modules/locale.views.inc:160
-#: modules/translation.views.inc:32
-#: modules/locale/views_handler_filter_locale_language.inc:10
-#: modules/translation/views_handler_filter_node_language.inc:9
-msgid "Language"
-msgstr "Språk"
-
-#: modules/locale.views.inc:161
-msgid "The language this translation is in."
-msgstr "Språket denna översättning finns i."
-
-#: modules/locale.views.inc:176
-msgid "Singular LID"
-msgstr "Singular LID"
-
-#: modules/locale.views.inc:177
-msgid "The ID of the parent translation."
-msgstr "Den överliggande översättningens ID."
-
-#: modules/locale.views.inc:186;194
-msgid "Plural"
-msgstr "Plural"
-
-#: modules/locale.views.inc:187
-msgid "Whether or not the translation is plural."
-msgstr "Huruvida noden är översättningen är plural eller ej."
 
 #: modules/node.views.inc:30
 msgid "Nodes are a Drupal site's primary content."
@@ -2791,7 +2747,6 @@ msgid "The actual, full data in the body field; this may not be valid data on al
 msgstr "Den aktuella, fullständiga datan i brödtextens fält. Detta behöver inte vara giltig data för alla nodtyper."
 
 #: modules/node.views.inc:377
-#: modules/node/views_plugin_row_node_view.inc:52
 msgid "Teaser"
 msgstr "Förhandstitt"
 
@@ -2851,7 +2806,7 @@ msgstr "Visa noden med förvalda nodvisningen."
 msgid "Node ID from URL"
 msgstr "Nodens ID från URL"
 
-#: modules/node.views.inc:718
+#: modules/node.views.inc:713
 msgid "Display %display has no access control but does not contain a filter for published nodes."
 msgstr "Visningen %display har inte någon åtkomstkontroll, men innehåller inte något filter för publicerade noder."
 
@@ -2904,7 +2859,7 @@ msgstr "Fri formulärslista %field-name för profil."
 msgid "Profile date %field-name."
 msgstr "Datum %field-name för profil."
 
-#: modules/search.views.inc:23;86;104;167
+#: modules/search.views.inc:23;77;88;106;163
 msgid "Search"
 msgstr "Sök"
 
@@ -2913,34 +2868,34 @@ msgid "Score"
 msgstr "Poäng"
 
 #: modules/search.views.inc:73
-msgid "The score of the search item. This will not be used if the search filter is not also present."
-msgstr "Poängen för sökalternativet. Detta kommer inte att användas om inte sökfiltret används."
+msgid "The score of the search item."
+msgstr "Poängen på det sökta alternativet."
 
-#: modules/search.views.inc:93
+#: modules/search.views.inc:95
 msgid "Links from"
 msgstr "Länkar från"
 
-#: modules/search.views.inc:94
+#: modules/search.views.inc:96
 msgid "Other nodes that are linked from the node."
 msgstr "Andra noder som är länkade från noden."
 
-#: modules/search.views.inc:111
+#: modules/search.views.inc:113
 msgid "Links to"
 msgstr "Länkar till"
 
-#: modules/search.views.inc:112
+#: modules/search.views.inc:114
 msgid "Other nodes that link to the node."
 msgstr "Andra noder som länkar till noden."
 
-#: modules/search.views.inc:123
+#: modules/search.views.inc:125
 msgid "Search Terms"
 msgstr "Termer för sökning"
 
-#: modules/search.views.inc:124
+#: modules/search.views.inc:126
 msgid "The terms to search for."
 msgstr "Termer att söka efter."
 
-#: modules/search.views.inc:168
+#: modules/search.views.inc:164
 msgid "Display the results with standard search view."
 msgstr "Visa resultat med en förvald visning för sökning."
 
@@ -3154,7 +3109,7 @@ msgid "The description associated with a taxonomy term."
 msgstr "Beskrivningen som associeras med en taxonomiterm."
 
 #: modules/taxonomy.views.inc:164
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:39
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:37
 msgid "Vocabulary"
 msgstr "Vokabulär"
 
@@ -3210,6 +3165,11 @@ msgstr "Term för taxonomi"
 #: modules/translation.views.inc:31;48;80;97;107;117
 msgid "Node translation"
 msgstr "Översättning av nod"
+
+#: modules/translation.views.inc:32
+#: modules/translation/views_handler_filter_node_language.inc:9
+msgid "Language"
+msgstr "Språk"
 
 #: modules/translation.views.inc:33
 msgid "The language the content is in."
@@ -3449,22 +3409,22 @@ msgid "Provide custom text or link."
 msgstr "Tillhandahåll en anpassad text eller länk."
 
 #: modules/aggregator/views_plugin_row_aggregator_rss.inc:25
-#: modules/node/views_plugin_row_node_rss.inc:32
+#: modules/node/views_plugin_row_node_rss.inc:26
 msgid "Full text"
 msgstr "Hela texten"
 
 #: modules/aggregator/views_plugin_row_aggregator_rss.inc:26
-#: modules/node/views_plugin_row_node_rss.inc:33
+#: modules/node/views_plugin_row_node_rss.inc:27
 msgid "Title plus teaser"
 msgstr "Titel plus förhandstitt"
 
 #: modules/aggregator/views_plugin_row_aggregator_rss.inc:27
-#: modules/node/views_plugin_row_node_rss.inc:34
+#: modules/node/views_plugin_row_node_rss.inc:28
 msgid "Title only"
 msgstr "Enbart titel"
 
 #: modules/aggregator/views_plugin_row_aggregator_rss.inc:28
-#: modules/node/views_plugin_row_node_rss.inc:35
+#: modules/node/views_plugin_row_node_rss.inc:29
 msgid "Use default RSS settings"
 msgstr "Använd standardinställningar för RSS"
 
@@ -3491,7 +3451,6 @@ msgid "This will override any other link you have set."
 msgstr "Detta kommer att åsidosätta alla andra länkar som du har angett."
 
 #: modules/comment/views_handler_field_comment_link.inc:23
-#: modules/locale/views_handler_field_locale_link_edit.inc:25
 #: modules/node/views_handler_field_node_link.inc:24
 #: modules/user/views_handler_field_user_link.inc:22
 msgid "Text to display"
@@ -3511,7 +3470,6 @@ msgid "delete"
 msgstr "radera"
 
 #: modules/comment/views_handler_field_comment_link_edit.inc:21
-#: modules/locale/views_handler_field_locale_link_edit.inc:41
 #: modules/node/views_handler_field_node_link_edit.inc:26
 #: modules/user/views_handler_field_user_link_edit.inc:13
 msgid "edit"
@@ -3520,10 +3478,6 @@ msgstr "redigera"
 #: modules/comment/views_handler_field_comment_link_reply.inc:13
 msgid "reply"
 msgstr "besvara"
-
-#: modules/comment/views_handler_field_comment_node_link.inc:36
-msgid "Show teaser-style link"
-msgstr "Visa länk med som förhandsvisning"
 
 #: modules/comment/views_handler_field_comment_username.inc:25
 msgid "Link this field to its user or an author's homepage"
@@ -3553,42 +3507,18 @@ msgid "Display nothing if no new comments"
 msgstr "Visa ingenting, om inga nya kommentarer"
 
 #: modules/comment/views_plugin_row_comment_view.inc:21
-#: modules/node/views_plugin_row_node_view.inc:64
+#: modules/node/views_plugin_row_node_view.inc:32
 msgid "Display links"
 msgstr "Visa länkar"
-
-#: modules/locale/views_handler_argument_locale_group.inc:32
-msgid "Unknown group"
-msgstr "Okänd grupp"
-
-#: modules/locale/views_handler_argument_locale_language.inc:30
-#: modules/node/views_handler_argument_node_language.inc:29
-#: modules/translation/views_handler_argument_node_language.inc:29
-msgid "Unknown language"
-msgstr "Okänt språk"
-
-#: modules/locale/views_handler_filter_locale_language.inc:11
-#: modules/translation/views_handler_filter_node_language.inc:10
-msgid "Current user's language"
-msgstr "Språk för nuvarande användare"
-
-#: modules/locale/views_handler_filter_locale_language.inc:11
-#: modules/translation/views_handler_filter_node_language.inc:10
-msgid "Default site language"
-msgstr "Förvalt språk för webbplatsen"
-
-#: modules/locale/views_handler_filter_locale_language.inc:11
-#: modules/translation/views_handler_filter_node_language.inc:10
-msgid "No language"
-msgstr "Inget språk"
-
-#: modules/locale/views_handler_filter_locale_version.inc:12
-msgid "Current installed version"
-msgstr "Nuvarande installerad version"
 
 #: modules/node/views_handler_argument_dates_various.inc:167
 msgid "Week @week"
 msgstr "Vecka @week"
+
+#: modules/node/views_handler_argument_node_language.inc:29
+#: modules/translation/views_handler_argument_node_language.inc:29
+msgid "Unknown language"
+msgstr "Okänt språk"
 
 #: modules/node/views_handler_argument_node_type.inc:30
 msgid "Unknown node type"
@@ -3635,37 +3565,17 @@ msgstr "ID för noden"
 msgid "Node IDs separated by , or +"
 msgstr "ID för noderna separerade med , eller +"
 
-#: modules/node/views_plugin_row_node_rss.inc:129
+#: modules/node/views_plugin_row_node_rss.inc:114
 msgid "read more"
 msgstr "läs mer"
 
-#: modules/node/views_plugin_row_node_view.inc:53
-msgid "Full node"
-msgstr "Fullständig nod"
+#: modules/node/views_plugin_row_node_view.inc:27
+msgid "Display only teaser"
+msgstr "Visa enbart förhandstitt"
 
-#: modules/node/views_plugin_row_node_view.inc:59
-msgid "Build mode"
-msgstr "Metod för uppbyggnad"
-
-#: modules/node/views_plugin_row_node_view.inc:69
+#: modules/node/views_plugin_row_node_view.inc:37
 msgid "Display node comments"
 msgstr "Visa kommentarer till noder"
-
-#: modules/search/views_handler_field_search_score.inc:21
-msgid "No alternate"
-msgstr "Inget alternativ"
-
-#: modules/search/views_handler_field_search_score.inc:28
-msgid "Alternative sort"
-msgstr "Alternativ sorteringsordning"
-
-#: modules/search/views_handler_field_search_score.inc:29
-msgid "If no search is performed and this field does not appear, pick an alternative default table sort field."
-msgstr "Om ingen sökning är genomförd och detta fält inte visas, välj ett alternativt förvalt sorteringsfält."
-
-#: modules/search/views_handler_field_search_score.inc:36
-msgid "Alternate sort order"
-msgstr "Byt sorteringsordning"
 
 #: modules/search/views_handler_filter_search.inc:23
 msgid "On empty input"
@@ -3683,11 +3593,11 @@ msgstr "Visa inget"
 msgid "Enter the terms you wish to search for."
 msgstr "Ange de termer du vill söka efter."
 
-#: modules/search/views_handler_filter_search.inc:60
+#: modules/search/views_handler_filter_search.inc:62
 msgid "You must include at least one positive keyword with @count characters or more."
 msgstr "Du måste ha med minst ett positivt sökord med @count bokstäver eller mer."
 
-#: modules/search/views_handler_filter_search.inc:64
+#: modules/search/views_handler_filter_search.inc:66
 msgid "Search for either of the two terms with uppercase <strong>OR</strong>. For example, <strong>cats OR dogs</strong>."
 msgstr "Sök efter vilket som av de två termerna med stora bokstäver <strong>OR</strong>. Exempel: <strong>katter OR hundar</strong>."
 
@@ -3701,7 +3611,7 @@ msgstr "Ingen titel"
 
 #: modules/system/views_handler_field_file.inc:29
 #: modules/upload/views_handler_field_upload_description.inc:24
-#: modules/upload/views_handler_field_upload_fid.inc:25
+#: modules/upload/views_handler_field_upload_fid.inc:21
 msgid "Link this field to download the file"
 msgstr "Länka detta fält för att ladda ned filen "
 
@@ -3753,39 +3663,35 @@ msgstr "Begränsa termer genom vokabulär"
 msgid "Vocabularies"
 msgstr "Vokabulärer"
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:41
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:39
 msgid "Select which vocabulary to show terms for in the regular options."
 msgstr "Välj vilket vokabulär som termer skall visas i, under de allmäna alternativen."
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:52
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:49
 msgid "Selection type"
 msgstr "Typ av urval"
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:53
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:50
 msgid "Dropdown"
 msgstr "Rullgardinsmeny"
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:53
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:50
 msgid "Autocomplete"
 msgstr "Automatiskt kompletterande"
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:59
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:56
 msgid "Show hierarchy in dropdown"
 msgstr "Visa hierarki i rullgardinsmeny"
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:76
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:73
 msgid "An invalid vocabulary is selected. Please change it in the options."
 msgstr "Ett ogiltigt vokabulär är valt. Var vänlig ändra det i alternativen."
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:94;158
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:91;147
 msgid "Select terms from vocabulary @voc"
 msgstr "Välj termer från vokabulär @voc"
 
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:94;158
-msgid "Select terms"
-msgstr "Välj termer"
-
-#: modules/taxonomy/views_handler_filter_term_node_tid.inc:273
+#: modules/taxonomy/views_handler_filter_term_node_tid.inc:258
 msgid "Unable to find term: @terms"
 msgid_plural "Unable to find terms: @terms"
 msgstr[0] "Kunde inte hitta termen: @terms"
@@ -3812,9 +3718,17 @@ msgstr "Namn för term eller synonym konverterad till ID för termen"
 msgid "Select the form of this argument; if using term name, it is generally more efficient to convert it to a term ID and use Taxonomy: Term ID rather than Taxonomy: Term Name\" as an argument."
 msgstr "Välj formen på detta argument. Om namnet på termen används är det generellt mer effektivt att konvertera det till ett ID för termen och använda taxonomi: Hellre ID för termen än taxonomi: Namn för termen som ett argument."
 
-#: modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:48
-msgid "Transform dashes in URL to spaces in term name arguments"
-msgstr "Gör om snedstreck i URL till mellanslag i arguments namn på termer"
+#: modules/translation/views_handler_filter_node_language.inc:10
+msgid "Current user's language"
+msgstr "Språk för nuvarande användare"
+
+#: modules/translation/views_handler_filter_node_language.inc:10
+msgid "Default site language"
+msgstr "Förvalt språk för webbplatsen"
+
+#: modules/translation/views_handler_filter_node_language.inc:10
+msgid "No language"
+msgstr "Inget språk"
 
 #: modules/translation/views_handler_filter_node_tnid.inc:22
 msgid "Include untranslated nodes"
@@ -3836,7 +3750,7 @@ msgstr "Alternativ för översättning"
 msgid "The translation options allows you to select which translation or translations in a translation set join on. Select \"Current language\" or \"Default language\" to join on the translation in the current or default language respectively. Select a specific language to join on a translation in that language. If you select \"All\", each translation will create a new row, which may appear to cause duplicates."
 msgstr "Alternativen för översättningen låter dig välja vilken översättning eller uppsättning av översättningar att ansluta till. Välj \"Nuvarande språk\" eller \"Förvalt språk\" för att ansluta till översättningen av det nuvarande språket, eller enbart det förvalda språket. Välj ett specifikt språk att ansluta till på översättningen för det språket. Väljer du \"Alla\" kommer varje översättning att skapa en ny rad, vilket kan orsaka dubletter."
 
-#: modules/upload/views_handler_field_upload_fid.inc:31
+#: modules/upload/views_handler_field_upload_fid.inc:27
 msgid "Only show \"listed\" file attachments"
 msgstr "Visa enbart \"listade\" bifogade filer"
 
@@ -3894,31 +3808,31 @@ msgstr[1] "Kunde inte hitta användarna: @users"
 msgid "Also look for a node and use the node author"
 msgstr "Leta även efter en nod och använd nodens författare"
 
-#: modules/user/views_plugin_argument_validate_user.inc:22
+#: modules/user/views_plugin_argument_validate_user.inc:15
 msgid "Type of user argument to allow"
 msgstr "Typ av argument för användare  att tillåta"
 
-#: modules/user/views_plugin_argument_validate_user.inc:24
+#: modules/user/views_plugin_argument_validate_user.inc:17
 msgid "Only allow numeric UIDs"
 msgstr "Tillåt enbart numeriska UID"
 
-#: modules/user/views_plugin_argument_validate_user.inc:25
+#: modules/user/views_plugin_argument_validate_user.inc:18
 msgid "Only allow string usernames"
 msgstr "Tillåt enbart användarnamn som strängar"
 
-#: modules/user/views_plugin_argument_validate_user.inc:26
+#: modules/user/views_plugin_argument_validate_user.inc:19
 msgid "Allow both numeric UIDs and string usernames"
 msgstr "Tillåt både numeriska UID och användarnamn som strängar"
 
-#: modules/user/views_plugin_argument_validate_user.inc:37
+#: modules/user/views_plugin_argument_validate_user.inc:26
 msgid "Restrict user based on role"
 msgstr "Begränsa användare baserat på roll"
 
-#: modules/user/views_plugin_argument_validate_user.inc:47
+#: modules/user/views_plugin_argument_validate_user.inc:33
 msgid "Restrict to the selected roles"
 msgstr "Begränsa till valda roller"
 
-#: modules/user/views_plugin_argument_validate_user.inc:50
+#: modules/user/views_plugin_argument_validate_user.inc:36
 msgid "If no roles are selected, users from any role will be allowed."
 msgstr "Om ingen roll är vald kommer användare från vilken roll som helst att tillåtas."
 
@@ -4839,43 +4753,43 @@ msgstr "Sökväg: !path"
 msgid "Edit this view"
 msgstr "Redigera denna vy"
 
-#: theme/theme.inc:324
+#: theme/theme.inc:322
 msgid "sort by @s"
 msgstr "sortera efter @s"
 
-#: theme/theme.inc:601
+#: theme/theme.inc:599
 msgid "‹‹"
 msgstr "‹‹"
 
-#: theme/theme.inc:606
+#: theme/theme.inc:604
 msgid "››"
 msgstr "››"
 
-#: theme/theme.inc:619
+#: theme/theme.inc:617
 msgid "@current of @max"
 msgstr "@current av @max"
 
-#: views_export/views_export.module:77
+#: views_export/views_export.module:76
 msgid "There are no views to be exported at this time."
 msgstr "Det finns inga vyer att exportera för tillfället."
 
-#: views_export/views_export.module:109
+#: views_export/views_export.module:108
 msgid "Show only these tags"
 msgstr "Visa endast dessa märken"
 
-#: views_export/views_export.module:123
+#: views_export/views_export.module:122
 msgid "Module name"
 msgstr "Namn på modul"
 
-#: views_export/views_export.module:124
+#: views_export/views_export.module:123
 msgid "Enter the module name to export code to."
 msgstr "Ange modulens namn att exportera koden till."
 
-#: views_export/views_export.module:205
+#: views_export/views_export.module:204
 msgid "Put this in @module.module in your modules/@module directory"
 msgstr "Stoppa in detta i @module.module i din katalog modules/@module"
 
-#: views_export/views_export.module:218
+#: views_export/views_export.module:217
 msgid "Put this in @module.views_default.inc in your modules/@module directory or modules/@module/includes directory"
 msgstr "Stoppa indetta i @module.views_default.inc i din katalog modules/@module eller katalogen modules/@module/includes"
 

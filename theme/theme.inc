@@ -82,7 +82,12 @@ function template_preprocess_views_view(&$vars) {
   if (!empty($view->pager['use_pager'])) {
     $pager_type = ($view->pager['use_pager'] === 'mini' ? 'views_mini_pager' : 'pager');
     $pager_theme = views_theme_functions($pager_type, $view, $view->display_handler->display);
-    $vars['pager']    = theme($pager_theme, $exposed_input, $view->pager['items_per_page'], $view->pager['element']);
+    $vars['pager']    = theme($pager_theme,
+      array(
+        'tags' => $exposed_input,
+        'element' => $view->pager['element'],
+      )
+    );
   }
 
   // if administrator, add some links. These used to be tabs, but this is better.
@@ -91,24 +96,28 @@ function template_preprocess_views_view(&$vars) {
       array(
         'title' => t('Edit'),
         'alt' => t("Edit this view"),
-        'href' => "admin/build/views/edit/$view->name",
+        'href' => "admin/structure/views/edit/$view->name",
         'fragment' => 'views-tab-' . $view->current_display,
         'query' => drupal_get_destination(),
       ),
       array(
         'title' => t('Export'),
         'alt' => t("Export this view"),
-        'href' => "admin/build/views/export/$view->name",
+        'href' => "admin/structure/views/export/$view->name",
       ),
       array(
         'title' => t('Clone'),
         'alt' => t("Create a copy of this view"),
-        'href' => "admin/build/views/clone/$view->name",
+        'href' => "admin/structure/views/clone/$view->name",
       ),
     );
 
     drupal_alter('views_admin_links', $vars['admin_links_raw'], $view);
-    $vars['admin_links'] = theme('links', $vars['admin_links_raw']);
+    $vars['admin_links'] = theme('links',
+      array(
+        'links' => $vars['admin_links_raw'],
+      )
+    );
   }
   else {
     $vars['admin_links'] = '';
@@ -205,7 +214,10 @@ function template_preprocess_views_view_fields(&$vars) {
  * $field->field_alias says what the raw value in $row will be. Reach it like
  * this: @code { $row->{$field->field_alias} @endcode
  */
-function theme_views_view_field($view, $field, $row) {
+function theme_views_view_field($vars) {
+  $view = $vars['view'];
+  $field = $vars['field'];
+  $row = $vars['row'];
   return $field->advanced_render($row);
 }
 
@@ -294,7 +306,7 @@ function template_preprocess_views_view_table(&$vars) {
   $active   = !empty($handler->active) ? $handler->active : '';
   $order    = !empty($handler->order) ? $handler->order : 'asc';
 
-  $query    = tablesort_get_querystring();
+  $query    = tablesort_get_query_parameters();
   if ($query) {
     $query = '&' . $query;
   }
@@ -329,12 +341,15 @@ function template_preprocess_views_view_table(&$vars) {
 
         $title = t('sort by @s', array('@s' => $label));
         if ($active == $field) {
-          $label .= theme('tablesort_indicator', $initial);
+          $label .= theme('tablesort_indicator', array('style' => $initial));
         }
+
+        $query['order'] = urlencode($field);
+        $query['sort'] = $initial;
         $link_options = array(
-          'html' => true,
+          'html' => TRUE,
           'attributes' => array('title' => $title),
-          'query' => 'order=' . urlencode($field) . '&sort=' . $initial . $query,
+          'query' => $query,
         );
         $vars['header'][$field] = l($label, $_GET['q'], $link_options);
       }
@@ -352,20 +367,19 @@ function template_preprocess_views_view_table(&$vars) {
       if (!empty($fields[$field]) && empty($fields[$field]->options['exclude'])) {
         $field_output = $renders[$num][$field];
 
-        if (!isset($vars['rows'][$num][$column])) {
-          $vars['rows'][$num][$column] = '';
-        }
-
         // Don't bother with separators and stuff if the field does not show up.
-        if ($field_output === '') {
+        if (empty($field_output) && !empty($vars['rows'][$num][$column])) {
           continue;
         }
 
         // Place the field into the column, along with an optional separator.
-        if ($vars['rows'][$num][$column] !== '') {
+        if (!empty($vars['rows'][$num][$column])) {
           if (!empty($options['info'][$column]['separator'])) {
             $vars['rows'][$num][$column] .= filter_xss_admin($options['info'][$column]['separator']);
           }
+        }
+        else {
+          $vars['rows'][$num][$column] = '';
         }
 
         $vars['rows'][$num][$column] .= $field_output;
@@ -380,10 +394,10 @@ function template_preprocess_views_view_table(&$vars) {
   $vars['row_classes'][0][] = 'views-row-first';
   $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
 
-  $vars['class'] = 'views-table';
+  $vars['class'] = array('views-table');
   if (!empty($options['sticky'])) {
     drupal_add_js('misc/tableheader.js');
-    $vars['class'] .= " sticky-enabled";
+    $vars['class'][] = "sticky-enabled";
   }
 }
 
@@ -434,7 +448,7 @@ function template_preprocess_views_view_grid(&$vars) {
         $row = 0;
         $col++;
       }
-      else if ($remainders && $row == $num_rows + 1) {
+      elseif ($remainders && $row == $num_rows + 1) {
         $row = 0;
         $col++;
         $remainders--;
@@ -454,8 +468,8 @@ function template_preprocess_views_view_grid(&$vars) {
  * Display the simple view of rows one after another
  */
 function template_preprocess_views_view_unformatted(&$vars) {
-  $view     = $vars['view'];
-  $rows     = $vars['rows'];
+  $view = $vars['view'];
+  $rows = $vars['rows'];
 
   $vars['classes'] = array();
   // Set up striping values.
@@ -539,7 +553,7 @@ function template_preprocess_views_view_rss(&$vars) {
   $vars['items'] = $items;
   $vars['channel_elements'] = format_xml_elements($style->channel_elements);
 
-  drupal_set_header('Content-Type: application/rss+xml; charset=utf-8');
+  drupal_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
 }
 
 /**
@@ -600,13 +614,8 @@ function template_preprocess_views_exposed_form(&$vars) {
     $vars['widgets']['checkboxes'] = $widget;
   }
 
-  // Don't render these:
-  unset($form['form_id']);
-  unset($form['form_build_id']);
-  unset($form['form_token']);
-
   // This includes the submit button.
-  $vars['button'] = drupal_render($form);
+  $vars['button'] = drupal_render_children($form);
 }
 
 function theme_views_mini_pager($tags = array(), $limit = 10, $element = 0, $parameters = array(), $quantity = 9) {
@@ -622,32 +631,55 @@ function theme_views_mini_pager($tags = array(), $limit = 10, $element = 0, $par
   // End of marker calculations.
 
 
-  $li_previous = theme('pager_previous', (isset($tags[1]) ? $tags[1] : t('‹‹')), $limit, $element, 1, $parameters);
+  $li_previous = theme('pager_previous',
+    array(
+      'text' => (isset($tags[1]) ? $tags[1] : t('‹‹')),
+      'limit' => $limit,
+      'element' => $element,
+      'interval' => 1,
+      'parameters' => $parameters,
+    )
+  );
   if (empty($li_previous)) {
     $li_previous = "&nbsp;";
   }
 
-  $li_next = theme('pager_next', (isset($tags[3]) ? $tags[3] : t('››')), $limit, $element, 1, $parameters);
+  $li_next = theme('pager_next',
+    array(
+      'text' => (isset($tags[3]) ? $tags[3] : t('››')),
+      'limit' => $limit,
+      'element' => $element,
+      'interval' => 1,
+      'parameters' => $parameters,
+    )
+  );
   if (empty($li_next)) {
     $li_next = "&nbsp;";
   }
 
   if ($pager_total[$element] > 1) {
     $items[] = array(
-      'class' => 'pager-previous',
+      'class' => array('pager-previous'),
       'data' => $li_previous,
     );
 
     $items[] = array(
-      'class' => 'pager-current',
+      'class' => array('pager-current'),
       'data' => t('@current of @max', array('@current' => $pager_current, '@max' => $pager_max)),
     );
 
     $items[] = array(
-      'class' => 'pager-next',
+      'class' => array('pager-next'),
       'data' => $li_next,
     );
-    return theme('item_list', $items, NULL, 'ul', array('class' => 'pager'));
+    return theme('item_list',
+      array(
+        'items' => $items,
+        'title' => NULL,
+        'type' => 'ul',
+        'attributes' => array('class' => array('pager')),
+      )
+    );
   }
 }
 

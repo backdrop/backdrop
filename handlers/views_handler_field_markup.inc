@@ -29,7 +29,7 @@ class views_handler_field_markup extends views_handler_field {
   function render($values) {
     $value = $values->{$this->field_alias};
     $format = is_numeric($this->format) ? $this->format : $values->{$this->aliases['format']};
-    return check_markup($value, $format, FALSE);
+    return check_markup($value, $format, '');
   }
 
   function element_type() {

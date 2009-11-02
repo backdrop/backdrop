@@ -14,7 +14,7 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function upload_views_data() {
   $data = array();
@@ -33,7 +33,7 @@ function upload_views_data() {
       'left_field' => 'vid',
       'field' => 'vid',
     ),
-    'files' => array(
+    'file' => array(
       'left_field' => 'fid',
       'field' => 'fid',
     ),
@@ -106,7 +106,7 @@ function upload_views_data() {
 }
 
 /**
- * Implementation of hook_views_data_alter()
+ * Implements hook_views_data_alter()
  */
 function upload_views_data_alter(&$data) {
   $data['node']['upload_fid'] = array(
@@ -128,7 +128,7 @@ function upload_views_data_alter(&$data) {
       'help' => t('Add a relationship to gain access to more file data for files uploaded by upload.module. Note that this relationship will cause duplicate nodes if there are multiple files attached to the node.'),
       'relationship table' => 'upload',
       'relationship field' => 'fid',
-      'base' => 'files',
+      'base' => 'file',
       'field' => 'fid',
       'handler' => 'views_handler_relationship',
       'label' => t('Files'),
@@ -137,25 +137,14 @@ function upload_views_data_alter(&$data) {
 }
 
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function upload_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/upload',
-    ),
-    'handlers' => array(
-      'views_handler_field_upload_fid' => array(
-        'parent' => 'views_handler_field_prerender_list',
-      ),
-      'views_handler_field_upload_description' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_filter_upload_fid' => array(
-        'parent' => 'views_handler_filter_boolean_operator',
-      ),
-    ),
+     'views_handler_field_upload_fid',
+     'views_handler_field_upload_description',
+     'views_handler_filter_upload_fid',
   );
 }
 

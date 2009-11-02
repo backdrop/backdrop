@@ -1,5 +1,5 @@
 # $Id$
-# 
+#
 # Esperanto translation of Drupal (general)
 # Copyright 2008 Chuck Smith <chuck@chucksmith.de>
 # Generated from files:
@@ -44,7 +44,7 @@
 # views-ui-edit-tab.tpl.php,v 1.10 2008/05/14 00:30:25 merlinofchaos
 # views-ui-edit-view.tpl.php,v 1.8 2008/05/14 00:52:10 merlinofchaos
 # views-ui-list-views.tpl.php,v 1.5 2008/05/08 05:29:30 merlinofchaos
-# 
+#
 #, fuzzy
 msgid ""
 ""

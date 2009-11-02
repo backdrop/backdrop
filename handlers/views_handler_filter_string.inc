@@ -84,6 +84,18 @@ class views_handler_filter_string extends views_handler_filter {
         'method' => 'op_not',
         'values' => 1,
       ),
+      'shorterthan' => array(
+        'title' => t('Length is shorter than'),
+        'short' => t('shorter than'),
+        'method' => 'op_shorter',
+        'values' => 1,
+      ),
+      'longerthan' => array(
+        'title' => t('Length is longer than'),
+        'short' => t('longer than'),
+        'method' => 'op_longer',
+        'values' => 1,
+      ),
     );
     // if the definition allows for the empty operator, add it.
     if (!empty($this->definition['allow empty'])) {
@@ -172,7 +184,7 @@ class views_handler_filter_string extends views_handler_filter {
         $which = in_array($this->operator, $this->operator_values(1)) ? 'value' : 'none';
       }
       else {
-        $source = 'edit-' . form_clean_id($this->options['expose']['operator']);
+        $source = 'edit-' . drupal_html_id($this->options['expose']['operator']);
       }
     }
 
@@ -204,8 +216,13 @@ class views_handler_filter_string extends views_handler_filter {
     }
   }
 
-  function case_transform() {
-    return !empty($this->options['case']) ? '' : 'UPPER';
+  function operator() {
+    if (!empty($this->options['case'])) {
+      return $this->operator;
+    }
+    else {
+      return $this->operator == '=' ? 'LIKE' : 'NOT LIKE';
+    }
   }
 
   /**
@@ -218,25 +235,24 @@ class views_handler_filter_string extends views_handler_filter {
   function query() {
     $this->ensure_my_table();
     $field = "$this->table_alias.$this->real_field";
-    $upper = $this->case_transform();
 
     $info = $this->operators();
     if (!empty($info[$this->operator]['method'])) {
-      $this->{$info[$this->operator]['method']}($field, $upper);
+      $this->{$info[$this->operator]['method']}($field);
     }
   }
 
-  function op_equal($field, $upper) {
-    // operator is either = or !=
-    $this->query->add_where($this->options['group'], "$upper(%s) $this->operator $upper('%s')", $field, $this->value);
+  function op_equal($field) {
+    $this->query->add_where($this->options['group'], $field, $this->value, $this->operator());
   }
 
-  function op_contains($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) LIKE $upper('%%%s%%')", $field, $this->value);
+  function op_contains($field) {
+    $this->query->add_where($this->options['group'], $field, "%$this->value%", 'LIKE');
   }
 
   function op_word($field, $upper) {
-    $where = array();
+    $where = $this->operator == 'word' ? db_or() : db_and();
+
     preg_match_all('/ (-?)("[^"]+"|[^" ]+)/i', ' ' . $this->value, $matches, PREG_SET_ORDER);
     foreach ($matches as $match) {
       $phrase = false;
@@ -248,9 +264,7 @@ class views_handler_filter_string extends views_handler_filter {
       $words = trim($match[2], ',?!();:-');
       $words = $phrase ? array($words) : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
       foreach ($words as $word) {
-        $where[] = "$upper(%s) LIKE $upper('%%%s%%')";
-        $values[] = $field;
-        $values[] = trim($word, " ,!?");
+        $where->condition($field, trim($word, " ,!?"), 'LIKE');
       }
     }
 
@@ -270,23 +284,31 @@ class views_handler_filter_string extends views_handler_filter {
   }
 
   function op_starts($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) LIKE $upper('%s%%')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field)", $this->value . '%', 'LIKE');
   }
 
   function op_not_starts($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) NOT LIKE $upper('%s%%')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field)", $this->value . '%', 'NOT LIKE');
   }
 
   function op_ends($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) LIKE $upper('%%%s')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field)", '%' . $this->value, 'LIKE');
   }
 
   function op_not_ends($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) NOT LIKE $upper('%%%s')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field)", '%' . $this->value, 'NOT LIKE');
   }
 
   function op_not($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) NOT LIKE $upper('%%%s%%')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field)", '%' . $this->value . '%', 'NOT LIKE');
+  }
+
+  function op_shorter($field, $upper) {
+    $this->query->add_where($this->options['group'], "LENGTH($upper($field))", $this->value, '<');
+  }
+
+  function op_longer($field, $upper) {
+    $this->query->add_where($this->options['group'], "LENGTH($upper($field))", $this->value, '>');
   }
 
   function op_empty($field) {
@@ -297,7 +319,7 @@ class views_handler_filter_string extends views_handler_filter {
       $operator = "IS NOT NULL";
     }
 
-    $this->query->add_where($this->options['group'], "$field $operator");
+    $this->query->add_where($this->options['group'], $field, NULL, $operator);
   }
 
 }

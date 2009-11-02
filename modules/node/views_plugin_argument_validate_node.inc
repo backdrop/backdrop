@@ -12,7 +12,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
   var $option_name = 'validate_argument_node_type';
 
   function validate_form(&$form, &$form_state) {
-    $types = node_get_types();
+    $types = node_type_get_types();
     foreach ($types as $type => $info) {
       $options[$type] = check_plain(t($info->name));
     }
@@ -30,7 +30,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
       '#options' => $options,
       '#default_value' => $arg,
       '#description' => t('If you wish to validate for specific node types, check them; if none are checked, all nodes will pass.'),
-      '#process' => array('expand_checkboxes', 'views_process_dependency'),
+      '#process' => array('form_process_checkboxes', 'views_process_dependency'),
       '#dependency' => array('edit-options-validate-type' => array($this->id)),
     );
 
@@ -93,13 +93,11 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
           return FALSE;
         }
 
-        $placeholders = implode(', ', array_fill(0, sizeof($nids->value), '%d'));
-
         $test = drupal_map_assoc($nids->value);
         $titles = array();
 
-        $result = db_query("SELECT * FROM {node} WHERE nid IN ($placeholders)", $nids->value);
-        while ($node = db_fetch_object($result)) {
+        $result = db_query("SELECT * FROM {node} WHERE nid IN (:nids)", array(':nids' =>  $nids->value));
+        foreach ($result as $node) {
           if ($types && empty($types[$node->type])) {
             return FALSE;
           }

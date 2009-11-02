@@ -138,7 +138,7 @@ class views_handler_filter_numeric extends views_handler_filter {
         $which = in_array($this->operator, $this->operator_values(2)) ? 'minmax' : 'value';
       }
       else {
-        $source = 'edit-' . form_clean_id($this->options['expose']['operator']);
+        $source = 'edit-' . drupal_html_id($this->options['expose']['operator']);
       }
     }
 
@@ -155,7 +155,7 @@ class views_handler_filter_numeric extends views_handler_filter {
         $form_state['input'][$identifier]['value'] = $this->value['value'];
       }
     }
-    else if ($which == 'value') {
+    elseif ($which == 'value') {
       // When exposed we drop the value-value and just do value if
       // the operator is locked.
       $form['value'] = array(
@@ -219,16 +219,15 @@ class views_handler_filter_numeric extends views_handler_filter {
 
   function op_between($field) {
     if ($this->operator == 'between') {
-      $this->query->add_where($this->options['group'], "$field >= %d", $this->value['min']);
-      $this->query->add_where($this->options['group'], "$field <= %d", $this->value['max']);
+      $this->query->add_where($this->options['group'], $field, array($this->value['min'], $this->value['max']), 'BETWEEN');
     }
     else {
-      $this->query->add_where($this->options['group'], "$field <= %d OR $field >= %d", $this->value['min'], $this->value['max']);
+      $this->query->add_where($this->options['group'], db_or()->condition($field, $this->value['min'], '<=')->condition($field, $this->value['max'], '>='));
     }
   }
 
   function op_simple($field) {
-    $this->query->add_where($this->options['group'], "$field $this->operator %d", $this->value['value']);
+    $this->query->add_where($this->options['group'], $field, $this->value['value'], $this->operator);
   }
 
   function op_empty($field) {
@@ -239,7 +238,7 @@ class views_handler_filter_numeric extends views_handler_filter {
       $operator = "IS NOT NULL";
     }
 
-    $this->query->add_where($this->options['group'], "$field $operator");
+    $this->query->add_where($this->options['group'], $field, NULL, $operator);
   }
 
   function admin_summary() {

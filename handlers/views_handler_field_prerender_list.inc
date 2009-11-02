@@ -57,7 +57,12 @@ class views_handler_field_prerender_list extends views_handler_field {
         return implode(check_plain($this->options['separator']), $this->items[$field]);
       }
       else {
-        return theme('item_list', $this->items[$field], NULL, $this->options['type']);
+        return theme('item_list',
+          array(
+            'items' => $this->items[$field],
+            'title' => NULL,
+            'type' => $this->options['type']
+          ));
       }
     }
   }
@@ -74,7 +79,12 @@ class views_handler_field_prerender_list extends views_handler_field {
         return implode(check_plain($this->options['separator']), $items);
       }
       else {
-        return theme('item_list', $items, NULL, $this->options['type']);
+        return theme('item_list',
+          array(
+            'items' => $this->items[$field],
+            'title' => NULL,
+            'type' => $this->options['type']
+          ));
       }
     }
   }
@@ -82,7 +92,7 @@ class views_handler_field_prerender_list extends views_handler_field {
   /**
    * Return an array of items for the field.
    *
-   * Items should be stored in the result array, if possible, as an array 
+   * Items should be stored in the result array, if possible, as an array
    * with 'value' as the actual displayable value of the item, plus
    * any items that might be found in the 'alter' options array for
    * creating links, such as 'path', 'fragment', 'query' etc, such a thing
@@ -94,7 +104,7 @@ class views_handler_field_prerender_list extends views_handler_field {
     if (!empty($this->items[$field])) {
       return $this->items[$field];
     }
-    
+
     return array();
   }
 

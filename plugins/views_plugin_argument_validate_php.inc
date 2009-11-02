@@ -31,7 +31,7 @@ class views_plugin_argument_validate_php extends views_plugin_argument_validate 
    * validate plugin.
    */
   function access() {
-    return user_access('use PHP for block visibility');
+    return user_access('use PHP for settings');
   }
 
   function validate_argument($argument) {

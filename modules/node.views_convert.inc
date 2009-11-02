@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_views_convert().
+ * Implements hook_views_convert().
  *
  * Intervene to convert field values from the Views 1 format to the
  * Views 2 format. Intervene only if $view->add_item() won't produce
@@ -62,7 +62,7 @@ function node_views_convert($display, $type, &$view, $field, $id = NULL) {
         case 'node':
           switch ($field['field']) {
             case 'type':
-              $operators = array('OR' => 'in', 'NOR' => 'not in');
+              $operators = array('OR' => 'IN', 'NOR' => 'NOT IN');
               $view->set_item_option($display, 'filter', $id, 'operator', $operators[$field['operator']]);
               break;
             case 'anon':

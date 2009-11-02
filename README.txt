@@ -2,7 +2,7 @@
 
 Welcome to Views 2. Please see the advanced help for more information.
 
-If you're having trouble installing this module, please ensure that your 
+If you're having trouble installing this module, please ensure that your
 tar program is not flattening the directory tree, truncating filenames
 or losing files.
 

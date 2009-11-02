@@ -1,0 +1,52 @@
+<?php
+// $Id$
+
+function views_test_install() {
+  drupal_install_schema('views_test');
+}
+
+function views_test_uninstall() {
+  drupal_uninstall_schema('views_test');
+}
+
+function views_test_schema() {
+  $schema['views_test'] = array(
+    'description' => 'Basic test table for Views tests.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => "A person's name",
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'age' => array(
+        'description' => "The person's age",
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+      'job' => array(
+        'description' => "The person's job",
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'Undefined',
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'name' => array('name')
+    ),
+    'indexes' => array(
+      'ages' => array('age'),
+    ),
+  );
+
+  return $schema;
+}

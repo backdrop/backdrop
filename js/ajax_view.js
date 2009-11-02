@@ -5,6 +5,7 @@
  *
  * Handles AJAX fetching of views, including filter submission and response.
  */
+(function ($) {
 
 Drupal.Views.Ajax = Drupal.Views.Ajax || {};
 
@@ -29,7 +30,7 @@ Drupal.Views.Ajax.ajaxViewResponse = function(target, response) {
     $view = $newView;
     Drupal.attachBehaviors($view.parent());
   }
- 
+
   if (response.messages) {
     // Show any messages (but first remove old ones, if there are any).
     $view.find('.views-messages').remove().end().prepend(response.messages);
@@ -37,7 +38,7 @@ Drupal.Views.Ajax.ajaxViewResponse = function(target, response) {
 };
 
 /**
- * Ajax behavior for views. 
+ * Ajax behavior for views.
  */
 Drupal.behaviors.ViewsAjaxView = function() {
   if (Drupal.settings && Drupal.settings.views && Drupal.settings.views.ajaxViews) {
@@ -154,3 +155,5 @@ Drupal.behaviors.ViewsAjaxView = function() {
     }); // .each Drupal.settings.views.ajaxViews
   } // if
 };
+
+})(jQuery);

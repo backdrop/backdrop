@@ -1,0 +1,644 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Tests for Views query features.
+ */
+
+/**
+ * Abstract class for views testing
+ */
+abstract class ViewsTestCase extends DrupalWebTestCase {
+  /**
+   * Helper function: verify a result set returned by view.
+   *
+   * The comparison is done on the string representation of the columns of the
+   * column map, taking the order of the rows into account, but not the order
+   * of the columns.
+   *
+   * @param $view
+   *  An executed View.
+   * @param $expected_result
+   *  An expected result set.
+   * @param $column_map
+   *  An associative array mapping the columns of the result set from the view
+   *  (as keys) and the expected result set (as values).
+   */
+  protected function assertIdenticalResultset($view, $expected_result, $column_map, $message = 'Identical result set') {
+    // Convert $view->result to an array of arrays.
+    $result = array();
+    foreach ($view->result as $key => $value) {
+      $row = array();
+      foreach ($column_map as $view_column => $expected_column) {
+        // The comparison will be done on the string representation of the value.
+        $row[$expected_column] = (string) $value->$view_column;
+      }
+      $result[$key] = $row;
+    }
+
+    // Remove the columns we don't need from the expected result.
+    foreach ($expected_result as $key => $value) {
+      $row = array();
+      foreach ($column_map as $expected_column) {
+        // The comparison will be done on the string representation of the value.
+        $row[$expected_column] = (string) $value[$expected_column];
+      }
+      $expected_result[$key] = $row;
+    }
+
+    // Reset the numbering of the arrays.
+    $result = array_values($result);
+    $expected_result = array_values($expected_result);
+
+    // Do the actual comparison.
+    return $this->assertIdentical($result, $expected_result, $message);
+  }
+
+  /**
+   * Helper function: order an array of array based on a column.
+   */
+  protected function orderResultSet($result_set, $column, $reverse = FALSE) {
+    $this->sort_column = $column;
+    $this->sort_order = $reverse ? -1 : 1;
+    usort($result_set, array($this, 'helperCompareFunction'));
+    return $result_set;
+  }
+
+  protected $sort_column = NULL;
+  protected $sort_order = 1;
+
+  /**
+   * Helper comparison function for orderResultSet().
+   */
+  protected function helperCompareFunction($a, $b) {
+    $value1 = $a[$this->sort_column];
+    $value2 = $b[$this->sort_column];
+    if ($value1 == $value2) {
+        return 0;
+    }
+    return $this->sort_order * (($value1 < $value2) ? -1 : 1);
+  }
+}
+
+
+/**
+ * Basic test class for Views query builder tests.
+ */
+class ViewsBasicTest extends ViewsTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => t('Basic query test'),
+      'description' => t('A basic query test for Views.'),
+      'group' => t('Views')
+    );
+  }
+
+  protected function setUp() {
+    parent::setUp('views', 'views_test');
+
+    // Load the test dataset.
+    $query = db_insert('views_test')
+      ->fields(array('name', 'age', 'job'));
+    foreach ($this->testDataSet() as $record) {
+      $query->values($record);
+    }
+    $query->execute();
+  }
+
+  /**
+   * A very simple test dataset.
+   */
+  protected function testDataSet() {
+    return array(
+      array(
+        'name' => 'John',
+        'age' => 25,
+        'job' => 'Singer',
+      ),
+      array(
+        'name' => 'George',
+        'age' => 27,
+        'job' => 'Singer',
+      ),
+      array(
+        'name' => 'Ringo',
+        'age' => 28,
+        'job' => 'Drummer',
+      ),
+      array(
+        'name' => 'Paul',
+        'age' => 26,
+        'job' => 'Songwriter',
+      ),
+      array(
+        'name' => 'Meredith',
+        'age' => 30,
+        'job' => 'Speaker',
+      ),
+    );
+  }
+
+  /**
+   * Build and return a basic view of the views_test table.
+   */
+  protected function getBasicView() {
+    views_include('view');
+
+    // Create the basic view.
+    $view = new view();
+    $view->vid = 'test_view';
+    $view->add_display('default');
+    $view->base_table = 'views_test';
+
+    // Set up the fields we need.
+    $display = $view->new_display('default', 'Defaults', 'default');
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Set up the sort order.
+    $display->override_option('sorts', array(
+      'id' => array(
+        'order' => 'ASC',
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+    ));
+
+    return $view;
+  }
+
+  /**
+   * Test a trivial result set.
+   */
+  protected function testSimpleResultSet() {
+    $view = $this->getBasicView();
+
+    // Execute the view.
+    $view->execute();
+
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+    $this->assertIdenticalResultset($view, $this->testDataSet(), array(
+      'views_test_name' => 'name',
+      'views_test_age' => 'age',
+    ));
+  }
+
+  /**
+   * Test ordering of the result set.
+   */
+  protected function testSimpleOrdering() {
+    $view = $this->getBasicView();
+
+    // Change the ordering
+    $view->display['default']->handler->override_option('sorts', array(
+      'age' => array(
+        'order' => 'ASC',
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Execute the view.
+    $view->execute();
+
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+    $this->assertIdenticalResultset($view, $this->orderResultSet($this->testDataSet(), 'age'), array(
+      'views_test_name' => 'name',
+      'views_test_age' => 'age',
+    ));
+  }
+
+  /**
+   * Test filtering of the result set.
+   */
+  protected function testSimpleFiltering() {
+    $view = $this->getBasicView();
+
+    // Add a filter.
+    $view->display['default']->handler->override_option('filters', array(
+      'age' => array(
+        'operator' => '<',
+        'value' => array(
+          'value' => '28',
+          'min' => '',
+          'max' => '',
+        ),
+        'group' => '0',
+        'exposed' => FALSE,
+        'expose' => array(
+          'operator' => FALSE,
+          'label' => '',
+        ),
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Execute the view.
+    $view->execute();
+
+    // Build the expected result.
+    $dataset = array(
+      array(
+        'id' => 1,
+        'name' => 'John',
+        'age' => 25,
+      ),
+      array(
+        'id' => 2,
+        'name' => 'George',
+        'age' => 27,
+      ),
+      array(
+        'id' => 4,
+        'name' => 'Paul',
+        'age' => 26,
+      ),
+    );
+
+    // Verify the result.
+    $this->assertEqual(3, count($view->result), t('The number of returned rows match.'));
+    $this->assertIdenticalResultSet($view, $dataset, array(
+      'views_test_name' => 'name',
+      'views_test_age' => 'age',
+    ));
+  }
+
+  /**
+   * Test simple argument.
+   */
+  protected function testSimpleArgument() {
+    $view = $this->getBasicView();
+
+    // Add a argument.
+    $view->display['default']->handler->override_option('arguments', array(
+      'age' => array(
+        'default_action' => 'ignore',
+        'style_plugin' => 'default_summary',
+        'style_options' => array(),
+        'wildcard' => 'all',
+        'wildcard_substitution' => 'All',
+        'title' => '',
+        'breadcrumb' => '',
+        'default_argument_type' => 'fixed',
+        'default_argument' => '',
+        'validate_type' => 'none',
+        'validate_fail' => 'not found',
+        'break_phrase' => 0,
+        'not' => 0,
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'validate_user_argument_type' => 'uid',
+        'validate_user_roles' => array(
+          '2' => 0,
+        ),
+        'relationship' => 'none',
+        'default_options_div_prefix' => '',
+        'default_argument_user' => 0,
+        'default_argument_fixed' => '',
+        'default_argument_php' => '',
+        'validate_argument_node_type' => array(
+          'page' => 0,
+          'story' => 0,
+        ),
+        'validate_argument_node_access' => 0,
+        'validate_argument_nid_type' => 'nid',
+        'validate_argument_vocabulary' => array(),
+        'validate_argument_type' => 'tid',
+        'validate_argument_transform' => 0,
+        'validate_user_restrict_roles' => 0,
+        'validate_argument_php' => '',
+      )
+    ));
+
+    $saved_view = clone $view;
+
+    // Execute with a view
+    $view->set_arguments(array(27));
+    $view->execute();
+
+    // Build the expected result.
+    $dataset = array(
+      array(
+        'id' => 2,
+        'name' => 'George',
+        'age' => 27,
+      ),
+    );
+
+    // Verify the result.
+    $this->assertEqual(1, count($view->result), t('The number of returned rows match.'));
+    $this->assertIdenticalResultSet($view, $dataset, array(
+      'views_test_name' => 'name',
+      'views_test_age' => 'age',
+    ));
+
+    // Test "show all" if no argument is present.
+    $view = $saved_view;
+    $view->execute();
+
+    // Build the expected result.
+    $dataset = $this->testDataSet();
+
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+    $this->assertIdenticalResultSet($view, $dataset, array(
+      'views_test_name' => 'name',
+      'views_test_age' => 'age',
+    ));
+  }
+
+  /**
+   * Test some SetHelpers of class view.
+   *
+   * @TODO Test exposed_filters.
+   *       Test set_use_pager.
+   *       Find a better name for this function.
+   */
+  protected function testSetHelpers() {
+    $view = $this->getBasicView();
+    $saved_view = clone $view;
+
+    // Test Items per page.
+    $view->set_items_per_page(2);
+
+    // Execute the view.
+    $view->execute();
+
+    // Build the expected result.
+    $dataset = array(
+      array(
+        'name' => 'John',
+        'age' => 25,
+        'job' => 'Singer',
+      ),
+      array(
+        'name' => 'George',
+        'age' => 27,
+        'job' => 'Singer',
+      ),
+    );
+
+    $this->assertEqual(2, count($view->result), t('The number of returned rows match.'));
+    $this->assertIdenticalResultSet($view, $dataset, array(
+      'views_test_name' => 'name',
+      'views_test_age' => 'age',
+    ));
+
+    // Test Offset.
+    $view = $saved_view;
+
+    $view->set_offset(1);
+
+    // Execute the view.
+    $view->execute();
+
+    // Build the expected result.
+    $dataset = array(
+      array(
+        'name' => 'George',
+        'age' => 27,
+        'job' => 'Singer',
+      ),
+      array(
+        'name' => 'Ringo',
+        'age' => 28,
+        'job' => 'Drummer',
+      ),
+      array(
+        'name' => 'Paul',
+        'age' => 26,
+        'job' => 'Songwriter',
+      ),
+      array(
+        'name' => 'Meredith',
+        'age' => 30,
+        'job' => 'Speaker',
+      ),
+    );
+
+    $this->assertEqual(4, count($view->result), t('The number of returned rows match.'));
+    $this->assertIdenticalResultSet($view, $dataset, array(
+      'views_test_name' => 'name',
+      'views_test_age' => 'age',
+    ));
+  }
+}
+
+/**
+ * Basic test for pluggable caching.
+ */
+class ViewsCacheTest extends ViewsTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => t('Pluggable caching test'),
+      'description' => t('Tests pluggable caching for views.'),
+      'group' => t('Views')
+    );
+  }
+
+  protected function setUp() {
+    parent::setUp('views', 'views_test');
+
+    // Load the test dataset.
+    $query = db_insert('views_test')
+      ->fields(array('name', 'age', 'job'));
+    foreach ($this->testDataSet() as $record) {
+      $query->values($record);
+    }
+    $query->execute();
+  }
+
+  /**
+   * A very simple test dataset.
+   */
+  protected function testDataSet() {
+    return array(
+      array(
+        'name' => 'John',
+        'age' => 25,
+        'job' => 'Singer',
+      ),
+      array(
+        'name' => 'George',
+        'age' => 27,
+        'job' => 'Singer',
+      ),
+      array(
+        'name' => 'Ringo',
+        'age' => 28,
+        'job' => 'Drummer',
+      ),
+      array(
+        'name' => 'Paul',
+        'age' => 26,
+        'job' => 'Songwriter',
+      ),
+      array(
+        'name' => 'Meredith',
+        'age' => 30,
+        'job' => 'Speaker',
+      ),
+    );
+  }
+
+
+  /**
+   * Build and return a basic view of the views_test table.
+   */
+  protected function getBasicView() {
+    views_include('view');
+
+    // Create the basic view.
+    $view = new view();
+    $view->vid = 'test_view';
+    $view->add_display('default');
+    $view->base_table = 'views_test';
+
+    // Set up the fields we need.
+    $display = $view->new_display('default', 'Defaults', 'default');
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Set up the sort order.
+    $display->override_option('sorts', array(
+      'id' => array(
+        'order' => 'ASC',
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+    ));
+
+    return $view;
+  }
+
+  /**
+   * Tests time based caching.
+   */
+  function testTimeCaching() {
+    // Create a basic result which just 2 results.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'time',
+      'results_lifespan' => '3600',
+      'output_lifespan' => '3600',
+    ));
+
+    $view->execute();
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+
+    // Add another man to the beatles.
+    $query = db_insert('views_test')
+      ->fields(array('name', 'age', 'job'));
+    $record = array(
+      'name' => 'Rod Davis',
+      'age' => 29,
+      'job' => 'Banjo',
+    );
+    $query->values($record);
+    $query->execute();
+
+    // The Result should be the same as before, because of the caching.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'time',
+      'results_lifespan' => '3600',
+      'output_lifespan' => '3600',
+    ));
+
+    $view->execute();
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+  }
+
+  /**
+   * Tests no caching.
+   */
+  function testNoneCaching() {
+    // Create a basic result which just 2 results.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'none',
+    ));
+
+    $view->execute();
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+
+    // Add another man to the beatles.
+    $query = db_insert('views_test')
+      ->fields(array('name', 'age', 'job'));
+    $record = array(
+      'name' => 'Rod Davis',
+      'age' => 29,
+      'job' => 'Banjo',
+    );
+    $query->values($record);
+    $query->execute();
+
+    // The Result should be the same as before, because of the caching.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'time',
+      'results_lifespan' => '3600',
+      'output_lifespan' => '3600',
+    ));
+
+    $view->execute();
+    // Verify the result.
+    $this->assertEqual(6, count($view->result), t('The number of returned rows match.'));
+  }
+}
+

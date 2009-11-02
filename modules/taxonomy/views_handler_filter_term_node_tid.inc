@@ -29,7 +29,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       // We only do this when the form is displayed so this query doesn't run
       // unnecessarily just when the object is constructed.
       if ($this->options['vid'] == 0) {
-        $this->options['vid'] = db_result(db_query('SELECT MIN(vid) FROM {vocabulary} v'));
+        $this->options['vid'] = db_query('SELECT MIN(vid) FROM {taxonomy_vocabulary} v')->fetchField();
       }
 
       $form['vid'] = array(
@@ -44,7 +44,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     $form['markup_start'] = array(
-      '#value' => '<div class="views-left-40">',
+      '#markup' => '<div class="views-left-40">',
     );
 
     $form['type'] = array(
@@ -63,7 +63,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     );
 
     $form['markup_end'] = array(
-      '#value' => '</div>',
+      '#markup' => '</div>',
     );
   }
 
@@ -71,9 +71,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $vocabulary = taxonomy_vocabulary_load($this->options['vid']);
     if (empty($vocabulary) && $this->options['limit']) {
       $form['markup'] = array(
-        '#prefix' => '<div class="form-item">',
-        '#suffix' => '</div>',
-        '#value' => t('An invalid vocabulary is selected. Please change it in the options.'),
+        '#markup' => '<div class="form-item">' . t('An invalid vocabulary is selected. Please change it in the options.') . '</div>',
       );
       return;
     }
@@ -81,8 +79,9 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     if ($this->options['type'] == 'textfield') {
       $default = '';
       if ($this->value) {
-        $result = db_query("SELECT * FROM {term_data} td WHERE td.tid IN (" . implode(', ', $this->value) . ')');
-        while ($term = db_fetch_object($result)) {
+        $result = db_query("SELECT * FROM {taxonomy_term_data} td WHERE td.tid IN (:tids)", array(
+          ':tids' => $this->value));
+        foreach ($result as $term) {
           if ($default) {
             $default .= ', ';
           }
@@ -116,12 +115,12 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       else {
         $options = array();
         if ($this->options['limit']) {
-          $result = db_query("SELECT * FROM {term_data} WHERE vid = %d ORDER BY weight, name", $vocabulary->vid);
+          $result = db_query("SELECT * FROM {taxonomy_term_data} WHERE vid = :vid ORDER BY weight, name", array(':vid' => $vocabulary->vid));
         }
         else {
-          $result = db_query("SELECT td.* FROM {term_data} td INNER JOIN {vocabulary} v ON td.vid = v.vid ORDER BY v.weight, v.name, td.weight, td.name");
+          $result = db_query("SELECT td.* FROM {taxonomy_term_data} td INNER JOIN {taxonomy_vocabulary} v ON td.vid = v.vid ORDER BY v.weight, v.name, td.weight, td.name");
         }
-        while ($term = db_fetch_object($result)) {
+        foreach ($result as $term) {
           $options[$term->tid] = $term->name;
         }
       }
@@ -143,7 +142,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
           if (!empty($this->options['expose']['optional']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
             $default_value = 'All';
           }
-          else if (empty($default_value)) {
+          elseif (empty($default_value)) {
             $keys = array_keys($options);
             $default_value = array_shift($keys);
           }
@@ -252,19 +251,20 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $results = array();
     foreach ($values as $value) {
       $missing[strtolower($value)] = TRUE;
-      $args[] = $value;
-      $placeholders[] = "'%s'";
+      $names[] = $value;
     }
 
-    if (!$args) {
+    if (!$names) {
       return;
     }
 
-    // add the taxonomy vid to the argument list.
-    $args[] = $this->options['vid'];
-
-    $result = db_query("SELECT * FROM {term_data} WHERE name IN (" . implode(', ', $placeholders) . ") AND vid = %d", $args);
-    while ($term = db_fetch_object($result)) {
+    //$result = db_query("SELECT * FROM {taxonomy_term_data} WHERE name IN (" . implode(', ', $placeholders) . ") AND vid = %d", $args);
+    $result = db_query("SELECT * FROM {taxonomy_term_data} WHERE name IN (:name) AND vid = :vid",
+      array(
+        ':vid' => $this->options['vid'],
+        ':name' => $names
+      ));
+    foreach ($result as $term) {
       unset($missing[strtolower($term->name)]);
       $tids[] = $term->tid;
     }
@@ -292,9 +292,9 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $this->value_options = array();
 
     if ($this->value) {
-      $result = db_query("SELECT * FROM {term_data} td WHERE td.tid IN ("  . implode(', ', $this->value) . ")");
+      $result = db_query("SELECT * FROM {taxonomy_term_data} td WHERE td.tid IN (:tids)", array(':tids' => $this->value));
 
-      while ($term = db_fetch_object($result)) {
+      foreach ($result as $term) {
         $this->value_options[$term->tid] = $term->name;
       }
     }

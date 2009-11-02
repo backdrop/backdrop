@@ -84,11 +84,11 @@ class views_handler_argument_numeric extends views_handler_argument {
     if (count($this->value) > 1) {
       $operator = empty($this->options['not']) ? 'IN' : 'NOT IN';
       $placeholders = implode(', ', array_fill(0, sizeof($this->value), '%d'));
-      $this->query->add_where(0, "$this->table_alias.$this->real_field $operator ($placeholders)", $this->value);
+      $this->query->add_where(0, "$this->table_alias.$this->real_field", $this->value, $operator);
     }
     else {
       $operator = empty($this->options['not']) ? '=' : '!=';
-      $this->query->add_where(0, "$this->table_alias.$this->real_field $operator %d", $this->argument);
+      $this->query->add_where(0, "$this->table_alias.$this->real_field", $this->argument, $operator);
     }
   }
 }

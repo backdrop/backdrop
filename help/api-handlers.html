@@ -1,5 +1,5 @@
 <!-- $Id$ -->
-In Views, a handler is an object that is part of the view and is part of the query building flow. 
+In Views, a handler is an object that is part of the view and is part of the query building flow.
 
 Handlers are objects; much of the time, the base handlers will work, but often you'll need to override the handler for something. One typical handler override will be views_handler_filter_operator_in which allows you to have a filter select from a list of options; you'll need to override this to provide your list.
 
@@ -52,15 +52,7 @@ class views_handler_filter_node_type extends views_handler_filter_in_operator {
 
 Handlers are stored in their own files; for these files to be loaded by Views on demand, they must first be registered. Since Views core handlers are also loaded this way, it's imperative that your module also implement this pattern in order to prevent code crashes when your handler's parent class is not yet available.
 
-To register handlers, you must implement <strong>hook_views_handlers()</strong>. This hook returns an array with two keys; the first key is <em>info</em> which contains the modulename (which is only necessary if you're registering handlers on behalf of another module, such as what Views does) and <em>path</em>, which is the search path to find the files. This path is only necessary if your files will not be stored in the same directory as the .module file.
-
-The other key is <em>handlers</em> which contains a full array of handlers and the information for each handler. The key to each handler array is the name of the handler class. It can contain:
-<dl>
-<dt><strong>parent</strong></dt>
-<dd>The class that this handler extends. This is important to make sure that the parent class is included before your handler class. Without this, you may cause people's sites to crash in a difficult to recover state. Be sure you get this right!</dd>
-<dt><strong>file</strong></dt>
-<dd>The filename the handler is in. By default, this will be classname.inc -- however, you can have multiple similar handlers together in one file. However, because there is only one parent, please be sure that the parentage on these handlers matches! Otherwise you will run into whitescreens as not all parents will be loaded.</dd>
-</dl>
+To register handlers, you must implement <strong>hook_views_handlers()</strong>. This hook returns an array of handlers. Each element of the array is the name of a handler class.
 
 You can see examples of this function in any of the various module.views.inc files in the views modules directory.
 

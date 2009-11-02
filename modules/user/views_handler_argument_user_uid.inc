@@ -18,10 +18,9 @@ class views_handler_argument_user_uid extends views_handler_argument_numeric {
     }
 
     $titles = array();
-    $placeholders = implode(', ', array_fill(0, sizeof($this->value), '%d'));
 
-    $result = db_query("SELECT u.name FROM {users} u WHERE u.uid IN ($placeholders)", $this->value);
-    while ($term = db_fetch_object($result)) {
+    $result = db_query("SELECT u.name FROM {users} u WHERE u.uid IN (:uids)", array(':uids' => $this->value));
+    foreach ($result as $term) {
       $titles[] = check_plain($term->name);
     }
     return $titles;

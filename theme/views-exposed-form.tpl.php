@@ -23,7 +23,7 @@
   ?>
 <?php endif; ?>
 <div class="views-exposed-form">
-  <div class="views-exposed-widgets clear-block">
+  <div class="views-exposed-widgets clearfix">
     <?php foreach($widgets as $id => $widget): ?>
       <div class="views-exposed-widget">
         <?php if (!empty($widget->label)): ?>

@@ -22,13 +22,11 @@ function views_ajax() {
     $dom_id = isset($_REQUEST['view_dom_id']) ? $_REQUEST['view_dom_id'] : NULL;
     $pager_element = isset($_REQUEST['pager_element']) ? $_REQUEST['pager_element'] : NULL;
     views_include('ajax');
-    $object = new stdClass();
 
-    $object->status = FALSE;
-    $object->display = '';
+    $commands = array();
 
     $arg = explode('/', $_REQUEST['view_path']);
-    
+
     if ($arg[0] == 'admin' || (variable_get('node_admin_theme', '0') && $arg[0] == 'node' && ($arg[1] == 'add' || $arg[2] == 'edit'))) {
         global $custom_theme;
         $custom_theme = variable_get('admin_theme', '0');
@@ -52,56 +50,134 @@ function views_ajax() {
 
         $errors = $view->validate();
         if ($errors === TRUE) {
-          $object->status = TRUE;
-          $object->title = $view->get_title();
-          $object->display .= $view->preview($display_id, $args);
+          $commands[] = ajax_command_replace('#' . $domid, $view->get_title());
+          $commands[] = ajax_command_replace('#' . $dom_id, $view->preview($display_id, $args));
         }
         else {
           foreach ($errors as $error) {
             drupal_set_message($error, 'error');
           }
         }
-        // Register the standard JavaScript callback.
-        $object->__callbacks = array('Drupal.Views.Ajax.ajaxViewResponse');
-        // Allow other modules to extend the data returned.
-        drupal_alter('ajax_data', $object, 'views', $view);
       }
     }
-    $messages = theme('status_messages');
-    $object->messages = $messages ? '<div class="views-messages">' . $messages . '</div>' : '';
 
-    views_ajax_render($object);
+    $messages = theme('status_messages');
+    $commands[] = ajax_command_replace('.views-messages', $messages);
+
+    ajax_render($commands);
   }
 }
 
 /**
- * Simple render function to make sure output is what we want.
+ * Creates a Drupal AJAX 'viewsSetForm' command.
  *
- * This function renders an object into JSON, and that object contains
- * commands to the ajax response parser on the other side. The actual
- * commands that can be sent are completely dependent upon the client
- * javascript parser, which can be anything, but this function assumes
- * that 'display', at least, will be displayed in some kind of ajax
- * spot or popup.
+ * @param $output
+ *   The form to display in the modal.
+ * @param $title
+ *   The title.
+ * @param $url
+ *   An optional URL.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
  */
-function views_ajax_render($output = NULL, $title = NULL, $url = NULL, $js = NULL) {
-  if (empty($output)) {
-    $output->display = t('Server reports invalid input error.');
-    $output->title = t('Error');
+function views_ajax_command_set_form($output, $title, $url = NULL) {
+  $command = array(
+    'command' => 'viewsSetForm',
+    'output' => $output,
+    'title' => $title,
+  );
+  if (isset($url)) {
+    $command['url'] = $url;
   }
-  elseif (!is_object($output)) {
-    $temp = new stdClass();
-    $temp->display = $output;
-    $temp->title = $title;
-    $temp->url = $url;
-    $output = $temp;
-  }
-  if (!empty($js)) {
-    $output->js = $js;
-  }
+  return $command;
+}
 
-  drupal_json($output);
-  exit;
+/**
+ * Creates a Drupal AJAX 'viewsDismissForm' command.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_dismiss_form() {
+  $command = array(
+    'command' => 'viewsDismissForm',
+  );
+  return $command;
+}
+
+/**
+ * Creates a Drupal AJAX 'viewsHilite' command.
+ *
+ * @param $selector
+ *   The selector to highlight
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_hilite($selector) {
+  return array(
+    'command' => 'viewsHilite',
+    'selector' => $selector,
+  );
+}
+
+/**
+ * Creates a Drupal AJAX 'addTab' command.
+ *
+ * @param $id
+ *   The DOM ID.
+ * @param $title
+ *   The title.
+ * @param $body
+ *   The body.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_add_tab($id, $title, $body) {
+  $command = array(
+    'command' => 'viewsAddTab',
+    'id' => $id,
+    'title' => $title,
+    'body' => $body,
+  );
+  return $command;
+}
+
+/**
+ * Disables Save, Cancel, and Delete buttons.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_disable_buttons() {
+  $command = array(
+    'command' => 'viewsDisableButtons',
+  );
+  return $command;
+}
+
+/**
+ * Enables Save, Cancel, and Delete buttons.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_enable_buttons() {
+  $command = array(
+    'command' => 'viewsEnableButtons',
+  );
+  return $command;
+}
+
+/**
+ * Return an AJAX error.
+ */
+function views_ajax_error($message) {
+  $commands = array();
+  $commands[] = views_ajax_command_set_form($message, t('Error'));
+  ajax_render($commands);
 }
 
 /**
@@ -115,29 +191,38 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     'no_redirect' => !empty($form_state['ajax']),
   );
 
-  $output = drupal_build_form($form_id, $form_state);
+  $output = drupal_render(drupal_build_form($form_id, $form_state));
   if (!empty($form_state['ajax']) && empty($form_state['executed'])) {
     // If the form didn't execute and we're using ajax, build up a
-    // json command object to render.
-    $object = new stdClass();
-    $object->display = '';
-    if ($messages = theme('status_messages')) {
-      $object->display = '<div class="views-messages">' . $messages . '</div>';
-    }
-    $object->display .= $output;
+    // Ajax command list to execute.
+    $commands = array();
 
-    $object->title = empty($form_state['title']) ? '' : $form_state['title'];
+    $display = '';
+    if ($messages = theme('status_messages')) {
+      $display = '<div class="views-messages">' . $messages . '</div>';
+    }
+    $display .= $output;
+
+    $title = empty($form_state['title']) ? '' : $form_state['title'];
     if (!empty($form_state['help_topic'])) {
       $module = !empty($form_state['help_module']) ? $form_state['help_module'] : 'views';
-      $object->title = theme('advanced_help_topic', $module, $form_state['help_topic']) . $object->title;
-    }
-    $object->url = empty($form_state['url']) ? url($_GET['q'], array('absolute' => TRUE)) : $form_state['url'];
-    $object->js = empty($form_state['js settings']) ? NULL : $form_state['js settings'];
-    if (!empty($form_state['#section'])) {
-      $object->hilite = '.' . views_ui_item_css($form_state['#section']);
+      if (module_exists('advanced_help')) {
+        $title = theme('advanced_help_topic', array('module' => $module, 'topic' => $form_state['help_topic'])) . $title;
+      }
     }
 
-    $output = $object;
+    $url = empty($form_state['url']) ? url($_GET['q'], array('absolute' => TRUE)) : $form_state['url'];
+
+    $commands[] = views_ajax_command_set_form($display, $title, $url);
+    if (!empty($form_state['js settings'])) {
+      $commands[] = ajax_command_settings($form_state['js settings']);
+    }
+
+    if (!empty($form_state['#section'])) {
+      $commands[] = views_ajax_command_hilite('.' . views_ui_item_css($form_state['#section']));
+    }
+
+    return $commands;
   }
 
   // These forms have the title built in, so set the title here:
@@ -165,9 +250,13 @@ function views_ajax_autocomplete_user($string = '') {
     if (strpos('anonymous', strtolower($last_string)) !== FALSE) {
       $matches[$prefix . 'Anonymous'] = 'Anonymous';
     }
-    $result = db_query_range("SELECT name FROM {users} WHERE LOWER(name) LIKE LOWER('%s%%')", $last_string, 0, 10);
+    $result = db_query_range("SELECT name FROM {users} WHERE name = :string",
+      0, 1,
+      array(
+        ':string' => $last_string
+      ));
 
-    while ($account = db_fetch_object($result)) {
+    foreach ($result as $account) {
       $n = $account->name;
       // Commas and quotes in terms are special cases, so encode 'em.
       if (strpos($account->name, ',') !== FALSE || strpos($account->name, '"') !== FALSE) {
@@ -177,7 +266,7 @@ function views_ajax_autocomplete_user($string = '') {
     }
   }
 
-  drupal_json($matches);
+  drupal_json_output($matches);
 }
 
 /**

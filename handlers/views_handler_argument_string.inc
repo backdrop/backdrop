@@ -167,7 +167,7 @@ class views_handler_argument_string extends views_handler_argument {
       $field = $this->get_formula();
     }
 
-    $this->query->add_where(0, "$field = '%s'", $argument);
+    $this->query->add_where(0, $field, $argument);
   }
 
   function summary_argument($data) {

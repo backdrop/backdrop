@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_default_view_views().
+ * Implements hook_default_view_views().
  */
 function comment_views_default_views() {
   $view = new view;
@@ -281,7 +281,7 @@ function comment_views_default_views() {
         'table' => 'comments',
         'field' => 'status',
         'operator' => '=',
-        'value' => 0,
+        'value' => 1,
         'group' => 0,
         'exposed' => FALSE,
         'expose' => array(

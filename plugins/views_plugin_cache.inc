@@ -73,7 +73,7 @@ class views_plugin_cache extends views_plugin {
       case 'results':
         $data = array(
           'result' => $this->view->result,
-          'total_rows' => $this->view->total_rows,
+          'total_rows' => isset($this->view->total_rows) ? $this->view->total_rows : 0,
           'pager' => $this->view->pager,
         );
         cache_set($this->get_results_key(), $data, $this->table);
@@ -164,11 +164,13 @@ class views_plugin_cache extends views_plugin {
    * will be removed so that we don't hold onto it.
    */
   function cache_start() {
-    $this->storage['head'] = drupal_set_html_head();
-    $this->storage['css'] = drupal_add_css();
-
-    foreach (array('header', 'footer') as $scope) {
-      $this->storage['js'][$scope] = drupal_add_js(NULL, NULL, $scope);
+    $this->storage['head'] = drupal_add_html_head();
+    $this->storage['css'] = drupal_add_css();  
+    $js = drupal_add_js();
+    foreach ($js as $key => $data) {
+      if ($data['scope'] == 'header' || $data['scope'] == 'footer') {
+        $this->storage['js'][$data['scope']][$key] = $data;
+      }
     }
   }
 
@@ -177,20 +179,21 @@ class views_plugin_cache extends views_plugin {
    */
   function gather_headers() {
     // Simple replacement for head
-    $this->storage['head'] = str_replace($this->storage['head'], '', drupal_set_html_head());
+    if (isset($this->storage['head'])) {
+      $this->storage['head'] = str_replace($this->storage['head'], '', drupal_add_html_head());
+    }
+    else {
+      $this->storage['head'] = '';
+    }
 
     // Slightly less simple for CSS:
     $css = drupal_add_css();
-    $start = $this->storage['css'];
+    $start = isset($this->storage['css']) ? $this->storage['css'] : array();
     $this->storage['css'] = array();
 
-    foreach ($css as $media => $medias) {
-      foreach ($medias as $type => $types) {
-        foreach ($types as $path => $preprocess) {
-          if (!isset($start[$media][$type][$path])) {
-            $this->storage['css'][] = array($path, $type, $media, $preprocess);
-          }
-        }
+    foreach ($css as $file => $data) {
+      if (!isset($this->storage['css'][$file])) {
+        $this->storage['css'][$file] = $data;
       }
     }
 
@@ -200,27 +203,14 @@ class views_plugin_cache extends views_plugin {
       $js[$scope] = drupal_add_js(NULL, NULL, $scope);
     }
 
-    $start = $this->storage['js'];
+    $start = isset($this->storage['js']) ? $this->storage['js'] : array();
     $this->storage['js'] = array();
 
-    foreach ($js as $scope => $scopes) {
-      foreach ($scopes as $type => $types) {
-        foreach ($types as $id => $info) {
-          if (!isset($start[$scope][$type][$id])) {
-            switch ($type) {
-              case 'setting':
-                $this->storage['js'][] = array($info, $type, $scope);
-                break;
+return; // @TODO: fixme
 
-              case 'inline':
-                $this->storage['js'][] = array($info['code'], $type, $scope, $info['defer']);
-                break;
-
-              default:
-                $this->storage['js'][] = array($id, $type, $scope, $info['defer'], $info['cache']);
-            }
-          }
-        }
+    foreach ($js as $key => $data) {
+      if (!isset($start[$key][$data['scope']][$key]) && ($data['scope'] == 'header' || $data['scope'] == 'footer')) {
+        $this->storage['js'][$data['scope']][$key] = $data;
       }
     }
   }
@@ -230,7 +220,7 @@ class views_plugin_cache extends views_plugin {
    */
   function restore_headers() {
     if (!empty($this->storage['head'])) {
-      drupal_set_html_head($this->storage['head']);
+      drupal_add_html_head($this->storage['head']);
     }
     if (!empty($this->storage['css'])) {
       foreach ($this->storage['css'] as $args) {
@@ -239,7 +229,7 @@ class views_plugin_cache extends views_plugin {
     }
     if (!empty($this->storage['js'])) {
       foreach ($this->storage['js'] as $args) {
-        call_user_func_array('drupal_add_js', $args);
+        drupal_add_js($data);
       }
     }
   }
@@ -248,8 +238,16 @@ class views_plugin_cache extends views_plugin {
     global $user;
 
     if (!isset($this->_results_key)) {
+      
+      $build_info = $this->view->build_info;
+      
+      foreach (array('query', 'count_query') as $index) {
+        $query = clone $build_info[$index];
+        $query->preExecute();
+        $build_info[$index] = (string)$query;
+      }
       $key_data = array(
-        'build_info' => $this->view->build_info,
+        'build_info' => $build_info,
         'roles' => array_keys($user->roles),
         'super-user' => $user->uid == 1, // special caching for super user.
       );

@@ -16,7 +16,7 @@ function contact_views_data() {
   return $data;
 }
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function contact_views_handlers() {

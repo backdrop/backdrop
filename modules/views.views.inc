@@ -12,7 +12,7 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function views_views_data() {
   $data['views']['table']['group'] = t('Global');
@@ -43,7 +43,7 @@ function views_views_data() {
       'handler' => 'views_handler_field_custom',
     ),
   );
-  
+
   $data['views']['counter'] = array(
     'title' => t('View result counter'),
     'help' => t('Displays the actual position of the view result'),

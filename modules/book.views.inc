@@ -12,7 +12,7 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function book_views_data() {
   // ----------------------------------------------------------------------

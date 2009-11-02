@@ -26,7 +26,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
         'either' => t('Allow both numeric UIDs and string usernames'),
       ),
       '#default_value' => $this->argument->options['validate_user_argument_type'],
-      '#process' => array('expand_radios', 'views_process_dependency'),
+      '#process' => array('form_process_radios', 'views_process_dependency'),
       '#dependency' => array('edit-options-validate-type' => array($this->id)),
       '#prefix' => '<div id="edit-options-validate-user-argument-type-wrapper">',
       '#suffix' => '</div>',
@@ -48,7 +48,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
       '#options' => user_roles(TRUE),
       '#default_value' => $this->argument->options['validate_user_roles'],
       '#description' => t('If no roles are selected, users from any role will be allowed.'),
-      '#process' => array('expand_checkboxes', 'views_process_dependency'),
+      '#process' => array('form_process_checkboxes', 'views_process_dependency'),
       '#dependency' => array(
         'edit-options-validate-type' => array($this->id),
         'edit-options-validate-user-restrict-roles' => array(1),
@@ -89,8 +89,8 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
       $roles = $this->argument->options['validate_user_roles'];
       $acccont->roles = array();
       $account->roles[] = $account->uid ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
-      $result = db_query('SELECT rid FROM {users_roles} WHERE uid = %d', $account->uid);
-      while ($role = db_fetch_object($result)) {
+      $result = db_query('SELECT rid FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
+      foreach ($result as $role) {
         $account->roles[] = $role->rid;
       }
       if (!(bool)array_intersect($account->roles, $roles)) {

@@ -11,7 +11,7 @@ class views_handler_argument_comment_user_uid extends views_handler_argument {
       $title = variable_get('anonymous', t('Anonymous'));
     }
     else {
-      $title = db_result(db_query("SELECT u.name FROM {users} u WHERE u.uid = %d", $this->argument));
+      $title = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uid', array(':uid' => $this->argument))->fetchField();
     }
     if (empty($title)) {
       return t('No user');
@@ -36,6 +36,17 @@ class views_handler_argument_comment_user_uid extends views_handler_argument {
 
   function query() {
     $this->ensure_my_table();
-    $this->query->add_where(0, "$this->table_alias.uid = %d OR ((SELECT COUNT(*) FROM {comments} c WHERE c.uid = %d AND c.nid = $this->table_alias.nid) > 0)", $this->argument, $this->argument);
+
+    $subselect = db_select('comments', 'c');
+    $subselect->addField('c', 'cid');
+    $subselect->condition('uid', $this->argument);
+    $subselect->condition('nid', "$this->table_alias.nid");
+    $subselect = $subselect->countQuery();
+
+    $condition = db_or()
+      ->condition("$this->table_alias.uid", $this->argument, $this->operator)
+      ->condition(0, $subselect, '<');
+
+    $this->query->add_where(0, $condition);
   }
 }

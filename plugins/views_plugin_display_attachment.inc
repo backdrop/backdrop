@@ -79,7 +79,7 @@ class views_plugin_display_attachment extends views_plugin_display {
     if (count($displays) > 1) {
       $attach_to = t('Multiple displays');
     }
-    else if (count($displays) == 1) {
+    elseif (count($displays) == 1) {
       $display = array_shift($displays);
       if (!empty($this->view->display[$display])) {
         $attach_to = check_plain($this->view->display[$display]->display_title);

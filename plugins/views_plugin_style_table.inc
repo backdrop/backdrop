@@ -137,9 +137,7 @@ class views_plugin_style_table extends views_plugin_style {
     $handlers = $this->display->handler->get_handlers('field');
     if (empty($handlers)) {
       $form['error_markup'] = array(
-        '#value' => t('You need at least one field before you can configure your table settings'),
-        '#prefix' => '<div class="error form-item description">',
-        '#suffix' => '</div>',
+        '#markup' => '<div class="error form-item description">' . t('You need at least one field before you can configure your table settings') . '</div>',
       );
       return;
     }
@@ -209,7 +207,7 @@ class views_plugin_style_table extends views_plugin_style {
           '#dependency' => array($id => array($field)),
         );
         // Provide an ID so we can have such things.
-        $radio_id = form_clean_id('edit-default-' . $field);
+        $radio_id = drupal_html_id('edit-default-' . $field);
         $form['default'][$field] = array(
           '#type' => 'radio',
           '#return_value' => $field,
@@ -232,7 +230,7 @@ class views_plugin_style_table extends views_plugin_style {
 
       // markup for the field name
       $form['info'][$field]['name'] = array(
-        '#value' => $field_names[$field],
+        '#markup' => $field_names[$field],
       );
     }
 
@@ -246,9 +244,7 @@ class views_plugin_style_table extends views_plugin_style {
     );
 
     $form['description_markup'] = array(
-      '#prefix' => '<div class="description form-item">',
-      '#suffix' => '</div>',
-      '#value' => t('Place fields into columns; you may combine multiple fields into the same column. If you do, the separator in the column specified will be used to separate the fields. Check the sortable box to make that column click sortable, and check the default sort radio to determine which column will be sorted by default, if any. You may control column order and field labels in the fields section.'),
+      '#markup' => '<div class="description form-item">' . t('Place fields into columns; you may combine multiple fields into the same column. If you do, the separator in the column specified will be used to separate the fields. Check the sortable box to make that column click sortable, and check the default sort radio to determine which column will be sorted by default, if any. You may control column order and field labels in the fields section.') . '</div>',
     );
   }
 }

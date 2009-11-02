@@ -66,7 +66,7 @@ class views_handler_field_history_user_timestamp extends views_handler_field_nod
       elseif ($last_comment > $last_read && $last_comment > NODE_NEW_LIMIT) {
         $mark = MARK_UPDATED;
       }
-      return $this->render_link(theme('mark', $mark), $values);
+      return $this->render_link(theme('mark', array('type' => $mark)), $values);
     }
   }
 }

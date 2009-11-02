@@ -10,7 +10,7 @@ class views_handler_field_file extends views_handler_field {
   function init(&$view, &$options) {
     parent::init($view, $options);
     if (!empty($options['link_to_file'])) {
-      $this->additional_fields['filepath'] = 'filepath';
+      $this->additional_fields['uri'] = 'uri';
     }
   }
 
@@ -41,7 +41,7 @@ class views_handler_field_file extends views_handler_field {
   function render_link($data, $values) {
     if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = file_create_url($values->{$this->aliases['filepath']});
+      $this->options['alter']['path'] = file_create_url($values->{$this->aliases['uri']});
     }
 
     return $data;

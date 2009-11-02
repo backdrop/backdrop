@@ -25,12 +25,10 @@ class views_handler_argument_node_type extends views_handler_argument {
   }
 
   function node_type($type) {
-    $output = node_get_types('name', $type);
+    $output = node_type_get_name($type);
     if (empty($output)) {
-      return t('Unknown node type');
+      $output = t('Unknown node type');
     }
-    else {
-      return check_plain(t($output));
-    }
+    return check_plain($output);
   }
 }

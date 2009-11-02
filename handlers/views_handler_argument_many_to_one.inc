@@ -75,7 +75,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
   function query() {
     if (empty($this->argument)) {
       parent::ensure_my_table();
-      $this->query->add_where(0, "$this->table_alias.$this->real_field IS NULL");
+      $this->query->add_where(0, "$this->table_alias.$this->real_field", NULL, 'IS NULL');
       return;
     }
 

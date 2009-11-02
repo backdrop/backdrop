@@ -24,15 +24,15 @@ function views_ui_admin_convert() {
   $current_views = views_get_all_views();
 
   $result = db_query("SELECT v.* FROM {view_view} v");
-  while ($view = db_fetch_object($result)) {
+  foreach ($result as $view) {
     $ops = array();
     if (!isset($current_views[$view->name])) {
-      $ops[] = l(t('Convert'), "admin/build/views1/convert/$view->name");
+      $ops[] = l(t('Convert'), "admin/structure/views1/convert/$view->name");
     }
     else {
       $ops[] = t('Converted');
     }
-    $ops[] = l(t('Delete'), "admin/build/views1/delete/$view->name");
+    $ops[] = l(t('Delete'), "admin/structure/views1/delete/$view->name");
 
     $item = array();
     $item[] = check_plain($view->name);
@@ -66,7 +66,7 @@ function views_ui_admin_convert() {
     $i[] = $items[$id];
   }
   $output = t('The table below lists Views version 1 views that are stored in the database. You can either convert them to work in Views version 2, or delete them. The views are convertible only if there is no Views 2 view with the same name.');
-  $output .= theme('table', $header, $i);
+  $output .= theme('table', array('header' => $header, 'rows' => $i));
 
   $output .= drupal_get_form('views_ui_convert_cleanup_form');
   return $output;
@@ -133,7 +133,7 @@ function views_ui_convert1($name) {
 
   if ($view) {
     views_ui_cache_set($view);
-    drupal_goto('admin/build/views/edit/' . $view->name);
+    drupal_goto('admin/structure/views/edit/' . $view->name);
   }
   else {
     return t('Unable to convert view.');
@@ -143,11 +143,11 @@ function views_ui_convert1($name) {
 /**
  * Page to delete a Views 1 view.
  */
-function views_ui_delete1_confirm(&$form_state, $vid) {
+function views_ui_delete1_confirm($form, &$form_state, $vid) {
   $form_state['vid'] = $vid;
   $form = array();
 
-  $cancel = 'admin/build/views/tools/convert';
+  $cancel = 'admin/structure/views/tools/convert';
   if (!empty($_REQUEST['cancel'])) {
     $cancel = $_REQUEST['cancel'];
   }
@@ -165,16 +165,13 @@ function views_ui_delete1_confirm(&$form_state, $vid) {
 function views_ui_delete1_confirm_submit(&$form, &$form_state) {
   views1_delete($form_state['vid']);
   drupal_set_message(t('The view has been deleted'));
-  $form_state['redirect'] = 'admin/build/views/tools/convert';
+  $form_state['redirect'] = 'admin/structure/views/tools/convert';
 }
 
 /**
  * Convert a Views 1 view to a Views 2 view.
  */
 function views1_import($imported) {
-  views_include_handlers();
-  views_module_include('views_convert.inc');
-
   $view = views_new_view();
 
   $view->name = $imported->name;
@@ -533,11 +530,23 @@ function views1_delete($arg) {
 
 
 
-  $result = db_query("DELETE FROM {view_sort} WHERE vid = $view->vid");
-  $result = db_query("DELETE FROM {view_argument} WHERE vid = $view->vid");
-  $result = db_query("DELETE FROM {view_tablefield} WHERE vid = $view->vid");
-  $result = db_query("DELETE FROM {view_filter} WHERE vid = $view->vid");
-  $result = db_query("DELETE FROM {view_exposed_filter} WHERE vid = $view->vid");
-  $result = db_query("DELETE FROM {view_view} WHERE vid = $view->vid");
+  db_delete('view_sort')
+    ->condition('vid', $view->vid)
+    ->execute();
+  db_delete('view_argument')
+    ->condition('vid', $view->vid)
+    ->execute();
+  db_delete('view_tablefield')
+    ->condition('vid', $view->vid)
+    ->execute();
+  db_delete('view_filter')
+    ->condition('vid', $view->vid)
+    ->execute();
+  db_delete('view_exposed_filter')
+    ->condition('vid', $view->vid)
+    ->execute();
+  db_delete('view_view')
+    ->condition('vid', $view->vid)
+    ->execute();
 }
 

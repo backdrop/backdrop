@@ -142,7 +142,7 @@ class views_plugin_style extends views_plugin {
    */
   function render() {
     if ($this->uses_row_plugin() && empty($this->row_plugin)) {
-      vpr('views_plugin_style_default: Missing row plugin');
+      debug('views_plugin_style_default: Missing row plugin');
       return;
     }
 
@@ -165,7 +165,13 @@ class views_plugin_style extends views_plugin {
         $rows = $records;
       }
 
-      $output .= theme($this->theme_functions(), $this->view, $this->options, $rows, $title);
+      $output .= theme($this->theme_functions(),
+        array(
+          'view' => $this->view,
+          'options' => $this->options,
+          'rows' => $rows,
+          'title' => $title)
+        );
     }
     unset($this->view->row_index);
     return $output;

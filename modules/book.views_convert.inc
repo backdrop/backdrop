@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_views_convert().
+ * Implements hook_views_convert().
  */
 function book_views_convert($display, $type, &$view, $field, $id = NULL) {
   switch ($type) {

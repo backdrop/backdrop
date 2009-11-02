@@ -24,9 +24,10 @@ class views_plugin_access_perm extends views_plugin_access {
   function options_form(&$form, &$form_state) {
     $perms = array();
     // Get list of permissions
-    foreach (module_list(FALSE, FALSE, TRUE) as $module) {
-      if ($permissions = module_invoke($module, 'perm')) {
-        $perms[$module] = drupal_map_assoc($permissions);
+    foreach (module_implements('permission') as $module) {
+      $permissions = module_invoke($module, 'permission');
+      foreach ($permissions as $name => $perm) {
+        $perms[$module][$name] = $perm['title'];
       }
     }
     $form['perm'] = array(

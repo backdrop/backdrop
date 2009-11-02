@@ -52,7 +52,7 @@ In general, having 'title' and 'help' at the table level doesn't make a lot of s
 </pre>
 
 <h3>Base table</h3>
-If your table is a base table -- meaning it can be the primary, central table for a View to use, you can declare it to be a base table. This primarily provides UI information so that it can be selected. 
+If your table is a base table -- meaning it can be the primary, central table for a View to use, you can declare it to be a base table. This primarily provides UI information so that it can be selected.
 For example:
 <pre>
   // Advertise this table as a possible base table
@@ -64,7 +64,7 @@ For example:
   );
 </pre>
 
-The following tags are available in the 
+The following tags are available in the
 <dl>
 <dt>field</dt>
 <dd>The primary key field for this table. For Views to treat any table as a base table, it <b>must</b> have a primary field. For node this is the 'nid', for users this is the 'uid', etc. <strong>Without a single primary key field (i.e. not a composite key), Views will not be able to utilize the table as a base table.</strong> If your table does not have a primary key field, it is not too difficult to just add a serial field to it, usually.</dd>

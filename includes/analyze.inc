@@ -50,9 +50,9 @@ function views_analyze_format_result($view, $messages) {
   foreach ($types as $type => $messages) {
     $message = '';
     if (count($messages) > 1) {
-      $message = theme('item_list', $messages);
+      $message = theme('item_list', array('items' => $messages));
     }
-    else if ($messages) {
+    elseif ($messages) {
       $message = array_shift($messages);
     }
 
@@ -91,7 +91,7 @@ function views_ui_analysis($message, $type = 'error') {
 }
 
 /**
- * Implementation of hook_views_analyze().
+ * Implements hook_views_analyze().
  *
  * This is the basic views analysis that checks for very minimal problems.
  * There are other analysis tools in core specific sections, such as

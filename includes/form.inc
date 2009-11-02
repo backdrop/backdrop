@@ -174,12 +174,12 @@ function drupal_process_form_new($form_id, &$form, &$form_state) {
   if ((!empty($form['#programmed'])) || (!empty($form['#post']) && (isset($form['#post']['form_id']) && ($form['#post']['form_id'] == $form_id)))) {
     drupal_validate_form_new($form_id, $form, $form_state);
 
-    // form_clean_id() maintains a cache of element IDs it has seen,
+    // drupal_html_id() maintains a cache of element IDs it has seen,
     // so it can prevent duplicates. We want to be sure we reset that
     // cache when a form is processed, so scenerios that result in
     // the form being built behind the scenes and again for the
     // browser don't increment all the element IDs needlessly.
-    form_clean_id(NULL, TRUE);
+    drupal_html_id(NULL, TRUE);
 
     if ((!empty($form_state['submitted'])) && !form_get_errors() && empty($form_state['rebuild'])) {
       $form_state['redirect'] = NULL;

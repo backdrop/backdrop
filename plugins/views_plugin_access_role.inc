@@ -20,7 +20,7 @@ class views_plugin_access_role extends views_plugin_access {
     if ($count < 1) {
       return t('No role(s) selected');
     }
-    else if ($count > 1) {
+    elseif ($count > 1) {
       return t('Multiple roles');
     }
     else {

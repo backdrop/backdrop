@@ -55,7 +55,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['operator']['default'] = 'in';
+    $options['operator']['default'] = 'IN';
     $options['value']['default'] = array();
 
     return $options;
@@ -68,9 +68,9 @@ class views_handler_filter_in_operator extends views_handler_filter {
    */
   function operators() {
     $operators = array(
-      'in' => array(
+      'IN' => array(
         'title' => t('Is one of'),
-        'short' => t('in'),
+        'short' => t('IN'),
         'short_single' => t('='),
         'method' => 'op_simple',
         'values' => 1,
@@ -146,7 +146,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
         $which = in_array($this->operator, $this->operator_values(1)) ? 'value' : 'none';
       }
       else {
-        $source = 'edit-' . form_clean_id($this->options['expose']['operator']);
+        $source = 'edit-' . drupal_html_id($this->options['expose']['operator']);
       }
 
       if (!empty($this->options['expose']['reduce'])) {
@@ -161,7 +161,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
         if (!empty($this->options['expose']['optional']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
           $default_value = 'All';
         }
-        else if (empty($default_value)) {
+        elseif (empty($default_value)) {
           $keys = array_keys($options);
           $default_value = array_shift($keys);
         }
@@ -228,14 +228,14 @@ class views_handler_filter_in_operator extends views_handler_filter {
         $options[$id] = $this->reduce_value_options($option);
         continue;
       }
-      else if (is_object($option)) {
+      elseif (is_object($option)) {
         $keys = array_keys($option->option);
         $key = array_shift($keys);
         if (isset($this->options['value'][$key])) {
           $options[$id] = $option;
         }
       }
-      else if (isset($this->options['value'][$id])) {
+      elseif (isset($this->options['value'][$id])) {
         $options[$id] = $option;
       }
     }
@@ -272,7 +272,6 @@ class views_handler_filter_in_operator extends views_handler_filter {
     // instead.
 
     $form_state['values']['options']['value'] = $form['value']['#value'];
-//    $form_state['values']['options']['value'] = array_filter($form_state['values']['options']['value']);
   }
 
   function admin_summary() {
@@ -334,20 +333,14 @@ class views_handler_filter_in_operator extends views_handler_filter {
       return;
     }
     $this->ensure_my_table();
-    $placeholder = !empty($this->definition['numeric']) ? '%d' : "'%s'";
-
-    $replace = array_fill(0, sizeof($this->value), $placeholder);
-    $in = ' (' . implode(", ", $replace) . ')';
 
     // We use array_values() because the checkboxes keep keys and that can cause
     // array addition problems.
-    $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field " . $this->operator . $in, array_values($this->value));
+    $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field", array_values($this->value), $this->operator);
   }
 
   function op_empty() {
     $this->ensure_my_table();
-    $field = "$this->table_alias.$this->real_field";
-
     if ($this->operator == 'empty') {
       $operator = "IS NULL";
     }
@@ -355,6 +348,6 @@ class views_handler_filter_in_operator extends views_handler_filter {
       $operator = "IS NOT NULL";
     }
 
-    $this->query->add_where($this->options['group'], "$field $operator");
+    $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field", NULL, $operator);
   }
 }

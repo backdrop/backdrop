@@ -13,7 +13,7 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function search_views_data() {
   // Basic table information.
@@ -128,30 +128,19 @@ function search_views_data() {
 }
 
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function search_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/search',
-    ),
-    'handlers' => array(
-      'views_handler_field_search_score' => array(
-        'parent' => 'views_handler_field_numeric',
-      ),
-      'views_handler_sort_search_score' => array(
-        'parent' => 'views_handler_sort',
-      ),
-      'views_handler_filter_search' => array(
-        'parent' => 'views_handler_filter',
-      ),
-    ),
+    'views_handler_field_search_score',
+    'views_handler_sort_search_score',
+    'views_handler_filter_search',
   );
 }
 
 /**
- * Implementation of hook_views_plugins
+ * Implements hook_views_plugins
  */
 function search_views_plugins() {
   return;
@@ -163,8 +152,8 @@ function search_views_plugins() {
         'title' => t('Search'),
         'help' => t('Display the results with standard search view.'),
         'handler' => 'views_plugin_row_search_view',
-        'path' => drupal_get_path('module', 'views') . '/modules/search', // not necessary for most modules
         'theme' => 'views_view_row_search',
+        'path' => drupal_get_path('module', 'views') . '/modules/search', // not necessary for most modules
         'base' => array('node'), // only works with 'node' as base.
         'type' => 'normal',
       ),
@@ -202,10 +191,10 @@ function template_preprocess_views_view_row_search(&$vars) {
   $vars['title'] = check_plain($node->title);
 
   $info = array();
-  $info['type'] = node_get_types('name', $node);
-  $info['user'] = theme('username', $node);
+  $info['type'] = node_type_get_name($node);
+  $info['user'] = theme('username', array('acccount' => $node));
   $info['date'] = format_date($node->changed, 'small');
-  $extra = node_invoke_nodeapi($node, 'search result');
+  $extra = module_invoke_all('node_search_result', $node);
   if (isset($extra) && is_array($extra)) {
     $info = array_merge($info, $extra);
   }

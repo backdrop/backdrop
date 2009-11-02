@@ -9,18 +9,18 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function views_export_menu() {
   $items = array();
-  $items['admin/build/views/tools/export'] = array(
+  $items['admin/structure/views/tools/export'] = array(
     'title' => 'Bulk export',
     'access arguments' => array('use views exporter'),
     'page callback' => 'views_export_export',
     'type' => MENU_LOCAL_TASK,
   );
 
-  $items['admin/build/views/tools/export/results'] = array(
+  $items['admin/structure/views/tools/export/results'] = array(
     'access arguments' => array('use views exporter'),
     'page callback' => 'views_export_export',
     'type' => MENU_CALLBACK,
@@ -28,20 +28,27 @@ function views_export_menu() {
 
   return $items;
 }
-
+/**
+ * Implements hook_theme().
+ */
 function views_export_theme() {
   return array(
     'views_export_export_form' => array(
-      'args' => array('form' => NULL),
+      'arguments' => array('form' => NULL),
     ),
   );
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_perm().
  */
-function views_export_perm() {
-  return array('use views exporter');
+function views_export_permission() {
+  return array(
+    'use views exporter' => array(
+      'title' => t('Use Views exporter'),
+      'description' => t('Use the Views exporter.'),
+    ),
+  );
 }
 
 /**
@@ -67,7 +74,7 @@ function views_export_export() {
       'tags' => $tags,
     );
 
-    $output = drupal_build_form('views_export_export_form', $form_state);
+    $output = drupal_render(drupal_build_form('views_export_export_form', $form_state));
     if (!$output) {
       $output = $form_state['output'];
     }
@@ -81,7 +88,7 @@ function views_export_export() {
 /**
  * Form to choose a group of views to export.
  */
-function views_export_export_form(&$form_state) {
+function views_export_export_form($form, &$form_state) {
   foreach ($form_state['exportables'] as $module => $views) {
     foreach ($views as $name => $data) {
       $options[$name] = $data['name'];
@@ -129,19 +136,24 @@ function views_export_export_form(&$form_state) {
     '#value' => t('Export'),
   );
 
-  $form['#action'] = url('admin/build/views/tools/export/results');
+  $form['#action'] = url('admin/structure/views/tools/export/results');
   $form['#redirect'] = FALSE;
-  $form['#exportables'] = $form_state['exportables'];
+  if (isset($form_state['exportables'])) {
+    $form['#exportables'] = $form_state['exportables'];
+  }
   return $form;
 }
 
-function theme_views_export_export_form($form) {
+function theme_views_export_export_form(&$vars) {
+  $form = $vars['form'];
   $output = '';
-  $files = module_rebuild_cache();
+    // Get current list of modules.
+  $files = system_rebuild_module_data();
+
   $exportables = $form['#exportables'];
   $output .= drupal_render($form['tags']);
   $output .= drupal_render($form['apply']);
-  $output .= '<div class="clear-block">';
+  $output .= '<div class="clearfix">';
 
   foreach ($exportables as $module => $views) {
     $header = array(theme('table_select_header_cell'), $files[$module]->info['name'], t('Tag'), t('Description'));
@@ -152,11 +164,16 @@ function theme_views_export_export_form($form) {
       $rows[] = array(drupal_render($form['modules'][$module][$name]), $title, $view['tag'], '<div class="description">' . $view['desc'] . '</div>');
     }
     $output .= '<div class="export-container">';
-    $output .= theme('table', $header, $rows);
+    $output .= theme('table', array(
+      'header' => $header,
+      'rows' => $rows
+    ));
     $output .= "</div>\n";
   }
   $output .= '</div>';
-  drupal_add_css(drupal_get_path('module', 'views_export') . '/views_export.css');
+  $form['#attached']['css'] = array(drupal_add_css(drupal_get_path('module', 'views_export') . '/views_export.css'));
+
+  // FIXME: This call leads to a endless recursion
   $output .= drupal_render($form);
   return $output;
 }
@@ -164,10 +181,10 @@ function theme_views_export_export_form($form) {
 function views_export_export_form_apply(&$form, &$form_state) {
   $tags = $form_state['values']['tags'];
   if ($tags) {
-    drupal_goto('admin/build/views/tools/export', array('tags' => implode(',', $tags)));
+    drupal_goto('admin/structure/views/tools/export', array('tags' => implode(',', $tags)));
   }
   else {
-    drupal_goto('admin/build/views/tools/export');
+    drupal_goto('admin/structure/views/tools/export');
   }
 }
 
@@ -189,7 +206,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
 
   $types = system_elements();
 
-  $info  = "; \$Id" . ": $\n"; // The break in the string prevents CVS.
+  $info  = '; $Id$'."\n";
   $info .= "\n";
   $info .= strtr("name = @module Export Module\n", array('@module' => $form_state['values']['name']));
   $info .= strtr("description = Exports some views of @module\n", array('@module' => $form_state['values']['name']));
@@ -211,7 +228,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
   ) + $types['textarea'];
 
   $api  = "/**\n";
-  $api .= " * Implementation of hook_views_api().\n";
+  $api .= " * Implements hook_views_api().\n";
   $api .= " */\n";
   $api .= "function @module_views_api() {\n";
   $api .= "  return array(\n";
@@ -249,8 +266,11 @@ function views_export_export_form_submit(&$form, &$form_state) {
   ) + $types['textarea'];
 
 
-  $form_state['output'] = theme('textarea', $element_info);
-  $form_state['output'] .= theme('textarea', $element_api);
-  $form_state['output'] .= theme('textarea', $element_hook);
+  $form_state['output'] = theme('textarea', array(
+    'element' => $element_info));
+  $form_state['output'] .= theme('textarea', array(
+    'element' => $element_api));
+  $form_state['output'] .= theme('textarea', array(
+    'element' => $element_hook));
 }
 

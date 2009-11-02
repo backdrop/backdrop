@@ -12,7 +12,11 @@ class views_handler_filter_user_current extends views_handler_filter_boolean_ope
 
   function query() {
     $this->ensure_my_table();
-    $where = "$this->table_alias.$this->real_field ";
+
+    // OLD: $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field " . (empty($this->value) ? '!=' : '=') . " ***CURRENT_USER***");
+    // NEW: $this->query->add_where($this->table_alias . '.' . $this->real_field, CURRENT_USER, empty($this->value) ? '!=' : '=');
+
+    $where = $this->table_alias . '.' . $this->real_field . ' ';
 
     if (empty($this->value)) {
       $where .= '<> ***CURRENT_USER***';
@@ -23,6 +27,6 @@ class views_handler_filter_user_current extends views_handler_filter_boolean_ope
     else {
       $where .= '= ***CURRENT_USER***';
     }
-    $this->query->add_where($this->options['group'], $where);    
+    $this->query->add_where($this->options['group'], $where);
   }
 }

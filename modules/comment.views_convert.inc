@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_views_convert().
+ * Implements hook_views_convert().
  *
  * Intervene to convert field values from the Views 1 format to the
  * Views 2 format. Intervene only if $view->add_item() won't produce

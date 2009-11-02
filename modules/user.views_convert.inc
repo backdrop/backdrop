@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_views_convert().
+ * Implements hook_views_convert().
  */
 function user_views_convert($display, $type, &$view, $field, $id = NULL) {
   switch ($type) {
@@ -26,7 +26,7 @@ function user_views_convert($display, $type, &$view, $field, $id = NULL) {
       if ($field['tablename'] == 'users' || !strncmp($field['tablename'], 'users_role_', 11)) {
         switch ($field['field']) {
           case 'uid':
-            $operators = array('OR' => 'in', 'NOR' => 'not in');
+            $operators = array('OR' => 'IN', 'NOR' => 'NOT IN');
             $view->set_item_option($display, 'filter', $id, 'operator', $operators[$field['operator']]);
             if ($rid = (integer) substr($field['tablename'], 11)) {
               $view->add_item($display, 'filter', 'users_roles', 'rid', array('value' => $rid));

@@ -6,7 +6,7 @@
  */
 
 function views_install() {
-  if ($GLOBALS['db_type'] == 'pgsql') {
+  if (db_driver() == 'pgsql') {
     db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
     db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
     db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
@@ -20,7 +20,7 @@ function views_uninstall() {
 }
 
 /**
- * Implementation of hook_schemea
+ * Implements hook_schemea
  */
 function views_schema() {
   // Currently, schema 1 is the only schema we have. As we make updates,
@@ -131,7 +131,7 @@ function views_schema_1() {
   );
 
   $schema['cache_views'] = drupal_get_schema_unprocessed('system', 'cache');
-  
+
   $schema['cache_views_data'] = drupal_get_schema_unprocessed('system', 'cache');
   $schema['cache_views_data']['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
   $schema['cache_views_data']['fields']['serialized']['default'] = 1;
@@ -208,7 +208,7 @@ function views_update_6000() {
 function views_update_6001() {
   $ret = array();
   $result = db_query("SELECT * FROM {blocks} WHERE module = 'views' AND delta LIKE '\$exp%'");
-  while ($block = db_fetch_object($result)) {
+  foreach ($result as $block) {
     $new = strtr($block->delta, '$', '-');
     $ret[] = update_sql("UPDATE {blocks} SET delta = '" . db_escape_string($new) . "' WHERE module = 'views' AND delta = '" . db_escape_string($block->delta) . "'");
   }
@@ -256,7 +256,7 @@ function views_update_6004() {
  */
 function views_update_6005() {
   $ret = array();
-  
+
   $new_field = array(
     'type' => 'varchar',
     'length' => '64',
@@ -273,7 +273,7 @@ function views_update_6005() {
  */
 function views_update_6006() {
   $ret = array();
-  
+
   $table = drupal_get_schema_unprocessed('system', 'cache');
   $table['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
   $table['fields']['serialized']['default'] = 1;
@@ -289,7 +289,7 @@ function views_update_6006() {
  */
 function views_update_6007() {
   $ret = array();
-  if ($GLOBALS['db_type'] == 'pgsql') {
+  if (db_driver() == 'pgsql') {
     $ret[] = update_sql('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
     $ret[] = update_sql("DROP AGGREGATE IF EXISTS first(anyelement)");
     $ret[] = update_sql("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");

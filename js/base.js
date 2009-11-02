@@ -4,28 +4,29 @@
  *
  * Some basic behaviors and utility functions for Views.
  */
+(function ($) {
 
 Drupal.Views = {};
 
 /**
  * jQuery UI tabs, Views integration component
  */
-Drupal.behaviors.viewsTabs = function (context) {
-  if ($.ui && $.ui.tabs) {
-    $('#views-tabset:not(.views-processed)').addClass('views-processed').tabs({
+Drupal.behaviors.viewsTabs = {
+  attach: function (context) {
+  if ($.viewsUi && $.viewsUi.tabs) {
+    $('#views-tabset').once('views-processed').viewsTabs({
       selectedClass: 'active'
     });
   }
 
-  $('a.views-remove-link')
-    .addClass('views-processed')
-    .click(function() {
+  $('a.views-remove-link').once('views-processed').click(function() {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
       $('#views-removed-' + id).attr('checked', true);
       return false;
     });
-}
+  }
+};
 
 /**
  * For IE, attach some javascript so that our hovers do what they're supposed
@@ -121,3 +122,5 @@ Drupal.Views.getPath = function (href) {
   }
   return href;
 };
+
+})(jQuery);

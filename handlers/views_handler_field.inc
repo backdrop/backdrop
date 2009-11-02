@@ -272,7 +272,7 @@ class views_handler_field extends views_handler {
           'edit-options-alter-make-link' => array(1)
         ),
       );
-      
+
 
       // Get a list of the available fields and arguments for token replacement.
       $options = array();
@@ -302,7 +302,11 @@ class views_handler_field extends views_handler {
             foreach ($options[$type] as $key => $value) {
               $items[] = $key . ' == ' . $value;
             }
-            $output .= theme('item_list', $items, $type);
+            $output .= theme('item_list',
+              array(
+                'items' => $items,
+                'type' => $type
+              ));
           }
         }
       }
@@ -458,7 +462,7 @@ class views_handler_field extends views_handler {
           $this->original_value = $this->last_render;
 
           $alter = $item + $this->options['alter'];
-          $items[] = $this->render_text($alter);       
+          $items[] = $this->render_text($alter);
         }
 
         $value = $this->render_items($items);
@@ -511,7 +515,7 @@ class views_handler_field extends views_handler {
 
     return $value;
   }
-  
+
   /**
    * Render this field as altered text, from a fieldset set by the user.
    */
@@ -603,7 +607,7 @@ class views_handler_field extends views_handler {
 
     $class = strtr($alter['link_class'], $tokens);
     if ($class) {
-      $options['attributes']['class'] = $class;
+      $options['attributes']['class'] = array($class);
     }
 
     $target = check_plain(trim($alter['target']));
@@ -698,7 +702,12 @@ class views_handler_field extends views_handler {
    * allows sites to override output fairly easily.
    */
   function theme($values) {
-    return theme($this->theme_functions(), $this->view, $this, $values);
+    return theme($this->theme_functions(),
+      array(
+        'view' => $this->view,
+        'field' => $this,
+        'row' => $values
+      ));
   }
 
   function theme_functions() {
@@ -740,8 +749,7 @@ class views_handler_field_broken extends views_handler_field {
   function query() { /* No query to run */ }
   function options_form(&$form, &$form_state) {
     $form['markup'] = array(
-      '#prefix' => '<div class="form-item description">',
-      '#value' => t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.'),
+      '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',
     );
   }
 

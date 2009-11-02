@@ -7,20 +7,14 @@
  */
 
 /**
- * Implementation of hook_views_plugins
+ * Implements hook_views_plugins
  */
 function views_views_plugins() {
-  $path = drupal_get_path('module', 'views') . '/js';
+  $js_path = drupal_get_path('module', 'views') . '/js';
   return array(
-    'module' => 'views', // This just tells our themes are elsewhere.
+    // display, style, row, argument default, argument validator and access.
     'display' => array(
-      'parent' => array(
-        // this isn't really a display but is necessary so the file can
-        // be included.
-        'no ui' => TRUE,
-        'handler' => 'views_plugin_display',
-        'parent' => '',
-      ),
+      // Default settings for all display plugins.
       'default' => array(
         'title' => t('Defaults'),
         'help' => t('Default settings for this view.'),
@@ -28,7 +22,7 @@ function views_views_plugins() {
         'theme' => 'views_view',
         'no ui' => TRUE,
         'no remove' => TRUE,
-        'js' => array('misc/collapse.js', 'misc/textarea.js', 'misc/tabledrag.js', 'misc/autocomplete.js', "$path/dependent.js"),
+        'js' => array('misc/collapse.js', 'misc/textarea.js', 'misc/tabledrag.js', 'misc/autocomplete.js', "$js_path/dependent.js"),
         'use ajax' => TRUE,
         'use pager' => TRUE,
         'use more' => TRUE,
@@ -72,7 +66,6 @@ function views_views_plugins() {
         'title' => t('Feed'),
         'help' => t('Display the view as a feed, such as an RSS feed.'),
         'handler' => 'views_plugin_display_feed',
-        'parent' => 'page', // so it knows to load the page plugin .inc file
         'uses hook menu' => TRUE,
         'use ajax' => FALSE,
         'use pager' => FALSE,
@@ -82,13 +75,7 @@ function views_views_plugins() {
       ),
     ),
     'style' => array(
-      'parent' => array(
-        // this isn't really a display but is necessary so the file can
-        // be included.
-        'no ui' => TRUE,
-        'handler' => 'views_plugin_style',
-        'parent' => '',
-      ),
+      // Default settings for all style plugins.
       'default' => array(
         'title' => t('Unformatted'),
         'help' => t('Displays rows one after another.'),
@@ -144,7 +131,6 @@ function views_views_plugins() {
         'title' => t('Unformatted'),
         'help' => t('Displays the summary unformatted, with option for one after another or inline.'),
         'handler' => 'views_plugin_style_summary_unformatted',
-        'parent' => 'default_summary',
         'theme' => 'views_view_summary_unformatted',
         'type' => 'summary', // only shows up as a summary style
         'uses options' => TRUE,
@@ -162,13 +148,6 @@ function views_views_plugins() {
       ),
     ),
     'row' => array(
-      'parent' => array(
-        // this isn't really a display but is necessary so the file can
-        // be included.
-        'no ui' => TRUE,
-        'handler' => 'views_plugin_row',
-        'parent' => '',
-      ),
       'fields' => array(
         'title' => t('Fields'),
         'help' => t('Displays the fields with an optional template.'),
@@ -181,8 +160,6 @@ function views_views_plugins() {
       ),
     ),
     'argument default' => array(
-      // This type of plugin does not conform to the standard and
-      // uses 'fixed' as the parent rather than having a separate parent.
       'fixed' => array(
         'title' => t('Fixed entry'),
         'handler' => 'views_plugin_argument_default',
@@ -190,15 +167,9 @@ function views_views_plugins() {
       'php' => array(
         'title' => t('PHP Code'),
         'handler' => 'views_plugin_argument_default_php',
-        'parent' => 'fixed',
       ),
     ),
     'argument validator' => array(
-      'parent' => array(
-        'no ui' => TRUE,
-        'handler' => 'views_plugin_argument_validate',
-        'parent' => '',
-      ),
       'php' => array(
         'title' => t('PHP Code'),
         'handler' => 'views_plugin_argument_validate_php',
@@ -209,11 +180,6 @@ function views_views_plugins() {
       ),
     ),
     'access' => array(
-      'parent' => array(
-        'no ui' => TRUE,
-        'handler' => 'views_plugin_access',
-        'parent' => '',
-      ),
       'none' => array(
         'title' => t('None'),
         'help' => t('Will be available to all users.'),
@@ -233,6 +199,18 @@ function views_views_plugins() {
         'handler' => 'views_plugin_access_perm',
         'uses options' => TRUE,
         'help topic' => 'access-perm',
+      ),
+    ),
+    'query' => array(
+      'parent' => array(
+        'no ui' => TRUE,
+        'handler' => 'views_plugin_query',
+        'parent' => '',
+      ),
+      'views_query' => array(
+        'title' => t('SQL Query'),
+        'help' => t('Query will be generated and run using the Drupal database API.'),
+        'handler' => 'views_plugin_query_default'
       ),
     ),
     'cache' => array(

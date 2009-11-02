@@ -107,7 +107,7 @@ class views_handler_filter_search extends views_handler_filter {
       }
 
       $this->query->add_groupby("$search_index.sid");
-      $this->query->add_having($this->options['group'], 'COUNT(*) >= %d', $this->search_query[4]);
+      $this->query->add_having($this->options['group'], 'COUNT(*)', $this->search_query[4], '>=');
     }
   }
 }

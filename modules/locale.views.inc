@@ -14,7 +14,7 @@
  */
 
 /**
- * Implementation of hook_views_data().
+ * Implements hook_views_data().
  */
 function locale_views_data() {
   // Basic table information.
@@ -203,42 +203,23 @@ function locale_views_data() {
 }
 
 /**
- * Implementation of hook_views_handlers().
+ * Implements hook_views_handlers().
  */
 function locale_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/locale',
-    ),
-    'handlers' => array(
-      // Field handlers.
-      'views_handler_field_locale_group' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_locale_language' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_locale_link_edit' => array(
-        'parent' => 'views_handler_field',
-      ),
-      // Argument handlers.
-      'views_handler_argument_locale_group' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_locale_language' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      // Filters.
-      'views_handler_filter_locale_group' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-      'views_handler_filter_locale_language' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-      'views_handler_filter_locale_version' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-    ),
+    // Field handlers.
+    'views_handler_field_locale_group',
+    'views_handler_field_locale_language',
+    'views_handler_field_locale_link_edit',
+
+    // Argument handlers.
+    'views_handler_argument_locale_group',
+    'views_handler_argument_locale_language',
+
+    // Filters.
+    'views_handler_filter_locale_group',
+    'views_handler_filter_locale_language',
+    'views_handler_filter_locale_version',
   );
 }
 

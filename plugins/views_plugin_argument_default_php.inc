@@ -33,7 +33,7 @@ class views_plugin_argument_default_php extends views_plugin_argument_default {
    * default plugin.
    */
   function access() {
-    return user_access('use PHP for block visibility');
+    return user_access('use PHP for settings');
   }
 
   function get_argument($raw = FALSE) {

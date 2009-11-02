@@ -17,15 +17,14 @@ class views_handler_field_date extends views_handler_field {
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $time = time();
 
     $form['date_format'] = array(
       '#type' => 'select',
       '#title' => t('Date format'),
       '#options' => array(
-        'small' => format_date($time, 'small'),
-        'medium' => format_date($time, 'medium'),
-        'large' => format_date($time, 'large'),
+        'small' => format_date(REQUEST_TIME, 'small'),
+        'medium' => format_date(REQUEST_TIME, 'medium'),
+        'large' => format_date(REQUEST_TIME, 'large'),
         'custom' => t('Custom'),
         'raw time ago' => t('Time ago'),
         'time ago' => t('Time ago (with "ago" appended)'),
@@ -50,12 +49,12 @@ class views_handler_field_date extends views_handler_field {
     if (in_array($format, array('custom', 'raw time ago', 'time ago', 'raw time span', 'time span'))) {
       $custom_format = $this->options['custom_date_format'];
     }
-    
+
     if (!$value) {
       return theme('views_nodate');
     }
     else {
-      $time_diff = time() - $value; // will be positive for a datetime in the past (ago), and negative for a datetime in the future (hence)
+      $time_diff = REQUEST_TIME - $value; // will be positive for a datetime in the past (ago), and negative for a datetime in the future (hence)
       switch ($format) {
         case 'raw time ago':
           return format_interval($time_diff, is_numeric($custom_format) ? $custom_format : 2);

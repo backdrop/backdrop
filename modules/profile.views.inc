@@ -12,7 +12,7 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function profile_views_data() {
   // Define the base group of this table. Fields that don't
@@ -72,7 +72,7 @@ function profile_views_get_fields() {
     $fields = array();
     $results = db_query("SELECT * FROM {profile_fields} ORDER BY category, weight");
 
-    while ($row = db_fetch_object($results)) {
+    foreach ($results as $row) {
       if (!empty($row->options)) {
         if (!in_array(substr($row->options, 0, 2), array('a:', 'b:', 'i:', 'f:', 'o:', 's:', ))) {
           // unserialized fields default version
@@ -126,7 +126,7 @@ function profile_views_fetch_field($field) {
         'help' => t('Profile textarea'),
         'field' => array(
           'handler' => 'views_handler_field_markup',
-          'format' => FILTER_FORMAT_DEFAULT,
+          'format' => filter_default_format(),
         ),
         'sort' => array(
           'handler' => 'views_handler_sort',
@@ -218,25 +218,14 @@ function profile_views_fetch_field($field) {
 }
 
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function profile_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/profile',
-    ),
-    'handlers' => array(
-      'views_handler_field_profile_date' => array(
-        'parent' => 'views_handler_field_date',
-      ),
-      'views_handler_field_profile_list' => array(
-        'parent' => 'views_handler_field_prerender_list',
-      ),
-      'views_handler_filter_profile_selection' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-    ),
+    'views_handler_field_profile_date',
+    'views_handler_field_profile_list',
+    'views_handler_filter_profile_selection',
   );
 }
 

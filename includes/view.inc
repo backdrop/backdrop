@@ -196,7 +196,7 @@ class view extends views_db_object {
       // has already been set; if it has, but $this->current_display is not
       // set, then something is dreadfully wrong.
       if (!empty($this->display[$id]->handler)) {
-        $this->display[$id] = drupal_clone($this->display[$id]);
+        $this->display[$id] = clone $this->display[$id];
         unset($this->display[$id]->handler);
       }
       $this->display[$id]->handler = views_get_plugin('display', $this->display[$id]->display_plugin);
@@ -212,7 +212,7 @@ class view extends views_db_object {
         }
       }
     }
-
+    
     $this->current_display = 'default';
     $this->display_handler = &$this->display['default']->handler;
 
@@ -270,7 +270,7 @@ class view extends views_db_object {
     if (empty($this->display[$display_id])) {
       $display_id = 'default';
       if (empty($this->display[$display_id])) {
-        vpr(t('set_display() called with invalid display id @display.', array('@display' => $display_id)));
+        debug(t('set_display() called with invalid display id @display.', array('@display' => $display_id)));
         return FALSE;
       }
     }
@@ -410,7 +410,7 @@ class view extends views_db_object {
       $form_state['ajax'] = TRUE;
     }
 
-    $output = drupal_build_form('views_exposed_form', $form_state);
+    $output = drupal_render(drupal_build_form('views_exposed_form', $form_state));
     if (!empty($form_state['js settings'])) {
       $this->js_settings = $form_state['js settings'];
     }
@@ -531,8 +531,12 @@ class view extends views_db_object {
     if (!empty($views_data['table']['base']['database'])) {
       $this->base_database = $views_data['table']['base']['database'];
     }
-    views_include('query');
-    $this->query = new views_query($this->base_table, $this->base_field);
+
+    // Create and initialize the query object.
+    $plugin = !empty($views_data['table']['base']['query class']) ? $views_data['table']['base']['query class'] : 'views_query';
+    $this->query = views_get_plugin('query', $plugin);
+
+    $this->query->init($this->base_table, $this->base_field);
   }
 
   /**
@@ -558,7 +562,7 @@ class view extends views_db_object {
     // Attempt to load from cache.
     // @todo Load a build_info from cache.
 
-    $start = views_microtime();
+    $start = microtime(TRUE);
     // If that fails, let's build!
     $this->build_info = array(
       'query' => '',
@@ -597,7 +601,7 @@ class view extends views_db_object {
 
     // Arguments can, in fact, cause this whole thing to abort.
     if (!$this->_build_arguments()) {
-      $this->build_time = views_microtime() - $start;
+      $this->build_time = microtime(TRUE) - $start;
       $this->attach_displays();
       return $this->built;
     }
@@ -631,20 +635,17 @@ class view extends views_db_object {
     $this->style_plugin->query();
 
     if (variable_get('views_sql_signature', FALSE)) {
-      $this->query->add_field(NULL, "'" . $this->name . ':' . $this->current_display . "'", 'view_name');
+      $this->query->add_signature($this);
     }
 
     // Let modules modify the query just prior to finalizing it.
-    foreach (module_implements('views_query_alter') as $module) {
-      $function = $module . '_views_query_alter';
-      $function($this, $this->query);
-    }
+    $this->query->alter($this);
 
-    $this->build_info['query'] = $this->query->query();
-    $this->build_info['count_query'] = $this->query->query(TRUE);
-    $this->build_info['query_args'] = $this->query->get_where_args();
+    // Build the necessary info to execute the query.
+    $this->query->build($this);
+
     $this->built = TRUE;
-    $this->build_time = views_microtime() - $start;
+    $this->build_time = microtime(TRUE) - $start;
 
     // Attach displays
     $this->attach_displays();
@@ -692,14 +693,6 @@ class view extends views_db_object {
       $function($this);
     }
 
-    $query = db_rewrite_sql($this->build_info['query'], $this->base_table, $this->base_field, array('view' => &$this));
-    $count_query = db_rewrite_sql($this->build_info['count_query'], $this->base_table, $this->base_field, array('view' => &$this));
-
-    $args = $this->build_info['query_args'];
-
-    vpr($query);
-
-
     // Check for already-cached results.
     if (!empty($this->live_preview)) {
       $cache = FALSE;
@@ -708,76 +701,10 @@ class view extends views_db_object {
       $cache = $this->display_handler->get_cache_plugin();
     }
     if ($cache && $cache->cache_get('results')) {
-      vpr('Used cached results');
+      debug('Used cached results');
     }
     else {
-      $items = array();
-      if ($query) {
-        $replacements = module_invoke_all('views_query_substitutions', $this);
-        $query = str_replace(array_keys($replacements), $replacements, $query);
-        $count_query = 'SELECT COUNT(*) FROM (' . str_replace(array_keys($replacements), $replacements, $count_query) . ') count_alias';
-
-        if (is_array($args)) {
-          foreach ($args as $id => $arg) {
-            $args[$id] = str_replace(array_keys($replacements), $replacements, $arg);
-          }
-        }
-
-        // Allow for a view to query an external database.
-        if (isset($this->base_database)) {
-          db_set_active($this->base_database);
-          $external = TRUE;
-        }
-
-        $start = views_microtime();
-        if (!empty($this->pager['items_per_page'])) {
-          // We no longer use pager_query() here because pager_query() does not
-          // support an offset. This is fine as we don't actually need pager
-          // query; we've already been doing most of what it does, and we
-          // just need to do a little more playing with globals.
-          if (!empty($this->pager['use_pager']) || !empty($this->get_total_rows)) {
-            $this->total_rows = db_result(db_query($count_query, $args)) - $this->pager['offset'];
-          }
-
-          if (!empty($this->pager['use_pager'])) {
-            // dump information about what we already know into the globals
-            global $pager_page_array, $pager_total, $pager_total_items;
-            // total rows in query
-            $pager_total_items[$this->pager['element']] = $this->total_rows;
-            // total pages
-            $pager_total[$this->pager['element']] = ceil($pager_total_items[$this->pager['element']] / $this->pager['items_per_page']);
-
-            // What page was requested:
-            $pager_page_array = isset($_GET['page']) ? explode(',', $_GET['page']) : array();
-
-            // If the requested page was within range. $this->pager['current_page']
-            // defaults to 0 so we don't need to set it in an out-of-range condition.
-            if (!empty($pager_page_array[$this->pager['element']])) {
-              $page = intval($pager_page_array[$this->pager['element']]);
-              if ($page > 0 && $page < $pager_total[$this->pager['element']]) {
-                $this->pager['current_page'] = $page;
-              }
-            }
-            $pager_page_array[$this->pager['element']] = $this->pager['current_page'];
-          }
-
-          $offset = $this->pager['current_page'] * $this->pager['items_per_page'] + $this->pager['offset'];
-          $result = db_query_range($query, $args, $offset, $this->pager['items_per_page']);
-
-        }
-        else {
-          $result = db_query($query, $args);
-        }
-
-        $this->result = array();
-        while ($item = db_fetch_object($result)) {
-          $this->result[] = $item;
-        }
-        if (!empty($external)) {
-          db_set_active();
-        }
-        $this->execute_time = views_microtime() - $start;
-      }
+      $this->query->execute($this);
       if ($cache) {
         $cache->cache_set('results');
       }
@@ -797,9 +724,9 @@ class view extends views_db_object {
       return;
     }
 
-    init_theme();
+    drupal_theme_initialize();
 
-    $start = views_microtime();
+    $start = microtime(TRUE);
     if (!empty($this->live_preview) && variable_get('views_show_additional_queries', FALSE)) {
       $this->start_query_capture();
     }
@@ -812,7 +739,7 @@ class view extends views_db_object {
       $cache = $this->display_handler->get_cache_plugin();
     }
     if ($cache && $cache->cache_get('output')) {
-      vpr('Used cached output');
+      debug('Used cached output');
     }
     else {
       if ($cache) {
@@ -870,7 +797,7 @@ class view extends views_db_object {
     if (!empty($this->live_preview) && variable_get('views_show_additional_queries', FALSE)) {
       $this->end_query_capture();
     }
-    $this->render_time = views_microtime() - $start;
+    $this->render_time = microtime(TRUE) - $start;
 
     return $this->display_handler->output;
   }
@@ -1020,7 +947,7 @@ class view extends views_db_object {
    * Called to get hook_block information from the view and the
    * named display handler.
    */
-  function execute_hook_block($display_id = NULL) {
+  function execute_hook_block_list($display_id = NULL) {
     // Prepare the view with the information we have.
 
     // This was probably already called, but it's good to be safe.
@@ -1030,7 +957,7 @@ class view extends views_db_object {
 
     // Execute the view
     if (isset($this->display_handler)) {
-      return $this->display_handler->execute_hook_block();
+      return $this->display_handler->execute_hook_block_list();
     }
   }
 
@@ -1277,35 +1204,42 @@ class view extends views_db_object {
 
     // We want a NULL value to return TRUE here, so we can't use isset() or empty().
     if (!array_key_exists($arg, $cache) || $reset) {
-      $where = (is_numeric($arg) ? "vid =  %d" : "name = '%s'");
-      $data = db_fetch_object(db_query("SELECT * FROM {views_view} WHERE $where", $arg));
-      if (empty($data)) {
-        $cache[$arg] = NULL;
-      }
-      else {
-        $view = new view();
-        $view->load_row($data);
-        $view->type = t('Normal');
-        // Load all of our subtables.
-        foreach ($view->db_objects() as $key) {
-          $object_name = "views_$key";
-          $result = db_query("SELECT * FROM {{$object_name}} WHERE vid = %d ORDER BY position", $view->vid);
+      $result = db_select('views_view', 'v')
+        ->fields('v')
+        ->condition(is_numeric($arg) ? 'vid' : 'name', $arg)
+        ->execute();
+      foreach ($result as $data) {
+        if (empty($data)) {
+          $cache[$arg] = NULL;
+        }
+        else {
+          $view = new view();
+          $view->load_row($data);
+          $view->type = t('Normal');
+          // Load all of our subtables.
+          foreach ($view->db_objects() as $key) {
+            $object_name = "views_$key";
+            $result = db_select($object_name, 'v')
+              ->fields('v')
+              ->condition('vid', $view->vid)
+              ->orderBy('position')
+              ->execute();
+            foreach ($result as $data) {
+              $object = new $object_name(FALSE);
+              $object->load_row($data);
 
-          while ($data = db_fetch_object($result)) {
-            $object = new $object_name(FALSE);
-            $object->load_row($data);
+              // Because it can get complicated with this much indirection,
+              // make a shortcut reference.
+              $location = &$view->$key;
 
-            // Because it can get complicated with this much indirection,
-            // make a shortcut reference.
-            $location = &$view->$key;
-
-            // If we have a basic id field, load the item onto the view based on
-            // this ID, otherwise push it on.
-            if (!empty($object->id)) {
-              $location[$object->id] = $object;
-            }
-            else {
-              $location[] = $object;
+              // If we have a basic id field, load the item onto the view based on
+              // this ID, otherwise push it on.
+              if (!empty($object->id)) {
+                $location[$object->id] = $object;
+              }
+              else {
+                $location[] = $object;
+              }
             }
           }
         }
@@ -1331,7 +1265,7 @@ class view extends views_db_object {
     $vids = array();
 
     // Load all the views.
-    while ($data = db_fetch_object($result)) {
+    foreach ($result as $data) {
       $view = new view;
       $view->load_row($data);
       $view->loaded = TRUE;
@@ -1349,9 +1283,10 @@ class view extends views_db_object {
     // Now load all the subtables:
     foreach (view::db_objects() as $key) {
       $object_name = "views_$key";
-      $result = db_query("SELECT * FROM {{$object_name}} WHERE vid IN ($vids) ORDER BY vid, position");
+      $result = db_query("SELECT * FROM {{$object_name}} WHERE vid IN (:vids) ORDER BY vid, position",
+        array(':vids' => array_keys($names)));
 
-      while ($data = db_fetch_object($result)) {
+      foreach ($result as $data) {
         $object = new $object_name(FALSE);
         $object->load_row($data);
 
@@ -1385,7 +1320,9 @@ class view extends views_db_object {
     if (!empty($this->vid)) {
       // remove existing table entries
       foreach ($this->db_objects() as $key) {
-        db_query("DELETE from {views_" . $key . "} WHERE vid = %d", $this->vid);
+        db_delete('views_' . $key)
+          ->condition('vid', $this->vid)
+          ->execute();
       }
     }
 
@@ -1421,10 +1358,14 @@ class view extends views_db_object {
       return;
     }
 
-    db_query("DELETE FROM {views_view} WHERE vid = %d", $this->vid);
+    db_delete('views_view')
+      ->condition('vid', $this->vid)
+      ->execute();
     // Delete from all of our subtables as well.
     foreach ($this->db_objects() as $key) {
-      db_query("DELETE from {views_" . $key . "} WHERE vid = %d", $this->vid);
+      db_delete('views_'. $key)
+        ->condition('vid', $this->vid)
+        ->execute();
     }
 
     cache_clear_all('views_query:' . $this->name, 'cache_views');
@@ -1521,7 +1462,7 @@ class view extends views_db_object {
     // *were not cloned*. We must clone them ourselves.
     $displays = array();
     foreach ($clone->display as $id => $display) {
-      $displays[$id] = drupal_clone($display);
+      $displays[$id] = clone $display;
       if (isset($displays[$id]->handler)) {
         unset($displays[$id]->handler);
       }
@@ -1569,6 +1510,17 @@ class view extends views_db_object {
       if (isset($this->query)) {
         unset($this->query);
       }
+
+      $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
+      foreach ($keys as $key) {
+        if (isset($this->$key)) {
+          unset($this->$key);
+        }
+      }
+      $this->built = $this->executed = FALSE;
+      $this->build_info = array();
+      $this->attachment_before = '';
+      $this->attachment_after = '';
     }
   }
 
@@ -1636,7 +1588,7 @@ class views_db_object {
         if (!empty($info['serialize']) && isset($info['serialized default'])) {
           $this->$field = unserialize($info['serialized default']);
         }
-        else if (isset($info['default'])) {
+        elseif (isset($info['default'])) {
           $this->$field = $info['default'];
         }
         else {
@@ -1653,8 +1605,8 @@ class views_db_object {
    *   If true this will be an UPDATE query. Otherwise it will be an INSERT.
    */
   function save_row($update = NULL) {
-    $schema = drupal_get_schema($this->db_table);
     $fields = $defs = $values = $serials = array();
+    $schema = drupal_get_schema($this->db_table);
 
     // Go through our schema and build correlations.
     foreach ($schema['fields'] as $field => $info) {
@@ -1663,48 +1615,24 @@ class views_db_object {
         $serials[] = $field;
         continue;
       }
-      $fields[] = $field;
-      switch ($info['type']) {
-        case 'blob':
-          $defs[] = '%b';
-          break;
-        case 'int':
-          $defs[] = '%d';
-          break;
-        case 'float':
-        case 'numeric':
-          $defs[] = '%f';
-          break;
-        default:
-          $defs[] = "'%s'";
-      }
-      if (empty($info['serialize'])) {
-        $values[] = $this->$field;
-      }
-      else {
-        $values[] = serialize($this->$field);
-      }
+      $fields[$field] = empty($info['serialize']) ? $this->$field : serialize($this->$field);
     }
-    $query = '';
     if (!$update) {
-      $query = "INSERT INTO {" . $this->db_table . "} (" . implode(', ', $fields) . ') VALUES (' . implode(', ', $defs) . ')';
+      $query = db_insert($this->db_table);
     }
     else {
-      $query = '';
-      foreach ($fields as $id => $field) {
-        if ($query) {
-          $query .= ', ';
-        }
-        $query .= $field . ' = ' . $defs[$id];
-      }
-      $query = "UPDATE {" . $this->db_table . "} SET " . $query . " WHERE $update = " . $this->$update;
+      $query = db_update($this->db_table)
+        ->condition($update, $this->$update);
     }
-    db_query($query, $values);
+    $return = $query
+      ->fields($fields)
+      ->execute();
 
     if ($serials && !$update) {
       // get last insert ids and fill them in.
+      // Well, one ID.
       foreach ($serials as $field) {
-        $this->$field = db_last_insert_id($this->db_table, $field);
+        $this->$field = $return;
       }
     }
   }
@@ -1725,7 +1653,7 @@ class views_db_object {
 
     // Go through our schema and build correlations.
     foreach ($schema['fields'] as $field => $info) {
-      $this->$field = empty($info['serialize']) ? $data->$field : unserialize(db_decode_blob($data->$field));
+      $this->$field = empty($info['serialize']) ? $data->$field : unserialize($data->$field);
     }
   }
 

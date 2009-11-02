@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_default_view_views().
+ * Implements hook_default_view_views().
  */
 function search_views_default_views() {
   $view = new view;

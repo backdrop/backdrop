@@ -16,10 +16,9 @@ class views_handler_argument_node_vid extends views_handler_argument_numeric {
    */
   function title_query() {
     $titles = array();
-    $placeholders = implode(', ', array_fill(0, sizeof($this->value), '%d'));
 
-    $result = db_query("SELECT n.title FROM {node_revisions} n WHERE n.nid IN ($placeholders)", $this->value);
-    while ($term = db_fetch_object($result)) {
+    $result = db_query("SELECT n.title FROM {node_revision} n WHERE n.nid IN (:nids)", array(':nids' => $this->value));
+    foreach ($result as $term) {
       $titles[] = check_plain($term->title);
     }
     return $titles;

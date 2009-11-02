@@ -130,7 +130,13 @@ class views_plugin_row extends views_plugin {
    * of some form, but not always.
    */
   function render($row) {
-    return theme($this->theme_functions(), $this->view, $this->options, $row, $this->field_alias);
+    return theme($this->theme_functions(),
+      array(
+        'view' => $this->view,
+        'options' => $this->options,
+        'row' => $row,
+        'field_alias' => $this->field_alias
+      ));
   }
 }
 

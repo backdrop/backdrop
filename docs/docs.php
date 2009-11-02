@@ -244,7 +244,7 @@ function hook_views_handlers() {
 function hook_views_api() {
   return array(
     'api' => 2,
-    'path' => drupal_get_path('module', 'example') . '/includes/views', 
+    'path' => drupal_get_path('module', 'example') . '/includes/views',
   );
 }
 

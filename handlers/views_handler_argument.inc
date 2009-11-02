@@ -114,16 +114,16 @@ class views_handler_argument extends views_handler {
     $defaults = $this->default_actions();
 
     $form['title'] = array(
-      '#prefix' => '<div class="clear-block">',
+      '#prefix' => '<div class="clearfix">',
       '#suffix' => '</div>',
       '#type' => 'textfield',
       '#title' => t('Title'),
       '#default_value' => $this->options['title'],
       '#description' => t('The title to use when this argument is present. It will override the title of the view and titles from previous arguments. You can use percent substitution here to replace with argument titles. Use "%1" for the first argument, "%2" for the second, etc.'),
     );
-    
+
     $form['breadcrumb'] = array(
-      '#prefix' => '<div class="clear-block">',
+      '#prefix' => '<div class="clearfix">',
       '#suffix' => '</div>',
       '#type' => 'textfield',
       '#title' => t('Breadcrumb'),
@@ -132,11 +132,11 @@ class views_handler_argument extends views_handler {
     );
 
     $form['clear_start'] = array(
-      '#value' => '<div class="clear-block">',
+      '#markup' => '<div class="clearfix">',
     );
 
     $form['defaults_start'] = array(
-      '#value' => '<div class="views-left-50">',
+      '#markup' => '<div class="views-left-50">',
     );
 
     $form['default_action'] = array(
@@ -146,7 +146,7 @@ class views_handler_argument extends views_handler {
     );
 
     $form['defaults_stop'] = array(
-      '#value' => '</div>',
+      '#markup' => '</div>',
     );
 
     $form['wildcard'] = array(
@@ -169,7 +169,7 @@ class views_handler_argument extends views_handler {
     );
 
     $form['clear_stop'] = array(
-      '#value' => '</div>',
+      '#markup' => '</div>',
     );
 
     $options = array();
@@ -188,7 +188,7 @@ class views_handler_argument extends views_handler {
 
     $form['validate_options_div_prefix'] = array(
       '#id' => 'views-validator-options',
-      '#value' => '<fieldset id="views-validator-options"><legend>' . t('Validator options') . '</legend>',
+      '#markup' => '<fieldset id="views-validator-options"><legend>' . t('Validator options') . '</legend>',
     );
 
     $form['validate_type'] = array(
@@ -242,7 +242,7 @@ class views_handler_argument extends views_handler {
     );
 
     $form['validate_options_div_suffix'] = array(
-      '#value' => '</fieldset>',
+      '#markup' => '</fieldset>',
     );
   }
 
@@ -329,7 +329,7 @@ class views_handler_argument extends views_handler {
       '#id' => 'edit-options-default-argument-type',
       '#title' => t('Default argument type'),
       '#default_value' => $this->options['default_argument_type'],
-      '#process' => array('expand_radios', 'views_process_dependency'),
+      '#process' => array('form_process_radios', 'views_process_dependency'),
       '#dependency' => array('radio:options[default_action]' => array('default')),
     );
 
@@ -346,7 +346,7 @@ class views_handler_argument extends views_handler {
     }
 
     $form['default_options_div_suffix'] = array(
-      '#value' => '</fieldset></div>',
+      '#markup' => '</fieldset></div>',
     );
 
     asort($options);
@@ -512,7 +512,7 @@ class views_handler_argument extends views_handler {
       if ($this->table_alias != $this->table) {
         $j = views_get_table_join($this->name_table, $this->table);
         if ($j) {
-          $join = drupal_clone($j);
+          $join = clone $j;
           $join->left_table = $this->table_alias;
           $this->name_table_alias = $this->query->add_table($this->name_table, $this->relationship, $join);
         }
@@ -598,8 +598,7 @@ class views_handler_argument extends views_handler {
    */
   function query() {
     $this->ensure_my_table();
-    $placeholder = empty($this->definition['numeric']) ? "'%s'" : '%d';
-    $this->query->add_where(0, "$this->table_alias.$this->real_field = $placeholder", $this->argument);
+    $this->query->add_where(0, "$this->table_alias.$this->real_field", $this->argument);
   }
 
   /**
@@ -714,7 +713,7 @@ class views_handler_argument extends views_handler {
     if (isset($this->argument)) {
       return $this->argument;
     }
-    
+
     // Otherwise, we have to pretend to process ourself to find the value.
     $value = NULL;
     // Find the position of this argument within the view.
@@ -731,7 +730,7 @@ class views_handler_argument extends views_handler {
 
     // Clone ourselves so that we don't break things when we're really
     // processing the arguments.
-    $argument = drupal_clone($this);
+    $argument = clone $this;
     if (!isset($arg) && $argument->has_default_argument()) {
       $arg = $argument->get_default_argument();
     }
@@ -758,8 +757,7 @@ class views_handler_argument_broken extends views_handler_argument {
   function query() { /* No query to run */ }
   function options_form(&$form, &$form_state) {
     $form['markup'] = array(
-      '#prefix' => '<div class="form-item description">',
-      '#value' => t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.'),
+      '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',
     );
   }
 

@@ -100,7 +100,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
     if (count($displays) > 1) {
       $attach_to = t('Multiple displays');
     }
-    else if (count($displays) == 1) {
+    elseif (count($displays) == 1) {
       $display = array_shift($displays);
       if (!empty($this->view->display[$display])) {
         $attach_to = check_plain($this->view->display[$display]->display_title);
@@ -195,7 +195,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
       $plugin->attach_to($display_id, $this->get_path(), $clone->get_title());
     }
   }
-  
+
   function uses_link_display() {
     return TRUE;
   }

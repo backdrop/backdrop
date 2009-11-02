@@ -8,12 +8,12 @@
 /**
  * @defgroup views_node_module node.module handlers
  *
- * Includes the tables 'node', 'node_revisions' and 'history'.
+ * Includes the tables 'node', 'node_revision' and 'history'.
  * @{
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implements hook_views_data()
  */
 function node_views_data() {
   // ----------------------------------------------------------------
@@ -34,10 +34,10 @@ function node_views_data() {
   // For other base tables, explain how we join
   $data['node']['table']['join'] = array(
     // this explains how the 'node' table (named in the line above)
-    // links toward the node_revisions table.
-    'node_revisions' => array(
+    // links toward the node_revision table.
+    'node_revision' => array(
       'handler' => 'views_join', // this is actually optional
-      'left_table' => 'node_revisions', // Because this is a direct link it could be left out.
+      'left_table' => 'node_revision', // Because this is a direct link it could be left out.
       'left_field' => 'nid',
       'field' => 'nid',
       // also supported:
@@ -64,7 +64,6 @@ function node_views_data() {
     // Information for accepting a nid as an argument
     'argument' => array(
       'handler' => 'views_handler_argument_node_nid',
-      'parent' => 'views_handler_argument_numeric', // make sure parent is included
       'name field' => 'title', // the field to display in the summary.
       'numeric' => TRUE,
       'validate type' => 'nid',
@@ -375,33 +374,10 @@ function node_views_data() {
     ),
   );
 
-  // ----------------------------------------------------------------------
-  // Node revisions table
-
-  // Define the base group of this table. Fields that don't
-  // have a group defined will go into this field by default.
-  $data['node_revisions']['table']['group']  = t('Node revision');
-
-  // Advertise this table as a possible base table
-  $data['node_revisions']['table']['base'] = array(
-    'field' => 'vid',
-    'title' => t('Node revision'),
-    'help' => t('Node revisions are a history of changes to nodes.'),
-  );
-
-  // For other base tables, explain how we join
-  $data['node_revisions']['table']['join'] = array(
-    // Directly links to node table.
-    'node' => array(
-      'left_field' => 'vid',
-      'field' => 'vid',
-    ),
-  );
-
   // uid field
-  $data['node_revisions']['uid'] = array(
-    'title' => t('User'),
-    'help' => t('Relate a node revision to the user who created the revision.'),
+  $data['node']['uid'] = array(
+    'title' => t('Author'),
+    'help' => t('Relate a node to the user who created it.'),
     'relationship' => array(
       'handler' => 'views_handler_relationship',
       'base' => 'users',
@@ -410,49 +386,52 @@ function node_views_data() {
     ),
   );
 
-  // Body field
-  $data['node_revisions']['body'] = array(
-    'group' => t('Node'),
-    'title' => t('Body'), // The item it appears as on the UI,
-    'help' => t('The actual, full data in the body field; this may not be valid data on all node types.'), // The help that appears on the UI,
-     // Information for displaying a title as a field
-    'field' => array(
-      'handler' => 'views_handler_field_markup',
-      'format' => 'format', // The name of the format field
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
+  // ----------------------------------------------------------------------
+  // Node revision table
+
+  // Define the base group of this table. Fields that don't
+  // have a group defined will go into this field by default.
+  $data['node_revision']['table']['group']  = t('Node revision');
+
+  // Advertise this table as a possible base table
+  $data['node_revision']['table']['base'] = array(
+    'field' => 'vid',
+    'title' => t('Node revision'),
+    'help' => t('Node revision are a history of changes to nodes.'),
+  );
+
+  // For other base tables, explain how we join
+  $data['node_revision']['table']['join'] = array(
+    // Directly links to node table.
+    'node' => array(
+      'left_field' => 'vid',
+      'field' => 'vid',
     ),
   );
 
-  // Teaser field
-  $data['node_revisions']['teaser'] = array(
-    'group' => t('Node'),
-    'title' => t('Teaser'), // The item it appears as on the UI,
-    'help' => t('The stored teaser field. This may not be valid or useful data on all node types.'), // The help that appears on the UI,
-     // Information for displaying a title as a field
-    'field' => array(
-      'handler' => 'views_handler_field_markup',
-      'format' => 'format', // The name of the format field
-     ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
+  // uid field for node revision
+  $data['node_revision']['uid'] = array(
+    'title' => t('User'),
+    'help' => t('Relate a node revision to the user who created the revision.'),
+    'relationship' => array(
+      'handler' => 'views_handler_relationship',
+      'base' => 'users',
+      'field' => 'uid',
+      'label' => t('revision user'),
     ),
   );
 
   // nid
-  $data['node_revisions']['vid'] = array(
+  $data['node_revision']['vid'] = array(
     'title' => t('Vid'),
     'help' => t('The revision ID of the node revision.'), // The help that appears on the UI,
     // Information for displaying the nid
     'field' => array(
-//      'handler' => 'views_handler_field',
       'click sortable' => TRUE,
     ),
     // Information for accepting a nid as an argument
     'argument' => array(
       'handler' => 'views_handler_argument_node_vid',
-      'parent' => 'views_handler_argument_numeric', // make sure parent is included
       'click sortable' => TRUE,
       'numeric' => TRUE,
     ),
@@ -467,7 +446,7 @@ function node_views_data() {
   );
 
   // title
-  $data['node_revisions']['title'] = array(
+  $data['node_revision']['title'] = array(
     'title' => t('Title'), // The item it appears as on the UI,
     'help' => t('The title of the node.'), // The help that appears on the UI,
      // Information for displaying a title as a field
@@ -488,7 +467,7 @@ function node_views_data() {
   );
 
   // log field
-  $data['node_revisions']['log'] = array(
+  $data['node_revision']['log'] = array(
     'title' => t('Log message'), // The item it appears as on the UI,
     'help' => t('The log message entered when the revision was created.'), // The help that appears on the UI,
      // Information for displaying a title as a field
@@ -502,7 +481,7 @@ function node_views_data() {
 
   // revision timestamp
   // changed field
-  $data['node_revisions']['timestamp'] = array(
+  $data['node_revision']['timestamp'] = array(
     'title' => t('Created date'), // The item it appears as on the UI,
     'help' => t('The date the node revision was created.'), // The help that appears on the UI,
     'field' => array(
@@ -517,40 +496,7 @@ function node_views_data() {
     ),
   );
 
-  // input format id
-  $data['node_revisions']['format'] = array(
-    'title' => t('Input format id'), // The item it appears as on the UI,
-    'help' => t('The numeric input format of the node revision. !default means the default input format.', array('!default' => FILTER_FORMAT_DEFAULT)), // The help that appears on the UI,
-     // Information for displaying an input format as a field
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-      'click sortable' => TRUE,
-    ),
-    // Information for sorting on input format
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    // Information for accepting input format as a filter
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-  );
-
-  // input format name
-  // A (numeric) format of 0 means the default; Drupal also applies the default
-  // if the format specifed for a node revision has been deleted.
-  // This complexity makes sorting and filtering by format name tricky,
-  // hence these are not yet supported.
-  $data['node_revisions']['format_name'] = array(
-    'title' => t('Input format'), // The item it appears as on the UI,
-    'help' => t('The name of the input format of the node revision.'), // The help that appears on the UI,
-     // Information for displaying an input format as a field
-    'field' => array(
-      'handler' => 'views_handler_field_filter_format_name',
-    ),
-  );
-
-  $data['node_revisions']['revert_revision'] = array(
+  $data['node_revision']['revert_revision'] = array(
     'field' => array(
       'title' => t('Revert link'),
       'help' => t('Provide a simple link to revert to the revision.'),
@@ -558,7 +504,7 @@ function node_views_data() {
     ),
   );
 
-  $data['node_revisions']['delete_revision'] = array(
+  $data['node_revision']['delete_revision'] = array(
     'field' => array(
       'title' => t('Delete link'),
       'help' => t('Provide a simple link to delete the node revision.'),
@@ -607,7 +553,7 @@ function node_views_data() {
       'left_field' => 'nid',
       'field' => 'nid',
       'extra' => array(
-        array('field' => 'uid', 'value' => '***CURRENT_USER***', 'numeric' => TRUE),
+        array('field' => 'uid', 'value' => ':user-current-user', 'numeric' => TRUE),
       ),
     ),
   );
@@ -627,104 +573,43 @@ function node_views_data() {
 }
 
 /**
- * Implementation of hook_views_handlers() to register all of the basic handlers
+ * Implements hook_views_handlers() to register all of the basic handlers
  * views uses.
  */
 function node_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/node',
-    ),
-    'handlers' => array(
-      // field handlers
-      'views_handler_field_node' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_node_type' => array(
-        'parent' => 'views_handler_field_node',
-      ),
-      'views_handler_field_node_link' => array(
-        'parent' => 'views_handler_field',
-      ),
-      'views_handler_field_node_type' => array(
-        'parent' => 'views_handler_field_node',
-      ),
-      'views_handler_field_node_link_edit' => array(
-        'parent' => 'views_handler_field_node_link',
-      ),
-      'views_handler_field_node_link_delete' => array(
-        'parent' => 'views_handler_field_node_link',
-      ),
-      'views_handler_field_node_revision_link_revert' => array(
-        'parent' => 'views_handler_field_node_link',
-      ),
-      'views_handler_field_node_revision_link_delete' => array(
-        'parent' => 'views_handler_field_node_link',
-      ),
-      'views_handler_field_history_user_timestamp' => array(
-        'parent' => 'views_handler_field_node',
-      ),
+    // field handlers
+    'views_handler_field_node',
+    'views_handler_field_node_type',
+    'views_handler_field_node_link',
+    'views_handler_field_node_type',
+    'views_handler_field_node_link_edit',
+    'views_handler_field_node_link_delete',
+    'views_handler_field_node_revision_link_revert',
+    'views_handler_field_node_revision_link_delete',
+    'views_handler_field_history_user_timestamp',
 
-      // argument handlers
-      'views_handler_argument_node_type' => array(
-        'parent' => 'views_handler_argument',
-      ),
-      'views_handler_argument_node_nid' => array(
-        'parent' => 'views_handler_argument_numeric',
-      ),
-      'views_handler_argument_node_vid' => array(
-        'parent' => 'views_handler_argument_numeric',
-      ),
-      'views_handler_argument_node_created_fulldate' => array(
-        // put several handlers in the same file
-        'file' => 'views_handler_argument_dates_various.inc',
-        'parent' => 'views_handler_argument_date',
-      ),
-      'views_handler_argument_node_created_year' => array(
-        // put several handlers in the same file
-        'file' => 'views_handler_argument_dates_various.inc',
-        'parent' => 'views_handler_argument_date',
-      ),
-      'views_handler_argument_node_created_year_month' => array(
-        // put several handlers in the same file
-        'file' => 'views_handler_argument_dates_various.inc',
-        'parent' => 'views_handler_argument_date',
-      ),
-      'views_handler_argument_node_created_month' => array(
-        // put several handlers in the same file
-        'file' => 'views_handler_argument_dates_various.inc',
-        'parent' => 'views_handler_argument_date',
-      ),
-      'views_handler_argument_node_created_day' => array(
-        // put several handlers in the same file
-        'file' => 'views_handler_argument_dates_various.inc',
-        'parent' => 'views_handler_argument_date',
-      ),
-      'views_handler_argument_node_created_week' => array(
-        // put several handlers in the same file
-        'file' => 'views_handler_argument_dates_various.inc',
-        'parent' => 'views_handler_argument_date',
-      ),
+    // argument handlers
+    'views_handler_argument_node_type',
+    'views_handler_argument_node_nid',
+    'views_handler_argument_node_vid',
+    'views_handler_argument_node_created_fulldate',
+    'views_handler_argument_node_created_year',
+    'views_handler_argument_node_created_year_month',
+    'views_handler_argument_node_created_month',
+    'views_handler_argument_node_created_day',
+    'views_handler_argument_node_created_week',
 
-      // filters
-      'views_handler_filter_node_type' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-      'views_handler_filter_history_user_timestamp' => array(
-        'parent' => 'views_handler_filter',
-      ),
-      'views_handler_filter_node_status' => array(
-        'parent' => 'views_handler_filter',
-      ),
-      'views_handler_filter_node_access' => array(
-        'parent' => 'views_handler_filter',
-      ),
-    ),
+    // filters
+    'views_handler_filter_node_type',
+    'views_handler_filter_history_user_timestamp',
+    'views_handler_filter_node_status',
+    'views_handler_filter_node_access',
   );
 }
 
 /**
- * Implementation of hook_views_plugins
+ * Implements hook_views_plugins
  */
 function node_views_plugins() {
   return array(
@@ -757,15 +642,12 @@ function node_views_plugins() {
       'node' => array(
         'title' => t('Node'),
         'handler' => 'views_plugin_argument_validate_node',
-        'path' => drupal_get_path('module', 'views') . '/modules/node', // not necessary for most modules
       ),
     ),
     'argument default' => array(
       'node' => array(
         'title' => t('Node ID from URL'),
-        'handler' => 'views_plugin_argument_default_node',
-        'path' => drupal_get_path('module', 'views') . '/modules/node', // not necessary for most modules
-        'parent' => 'fixed', // so that the parent class is included
+        'handler' => 'views_plugin_argument_default_node'
       ),
     ),
   );
@@ -793,8 +675,13 @@ function template_preprocess_views_view_row_node(&$vars) {
   }
 
   $node->view = $vars['view'];
-  $node->build_mode = ($options['build_mode'] == 'teaser' || $options['build_mode'] == 'full') ? NODE_BUILD_NORMAL : $options['build_mode'];
-  $vars['node'] = node_view($node, $options['build_mode'] == 'teaser', FALSE, $options['links']);
+  //$node->build_mode = ($options['build_mode'] == 'teaser' || $options['build_mode'] == 'full') ? NODE_BUILD_NORMAL : $options['build_mode'];
+  //$vars['node'] = node_view($node, $options['build_mode'] == 'teaser', FALSE, $options['links']);
+  $content = node_build($node, $options['build_mode']);
+  if (!$options['links']) {
+    unset($content['links']);
+  }
+  $vars['node'] = drupal_render($content);
 
   if (!empty($options['comments']) && function_exists('comment_render')) {
     $vars['comments'] = comment_render($node);
@@ -802,16 +689,16 @@ function template_preprocess_views_view_row_node(&$vars) {
 }
 
 /**
- * Implementation of hook_views_query_substitutions().
+ * Implements hook_views_query_substitutions().
  */
 function node_views_query_substitutions() {
   return array(
-    '***ADMINISTER_NODES***' => intval(user_access('administer nodes')),
+    ':node-administer-nodes' => intval(user_access('administer nodes')),
   );
 }
 
 /**
- * Implementation of hook_views_analyze().
+ * Implements hook_views_analyze().
  */
 function node_views_analyze($view) {
   $ret = array();

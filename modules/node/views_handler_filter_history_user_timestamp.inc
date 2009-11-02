@@ -45,7 +45,7 @@ class views_handler_filter_history_user_timestamp extends views_handler_filter {
     // Hey, Drupal kills old history, so nodes that haven't been updated
     // since NODE_NEW_LIMIT are bzzzzzzzt outta here!
 
-    $limit = time() - NODE_NEW_LIMIT;
+    $limit = REQUEST_TIME - NODE_NEW_LIMIT;
 
     $this->ensure_my_table();
     $field = "$this->table_alias.$this->real_field";

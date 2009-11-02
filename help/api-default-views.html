@@ -90,8 +90,8 @@ Be sure to use the right arguments line or the theme system will not properly tr
       ),
 </pre>
 
-  The first one is the global 'template_preprocess' function which all templates utilize. It does some basic things such as setting up $zebra and a few other items. See <a href="http://api.drupal.org/api/function/template_preprocess/6">api.drupal.org</a> for specifics. 
-  
+  The first one is the global 'template_preprocess' function which all templates utilize. It does some basic things such as setting up $zebra and a few other items. See <a href="http://api.drupal.org/api/function/template_preprocess/6">api.drupal.org</a> for specifics.
+
   The second one is the plugin specific preprocess. Like 'original hook' it should conform to the name used by the original template. i.e, if the original template was <em>views-view-list.tpl.php</em> then that preprocess function would be named <em>template_preprocess_views_view_list</em>.
 
   The third one is your module's preprocess function, if it needs one. In general, you probably will not need one, and you should only attempt to use one if you are reasonably familiar with the concept of preprocess functions and Drupal's theme system in general. See Drupal's theme documentation for more information.

@@ -37,7 +37,9 @@ class views_handler_field_ncs_last_comment_name extends views_handler_field {
       $account = new stdClass();
       $account->name = $values->{$this->field_alias};
       $account->uid = $values->{$this->uid};
-      return theme('username', $account);
+      return theme('username', array(
+        'account' => $account
+      ));
     }
     else {
       return check_plain($values->{$this->field_alias});
