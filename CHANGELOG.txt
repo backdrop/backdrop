@@ -1,6 +1,6 @@
 CHANGELOG for Views 2 for Drupal 6
 
-Views 2.x-dev
+Views 3.x-dev
   Bug fixes:
     o Table style when not overriding sorts put sorts in wrong order.
     o #488908 by sl27257: "Node: Has new content" only worked when exposed.

@@ -130,6 +130,16 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
+   * Should the enabled display more link be shown when no more items?
+   */
+  function use_more_always() {
+    if (!empty($this->definition['use more'])) {
+      return $this->get_option('use_more_always');
+    }
+    return FALSE;
+  }
+
+  /**
    * Does the display have custom link text?
    */
   function use_more_text() {
@@ -166,7 +176,7 @@ class views_plugin_display extends views_plugin {
       'use_ajax' => array('use_ajax'),
       'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
       'use_pager' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
-      'use_more' => array('use_more', 'use_more_text'),
+      'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
       'distinct' => array('distinct'),
       'exposed_block' => array('exposed_block'),
@@ -240,6 +250,7 @@ class views_plugin_display extends views_plugin {
           'use_pager' => TRUE,
           'pager_element'  => TRUE,
           'use_more' => TRUE,
+          'use_more_always' => TRUE,
           'use_more_text' => TRUE,
           'distinct' => TRUE,
           'exposed_block' => TRUE,
@@ -335,6 +346,9 @@ class views_plugin_display extends views_plugin {
         'default' => 0,
       ),
       'use_more' => array(
+        'default' => FALSE,
+      ),
+      'use_more_always' => array(
         'default' => FALSE,
       ),
       'use_more_text' => array(
@@ -895,6 +909,12 @@ class views_plugin_display extends views_plugin {
           '#title' => t('Create more link'),
           '#description' => t("This will add a more link to the bottom of this view, which will link to the page view. If you have more than one page view, the link will point to the display specified in 'Link display' above."),
           '#default_value' => $this->get_option('use_more'),
+        );
+        $form['use_more_always'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Always display more link'),
+          '#description' => t("This will display the more link even if there are no more items to display."),
+          '#default_value' => $this->get_option('use_more_always'),
         );
         $form['#title'] .= t('Text to use for the more link.');
         $form['use_more_text'] = array(
@@ -1468,6 +1488,7 @@ class views_plugin_display extends views_plugin {
         break;
       case 'use_more':
         $this->set_option($section, intval($form_state['values'][$section]));
+        $this->set_option('use_more_always', intval($form_state['values']['use_more_always']));
         $this->set_option('use_more_text', $form_state['values']['use_more_text']);
       case 'distinct':
         $this->set_option($section, $form_state['values'][$section]);
@@ -1632,7 +1653,7 @@ class views_plugin_display extends views_plugin {
    * Render the 'more' link
    */
   function render_more_link() {
-    if ($this->use_more() && $this->view->total_rows > $this->view->pager['items_per_page']) {
+    if ($this->use_more() && ($this->view->total_rows > $this->view->pager['items_per_page'] || $this->use_more_always())) {
       $path = $this->get_path();
       if ($path) {
         $path = $this->view->get_url(NULL, $path);
