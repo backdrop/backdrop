@@ -31,7 +31,7 @@ function views_theme() {
 
   // Our extra version of pager from pager.inc
   $hooks['views_mini_pager'] = $base + array(
-    'arguments' => array('tags' => array(), 'limit' => 10, 'element' => 0, 'parameters' => array()),
+    'variables' => array('tags' => array(), 'limit' => 10, 'element' => 0, 'parameters' => array()),
     'pattern' => 'views_mini_pager__',
   );
 
@@ -44,7 +44,7 @@ function views_theme() {
   // Default view themes
   $hooks['views_view_field'] = $base + array(
     'pattern' => 'views_view_field__',
-    'arguments' => array('view' => NULL, 'field' => NULL, 'row' => NULL),
+    'variables' => array('view' => NULL, 'field' => NULL, 'row' => NULL),
   );
 
   $plugins = views_fetch_plugin_data();
@@ -57,7 +57,7 @@ function views_theme() {
           'pattern' => $def['theme'] . '__',
           'file' => $def['theme file'],
           'path' => $def['theme path'],
-          'arguments' => $arguments[$type],
+          'variables' => $arguments[$type],
         );
 
         $include = DRUPAL_ROOT . '/' . $def['theme path'] . '/' . $def['theme file'];
@@ -80,7 +80,7 @@ function views_theme() {
             'pattern' => $theme . '__',
             'file' => $def['theme file'],
             'path' => $def['theme path'],
-            'arguments' => $arguments[$theme_type],
+            'variables' => $arguments[$theme_type],
           );
 
           if (!function_exists('theme_' . $theme)) {
@@ -94,13 +94,13 @@ function views_theme() {
   $hooks['views_exposed_form'] = $base + array(
     'template' => 'views-exposed-form',
     'pattern' => 'views_exposed_form__',
-    'arguments' => array('form' => NULL),
+    'render element' => 'form',
   );
 
   $hooks['views_more'] = $base + array(
     'template' => 'views-more',
     'pattern' => 'views_more__',
-    'arguments' => array('more_url' => NULL, 'link_text' => 'more'),
+    'variables' => array('more_url' => NULL, 'link_text' => 'more'),
   );
   return $hooks;
 }
