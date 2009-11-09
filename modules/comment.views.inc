@@ -196,7 +196,7 @@ function comment_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_date',
     ),
-  );  
+  );
 
   // status (approved or not)
   $data['comment']['status'] = array(
@@ -278,7 +278,7 @@ function comment_views_data() {
     'help' => t('The node the comment is a reply to.'),
     'relationship' => array(
       'base' => 'node',
-      'field' => 'nid',
+      'base field' => 'nid',
       'handler' => 'views_handler_relationship',
       'label' => t('Node'),
     ),
@@ -289,7 +289,7 @@ function comment_views_data() {
     'help' => t("The User ID of the comment's author."),
     'relationship' => array(
       'base' => 'users',
-      'field' => 'uid',
+      'base field' => 'uid',
       'handler' => 'views_handler_relationship',
       'label' => t('User'),
     ),
@@ -305,7 +305,7 @@ function comment_views_data() {
       'title' => t('Parent comment'),
       'help' => t('The parent comment.'),
       'base' => 'comment',
-      'field' => 'cid',
+      'base field' => 'cid',
       'handler' => 'views_handler_relationship',
       'label' => t('Parent comment'),
     ),
@@ -321,7 +321,7 @@ function comment_views_data() {
   $data['node_comment_statistics']['table']['join'] = array(
     //...to the node table
     'node' => array(
-      'type' => 'INNER',      
+      'type' => 'INNER',
       'left_field' => 'nid',
       'field' => 'nid',
      ),

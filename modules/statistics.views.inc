@@ -206,7 +206,7 @@ function statistics_views_data() {
     'relationship' => array(
       'handler' => 'views_handler_relationship',
       'base' => 'users',
-      'field' => 'uid',
+      'base field' => 'uid',
      ),
   );
 
