@@ -161,27 +161,27 @@ function views_ui_theme() {
   return array(
     // edit a view
     'views_ui_edit_view' => array(
-      'arguments' => array('view' => NULL),
+      'variables' => array('view' => NULL),
       'template' => 'views-ui-edit-view',
       'path' => "$path/theme",
     ),
     'views_ui_edit_tab' => array(
-      'arguments' => array('view' => NULL, 'display' => NULL),
+      'variables' => array('view' => NULL, 'display' => NULL),
       'template' => 'views-ui-edit-tab',
       'path' => "$path/theme",
     ),
     'views_ui_edit_item' => array(
-      'arguments' => array('type' => NULL, 'view' => NULL, 'display' => NULL, 'no_fields' => FALSE),
+      'variables' => array('type' => NULL, 'view' => NULL, 'display' => NULL, 'no_fields' => FALSE),
       'template' => 'views-ui-edit-item',
       'path' => "$path/theme",
     ),
     'views_ui_rearrange_form' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
     ),
 
     // list views
     'views_ui_list_views' => array(
-      'arguments' => array(
+      'variables' => array(
         'views' => array(),
         'help' => '',
         'widgets' => '',
@@ -193,15 +193,15 @@ function views_ui_theme() {
 
     // tab themes
     'views_tabset' => array(
-      'arguments' => array('tabs' => NULL),
+      'variables' => array('tabs' => NULL),
     ),
     'views_tab' => array(
-      'arguments' => array('body' => NULL),
+      'variables' => array('body' => NULL),
     ),
 
     // On behalf of a plugin
     'views_ui_style_plugin_table' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
     ),
   );
 }
