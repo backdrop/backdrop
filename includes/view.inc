@@ -397,6 +397,9 @@ class view extends views_db_object {
       'method' => 'get',
       'rerender' => TRUE,
       'no_redirect' => TRUE,
+      'build_info' => array(
+        'args' => array(),
+    ),
     );
 
     // Some types of displays (eg. attachments) may wish to use the exposed

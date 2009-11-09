@@ -189,6 +189,9 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
   $form_state += array(
     're_render' => FALSE,
     'no_redirect' => !empty($form_state['ajax']),
+    'build_info' => array(
+      'args' => array(),
+    ),
   );
 
   $output = drupal_render(drupal_build_form($form_id, $form_state));

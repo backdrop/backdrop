@@ -73,6 +73,9 @@ function template_preprocess_views_ui_list_views(&$vars) {
     'rerender' => TRUE,
     'no_redirect' => TRUE,
     'always_process' => TRUE,
+    'build_info' => array(
+      'args' => array(),
+    ),
   );
 
   $vars['widgets'] = drupal_build_form('views_ui_list_views_form', $form_state);
@@ -354,7 +357,10 @@ function views_ui_preview($js, $view) {
     'rerender' => TRUE,
     'no_redirect' => TRUE,
     'view' => &$view,
-    'ajax' => $js
+    'ajax' => $js,
+    'build_info' => array(
+      'args' => array(),
+    ),
   );
 
   $output = drupal_render(drupal_build_form('views_ui_preview_form', $form_state));
@@ -522,7 +528,10 @@ function views_ui_preview_form_submit(&$form, &$form_state) {
  */
 function views_ui_add_page() {
   $form_state = array(
-    'view' => NULL
+    'view' => NULL,
+    'build_info' => array(
+      'args' => array(),
+    ),
   );
 
   return drupal_render(drupal_build_form('views_ui_add_form', $form_state));
@@ -534,6 +543,9 @@ function views_ui_add_page() {
 function views_ui_clone_page($view) {
   $form_state = array(
     'view' => $view->copy(),
+    'build_info' => array(
+      'args' => array(),
+    ),
   );
 
   drupal_set_title(t('Clone view %view', array('%view' => $view->name)), PASS_THROUGH);
@@ -983,6 +995,9 @@ function template_preprocess_views_ui_edit_view(&$vars) {
   $form_state = array(
     'view' => &$view,
     'ajax' => FALSE,
+    'build_info' => array(
+      'args' => array(),
+    ),
   );
 
   $display_button = drupal_render(drupal_build_form('views_ui_add_display_form', $form_state));
@@ -998,6 +1013,9 @@ function template_preprocess_views_ui_edit_view(&$vars) {
     'no_redirect' => TRUE,
     'view' => &$view,
     'input' => array(),
+    'build_info' => array(
+      'args' => array(),
+    ),
   );
   $vars['preview'] = drupal_render(drupal_build_form('views_ui_preview_form', $form_state));
 
@@ -1082,7 +1100,7 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
     if (!empty($_POST['form_id']) && $_POST['form_id'] == 'views_ui_remove_display_form') {
       unset($_POST['form_id']);
     }
-    $form_state = array('view' => &$view, 'display_id' => $display->id, 'ajax' => FALSE);
+    $form_state = array('view' => &$view, 'display_id' => $display->id, 'ajax' => FALSE, 'build_info' => array('args' => array()));
     $vars['remove'] = drupal_render(drupal_build_form('views_ui_remove_display_form', $form_state));
   }
 
