@@ -63,14 +63,20 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
     }
 
     if ($nids) {
-      $result = db_query("SELECT n.nid, COUNT(c.cid) as num_comments FROM {node} n INNER JOIN {comments} c ON n.nid = c.nid LEFT JOIN {history} h ON h.nid = n.nid AND h.uid = %d WHERE n.nid IN (" . implode(', ', $nids) . ") AND c.timestamp > GREATEST(COALESCE(h.timestamp, %d), %d) AND c.status = %d GROUP BY n.nid  ", $user->uid, NODE_NEW_LIMIT, NODE_NEW_LIMIT, COMMENT_PUBLISHED);
+      $result = db_query("SELECT n.nid, COUNT(c.cid) as num_comments FROM {node} n INNER JOIN {comment} c ON n.nid = c.nid
+        LEFT JOIN {history} h ON h.nid = n.nid AND h.uid = :h_uid WHERE n.nid IN (:nids)
+        AND c.changed > GREATEST(COALESCE(h.timestamp, :timestamp), :timestamp) AND c.status = :status GROUP BY n.nid  ", array(
+          ':status' => COMMENT_PUBLISHED,
+          ':h_uid' => $user->uid,
+          ':nids' => $nids,
+          ':timestamp' => NODE_NEW_LIMIT,
+        ));
 
-      while ($node = db_fetch_object($result)) {
+      foreach ($result as $node) {
         foreach ($ids[$node->nid] as $id) {
           $values[$id]->{$this->field_alias} = $node->num_comments;
         }
       }
-
     }
   }
 
@@ -81,7 +87,7 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
       $node->type = $values->{$this->aliases['type']};
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = 'node/' . $node->nid;
-      $this->options['alter']['query'] = comment_new_page_count($values->node_comment_statistics_comment_count, $values->node_new_comments, $node);
+      $this->options['alter']['query'] = comment_new_page_count($values->{$this->field_alias}, $values->node_new_comments, $node);
       $this->options['alter']['fragment'] = 'new';
     }
 
