@@ -4,6 +4,7 @@ Views 3.x-7.x-dev
     o #580320 by chaps2: Allow "always use more link" setting.
     o #363516 by dagmar: Validate the uniqueness of exposed filter identifiers.
     o #480162 by dereine: Count whitespace fields as empty for hiding labels.
+    o #622602: Missing ORDER BY in some views with tables due to incorrect test for default table sorting.
 
 Views 3.x-6.x-dev
   Bug fixes:
