@@ -1060,6 +1060,12 @@ class views_plugin_query_default extends views_plugin_query {
         foreach ($result as $item) {
           $view->result[] = $item;
         }
+
+        // If we already know how many items we have even if we did not run the
+        // count query, go ahead and set that value:
+        if (empty($this->pager['items_per_page'])) {
+          $this->total_rows = count($this->result);
+        }
       }
       catch (Exception $e) {
         $view->result = array();
