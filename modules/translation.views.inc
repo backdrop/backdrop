@@ -152,7 +152,6 @@ function translation_views_handlers() {
     // relationships
     'views_handler_relationship_translation',
     'views_handler_filter_node_tnid_child',
-    ),
   );
 }
 
