@@ -1444,7 +1444,6 @@ class views_plugin_display extends views_plugin {
           $plugin = views_get_plugin('access', $form_state['values']['access']['type']);
           if ($plugin) {
             $access = array('type' => $form_state['values']['access']['type']);
-            $plugin->option_defaults($access);
             $this->set_option('access', $access);
             if (!empty($plugin->definition['uses options'])) {
               views_ui_add_form_to_stack('display', $this->view, $this->display->id, array('access_options'));
@@ -1466,7 +1465,6 @@ class views_plugin_display extends views_plugin {
           $plugin = views_get_plugin('cache', $form_state['values']['cache']['type']);
           if ($plugin) {
             $cache = array('type' => $form_state['values']['cache']['type']);
-            $plugin->option_defaults($cache);
             $this->set_option('cache', $cache);
             if (!empty($plugin->definition['uses options'])) {
               views_ui_add_form_to_stack('display', $this->view, $this->display->id, array('cache_options'));
