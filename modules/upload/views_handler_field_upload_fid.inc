@@ -44,8 +44,8 @@ class views_handler_field_upload_fid extends views_handler_field_prerender_list 
       if (!empty($this->options['only_listed'])) {
         $where = " AND u.list <> 0";
       }
-       => $fids$result = db_query("SELECT u.vid, u.fid, f.filename, f.uri, f.filesize, f.filemime, u.description FROM {upload} u LEFT JOIN {files} f ON f.fid = u.fid WHERE u.vid IN (" . implode(', ', $vids) . ")$where ORDER BY u.weight");
-      while ($file = db_fetch_array($result)) {
+      $result = db_query("SELECT u.vid, u.fid, f.filename, f.uri, f.filesize, f.filemime, u.description FROM {upload} u LEFT JOIN {files} f ON f.fid = u.fid WHERE u.vid IN (" . implode(', ', $vids) . ")$where ORDER BY u.weight")->fetchAssoc();
+      foreach ($result as $file) {
         $file['filename'] = check_plain($file['filename']);
         $file['filemime'] = check_plain($file['filemime']);
         $file['description'] = check_plain($file['description']);
