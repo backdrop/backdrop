@@ -11,7 +11,7 @@ class views_handler_argument_aggregator_category_cid extends views_handler_argum
   function title_query() {
     $titles = array();
 
-    $result = db_query("SELECT c.title FROM {aggregator_category} c WHERE c.cid IN (:cid)", array(':cid' => $this->value)));
+    $result = db_query("SELECT c.title FROM {aggregator_category} c WHERE c.cid IN (:cid)", array(':cid' => $this->value));
     foreach ($result as $term) {
       $titles[] = check_plain($term->title);
     }

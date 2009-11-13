@@ -11,7 +11,7 @@ class views_handler_filter_locale_version extends views_handler_filter_in_operat
       // Enable filtering by the current installed Drupal version.
       $versions = array('***CURRENT_VERSION***' => t('Current installed version'));
       $result = db_query('SELECT DISTINCT(version) FROM {locales_source} ORDER BY version');
-      foreach ($result > $row) {
+      foreach ($result as $row) {
         if (!empty($row->version)) {
           $versions[$row->version] = $row->version;
         }

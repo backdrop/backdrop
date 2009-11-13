@@ -16,7 +16,7 @@ class views_handler_filter_comment_user_uid extends views_handler_filter_user_na
     $subselect = $subselect->countQuery();
 
     $condition = db_or()
-      ->condition("$this->table_alias.uid", $this->value, $this->operator);
+      ->condition("$this->table_alias.uid", $this->value, $this->operator)
       ->condition(0, $subselect, '<');
 
     $this->query->add_where(0, $condition);
