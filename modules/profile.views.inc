@@ -70,7 +70,7 @@ function profile_views_get_fields() {
 
   if (!isset($fields)) {
     $fields = array();
-    $results = db_query("SELECT * FROM {profile_fields} ORDER BY category, weight");
+    $results = db_query("SELECT * FROM {profile_field} ORDER BY category, weight");
 
     foreach ($results as $row) {
       if (!empty($row->options)) {
