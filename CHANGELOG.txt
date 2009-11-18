@@ -13,6 +13,7 @@ Views 3.x-7.x-dev
     o #589484 by Markus Petrux: External styles could not properly provide advanced help files.
     o #494490 by Niels Hackius: User picture incorrectly set as an inline element when it should be block.
     o #616956 by neochief: Exposed form labels should have "for" keyword.
+    o #620046 by cedric: Date validate handler does not fallback properly causing sporadic improper validation.
 
 Views 3.x-6.x-dev
   Bug fixes:

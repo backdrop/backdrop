@@ -60,8 +60,8 @@ class views_handler_argument_date extends views_handler_argument_formula {
         return date($this->arg_format, $node->changed);
       }
     }
-    else {
-      return parent::get_default_argument($raw);
-    }
+
+    return parent::get_default_argument($raw);
+
   }
 }
