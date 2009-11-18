@@ -11,6 +11,7 @@ Views 3.x-7.x-dev
     o #592476 by Garrett Albright: Remove redundant CSS from views-list.css
     o #581616 by cangeceiro: Defend text color from themes in Views UI.
     o #589484 by Markus Petrux: External styles could not properly provide advanced help files.
+    o #494490 by Niels Hackius: User picture incorrectly set as an inline element when it should be block.
 
 Views 3.x-6.x-dev
   Bug fixes:

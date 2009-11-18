@@ -11,6 +11,10 @@ class views_handler_field_user_picture extends views_handler_field {
     $this->additional_fields['name'] = 'name';
   }
 
+  function element_type() {
+    return 'div';
+  }
+
   function render($values) {
     // Fake an account object.
     $account = new stdClass();
