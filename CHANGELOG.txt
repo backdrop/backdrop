@@ -7,6 +7,7 @@ Views 3.x-7.x-dev
     o #622602: Missing ORDER BY in some views with tables due to incorrect test for default table sorting.
     o #623498 by marcp: total_rows should be filled in if fetching all records.
     o #535206: Attachment displays repeat exposed filters because exposed filters were left hanging around during cloning.
+    o #550560 by donquixote: Fix unterminated string in views.help.ini that breaks under php 5.3
 
 Views 3.x-6.x-dev
   Bug fixes:
