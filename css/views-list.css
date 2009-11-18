@@ -74,10 +74,6 @@ table.view-disabled td.view-ops {
   line-height: 1.6;
   padding-bottom: 0.3em;
 }
-table.views-entry td.view-name,
-table.views-entry td.view-ops {
-  background: #eee;
-}
 table.view-enabled td.view-name,
 table.view-enabled td.view-ops {
   background: #E4F0F8;
