@@ -216,6 +216,7 @@ div.views-display-deleted div.tab-section {
 
 #views-ajax-title {
   background: #f6f6f6;
+  color: #000;
   border-left: #D6DBDE 1px solid;
   border-right: #D6DBDE 1px solid;
   margin: 0 0 0 118px;
@@ -225,6 +226,7 @@ div.views-display-deleted div.tab-section {
 
 #views-ajax-pad .message {
   background: #f6f6f6;
+  color: #000;
   margin-left: 118px;
   border: #D6DBDE 1px solid;
   border-top: 0;
@@ -235,6 +237,7 @@ div.views-display-deleted div.tab-section {
 
 #views-ajax-pad form {
   background: #fff;
+  color: #000;
   margin-left: 118px;
   border: #D6DBDE 1px solid;
   padding-top: 3px;
