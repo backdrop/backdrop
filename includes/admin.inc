@@ -1571,7 +1571,7 @@ function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FAL
  * and $display_id, so we have a couple of ajax forms that we don't
  * use with this system.
  */
-function views_ui_ajax_form($js, $key, &$view, $display_id) {
+function views_ui_ajax_form($js, $key, $view, $display_id) {
   $form = views_ui_ajax_forms($key);
   $js = $js == 'ajax';
   if (empty($form)) {
