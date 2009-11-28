@@ -81,18 +81,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
   }
 }
 
-
-/**
- * Basic test class for Views query builder tests.
- */
-class ViewsBasicTest extends ViewsTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => t('Basic query test'),
-      'description' => t('A basic query test for Views.'),
-      'group' => t('Views')
-    );
-  }
+abstract class ViewsSqlTest extends ViewsTestCase {
 
   protected function setUp() {
     parent::setUp('views', 'views_test');
@@ -136,6 +125,20 @@ class ViewsBasicTest extends ViewsTestCase {
         'age' => 30,
         'job' => 'Speaker',
       ),
+    );
+  }
+}
+
+
+/**
+ * Basic test class for Views query builder tests.
+ */
+class ViewsBasicTest extends ViewsSqlTest {
+  public static function getInfo() {
+    return array(
+      'name' => t('Basic query test'),
+      'description' => t('A basic query test for Views.'),
+      'group' => t('Views')
     );
   }
 
@@ -455,7 +458,7 @@ class ViewsBasicTest extends ViewsTestCase {
 /**
  * Basic test for pluggable caching.
  */
-class ViewsCacheTest extends ViewsTestCase {
+class ViewsCacheTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
       'name' => t('Pluggable caching test'),
@@ -463,52 +466,6 @@ class ViewsCacheTest extends ViewsTestCase {
       'group' => t('Views')
     );
   }
-
-  protected function setUp() {
-    parent::setUp('views', 'views_test');
-
-    // Load the test dataset.
-    $query = db_insert('views_test')
-      ->fields(array('name', 'age', 'job'));
-    foreach ($this->testDataSet() as $record) {
-      $query->values($record);
-    }
-    $query->execute();
-  }
-
-  /**
-   * A very simple test dataset.
-   */
-  protected function testDataSet() {
-    return array(
-      array(
-        'name' => 'John',
-        'age' => 25,
-        'job' => 'Singer',
-      ),
-      array(
-        'name' => 'George',
-        'age' => 27,
-        'job' => 'Singer',
-      ),
-      array(
-        'name' => 'Ringo',
-        'age' => 28,
-        'job' => 'Drummer',
-      ),
-      array(
-        'name' => 'Paul',
-        'age' => 26,
-        'job' => 'Songwriter',
-      ),
-      array(
-        'name' => 'Meredith',
-        'age' => 30,
-        'job' => 'Speaker',
-      ),
-    );
-  }
-
 
   /**
    * Build and return a basic view of the views_test table.
