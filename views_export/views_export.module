@@ -34,7 +34,7 @@ function views_export_menu() {
 function views_export_theme() {
   return array(
     'views_export_export_form' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
     ),
   );
 }
@@ -72,6 +72,9 @@ function views_export_export() {
       'no_redirect' => TRUE,
       'exportables' => $exportables,
       'tags' => $tags,
+      'build_info' => array(
+        'args' => array(),
+      ),
     );
 
     $output = drupal_render(drupal_build_form('views_export_export_form', $form_state));
@@ -173,8 +176,7 @@ function theme_views_export_export_form(&$vars) {
   $output .= '</div>';
   $form['#attached']['css'] = array(drupal_add_css(drupal_get_path('module', 'views_export') . '/views_export.css'));
 
-  // FIXME: This call leads to a endless recursion
-  $output .= drupal_render($form);
+  $output .= drupal_render_children($form);
   return $output;
 }
 
@@ -204,7 +206,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
 
   $lines = substr_count($code, "\n");
 
-  $types = system_elements();
+  $types = system_element_info();
 
   $info  = '; $Id$'."\n";
   $info .= "\n";
