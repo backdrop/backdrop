@@ -576,7 +576,6 @@ class views_plugin_query_default extends views_plugin_query {
       $table = $this->table_queue[$table]['table'];
     }
     return views_get_table_join($table, $base_table);
-
   }
 
   /**
@@ -889,8 +888,7 @@ class views_plugin_query_default extends views_plugin_query {
     // Add all the tables to the query via joins. We assume all LEFT joins.
     foreach ($this->table_queue as $table) {
       if (is_object($table['join'])) {
-        $join_data = $table['join']->join_data($table, $this);
-        $query->leftJoin($join_data['table'], $join_data['alias'], $join_data['condition']);
+        $table['join']->build_join($query, $table, $this);
       }
     }
 

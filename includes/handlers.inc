@@ -1187,8 +1187,17 @@ class views_join {
 
   /**
    * Build the SQL for the join this object represents.
+   *
+   * @param $select_query
+   *   An implementation of SelectQueryInterface.
+   * @param $table
+   *   The base table to join.
+   * @param $view_query
+   *   The source query, implementation of views_plugin_query.
+   * @return
+   *   
    */
-  function join_data($table, $query) {
+  function build_join($select_query, $table, $view_query) {
     if (empty($this->definition['table formula'])) {
       $right_table = "{" . $this->table . "}";
     }
@@ -1197,7 +1206,7 @@ class views_join {
     }
 
     if ($this->left_table) {
-      $left = $query->get_table_info($this->left_table);
+      $left = $view_query->get_table_info($this->left_table);
       $left_field = "$left[alias].$this->left_field";
     }
     else {
@@ -1206,6 +1215,7 @@ class views_join {
     }
 
     $condition = "$left_field = $table[alias].$this->field";
+    $arguments = array();
 
     // Tack on the extra.
     if (isset($this->extra)) {
@@ -1223,28 +1233,22 @@ class views_join {
             $join_table = $info['table'] . '.';
           }
 
-          // And now deal with the value and the operator.  Set $q to
-          // a single-quote for non-numeric values and the
-          // empty-string for numeric values, then wrap all values in $q.
-          $raw_value = $this->db_safe($info['value']);
-          $q = (empty($info['numeric']) ? "'" : '');
+          $placeholder = ':views_join_condition_' . $select_query->nextPlaceholder();
 
-          if (is_array($raw_value)) {
+          if (is_array($info['value'])) {
             $operator = !empty($info['operator']) ? $info['operator'] : 'IN';
             // Transform from IN() notation to = notation if just one value.
             if (count($raw_value) == 1) {
-              $value = $q . array_shift($raw_value) . $q;
+              $info['value'] = array_shift($info['value']);
               $operator = $operator == 'NOT IN' ? '!=' : '=';
-            }
-            else {
-              $value = "($q" . implode("$q, $q", $raw_value) . "$q)";
             }
           }
           else {
             $operator = !empty($info['operator']) ? $info['operator'] : '=';
-            $value = "$q$raw_value$q";
           }
-          $extras[] = "$join_table$info[field] $operator $value";
+
+          $extras[] = "$join_table$info[field] $operator $placeholder";
+          $arguments[$placeholder] = $info['value'];
         }
 
         if ($extras) {
@@ -1260,34 +1264,13 @@ class views_join {
         $condition .= " AND ($this->extra)";
       }
     }
-    return array('table' => $table['table'], 'alias' => $table['alias'], 'condition' => $condition);
-  }
 
-  /**
-   * Ensure that input is db safe. We only check strings and ints tho
-   * so something that needs floats in their joins needs to do their
-   * own type checking.
-   */
-  function db_safe($input) {
-    if (is_array($input)) {
-      $output = array();
-      foreach ($input as $value) {
-        if (empty($info['numeric'])) {
-          $output[] = Database::getConnection()->quote($value);
-        }
-        else {
-          $output[] = intval($value);
-        }
-      }
-    }
-    elseif (empty($info['numeric'])) {
-      $output = Database::getConnection()->quote($input);
+    if ($this->type == 'LEFT') {
+      $select_query->leftJoin($table['table'], $table['alias'], $condition, $arguments);
     }
     else {
-      $output = intval($input);
+      $select_query->innerJoin($table['table'], $table['alias'], $condition, $arguments);
     }
-
-    return $output;
   }
 }
 
