@@ -175,7 +175,7 @@ class views_plugin_display_page extends views_plugin_display {
     $this->view->get_breadcrumb(TRUE);
 
     // And the title, which is much easier.
-    drupal_set_title(filter_xss_admin($this->view->get_title()));
+    drupal_set_title(filter_xss_admin($this->view->get_title()), PASS_THROUGH);
 
     // And now render the view.
     return $this->view->render();
