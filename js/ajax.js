@@ -39,7 +39,7 @@ Drupal.ajax.prototype.commands.viewsAddTab = function(ajax, response, status) {
   var id = '#views-tab-' + response.id;
   $('#views-tabset').viewsAddTab(id, response.title, 0);
   $(id).html(response.body).addClass('views-tab');
-  Drupal.attachBehaviors(response.id);
+  Drupal.attachBehaviors(id);
   var instance = $.viewsUi.tabs.instances[$('#views-tabset').get(0).UI_TABS_UUID];
   $('#views-tabset').viewsClickTab(instance.$tabs.length);
 };
