@@ -128,7 +128,7 @@ class views_handler_argument extends views_handler {
       '#type' => 'textfield',
       '#title' => t('Breadcrumb'),
       '#default_value' => $this->options['breadcrumb'],
-      '#description' => t('The Breadcrumb title to use when this argument is present. If no breadcrumb is setted here, default Title values will be used, see "Title" for percent substitutions.'),
+      '#description' => t('The Breadcrumb title to use when this argument is present. If no breadcrumb is set here, default Title values will be used, see "Title" for percent substitutions.'),
     );
 
     $form['clear_start'] = array(
