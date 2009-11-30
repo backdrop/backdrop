@@ -17,6 +17,7 @@ Views 3.x-7.x-dev
     o #515564: Views UI would fail to rearrange with > 25 fields.
     o #452384: Fix PHP 5.3 compatibility.
     o #622608: Allow attachments to inherit pager data.
+    o #495606 by Roi Danton and dereine: Introduce views_get_view_result() as a fast way to get just the results of a view.
 
 Views 3.x-6.x-dev
   Bug fixes:
