@@ -152,13 +152,12 @@ class views_plugin_style extends views_plugin {
     // Render each group separately and concatenate.  Plugins may override this
     // method if they wish some other way of handling grouping.
     $output = '';
-    $this->view->row_index = 0;
     foreach ($sets as $title => $records) {
       if ($this->uses_row_plugin()) {
         $rows = array();
-        foreach ($records as $label => $row) {
+        foreach ($records as $row_index => $row) {
+          $this->view->row_index = $row_index;
           $rows[] = $this->row_plugin->render($row);
-          $this->view->row_index++;
         }
       }
       else {
