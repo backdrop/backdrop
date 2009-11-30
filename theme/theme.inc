@@ -79,7 +79,7 @@ function template_preprocess_views_view(&$vars) {
   $vars['pager']      = '';
 
   $exposed_input = isset($view->exposed_data_raw) ? $view->exposed_data_raw : NULL;
-  if (!empty($view->pager['use_pager'])) {
+  if ($view->display_handler->render_pager()) {
     $pager_type = ($view->pager['use_pager'] === 'mini' ? 'views_mini_pager' : 'pager');
     $pager_theme = views_theme_functions($pager_type, $view, $view->display_handler->display);
     $vars['pager']    = theme($pager_theme,

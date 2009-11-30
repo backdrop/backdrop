@@ -16,6 +16,7 @@ Views 3.x-7.x-dev
     o #620046 by cedric: Date validate handler does not fallback properly causing sporadic improper validation.
     o #515564: Views UI would fail to rearrange with > 25 fields.
     o #452384: Fix PHP 5.3 compatibility.
+    o #622608: Allow attachments to inherit pager data.
 
 Views 3.x-6.x-dev
   Bug fixes:

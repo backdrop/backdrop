@@ -21,6 +21,8 @@ class views_plugin_display_attachment extends views_plugin_display {
     $options['attachment_position'] = array('default' => 'before');
     $options['inherit_arguments'] = array('default' => TRUE);
     $options['inherit_exposed_filters'] = array('default' => FALSE);
+    $options['inherit_pager'] = array('default' => FALSE);
+    $options['render_pager'] = array('default' => TRUE);
     $options['displays'] = array('default' => array());
 
     return $options;
@@ -67,6 +69,18 @@ class views_plugin_display_attachment extends views_plugin_display {
       'category' => 'attachment',
       'title' => t('Inherit exposed filters'),
       'value' => $this->get_option('inherit_exposed_filters') ? t('Yes') : t('No'),
+    );
+
+    $options['inherit_pager'] = array(
+      'category' => 'attachment',
+      'title' => t('Inherit pager'),
+      'value' => $this->get_option('inherit_pager') ? t('Yes') : t('No'),
+    );
+
+    $options['render_pager'] = array(
+      'category' => 'attachment',
+      'title' => t('Render pager'),
+      'value' => $this->get_option('render_pager') ? t('Yes') : t('No'),
     );
 
     $options['attachment_position'] = array(
@@ -123,6 +137,24 @@ class views_plugin_display_attachment extends views_plugin_display {
           '#default_value' => $this->get_option('inherit_exposed_filters'),
         );
         break;
+      case 'inherit_pager':
+        $form['#title'] .= t('Inherit pager');
+        $form['inherit_pager'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Inherit'),
+          '#description' => t('Should this display inherit its paging values from the parent display to which it is attached? Note that this will provide unexpected results if the number of items to display do not match.'),
+          '#default_value' => $this->get_option('inherit_pager'),
+        );
+        break;
+      case 'render_pager':
+        $form['#title'] .= t('Render pager');
+        $form['render_pager'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Render'),
+          '#description' => t('Should this display render the pager values? If not it can inherit from the parent...'),
+          '#default_value' => $this->get_option('render_pager'),
+        );
+        break;
       case 'attachment_position':
         $form['#title'] .= t('Position');
         $form['attachment_position'] = array(
@@ -159,6 +191,8 @@ class views_plugin_display_attachment extends views_plugin_display {
     parent::options_submit($form, $form_state);
     switch ($form_state['section']) {
       case 'inherit_arguments':
+      case 'inherit_pager':
+      case 'render_pager':
       case 'inherit_exposed_filters':
       case 'attachment_position':
       case 'displays':
@@ -188,6 +222,11 @@ class views_plugin_display_attachment extends views_plugin_display {
 
     $args = $this->get_option('inherit_arguments') ? $this->view->args : array();
     $view->set_arguments($args);
+    $view->set_display($this->display->id);
+    if ($this->get_option('inherit_pager')) {
+      $view->display_handler->use_pager = $this->view->display[$display_id]->handler->use_pager();
+      $view->display_handler->set_option('pager_element', $this->view->display[$display_id]->handler->get_option('pager_element'));
+    }
 
     // because of this, it is very very important that displays that can accept
     // attachments not also be attachments, or this could explode messily.
@@ -228,5 +267,13 @@ class views_plugin_display_attachment extends views_plugin_display {
    */
   function displays_exposed() {
     return $this->options['inherit_exposed_filters'] ? FALSE : TRUE;
+  }
+
+  function use_pager() {
+    return !empty($this->use_pager);
+  }
+
+  function render_pager() {
+    return !empty($this->use_pager) && $this->get_option('render_pager');
   }
 }

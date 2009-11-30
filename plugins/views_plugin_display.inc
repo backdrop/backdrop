@@ -120,6 +120,13 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
+   * Does the display render the pager if it has it enabled?
+   */
+  function render_pager() {
+    return $this->use_pager();
+  }
+
+  /**
    * Does the display have a more link enabled?
    */
   function use_more() {
