@@ -20,6 +20,7 @@ Views 3.x-7.x-dev
     o #495606 by Roi Danton and dereine: Introduce views_get_view_result() as a fast way to get just the results of a view.
     o #619884: Fix incorrect grouping for styles other than table.
     o #638916 by dereine: views.help.ini strings need quoting to continue to work in PHP 5.3
+    o #576386 by jmorahan: Fix book sort help text to be more accurate by not telling you to do something that will not work.
 
 Views 3.x-6.x-dev
   Bug fixes:

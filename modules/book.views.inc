@@ -85,7 +85,7 @@ function book_views_data() {
 
   $data['book_menu_links']['p'] = array(
     'title' => t('Hierarchy'),
-    'help' => t('The order of pages in the book hierarchy. If you want the exactly right order, remember to sort by weight, too.'),
+    'help' => t('The order of pages in the book hierarchy.'),
     'sort' => array(
       'handler' => 'views_handler_sort_menu_hierarchy',
     ),
