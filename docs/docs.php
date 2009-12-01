@@ -220,6 +220,14 @@ function hook_views_plugins() {
 }
 
 /**
+ * Alter existing plugins data, defined by modules.
+ */
+function hook_views_plugins_alter(&$plugins) {
+  // Add apachesolr to the base of the node row plugin.
+  $plugins['row']['node']['base'][] = 'apachesolr';
+}
+
+/**
  * Register handler, file and parent information so that handlers can be
  * loaded only on request.
  *

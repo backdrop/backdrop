@@ -289,6 +289,9 @@ function views_discover_plugins() {
       }
     }
   }
+
+  // Let other modules modify the plugins.
+  drupal_alter('views_plugins', $cache);
   return $cache;
 }
 
