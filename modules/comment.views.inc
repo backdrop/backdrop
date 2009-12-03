@@ -521,7 +521,7 @@ function template_preprocess_views_view_row_comment(&$vars) {
   // Put the view on the node so we can retrieve it in the preprocess.
   $node->view = &$view;
 
-  $links = '';
+  $links = array();
   if (!empty($options['links'])) {
     $links = module_invoke_all('link', 'comment', $comment, 0);
     drupal_alter('link', $links, $node);
