@@ -22,6 +22,7 @@ Views 3.x-7.x-dev
     o #638916 by dereine: views.help.ini strings need quoting to continue to work in PHP 5.3
     o #576386 by jmorahan: Fix book sort help text to be more accurate by not telling you to do something that will not work.
     o #630430 by cafuego: Fix typo in argument text.
+    o #324873 by dagmar: Show all paths when listing views, not just the first path.
 
 Views 3.x-6.x-dev
   Bug fixes:
