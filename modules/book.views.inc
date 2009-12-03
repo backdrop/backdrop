@@ -31,7 +31,6 @@ function book_views_data() {
     'help' => t('The book the node is in.'),
     'relationship' => array(
       'base' => 'node',
-      'base field' => 'bid',
       'handler' => 'views_handler_relationship',
       'label' => t('Book'),
     ),
