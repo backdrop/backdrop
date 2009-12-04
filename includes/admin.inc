@@ -148,7 +148,7 @@ function template_preprocess_views_ui_list_views(&$vars) {
           }
           if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
             $all_paths[] = l($one_path, $one_path);
-          } 
+          }
           else {
             $all_paths[] = check_plain($one_path);
           }
