@@ -2799,7 +2799,7 @@ function views_ui_admin_tools() {
   $form['views_exposed_filter_any_label'] = array(
     '#type' => 'select',
     '#title' => t('Label for "Any" value on optional single-select exposed filters'),
-    '#options' => array('old_any' => t('<Any>'), 'new_any' => t('- Any -')),
+    '#options' => array('old_any' => '<Any>', 'new_any' => t('- Any -')),
     '#default_value' => variable_get('views_exposed_filter_any_label', 'old_any'),
   );
 
