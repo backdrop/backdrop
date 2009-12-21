@@ -25,6 +25,7 @@ Views 3.x-7.x-dev
     o #324873 by dagmar: Show all paths when listing views, not just the first path.
     o #651244 by dagmar: Other instances of <Any> are not translatable and should not be run through t().
     o #653628: init declaration for views_handler_filter_many_to_one() did not match parent init.
+    o #657700: Fixed 'Override normal sorting if click sorting is used' setting on the table style plugin that was broken by #622602.
 
 Views 3.x-6.x-dev
   Bug fixes:
