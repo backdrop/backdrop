@@ -29,6 +29,7 @@ Views 3.x-7.x-dev
     o #473698 by jrglasgow: Fix error in help text regarding custom theming.
     o #387448 by joachim: Provide better help text to describe how to use sticky sort.
     o #652716 by dagmar: "no single" flag on filter objects not completely respected, causing improper default filters.
+    o #648438 by dww: In rare circumstances, unnecessary term_node tables could be joined in when adding term_data relationships.
 
 Views 3.x-6.x-dev
   Bug fixes:

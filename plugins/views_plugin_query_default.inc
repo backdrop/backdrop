@@ -212,6 +212,12 @@ class views_plugin_query_default extends views_plugin_query {
       'table' => $join->table,
       'base' => $base,
     );
+
+    $this->tables[$this->base_table][$alias] = array(
+      'count' => 1,
+      'alias' => $alias,
+    );
+
     return $alias;
   }
 
