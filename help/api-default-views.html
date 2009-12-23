@@ -48,10 +48,11 @@ You can theme these views in the module and not need to rely on the theme to do 
 To do this, you need to implement <em>hook_theme()</em> in your module:
 <pre>function mymodule_theme($existing) {
   return array(
-    'views_view__viewname_displayid' => array (
+    'views_view__viewname__displayid' => array (
       'arguments' => array('view' => NULL),
       'template' => 'views-view--viewname--displayid',
       'original hook' => 'views_view',
+      'path' => drupal_get_path('module', 'mymodule'),
     ),
   );
 }
@@ -60,7 +61,7 @@ To do this, you need to implement <em>hook_theme()</em> in your module:
 There are a small number of gotchas in doing this that you must be aware of.
 
 <ol>
-<li>When referring to a template filename, you always use dashes in the name. i.e, <em>views-view--viewname--displayid.tpl.php</em>. However, when referring to the hook or function names, you use underscores instead of dashes. i.e, <em>views_view</em> and <em>views_view__viewname_displayid</em></li>
+<li>When referring to a template filename, you always use dashes in the name. i.e, <em>views-view--viewname--displayid.tpl.php</em>. However, when referring to the hook or function names, you use underscores instead of dashes. i.e, <em>views_view</em> and <em>views_view__viewname__displayid</em></li>
 
 <li>The 'arguments' change based upon which of the 3 types you're overriding. There's the 'display', the 'style' and the 'row' style. The above code is assuming the display, which is usually just <em>views_view</em>. Here are the possibilities:
 
@@ -97,6 +98,9 @@ Be sure to use the right arguments line or the theme system will not properly tr
   The third one is your module's preprocess function, if it needs one. In general, you probably will not need one, and you should only attempt to use one if you are reasonably familiar with the concept of preprocess functions and Drupal's theme system in general. See Drupal's theme documentation for more information.
   </li>
 </ol>
+</li>
+<li>
+  If you leave the path blank the template file will be searched for in "./" which is the Drupal install base path.
 </li>
 </ol>
 
