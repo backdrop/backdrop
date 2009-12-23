@@ -1077,7 +1077,6 @@ function template_preprocess_views_ui_edit_view(&$vars) {
 
   $vars['quick_links'] = theme('links', array('links' => $vars['quick_links_raw']));
   views_add_css('views-admin');
-  views_add_css('views');
   views_add_js('ajax');
   drupal_add_js('misc/jquery.form.js');
 
