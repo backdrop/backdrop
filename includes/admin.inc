@@ -3080,6 +3080,7 @@ function theme_views_ui_style_plugin_table($variables) {
   $header = array(
     t('Field'),
     t('Column'),
+    t('Align'),
     t('Separator'),
     array(
       'data' => t('Sortable'),
@@ -3095,6 +3096,7 @@ function theme_views_ui_style_plugin_table($variables) {
     $row = array();
     $row[] = drupal_render($form['info'][$id]['name']);
     $row[] = drupal_render($form['columns'][$id]);
+    $row[] = drupal_render($form['info'][$id]['align']);
     $row[] = drupal_render($form['info'][$id]['separator']);
     if (!empty($form['info'][$id]['sortable'])) {
       $row[] = array(

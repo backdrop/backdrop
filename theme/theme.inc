@@ -362,6 +362,11 @@ function template_preprocess_views_view_table(&$vars) {
       $vars['fields'][$field] .= ' active';
     }
 
+    // Add a CSS align class to each field if one was set
+    if (!empty($options['info'][$field]['align'])) {
+      $vars['fields'][$field] .= ' ' . views_css_safe($options['info'][$field]['align']);
+    }
+
     // Render each field into its appropriate column.
     foreach ($result as $num => $row) {
       if (!empty($fields[$field]) && empty($fields[$field]->options['exclude'])) {

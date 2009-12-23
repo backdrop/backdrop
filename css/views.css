@@ -22,6 +22,17 @@
   margin-bottom: .5em;
 }
 
+/* table style column align */
+.views-align-left {
+  text-align: left;
+}
+.views-align-right {
+  text-align: right;
+}
+.views-align-center {
+  text-align: center;
+}
+
 html.js a.views-throbbing,
 html.js span.views-throbbing {
   background:url(../images/status-active.gif) no-repeat right center;
