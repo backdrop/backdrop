@@ -28,6 +28,7 @@ Views 3.x-7.x-dev
     o #657700: Fixed 'Override normal sorting if click sorting is used' setting on the table style plugin that was broken by #622602.
     o #473698 by jrglasgow: Fix error in help text regarding custom theming.
     o #387448 by joachim: Provide better help text to describe how to use sticky sort.
+    o #652716 by dagmar: "no single" flag on filter objects not completely respected, causing improper default filters.
 
 Views 3.x-6.x-dev
   Bug fixes:
