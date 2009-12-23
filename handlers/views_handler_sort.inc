@@ -10,6 +10,12 @@
  * Base sort handler that has no options and performs a simple sort
  */
 class views_handler_sort extends views_handler {
+
+  /**
+   * Determine if a sort can be exposed.
+   */
+  function can_expose() { return TRUE; }
+
   /**
    * Called to add the sort to a query.
    */
@@ -23,7 +29,12 @@ class views_handler_sort extends views_handler {
     $options = parent::option_definition();
 
     $options['order'] = array('default' => 'ASC');
-
+    $options['exposed'] = array('default' => FALSE);
+    $options['expose'] = array(
+      'contains' => array(
+        'label' => array('default' => '', 'translatable' => TRUE),
+      ),
+    );
     return $options;
   }
 
@@ -31,29 +42,124 @@ class views_handler_sort extends views_handler {
    * Display whether or not the sort order is ascending or descending
    */
   function admin_summary() {
+    if (!empty($this->options['exposed'])) {
+      return t('Exposed');
+    }
     switch ($this->options['order']) {
       case 'ASC':
       case 'asc':
       default:
-        $type = t('asc');
+        return t('asc');
         break;
       case 'DESC';
       case 'desc';
-        $type = t('desc');
+        return t('desc');
         break;
     }
-    return '<span class="views-ascending"><span>' . $type . '</span></span>';
   }
 
   /**
    * Basic options for all sort criteria
    */
   function options_form(&$form, &$form_state) {
-    $form['order'] = array(
-      '#type' => 'radios',
-      '#title' => t('Sort order'),
-      '#options' => array('ASC' => t('Ascending'), 'DESC' => t('Descending')),
-      '#default_value' => $this->options['order'],
+    if ($this->can_expose()) {
+      $this->show_expose_button($form, $form_state);
+    }
+    $form['op_val_start'] = array('#value' => '<div class="clear-block">');
+    $this->show_sort_form($form, $form_state);
+    $form['op_val_end'] = array('#value' => '</div>');
+    if ($this->can_expose()) {
+      $this->show_expose_form($form, $form_state);
+    }
+  }
+
+  /**
+   * Simple validate handler
+   */
+  function options_validate(&$form, &$form_state) {
+    $this->sort_validate($form, $form_state);
+    if (!empty($this->options['exposed'])) {
+      $this->expose_validate($form, $form_state);
+    }
+
+  }
+
+  /**
+   * Simple submit handler
+   */
+  function options_submit(&$form, &$form_state) {
+    unset($form_state['values']['expose_button']); // don't store this.
+    $this->sort_submit($form, $form_state);
+    if (!empty($this->options['exposed'])) {
+      $this->expose_submit($form, $form_state);
+    }
+  }
+
+  /**
+   * Shortcut to display the value form.
+   */
+  function show_sort_form(&$form, &$form_state) {
+    $options = $this->sort_options();
+    if (!empty($options)) {
+      $form['order'] = array(
+        '#type' => 'radios',
+        '#options' => $options,
+        '#default_value' => $this->options['order'],
+      );
+    }
+  }
+
+  function sort_validate(&$form, &$form_state) { }
+
+  function sort_submit(&$form, &$form_state) { }
+
+  /**
+   * Provide a list of options for the default sort form.
+   * Should be overridden by classes that don't override sort_form
+   */
+  function sort_options() { 
+    return array(
+      'ASC' => t('Sort ascending'), 
+      'DESC' => t('Sort descending'),
+    ); 
+  }
+
+  /**
+   * Since all exposed sorts are grouped into one select box.
+   * We don't return nothing when views call to exposed_form()
+   */ 
+  function exposed_form(&$form, &$form_state) { }
+
+  /**
+   * Handle the 'left' side fo the exposed options form.
+   */
+ function expose_form_left(&$form, &$form_state) {
+    $form['expose']['label'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->options['expose']['label'],
+      '#title' => t('Label'),
+      '#required' => TRUE,
+      '#size' => 40,
+   );
+  }
+  
+  /**
+   * Handle the 'right' side fo the exposed options form.
+   */
+  function expose_form_right(&$form, &$form_state) {
+    $form['expose']['order'] = array(
+      '#type' => 'value',
+      '#value' => 'ASC',
+     );
+  }
+
+  /**
+   * Provide default options for exposed sorts.
+   */
+  function expose_options() {
+    $this->options['expose'] = array(
+      'order' => $this->options['order'],
+      'label' => $this->ui_name(),
     );
   }
 }

@@ -387,8 +387,9 @@ function template_preprocess_views_view_table(&$vars) {
     }
   }
 
+  $count = 0;
   foreach ($vars['rows'] as $num => $row) {
-    $vars['row_classes'][$num][] = ($num % 2 == 0) ? 'odd' : 'even';
+    $vars['row_classes'][$num][] = ($count++ % 2 == 0) ? 'odd' : 'even';
   }
 
   $vars['row_classes'][0][] = 'views-row-first';
