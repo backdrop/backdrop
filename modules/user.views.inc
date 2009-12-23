@@ -97,6 +97,11 @@ function user_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'title' => t('Name (raw)'),
+      'help' => t('The user or author name. This filter does not check if the user exists and allows partial matching. Does not utilize autocomplete.')
+    ),
   );
 
   // mail

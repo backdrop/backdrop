@@ -31,6 +31,7 @@ Views 3.x-7.x-dev
     o #652716 by dagmar: "no single" flag on filter objects not completely respected, causing improper default filters.
     o #648438 by dww: In rare circumstances, unnecessary term_node tables could be joined in when adding term_data relationships.
     o #621780 by PaulMagrath: Even/Odd classes wrong with grouping due to row numbering no longer being sequential.
+    o #660140 by dagmar: Add a raw user name filter so that we can do more filtering purely on the user name.
 
 Views 3.x-6.x-dev
   Bug fixes:
