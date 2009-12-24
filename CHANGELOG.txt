@@ -39,6 +39,7 @@ Views 3.x-7.x-dev
     o #623392 by dww: Allow the use of synonyms in summaries for taxonomy arguments.
     o #629840 by fuerst: Search filter caused bad query on PostgreSQL.
     o #593668 by neochief: Allow changing of the display ID.
+    o #600242 by pcambra: Allow "search" filter as an argument.
 
 Views 3.x-6.x-dev
   Bug fixes:

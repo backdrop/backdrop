@@ -122,6 +122,9 @@ function search_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_search',
     ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_search',
+    ),
   );
 
   return $data;
@@ -156,6 +159,9 @@ function search_views_plugins() {
         'path' => drupal_get_path('module', 'views') . '/modules/search', // not necessary for most modules
         'base' => array('node'), // only works with 'node' as base.
         'type' => 'normal',
+      ),
+      'views_handler_argument_search' => array(
+        'parent' => 'views_handler_argument',
       ),
     ),
   );
