@@ -35,6 +35,7 @@ Views 3.x-7.x-dev
     o #383994 by bendiy: Allow column align setting on tables.
     o #557372 by brush: Allow sorting by taxonomy term views by vocabulary ID and vocabulary name.
     o #570558 by yhahn: Segment default views caching to conserve memory used by Views during normal operation.
+    o #373615 by dereine and lonelyrobot: Allow full set of date arguments for comment timestamp.
 
 Views 3.x-6.x-dev
   Bug fixes:
