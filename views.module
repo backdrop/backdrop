@@ -705,8 +705,16 @@ function views_get_plugin($type, $plugin) {
  */
 function &views_get_default_view($view_name) {
   $null = NULL;
-  $cache = views_discover_default_views();
 
+  // Attempt to load individually cached view from cache.
+  views_include('cache');
+  $data = views_cache_get("views_default:{$view_name}", TRUE);
+  if (isset($data->data) && is_object($data->data)) {
+    return $data->data;
+  }
+
+  // Otherwise, allow entire cache to be rebuilt.
+  $cache = views_discover_default_views();
   if (isset($cache[$view_name])) {
     return $cache[$view_name];
   }

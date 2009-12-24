@@ -33,6 +33,8 @@ Views 3.x-7.x-dev
     o #621780 by PaulMagrath: Even/Odd classes wrong with grouping due to row numbering no longer being sequential.
     o #660140 by dagmar: Add a raw user name filter so that we can do more filtering purely on the user name.
     o #383994 by bendiy: Allow column align setting on tables.
+    o #557372 by brush: Allow sorting by taxonomy term views by vocabulary ID and vocabulary name.
+    o #570558 by yhahn: Segment default views caching to conserve memory used by Views during normal operation.
 
 Views 3.x-6.x-dev
   Bug fixes:
