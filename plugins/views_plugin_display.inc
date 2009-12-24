@@ -646,6 +646,15 @@ class views_plugin_display extends views_plugin {
       ),
     );
 
+    if ($this->display->id != 'default') {
+      $options['display_id'] = array(
+        'category' => 'basic',
+        'title' => t('Machine Name'),
+        'value' => !empty($this->display->new_id) ? check_plain($this->display->new_id) : check_plain($this->display->id),
+        'desc' => t('Change the machine name of this display.'),
+      );
+    }
+
     $options['display_title'] = array(
       'category' => 'basic',
       'title' => t('Name'),
@@ -864,6 +873,16 @@ class views_plugin_display extends views_plugin {
     }
 
     switch ($form_state['section']) {
+      case 'display_id':
+        $form['#title'] .= t('The machine name of this display');
+        $form['display_id'] = array(
+          '#type' => 'textfield',
+          '#description' => t('This is machine name of the display.'),
+          '#default_value' => $this->display->id,
+          '#required' => TRUE,
+          '#size' => 64,
+        );
+        break;
       case 'display_title':
         $form['#title'] .= t('The name of this display');
         $form['display_title'] = array(
@@ -1218,6 +1237,14 @@ class views_plugin_display extends views_plugin {
           '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
         );
 
+        if (isset($this->view->display[$this->view->current_display]->new_id)) {
+          $form['important']['new_id'] = array(
+            '#prefix' => '<div class="description">',
+            '#suffix' => '</div>',
+            '#value' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
+          );
+        }
+
         foreach (list_themes() as $key => $theme) {
           $options[$key] = $theme->info['name'];
         }
@@ -1408,6 +1435,15 @@ class views_plugin_display extends views_plugin {
    */
   function options_validate(&$form, &$form_state) {
     switch ($form_state['section']) {
+      case 'display_id':
+        if ($form_state['values']['display_id']) {
+          foreach ($this->view->display as $id => $display) {
+            if ($id != $this->view->current_display && ($form_state['values']['display_id'] == $id || $form_state['values']['display_id'] == $display->new_id)) {
+              form_error($form['display_id'], t('Display id should be unique.'));
+            }
+          }
+        }
+        break;
       case 'style_options':
         $style = TRUE;
       case 'row_options':
@@ -1445,6 +1481,11 @@ class views_plugin_display extends views_plugin {
 
     $section = $form_state['section'];
     switch ($section) {
+      case 'display_id':
+        if ($this->display->id != $form_state['values']['display_id']) {
+          $this->display->new_id = $form_state['values']['display_id'];
+        }
+        break;
       case 'display_title':
         $this->display->display_title = $form_state['values']['display_title'];
         break;

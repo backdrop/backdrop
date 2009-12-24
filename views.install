@@ -127,6 +127,7 @@ function views_schema_1() {
         'serialized default' => 'a:0:{}',
       ),
     ),
+    'primary key' => array('vid', 'id'),
     'indexes' => array('vid' => array('vid', 'position')),
   );
 
@@ -294,5 +295,16 @@ function views_update_6007() {
     $ret[] = update_sql("DROP AGGREGATE IF EXISTS first(anyelement)");
     $ret[] = update_sql("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
   }
+  return $ret;
+}
+
+/**
+ * Add the primary key to views_display table.
+ */
+function views_update_6008() {
+  $ret = array();
+
+  db_add_primary_key($ret, 'views_display', array('vid', 'id'));
+
   return $ret;
 }

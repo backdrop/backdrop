@@ -944,6 +944,12 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
       unset($form_state['view']->display[$id]);
     }
   }
+  // Rename display ids if needed.
+  foreach ($form_state['view']->display as $id => $display) {
+    if (!empty($display->new_id)) {
+      $form_state['view']->display[$id]->id = $display->new_id;
+    }
+  }
 
   $form_state['view']->save();
   drupal_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->name)));
