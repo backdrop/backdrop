@@ -40,6 +40,7 @@ Views 3.x-7.x-dev
     o #629840 by fuerst: Search filter caused bad query on PostgreSQL.
     o #593668 by neochief: Allow changing of the display ID.
     o #600242 by pcambra: Allow "search" filter as an argument.
+    o #387748 by recrit: Allow summaries to be ordered by number of records.
 
 Views 3.x-6.x-dev
   Bug fixes:

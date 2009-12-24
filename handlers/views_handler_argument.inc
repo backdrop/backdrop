@@ -283,6 +283,20 @@ class views_handler_argument extends views_handler {
         'style plugin' => TRUE,
         'breadcrumb' => TRUE, // generate a breadcrumb to here
       ),
+      'summary asc by count' => array(
+        'title' => t('Summary, sorted by number of records ascending'),
+        'method' => 'default_summary',
+        'method args' => array('asc', 'num_records'),
+        'style plugin' => TRUE,
+        'breadcrumb' => TRUE, // generate a breadcrumb to here
+      ),
+      'summary desc by count' => array(
+        'title' => t('Summary, sorted by number of records descending'),
+        'method' => 'default_summary',
+        'method args' => array('desc', 'num_records'),
+        'style plugin' => TRUE,
+        'breadcrumb' => TRUE, // generate a breadcrumb to here
+      ),
       'default' => array(
         'title' => t('Provide default argument'),
         'method' => 'default_default',
@@ -455,7 +469,7 @@ class views_handler_argument extends views_handler {
    * If an argument was expected and was not given, in this case, display
    * a summary query.
    */
-  function default_summary($order) {
+  function default_summary($order, $by = NULL) {
     $this->view->build_info['summary'] = TRUE;
     $this->view->build_info['summary_level'] = $this->options['id'];
 
@@ -469,7 +483,7 @@ class views_handler_argument extends views_handler {
     $this->query->clear_fields();
     $this->summary_query();
 
-    $this->summary_sort($order);
+    $this->summary_sort($order, $by);
 
     // Summaries have their own sorting and fields, so tell the View not
     // to build these.
@@ -560,8 +574,8 @@ class views_handler_argument extends views_handler {
    * @param $order
    *   The order selected in the UI.
    */
-  function summary_sort($order) {
-    $this->query->add_orderby(NULL, NULL, $order, $this->name_alias);
+  function summary_sort($order, $by = NULL) {
+    $this->query->add_orderby(NULL, NULL, $order, (!empty($by) ? $by : $this->name_alias));
   }
 
   /**
