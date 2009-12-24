@@ -77,7 +77,7 @@ class views_handler_filter_search extends views_handler_filter {
   function query() {
     if (!isset($this->search_query) || empty($this->search_query[3])) {
       if ($this->operator == 'required') {
-        $this->query->add_where($this->options['group'], '0');
+        $this->query->add_where($this->options['group'], 'FALSE');
       }
     }
     else {

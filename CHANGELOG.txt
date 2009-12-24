@@ -36,6 +36,8 @@ Views 3.x-7.x-dev
     o #557372 by brush: Allow sorting by taxonomy term views by vocabulary ID and vocabulary name.
     o #570558 by yhahn: Segment default views caching to conserve memory used by Views during normal operation.
     o #373615 by dereine and lonelyrobot: Allow full set of date arguments for comment timestamp.
+    o #623392 by dww: Allow the use of synonyms in summaries for taxonomy arguments.
+    o #629840 by fuerst: Search filter caused bad query on PostgreSQL.
 
 Views 3.x-6.x-dev
   Bug fixes:
