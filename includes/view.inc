@@ -399,7 +399,7 @@ class view extends views_db_object {
       'no_redirect' => TRUE,
       'build_info' => array(
         'args' => array(),
-    ),
+      ),
     );
 
     // Some types of displays (eg. attachments) may wish to use the exposed
@@ -587,7 +587,8 @@ class view extends views_db_object {
     $this->_pre_query();
 
     if ($this->display_handler->uses_exposed()) {
-      $this->exposed_widgets = $this->render_exposed_form();
+      $exposed_form = $this->display_handler->get_exposed_form_plugin();
+      $this->exposed_widgets = $exposed_form->render_exposed_form();
       if (form_set_error() || !empty($this->build_info['abort'])) {
         $this->built = TRUE;
         return empty($this->build_info['fail']);
@@ -637,6 +638,11 @@ class view extends views_db_object {
     // Allow style handler to affect the query:
     $this->style_plugin->query();
 
+    // Allow exposed form to affect the query:
+    if (isset($exposed_form)) {
+      $exposed_form->query();
+    }
+
     if (variable_get('views_sql_signature', FALSE)) {
       $this->query->add_signature($this);
     }
@@ -644,8 +650,11 @@ class view extends views_db_object {
     // Let modules modify the query just prior to finalizing it.
     $this->query->alter($this);
 
-    // Build the necessary info to execute the query.
-    $this->query->build($this);
+    // Only build the query if we weren't interrupted.
+    if (empty($this->built)) {
+      // Build the necessary info to execute the query.
+      $this->query->build($this);
+    }
 
     $this->built = TRUE;
     $this->build_time = microtime(TRUE) - $start;
@@ -734,6 +743,9 @@ class view extends views_db_object {
       $this->start_query_capture();
     }
 
+    $exposed_form = $this->display_handler->get_exposed_form_plugin();
+    $exposed_form->pre_render();
+
     // Check for already-cached output.
     if (!empty($this->live_preview)) {
       $cache = FALSE;
@@ -780,6 +792,8 @@ class view extends views_db_object {
         $cache->cache_set('output');
       }
     }
+
+    $exposed_form->post_render($this->display_handler->output);
 
     if ($cache) {
       $cache->post_render($this->display_handler->output);

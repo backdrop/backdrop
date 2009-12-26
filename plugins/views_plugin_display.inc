@@ -187,6 +187,7 @@ class views_plugin_display extends views_plugin {
       'link_display' => array('link_display'),
       'distinct' => array('distinct'),
       'exposed_block' => array('exposed_block'),
+      'exposed_form' => array('exposed_form'),
 
       // Force these to cascade properly.
       'style_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
@@ -261,6 +262,7 @@ class views_plugin_display extends views_plugin {
           'use_more_text' => TRUE,
           'distinct' => TRUE,
           'exposed_block' => TRUE,
+          'exposed_form' => TRUE,
 
           'link_display' => TRUE,
 
@@ -384,6 +386,12 @@ class views_plugin_display extends views_plugin {
 
       'exposed_block' => array(
         'default' => FALSE,
+      ),
+      'exposed_form' => array(
+        'contains' => array(
+          'type' => array('default' => 'basic'),
+          'options' => array('default' => array()),
+         ),
       ),
     );
 
@@ -534,6 +542,22 @@ class views_plugin_display extends views_plugin {
     }
 
     $plugin = views_get_plugin('cache', $name);
+    if ($plugin) {
+      $plugin->init($this->view, $this->display);
+      return $plugin;
+    }
+  }
+
+  /**
+   * Get the exposed form plugin
+   */
+  function get_exposed_form_plugin($name = NULL) {
+    if (!$name) {
+      $exposed_form = $this->get_option('exposed_form');
+      $name = $exposed_form['type'];
+    }
+
+    $plugin = views_get_plugin('exposed_form', $name);
     if ($plugin) {
       $plugin->init($this->view, $this->display);
       return $plugin;
@@ -816,6 +840,25 @@ class views_plugin_display extends views_plugin {
       'value' => $this->get_option('exposed_block') ? t('Yes') : t('No'),
       'desc' => t('Allow the exposed form to appear in a block instead of the view.'),
     );
+
+    $exposed_form_plugin = $this->get_exposed_form_plugin();
+    if (!$exposed_form_plugin) {
+      // default to the no cache control plugin.
+      $exposed_form_plugin = views_get_plugin('exposed_form', 'basic');
+    }
+
+    $exposed_form_str = $exposed_form_plugin->summary_title();
+
+    $options['exposed_form'] = array(
+      'category' => 'exposed',
+      'title' => t('Exposed form style'),
+      'value' => $exposed_form_str,
+      'desc' => t('Select the kind of exposed filter to use.'),
+    );
+
+    if (!empty($exposed_form_plugin->definition['uses options'])) {
+      $options['exposed_form']['links']['exposed_form_options'] = t('Exposed form settings for this exposed form style.');
+    }
 
     foreach (array('header' => t('Header'), 'footer' => t('Footer'), 'empty' => t('Empty text')) as $type => $name) {
       if (!$this->get_option($type)) {
@@ -1390,6 +1433,43 @@ class views_plugin_display extends views_plugin {
           '#default_value' => $this->get_option('exposed_block') ? 1 : 0,
         );
         break;
+      case 'exposed_form':
+        $form['#title'] .= t('Exposed Form');
+        $form['exposed_form'] = array(
+          '#prefix' => '<div class="clear-block">',
+          '#suffix' => '</div>',
+          '#tree' => TRUE,
+        );
+
+        $exposed_form = $this->get_option('exposed_form');
+        $form['exposed_form']['type'] =  array(
+          '#type' => 'radios',
+          '#options' => views_fetch_plugin_names('exposed_form'),
+          '#default_value' => $exposed_form['type'],
+        );
+
+        $exposed_form_plugin = views_fetch_plugin_data('exposed_form', $exposed_form['type']);
+        if (!empty($exposed_form_plugin['uses options'])) {
+          $form['markup'] = array(
+            '#prefix' => '<div class="form-item description">',
+            '#suffix' => '</div>',
+            '#value' => t('You may also adjust the !settings for the currently selected style by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'exposed_form_options'))),
+          );
+        }
+        break;
+      case 'exposed_form_options':
+        $exposed_form = $this->get_option('exposed_form');
+        $plugin = $this->get_exposed_form_plugin();
+        $form['#title'] .= t('Exposed form options');
+        if ($plugin) {
+          $form['#help_topic'] = $plugin->definition['help topic'];
+
+          $form['exposed_form_options'] = array(
+            '#tree' => TRUE,
+          );
+          $plugin->options_form($form['exposed_form_options'], $form_state);
+        }
+        break;
     }
   }
 
@@ -1463,6 +1543,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_cache_plugin();
         if ($plugin) {
           $plugin->options_validate($form['cache_options'], $form_state);
+        }
+        break;
+      case 'exposed_form_options':
+        $plugin = $this->get_exposed_form_plugin();
+        if ($plugin) {
+          $plugin->options_validate($form['exposed_form_options'], $form_state);
         }
         break;
     }
@@ -1605,6 +1691,29 @@ class views_plugin_display extends views_plugin {
         break;
       case 'exposed_block':
         $this->set_option($section, (bool) $form_state['values'][$section]);
+        break;
+      case 'exposed_form':
+        $exposed_form = $this->get_option('exposed_form');
+        if ($exposed_form['type'] != $form_state['values']['exposed_form']['type']) {
+          $plugin = views_get_plugin('exposed_form', $form_state['values']['exposed_form']['type']);
+          if ($plugin) {
+            $exposed_form = array('type' => $form_state['values']['exposed_form']['type'], 'options' => array());
+            $this->set_option('exposed_form', $exposed_form);
+            if (!empty($plugin->definition['uses options'])) {
+              views_ui_add_form_to_stack('display', $this->view, $this->display->id, array('exposed_form_options'));
+            }
+          }
+        }
+
+        break;
+      case 'exposed_form_options':
+        $plugin = $this->get_exposed_form_plugin();
+        if ($plugin) {
+          $exposed_form = $this->get_option('exposed_form');
+          $plugin->options_submit($form['exposed_form_options'], $form_state);
+          $exposed_form['options'] = $form_state['values'][$section];
+          $this->set_option('exposed_form', $exposed_form);
+        }
         break;
     }
   }

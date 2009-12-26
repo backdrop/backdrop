@@ -233,6 +233,27 @@ function views_views_plugins() {
         'help topic' => 'cache-time',
       ),
     ),
+    'exposed_form' => array(
+      'parent' => array(
+        'no ui' => TRUE,
+        'handler' => 'views_plugin_exposed_form',
+        'parent' => '',
+      ),
+      'basic' => array(
+        'title' => t('Basic'),
+        'help' => t('Basic exposed form'),
+        'handler' => 'views_plugin_exposed_form_basic',
+        'uses options' => TRUE,
+        'help topic' => 'exposed-form-basic',
+      ),
+      'input_required' => array(
+        'title' => t('Input required'),
+        'help' => t('An exposed form that only renders a view if the form contains user input.'),
+        'handler' => 'views_plugin_exposed_form_input_required',
+        'uses options' => TRUE,
+        'help topic' => 'exposed-form-input-required',
+      ),
+    ),
   );
 }
 
@@ -242,7 +263,7 @@ function views_views_plugins() {
  * @return Nested array of plugins, grouped by type.
  */
 function views_discover_plugins() {
-  $cache = array('display' => array(), 'style' => array(), 'row' => array(), 'argument default' => array(), 'argument validator' => array(), 'access' => array(), 'cache' => array());
+  $cache = array('display' => array(), 'style' => array(), 'row' => array(), 'argument default' => array(), 'argument validator' => array(), 'access' => array(), 'cache' => array(), 'exposed_form' => array());
   // Get plugins from all mdoules.
   foreach (module_implements('views_plugins') as $module) {
     $function = $module . '_views_plugins';
