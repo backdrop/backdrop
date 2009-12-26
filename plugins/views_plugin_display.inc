@@ -1941,6 +1941,11 @@ class views_plugin_display extends views_plugin {
     if ($this->use_more()) {
       $this->view->get_total_rows = TRUE;
     }
+    $this->view->init_handlers();
+    if ($this->uses_exposed()) {
+      $exposed_form = $this->get_exposed_form_plugin();
+      $exposed_form->pre_execute();
+    }    
   }
 
   /**
