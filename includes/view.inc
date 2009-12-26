@@ -1618,6 +1618,9 @@ class views_db_object {
         $serials[] = $field;
         continue;
       }
+      elseif ($info['type'] == 'int') {
+        $this->$field = (int) $this->$field;
+      }
       $fields[$field] = empty($info['serialize']) ? $this->$field : serialize($this->$field);
     }
     if (!$update) {
