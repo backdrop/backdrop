@@ -666,12 +666,12 @@ class views_handler_field extends views_handler {
       else {
         $tokens["[$field]"] = '';
       }
+      $this->add_self_tokens($tokens, $item);
+
       // We only use fields up to (and including) this one.
       if ($field == $this->options['id']) {
         break;
       }
-
-      $this->add_self_tokens($tokens, $item);
     }
 
     return $tokens;

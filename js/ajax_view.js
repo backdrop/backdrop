@@ -122,6 +122,7 @@ Drupal.behaviors.ViewsAjaxView = function() {
                 Drupal.Views.parseViewArgs($(this).attr('href'), settings.view_base_path)
               );
               $(this).click(function () {
+                $.extend(viewData, Drupal.Views.parseViewArgs($(this).attr('href'), settings.view_base_path));
                 $(this).addClass('views-throbbing');
                 $.ajax({
                   url: ajax_path,

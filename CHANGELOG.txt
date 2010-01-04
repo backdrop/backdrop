@@ -44,8 +44,8 @@ Views 3.x-7.x-dev
     o #535868 by dagmar: Exposed forms as plugins, helping to isolate exposed form code and increase the ability for modules to change the behavior of exposed forms.
     o #633482 by dagmar: pre_execute() method needs to be called on exposed forms.
     o #535206: Attachment displays repeat exposed filters because exposed filters were left hanging around during cloning.
-
-
+    o #652742: Replacement pattern tokens for multiple fields did not work.
+    o #659510 by Souvent22 and dereine: glossary AJAX broken.
 
 Views 3.x-6.x-dev
   Bug fixes:
