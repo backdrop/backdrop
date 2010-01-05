@@ -119,12 +119,22 @@ function _views_discover_default_views() {
       $defaults = module_invoke_all('views_default_views');
       $cache = array();
 
-      foreach ($defaults as $name => $view) {
-        // Only views with a sufficiently high api version are eligible.
-        if (isset($view->api_version) && $view->api_version >= 2) {
-          // Do not cache dead handlers.
-          $view->destroy();
-          $cache[$name] = $view;
+      foreach(module_implements('views_default_views') as $module) {
+        $results = call_user_func($module . "_views_default_views");
+        if (!empty($results) && is_array($results)) {
+          foreach($results as $name => $view) {
+            // Only views with a sufficiently high api version are eligible.
+            if (!empty($view->api_version) && $view->api_version >= 2) {
+              // Do not cache dead handlers.
+              $view->destroy();
+              if (!isset($cache[$name])) {
+                $cache[$name] = $view;
+              }
+              else {
+                watchdog('view', "View name '@name' is already taken", array('@name' => $name), WATCHDOG_ERROR);
+              }
+            }
+          }
         }
       }
 

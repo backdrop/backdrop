@@ -50,6 +50,7 @@ Views 3.x-7.x-dev
     o #670308 by Mike Wacker: Make views_get_view() properly set disabled flag when retrieving default views.
     o #536910 by dereine: Theme and language should be taken into account during caching.
     o #657442 by nicholasThompson and dagmar: Include "mail" field in user picture so that modules that need this do not break when rendering picture in Views.
+    o #455364 by sdrycroft: Prevent modules trying to define the same default view name from breaking everything.
 
 Views 3.x-6.x-dev
   Bug fixes:
