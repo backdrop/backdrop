@@ -49,6 +49,7 @@ Views 3.x-7.x-dev
     o #335599 by miro_dietiker: Remove the 95% width constraint on the admin hover links to be nicer to themes.
     o #670308 by Mike Wacker: Make views_get_view() properly set disabled flag when retrieving default views.
     o #536910 by dereine: Theme and language should be taken into account during caching.
+    o #657442 by nicholasThompson and dagmar: Include "mail" field in user picture so that modules that need this do not break when rendering picture in Views.
 
 Views 3.x-6.x-dev
   Bug fixes:

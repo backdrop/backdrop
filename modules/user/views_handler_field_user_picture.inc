@@ -9,6 +9,7 @@ class views_handler_field_user_picture extends views_handler_field {
     parent::construct();
     $this->additional_fields['uid'] = 'uid';
     $this->additional_fields['name'] = 'name';
+    $this->additional_fields['name'] = 'mail';   
   }
 
   function element_type() {
@@ -20,6 +21,7 @@ class views_handler_field_user_picture extends views_handler_field {
     $account = new stdClass();
     $account->uid = $values->{$this->aliases['uid']};
     $account->name = $values->{$this->aliases['name']};
+    $account->mail = $values->{$this->aliases['mail']};
     $account->picture = $values->{$this->field_alias};
 
     return theme('user_picture', array('account' => $account));
