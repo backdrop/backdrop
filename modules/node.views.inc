@@ -676,17 +676,19 @@ function template_preprocess_views_view_row_node(&$vars) {
   }
 
   $node->view = $vars['view'];
-  //$node->build_mode = ($options['build_mode'] == 'teaser' || $options['build_mode'] == 'full') ? NODE_BUILD_NORMAL : $options['build_mode'];
-  //$vars['node'] = node_view($node, $options['build_mode'] == 'teaser', FALSE, $options['links']);
-  $content = node_build($node, $options['build_mode']);
+  $node->build_mode = ($options['build_mode'] == 'teaser' || $options['build_mode'] == 'full') ? $options['build_mode'] : 'full';
+  $content = node_view_multiple(array($node->nid => $node), $node->build_mode);
+  $content = $content['nodes'][$node->nid];
   if (!$options['links']) {
     unset($content['links']);
   }
+
+  if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
+    $vars['comments'] = drupal_render(comment_node_page_additions($node));
+  }
+
   $vars['node'] = drupal_render($content);
 
-  if (!empty($options['comments']) && function_exists('comment_render')) {
-    $vars['comments'] = comment_render($node);
-  }
 }
 
 /**
