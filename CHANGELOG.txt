@@ -54,6 +54,7 @@ Views 3.x-7.x-dev
     o #682140 by dereine: Use new node-building system
     o #682146 by dereine: node.format is now handled by body-field
     o #687610 by fgm: Wrong path for module in help message
+    o by dereine: Fix views_get_module_apis, registry is not in anymore.
 
 
 Views 3.x-6.x-dev

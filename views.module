@@ -547,6 +547,9 @@ function views_get_module_apis() {
       $info = module_invoke($module, 'views_api');
       if (isset($info['api']) && $info['api'] == 2.000) {
         $cache[$module] = $info;
+        if (!isset($info['path'])) {
+          $info['path'] = drupal_get_path('module', $module);
+        }
       }
     }
   }
