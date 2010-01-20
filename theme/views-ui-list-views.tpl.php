@@ -26,7 +26,7 @@
           <?php if ($view->title): ?>
             <?php print t('Title: @title', array('@title' => $view->title)); ?> <br />
           <?php endif; ?>
-          <?php if ($view->path): ?>
+          <?php if (isset($view->path)): ?>
             <?php print t('Path: !path', array('!path' => $view->path)); ?> <br />
           <?php endif; ?>
           <?php if ($view->displays): ?>
