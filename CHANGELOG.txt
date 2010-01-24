@@ -56,9 +56,15 @@ Views 3.x-7.x-dev
     o #687610 by fgm: Wrong path for module in help message
     o by dereine: Fix views_get_module_apis, registry is not in anymore.
     o by dereine: fix notify on views-ui-list-views.tpl.php
+    o by dereine: Fix aggregateCount test case, this does work now
+    o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
 
 
-Views 3.x-6.x-dev
+Views 6.x-3.x-dev
+    o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
+    o #535868 by dagmar: Exposed forms as plugins, helping to isolate exposed form code and increase the ability for modules to change the behavior of exposed forms.
+
+Views 6.x-3.0-alpha1
   Bug fixes:
     o Table style when not overriding sorts put sorts in wrong order.
     o #488908 by sl27257: "Node: Has new content" only worked when exposed.

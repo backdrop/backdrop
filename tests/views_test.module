@@ -2,6 +2,15 @@
 // $Id$
 
 /**
+ * Implements hook_views_api().
+ */
+function views_test_views_api() {
+  return array(
+    'api' => 2.0,
+  );
+}
+
+/**
  * Implements hook_views_data()
  */
 function views_test_views_data() {

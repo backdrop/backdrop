@@ -94,7 +94,12 @@ class views_handler_field extends views_handler {
           else {
             $table_alias = $this->table_alias;
           }
-          $this->aliases[$identifier] = $this->query->add_field($table_alias, $info['field']);
+          $params = array();
+          if (!empty($info['params'])) {
+            $params = $info['params'];
+          }
+
+          $this->aliases[$identifier] = $this->query->add_field($table_alias, $info['field'], NULL, $params);
         }
         else {
           $this->aliases[$info] = $this->query->add_field($this->table_alias, $info);
@@ -173,6 +178,8 @@ class views_handler_field extends views_handler {
    * should have.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),

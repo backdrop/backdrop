@@ -553,10 +553,9 @@ class views_handler_argument extends views_handler {
    */
   function summary_basics($count_field = TRUE) {
     // Add the number of nodes counter
-    $field = $this->query->base_table . '.' . $this->query->base_field;
     $distinct = ($this->view->display_handler->get_option('distinct') && empty($this->query->no_distinct));
 
-    $count_alias = $this->query->add_field(NULL, $field, 'num_records',
+    $count_alias = $this->query->add_field($this->query->base_table, $this->query->base_field, 'num_records',
                                            array('count' => TRUE, 'distinct' => $distinct));
     $this->query->add_groupby($this->name_alias);
 

@@ -116,6 +116,7 @@ function upload_views_data_alter(&$data) {
     'real field' => 'vid',
     'field' => array(
       'handler' => 'views_handler_field_upload_fid',
+      'no group by' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_upload_fid',

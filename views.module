@@ -13,7 +13,14 @@
  * Advertise the current views api version
  */
 function views_api_version() {
-  return 2.0;
+  return '3.0-alpha1';
+}
+
+/**
+ * Views will not load plugins advertising a version older than this.
+ */
+function views_api_minimum_version() {
+  return '2';
 }
 
 /**
@@ -545,11 +552,12 @@ function views_get_module_apis() {
     $cache = array();
     foreach (module_implements('views_api') as $module) {
       $info = module_invoke($module, 'views_api');
-      if (isset($info['api']) && $info['api'] == 2.000) {
-        $cache[$module] = $info;
+      if (version_compare($info['api'], views_api_minimum_version(), '>=') &&
+          version_compare($info['api'], views_api_version(), '<=')) {
         if (!isset($info['path'])) {
           $info['path'] = drupal_get_path('module', $module);
         }
+        $cache[$module] = $info;
       }
     }
   }
@@ -638,19 +646,35 @@ function views_include_default_views() {
  *   The name of the field this handler is from.
  * @param $key
  *   The type of handler. i.e, sort, field, argument, filter, relationship
+ * @param $override
+ *   Override the actual handler object with this class. Used for
+ *   aggregation when the handler is redirected to the aggregation
+ *   handler.
  *
  * @return
  *   An instance of a handler object. May be views_handler_broken.
  */
-function views_get_handler($table, $field, $key) {
+function views_get_handler($table, $field, $key, $override = NULL) {
   $data = views_fetch_data($table);
+  $handler = NULL;
+
   if (isset($data[$field][$key])) {
     // Set up a default handler:
     if (empty($data[$field][$key]['handler'])) {
       $data[$field][$key]['handler'] = 'views_handler_' . $key;
     }
-    return _views_prepare_handler($data[$field][$key], $data, $field);
+
+    if ($override) {
+      $data[$field][$key]['override handler'] = $override;
+    }
+
+    $handler = _views_prepare_handler($data[$field][$key], $data, $field);
   }
+
+  if ($handler) {
+    return $handler;
+  }
+
   // DEBUG -- identify missing handlers
   debug("Missing handler: $table $field $key");
   $broken = array(

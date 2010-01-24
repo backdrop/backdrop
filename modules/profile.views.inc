@@ -195,6 +195,7 @@ function profile_views_fetch_field($field) {
         'help' => t('Profile freeform list %field-name.', array('%field-name' => $field->title)),
         'field' => array(
           'handler' => 'views_handler_field_profile_list',
+          'no group by' => TRUE,
         ),
         'filter' => array(
           'handler' => 'views_handler_filter_string',

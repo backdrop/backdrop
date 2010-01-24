@@ -15,11 +15,22 @@ function _views_create_handler($definition, $type = 'handler') {
   }
 
   // class_exists will automatically load the code file.
+  if (!empty($definition['override handler']) &&
+      !class_exists($definition['override handler'])) {
+    return;
+  }
+  
   if (!class_exists($definition['handler'])) {
     return;
   }
+  
+   if (!empty($definition['override handler'])) {
+     $handler = new $definition['override handler'];
+   }
+   else {
+     $handler = new $definition['handler'];
+   }
 
-  $handler = new $definition['handler'];
   $handler->set_definition($definition);
   // let the handler have something like a constructor.
   $handler->construct();
@@ -194,6 +205,14 @@ class views_handler extends views_object {
     $this->query = &$view->query;
   }
 
+  function option_definition() {
+    $options = parent::option_definition();
+
+    $options['group_type'] = array('default' => 'group');
+
+    return $options;
+  }
+
   /**
    * Return a string representing this handler's name in the UI.
    */
@@ -203,15 +222,39 @@ class views_handler extends views_object {
   }
 
   /**
-   * Provide a form for setting options.
+   * Shortcut to get a handler's raw field value.
+   *
+   * This should be overridden for handlers with formulae or other
+   * non-standard fields. Because this takes an argument, fields
+   * overriding this can just call return parent::get_field($formula)
    */
-  function options_form(&$form, &$form_state) { }
+  function get_field($field = NULL) {
+    if (!isset($field)) {
+      if (!empty($this->formula)) {
+        $field = $this->get_formula();
+      }
+      else {
+        $field = $this->table_alias . '.' . $this->real_field;
+      }
+    }
+
+    // If grouping, check to see if the aggregation method needs to modify the field.
+    if ($this->view->display_handler->use_group_by()) {
+      $info = $this->query->get_aggregation_info();
+      if (!empty($info[$this->options['group_type']]['method']) && function_exists($info[$this->options['group_type']]['method'])) {
+        return $info[$this->options['group_type']]['method']($this->options['group_type'], $field);
+      }
+    }
+
+    return $field;
+  }
 
   /**
    * Validate the options form.
    */
   function options_validate($form, &$form_state) { }
 
+  function options_form(&$form, &$form_state) { }
   /**
    * Perform any necessary changes to the form values prior to storage.
    * There is no need for this function to actually store the data.
@@ -437,7 +480,7 @@ class views_handler extends views_object {
    *
    * If we were using PHP5, this would be abstract.
    */
-  function query() { }
+  function query($group_by = FALSE) { }
 
   /**
    * Ensure the main table for this handler is in the query. This is used
@@ -1096,6 +1139,20 @@ function views_views_handlers() {
     'views_handler_sort_date',
     'views_handler_sort_menu_hierarchy',
     'views_handler_sort_random',
+  
+    // group by handlers
+    'views_handler_argument_group_by_numeric' => array(
+      'parent' => 'views_handler_argument',
+    ),
+    'views_handler_field_group_by_numeric' => array(
+      'parent' => 'views_handler_field',
+    ),
+    'views_handler_filter_group_by_numeric' => array(
+      'parent' => 'views_handler_filter_numeric',
+    ),
+    'views_handler_sort_group_by_numeric' => array(
+      'parent' => 'views_handler_sort',
+    ),
   );
 }
 
@@ -1287,7 +1344,8 @@ class views_join {
  */
 function views_views_api() {
   return array(
-    'api' => 2,
+    // in your modules do *not* use views_api_version()!!!
+    'api' => views_api_version(),
     'path' => drupal_get_path('module', 'views') . '/modules',
   );
 }

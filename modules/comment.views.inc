@@ -459,6 +459,7 @@ function comment_views_data_alter(&$data) {
     'help' => t('The number of new comments on the node.'),
     'field' => array(
       'handler' => 'views_handler_field_node_new_comments',
+      'no group by' => TRUE,
     ),
   );
 

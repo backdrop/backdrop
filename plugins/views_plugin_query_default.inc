@@ -68,6 +68,13 @@ class views_plugin_query_default extends views_plugin_query {
 
   var $placeholder_counter = 0;
 
+  var $has_aggregate = FALSE;
+
+  /**
+   * Should this query be optimized for counts, for example no sorts.
+   */
+  var $get_count_optimized = NULL;
+
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
@@ -95,6 +102,8 @@ class views_plugin_query_default extends views_plugin_query {
       'alias' => $base_table,
     );
 
+/**
+ * -- we no longer want the base field to appear automatigically.
     if ($base_field) {
       $this->fields[$base_field] = array(
         'table' => $base_table,
@@ -102,6 +111,7 @@ class views_plugin_query_default extends views_plugin_query {
         'alias' => $base_field,
       );
     }
+ */
 
     $this->count_field = array(
       'table' => $base_table,
@@ -619,11 +629,14 @@ class views_plugin_query_default extends views_plugin_query {
    *   The alias to create. If not specified, the alias will be $table_$field
    *   unless $table is NULL. When adding formulae, it is recommended that an
    *   alias be used.
+   * @param $params
+   *   An array of parameters additional to the field that will control items
+   *   such as aggregation functions and DISTINCT.
    *
    * @return $name
    *   The name that this field can be referred to as. Usually this is the alias.
    */
-  function add_field($table, $field, $alias = '', $params = NULL) {
+  function add_field($table, $field, $alias = '', $params = array()) {
     // We check for this specifically because it gets a special alias.
     if ($table == $this->base_table && $field == $this->base_field && empty($alias)) {
       $alias = $this->base_field;
@@ -637,22 +650,30 @@ class views_plugin_query_default extends views_plugin_query {
       $alias = $table . '_' . $field;
     }
 
-    $name = $alias ? $alias : $field;
+    // Make sure an alias is assigned
+    $alias = $alias ? $alias : $field;
 
-    // @todo FIXME -- $alias, then $name is inconsistent
+    // Create a field info array.
+    $field_info = array(
+      'field' => $field,
+      'table' => $table,
+      'alias' => $alias,
+    ) + $params;
+
+    // Test to see if the field is actually the same or not. Due to
+    // differing parameters changing the aggregation function, we need
+    // to do some automatic alias collision detection:
+    $base = $alias;
+    $counter = 0;
+    while (!empty($this->fields[$alias]) && $this->fields[$alias] != $field_info) {
+      $field_info['alias'] = $alias = $base . '_' . ++$counter;
+    }
+
     if (empty($this->fields[$alias])) {
-      $this->fields[$name] = array(
-        'field' => $field,
-        'table' => $table,
-        'alias' => $alias,
-      );
+      $this->fields[$alias] = $field_info;
     }
 
-    foreach ((array)$params as $key => $value) {
-      $this->fields[$name][$key] = $value;
-    }
-
-    return $name;
+    return $alias;
   }
 
   /**
@@ -788,8 +809,10 @@ class views_plugin_query_default extends views_plugin_query {
    *   must also be in the SELECT portion. If an $alias isn't specified
    *   one will be generated for from the $field; however, if the
    *   $field is a formula, this alias will likely fail.
+   * @param $params
+   *   Any params that should be passed through to the add_field.
    */
-  function add_orderby($table, $field, $order, $alias = '') {
+  function add_orderby($table, $field, $order, $alias = '', $params = array()) {
     if ($table) {
       $this->ensure_table($table);
     }
@@ -804,7 +827,7 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     if ($field) {
-      $this->add_field($table, $field, $as);
+      $this->add_field($table, $field, $as, $params);
     }
 
     $this->orderby[] = array(
@@ -812,12 +835,16 @@ class views_plugin_query_default extends views_plugin_query {
       'direction' => strtoupper($order)
     );
 
-    // If grouping, all items in the order by must also be in the
-    // group by clause. Check $table to ensure that this is not a
-    // formula.
-    if ($this->groupby && $table) {
-      $this->add_groupby($as);
-    }
+	/**
+ 	 * -- removing, this should be taken care of by field adding now.
+     * -- leaving commented because I am unsure.
+      // If grouping, all items in the order by must also be in the
+      // group by clause. Check $table to ensure that this is not a
+      // formula.
+      if ($this->groupby && $table) {
+        $this->add_groupby($as);
+      }
+    */
   }
 
   /**
@@ -851,6 +878,72 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
+   * Build fields array.
+   */
+  function compile_fields($fields_array, $query) {
+    $non_aggregates = array();
+    foreach ($fields_array as $field) {
+      $string = '';
+      if (!empty($field['table'])) {
+        $string .= $field['table'] . '.';
+      }
+      $string .= $field['field'];
+      $fieldname = (!empty($field['alias']) ? $field['alias'] : $string);
+
+      if (!empty($field['distinct'])) {
+        throw new Exception("d7cx: Column-level distinct is not supported yet.");
+      }
+
+      if (!empty($field['count'])) {
+        // Retained for compatibility
+        $field['function'] = 'COUNT';
+        // It seems there's no way to abstract the table+column reference
+        // without adding a field, aliasing, and then using the alias.
+        $table = !empty($field['table']) ? $field['table'] : $this->base_table;
+        $alias = $table . '_' . $field['field'] . '_viewscount';
+        $query->addField($table, $field['field'], $alias);
+        $query->addExpression('COUNT(' . $field['table'] .'.'. $field['field'] . ')', $fieldname);
+      }
+
+      if (!empty($field['function'])) {
+        $info = $this->get_aggregation_info();
+        if (!empty($info[$field['function']]['method']) && function_exists($info[$field['function']]['method'])) {
+          $string = $info[$field['function']]['method']($field['function'], $string);
+          $query->addExpression($string, $fieldname);
+        }
+
+        $this->has_aggregate = TRUE;
+      }
+
+      elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
+        // d7cx: This code was there, apparently needed for PostgreSQL
+        // $string = db_driver() == 'pgsql' ? "FIRST($string)" : $string;
+        $query->addField(!empty($field['table']) ? $field['table'] : $this->base_table, $field['field'], $fieldname);
+      }
+      elseif (empty($field['aggregate'])) {
+        $non_aggregates[] = $fieldname;
+        $query->addField(!empty($field['table']) ? $field['table'] : $this->base_table, $field['field'], $fieldname);
+      }
+
+      // @TODO Remove this old code.
+      if (!empty($field['distinct']) && empty($field['function'])) {
+        $distinct[] = $string;
+      }
+      else {
+        $fields[] = $string;
+      }
+
+      if ($this->get_count_optimized) {
+        // We only want the first field in this case.
+        break;
+      }
+    }
+    return array(
+      $non_aggregates,
+    );
+  }
+
+  /**
    * Generate a query and a countquery from all of the information supplied
    * to the object.
    *
@@ -860,10 +953,8 @@ class views_plugin_query_default extends views_plugin_query {
   function query($get_count = FALSE) {
     // Check query distinct value.
     if (empty($this->no_distinct) && $this->distinct && !empty($this->fields)) {
-      if (!empty($this->fields[$this->base_field])) {
-        $this->fields[$this->base_field]['distinct'] = TRUE;
-        $this->add_groupby($this->base_field);
-      }
+      $base_field_alias = $this->add_field($this->base_table, $this->base_field, NULL, array('distinct' => TRUE));
+      $this->add_groupby($base_field_alias);
     }
 
     /**
@@ -873,23 +964,24 @@ class views_plugin_query_default extends views_plugin_query {
     $fields_array = $this->fields;
     if ($get_count && !$this->groupby) {
       foreach ($fields_array as $field) {
-        if (!empty($field['distinct'])) {
-          $get_count_optimized = FALSE;
+        if (!empty($field['distinct']) || !empty($field['function'])) {
+          $this->get_count_optimized = FALSE;
           break;
         }
       }
     }
     else {
-      $get_count_optimized = FALSE;
+      $this->get_count_optimized = FALSE;
     }
-    if (!isset($get_count_optimized)) {
-      $get_count_optimized = TRUE;
+    if (!isset($this->get_count_optimized)) {
+      $this->get_count_optimized = TRUE;
     }
 
     // Go ahead and build the query.
     $query = db_select($this->base_table, $this->base_table);
 
-    $joins = $fields = $where = $having = $orderby = $groupby = '';
+    $joins = $where = $having = $orderby = $groupby = '';
+    $fields = $distinct = array();
 
     // Add all the tables to the query via joins. We assume all LEFT joins.
     foreach ($this->table_queue as $table) {
@@ -898,52 +990,26 @@ class views_plugin_query_default extends views_plugin_query {
       }
     }
 
-    $has_aggregate = FALSE;
+    $this->has_aggregate = FALSE;
     $non_aggregates = array();
 
-    foreach ($fields_array as $field) {
-      $fieldname = (!empty($field['alias']) ? $field['alias'] : $string);
+    list($non_aggregates) = $this->compile_fields($fields_array, $query);
 
-      if (!empty($field['distinct'])) {
-        throw new Exception("d7cx: Column-level distinct is not supported yet.");
-      }
-
-      if (!empty($field['count'])) {
-        // It seems there's no way to abstract the table+column reference
-        // without adding a field, aliasing, and then using the alias.
-        $table = !empty($field['table']) ? $field['table'] : $this->base_table;
-        $alias = $table . '_' . $field . '_viewscount';
-        $query->addField($table, $field['field'], $alias);
-        $query->addExpression('COUNT(' . $alias . ')', $fieldname);
-      }
-      elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
-        // d7cx: This code was there, apparently needed for PostgreSQL
-        // $string = db_driver() == 'pgsql' ? "FIRST($string)" : $string;
-        $query->addField(!empty($field['table']) ? $field['table'] : $this->base_table, $field['field'], $fieldname);
-      }
-      else {
-        $non_aggregates[] = $fieldname;
-        $query->addField(!empty($field['table']) ? $field['table'] : $this->base_table, $field['field'], $fieldname);
-      }
-
-      if ($get_count_optimized) {
-        // We only want the first field in this case.
-        break;
-      }
+    if (count($this->having)) {
+      $this->has_aggregate = TRUE;
     }
-
-    if ($has_aggregate || $this->groupby) {
+    if ($this->has_aggregate || $this->groupby) {
       $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
       foreach ($groupby as $field) {
         $query->groupBy($field);
       }
       if (!empty($this->having)) {
-        $query->having($this->build_condition('having'));
+        $query->havingCondition($this->build_condition('having'));
       }
     }
 
-    if (!$get_count_optimized) {
-      // we only add the groupby if we're not counting.
+    if (!$this->get_count_optimized) {
+      // we only add the orderby if we're not counting.
       if ($this->orderby) {
         foreach ($this->orderby as $order) {
           $query->orderBy($order['field'], $order['direction']);
@@ -1005,7 +1071,8 @@ class views_plugin_query_default extends views_plugin_query {
     $items = array();
     if ($query) {
       $additional_arguments = module_invoke_all('views_query_substitutions', $view);
-      $count_query = $count_query->countQuery();
+      // We have already build a working count query. Views optimeses it automatically.
+      //$count_query = $count_query->countQuery();
 
       // Add additional arguments as a fake condition.
       // XXX: this doesn't work... because PDO mandates that all bound arguments
@@ -1089,4 +1156,69 @@ class views_plugin_query_default extends views_plugin_query {
     $view->query->add_field(NULL, "'" . $view->name . ':' . $view->current_display . "'", 'view_name');
   }
 
+  function get_aggregation_info() {
+    // @todo -- need a way to get database specific and customized aggregation
+    // functions into here.
+    return array(
+      'group' => array(
+        'title' => t('Group results together'),
+        'is aggregate' => FALSE,
+      ),
+      'count' => array(
+        'title' => t('Count'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'sum' => array(
+        'title' => t('Sum'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'avg' => array(
+        'title' => t('Average'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'min' => array(
+        'title' => t('Minimum'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'max' => array(
+        'title' => t('Maximum'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+    );
+  }
 }
+
+function views_query_default_aggregation_method_simple($group_type, $field) {
+  return strtoupper($group_type) . '(' . $field . ')';
+}
+

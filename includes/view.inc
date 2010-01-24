@@ -51,17 +51,19 @@ class view extends views_db_object {
 
   // Used to store views that were previously running if we recurse.
   var $old_view = array();
+
+  // Where the $query object will reside:
+  var $query = NULL;
+
   /**
    * Constructor
    */
-  function view() {
+  function __construct() {
     parent::init();
     // Make sure all of our sub objects are arrays.
     foreach ($this->db_objects() as $object) {
       $this->$object = array();
     }
-
-    $this->query = new stdClass();
   }
 
   /**
@@ -477,7 +479,7 @@ class view extends views_db_object {
         }
         else {
           $arg_title = $argument->get_title();
-          $argument->query();
+          $argument->query($this->display_handler->use_group_by());
         }
 
         // Add this argument's substitution
@@ -528,6 +530,14 @@ class view extends views_db_object {
    * Do some common building initialization.
    */
   function init_query() {
+    if (!empty($this->query)) {
+      $class = get_class($this->query);
+      if ($class && $class != 'stdClass') {
+        // return if query is already initialized.
+        return;
+      }
+    }
+
     // Create and initialize the query object.
     $views_data = views_fetch_data($this->base_table);
     $this->base_field = $views_data['table']['base']['field'];
@@ -633,10 +643,10 @@ class view extends views_db_object {
     }
 
     // Allow display handler to affect the query:
-    $this->display_handler->query();
+    $this->display_handler->query($this->display_handler->use_group_by());
 
     // Allow style handler to affect the query:
-    $this->style_plugin->query();
+    $this->style_plugin->query($this->display_handler->use_group_by());
 
     // Allow exposed form to affect the query:
     if (isset($exposed_form)) {
@@ -680,7 +690,7 @@ class view extends views_db_object {
           }
         }
         $handlers[$id]->set_relationship();
-        $handlers[$id]->query();
+        $handlers[$id]->query($this->display_handler->use_group_by());
       }
     }
   }

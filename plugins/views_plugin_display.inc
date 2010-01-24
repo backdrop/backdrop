@@ -137,6 +137,13 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
+   * Does the display have a more link enabled?
+   */
+  function use_group_by() {
+    return $this->get_option('group_by');
+  }
+
+  /**
    * Should the enabled display more link be shown when no more items?
    */
   function use_more_always() {
@@ -265,6 +272,7 @@ class views_plugin_display extends views_plugin {
           'exposed_form' => TRUE,
 
           'link_display' => TRUE,
+          'group_by' => TRUE,
 
           'style_plugin' => TRUE,
           'style_options' => TRUE,
@@ -368,6 +376,9 @@ class views_plugin_display extends views_plugin {
         'default' => '',
       ),
       'distinct' => array(
+        'default' => FALSE,
+      ),
+      'group_by' => array(
         'default' => FALSE,
       ),
 
@@ -590,7 +601,21 @@ class views_plugin_display extends views_plugin {
       $types = views_object_types();
       $plural = $types[$type]['plural'];
       foreach ($this->get_option($plural) as $id => $info) {
-        $handler = views_get_handler($info['table'], $info['field'], $type);
+        // If aggregation is on, the group type might override the actual
+        // handler that is in use. This piece of code checks that and,
+        // if necessary, sets the override handler.
+        $override = NULL;
+        if ($this->use_group_by() && !empty($info['group_type'])) {
+          if (empty($this->view->query)) {
+            $this->view->init_query();
+          }
+          $aggregate = $this->view->query->get_aggregation_info();
+          if (!empty($aggregate[$info['group_type']]['handler'][$type])) {
+            $override = $aggregate[$info['group_type']]['handler'][$type];
+          }
+        }
+
+        $handler = views_get_handler($info['table'], $info['field'], $type, $override);
         if ($handler) {
           $handler->init($this->view, $info);
           $this->handlers[$type][$id] = &$handler;
@@ -771,6 +796,16 @@ class views_plugin_display extends views_plugin {
       'value' => $this->get_option('distinct') ? t('Yes') : t('No'),
       'desc' => t('Display only distinct items, without duplicates.'),
     );
+
+    $this->view->init_query();
+    if ($this->view->query->get_aggregation_info()) {
+      $options['group_by'] = array(
+        'category' => 'advanced',
+        'title' => t('Use grouping'),
+        'value' => $this->get_option('group_by') ? t('Yes') : t('No'),
+        'desc' => t('Allow grouping and aggregation (calculation) of fields.'),
+      );
+    }
 
     $access_plugin = $this->get_access_plugin();
     if (!$access_plugin) {
@@ -1010,6 +1045,15 @@ class views_plugin_display extends views_plugin {
           '#type' => 'checkbox',
           '#title' => t('Distinct'),
           '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
+          '#default_value' => $this->get_option('distinct'),
+        );
+        break;
+      case 'group_by':
+        $form['#title'] .= t('Allow grouping and aggregation (calculation) of fields.');
+        $form['group_by'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Group by'),
+          '#description' => t('If enabled, some fields may become unavailable. All fields that are selected for grouping will be collapsed to one record per distinct value. Other fields which are selected for aggregation will have the function run on them. For example, you can group nodes on title and count the number of nids in order to get a list of duplicate titles.'),
           '#default_value' => $this->get_option('distinct'),
         );
         break;
@@ -1637,6 +1681,9 @@ class views_plugin_display extends views_plugin {
         $this->set_option('use_more_always', intval($form_state['values']['use_more_always']));
         $this->set_option('use_more_text', $form_state['values']['use_more_text']);
       case 'distinct':
+        $this->set_option($section, $form_state['values'][$section]);
+        break;
+      case 'group_by':
         $this->set_option($section, $form_state['values'][$section]);
         break;
       case 'row_plugin':

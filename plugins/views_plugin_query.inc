@@ -50,4 +50,11 @@ class views_plugin_query extends views_plugin {
    * discern where particular queries might be coming from.
    */
   function add_signature(&$view) { }
+
+  /**
+   * Get aggregation info for group by queries.
+   *
+   * If NULL, aggregation is not allowed.
+   */
+  function get_aggregation_info() { }
 }
