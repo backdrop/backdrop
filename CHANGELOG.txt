@@ -59,8 +59,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix aggregateCount test case, this does work now
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
     o by dereine: Fix filter_format_default in exposed_form plugin.
-    
-
+    o #571548 by dagmar: Prevent aliases longer than 63 characters which pgsql cannot handle.  
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
