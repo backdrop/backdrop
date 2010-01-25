@@ -58,6 +58,8 @@ Views 3.x-7.x-dev
     o by dereine: fix notify on views-ui-list-views.tpl.php
     o by dereine: Fix aggregateCount test case, this does work now
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
+    o by dereine: Fix filter_format_default in exposed_form plugin.
+    
 
 
 Views 6.x-3.x-dev
