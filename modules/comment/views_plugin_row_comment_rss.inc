@@ -9,12 +9,14 @@
  * Plugin which formats the comments as RSS items.
  */
 class views_plugin_row_comment_rss extends views_plugin_row {
+   var $base_table = 'comments';
+   var $base_field = 'cid';
 
   function render($row) {
     global $base_url;
 
     // Load the specified comment:
-    $comment = comment_load($row->cid);
+    $comment = comment_load($row->{$this->field_alias});
 
     $item = new stdClass();
     $item->title = $comment->subject;

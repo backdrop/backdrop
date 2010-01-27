@@ -9,6 +9,9 @@
  * Plugin which performs a comment_view on the resulting object.
  */
 class views_plugin_row_comment_view extends views_plugin_row {
+  var $base_table = 'comments';
+  var $base_field = 'cid';
+
   function option_definition() {
     $options = parent::option_definition();
     $options['links'] = array('default' => TRUE);

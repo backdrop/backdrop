@@ -60,7 +60,6 @@ class views_plugin_row_node_rss extends views_plugin_row {
 
     $item_text = '';
 
-    $node->link = url("node/$node->nid", array('absolute' => TRUE));
     $node->rss_namespaces = array();
     $node->rss_elements = array(
       array('key' => 'pubDate', 'value' => gmdate('r', $node->created)),
@@ -86,7 +85,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
 
     $item->description = $item_text;
     $item->title = $node->title[FIELD_LANGUAGE_NONE][0]['value'];
-    $item->link = $node->link;
+    $item->link = url("node/$node->nid", array('absolute' => TRUE));
     $item->elements = $node->rss_elements;
 
 
