@@ -315,9 +315,9 @@ function views_page() {
 }
 
 /**
- * Implement hook_block_list().
+ * Implement hook_block_info().
  */
-function views_block_list() {
+function views_block_info() {
   $items = array();
   $views = views_get_all_views();
   foreach ($views as $view) {
