@@ -66,7 +66,7 @@ class views_plugin_display_page extends views_plugin_display {
 
     $path = implode('/', $bits);
 
-    $access_plugin = $this->get_access_plugin();
+    $access_plugin = $this->get_plugin('access');
 
     if ($path) {
       $items[$path] = array(

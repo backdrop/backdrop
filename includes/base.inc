@@ -76,7 +76,7 @@ class views_object {
    * Unpack options over our existing defaults, drilling down into arrays
    * so that defaults don't get totally blown away.
    */
-  function unpack_options(&$storage, $options, $definition = NULL) {
+  function unpack_options(&$storage, $options, $definition = NULL, $all = TRUE) {
     if (!is_array($options)) {
       return;
     }
@@ -91,12 +91,20 @@ class views_object {
           $storage[$key] = array();
         }
 
-        $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array());
+        // If we're just unpacking our known options, and we're dropping an
+        // unknown array (as might happen for a dependent plugin fields) go
+        // ahead and drop that in.
+        if (!$all && isset($definition[$key]) && !isset($definition[$key]['contains'])) {
+          $storage[$key] = $value;
+          continue;
+        }
+
+        $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all);
       }
       elseif (!empty($definition[$key]['translatable']) && !empty($value)) {
         $storage[$key] = t($value);
       }
-      else {
+      else if ($all || !empty($definition[$key])) {
         $storage[$key] = $value;
       }
     }
@@ -124,5 +132,64 @@ class views_object {
     if (isset($this->query)) {
       unset($this->query);
     }
+  }
+
+  function export_options($indent, $prefix) {
+    $output = '';
+    foreach ($this->option_definition() as $option => $definition) {
+      $output .= $this->export_option($indent, $prefix, $this->options, $option, $definition, array());
+    }
+
+    return $output;
+  }
+
+  function export_option($indent, $prefix, $storage, $option, $definition, $parents) {
+    // Do not export options for which we have no settings.
+    if (!isset($storage[$option])) {
+      return;
+    }
+
+    if (isset($definition['export'])) {
+      if ($definition['export'] === FALSE) {
+        return;
+      }
+
+      // Special handling for some items
+      if (method_exists($this, $definition['export'])) {
+        return $this->{$definition['export']}($indent, $prefix, $storage, $option, $definition, $parents);
+      }
+    }
+
+    // Add the current option to the parents tree.
+    $parents[] = $option;
+    $output = '';
+
+    // If it has child items, export those separately.
+    if (isset($definition['contains'])) {
+      foreach ($definition['contains'] as $sub_option => $sub_definition) {
+        $output .= $this->export_option($indent, $prefix, $storage[$option], $sub_option, $sub_definition, $parents);
+      }
+    }
+    // Otherwise export just this item.
+    else {
+      $default = isset($definition['default']) ? $definition['default'] : NULL;
+      $value = $storage[$option];
+      if (isset($definition['bool'])) {
+        $value = (bool) $value;
+      }
+
+      if ($value !== $default) {
+        $output .= $indent . $prefix . "['" . implode("']['", $parents) . "'] = ";
+        if (isset($definition['bool'])) {
+          $output .= empty($storage[$option]) ? 'FALSE' : 'TRUE';
+        }
+        else {
+          $output .= views_var_export($storage[$option], $indent);
+        }
+
+        $output .= ";\n";
+      }
+    }
+    return $output;
   }
 }

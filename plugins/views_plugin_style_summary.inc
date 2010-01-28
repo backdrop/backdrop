@@ -14,8 +14,8 @@ class views_plugin_style_summary extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['count'] = array('default' => TRUE);
-    $options['override'] = array('default' => FALSE);
+    $options['count'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['override'] = array('default' => FALSE, 'bool' => TRUE);
     $options['items_per_page'] = array('default' => 25);
 
     return $options;

@@ -160,9 +160,14 @@ function views_views_plugins() {
       ),
     ),
     'argument default' => array(
+      'parent' => array(
+        'no ui' => TRUE,
+        'handler' => 'views_plugin_argument_default',
+        'parent' => '',
+      ),
       'fixed' => array(
         'title' => t('Fixed entry'),
-        'handler' => 'views_plugin_argument_default',
+        'handler' => 'views_plugin_argument_default_fixed',
       ),
       'php' => array(
         'title' => t('PHP Code'),

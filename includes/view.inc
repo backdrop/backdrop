@@ -597,7 +597,7 @@ class view extends views_db_object {
     $this->_pre_query();
 
     if ($this->display_handler->uses_exposed()) {
-      $exposed_form = $this->display_handler->get_exposed_form_plugin();
+      $exposed_form = $this->display_handler->get_plugin('exposed_form');
       $this->exposed_widgets = $exposed_form->render_exposed_form();
       if (form_set_error() || !empty($this->build_info['abort'])) {
         $this->built = TRUE;
@@ -720,7 +720,7 @@ class view extends views_db_object {
       $cache = FALSE;
     }
     else {
-      $cache = $this->display_handler->get_cache_plugin();
+      $cache = $this->display_handler->get_plugin('cache');
     }
     if ($cache && $cache->cache_get('results')) {
       debug('Used cached results');
@@ -753,7 +753,7 @@ class view extends views_db_object {
       $this->start_query_capture();
     }
 
-    $exposed_form = $this->display_handler->get_exposed_form_plugin();
+    $exposed_form = $this->display_handler->get_plugin('exposed_form');
     $exposed_form->pre_render();
 
     // Check for already-cached output.
@@ -761,7 +761,7 @@ class view extends views_db_object {
       $cache = FALSE;
     }
     else {
-      $cache = $this->display_handler->get_cache_plugin();
+      $cache = $this->display_handler->get_plugin('cache');
     }
     if ($cache && $cache->cache_get('output')) {
       debug('Used cached output');
@@ -1412,6 +1412,7 @@ class view extends views_db_object {
     $output .= $indent . '$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */' . "\n";
 
     foreach ($this->display as $id => $display) {
+      $output .= $indent . "\n/* Display: $display->display_title */\n";
       $output .= $indent . '$handler = $view->new_display(' . views_var_export($display->display_plugin, $indent) . ', ' . views_var_export($display->display_title, $indent) . ', \'' . $id . "');\n";
       if (empty($display->handler)) {
         // @todo -- probably need a method of exporting broken displays as
@@ -1420,28 +1421,7 @@ class view extends views_db_object {
         continue;
       }
 
-      foreach ($display->handler->option_definition() as $option => $definition) {
-        // Special handling for some items
-        switch ($option) {
-          case 'defaults':
-            // skip these
-            break;
-          default:
-            if (!$display->handler->is_defaulted($option)) {
-              $value = $display->handler->get_option($option);
-              if ($id == 'default') {
-                $default = isset($definition['default']) ? $definition['default'] : NULL;
-              }
-              else {
-                $default = $this->display['default']->handler->get_option($option);
-              }
-
-              if ($value !== $default) {
-                $output .= $indent . '$handler->override_option(\'' . $option . '\', ' . views_var_export($value, $indent) . ");\n";
-              }
-            }
-        }
-      }
+      $output .= $display->handler->export_options($indent, '$handler->options');
     }
 
     return $output;

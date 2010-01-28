@@ -208,6 +208,10 @@ class views_handler extends views_object {
   function option_definition() {
     $options = parent::option_definition();
 
+    $options['id'] = array('default' => '');
+    $options['table'] = array('default' => '');
+    $options['field'] = array('default' => '');
+    $options['relationship'] = array('default' => 'none');
     $options['group_type'] = array('default' => 'group');
 
     return $options;

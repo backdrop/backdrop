@@ -2405,17 +2405,19 @@ function views_ui_config_item_form_submit($form, &$form_state) {
   $form_state['handler']->options_submit($form['options'], $form_state);
   $item = $form_state['handler']->options;
 
-  // Unset a button
-  unset($form_state['values']['options']['expose_button']);
-
-  // Store the data we're given.
-  foreach ($form_state['values']['options'] as $key => $value) {
-    $item[$key] = $value;
-  }
-
+  // Create a new handler and unpack the options from the form onto it. We
+  // can use that for storage.
+  $handler = views_get_handler($item['table'], $item['field'], $form_state['type']);
+  
+  // This unpacks only options that are in the definition, ensuring random
+  // extra stuff on the form is not sent through.
+  $handler->unpack_options($handler->options, $form_state['values']['options'], NULL, FALSE);
+  $handler->options['id'] = $item['id'];
+  $handler->options['table'] = $item['table'];
+  $handler->options['field'] = $item['field'];
+  
   // Store the item back on the view
-  $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
-
+  $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $handler->options);
   if ($form_state['handler'] && $form_state['handler']->needs_style_plugin()) {
     views_ui_add_form_to_stack('change-style', $form_state['view'], $form_state['display_id'], array($form_state['type'], $form_state['id']), TRUE);
   }

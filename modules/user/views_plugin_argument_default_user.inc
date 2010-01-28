@@ -9,20 +9,25 @@
  * Default argument plugin to extract a user via menu_get_object
  */
 class views_plugin_argument_default_user extends views_plugin_argument_default {
-  var $option_name = 'default_argument_user';
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['user'] = array('default' => '');
 
-  function argument_form(&$form, &$form_state) {
-    $form[$this->option_name] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Also look for a node and use the node author'),
-      '#default_value' => !empty($this->argument->options[$this->option_name]),
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array(
-        'radio:options[default_action]' => array('default'),
-        'radio:options[default_argument_type]' => array($this->id)
-      ),
-      '#dependency_count' => 2,
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    $form['user'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Default argument'),
+      '#default_value' => $this->options['user'],
     );
+  }
+
+  function convert_options(&$options) {
+    if (!isset($options['user']) && isset($this->argument->options['default_argument_user'])) {
+      $options['user'] = $this->argument->options['default_argument_user'];
+    }
   }
 
   function get_argument() {
@@ -40,7 +45,7 @@ class views_plugin_argument_default_user extends views_plugin_argument_default {
       }
     }
 
-    if (!empty($this->argument->options[$this->option_name])) {
+    if (!empty($this->options['user'])) {
       foreach (range(1, 3) as $i) {
         $node = menu_get_object('node', $i);
         if (!empty($node)) {
