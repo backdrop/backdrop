@@ -1989,7 +1989,7 @@ class views_plugin_display extends views_plugin {
     }
     $this->view->init_handlers();
     if ($this->uses_exposed()) {
-      $exposed_form = $this->get_exposed_form_plugin();
+      $exposed_form = $this->get_plugin('exposed_form');
       $exposed_form->pre_execute();
     }
   }
