@@ -37,7 +37,7 @@ class views_handler_argument_comment_user_uid extends views_handler_argument {
   function query() {
     $this->ensure_my_table();
 
-    $subselect = db_select('comments', 'c');
+    $subselect = db_select('comment', 'c');
     $subselect->addField('c', 'cid');
     $subselect->condition('uid', $this->argument);
     $subselect->condition('nid', "$this->table_alias.nid");
