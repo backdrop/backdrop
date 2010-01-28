@@ -67,6 +67,7 @@ Views 3.x-7.x-dev
     o #503452: Retool exports to properly use option definition, improving translatability and information use.
     o #539498: "Comments: Node link" did not work at all. Replaced with "Node: Add comment link" which is what that was supposed to do.
     o #664382 by dagmar: "Exclude" option on fields not properly stored.
+    o #664518 by dagmar: "Group by" settings on items not properly retained during editing process.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
