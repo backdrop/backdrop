@@ -147,6 +147,7 @@ class views_handler_field extends views_handler {
     $options = parent::option_definition();
 
     $options['label'] = array('default' => $this->definition['title'], 'translatable' => TRUE);
+    $options['exclude'] = array('default' => FALSE, 'bool' => TRUE);
     $options['alter'] = array(
       'contains' => array(
         'alter_text' => array('default' => FALSE),
