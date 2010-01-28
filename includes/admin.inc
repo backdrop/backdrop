@@ -390,6 +390,7 @@ function views_ui_preview($js, $view) {
   if ($errors === TRUE) {
     $view->ajax = $js;
     $view->live_preview = TRUE;
+    $view->set_exposed_input($_POST);
 
     // Store the current view URL for later use:
     $view->set_display($form_state['display_id']);
@@ -471,7 +472,6 @@ function views_ui_preview($js, $view) {
     return $output;
   }
   else {
-    views_include('ajax');
     $commands = array();
     if (!empty($view->js_settings)) {
       $commands[] = ajax_command_settings($view->js_settings);
@@ -482,7 +482,7 @@ function views_ui_preview($js, $view) {
     }
     $display .= $output;
     if ($display) {
-      $commands[] = views_ajax_command_set_form($display, $view->get_title());
+      $commands[] = ajax_command_html('div#views-live-preview', $display);
     }
     ajax_render($commands);
   }
@@ -1596,7 +1596,6 @@ function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FAL
  */
 function views_ui_ajax_form($js, $key, $view, $display_id) {
   $form = views_ui_ajax_forms($key);
-  $js = $js == 'ajax';
   if (empty($form)) {
     return drupal_not_found();
   }
@@ -1642,6 +1641,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
       $output = array();
       $output[] = views_ajax_command_enable_buttons();
       $output[] = views_ajax_command_dismiss_form();
+      $output[] = views_ajax_command_trigger_preview();
     }
     views_ui_regenerate_tabs($view, $output);
   }
@@ -1659,7 +1659,7 @@ function views_ui_add_display($js, $view) {
   views_include('ajax');
   $form_state = array(
     'view' => &$view,
-    'ajax' => $js == 'ajax',
+    'ajax' => $js,
   );
 
   $output = views_ajax_form_wrapper('views_ui_add_display_form', $form_state);
@@ -1804,7 +1804,7 @@ function views_ui_analyze_view($js, $view) {
 
   $output = views_ajax_form_wrapper('views_ui_analyze_view_form', $form_state);
 
-  if ($js == 'ajax') {
+  if ($js) {
     // If we don't have an output object, it was submitted. Set up the submission.
     if (empty($output)) {
       return views_ui_regenerate_tabs($view);

@@ -115,17 +115,34 @@ function views_ui_menu() {
     'page arguments' => array(4),
     'type' => MENU_LOCAL_TASK
   );
-  foreach (array('analyze' => 'views_ui_analyze_view', 'details' => 'views_ui_edit_details', 'add-display' => 'views_ui_add_display', 'preview' => 'views_ui_preview', '%' => 'views_ui_ajax_form') as $menu => $menu_callback) {
+  $ajax_callbacks = array(
+    'analyze' => 'views_ui_analyze_view',
+    'details' => 'views_ui_edit_details',
+    'add-display' => 'views_ui_add_display',
+    'preview' => 'views_ui_preview',
+  );
+
+  foreach ($ajax_callbacks as $menu => $menu_callback) {
     $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache'] = $callback + array(
       'page callback' => $menu_callback,
-      'page arguments' => array('nojs', 5),
+      'page arguments' => array(FALSE, 5),
     );
     $items['admin/structure/views/ajax/' . $menu . '/%views_ui_cache'] = $callback + array(
       'page callback' => $menu_callback,
-      'page arguments' => array('ajax', 5),
+      'page arguments' => array(TRUE, 5),
       'delivery callback' => 'views_ui_ajax_deliver',
     );
   }
+
+  $items['admin/structure/views/nojs/%/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_ajax_form',
+    'page arguments' => array(FALSE, 4, 5),
+  );
+  $items['admin/structure/views/ajax/%/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_ajax_form',
+    'page arguments' => array(TRUE, 4, 5),
+    'delivery callback' => 'views_ui_ajax_deliver',
+  );
 
   // autocompletes for handlers and such
   $items['admin/views/ajax/autocomplete/tag'] = $callback + array(
@@ -134,9 +151,6 @@ function views_ui_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/admin.inc',
   );
-
-  $items['admin/structure/views/ajax/%/%views_ui_cache']['page arguments'] =
-  $items['admin/structure/views/nojs/%/%views_ui_cache']['page arguments'] = array(3, 4, 5);
 
   return $items;
 }
@@ -318,7 +332,7 @@ function views_ui_ajax_deliver($page_callback_result) {
   }
   elseif (is_array($page_callback_result) && isset($page_callback_result['#type']) && ($page_callback_result['#type'] == 'ajax_commands')) {
     // Complex AJAX callbacks can return a result that contains a specific
-    // set of commands to send to the browser. 
+    // set of commands to send to the browser.
     if (isset($page_callback_result['#ajax_commands'])) {
       $commands = $page_callback_result['#ajax_commands'];
     }

@@ -62,6 +62,7 @@ Views 3.x-7.x-dev
     o #571548 by dagmar: Prevent aliases longer than 63 characters which pgsql cannot handle.
     o #696400 by jenlampton: Use hook_block_info() instead of hook_block_list().
     o #629984 by dagmar: Ensure that row styles are relationship safe and add fields they need to the query, such as nids and cids.
+    o #628132: Live preview works again.
     o #697354 by dereine: make comment row plugin working.
 
 Views 6.x-3.x-dev

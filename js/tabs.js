@@ -171,7 +171,7 @@
         this.$containers.addClass(o.hideClass);
         $lis.removeClass(o.selectedClass);
         if (!o.unselected) {
-          this.$containers.slice(o.initial, o.initial + 1).show();
+          this.$containers.slice(o.initial, o.initial + 1).css('display', 'block');
           $lis.slice(o.initial, o.initial + 1).addClass(o.selectedClass);
         }
 

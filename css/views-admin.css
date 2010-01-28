@@ -580,15 +580,14 @@ form#views-ui-preview-form,
   padding: .5em;
 }
 
-form#views-ui-preview-form div#preview-display-id-wrapper,
-form#views-ui-preview-form div#preview-args-wrapper {
+form#views-ui-preview-form div.form-item {
   float: left;
   margin: 0;
   padding: 0 1em 0 0;
 }
 
 form#views-ui-preview-form input#preview-submit {
-  margin: 1.7em 0 0 0;
+  margin: 1em 0 0 0;
 }
 
 .view-locked {

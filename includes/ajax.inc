@@ -172,6 +172,19 @@ function views_ajax_command_enable_buttons() {
 }
 
 /**
+ * Trigger the Views live preview.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_trigger_preview() {
+  $command = array(
+    'command' => 'viewsTriggerPreview',
+  );
+  return $command;
+}
+
+/**
  * Return an AJAX error.
  */
 function views_ajax_error($message) {
