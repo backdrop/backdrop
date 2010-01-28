@@ -2105,9 +2105,12 @@ class views_plugin_display extends views_plugin {
         return;
       }
       $this->view->init_handlers();
-      return array(
-        'content' => $this->view->render_exposed_form(TRUE),
-      );
+      if ($this->uses_exposed()) {
+        $exposed_form = $this->get_plugin('exposed_form');
+        return array(
+          'content' => $exposed_form->render_exposed_form(TRUE),
+        );
+      }
     }
   }
 
