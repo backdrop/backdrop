@@ -137,7 +137,7 @@ class views_plugin_row extends views_plugin {
         'view' => $this->view,
         'options' => $this->options,
         'row' => $row,
-        'field_alias' => $this->field_alias
+        'field_alias' => isset($this->field_alias) ? $this->field_alias : '',
       ));
   }
 }

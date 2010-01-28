@@ -9,15 +9,12 @@ class views_handler_field_comment_node_link extends views_handler_field {
 
     // Add the node fields that comment_link will need..
     $this->additional_fields['nid'] = array(
-      'table' => 'node',
       'field' => 'nid',
     );
     $this->additional_fields['type'] = array(
-      'table' => 'node',
       'field' => 'type',
     );
     $this->additional_fields['comment'] = array(
-      'table' => 'node',
       'field' => 'comment',
     );
   }
@@ -53,14 +50,13 @@ class views_handler_field_comment_node_link extends views_handler_field {
     $node->comment  = $values->{$this->aliases['comment']};
 
     // Call comment.module's hook_link: comment_link($type, $node = NULL, $teaser = FALSE)
-    $links = comment_link('node', $node, $this->options['teaser']);
+    // Call node by reference so that something is changed here
+    comment_node_view(&$node, $this->options['teaser'] ? 'teaser' : 'full');
     // question: should we run these through:    drupal_alter('link', $links, $node);
     // might this have unexpected consequences if these hooks expect items in $node that we don't have?
 
-    return !empty($links) ? theme('links', array(
-      'links' => $links,
-      'attributes' => array('class' => 'links inline')))
-      : '';
+    // Only render the links, if they are defined.
+    return !empty($node->content['links']['comment']) ? drupal_render($node->content['links']['comment']) : '';
   }
 }
 
