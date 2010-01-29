@@ -43,6 +43,13 @@ class views_plugin_exposed_form extends views_plugin {
       '#description' => t('Text to display in the submit button of the exposed form.'),
       '#default_value' => $this->options['submit_button'],
     );
+    
+    $form['reset_button'] = array (
+      '#type' => 'checkbox',
+      '#title' => t('Include reset button'),
+      '#description' => t('If checked the exposed form will provide a button to reset all the applied exposed filters'),
+      '#default_value' => $this->options['reset_button'],
+    );
   }
 
   /**
@@ -93,7 +100,14 @@ class views_plugin_exposed_form extends views_plugin {
 
   function post_execute() { }
 
-  function exposed_form_alter(&$form, &$form_state) { }
+  function exposed_form_alter(&$form, &$form_state) {
+    if (!empty($this->options['reset_button'])) {
+      $form['reset'] = array(
+        '#value' => t('Reset'),
+        '#type' => 'submit',
+      );
+    }
+  }
   
   function exposed_form_validate(&$form, &$form_state) { }
   
@@ -108,5 +122,15 @@ class views_plugin_exposed_form extends views_plugin {
   *   Nested array of keys to exclude of insert into 
   *   $view->exposed_raw_input
   */ 
-  function exposed_form_submit(&$form, &$form_state, &$exclude) { }
+  function exposed_form_submit(&$form, &$form_state, &$exclude) {
+    if (isset($form_state['values']['op']) && $form_state['values']['op'] == t('Reset')) {
+      $this->reset_form($form, $form_state);
+    }
+  }
+   
+  function reset_form(&$form, &$form_state) {
+    unset($_SESSION['views'][$this->view->name][$this->view->current_display]);
+    $form_state = array();
+    $form_state['values'] = array();
+  }
 }

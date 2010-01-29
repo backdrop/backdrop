@@ -75,6 +75,7 @@ Views 3.x-7.x-dev
     o #329044 by gordon: Check to see if access plugin exists before using to prevent whitescreens.
     o #662174: handlers with an 'extra form' or other option data that was not in the main form could lose that data.
     o #646236 by dagmar: User validate plugin did not properly save values.
+    o #99370 by dagmar: Allow a "reset" button as part of the exposed filters.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
