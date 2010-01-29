@@ -15,6 +15,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $options['type'] = array('default' => 'textfield');
     $options['limit'] = array('default' => TRUE);
     $options['vid'] = array('default' => 0);
+    $options['hierarchy'] = array('default' => 0);
 
     return $options;
   }

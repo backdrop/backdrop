@@ -2408,15 +2408,16 @@ function views_ui_config_item_form_submit($form, &$form_state) {
   // Create a new handler and unpack the options from the form onto it. We
   // can use that for storage.
   $handler = views_get_handler($item['table'], $item['field'], $form_state['type']);
-  
+
+
+  // Add the incoming options to existing options because items using
+  // the extra form may not have everything in the form here.
+  $options = $form_state['values']['options'] + $form_state['handler']->options;
+ 
   // This unpacks only options that are in the definition, ensuring random
   // extra stuff on the form is not sent through.
-  $handler->unpack_options($handler->options, $form_state['values']['options'], NULL, FALSE);
-  $handler->options['id'] = $item['id'];
-  $handler->options['table'] = $item['table'];
-  $handler->options['field'] = $item['field'];
-  $handler->options['group_type'] = $item['group_type'];
-  
+  $handler->unpack_options($handler->options, $options, NULL, FALSE);
+
   // Store the item back on the view
   $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $handler->options);
   if ($form_state['handler'] && $form_state['handler']->needs_style_plugin()) {

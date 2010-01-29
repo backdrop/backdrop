@@ -84,9 +84,13 @@ class views_object {
     if (!isset($definition)) {
       $definition = $this->option_definition();
     }
-
     foreach ($options as $key => $value) {
       if (is_array($value)) {
+        // Ignore arrays with no definition.
+        if (!$all && empty($definition[$key])) {
+          continue;
+        }
+
         if (!isset($storage[$key]) || !is_array($storage[$key])) {
           $storage[$key] = array();
         }
