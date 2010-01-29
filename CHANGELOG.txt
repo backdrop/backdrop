@@ -70,6 +70,8 @@ Views 3.x-7.x-dev
     o #664518 by dagmar: "Group by" settings on items not properly retained during editing process.
     o #645150 by dagmar: Incorrect call to deprecated get_exposed_form_plugin() function fixed.
     o #639094 by dagmar: Exposed forms not working with blocks after exposed plugins.
+    o #635966 by dagmar: Allow the exposed form plugin to actually control the exposed form.
+    o #664492 by dagmar: "Group by" settings not properly stored due to typo.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
