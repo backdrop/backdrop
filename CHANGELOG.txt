@@ -72,6 +72,7 @@ Views 3.x-7.x-dev
     o #639094 by dagmar: Exposed forms not working with blocks after exposed plugins.
     o #635966 by dagmar: Allow the exposed form plugin to actually control the exposed form.
     o #664492 by dagmar: "Group by" settings not properly stored due to typo.
+    o #329044 by gordon: Check to see if access plugin exists before using to prevent whitescreens.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
