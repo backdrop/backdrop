@@ -1009,6 +1009,9 @@ function views_exposed_form($form, &$form_state) {
   }
   views_add_js('dependent');
 
+  $exposed_form_plugin = $form_state['exposed_form_plugin'];
+  $exposed_form_plugin->exposed_form_alter($form, $form_state);
+
   // Save the form
   views_exposed_form_cache($view->name, $view->current_display, $form);
 
@@ -1025,6 +1028,8 @@ function views_exposed_form_validate(&$form, &$form_state) {
       $handlers[$key]->exposed_validate($form, $form_state);
     }
   }
+  $exposed_form_plugin = $form_state['exposed_form_plugin'];
+  $exposed_form_plugin->exposed_form_validate($form, $form_state);
 }
 
 /**
@@ -1040,8 +1045,13 @@ function views_exposed_form_submit(&$form, &$form_state) {
   $form_state['view']->exposed_data = $form_state['values'];
   $form_state['view']->exposed_raw_input = array();
 
+
+  $exclude = array('q', 'submit', 'form_build_id', 'form_id', 'form_token', 'submit_button', 'exposed_form_plugin', '');
+  $exposed_form_plugin = $form_state['exposed_form_plugin'];
+  $exposed_form_plugin->exposed_form_submit($form, $form_state, $exclude);
+
   foreach ($form_state['values'] as $key => $value) {
-    if (!in_array($key, array('q', 'submit', 'form_build_id', 'form_id', 'form_token', ''))) {
+    if (!in_array($key, $exclude)) {
       $form_state['view']->exposed_raw_input[$key] = $value;
     }
   }

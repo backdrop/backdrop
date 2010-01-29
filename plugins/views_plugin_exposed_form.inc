@@ -74,6 +74,7 @@ class views_plugin_exposed_form extends views_plugin {
       $form_state['ajax'] = TRUE;
     }
 
+    $form_state['exposed_form_plugin'] = $this;
     $output = drupal_render(drupal_build_form('views_exposed_form', $form_state));
     if (!empty($form_state['js settings'])) {
       $this->view->js_settings = $form_state['js settings'];
@@ -91,4 +92,21 @@ class views_plugin_exposed_form extends views_plugin {
   function pre_execute() { }
 
   function post_execute() { }
+
+  function exposed_form_alter(&$form, &$form_state) { }
+  
+  function exposed_form_validate(&$form, &$form_state) { }
+  
+  /**
+  * This function is executed when exposed form is submited.
+  *
+  * @param $form
+  *   Nested array of form elements that comprise the form.
+  * @param $form_state
+  *   A keyed array containing the current state of the form.
+  * @param $exclude
+  *   Nested array of keys to exclude of insert into 
+  *   $view->exposed_raw_input
+  */ 
+  function exposed_form_submit(&$form, &$form_state, &$exclude) { }
 }
