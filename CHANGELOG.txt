@@ -77,6 +77,7 @@ Views 3.x-7.x-dev
     o #646236 by dagmar: User validate plugin did not properly save values.
     o #99370 by dagmar: Allow a "reset" button as part of the exposed filters.
     o #627402 by dereine: Aggregator description needed more controllable input filtering.
+    o #699200 by xgretsch: Non-static functions cause strict warning messages.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
