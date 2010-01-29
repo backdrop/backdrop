@@ -98,7 +98,7 @@ function aggregator_views_data() {
     'help' => t('The actual content of the imported item.'),
      // Information for displaying a title as a field
     'field' => array(
-      'handler' => 'views_handler_field_xss',
+      'handler' => 'views_handler_field_aggregator_item_description',
       'click sortable' => FALSE,
      ),
     // Information for accepting a title as a filter
@@ -334,6 +334,7 @@ function aggregator_views_handlers() {
     // field handlers
     'views_handler_field_aggregator_title_link',
     'views_handler_field_aggregator_category',
+    'views_handler_field_aggregator_item_description',
 
     // argument handlers
     'views_handler_argument_aggregator_fid',
