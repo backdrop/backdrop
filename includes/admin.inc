@@ -3200,3 +3200,4 @@ function theme_views_ui_style_plugin_table($variables) {
   $output .= drupal_render_children($form);
   return $output;
 }
+
