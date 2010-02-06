@@ -2,6 +2,8 @@
 // $Id$
 /**
  * Filter for new content
+ *
+ * The handler is named history_user, because of compability reasons, the table is history.
  */
 class views_handler_filter_history_user_timestamp extends views_handler_filter {
   // Don't display empty space where the operator would be.

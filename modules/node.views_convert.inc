@@ -119,7 +119,7 @@ function node_views_convert($display, $type, &$view, $field, $id = NULL) {
         case 'history':
           switch ($field['field']) {
             case 'timestamp':
-              $view->set_item_option($display, 'filter', $id, 'table', 'history_user');
+              $view->set_item_option($display, 'filter', $id, 'table', 'history');
               break;
           }
           break;
