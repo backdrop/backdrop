@@ -1058,6 +1058,14 @@ class views_plugin_query_default extends views_plugin_query {
    * Builds the necessary info to execute the query.
    */
   function build(&$view) {
+    $this->init_pager($view);
+    if ($this->pager->use_pager()) {
+      $this->pager->set_current_page($view->current_page);
+    }
+
+    // Let the pager modify the query to add limits.
+    $this->pager->query();
+
     $view->build_info['query'] = $this->query();
     $view->build_info['count_query'] = $this->query(TRUE);
   }
@@ -1067,7 +1075,7 @@ class views_plugin_query_default extends views_plugin_query {
    * values.
    *
    * Values to set: $view->result, $view->total_rows, $view->execute_time,
-   * $view->pager['current_page'].
+   * $view->current_page.
    */
   function execute(&$view) {
     $external = FALSE; // Whether this query will run against an external database.
@@ -1079,6 +1087,9 @@ class views_plugin_query_default extends views_plugin_query {
       $additional_arguments = module_invoke_all('views_query_substitutions', $view);
       // We have already build a working count query. Views optimeses it automatically.
       //$count_query = $count_query->countQuery();
+
+      // against strict problems
+      $args = array();
 
       // Add additional arguments as a fake condition.
       // XXX: this doesn't work... because PDO mandates that all bound arguments
@@ -1095,39 +1106,19 @@ class views_plugin_query_default extends views_plugin_query {
       }
 
       $start = microtime(TRUE);
-      if (!empty($view->pager['items_per_page'])) {
-        // We no longer use pager_query() here because pager_query() does not
-        // support an offset. This is fine as we don't actually need pager
-        // query; we've already been doing most of what it does, and we
-        // just need to do a little more playing with globals.
-        if (!empty($view->pager['use_pager']) || !empty($view->get_total_rows)) {
-          $view->total_rows = $count_query->execute()->fetchField() - $view->pager['offset'];
-        }
 
-        if (!empty($view->pager['use_pager'])) {
-          // Dump information about what we already know into the globals.
-          global $pager_page_array, $pager_total, $pager_total_items;
-          // Set the item count for the pager.
-          $pager_total_items[$view->pager['element']] = $view->total_rows;
-          // Calculate and set the count of available pages.
-          $pager_total[$view->pager['element']] = ceil($pager_total_items[$view->pager['element']] / $view->pager['items_per_page']);
+      if ($this->pager->use_count_query() || !empty($view->get_total_rows)) {
+        $this->pager->execute_count_query($count_query, $args);
+      }
 
-          // What page was requested:
-          $pager_page_array = isset($_GET['page']) ? explode(',', $_GET['page']) : array();
+      // Let the pager modify the query to add limits.
+      $this->pager->pre_execute($query, $args);
 
-          // If the requested page was within range. $view->pager['current_page']
-          // defaults to 0 so we don't need to set it in an out-of-range condition.
-          if (!empty($pager_page_array[$view->pager['element']])) {
-            $page = intval($pager_page_array[$view->pager['element']]);
-            if ($page > 0 && $page < $pager_total[$view->pager['element']]) {
-              $view->pager['current_page'] = $page;
-            }
-          }
-          $pager_page_array[$view->pager['element']] = $view->pager['current_page'];
-        }
-
-        $offset = $view->pager['current_page'] * $view->pager['items_per_page'] + $view->pager['offset'];
-        $query->range($offset, $view->pager['items_per_page']);
+      if (!empty($this->limit) || !empty($this->offset)) {
+        // We can't have an offset without a limit, so provide a very large limit instead.
+        $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+        $offset = intval(!empty($this->offset) ? $this->offset : 0);
+        $query->range($offset, $limit);
       }
 
       try {
@@ -1138,10 +1129,10 @@ class views_plugin_query_default extends views_plugin_query {
           $view->result[] = $item;
         }
 
-        // If we already know how many items we have even if we did not run the
-        // count query, go ahead and set that value:
-        if (empty($this->pager['items_per_page'])) {
-          $this->total_rows = count($view->result);
+        $this->pager->post_execute($view->result);
+
+        if ($this->pager->use_pager()) {
+          $view->total_rows = $this->pager->get_total_items();
         }
       }
       catch (Exception $e) {

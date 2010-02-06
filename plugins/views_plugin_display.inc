@@ -41,6 +41,44 @@ class views_plugin_display extends views_plugin {
     }
 
     $this->unpack_options($this->options, $options);
+
+    // Translate changed settings:
+    // Check if any of the previous values now managed by
+    // pluggable pagers have been changed. 
+    // If yes, perform the conversion
+    $items_per_page = $this->get_option('items_per_page');
+    $offset = $this->get_option('offset');
+    $type = $this->get_option('use_pager');
+    if ((!empty($items_per_page) && $items_per_page != 10) || !empty($offset) || !empty($type)) {
+      if (!$type) {
+        $type = $items_per_page ? 'some' : 'none';
+      }
+
+      if ($type == 1) {
+        $type = 'full';
+      }
+
+      $pager = array(
+        'type' => $type,
+        'options' => array(
+          'offset' => $offset
+        ),
+      );
+
+      if ($items_per_page) {
+        $pager['options']['items_per_page'] = $items_per_page;
+      }
+      if ($id = $this->get_option('pager_element')) {
+        $pager['options']['id'] = $id;
+      }
+
+      // Unset the previous options
+      // After edit and save the view they will be erased
+      $this->set_option('items_per_page', NULL);
+      $this->set_option('offset', NULL);
+      $this->set_option('use_pager', NULL);
+      $this->set_option('pager', $pager);
+    }
   }
 
   function destroy() {
@@ -113,17 +151,10 @@ class views_plugin_display extends views_plugin {
    * Does the display have a pager enabled?
    */
   function use_pager() {
-    if (!empty($this->definition['use pager'])) {
-      return $this->get_option('use_pager');
+    $pager = $this->get_plugin('pager');
+    if ($pager) {
+      return $pager->use_pager();
     }
-    return FALSE;
-  }
-
-  /**
-   * Does the display render the pager if it has it enabled?
-   */
-  function render_pager() {
-    return $this->use_pager();
   }
 
   /**
@@ -189,7 +220,7 @@ class views_plugin_display extends views_plugin {
       'empty' => array('empty', 'empty_format'),
       'use_ajax' => array('use_ajax'),
       'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
-      'use_pager' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
+      'pager' => array('pager'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
       'distinct' => array('distinct'),
@@ -261,9 +292,9 @@ class views_plugin_display extends views_plugin {
 
           'use_ajax' => TRUE,
           'items_per_page' => TRUE,
-          'offset' => TRUE,
           'use_pager' => TRUE,
-          'pager_element'  => TRUE,
+          'offset' => TRUE,
+          'pager' => TRUE,
           'use_more' => TRUE,
           'use_more_always' => TRUE,
           'use_more_text' => TRUE,
@@ -333,9 +364,6 @@ class views_plugin_display extends views_plugin {
         'default' => FALSE,
         'bool' => TRUE,
       ),
-      'pager_element' => array(
-        'default' => 0,
-      ),
       'use_more' => array(
         'default' => FALSE,
         'bool' => TRUE,
@@ -381,6 +409,12 @@ class views_plugin_display extends views_plugin {
       'exposed_form' => array(
         'contains' => array(
           'type' => array('default' => 'basic', 'export' => 'export_plugin'),
+          'options' => array('default' => array(), 'export' => FALSE),
+         ),
+      ),
+      'pager' => array(
+        'contains' => array(
+          'type' => array('default' => 'none', 'export' => 'export_plugin'),
           'options' => array('default' => array(), 'export' => FALSE),
          ),
       ),
@@ -544,35 +578,42 @@ class views_plugin_display extends views_plugin {
    * Get the display or row plugin, if it exists.
    */
   function get_plugin($type = 'style', $name = NULL) {
-    switch ($type) {
-      case 'style':
-      case 'row':
-        $option_name = $type . '_plugin';
-        $options = $this->get_option($type . '_options');
-        if (!$name) {
-          $name = $this->get_option($option_name);
-        }
+    static $cache = array();
+    if (!isset($cache[$type][$name])) {
+      switch ($type) {
+        case 'style':
+        case 'row':
+          $option_name = $type . '_plugin';
+          $options = $this->get_option($type . '_options');
+          if (!$name) {
+            $name = $this->get_option($option_name);
+          }
 
-        break;
-      default:
-        $option_name = $type;
-        $options = $this->get_option($type);
-        if (!$name) {
-          $name = $options['type'];
-        }
+          break;
+        default:
+          $option_name = $type;
+          $options = $this->get_option($type);
+          if (!$name) {
+            $name = $options['type'];
+          }
 
-        // access & cache store their options as siblings with the
-        // type; all others use an 'options' array.
-        if ($type != 'access' && $type != 'cache') {
-          $options = $options['options'];
-        }
-    }
+          // access & cache store their options as siblings with the
+          // type; all others use an 'options' array.
+          if ($type != 'access' && $type != 'cache') {
+            $options = $options['options'];
+          }
+      }
 
-    $plugin = views_get_plugin($type, $name);
-    if ($plugin) {
+      $plugin = views_get_plugin($type, $name);
+      if (!$plugin) {
+        return;
+      }
+
       $plugin->init($this->view, $this->display, $options);
-      return $plugin;
+      $cache[$type][$name] = $plugin;
     }
+
+    return $cache[$type][$name];
   }
 
   /**
@@ -765,21 +806,26 @@ class views_plugin_display extends views_plugin {
     }
 
     if (!empty($this->definition['use pager'])) {
-      $options['use_pager'] = array(
+
+      $pager_plugin = $this->get_plugin('pager');
+      if (!$pager_plugin) {
+        // default to the no pager plugin.
+        $pager_plugin = views_get_plugin('pager', 'none');
+      }
+
+      $pager_str = $pager_plugin->summary_title();
+
+      $options['pager'] = array(
         'category' => 'basic',
         'title' => t('Use pager'),
-        'value' => $this->get_option('use_pager') ? ($this->get_option('use_pager') === 'mini' ? t('Mini') : t('Yes')) : t('No'),
+        'value' => $pager_str,
         'desc' => t("Change this display's pager setting."),
       );
     }
 
-    $items = intval($this->get_option('items_per_page'));
-    $options['items_per_page'] = array(
-      'category' => 'basic',
-      'title' => $this->use_pager() ? t('Items per page') : t('Items to display'),
-      'value' => $items ? $items : t('Unlimited'),
-      'desc' => t('Change how many items to display.'),
-    );
+    if (!empty($pager_plugin->definition['uses options'])) {
+      $options['pager']['links']['pager_options'] = t('Change settings for this pager type.');
+    }
 
     if (!empty($this->definition['use more'])) {
       $options['use_more'] = array(
@@ -843,6 +889,10 @@ class views_plugin_display extends views_plugin {
 
     if (!empty($cache_plugin->definition['uses options'])) {
       $options['cache']['links']['cache_options'] = t('Change settings for this caching type.');
+    }
+
+    if (!empty($access_plugin->definition['uses options'])) {
+      $options['access']['links']['access_options'] = t('Change settings for this access type.');
     }
 
     if ($this->uses_link_display()) {
@@ -986,35 +1036,6 @@ class views_plugin_display extends views_plugin {
           '#type' => 'radios',
           '#options' => array(1 => t('Yes'), 0 => t('No')),
           '#default_value' => $this->get_option('use_ajax') ? 1 : 0,
-        );
-        break;
-      case 'use_pager':
-        $form['#title'] .= t('Use a pager for this view');
-        $form['use_pager'] = array(
-          '#type' => 'radios',
-          '#options' => array(TRUE => t('Full pager'), 'mini' => t('Mini pager'), 0 => t('No')),
-          '#default_value' => $this->get_option('use_pager'),
-        );
-        $form['pager_element'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Pager element'),
-          '#description' => t("Unless you're experiencing problems with pagers related to this view, you should leave this at 0. If using multiple pagers on one page you may need to set this number to a higher value so as not to conflict within the ?page= array. Large values will add a lot of commas to your URLs, so avoid if possible."),
-          '#default_value' => intval($this->get_option('pager_element')),
-        );
-        break;
-      case 'items_per_page':
-        $form['#title'] .= $this->use_pager() ? t('Items per page') : t('Items to display');
-
-        $form['items_per_page'] = array(
-          '#type' => 'textfield',
-          '#description' => t('The number of items to display per page. Enter 0 for no limit.'),
-          '#default_value' => intval($this->get_option('items_per_page')),
-        );
-        $form['offset'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Offset'),
-          '#description' => t('The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed. Offset can not be used if items to display is 0; instead use a very large number there.'),
-          '#default_value' => intval($this->get_option('offset')),
         );
         break;
       case 'use_more':
@@ -1513,7 +1534,45 @@ class views_plugin_display extends views_plugin {
           $plugin->options_form($form['exposed_form_options'], $form_state);
         }
         break;
+      case 'pager':
+        $form['#title'] .= t('Select which pager, if any, to use for this view');
+        $form['pager'] = array(
+          '#prefix' => '<div class="clear-block">',
+          '#suffix' => '</div>',
+          '#tree' => TRUE,
+        );
+
+        $pager = $this->get_option('pager');
+        $form['pager']['type'] =  array(
+          '#type' => 'radios',
+          '#options' => views_fetch_plugin_names('pager'),
+          '#default_value' => $pager['type'],
+        );
+
+        $pager_plugin = views_fetch_plugin_data('pager', $pager['type']);
+        if (!empty($pager_plugin['uses options'])) {
+          $form['markup'] = array(
+            '#prefix' => '<div class="form-item description">',
+            '#suffix' => '</div>',
+            '#value' => t('You may also adjust the !settings for the currently selected pager by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'pager_options'))),
+          );
+        }
+
+        break;
+      case 'pager_options':
+        $plugin = $this->get_plugin('pager');
+        $form['#title'] .= t('Pager options');
+        if ($plugin) {
+          $form['#help_topic'] = $plugin->definition['help topic'];
+
+          $form['pager_options'] = array(
+            '#tree' => TRUE,
+          );
+          $plugin->options_form($form['pager_options'], $form_state);
+        }
+        break;
     }
+
   }
 
   /**
@@ -1594,6 +1653,12 @@ class views_plugin_display extends views_plugin {
           $plugin->options_validate($form['exposed_form_options'], $form_state);
         }
         break;
+      case 'pager_options':
+        $plugin = $this->get_plugin('pager');
+        if ($plugin) {
+          $plugin->options_validate($form['pager_options'], $form_state);
+        }
+        break;
     }
   }
 
@@ -1663,17 +1728,6 @@ class views_plugin_display extends views_plugin {
       case 'title':
       case 'link_display':
         $this->set_option($section, $form_state['values'][$section]);
-        break;
-      case 'use_ajax':
-        $this->set_option($section, (bool)$form_state['values'][$section]);
-        break;
-      case 'use_pager':
-        $this->set_option($section, $form_state['values'][$section]);
-        $this->set_option('pager_element', intval($form_state['values']['pager_element']));
-        break;
-      case 'items_per_page':
-        $this->set_option($section, intval($form_state['values'][$section]));
-        $this->set_option('offset', intval($form_state['values']['offset']));
         break;
       case 'use_more':
         $this->set_option($section, intval($form_state['values'][$section]));
@@ -1759,6 +1813,33 @@ class views_plugin_display extends views_plugin {
           $plugin->options_submit($form['exposed_form_options'], $form_state);
           $exposed_form['options'] = $form_state['values'][$section];
           $this->set_option('exposed_form', $exposed_form);
+        }
+        break;
+      case 'pager':
+        $pager = $this->get_option('pager');
+        if ($pager['type'] != $form_state['values']['pager']['type']) {
+          $plugin = views_get_plugin('pager', $form_state['values']['pager']['type']);
+          if ($plugin) {
+            // Because pagers have very similar options, let's allow pagers to
+            // try to carry the options over.
+            $plugin->init($this->view, $this->display, $pager['options']);
+
+            $pager = array('type' => $form_state['values']['pager']['type'], 'options' => $plugin->options);
+            $this->set_option('pager', $pager);
+            if (!empty($plugin->definition['uses options'])) {
+              views_ui_add_form_to_stack('display', $this->view, $this->display->id, array('pager_options'));
+            }
+          }
+        }
+
+        break;
+      case 'pager_options':
+        $plugin = $this->get_plugin('pager');
+        if ($plugin) {
+          $pager = $this->get_option('pager');
+          $plugin->options_submit($form['pager_options'], $form_state);
+          $pager['options'] = $form_state['values'][$section];
+          $this->set_option('pager', $pager);
         }
         break;
     }
@@ -1868,7 +1949,7 @@ class views_plugin_display extends views_plugin {
    * Render the 'more' link
    */
   function render_more_link() {
-    if ($this->use_more() && ($this->view->total_rows > $this->view->pager['items_per_page'] || $this->use_more_always())) {
+    if ($this->use_more() && ($this->use_more_always() || $this->view->query->pager->has_more_records())) {
       $path = $this->get_path();
       if ($path) {
         $path = $this->view->get_url(NULL, $path);
@@ -1979,11 +2060,6 @@ class views_plugin_display extends views_plugin {
    */
   function pre_execute() {
     $this->view->set_use_ajax($this->use_ajax());
-    // Copy pager information from the display.
-    $this->view->set_use_pager($this->use_pager());
-    $this->view->set_pager_element($this->get_option('pager_element'));
-    $this->view->set_items_per_page($this->get_option('items_per_page'));
-    $this->view->set_offset($this->get_option('offset'));
     if ($this->use_more()) {
       $this->view->get_total_rows = TRUE;
     }

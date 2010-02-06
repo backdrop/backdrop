@@ -32,14 +32,8 @@ class view extends views_db_object {
   // Where the results of a query will go.
   var $result = array();
 
-  // pager variables
-  var $pager = array(
-    'use_pager' => FALSE,
-    'items_per_page' => 10,
-    'element' => 0,
-    'offset' => 0,
-    'current_page' => 0,
-  );
+  // May be used to override the current page number.
+  var $current_page = NULL;
 
   // Places to put attached renderings:
   var $attachment_before = '';
@@ -94,42 +88,37 @@ class view extends views_db_object {
   }
 
   /**
-   * Set the page size for ranged or pager queries
+   * Change/Set the current page for the pager.
    */
-  function set_items_per_page($items_per_page) {
-    $this->pager['items_per_page'] = $items_per_page;
-    if (empty($items_per_page)) {
-      $this->pager['use_pager'] = FALSE;
+  function set_current_page($page) {
+    $this->current_page = $page;
+  }
+
+  /**
+   * Get the current page from the pager.
+   */
+  function get_current_page() {
+    if (!empty($this->query->pager)) {
+      return $this->query->pager->get_current_page();
     }
   }
 
   /**
-   * Change/Set the current page for the pager.
+   * Get the items per page from the pager.
    */
-  function set_current_page($page) {
-    $this->pager['current_page'] = $page;
+  function get_items_per_page() {
+    if (!empty($this->query->pager)) {
+      return $this->query->pager->get_items_per_page();
+    }
   }
 
   /**
-   * Whether or not the pager should be used.
+   * Get the pager offset from the pager.
    */
-  function set_use_pager($use_pager) {
-    $this->pager['use_pager'] = $use_pager;
-  }
-
-  /**
-   * The pager element id to use if use_apger is on
-   */
-  function set_pager_element($pager_element) {
-    $this->pager['element'] = $pager_element;
-  }
-
-  /**
-   * How many records to skip. This does not function if use_pager is
-   * set.
-   */
-  function set_offset($offset) {
-    $this->pager['offset'] = $offset;
+  function get_offset() {
+    if (!empty($this->query->pager)) {
+      return $this->query->pager->get_offset();
+    }
   }
 
   /**

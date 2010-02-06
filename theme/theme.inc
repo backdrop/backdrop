@@ -72,23 +72,10 @@ function template_preprocess_views_view(&$vars) {
   }
   $vars['more']       = $view->display_handler->render_more_link();
   $vars['feed_icon']  = !empty($view->feed_icon) ? $view->feed_icon : '';
+  $vars['pager']      = $view->query->render_pager();
 
   $vars['attachment_before'] = !empty($view->attachment_before) ? $view->attachment_before : '';
   $vars['attachment_after'] = !empty($view->attachment_after) ? $view->attachment_after : '';
-
-  $vars['pager']      = '';
-
-  $exposed_input = isset($view->exposed_data_raw) ? $view->exposed_data_raw : NULL;
-  if ($view->display_handler->render_pager()) {
-    $pager_type = ($view->pager['use_pager'] === 'mini' ? 'views_mini_pager' : 'pager');
-    $pager_theme = views_theme_functions($pager_type, $view, $view->display_handler->display);
-    $vars['pager']    = theme($pager_theme,
-      array(
-        'tags' => $exposed_input,
-        'element' => $view->pager['element'],
-      )
-    );
-  }
 
   // if administrator, add some links. These used to be tabs, but this is better.
   if (user_access('administer views') && module_exists('views_ui') && empty($view->hide_admin_links) && !variable_get('views_no_hover_links', FALSE)) {

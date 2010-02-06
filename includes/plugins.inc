@@ -259,6 +259,42 @@ function views_views_plugins() {
         'help topic' => 'exposed-form-input-required',
       ),
     ),
+    'pager' => array(
+      'parent' => array(
+        'no ui' => TRUE,
+        'handler' => 'views_plugin_pager',
+        'parent' => '',
+      ),
+      'none' => array(
+        'title' => t('Display all items'),
+        'help' => t("Display all items that this view might find"),
+        'handler' => 'views_plugin_pager_none',
+        'help topic' => 'pager-none',
+        'uses options' => TRUE,
+      ),
+      'some' => array(
+        'title' => t('Display a specified number of items'),
+        'help' => t('Display a limited number items that this view might find.'),
+        'handler' => 'views_plugin_pager_some',
+        'help topic' => 'pager-some',
+        'uses options' => TRUE,
+      ),
+      'full' => array(
+        'title' => t('Paged output, full pager'),
+        'help' => t('Paged output, full Drupal style'),
+        'handler' => 'views_plugin_pager_full',
+        'help topic' => 'pager-full',
+        'uses options' => TRUE,
+      ),
+      'mini' => array(
+        'title' => t('Paged output, mini pager'),
+        'help' => t('Use the mini pager output.'),
+        'handler' => 'views_plugin_pager_mini',
+        'help topic' => 'pager-mini',
+        'uses options' => TRUE,
+        'parent' => 'full',
+      ),
+    ),
   );
 }
 
