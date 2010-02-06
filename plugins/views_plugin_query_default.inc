@@ -1088,9 +1088,6 @@ class views_plugin_query_default extends views_plugin_query {
       // We have already build a working count query. Views optimeses it automatically.
       //$count_query = $count_query->countQuery();
 
-      // against strict problems
-      $args = array();
-
       // Add additional arguments as a fake condition.
       // XXX: this doesn't work... because PDO mandates that all bound arguments
       // are used on the query. TODO: Find a better way to do this.
@@ -1108,11 +1105,11 @@ class views_plugin_query_default extends views_plugin_query {
       $start = microtime(TRUE);
 
       if ($this->pager->use_count_query() || !empty($view->get_total_rows)) {
-        $this->pager->execute_count_query($count_query, $args);
+        $this->pager->execute_count_query($count_query);
       }
 
       // Let the pager modify the query to add limits.
-      $this->pager->pre_execute($query, $args);
+      $this->pager->pre_execute($query);
 
       if (!empty($this->limit) || !empty($this->offset)) {
         // We can't have an offset without a limit, so provide a very large limit instead.
