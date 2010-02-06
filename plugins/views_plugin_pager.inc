@@ -115,7 +115,7 @@ class views_plugin_pager extends views_plugin {
    * itself being executed.
    */
   function execute_count_query(&$count_query) {
-    $this->total_items = $count_query->execute();
+    $this->total_items = $count_query->execute()->fetchField();
     if (!empty($this->options['offset'])) {
       $this->total_items -= $this->options['offset'];
     }

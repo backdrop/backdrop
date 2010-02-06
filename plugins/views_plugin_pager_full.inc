@@ -19,6 +19,7 @@ class views_plugin_pager_full extends views_plugin_pager {
     $options['items_per_page'] = array('default' => 10);
     $options['offset'] = array('default' => 0);
     $options['id'] = array('default' => 0);
+    $options['total_pages'] = array('default' => '');
 
     return $options;
   }
@@ -47,11 +48,27 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#description' => t("Unless you're experiencing problems with pagers related to this view, you should leave this at 0. If using multiple pagers on one page you may need to set this number to a higher value so as not to conflict within the ?page= array. Large values will add a lot of commas to your URLs, so avoid if possible."),
       '#default_value' => $this->options['id'],
     );
+
+    $form['total_pages'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Number of pages'),
+      '#description' => t('The total number of pages. Leave empty to show all pages.'),
+      '#default_value' => $this->options['total_pages'],
+    );
   }
 
   function query() {
-    $this->view->query->set_limit($this->options['items_per_page']);
-    $this->view->query->set_offset($this->current_page * $this->options['items_per_page'] + $this->options['offset']);
+    $limit = $this->options['items_per_page'];
+    $offset = $this->current_page * $this->options['items_per_page'] + $this->options['offset'];
+    if (!empty($this->options['total_pages'])) {
+      if ($this->current_page >= $this->options['total_pages']) {
+        $limit = $this->options['items_per_page'];
+        $offset = $this->options['total_pages'] * $this->options['items_per_page'];
+      }
+    }
+
+    $this->view->query->set_limit($limit);
+    $this->view->query->set_offset($offset);
   }
 
   function render($input) {
@@ -94,6 +111,12 @@ class views_plugin_pager_full extends views_plugin_pager {
    * page is out of range.
    */
   function update_page_info() {
+    if (!empty($this->options['total_pages'])) {
+      if (($this->options['total_pages'] * $this->options['items_per_page']) < $this->total_items) {
+        $this->total_items = $this->options['total_pages'] * $this->options['items_per_page'];
+      }
+    }
+
     // Dump information about what we already know into the globals.
     global $pager_page_array, $pager_total, $pager_total_items;
 
@@ -115,5 +138,4 @@ class views_plugin_pager_full extends views_plugin_pager {
     // goes to look for it later.
     $pager_page_array[$this->options['id']] = $this->current_page;
   }
-
 }
