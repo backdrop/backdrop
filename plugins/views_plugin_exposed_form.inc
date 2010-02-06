@@ -32,6 +32,10 @@ class views_plugin_exposed_form extends views_plugin {
   function option_definition() {
     $options = parent::option_definition();
     $options['submit_button'] = array('default' => t('Apply'), 'translatable' => TRUE);
+    $options['reset_button'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['exposed_sorts_label'] = array('default' => 'Sort By', 'translatable' => TRUE);
+    $options['sort_asc_label'] = array('default' => 'Asc', 'translatable' => TRUE);
+    $options['sort_desc_label'] = array('default' => 'Desc', 'translatable' => TRUE);
     return $options;
   }
 
@@ -41,13 +45,38 @@ class views_plugin_exposed_form extends views_plugin {
       '#title' => t('Submit button text'),
       '#description' => t('Text to display in the submit button of the exposed form.'),
       '#default_value' => $this->options['submit_button'],
+      '#required' => TRUE,
     );
-    
+
     $form['reset_button'] = array (
       '#type' => 'checkbox',
       '#title' => t('Include reset button'),
       '#description' => t('If checked the exposed form will provide a button to reset all the applied exposed filters'),
       '#default_value' => $this->options['reset_button'],
+    );
+
+    $form['exposed_sorts_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Exposed sorts label'),
+      '#description' => t('Text to display as the label of the exposed sort select box.'),
+      '#default_value' => $this->options['exposed_sorts_label'],
+      '#required' => TRUE,
+    );
+
+    $form['sort_asc_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Ascending'),
+      '#description' => t('Text to use when exposed sort is ordered ascending.'),
+      '#default_value' => $this->options['sort_asc_label'],
+      '#required' => TRUE,
+    );
+
+    $form['sort_desc_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Descending'),
+      '#description' => t('Text to use when exposed sort is ordered descending.'),
+      '#default_value' => $this->options['sort_desc_label'],
+      '#required' => TRUE,
     );
   }
 
@@ -66,7 +95,6 @@ class views_plugin_exposed_form extends views_plugin {
       'method' => 'get',
       'rerender' => TRUE,
       'no_redirect' => TRUE,
-      'submit_button' => $this->options['submit_button'],
     );
 
     // Some types of displays (eg. attachments) may wish to use the exposed
@@ -89,7 +117,26 @@ class views_plugin_exposed_form extends views_plugin {
     return $output;
   }
 
-  function query() { }
+  function query() {
+    $view = $this->view;
+    $exposed_data = $view->exposed_data;
+    $sort_by = $exposed_data['sort_by'];
+    if (!empty($sort_by)) {
+      $handler = $view->sort[$sort_by];
+      if (isset($handler)) {
+        $view->query->orderby = array();
+        if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('asc', 'desc'))) {
+          $handler->options['order'] = $exposed_data['sort_order'];
+        }
+        $handler->query();
+        foreach ($view->sort as $sort) {
+          if (!$sort->is_exposed()) {
+            $sort->query();
+          }
+        }
+      }
+    }
+  }
 
   function pre_render() { }
 
@@ -105,6 +152,36 @@ class views_plugin_exposed_form extends views_plugin {
         '#value' => t('Reset'),
         '#type' => 'submit',
       );
+    }
+
+    $form['submit']['#value'] = t($this->options['submit_button']);
+    // Check if there is exposed sorts for this view
+    $exposed_sorts = array();
+    foreach ($this->view->sort as $id => $handler) {
+      if ($handler->can_expose() && $handler->is_exposed()) {
+        $exposed_sorts[$id] = check_plain($handler->options['expose']['label']);
+      }
+    }
+
+    if (count($exposed_sorts)) {
+      $form['sort_by'] = array(
+        '#type' => 'select',
+        '#options' => $exposed_sorts,
+        '#title' => t($this->options['exposed_sorts_label']),
+      );
+      $sort_order = array(
+        'asc' => t($this->options['sort_asc_label']),
+        'desc' => t($this->options['sort_desc_label']),
+      );
+      $form['sort_order'] = array(
+        '#type' => 'select',
+        '#options' => $sort_order,
+        '#title' => t('Order'),
+      );
+      $form['submit']['#weight'] = 10;
+      if (isset($form['reset'])) {
+        $form['reset']['#weight'] = 10;
+      }
     }
   }
 
@@ -126,7 +203,7 @@ class views_plugin_exposed_form extends views_plugin {
       $this->reset_form($form, $form_state);
     }
   }
-   
+
   function reset_form(&$form, &$form_state) {
     unset($_SESSION['views'][$this->view->name][$this->view->current_display]);
     $form_state = array();

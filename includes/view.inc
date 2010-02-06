@@ -203,7 +203,7 @@ class view extends views_db_object {
         }
       }
     }
-    
+
     $this->current_display = 'default';
     $this->display_handler = &$this->display['default']->handler;
 

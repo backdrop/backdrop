@@ -19,11 +19,11 @@ function _views_create_handler($definition, $type = 'handler') {
       !class_exists($definition['override handler'])) {
     return;
   }
-  
+
   if (!class_exists($definition['handler'])) {
     return;
   }
-  
+
    if (!empty($definition['override handler'])) {
      $handler = new $definition['override handler'];
    }
@@ -951,6 +951,14 @@ function views_get_timezone() {
 function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
   $db_type = db_driver();
   $offset = $set_offset !== NULL ? $set_offset : views_get_timezone();
+  if (isset($offset) && !is_numeric($offset)) {
+    $tz = date_default_timezone_get();
+    $current = time('Z');
+    date_default_timezone_set($offset);
+    $offset_seconds = $current - time('Z');
+    date_default_timezone_set($tz);
+  }
+
   switch ($db_type) {
     case 'mysql':
     case 'mysqli':
@@ -962,7 +970,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
           break;
       }
       if (!empty($offset)) {
-        $field = "($field + INTERVAL $offset SECOND)";
+        $field = "($field + INTERVAL $offset_seconds SECOND)";
       }
       return $field;
     case 'pgsql':
@@ -974,7 +982,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
           break;
       }
       if (!empty($offset)) {
-        $field = "($field + INTERVAL '$offset SECONDS')";
+        $field = "($field + INTERVAL '$offset_seconds SECONDS')";
       }
       return $field;
   }
@@ -1143,7 +1151,7 @@ function views_views_handlers() {
     'views_handler_sort_date',
     'views_handler_sort_menu_hierarchy',
     'views_handler_sort_random',
-  
+
     // group by handlers
     'views_handler_argument_group_by_numeric' => array(
       'parent' => 'views_handler_argument',
@@ -1256,7 +1264,7 @@ class views_join {
    * @param $view_query
    *   The source query, implementation of views_plugin_query.
    * @return
-   *   
+   *
    */
   function build_join($select_query, $table, $view_query) {
     if (empty($this->definition['table formula'])) {

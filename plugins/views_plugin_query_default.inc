@@ -1215,4 +1215,3 @@ class views_plugin_query_default extends views_plugin_query {
 function views_query_default_aggregation_method_simple($group_type, $field) {
   return strtoupper($group_type) . '(' . $field . ')';
 }
-
