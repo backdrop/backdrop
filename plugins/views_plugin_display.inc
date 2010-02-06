@@ -414,7 +414,7 @@ class views_plugin_display extends views_plugin {
       ),
       'pager' => array(
         'contains' => array(
-          'type' => array('default' => 'none', 'export' => 'export_plugin'),
+          'type' => array('default' => 'full', 'export' => 'export_plugin'),
           'options' => array('default' => array(), 'export' => FALSE),
          ),
       ),

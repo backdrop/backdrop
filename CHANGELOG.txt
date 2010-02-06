@@ -82,6 +82,7 @@ Views 3.x-7.x-dev
     o #586668: Pagers turned into plugins to allow all kinds of new fun stuff with paging.
     o #652712 by dagmar: Some pager settings were not getting properly stored with pluggable pagers.
     o #268023 by dagmar and dereine: Allow a number of pages limit in paging.
+    o #694980 by dereine: New views should default to limiting to 10 items, to copy previous behavior.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
