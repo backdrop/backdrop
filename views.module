@@ -1305,7 +1305,7 @@ function views_process_dependency($element) {
  * if the options need to be sanitized before they're rendered. This callback
  * inspects the type, and if it's still 'checkboxes', does the sanitation.
  */
-function views_process_check_options($element, $edit, &$form_state, &$form) {
+function views_process_check_options($element, &$form_state) {
   if ($element['#type'] == 'checkboxes' || $element['#type'] == 'checkbox') {
     $element['#options'] = array_map('check_plain', $element['#options']);
   }

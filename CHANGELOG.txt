@@ -87,6 +87,7 @@ Views 3.x-7.x-dev
     o #706528 by dereine: Fix validation handling.
     o #608246 by dereine: Use default filter on signature rather than XSS filter.
     o #706518 by dereine: Fix call to undefined views_process_check_options
+    o by dereine: Fix signature of views_process_check_options.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
