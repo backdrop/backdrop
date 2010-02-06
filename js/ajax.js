@@ -60,7 +60,7 @@
    * Get rid of irritating tabledrag messages
    */
   Drupal.theme.tableDragChangedWarning = function () {
-    return ' ';
+    return [];
   }
 
   Drupal.behaviors.viewsAjax = {
