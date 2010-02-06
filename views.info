@@ -242,3 +242,4 @@ files[] = theme/views-view.tpl.php
 files[] = tests/views_query.test
 files[] = tests/views_groupby.test
 files[] = tests/views_pager.test
+files[] = tests/views_glossary.test

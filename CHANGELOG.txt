@@ -78,6 +78,7 @@ Views 3.x-7.x-dev
     o #99370 by dagmar: Allow a "reset" button as part of the exposed filters.
     o #627402 by dereine: Aggregator description needed more controllable input filtering.
     o #699200 by xgretsch: Non-static functions cause strict warning messages.
+    o #705668 by dereine: Fix glossary view, add tests for glossary view.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

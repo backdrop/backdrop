@@ -902,13 +902,9 @@ class views_plugin_query_default extends views_plugin_query {
 
       if (!empty($field['count'])) {
         // Retained for compatibility
-        $field['function'] = 'COUNT';
+        $field['function'] = 'count';
         // It seems there's no way to abstract the table+column reference
         // without adding a field, aliasing, and then using the alias.
-        $table = !empty($field['table']) ? $field['table'] : $this->base_table;
-        $alias = $table . '_' . $field['field'] . '_viewscount';
-        $query->addField($table, $field['field'], $alias);
-        $query->addExpression('COUNT(' . $field['table'] .'.'. $field['field'] . ')', $fieldname);
       }
 
       if (!empty($field['function'])) {
