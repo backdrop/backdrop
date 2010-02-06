@@ -1381,8 +1381,13 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
       '#type' => 'submit',
       '#value' => $name,
       '#submit' => array($form_id . '_submit'),
-      '#validate' => array('views_ui_standard_submit', $form_id . '_validate'),
+      '#validate' => array('views_ui_standard_submit'),
     );
+    // Take sure that the validation handler exists.
+    if (function_exists($form_id . '_validate')) {
+      $form['buttons']['submit']['#validate'][] = $form_id . '_validate';
+    }
+
   }
 
   $cancel_submit = function_exists($form_id . '_cancel') ? $form_id . '_cancel' : 'views_ui_standard_cancel';
