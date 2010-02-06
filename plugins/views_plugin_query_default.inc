@@ -920,6 +920,10 @@ class views_plugin_query_default extends views_plugin_query {
 
         $this->has_aggregate = TRUE;
       }
+      // This is a formula, using no tables.
+      elseif (empty($field['table'])) {
+        $query->addExpression($string, $fieldname);
+      }
 
       elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
         // d7cx: This code was there, apparently needed for PostgreSQL
