@@ -229,8 +229,9 @@ function user_views_data() {
     'help' => t("The user's signature."), // The help that appears on the UI,
      // Information for displaying a title as a field
     'field' => array(
-      'handler' => 'views_handler_field_xss',
-     ),
+      'handler' => 'views_handler_field_markup',
+      'format' => filter_fallback_format(),
+    ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
     ),
