@@ -118,6 +118,11 @@ class views_plugin_display extends views_plugin {
           }
         }
       }
+      $pager = $this->get_plugin('pager');
+      if (isset($pager) && $pager->uses_exposed()) {
+        $this->has_exposed = TRUE;
+        return TRUE;
+      }
       $this->has_exposed = FALSE;
     }
 

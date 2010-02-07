@@ -20,7 +20,16 @@ class views_plugin_pager_full extends views_plugin_pager {
     $options['offset'] = array('default' => 0);
     $options['id'] = array('default' => 0);
     $options['total_pages'] = array('default' => '');
+    $options['expose'] = array(
+      'contains' => array(
+        'items_per_page' => array('default' => FALSE, 'bool' => TRUE),
+        'items_per_page_label' => array('default' => 'Items per page', 'translatable' => TRUE),
+        'items_per_page_options' => array('default' => '5, 10, 20, 40, 60'),
 
+        'offset' => array('default' => FALSE, 'bool' => TRUE),
+        'offset_label' => array('default' => 'Offset', 'translatable' => TRUE),
+      ),
+    );
     return $options;
   }
 
@@ -55,9 +64,103 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#description' => t('The total number of pages. Leave empty to show all pages.'),
       '#default_value' => $this->options['total_pages'],
     );
+
+    $form['expose'] = array (
+      '#type' => 'fieldset',
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+      '#title' => t('Exposed options'),
+      '#input' => TRUE,
+      '#description' => t('Exposing this options allows users to define their values in a exposed form when view is displayed'),
+    );
+
+    $form['expose']['items_per_page'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Expose items per page'),
+      '#description' => t('When checked, users can determine how many items per page show in a view'),
+      '#default_value' => $this->options['expose']['items_per_page'],
+    );
+
+    $form['expose']['items_per_page_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Items per page label'),
+      '#required' => TRUE,
+      '#description' => t('Label to use in the exposed items per page form element.'),
+      '#default_value' => $this->options['expose']['items_per_page_label'],
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array(
+        'edit-pager-options-expose-items-per-page' => array(1)
+      ),
+    );
+
+    $form['expose']['items_per_page_options'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Exposed items per page options'),
+      '#required' => TRUE,
+      '#description' => t('Set between which values the user can choose when determining the items per page. Separated by colon.'),
+      '#default_value' => $this->options['expose']['items_per_page_options'],
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array(
+        'edit-pager-options-expose-items-per-page' => array(1)
+      ),
+    );
+
+    $form['expose']['offset'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Expose Offset'),
+      '#description' => t('When checked, users can determine how many items per page show in a view'),
+      '#default_value' => $this->options['expose']['items_per_page'],
+    );
+
+    $form['expose']['offset_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Offset label'),
+      '#required' => TRUE,
+      '#description' => t('Label to use in the exposed offset form element.'),
+      '#default_value' => $this->options['expose']['offset_label'],
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array(
+        'edit-pager-options-expose-offset' => array(1)
+      ),
+    );
+  }
+
+  function options_validate(&$form, &$form_state) {
+    // Only accept integer values.
+    $error = FALSE;
+    $exposed_options = $form_state['values']['pager_options']['expose']['items_per_page_options'];
+    if (strpos($exposed_options, '.') !== FALSE) {
+      $error = TRUE;
+    }
+    $options = explode(',',$exposed_options);
+    if (!$error && is_array($options)) {
+      foreach ($options as $option) {
+        if (!is_numeric($option) || intval($option) == 0) {
+          $error = TRUE;
+        }
+      }
+    }
+    else {
+      $error = TRUE;
+    }
+    if ($error) {
+      form_set_error('pager_options][expose][items_per_page_options', t('Please insert a list of integer numeric values separated by colons: e.g: 10, 20, 50, 100'));
+    }
   }
 
   function query() {
+    if ($this->items_per_page_exposed()) {
+      if (!empty($_GET['items_per_page']) && $_GET['items_per_page'] > 0){
+        $this->options['items_per_page'] = $_GET['items_per_page'];
+      }
+    }
+    if ($this->offset_exposed()) {
+      if (isset($_GET['offset']) && $_GET['offset'] >= 0){
+        $this->options['offset'] = $_GET['offset'];
+      }
+    }
+
     $limit = $this->options['items_per_page'];
     $offset = $this->current_page * $this->options['items_per_page'] + $this->options['offset'];
     if (!empty($this->options['total_pages'])) {
@@ -137,5 +240,54 @@ class views_plugin_pager_full extends views_plugin_pager {
     // Put this number in to guarantee that we do not generate notices when the pager
     // goes to look for it later.
     $pager_page_array[$this->options['id']] = $this->current_page;
+  }
+
+  function uses_exposed() {
+    return $this->items_per_page_exposed() || $this->offset_exposed();
+  }
+
+  function items_per_page_exposed() {
+    return !empty($this->options['expose']['items_per_page']);
+  }
+
+  function offset_exposed() {
+    return !empty($this->options['expose']['offset']);
+  }
+
+  function exposed_form_alter(&$form, &$form_state) {
+    if ($this->items_per_page_exposed()) {
+      $options = explode(',', $this->options['expose']['items_per_page_options']);
+      $sanitized_options = array();
+      if (is_array($options)) {
+        foreach ($options as $option) {
+          $sanitized_options[intval($option)] = intval($option);
+        }
+
+        $form['items_per_page'] = array(
+          '#type' => 'select',
+          '#title' => $this->options['expose']['items_per_page_label'],
+          '#options' => $sanitized_options,
+          '#default_value' => $this->get_items_per_page(),
+        );
+      }
+    }
+
+    if ($this->offset_exposed()) {
+      $form['offset'] = array(
+        '#type' => 'textfield',
+        '#size' => 10,
+        '#maxlength' => 10,
+        '#title' => $this->options['expose']['offset_label'],
+        '#default_value' => $this->get_offset(),
+      );
+    }
+  }
+
+  function exposed_form_validate(&$form, &$form_state) {
+    if (!empty($form_state['values']['offset']) && trim($form_state['values']['offset'])) {
+      if (!is_numeric($form_state['values']['offset']) || $form_state['values']['offset'] < 0) {
+        form_set_error('offset', t('Offset must be an number greather or equal than 0.'));
+      }
+    }
   }
 }
