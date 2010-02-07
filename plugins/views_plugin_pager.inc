@@ -36,6 +36,15 @@ class views_plugin_pager extends views_plugin {
   }
 
   /**
+   * Set how many items per page this pager will display.
+   *
+   * This is mostly used for things that will override the value.
+   */
+  function set_items_per_page($items) {
+    $this->options['items_per_page'] = $items;
+  }
+
+  /**
    * Get the page offset, or how many items to skip.
    *
    * Even pagers that don't actually page can skip items at the beginning,

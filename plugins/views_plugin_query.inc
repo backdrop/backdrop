@@ -79,7 +79,9 @@ class views_plugin_query extends views_plugin {
   function init_pager(&$view) {
     // @todo -- probably this should be a method on the display rather than directly calling
     // get plugin?
-    $this->pager = $view->display_handler->get_plugin('pager');
+    if (empty($this->pager)) {
+      $this->pager = $view->display_handler->get_plugin('pager');
+    }
   }
 
   /**

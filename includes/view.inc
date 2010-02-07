@@ -113,6 +113,16 @@ class view extends views_db_object {
   }
 
   /**
+   * Set the items per page on the pager.
+   */
+  function set_items_per_page($items_per_page) {
+    if (empty($this->query->pager)) {
+      $this->query->init_pager($this);
+    }
+    $this->query->pager->set_items_per_page($items_per_page);
+  }
+
+  /**
    * Get the pager offset from the pager.
    */
   function get_offset() {

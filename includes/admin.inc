@@ -2713,12 +2713,12 @@ function views_ui_config_style_form($form, &$form_state) {
 
     $form['#section'] = $display_id . '-' . $type . '-style-options';
 
-    $plugin = views_get_plugin('style', $item['style_plugin']);
+    $plugin = views_get_plugin('style', $handler->options['style_plugin']);
     if ($plugin) {
       $form['style_options'] = array(
         '#tree' => TRUE,
       );
-      $plugin->init($view, $view->display[$display_id], $item['style_options']);
+      $plugin->init($view, $view->display[$display_id], $handler->options['style_options']);
 
       $plugin->options_form($form['style_options'], $form_state);
     }
