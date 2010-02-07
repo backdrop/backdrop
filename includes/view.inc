@@ -65,7 +65,7 @@ class view extends views_db_object {
    * stored on the display, and are used in the build process.
    */
   function display_objects() {
-    return array('argument', 'field', 'sort', 'filter', 'relationship');
+    return array('argument', 'field', 'sort', 'filter', 'relationship', 'header', 'footer', 'empty');
   }
 
   /**
@@ -1452,7 +1452,7 @@ class view extends views_db_object {
   function clone_view() {
     $clone = version_compare(phpversion(), '5.0') < 0 ? $this : clone($this);
 
-    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'query', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'exposed_widgets', 'many_to_one_tables');
+    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'exposed_widgets', 'many_to_one_tables');
     foreach ($keys as $key) {
       if (isset($clone->$key)) {
         unset($clone->$key);
@@ -1517,7 +1517,7 @@ class view extends views_db_object {
         unset($this->query);
       }
 
-      $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
+      $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
       foreach ($keys as $key) {
         if (isset($this->$key)) {
           unset($this->$key);
@@ -1818,7 +1818,14 @@ class views_db_object {
       'field' => $field,
     ) + $options;
 
-    $handler = views_get_handler($table, $field, $type);
+    if (!empty($types[$type]['type'])) {
+      $handler_type = $types[$type]['type'];
+    }
+    else {
+      $handler_type = $type;
+    }
+
+    $handler = views_get_handler($table, $field, $handler_type);
 
     $fields[$id] = $new_item;
     $this->display[$display_id]->handler->set_option($types[$type]['plural'], $fields);
@@ -1960,6 +1967,30 @@ function views_object_types() {
         'stitle' => t('Relationship'),
         'lstitle' => t('Relationship'),
         'plural' => 'relationships',
+      ),
+      'header' => array(
+        'title' => t('Header'),
+        'ltitle' => t('header'),
+        'stitle' => t('Header'),
+        'lstitle' => t('Header'),
+        'plural' => 'header',
+        'type' => 'area',
+      ),
+      'footer' => array(
+        'title' => t('Footer'),
+        'ltitle' => t('footer'),
+        'stitle' => t('Footer'),
+        'lstitle' => t('Footer'),
+        'plural' => 'footer',
+        'type' => 'area',
+      ),
+      'empty' => array(
+        'title' => t('Empty text'),
+        'ltitle' => t('empty text'),
+        'stitle' => t('Empty text'),
+        'lstitle' => t('Empty text'),
+        'plural' => 'empty',
+        'type' => 'area',
       ),
     );
   }

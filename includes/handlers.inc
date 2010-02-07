@@ -1165,6 +1165,13 @@ function views_views_handlers() {
     'views_handler_sort_group_by_numeric' => array(
       'parent' => 'views_handler_sort',
     ),
+    // area handlers
+    'views_handler_area' => array(
+      'parent' => 'views_handler',
+    ),
+    'views_handler_area_text' => array(
+      'parent' => 'views_handler_area',
+    ),
   );
 }
 

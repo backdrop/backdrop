@@ -44,7 +44,7 @@ class views_plugin_display extends views_plugin {
 
     // Translate changed settings:
     // Check if any of the previous values now managed by
-    // pluggable pagers have been changed. 
+    // pluggable pagers have been changed.
     // If yes, perform the conversion
     $items_per_page = $this->get_option('items_per_page');
     $offset = $this->get_option('offset');
@@ -78,6 +78,35 @@ class views_plugin_display extends views_plugin {
       $this->set_option('offset', NULL);
       $this->set_option('use_pager', NULL);
       $this->set_option('pager', $pager);
+    }
+
+    // Plugable headers, footer and empty texts are
+    // not compatible with previous version of views
+    // This code converts old values into a configured handler for each area
+    foreach (array('header', 'footer', 'empty') as $area) {
+      if (isset($this->options[$area]) && !is_array($this->options[$area])) {
+        if (!empty($this->options[$area])) {
+          $content = $this->get_option($area);
+          if (!empty($content) && !is_array($content)) {
+            $format = $this->get_option($area . '_format');
+            $options = array(
+              'id' => 'area',
+              'table' => 'views',
+              'field' => 'area',
+              'label' => '',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'content' => $content,
+              'format' => !empty($format) ? $format : variable_get('filter_default_format', 1),
+            );
+
+            if ($area != 'empty' && $empty = $this->get_option($area . '_empty')) {
+              $options['empty'] = $empty;
+            }
+            $this->set_option($area, array('text' => $options));
+          }
+        }
+      }
     }
   }
 
@@ -220,9 +249,6 @@ class views_plugin_display extends views_plugin {
       'access' => array('access'),
       'cache' => array('cache'),
       'title' => array('title'),
-      'header' => array('header', 'header_format', 'header_empty'),
-      'footer' => array('footer', 'footer_format', 'footer_empty'),
-      'empty' => array('empty', 'empty_format'),
       'use_ajax' => array('use_ajax'),
       'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
       'pager' => array('pager'),
@@ -239,6 +265,9 @@ class views_plugin_display extends views_plugin {
       'row_options' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
 
       // These guys are special
+      'header' => array('header'),
+      'footer' => array('empty'),
+      'empty' => array('empty'),
       'relationships' => array('relationships'),
       'fields' => array('fields'),
       'sorts' => array('sorts'),
@@ -286,14 +315,6 @@ class views_plugin_display extends views_plugin {
           'access' => TRUE,
           'cache' => TRUE,
           'title' => TRUE,
-          'header' => TRUE,
-          'header_format' => TRUE,
-          'header_empty' => TRUE,
-          'footer' => TRUE,
-          'footer_format' => TRUE,
-          'footer_empty' => TRUE,
-          'empty' => TRUE,
-          'empty_format' => TRUE,
 
           'use_ajax' => TRUE,
           'items_per_page' => TRUE,
@@ -315,6 +336,10 @@ class views_plugin_display extends views_plugin {
           'row_plugin' => TRUE,
           'row_options' => TRUE,
 
+          'header' => TRUE,
+          'footer' => TRUE,
+          'empty' => TRUE,
+
           'relationships' => TRUE,
           'fields' => TRUE,
           'sorts' => TRUE,
@@ -327,33 +352,6 @@ class views_plugin_display extends views_plugin {
       'title' => array(
         'default' => '',
         'translatable' => TRUE,
-      ),
-      'header' => array(
-        'default' => '',
-        'translatable' => TRUE,
-      ),
-      'header_format' => array(
-        'default' => filter_default_format(),
-      ),
-      'header_empty' => array(
-        'default' => FALSE,
-      ),
-      'footer' => array(
-        'default' => '',
-        'translatable' => TRUE,
-      ),
-      'footer_format' => array(
-        'default' => filter_default_format(),
-      ),
-      'footer_empty' => array(
-        'default' => FALSE,
-      ),
-      'empty' => array(
-        'default' => '',
-        'translatable' => TRUE,
-      ),
-      'empty_format' => array(
-        'default' => filter_default_format(),
       ),
       'use_ajax' => array(
         'default' => FALSE,
@@ -446,6 +444,19 @@ class views_plugin_display extends views_plugin {
 
       'exposed_block' => array(
         'default' => FALSE,
+      ),
+
+      'header' => array(
+        'default' => array(),
+        'export' => 'export_handler',
+      ),
+      'footer' => array(
+        'default' => array(),
+        'export' => 'export_handler',
+      ),
+      'empty' => array(
+        'default' => array(),
+        'export' => 'export_handler',
       ),
 
       // We want these to export last.
@@ -661,7 +672,14 @@ class views_plugin_display extends views_plugin {
           }
         }
 
-        $handler = views_get_handler($info['table'], $info['field'], $type, $override);
+        if (!empty($types[$type]['type'])) {
+          $handler_type = $types[$type]['type'];
+        }
+        else {
+          $handler_type = $type;
+        }
+
+        $handler = views_get_handler($info['table'], $info['field'], $handler_type, $override);
         if ($handler) {
           $handler->init($this->view, $info);
           $this->handlers[$type][$id] = &$handler;
@@ -950,33 +968,6 @@ class views_plugin_display extends views_plugin {
       $options['exposed_form']['links']['exposed_form_options'] = t('Exposed form settings for this exposed form style.');
     }
 
-    foreach (array('header' => t('Header'), 'footer' => t('Footer'), 'empty' => t('Empty text')) as $type => $name) {
-      if (!$this->get_option($type)) {
-        $field = t('None');
-      }
-      else {
-        // A lot of code to get the name of the filter format.
-        $format_id = $this->get_option($type . '_format');
-        if (empty($format_id)) {
-          $format_id = filter_default_format();
-        }
-        $format = filter_format_load($format_id);
-        if ($format) {
-          $field = check_plain($format->name);
-        }
-        else {
-          $field = t('Unknown/missing format');
-        }
-      }
-
-      $options[$type] = array(
-        'category' => 'style',
-        'title' => $name,
-        'value' => $field,
-        'desc' => t("Change this display's !name.", array('!name' => strtolower($name))),
-      );
-    }
-
     $options['analyze-theme'] = array(
       'category' => 'style',
       'title' => t('Theme'),
@@ -1167,49 +1158,6 @@ class views_plugin_display extends views_plugin {
           );
           $plugin->options_form($form['cache_options'], $form_state);
         }
-        break;
-      case 'header':
-        $form['#title'] .= t('Header');
-        $form['header_empty'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Display even if view has no result'),
-          '#default_value' => $this->get_option('header_empty'),
-        );
-        $form['header'] = array(
-          '#type' => 'textarea',
-          '#default_value' => $this->get_option('header'),
-          '#rows' => 6,
-          '#description' => t('Text to display at the top of the view. May contain an explanation or links or whatever you like. Optional.'),
-        );
-
-        $form['header_format'] = filter_form($this->get_option('header_format'), NULL, array('header_format'));
-        break;
-      case 'footer':
-        $form['#title'] .= t('Footer');
-        $form['footer_empty'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Display even if view has no result'),
-          '#default_value' => $this->get_option('footer_empty'),
-        );
-        $form['footer'] = array(
-          '#type' => 'textarea',
-          '#default_value' => $this->get_option('footer'),
-          '#rows' => 6,
-          '#description' => t('Text to display beneath the view. May contain an explanation or links or whatever you like. Optional.'),
-        );
-
-        $form['footer_format'] = filter_form($this->get_option('footer_format'), NULL, array('footer_format'));
-        break;
-      case 'empty':
-        $form['#title'] .= t('Empty text');
-        $form['empty'] = array(
-          '#type' => 'textarea',
-          '#default_value' => $this->get_option('empty'),
-          '#rows' => 6,
-          '#description' => t('Text to display if the view has no results. Optional.'),
-        );
-
-        $form['empty_format'] = filter_form($this->get_option('empty_format'), NULL, array('empty_format'));
         break;
       case 'style_plugin':
         $form['#title'] .= t('How should this view be styled');
@@ -1785,15 +1733,6 @@ class views_plugin_display extends views_plugin {
         }
         $this->set_option($section, $form_state['values'][$section]);
         break;
-      case 'header':
-      case 'footer':
-      case 'empty':
-        $this->set_option($section, $form_state['values'][$section]);
-        $this->set_option($section . '_format', $form_state['values'][$section . '_format']);
-        if ($section != 'empty') {
-          $this->set_option($section . '_empty', $form_state['values'][$section . '_empty']);
-        }
-        break;
       case 'exposed_block':
         $this->set_option($section, (bool) $form_state['values'][$section]);
         break;
@@ -1970,58 +1909,35 @@ class views_plugin_display extends views_plugin {
     }
   }
 
+
   /**
-   * Render a text area, using the proper format.
+   * Legacy functions.
    */
-  function render_textarea($area) {
-    static $formats = array();
-
-    $value = $this->get_option($area);
-    // Check to make sure the filter format exists; if not, we don't
-    // display anything.
-    //$format = filter_resolve_format($this->get_option($area . '_format'));
-    $format = $this->get_option($area . '_format');
-
-    if (!array_key_exists($format, $formats)) {
-      $filter = filter_format_load($format);
-      $formats[$format] = $filter->name;
-    }
-
-    if (!$formats[$format]) {
-      return;
-    }
-
-    if ($value) {
-      return check_markup($value, $format, '', FALSE);
-    }
-  }
 
   /**
    * Render the header of the view.
    */
   function render_header() {
-    if (!empty($this->view->result) || $this->get_option('header_empty')) {
-      return $this->render_textarea('header');
-    }
+    $empty = !empty($this->view->result);
+    return $this->render_area('header', $empty);
   }
 
   /**
    * Render the footer of the view.
    */
   function render_footer() {
-    if (!empty($this->view->result) || $this->get_option('footer_empty')) {
-      return $this->render_textarea('footer');
-    }
+    $empty = !empty($this->view->result);
+    return $this->render_area('footer', $empty);
+  }
+
+  function render_empty() {
+    return $this->render_area('empty');
   }
 
   /**
-   * Render the empty text of the view.
-   */
-  function render_empty() { return $this->render_textarea('empty'); }
-  /**
    * If this display creates a block, implement one of these.
    */
-  function hook_block_save($delta = 0, $edit = array()) { return array(); }
+  function hook_block_list($delta = 0, $edit = array()) { return array(); }
 
   /**
    * If this display creates a page with a menu item, implement it here.
@@ -2034,6 +1950,15 @@ class views_plugin_display extends views_plugin {
   function render() {
     return theme($this->theme_functions(), array('view' => $this->view));
   }
+
+  function render_area($area, $empty = FALSE) {
+    $return = '';
+    foreach ($this->get_handlers($area) as $area) {
+      $return .= $area->render($empty);
+    }
+    return $return;
+  }
+
 
   /**
    * Determine if the user has access to this display of the view.
@@ -2235,10 +2160,21 @@ class views_plugin_display extends views_plugin {
 
     // cut the 's' off because the data is stored as the plural form but we need
     // the singular form. Who designed that anyway? Oh yeah, I did. :(
-    $type = substr($option, 0, -1);
+    if ($option != 'header' && $option != 'footer' && $option != 'empty') {
+      $type = substr($option, 0, -1);
+    }
+    else {
+      $type = $option;
+    }
     $types = views_object_types();
     foreach ($storage[$option] as $id => $info) {
-      $handler = views_get_handler($info['table'], $info['field'], $type);
+      if (!empty($types[$type]['type'])) {
+        $handler_type = $types[$type]['type'];
+      }
+      else {
+        $handler_type = $type;
+      }
+      $handler = views_get_handler($info['table'], $info['field'], $handler_type);
       if ($handler) {
         $handler->init($this->view, $info);
         $output .= $indent . '/* ' . $types[$type]['stitle'] . ': ' . $handler->ui_name() . " */\n";

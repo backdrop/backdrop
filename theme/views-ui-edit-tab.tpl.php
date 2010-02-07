@@ -67,12 +67,11 @@
   <?php // middle section ?>
   <div class="middle tab-section">
     <div class="inside">
+      <?php foreach ($areas as $area): ?>
       <div class="views-category">
-        <?php print $relationships; ?>
+        <?php print $area; ?>
       </div>
-      <div class="views-category">
-        <?php print $arguments; ?>
-      </div>
+      <?php endforeach;?>
       <?php if (!empty($fields)): ?>
         <div class="views-category">
           <?php print $fields; ?>
@@ -84,6 +83,12 @@
   <?php // right section ?>
   <div class="right tab-section">
     <div class="inside">
+      <div class="views-category">
+        <?php print $relationships; ?>
+      </div>
+      <div class="views-category">
+        <?php print $arguments; ?>
+      </div>
       <div class="views-category">
         <?php print $sorts; ?>
       </div>
