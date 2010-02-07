@@ -33,6 +33,7 @@ class views_plugin_exposed_form extends views_plugin {
     $options = parent::option_definition();
     $options['submit_button'] = array('default' => t('Apply'), 'translatable' => TRUE);
     $options['reset_button'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['reset_button_label'] = array('default' => 'Reset', 'translatable' => TRUE);
     $options['exposed_sorts_label'] = array('default' => 'Sort By', 'translatable' => TRUE);
     $options['sort_asc_label'] = array('default' => 'Asc', 'translatable' => TRUE);
     $options['sort_desc_label'] = array('default' => 'Desc', 'translatable' => TRUE);
@@ -53,6 +54,18 @@ class views_plugin_exposed_form extends views_plugin {
       '#title' => t('Include reset button'),
       '#description' => t('If checked the exposed form will provide a button to reset all the applied exposed filters'),
       '#default_value' => $this->options['reset_button'],
+    );
+
+    $form['reset_button_label'] = array(
+     '#type' => 'textfield',
+      '#title' => t('Reset button label'),
+      '#description' => t('Text to display in the reset button of the exposed form.'),
+      '#default_value' => $this->options['reset_button_label'],
+      '#required' => TRUE,
+      '#dependency' => array(
+        'edit-exposed-form-options-reset-button' => array(1)
+      ),
+      '#process' => array('views_process_dependency'),
     );
 
     $form['exposed_sorts_label'] = array(
@@ -149,7 +162,7 @@ class views_plugin_exposed_form extends views_plugin {
   function exposed_form_alter(&$form, &$form_state) {
     if (!empty($this->options['reset_button'])) {
       $form['reset'] = array(
-        '#value' => t('Reset'),
+        '#value' => t($this->options['reset_button_label']),
         '#type' => 'submit',
       );
     }

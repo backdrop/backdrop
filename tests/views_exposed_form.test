@@ -1,0 +1,54 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Test exposed forms.
+ */
+class ViewsExposedFormTest extends ViewsSqlTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Exposed forms',
+      'description' => 'Test exosed forms functionality.',
+      'group' => 'Views',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('views', 'views_ui', 'views_test');
+    module_enable(array('views_ui', 'views_test'));
+  }
+
+  /**
+   * Tests, whether and how the reset button can be renamed.
+   */
+  public function testRenameResetButton() {
+    $account = $this->drupalCreateUser();
+    $this->drupalLogin($account);
+    // Create some random nodes.
+    for ($i = 0; $i < 5; $i++) {
+      $this->drupalCreateNode();
+    }
+    // Look at the page and check the label "reset".
+    $this->drupalGet('test_rename_reset_button');
+    // Rename the label of the reset button.
+    $view = views_get_view('test_rename_reset_button');
+    $view->set_display('default');
+
+    $exposed_form = $view->display_handler->get_option('exposed_form');
+    $exposed_form['options']['reset_button_label'] = $expected_label = $this->randomName();
+    $exposed_form['options']['reset_button'] = TRUE;
+    $view->display_handler->set_option('exposed_form', $exposed_form);
+    $view->save();
+
+    views_invalidate_cache();
+
+    // Look whether ther reset button label changed.
+    $this->drupalGet('test_rename_reset_button');
+
+    $xpath = '//input[@id="edit-reset"]';
+    $element = $this->xpath($xpath);
+    $label = $element[0]['value'];
+    $this->assertEqual($label, $expected_label, t('Label of the rest button changed.'));
+  }
+}
+
