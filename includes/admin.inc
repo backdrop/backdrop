@@ -983,7 +983,7 @@ function views_ui_edit_view_form_cancel($form, &$form_state) {
 function views_ui_edit_view_form_delete($form, &$form_state) {
   unset($_REQUEST['destination']);
   // Redirect to the delete confirm page
-  $form_state['redirect'] = array('admin/structure/views/delete/' . $form_state['view']->name, 'cancel=admin/structure/views/edit/' . $form_state['view']->name);
+  $form_state['redirect'] = array('admin/structure/views/delete/' . $form_state['view']->name, array('cancel' => 'admin/structure/views/edit/' . $form_state['view']->name));
 }
 
 /**
