@@ -2,6 +2,13 @@
 // $Id$
 
 /**
+ * Implements hook_perm().
+ */
+function views_test_perm() {
+  return array('views_test test permission');
+}
+
+/**
  * Implements hook_views_api().
  */
 function views_test_views_api() {
