@@ -14,134 +14,94 @@ function comment_views_default_views() {
   $view->description = 'Contains a block and a page to list recent comments; the block will automatically link to the page, which displays the comment body as well as a link to the node.';
   $view->tag = 'default';
   $view->view_php = '';
-  $view->base_table = 'comments';
-  $view->is_cacheable = '0';
+  $view->base_table = 'comment';
+  $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+  /* Display: Defaults */
   $handler = $view->new_display('default', 'Defaults', 'default');
-  $handler->override_option('relationships', array(
-    'nid' => array(
-      'id' => 'nid',
-      'table' => 'comments',
-      'field' => 'nid',
-      'label' => 'Node',
-      'required' => FALSE,
-    ),
-  ));
-  $handler->override_option('fields', array(
-    'subject' => array(
-      'id' => 'subject',
-      'table' => 'comments',
-      'field' => 'subject',
-      'label' => '',
-      'link_to_comment' => 1,
-      'relationship' => 'none',
-    ),
-    'timestamp' => array(
-      'id' => 'timestamp',
-      'table' => 'comments',
-      'field' => 'timestamp',
-      'label' => '',
-      'date_format' => 'time ago',
-      'custom_date_format' => '',
-      'relationship' => 'none',
-    ),
-  ));
-  $handler->override_option('sorts', array(
-    'timestamp' => array(
-      'id' => 'timestamp',
-      'table' => 'comments',
-      'field' => 'timestamp',
-      'order' => 'DESC',
-      'granularity' => 'second',
-      'relationship' => 'none',
-    ),
-  ));
-  $handler->override_option('filters', array(
-    'status_extra' => array(
-      'id' => 'status_extra',
-      'table' => 'node',
-      'field' => 'status_extra',
-      'operator' => '=',
-      'value' => '',
-      'group' => 0,
-      'exposed' => FALSE,
-      'expose' => array(
-        'operator' => FALSE,
-        'label' => '',
-      ),
-      'relationship' => 'nid',
-    ),
-  ));
-  $handler->override_option('access', array(
-    'type' => 'none',
-    'role' => array(),
-    'perm' => '',
-  ));
-  $handler->override_option('title', 'Recent comments');
-  $handler->override_option('items_per_page', 5);
-  $handler->override_option('use_more', 1);
-  $handler->override_option('style_plugin', 'list');
-  $handler->override_option('style_options', array(
-    'type' => 'ul',
-  ));
+  $handler->display->display_options['title'] = 'Recent comments';
+  $handler->display->display_options['use_more'] = TRUE;
+  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['pager']['options']['items_per_page'] = 5;
+  $handler->display->display_options['style_plugin'] = 'list';
+  $handler->display->display_options['row_plugin'] = 'fields';
+  /* Relationship: Comment: Node */
+  $handler->display->display_options['relationships']['nid']['id'] = 'nid';
+  $handler->display->display_options['relationships']['nid']['table'] = 'comment';
+  $handler->display->display_options['relationships']['nid']['field'] = 'nid';
+  /* Field: Comment: Title */
+  $handler->display->display_options['fields']['subject']['id'] = 'subject';
+  $handler->display->display_options['fields']['subject']['table'] = 'comment';
+  $handler->display->display_options['fields']['subject']['field'] = 'subject';
+  $handler->display->display_options['fields']['subject']['label'] = '';
+  $handler->display->display_options['fields']['subject']['link_to_comment'] = 1;
+  /* Field: Comment: Post date */
+  $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
+  $handler->display->display_options['fields']['timestamp']['table'] = 'comment';
+  $handler->display->display_options['fields']['timestamp']['field'] = 'changed';
+  $handler->display->display_options['fields']['timestamp']['label'] = '';
+  $handler->display->display_options['fields']['timestamp']['date_format'] = 'time ago';
+  /* Sort criterion: Comment: Post date */
+  $handler->display->display_options['sorts']['timestamp']['id'] = 'timestamp';
+  $handler->display->display_options['sorts']['timestamp']['table'] = 'comment';
+  $handler->display->display_options['sorts']['timestamp']['field'] = 'changed';
+  $handler->display->display_options['sorts']['timestamp']['order'] = 'DESC';
+  /* Filter: Node: Published or admin */
+  $handler->display->display_options['filters']['status_extra']['id'] = 'status_extra';
+  $handler->display->display_options['filters']['status_extra']['table'] = 'node';
+  $handler->display->display_options['filters']['status_extra']['field'] = 'status_extra';
+  $handler->display->display_options['filters']['status_extra']['relationship'] = 'nid';
+  $handler->display->display_options['filters']['status_extra']['group'] = 0;
+
+  /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
-  $handler->override_option('fields', array(
-    'title' => array(
-      'id' => 'title',
-      'table' => 'node',
-      'field' => 'title',
-      'label' => 'Reply to',
-      'relationship' => 'nid',
-      'link_to_node' => 1,
-    ),
-    'timestamp' => array(
-      'id' => 'timestamp',
-      'table' => 'comments',
-      'field' => 'timestamp',
-      'label' => '',
-      'date_format' => 'time ago',
-      'custom_date_format' => '',
-      'relationship' => 'none',
-    ),
-    'subject' => array(
-      'id' => 'subject',
-      'table' => 'comments',
-      'field' => 'subject',
-      'label' => '',
-      'link_to_comment' => 1,
-      'relationship' => 'none',
-    ),
-    'comment' => array(
-      'id' => 'comment',
-      'table' => 'comments',
-      'field' => 'comment',
-      'label' => '',
-      'relationship' => 'none',
-    ),
-  ));
-  $handler->override_option('items_per_page', 25);
-  $handler->override_option('use_pager', '1');
-  $handler->override_option('row_options', array(
-    'inline' => array(
-      'title' => 'title',
-      'timestamp' => 'timestamp',
-    ),
-    'separator' => '&nbsp;',
-  ));
-  $handler->override_option('path', 'comments/recent');
-  $handler->override_option('menu', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
-  $handler->override_option('tab_options', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
+  $handler->display->display_options['defaults']['items_per_page'] = FALSE;
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'list';
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['row_plugin'] = 'fields';
+  $handler->display->display_options['row_options']['inline'] = array(
+    'title' => 'title',
+    'timestamp' => 'timestamp',
+  );
+  $handler->display->display_options['row_options']['separator'] = '&nbsp;';
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Node: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['relationship'] = 'nid';
+  $handler->display->display_options['fields']['title']['label'] = 'Reply to';
+  $handler->display->display_options['fields']['title']['link_to_node'] = 1;
+  /* Field: Comment: Post date */
+  $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
+  $handler->display->display_options['fields']['timestamp']['table'] = 'comment';
+  $handler->display->display_options['fields']['timestamp']['field'] = 'changed';
+  $handler->display->display_options['fields']['timestamp']['label'] = '';
+  $handler->display->display_options['fields']['timestamp']['date_format'] = 'time ago';
+  /* Field: Comment: Title */
+  $handler->display->display_options['fields']['subject']['id'] = 'subject';
+  $handler->display->display_options['fields']['subject']['table'] = 'comment';
+  $handler->display->display_options['fields']['subject']['field'] = 'subject';
+  $handler->display->display_options['fields']['subject']['label'] = '';
+  $handler->display->display_options['fields']['subject']['link_to_comment'] = 1;
+  /* Field: Comment: Body */
+  $handler->display->display_options['fields']['comment']['id'] = 'comment';
+  $handler->display->display_options['fields']['comment']['table'] = 'comment';
+  $handler->display->display_options['fields']['comment']['field'] = 'comment';
+  $handler->display->display_options['fields']['comment']['label'] = '';
+  $handler->display->display_options['path'] = 'comments/recent';
+
+  /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block');
-  $handler->override_option('block_description', 'Recent comments view');
+  $handler->display->display_options['block_description'] = 'Recent comments view';
   $views[$view->name] = $view;
 
   $view = new view;

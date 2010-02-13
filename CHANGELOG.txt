@@ -95,6 +95,7 @@ Views 3.x-7.x-dev
     o #669448: items per page override from summary style stopped working with pluggable pagers.
     o #324092 by dagmar: Expose "Items per page" and "Offset".
     o by dereine: Fix delete button in views ui.
+    o by dereine: Update recent_comments default view to a working version.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
