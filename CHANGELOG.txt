@@ -98,6 +98,7 @@ Views 3.x-7.x-dev
     o by dereine: Update recent_comments default view to a working version.
     o by dereine: Test pluggable access.
     o by dereine: Test pluggable default argument.
+    o by dereine: Test exposed forms ui.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

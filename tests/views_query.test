@@ -79,6 +79,13 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
     }
     return $this->sort_order * (($value1 < $value2) ? -1 : 1);
   }
+
+  /**
+   * Helper function to check whether a button with a certain id exists and has a certain label.
+   */
+  protected function helperButtonHasLabel($id, $expected_label, $message = 'Label has the expected value: %label.') {
+    return $this->assertFieldById($id, $expected_label, t($message, array('%label' => $expected_label)));
+  }
 }
 
 abstract class ViewsSqlTest extends ViewsTestCase {
