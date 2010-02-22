@@ -1454,7 +1454,7 @@ class views_plugin_display extends views_plugin {
       case 'exposed_form':
         $form['#title'] .= t('Exposed Form');
         $form['exposed_form'] = array(
-          '#prefix' => '<div class="clear-block">',
+          '#prefix' => '<div class="clearfix">',
           '#suffix' => '</div>',
           '#tree' => TRUE,
         );
@@ -1490,7 +1490,7 @@ class views_plugin_display extends views_plugin {
       case 'pager':
         $form['#title'] .= t('Select which pager, if any, to use for this view');
         $form['pager'] = array(
-          '#prefix' => '<div class="clear-block">',
+          '#prefix' => '<div class="clearfix">',
           '#suffix' => '</div>',
           '#tree' => TRUE,
         );

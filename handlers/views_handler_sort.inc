@@ -65,7 +65,7 @@ class views_handler_sort extends views_handler {
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }
-    $form['op_val_start'] = array('#value' => '<div class="clear-block">');
+    $form['op_val_start'] = array('#value' => '<div class="clearfix">');
     $this->show_sort_form($form, $form_state);
     $form['op_val_end'] = array('#value' => '</div>');
     if ($this->can_expose()) {
