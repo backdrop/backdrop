@@ -151,6 +151,7 @@ files[] = modules/taxonomy/views_handler_argument_term_node_tid_depth_modifier.i
 files[] = modules/taxonomy/views_handler_argument_vocabulary_vid.inc
 files[] = modules/taxonomy/views_handler_field_taxonomy.inc
 files[] = modules/taxonomy/views_handler_field_term_node_tid.inc
+files[] = modules/taxonomy/views_handler_field_term_link_edit.inc
 files[] = modules/taxonomy/views_handler_filter_term_node_tid.inc
 files[] = modules/taxonomy/views_handler_filter_vocabulary_vid.inc
 files[] = modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc

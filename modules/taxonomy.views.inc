@@ -182,6 +182,15 @@ function taxonomy_views_data() {
     ),
   );
 
+  // Link to edit the term
+  $data['term_data']['edit_term'] = array(
+    'field' => array(
+      'title' => t('Term edit link'),
+      'help' => t('Provide a simple link to edit the term.'),
+      'handler' => 'views_handler_field_term_link_edit',
+    ),
+  );
+
   // ----------------------------------------------------------------------
   // term_node table
 
@@ -374,6 +383,7 @@ function taxonomy_views_handlers() {
     'views_handler_filter_term_node_tid',
     'views_handler_filter_term_node_tid_depth',
     'views_handler_relationship',
+    'views_handler_field_term_link_edit',
   );
 }
 
