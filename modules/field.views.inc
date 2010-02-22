@@ -141,7 +141,6 @@ function field_views_field_default_views_data($field) {
 
       case 'text':
       case 'blob':
-        // TODO add markup handlers for these types
       default:
         $filter = 'views_handler_filter_string';
         $argument = 'views_handler_argument_string';

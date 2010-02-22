@@ -101,6 +101,7 @@ Views 3.x-7.x-dev
     o by dereine: Test exposed forms ui.
     o #721388 by JohnAlbin: Replace clear-block class with clearfix class
     o #626704 by DamZ: Build views integration for field.module
+    o #721990: Remove todo.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
