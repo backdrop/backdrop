@@ -104,6 +104,7 @@ Views 3.x-7.x-dev
     o #721990: Remove todo.
     o #681726 by drewish: Allow term edit link field.
     o Test argument validation plugins.
+    o #734062 : Fix use_ajax storage.
 
 
 Views 6.x-3.x-dev

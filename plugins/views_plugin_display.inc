@@ -1682,6 +1682,9 @@ class views_plugin_display extends views_plugin {
       case 'link_display':
         $this->set_option($section, $form_state['values'][$section]);
         break;
+      case 'use_ajax':
+        $this->set_option($section, (bool)$form_state['values'][$section]);
+        break;
       case 'use_more':
         $this->set_option($section, intval($form_state['values'][$section]));
         $this->set_option('use_more_always', intval($form_state['values']['use_more_always']));
