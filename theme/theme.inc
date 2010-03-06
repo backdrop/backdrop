@@ -281,9 +281,6 @@ function template_preprocess_views_view_table(&$vars) {
   $order    = !empty($handler->order) ? $handler->order : 'asc';
 
   $query    = tablesort_get_query_parameters();
-  if ($query) {
-    $query = '&' . $query;
-  }
 
   // Fields must be rendered in order as of Views 2.3, so we will pre-render
   // everything.
