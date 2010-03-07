@@ -27,7 +27,7 @@ Views 3.x-7.x-dev
     o #653628: init declaration for views_handler_filter_many_to_one() did not match parent init.
     o #657700: Fixed 'Override normal sorting if click sorting is used' setting on the table style plugin that was broken by #622602.
     o #473698 by jrglasgow: Fix error in help text regarding custom theming.
-    o #387448 by joachim: Provide better help text to describe how to use sticky sort.
+    o #387448 by johttp://drupal.org/files/issues/fix-pager.patchachim: Provide better help text to describe how to use sticky sort.
     o #652716 by dagmar: "no single" flag on filter objects not completely respected, causing improper default filters.
     o #648438 by dww: In rare circumstances, unnecessary term_node tables could be joined in when adding term_data relationships.
     o #621780 by PaulMagrath: Even/Odd classes wrong with grouping due to row numbering no longer being sequential.
@@ -48,7 +48,7 @@ Views 3.x-7.x-dev
     o #659510 by Souvent22 and dereine: glossary AJAX broken.
     o #335599 by miro_dietiker: Remove the 95% width constraint on the admin hover links to be nicer to themes.
     o #670308 by Mike Wacker: Make views_get_view() properly set disabled flag when retrieving default views.
-    o #536910 by dereine: Theme and language should be taken into account during caching.
+    o #536910 by dehttp://drupal.org/files/issues/fix-pager.patchreine: Theme and language should be taken into account during caching.
     o #657442 by nicholasThompson and dagmar: Include "mail" field in user picture so that modules that need this do not break when rendering picture in Views.
     o #455364 by sdrycroft: Prevent modules trying to define the same default view name from breaking everything.
     o #682140 by dereine: Use new node-building system
@@ -107,6 +107,7 @@ Views 3.x-7.x-dev
     o #734062 : Fix use_ajax storage.
     o by dereine: Fix tablesorts url-query.
     o #731156 by dereine: Remove debug calls for port.
+    o #734066 by dereine: Fix pager queries.
 
 
 Views 6.x-3.x-dev
