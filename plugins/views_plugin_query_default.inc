@@ -1141,7 +1141,6 @@ class views_plugin_query_default extends views_plugin_query {
         db_set_active();
       }
 
-      debug((string) $query);
     }
     $view->execute_time = microtime(TRUE) - $start;
   }

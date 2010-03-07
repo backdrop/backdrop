@@ -23,7 +23,6 @@ class views_handler_field_group_by_numeric extends views_handler_field {
       'function' => $this->options['group_type'],
     );
 
-    debug($this->real_field);
     $this->field_alias = $this->query->add_field($this->table_alias, $this->real_field, NULL, $params);
     $this->add_additional_fields();
   }

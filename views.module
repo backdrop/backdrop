@@ -407,7 +407,6 @@ function views_block_view($delta) {
   if ($view = views_get_view($name)) {
     if ($view->access($display_id)) {
       $output = $view->execute_display($display_id);
-      debug("Block $view->name execute time: " . (microtime(TRUE) - $start) * 1000 . "ms");
       $view->destroy();
       return $output;
     }

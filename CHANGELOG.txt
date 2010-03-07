@@ -106,6 +106,7 @@ Views 3.x-7.x-dev
     o Test argument validation plugins.
     o #734062 : Fix use_ajax storage.
     o by dereine: Fix tablesorts url-query.
+    o #731156 by dereine: Remove debug calls for port.
 
 
 Views 6.x-3.x-dev

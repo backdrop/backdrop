@@ -722,7 +722,6 @@ class view extends views_db_object {
       $cache = $this->display_handler->get_plugin('cache');
     }
     if ($cache && $cache->cache_get('results')) {
-      debug('Used cached results');
     }
     else {
       $this->query->execute($this);
@@ -763,7 +762,6 @@ class view extends views_db_object {
       $cache = $this->display_handler->get_plugin('cache');
     }
     if ($cache && $cache->cache_get('output')) {
-      debug('Used cached output');
     }
     else {
       if ($cache) {

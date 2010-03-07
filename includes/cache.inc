@@ -45,8 +45,6 @@ function _views_fetch_data($table = NULL) {
 
       views_cache_set('views_data', $cache, TRUE);
     }
-
-    debug('Views data build time: ' . (microtime(TRUE) - $start) * 1000 . ' ms');
   }
 
   if (!$table) {
@@ -72,7 +70,6 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL) {
 
     $cache = views_discover_plugins();
 
-    //debug('Views plugins build time: ' . (microtime(TRUE) - $start) * 1000 . ' ms');
   }
 
   if (!$type && !$plugin) {
