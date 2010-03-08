@@ -113,6 +113,7 @@ Views 3.x-7.x-dev
     o #694094 by yhahn: Allow default views cache to be reset.
     o #654738 by Scott Reynolds: Offset date filter missing current time.
     o #716236 by jmiccolis: Allow default menu tabs to also have menu entries.
+    o #687550: Form caching caused display adding to fail. Probably broke other forms here and there too.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

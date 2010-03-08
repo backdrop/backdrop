@@ -1021,6 +1021,7 @@ function template_preprocess_views_ui_edit_view(&$vars) {
     'build_info' => array(
       'args' => array(),
     ),
+    'no_cache' => TRUE,
   );
 
   $display_button = drupal_render(drupal_build_form('views_ui_add_display_form', $form_state));
@@ -2435,7 +2436,7 @@ function views_ui_config_item_form_submit($form, &$form_state) {
   // Add the incoming options to existing options because items using
   // the extra form may not have everything in the form here.
   $options = $form_state['values']['options'] + $form_state['handler']->options;
- 
+
   // This unpacks only options that are in the definition, ensuring random
   // extra stuff on the form is not sent through.
   $handler->unpack_options($handler->options, $options, NULL, FALSE);
