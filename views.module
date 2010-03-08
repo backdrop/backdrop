@@ -729,18 +729,20 @@ function views_get_plugin($type, $plugin) {
  * @return
  *   A view object or NULL if it is not available.
  */
-function &views_get_default_view($view_name) {
+function &views_get_default_view($view_name, $reset = FALSE) {
   $null = NULL;
 
   // Attempt to load individually cached view from cache.
   views_include('cache');
-  $data = views_cache_get("views_default:{$view_name}", TRUE);
-  if (isset($data->data) && is_object($data->data)) {
-    return $data->data;
+  if (!$reset) {
+    $data = views_cache_get("views_default:{$view_name}", TRUE);
+    if (isset($data->data) && is_object($data->data)) {
+      return $data->data;
+    }
   }
 
   // Otherwise, allow entire cache to be rebuilt.
-  $cache = views_discover_default_views();
+  $cache = views_discover_default_views($reset);
   if (isset($cache[$view_name])) {
     return $cache[$view_name];
   }
@@ -768,12 +770,12 @@ function views_new_view() {
  *
  * @return An associative array of all known default views.
  */
-function views_discover_default_views() {
+function views_discover_default_views($reset = FALSE) {
   static $cache = array();
 
-  if (empty($cache)) {
+  if (empty($cache) || $reset) {
     views_include('cache');
-    $cache = _views_discover_default_views();
+    $cache = _views_discover_default_views($reset);
   }
   return $cache;
 }
@@ -848,7 +850,7 @@ function views_get_all_views($reset = FALSE) {
     // Get all default views.
     $status = variable_get('views_defaults', array());
 
-    foreach (views_discover_default_views() as $view) {
+    foreach (views_discover_default_views($reset) as $view) {
       // Determine if default view is enabled or disabled.
       if (isset($status[$view->name])) {
         $view->disabled = $status[$view->name];
@@ -886,7 +888,7 @@ function views_get_all_views($reset = FALSE) {
 function views_get_view($name, $reset = FALSE) {
   views_include('view');
   $view = view::load($name, $reset);
-  $default_view = views_get_default_view($name);
+  $default_view = views_get_default_view($name, $reset);
 
   if (empty($view) && empty($default_view)) {
     return;
