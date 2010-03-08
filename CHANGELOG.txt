@@ -108,6 +108,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix tablesorts url-query.
     o #731156 by dereine: Remove debug calls for port.
     o #734066 by dereine: Fix pager queries.
+    o #422434 by BWPanda: Correct (NULL) to (NOT NULL) in varios operator descriptions for empty/not empty.
 
 
 Views 6.x-3.x-dev

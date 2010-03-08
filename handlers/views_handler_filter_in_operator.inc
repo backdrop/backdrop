@@ -93,7 +93,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
           'values' => 0,
         ),
         'not empty' => array(
-          'title' => t('Is not empty (NULL)'),
+          'title' => t('Is not empty (NOT NULL)'),
           'method' => 'op_empty',
           'short' => t('not empty'),
           'values' => 0,
