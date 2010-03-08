@@ -546,8 +546,8 @@ function hook_views_query_substitutions() {
  * This hook is called at the very beginning of views processing,
  * before anything is done.
  *
- * Adding output to the view cam be accomplished by placing text on
- * $view->attachment_before and $view->attachment_after
+ * Adding output to the view can be accomplished by placing text on
+ * $view->attachment_before and $view->attachment_after.
  */
 function hook_views_pre_view(&$view, &$display_id, &$args) {
   // example code here
@@ -557,8 +557,8 @@ function hook_views_pre_view(&$view, &$display_id, &$args) {
  * This hook is called right before the build process, but after displays
  * are attached and the display performs its pre_execute phase.
  *
- * Adding output to the view cam be accomplished by placing text on
- * $view->attachment_before and $view->attachment_after
+ * Adding output to the view can be accomplished by placing text on
+ * $view->attachment_before and $view->attachment_after.
  */
 function hook_views_pre_build(&$view) {
   // example code here
@@ -568,8 +568,8 @@ function hook_views_pre_build(&$view) {
  * This hook is called right before the execute process. The query is
  * now fully built, but it has not yet been run through db_rewrite_sql.
  *
- * Adding output to the view cam be accomplished by placing text on
- * $view->attachment_before and $view->attachment_after
+ * Adding output to the view can be accomplished by placing text on
+ * $view->attachment_before and $view->attachment_after.
  */
 function hook_views_pre_execute(&$view) {
   // example code here
@@ -580,8 +580,9 @@ function hook_views_pre_execute(&$view) {
  * been executed, and the pre_render() phase has already happened for
  * handlers, so all data should be available.
  *
- * Adding output to the view cam be accomplished by placing text on
- * $view->attachment_before and $view->attachment_after
+ * Adding output to the view can be accomplished by placing text on
+ * $view->attachment_before and $view->attachment_after. Altering the
+ * content can be achieved by editing the items of $view->result.
  *
  * This hook can be utilized by themes.
  */

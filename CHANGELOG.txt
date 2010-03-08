@@ -109,6 +109,7 @@ Views 3.x-7.x-dev
     o #731156 by dereine: Remove debug calls for port.
     o #734066 by dereine: Fix pager queries.
     o #422434 by BWPanda: Correct (NULL) to (NOT NULL) in varios operator descriptions for empty/not empty.
+    o #692428 by Roi Danton: Documentation typo fix.
 
 
 Views 6.x-3.x-dev
