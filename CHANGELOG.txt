@@ -111,6 +111,7 @@ Views 3.x-7.x-dev
     o #422434 by BWPanda: Correct (NULL) to (NOT NULL) in varios operator descriptions for empty/not empty.
     o #692428 by Roi Danton: Documentation typo fix.
     o #694094 by yhahn: Allow default views cache to be reset.
+    o #654738 by Scott Reynolds: Offset date filter missing current time.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
