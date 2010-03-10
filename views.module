@@ -204,7 +204,7 @@ function views_menu_alter(&$callbacks) {
   $views = views_get_applicable_views('uses hook menu');
   foreach ($views as $data) {
     list($view, $display_id) = $data;
-    $result = $view->execute_hook_menu($display_id);
+    $result = $view->execute_hook_menu($display_id, $callbacks);
     if (is_array($result)) {
       // The menu system doesn't support having two otherwise
       // identical paths with different placeholders.  So we

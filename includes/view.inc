@@ -950,10 +950,14 @@ class view extends views_db_object {
   }
 
   /**
-   * Called to get hook_menu information from the view and the
-   * named display handler.
+   * Called to get hook_menu() information from the view and the named display handler.
+   *
+   * @param $display_id
+   *   A display id.
+   * @param $callbacks
+   *   A menu callback array passed from views_menu_alter().
    */
-  function execute_hook_menu($display_id = NULL) {
+  function execute_hook_menu($display_id = NULL, $callbacks = array()) {
     // Prepare the view with the information we have.
 
     // This was probably already called, but it's good to be safe.
@@ -963,7 +967,7 @@ class view extends views_db_object {
 
     // Execute the view
     if (isset($this->display_handler)) {
-      return $this->display_handler->execute_hook_menu();
+      return $this->display_handler->execute_hook_menu($callbacks);
     }
   }
 
