@@ -442,10 +442,6 @@ function views_invalidate_cache() {
  * is accessible, then the view is accessible.
  */
 function views_access() {
-  if (user_access('access all views')) {
-    return TRUE;
-  }
-
   $args = func_get_args();
   foreach ($args as $arg) {
     if ($arg === TRUE) {
@@ -466,17 +462,29 @@ function views_access() {
 }
 
 /**
- * Access callback to determine if the logged in user has any of the
- * requested roles.
+ * Access callback for the views_plugin_access_perm access plugin.
  *
- * This must be in views.module as it is called by menu access callback
- * and can be called often.
+ * Determine if the specified user has access to a view on the basis of
+ * permissions. If the $account argument is omitted, the current user
+ * is used.
  */
-function views_check_roles($rids) {
+function views_check_perm($perm, $account = NULL) {
+  return user_access($perm, $account) || user_access('access all views', $account);
+}
+
+/**
+ * Access callback for the views_plugin_access_role access plugin.
+
+ * Determine if the specified user has access to a view on the basis of any of
+ * the requested roles. If the $account argument is omitted, the current user
+ * is used.
+ */
+function views_check_roles($rids, $account = NULL) {
   global $user;
-  $roles = array_keys($user->roles);
-  $roles[] = $user->uid ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
-  return array_intersect(array_filter($rids), $roles);
+  $account = isset($account) ? $account : $user;
+  $roles = array_keys($account->roles);
+  $roles[] = $account->uid ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
+  return user_access('access all views', $account) || array_intersect(array_filter($rids), $roles);
 }
 // ------------------------------------------------------------------
 // Functions to help identify views that are running or ran

@@ -122,6 +122,7 @@ Views 3.x-7.x-dev
     o #737120 by james.williams: Fix help text for date offsets which gave incorrect information.
     o #737118 by DeFr: Allow API calls to delete to not clear the views cache to facilitate batch operations.
     o #684656 by yhahn: Prevent Views from performing an unneeded variable_set() during block list.
+    o #673852 by yhahn: Allow access plugins to choose whether or not "access all views" should be used.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
