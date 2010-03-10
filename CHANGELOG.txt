@@ -124,6 +124,7 @@ Views 3.x-7.x-dev
     o #684656 by yhahn: Prevent Views from performing an unneeded variable_set() during block list.
     o #673852 by yhahn: Allow access plugins to choose whether or not "access all views" should be used.
     o #550132 by tha_sun: Allow plugins to better control the callbacks used for page type displays.
+    o #546586 by jeffschuler: String 0 values were being treated as empty therefore not displayed as fields.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
