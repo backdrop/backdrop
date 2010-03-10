@@ -362,7 +362,11 @@ function views_block_info() {
     }
   }
 
-  variable_set('views_block_hashes', $hashes);
+  // Only save hashes if they have changed.
+  $old_hashes = variable_get('views_block_hashes', array());
+  if ($hashes != $old_hashes) {
+    variable_set('views_block_hashes', $hashes);
+  }
   // Save memory: Destroy those views.
   foreach ($views as $view) {
     $view->destroy();
