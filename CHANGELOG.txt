@@ -120,6 +120,7 @@ Views 3.x-7.x-dev
     o #704490 by domidc: Remove invalid short tags from template.
     o #727798 by SteveReher: Fix typo in overrides.html documentation.
     o #737120 by james.williams: Fix help text for date offsets which gave incorrect information.
+    o #737118 by DeFr: Allow API calls to delete to not clear the views cache to facilitate batch operations.
     o #684656 by yhahn: Prevent Views from performing an unneeded variable_set() during block list.
 
 Views 6.x-3.x-dev
