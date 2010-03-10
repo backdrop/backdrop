@@ -53,6 +53,9 @@ class views_handler_field_node extends views_handler_field {
         if (isset($languages[$values->{$this->aliases['language']}])) {
           $this->options['alter']['language'] = $languages[$values->{$this->aliases['language']}];
         }
+        else {
+          unset($this->options['alter']['language']);
+        }
       }
     }
     return $data;

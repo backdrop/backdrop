@@ -115,6 +115,7 @@ Views 3.x-7.x-dev
     o #716236 by jmiccolis: Allow default menu tabs to also have menu entries.
     o #687550: Form caching caused display adding to fail. Probably broke other forms here and there too.
     o #687550: Follow Up remove dsm.
+    o #713210 by dereine: Node language settings could persist for subsequent rows if they should not have had a language.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
