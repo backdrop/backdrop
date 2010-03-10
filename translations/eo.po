@@ -1564,8 +1564,8 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr "Dato en maŝinlegebla formato. CCYY-MM-DD HH:MM:SS estas preferata."
 
 #: includes/filter.handlers.inc:1384
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours and 30 minutes\""
-msgstr "Deŝovo de la nuna tempo kiel \"+1 tago\" aŭ \"-2 horoj kaj 30 minutoj\""
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes\""
+msgstr "Deŝovo de la nuna tempo kiel \"+1 tago\" aŭ \"-2 horoj -30 minutoj\""
 
 #: includes/filter.handlers.inc:1434
 msgid "Invalid date format."

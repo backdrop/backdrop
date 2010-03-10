@@ -24,7 +24,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
         '#title' => t('Value type'),
         '#options' => array(
           'date' => t('A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred.'),
-          'offset' => t('An offset from the current time such as "+1 day" or "-2 hours and 30 minutes"'),
+          'offset' => t('An offset from the current time such as "+1 day" or "-2 hours -30 minutes"'),
         ),
         '#default_value' => !empty($this->value['type']) ? $this->value['type'] : 'date',
       );

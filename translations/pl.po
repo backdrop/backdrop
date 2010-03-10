@@ -1534,8 +1534,8 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr "Data w formacie maszynowym (machine redable format). Preferowana CCYY-MM-DD HH:MM:SS ."
 
 #: includes/filter.handlers.inc:1304
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours and 30 minutes\""
-msgstr "Przesunięcie od obecnego czasu takie jak \"+1 dzień\" albo \"-2 godziny i 30 minut\""
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes\""
+msgstr "Przesunięcie od obecnego czasu takie jak \"+1 dzień\" albo \"-2 godziny -30 minut\""
 
 #: includes/filter.handlers.inc:1354;1360;1364
 msgid "Invalid date format."

@@ -775,8 +775,8 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr "Ein Datum in einem maschinenlesbaren Format. JJJJ-MM-TT HH:MM:SS ist bevorzugt."
 
 #: handlers/views_handler_filter_date.inc:27
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours and 30 minutes\""
-msgstr "Ein Zeitversatz bezogen auf die aktuellen Uhrzeit, wie etwa „+1 Tag“ oder „-2 Stunden und 30 Minuten“"
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes\""
+msgstr "Ein Zeitversatz bezogen auf die aktuellen Uhrzeit, wie etwa „+1 Tag“ oder „-2 Stunden -30 Minuten“"
 
 #: handlers/views_handler_filter_date.inc:77;83;87
 msgid "Invalid date format."

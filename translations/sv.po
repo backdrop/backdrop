@@ -1083,8 +1083,8 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr "Ett datum i ett maskinläsbart format. CCYY-MM-DD HH:MM:SS är att föredra."
 
 #: handlers/views_handler_filter_date.inc:27
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours and 30 minutes\""
-msgstr "En kompensation av aktuell tid såsom \"+1 dag\" eller \"-2 timmar och 30 minuter\""
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes""
+msgstr "En kompensation av aktuell tid såsom \"+1 dag\" eller \"-2 timmar -30 minuter\""
 
 #: handlers/views_handler_filter_date.inc:77;83;87
 msgid "Invalid date format."

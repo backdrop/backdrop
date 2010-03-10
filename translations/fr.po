@@ -1493,8 +1493,8 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr "Date dans n'importe quel format machine. AAAA-MM-JJ HH:MM:SS est préférable"
 
 #: includes/filter.handlers.inc:1304
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours and 30 minutes\""
-msgstr "Décalage à partir de l'heure courante, par exemple \"+1 jour\" ou \"-2 heures et 30 minutes\""
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes\""
+msgstr "Décalage à partir de l'heure courante, par exemple \"+1 jour\" ou \"-2 heures -30 minutes\""
 
 #: includes/filter.handlers.inc:1354;1360;1364
 msgid "Invalid date format."

@@ -827,7 +827,7 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr ""
 
 #: handlers/views_handler_filter_date.inc:27
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours and 30 minutes\""
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes""
 msgstr ""
 
 #: handlers/views_handler_filter_date.inc:77;83;87
