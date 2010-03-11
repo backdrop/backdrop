@@ -114,6 +114,7 @@ files[] = modules/node/views_handler_field_node_link_delete.inc
 files[] = modules/node/views_handler_field_node_link_edit.inc
 files[] = modules/node/views_handler_field_node_revision_link_delete.inc
 files[] = modules/node/views_handler_field_node_revision_link_revert.inc
+files[] = modules/node/views_handler_field_node_path.inc
 files[] = modules/node/views_handler_field_node_type.inc
 files[] = modules/node/views_handler_filter_history_user_timestamp.inc
 files[] = modules/node/views_handler_filter_node_status.inc
