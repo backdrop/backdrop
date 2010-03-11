@@ -562,7 +562,7 @@ class views_handler_field extends views_handler {
     $value = rtrim(preg_replace('/(?:<(?!.+>)|&(?!.+;)).*$/us', '', $value));
 
     if (!empty($alter['ellipsis'])) {
-      $value .= '...';
+      $value .= '&#8230;';
     }
 
     if (!empty($alter['html'])) {
