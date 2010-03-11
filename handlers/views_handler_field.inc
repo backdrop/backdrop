@@ -596,6 +596,12 @@ class views_handler_field extends views_handler {
     // were removed by check_plain().
     $path = strip_tags(html_entity_decode(strtr($path, $tokens)));
 
+    // If the path is empty do not build a link around the given text and return
+    // it as is.
+    if (empty($path)) {
+      return $text;
+    }
+
     // Parse the URL and move any query and fragment parameters out of the path.
     $url = parse_url($path);
     if (isset($url['query'])) {

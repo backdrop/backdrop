@@ -127,6 +127,7 @@ Views 3.x-7.x-dev
     o #546586 by jeffschuler: String 0 values were being treated as empty therefore not displayed as fields.
     o #651274 by dagmar: Show relationship labels in field lists for style config forms.
     o #738608 by dagmar: Footer cannot be overridden.
+    o #638004 by stBorchert and BillyMG: If a field "Output as link" ends up with an empty path, do not actually print an empty link.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
