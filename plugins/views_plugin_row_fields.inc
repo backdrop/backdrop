@@ -27,10 +27,7 @@ class views_plugin_row_fields extends views_plugin_row {
    * Provide a form for setting options.
    */
   function options_form(&$form, &$form_state) {
-    $options = array();
-    foreach ($this->display->handler->get_handlers('field') as $field => $handler) {
-      $options[$field] = $handler->ui_name();
-    }
+    $options = $this->display->handler->get_field_labels();
 
     if (empty($this->options['inline'])) {
       $this->options['inline'] = array();

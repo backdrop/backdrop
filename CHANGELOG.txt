@@ -125,6 +125,7 @@ Views 3.x-7.x-dev
     o #673852 by yhahn: Allow access plugins to choose whether or not "access all views" should be used.
     o #550132 by tha_sun: Allow plugins to better control the callbacks used for page type displays.
     o #546586 by jeffschuler: String 0 values were being treated as empty therefore not displayed as fields.
+    o #651274 by dagmar: Show relationship labels in field lists for style config forms.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

@@ -694,6 +694,35 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
+   * Retrieve a list of fields for the current display with the
+   *  relationship associated if it exists.
+   */ 
+  function get_field_labels() {
+    $options = array();
+    foreach ($this->get_handlers('relationship') as $relationship => $handler) {
+      if ($label = $handler->label()) {
+        $relationships[$relationship] = $label;
+      }
+      else {
+        $relationships[$relationship] = $handler->ui_name();
+      }
+    }
+
+    foreach ($this->get_handlers('field') as $id => $handler) {
+      if ($label = $handler->label()) {
+        $options[$id] = $label;
+      }
+      else {
+        $options[$id] = $handler->ui_name();
+      }
+      if (!empty($handler->options['relationship']) && !empty($relationships[$handler->options['relationship']])) {
+        $options[$id] = '(' . $relationships[$handler->options['relationship']] . ') ' . $options[$id];
+      }
+    }
+    return $options;
+  }
+
+  /**
    * Intelligently set an option either from this display or from the
    * default display, if directed to do so.
    */

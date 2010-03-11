@@ -170,14 +170,7 @@ class views_plugin_style_table extends views_plugin_style {
     $columns = $this->sanitize_columns($this->options['columns']);
 
     // Create an array of allowed columns from the data we know:
-    foreach ($handlers as $field => $handler) {
-      if ($label = $handler->label()) {
-        $field_names[$field] = $label;
-      }
-      else {
-        $field_names[$field] = $handler->ui_name();
-      }
-    }
+    $field_names = $this->display->handler->get_field_labels();
 
     if (isset($this->options['default'])) {
       $default = $this->options['default'];
