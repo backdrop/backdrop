@@ -131,6 +131,7 @@ Views 3.x-7.x-dev
     o #658842 by tomgf: Provide a proper ellipsis instead of "...".
     o #662654 by dereine: Do not use query to load/validate a user if the user happens to be the logged in user.
     o #548292 by mikeker: Create a "Node: path" field that can be used to display the aliased path to a node.
+    o #657384 by smoothify: Under rare circumstances, date default argument could get wrong value.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

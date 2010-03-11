@@ -38,7 +38,7 @@ class views_handler_argument_date extends views_handler_argument_formula {
     if (!$raw && $this->options['default_argument_type'] == 'date') {
       return date($this->arg_format, REQUEST_TIME);
     }
-    elseif (!$raw) {
+    else if (!$raw && in_array($this->options['default_argument_type'], array('node_created', 'node_changed'))) {
       foreach (range(1, 3) as $i) {
         $node = menu_get_object('node', $i);
         if (!empty($node)) {
