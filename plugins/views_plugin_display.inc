@@ -266,7 +266,7 @@ class views_plugin_display extends views_plugin {
 
       // These guys are special
       'header' => array('header'),
-      'footer' => array('empty'),
+      'footer' => array('footer'),
       'empty' => array('empty'),
       'relationships' => array('relationships'),
       'fields' => array('fields'),
