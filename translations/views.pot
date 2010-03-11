@@ -559,7 +559,7 @@ msgid "Case in path"
 msgstr ""
 
 #: handlers/views_handler_argument_string.inc:75
-msgid "When printing url paths, how to transform the of the argument. Do not use this unless with Postgres as it uses case sensitive comparisons."
+msgid "When printing url paths, how to transform the case of the argument. Do not use this unless with Postgres as it uses case sensitive comparisons."
 msgstr ""
 
 #: handlers/views_handler_argument_string.inc:88
