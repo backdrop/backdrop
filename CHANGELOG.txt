@@ -133,6 +133,7 @@ Views 3.x-7.x-dev
     o #548292 by mikeker: Create a "Node: path" field that can be used to display the aliased path to a node.
     o #657384 by smoothify: Under rare circumstances, date default argument could get wrong value.
     o #666912 by dereine: Prevent imports of views created by newer, incompatible versions of Views.
+    o #672864 by dereine: Add a column count class to the table style for themers to more easily do generic targeting.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
