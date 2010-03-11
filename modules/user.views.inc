@@ -119,6 +119,9 @@ function user_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
     ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
   );
 
   // language
