@@ -70,11 +70,17 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     // However, is_integer() will always fail, since $argument is a string.
     if (is_numeric($argument) && $argument == (int)$argument) {
       if ($type == 'uid' || $type == 'either') {
+        if ($argument == $GLOBALS['user']->uid) {
+          $account = $GLOBALS['user'];
+        }
         $where = 'uid = %d';
       }
     }
     else {
       if ($type == 'name' || $type == 'either') {
+        if ($argument == $GLOBALS['user']->name) {
+          $account = $GLOBALS['user'];
+        }
         $where = "name = '%s'";
       }
     }
@@ -84,8 +90,10 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
       return FALSE;
     }
 
-    $query = "SELECT uid, name FROM {users} WHERE $where";
-    $account = db_fetch_object(db_query($query, $argument));
+    if (!isset($account)) {
+      $query = "SELECT uid, name FROM {users} WHERE $where";
+      $account = db_fetch_object(db_query($query, $argument));
+    }
     if (empty($account)) {
       // User not found.
       return FALSE;

@@ -129,6 +129,7 @@ Views 3.x-7.x-dev
     o #738608 by dagmar: Footer cannot be overridden.
     o #638004 by stBorchert and BillyMG: If a field "Output as link" ends up with an empty path, do not actually print an empty link.
     o #658842 by tomgf: Provide a proper ellipsis instead of "...".
+    o #662654 by dereine: Do not use query to load/validate a user if the user happens to be the logged in user.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
