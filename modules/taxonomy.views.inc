@@ -140,6 +140,10 @@ function taxonomy_views_data() {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'help' => t('Taxonomy term name.'),
+    ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
       'help' => t('Taxonomy term name.'),
@@ -215,6 +219,17 @@ function taxonomy_views_data() {
     'term_hierarchy' => array(
       'left_field' => 'tid',
       'field' => 'tid',
+    ),
+  );
+
+  $data['term_node']['vid'] = array(
+    'title' => t('Node'),
+    'help' => t('Get all nodes tagged with a term.'),
+    'relationship' => array(
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'vid',
+      'label' => t('node'),
     ),
   );
 
