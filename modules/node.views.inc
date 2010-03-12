@@ -462,7 +462,7 @@ function node_views_data() {
      // Information for displaying a title as a field
     'field' => array(
       'field' => 'title', // the real field
-      'handler' => 'views_handler_field_node',
+      'handler' => 'views_handler_field_node_revision',
       'click sortable' => TRUE,
      ),
     'sort' => array(
@@ -599,6 +599,7 @@ function node_views_handlers() {
     'views_handler_field_node_revision_link_revert',
     'views_handler_field_node_revision_link_delete',
     'views_handler_field_history_user_timestamp',
+    'views_handler_field_node_revision',
 
     // argument handlers
     'views_handler_argument_node_type',

@@ -143,6 +143,8 @@ Views 3.x-7.x-dev
     o #677936 by mr.baileys: "views-row-last" class accidentally omitted on grids with just one row.
     o #673184 by markus petrux: Default views not always properly loaded by language.
     o #730342 by dereine: Inline documentation fix.
+    o #685622 by dereine: Field to provide link to a node revision.
+
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
