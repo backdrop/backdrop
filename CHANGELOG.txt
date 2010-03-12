@@ -137,6 +137,7 @@ Views 3.x-7.x-dev
     o #552498 by dereine: User email as an argument.
     o reverted #734066 by dereine: Fix pager queries.
     o #515324 by dereine: Make API documentation easier to find.
+    o #640862 by dereine: Properly clear feed icon when cloning a view to prevent duplicate feed icons in attachments.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
