@@ -761,7 +761,7 @@ class views_handler_argument extends views_handler {
       return FALSE;
     }
 
-    if (isset($this->definition['numeric']) && !isset($this->options['break_phrase']) && !is_numeric($arg)) {
+    if (!empty($this->definition['numeric']) && !isset($this->options['break_phrase']) && !is_numeric($arg)) {
       return FALSE;
     }
 
