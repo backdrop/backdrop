@@ -11,7 +11,7 @@
  */
 function views_views_plugins() {
   $js_path = drupal_get_path('module', 'views') . '/js';
-  return array(
+  $plugins = array(
     // display, style, row, argument default, argument validator and access.
     'display' => array(
       // Default settings for all display plugins.
@@ -296,6 +296,31 @@ function views_views_plugins() {
       ),
     ),
   );
+
+  if (module_invoke('ctools', 'api_version', '1.3')) {
+    $plugins['style']['jump_menu_summary'] = array(
+      'title' => t('Jump menu'),
+      'help' => t('Puts all of the results into a select box and allows the user to go to a different page based upon the results.'),
+      'handler' => 'views_plugin_style_summary_jump_menu',
+      'theme' => 'views_view_summary_jump_menu',
+      'type' => 'summary', // only shows up as a summary style
+      'uses options' => TRUE,
+      'help topic' => 'style-summary-jump-menu',
+    );
+    $plugins['style']['jump_menu'] = array(
+      'title' => t('Jump menu'),
+      'help' => t('Puts all of the results into a select box and allows the user to go to a different page based upon the results.'),
+      'handler' => 'views_plugin_style_jump_menu',
+      'theme' => 'views_view_jump_menu',
+      'uses row plugin' => TRUE,
+      'uses fields' => TRUE,
+      'uses options' => TRUE,
+      'type' => 'normal',
+      'help topic' => 'style-jump-menu',
+    );
+  }
+
+  return $plugins;
 }
 
 /**
@@ -383,7 +408,7 @@ class views_plugin extends views_object {
   /**
    * Handle any special handling on the validate form.
    */
-  function options_submit(&$form, &$form_state) { }
+  function options_submit($form, &$form_state) { }
 
   /**
    * Add anything to the query that we might need to.

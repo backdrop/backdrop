@@ -150,6 +150,7 @@ Views 3.x-7.x-dev
     o #708618 by thsutton: Friendlier message when a handler is missing.
     o #508124 by dereine: "accept_null" should have been "accept null" in boolean filter definitions.
     o #513396 by yhager: Attempt multi-byte safety for "trim at word boundary" setting.
+    o #692970 by dereine: Missing jump menu definition
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
