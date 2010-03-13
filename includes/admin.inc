@@ -913,7 +913,7 @@ function views_ui_edit_view_form($form, &$form_state, $view) {
   if (is_numeric($view->vid)) {
     $form['buttons']['delete'] = array(
       '#type' => 'submit',
-      '#value' => t('Delete'),
+      '#value' => $view->type == t('Overridden') ? t('Revert') : t('Delete'),
       '#submit' => array('views_ui_edit_view_form_delete'),
     );
   }
@@ -926,7 +926,7 @@ function views_ui_edit_view_form($form, &$form_state, $view) {
  * Validate that a view is complete and whole.
  */
 function views_ui_edit_view_form_validate($form, &$form_state) {
-  // Do not validate cancel or delete.
+  // Do not validate cancel or delete or revert.
   if (empty($form_state['clicked_button']['#value']) || $form_state['clicked_button']['#value'] != t('Save')) {
     return;
   }
