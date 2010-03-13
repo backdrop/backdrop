@@ -24,7 +24,7 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
       $this->value_value = $this->definition['label'];
     }
     if (isset($this->definition['accept_null'])) {
-      $this->accept_null = (bool) $this->definition['accept null'];
+      $this->accept_null = (bool) $this->definition['accept_null'];
     }
     $this->value_options = NULL;
     parent::construct();
