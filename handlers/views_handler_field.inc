@@ -553,8 +553,17 @@ class views_handler_field extends views_handler {
 
     $value = drupal_substr($value, 0, $alter['max_length']);
 
+    // TODO: replace this with cleanstring of ctools
     if (!empty($alter['word_boundary'])) {
-      if (preg_match("/(.*)\b.+/us", $value, $matches)) {
+      $regex = "(.*)\b.+";
+      if (function_exists('mb_ereg')) {
+        mb_regex_encoding('UTF-8');
+        $found = mb_ereg($regex, $value, $matches);
+      }
+      else {
+        $found = preg_match("/$regex/us", $value, $matches);
+      }
+      if ($found) {
         $value = $matches[1];
       }
     }
