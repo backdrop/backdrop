@@ -146,6 +146,7 @@ Views 3.x-7.x-dev
     o #730342 by dereine: Inline documentation fix.
     o #685622 by dereine: Field to provide link to a node revision.
     o #701588 by dereine: Delete button should say Revert on Overridden views.
+    o #708618 by thsutton: Friendlier message when a handler is missing.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
