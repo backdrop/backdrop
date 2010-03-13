@@ -98,7 +98,7 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#type' => 'textfield',
       '#title' => t('Exposed items per page options'),
       '#required' => TRUE,
-      '#description' => t('Set between which values the user can choose when determining the items per page. Separated by colon.'),
+      '#description' => t('Set between which values the user can choose when determining the items per page. Separated by comma.'),
       '#default_value' => $this->options['expose']['items_per_page_options'],
       '#process' => array('views_process_dependency'),
       '#dependency' => array(
@@ -145,7 +145,7 @@ class views_plugin_pager_full extends views_plugin_pager {
       $error = TRUE;
     }
     if ($error) {
-      form_set_error('pager_options][expose][items_per_page_options', t('Please insert a list of integer numeric values separated by colons: e.g: 10, 20, 50, 100'));
+      form_set_error('pager_options][expose][items_per_page_options', t('Please insert a list of integer numeric values separated by commas: e.g: 10, 20, 50, 100'));
     }
   }
 
