@@ -1,7 +1,6 @@
 <?php
 // $Id$
 
-module_load_include('inc', 'views', 'tests/views_query');
 /**
 * Basic test for pluggable access.
 */

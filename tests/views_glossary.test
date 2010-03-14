@@ -5,8 +5,6 @@
  *   Test glossary view ( summary of arguments )
  */
 
-module_load_include('inc', 'views', 'tests/views_query');
-
 class ViewsGlossaryTestCase extends ViewsSqlTest {
   public static function getInfo() {
     return array(

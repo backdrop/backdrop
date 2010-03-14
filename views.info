@@ -252,6 +252,7 @@ files[] = theme/views-view-unformatted.tpl.php
 files[] = theme/views-view.tpl.php
 ; Tests
 files[] = tests/views_access.test
+files[] = tests/views_basic.test
 files[] = tests/views_argument_default.test
 files[] = tests/views_argument_validator.test
 files[] = tests/views_exposed_form.test
@@ -259,5 +260,4 @@ files[] = tests/views_glossary.test
 files[] = tests/views_groupby.test
 files[] = tests/views_handlers.test
 files[] = tests/views_pager.test
-files[] = tests/views_query.test
-
+files[] = tests/views_query.inc

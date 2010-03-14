@@ -153,6 +153,7 @@ Views 3.x-7.x-dev
     o #692970 by dereine: Missing jump menu definition
     o #739448 by brunodbo: Allow "Jump Menu" to set the "Choose" text in style options.
     o #721358 by dereine: Unable to select "Limit list to selected items." With tests.
+    o by dereine: Bring simpletest structure to the same level then 6.x-3.x
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

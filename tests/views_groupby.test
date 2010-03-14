@@ -1,8 +1,6 @@
 <?php
 // $Id$
 
-module_load_include('inc', 'views', 'tests/views_query');
-
 class ViewsQueryGroupByTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
