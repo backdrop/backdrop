@@ -57,6 +57,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
 
     $options['operator']['default'] = 'IN';
     $options['value']['default'] = array();
+    $options['expose']['contains']['reduce'] = array('default' => FALSE);
 
     return $options;
   }

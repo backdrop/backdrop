@@ -124,6 +124,7 @@ class views_tabset {
    */
   function render() {
     views_add_js('tabs');
+    drupal_add_library('system', 'ui.tabs');
     views_add_css('views-tabs');
 
     if (empty($this->selected)) {
@@ -174,7 +175,7 @@ function theme_views_tabset($variables) {
   $tab_output = "<div class=\"views-tab-area\">\n";
 
   foreach ($tabs as $name => $tab) {
-    $link_output .= '<li' . ($name == $selected ? ' class="active"': '') . '><a href="#views-tab-' . $tab->name . '" id="views-tab-title-' . $tab->name . '">' . check_plain($tab->title) . '</a></li>' . "\n";
+    $link_output .= '<li' . ($name == $selected ? ' class="ui-tabs-selected"': '') . '><a href="#views-tab-' . $tab->name . '" id="views-tab-title-' . $tab->name . '">' . check_plain($tab->title) . '</a></li>' . "\n";
     $tab_output .= '<div id="views-tab-' . $tab->name . '" class="views-tab">' . $tab->render() . "</div>\n";
   }
   $link_output .= "</ul>\n";

@@ -16,7 +16,8 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
     $options['hide'] = array('default' => FALSE);
     $options['path'] = array('default' => '');
-    $options['text'] = array('default' => t('Go'), 'translatable' => TRUE);
+    $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
+    $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
 
     return $options;
   }
@@ -64,6 +65,13 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       '#type' => 'textfield',
       '#title' => t('Button text'),
       '#default_value' => $this->options['text'],
+    );
+    
+    $form['choose'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Choose text'),
+      '#default_value' => $this->options['choose'],
+      '#description' => t('The text that will appear as the selected option in the jump menu.'),
     );
   }
 
@@ -120,9 +128,10 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     $settings = array(
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
+      'choose' => $this->options['choose'],
     );
 
-    return drupal_get_form('ctools_jump_menu', $options, $settings);
+    return drupal_render(drupal_get_form('ctools_jump_menu', $options, $settings));
   }
 
   function render_set($title, $records) {

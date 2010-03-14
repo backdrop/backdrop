@@ -13,7 +13,7 @@ Drupal.Views = {};
  */
 Drupal.behaviors.viewsTabs = {
   attach: function (context) {
-  if ($.viewsUi && $.viewsUi.tabs) {
+	if ($.ui && $.ui.tabs) {
     $('#views-tabset').once('views-processed').viewsTabs({
       selectedClass: 'active'
     });

@@ -39,11 +39,8 @@
 }
 
 .views-tabset .views-tabs ul {
-  list-style-type: none !important;
-  list-style-image: none !important;
   padding: 0;
   margin: 0;
-  position: relative;
 }
 
 .views-tabset .views-tabs ul li {
@@ -51,13 +48,13 @@
   list-style-type: none;
   list-style-image: none;
   line-height: 100%;
-  border-bottom: #D6DBDE 1px solid;
+  border-bottom: #D6DBDE 1px solid !important;
   margin: 0;
   padding: 0;
   position: relative;
 }
 
-.views-tabset .views-tabs ul li.active {
+.views-tabset .views-tabs ul li.ui-tabs-selected {
   background: #fff url(../images/arrow-active.png) no-repeat right;
   position: relative;
   width: 118px;
@@ -77,12 +74,12 @@
   text-decoration: none;
 }
 
-.views-tabset .views-tabs ul li.active a {
+.views-tabset .views-tabs ul li.ui-tabs-selected a {
   color: #000;
   font-weight: bold;
 }
 
-.views-tabset .views-tabs ul li.active a:hover {
+.views-tabset .views-tabs ul li.ui-tabs-selected a:hover {
   color: #000;
   background: #fff url(../images/arrow-active.png) no-repeat right;
 }
