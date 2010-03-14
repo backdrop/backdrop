@@ -35,7 +35,7 @@ class viewsArgumentValidatorTest extends ViewsSqlTest {
   }
 
   function view_test_argument_validate_php($string) {
-    $code = 'return $argument == '. $string .';';
+    $code = 'return $argument == \''. $string .'\';';
     $view = new view;
     $view->name = 'view_argument_validate_numeric';
     $view->description = '';

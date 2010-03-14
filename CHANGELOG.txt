@@ -155,6 +155,7 @@ Views 3.x-7.x-dev
     o #721358 by dereine: Unable to select "Limit list to selected items." With tests.
     o by dereine: Bring simpletest structure to the same level then 6.x-3.x
     o by dereine: Fix pluggable access tests, by rename hook_perm to hook_permission
+    o by dereine: Fix exceptions for pluggable argument validation tests.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
