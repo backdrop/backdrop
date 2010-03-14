@@ -156,6 +156,7 @@ Views 3.x-7.x-dev
     o by dereine: Bring simpletest structure to the same level then 6.x-3.x
     o by dereine: Fix pluggable access tests, by rename hook_perm to hook_permission
     o by dereine: Fix exceptions for pluggable argument validation tests.
+    o #697224 by Sun, thanoulas, dereine: Replace $.viewsUI.tabs with $.ui.tabs(was commited already)
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
