@@ -2,10 +2,15 @@
 // $Id$
 
 /**
- * Implements hook_perm().
+ * Implements hook_permission().
  */
-function views_test_perm() {
-  return array('views_test test permission');
+function views_test_permission() {
+  return array(
+    'views_test test permission' => array(
+      'title' => t('Test permission'),
+      'description' => t('views_test test permission'),
+    ),
+  );
 }
 
 /**
