@@ -159,6 +159,7 @@ Views 3.x-7.x-dev
     o #697224 by Sun, thanoulas, dereine: Replace $.viewsUI.tabs with $.ui.tabs(was commited already)
     o #418230 by Scott Reynolds: Views adds wrong nid with "Node: Has new content".
     o #558602 by dboulet and Crashtest_: Summary views should provide "active" class on links properly.
+    o #496634 by dereine: Fix long-standing issue of "0" not being a valid argument for multiple integer CCK types.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

@@ -120,6 +120,7 @@ function taxonomy_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
       'skip base' => array('node', 'node_revision'),
+      'zero is null' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_term_node_tid',
