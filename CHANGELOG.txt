@@ -158,6 +158,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix exceptions for pluggable argument validation tests.
     o #697224 by Sun, thanoulas, dereine: Replace $.viewsUI.tabs with $.ui.tabs(was commited already)
     o #418230 by Scott Reynolds: Views adds wrong nid with "Node: Has new content".
+    o #558602 by dboulet and Crashtest_: Summary views should provide "active" class on links properly.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
