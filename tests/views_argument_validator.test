@@ -1,6 +1,5 @@
 <?php
 // $Id$
-module_load_include('inc', 'views', 'tests/views_query');
 
 class viewsArgumentValidatorTest extends ViewsSqlTest {
   function getInfo() {
