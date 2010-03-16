@@ -160,6 +160,7 @@ Views 3.x-7.x-dev
     o #418230 by Scott Reynolds: Views adds wrong nid with "Node: Has new content".
     o #558602 by dboulet and Crashtest_: Summary views should provide "active" class on links properly.
     o #496634 by dereine: Fix long-standing issue of "0" not being a valid argument for multiple integer CCK types.
+    o #521954 by Agileware: Allow taxonomy breadcrumbs to link to actual taxonomy page instead of back to view.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
