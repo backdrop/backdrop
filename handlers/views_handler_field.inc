@@ -229,6 +229,7 @@ class views_handler_field extends views_handler {
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1)
         ),
+        '#maxlength' => 255,
       );
       $form['alter']['link_class'] = array(
         '#title' => t('Link class'),
