@@ -109,8 +109,8 @@ class views_plugin_pager_full extends views_plugin_pager {
     $form['expose']['offset'] = array(
       '#type' => 'checkbox',
       '#title' => t('Expose Offset'),
-      '#description' => t('When checked, users can determine how many items per page show in a view'),
-      '#default_value' => $this->options['expose']['items_per_page'],
+      '#description' => t('When checked, users can determine how many items should be skipped at the beginning.'),
+      '#default_value' => $this->options['expose']['offset'],
     );
 
     $form['expose']['offset_label'] = array(
