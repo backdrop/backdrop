@@ -164,6 +164,7 @@ Views 3.x-7.x-dev
     o #720012 by dereine: Exposed offset was accidentally using items per page text and field.
     o #528838 by zzolo: If exposed form is in a block, and the form does not validate, ensure the form does not render twice.
     o #727304 by mariusz.slonina: User edit link was disallowing users from editing themselves.
+    o #474174 by dereine: Analyze will now warn about "node/%" not being a valid path for Views.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

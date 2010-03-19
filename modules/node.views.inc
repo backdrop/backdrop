@@ -734,6 +734,13 @@ function node_views_analyze($view) {
       }
     }
   }
+  foreach ($view->display as $id => $display) {
+    if ($display->display_plugin == 'page') {
+      if ($display->handler->get_option('path') == 'node/%') {
+        $ret[] = views_ui_analysis(t('Display %display has set node/% as path. This will not produce what you want. If you want to have multiple versions of the node view, use panels.', array('%display' => $display->display_title)), 'warning');
+      }
+    }
+  }
 
   return $ret;
 }
