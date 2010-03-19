@@ -163,6 +163,7 @@ Views 3.x-7.x-dev
     o #521954 by Agileware: Allow taxonomy breadcrumbs to link to actual taxonomy page instead of back to view.
     o #720012 by dereine: Exposed offset was accidentally using items per page text and field.
     o #528838 by zzolo: If exposed form is in a block, and the form does not validate, ensure the form does not render twice.
+    o #727304 by mariusz.slonina: User edit link was disallowing users from editing themselves.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
