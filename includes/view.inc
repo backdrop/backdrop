@@ -418,6 +418,12 @@ class view extends views_db_object {
     if (!empty($form_state['js settings'])) {
       $this->js_settings = $form_state['js settings'];
     }
+ 
+    // Don't render exposed filter form when there's form errors.
+    // Applies when filters are in a block ("exposed_block" option).
+    if (form_get_errors() && empty($form_state['rerender'])) {
+      return NULL;
+    }
 
     return $output;
   }
