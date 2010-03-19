@@ -11,7 +11,7 @@ A typical use of an argument might be to reduce a view to a single node, a singl
 <dd>The argument is removed from the view as though it weren't there and all results will be displayed.</dd>
 
 <dt>Hide view / Page not found</dt>
-<dd>The view will remove itself entirely if the argument is not present; for a block this means it simply won't a appear. For page views the View will return a 404 and present a "Page not found" error. </dd>
+<dd>The view will remove itself entirely if the argument is not present; for a block this means it simply won't appear. For page views the View will return a 404 and present a "Page not found" error. </dd>
 
 <dt>Display empty text</dt>
 <dd>The value of the <a href=topic:views/empty-text>empty text</a> will be displayed.</dd>
@@ -38,7 +38,7 @@ Default argument selection is available <strong>only if the action to take is "P
 <dd>You can use this to easily default a menu item to the logged in user. For example, if you created the path 'blogs' and gave it a User: ID argument with this default, 'blogs' would go to the user's own blogs, and blogs/1 would go to User ID 1's blogs.</dd>
 </dl>
 
-Please bear in mind that the selection of default argument happens only if an argument is not provided. If using a display that has no argument source, such as a block, this will be the case 100% of the time. However, if using a display that reads arguments from the URL, this will happen only if the URL did not contain an argument.
+Please bear in mind that the selection of default argument happens only if an argument is not provided. If using a display that has no argument source, such as a block, this will always be used. However, if using a display that reads arguments from the URL, this will happen only if the URL did not contain an argument.
 <h3>Argument validation</h3>
 Arguments can also have validators, which are pluggable systems used to ensure that arguments fit within certain parameters. When a validator is chosen, it may provide some settings for the validator, including the action to take if an argument is presented, but it fails to validate. These actions are generally the same as the default actions above, excluding the ability to provide another default.
 
