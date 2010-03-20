@@ -21,7 +21,6 @@ function views_ajax() {
     $path = isset($_REQUEST['view_path']) ? $_REQUEST['view_path'] : NULL;
     $dom_id = isset($_REQUEST['view_dom_id']) ? $_REQUEST['view_dom_id'] : NULL;
     $pager_element = isset($_REQUEST['pager_element']) ? $_REQUEST['pager_element'] : NULL;
-    views_include('ajax');
 
     $commands = array();
 
@@ -64,7 +63,7 @@ function views_ajax() {
     $messages = theme('status_messages');
     $commands[] = ajax_command_replace('.views-messages', $messages);
 
-    ajax_render($commands);
+    return $commands;
   }
 }
 
@@ -190,7 +189,7 @@ function views_ajax_command_trigger_preview() {
 function views_ajax_error($message) {
   $commands = array();
   $commands[] = views_ajax_command_set_form($message, t('Error'));
-  ajax_render($commands);
+  return $commands;
 }
 
 /**

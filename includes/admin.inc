@@ -1667,7 +1667,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
     $output[] = views_ajax_command_disable_buttons();
   }
 
-  return $js ? array('#type' => 'ajax_commands', '#ajax_commands' => $output) : $output;
+  return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
 }
 
 /**
@@ -1698,7 +1698,7 @@ function views_ui_add_display($js, $view) {
       $output = array();
       $output[] = views_ajax_command_add_tab($id, $title, $body);
     }
-    $output = array('#type' => 'ajax_commands', '#ajax_commands' => $output);
+    $output = array('#type' => 'ajax', '#commands' => $output);
   }
 
   // But the non-js variant will return output if it didn't redirect us.
@@ -1829,7 +1829,7 @@ function views_ui_analyze_view($js, $view) {
     }
     $commands = array();
     $commands[] = views_ajax_command_set_form($output, t('Analyse'));
-    return $js ? array('#type' => 'ajax_commands', '#ajax_commands' => $commands) : $commands;
+    return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
   }
   return $output;
 }
@@ -1903,7 +1903,7 @@ function views_ui_edit_details($js, $view) {
     if (empty($output)) {
       return views_ui_regenerate_tabs($view);
     }
-    return $js ? array('#type' => 'ajax_commands', '#ajax_commands' => $output) : $output;
+    return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
 
   }
   return $output;

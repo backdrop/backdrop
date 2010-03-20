@@ -330,11 +330,11 @@ function views_ui_ajax_deliver($page_callback_result) {
         break;
     }
   }
-  elseif (is_array($page_callback_result) && isset($page_callback_result['#type']) && ($page_callback_result['#type'] == 'ajax_commands')) {
+  elseif (is_array($page_callback_result) && isset($page_callback_result['#type']) && ($page_callback_result['#type'] == 'ajax')) {
     // Complex AJAX callbacks can return a result that contains a specific
     // set of commands to send to the browser.
-    if (isset($page_callback_result['#ajax_commands'])) {
-      $commands = $page_callback_result['#ajax_commands'];
+    if (isset($page_callback_result['#commands'])) {
+      $commands = $page_callback_result['#commands'];
     }
   }
   else {
@@ -349,5 +349,24 @@ function views_ui_ajax_deliver($page_callback_result) {
   }
   $js = drupal_add_js();
   $commands[] = ajax_command_settings($js['settings']['data']);
-  ajax_render($commands);
+
+  // This function needs to do the same thing that drupal_deliver_html_page()
+  // does: add any needed http headers, print rendered output, and perform
+  // end-of-request tasks. By default, $header=TRUE, and we add a
+  // 'text/javascript' header. The page callback can override $header by
+  // returning an 'ajax' element with a #header property. This can be set to
+  // FALSE to prevent the 'text/javascript' header from being output, necessary
+  // when outputting to an IFRAME. This can also be set to 'multipart', in which
+  // case, we don't output JSON, but JSON content wrapped in a textarea, making
+  // a 'text/javascript' header incorrect.
+  if ($header && $header !== 'multipart') {
+    drupal_add_http_header('Content-Type', 'text/javascript; charset=utf-8');
+  }
+  $output = ajax_render($commands);
+  if ($header === 'multipart') {
+    // jQuery file uploads: http://malsup.com/jquery/form/#code-samples
+    $output = '<textarea>' . $output . '</textarea>';
+  }
+  print $output;
+  ajax_footer();
 }
