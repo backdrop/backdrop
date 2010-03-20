@@ -138,6 +138,9 @@ function user_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_node_language',
     ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_node_language',
+    ),
   );
 
   // picture

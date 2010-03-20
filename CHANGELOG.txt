@@ -167,6 +167,7 @@ Views 3.x-7.x-dev
     o #474174 by dereine: Analyze will now warn about "node/%" not being a valid path for Views.
     o #711968 by dereine: Taxonomy selections could disappear on upgrade.
     o #733142 by dereine: Link path field restricts input to too few characters for long links.
+    o #619642 by dereine: Allow argument for user language.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
