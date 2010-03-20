@@ -170,6 +170,7 @@ Views 3.x-7.x-dev
     o #619642 by dereine: Allow argument for user language.
     o #748168 by dereine: Fix ajax interface based on changed ajax framework in d7.
     o #697224 Reverted Replace $.viewsUI.tabs with $.ui.tabs
+    o #748168 by dereine: Fix ajax interface based on changed ajax framework in d7(2).
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

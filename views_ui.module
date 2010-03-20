@@ -310,6 +310,8 @@ function views_ui_default_load($name) {
  */
 function views_ui_ajax_deliver($page_callback_result) {
   $commands = array();
+  $header = TRUE;
+
   if (!isset($page_callback_result)) {
     // Simply delivering an empty commands array is sufficient. This results
     // in the AJAX request being completed, but nothing being done to the page.
@@ -331,9 +333,18 @@ function views_ui_ajax_deliver($page_callback_result) {
     }
   }
   elseif (is_array($page_callback_result) && isset($page_callback_result['#type']) && ($page_callback_result['#type'] == 'ajax')) {
-    // Complex AJAX callbacks can return a result that contains a specific
-    // set of commands to send to the browser.
-    if (isset($page_callback_result['#commands'])) {
+    // Complex AJAX callbacks can return a result that contains an error message
+    // or a specific set of commands to send to the browser.
+    $page_callback_result += element_info('ajax');
+    $header = $page_callback_result['#header'];
+    $error = $page_callback_result['#error'];
+    if (isset($error) && $error !== FALSE) {
+      if ((empty($error) || $error === TRUE)) {
+        $error = t('An error occurred while handling the request: The server received invalid input.');
+      }
+      $commands[] = ajax_command_alert($error);
+    }
+    else {
       $commands = $page_callback_result['#commands'];
     }
   }
