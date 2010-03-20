@@ -14,17 +14,15 @@ class views_handler_area_text extends views_handler_area {
     parent::options_form($form, $form_state);
 
     $form['content'] = array(
-      '#type' => 'textarea',
+      '#type' => 'text_format',
       '#default_value' => $this->options['content'],
       '#rows' => 6,
       '#description' => $description,
+      '#format' => $this->options['format'],
     );
-
-    $form['format'] = filter_form($this->options['format']);
   }
 
   function options_submit(&$form, &$form_state) {
-    $form_state['values']['options']['format'] = $form_state['values']['format'];
     parent::options_submit($form, $form_state);
   }
 
