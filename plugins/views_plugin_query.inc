@@ -76,14 +76,6 @@ class views_plugin_query extends views_plugin {
     $this->offset = $offset;
   }
 
-  function init_pager(&$view) {
-    // @todo -- probably this should be a method on the display rather than directly calling
-    // get plugin?
-    if (empty($this->pager)) {
-      $this->pager = $view->display_handler->get_plugin('pager');
-    }
-  }
-
   /**
    * Render the pager, if necessary.
    */
