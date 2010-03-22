@@ -1460,7 +1460,7 @@ class view extends views_db_object {
     $output = '';
     $output .= $this->export_row('view', $indent);
     // Set the API version
-    $output .= $indent . '$view->api_version = 2' . ";\n";
+    $output .= $indent . '$view->api_version = ' . views_api_version() . ";\n";
     $output .= $indent . '$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */' . "\n";
 
     foreach ($this->display as $id => $display) {

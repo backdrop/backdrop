@@ -182,6 +182,7 @@ Views 3.x-7.x-dev
     o #698270 by dereine, dagmar: Fix pager legacy functions view::set_items_per_page() and view::set_offset().
     o #730810 by alex_b: Add fields for authmap table.
     o #747418 by dereine: Fix taxonomy term ID bug introduced in #496634.
+    o #666920 by dereine: Include actual API version in exports.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
