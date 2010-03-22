@@ -302,6 +302,7 @@ class views_handler_filter extends views_handler {
       return;
     }
 
+    // Build the exposed form, when its based on an operator.
     if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator'])) {
       $operator = $this->options['expose']['operator'];
       $this->operator_form($form, $form_state);
@@ -316,6 +317,7 @@ class views_handler_filter extends views_handler {
       unset($form['operator']);
     }
 
+    // Build the form and set the value based on the identifier.
     if (!empty($this->options['expose']['identifier'])) {
       $value = $this->options['expose']['identifier'];
       $this->value_form($form, $form_state);
