@@ -176,6 +176,7 @@ Views 3.x-7.x-dev
     o #675154 by dereine and Crashtest_: Improvements to rendering trim text and tag stripping.
     o #675264 by peck66: Freeform profile list field did not output properly.
     o #663372 by dan.nsk: Allow tokens to work in the "target" field during link rewriting.
+    o #720874 by dereine: Fix division by zero error in full pager when "items per page" is set to 0.
     o #721168 by infojunkie: Guard against uninstantiated pagers.
     o #748920 by Infojunkie, dereine: $vars[class] should be an array in inc:template_preprocess_views_view_table()
 

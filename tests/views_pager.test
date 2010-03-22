@@ -261,6 +261,26 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $this->assertEqual(count($view->result), 3, t('Take sure that only a certain count of items is returned'));
 
     // TODO test number of pages.
+
+    // Test items per page = 0.
+    $view->destroy();
+
+    // Setup and test a offset.
+    $view = $this->viewsPagerFull();
+    $view->set_display('default');
+
+    $pager = array(
+      'type' => 'full',
+      'options' => array(
+        'offset' => 0,
+        'items_per_page' => 0,
+      ),
+    );
+
+    $view->display_handler->set_option('pager', $pager);
+    $view->execute();
+    $this->assertEqual($view->query->pager->get_items_per_page(), 0);
+    $this->assertEqual(count($view->result), 11);
   }
 
   function viewsPagerFull() {
