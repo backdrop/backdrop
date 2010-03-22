@@ -644,6 +644,10 @@ class views_handler_field extends views_handler {
     if (isset($alter['query'])) {
       $options['query'] = strtr($alter['query'], $tokens);
     }
+    if (isset($alter['alias'])) {
+      // Alias is a boolean field, so no token.
+      $options['alias'] = $alter['alias'];
+    }
     if (isset($alter['fragment'])) {
       $options['fragment'] = strtr($alter['fragment'], $tokens);
     }
