@@ -82,7 +82,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
       }
     }
     else {
-      if (isset($this->argument)) {
+      if (!isset($this->argument)) {
         $empty = TRUE;
       }
     }

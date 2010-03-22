@@ -181,6 +181,7 @@ Views 3.x-7.x-dev
     o #748920 by Infojunkie, dereine: $vars[class] should be an array in inc:template_preprocess_views_view_table()
     o #698270 by dereine, dagmar: Fix pager legacy functions view::set_items_per_page() and view::set_offset().
     o #730810 by alex_b: Add fields for authmap table.
+    o #747418 by dereine: Fix taxonomy term ID bug introduced in #496634.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
