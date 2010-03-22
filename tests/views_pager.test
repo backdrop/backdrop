@@ -263,7 +263,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     // TODO test number of pages.
   }
 
-  function ViewsPagerFull() {
+  function viewsPagerFull() {
     $view = new view;
     $view->name = 'test_pager_full';
     $view->description = '';
@@ -289,6 +289,43 @@ class ViewsPagerTest extends DrupalWebTestCase {
     return $view;
   }
 
+  function viewsPagerFullFields() {
+    $view = new view;
+    $view->name = 'test_pager_full';
+    $view->description = '';
+    $view->tag = '';
+    $view->view_php = '';
+    $view->base_table = 'node';
+    $view->is_cacheable = FALSE;
+    $view->api_version = 2;
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Defaults */
+    $handler = $view->new_display('default', 'Defaults', 'default');
+    $handler->display->display_options['access']['type'] = 'none';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['pager']['options']['items_per_page'] = '5';
+    $handler->display->display_options['pager']['options']['offset'] = '0';
+    $handler->display->display_options['pager']['options']['id'] = '0';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['alter']['alter_text'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['make_link'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = 1;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = 1;
+    $handler->display->display_options['fields']['title']['alter']['strip_tags'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['html'] = 0;
+    $handler->display->display_options['fields']['title']['hide_empty'] = 0;
+    $handler->display->display_options['fields']['title']['empty_zero'] = 0;
+    $handler->display->display_options['fields']['title']['link_to_node'] = 0;
+    return $view;
+  }
 
   /**
    * Test the minipager.
@@ -296,4 +333,23 @@ class ViewsPagerTest extends DrupalWebTestCase {
   public function testMiniPager() {
     // the functionality is the same as the normal pager, so i don't know what to test here.
   }
+
+  /**
+   * Test rendering with NULL pager.
+   */
+  public function testRenderNullPager() {
+    // Create 11 nodes and take sure that everyone is returned.
+    // We create 11 nodes, because the default pager plugin had 10 items per page.
+    for ($i = 0; $i < 11; $i++) {
+      $this->drupalCreateNode();
+    }
+    $view = $this->viewsPagerFullFields();
+    $view->set_display('default');
+    $view->execute();
+    $view->use_ajax = TRUE; // force the value again here
+    $view->query->pager = NULL;
+    $output = $view->render();
+    $this->assertEqual(preg_match('/<ul class="pager">/', $output), 0, t('The pager is not rendered.'));
+  }
 }
+
