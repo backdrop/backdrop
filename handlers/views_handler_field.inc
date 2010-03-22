@@ -634,7 +634,7 @@ class views_handler_field extends views_handler {
       $options['attributes']['class'] = array($class);
     }
 
-    $target = check_plain(trim($alter['target']));
+    $target = check_plain(trim(strtr($alter['target'],$tokens)));
     if (!empty($target)) {
       $options['attributes']['target'] = $target;
     }
