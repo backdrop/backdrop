@@ -374,17 +374,6 @@ class views_handler_field extends views_handler {
         ),
       );
 
-      $form['alter']['strip_tags'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Strip HTML tags'),
-        '#description' => t('If checked, all HTML tags will be stripped.'),
-        '#default_value' => $this->options['alter']['strip_tags'],
-        '#process' => array('views_process_dependency'),
-        '#dependency' => array(
-          'edit-options-alter-trim' => array(1)
-        ),
-      );
-
       $form['alter']['html'] = array(
         '#type' => 'checkbox',
         '#title' => t('Field can contain HTML'),
@@ -395,7 +384,16 @@ class views_handler_field extends views_handler {
           'edit-options-alter-trim' => array(1)
         ),
       );
+
+      $form['alter']['strip_tags'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Strip HTML tags'),
+        '#description' => t('If checked, all HTML tags will be stripped.'),
+        '#default_value' => $this->options['alter']['strip_tags'],
+        '#process' => array('views_process_dependency'),
+      );
     }
+
     $form['empty'] = array(
       '#type' => 'textfield',
       '#title' => t('Empty text'),
@@ -510,6 +508,10 @@ class views_handler_field extends views_handler {
       $tokens = $this->get_render_tokens($alter);
       $value = $this->render_altered($alter, $tokens);
     }
+ 
+    if (!empty($alter['strip_tags'])) {
+      $value = strip_tags($value);
+    }
 
     if (!empty($alter['trim']) && !empty($alter['max_length'])) {
       $value = $this->render_trim_text($alter, $value);
@@ -541,45 +543,12 @@ class views_handler_field extends views_handler {
    */
   function render_trim_text($alter, $value) {
     if (!empty($alter['strip_tags'])) {
-      $value = strip_tags($value);
       // NOTE: It's possible that some external fields might override the
       // element type so if someone from, say, CCK runs into a bug here,
       // this may be why =)
       $this->definition['element type'] = 'span';
     }
-
-    if (drupal_strlen($value) <= $alter['max_length']) {
-      return $value;
-    }
-
-    $value = drupal_substr($value, 0, $alter['max_length']);
-
-    // TODO: replace this with cleanstring of ctools
-    if (!empty($alter['word_boundary'])) {
-      $regex = "(.*)\b.+";
-      if (function_exists('mb_ereg')) {
-        mb_regex_encoding('UTF-8');
-        $found = mb_ereg($regex, $value, $matches);
-      }
-      else {
-        $found = preg_match("/$regex/us", $value, $matches);
-      }
-      if ($found) {
-        $value = $matches[1];
-      }
-    }
-    // Remove scraps of HTML entities from the end of a strings
-    $value = rtrim(preg_replace('/(?:<(?!.+>)|&(?!.+;)).*$/us', '', $value));
-
-    if (!empty($alter['ellipsis'])) {
-      $value .= '&#8230;';
-    }
-
-    if (!empty($alter['html'])) {
-      $value = _filter_htmlcorrector($value);
-    }
-
-    return $value;
+    return drupal_trim_text($alter, $value);
   }
 
   /**
