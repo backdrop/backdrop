@@ -113,8 +113,13 @@ function template_preprocess_views_ui_list_views(&$vars) {
       continue;
     }
 
+    if ($form_state['values']['status'] != 'all' && (!empty($view->disabled) == $form_state['values']['status'])) {
+      continue;
+    }
+
     $item = new stdClass();
     $item->ops = array();
+
     if (empty($view->disabled)) {
       $item->ops[] = l(t('Edit'), "admin/structure/views/edit/$view->name");
       $item->ops[] = l(t('Export'), "admin/structure/views/export/$view->name");
@@ -261,6 +266,17 @@ function views_ui_list_views_form($form, &$form_state) {
       t('Default') => t('Default'),
       t('Overridden') => t('Overridden'),
     ),
+    '#default_value' => 'all',
+  );
+
+  $status = array(
+    '0' => t('Disabled'),
+    '1' => t('Enabled'),
+  );
+  $form['status'] = array(
+    '#type' => 'select',
+    '#title' => t('Status'),
+    '#options' => array_merge($all, $status),
     '#default_value' => 'all',
   );
 

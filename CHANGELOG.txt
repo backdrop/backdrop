@@ -185,6 +185,7 @@ Views 3.x-7.x-dev
     o #666920 by dereine: Include actual API version in exports.
     o #689446 by dereine: Allow use of l() in link rewriting to not check for aliases.
     o #684608 by dereine: Default argument to acquire a taxonomy tid from the URL or a node in the URL.
+    o #319991 by dereine: Add a search widget for "Enabled" and "Disabled" in view admin.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
