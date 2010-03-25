@@ -49,6 +49,13 @@ function template_preprocess_views_view(&$vars) {
   $vars['name']       = $view->name;
   $vars['display_id'] = $view->current_display;
 
+  // Basic classes
+  $vars['classes_array'] = array();
+  $vars['classes_array'][] = 'view';
+  $vars['classes_array'][] = 'view-' . views_css_safe($vars['name']);
+  $vars['classes_array'][] = 'view-id-' . $vars['name'];
+  $vars['classes_array'][] = 'view-display-id-' . $vars['display_id'];
+
   $empty = empty($vars['rows']);
 
   $vars['header'] = $view->display_handler->render_area('header', $empty);
@@ -110,6 +117,7 @@ function template_preprocess_views_view(&$vars) {
   // wrapper.
   static $dom_id = 1;
   $vars['dom_id'] = !empty($view->dom_id) ? $view->dom_id : $dom_id++;
+  $vars['classes_array'][] = 'view-dom-id-' . $vars['dom_id'];
 
   // If using AJAX, send identifying data about this view.
   if ($view->use_ajax) {
@@ -137,6 +145,8 @@ function template_preprocess_views_view(&$vars) {
     drupal_add_js($settings, 'setting');
     views_add_js('ajax_view');
   }
+  // Flatten the classes to a string for the template file.
+  $vars['classes'] = implode(' ', $vars['classes_array']);
 }
 
 /**
@@ -457,17 +467,22 @@ function template_preprocess_views_view_unformatted(&$vars) {
   $view = $vars['view'];
   $rows = $vars['rows'];
 
+  $vars['classes_array'] = array();
   $vars['classes'] = array();
   // Set up striping values.
   foreach ($rows as $id => $row) {
-    $vars['classes'][$id] = 'views-row';
-    $vars['classes'][$id] .= ' views-row-' . ($id + 1);
-    $vars['classes'][$id] .= ' views-row-' . ($id % 2 ? 'even' : 'odd');
+    $vars['classes_array'][$id][] = 'views-row';
+    $vars['classes_array'][$id][] = 'views-row-' . ($id + 1);
+    $vars['classes_array'][$id][] = 'views-row-' . ($id % 2 ? 'even' : 'odd');
     if ($id == 0) {
-      $vars['classes'][$id] .= ' views-row-first';
+      $vars['classes_array'][$id][] = 'views-row-first';
     }
+    if ($id == count($rows) -1) {
+      $vars['classes_array'][$id][] = 'views-row-last';
+    }
+    // Flatten the classes to a string for each row for the template file.
+    $vars['classes'][$id] = implode(' ', $vars['classes_array'][$id]);
   }
-  $vars['classes'][$id] .= ' views-row-last';
 }
 
 /**
