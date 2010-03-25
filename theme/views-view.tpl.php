@@ -14,6 +14,7 @@
  *     .view-dom-id-[dom_id]
  * - $classes: A string version of $classes_array for use in the class attribute
  * - $css_name: A css-safe version of the view name.
+ * - $css_class: The user-specified classes names, if any
  * - $header: The view header
  * - $footer: The view footer
  * - $rows: The results of the view query, if any

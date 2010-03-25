@@ -56,6 +56,12 @@ function template_preprocess_views_view(&$vars) {
   $vars['classes_array'][] = 'view-id-' . $vars['name'];
   $vars['classes_array'][] = 'view-display-id-' . $vars['display_id'];
 
+  $css_class = $view->display_handler->get_option('css_class');
+  if (!empty($css_class)) {
+    $vars['css_class'] = preg_replace('/[^a-zA-Z0-9- ]/', '-', $css_class);
+    $vars['classes_array'][] = $vars['css_class'];
+  }
+
   $empty = empty($vars['rows']);
 
   $vars['header'] = $view->display_handler->render_area('header', $empty);
