@@ -548,7 +548,7 @@ class views_handler_field extends views_handler {
       // this may be why =)
       $this->definition['element type'] = 'span';
     }
-    return drupal_trim_text($alter, $value);
+    return views_trim_text($alter, $value);
   }
 
   /**

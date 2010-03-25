@@ -1337,7 +1337,7 @@ function views_process_check_options($element, &$form_state) {
  * @param $value
  *   The string which should be trimmed.
  */
-function drupal_trim_text($alter, $value) {
+function views_trim_text($alter, $value) {
   if (drupal_strlen($value) > $alter['max_length']) {
     $value = drupal_substr($value, 0, $alter['max_length']);
     if (!empty($alter['word_boundary'])) {
