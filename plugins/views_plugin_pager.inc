@@ -84,6 +84,13 @@ class views_plugin_pager extends views_plugin {
   }
 
   /**
+   * Get the pager id, if it exists
+   */
+  function get_pager_id() {
+    return isset($this->options['id']) ? $this->options['id'] : 0;
+  }
+
+  /**
    * Provide the default form form for validating options
    */
   function options_validate(&$form, &$form_state) { }
