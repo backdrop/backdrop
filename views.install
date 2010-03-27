@@ -11,12 +11,7 @@ function views_install() {
     db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
     db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
   }
-  drupal_install_schema('views');
   db_query("UPDATE {system} SET weight = 10 WHERE name = 'views'");
-}
-
-function views_uninstall() {
-  drupal_uninstall_schema('views');
 }
 
 /**

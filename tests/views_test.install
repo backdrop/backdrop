@@ -1,14 +1,6 @@
 <?php
 // $Id$
 
-function views_test_install() {
-  drupal_install_schema('views_test');
-}
-
-function views_test_uninstall() {
-  drupal_uninstall_schema('views_test');
-}
-
 function views_test_schema() {
   $schema['views_test'] = array(
     'description' => 'Basic test table for Views tests.',
