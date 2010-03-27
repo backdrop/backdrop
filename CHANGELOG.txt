@@ -188,6 +188,7 @@ Views 3.x-7.x-dev
     o #319991 by dereine: Add a search widget for "Enabled" and "Disabled" in view admin.
     o #740686 by jacine: Introduce $classes array in views-view.tpl.php.
     o #582348 by dagmar: Allow UI setting a CSS class for views-view.tpl.php
+    o #99370 followup by dereine: add lost get_pager_id
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
