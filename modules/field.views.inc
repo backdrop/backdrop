@@ -66,14 +66,14 @@ function field_views_field_default_views_data($field) {
     $entity_info = entity_get_info($entity);
 
     $data[$current_table]['table']['join'][$entity_info['base table']] = array(
-      'left_field' => $entity_info['object keys']['id'],
+      'left_field' => $entity_info['entity keys']['id'],
       'field' => 'entity_id',
       'extra' => array(array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE)),
     );
 
     if (!empty($entity_info['object keys']['revision']) && !empty($entity_info['revision table'])) {
       $data[$revision_table]['table']['join'][$entity_info['revision table']] = array(
-        'left_field' => $entity_info['object keys']['revision'],
+        'left_field' => $entity_info['entity keys']['revision'],
         'field' => 'revision_id',
         'extra' => array(array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE)),
       );
