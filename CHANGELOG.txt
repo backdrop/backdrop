@@ -193,6 +193,7 @@ Views 3.x-7.x-dev
     o #755346 by KarenS: Rename fieldapi arguments, introduced by #707724
     o #755346 by KarenS: Rename fieldapi arguments, introduced by #707724(2)
     o by dereine: Disable recent comment view by default.
+    o #531686 by jweowu: Update process failed to properly track its history, causing errors when updating from really old sites.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
