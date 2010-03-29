@@ -11,7 +11,7 @@
   <h3><?php print $title; ?></h3>
 <?php endif; ?>
 <?php foreach ($rows as $id => $row): ?>
-  <div class="<?php print $classes[$id]; ?>">
+  <div class="<?php print $classes_array[$id]; ?>">
     <?php print $row; ?>
   </div>
 <?php endforeach; ?>

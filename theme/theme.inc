@@ -477,17 +477,17 @@ function template_preprocess_views_view_unformatted(&$vars) {
   $vars['classes'] = array();
   // Set up striping values.
   foreach ($rows as $id => $row) {
-    $vars['classes_array'][$id][] = 'views-row';
-    $vars['classes_array'][$id][] = 'views-row-' . ($id + 1);
-    $vars['classes_array'][$id][] = 'views-row-' . ($id % 2 ? 'even' : 'odd');
+    $vars['classes'][$id][] = 'views-row';
+    $vars['classes'][$id][] = 'views-row-' . ($id + 1);
+    $vars['classes'][$id][] = 'views-row-' . ($id % 2 ? 'even' : 'odd');
     if ($id == 0) {
-      $vars['classes_array'][$id][] = 'views-row-first';
+      $vars['classes'][$id][] = 'views-row-first';
     }
     if ($id == count($rows) -1) {
-      $vars['classes_array'][$id][] = 'views-row-last';
+      $vars['classes'][$id][] = 'views-row-last';
     }
     // Flatten the classes to a string for each row for the template file.
-    $vars['classes'][$id] = implode(' ', $vars['classes_array'][$id]);
+    $vars['classes_array'][$id] = implode(' ', $vars['classes'][$id]);
   }
 }
 
