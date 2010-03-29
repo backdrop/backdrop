@@ -192,6 +192,7 @@ Views 3.x-7.x-dev
     o #751340 by David_Rothstein: Remove call to drupal_(un)install_schema on install file.
     o #755346 by KarenS: Rename fieldapi arguments, introduced by #707724
     o #755346 by KarenS: Rename fieldapi arguments, introduced by #707724(2)
+    o by dereine: Disable recent comment view by default.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
