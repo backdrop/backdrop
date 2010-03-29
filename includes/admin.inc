@@ -500,7 +500,7 @@ function views_ui_preview($js, $view) {
     if ($display) {
       $commands[] = ajax_command_html('div#views-live-preview', $display);
     }
-    ajax_render($commands);
+    return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
   }
 }
 
