@@ -197,6 +197,8 @@ Views 3.x-7.x-dev
     o #753808 by KarenS, dereine: Fix Notice: Array to string conversion in template_process().
     o #756068 by dereine: Fix ajax preview. Follow up of #748168.
     o #761758 by rfay: Move drupal_alter() for hook_field_views_data_alter() to more useful spot
+    o #761754 by rfay: Removed outdated storage details in field_views_field_default_views_data().
+
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
