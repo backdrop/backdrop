@@ -1069,7 +1069,7 @@ function template_preprocess_views_ui_edit_view(&$vars) {
     $account = array();
     $account['account'] = user_load($view->locked->uid);
     $account['name'] = $account['account']->name;
-    $vars['locked'] = theme('username', array($account));
+    $vars['locked'] = theme('username', array('account' => $account['account']));
     $vars['lock_age'] = format_interval(REQUEST_TIME - $view->locked->updated);
     $vars['break'] = url('admin/structure/views/break-lock/' . $view->name);
   }

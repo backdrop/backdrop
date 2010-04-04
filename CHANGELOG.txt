@@ -198,6 +198,7 @@ Views 3.x-7.x-dev
     o #756068 by dereine: Fix ajax preview. Follow up of #748168.
     o #761758 by rfay: Move drupal_alter() for hook_field_views_data_alter() to more useful spot
     o #761754 by rfay: Removed outdated storage details in field_views_field_default_views_data().
+    o #761828 by rfay: theme uses array as argument for lock-breaking text.
 
 
 Views 6.x-3.x-dev
