@@ -24,11 +24,12 @@ function field_views_data() {
 
     $module = $field['module'];
     $result = (array) module_invoke($module, 'field_views_data', $field);
-    drupal_alter('field_views_data', $result, $field);
 
     if (empty($result)) {
       $result = field_views_field_default_views_data($field);
     }
+    drupal_alter('field_views_data', $result, $field, $module);
+
     if (is_array($result)) {
       $data = array_merge($data, $result);
     }
