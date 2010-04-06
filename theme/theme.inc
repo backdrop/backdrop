@@ -430,8 +430,10 @@ function template_preprocess_views_view_grid(&$vars) {
     }
     if ($row) {
       // Fill up the last line.
-      for ($i = 0; $i < ($columns - $row_count); $i++) {
-        $row[] = '';
+      if (count($rows)) {
+        for ($i = 0; $i < ($columns - $row_count); $i++) {
+          $row[] = '';
+        }
       }
       $rows[] = $row;
     }
