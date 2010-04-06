@@ -199,7 +199,7 @@ Views 3.x-7.x-dev
     o #761758 by rfay: Move drupal_alter() for hook_field_views_data_alter() to more useful spot
     o #761754 by rfay: Removed outdated storage details in field_views_field_default_views_data().
     o #761828 by rfay: theme uses array as argument for lock-breaking text.
-
+    o #682030 by killes: Add term relation table integration.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
