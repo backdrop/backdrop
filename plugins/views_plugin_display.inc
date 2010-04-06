@@ -84,6 +84,7 @@ class views_plugin_display extends views_plugin {
     // not compatible with previous version of views
     // This code converts old values into a configured handler for each area
     foreach (array('header', 'footer', 'empty') as $area) {
+      $converted = FALSE;
       if (isset($this->options[$area]) && !is_array($this->options[$area])) {
         if (!empty($this->options[$area])) {
           $content = $this->get_option($area);
@@ -104,8 +105,13 @@ class views_plugin_display extends views_plugin {
               $options['empty'] = $empty;
             }
             $this->set_option($area, array('text' => $options));
+            $converted = TRUE;
           }
         }
+      }
+      // Ensure that options are at least an empty array
+      if (!$converted) {
+        $this->set_option($area, array());
       }
     }
   }
