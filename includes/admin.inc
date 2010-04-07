@@ -1160,7 +1160,7 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
   }
 
   $tag = empty($view->tag) ? t('None') : $view->tag;
-  $vars['details'] = t('Tag') . ': ' . l($tag, "admin/structure/views/nojs/details/$view->name", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-tag')));
+  $vars['details'] = t('Description') . '/' . t('Tag') . ': ' . l($tag, "admin/structure/views/nojs/details/$view->name", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-tag')));
 
   // Calculate options from display plugin.
   $options = $categories = array();
