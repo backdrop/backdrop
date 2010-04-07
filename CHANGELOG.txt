@@ -204,6 +204,7 @@ Views 3.x-7.x-dev
     o #339758 by dereine: Better handling for display of set options in multiple choice filters.
     o #330160 by aditya_kristanto: Improve text to make it easier to find where to edit the view description.
     o #466250 by alex_b and dereine: Enlarge views_display field to prevent heavy displays from losing data.
+    o #689260 by dereine: Allow "Node type" field to output the machine name as well as the human readable name.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
