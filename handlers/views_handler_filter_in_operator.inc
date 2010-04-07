@@ -290,20 +290,25 @@ class views_handler_filter_in_operator extends views_handler_filter {
     $operator = check_plain($info[$this->operator]['short']);
     $values = '';
     if (in_array($this->operator, $this->operator_values(1))) {
-      if (count($this->value) == 1) {
+      // Remove every element which is not known.
+      foreach ($this->value as $value) {
+        if (!isset($this->value_options[$value])) {
+          unset($this->value[$value]);
+        }
+      }
+      // Choose different kind of ouput for 0, a single and multiple values.
+      if (count($this->value) == 0) {
+        $values = t('Unknown');
+      }
+      else if (count($this->value) == 1) {
         // If any, use the 'single' short name of the operator instead.
         if (isset($info[$this->operator]['short_single'])) {
           $operator = check_plain($info[$this->operator]['short_single']);
         }
 
         $keys = $this->value;
-        $key = array_shift($keys);
-        if (isset($this->value_options[$key])) {
-          $values = check_plain($this->value_options[$key]);
-        }
-        else {
-          $values = t('Unknown');
-        }
+        $value = array_shift($keys);
+        $values = check_plain($this->value_options[$value]);
       }
       else {
         foreach ($this->value as $value) {
