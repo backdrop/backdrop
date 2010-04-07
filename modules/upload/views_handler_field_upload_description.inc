@@ -51,7 +51,7 @@ class views_handler_field_upload_description extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link($values->{$this->field_alias}, $values);
+    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
   }
 
   /**

@@ -39,12 +39,13 @@ function views_ui_menu() {
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_TASK
   );
-  $items['admin/structure/views/import'] = $base + array(
+  $items['admin/structure/views/import'] = array(
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_import_page'),
+    'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_TASK
-  );
+  ) + $base;
   $items['admin/structure/views/tools'] = $base + array(
     'title' => 'Tools',
     'page callback' => 'drupal_get_form',
