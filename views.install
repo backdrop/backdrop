@@ -387,10 +387,38 @@ function views_schema_6008() {
   return $schema;
 }
 
+/**
+ * Add the primary key to the views_display table.
+ */
 function views_update_6008() {
   $ret = array();
 
   db_add_primary_key($ret, 'views_display', array('vid', 'id'));
+
+  return $ret;
+}
+
+/**
+ * Enlarge the views_display.display_options field to accomodate a larger set
+ * of configurations (e. g. fields, filters, etc.) on a display.
+ */
+function views_schema_6009() {
+  $schema = views_schema(__FUNCTION__);
+  $schema['views_display']['fields']['display_options'] = array(
+    'type' => 'text',
+    'size' => 'big',
+    'description' => 'A serialized array of options for this display; it contains options that are generally only pertinent to that display plugin type.',
+    'serialize' => TRUE,
+    'serialized default' => 'a:0:{}',
+  );
+  return $schema;
+}
+
+function views_update_6009() {
+  $ret = array();
+
+  $schema = views_schema_6009();
+  db_change_field($ret, 'views_display', 'display_options', 'display_options', $schema['views_display']['fields']['display_options']);
 
   return $ret;
 }
