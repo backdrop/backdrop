@@ -504,7 +504,7 @@ class views_handler_field extends views_handler {
       return '';
     }
 
-    if ($alter['alter_text'] !== '' && $alter['text'] !== '') {
+    if (!empty($alter['alter_text']) && $alter['text'] !== '') {
       $tokens = $this->get_render_tokens($alter);
       $value = $this->render_altered($alter, $tokens);
     }
