@@ -208,6 +208,7 @@ Views 3.x-7.x-dev
     o #765022: SA-CONTRIB-2010-036: Fix XSS and PHP vulnerabilities.
     o #765760 by crea: New setting for raw node type had wrong default.
     o #765340 by dereine: <front> token accidentally removed by html entity stripping from URLs.
+    o #765352: Fix for postgress versions prior to 8.3 which caused data loss in update.php. Note: This will not repair lost data. If you experienced this you must restore your views_display table from backup.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

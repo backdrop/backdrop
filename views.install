@@ -418,7 +418,24 @@ function views_update_6009() {
   $ret = array();
 
   $schema = views_schema_6009();
-  db_change_field($ret, 'views_display', 'display_options', 'display_options', $schema['views_display']['fields']['display_options']);
+
+  if ($GLOBALS['db_type'] == 'pgsql') {
+    $ret[] = update_sql('ALTER TABLE {views_display} RENAME "display_options" TO "display_options_old"');
+    db_add_field($ret, 'views_display', 'display_options', $schema['views_display']['fields']['display_options']);
+
+    $sql = "SELECT vid, id, display_options_old FROM {views_display}";
+    $result = db_query($sql);
+    while ($row = db_fetch_array($result)) {
+      $row['display_options_old'] = db_decode_blob($row['display_options_old']);
+      $sql = "UPDATE {views_display} SET display_options = '%s' WHERE vid = %d AND id = '%s'";
+      db_query($sql, $row['display_options_old'], $row['vid'], $row['id']);
+    }
+
+    db_drop_field($ret, 'views_display', 'display_options_old');
+  }
+  else {
+    db_change_field($ret, 'views_display', 'display_options', 'display_options', $schema['views_display']['fields']['display_options']);
+  }
 
   return $ret;
 }
