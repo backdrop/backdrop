@@ -570,10 +570,13 @@ class views_handler_field extends views_handler {
     // sanitize it ourselves.
     $path = $alter['path'];
 
-    // Use strip tags as there should never be HTML in the path.
-    // However, we need to preserve special characters like " that
-    // were removed by check_plain().
-    $path = strip_tags(html_entity_decode(strtr($path, $tokens)));
+    // html_entity_decode removes <front>, so check whether its different to front.
+    if ($path != '<front>') {
+      // Use strip tags as there should never be HTML in the path.
+      // However, we need to preserve special characters like " that
+      // were removed by check_plain().
+      $path = strip_tags(html_entity_decode(strtr($path, $tokens)));
+    }
 
     // If the path is empty do not build a link around the given text and return
     // it as is.
