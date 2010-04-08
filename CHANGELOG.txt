@@ -206,6 +206,7 @@ Views 3.x-7.x-dev
     o #466250 by alex_b and dereine: Enlarge views_display field to prevent heavy displays from losing data.
     o #689260 by dereine: Allow "Node type" field to output the machine name as well as the human readable name.
     o #765022: SA-CONTRIB-2010-036: Fix XSS and PHP vulnerabilities.
+    o #765760 by crea: New setting for raw node type had wrong default.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

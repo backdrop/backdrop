@@ -7,7 +7,7 @@
 class views_handler_field_node_type extends views_handler_field_node {
   function option_definition() {
     $options = parent::option_definition();
-    $options['machine_name'] = array('default' => TRUE);
+    $options['machine_name'] = array('default' => FALSE);
 
     return $options;
   }
