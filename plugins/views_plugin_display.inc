@@ -108,10 +108,10 @@ class views_plugin_display extends views_plugin {
             $converted = TRUE;
           }
         }
-      }
-      // Ensure that options are at least an empty array
-      if (!$converted) {
-        $this->set_option($area, array());
+        // Ensure that options are at least an empty array
+        if (!$converted) {
+          $this->set_option($area, array());
+        }
       }
     }
   }
