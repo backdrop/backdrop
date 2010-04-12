@@ -212,6 +212,7 @@ Views 3.x-7.x-dev
     o #740130: #561892 not applied correctly, caused the 'rewrite' checkbox to be ignored and rewrite always used.
     o #765310 by dagmar: area handlers unable to be added.
     o #765296: field IDs could get out of sync, causing render path to try to render a field that did not exist leading to whitescreens.
+    o #769464 by dereine, reported by rfay: Remove form.inc replacement.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
