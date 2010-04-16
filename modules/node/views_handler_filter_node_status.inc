@@ -9,6 +9,6 @@ class views_handler_filter_node_status extends views_handler_filter {
 
   function query() {
     $table = $this->ensure_my_table();
-    $this->query->add_where($this->options['group'], "$table.status <> 0 OR ($table.uid = ***CURRENT_USER*** AND ***CURRENT_USER*** <> 0) OR ***ADMINISTER_NODES*** = 1");
+    $this->query->add_where($this->options['group'], "$table.status <> 0 OR ($table.uid = :user-current-user AND :user-current-user <> 0) OR :node-administer-nodes = 1");
   }
 }
