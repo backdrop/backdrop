@@ -73,11 +73,8 @@ class view extends views_db_object {
   /**
    * Returns the complete list of dependent objects in a view, for the purpose
    * of initialization and loading/saving to/from the database.
-   *
-   * Note: In PHP5 this should be static, but PHP4 doesn't support static
-   * methods.
    */
-  function db_objects() {
+  static function db_objects() {
     return array('display');
   }
 
