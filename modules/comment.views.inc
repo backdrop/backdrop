@@ -437,6 +437,20 @@ function comment_views_data() {
     ),
   );
 
+  $data['node_comment_statistics']['cid'] = array(
+    'title' => t('Last comment CID'),
+    'help' => t('Display the last comment of a node'),
+    'relationship' => array(
+      'title' => t('Last Comment'),
+      'help' => t('The last comment of a node.'),
+      'group' => t('Comment'),
+      'base' => 'comment',
+      'base field' => 'cid',
+      'handler' => 'views_handler_relationship',
+      'label' => t('Last Comment'),
+    ),
+  );
+
   return $data;
 }
 

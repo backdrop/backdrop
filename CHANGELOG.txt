@@ -215,6 +215,7 @@ Views 3.x-7.x-dev
     o #769464 by dereine, reported by rfay: Remove form.inc replacement.
     o #769528: Rename tests/views_query.inc to tests/views_query.test
     o #740120: Fix views_handler_filter_node_status to use the new syntax.
+    o #196439 by dereine: Support last comment field of node comment statistic.
 
 
 Views 6.x-3.x-dev
