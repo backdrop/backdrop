@@ -260,4 +260,4 @@ files[] = tests/views_glossary.test
 files[] = tests/views_groupby.test
 files[] = tests/views_handlers.test
 files[] = tests/views_pager.test
-files[] = tests/views_query.inc
+files[] = tests/views_query.test
