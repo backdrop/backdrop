@@ -2,7 +2,7 @@
 // $Id$
 
 class viewsArgumentValidatorTest extends ViewsSqlTest {
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Argument validator tests.'),
       'group' => t('Views'),

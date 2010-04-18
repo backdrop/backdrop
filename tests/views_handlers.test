@@ -7,7 +7,7 @@
 */
 
 class ViewsHandlersTest extends ViewsSqlTest {
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Handlers test'),
       'description' => t('test abstract handler definitions'),
