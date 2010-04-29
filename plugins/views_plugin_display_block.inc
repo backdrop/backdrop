@@ -184,8 +184,15 @@ class views_plugin_display_block extends views_plugin_display {
    * exists in the blocks table. Dirty fix untill http://drupal.org/node/235673 gets in.
    */
   function save_block_cache($delta, $cache_setting) {
-    if ($bid = db_fetch_object(db_query("SELECT bid, cache FROM {blocks} WHERE module = 'views' AND delta = '%s'", $delta))) {
-      db_query("UPDATE {blocks} set cache = %d WHERE module = 'views' AND delta = '%s'", $cache_setting, $delta);
+    if ($bid = db_query("SELECT bid FROM {block} WHERE module = 'views' AND delta = :delta", array(
+        ':delta' => $delta))->fetchField()) {
+      db_update('block')
+        ->fields(array(
+        'cache' => $cache_setting,
+        ))
+        ->condition('module','views')
+        ->condition('delta', $delta)
+        ->execute();
     }
   }
 }
