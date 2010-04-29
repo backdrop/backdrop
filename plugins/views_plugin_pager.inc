@@ -55,6 +55,13 @@ class views_plugin_pager extends views_plugin {
   }
 
   /**
+   * Set the page offset, or how many items to skip.
+   */
+  function set_offset($offset) {
+    $this->options['offset'] = $offset;
+  }
+
+  /**
    * Get the current page.
    *
    * If NULL, we do not know what the current page is.
