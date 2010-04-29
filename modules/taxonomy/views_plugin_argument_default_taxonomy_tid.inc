@@ -12,7 +12,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
     $options['term_page'] = array('default' => TRUE);
     $options['node'] = array('default' => FALSE);
     $options['limit'] = array('default' => FALSE);
-    $options['vids'] = array('default' => NULL);
+    $options['vids'] = array('default' => array());
 
     return $options;
   }
