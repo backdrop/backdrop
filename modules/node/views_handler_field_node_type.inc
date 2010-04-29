@@ -36,7 +36,7 @@ class views_handler_field_node_type extends views_handler_field_node {
   }
 
   function render($values) {
-    return $this->render_name($values->{$this->field_alias}, $values);
+    return $this->render_link($this->render_name($values->{$this->field_alias}, $values), $values);
   }
 }
 
