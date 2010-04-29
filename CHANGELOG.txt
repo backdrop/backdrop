@@ -221,6 +221,7 @@ Views 3.x-7.x-dev
     o #780156 by marcvanged: Declaration of views_plugin_display::options_submit() should be compatible with that of views_plugin::options_submit().
     o #770006 by macdee: Taxonomy term default plugin mysteriously broken.
     o #767146 by bangpound: Validation not passed down into row style plugin.
+    o #513396 by yhager and jcisio: Views trim was not multibyte safe.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
