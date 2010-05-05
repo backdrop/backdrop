@@ -227,6 +227,7 @@ Views 3.x-7.x-dev
     o #754294 by dagmar: Fix warnings on taxonomy term filter.
     o #698270 by dagmar: Pager plugin re-org (again).
     o #785526 by dereine: convert block cache settings to dbtng.
+    o #790038 by justin2pin: Add missing handler to views.info
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
