@@ -81,7 +81,7 @@ class views_handler_field_prerender_list extends views_handler_field {
       else {
         return theme('item_list',
           array(
-            'items' => $this->items[$field],
+            'items' => $items,
             'title' => NULL,
             'type' => $this->options['type']
           ));
