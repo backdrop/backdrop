@@ -232,6 +232,7 @@ Views 3.x-7.x-dev
     o #689780 by deviantintegral: AJAX scrolling could go to wrong place.
     o #773784 by dereine: Support "view own unpublished content".
     o #626422 by vgarvardt: Static caching of validated taxonomy terms to improve taxonomy_term performance.
+    o #730454 by stella: Add "translate" link along with view/edit/delete links on nodes.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
