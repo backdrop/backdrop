@@ -39,6 +39,12 @@
     var id = '#views-tab-' + response.id;
     $('#views-tabset').viewsAddTab(id, response.title, 0);
     $(id).html(response.body).addClass('views-tab');
+
+    // Update the preview widget to preview the new tab.
+    var display_id = id.replace('#views-tab-', '');
+    console.log(response);
+    $("#preview-display-id").append('<option selected="selected" value="' + id + '">' + data.tab[id]['title'] + '</option>');
+ 
     Drupal.attachBehaviors(id);
     var instance = $.viewsUi.tabs.instances[$('#views-tabset').get(0).UI_TABS_UUID];
     $('#views-tabset').viewsClickTab(instance.$tabs.length);
@@ -61,6 +67,22 @@
    */
   Drupal.theme.tableDragChangedWarning = function () {
     return [];
+  }
+
+  /**
+   * Sync preview display.
+   */
+  Drupal.behaviors.syncPreviewDisplay = {
+    attach: function(context) {
+      $("#views-tabset a").once('views-ajax-processed').click(function() {
+        var href = $(this).attr('href');
+        // Cut of #views-tabset.
+        var display_id = href.substr(11);
+        console.log(display_id);
+        // Set the form element.
+        $("#views-live-preview #preview-display-id").val(display_id);
+      }).addClass('views-ajax-processed');
+    }
   }
 
   Drupal.behaviors.viewsAjax = {
