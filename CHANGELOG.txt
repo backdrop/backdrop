@@ -229,6 +229,7 @@ Views 3.x-7.x-dev
     o #785526 by dereine: convert block cache settings to dbtng.
     o #790038 by justin2pin: Add missing handler to views.info
     o #793680 by Amitaibu: Fix views_handler_field_prerender_list::render_items().
+    o #689780 by deviantintegral: AJAX scrolling could go to wrong place.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

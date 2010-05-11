@@ -134,9 +134,17 @@ Drupal.behaviors.ViewsAjaxView = function() {
                     // to browse newly loaded content after e.g. clicking a pager
                     // link.
                     var offset = $(target).offset();
+                    // We can't guarantee that the scrollable object should be
+                    // the body, as the view could be embedded in something
+                    // more complex such as a modal popup. Recurse up the DOM
+                    // and scroll the first element that has a non-zero top.
+                    var scrollTarget = target;
+                    while ($(scrollTarget).scrollTop() == 0 && $(scrollTarget).parent()) {
+                      scrollTarget = $(scrollTarget).parent()
+                    }
                     // Only scroll upward
-                    if (offset.top - 10 < $(window).scrollTop()) {
-                      $('html,body').animate({scrollTop: (offset.top - 10)}, 500);
+                    if (offset.top - 10 < $(scrollTarget).scrollTop()) {
+                      $(scrollTarget).animate({scrollTop: (offset.top - 10)}, 500);
                     }
                     // Call all callbacks.
                     if (response.__callbacks) {
