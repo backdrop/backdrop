@@ -256,14 +256,14 @@ class views_handler extends views_object {
   /**
    * Validate the options form.
    */
-  function options_validate($form, &$form_state) { }
+  function options_validate(&$form, &$form_state) { }
 
   function options_form(&$form, &$form_state) { }
   /**
    * Perform any necessary changes to the form values prior to storage.
    * There is no need for this function to actually store the data.
    */
-  function options_submit($form, &$form_state) { }
+  function options_submit(&$form, &$form_state) { }
 
   /**
    * If a handler has 'extra options' it will get a little settings widget and
@@ -478,13 +478,6 @@ class views_handler extends views_object {
     // Finally!
     $this->relationship = $this->view->relationship[$relationship]->alias;
   }
-
-  /**
-   * Add this handler into the query.
-   *
-   * If we were using PHP5, this would be abstract.
-   */
-  function query($group_by = FALSE) { }
 
   /**
    * Ensure the main table for this handler is in the query. This is used

@@ -235,6 +235,7 @@ Views 3.x-7.x-dev
     o #730454 by stella: Add "translate" link along with view/edit/delete links on nodes.
     o #685938 by dereine: Sync preview widget to current tab to reduce WTFs when previewing the wrong display.
     o #685938 Follow up by tobiasb: Remove console.log.
+    o #783718 by dereine: Fix strict errors. There might be some more.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
