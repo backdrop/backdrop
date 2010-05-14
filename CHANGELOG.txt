@@ -237,6 +237,8 @@ Views 3.x-7.x-dev
     o #685938 Follow up by tobiasb: Remove console.log.
     o #783718 by dereine: Fix strict errors. There might be some more.
     o by dereine: Fix access tests.
+    o #734066 by dereine: Initial version of the fix for the countquery
+    o #799200 by dereine: Fix live preview
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
