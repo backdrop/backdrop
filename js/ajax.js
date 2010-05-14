@@ -58,7 +58,7 @@
   }
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function(ajax, response, status) {
-    $('#views-ui-preview-form input[type=submit]').trigger('click');
+    $('#views-live-preview input[type=submit]').trigger('click');
   }
 
   /**
