@@ -1082,8 +1082,10 @@ class views_plugin_query_default extends views_plugin_query {
     $items = array();
     if ($query) {
       $additional_arguments = module_invoke_all('views_query_substitutions', $view);
-      // We have already build a working count query. Views optimeses it automatically.
-      //$count_query = $count_query->countQuery();
+      // Build the count query. db_select::countQuery does not work with groupby.
+      $count_query = db_select($count_query);
+      $count_query->addExpression('COUNT(*)');
+      //  $count_query->distinct = FALSE;
 
       // Add additional arguments as a fake condition.
       // XXX: this doesn't work... because PDO mandates that all bound arguments
