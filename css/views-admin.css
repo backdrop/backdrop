@@ -573,20 +573,20 @@ form#views-add-display-form select {
   padding-top: .5em;
 }
 
-form#views-ui-preview-form,
-#center form#views-ui-preview-form {
+#views-live-preview form,
+#center #views-live-preview form {
   border: 1px solid #D6DBDE;
   margin: 0 0 .5em 0;
   padding: .5em;
 }
 
-form#views-ui-preview-form div.form-item {
+#views-live-preview form div.form-item {
   float: left;
   margin: 0;
   padding: 0 1em 0 0;
 }
 
-form#views-ui-preview-form input#preview-submit {
+#views-live-preview form input#preview-submit {
   margin: 1em 0 0 0;
 }
 

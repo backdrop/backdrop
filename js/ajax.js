@@ -58,7 +58,9 @@
   }
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function(ajax, response, status) {
-    $('#views-live-preview input[type=submit]').trigger('click');
+    if ($('#views-live-preview div.form-item-live-preview input').is(':checked')) {
+      $('#views-live-preview input[type=submit]').trigger('click');
+    }
   }
 
   /**
