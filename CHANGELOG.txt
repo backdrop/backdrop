@@ -240,6 +240,7 @@ Views 3.x-7.x-dev
     o #734066 by dereine: Initial version of the fix for the countquery
     o #799200 by dereine: Fix live preview
     o #484600 by dereine: Ability to disable the automatic live preview. Fix live preview css.
+    o by dereine: Remove includes/query.inc. This is a 2.x file. The query is now handled in the pluggable query backend.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
