@@ -247,6 +247,7 @@ Views 3.x-7.x-dev
     o #790956 by pwolanin: Adding/import a new View should be a local action.
     o by dereine: Fix views_export output display.
     o by dereine: Fix warning in views_plugin_argument_validate_node::convert_options.
+    o by dereine: $node->title is not a fieldapi field anymore. Fix views_plugin_row_node_rss with this patch.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
