@@ -177,6 +177,7 @@ files[] = modules/user.views.inc
 files[] = modules/user/views_handler_argument_user_uid.inc
 files[] = modules/user/views_handler_argument_users_roles_rid.inc
 files[] = modules/user/views_handler_field_user.inc
+files[] = modules/user/views_handler_field_user_language.inc
 files[] = modules/user/views_handler_field_user_link.inc
 files[] = modules/user/views_handler_field_user_link_delete.inc
 files[] = modules/user/views_handler_field_user_link_edit.inc
