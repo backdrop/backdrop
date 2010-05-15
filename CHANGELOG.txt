@@ -243,6 +243,7 @@ Views 3.x-7.x-dev
     o by dereine: Remove includes/query.inc. This is a 2.x file. The query is now handled in the pluggable query backend.
     o by dereine: Add missing file in registry: views_handler_field_user_language.
     o #496840 by dereine: Allow boolean filters to define additional output formats and provide an additional for Node: Sticky.
+    o by dereine: Rename {file} table to {file_managed}.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

@@ -33,7 +33,7 @@ function upload_views_data() {
       'left_field' => 'vid',
       'field' => 'vid',
     ),
-    'file' => array(
+    'file_managed' => array(
       'left_field' => 'fid',
       'field' => 'fid',
     ),
@@ -129,7 +129,7 @@ function upload_views_data_alter(&$data) {
       'help' => t('Add a relationship to gain access to more file data for files uploaded by upload.module. Note that this relationship will cause duplicate nodes if there are multiple files attached to the node.'),
       'relationship table' => 'upload',
       'relationship field' => 'fid',
-      'base' => 'file',
+      'base' => 'file_managed',
       'base field' => 'fid',
       'handler' => 'views_handler_relationship',
       'label' => t('Files'),

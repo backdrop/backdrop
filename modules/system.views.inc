@@ -20,12 +20,12 @@ function system_views_data() {
   $data = array();
 
   // ----------------------------------------------------------------------
-  // file table
+  // file_managed table
 
-  $data['file']['table']['group']  = t('File');
+  $data['file_managed']['table']['group']  = t('File');
 
   // Advertise this table as a possible base table
-  $data['file']['table']['base'] = array(
+  $data['file_managed']['table']['base'] = array(
     'field' => 'fid',
     'title' => t('File'),
     'help' => t("Files maintained by Drupal and various modules."),
@@ -36,7 +36,7 @@ function system_views_data() {
   // that allow file fields to be used.
 
   // For other base tables, explain how we join
-  $data['file']['table']['join'] = array(
+  $data['file_managed']['table']['join'] = array(
     'users' => array(
       // direct join to the users table via 'uid' field.
       'left_field' => 'uid',
@@ -45,7 +45,7 @@ function system_views_data() {
   );
 
   // fid
-  $data['file']['fid'] = array(
+  $data['file_managed']['fid'] = array(
     'title' => t('File ID'),
     'help' => t('The ID of the file.'),
     'field' => array(
@@ -65,7 +65,7 @@ function system_views_data() {
   );
 
   // filename
-  $data['file']['filename'] = array(
+  $data['file_managed']['filename'] = array(
     'title' => t('Name'),
     'help' => t('The name of the file.'),
     'field' => array(
@@ -84,7 +84,7 @@ function system_views_data() {
   );
 
   // uri
-  $data['file']['uri'] = array(
+  $data['file_managed']['uri'] = array(
     'title' => t('Path'),
     'help' => t('The path of the file.'),
     'field' => array(
@@ -103,7 +103,7 @@ function system_views_data() {
   );
 
   // filemime
-  $data['file']['filemime'] = array(
+  $data['file_managed']['filemime'] = array(
     'title' => t('Mime type'),
     'help' => t('The mime type of the file.'),
     'field' => array(
@@ -122,7 +122,7 @@ function system_views_data() {
   );
 
   // filesize
-  $data['file']['filesize'] = array(
+  $data['file_managed']['filesize'] = array(
     'title' => t('Size'),
     'help' => t('The size of the file.'),
     'field' => array(
@@ -138,7 +138,7 @@ function system_views_data() {
   );
 
   // status
-  $data['file']['status'] = array(
+  $data['file_managed']['status'] = array(
     'title' => t('Status'),
     'help' => t('The status of the file.'),
     'field' => array(
@@ -154,7 +154,7 @@ function system_views_data() {
   );
 
   // timestamp field
-  $data['file']['timestamp'] = array(
+  $data['file_managed']['timestamp'] = array(
     'title' => t('Upload date'),
     'help' => t('The date the file was uploaded.'),
     'field' => array(
