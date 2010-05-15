@@ -245,6 +245,7 @@ Views 3.x-7.x-dev
     o #496840 by dereine: Allow boolean filters to define additional output formats and provide an additional for Node: Sticky.
     o by dereine: Rename {file} table to {file_managed}.
     o #790956 by pwolanin: Adding/import a new View should be a local action.
+    o by dereine: Fix views_export output display.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

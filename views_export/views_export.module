@@ -77,8 +77,9 @@ function views_export_export() {
       ),
     );
 
-    $output = drupal_render(drupal_build_form('views_export_export_form', $form_state));
-    if (!$output) {
+    $form = drupal_build_form('views_export_export_form', $form_state);
+    $output = drupal_render($form);
+    if ($form_state['submitted']) {
       $output = $form_state['output'];
     }
     return $output;
