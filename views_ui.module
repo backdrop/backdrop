@@ -35,16 +35,16 @@ function views_ui_menu() {
     'weight' => '-1'
   );
   $items['admin/structure/views/add'] = $base + array(
-    'title' => 'Add',
+    'title' => 'Add new view',
     'page callback' => 'views_ui_add_page',
-    'type' => MENU_LOCAL_TASK
+    'type' => MENU_LOCAL_ACTION,
   );
   $items['admin/structure/views/import'] = array(
-    'title' => 'Import',
+    'title' => 'Import view from code',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_import_page'),
     'access callback' => 'views_import_access',
-    'type' => MENU_LOCAL_TASK
+    'type' => MENU_LOCAL_ACTION,
   ) + $base;
   $items['admin/structure/views/tools'] = $base + array(
     'title' => 'Tools',
