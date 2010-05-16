@@ -1849,8 +1849,7 @@ function views_ui_analyze_view($js, $view) {
     if (empty($output)) {
       return views_ui_regenerate_tabs($view);
     }
-    $commands = array();
-    $commands[] = views_ajax_command_set_form($output, t('Analyse'));
+    $commands = $output;
     return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
   }
   return $output;
@@ -1892,7 +1891,7 @@ function views_ui_analyze_view_form($form, &$form_state) {
   $form['analysis'] = array(
     '#prefix' => '<div class="form-item">',
     '#suffix' => '</div>',
-    '#value' => views_analyze_format_result($view, $messages),
+    '#markup' => views_analyze_format_result($view, $messages),
   );
 
   // Inform the standard button function that we want an OK button.
