@@ -140,10 +140,12 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
           $and = " AND td.vid IN(" . implode(', ', $vids) . ')';
         }
         if ($transform) {
-          $result = db_fetch_object(db_query("SELECT td.* FROM {taxonomy_term_data} td LEFT JOIN {taxonomy_term_synonym} ts ON ts.tid = td.tid WHERE (replace(td.name, ' ', '-') = '%s' OR replace(ts.name, ' ', '-') = '%s')$and", $argument, $argument));
+          $result = db_query("SELECT td.* FROM {taxonomy_term_data} td WHERE (replace(td.name, ' ', '-') = :name $and", array(
+            ':name' => $argument))->fetchObject();
         }
         else {
-          $result = db_fetch_object(db_query("SELECT td.* FROM {taxonomy_term_data} td LEFT JOIN {taxonomy_term_synonym} ts ON ts.tid = td.tid WHERE (td.name = '%s' OR ts.name = '%s')$and", $argument, $argument));
+          $result = db_query("SELECT td.* FROM {taxonomy_term_data} td WHERE td.name = :name $and", array(
+            ':name' => $argument))->fetchObject();
         }
         if (!$result) {
           return FALSE;
