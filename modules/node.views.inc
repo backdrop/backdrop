@@ -683,13 +683,15 @@ function template_preprocess_views_view_row_node(&$vars) {
     return;
   }
 
-  $node = node_load($nid);
+  $row_plugin = $vars['view']->style_plugin->row_plugin;
+  $node = $row_plugin->nodes[$nid];
 
   if (empty($node)) {
     return;
   }
 
   $node->view = $vars['view'];
+  // Detect which build module should be used.
   $node->build_mode = ($options['build_mode'] == 'teaser' || $options['build_mode'] == 'full') ? $options['build_mode'] : 'full';
   $content = node_view_multiple(array($node->nid => $node), $node->build_mode);
   $content = $content['nodes'][$node->nid];

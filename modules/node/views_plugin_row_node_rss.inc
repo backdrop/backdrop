@@ -14,6 +14,9 @@ class views_plugin_row_node_rss extends views_plugin_row {
   var $base_table = 'node';
   var $base_field = 'nid';
 
+  // Stores the nodes loaded with pre_render.
+  var $nodes = array();
+
   function option_definition() {
     $options = parent::option_definition();
 
@@ -38,6 +41,13 @@ class views_plugin_row_node_rss extends views_plugin_row {
     );
   }
 
+  function pre_render($values) {
+    foreach ($values as $row) {
+      $nids[] = $row->{$this->field_alias};
+    }
+    $this->nodes = node_load_multiple($nids);
+  }
+
   function render($row) {
     // For the most part, this code is taken from node_feed() in node.module
     global $base_url;
@@ -53,7 +63,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
     }
 
     // Load the specified node:
-    $node = node_load($nid);
+    $node = $this->nodes[$nid];
     if (empty($node)) {
       return;
     }

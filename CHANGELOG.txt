@@ -251,6 +251,7 @@ Views 3.x-7.x-dev
     o #766046: Live preview broken right after adding new display.
     o #626732 by dereine: Fix displaying of analyze_view, clicking ok is broken.
     o #802154 by dereine: Fix views_plugin_argument_validate_taxonomy_term.
+    o #799582 by dereine, Scott Reynolds: Use node_load_multiple for node row plugins.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
