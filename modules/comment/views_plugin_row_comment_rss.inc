@@ -9,14 +9,31 @@
  * Plugin which formats the comments as RSS items.
  */
 class views_plugin_row_comment_rss extends views_plugin_row {
-   var $base_table = 'comments';
+   var $base_table = 'comment';
    var $base_field = 'cid';
+ 
+  function pre_render($result) {
+    $cids = array();
+    $this->comments = array();
+
+    foreach ($result as $row) {
+      $cids[] = $row->cid;
+    }
+
+    $cresult = comment_load_multiple($cids);
+    foreach ($cresult as $comment) {
+      $comment = drupal_unpack($comment);
+      $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
+      $comment->depth = count(explode('.', $comment->thread)) - 1;
+      $this->comments[$comment->cid] = $comment;
+    }
+  }
 
   function render($row) {
     global $base_url;
 
     // Load the specified comment:
-    $comment = comment_load($row->{$this->field_alias});
+    $comment = $this->comments[$row->{$this->field_alias}];
 
     $item = new stdClass();
     $item->title = $comment->subject;
