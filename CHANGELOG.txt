@@ -253,6 +253,7 @@ Views 3.x-7.x-dev
     o #802154 by dereine: Fix views_plugin_argument_validate_taxonomy_term.
     o #799582 by dereine, Scott Reynolds: Use node_load_multiple for node row plugins.
     o #801430 by dereine, Scott Reynolds; Use comment_load_multiple for comment rss row plugin, fix comment rss row plugin.
+    o by dereine: Fix missing files in the info file.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
