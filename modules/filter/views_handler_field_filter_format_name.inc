@@ -21,7 +21,7 @@ class views_handler_field_filter_format_name extends views_handler_field {
       // Default or invalid input format.
       // filter_formats() will reliably return the default format even if the
       // current user is unprivileged.
-      $format = filter_formats(variable_get('filter_default_format', 1));
+      $format = filter_formats(filter_default_format());
       return check_plain($format->name);
     }
     return check_plain($format_name);
