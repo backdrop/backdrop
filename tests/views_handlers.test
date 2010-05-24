@@ -16,7 +16,7 @@ class ViewsHandlersTest extends ViewsSqlTest {
   }
 
   function setUp() {
-    parent::setUp('views', 'views_ui', 'views_test');
+    parent::setUp('views', 'views_ui');
     module_enable(array('views_ui'));
   }
 

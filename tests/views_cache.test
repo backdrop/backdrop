@@ -12,9 +12,9 @@ module_load_include('test', 'views', 'tests/views_query');
 class ViewsCacheTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Pluggable caching test'),
+      'name' => t('Cache'),
       'description' => t('Tests pluggable caching for views.'),
-      'group' => t('Views')
+      'group' => t('Views Plugins')
     );
   }
 

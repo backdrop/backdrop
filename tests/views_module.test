@@ -4,9 +4,9 @@ module_load_include('test', 'views', 'tests/views_query');
 class viewsModuleTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-    'name' => 'Tests views.module',
-    'description' => 'Tests some basic functions of views.module',
-    'group' => 'Views',
+      'name' => 'Tests views.module',
+      'description' => 'Tests some basic functions of views.module',
+      'group' => 'Views',
     );
   }
   

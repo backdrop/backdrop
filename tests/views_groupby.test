@@ -11,8 +11,8 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   }
 
   public function setUp() {
-    parent::setUp('views', 'views_ui', 'views_test');
-    module_enable(array('views_ui', 'views_test'));
+    parent::setUp('views', 'views_ui');
+    module_enable(array('views_ui'));
   }
 
   /**

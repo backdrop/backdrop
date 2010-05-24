@@ -9,13 +9,13 @@ class ViewsExposedFormTest extends ViewsSqlTest {
     return array(
       'name' => 'Exposed forms',
       'description' => 'Test exosed forms functionality.',
-      'group' => 'Views',
+      'group' => 'Views Plugins',
     );
   }
 
   public function setUp() {
-    parent::setUp('views', 'views_ui', 'views_test');
-    module_enable(array('views_ui', 'views_test'));
+    parent::setUp('views', 'views_ui');
+    module_enable(array('views_ui'));
   }
 
   /**

@@ -7,9 +7,9 @@
 class ViewsAccessTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Pluggable access test'),
+      'name' => t('Access'),
       'description' => t('Tests pluggable access for views.'),
-      'group' => t('Views')
+      'group' => t('Views Plugins')
     );
   }
 

@@ -7,14 +7,14 @@
 class ViewsArgumentDefaultTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Pluggable argument_default test'),
+      'name' => t('Argument_default'),
       'description' => t('Tests pluggable argument_default for views.'),
-      'group' => t('Views')
+      'group' => t('Views Plugins')
     );
   }
 
   public function setUp() {
-    parent::setUp('views', 'views_test');
+    parent::setUp('views');
 
     $this->random = $this->randomString();
   }
