@@ -19,8 +19,6 @@ class ViewsHandlerFieldDateTest extends ViewsSqlTest {
   public function testFieldDate() {
     $view = $this->getBasicView();
 
-    // Alter the text of the field to a random string.
-    $random = $this->randomName();
     $view->display['default']->handler->override_option('fields', array(
       'created' => array(
         'id' => 'created',
