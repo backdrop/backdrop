@@ -172,6 +172,13 @@ abstract class ViewsSqlTest extends ViewsTestCase {
           'not null' => TRUE,
           'default' => 'Undefined',
         ),
+        'created' => array(
+          'description' => "The creation date of this record",
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
       ),
       'primary key' => array('id'),
       'unique keys' => array(
@@ -267,6 +274,23 @@ abstract class ViewsSqlTest extends ViewsTestCase {
         'handler' => 'views_handler_sort',
       ),
     );
+    $data['views_test']['created'] = array(
+      'title' => t('Created'),
+      'help' => t('The creation date of this record'),
+      'field' => array(
+        'handler' => 'views_handler_field_date',
+        'click sortable' => TRUE,
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_date',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_date',
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort_date',
+      ),
+    );
     return $data;
   }
 
@@ -279,26 +303,31 @@ abstract class ViewsSqlTest extends ViewsTestCase {
         'name' => 'John',
         'age' => 25,
         'job' => 'Singer',
+        'created' => gmmktime(0, 0, 0, 1, 1, 2000),
       ),
       array(
         'name' => 'George',
         'age' => 27,
         'job' => 'Singer',
+        'created' => gmmktime(0, 0, 0, 1, 2, 2000),
       ),
       array(
         'name' => 'Ringo',
         'age' => 28,
         'job' => 'Drummer',
+        'created' => gmmktime(6, 30, 30, 1, 1, 2000),
       ),
       array(
         'name' => 'Paul',
         'age' => 26,
         'job' => 'Songwriter',
+        'created' => gmmktime(6, 0, 0, 1, 1, 2000),
       ),
       array(
         'name' => 'Meredith',
         'age' => 30,
         'job' => 'Speaker',
+        'created' => gmmktime(6, 30, 10, 1, 1, 2000),
       ),
     );
   }
