@@ -31,34 +31,6 @@ class ViewsBasicTest extends ViewsSqlTest {
   }
 
   /**
-   * Test ordering of the result set.
-   */
-  public function testSimpleOrdering() {
-    $view = $this->getBasicView();
-
-    // Change the ordering
-    $view->display['default']->handler->override_option('sorts', array(
-      'age' => array(
-        'order' => 'ASC',
-        'id' => 'age',
-        'table' => 'views_test',
-        'field' => 'age',
-        'relationship' => 'none',
-      ),
-    ));
-
-    // Execute the view.
-    $view->execute();
-
-    // Verify the result.
-    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
-    $this->assertIdenticalResultset($view, $this->orderResultSet($this->dataSet(), 'age'), array(
-      'views_test_name' => 'name',
-      'views_test_age' => 'age',
-    ));
-  }
-
-  /**
    * Test filtering of the result set.
    */
   public function testSimpleFiltering() {

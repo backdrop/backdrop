@@ -25,7 +25,28 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
    *  An associative array mapping the columns of the result set from the view
    *  (as keys) and the expected result set (as values).
    */
-  protected function assertIdenticalResultset($view, $expected_result, $column_map, $message = 'Identical result set') {
+  protected function assertIdenticalResultset($view, $expected_result, $column_map = array(), $message = 'Identical result set') {
+    return $this->assertIdenticalResultsetHelper($view, $expected_result, $column_map, $message, 'assertIdentical');
+  }
+
+  /**
+   * Helper function: verify a result set returned by view.
+   *
+   * Inverse of ViewsTestCase::assertIdenticalResultset().
+   *
+   * @param $view
+   *  An executed View.
+   * @param $expected_result
+   *  An expected result set.
+   * @param $column_map
+   *  An associative array mapping the columns of the result set from the view
+   *  (as keys) and the expected result set (as values).
+   */
+  protected function assertNotIdenticalResultset($view, $expected_result, $column_map = array(), $message = 'Identical result set') {
+    return $this->assertIdenticalResultsetHelper($view, $expected_result, $column_map, $message, 'assertNotIdentical');
+  }
+
+  protected function assertIdenticalResultsetHelper($view, $expected_result, $column_map, $message, $assert_method) {
     // Convert $view->result to an array of arrays.
     $result = array();
     foreach ($view->result as $key => $value) {
@@ -42,7 +63,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
       $row = array();
       foreach ($column_map as $expected_column) {
         // The comparison will be done on the string representation of the value.
-        $row[$expected_column] = (string) $value[$expected_column];
+        $row[$expected_column] = (string) (is_object($value) ? $value->$expected_column : $value[$expected_column]);
       }
       $expected_result[$key] = $row;
     }
@@ -54,7 +75,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
     $this->verbose('<pre>Returned data set: ' . print_r($result, TRUE) . "\n\nExpected: ". print_r($expected_result, TRUE));
 
     // Do the actual comparison.
-    return $this->assertIdentical($result, $expected_result, $message);
+    return $this->$assert_method($result, $expected_result, $message);
   }
 
   /**
@@ -94,7 +115,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
    */
   protected function executeView($view) {
     $view->execute();
-    $this->verbose('<pre>Executed view: ' . print_r($view->build_info, TRUE) . '</pre>');
+    $this->verbose('<pre>Executed view: ' . ((string) $view->build_info['query']) . '</pre>');
   }
 }
 
@@ -110,9 +131,10 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     module_enable(array('views_test'));
 
     // Load the test dataset.
+    $data_set = $this->dataSet();
     $query = db_insert('views_test')
-      ->fields(array('name', 'age', 'job'));
-    foreach ($this->dataSet() as $record) {
+      ->fields(array_keys($data_set[0]));
+    foreach ($data_set as $record) {
       $query->values($record);
     }
     $query->execute();
@@ -325,6 +347,12 @@ abstract class ViewsSqlTest extends ViewsTestCase {
         'field' => 'id',
         'relationship' => 'none',
       ),
+    ));
+
+    // Set up the pager.
+    $display->override_option('pager', array(
+      'type' => 'none',
+      'options' => array('offset' => 0),
     ));
 
     return $view;
