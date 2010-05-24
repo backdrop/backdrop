@@ -14,59 +14,9 @@ class ViewsBasicTest extends ViewsSqlTest {
   }
 
   /**
-   * Build and return a basic view of the views_test table.
-   */
-  protected function getBasicView() {
-    views_include('view');
-
-    // Create the basic view.
-    $view = new view();
-    $view->vid = 'test_view';
-    $view->add_display('default');
-    $view->base_table = 'views_test';
-
-    // Set up the fields we need.
-    $display = $view->new_display('default', 'Defaults', 'default');
-    $display->override_option('fields', array(
-      'id' => array(
-        'id' => 'id',
-        'table' => 'views_test',
-        'field' => 'id',
-        'relationship' => 'none',
-      ),
-      'name' => array(
-        'id' => 'name',
-        'table' => 'views_test',
-        'field' => 'name',
-        'relationship' => 'none',
-      ),
-      'age' => array(
-        'id' => 'age',
-        'table' => 'views_test',
-        'field' => 'age',
-        'relationship' => 'none',
-      ),
-    ));
-
-    // Set up the sort order.
-    $display->override_option('sorts', array(
-      'id' => array(
-        'order' => 'ASC',
-        'id' => 'id',
-        'table' => 'views_test',
-        'field' => 'id',
-        'relationship' => 'none',
-      ),
-    ));
-
-    return $view;
-  }
-
-  /**
    * Test a trivial result set.
    */
   public function testSimpleResultSet() {
-    error_log('testSimpleResultSet');
     $view = $this->getBasicView();
 
     // Execute the view.
@@ -74,7 +24,7 @@ class ViewsBasicTest extends ViewsSqlTest {
 
     // Verify the result.
     $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
-    $this->assertIdenticalResultset($view, $this->testDataSet(), array(
+    $this->assertIdenticalResultset($view, $this->dataSet(), array(
       'views_test_name' => 'name',
       'views_test_age' => 'age',
     ));
@@ -102,7 +52,7 @@ class ViewsBasicTest extends ViewsSqlTest {
 
     // Verify the result.
     $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
-    $this->assertIdenticalResultset($view, $this->orderResultSet($this->testDataSet(), 'age'), array(
+    $this->assertIdenticalResultset($view, $this->orderResultSet($this->dataSet(), 'age'), array(
       'views_test_name' => 'name',
       'views_test_age' => 'age',
     ));
@@ -241,7 +191,7 @@ class ViewsBasicTest extends ViewsSqlTest {
     $view->execute();
 
     // Build the expected result.
-    $dataset = $this->testDataSet();
+    $dataset = $this->dataSet();
 
     $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
     $this->assertIdenticalResultSet($view, $dataset, array(
