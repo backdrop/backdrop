@@ -258,6 +258,7 @@ Views 3.x-7.x-dev
     o #807510 by damZ: Test sort handler.
     o by dereine: Move views_test.created field to viewsSqlTest.
     o by dereine: Test views_handler_field_boolean.
+    o by dereine: Test views_handler_field_custom/
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

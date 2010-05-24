@@ -22,6 +22,7 @@ files[] = handlers/views_handler_field_group_by_numeric.inc
 files[] = handlers/views_handler_field_boolean.inc
 files[] = handlers/views_handler_field_boolean.test
 files[] = handlers/views_handler_field_custom.inc
+files[] = handlers/views_handler_field_custom.test
 files[] = handlers/views_handler_field_date.inc
 files[] = handlers/views_handler_field_markup.inc
 files[] = handlers/views_handler_field_numeric.inc
