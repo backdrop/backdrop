@@ -16,7 +16,7 @@ class ViewsHandlerFieldCustomTest extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFieldBoolean() {
+  public function testFieldCustom() {
     $view = $this->getBasicView();
 
     // Alter the text of the field to a random string.
