@@ -14,6 +14,7 @@ files[] = handlers/views_handler_argument_date.inc
 files[] = handlers/views_handler_argument_formula.inc
 files[] = handlers/views_handler_argument_many_to_one.inc
 files[] = handlers/views_handler_argument_null.inc
+files[] = handlers/views_handler_argument_null.test
 files[] = handlers/views_handler_argument_numeric.inc
 files[] = handlers/views_handler_argument_string.inc
 files[] = handlers/views_handler_argument_group_by_numeric.inc
