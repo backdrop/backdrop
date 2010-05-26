@@ -266,6 +266,7 @@ Views 3.x-7.x-dev
     o by dereine: Test views_handler_area_text.
     o by dereine: Add $args parameter to ViewsTestCase::executeView.
     o by dereine: Test views_handler_argument_null.
+    o #808230 by dereine: Fix Problems with XML namespace and dc:creator tag.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

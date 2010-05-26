@@ -73,7 +73,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
     $node->rss_namespaces = array();
     $node->rss_elements = array(
       array('key' => 'pubDate', 'value' => gmdate('r', $node->created)),
-      array('key' => 'dc:creator', 'value' => $node->name),
+      array('key' => 'dc:creator', 'value' => $node->name, 'namespace' => array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/')),
       array('key' => 'guid', 'value' => $node->nid . ' at ' . $base_url, 'attributes' => array('isPermaLink' => 'false'))
     );
 
@@ -81,7 +81,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
     // and $node->rss_namespaces.
     node_build_content($node, 'rss');
 
-    foreach ($node->rss_namespaces as $element) {
+    foreach ($node->rss_elements as $element) {
       if (isset($element['namespace'])) {
         $this->view->style_plugin->namespaces = array_merge($this->view->style_plugin->namespaces, $element['namespace']);
       }
