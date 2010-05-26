@@ -264,6 +264,7 @@ Views 3.x-7.x-dev
     o by dereine: Test views_handler_filter_in_operator.
     o by dereine: Test views_handler_field_url.
     o by dereine: Test views_handler_area_text.
+    o by dereine: Add $args parameter to ViewsTestCase::executeView.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
