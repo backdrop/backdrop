@@ -114,6 +114,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
    * Helper function to execute a view with debugging.
    */
   protected function executeView($view, $args = array()) {
+    $view->set_display();
     $view->pre_execute($args);
     $view->execute();
     $this->verbose('<pre>Executed view: ' . ((string) $view->build_info['query']) . '</pre>');
