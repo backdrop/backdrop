@@ -262,6 +262,7 @@ Views 3.x-7.x-dev
     o by dereine: Test views_handler_field_date.
     o by dereine: Port views_cache tests from d6.
     o by dereine: Test views_handler_filter_in_operator.
+    o by dereine: Test views_handler_field_url.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
