@@ -30,7 +30,7 @@ class ViewsHandlerTestFileSize extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFieldXss() {
+  public function testFieldFileSize() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('fields', array(
