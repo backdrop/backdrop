@@ -23,6 +23,7 @@ class ViewsHandlerSortRandomTest extends ViewsSqlTest {
         'name' => 'name_' . $i,
         'age' => $i,
         'job' => 'job_' . $i,
+        'created' => rand(0, time()),
       );
     }
     return $data;
