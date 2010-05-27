@@ -20,6 +20,7 @@ files[] = handlers/views_handler_argument_string.inc
 files[] = handlers/views_handler_argument_group_by_numeric.inc
 files[] = handlers/views_handler_field.inc
 files[] = handlers/views_handler_field_xss.test
+files[] = handlers/views_handler_field_file_size.test
 files[] = handlers/views_handler_field_counter.inc
 files[] = handlers/views_handler_field_group_by_numeric.inc
 files[] = handlers/views_handler_field_boolean.inc
