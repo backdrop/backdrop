@@ -55,7 +55,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['operator']['default'] = 'IN';
+    $options['operator']['default'] = 'in';
     $options['value']['default'] = array();
     $options['expose']['contains']['reduce'] = array('default' => FALSE);
 
@@ -69,9 +69,9 @@ class views_handler_filter_in_operator extends views_handler_filter {
    */
   function operators() {
     $operators = array(
-      'IN' => array(
+      'in' => array(
         'title' => t('Is one of'),
-        'short' => t('IN'),
+        'short' => t('in'),
         'short_single' => t('='),
         'method' => 'op_simple',
         'values' => 1,
