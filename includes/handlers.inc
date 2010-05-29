@@ -1334,12 +1334,7 @@ class views_join {
       }
     }
 
-    if ($this->type == 'LEFT') {
-      $select_query->leftJoin($table['table'], $table['alias'], $condition, $arguments);
-    }
-    else {
-      $select_query->innerJoin($table['table'], $table['alias'], $condition, $arguments);
-    }
+    $select_query->addJoin($this->type, $right_table, $table['alias'], $condition, $arguments);
   }
 }
 
