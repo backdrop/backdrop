@@ -419,10 +419,34 @@ function views_block_view($delta) {
 }
 
 /**
- * Implement hook_flush_caches().
+ * Implements hook_flush_caches().
  */
 function views_flush_caches() {
   return array('cache_views', 'cache_views_data');
+}
+
+/**
+ * Implements hook_field_create_instance.
+ */
+function views_field_create_instance($instance) {
+  cache_clear_all('*', 'cache_views', TRUE);
+  cache_clear_all('*', 'cache_views_data', TRUE);
+}
+
+/**
+ * Implements hook_field_update_instance.
+ */
+function views_field_update_instance($instance, $prior_instance) {
+  cache_clear_all('*', 'cache_views', TRUE);
+  cache_clear_all('*', 'cache_views_data', TRUE);
+}
+
+/**
+ * Implements hook_field_delete_instance.
+ */
+function views_field_delete_instance($instance) {
+  cache_clear_all('*', 'cache_views', TRUE);
+  cache_clear_all('*', 'cache_views_data', TRUE);
 }
 
 /**

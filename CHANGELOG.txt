@@ -272,6 +272,7 @@ Views 3.x-7.x-dev
     o #812196 by yuriy.babenko: Lower the in operator in views_handler_filter_in_operator. This fixes update issues.
     o #812928 by dereine: Rename expand_checkboxes to form_process_checkboxes.
     o #812362 by dereine: Fix views_join::build_join, make it more flexibel on act like in views for drupal6.
+    o #810936 by dereine: Clear cache when a instance of a field gets created/updated/deleted.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
