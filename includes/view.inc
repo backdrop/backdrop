@@ -797,7 +797,7 @@ class view extends views_db_object {
     }
 
     $exposed_form = $this->display_handler->get_plugin('exposed_form');
-    $exposed_form->pre_render();
+    $exposed_form->pre_render($this->result);
 
     // Check for already-cached output.
     if (!empty($this->live_preview)) {

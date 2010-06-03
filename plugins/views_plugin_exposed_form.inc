@@ -151,7 +151,7 @@ class views_plugin_exposed_form extends views_plugin {
     }
   }
 
-  function pre_render() { }
+  function pre_render($values) { }
 
   function post_render(&$output) { }
 

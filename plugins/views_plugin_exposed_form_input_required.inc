@@ -59,7 +59,7 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
     return $cache;
   }
 
-  function pre_render() {
+  function pre_render($values) {
     if (!$this->exposed_filter_applied()) {
       $options = array(
         'id' => 'area',

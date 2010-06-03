@@ -61,7 +61,7 @@ class views_handler_filter_term_node_tid_depth extends views_handler_filter_term
     }
 
     // Now build the subqueries.
-    $subquery = dbtng_select('term_node', 'tn');
+    $subquery = db_select('term_node', 'tn');
     $subquery->addField('tn', 'vid');
     $where = db_or()->condition('tn.tid', $this->value, $operator);
     $last = "tn";
