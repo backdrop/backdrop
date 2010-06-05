@@ -70,49 +70,61 @@ class views_handler_field_field extends views_handler_field {
     );
   }
 
+  /**
+   * Loads the objects providing the field information necessary to render the
+   *   field in the View.
+   */
   function pre_render(&$values) {
-    if (!empty($values) && empty($values[0]->_object)) {
+    static $entity_type_map;
 
-      // OMG, this is *ugly*.
-      $obj_type_map = db_query('SELECT etid, type FROM {field_config_entity_type}')->fetchAllKeyed();
+    if (!empty($values)) {
+      // Cache the entity type map for repeat usage.
+      if (empty($entity_type_map)) {
+        $entity_type_map = db_query('SELECT etid, type FROM {field_config_entity_type}')->fetchAllKeyed();
+      }
 
-      // Load the full objects.
+      // Create an array mapping the Views values to their object types.
       $objects_by_type = array();
+
       foreach ($values as $key => $object) {
         // Derive the entity type. For some field types, etid might be empty.
-        if (isset($object->{$this->aliases['etid']}) && isset($obj_type_map[$object->{$this->aliases['etid']}])) {
-          $obj_type = $obj_type_map[$object->{$this->aliases['etid']}];
+        if (isset($object->{$this->aliases['etid']}) && isset($entity_type_map[$object->{$this->aliases['etid']}])) {
+          $entity_type = $entity_type_map[$object->{$this->aliases['etid']}];
           $entity_id = $object->{$this->field_alias};
-          $objects_by_type[$obj_type][$key] = $entity_id;
+          $objects_by_type[$entity_type][$key] = $entity_id;
         }
       }
 
       // Load the objects.
-      foreach ($objects_by_type as $obj_type => $oids) {
-        $objects = entity_load($obj_type, $oids);
+      foreach ($objects_by_type as $entity_type => $oids) {
+        $objects = entity_load($entity_type, $oids);
+
         foreach ($oids as $key => $entity_id) {
-          if (isset($objects[$entity_id])) {
-            $values[$key]->_obj_type = $obj_type;
-            $values[$key]->_object = $objects[$entity_id];
-          }
+          $values[$key]->_field_cache[$this->field_alias] = array(
+            'entity_type' => $entity_type,
+            'object' => $objects[$entity_id],
+          );
         }
       }
     }
   }
 
   function render($values) {
-    if (isset($values->_obj_type)) {
-      $field_name = $this->definition['field_name'];
+    if (isset($values->_field_cache[$this->field_alias])) {
+      // Prepare arguments for rendering based on the objects cached in the
+      // pre-render phase and the display options for this field.
+      $entity_type = $values->_field_cache[$this->field_alias]['entity_type'];
+      $object = $values->_field_cache[$this->field_alias]['object'];
+
       $display = array(
         'type' => $this->options['type'],
         'label' => 'hidden',
       );
 
-      return drupal_render(field_view_field($values->_obj_type, $values->_object, $field_name, $display));
+      return drupal_render(field_view_field($entity_type, $object, $this->definition['field_name'], $display));
     }
     else {
       return '';
     }
   }
 }
-
