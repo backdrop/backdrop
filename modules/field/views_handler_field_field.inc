@@ -50,7 +50,6 @@ class views_handler_field_field extends views_handler_field {
 
     $options['type'] = array(
       'default' => $field_type['default_formatter'],
-      'translatable' => TRUE,
     );
 
     return $options;
