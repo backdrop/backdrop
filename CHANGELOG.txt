@@ -275,6 +275,7 @@ Views 3.x-7.x-dev
     o #810936 by dereine: Clear cache when a instance of a field gets created/updated/deleted.
     o #722180 by rszrama: Fix field integration for fields across entity types.
     o by dereine: Remove translatable property for field formatter setting.
+    o by chx: Replace placeholders in the query preview with the values.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
