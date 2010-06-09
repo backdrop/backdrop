@@ -1020,7 +1020,9 @@ function template_preprocess_views_ui_edit_view(&$vars) {
   $view = &$vars['view'];
   views_add_js('dependent');
 
-  $vars['save_button'] = drupal_render(drupal_get_form('views_ui_edit_view_form', $view));
+  // The form has to be saved as variable because of strict warnings.
+  $form = drupal_get_form('views_ui_edit_view_form', $view);
+  $vars['save_button'] = drupal_render($form);
 
   $table = views_fetch_data($view->base_table);
   $vars['base_table'] = !empty($table['table']['base']['title']) ?
@@ -1051,8 +1053,10 @@ function template_preprocess_views_ui_edit_view(&$vars) {
     'no_cache' => TRUE,
   );
 
-  $display_button = drupal_render(drupal_build_form('views_ui_add_display_form', $form_state));
-  $analyze_button = drupal_render(drupal_get_form('views_ui_analyze_view_button', $view));
+  $form = drupal_build_form('views_ui_add_display_form', $form_state);
+  $display_button = drupal_render($form);
+  $form = drupal_get_form('views_ui_analyze_view_button', $view);
+  $analyze_button = drupal_render($form);
   $tabs->add_extra($display_button . $analyze_button);
 
   $vars['tabs'] = $tabs->render();
