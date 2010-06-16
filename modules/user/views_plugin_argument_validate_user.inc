@@ -102,7 +102,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     // See if we're filtering users based on roles.
     if (!empty($this->options['restrict_roles']) && !empty($this->options['roles'])) {
       $roles = $this->options['roles'];
-      $acccont->roles = array();
+      $account->roles = array();
       $account->roles[] = $account->uid ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
       $result = db_query('SELECT rid FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
       foreach ($result as $role) {

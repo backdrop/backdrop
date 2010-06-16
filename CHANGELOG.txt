@@ -279,6 +279,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix some other strict warnings. Sighs.
     o #607418: Fix queries broken with "ambiguous nid" due to uncommon relationships.
     o #768162: Revert inadvertant change to grid style behavior.
+    o #815392 by killes and dereine: Incorrect construction of $account caused accidental non-permanent change to $user->roles.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
