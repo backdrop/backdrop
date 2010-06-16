@@ -19,6 +19,7 @@ class views_plugin_style_grid extends views_plugin_style {
 
     $options['columns'] = array('default' => '4');
     $options['alignment'] = array('default' => 'horizontal');
+    $options['fill_single_line'] = array('default' => TRUE);
 
     return $options;
   }
@@ -39,6 +40,13 @@ class views_plugin_style_grid extends views_plugin_style {
       '#options' => array('horizontal' => t('Horizontal'), 'vertical' => t('Vertical')),
       '#default_value' => $this->options['alignment'],
       '#description' => t('Horizontal alignment will place items starting in the upper left and moving right. Vertical alignment will place items starting in the upper left and moving down.'),
+    );
+    
+    $form['fill_single_line'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Fill up single line'),
+      '#description' => t('If you disable this option a grid with only one row will have the amount of items as tds. If you disable it this can cause problems with your css.'),
+      '#default_value' => !empty($this->options['fill_single_line']),
     );
   }
 }

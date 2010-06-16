@@ -278,6 +278,7 @@ Views 3.x-7.x-dev
     o by chx: Replace placeholders in the query preview with the values.
     o by dereine: Fix some other strict warnings. Sighs.
     o #607418: Fix queries broken with "ambiguous nid" due to uncommon relationships.
+    o #768162: Revert inadvertant change to grid style behavior.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
