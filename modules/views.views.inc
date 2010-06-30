@@ -60,6 +60,16 @@ function views_views_data() {
     ),
   );
 
+  if (module_invoke('ctools', 'api_version', '1.7.1')) {
+    $data['views']['expression'] = array(
+      'title' => t('Math expression'),
+      'help' => t('Evaluates a mathematical epression and displays it.'),
+      'field' => array(
+        'handler' => 'views_handler_field_math',
+      ),
+    );
+  }
+
   return $data;
 }
 
