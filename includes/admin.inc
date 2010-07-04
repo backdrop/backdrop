@@ -431,7 +431,7 @@ function views_ui_preview($js, $view) {
     if (!empty($view->build_info['query'])) {
       $rows = array();
       $query = $view->build_info['query'];
-      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr(DatabaseConnection::prefixTables($query), $query->getArguments())) . '</pre>');
+      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $query->getArguments())) . '</pre>');
       if (!empty($view->additional_queries)) {
         $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
         foreach ($view->additional_queries as $query) {

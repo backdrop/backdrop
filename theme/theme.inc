@@ -79,8 +79,8 @@ function template_preprocess_views_view(&$vars) {
   $vars['attachment_after'] = !empty($view->attachment_after) ? $view->attachment_after : '';
 
   // if administrator, add some links. These used to be tabs, but this is better.
-  if (user_access('administer views') && module_exists('views_ui') && empty($view->hide_admin_links) && !variable_get('views_no_hover_links', FALSE)) {
-    $vars['admin_links_raw'] = array(
+  if (user_access('administer views') && module_exists('views_ui') && module_exists('contextual') && empty($view->hide_admin_links) && !variable_get('views_no_hover_links', FALSE)) {
+    $links = array(
       array(
         'title' => t('Edit'),
         'alt' => t("Edit this view"),
@@ -99,13 +99,21 @@ function template_preprocess_views_view(&$vars) {
         'href' => "admin/structure/views/clone/$view->name",
       ),
     );
+    drupal_alter('views_admin_links', $links, $view);
 
-    drupal_alter('views_admin_links', $vars['admin_links_raw'], $view);
-    $vars['admin_links'] = theme('links',
-      array(
-        'links' => $vars['admin_links_raw'],
-      )
+    $build = array(
+      '#prefix' => '<div class="contextual-links-wrapper">',
+      '#suffix' => '</div>',
+      '#theme' => 'links__contextual',
+      '#links' => $links,
+      '#attributes' => array('class' => array('contextual-links')),
+      '#attached' => array(
+        'library' => array(array('contextual', 'contextual-links')),
+      ),
     );
+    drupal_add_library('contextual', 'contextual-links');
+    $vars['classes_array'][] = 'contextual-links-region';
+    $vars['admin_links'] = drupal_render($build);
   }
   else {
     $vars['admin_links'] = '';

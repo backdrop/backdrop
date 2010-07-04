@@ -33,50 +33,6 @@
   text-align: center;
 }
 
-/* administrative hover links */
-
-div.view div.views-admin-links {
-  font-size: xx-small;
-  margin-right: 1em;
-  margin-top: 1em;
-/*  width: 95%; */
-}
-
-.block div.view div.views-admin-links {
-  margin-top: 0;
-}
-
-div.view div.views-admin-links ul {
-  padding-left: 0;
-}
-
-div.view div.views-admin-links li a {
-  color: #ccc;
-}
-
-div.view div.views-admin-links li {
-  padding-bottom: 2px;
-  z-index: 201;
-}
-
-div.view div.views-admin-links-hover a,
-div.view div.views-admin-links:hover a {
-  color: #000;
-}
-
-div.view div.views-admin-links-hover,
-div.view div.views-admin-links:hover {
-  background: transparent;;
-}
-
-div.view div.views-admin-links a:before {
-  content: "[";
-}
-
-div.view div.views-admin-links a:after {
-  content: "]";
-}
-
 div.view div.views-hide {
   display: none;
 }
