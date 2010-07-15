@@ -1886,7 +1886,7 @@ class views_plugin_display extends views_plugin {
       );
       $help = '';
       if (module_exists('advanced_help')) {
-        $help = theme('advanced_help_topic', array('topic' => 'views', 'type' => 'overrides'));
+        $help = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'overrides'));
       }
       $form['override']['markup'] = array(
         '#markup' => '<div class="description">' . $help . t('Status: using default values.') . '</div>',
@@ -1902,7 +1902,7 @@ class views_plugin_display extends views_plugin {
       );
       $help = '';
       if (module_exists('advanced_help')) {
-        $help = theme('advanced_help_topic', array('topic' => 'views', 'type' => 'overrides'));
+        $help = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'overrides'));
       }
       $form['override']['markup'] = array(
         '#markup' => '<div class="description">' . $help . t('Status: using overridden values.') . '</div>',

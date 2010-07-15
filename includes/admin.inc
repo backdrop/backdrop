@@ -85,7 +85,7 @@ function template_preprocess_views_ui_list_views(&$vars) {
 
   $vars['help_type_icon'] = '';
   if (module_exists('advanced_help')) {
-    $vars['help_type_icon'] = theme('advanced_help_topic', array('topic' => 'views', 'type' => 'view-type'));
+    $vars['help_type_icon'] = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'view-type'));
   }
 
   $base_tables = views_fetch_base_tables();
@@ -234,7 +234,7 @@ function template_preprocess_views_ui_list_views(&$vars) {
 
   $getting_started = '';
   if (module_exists('advanced_help')) {
-    $getting_started = theme('advanced_help_topic', array('topic' => 'views', 'type' => 'getting-started', 'extra' => 'title'));
+    $getting_started = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'getting-started', 'type' => 'title'));
   }
   if (!$getting_started) {
     $getting_started = t('Install the advanced help module for the getting started');
@@ -1222,7 +1222,7 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
 
   // Add a help icon
   if (isset($plugin['help topic']) && module_exists('advanced_help')) {
-    $vars['display_help_icon'] = theme('advanced_help_topic', array('topic' => $plugin['module'], 'type' => $plugin['help topic']));
+    $vars['display_help_icon'] = theme('advanced_help_topic', array('module' => $plugin['module'], 'topic' => $plugin['help topic']));
   }
   else {
     $vars['display_help_icon'] = '';
@@ -1280,7 +1280,7 @@ function template_preprocess_views_ui_edit_item(&$vars) {
 
   $vars['overridden'] = FALSE;
   $vars['defaulted'] = FALSE;
-  $vars['item_help_icon'] = module_exists('advanced_help') ? theme('advanced_help_topic', array('topic' => 'views', 'type' => $type)) : '';
+  $vars['item_help_icon'] = module_exists('advanced_help') ? theme('advanced_help_topic', array('module' => 'views', 'topic' => $type)) : '';
 
   if ($vars['no_fields']) {
     $vars['title'] = $types[$type]['title'];
