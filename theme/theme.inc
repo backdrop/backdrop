@@ -88,16 +88,6 @@ function template_preprocess_views_view(&$vars) {
         'fragment' => 'views-tab-' . $view->current_display,
         'query' => drupal_get_destination(),
       ),
-      array(
-        'title' => t('Export'),
-        'alt' => t("Export this view"),
-        'href' => "admin/structure/views/export/$view->name",
-      ),
-      array(
-        'title' => t('Clone'),
-        'alt' => t("Create a copy of this view"),
-        'href' => "admin/structure/views/clone/$view->name",
-      ),
     );
     drupal_alter('views_admin_links', $links, $view);
 

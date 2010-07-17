@@ -284,6 +284,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix notice in views_plugin_row_node_view::pre_render.
     o by dereine:  allow test cases to add a example plugin
     o #854252 by bojanz: Fix advanced_help integration.
+    o #844156 by bojhan and dereine: Use contextual links instead of views own admin hover links.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
