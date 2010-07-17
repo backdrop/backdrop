@@ -82,7 +82,7 @@ function template_preprocess_views_view(&$vars) {
   if (user_access('administer views') && module_exists('views_ui') && module_exists('contextual') && empty($view->hide_admin_links) && !variable_get('views_no_hover_links', FALSE)) {
     $links = array(
       array(
-        'title' => t('Edit'),
+        'title' => t('Edit view'),
         'alt' => t("Edit this view"),
         'href' => "admin/structure/views/edit/$view->name",
         'fragment' => 'views-tab-' . $view->current_display,
