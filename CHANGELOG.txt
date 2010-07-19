@@ -286,6 +286,7 @@ Views 3.x-7.x-dev
     o #854252 by bojanz: Fix advanced_help integration.
     o #844156 by bojhan and dereine: Use contextual links instead of views own admin hover links.
     o Change text of the the contextual link to "Edit view".
+    o #856186 by bojanz and dereine: Remove hook_views_handlers and update upgrade docs. Awesome!!
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
