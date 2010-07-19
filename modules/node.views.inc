@@ -586,44 +586,6 @@ function node_views_data() {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function node_views_handlers() {
-  return array(
-    // field handlers
-    'views_handler_field_node',
-    'views_handler_field_node_type',
-    'views_handler_field_node_link',
-    'views_handler_field_node_path',
-    'views_handler_field_node_type',
-    'views_handler_field_node_link_edit',
-    'views_handler_field_node_link_delete',
-    'views_handler_field_node_revision_link_revert',
-    'views_handler_field_node_revision_link_delete',
-    'views_handler_field_history_user_timestamp',
-    'views_handler_field_node_revision',
-
-    // argument handlers
-    'views_handler_argument_node_type',
-    'views_handler_argument_node_nid',
-    'views_handler_argument_node_vid',
-    'views_handler_argument_node_created_fulldate',
-    'views_handler_argument_node_created_year',
-    'views_handler_argument_node_created_year_month',
-    'views_handler_argument_node_created_month',
-    'views_handler_argument_node_created_day',
-    'views_handler_argument_node_created_week',
-
-    // filters
-    'views_handler_filter_node_type',
-    'views_handler_filter_history_user_timestamp',
-    'views_handler_filter_node_status',
-    'views_handler_filter_node_access',
-  );
-}
-
-/**
  * Implements hook_views_plugins
  */
 function node_views_plugins() {

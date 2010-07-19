@@ -423,26 +423,6 @@ function taxonomy_views_data_alter(&$data) {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function taxonomy_views_handlers() {
-  return array(
-    'views_handler_argument_term_node_tid_depth_modifier',
-    'views_handler_argument_taxonomy',
-    'views_handler_argument_vocabulary_vid',
-    'views_handler_argument_term_node_tid',
-    'views_handler_field_term_node_tid',
-    'views_handler_field_taxonomy',
-    'views_handler_filter_vocabulary_vid',
-    'views_handler_filter_term_node_tid',
-    'views_handler_filter_term_node_tid_depth',
-    'views_handler_relationship',
-    'views_handler_field_term_link_edit',
-  );
-}
-
-/**
  * Implements hook_views_plugins
  */
 function taxonomy_views_plugins() {

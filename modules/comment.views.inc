@@ -545,40 +545,6 @@ function comment_views_plugins() {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function comment_views_handlers() {
-  return array(
-    'views_handler_field_comment',
-    'views_handler_field_comment_username',
-    'views_handler_field_comment_depth',
-    'views_handler_field_comment_link',
-    'views_handler_field_comment_link_edit',
-    'views_handler_field_comment_link_delete',
-    'views_handler_field_comment_link_reply',
-    'views_handler_field_comment_node_link',
-    'views_handler_field_ncs_last_comment_name',
-    'views_handler_field_ncs_last_updated',
-    'views_handler_field_node_new_comments',
-    'views_handler_field_node_comment',
-
-    // sort handlers
-    'views_handler_sort_comment_thread',
-    'views_handler_sort_ncs_last_comment_name',
-    'views_handler_sort_ncs_last_updated',
-
-    // filter handlers
-    'views_handler_filter_ncs_last_updated',
-    'views_handler_filter_node_comment',
-    'views_handler_filter_comment_user_uid',
-
-    // argument handlers
-    'views_handler_argument_comment_user_uid',
-  );
-}
-
-/**
  * Template helper for theme_views_view_row_comment
  */
 function template_preprocess_views_view_row_comment(&$vars) {

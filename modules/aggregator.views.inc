@@ -325,28 +325,6 @@ function aggregator_views_data() {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function aggregator_views_handlers() {
-  return array(
-
-    // field handlers
-    'views_handler_field_aggregator_title_link',
-    'views_handler_field_aggregator_category',
-    'views_handler_field_aggregator_item_description',
-
-    // argument handlers
-    'views_handler_argument_aggregator_fid',
-    'views_handler_argument_aggregator_category_cid',
-
-    // filter handlers
-      'views_handler_filter_aggregator_category_cid',
-  );
-}
-
-
-/**
  * Implements hook_views_plugins
  */
 function aggregator_views_plugins() {

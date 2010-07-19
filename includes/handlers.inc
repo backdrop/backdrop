@@ -59,54 +59,6 @@ function _views_prepare_handler($definition, $data, $field) {
 }
 
 /**
- * Fetch the handler data from cache.
- */
-function views_fetch_handler_data($handler = NULL) {
-  static $cache = NULL;
-  if (!isset($cache)) {
-    $start = microtime(TRUE);
-
-    $cache = views_discover_handlers();
-
-    debug('Views handlers build time: ' . (microtime(TRUE) - $start) * 1000 . ' ms');
-  }
-
-  if (!$handler) {
-    return $cache;
-  }
-  elseif (isset($cache[$handler])) {
-    return $cache[$handler];
-  }
-
-  // Return an empty array if there is no match.
-  return array();
-}
-
-/**
- * Builds and return a list of all handlers available in the system.
- *
- * @return Nested array of handlers
- */
-function views_discover_handlers() {
-  $cache = array();
-  // Get handlers from all modules.
-  foreach (module_implements('views_handlers') as $module) {
-    $result = module_invoke($module, 'views_handlers');
-    if (!is_array($result)) {
-      continue;
-    }
-
-    foreach ($result['handlers'] as $handler) {
-      $cache[$handler] = array(
-        'module' => $module,
-        'handler' => $handler,
-      );
-    }
-  }
-  return $cache;
-}
-
-/**
  * Fetch a handler to join one table to a primary table from the data cache
  */
 function views_get_table_join($table, $base_table) {
@@ -1093,81 +1045,6 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
     }
   }
 }
-
-/**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function views_views_handlers() {
-  return array(
-    // argument handlers
-    'views_handler_argument',
-    'views_handler_argument_numeric',
-    'views_handler_argument_formula',
-    'views_handler_argument_date',
-    'views_handler_argument_string',
-    'views_handler_argument_many_to_one',
-    'views_handler_argument_null',
-
-    // field handlers
-    'views_handler_field',
-    'views_handler_field_date',
-    'views_handler_field_boolean',
-    'views_handler_field_markup',
-    'views_handler_field_xss',
-    'views_handler_field_url',
-    'views_handler_field_file_size',
-    'views_handler_field_prerender_list',
-    'views_handler_field_numeric',
-    'views_handler_field_custom',
-    'views_handler_field_counter',
-
-    // filter handlers
-    'views_handler_filter',
-    'views_handler_filter_equality',
-    'views_handler_filter_string',
-    'views_handler_filter_boolean_operator',
-    'views_handler_filter_boolean_operator_string',
-    'views_handler_filter_in_operator',
-    'views_handler_filter_numeric',
-    'views_handler_filter_float',
-    'views_handler_filter_date',
-    'views_handler_filter_many_to_one',
-
-    // relationship handlers
-    'views_handler_relationship',
-
-
-    // sort handlers
-    'views_handler_sort',
-    'views_handler_sort_formula',
-    'views_handler_sort_date',
-    'views_handler_sort_menu_hierarchy',
-    'views_handler_sort_random',
-
-    // group by handlers
-    'views_handler_argument_group_by_numeric' => array(
-      'parent' => 'views_handler_argument',
-    ),
-    'views_handler_field_group_by_numeric' => array(
-      'parent' => 'views_handler_field',
-    ),
-    'views_handler_filter_group_by_numeric' => array(
-      'parent' => 'views_handler_filter_numeric',
-    ),
-    'views_handler_sort_group_by_numeric' => array(
-      'parent' => 'views_handler_sort',
-    ),
-    // area handlers
-    'views_handler_area' => array(
-      'parent' => 'views_handler',
-    ),
-    'views_handler_area_text' => array(
-      'parent' => 'views_handler_area',
-    ),
-  );
-}
-
 
 /**
  * @}

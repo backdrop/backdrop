@@ -219,17 +219,5 @@ function profile_views_fetch_field($field) {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function profile_views_handlers() {
-  return array(
-    'views_handler_field_profile_date',
-    'views_handler_field_profile_list',
-    'views_handler_filter_profile_selection',
-  );
-}
-
-/**
  * @}
  */

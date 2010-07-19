@@ -419,30 +419,6 @@ function user_views_plugins() {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function user_views_handlers() {
-  return array(
-    'views_handler_argument_user_uid',
-    'views_handler_field_user',
-    'views_handler_field_user_name',
-    'views_handler_field_user_link',
-    'views_handler_field_user_link_edit',
-    'views_handler_field_user_link_delete',
-    'views_handler_field_user_mail',
-    'views_handler_field_user_language',
-    'views_handler_field_user_picture',
-    'views_handler_field_user_roles',
-    'views_handler_filter_user_name',
-    'views_handler_filter_user_current',
-    'views_handler_filter_user_roles',
-    'views_handler_argument_users_roles_rid',
-  );
-}
-
-
-/**
  * Allow replacement of current userid so we can cache these queries
  */
 function user_views_query_substitutions($view) {

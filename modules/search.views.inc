@@ -131,18 +131,6 @@ function search_views_data() {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function search_views_handlers() {
-  return array(
-    'views_handler_field_search_score',
-    'views_handler_sort_search_score',
-    'views_handler_filter_search',
-  );
-}
-
-/**
  * Implements hook_views_plugins
  */
 function search_views_plugins() {

@@ -247,13 +247,5 @@ function statistics_views_data() {
 }
 
 /**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function statistics_views_handlers() {
-  return array('views_handler_field_accesslog_path');
-}
-
-/**
  * @}
  */

@@ -234,22 +234,5 @@ function field_views_field_default_views_data($field) {
 }
 
 /**
- * Implements hook_views_handlers().
- */
-function field_views_handlers() {
-  return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/field',
-    ),
-    'handlers' => array(
-      'views_handler_field_field' => array(
-        'parent' => 'views_handler_field',
-      ),
-    ),
-  );
-}
-
-
-/**
  * @}
  */

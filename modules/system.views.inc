@@ -173,19 +173,6 @@ function system_views_data() {
   return $data;
 }
 
-/**
- * Implements hook_views_handlers() to register all of the basic handlers
- * views uses.
- */
-function system_views_handlers() {
-  return array(
-    'views_handler_field_file',
-    'views_handler_field_file_status',
-    'views_handler_filter_file_status',
-    'views_handler_argument_file_fid',
-  );
-}
-
 function _views_file_status($choice = NULL) {
   $status = array(
     0 => t('Temporary'),

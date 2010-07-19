@@ -36,20 +36,6 @@ function filter_views_data() {
   return $data;
 }
 
-function filter_views_handlers() {
-  return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'views') . '/modules/filter',
-    ),
-    'handlers' => array(
-      // field handlers
-      'views_handler_field_filter_format_name' => array(
-        'parent' => 'views_handler_field',
-      ),
-    ),
-  );
-}
-
 /**
  * @}
  */

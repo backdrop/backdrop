@@ -50,11 +50,18 @@ class views_handler_filter_node_type extends views_handler_filter_in_operator {
 
 <i>views_handler_filter_in_operator</i> provides a simple mechanism to set the list used and the rest of the handler is perfectly fine for this.
 
-Handlers are stored in their own files; for these files to be loaded by Views on demand, they must first be registered. Since Views core handlers are also loaded this way, it's imperative that your module also implement this pattern in order to prevent code crashes when your handler's parent class is not yet available.
+Handlers are stored in their own files and loaded on demand.
+Like all other module files, they must first be registered through the module's info file. For example:
+<pre>
+name = Example module
+description = "Gives an example of a module."
+core = 7.x
+files[] = example.module
+files[] = example.install
 
-To register handlers, you must implement <strong>hook_views_handlers()</strong>. This hook returns an array of handlers. Each element of the array is the name of a handler class.
-
-You can see examples of this function in any of the various module.views.inc files in the views modules directory.
+; Views handlers
+files[] = includes/views/handlers/example_handler_argument_string.inc
+</pre>
 
 The best place to learn more about handlers and how they work is to explore <a href="http://views.doc.logrus.com">the views API site</a> and use existing handlers as a guide and a model. Understanding how views_handler and its child classes work is handy but you can do a lot just following these models. You can also explore the views module directory, particularly node.views.inc.
 

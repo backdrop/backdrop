@@ -228,16 +228,6 @@ function hook_views_plugins_alter(&$plugins) {
 }
 
 /**
- * Register handler, file and parent information so that handlers can be
- * loaded only on request.
- *
- * The full documentation for this hook is in the advanced help.
- */
-function hook_views_handlers() {
-  // example code here
-}
-
-/**
  * Register View API information. This is required for your module to have
  * its include files loaded; for example, when implementing
  * hook_views_default_views().
