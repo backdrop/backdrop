@@ -27,12 +27,25 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
     $form['text']['#default_value'] = empty($this->options['text']) ? t('contact') : $this->options['text'];
   }
 
+  // An example of field level access control.
+  // We must override the access method in the parent class, as that requires
+  // the 'access user profiles' permission, which the contact form does not.
+  function access() {
+    global $user;
+
+    // Only registered users can view other registered user's contact page.
+    if (empty($user->uid)) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
   function render($values) {
     global $user;
     $uid = $values->{$this->aliases['uid']};
 
-    // Only registered users can view other registered user's contact page.
-    if (empty($user->uid) || empty($uid)) {
+    if (empty($uid)) {
       return;
     }
 
