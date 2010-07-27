@@ -30,7 +30,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
   }
 
   function preview() {
-    if (!empty($this->live_preview)) {
+    if (!empty($this->view->live_preview)) {
       return '<pre>' . check_plain($this->view->render()) . '</pre>';
     }
     return $this->view->render();
