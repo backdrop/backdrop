@@ -299,6 +299,7 @@ Views 3.x-7.x-dev
     o #780362 by ericduran: Validate display id when changed.
     o #792582 by ducktape: Validate that view names are not purely numeric, which cannot be loaded by views_get_view().
     o #594402 by joachim: Clarify text on "Moderation" field.
+    o #848506 by dereine: Add aggregator item ID as an aggregator field.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
