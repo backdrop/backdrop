@@ -210,7 +210,7 @@ function user_views_data() {
     ),
   );
 
-  // published status
+  // active status
   $data['users']['status'] = array(
     'title' => t('Active'), // The item it appears as on the UI,
     'help' => t('Whether a user is active or blocked.'), // The help that appears on the UI,
