@@ -492,7 +492,9 @@ class views_handler_field extends views_handler {
 
     if (empty($this->last_render)) {
       if (($this->last_render !== 0 && $this->last_render !== '0') || !empty($this->options['empty_zero'])) {
-        $this->last_render = $this->options['empty'];
+        $this->options['alter']['alter_text'] = 1;
+        $this->options['alter']['text'] = $this->options['empty'];
+        $this->last_render = $this->render_text($this->options['alter']);
       }
     }
 

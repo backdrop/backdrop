@@ -288,6 +288,7 @@ Views 3.x-7.x-dev
     o Change text of the the contextual link to "Edit view".
     o #856186 by bojanz and dereine: Remove hook_views_handlers and update upgrade docs. Awesome!!
     o #727894 by stella: Give stronger classes on exposed widgets for easier theming.
+    o #768060 by EmanueleQuinto: Better empty field replacement that continues to respect other rewriting rules.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
