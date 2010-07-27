@@ -296,6 +296,7 @@ Views 3.x-7.x-dev
     o #734706 by joachim: Use proper access control to prevent unregistered users from seeing links to inaccessible contact pages.
     o #827188 by dereine: Comment ID field should be numeric, not the generic field handler.
     o #827780 by dereine: Fix RSS feed live preview not getting proper PRE tags.
+    o #780362 by ericduran: Validate display id when changed.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
