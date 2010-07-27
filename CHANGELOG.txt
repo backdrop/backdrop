@@ -290,6 +290,7 @@ Views 3.x-7.x-dev
     o #727894 by stella: Give stronger classes on exposed widgets for easier theming.
     o #768060 by EmanueleQuinto: Better empty field replacement that continues to respect other rewriting rules.
     o #464490 by dereine: Allow links to specify that they are absolute.
+    o #780898 by ericduran: New display IDs not used until view is saved.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

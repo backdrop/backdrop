@@ -1059,7 +1059,7 @@ class views_plugin_display extends views_plugin {
         $form['display_id'] = array(
           '#type' => 'textfield',
           '#description' => t('This is machine name of the display.'),
-          '#default_value' => $this->display->id,
+          '#default_value' => !empty($this->display->new_id) ? $this->display->new_id : $this->display->id,
           '#required' => TRUE,
           '#size' => 64,
         );
@@ -1700,7 +1700,7 @@ class views_plugin_display extends views_plugin {
     $section = $form_state['section'];
     switch ($section) {
       case 'display_id':
-        if ($this->display->id != $form_state['values']['display_id']) {
+        if (isset($form_state['values']['display_id'])) {
           $this->display->new_id = $form_state['values']['display_id'];
         }
         break;
