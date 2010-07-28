@@ -303,6 +303,7 @@ Views 3.x-7.x-dev
     o #798764 by setvik: Fix broken AJAX in some IE circumstances due to odd IE behavior.
     o #827300 by dereine: Fix authenticated users showing up as "No role" in role summary view.
     o #746846 by lavamind: url encoding on options could cause visual problems in jump menu.
+    o #839214 by AlexisWilke: Improve encoding on help text snippets.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
