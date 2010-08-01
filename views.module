@@ -463,7 +463,7 @@ function views_invalidate_cache() {
  * code and PHP is more locked down than administer views.
  */
 function views_import_access() {
-  return user_access('administer views') && user_access('use PHP for block visibility');
+  return user_access('administer views') && user_access('use PHP for settings');
 }
 
 /**
