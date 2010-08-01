@@ -305,6 +305,7 @@ Views 3.x-7.x-dev
     o #746846 by lavamind: url encoding on options could cause visual problems in jump menu.
     o #839214 by AlexisWilke: Improve encoding on help text snippets.
     o #846054 by celeritas: Exposed form "Reset" button failed to reset if the name was changed in form options.
+    o #870770 by bojany: Exposed filter settings can't be saved. The same patch as #645146.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
