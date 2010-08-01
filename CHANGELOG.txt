@@ -307,6 +307,7 @@ Views 3.x-7.x-dev
     o #846054 by celeritas: Exposed form "Reset" button failed to reset if the name was changed in form options.
     o #870770 by bojany: Exposed filter settings can't be saved. The same patch as #645146.
     o by dereine: Rename re_render to rerender.
+    o by dereine: Fix views_import_access by changing the permission to use PHP for settings
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

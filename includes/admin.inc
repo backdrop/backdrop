@@ -1662,8 +1662,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
   }
 
   $output = views_ajax_form_wrapper($form_state['form_id'], $form_state);
-
-  if (!$output) {
+  if ($form_state['submitted']) {
     // Sometimes we need to re-generate the form for multi-step type operations.
     $object = NULL;
     if (!empty($view->stack)) {
