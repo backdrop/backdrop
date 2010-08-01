@@ -199,7 +199,7 @@ function views_ajax_error($message) {
 function views_ajax_form_wrapper($form_id, &$form_state) {
   // This won't override settings already in.
   $form_state += array(
-    're_render' => FALSE,
+    'rerender' => FALSE,
     'no_redirect' => !empty($form_state['ajax']),
     'no_cache' => TRUE,
     'build_info' => array(
