@@ -431,7 +431,6 @@ a.views-button-remove {
 a.views-button-remove {
   background-position: 0px -72px;
   position: relative;
-  top: -4px;
 }
 a.views-button-remove:hover {
   background-position: 0px -84px;

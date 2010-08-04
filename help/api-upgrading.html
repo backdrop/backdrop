@@ -1,0 +1,20 @@
+<!-- $Id$ -->
+In order to take advantage of the changes in Drupal 7, Views has gone through several API changes.  +Here's what you should know.
+
+<h3>Handler registry</h3>
+
+Views now uses Drupal's dynamic-loading code registry.
+You can safely remove your implementations of hook_views_handlers(), since they are no longer used.
+
+Please remember to specify the handlers in your module's .info file. For example:
+<pre>
+name = Example module
+description = "Gives an example of a module."
+core = 7.x
+files[] = example.module
+files[] = example.install
+
+; Views handlers
+files[] = includes/views/handlers/example_handler_argument_string.inc
+</pre>
+
