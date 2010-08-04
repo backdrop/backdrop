@@ -28,10 +28,10 @@ description = My site specific module.
 core = 6.x
 </pre>
 
-Once you have these two files set up, you should be able to activate your new module at the <em>Administer >> Site building >> Modules</em> page.
+Once you have these two files set up, you should be able to activate your new module at the <em>Administer >> Modules</em> page.
 <h3>Exporting your views</h3>
 
-The easiest way to do this is to activate the 'views_export' module, and navigate to <em>Administer >> Views >> Tools >> Bulk export</em> Place a check next to each view that you want in your module, type the module name into the text field, and click export. This will create the entire <em>hook_views_default_views()</em> function for you.
+The easiest way to do this is to activate the 'views_export' module, and navigate to <em>Administer >> Structure >> Views >> Tools >> Bulk export</em> Place a check next to each view that you want in your module, type the module name into the text field, and click export. This will create the entire <em>hook_views_default_views()</em> function for you.
 
 You can also export individual views. If you do this, keep in mind that this export does not include the line that adds the exported $view into the larger $views array:
 

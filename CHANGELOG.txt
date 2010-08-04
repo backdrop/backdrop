@@ -310,6 +310,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix views_import_access by changing the permission to use PHP for settings
     o by bojanz and dereine: Fix a remaining call to vpr.
     o by dereine: viewsAddTab used wrong variable, so adding displays is working again.
+    o #873250 by webchick: References to old admin navigation paths
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
