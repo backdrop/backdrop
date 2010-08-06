@@ -312,6 +312,7 @@ Views 3.x-7.x-dev
     o by dereine: viewsAddTab used wrong variable, so adding displays is working again.
     o #873250 by webchick: References to old admin navigation paths
     o #873238 by dereine: Temporary fix for #561858
+    o #875876 by grendzy: Convert user validation to dbtng.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

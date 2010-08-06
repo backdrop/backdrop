@@ -73,7 +73,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
         if ($argument == $GLOBALS['user']->uid) {
           $account = $GLOBALS['user'];
         }
-        $where = 'uid = %d';
+        $where = 'uid = :argument';
       }
     }
     else {
@@ -81,7 +81,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
         if ($argument == $GLOBALS['user']->name) {
           $account = $GLOBALS['user'];
         }
-        $where = "name = '%s'";
+        $where = "name = :argument";
       }
     }
 
@@ -92,7 +92,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
 
     if (!isset($account)) {
       $query = "SELECT uid, name FROM {users} WHERE $where";
-      $account = db_fetch_object(db_query($query, $argument));
+      $account = db_query($query, array(':argument' => $argument))->fetchObject();
     }
     if (empty($account)) {
       // User not found.
