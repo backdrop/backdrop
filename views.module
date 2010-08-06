@@ -80,7 +80,7 @@ function views_theme() {
         }
 
         if (!function_exists('theme_' . $def['theme'])) {
-          $hooks[$def['theme']]['template'] = views_css_safe($def['theme']);
+          $hooks[$def['theme']]['template'] = drupal_clean_css_identifier($def['theme']);
         }
       }
       if (isset($def['additional themes'])) {
@@ -98,7 +98,7 @@ function views_theme() {
           );
 
           if (!function_exists('theme_' . $theme)) {
-            $hooks[$theme]['template'] = views_css_safe($theme);
+            $hooks[$theme]['template'] = drupal_clean_css_identifier($theme);
           }
         }
       }
@@ -1047,7 +1047,7 @@ function views_exposed_form($form, &$form_state) {
 
   $form['#action'] = url($view->get_url());
   $form['#theme'] = views_theme_functions('views_exposed_form', $view, $display);
-  $form['#id'] = views_css_safe('views_exposed_form-' . check_plain($view->name) . '-' . check_plain($display->id));
+  $form['#id'] = drupal_clean_css_identifier('views_exposed_form-' . check_plain($view->name) . '-' . check_plain($display->id));
 //  $form['#attributes']['class'] = array('views-exposed-form');
 
   // If using AJAX, we need the form plugin.
@@ -1273,13 +1273,6 @@ function views_var_export($var, $prefix = '', $init = TRUE) {
   }
 
   return $output;
-}
-
-/**
- * Prepare the specified string for use as a CSS identifier.
- */
-function views_css_safe($string) {
-  return str_replace('_', '-', $string);
 }
 
 /**

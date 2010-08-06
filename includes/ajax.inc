@@ -235,7 +235,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     }
 
     if (!empty($form_state['#section'])) {
-      $commands[] = views_ajax_command_hilite('.' . views_ui_item_css($form_state['#section']));
+      $commands[] = views_ajax_command_hilite('.' . drupal_clean_css_identifier($form_state['#section']));
     }
 
     return $commands;

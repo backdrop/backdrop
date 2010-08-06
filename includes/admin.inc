@@ -1166,7 +1166,7 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
 
   // Special fields if tihs is the default display.
   $vars['default'] = ($display->id == 'default');
-  $vars['details_class'] = views_ui_item_css('details');
+  $vars['details_class'] = drupal_clean_css_identifier('details');
   if (!empty($view->changed_sections['details'])) {
     $vars['details_changed'] = TRUE;
   }
@@ -1214,7 +1214,7 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
         }
       }
     }
-    $data['class'][] = views_ui_item_css($display_id . '-' . $id);
+    $data['class'][] = drupal_clean_css_identifier($display_id . '-' . $id);
     if (!empty($view->changed_sections[$display_id . '-' . $id])) {
       $data['changed'] = TRUE;
     }
@@ -1336,7 +1336,7 @@ function template_preprocess_views_ui_edit_item(&$vars) {
     }
 
     $fields[$id]['title'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
-    $fields[$id]['class'][] = views_ui_item_css($display->id . '-' . $type . '-' . $id);
+    $fields[$id]['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
     if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $id])) {
       $fields[$id]['changed'] = TRUE;
     }
@@ -1360,7 +1360,7 @@ function template_preprocess_views_ui_edit_item(&$vars) {
       }
 
       $fields[$pid]['title'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
-      $fields[$pid]['class'][] = views_ui_item_css($display->id . '-' . $type . '-' . $pid);
+      $fields[$pid]['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
       if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $pid])) {
         $fields[$pid]['changed'] = TRUE;
       }
@@ -2813,13 +2813,6 @@ function views_ui_get_roles() {
   }
 
   return $roles;
-}
-
-/**
- * Get a css safe id for a particular section.
- */
-function views_ui_item_css($item) {
-  return views_css_safe('views-item-' . $item);
 }
 
 /**
