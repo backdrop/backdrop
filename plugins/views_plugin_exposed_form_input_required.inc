@@ -22,18 +22,16 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
     parent::options_form($form, $form_state);
 
     $form['text_input_required'] = array(
-      '#type' => 'textarea',
+      '#type' => 'text_format',
       '#title' => t('Text on demand'),
       '#description' => t('Text to display instead results until user select and apply an expose filter.'),
       '#default_value' => $this->options['text_input_required'],
+      '#format' => $this->options['text_input_required_format'],
     );
-
-    $form['text_input_required_format'] = filter_form($this->options['text_input_required_format'], NULL, array('text_input_required_format'));
   }
 
   function options_submit(&$form, &$form_state) {
-    $form_state['values']['exposed_form_options']['text_input_required_format'] = $form_state['values']['text_input_required_format'];
-
+    $form_state['values']['exposed_form_options']['text_input_required_format'] = $form_state['values']['options']['text_input_required']['format'];
     parent::options_submit($form, $form_state);
   }
 
