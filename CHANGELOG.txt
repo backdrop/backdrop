@@ -316,6 +316,7 @@ Views 3.x-7.x-dev
     o #706680 by casey: Replace views_css_safe() and views_ui_item_css() with drupal_clean_css_identifier()
     o by dereine: Convert views_handler_argument_aggregator_fid to dbtng.
     o by dereine: Fix filter_form error in input_required plugin.
+    o #799604 by KarenS and dereine: Fix add_where with formulas.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

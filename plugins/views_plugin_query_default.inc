@@ -658,7 +658,7 @@ class views_plugin_query_default extends views_plugin_query {
     // We limit the length of the original alias up to 60 characters
     // to get a unique alias later if its have duplicates
     $alias = substr($alias, 0, 60);
-
+       
     // Create a field info array.
     $field_info = array(
       'field' => $field,
@@ -678,7 +678,7 @@ class views_plugin_query_default extends views_plugin_query {
     if (empty($this->fields[$alias])) {
       $this->fields[$alias] = $field_info;
     }
-
+    
     return $alias;
   }
 
@@ -876,7 +876,12 @@ class views_plugin_query_default extends views_plugin_query {
     foreach ($this->$where as $group => $info) {
       $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
       foreach ($info['conditions'] as $key => $clause) {
-        $sub_group->condition($clause['field'], $clause['value'], $clause['operator']);
+        if ($clause['operator'] == 'formula') {
+          $sub_group->where($clause['field'], $clause['value']);
+        }
+        else {
+          $sub_group->condition($clause['field'], $clause['value'], $clause['operator']);
+        }
       }
       $main_group->condition($sub_group);
     }
@@ -911,14 +916,16 @@ class views_plugin_query_default extends views_plugin_query {
         $info = $this->get_aggregation_info();
         if (!empty($info[$field['function']]['method']) && function_exists($info[$field['function']]['method'])) {
           $string = $info[$field['function']]['method']($field['function'], $string);
-          $query->addExpression($string, $fieldname);
+          $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
+          $query->addExpression($string, $fieldname, $placeholders);
         }
 
         $this->has_aggregate = TRUE;
       }
       // This is a formula, using no tables.
       elseif (empty($field['table'])) {
-        $query->addExpression($string, $fieldname);
+        $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
+        $query->addExpression($string, $fieldname, $placeholders);
       }
 
       elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
