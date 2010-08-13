@@ -321,6 +321,7 @@ Views 3.x-7.x-dev
     o #843866 by dagmar: Allow summary views to specify their path rather than assuming the view path all the time.
     o #526106 by Blackice2999: Fix occasional off-by-one-day problem with date arguments.
     o #785960 by dereine: Reset button should appear after Apply button, not before.
+    o #863666 by dereine: Revert button redirects to wrong place after view is reverted.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
