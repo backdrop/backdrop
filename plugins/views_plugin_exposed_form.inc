@@ -138,7 +138,7 @@ class views_plugin_exposed_form extends views_plugin {
       $handler = $view->sort[$sort_by];
       if (isset($handler)) {
         $view->query->orderby = array();
-        if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('asc', 'desc'))) {
+        if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('ASC', 'DESC'))) {
           $handler->options['order'] = $exposed_data['sort_order'];
         }
         $handler->query();
@@ -183,13 +183,15 @@ class views_plugin_exposed_form extends views_plugin {
         '#title' => t($this->options['exposed_sorts_label']),
       );
       $sort_order = array(
-        'asc' => t($this->options['sort_asc_label']),
-        'desc' => t($this->options['sort_desc_label']),
+        'ASC' => t($this->options['sort_asc_label']),
+        'DESC' => t($this->options['sort_desc_label']),
       );
+      $first_sort = reset($this->view->sort);
       $form['sort_order'] = array(
         '#type' => 'select',
         '#options' => $sort_order,
         '#title' => t('Order'),
+        '#default_value' => $first_sort->options['order'],
       );
       $form['submit']['#weight'] = 10;
       if (isset($form['reset'])) {
