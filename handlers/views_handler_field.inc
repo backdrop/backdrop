@@ -119,7 +119,7 @@ class views_handler_field extends views_handler {
    * Called to determine what to tell the clicksorter.
    */
   function click_sort($order) {
-    $this->query->add_orderby($this->table, $this->field, $order, $this->field_alias);
+    $this->query->add_orderby($this->table_alias, $this->real_field, $order, $this->field_alias);
   }
 
   /**
