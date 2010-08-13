@@ -327,6 +327,7 @@ Views 3.x-7.x-dev
     o #743682 by nicedawg: Prevent exposed filter in a block from showing up twice on validation error.
     o #768972 by dereine, cyberwolf and nicedawg: Add an option to disable an error message if terms do not exist on taxonomy term filter.
     o #812608 by drunken monkey: Views outputs unquoted version in exports.
+    o #402944 by drewish: Cache views block list to reduce overhead when listing blocks.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
