@@ -325,6 +325,7 @@ Views 3.x-7.x-dev
     o #666870 by dereine and dww: Exposed sorts do not default properly.
     o #703980 by jmiccolis: Custom date needs to better support "r".
     o #743682 by nicedawg: Prevent exposed filter in a block from showing up twice on validation error.
+    o #768972 by dereine, cyberwolf and nicedawg: Add an option to disable an error message if terms do not exist on taxonomy term filter.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
