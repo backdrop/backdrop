@@ -14,6 +14,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
 
+    $options['base_path'] = array('default' => '');
     $options['count'] = array('default' => TRUE);
     $options['hide'] = array('default' => FALSE);
     $options['text'] = array('default' => t('Go'), 'translatable' => TRUE);
@@ -28,6 +29,16 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+    $form['base_path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Base path'),
+      '#default_value' => $this->options['base_path'],
+      '#description' => t('Define the base path for links in this summary
+        view, i.e. http://example.com/<strong>your_view_path/archive</strong>.
+        Do not include beginning and ending forward slash. If this value
+        is empty, views will use the first path found as the base path,
+        in page displays, or / if no path could be found.'),
+    );
     $form['count'] = array(
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['count']),
@@ -61,7 +72,11 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
     foreach ($this->view->result as $id => $row) {
       $args = $this->view->args;
       $args[$argument->position] = $argument->summary_argument($row);
-      $path = url($this->view->get_url($args), $url_options);
+      $base_path = NULL;
+      if (!empty($argument->options['style_options']['base_path'])) {
+        $base_path = $argument->options['style_options']['base_path'];
+      }
+      $path = url($this->view->get_url($args, $base_path), $url_options);
 
       $options[$path] = strip_tags($argument->summary_name($row));
       if (!empty($this->options['count'])) {

@@ -318,6 +318,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix filter_form error in input_required plugin.
     o #799604 by KarenS and dereine: Fix add_where with formulas.
     o #859368 by dereine: Click sort using wrong add_orderby() line caused some click sorts to fail.
+    o #843866 by dagmar: Allow summary views to specify their path rather than assuming the view path all the time.
     o #526106 by Blackice2999: Fix occasional off-by-one-day problem with date arguments.
 
 Views 6.x-3.x-dev
