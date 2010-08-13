@@ -323,6 +323,7 @@ Views 3.x-7.x-dev
     o #785960 by dereine: Reset button should appear after Apply button, not before.
     o #863666 by dereine: Revert button redirects to wrong place after view is reverted.
     o #666870 by dereine and dww: Exposed sorts do not default properly.
+    o #703980 by jmiccolis: Custom date needs to better support "r".
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
