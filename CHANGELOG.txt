@@ -329,6 +329,7 @@ Views 3.x-7.x-dev
     o #812608 by drunken monkey: Views outputs unquoted version in exports.
     o #402944 by drewish: Cache views block list to reduce overhead when listing blocks.
     o #792184 by mgriego: Remove unnecessary special handling of option defaulting which actually causes problems in the new world order.
+    o #692988 by joachim: Eliminate an unnecessary query in taxonomy filter.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

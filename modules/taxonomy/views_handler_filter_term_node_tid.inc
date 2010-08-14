@@ -28,10 +28,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     if ($this->options['limit']) {
-      // We only do this when the form is displayed so this query doesn't run
-      // unnecessarily just when the object is constructed.
+      // We only do this when the form is displayed.
       if ($this->options['vid'] == 0) {
-        $this->options['vid'] = db_query('SELECT MIN(vid) FROM {taxonomy_vocabulary} v')->fetchField();
+        $first_vocabulary = reset($vocabularies);
+        $this->options['vid'] = $first_vocabulary->vid;
       }
 
       $form['vid'] = array(
