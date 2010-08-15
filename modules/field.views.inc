@@ -118,7 +118,7 @@ function field_views_field_default_views_data($field) {
   }
 
   foreach ($field['columns'] as $column => $attributes) {
-    $sort = !empty($attributes['sortable']) ? TRUE : FALSE;
+    $allow_sort = TRUE;
 
     // Identify likely filters and arguments for each column based on field type.
     switch ($attributes['type']) {
@@ -129,18 +129,23 @@ function field_views_field_default_views_data($field) {
       case 'serial':
         $filter = 'views_handler_filter_numeric';
         $argument = 'views_handler_argument_numeric';
+        $sort = 'views_handler_sort';
         break;
       case 'numeric':
       case 'float':
         $filter = 'views_handler_filter_float';
         $argument = 'views_handler_argument_numeric';
+        $sort = 'views_handler_sort';
         break;
 
       case 'text':
       case 'blob':
+        // It does not make sense to sort by blob or text.
+        $allow_sort = FALSE;
       default:
         $filter = 'views_handler_filter_string';
         $argument = 'views_handler_argument_string';
+        $sort = 'views_handler_sort';
         break;
     }
 
@@ -185,11 +190,11 @@ function field_views_field_default_views_data($field) {
         'content_field_name' => $field['field_name'],
         'allow empty' => TRUE,
       );
-      if (!empty($sort)) {
+      if (!empty($allow_sort)) {
         $data[$table][$column_real_name]['sort'] = array(
           'field' => $column_real_name,
           'table' => $table,
-          'handler' => 'content_handler_sort',
+          'handler' => $sort,
           'additional fields' => $additional_fields,
           'content_field_name' => $field['field_name'],
         );
