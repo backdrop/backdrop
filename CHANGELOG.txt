@@ -332,6 +332,7 @@ Views 3.x-7.x-dev
     o #692988 by joachim: Eliminate an unnecessary query in taxonomy filter.
     o #857882 by dereine: Fix sorting of fieldapi fields.
     o #884000 by bojanz: Fill node.moderate column.
+    o #883990 by dereine: Rename history_user to history in the popular default view.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

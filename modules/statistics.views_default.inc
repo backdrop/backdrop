@@ -42,7 +42,7 @@ function statistics_views_default_views() {
     ),
     'timestamp' => array(
       'id' => 'timestamp',
-      'table' => 'history_user',
+      'table' => 'history',
       'field' => 'timestamp',
       'label' => '',
       'comments' => 1,
@@ -172,7 +172,7 @@ function statistics_views_default_views() {
     ),
     'timestamp' => array(
       'id' => 'timestamp',
-      'table' => 'history_user',
+      'table' => 'history',
       'field' => 'timestamp',
       'label' => '',
       'comments' => 1,
