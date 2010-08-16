@@ -166,6 +166,7 @@ class views_handler_argument_string extends views_handler_argument {
     }
 
     $this->ensure_my_table();
+    $formula = FALSE;
     if (empty($this->options['glossary'])) {
       $field = "$this->table_alias.$this->real_field";
     }
@@ -196,8 +197,8 @@ class views_handler_argument_string extends views_handler_argument {
   }
 
   function case_transform($string, $option) {
-		global $multibyte;
-		
+    global $multibyte;
+
     switch ($this->options[$option]) {
       default:
         return $string;
