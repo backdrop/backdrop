@@ -61,23 +61,23 @@ class views_handler_filter_term_node_tid_depth extends views_handler_filter_term
     }
 
     // Now build the subqueries.
-    $subquery = db_select('term_node', 'tn');
-    $subquery->addField('tn', 'vid');
+    $subquery = dbtng_select('taxonomy_index', 'tn');
+    $subquery->addField('tn', 'nid');
     $where = db_or()->condition('tn.tid', $this->value, $operator);
     $last = "tn";
 
     if ($this->options['depth'] > 0) {
-      $subquery->leftJoin('term_hierarchy', 'th', "th.tid = tn.tid");
+      $subquery->leftJoin('taxonomy_term_hierarchy', 'th', "th.tid = tn.tid");
       $last = "th";
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery->leftJoin('term_hierarchy', "th$count", "$last.parent = th$count.tid");
+        $subquery->leftJoin('taxonomy_term_hierarchy', "th$count", "$last.parent = th$count.tid");
         $where->condition("th$count.tid", $this->value, $operator);
         $last = "th$count";
       }
     }
     elseif ($this->options['depth'] < 0) {
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery->leftJoin('term_hierarchy', "th$count", "$last.tid = th$count.parent");
+        $subquery->leftJoin('taxonomy_term_hierarchy', "th$count", "$last.tid = th$count.parent");
         $where->condition("th$count.tid", $this->value, $operator);
         $last = "th$count";
       }

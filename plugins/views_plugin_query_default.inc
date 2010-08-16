@@ -450,7 +450,7 @@ class views_plugin_query_default extends views_plugin_query {
       // add_table() which requires the ability to intentionally add
       // the same table with the same join multiple times.  For
       // example, a view that filters on 3 taxonomy terms using AND
-      // needs to join term_data 3 times with the same join.
+      // needs to join taxonomy_term_data 3 times with the same join.
 
       // scan through the table queue to see if a matching join and
       // relationship exists.  If so, use it instead of this join.

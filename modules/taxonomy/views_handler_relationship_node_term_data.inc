@@ -40,11 +40,11 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
     $this->ensure_my_table();
 
     $def = $this->definition;
-    $def['table'] = 'term_data';
+    $def['table'] = 'taxonomy_term_data';
 
     if (!empty($this->options['required']) || !array_filter($this->options['vids'])) {
-      $term_node = $this->query->add_table('term_node', $this->relationship);
-      $def['left_table'] = 'term_node';
+      $term_node = $this->query->add_table('taxonomy_index', $this->relationship);
+      $def['left_table'] = 'taxonomy_index';
       $def['left_field'] = 'tid';
       $def['field'] = 'tid';
       if (!empty($this->options['required'])) {
@@ -52,13 +52,13 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
       }
     }
     else {
-      // If the join is optional, join a subselect that will emulate term_data table instead
+      // If the join is optional, join a subselect that will emulate taxonomy_term_data table instead
       $def['left_table'] = $this->table_alias;
       $def['left_field'] = 'vid';
       $def['field'] = 'revision';
       // fapi ensures vids are safe here.
       $vids = implode(', ', array_filter($this->options['vids']));
-      $def['table formula'] = "(SELECT td.*, tn.vid AS revision FROM {taxonomy_term_data} td INNER JOIN {taxonomy_term_node} tn ON tn.tid = td.tid WHERE td.vid IN ($vids))";
+      $def['table formula'] = "(SELECT td.*, tn.vid AS revision FROM {taxonomy_term_data} td INNER JOIN {taxonomy_index} tn ON tn.tid = td.tid WHERE td.vid IN ($vids))";
     }
 
     $join = new views_join();
@@ -70,6 +70,6 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
     // use a short alias for this:
     $alias = $def['table'] . '_' . $this->table;
 
-    $this->alias = $this->query->add_relationship($alias, $join, 'term_data', $this->relationship);
+    $this->alias = $this->query->add_relationship($alias, $join, 'taxonomy_term_data', $this->relationship);
   }
 }

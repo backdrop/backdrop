@@ -24,20 +24,14 @@ function taxonomy_views_data() {
   $data['taxonomy_vocabulary']['table']['group']  = t('Taxonomy');
 
   $data['taxonomy_vocabulary']['table']['join'] = array(
-    // vocabulary links to term_data directly via vid.
-    'term_data' => array(
+    // vocabulary links to taxonomy_term_data directly via vid.
+    'taxonomy_term_data' => array(
       'left_field' => 'vid',
       'field' => 'vid',
     ),
-    // vocabulary links to node through term_data via vid
+    // vocabulary links to node through taxonomy_term_data via vid
     'node' => array(
-      'left_table' => 'term_data',
-      'left_field' => 'vid',
-      'field' => 'vid',
-    ),
-    // vocabulary links to node_revision via term_data
-    'node_revision' => array(
-      'left_table' => 'term_data',
+      'left_table' => 'taxonomy_term_data',
       'left_field' => 'vid',
       'field' => 'vid',
     ),
@@ -77,10 +71,10 @@ function taxonomy_views_data() {
   );
 
   // ----------------------------------------------------------------------
-  // term_data table
+ // taxonomy_term_data table
 
-  $data['term_data']['table']['group']  = t('Taxonomy');
-  $data['term_data']['table']['base'] = array(
+  $data['taxonomy_term_data']['table']['group']  = t('Taxonomy');
+  $data['taxonomy_term_data']['table']['base'] = array(
     'field' => 'tid',
     'title' => t('Term'),
     'help' => t('Taxonomy terms are attached to nodes.'),
@@ -88,26 +82,21 @@ function taxonomy_views_data() {
 
 
   // The term data table
-  $data['term_data']['table']['join'] = array(
+  $data['taxonomy_term_data']['table']['join'] = array(
     'node' => array(
-      'left_table' => 'term_node',
-      'left_field' => 'tid',
-      'field' => 'tid',
-    ),
-    'node_revision' => array(
-      'left_table' => 'term_node',
+      'left_table' => 'taxonomy_index',
       'left_field' => 'tid',
       'field' => 'tid',
     ),
     // This is provided for many_to_one argument
-    'term_node' => array(
+    'taxonomy_index' => array(
       'field' => 'tid',
       'left_field' => 'tid',
     ),
   );
 
   // tid field
-  $data['term_data']['tid'] = array(
+  $data['taxonomy_term_data']['tid'] = array(
     'title' => t('Term ID'),
     'help' => t('The taxonomy term ID'),
     'field' => array(
@@ -119,19 +108,19 @@ function taxonomy_views_data() {
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
-      'skip base' => array('node', 'node_revision'),
+      'skip base' => array('node'),
       'zero is null' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_term_node_tid',
-      'hierarchy table' => 'term_hierarchy',
+      'hierarchy table' => 'taxonomy_term_hierarchy',
       'numeric' => TRUE,
-      'skip base' => array('node', 'node_revision'),
+      'skip base' => array('node'),
     ),
   );
 
   // Term name field
-  $data['term_data']['name'] = array(
+  $data['taxonomy_term_data']['name'] = array(
     'title' => t('Term'),
     'help' => t('Taxonomy terms. Note that using this can cause duplicate nodes to appear in views; you must add filters to reduce the result set.'),
     'field' => array(
@@ -154,7 +143,7 @@ function taxonomy_views_data() {
   );
 
   // taxonomy weight
-  $data['term_data']['weight'] = array(
+  $data['taxonomy_term_data']['weight'] = array(
     'title' => t('Weight'),
     'help' => t('The term weight field'),
     'field' => array(
@@ -167,7 +156,7 @@ function taxonomy_views_data() {
   );
 
   // Term description
-  $data['term_data']['description'] = array(
+  $data['taxonomy_term_data']['description'] = array(
     'title' => t('Term description'), // The item it appears as on the UI,
     'help' => t('The description associated with a taxonomy term.'),
     'field' => array(
@@ -179,7 +168,7 @@ function taxonomy_views_data() {
   );
 
   // Term vocabulary
-  $data['term_data']['vid'] = array(
+  $data['taxonomy_term_data']['vid'] = array(
     'title' => t('Vocabulary'),
     'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
     'filter' => array(
@@ -188,7 +177,7 @@ function taxonomy_views_data() {
   );
 
   // Link to edit the term
-  $data['term_data']['edit_term'] = array(
+  $data['taxonomy_term_data']['edit_term'] = array(
     'field' => array(
       'title' => t('Term edit link'),
       'help' => t('Provide a simple link to edit the term.'),
@@ -197,104 +186,94 @@ function taxonomy_views_data() {
   );
 
   // ----------------------------------------------------------------------
-  // term_node table
+  // taxonomy_index table
 
-  $data['term_node']['table']['group']  = t('Taxonomy');
+  $data['taxonomy_index']['table']['group']  = t('Taxonomy');
 
-  $data['term_node']['table']['join'] = array(
-    'term_data' => array(
-      // links directly to term_data via tid
+  $data['taxonomy_index']['table']['join'] = array(
+    'taxonomy_term_data' => array(
+      // links directly to taxonomy_term_data via tid
       'left_field' => 'tid',
       'field' => 'tid',
     ),
     'node' => array(
       // links directly to node via vid
-      'left_field' => 'vid',
-      'field' => 'vid',
+      'left_field' => 'nid',
+      'field' => 'nid',
     ),
-    'node_revisions' => array(
-      // links directly to node_revisions via vid
-      'left_field' => 'vid',
-      'field' => 'vid',
-    ),
-    'term_hierarchy' => array(
+    'taxonomy_term_hierarchy' => array(
       'left_field' => 'tid',
       'field' => 'tid',
     ),
   );
 
-  $data['term_node']['vid'] = array(
+  $data['taxonomy_index']['nid'] = array(
     'title' => t('Node'),
     'help' => t('Get all nodes tagged with a term.'),
     'relationship' => array(
       'handler' => 'views_handler_relationship',
       'base' => 'node',
-      'base field' => 'vid',
+      'base field' => 'nid',
       'label' => t('node'),
     ),
   );
 
   // tid field
-  $data['term_node']['tid'] = array(
+  $data['taxonomy_index']['tid'] = array(
     'title' => t('Term ID'),
     'help' => t('The taxonomy term ID'),
     'field' => array(
       'title' => t('All terms'),
       'help' => t('Display all taxonomy terms associated with a node from specified vocabularies.'),
       'handler' => 'views_handler_field_term_node_tid',
-      'skip base' => 'term_data',
+      'skip base' => 'taxonomy_term_data',
       'no group by' => TRUE,
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_term_node_tid',
-      'name table' => 'term_data',
+      'name table' => 'taxonomy_term_data',
       'name field' => 'name',
       'empty field name' => t('Uncategorized'),
       'numeric' => TRUE,
-      'skip base' => 'term_data',
+      'skip base' => 'taxonomy_term_data',
     ),
     'filter' => array(
       'title' => t('Term'),
       'handler' => 'views_handler_filter_term_node_tid',
-      'hierarchy table' => 'term_hierarchy',
+      'hierarchy table' => 'taxonomy_term_hierarchy',
       'numeric' => TRUE,
-      'skip base' => 'term_data',
+      'skip base' => 'taxonomy_term_data',
       'allow empty' => TRUE,
     ),
   );
 
-  // term_relation
+  // taxonomy_term_relation
 
-  $data['term_relation']['table']['group']  = t('Taxonomy');
+  $data['taxonomy_term_relation']['table']['group']  = t('Taxonomy');
 
-  $data['term_relation']['table']['join'] = array(
-    'term_data' => array(
-      // links directly to term_data via tid
+  $data['taxonomy_term_relation']['table']['join'] = array(
+    'taxonomy_term_data' => array(
+      // links directly to taxonomy_term_data via tid
       'left_field' => 'tid',
       'field' => 'tid1',
     ),
-    'term_relation' => array(
+    'taxonomy_term_relation' => array(
       // links to self through left.tid1 = right.tid2
       'left_field' => 'tid1',
       'field' => 'tid2',
     ),
     'node' => array(
-      'left_table' => 'term_node',
-      'left_field' => 'tid',
-      'field' => 'tid1',
-    ),
-    'node_revisions' => array(
-      'left_table' => 'term_node',
+      'left_table' => 'taxonomy_index',
       'left_field' => 'tid',
       'field' => 'tid1',
     ),
   );
 
-  $data['term_relation']['tid2'] = array(
+  $data['taxonomy_term_relation']['tid2'] = array(
     'title' => t('Related terms'),
     'help' => t('The related terms of the term. This can produce duplicate entries if there is more than one related term.'),
     'relationship' => array(
-      'base' => 'term_data',
+      'base' => 'taxonomy_term_data',
       'field' => 'tid2',
       'label' => t('Related term'),
     ),
@@ -307,38 +286,32 @@ function taxonomy_views_data() {
   // ----------------------------------------------------------------------
   // term_hierarchy table
 
-  $data['term_hierarchy']['table']['group']  = t('Taxonomy');
+  $data['taxonomy_term_hierarchy']['table']['group']  = t('Taxonomy');
 
-  $data['term_hierarchy']['table']['join'] = array(
-    'term_hierarchy' => array(
+  $data['taxonomy_term_hierarchy']['table']['join'] = array(
+    'taxonomy_term_hierarchy' => array(
       // links to self through left.parent = right.tid (going down in depth)
       'left_field' => 'tid',
       'field' => 'parent',
     ),
-    'term_data' => array(
-      // links directly to term_data via tid
+    'taxonomy_term_data' => array(
+      // links directly to taxonomy_term_data via tid
       'left_field' => 'tid',
       'field' => 'tid',
     ),
     'node' => array(
-      // links to node thorugh term_data
-      'left_table' => 'term_data',
-      'left_field' => 'tid',
-      'field' => 'tid',
-    ),
-    'node_revisions' => array(
-      // links to node_revisions thorugh term_data
-      'left_table' => 'term_data',
+      // links to node thorugh taxonomy_term_data
+      'left_table' => 'taxonomy_term_data',
       'left_field' => 'tid',
       'field' => 'tid',
     ),
   );
 
-  $data['term_hierarchy']['parent'] = array(
+  $data['taxonomy_term_hierarchy']['parent'] = array(
     'title' => t('Parent term'),
     'help' => t('The parent term of the term. This can produce duplicate entries if you are using a vocabulary that allows multiple parents.'),
     'relationship' => array(
-      'base' => 'term_data',
+      'base' => 'taxonomy_term_data',
       'field' => 'parent',
       'label' => t('Parent'),
     ),
@@ -354,18 +327,13 @@ function taxonomy_views_data() {
   $data['term_synonym']['table']['group']  = t('Taxonomy');
 
   $data['term_synonym']['table']['join'] = array(
-    'term_data' => array(
-      // links directly to term_data via tid
+    'taxonomy_term_data' => array(
+      // links directly to taxonomy_term_data via tid
       'left_field' => 'tid',
       'field' => 'tid',
     ),
     'node' => array(
-      'left_table' => 'term_node',
-      'left_field' => 'tid',
-      'field' => 'tid',
-    ),
-    'node_revisions' => array(
-      'left_table' => 'term_node',
+      'left_table' => 'taxonomy_index',
       'left_field' => 'tid',
       'field' => 'tid',
     ),
@@ -394,7 +362,7 @@ function taxonomy_views_data_alter(&$data) {
     'relationship' => array(
       'handler' => 'views_handler_relationship_node_term_data',
       'label' => t('term'),
-      'base' => 'term_data',
+      'base' => 'taxonomy_term_data',
     ),
   );
 
@@ -402,7 +370,7 @@ function taxonomy_views_data_alter(&$data) {
     'group' => t('Taxonomy'),
     'title' => t('Term ID (with depth)'),
     'help' => t('The depth filter is more complex, so provides fewer options.'),
-    'real field' => 'vid',
+    'real field' => 'nid',
     'argument' => array(
       'handler' => 'views_handler_argument_term_node_tid_depth',
       'accept depth modifier' => TRUE,

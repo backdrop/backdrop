@@ -47,7 +47,7 @@ class views_handler_argument_term_node_tid extends views_handler_argument_many_t
 
   function summary_argument($data) {
     if (!empty($this->options['use_synonym_for_summary_links'])) {
-      $synonym = db_result(db_query_range("SELECT name FROM {term_synonym} WHERE tid = %d", $data->{$this->base_alias}, 0, 1));
+      $synonym = db_query_range("SELECT name FROM {taxonomy_term_synonym} WHERE tid = %d", $data->{$this->base_alias}, 0, 1)->fetchField();
       if (!empty($synonym)) {
         return $synonym;
       }

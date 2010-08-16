@@ -100,9 +100,9 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
       $tids = array($this->argument);
     }
     // Now build the subqueries.
-    $subquery = db_select('term_node', 'tn');
-    $subquery->addField('tn', 'vid');
-    $where = db_or()->condition('tn.tid', $this->value, $operator);
+    $subquery = db_select('taxonomy_index', 'tn');
+    $subquery->addField('tn', 'nid');
+    $where = db_or()->condition('tn.tid', $tids, $operator);
     $last = "tn";
 
     if ($this->options['depth'] > 0) {

@@ -98,20 +98,20 @@ For Views to use your table, it has to either be a base table, or know how to li
 
 <div class="help-box" style="text-align:center">
 <a href="path:images/node-term_node-term_data-large.png"><img src="path:images/node-term_node-term_data.png" /></a>
-<em>How term_data joins to node</em>
+<em>How taxonomy_term_data joins to node</em>
 </div>
 
-In the above example, to use these with 'node' as the base table, both 'term_data' and 'term_node' need to be defined, and they each need a join handler for node:
+In the above example, to use these with 'node' as the base table, both 'taxonomy_term_data' and 'term_node' need to be defined, and they each need a join handler for node:
 
 <pre>
-$data['term_data']['table']['join']['node'] = array(
+$data['taxonomy_term_data']['table']['join']['node'] = array(
   'left_table' =&gt; 'term_node',
   'left_field' =&gt; 'tid',
   'field' =&gt; 'tid',
 );
 </pre>
 
-The above can be read as "In order to join to the node table, the term_data table must first link to the term_node table, and they join on the 'tid' field.". When adding this table to the query for a node view, Views will look at this and then look for the term_node table.
+The above can be read as "In order to join to the node table, the taxonomy_term_data table must first link to the term_node table, and they join on the 'tid' field.". When adding this table to the query for a node view, Views will look at this and then look for the term_node table.
 
 <pre>
 $data['term_node']['table']['join']['node'] = array(
