@@ -335,6 +335,7 @@ Views 3.x-7.x-dev
     o #883990 by dereine: Rename history_user to history in the popular default view.
     o #884512 by bojanz, dereine: Fix notice in views_handler_argument_string
     o #722454 by DeFr, dereine: Fix taxonomy integration
+    o #887328 by jmaties: Rename profile_values to profile_value.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
