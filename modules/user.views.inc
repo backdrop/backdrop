@@ -26,6 +26,7 @@ function user_views_data() {
     'field' => 'uid',
     'title' => t('User'),
     'help' => t('Users who have created accounts on your site.'),
+    'access query tag' => 'user_access',
   );
 
   $data['users']['table']['join'] = array(

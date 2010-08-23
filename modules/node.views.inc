@@ -29,6 +29,7 @@ function node_views_data() {
     'title' => t('Node'),
     'help' => t("Nodes are a Drupal site's primary content."),
     'weight' => -10,
+    'access query tag' => 'node_access',
   );
 
   // For other base tables, explain how we join

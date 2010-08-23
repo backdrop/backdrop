@@ -78,6 +78,7 @@ function taxonomy_views_data() {
     'field' => 'tid',
     'title' => t('Term'),
     'help' => t('Taxonomy terms are attached to nodes.'),
+    'access query tag' => 'term_access',
   );
 
 

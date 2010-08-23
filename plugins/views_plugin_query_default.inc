@@ -78,7 +78,8 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function init($base_table = 'node', $base_field = 'nid') {
+  function init($base_table = 'node', $base_field = 'nid', $options) {
+    parent::init($base_table, $base_field, $options);
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;
     $this->relationships[$base_table] = array(
@@ -154,6 +155,30 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function set_header($header) {
     $this->header = $header;
+  }
+
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['disable_sql_rewrite'] = array(
+      'default' => FALSE,
+      'translatable' => FALSE,
+      'bool' => TRUE,
+    );
+
+    return $options;
+  }
+
+  /**
+   * Add settings for the ui.
+   */
+  function options_form(&$form, &$form_state) {
+    $form['disable_sql_rewrite'] = array(
+      '#title' => t('Disable SQL rewriting'),
+      '#description' => t('Disabling SQL rewriting will disable node_access checks as well as other modules that implement hook_db_rewrite_sql().'),
+      '#type' => 'checkbox',
+      '#default_value' => !empty($this->options['disable_sql_rewrite']),
+      '#prefix' =>  '<div class="messages warning">' . t('WARNING: Disabling SQL rewriting means that node access security is disabled. This may allow users to see data they should not be able to see if your view is misconfigured. Please use this option only if you understand and accept this security risk.') . '</div>',
+    );
   }
 
   // ----------------------------------------------------------------
@@ -1085,6 +1110,18 @@ class views_plugin_query_default extends views_plugin_query {
     $external = FALSE; // Whether this query will run against an external database.
     $query = $view->build_info['query'];
     $count_query = $view->build_info['count_query'];
+
+    $query->addMetaData('view', $view);
+    $count_query->addMetaData('view', $view);
+
+    if (empty($this->options['disable_sql_rewrite'])) {
+      $base_table_data = views_fetch_data($this->base_table);
+      if (isset($base_table_data['table']['base']['access query tag'])) {
+        $access_tag = $base_table_data['table']['base']['access query tag'];
+        $query->addTag($access_tag);
+        $count_query->addTag($access_tag);
+      }
+    }
 
     $items = array();
     if ($query) {
