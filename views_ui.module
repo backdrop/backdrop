@@ -135,6 +135,17 @@ function views_ui_menu() {
     );
   }
 
+  $items['admin/build/views/nojs/clone-display/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_clone_display',
+    'page arguments' => array(FALSE, 5, 6),
+  );
+
+  $items['admin/build/views/ajax/clone-display/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_clone_display',
+    'page arguments' => array(TRUE, 5, 6),
+    'delivery callback' => 'views_ui_ajax_deliver',
+  );
+
   $items['admin/structure/views/nojs/%/%views_ui_cache'] = $callback + array(
     'page callback' => 'views_ui_ajax_form',
     'page arguments' => array(FALSE, 4, 5),

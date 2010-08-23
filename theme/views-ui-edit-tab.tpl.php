@@ -10,6 +10,9 @@
   <?php if ($remove): ?>
     <div class="remove-display"><?php print $remove ?></div>
   <?php endif; ?>
+  <?php if ($clone): ?>
+    <div class="clone-display"><?php print $clone ?></div>
+  <?php endif; ?>
   <div class="top">
     <div class="inside">
       <?php print $display_help_icon; ?>

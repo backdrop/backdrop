@@ -1152,12 +1152,14 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
   // submit again.
 
   $vars['remove'] = '';
+  $vars['clone'] = '';
   if (empty($plugin['no remove'])) {
-    if (!empty($_POST['form_id']) && $_POST['form_id'] == 'views_ui_remove_display_form') {
+    if (!empty($_POST['form_id']) && in_array($_POST['form_id'], array('views_ui_remove_display_form', 'views_ui_clone_display_form'))) {
       unset($_POST['form_id']);
     }
     $form_state = array('view' => &$view, 'display_id' => $display->id, 'ajax' => FALSE, 'build_info' => array('args' => array()));
     $vars['remove'] = drupal_render(drupal_build_form('views_ui_remove_display_form', $form_state));
+    $vars['clone'] = drupal_render(drupal_build_form('views_ui_clone_display_form', $form_state));
   }
 
   // basic fields
@@ -1774,6 +1776,86 @@ function views_ui_add_display_form_submit($form, &$form_state) {
 
   // Send it back
   $form_state['redirect'] = array('admin/structure/views/edit/' . $form_state['view']->name, array('fragment' => 'views-tab-' . $form_state['id']));
+}
+
+/**
+ * AJAX callback to add a display.
+ */
+function views_ui_clone_display($js, $view, $id) {
+  views_include('ajax');
+  $form_state = array(
+    'view' => &$view,
+    'ajax' => $js,
+    'display_id' => $id,
+  );
+
+  $output = views_ajax_form_wrapper('views_ui_clone_display_form', $form_state);
+
+  if ($js) {
+    // If we don't have an output object, it was submitted. Set up the submission.
+    if (empty($output)) {
+      $id = $form_state['id'];
+
+      // Make sure the new display is active
+      if (!$view->set_display('default')) {
+        views_ajax_render(t('Unable to initialize default display'));
+      }
+
+      // Render the new display
+      list($title, $body) = views_ui_display_tab($view, $view->display[$id]);
+
+      // Instruct the javascript on the browser to render the new tab.
+      $output = new stdClass;
+      $output->tab = array('#views-tab-' . $id => array('title' => $title, 'body' => $body));
+    }
+    // Render the command object. This automatically exits.
+    views_ajax_render($output);
+  }
+
+  // But the non-js variant will return output if it didn't redirect us.
+  return $output;
+}
+
+/**
+ * From to clone a display from a view.
+ */
+function views_ui_clone_display_form($form, &$form_state) {
+  $view = &$form_state['view'];
+  $display_id = $form_state['display_id'];
+
+  $form['clone_display'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clone display'),
+    '#submit' => array('views_ui_clone_display_form_submit'),
+  );
+
+  $form['#id'] = 'views-clone-display-form';
+  $form['#action'] = url("admin/build/views/nojs/clone-display/$view->name/$display_id");
+  $form['#attributes'] = array('class' => 'views-ajax-form');
+
+  return $form;
+}
+
+/**
+ * Submit handler to add a clone to a display from a view.
+ */
+function views_ui_clone_display_form_submit($form, &$form_state) {
+  // Create the new display
+  $id = $form_state['display_id'];
+  $display = $form_state['view']->display[$id];
+
+  $new_id = $form_state['view']->add_display($display->display_plugin);
+  $form_state['id'] = $new_id;
+
+  // Replace the new display by a copy of the old
+  $form_state['view']->display[$new_id] = clone $display;
+  $form_state['view']->display[$new_id]->id = $new_id;
+
+  // Store in cache
+  views_ui_cache_set($form_state['view']);
+
+  // Send it back
+  $form_state['redirect'] = array('admin/structure/views/edit/' . $form_state['view']->name, array('fragment' =>  'views-tab-' . $new_id));
 }
 
 /**

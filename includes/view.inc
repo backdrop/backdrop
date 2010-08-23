@@ -1782,21 +1782,14 @@ class views_db_object {
       $plugin['title'] = t('Broken');
     }
 
-    // 'default' is singular and is unique, so just go with 'default'
-    // for it. For all others, start counting.
+
     if (empty($id)) {
-      $id = ($type == 'default') ? $type : $type . '_1';
       $title = $plugin['title'];
 
-      $count = 1;
-
-      // Loop through IDs based upon our style plugin name until
-      // we find one that is unused.
-      while (!empty($this->display[$id])) {
-        $id = $type . '_' . ++$count;
-        if (empty($title)) {
-          $title = $plugin['title'] . ' ' . $count;
-        }
+      $id = $this->generate_display_id($type);
+      $count = str_replace($type . '_', '', $id);
+      if (empty($title)) {
+        $title = $plugin['title'] . ' ' . $count;
       }
     }
 
@@ -1806,6 +1799,31 @@ class views_db_object {
 
     // Add the new display object to the view.
     $this->display[$id] = $display;
+    return $id;
+  }
+
+  /**
+   * Generate a display id of a certain plugin type.
+   *
+   * @param $type
+   *   Which plugin should be used for the new display id.
+   */
+  function generate_display_id($type) {
+    // 'default' is singular and is unique, so just go with 'default'
+    // for it. For all others, start counting.
+    if ($type == 'default') {
+      return 'default';
+    }
+    // Initial id.
+    $id = $type . '_1';
+    $count = 1;
+
+    // Loop through IDs based upon our style plugin name until
+    // we find one that is unused.
+    while (!empty($this->display[$id])) {
+      $id = $type . '_' . ++$count;
+    }
+
     return $id;
   }
 

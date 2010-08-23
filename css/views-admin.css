@@ -643,6 +643,7 @@ html.js .views-hidden {
   max-width: 95%;
 }
 
+.clone-display,
 .remove-display {
   float: right;
   margin: 0;
@@ -652,7 +653,9 @@ html.js .views-hidden {
 }
 
 .views-display .remove-display form,
-.remove-display input {
+.remove-display input,
+.views-display .clone-display form,
+.clone-display input {
   margin: 0 !important;
 }
 
