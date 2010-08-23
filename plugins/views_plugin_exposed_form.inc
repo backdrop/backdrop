@@ -137,7 +137,7 @@ class views_plugin_exposed_form extends views_plugin {
 
   function query() {
     $view = $this->view;
-    $exposed_data = $view->exposed_data;
+    $exposed_data = isset($view->exposed_data) ? $view->exposed_data : array();
     $sort_by = isset($exposed_data['sort_by']) ? $exposed_data['sort_by'] : NULL;
     if (!empty($sort_by)) {
       $handler = $view->sort[$sort_by];
