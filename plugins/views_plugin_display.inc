@@ -280,7 +280,7 @@ class views_plugin_display extends views_plugin {
       'fields' => array('fields'),
       'sorts' => array('sorts'),
       'arguments' => array('arguments'),
-      'filters' => array('filters'),
+      'filters' => array('filters', 'filter_groups'),
     );
     if ($section) {
       if (!empty($sections[$section])) {
@@ -331,6 +331,7 @@ class views_plugin_display extends views_plugin {
           'sorts' => TRUE,
           'arguments' => TRUE,
           'filters' => TRUE,
+          'filter_groups' => TRUE,
         ),
         'export' => FALSE,
       ),
@@ -472,6 +473,12 @@ class views_plugin_display extends views_plugin {
       'arguments' => array(
         'default' => array(),
         'export' => 'export_handler',
+      ),
+      'filter_groups' => array(
+        'contains' => array(
+          'operator' => array('default' => 'AND'),
+          'groups' => array('default' => array(0 => 'AND')),
+        ),
       ),
       'filters' => array(
         'default' => array(),

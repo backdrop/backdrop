@@ -43,5 +43,7 @@ class views_handler_filter_group_by_numeric extends views_handler_filter_numeric
   function ui_name() {
     return $this->get_field(parent::ui_name());
   }
+
+  function can_group() { return FALSE; }
 }
 
