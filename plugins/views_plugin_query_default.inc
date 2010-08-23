@@ -1127,8 +1127,7 @@ class views_plugin_query_default extends views_plugin_query {
     if ($query) {
       $additional_arguments = module_invoke_all('views_query_substitutions', $view);
       // Build the count query. db_select::countQuery does not work with groupby.
-      $count_query = db_select($count_query);
-      $count_query->addExpression('COUNT(*)');
+      $count_query = $count_query->countQuery();
       //  $count_query->distinct = FALSE;
 
       // Add additional arguments as a fake condition.
