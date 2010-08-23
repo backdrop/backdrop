@@ -337,6 +337,7 @@ Views 3.x-7.x-dev
     o #722454 by DeFr, dereine: Fix taxonomy integration
     o #887328 by jmaties: Rename profile_values to profile_value.
     o #884046 by bojanz and dereine: Fix countquery.
+    o #856742 by deriene and aspilicious: Add a special handler for list field type.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

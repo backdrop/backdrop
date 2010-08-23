@@ -106,6 +106,7 @@ files[] = modules/contact/views_handler_field_contact_link.inc
 files[] = modules/contact.views.inc
 files[] = modules/field.views.inc
 files[] = modules/field/views_handler_field_field.inc
+files[] = modules/field/views_handler_filter_field_list.inc
 files[] = modules/filter/views_handler_field_filter_format_name.inc
 files[] = modules/filter.views.inc
 files[] = modules/locale.views.inc

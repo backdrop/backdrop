@@ -239,5 +239,20 @@ function field_views_field_default_views_data($field) {
 }
 
 /**
+ * Have a different filter handler for lists. This should allow to select values of the list.
+ */
+function list_field_views_data($field) {
+  $data = field_views_field_default_views_data($field);
+  foreach ($data as $table_name => $table_data) {
+    foreach ($table_data as $field_name => $field_data) {
+      if (!in_array(array('table', 'entity_id'), $field)) {
+        $data[$table_name][$field_name]['filter']['handler'] = 'views_handler_filter_field_list';
+      }
+    }
+  }
+  return $data;
+}
+
+/**
  * @}
  */
