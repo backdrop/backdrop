@@ -340,6 +340,7 @@ Views 3.x-7.x-dev
     o #856742 by deriene and aspilicious: Add a special handler for list field type.
     o #118672: Allow an OR in filters by adding groups in the filter UI.
     o #788950 (part) by dereine: Add title to no-js form page.
+    o #891902/883230 by sgabe/wizian: Restore removed code from earlier patch.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
