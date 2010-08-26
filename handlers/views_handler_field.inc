@@ -609,7 +609,7 @@ class views_handler_field extends views_handler {
     $url = parse_url($path);
     if (isset($url['query'])) {
       $path = strtr($path, array('?' . $url['query'] => ''));
-      $options['query'] = $url['query'];
+      $options['query'] = drupal_get_query_array($url['query']);
     }
     if (isset($url['fragment'])) {
       $path = strtr($path, array('#' . $url['fragment'] => ''));
@@ -635,7 +635,11 @@ class views_handler_field extends views_handler {
     // If the query and fragment were programatically assigned overwrite any
     // parsed values.
     if (isset($alter['query'])) {
+      // Convert the query to a string, perform token replacement, and then
+      // convert back to an array form for l().
+      $options['query'] = drupal_http_build_query($alter['query']);
       $options['query'] = strtr($alter['query'], $tokens);
+      $options['query'] = drupal_get_query_array($options['query']);
     }
     if (isset($alter['alias'])) {
       // Alias is a boolean field, so no token.
