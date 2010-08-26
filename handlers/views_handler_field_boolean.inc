@@ -26,7 +26,7 @@ class views_handler_field_boolean extends views_handler_field {
     return $options;
   }
 
-  function init(&$view, $options) {
+  function init(&$view, &$options) {
     parent::init($view, $options);
 
     $default_formats = array(

@@ -130,7 +130,7 @@ class views_handler extends views_object {
    *   The item from the database; the actual contents of this will vary
    *   based upon the type of handler.
    */
-  function init(&$view, $options) {
+  function init(&$view, &$options) {
     $this->view = &$view;
     $this->unpack_options($this->options, $options);
 

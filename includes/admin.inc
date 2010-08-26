@@ -1072,7 +1072,8 @@ function template_preprocess_views_ui_edit_view(&$vars) {
       'args' => array(),
     ),
   );
-  $vars['preview'] = drupal_render(drupal_build_form('views_ui_preview_form', $form_state));
+  $preview_form = drupal_build_form('views_ui_preview_form', $form_state);
+  $vars['preview'] = drupal_render($preview_form);
 
   $vars['locked'] = NULL;
   if (isset($view->locked) && is_object($view->locked)) {
@@ -1158,8 +1159,10 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
       unset($_POST['form_id']);
     }
     $form_state = array('view' => &$view, 'display_id' => $display->id, 'ajax' => FALSE, 'build_info' => array('args' => array()));
-    $vars['remove'] = drupal_render(drupal_build_form('views_ui_remove_display_form', $form_state));
-    $vars['clone'] = drupal_render(drupal_build_form('views_ui_clone_display_form', $form_state));
+    $remove_form = drupal_build_form('views_ui_remove_display_form', $form_state);
+    $clone_form = drupal_build_form('views_ui_clone_display_form', $form_state);
+    $vars['remove'] = drupal_render($remove_form);
+    $vars['clone'] = drupal_render($clone_form);
   }
 
   // basic fields
@@ -3333,4 +3336,3 @@ function theme_views_ui_style_plugin_table($variables) {
   $output .= drupal_render_children($form);
   return $output;
 }
-

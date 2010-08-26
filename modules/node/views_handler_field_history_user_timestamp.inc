@@ -6,7 +6,7 @@
  * The handler is named history_user, because of compability reasons, the table is history.
  */
 class views_handler_field_history_user_timestamp extends views_handler_field_node {
-  function init(&$view, $options) {
+  function init(&$view, &$options) {
     parent::init($view, $options);
     global $user;
     if ($user->uid) {

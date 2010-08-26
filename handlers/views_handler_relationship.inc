@@ -38,7 +38,7 @@ class views_handler_relationship extends views_handler {
    * Init handler to let relationships live on tables other than
    * the table they operate on.
    */
-  function init(&$view, $options) {
+  function init(&$view, &$options) {
     parent::init($view, $options);
     if (isset($this->definition['relationship table'])) {
       $this->table = $this->definition['relationship table'];

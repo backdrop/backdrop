@@ -103,7 +103,7 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
     }
   }
 
-  function value_validate(&$form, &$form_state) {
+  function value_validate($form, &$form_state) {
     if ($form_state['values']['options']['value'] == 'All' && empty($form_state['values']['options']['expose']['optional'])) {
       form_set_error('value', t('You must select a value unless this is an optional exposed filter.'));
     }

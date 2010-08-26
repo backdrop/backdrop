@@ -5,7 +5,7 @@
  * Field handler to display the number of new comments
  */
 class views_handler_field_node_new_comments extends views_handler_field_numeric {
-  function init(&$view, $options) {
+  function init(&$view, &$options) {
     parent::init($view, $options);
 
     // translate an older setting:
