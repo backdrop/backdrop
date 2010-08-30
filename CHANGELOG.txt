@@ -344,6 +344,7 @@ Views 3.x-7.x-dev
     o #893754 by davereid: render_as_link() needs to convert $options['query'] to an array.
     o #893128 by davereid: Fix E_STRICT notices.
     o #894350 by elliotttf: Replace template_files with theme_hook_suggestions.
+    o #897694 by jmaties: Replace taxonomy_term_path by entity_uri.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

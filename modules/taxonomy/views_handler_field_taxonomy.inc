@@ -48,7 +48,8 @@ class views_handler_field_taxonomy extends views_handler_field {
       $term->tid = $values->{$this->aliases['tid']};
       $term->vid = $values->{$this->aliases['vid']};
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = taxonomy_term_path($term);
+      $uri = entity_uri('taxonomy_term', $term);
+      $this->options['alter']['path'] = $uri['path'];
     }
     return $data;
   }
