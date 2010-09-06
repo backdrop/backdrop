@@ -346,6 +346,7 @@ Views 3.x-7.x-dev
     o #894350 by elliotttf: Replace template_files with theme_hook_suggestions.
     o #897694 by jmaties: Replace taxonomy_term_path by entity_uri.
     o #903466 by das-peter: Undefined offset in theme_pager_* functions.
+    o #894018 by das-peter: Fix notice in includes/view.inc on export.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

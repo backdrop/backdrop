@@ -19,6 +19,7 @@
 class view extends views_db_object {
   var $db_table = 'views_view';
   var $base_table = 'node';
+  var $base_field = 'nid';
 
   // State variables
   var $built = FALSE;
