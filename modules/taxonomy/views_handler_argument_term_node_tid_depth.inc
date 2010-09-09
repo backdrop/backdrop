@@ -87,16 +87,16 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
       }
 
       if (count($tids->value) > 1) {
-        $operator = 'IN';# = " IN (" . implode(', ', array_fill(0, sizeof($tids->value), '%d')) . ")";
+        $operator = 'IN';
       }
       else {
-        $operator = '=';#$placeholder = " = %d";
+        $operator = '=';
       }
 
       $tids = $tids->value;
     }
     else {
-      $placeholder = "= %d";
+      $operator = "=";
       $tids = array($this->argument);
     }
     // Now build the subqueries.
@@ -106,17 +106,17 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
     $last = "tn";
 
     if ($this->options['depth'] > 0) {
-      $subquery->leftJoin('term_hierarchy', 'th', "th.tid = tn.tid");
+      $subquery->leftJoin('taxonomy_term_hierarchy', 'th', "th.tid = tn.tid");
       $last = "th";
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery->leftJoin('term_hierarchy', "th$count", "$last.parent = th$count.tid");
+        $subquery->leftJoin('taxonomy_term_hierarchy', "th$count", "$last.parent = th$count.tid");
         $where->condition("th$count.tid", $tids, $operator);
         $last = "th$count";
       }
     }
     elseif ($this->options['depth'] < 0) {
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery->leftJoin('term_hierarchy', "th$count", "$last.tid = th$count.parent");
+        $subquery->leftJoin('taxonomy_term_hierarchy', "th$count", "$last.tid = th$count.parent");
         $where->condition("th$count.tid", $tids, $operator);
         $last = "th$count";
       }
