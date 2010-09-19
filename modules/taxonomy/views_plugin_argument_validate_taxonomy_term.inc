@@ -64,7 +64,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
     if (!isset($options['vids']) && !empty($this->argument->options['validate_argument_vocabulary'])) {
       $options['vids'] = $this->argument->options['validate_argument_vocabulary'];
       $options['type'] = $this->argument->options['validate_argument_type'];
-      $options['transform'] = $this->argument->options['validate_argument_transform'];
+      $options['transform'] = isset($this->argument->options['validate_argument_transform']) ? $this->argument->options['validate_argument_transform'] : FALSE;
     }
   }
 
