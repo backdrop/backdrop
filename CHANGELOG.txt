@@ -353,6 +353,7 @@ Views 3.x-7.x-dev
     o #915996 by yhahn: Fix for missing vocabulary machine name error in taxonomy field handler.
     o #911748 by lefnire: _contact_user_tab_access was replaced with _contact_personal_tab_access.
     o #905118 by dereine: Fix notice in plugin_validate_taxonomy.
+    o #812970 by Scott Reynolds, dereine: Get Views Query substitutions working
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

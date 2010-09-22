@@ -1016,7 +1016,7 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     // Go ahead and build the query.
-    $query = db_select($this->base_table, $this->base_table);
+    $query = db_select($this->base_table, $this->base_table)->addTag('views');
 
     $joins = $where = $having = $orderby = $groupby = '';
     $fields = $distinct = array();
@@ -1058,6 +1058,9 @@ class views_plugin_query_default extends views_plugin_query {
     if (!empty($this->where)) {
       $query->condition($this->build_condition('where'));
     }
+
+    // Add all query substitutions as metadata.
+    $query->addMetaData('views_substitutions', module_invoke_all('views_query_substitutions', $this));
 
     return $query;
   }

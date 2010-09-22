@@ -1155,12 +1155,53 @@ function views_theme_functions($hook, $view, $display = NULL) {
 function views_views_query_substitutions($view) {
   global $language;
   return array(
-    ':views-current-version' => VERSION,
-    ':views-current-time' => REQUEST_TIME,
-    ':views-current-language' => $language->language,
-    ':views-default-language' => language_default('language'),
-    ':views-no-language' => '',
+    '***CURRENT_VERSION***' => VERSION,
+    '***CURRENT_TIME***' => REQUEST_TIME,
+    '***CURRENT_LANGUAGE***' => $language->language,
+    '***DEFAULT_LANGUAGE***' => language_default('language'),
+    '***NO_LANGUAGE***' => '',
   );
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * This is the hook_query_alter() for queries tagged by Views and is used to
+ * add in substitutions from hook_views_query_substitutions().
+ */
+function views_query_views_alter(QueryAlterableInterface $query) {
+  $substitutions = $query->getMetaData('views_substitutions');
+  $tables =& $query->getTables();
+  $where =& $query->conditions();
+
+  // Replaces substitions in tables.
+  foreach ($tables as $table_name => $table_metadata) {
+    foreach ($table_metadata['arguments'] as $replacement_key => $value) {
+      if (isset($subsitutions[$value])) {
+        $tables[$table_name]['arguments'][$replacement_key] = $substitutions[$value];
+      }
+    }
+  }
+
+  // Replaces substitions in filter criterias.
+  _views_query_tag_alter_condition($where, $substitutions);
+}
+
+/**
+ * Replaces the substitutions recursive foreach condition.
+ */
+function _views_query_tag_alter_condition(&$conditions, $substitutions) {
+  foreach ($conditions as $condition_id => &$condition) {
+    if (is_numeric($condition_id)) {
+      if (is_string($condition['field'])) {
+        $condition['field'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['field']);
+      }
+      else {
+        $sub_conditions =& $condition['field']->conditions();
+        _views_query_tag_alter_condition($sub_conditions, $substitutions);
+      }
+    }
+  }
 }
 
 /**

@@ -426,7 +426,7 @@ function user_views_plugins() {
  */
 function user_views_query_substitutions($view) {
   global $user;
-  return array(':user-current-user' => intval($user->uid));
+  return array('***CURRENT_USER***' => intval($user->uid));
 }
 
 /**
