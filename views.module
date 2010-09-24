@@ -1195,6 +1195,9 @@ function _views_query_tag_alter_condition(&$conditions, $substitutions) {
     if (is_numeric($condition_id)) {
       if (is_string($condition['field'])) {
         $condition['field'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['field']);
+        if (is_string($condition['value'])) {
+          $condition['value'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['value']);
+        }
       }
       else {
         $sub_conditions =& $condition['field']->conditions();
