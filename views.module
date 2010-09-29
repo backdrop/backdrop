@@ -1177,7 +1177,7 @@ function views_query_views_alter(QueryAlterableInterface $query) {
   // Replaces substitions in tables.
   foreach ($tables as $table_name => $table_metadata) {
     foreach ($table_metadata['arguments'] as $replacement_key => $value) {
-      if (isset($subsitutions[$value])) {
+      if (isset($substitutions[$value])) {
         $tables[$table_name]['arguments'][$replacement_key] = $substitutions[$value];
       }
     }
