@@ -73,9 +73,9 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
         if ($argument == $GLOBALS['user']->uid) {
           // If you assign an object to a variable in PHP, the variable
           // automatically acts as a reference, not a copy, so we use
-          // drupal_clone() to ensure that we don't actually mess with the
+          // clone to ensure that we don't actually mess with the
           // real global $user object.
-          $account = drupal_clone($GLOBALS['user']);
+          $account = clone $GLOBALS['user'];
         }
         $where = 'uid = :argument';
       }
@@ -83,7 +83,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     else {
       if ($type == 'name' || $type == 'either') {
         if ($argument == $GLOBALS['user']->name) {
-          $account = drupal_clone($GLOBALS['user']);
+          $account = clone $GLOBALS['user'];
         }
         $where = "name = :argument";
       }

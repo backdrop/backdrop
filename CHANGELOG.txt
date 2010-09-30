@@ -358,6 +358,8 @@ Views 3.x-7.x-dev
     o by dereine: Fix typo in views_query_substitution, reported by agentrickard.
     o by agentrickard: Fix array-value substitutions.
     o #921144 by yhahn, dereine: Bad key in field filter handler.
+    o #832954 by dww: Fixed bug that was modifying global user->roles
+      inside argument_validate_user (patch 34).
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
