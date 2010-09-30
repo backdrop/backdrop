@@ -357,6 +357,7 @@ Views 3.x-7.x-dev
     o #906440 by dereine, berenddeboer: Fix views_handler_filter_user_current.inc and use dbtng syntax.
     o by dereine: Fix typo in views_query_substitution, reported by agentrickard.
     o by agentrickard: Fix array-value substitutions.
+    o #921144 by yhahn, dereine: Bad key in field filter handler.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

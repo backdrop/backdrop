@@ -179,7 +179,7 @@ function field_views_field_default_views_data($field) {
         'table' => $table,
         'handler' => $argument,
         'additional fields' => $additional_fields,
-        'content_field_name' => $field['field_name'],
+        'field_name' => $field['field_name'],
         'empty field name' => t('<No value>'),
       );
       $data[$table][$column_real_name]['filter'] = array(
@@ -187,7 +187,7 @@ function field_views_field_default_views_data($field) {
         'table' => $table,
         'handler' => $filter,
         'additional fields' => $additional_fields,
-        'content_field_name' => $field['field_name'],
+        'field_name' => $field['field_name'],
         'allow empty' => TRUE,
       );
       if (!empty($allow_sort)) {
@@ -196,7 +196,7 @@ function field_views_field_default_views_data($field) {
           'table' => $table,
           'handler' => $sort,
           'additional fields' => $additional_fields,
-          'content_field_name' => $field['field_name'],
+          'field_name' => $field['field_name'],
         );
       }
 
@@ -217,12 +217,14 @@ function field_views_field_default_views_data($field) {
           'handler' => 'views_handler_argument_numeric',
           'additional fields' => $additional_fields,
           'empty field name' => t('<No value>'),
+          'field_name' => $field['field_name'],
         );
         $data[$table]['delta']['filter'] = array(
           'field' => 'delta',
           'table' => $table,
           'handler' => 'views_handler_filter_numeric',
           'additional fields' => $additional_fields,
+          'field_name' => $field['field_name'],
           'allow empty' => TRUE,
         );
         $data[$table]['delta']['sort'] = array(
@@ -230,6 +232,7 @@ function field_views_field_default_views_data($field) {
           'table' => $table,
           'handler' => 'views_handler_sort',
           'additional fields' => $additional_fields,
+          'field_name' => $field['field_name'],
         );
       }
     }
@@ -245,7 +248,7 @@ function list_field_views_data($field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
     foreach ($table_data as $field_name => $field_data) {
-      if (!in_array(array('table', 'entity_id'), $field)) {
+      if (!in_array($field_name, array('table', 'entity_id', 'revision_id'))) {
         $data[$table_name][$field_name]['filter']['handler'] = 'views_handler_filter_field_list';
       }
     }
