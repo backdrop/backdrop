@@ -132,6 +132,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     variable_set('views_test_views_plugins', $this->viewsPlugins());
 
     module_enable(array('views_test'));
+    $this->resetAll();
 
     // Load the test dataset.
     $data_set = $this->dataSet();

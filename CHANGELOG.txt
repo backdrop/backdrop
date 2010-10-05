@@ -363,6 +363,7 @@ Views 3.x-7.x-dev
     o #914102 by torelad: Correct placeholder in views_date_sql_format.
     o #931582 by bec: Provide integration of {file_usage} table.
     o by dereine: Fix in_operator test.
+    o by dereine: Fix more testcases by adding $this->resetAll().
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
