@@ -1,5 +1,6 @@
 <!-- $Id$ -->
-In order to take advantage of the changes in Drupal 7, Views has gone through several API changes.  +Here's what you should know.
+In order to take advantage of the changes in Drupal 7, Views has gone through several API changes.
+Here's what you should know.
 
 <h3>Handler registry</h3>
 
@@ -18,3 +19,8 @@ files[] = example.install
 files[] = includes/views/handlers/example_handler_argument_string.inc
 </pre>
 
+<h3>Removed handlers</h3>
+
+Note that views_handler_filter_float has been removed.
+This functionality is now handled by views_handler_filter_numeric.
+There's no need for having a special handler any more, thanks to the new DB layer in Drupal 7.
