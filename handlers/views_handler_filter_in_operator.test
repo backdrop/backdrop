@@ -27,7 +27,7 @@ class ViewsHandlerFilterInOperator extends ViewsSqlTest {
         'field' => 'age',
         'table' => 'views_test',
         'value' => array(26, 30),
-        'operator' => 'IN',
+        'operator' => 'in',
       ),
     ));
 
