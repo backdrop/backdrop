@@ -365,6 +365,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix in_operator test.
     o by dereine: Fix more testcases by adding $this->resetAll().
     o #931886 by bojanz: Remove views_handler_filter_float because numeric handler + dbtng does everything.
+    o #932792 by bec: Extras for formatting {file_managed} fields.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
