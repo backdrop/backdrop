@@ -369,6 +369,7 @@ Views 3.x-7.x-dev
     o by dereine: Move file_* handlers to extra files.
     o #934086 by dereine: Attach the contextual links library only once.
     o #917402 by yhahn: Update taxonomy handlers for d7 changes.
+    o #930582 by berdir, Damz, dereine: Fix query substitutions for subqueries.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
