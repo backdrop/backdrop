@@ -7,7 +7,6 @@ class views_handler_argument_term_node_tid extends views_handler_argument_many_t
   function option_definition() {
     $options = parent::option_definition();
     $options['set_breadcrumb'] = array('default' => FALSE);
-    $options['use_synonym_for_summary_links'] = array('default' => FALSE);
     return $options;
   }
 
@@ -18,12 +17,6 @@ class views_handler_argument_term_node_tid extends views_handler_argument_many_t
       '#title' => t("Set the breadcrumb for the term parents"),
       '#description' => t('If selected, the breadcrumb trail will include all parent terms, each one linking to this view. Note that this only works if just one term was received.'),
       '#default_value' => !empty($this->options['set_breadcrumb']),
-    );
-    $form['use_synonym_for_summary_links'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use term synonyms for summary links'),
-      '#description' => t('If selected, summary views will use a synonym defined for each term when creating the URL to link to that term. Note that this only works reliably if terms have at most one synonym.'),
-      '#default_value' => !empty($this->options['use_synonym_for_summary_links']),
     );
   }
 
@@ -37,23 +30,12 @@ class views_handler_argument_term_node_tid extends views_handler_argument_many_t
 
   function title_query() {
     $titles = array();
-
-    $result = db_query("SELECT name FROM {taxonomy_term_data} WHERE tid IN (:tids)", array(':tids' => $this->value));
+    $result = db_select('taxonomy_term_data', 'td')
+      ->fields('td', array('name'))
+      ->condition('td.tid', $this->value);
     foreach ($result as $term) {
       $titles[] = check_plain($term->name);
     }
     return $titles;
   }
-
-  function summary_argument($data) {
-    if (!empty($this->options['use_synonym_for_summary_links'])) {
-      $synonym = db_query_range("SELECT name FROM {taxonomy_term_synonym} WHERE tid = %d", $data->{$this->base_alias}, 0, 1)->fetchField();
-      if (!empty($synonym)) {
-        return $synonym;
-      }
-    }
-    return $data->{$this->base_alias};
-  }
-
 }
-

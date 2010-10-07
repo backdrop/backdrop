@@ -13,6 +13,16 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
     else {
       $this->additional_fields['vid'] = array('table' => 'node', 'field' => 'vid');
     }
+
+    // Convert legacy vids option to machine name vocabularies.
+    if (!empty($this->options['vids'])) {
+      $vocabularies = taxonomy_get_vocabularies();
+      foreach ($this->options['vids'] as $vid) {
+        if (isset($vocabularies[$vid], $vocabularies[$vid]->machine_name)) {
+          $this->options['vocabularies'][$vocabularies[$vid]->machine_name] = $vocabularies[$vid]->machine_name;
+        }
+      }
+    }
   }
 
   function option_definition() {
@@ -20,7 +30,7 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
 
     $options['link_to_taxonomy'] = array('default' => TRUE);
     $options['limit'] = array('default' => FALSE);
-    $options['vids'] = array('default' => array());
+    $options['vocabularies'] = array('default' => array());
 
     return $options;
   }
@@ -45,16 +55,16 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
     $options = array();
     $vocabularies = taxonomy_get_vocabularies();
     foreach ($vocabularies as $voc) {
-      $options[$voc->vid] = check_plain($voc->name);
+      $options[$voc->machine_name] = check_plain($voc->name);
     }
 
-    $form['vids'] = array(
-      '#prefix' => '<div><div id="edit-options-vids">',
+    $form['vocabularies'] = array(
+      '#prefix' => '<div><div id="edit-options-vocabularies">',
       '#suffix' => '</div></div>',
       '#type' => 'checkboxes',
       '#title' => t('Vocabularies'),
       '#options' => $options,
-      '#default_value' => $this->options['vids'],
+      '#default_value' => $this->options['vocabularies'],
       '#process' => array('form_process_checkboxes', 'views_process_dependency'),
       '#dependency' => array('edit-options-limit' => array(TRUE)),
     );
@@ -77,17 +87,26 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
     }
 
     if ($vids) {
-      $voc = '';
-      if (!empty($this->options['limit']) && !empty($this->options['vids'])) {
-        $voc = " AND td.vid IN (" . implode(', ', array_keys(array_filter($this->options['vids']))) . ")";
+      $query = db_select('taxonomy_term_data', 'td');
+      $query->innerJoin('taxonomy_index', 'tn', 'td.tid = tn.tid');
+      $query->innerJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
+      $query->fields('td');
+      $query->addField('tn', 'nid', 'node_vid');
+      $query->addField('tv', 'name', 'vocabulary');
+      $query->addField('tv', 'machine_name', 'vocabulary_machine_name');
+      $query->orderby('td.weight');
+      $query->orderby('td.name');
+      $query->condition('tn.nid', $vids);
+      $query->addTag('term_access');
+      if (!empty($this->options['limit']) && !empty($this->options['vocabularies'])) {
+        $query->condition('tv.machine_name', $this->options['vocabularies']);
       }
-
-      $result = db_query("SELECT tn.nid AS node_vid, td.*, v.name as vocabulary FROM {taxonomy_term_data} td INNER JOIN {taxonomy_index} tn ON td.tid = tn.tid INNER JOIN {taxonomy_vocabulary} v ON v.vid = td.vid WHERE tn.nid IN (" . implode(', ', $vids) . ")$voc ORDER BY td.weight, td.name");
+      $result = $query->execute();
 
       foreach ($result as $term) {
         $this->items[$term->node_vid][$term->tid]['name'] = check_plain($term->name);
         $this->items[$term->node_vid][$term->tid]['tid'] = $term->tid;
-        $this->items[$term->node_vid][$term->tid]['vid'] = $term->vid;
+        $this->items[$term->node_vid][$term->tid]['vocabulary_machine_name'] = check_plain($term->vocabulary_machine_name);
         $this->items[$term->node_vid][$term->tid]['vocabulary'] = check_plain($term->vocabulary);
 
         if (!empty($this->options['link_to_taxonomy'])) {
@@ -105,14 +124,14 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
   function document_self_tokens(&$tokens) {
     $tokens['[' . $this->options['id'] . '-tid' . ']'] = t('The taxonomy term ID for the term.');
     $tokens['[' . $this->options['id'] . '-name' . ']'] = t('The taxonomy term name for the term.');
-    $tokens['[' . $this->options['id'] . '-vid' . ']'] = t('The vocabulary ID for the vocabulary the term belongs to.');
+    $tokens['[' . $this->options['id'] . '-vocabulary-machine-name' . ']'] = t('The machine name for the vocabulary the term belongs to.');
     $tokens['[' . $this->options['id'] . '-vocabulary' . ']'] = t('The name for the vocabulary the term belongs to.');
   }
 
   function add_self_tokens(&$tokens, $item) {
     $tokens['[' . $this->options['id'] . '-tid' . ']'] = $item['tid'];
     $tokens['[' . $this->options['id'] . '-name' . ']'] = $item['name'];
-    $tokens['[' . $this->options['id'] . '-vid' . ']'] = $item['vid'];
+    $tokens['[' . $this->options['id'] . '-vocabulary-machine-name' . ']'] = $item['vocabulary_machine_name'];
     $tokens['[' . $this->options['id'] . '-vocabulary' . ']'] = $item['vocabulary'];
   }
 }

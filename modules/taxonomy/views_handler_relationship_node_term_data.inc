@@ -6,9 +6,23 @@
  */
 
 class views_handler_relationship_node_term_data extends views_handler_relationship  {
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+
+    // Convert legacy vids option to machine name vocabularies.
+    if (!empty($this->options['vids'])) {
+      $vocabularies = taxonomy_get_vocabularies();
+      foreach ($this->options['vids'] as $vid) {
+        if (isset($vocabularies[$vid], $vocabularies[$vid]->machine_name)) {
+          $this->options['vocabularies'][$vocabularies[$vid]->machine_name] = $vocabularies[$vid]->machine_name;
+        }
+      }
+    }
+  }
+
   function option_definition() {
     $options = parent::option_definition();
-    $options['vids'] = array('default' => array());
+    $options['vocabularies'] = array('default' => array());
     return $options;
   }
 
@@ -21,14 +35,14 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
     $vocabularies = taxonomy_get_vocabularies();
     $options = array();
     foreach ($vocabularies as $voc) {
-      $options[$voc->vid] = check_plain($voc->name);
+      $options[$voc->machine_name] = check_plain($voc->name);
     }
 
-    $form['vids'] = array(
+    $form['vocabularies'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Vocabularies'),
       '#options' => $options,
-      '#default_value' => $this->options['vids'],
+      '#default_value' => $this->options['vocabularies'],
       '#description' => t('Choose which vocabularies you wish to relate. Remember that every term found will create a new record, so this relationship is best used on just one vocabulary that has only one term per node.'),
     );
   }
@@ -42,23 +56,28 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
     $def = $this->definition;
     $def['table'] = 'taxonomy_term_data';
 
-    if (!empty($this->options['required']) || !array_filter($this->options['vids'])) {
+    if (!array_filter($this->options['vocabularies'])) {
       $term_node = $this->query->add_table('taxonomy_index', $this->relationship);
       $def['left_table'] = 'taxonomy_index';
       $def['left_field'] = 'tid';
       $def['field'] = 'tid';
-      if (!empty($this->options['required'])) {
-        $def['type'] = 'INNER';
-      }
+      $def['type'] = empty($this->options['required']) ? 'LEFT' : 'INNER';
     }
     else {
-      // If the join is optional, join a subselect that will emulate taxonomy_term_data table instead
+      // If vocabularies are supplied join a subselect instead
       $def['left_table'] = $this->table_alias;
-      $def['left_field'] = 'vid';
-      $def['field'] = 'revision';
-      // fapi ensures vids are safe here.
-      $vids = implode(', ', array_filter($this->options['vids']));
-      $def['table formula'] = "(SELECT td.*, tn.vid AS revision FROM {taxonomy_term_data} td INNER JOIN {taxonomy_index} tn ON tn.tid = td.tid WHERE td.vid IN ($vids))";
+      $def['left_field'] = 'nid';
+      $def['field'] = 'nid';
+      $def['type'] = empty($this->options['required']) ? 'LEFT' : 'INNER';
+
+      $query = db_select('taxonomy_term_data', 'td');
+      $query->addJoin($def['type'], 'taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
+      $query->addJoin($def['type'], 'taxonomy_index', 'tn', 'tn.tid = td.tid');
+      $query->condition('tv.machine_name', array_filter($this->options['vocabularies']));
+      $query->addTag('term_access');
+      $query->fields('td');
+      $query->fields('tn', array('nid'));
+      $def['table formula'] = $query;
     }
 
     $join = new views_join();

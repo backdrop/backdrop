@@ -368,6 +368,7 @@ Views 3.x-7.x-dev
     o #932792 by bec: Extras for formatting {file_managed} fields.
     o by dereine: Move file_* handlers to extra files.
     o #934086 by dereine: Attach the contextual links library only once.
+    o #917402 by yhahn: Update taxonomy handlers for d7 changes.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

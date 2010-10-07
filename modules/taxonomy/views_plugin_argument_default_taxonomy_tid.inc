@@ -6,13 +6,27 @@
  */
 
 class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_default {
+  function init(&$view, &$argument, &$options) {
+    parent::init($view, $argument, $options);
+
+    // Convert legacy vids option to machine name vocabularies.
+    if (!empty($this->options['vids'])) {
+      $vocabularies = taxonomy_get_vocabularies();
+      foreach ($this->options['vids'] as $vid) {
+        if (isset($vocabularies[$vid], $vocabularies[$vid]->machine_name)) {
+          $this->options['vocabularies'][$vocabularies[$vid]->machine_name] = $vocabularies[$vid]->machine_name;
+        }
+      }
+    }
+  }
+
   function option_definition() {
     $options = parent::option_definition();
 
     $options['term_page'] = array('default' => TRUE);
     $options['node'] = array('default' => FALSE);
     $options['limit'] = array('default' => FALSE);
-    $options['vids'] = array('default' => array());
+    $options['vocabularies'] = array('default' => array());
 
     return $options;
   }
@@ -42,16 +56,16 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
     $options = array();
     $vocabularies = taxonomy_get_vocabularies();
     foreach ($vocabularies as $voc) {
-      $options[$voc->vid] = check_plain($voc->name);
+      $options[$voc->machine_name] = check_plain($voc->name);
     }
 
-    $form['vids'] = array(
+    $form['vocabularies'] = array(
       '#prefix' => '<div><div id="edit-options-vids">',
       '#suffix' => '</div></div>',
       '#type' => 'checkboxes',
       '#title' => t('Vocabularies'),
       '#options' => $options,
-      '#default_value' => $this->options['vids'],
+      '#default_value' => $this->options['vocabularies'],
       '#process' => array('form_process_checkboxes', 'views_process_dependency'),
       '#dependency' => array(
         //'edit-options-argument-default-taxonomy-tid-limit' => array(1),
@@ -62,7 +76,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
 
   function options_submit(&$form, &$form_state, &$options) {
     // Clear checkbox values.
-    $options['vids'] = array_filter($options['vids']);
+    $options['vocabularies'] = array_filter($options['vocabularies']);
   }
 
   function get_argument() {
@@ -88,16 +102,18 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
           $field_info = field_info_field($name);
           if ($field_info['type'] == 'taxonomy_term_reference') {
             $items = field_get_items('node', $node, $name);
-            foreach ($items as $item) {
-              $taxonomy[$item['tid']] = $item['taxonomy_term'];
+            if (is_array($items)) {
+              foreach ($items as $item) {
+                $taxonomy[$item['tid']] = $item['taxonomy_term'];
+              }
             }
           }
         }
         if (!empty($this->options['limit'])) {
           $tids = array();
-          // filter by vid
+          // filter by vocabulary
           foreach ($taxonomy as $tid => $term) {
-            if (!empty($this->options['vids'][$term->vid])) {
+            if (!empty($this->options['vocabularies'][$term->vocabulary_machine_name])) {
               $tids[] = $tid;
             }
           }

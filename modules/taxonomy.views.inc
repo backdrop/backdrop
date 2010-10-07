@@ -57,6 +57,10 @@ function taxonomy_views_data() {
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
     ),
+    'filter' => array(
+      'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
+      'handler' => 'views_handler_filter_vocabulary_machine_name',
+    ),
   );
   $data['taxonomy_vocabulary']['vid'] = array(
     'title' => t('Vocabulary ID'), // The item it appears as on the UI,
@@ -88,6 +92,10 @@ function taxonomy_views_data() {
       'left_table' => 'taxonomy_index',
       'left_field' => 'tid',
       'field' => 'tid',
+    ),
+    'taxonomy_vocabulary' => array(
+      'field' => 'vid',
+      'left_field' => 'vid',
     ),
     // This is provided for many_to_one argument
     'taxonomy_index' => array(
