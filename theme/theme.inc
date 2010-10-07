@@ -101,7 +101,6 @@ function template_preprocess_views_view(&$vars) {
         'library' => array(array('contextual', 'contextual-links')),
       ),
     );
-    drupal_add_library('contextual', 'contextual-links');
     $vars['classes_array'][] = 'contextual-links-region';
     $vars['admin_links'] = drupal_render($build);
   }
