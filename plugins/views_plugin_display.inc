@@ -1808,6 +1808,9 @@ class views_plugin_display extends views_plugin {
       case 'distinct':
         $this->set_option($section, $form_state['values'][$section]);
         break;
+      case 'distinct':
+        $this->set_option($section, $form_state['values'][$section]);
+        break;
       case 'group_by':
         $this->set_option($section, $form_state['values'][$section]);
         break;
