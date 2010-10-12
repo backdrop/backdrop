@@ -28,7 +28,7 @@ class views_plugin_display_page extends views_plugin_display {
         'title' => array('default' => '', 'translatable' => FALSE),
         'description' => array('default' => '', 'translatable' => FALSE),
         'weight' => array('default' => 0),
-        'name' => array('default' => 'navigation'),
+        'name' => array('default' => variable_get('menu_default_node_menu', 'navigation')),
        ),
     );
     $options['tab_options'] = array(
