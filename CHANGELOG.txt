@@ -377,6 +377,7 @@ Views 3.x-7.x-dev
     o #772782 by mstrelan: Menu normal item menu should default to system default menu rather than  "navigation".
     o #571234 by dereine: Better handling of invalid exposed filters or other methods that cause a view to abort during the build process.
     o #685554 by MyXelf: Illegal characters in View tag translated improperly when used in theming templates.
+    o #508832 by nick_vh: Documentation improvement on templates.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
