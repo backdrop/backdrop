@@ -372,6 +372,7 @@ Views 3.x-7.x-dev
     o #930582 by berdir, Damz, dereine: Fix query substitutions for subqueries.
     o #711860 by dereine: 00 entered in pager total fails.
     o #889770 by tim.plunkett: Empty fields not always hidden based on row settings.
+    o #762484 by master-of-magic: Link to node status could be lost between rows.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

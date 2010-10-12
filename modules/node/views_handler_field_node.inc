@@ -58,6 +58,9 @@ class views_handler_field_node extends views_handler_field {
         }
       }
     }
+    else {
+      $this->options['alter']['make_link'] = FALSE;
+    }
     return $data;
   }
 
