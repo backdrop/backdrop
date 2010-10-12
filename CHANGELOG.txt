@@ -386,6 +386,7 @@ Views 3.x-7.x-dev
     o #884440 by Amitaibu: Improve token encoding to eliminate double html entity encoding.
     o #847930 by dereine: Reduce duplicates option not staying set.
     o #865482 by dereine: RSS options form does not include override.
+    o #813422 by dereine and killes: Improved time-based caching expiration.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
