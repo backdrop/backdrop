@@ -37,6 +37,7 @@ class view extends views_db_object {
   var $current_page = NULL;
   var $items_per_page = NULL;
   var $offset = NULL;
+  var $total_rows = NULL;
 
   // Places to put attached renderings:
   var $attachment_before = '';
@@ -654,6 +655,8 @@ class view extends views_db_object {
       $this->exposed_widgets = $exposed_form->render_exposed_form();
       if (form_set_error() || !empty($this->build_info['abort'])) {
         $this->built = TRUE;
+        // Don't execute the query, but rendering will still be executed to display the empty text.
+        $this->executed = TRUE;
         return empty($this->build_info['fail']);
       }
     }
