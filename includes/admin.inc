@@ -613,6 +613,7 @@ function views_ui_add_form($form, &$form_state) {
     '#title' => t('View description'),
     '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
     '#default_value' => $view ? $view->description : '',
+    '#maxlength' => 255,
   );
 
   $form['tag'] = array(
