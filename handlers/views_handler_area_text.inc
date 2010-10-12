@@ -46,7 +46,7 @@ class views_handler_area_text extends views_handler_area {
       $formats[$format] = $filter->name;
     }
 
-    if (!$formats[$format]) {
+    if (!isset($formats[$format])) {
       return;
     }
 
