@@ -2579,12 +2579,12 @@ function views_ui_config_item_group_form($type, &$form_state) {
   $type = $form_state['type'];
   $id = $form_state['id'];
 
-  $view->init_query();
-
   $form = array('options' => array('#tree' => TRUE));
   if (!$view->set_display($display_id)) {
     views_ajax_render(t('Invalid display id @display', array('@display' => $display_id)));
   }
+
+  $view->init_query();
 
   $item = $view->get_item($display_id, $type, $id);
 
