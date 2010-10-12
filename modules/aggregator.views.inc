@@ -112,6 +112,27 @@ function aggregator_views_data() {
     ),
   );
 
+  // guid
+  $data['aggregator_item']['guid'] = array(
+    'title' => t('GUID'), // The item it appears as on the UI,
+    'help' => t('The guid of the original imported item.'),
+     // Information for displaying a title as a field
+    'field' => array(
+      'handler' => 'views_handler_field_xss',
+      'click sortable' => TRUE,
+     ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    // Information for accepting a title as a filter
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
   // feed body
   $data['aggregator_item']['description'] = array(
     'title' => t('Body'), // The item it appears as on the UI,
