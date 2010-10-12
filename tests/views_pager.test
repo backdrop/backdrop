@@ -123,8 +123,9 @@ class ViewsPagerTest extends DrupalWebTestCase {
     }
     $view = $this->viewsPagerNoLimit();
     $view->set_display('default');
+    $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 11, t('Take sure that every item is returned in the result'));
+    $this->assertEqual(count($view->result), 11, 'Take sure that every item is returned in the result');
 
     $view->destroy();
 
@@ -139,9 +140,10 @@ class ViewsPagerTest extends DrupalWebTestCase {
       ),
     );
     $view->display_handler->set_option('pager', $pager);
+    $view->pre_execute();
     $view->execute();
 
-    $this->assertEqual(count($view->result), 8, t('Take sure that every item beside the first three is returned in the result'));
+    $this->assertEqual(count($view->result), 8, 'Take sure that every item beside the first three is returned in the result');
 
     // Check some public functions.
     $this->assertFalse($view->query->pager->use_pager());
@@ -183,7 +185,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view = $this->viewsPagerLimit();
     $view->set_display('default');
     $view->execute();
-    $this->assertEqual(count($view->result), 5, t('Take sure that only a certain count of items is returned'));
+    $this->assertEqual(count($view->result), 5, 'Take sure that only a certain count of items is returned');
     $view->destroy();
 
     // Setup and test a offset.
@@ -198,8 +200,9 @@ class ViewsPagerTest extends DrupalWebTestCase {
       ),
     );
     $view->display_handler->set_option('pager', $pager);
+    $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 3, t('Take sure that only a certain count of items is returned'));
+    $this->assertEqual(count($view->result), 3, 'Take sure that only a certain count of items is returned');
 
     // Check some public functions.
     $this->assertFalse($view->query->pager->use_pager());
@@ -241,8 +244,9 @@ class ViewsPagerTest extends DrupalWebTestCase {
     }
     $view = $this->viewsPagerFull();
     $view->set_display('default');
+    $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 5, t('Take sure that only a certain count of items is returned'));
+    $this->assertEqual(count($view->result), 5, 'Take sure that only a certain count of items is returned');
     $view->destroy();
 
     // Setup and test a offset.
@@ -257,8 +261,17 @@ class ViewsPagerTest extends DrupalWebTestCase {
       ),
     );
     $view->display_handler->set_option('pager', $pager);
+    $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 3, t('Take sure that only a certain count of items is returned'));
+    $this->assertEqual(count($view->result), 3, 'Take sure that only a certain count of items is returned');
+
+    // Test items per page = 0
+    $view = $this->viewPagerFullZeroItemsPerPage();
+    $view->set_display('default');
+    $view->pre_execute();
+    $view->execute();
+
+    $this->assertEqual(count($view->result), 11, 'All items are return');
 
     // TODO test number of pages.
 
@@ -281,6 +294,46 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view->execute();
     $this->assertEqual($view->query->pager->get_items_per_page(), 0);
     $this->assertEqual(count($view->result), 11);
+  }
+  
+  function viewPagerFullZeroItemsPerPage() {
+    $view = new view;
+    $view->name = 'view_pager_full_zero_items_per_page';
+    $view->description = '';
+    $view->tag = '';
+    $view->view_php = '';
+    $view->base_table = 'node';
+    $view->is_cacheable = FALSE;
+    $view->api_version = 2;
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Defaults */
+    $handler = $view->new_display('default', 'Defaults', 'default');
+    $handler->display->display_options['access']['type'] = 'none';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['pager']['options']['items_per_page'] = '0';
+    $handler->display->display_options['pager']['options']['offset'] = '0';
+    $handler->display->display_options['pager']['options']['id'] = '0';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Node: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['alter']['alter_text'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['make_link'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = 1;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = 1;
+    $handler->display->display_options['fields']['title']['alter']['strip_tags'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['html'] = 0;
+    $handler->display->display_options['fields']['title']['hide_empty'] = 0;
+    $handler->display->display_options['fields']['title']['empty_zero'] = 0;
+    $handler->display->display_options['fields']['title']['link_to_node'] = 0;
+
+    return $view;
   }
 
   function viewsPagerFull() {
