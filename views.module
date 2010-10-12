@@ -945,9 +945,11 @@ function views_get_view($name, $reset = FALSE) {
   $view = view::load($name, $reset);
   $default_view = views_get_default_view($name, $reset);
 
+   // The view does not exist.
   if (empty($view) && empty($default_view)) {
     return;
   }
+  // The view is defined in code.
   elseif (empty($view) && !empty($default_view)) {
     $status = variable_get('views_defaults', array());
     if (isset($status[$default_view->name])) {
@@ -956,6 +958,7 @@ function views_get_view($name, $reset = FALSE) {
     $default_view->type = t('Default');
     return $default_view->clone_view();
   }
+  // The view is overriden/defined in the database.
   elseif (!empty($view) && !empty($default_view)) {
     $view->type = t('Overridden');
   }
