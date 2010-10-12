@@ -235,7 +235,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
   $api .= " */\n";
   $api .= "function @module_views_api() {\n";
   $api .= "  return array(\n";
-  $api .= "    'api' => 2,\n";
+  $api .= "    'api' => '" . views_api_version() . "',\n";
   $api .= "    'path' => drupal_get_path('module', '@module'),\n";
   $api .= "    //'path' => drupal_get_path('module', '@module') . '/includes',\n";
   $api .= "  );\n";

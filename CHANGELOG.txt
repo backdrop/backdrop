@@ -382,6 +382,7 @@ Views 3.x-7.x-dev
     o #930714 by brad.bulger: Add aggregator GUID field.
     o #936828 by xjm: Empty field replacement not quite always working.
     o #872000 by NaX: Comment edit field needs option to set destination so it can work like comment edit field.
+    o #799580 by dereine: api version of views exports should use views_api_version() not hardcoded number.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
