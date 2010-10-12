@@ -205,6 +205,36 @@ function hook_views_data() {
 }
 
 /**
+ * Alter table structure.
+ *
+ * You can add/edit/remove to existing tables defined by hook_views_data().
+ *
+ * This hook should be placed in MODULENAME.views.inc and it will be auto-loaded.
+ * This must either be in the same directory as the .module file or in a subdirectory
+ * named 'includes'.
+ *
+ * The full documentation for this hook is in the advanced help.
+ * @link http://views-help.doc.logrus.com/help/views/api-tables @endlink
+ */
+function hook_views_data_alter(&$data) {
+  // This example alters the title of the node: nid field for the admin.
+  $data['node']['nid']['title'] = t('Node-Nid');
+
+  // This example adds a example field to the users table
+  $data['users']['example_field'] = array(
+    'title' => t('Example field'),
+    'help' => t('Some examüple content that references a user'),
+    'handler' => 'hook_handlers_field_example_field',
+  );
+
+  // This example changes the handler of the node title field.
+  // In this handler you could do stuff, like preview of the node, when clicking the node title.
+
+  $data['node']['title']['handler'] = 'modulename_handlers_field_node_title';
+}
+
+
+/**
  * The full documentation for this hook is now in the advanced help.
  *
  * This hook should be placed in MODULENAME.views.inc and it will be auto-loaded.
