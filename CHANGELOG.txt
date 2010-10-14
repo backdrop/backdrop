@@ -389,6 +389,7 @@ Views 3.x-7.x-dev
     o #813422 by dereine and killes: Improved time-based caching expiration.
     o #829550 by hefox: Better testing of batch form use by exposed filters.
     o #570618 by dereine: Enforce denying access to disabled views more strongly.
+    o #667014 by dereine: Prevent notice with relationships and node row style if relationship has no endpoint node.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
