@@ -66,7 +66,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       '#title' => t('Button text'),
       '#default_value' => $this->options['text'],
     );
-    
+
     $form['choose'] = array(
       '#type' => 'textfield',
       '#title' => t('Choose text'),
@@ -111,8 +111,27 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     foreach ($sets as $title => $records) {
       foreach ($records as $row) {
         $path = strip_tags($this->get_field($this->view->row_index, $this->options['path']));
-        $path = url($path);
-        $field = strip_tags($this->row_plugin->render($row));;
+        // Putting a '/' in front messes up url() so let's take that out
+        // so users don't shoot themselves in the foot.
+        if (strpos($path, '/') === 0) {
+          $path = substr($path, 1);
+        }
+
+        // use parse_url() to preserve query and fragment in case the user
+        // wants to do fun tricks.
+        $url = parse_url($path);
+        $options = array();
+        if (isset($url['query'])) {
+          $path = strtr($path, array('?' . $url['query'] => ''));
+          $options['query'] = $url['query'];
+        }
+        if (isset($url['fragment'])) {
+          $path = strtr($path, array('#' . $url['fragment'] => ''));
+          $options['fragment'] = $url['fragment'];
+        }
+
+        $path = url($path, $options);
+        $field = strip_tags($this->row_plugin->render($row));
         if ($title) {
           $options[$title][$path] = $field;
         }
