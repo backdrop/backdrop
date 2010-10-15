@@ -614,6 +614,10 @@ class views_handler_field extends views_handler {
     }
     if (isset($url['fragment'])) {
       $path = strtr($path, array('#' . $url['fragment'] => ''));
+      // If the path is empty we want to have a fragment for the current site.
+      if ($path == '') {
+        $options['external'] = TRUE;
+      }
       $options['fragment'] = $url['fragment'];
     }
 
