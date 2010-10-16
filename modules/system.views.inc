@@ -121,6 +121,17 @@ function system_views_data() {
     ),
   );
 
+  // extension
+  $data['files']['extension'] = array(
+    'title' => t('Extension'),
+    'help' => t('The extension of the file.'),
+    'real field' => 'filename',
+    'field' => array(
+      'handler' => 'views_handler_field_file_extension',
+      'click sortable' => FALSE,
+     ),
+  );
+
   // filesize
   $data['file_managed']['filesize'] = array(
     'title' => t('Size'),
