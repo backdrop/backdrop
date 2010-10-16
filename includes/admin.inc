@@ -1115,7 +1115,22 @@ function template_preprocess_views_ui_edit_view(&$vars) {
     }
   }
 
-  $vars['quick_links'] = theme('links', array('links' => $vars['quick_links_raw']));
+  if (module_exists('contextual')) {
+    $build = array(
+      '#prefix' => '<div class="contextual-links-wrapper">',
+      '#suffix' => '</div>',
+      '#theme' => 'links__contextual',
+      '#links' => $vars['quick_links_raw'],
+      '#attributes' => array('class' => array('contextual-links')),
+      '#attached' => array(
+        'library' => array(array('contextual', 'contextual-links')),
+      ),
+    );
+    $vars['quick_links'] = drupal_render($build);
+  }
+  else {
+    $vars['quick_links'] = theme('links__views_quick_links', array('links' => $vars['quick_links_raw']));
+  }
   views_add_css('views-admin');
   views_add_js('ajax');
   drupal_add_js('misc/jquery.form.js');
