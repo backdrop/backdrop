@@ -397,6 +397,7 @@ Views 3.x-7.x-dev
     o #917916 by MyXelf: break delimiter not removed from formatted output. (port by aspilicious)
     o #918654 by Will White: numeric GROUP BY fields missing numeric format options.
     o by dereine: Test for views_handler_filter_date.
+    o #785236 by e_log: Add aggregator field item id as a field.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

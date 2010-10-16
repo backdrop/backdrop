@@ -55,6 +55,31 @@ function aggregator_views_data() {
     ),
   );
 
+  // iid
+  $data['aggregator_item']['iid'] = array(
+    'title' => t('Item ID'),
+    'help' => t('The unique ID of the aggregator item.'), // The help that appears on the UI,
+    // Information for displaying the iid
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    // Information for accepting a iid as an argument
+    'argument' => array(
+      'handler' => 'views_handler_argument_aggregator_iid',
+      'name field' => 'title', // the field to display in the summary.
+      'numeric' => TRUE,
+    ),
+    // Information for accepting a nid as a filter
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    // Information for sorting on a nid.
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   // title
   $data['aggregator_item']['title'] = array(
     'title' => t('Title'), // The item it appears as on the UI,
