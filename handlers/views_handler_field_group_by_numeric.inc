@@ -4,7 +4,7 @@
 /**
  * Handler for GROUP BY on simple numeric fields.
  */
-class views_handler_field_group_by_numeric extends views_handler_field {
+class views_handler_field_group_by_numeric extends views_handler_field_numeric {
   function init(&$view, &$options) {
     parent::init($view, $options);
 
