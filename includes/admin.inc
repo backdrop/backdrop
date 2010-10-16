@@ -1310,7 +1310,12 @@ function template_preprocess_views_ui_edit_item(&$vars) {
     }
   }
 
-  $vars['title'] = l($types[$type]['title'], "admin/structure/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-title-' . $type)));
+  if ($display->display_plugin != 'default') {
+    $vars['title'] = l($types[$type]['title'], "admin/structure/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-title-' . $type)));
+  }
+  else {
+    $vars['title'] = $types[$type]['title'];
+  }
 
   $fields = array();
 
