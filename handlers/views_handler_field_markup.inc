@@ -30,6 +30,7 @@ class views_handler_field_markup extends views_handler_field {
     $value = $values->{$this->field_alias};
     $format = is_numeric($this->format) ? $this->format : $values->{$this->aliases['format']};
     if ($value) {
+      $value = str_replace('<!--break-->', '', $value);
       return check_markup($value, $format, '');
     }
   }
