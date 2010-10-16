@@ -403,6 +403,7 @@ Views 3.x-7.x-dev
     o #635336 by dereine: Remove unused fields from views.
     o #795270 by dereine: Remove unnecessary links to sections that will have no settings.
     o #882800 by dereine: Move "Distinct" option to query settings.
+    o #755342 by jcmarco: Improve SQL date field handling.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
