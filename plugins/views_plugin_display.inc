@@ -114,6 +114,16 @@ class views_plugin_display extends views_plugin {
         }
       }
     }
+
+    // Convert distinct setting from display to query settings.
+    $distinct = $this->get_option('distinct');
+    if (!empty($distinct)) {
+      $query_settings = $this->get_option('query');
+      $query_settings['options']['distinct'] = $distinct;
+      $this->set_option('query', $query_settings);
+      // Clear the values
+      $this->set_option('distinct', NULL);
+    }
   }
 
   function destroy() {
@@ -262,7 +272,6 @@ class views_plugin_display extends views_plugin {
       'pager' => array('pager'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
-      'distinct' => array('distinct'),
       'exposed_block' => array('exposed_block'),
       'exposed_form' => array('exposed_form'),
 
@@ -310,7 +319,6 @@ class views_plugin_display extends views_plugin {
           'use_more' => TRUE,
           'use_more_always' => TRUE,
           'use_more_text' => TRUE,
-          'distinct' => TRUE,
           'exposed_block' => TRUE,
           'exposed_form' => TRUE,
 
@@ -371,10 +379,6 @@ class views_plugin_display extends views_plugin {
       ),
       'link_display' => array(
         'default' => '',
-      ),
-      'distinct' => array(
-        'default' => FALSE,
-        'bool' => TRUE,
       ),
       'group_by' => array(
         'default' => FALSE,
@@ -895,13 +899,6 @@ class views_plugin_display extends views_plugin {
       );
     }
 
-    $options['distinct'] = array(
-      'category' => 'advanced',
-      'title' => t('Distinct'),
-      'value' => $this->get_option('distinct') ? t('Yes') : t('No'),
-      'desc' => t('Display only distinct items, without duplicates.'),
-    );
-
     $this->view->init_query();
     if ($this->view->query->get_aggregation_info()) {
       $options['group_by'] = array(
@@ -1117,15 +1114,6 @@ class views_plugin_display extends views_plugin {
           '#title' => t('More link text'),
           '#description' => t("The text to display for the more link."),
           '#default_value' => $this->get_option('use_more_text'),
-        );
-        break;
-      case 'distinct':
-        $form['#title'] .= t('Display only distinct items, without duplicates.');
-        $form['distinct'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Distinct'),
-          '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
-          '#default_value' => $this->get_option('distinct'),
         );
         break;
       case 'group_by':
@@ -1808,9 +1796,6 @@ class views_plugin_display extends views_plugin {
       case 'distinct':
         $this->set_option($section, $form_state['values'][$section]);
         break;
-      case 'distinct':
-        $this->set_option($section, $form_state['values'][$section]);
-        break;
       case 'group_by':
         $this->set_option($section, $form_state['values'][$section]);
         break;
@@ -1999,12 +1984,7 @@ class views_plugin_display extends views_plugin {
   /**
    * Inject anything into the query that the display handler needs.
    */
-  function query() {
-    // Make the query distinct if the option was set.
-    if ($this->get_option('distinct')) {
-      $this->view->query->set_distinct();
-    }
-  }
+  function query() {  }
 
   /**
    * Not all display plugins will support filtering

@@ -402,6 +402,7 @@ Views 3.x-7.x-dev
     o #611086 by dereine: add -url token to files that can fetch proper URLs with private filesystems.
     o #635336 by dereine: Remove unused fields from views.
     o #795270 by dereine: Remove unnecessary links to sections that will have no settings.
+    o #882800 by dereine: Move "Distinct" option to query settings.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

@@ -164,6 +164,10 @@ class views_plugin_query_default extends views_plugin_query {
       'translatable' => FALSE,
       'bool' => TRUE,
     );
+    $options['distinct'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
 
     return $options;
   }
@@ -178,6 +182,12 @@ class views_plugin_query_default extends views_plugin_query {
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['disable_sql_rewrite']),
       '#prefix' =>  '<div class="messages warning">' . t('WARNING: Disabling SQL rewriting means that node access security is disabled. This may allow users to see data they should not be able to see if your view is misconfigured. Please use this option only if you understand and accept this security risk.') . '</div>',
+    );
+    $form['distinct'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Distinct'),
+      '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
+      '#default_value' => !empty($this->options['distinct']),
     );
   }
 
@@ -1093,6 +1103,11 @@ class views_plugin_query_default extends views_plugin_query {
    * Builds the necessary info to execute the query.
    */
   function build(&$view) {
+    // Make the query distinct if the option was set.
+    if ($this->options['distinct']) {
+      // $this->set_distinct();
+    }
+
     $view->init_pager();
 
     // Let the pager modify the query to add limits.
