@@ -409,6 +409,7 @@ Views 3.x-7.x-dev
     o #718832 by dereine: Add file extension as a field available within the File group.
     o #941974 by dereine: Use contextual links in the views ui when possible.
     o #761102 by dereine: test: user default argument.
+    o by dereine: Fix notice in views_ui_add_page.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

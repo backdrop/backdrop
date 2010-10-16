@@ -573,7 +573,8 @@ function views_ui_add_page() {
     ),
   );
 
-  return drupal_render(drupal_build_form('views_ui_add_form', $form_state));
+  $form = drupal_build_form('views_ui_add_form', $form_state);
+  return drupal_render($form);
 }
 
 /**
