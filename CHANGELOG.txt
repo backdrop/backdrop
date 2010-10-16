@@ -393,6 +393,7 @@ Views 3.x-7.x-dev
     o #835934 by dereine: Provide relationship from files to users.
     o #738172 by dereine: Fields rewritten to be links with just a fragment did not work.
     o #694094 by Ian Ward: Allow more static caches to be resettable. (port by aspilicious)
+    o #811226 by dereine: Fix another notice in area text handler. (port by aspilicious)
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

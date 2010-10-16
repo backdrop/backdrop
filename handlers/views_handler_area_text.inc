@@ -17,7 +17,6 @@ class views_handler_area_text extends views_handler_area {
       '#type' => 'text_format',
       '#default_value' => $this->options['content'],
       '#rows' => 6,
-      '#description' => $description,
       '#format' => $this->options['format'],
     );
   }
