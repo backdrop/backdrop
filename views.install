@@ -439,3 +439,26 @@ function views_update_6009() {
 
   return $ret;
 }
+
+/**
+ * Remove the view_php field
+ */
+function views_schema_6010() {
+  $schema = views_schema(__FUNCTION__);
+  unset($schema['views_view']['fields']['view_php']);
+  unset($schema['views_view']['fields']['is_cacheable']);
+  return $schema;
+}
+
+/**
+ * Remove the view_php and is_cacheable field
+ */
+function views_update_6010() {
+  $ret = array();
+
+  db_drop_field($ret, 'views_view', 'view_php');
+  db_drop_field($ret, 'views_view', 'is_cacheable');
+
+
+  return $ret;
+}

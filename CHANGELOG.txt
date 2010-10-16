@@ -400,6 +400,7 @@ Views 3.x-7.x-dev
     o #785236 by e_log: Add aggregator field item id as a field.
     o #366886 by Scott Reynolds: For "last comment time" if "count zero is empty" is set, use empty text for nodes with no comments.
     o #611086 by dereine: add -url token to files that can fetch proper URLs with private filesystems.
+    o #635336 by dereine: Remove unused fields from views.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
