@@ -24,9 +24,9 @@ function _views_include_default_views() {
 /**
  * Fetch Views' data from the cache
  */
-function _views_fetch_data($table = NULL) {
+function _views_fetch_data($table = NULL, $reset = FALSE) {
   static $cache = NULL;
-  if (!isset($cache)) {
+  if (!isset($cache) || $reset) {
     $start = microtime(TRUE);
     // NOTE: This happens whether we retrieve them from cache or otherwise.
 
@@ -61,9 +61,9 @@ function _views_fetch_data($table = NULL) {
 /**
  * Fetch the plugin data from cache.
  */
-function _views_fetch_plugin_data($type = NULL, $plugin = NULL) {
+function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
   static $cache = NULL;
-  if (!isset($cache)) {
+  if (!isset($cache) || $reset) {
     $start = microtime(TRUE);
     views_include('plugins');
     views_include_handlers();

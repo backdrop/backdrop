@@ -589,8 +589,8 @@ function views_include($file) {
 /**
  * Load views files on behalf of modules.
  */
-function views_module_include($file) {
-  foreach (views_get_module_apis() as $module => $info) {
+function views_module_include($file, $reset = FALSE) {
+  foreach (views_get_module_apis($reset) as $module => $info) {
     if (file_exists(DRUPAL_ROOT . "/$info[path]/$module.$file")) {
       require_once DRUPAL_ROOT . "/$info[path]/$module.$file";
     }
@@ -600,9 +600,9 @@ function views_module_include($file) {
 /**
  * Get a list of modules that support the current views API.
  */
-function views_get_module_apis() {
+function views_get_module_apis($reset = FALSE) {
   static $cache = NULL;
-  if (!isset($cache)) {
+  if (!isset($cache) || $reset) {
     $cache = array();
     foreach (module_implements('views_api') as $module) {
       $info = module_invoke($module, 'views_api');
@@ -654,10 +654,10 @@ function views_add_js($file) {
 /**
  * Load views files on behalf of modules.
  */
-function views_include_handlers() {
+function views_include_handlers($reset = FALSE) {
   static $finished = FALSE;
   // Ensure this only gets run once.
-  if ($finished) {
+  if ($finished && !$reset) {
     return;
   }
 
@@ -672,19 +672,19 @@ function views_include_handlers() {
 /**
  * Load default views files on behalf of modules.
  */
-function views_include_default_views() {
+function views_include_default_views($reset = FALSE) {
   static $finished = FALSE;
   // Ensure this only gets run once.
-  if ($finished) {
+  if ($finished && !$reset) {
     return;
   }
 
   // Default views hooks may be in the normal handler file,
   // or in a separate views_default file at the discretion of
   // the module author.
-  views_include_handlers();
+  views_include_handlers($reset);
 
-  _views_include_default_views();
+  _views_include_default_views($reset);
   $finished = TRUE;
 }
 
@@ -743,9 +743,9 @@ function views_get_handler($table, $field, $key, $override = NULL) {
 /**
  * Fetch Views' data from the cache
  */
-function views_fetch_data($table = NULL) {
+function views_fetch_data($table = NULL, $reset = FALSE) {
   views_include('cache');
-  return _views_fetch_data($table);
+  return _views_fetch_data($table, $reset);
 }
 
 // -----------------------------------------------------------------------
@@ -754,17 +754,17 @@ function views_fetch_data($table = NULL) {
 /**
  * Fetch the plugin data from cache.
  */
-function views_fetch_plugin_data($type = NULL, $plugin = NULL) {
+function views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
   views_include('cache');
-  return _views_fetch_plugin_data($type, $plugin);
+  return _views_fetch_plugin_data($type, $plugin, $reset);
 }
 
 /**
  * Get a handler for a plugin
  */
-function views_get_plugin($type, $plugin) {
+function views_get_plugin($type, $plugin, $reset = FALSE) {
   views_include('handlers');
-  $definition = views_fetch_plugin_data($type, $plugin);
+  $definition = views_fetch_plugin_data($type, $plugin, $reset);
   if (!empty($definition)) {
     return _views_create_handler($definition, $type);
   }
