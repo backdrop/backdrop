@@ -296,3 +296,4 @@ files[] = tests/views_handlers.test
 files[] = tests/views_pager.test
 files[] = tests/views_query.test
 files[] = tests/views_test.views_default.inc
+files[] = tests/user/views_user_argument_default.test
