@@ -1424,16 +1424,29 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   if (empty($name)) {
     $name = t('Update');
   }
+
   // remove default validate handler
   $form['#validate'] = array();
+
+    // Add the override and update button
+  if ($name == t('Update default display')) {
+    $form['buttons']['override_update'] = array(
+      '#type' => 'submit',
+      '#value' => t('Update and override'),
+      '#submit' => array(
+        'views_ui_edit_display_form_override_update_section',
+        'views_ui_standard_submit',
+        'views_ui_edit_display_form_override_update',
+      ),
+    );
+  }
 
   if (empty($form_state['ok_button'])) {
     // but be sure submit button validates!
     $form['buttons']['submit'] = array(
       '#type' => 'submit',
       '#value' => $name,
-      '#submit' => array($form_id . '_submit'),
-      '#validate' => array('views_ui_standard_submit'),
+      '#submit' => array('views_ui_standard_submit', $form_id . '_submit'),
     );
     // Take sure that the validation handler exists.
     if (function_exists($form_id . '_validate')) {
@@ -2118,6 +2131,24 @@ function views_ui_edit_display_form_override($form, &$form_state) {
   $form_state['rerender'] = TRUE;
   $form_state['rebuild'] = TRUE;
 }
+/**
+ * Override handler and submit views_ui_edit_display_form
+ */
+function views_ui_edit_display_form_override_update(&$form, &$form_state) {
+  $display = &$form_state['view']->display[$form_state['display_id']];
+  $display->handler->options_override($form, $form_state);
+  $display->handler->options_submit($form, $form_state);
+  views_ui_cache_set($form_state['view']);
+}
+
+/**
+ * Override handler and submit views_ui_edit_display_form
+ */
+function views_ui_edit_display_form_override_update_section(&$form, &$form_state) {
+  // Update the #section so it knows what to mark changed.
+  $form['#section'] = str_replace('default-', $form_state['display_id'] . '-', $form['#section']);
+}
+
 /**
  * Form to config items in the views UI.
  */
