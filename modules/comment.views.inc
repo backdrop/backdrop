@@ -378,7 +378,7 @@ function comment_views_data() {
     'title' => t('Last comment time'),
     'help' => t('Date and time of when the last comment was posted.'),
     'field' => array(
-      'handler' => 'views_handler_field_date',
+      'handler' => 'views_handler_field_last_comment_timestamp',
       'click sortable' => TRUE,
     ),
     'sort' => array(
