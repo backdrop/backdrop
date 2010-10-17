@@ -196,8 +196,11 @@ class views_plugin_style_table extends views_plugin_style {
         $form['info'][$field]['sortable'] = array(
           '#type' => 'checkbox',
           '#default_value' => !empty($this->options['info'][$field]['sortable']),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array($id => array($field)),
+          '#states' => array(
+            'visible' => array(
+              ':input[id="' . $id . '"]' => array('value' => $field),
+            ),
+          ),
         );
         // Provide an ID so we can have such things.
         $radio_id = drupal_html_id('edit-default-' . $field);
@@ -209,8 +212,11 @@ class views_plugin_style_table extends views_plugin_style {
           // because 'radio' doesn't fully support '#id' =(
           '#attributes' => array('id' => $radio_id),
           '#default_value' => $default,
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array($id => array($field)),
+          '#states' => array(
+            'visible' => array(
+              ':input[id="' . $id . '"]' => array('value' => $field),
+            ),
+          ),
         );
       }
       $form['info'][$field]['align'] = array(
@@ -222,14 +228,12 @@ class views_plugin_style_table extends views_plugin_style {
           'views-align-center' => t('Center'),
           'views-align-right' => t('Right'),
           ),
-        '#process' => array('views_process_dependency'),
         '#dependency' => array($id => array($field)),
       );
       $form['info'][$field]['separator'] = array(
         '#type' => 'textfield',
         '#size' => 10,
         '#default_value' => isset($this->options['info'][$field]['separator']) ? $this->options['info'][$field]['separator'] : '',
-        '#process' => array('views_process_dependency'),
         '#dependency' => array($id => array($field)),
       );
 

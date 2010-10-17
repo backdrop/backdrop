@@ -227,9 +227,10 @@ class views_handler_argument extends views_handler {
             $form['argument_validate'][$id] = array(
               '#type' => 'item',
               '#input' => TRUE, // trick it into checking input to make #process run
-              '#process' => array('views_process_dependency'),
-              '#dependency' => array(
-                'edit-options-validate-type' => array($id)
+              '#states' => array(
+                'visible' => array(
+                  ':input[name="options[validate_type]"]' => array('value' => $id),
+                ),
               ),
             );
             $plugin->options_form($form['argument_validate'][$id], $form_state);
@@ -385,8 +386,11 @@ class views_handler_argument extends views_handler {
       '#type' => 'hidden',
       '#id' => 'views-default-options',
       '#prefix' => '<div><fieldset id="views-default-options"><legend>' . t('Provide default argument options') . '</legend>',
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array('radio:options[default_action]' => array('default')),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="options[default_action]"]' => array('value' => 'default'),
+        ),
+      ),
     );
 
     $form['default_argument_type'] = array(
@@ -396,6 +400,11 @@ class views_handler_argument extends views_handler {
       '#id' => 'edit-options-default-argument-type',
       '#title' => t('Default argument type'),
       '#default_value' => $this->options['default_argument_type'],
+      '#states' => array(
+        'visible' => array(
+          ':input[name="options[default_action]"]' => array('value' => 'default'),
+        ),
+      ),
     );
 
     foreach ($plugins as $id => $info) {
@@ -408,12 +417,12 @@ class views_handler_argument extends views_handler {
           $form['argument_default'][$id] = array(
             '#type' => 'item',
             '#input' => TRUE, // trick it into checking input to make #process run
-            '#process' => array('views_process_dependency'),
-            '#dependency' => array(
-              'radio:options[default_action]' => array('default'),
-              'radio:options[default_argument_type]' => array($id)
+            '#states' => array(
+              'visible' => array(
+                ':input[name="options[default_action]"]' => array('value' => 'default'),
+                ':input[name="options[default_argument_type]"]' => array('value' => $id),
+              ),
             ),
-            '#dependency_count' => 2,
           );
           $options[$id] = $info['title'];
           $plugin->options_form($form['argument_default'][$id], $form_state);

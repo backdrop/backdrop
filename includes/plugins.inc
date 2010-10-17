@@ -10,7 +10,6 @@
  * Implements hook_views_plugins
  */
 function views_views_plugins() {
-  $js_path = drupal_get_path('module', 'views') . '/js';
   $plugins = array(
     // display, style, row, argument default, argument validator and access.
     'display' => array(
@@ -22,7 +21,7 @@ function views_views_plugins() {
         'theme' => 'views_view',
         'no ui' => TRUE,
         'no remove' => TRUE,
-        'js' => array('misc/collapse.js', 'misc/textarea.js', 'misc/tabledrag.js', 'misc/autocomplete.js', "$js_path/dependent.js"),
+        'js' => array('misc/collapse.js', 'misc/textarea.js', 'misc/tabledrag.js', 'misc/autocomplete.js', 'misc/states.js'),
         'use ajax' => TRUE,
         'use pager' => TRUE,
         'use more' => TRUE,

@@ -88,9 +88,10 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#required' => TRUE,
       '#description' => t('Label to use in the exposed items per page form element.'),
       '#default_value' => $this->options['expose']['items_per_page_label'],
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array(
-        'edit-pager-options-expose-items-per-page' => array(1)
+      '#states' => array(
+        'invisible' => array(
+          'input[name="pager_options[expose][items_per_page]"]' => array('checked' => FALSE),
+        ),
       ),
     );
 
@@ -100,9 +101,10 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#required' => TRUE,
       '#description' => t('Set between which values the user can choose when determining the items per page. Separated by comma.'),
       '#default_value' => $this->options['expose']['items_per_page_options'],
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array(
-        'edit-pager-options-expose-items-per-page' => array(1)
+      '#states' => array(
+        'invisible' => array(
+          'input[name="pager_options[expose][items_per_page]"]' => array('checked' => FALSE),
+        ),
       ),
     );
 
@@ -119,9 +121,10 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#required' => TRUE,
       '#description' => t('Label to use in the exposed offset form element.'),
       '#default_value' => $this->options['expose']['offset_label'],
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array(
-        'edit-pager-options-expose-offset' => array(1)
+      '#states' => array(
+        'invisible' => array(
+          'input[name="pager_options[expose][offset]"]' => array('checked' => FALSE),
+        ),
       ),
     );
   }

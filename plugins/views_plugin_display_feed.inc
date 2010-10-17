@@ -136,8 +136,11 @@ class views_plugin_display_feed extends views_plugin_display_page {
           '#default_value' => $this->get_option('sitename_title'),
         );
         $form['title'] = $title;
-        $form['title']['#process'] = array('views_process_dependency');
-        $form['title']['#dependency'] = array('edit-sitename-title' => array(FALSE));
+        $form['title']['#states'] = array(
+          'invisible' => array(
+            'input[name="sitename_title"]' => array('checked' => TRUE),
+          ),
+        );
         break;
       case 'displays':
         $form['#title'] .= t('Attach to');

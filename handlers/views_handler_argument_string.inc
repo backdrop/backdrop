@@ -51,8 +51,11 @@ class views_handler_argument_string extends views_handler_argument {
       '#title' => t('Character limit'),
       '#description' => t('How many characters of the argument to filter against. If set to 1, all fields starting with the letter in the argument would be matched.'),
       '#default_value' => $this->options['limit'],
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array('edit-options-glossary' => array(TRUE)),
+      '#states' => array(
+        'invisible' => array(
+          'input[name="options[glossary]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
 
     $form['case'] = array(

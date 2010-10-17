@@ -38,8 +38,11 @@ class views_handler_field_prerender_list extends views_handler_field {
       '#type' => 'textfield',
       '#title' => t('Separator'),
       '#default_value' => $this->options['separator'],
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array('radio:options[type]' => array('separator')),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="options[type]"]' => array('value' => 'separator'),
+        ),
+      ),
     );
   }
 

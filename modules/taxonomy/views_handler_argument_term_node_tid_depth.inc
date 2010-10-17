@@ -46,8 +46,11 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
       '#title' => t("Use Drupal's taxonomy term path to create breadcrumb links"),
       '#description' => t('If selected, the links in the breadcrumb trail will be created using the standard drupal method instead of the custom views method. This is useful if you are using modules like taxonomy redirect to modify your taxonomy term links.'),
       '#default_value' => !empty($this->options['use_taxonomy_term_path']),
-      '#process' => array('views_process_dependency'),
-      '#dependency' => array('edit-options-set-breadcrumb' => array(TRUE)),
+      '#states' => array(
+        'invisible' => array(
+          'input[name="options[set_breadcrumb]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
   }
 

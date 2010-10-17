@@ -21,7 +21,6 @@ class views_plugin_argument_default_php extends views_plugin_argument_default {
       '#type' => 'textarea',
       '#title' => t('PHP argument code'),
       '#default_value' => $this->options['code'],
-      '#process' => array('views_process_dependency'),
       '#description' => t('Enter PHP code that returns a value to use for this argument. Do not use &lt;?php ?&gt;. You must return only a single value for just this argument.'),
     );
 

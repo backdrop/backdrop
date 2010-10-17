@@ -193,6 +193,15 @@ function views_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
+  // Define another taxonomy autocomplete because the default one of drupal
+  // does not support a vid a argument anymore
+  $items['admin/views/ajax/autocomplete/taxonomy'] = array(
+    'page callback' => 'views_ajax_autocomplete_taxonomy',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/ajax.inc',
+  );
   return $items;
 }
 
@@ -1065,7 +1074,6 @@ function views_exposed_form($form, &$form_state) {
   if ($view->use_ajax) {
     drupal_add_js('misc/jquery.form.js');
   }
-  views_add_js('dependent');
 
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
   $exposed_form_plugin->exposed_form_alter($form, $form_state);
@@ -1374,28 +1382,6 @@ function views_views_exportables($op = 'list', $views = NULL, $name = 'foo') {
 
     return $code;
   }
-}
-
-/**
- * Process callback to add dependency to form items.
- *
- * Usage:
- *
- * On any form item, add
- * - @code '#process' => 'views_process_dependency' @endcode
- * - @code '#dependency' => array('id-of-form-without-the-#' => array(list, of, values, that, make, this, gadget, visible)); @endcode
- */
-function views_process_dependency($element) {
-  if (isset($element['#dependency'])) {
-    if (!isset($element['#dependency_count'])) {
-      $element['#dependency_count'] = 1;
-    }
-    views_add_js('dependent');
-    $options['viewsAjax']['formRelationships'][$element['#id']] = array('num' => $element['#dependency_count'], 'values' => $element['#dependency']);
-    drupal_add_js($options, 'setting');
-  }
-
-  return $element;
 }
 
 /**
