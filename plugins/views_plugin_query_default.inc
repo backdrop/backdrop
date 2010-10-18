@@ -693,7 +693,7 @@ class views_plugin_query_default extends views_plugin_query {
     // We limit the length of the original alias up to 60 characters
     // to get a unique alias later if its have duplicates
     $alias = substr($alias, 0, 60);
-       
+
     // Create a field info array.
     $field_info = array(
       'field' => $field,
@@ -713,7 +713,7 @@ class views_plugin_query_default extends views_plugin_query {
     if (empty($this->fields[$alias])) {
       $this->fields[$alias] = $field_info;
     }
-    
+
     return $alias;
   }
 
@@ -1104,7 +1104,7 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function build(&$view) {
     // Make the query distinct if the option was set.
-    if ($this->options['distinct']) {
+    if (!empty($this->options['distinct'])) {
       // $this->set_distinct();
     }
 

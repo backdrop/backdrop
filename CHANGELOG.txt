@@ -412,6 +412,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix notice in views_ui_add_page.
     o #667950 by damZ, dereine: Port #dependency form elements to #states.
     o Added missing file: modules/taxonomy/views_handler_filter_vocabulary_machine_name.inc
+    o #882800 by rszrama: Fix notice for options['distinct'].
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
