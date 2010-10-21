@@ -11,6 +11,9 @@
  *     @see field_group_field_group_formats()
  */
 
+define('FIELD_GROUP_TABS_SEPARATE', 1);
+define('FIELD_GROUP_TABS_MERGED', 2);
+
 /**
  * Implements hook_menu().
  */
@@ -117,217 +120,20 @@ function field_group_field_info_max_weight($entity_type, $bundle, $context) {
  * Implements hook_form_FORM_ID_alter().
  */
 function field_group_form_field_ui_field_overview_form_alter(&$form, &$form_state) {
-  _field_groups_extend_overview_table($form, $form_state);
+  field_group_field_ui_overview_form_alter($form, $form_state);
 }
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
 function field_group_form_field_ui_display_overview_form_alter(&$form, &$form_state) {
-  _field_groups_extend_overview_table($form, $form_state, TRUE);
+  field_group_field_ui_overview_form_alter($form, $form_state, TRUE);
 }
 
 /**
- * Implements hook_field_group_formats().
- * @return array of available formatting html controls
- * for form and display overview type.
+ * Function to alter the fields overview and display overview screen.
  */
-function field_group_field_group_formats() {
-  return array(
-    'form' => array(
-      'fieldset' => t('Fieldset'),
-      'tabs' => t('Tabs')
-    ),
-    'display' => array(
-      'div' => t('Div'),
-    ),
-  );
-}
-
-/**
- * Implements hook_field_group_format_pre_render().
- * @param Array $elements by address.
- * @param Object $group The Field group info.
- */
-function field_group_field_group_format_pre_render(& $element, $group, & $form) {
-  $collapsible = $group->format_settings['fieldgroup_settings'] != 'open';
-  $collapsed = $group->format_settings['fieldgroup_settings'] == 'collapsed';
-  $classes = array($group->visible);
-  if ($collapsible) {
-    $classes[] = 'collapsible';
-    if ($collapsed) {
-      $classes[] = 'collapsed';
-    }
-  }
-
-  switch ($group->visible) {
-    case 'tabs':
-      $element += array(
-        '#type' => 'fieldset',
-        '#title' => $group->label,
-        '#weight' => $group->weight,
-        '#collapsible' => $collapsible,
-        '#collapsed' => $collapsed,
-        '#attributes' => array('class' => array($group->visible)),
-        '#group' => 'form-layout',
-      );
-      $form['form-layout'] = array('#type' => 'vertical_tabs');
-    break;
-    case 'fieldset':
-      $element += array(
-        '#type' => 'fieldset',
-        '#title' => $group->label,
-        '#weight' => $group->weight,
-        '#collapsible' => $collapsible,
-        '#collapsed' => $collapsed,
-        '#attributes' => array('class' => $classes),
-      );
-      break;
-    case 'div':
-      $element += array(
-        '#type' => 'markup',
-        '#prefix' => '<div class="field-group-format '. implode(' ', $classes) . '">
-        <span class="field-group-format-toggler">'. $group->label .'</span>
-        <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
-        '#suffix' => '</div></div>',
-        '#weight' => $group->weight,
-        '#attached' => array(
-          'js' => array(
-            'misc/collapse.js',
-            drupal_get_path('module', 'field_group') .'/field_group.js'
-          ),
-        ),
-      );
-      break;
-  }
-}
-
-/**
- * Implements hook_field_group_format_settings().
- * @var unknown_type
- */
-function field_group_field_group_format_settings(& $group) {
-  $form = array();
-  switch ($group->visible) {
-    case 'tabs':
-      $options = array(1 => t('option 1'), 2 => t('option 2'));
-      $form['tab_settings'] = array(
-        '#title' => t('Tab settings'),
-        '#type' => 'select',
-        '#default_value' => $group->format_settings['tab_settings'],
-        '#options' => $options,
-        '#weight' => 2,
-      //'#description' => t('Vivamus nec magna vel lectus congue eleifend. Mauris dapibus erat eu tortor gravida ut suscipit dui tincidunt.'),
-      );
-    // Fall through to add extra tabs configuration.
-    case 'fieldset':
-    case 'div':
-      $form['fieldgroup_settings'] = array(
-        '#title' => t('Fieldgroup settings'),
-        '#type' => 'select',
-        '#options' => array(
-          'open' => t('Open'),
-          'collapsible' => t('Collapsible'),
-          'collapsed' => t('Collapsed'),
-        ),
-        '#default_value' => $group->format_settings['fieldgroup_settings'],
-        '#weight' => 1,
-        //'#element_validate' => array('_element_validate_integer_positive'),
-        //'#description' => t('Some longish description. Lorem ipsum dolor sit amet, consectetur adipiscing elit'),
-        //'#required' => TRUE,
-      );
-      break;
-  }
-  return $form;
-}
-
-/**
- * Implements hook_field_group_format_summary().
- */
-function field_group_field_group_format_summary(& $group) {
-  $output = '<strong>'. $group->visible .'</strong> '. $group->format_settings['fieldgroup_settings'] .'';
-  if ($group->visible == 'tabs') {
-    $output .= '<br />'. t('Tabs') .': ' . (isset($group->format_settings['tab_settings']) ? $group->format_settings['tab_settings'] : t('No option selected'));
-  }
-  return $output;
-}
-
-/**
- * Menu loader; Load a group instance based on group and bundle name.
- *
- * @param $group_name
- *   The name of the group, as contained in the path.
- * @param $entity_type
- *   The name of the entity.
- * @param $bundle_name
- *   The name of the bundle, as contained in the path.
- * @param $bundle_pos
- *   The position of $bundle_name in $map.
- * @param $map
- *   The translated menu router path argument map.
- */
-function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
-  // @todo : this is broken - loads (and thus edits / deletes) a group only by group name,
-  // which is not unique.
-  // A unique group is identified by a [entity_type, bundle, group_name, view_mode] tuple.
-  // But sticking that much info in the menu path might be a bit long...
-  // Tricky stuff, I'll try to look into this - yched.
-  $query = db_select('field_group', 'fg');
-  $query->fields('fg');
-  $query->condition('group_name', $group_name);
-  $group = $query->execute()->fetchObject();
-  if ($group->id) {
-    // @todo should happen in a proper CRUD API function
-    $data = unserialize($group->data);
-    unset($group->data);
-    $group->label = $data['label'];
-    $group->weight = $data['weight'];
-    $group->children = $data['children'];
-    $group->visible = $data['visible'];
-
-    return $group;
-  }
-  return FALSE;
-}
-
-/**
- * Function to retrieve all format possibilities for the fieldgroups.
- */
-function field_group_formats($display_overview = FALSE) {
-  $cache = &drupal_static(__FUNCTION__, array());
-  if (empty($cache)) {
-    if ($cached = cache_get('field_group_formats', 'cache_field')) {
-      $format_options = $cached->data;
-    }
-    else {
-      $format_options = array('hidden' => t('<Hidden>'));
-      $format_options += module_invoke_all('field_group_formats');
-      cache_set('field_group_formats', $format_options, 'cache_field');
-    }
-    $cache = $format_options;
-  }
-  return $cache;
-}
-
-/**
- * Function to pre render the field group element.
- */
-function field_group_format_pre_render(& $element, $group, & $form) {
-  foreach (module_implements('field_group_format_pre_render') as $module) {
-    $function = $module . '_field_group_format_pre_render';
-    if (function_exists($function)) {
-      // The intention here is to have the opportunity to alter the
-      // elements, as defined in hook_field_group_formats.
-      // Note, implement $element by reference!
-      $function($element, $group, $form);
-    }
-  }
-}
-
-/**
- * @todo
- */
-function _field_groups_extend_overview_table(&$form, &$form_state, $display_overview = FALSE) {
+function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display_overview = FALSE) {
   $entity_type = $form['#entity_type'];
   $bundle = $form['#bundle'];
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
@@ -342,7 +148,7 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
     $region_callback = 'field_group_field_overview_row_region';
     $mode = 'form';
     $format_options = $formatters['form'];
-    // Overview form does not have this key by default
+    // Overview form does not have this key by default.
     $form_state += array(
       'formatter_settings_edit' => NULL,
     );
@@ -569,19 +375,17 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
       '#cell_attributes' => array('colspan' => $display_overview ? 1 : 2),
     ),
   );
-  //if ($display_overview) {
-    $table[$name] += array(
-      'format' => array(
-        'type' => array(
-          '#type' => 'select',
-          '#options' => $format_options,
-          '#default_value' => 'fieldset',
-        ),
+  $table[$name] += array(
+    'format' => array(
+      'type' => array(
+        '#type' => 'select',
+        '#options' => $format_options,
+        '#default_value' => 'fieldset',
       ),
-      'settings_summary' => array(),
-      'settings_edit' => array(),
-    );
-  //}
+    ),
+    'settings_summary' => array(),
+    'settings_edit' => array(),
+  );
 
   $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
   $form['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group_admin.js';
@@ -591,30 +395,338 @@ function _field_groups_extend_overview_table(&$form, &$form_state, $display_over
 }
 
 /**
- * Submit handler to save the configuration of a fieldgroup.
- * @param $group
- * @param $name
- * @param $form
- * @param $form_state
+ * Implements hook_field_group_formats().
+ * @return array of available formatting html controls
+ * for form and display overview type.
  */
-function field_group_format_settings_submit(& $group, $settings) {
-  $group->visible = $settings['format']['type'];
-  $group->format_settings = $settings['format_settings']['settings'];
-  field_group_save($group);
-  cache_clear_all('field_groups', 'cache_field');
+function field_group_field_group_formats() {
+  return array(
+    'form' => array(
+      'fieldset' => t('Fieldset'),
+      'tabs' => t('Tabs')
+    ),
+    'display' => array(
+      'div' => t('Div'),
+      'fieldset' => t('Fieldset'),
+    ),
+  );
 }
 
 /**
- * Creates a summary for the field format configuration summary.
- * @param String $group_name
- * @param Object $group
+ * Implements hook_field_group_pre_render().
+ * @param Array $elements by address.
+ * @param Object $group The Field group info.
  */
-function field_group_format_settings_summary($group_name, $group) {
-  $summary = implode('', module_invoke_all('field_group_format_summary', $group));
-  return array(
-    '#markup' => '<div class="field-formatter-summary">'. $summary .'</div>',
-    '#cell_attributes' => array('class' => array('field-formatter-summary-cell')),
+function field_group_field_group_pre_render(& $element, $group, & $form) {
+  $collapsible = $group->format_settings['fieldgroup_settings'] != 'open';
+  $collapsed = $group->format_settings['fieldgroup_settings'] == 'collapsed';
+  $classes = array($group->visible);
+  if ($collapsible) {
+    $classes[] = 'collapsible';
+    if ($collapsed) {
+      $classes[] = 'collapsed';
+    }
+  }
+
+  switch ($group->visible) {
+    case 'tabs':
+      $tab_container = $group->format_settings['tab_settings'] == FIELD_GROUP_TABS_SEPARATE ? 'form-layout' : 'additional_settings';
+      $element += array(
+        '#type' => 'fieldset',
+        '#title' => $group->label,
+        '#weight' => $group->weight,
+        '#collapsible' => $collapsible,
+        '#collapsed' => $collapsed,
+        '#attributes' => array('class' => array($group->visible)),
+        '#group' => $tab_container,
+      );
+      $form[$tab_container] = array('#type' => 'vertical_tabs');
+    break;
+    case 'fieldset':
+      $element += array(
+        '#type' => 'fieldset',
+        '#title' => $group->label,
+        '#weight' => $group->weight,
+        '#collapsible' => $collapsible,
+        '#collapsed' => $collapsed,
+        '#pre_render' => array(),
+        '#attributes' => array('class' => $classes),
+      );
+      $element['#attached']['js'][] = 'misc/form.js';
+      $element['#attached']['js'][] = 'misc/collapse.js';
+      break;
+    case 'div':
+      $element += array(
+        '#type' => 'markup',
+        '#prefix' => '<div class="field-group-format '. implode(' ', $classes) . '">
+        <span class="field-group-format-toggler">'. $group->label .'</span>
+        <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
+        '#suffix' => '</div></div>',
+        '#weight' => $group->weight,
+        '#attached' => array(
+          'js' => array(
+            'misc/collapse.js',
+            drupal_get_path('module', 'field_group') .'/field_group.js'
+          ),
+        ),
+      );
+      break;
+  }
+}
+
+/**
+ * Implements hook_field_group_format_settings().
+ * @var unknown_type
+ */
+function field_group_field_group_format_settings(& $group) {
+  $form = array();
+  switch ($group->visible) {
+    case 'tabs':
+      $form['tab_settings'] = array(
+        '#title' => t('Tab settings'),
+        '#type' => 'select',
+        '#default_value' => $group->format_settings['tab_settings'],
+        '#options' => array(
+          FIELD_GROUP_TABS_SEPARATE => t('Seperate from core fieldsets'),
+          FIELD_GROUP_TABS_MERGED => t('Merged with core fieldsets')),
+        '#weight' => 2,
+      //'#description' => t('Vivamus nec magna vel lectus congue eleifend. Mauris dapibus erat eu tortor gravida ut suscipit dui tincidunt.'),
+      );
+    // Fall through to add extra tabs configuration.
+    case 'fieldset':
+    case 'div':
+      $form['fieldgroup_settings'] = array(
+        '#title' => t('Fieldgroup settings'),
+        '#type' => 'select',
+        '#options' => array(
+          'open' => t('Open'),
+          'collapsible' => t('Collapsible'),
+          'collapsed' => t('Collapsed'),
+        ),
+        '#default_value' => $group->format_settings['fieldgroup_settings'],
+        '#weight' => 1,
+        //'#element_validate' => array('_element_validate_integer_positive'),
+        //'#description' => t('Some longish description. Lorem ipsum dolor sit amet, consectetur adipiscing elit'),
+        //'#required' => TRUE,
+      );
+      break;
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_field_group_format_summary().
+ */
+function field_group_field_group_format_summary(& $group) {
+  $output = '<strong>'. $group->visible .'</strong> '. $group->format_settings['fieldgroup_settings'] .'';
+  if ($group->visible == 'tabs') {
+    $options = array(
+      FIELD_GROUP_TABS_SEPARATE => t('Seperate from core fieldsets'),
+      FIELD_GROUP_TABS_MERGED => t('Merged with core fieldsets'));
+    $output .= '<br />'. t('Tabs') .': ' . (isset($options[$group->format_settings['tab_settings']]) ? $options[$group->format_settings['tab_settings']] : t('No option selected'));
+  }
+  return $output;
+}
+
+/**
+ * Menu loader; Load a group instance based on group and bundle name.
+ *
+ * @param $group_name
+ *   The name of the group, as contained in the path.
+ * @param $entity_type
+ *   The name of the entity.
+ * @param $bundle_name
+ *   The name of the bundle, as contained in the path.
+ * @param $bundle_pos
+ *   The position of $bundle_name in $map.
+ * @param $map
+ *   The translated menu router path argument map.
+ */
+function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
+  // @todo : this is broken - loads (and thus edits / deletes) a group only by group name,
+  // which is not unique.
+  // A unique group is identified by a [entity_type, bundle, group_name, view_mode] tuple.
+  // But sticking that much info in the menu path might be a bit long...
+  // Tricky stuff, I'll try to look into this - yched.
+  $query = db_select('field_group', 'fg');
+  $query->fields('fg');
+  $query->condition('group_name', $group_name);
+  $group = $query->execute()->fetchObject();
+  if ($group->id) {
+    // @todo should happen in a proper CRUD API function
+    $data = unserialize($group->data);
+    unset($group->data);
+    $group->label = $data['label'];
+    $group->weight = $data['weight'];
+    $group->children = $data['children'];
+    $group->visible = $data['visible'];
+
+    return $group;
+  }
+  return FALSE;
+}
+
+/**
+ * Read all groups.
+ */
+function field_group_read_groups($params = array()) {
+  $groups = array();
+
+  $query = db_select('field_group', 'fg');
+  $query->fields('fg');
+
+  // Turn the conditions into a query.
+  foreach ($params as $key => $value) {
+    $query->condition($key, $value);
+  }
+
+  $results = $query->execute();
+  foreach ($results as $group) {
+    // Extract unserialized data.
+    $data = unserialize($group->data);
+    unset($group->data);
+    $group->label = $data['label'];
+    $group->weight = $data['weight'];
+    $group->children = $data['children'];
+    $group->visible = $data['visible'];
+    if (isset($data['format_settings'])) {
+      $group->format_settings = $data['format_settings'];
+    }
+
+    $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = $group;
+  }
+
+  return $groups;
+}
+
+/**
+ * Get all groups.
+ *
+ * @param $entity_type
+ *   The name of the entity.
+ * @param $bundle
+ *   The name of the bundle.
+ * @param $view_mode
+ *   The view mode.
+ * @param $reset.
+ *   Whether to reset the cache or not.
+ */
+function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode = NULL, $reset = FALSE) {
+  static $groups = FALSE;
+
+  if (!$groups || $reset) {
+    if ($cached = cache_get('field_groups', 'cache_field')) {
+      $groups = $cached->data;
+    }
+    else {
+      $groups = field_group_read_groups();
+      cache_set('field_groups', $groups, 'cache_field');
+    }
+  }
+
+  if (!isset($entity_type)) {
+    return $groups;
+  }
+  else {
+    if (isset($groups[$entity_type][$bundle][$view_mode])) {
+      return $groups[$entity_type][$bundle][$view_mode];
+    }
+    else {
+      return array();
+    }
+  }
+}
+
+/**
+ * Saves a group definition.
+ *
+ * @param $group
+ *   A group definition.
+ */
+function field_group_save(&$group) {
+  // Prepare the record.
+  $record = clone $group;
+  $record->data = array(
+    'label' => $record->label,
+    'weight' => $record->weight,
+    'children' => $record->children,
+    // @todo rename to format ? And how to select format/theming on manage fields screen?
+    // Depends on what we will do with Display Suite. If we take on this challenge,
+    // maybe fieldgroups are a very explicable and extendable replacement for object-regions.
+    // - Stalski
+    'visible' => $record->visible,
   );
+  if (isset($record->format_settings)) {
+    $record->data['format_settings'] = $record->format_settings;
+  }
+
+  if (isset($record->id)) {
+    drupal_write_record('field_group', $record, array('id'));
+  }
+  else {
+    drupal_write_record('field_group', $record);
+    $group->id = $record->id;
+  }
+}
+
+/**
+ * Function to retrieve all format possibilities for the fieldgroups.
+ */
+function field_group_formats($display_overview = FALSE) {
+  $cache = &drupal_static(__FUNCTION__, array());
+  if (empty($cache)) {
+    if ($cached = cache_get('field_group_formats', 'cache_field')) {
+      $format_options = $cached->data;
+    }
+    else {
+      $format_options = array('hidden' => t('<Hidden>'));
+      $format_options += module_invoke_all('field_group_formats');
+      cache_set('field_group_formats', $format_options, 'cache_field');
+    }
+    $cache = $format_options;
+  }
+  return $cache;
+}
+
+/**
+ * Process/ Pre-render callback.
+ * Depending on whether it is a form build or content build.
+ * Form api go through more than a regular build. #process is
+ * needed here, where #pre_render is ideal for the regular array.
+ * @see called by field_group_attach_groups().
+ * @see calls field_group_nest_fields().
+ * @param $element Form element
+ * @return $element Array with re-arranged fields in forms.
+ */
+function field_group_fields_process($element) {
+  // Nest the fields in the corresponding field groups.
+  field_group_nest_fields($element, $element);
+  if (isset($element['#node_edit_form'])) {
+    $element['menu']['#weight'] = 40;
+    $element['revision_information']['#weight'] = 40;
+    $element['path']['#weight'] = 40;
+  }
+
+  return $element;
+}
+
+/**
+ * Function to pre render the field group element.
+ * @see called by field_group_nest_fields().
+ * @param $element Array of group element that needs to be created!
+ * @param $group Object with the group information.
+ * @param $form The form object itself.
+ */
+function field_group_pre_render(& $element, $group, & $form) {
+  foreach (module_implements('field_group_pre_render') as $module) {
+    $function = $module . '_field_group_pre_render';
+    if (function_exists($function)) {
+      // The intention here is to have the opportunity to alter the
+      // elements, as defined in hook_field_group_formats.
+      // Note, implement $element by reference!
+      $function($element, $group, $form);
+    }
+  }
 }
 
 /**
@@ -628,41 +740,35 @@ function field_group_format_settings_form(&$group) {
 }
 
 /**
- * Returns the region to which a row in the 'Manage fields' screen belongs.
+ * Submit handler to save the configuration of a fieldgroup.
+ * @param Ojbect $group The group object
+ * @param Array $settins Configuration settings
  */
-function field_group_field_overview_row_region($row) {
-  switch ($row['#row_type']) {
-    case 'group':
-      return 'main';
-    case 'add_new_group':
-      // If no input in 'label', assume the row has not been dragged out of the
-      // 'add new' section.
-      if (empty($row['label']['#value'])) {
-        return 'add_new';
-      }
-      return 'main';
-  }
+function field_group_format_settings_submit(& $group, $settings) {
+  $group->visible = $settings['format']['type'];
+  $group->format_settings = $settings['format_settings']['settings'];
+  field_group_save($group);
+  cache_clear_all('field_groups', 'cache_field');
 }
 
 /**
- * Returns the region to which a row in the 'Manage display' screen belongs.
+ * Creates a summary for the field format configuration summary.
+ * @param String $group_name The name of the group
+ * @param Object $group The group object
+ * @return Array ready to be rendered.
  */
-function field_group_display_overview_row_region($row) {
-  switch ($row['#row_type']) {
-    case 'group':
-      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
-    case 'add_new_group':
-      // If no input in 'label', assume the row has not been dragged out of the
-      // 'add new' section.
-      if (empty($row['label']['#value'])) {
-        return 'add_new';
-      }
-      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
-  }
+function field_group_format_settings_summary($group_name, $group) {
+  $summary = implode('', module_invoke_all('field_group_format_summary', $group));
+  return array(
+    '#markup' => '<div class="field-formatter-summary">'. $summary .'</div>',
+    '#cell_attributes' => array('class' => array('field-formatter-summary-cell')),
+  );
 }
 
 /**
  * Validate handler for the overview screens.
+ * @param Array $form The complete form.
+ * @param Array $form_state The state of the form.
  */
 function field_group_field_overview_validate($form, &$form_state) {
   $form_values = $form_state['values']['fields'];
@@ -712,6 +818,8 @@ function field_group_field_overview_validate($form, &$form_state) {
 
 /**
  * Submit handler for the overview screens.
+ * @param Array $form The complete form.
+ * @param Array $form_state The state of the form.
  */
 function field_group_field_overview_submit($form, &$form_state) {
   $form_values = $form_state['values']['fields'];
@@ -783,110 +891,47 @@ function field_group_field_overview_submit($form, &$form_state) {
 }
 
 /**
- * Get all groups.
- *
- * @param $entity_type
- *   The name of the entity.
- * @param $bundle
- *   The name of the bundle.
- * @param $view_mode
- *   The view mode.
- * @param $reset.
- *   Whether to reset the cache or not.
+ * Returns the region to which a row in the 'Manage fields' screen belongs.
+ * @param Array $row A field or field_group row
+ * @return String the current region.
  */
-function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode = NULL, $reset = FALSE) {
-  static $groups = FALSE;
-
-  if (!$groups || $reset) {
-    if ($cached = cache_get('field_groups', 'cache_field')) {
-      $groups = $cached->data;
-    }
-    else {
-      $groups = field_group_read_groups();
-      cache_set('field_groups', $groups, 'cache_field');
-    }
-  }
-
-  if (!isset($entity_type)) {
-    return $groups;
-  }
-  else {
-    if (isset($groups[$entity_type][$bundle][$view_mode])) {
-      return $groups[$entity_type][$bundle][$view_mode];
-    }
-    else {
-      return array();
-    }
+function field_group_field_overview_row_region($row) {
+  switch ($row['#row_type']) {
+    case 'group':
+      return 'main';
+    case 'add_new_group':
+      // If no input in 'label', assume the row has not been dragged out of the
+      // 'add new' section.
+      if (empty($row['label']['#value'])) {
+        return 'add_new';
+      }
+      return 'main';
   }
 }
 
 /**
- * Read all groups.
+ * Returns the region to which a row in the 'Manage display' screen belongs.
+ * @param Array $row A field or field_group row
+ * @return String the current region.
  */
-function field_group_read_groups($params = array()) {
-  $groups = array();
-
-  $query = db_select('field_group', 'fg');
-  $query->fields('fg');
-
-  // Turn the conditions into a query.
-  foreach ($params as $key => $value) {
-    $query->condition($key, $value);
-  }
-
-  $results = $query->execute();
-  foreach ($results as $group) {
-    // Extract unserialized data.
-    $data = unserialize($group->data);
-    unset($group->data);
-    $group->label = $data['label'];
-    $group->weight = $data['weight'];
-    $group->children = $data['children'];
-    $group->visible = $data['visible'];
-    if (isset($data['format_settings'])) {
-      $group->format_settings = $data['format_settings'];
-    }
-
-    $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = $group;
-  }
-
-  return $groups;
-}
-
-/**
- * Saves a group definition.
- *
- * @param $group
- *   A group definition.
- */
-function field_group_save(&$group) {
-  // Prepare the record.
-  $record = clone $group;
-  $record->data = array(
-    'label' => $record->label,
-    'weight' => $record->weight,
-    'children' => $record->children,
-    // @todo rename to format ? And how to select format/theming on manage fields screen?
-    // Depends on what we will do with Display Suite. If we take on this challenge,
-    // maybe fieldgroups are a very explicable and extendable replacement for object-regions.
-    // - Stalski
-    'visible' => $record->visible,
-  );
-  if (isset($record->format_settings)) {
-    $record->data['format_settings'] = $record->format_settings;
-  }
-
-  if (isset($record->id)) {
-    drupal_write_record('field_group', $record, array('id'));
-  }
-  else {
-    drupal_write_record('field_group', $record);
-    $group->id = $record->id;
+function field_group_display_overview_row_region($row) {
+  switch ($row['#row_type']) {
+    case 'group':
+      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
+    case 'add_new_group':
+      // If no input in 'label', assume the row has not been dragged out of the
+      // 'add new' section.
+      if (empty($row['label']['#value'])) {
+        return 'add_new';
+      }
+      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
   }
 }
 
 /**
- * Attach groups to the form / object.
+ * Attach groups to the (form) build.
+ * @param Array $element The part of the form.
+ * @param String $view_mode The mode for the build.
  */
 function field_group_attach_groups(&$element, $view_mode) {
   $entity_type = $element['#entity_type'];
@@ -904,21 +949,17 @@ function field_group_attach_groups(&$element, $view_mode) {
   $element['#group_children'] = $group_children;
 
   // Add a pre render or process callback.
-  $element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_pre_render';
-}
-
-/**
- * Pre render callback.
- * @param $element
- */
-function field_group_pre_render($element) {
-  // Nest the fields in the corresponding field groups.
-  field_group_nest_fields($element, $element);
-  return $element;
+  $element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_fields_process';
 }
 
 /**
  * Recursive function to nest fields in the field groups.
+ * @param Array $element
+ *   The current element to analyse for grouping.
+ * @param Array $root_element
+ *   The root element to control.
+ * @param String $parent
+ *   the parent name to look for in each level.
  */
 function field_group_nest_fields(&$element, &$root_element, $parent = NULL) {
   $groups = $root_element['#groups'];
@@ -934,7 +975,7 @@ function field_group_nest_fields(&$element, &$root_element, $parent = NULL) {
       // to be able to alter the form structure (E.g. in case of tabs)
       $element[$group_name] = array();
 
-      field_group_format_pre_render($element[$group_name], $group, $root_element);
+      field_group_pre_render($element[$group_name], $group, $root_element);
 
       foreach ($group_fields as $groupfield => $groupname) {
         // Stash the field in the group.
@@ -945,7 +986,7 @@ function field_group_nest_fields(&$element, &$root_element, $parent = NULL) {
         }
       }
 
-      unset($root_element['#groups'][$group_name]);
+      //unset($root_element['#groups'][$group_name]);
       field_group_nest_fields($element[$group_name], $root_element, $group_name);
     }
   }
