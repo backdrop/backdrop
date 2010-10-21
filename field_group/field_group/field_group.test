@@ -1,0 +1,61 @@
+<?php
+// $Id $
+
+/**
+ * @file
+ * Unit test file for groups.
+ */
+
+/**
+ * Group UI tests.
+ */
+class GroupUITestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Group UI tests',
+      'description' => 'Test the group UI functionality.',
+      'group' => 'Field group',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('field_test', 'field_group');
+
+    // Create test user.
+    $admin_user = $this->drupalCreateUser(array('administer content types'));
+    $this->drupalLogin($admin_user);
+
+    // Create random group name.
+    $this->group_label = $this->randomName(8);
+    $this->group_name_input =  strtolower($this->randomName(8));
+    $this->group_name = 'group_'. $this->group_name_input;
+  }
+
+  /**
+   * Main entry point for the group CRUD tests.
+   *
+   * In order to act on the same groups, and not create the groups over and over
+   * again the following tests create, update and delete the same groups.
+   */
+  function testCRUDGroups() {
+    $this->createGroup();
+  }
+
+  /**
+   * Test adding a new group.
+   */
+  function createGroup() {
+    // Create a test groupp.
+    $edit = array(
+      'fields[_add_new_group][label]' => $this->group_label,
+      'fields[_add_new_group][group_name]' => $this->group_name_input,
+    );
+
+    $label = $edit['fields[_add_new_group][label]'];
+    $field_name = $edit['fields[_add_new_group][group_name]'];
+
+    // 'Add new group' on the 'Manage fields' page.
+    $this->drupalPost('admin/structure/types/manage/article/fields',  $edit, t('Save'));
+    $this->assertRaw(t('New group %label succesfully created.', array('%label' => $label)), t('Group succesfully saved.'));
+  }
+}
