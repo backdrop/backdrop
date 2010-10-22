@@ -190,6 +190,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   foreach (array_keys($groups) as $name) {
 
     $group = & $groups[$name];
+
+    // Determine visibility for the group.
     if (!empty($form_state['values']['fields'][$name]['format']['type'])) {
       $group->visible = $form_state['values']['fields'][$name]['format']['type'];
     }
@@ -263,8 +265,9 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#type' => 'container',
         '#attributes' => array('class' => array('field-formatter-settings-edit-form')),
         '#parents' => array('fields', $name, 'format_settings'),
+        '#weight' => -5,
         'label' => array(
-          '#markup' => ' <span class="formatter-name">' . $formatter['label'] . '</span>',
+          '#markup' => t('Field group format:') .' <span class="formatter-name">'. $group->visible . '</span>',
         ),
         // Create a settings form where hooks can pick in.
         'settings' => field_group_format_settings_form($group),
@@ -408,6 +411,7 @@ function field_group_field_group_formats() {
     'display' => array(
       'div' => t('Div'),
       'fieldset' => t('Fieldset'),
+      'tabs' => t('Tabs')
     ),
   );
 }
@@ -440,7 +444,11 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#attributes' => array('class' => array($group->visible)),
         '#group' => $tab_container,
       );
-      $form[$tab_container] = array('#type' => 'vertical_tabs');
+      // TODO For the frontend view modes?
+//      $element['#attached']['js'][] = 'misc/form.js';
+//      $element['#attached']['js'][] = 'misc/vertical-tabs.js';
+//      $element['#attached']['css'][] = 'misc/vertical-tabs.css';
+//      $form[$tab_container] = array('#type' => 'vertical_tabs');
     break;
     case 'fieldset':
       $element += array(
@@ -679,7 +687,9 @@ function field_group_formats($display_overview = FALSE) {
       $format_options = $cached->data;
     }
     else {
-      $format_options = array('hidden' => t('<Hidden>'));
+      $format_options = array(
+        'form' => array('hidden' => t('<Hidden>')),
+        'display' => array('hidden' => t('<Hidden>')));
       $format_options += module_invoke_all('field_group_formats');
       cache_set('field_group_formats', $format_options, 'cache_field');
     }
