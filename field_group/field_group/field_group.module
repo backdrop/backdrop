@@ -433,19 +433,23 @@ function field_group_field_group_formats() {
     'form' => array(
       'hidden' => t('Hidden'),
       'fieldset' => t('Fieldset'),
-      'tabs' => t('Tabs')
+      'tabs' => t('Tabs'),
+      'accordion' => t('Accordion')
     ),
     'display' => array(
       'hidden' => t('Hidden'),
       'div' => t('Div'),
       'fieldset' => t('Fieldset'),
-      'tabs' => t('Tabs')
+      'tabs' => t('Tabs'),
+      'accordion' => t('Accordion')
     ),
   );
 }
 
 /**
  * Implements hook_field_group_pre_render().
+ * This function (only) gives you the oppertunity to 'create' the given
+ * wrapper field.
  * @param Array $elements by address.
  * @param Object $group The Field group info.
  */
@@ -472,11 +476,15 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#attributes' => array('class' => array($group->visible)),
         '#group' => $tab_container,
       );
-      // TODO For the frontend view modes?
-//      $element['#attached']['js'][] = 'misc/form.js';
-//      $element['#attached']['js'][] = 'misc/vertical-tabs.js';
-//      $element['#attached']['css'][] = 'misc/vertical-tabs.css';
-//      $form[$tab_container] = array('#type' => 'vertical_tabs');
+      // TODO For the frontend view modes only?
+      $element['#attached']['js'][] = 'misc/form.js';
+      $element['#attached']['js'][] = 'misc/vertical-tabs.js';
+      $element['#attached']['css'][] = 'misc/vertical-tabs.css';
+      $element['#attached']['js'][] = array(
+        'data' => array('field_group' => array('collapsible' => TRUE)),
+        'type' => 'setting'
+      );
+      $form[$tab_container] = array('#type' => 'vertical_tabs');
     break;
     case 'fieldset':
       $element += array(
@@ -501,11 +509,37 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#weight' => $group->weight,
         '#attached' => array(
           'js' => array(
-            'misc/collapse.js',
-            drupal_get_path('module', 'field_group') .'/field_group.js'
+            drupal_get_path('module', 'field_group') .'/field_group.js',
+            array(
+              'data' => array('field_group' => array('collapsible' => TRUE)),
+              'type' => 'setting'
+            ),
           ),
         ),
       );
+      drupal_add_library('system', 'effects.blind');
+      break;
+    case 'accordion':
+      $element += array(
+        '#type' => 'markup',
+        '#prefix' => '
+        <h3 class="field-group-format-toggler '. $group->visible .'">'. $group->label .'</h3>
+        <div class="field-group-format-wrapper">',
+        '#suffix' => '</div>',
+        '#weight' => $group->weight,
+        '#attributes' => array('class' => array($group->visible)),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'field_group') .'/field_group.js',
+            array(
+              'data' => array('field_group' => array('accordion' => TRUE)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+
+      drupal_add_library('system', 'ui.accordion');
       break;
   }
 }
@@ -526,7 +560,6 @@ function field_group_field_group_format_settings(& $group) {
           FIELD_GROUP_TABS_SEPARATE => t('Seperate from core fieldsets'),
           FIELD_GROUP_TABS_MERGED => t('Merged with core fieldsets')),
         '#weight' => 2,
-      //'#description' => t('Vivamus nec magna vel lectus congue eleifend. Mauris dapibus erat eu tortor gravida ut suscipit dui tincidunt.'),
       );
     // Fall through to add extra tabs configuration.
     case 'fieldset':
@@ -542,8 +575,19 @@ function field_group_field_group_format_settings(& $group) {
         '#default_value' => $group->format_settings['fieldgroup_settings'],
         '#weight' => 1,
         //'#element_validate' => array('_element_validate_integer_positive'),
-        //'#description' => t('Some longish description. Lorem ipsum dolor sit amet, consectetur adipiscing elit'),
         //'#required' => TRUE,
+      );
+      break;
+    case 'accordion':
+      $form['fieldgroup_settings'] = array(
+        '#title' => t('Fieldgroup settings'),
+        '#type' => 'select',
+        '#options' => array(
+          'open' => t('Open'),
+          'closed' => t('Closed'),
+        ),
+        '#default_value' => $group->format_settings['fieldgroup_settings'],
+        '#weight' => 1,
       );
       break;
   }
@@ -985,6 +1029,7 @@ function field_group_attach_groups(&$element, $view_mode) {
   $element['#group_children'] = $group_children;
 
   // Add a pre render or process callback.
+  // This is needed since process seems too early for the front view modes.
   $element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_fields_process';
 }
 
