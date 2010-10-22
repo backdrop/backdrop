@@ -131,23 +131,51 @@ function field_group_form_field_ui_display_overview_form_alter(&$form, &$form_st
 }
 
 /**
- * Function to alter the fields overview and display overview screen.
+ * Helper function to get the form parameters to use while
+ * building the fields and display overview form.
  */
-function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display_overview = FALSE) {
-  $entity_type = $form['#entity_type'];
-  $bundle = $form['#bundle'];
-  $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
+function field_group_field_ui_form_params($form, $display_overview) {
+
+  $params = new stdClass();
+  $params->entity_type = $form['#entity_type'];
+  $params->bundle = $form['#bundle'];
+  $params->admin_path = _field_ui_bundle_admin_path($params->entity_type, $params->bundle);
+  $params->display_overview = $display_overview;
+
   $formatters = field_group_formats();
 
   if ($display_overview) {
-    $region_callback = 'field_group_display_overview_row_region';
-    $mode = $form['#view_mode'];
-    $format_options = $formatters['display'];
+    $params->region_callback = 'field_group_display_overview_row_region';
+    $params->mode = $form['#view_mode'];
+    $params->format_options = $formatters['display'];
   }
   else {
-    $region_callback = 'field_group_field_overview_row_region';
-    $mode = 'form';
-    $format_options = $formatters['form'];
+    $params->region_callback = 'field_group_field_overview_row_region';
+    $params->mode = 'form';
+    $params->format_options = $formatters['form'];
+  }
+
+  $params->groups = field_group_info_groups($params->entity_type, $params->bundle, $params->mode);
+
+  // Gather parenting data.
+  $params->parents = array();
+  foreach ($params->groups as $name => $group) {
+    foreach ($group->children as $child) {
+      $params->parents[$child] = $name;
+    }
+  }
+
+  return $params;
+}
+
+/**
+ * Function to alter the fields overview and display overview screen.
+ */
+function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display_overview = FALSE) {
+
+  $params = field_group_field_ui_form_params($form, $display_overview);
+
+  if (!$display_overview) {
     // Overview form does not have this key by default.
     $form_state += array(
       'formatter_settings_edit' => NULL,
@@ -156,9 +184,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     $form['fields']['#prefix'] = '<div id="field-display-overview-wrapper">';
     $form['fields']['#suffix'] = '</div>';
   }
-
-  $groups = field_group_info_groups($entity_type, $bundle, $mode);
-  $form['#groups'] = array_keys($groups);
+  $form['#groups'] = array_keys($params->groups);
 
   $table = &$form['fields'];
 
@@ -168,28 +194,22 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   );
 
   // Extend available parenting options.
-  foreach ($groups as $name => $group) {
+  foreach ($params->groups as $name => $group) {
     $table['#parent_options'][$name] = $group->label;
   }
   $table['#parent_options']['_add_new_group'] = t('Add new group');
 
-  // Gather parenting data, and update existing rows accordingly.
-  $parents = array();
-  foreach ($groups as $name => $group) {
-    foreach ($group->children as $child) {
-      $parents[$child] = $name;
-    }
-  }
+  // Update existing rows accordingly to the parents.
   foreach (element_children($table) as $name) {
     $row = &$table[$name];
     $row['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
-    $row['parent_wrapper']['parent']['#default_value'] = isset($parents[$name]) ? $parents[$name] : '';
+    $row['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
   }
 
   // Group rows.
-  foreach (array_keys($groups) as $name) {
+  foreach (array_keys($params->groups) as $name) {
 
-    $group = & $groups[$name];
+    $group = & $params->groups[$name];
 
     // Determine visibility for the group.
     if (!empty($form_state['values']['fields'][$name]['format']['type'])) {
@@ -207,7 +227,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     $table[$name] = array(
       '#attributes' => array('class' => array('draggable', 'field-group'), 'id' => $id),
       '#row_type' => 'group',
-      '#region_callback' => $region_callback,
+      '#region_callback' => $params->region_callback,
       '#js_settings' => array('rowHandler' => 'group'),
       'human_name' => array(
         '#markup' => check_plain($group->label),
@@ -225,7 +245,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
           '#type' => 'select',
           '#options' =>  $parent_options,
           '#empty_value' => '',
-          '#default_value' => isset($parents[$name]) ? $parents[$name] : '',
+          '#default_value' => isset($params->parents[$name]) ? $params->parents[$name] : '',
           '#attributes' => array('class' => array('field-parent')),
           '#parents' => array('fields', $name, 'parent'),
         ),
@@ -242,7 +262,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       'format' => array(
         'type' => array(
           '#type' => 'select',
-          '#options' => $format_options,
+          '#options' => $params->format_options,
           '#default_value' => $group->visible,
           '#attributes' => array('class' => array('field-group-type')),
         ),
@@ -317,24 +337,47 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     // and move delete to the settings ?
 //    $table[$name] += array(
 //      'edit' => array(
-//        '#markup' => l(t('edit'), $admin_path . '/groups/' . $name . '/edit'),
+//        '#markup' => l(t('edit'), $params->admin_path . '/groups/' . $name . '/edit'),
 //      ),
 //      'delete' => array(
-//        '#markup' => l(t('delete'), $admin_path . '/groups/' . $name . '/delete'),
+//        '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete'),
 //      ),
 //    );
   }
 
   // Additional row: add new group.
-  $name = '_add_new_group';
-  // A group cannot be selected as its own parent.
   $parent_options = $table['#parent_options'];
-  unset($parent_options[$name]);
-  $table[$name] = array(
+  unset($parent_options['_add_new_group']);
+  $table['_add_new_group'] = field_group_add_row('_add_new_group', $parent_options, $params);
+
+  $table['_add_new_group'] += array(
+    'format' => array(
+      'type' => array(
+        '#type' => 'select',
+        '#options' => $params->format_options,
+        '#default_value' => 'fieldset',
+      ),
+    ),
+    'settings_summary' => array(),
+    'settings_edit' => array(),
+  );
+
+  $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
+  $form['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group_admin.js';
+
+  $form['#validate'][] = 'field_group_field_overview_validate';
+  $form['#submit'][] = 'field_group_field_overview_submit';
+}
+
+/**
+ * Helper function to add a row in the overview forms.
+ */
+function field_group_add_row($name, $parent_options, $params) {
+  return array(
     '#attributes' => array('class' => array('draggable', 'field-group', 'add-new')),
     '#row_type' => 'add_new_group',
     '#js_settings' => array('rowHandler' => 'group'),
-    '#region_callback' => $region_callback,
+    '#region_callback' => $params->region_callback,
     'label' => array(
       '#type' => 'textfield',
       '#size' => 15,
@@ -344,7 +387,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     ),
     'weight' => array(
       '#type' => 'textfield',
-      '#default_value' => field_info_max_weight($entity_type, $bundle, $mode) + 3,
+      '#default_value' => field_info_max_weight($params->entity_type, $params->bundle, $params->mode) + 3,
       '#size' => 3,
       '#title_display' => 'invisible',
       '#title' => t('Weight for new group'),
@@ -375,26 +418,9 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       '#size' => 15,
       '#description' => t('Group name (a-z, 0-9, _)'),
       '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      '#cell_attributes' => array('colspan' => $display_overview ? 1 : 2),
+      '#cell_attributes' => array('colspan' => $params->display_overview ? 1 : 2),
     ),
   );
-  $table[$name] += array(
-    'format' => array(
-      'type' => array(
-        '#type' => 'select',
-        '#options' => $format_options,
-        '#default_value' => 'fieldset',
-      ),
-    ),
-    'settings_summary' => array(),
-    'settings_edit' => array(),
-  );
-
-  $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
-  $form['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group_admin.js';
-
-  $form['#validate'][] = 'field_group_field_overview_validate';
-  $form['#submit'][] = 'field_group_field_overview_submit';
 }
 
 /**
@@ -405,10 +431,12 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 function field_group_field_group_formats() {
   return array(
     'form' => array(
+      'hidden' => t('Hidden'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Tabs')
     ),
     'display' => array(
+      'hidden' => t('Hidden'),
       'div' => t('Div'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Tabs')
@@ -687,9 +715,7 @@ function field_group_formats($display_overview = FALSE) {
       $format_options = $cached->data;
     }
     else {
-      $format_options = array(
-        'form' => array('hidden' => t('<Hidden>')),
-        'display' => array('hidden' => t('<Hidden>')));
+      $format_options = array();
       $format_options += module_invoke_all('field_group_formats');
       cache_set('field_group_formats', $format_options, 'cache_field');
     }
