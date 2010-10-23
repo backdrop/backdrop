@@ -11,7 +11,7 @@ class views_handler_argument_aggregator_fid extends views_handler_argument_numer
   function title_query() {
     $titles = array();
 
-    $result = db_query("SELECT f.title FROM {aggregator_feed} f WHERE f.fid IN (:fids)", $this->value);
+    $result = db_query("SELECT f.title FROM {aggregator_feed} f WHERE f.fid IN (:fids)", array(':fids' => $this->value));
     foreach ($result as $term) {
       $titles[] = check_plain($term->title);
     }
