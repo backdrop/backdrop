@@ -6,21 +6,52 @@
  * Drupal FieldGroup object.
  */
 Drupal.FieldGroup = Drupal.FieldGroup || {};
+Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
 
 /**
- * Create a link to animate on.
+ * Implements Drupal.FieldGroup.processHook().
  */
-Drupal.FieldGroup.createLink = function (element) {
-  // Turn the legend into a clickable link, but retain span.field-group-format-toggler
-  // for CSS positioning.
-  var $toggler = $('span.field-group-format-toggler', element);
-  $('<span class="field-group-format-toggler element-invisible"></span>')
-    .prependTo($toggler)
-    .after(' ');
-  var $link = $('<a class="field-group-format-title" href="#"></a>');
-  $link.prepend($toggler.contents())
-    .appendTo($toggler);
-  return $link;
+Drupal.FieldGroup.Effects.processAccordion = {
+  execute: function (context, settings) {
+    var accordionWrapper = $('div.field-group-accordion-wrapper', context);
+    accordionWrapper.accordion({ autoHeight: false });
+  }
+};
+
+/**
+ * Implements Drupal.FieldGroup.processHook().
+ * 
+ * TODO clean this up meaning check if this is really 
+ *      necessary.
+ */
+Drupal.FieldGroup.Effects.processDiv = {
+  execute: function (context, settings) {
+
+    $('div.collapsible', context).each(function() {
+      var $wrapper = $(this);
+
+      // Turn the legend into a clickable link, but retain span.field-group-format-toggler
+      // for CSS positioning.
+      var $toggler = $('span.field-group-format-toggler', $wrapper);
+      $('<span class="field-group-format-toggler element-invisible"></span>')
+        .prependTo($toggler).after(' ');
+      var $link = $('<a class="field-group-format-title" href="#"></a>');
+      $link.prepend($toggler.contents()).appendTo($toggler);
+      
+      // .wrapInner() does not retain bound events.
+      $link.click(function () {
+        var wrapper = $wrapper.get(0);
+        // Don't animate multiple times.
+        if (!wrapper.animating) {
+          wrapper.animating = true;
+          $('> .field-group-format-wrapper', wrapper).toggle('blind', {}, 500);
+          wrapper.animating = false;
+        }
+        return false;
+      });
+      
+    });
+  }
 };
 
 /**
@@ -28,34 +59,15 @@ Drupal.FieldGroup.createLink = function (element) {
  */
 Drupal.behaviors.fieldGroup = {
   attach: function (context, settings) {
-    $('div.collapsible', context).once('togglevis', function () {
-    	
-      var $wrapper = $(this);
-      // Expand wrapper if there are errors inside, or if it contains an
-      // element that is targeted by the uri fragment identifier. 
-      var anchor = location.hash && location.hash != '#' ? ', ' + location.hash : '';
-      if ($('.error' + anchor, $wrapper).length) {
-        $wrapper.removeClass('collapsed');
-      }
-      
-      var $link = Drupal.FieldGroup.createLink(this);
-
-      // .wrapInner() does not retain bound events.
-      $link.click(function () {
-          var wrapper = $wrapper.get(0);
-          // Don't animate multiple times.
-          if (!wrapper.animating) {
-            wrapper.animating = true;
-            $('> .'+ baseClass +'-wrapper', element).toggle('blind', {}, 500);
-            element.animating = false;
-          }
-          return false;
-        });
-    });
-    
-	var accordionWrapper = $('h3.accordion', context).parent();
-	accordionWrapper.once('accordion', function () {
-      $(this).accordion({ autoHeight: false });
+    $('.field-group-content-wrapper', context).once('fieldgroup.effects', function () {
+      // Execute all of them.
+      $.each(Drupal.FieldGroup.Effects, function (func) {
+        // We check for a wrapper function in Drupal.field_group as 
+        // alternative for dynamic string function calls.
+        if (settings.field_group[func.toLowerCase().replace("process", "")] != undefined && $.isFunction(this.execute)) {
+          this.execute(context, settings);
+        }
+      });
     });
   }
 };

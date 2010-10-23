@@ -464,6 +464,11 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     }
   }
 
+  $form['#attached']['js'][] = array(
+    'data' => array('field_group' => array($group->visible => TRUE)),
+    'type' => 'setting'
+  );
+
   switch ($group->visible) {
     case 'tabs':
       $tab_container = $group->format_settings['tab_settings'] == FIELD_GROUP_TABS_SEPARATE ? 'form-layout' : 'additional_settings';
@@ -476,14 +481,12 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#attributes' => array('class' => array($group->visible)),
         '#group' => $tab_container,
       );
-      // TODO For the frontend view modes only?
-      $element['#attached']['js'][] = 'misc/form.js';
-      $element['#attached']['js'][] = 'misc/vertical-tabs.js';
-      $element['#attached']['css'][] = 'misc/vertical-tabs.css';
-      $element['#attached']['js'][] = array(
-        'data' => array('field_group' => array('collapsible' => TRUE)),
-        'type' => 'setting'
-      );
+      // For the view modes only.
+      if (isset($form['#view_mode'])) {
+        $element['#attached']['js'][] = 'misc/form.js';
+        $element['#attached']['js'][] = 'misc/vertical-tabs.js';
+        $element['#attached']['css'][] = 'misc/vertical-tabs.css';
+      }
       $form[$tab_container] = array('#type' => 'vertical_tabs');
     break;
     case 'fieldset':
@@ -510,10 +513,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#attached' => array(
           'js' => array(
             drupal_get_path('module', 'field_group') .'/field_group.js',
-            array(
-              'data' => array('field_group' => array('collapsible' => TRUE)),
-              'type' => 'setting'
-            ),
           ),
         ),
       );
@@ -531,17 +530,37 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#attached' => array(
           'js' => array(
             drupal_get_path('module', 'field_group') .'/field_group.js',
-            array(
-              'data' => array('field_group' => array('accordion' => TRUE)),
-              'type' => 'setting'
-            ),
           ),
         ),
       );
-
       drupal_add_library('system', 'ui.accordion');
       break;
   }
+}
+
+/**
+ * Implements hook_field_group_pre_render_alter().
+ * @param Array $elements by address.
+ */
+function field_group_field_group_pre_render_alter(& $element) {
+
+  // Calculate the number of containers.
+  $accordions = array();
+  $first = 0;
+  foreach(array_keys($element['#groups']) as $group_name) {
+    if ($element['#groups'][$group_name]->visible == 'accordion') {
+      $accordions[$element['#groups'][$group_name]->weight + 200] = $group_name;
+    }
+  }
+  ksort($accordions);
+  $first = reset($accordions);
+  $element[$first]['#prefix'] = '<div class="field-group-accordion-wrapper">' . (isset($element[$first]['#prefix']) ? $element[$first]['#prefix'] : '');
+  $end = end($accordions);
+  $element[$end]['#suffix'] .= '</div>';
+
+  $element['#prefix'] = '<div class="field-group-content-wrapper">';
+  $element['#suffix'] = '</div>';
+
 }
 
 /**
@@ -786,6 +805,8 @@ function field_group_fields_process($element) {
     $element['revision_information']['#weight'] = 40;
     $element['path']['#weight'] = 40;
   }
+
+  drupal_alter('field_group_pre_render', $element);
 
   return $element;
 }
