@@ -176,7 +176,7 @@ function field_group_field_ui_form_params($form, $display_overview) {
     $params->format_options = $formatters['form'];
   }
 
-  $params->groups = field_group_info_groups($params->entity_type, $params->bundle, $params->mode);
+  $params->groups = field_group_info_groups($params->entity_type, $params->bundle, $params->mode, TRUE);
 
   // Gather parenting data.
   $params->parents = array();
@@ -231,6 +231,13 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   foreach (array_keys($params->groups) as $name) {
 
     $group = & $params->groups[$name];
+
+    // Save the (re)configured formatter on the fieldgroup.
+    // This needs to be done first, so even the label already is updated
+    // to display the correct one.
+    if (isset($form_state['values']['fields'][$name]) && !empty($form_state['values'][$name .'_formatter_settings_update'])) {
+      field_group_format_settings_submit($group, $form_state['values']['fields'][$name]);
+    }
 
     // Determine visibility for the group.
     if (!empty($form_state['values']['fields'][$name]['format']['type'])) {
@@ -334,10 +341,6 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       $table[$name]['format']['type']['#attributes']['class'] = array('element-invisible');
     }
     else {
-      // Save the (re)configured formatter on the fieldgroup.
-      if (isset($form_state['values']['fields'][$name]) && !empty($form_state['values'][$name .'_formatter_settings_update'])) {
-        field_group_format_settings_submit($group, $form_state['values']['fields'][$name]);
-      }
       // After saving, the settings are updated here aswell.
       if (!empty($group->format_settings)) {
         $table[$name]['settings_summary'] = field_group_format_settings_summary($name, $group);
@@ -953,6 +956,7 @@ function field_group_pre_render(& $element, $group, & $form) {
  */
 function field_group_format_settings_form(&$group) {
   $form = array();
+  $form['label'] = array('#type' => 'textfield', '#title' => t('Field group label'), '#default_value' => $group->label, '#weight' => -5);
   $form += module_invoke_all('field_group_format_settings', $group);
   return $form;
 }
@@ -964,6 +968,7 @@ function field_group_format_settings_form(&$group) {
  */
 function field_group_format_settings_submit(& $group, $settings) {
   $group->visible = $settings['format']['type'];
+  $group->label = $settings['format_settings']['settings']['label'];
   $group->format_settings = $settings['format_settings']['settings'];
   field_group_save($group);
   cache_clear_all('field_groups', 'cache_field');
