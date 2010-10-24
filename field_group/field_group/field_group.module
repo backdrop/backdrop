@@ -5,12 +5,33 @@
  * @file
  * Fieldgroup module.
  *
- * Hooks
- *   hook_field_group_formats
+ *   PHP HOOKS
+ *
+ *   hook_field_group_formats()
  *     Creates a format entry for a fieldgroup.
  *     @see field_group_field_group_formats()
+ *
+ *   hook_field_group_format_settings
+ *     Creates a form for the fieldgroup settings of the current group.
+ *
+ *   hook_field_group_format_summary
+ *     Creates a summary for the current group.
+ *
+ *   hook_field_group_pre_render()
+ *     Create an element for the field group
+ *
+ *   hook_field_group_pre_render_alter()
+ *     Gives the opportunity to do extra things for
+ *     some format cases.
+ *
+ *   JAVASCRIPT HOOKS
+ *
+ *   Drupal.FieldGroup.Effects.processHook.execute()
+ *
+ *
  */
 
+// Constant to distinguish tabs.
 define('FIELD_GROUP_TABS_SEPARATE', 1);
 define('FIELD_GROUP_TABS_MERGED', 2);
 
@@ -280,7 +301,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     );
 
     if ($form_state['formatter_settings_edit'] == $name) {
-      $table[$name]['format']['#cell_attributes'] = array('colspan' => 3);
+      $table[$name]['format']['#cell_attributes'] = array('colspan' => $display_overview ? 3 : 3);
       $table[$name]['format']['format_settings'] = array(
         '#type' => 'container',
         '#attributes' => array('class' => array('field-formatter-settings-edit-form')),
@@ -310,6 +331,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         ),
       );
       $table[$name]['#attributes']['class'][] = 'field-formatter-settings-editing';
+      $table[$name]['format']['type']['#attributes']['class'] = array('element-invisible');
     }
     else {
       // Save the (re)configured formatter on the fieldgroup.
@@ -320,6 +342,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       if (!empty($group->format_settings)) {
         $table[$name]['settings_summary'] = field_group_format_settings_summary($name, $group);
       }
+      // Add the configure button.
       $table[$name]['settings_edit'] = $base_button + array(
         '#type' => 'image_button',
         '#name' => $name . '_group_settings_edit',
@@ -331,18 +354,31 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#prefix' => '<div class="field-formatter-settings-edit-wrapper">',
         '#suffix' => '</div>',
       );
+      if ($display_overview) {
+        $table[$name]['settings_edit']['#suffix'] .= l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete');
+      }
     }
 
     // @todo if we use the settings, we might as well remove edit
     // and move delete to the settings ?
-//    $table[$name] += array(
-//      'edit' => array(
-//        '#markup' => l(t('edit'), $params->admin_path . '/groups/' . $name . '/edit'),
-//      ),
-//      'delete' => array(
-//        '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete'),
-//      ),
-//    );
+    // Well, how bad as it sounds, edit would now only change the label,
+    // and delete would be very handy from there. Fields should probably
+    // moved back to root. - Stalski
+    // First try editing label move to configure settings.
+    // Keeping delete butons. little workaround on the displays there.
+    if (!$display_overview) {
+      $table[$name] += array(
+        /*'edit' => array(
+          '#markup' => l(t('edit'), $params->admin_path . '/groups/' . $name . '/edit'),
+        ),*/
+        'delete' => array(
+          '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete'),
+        ),
+      );
+    }
+    else {
+
+    }
   }
 
   // Additional row: add new group.
@@ -433,14 +469,16 @@ function field_group_field_group_formats() {
     'form' => array(
       'hidden' => t('Hidden'),
       'fieldset' => t('Fieldset'),
-      'tabs' => t('Tabs'),
+      'tabs' => t('Vertical tabs'),
+      'horizontal_tabs' => t('Horizontal tabs'),
       'accordion' => t('Accordion')
     ),
     'display' => array(
       'hidden' => t('Hidden'),
       'div' => t('Div'),
       'fieldset' => t('Fieldset'),
-      'tabs' => t('Tabs'),
+      'tabs' => t('Vertical tabs'),
+      'horizontal_tabs' => t('Horizontal tabs'),
       'accordion' => t('Accordion')
     ),
   );
@@ -454,8 +492,8 @@ function field_group_field_group_formats() {
  * @param Object $group The Field group info.
  */
 function field_group_field_group_pre_render(& $element, $group, & $form) {
-  $collapsible = $group->format_settings['fieldgroup_settings'] != 'open';
-  $collapsed = $group->format_settings['fieldgroup_settings'] == 'collapsed';
+  $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open'));
+  $collapsed = in_array($group->format_settings['fieldgroup_settings'], array('collapsed', 'closed'));
   $classes = array($group->visible);
   if ($collapsible) {
     $classes[] = 'collapsible';
@@ -471,38 +509,13 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
   // Set the count as well. Tabs for instance could then use this
   // to not trigger the rendering if there is only one tab container.
   $form['#field_group_processed'][$group->visible] = isset($form['#field_group_processed'][$group->visible]) ? $form['#field_group_processed'][$group->visible] + 1 : 1;
-
+  // Javascript has to be able to play along.
   $form['#attached']['js'][] = array(
     'data' => array('field_group' => array($group->visible => TRUE)),
     'type' => 'setting'
   );
 
   switch ($group->visible) {
-    case 'tabs':
-      $tab_container = $group->format_settings['tab_settings'] == FIELD_GROUP_TABS_SEPARATE ? 'form-layout' : 'additional_settings';
-      $element += array(
-        '#type' => 'fieldset',
-        '#title' => $group->label,
-        '#weight' => $group->weight,
-        '#collapsible' => $collapsible,
-        '#collapsed' => $collapsed,
-        '#attributes' => array('class' => $classes),
-        '#group' => $tab_container,
-      );
-      // For the view modes only.
-      if (isset($form['#view_mode'])) {
-        $element['#attached']['js'][] = 'misc/form.js';
-        $element['#attached']['js'][] = 'misc/collapse.js';
-        $element['#attached']['js'][] = 'misc/vertical-tabs.js';
-        $element['#attached']['css'][] = 'misc/vertical-tabs.css';
-        $element['#parents'] = array($tab_container);
-      }
-      $form[$tab_container] = array(
-        '#type' => 'vertical_tabs',
-        '#weight' => $group->weight,
-        '#theme_wrappers' => array('vertical_tabs'),
-      );
-    break;
     case 'fieldset':
       $element += array(
         '#type' => 'fieldset',
@@ -547,8 +560,77 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           ),
         ),
       );
+      $form['#field_group_wrap'][$group->visible] = TRUE;
       drupal_add_library('system', 'ui.accordion');
       break;
+    case 'horizontal_tabs':
+      $element += array(
+        '#type' => 'markup',
+        '#prefix' => '
+        <span class="field-group-format-toggler '. $group->visible .'">'. $group->label .'</span>
+        <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
+        '#suffix' => '</div>',
+        '#weight' => $group->weight,
+        '#attributes' => array('class' => $classes),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'field_group') .'/field_group.js',
+          ),
+        ),
+      );
+      $form['#field_group_wrap'][$group->visible] = TRUE;
+      drupal_add_library('system', 'effects.blind');
+      break;
+    case 'tabs':
+      $tab_container = $group->format_settings['tab_settings'] == FIELD_GROUP_TABS_SEPARATE ? 'form-layout' : 'additional_settings';
+      if (!isset($form[$tab_container])) {
+        $form[$tab_container] = array(
+          '#type' => 'vertical_tabs',
+          '#weight' => $group->weight,
+          '#theme_wrappers' => array('vertical_tabs'),
+        );
+      }
+      $form[$tab_container][$group->group_name] = array(
+        '#type' => 'fieldset',
+        '#title' => $group->label,
+        '#weight' => $group->weight,
+        '#collapsible' => $collapsible,
+        '#collapsed' => $collapsed,
+        '#attributes' => array('class' => $classes),
+        '#group' => $tab_container,
+      );
+      // Adding this is very important to bypass form.inc.
+      // Note that form cannot have this for it gives a continuous loop.
+      if (isset($form['#view_mode'])) {
+        $form[$tab_container][$group->group_name]['#parents'] = array($tab_container);
+      }
+      // Stash the elements in the group into #group > fieldgroup.
+      foreach (element_children($element) as $fieldname) {
+        $form[$tab_container][$group->group_name][$fieldname] = $element[$fieldname];
+        unset($element[$fieldname]);
+        // TODO fix this. The code seems to work, but the vertical tabs always
+        // set the wrong default tab. me not unerstand.
+        // Ironic that it works without default tab.
+        /*if ($group->format_settings['fieldgroup_settings'] == 'collapsible') {
+          $form[$tab_container]['#default_tab'] = $group->group_name;
+        }
+        if (isset($form[$tab_container]['#default_tab'])) {
+          $form[$tab_container][$group->group_name .'__active_tab'] = array(
+            '#type' => 'hidden',
+            '#default_value' => $form[$tab_container]['#default_tab'],
+            '#attributes' => array('class' => array('vertical-tabs-active-tab')),
+          );
+        }*/
+      }
+
+      // For the view modes only.
+      if (isset($form['#view_mode']) && !isset($form[$tab_container]['#attached'])) {
+        $form[$tab_container]['#attached']['js'][] = 'misc/form.js';
+        $form[$tab_container]['#attached']['js'][] = 'misc/collapse.js';
+        $form[$tab_container]['#attached']['js'][] = 'misc/vertical-tabs.js';
+        $form[$tab_container]['#attached']['css'][] = 'misc/vertical-tabs.css';
+      }
+    break;
   }
 }
 
@@ -558,75 +640,29 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
  */
 function field_group_field_group_pre_render_alter(& $element) {
 
-  // Specific for accordions.
-  if (isset($element['#field_group_processed']['accordion']) && $element['#field_group_processed']['accordion'] > 1) {
-
-    // Calculate weights of containers to sort. This way we know
-    // the first and the last rendered tab. Putting a wrapper around it,
-    // makes sure that this is the one we can use to target html.
-    $accordions = array();
-    foreach(array_keys($element['#groups']) as $group_name) {
-      if ($element['#groups'][$group_name]->visible == 'accordion') {
-        $accordions[$element['#groups'][$group_name]->weight + 200] = $group_name;
-      }
-    }
-    ksort($accordions);
-    $first = reset($accordions);
-    $element[$first]['#prefix'] = '<div class="field-group-accordion-wrapper">' . (isset($element[$first]['#prefix']) ? $element[$first]['#prefix'] : '');
-    $end = end($accordions);
-    if (!isset($element[$end]['#suffix'])) $element[$end]['#suffix'] = '';
-    $element[$end]['#suffix'] .= '</div>';
-  }
-
-
-  // Specific for tabs. We couldn't interfer in the nesting fields
-  // into groups process. So for vertical tabs, we are doing it here.
-  if (isset($element['#view_mode']) && isset($element['#field_group_processed']['tabs'])) {
-    foreach (array_keys($element['#groups']) as $group_name) {
-      if ($element['#groups'][$group_name]->visible == 'tabs') {
-        $name = implode('__', $element[$group_name]['#parents']);
-        if ($element['#groups'][$group_name]->format_settings['fieldgroup_settings'] == 'collapsible') {
-          $element[$name]['#default_tab'] = $group_name;
+  foreach (array_keys($element['#field_group_wrap']) as $name) {
+    $format = $name;
+    // Accordions needs an own wrapper.
+    if (isset($element['#field_group_processed'][$format]) && $element['#field_group_processed'][$format] > 1) {
+      // Calculate weights of containers to sort. This way we know
+      // the first and the last rendered tab. Putting a wrapper around it,
+      // makes sure that this is the one we can use to target html.
+      $children = array();
+      foreach(array_keys($element['#groups']) as $group_name) {
+        if ($element['#groups'][$group_name]->visible == $format) {
+          $children[$element['#groups'][$group_name]->weight + 200] = $group_name;
         }
-        $element[$name][$group_name] = $element[$group_name];
-        $element[$name][$group_name]['#parents'] = array('additional_settings');
-        unset($element[$group_name]);
-        $element[$name][$name .'__active_tab'] = array(
-          '#type' => 'hidden',
-          '#default_value' => 'group_categories',//isset($element[$name]['#default_tab']) ? $element[$name]['#default_tab'] : $group_name,
-          '#attributes' => array('class' => array('vertical-tabs-active-tab')),
-        );
       }
+      ksort($children);
+      $first = reset($children);
+      $element[$first]['#prefix'] = '<div class="field-group-'. $format .'-wrapper">' . (isset($element[$first]['#prefix']) ? $element[$first]['#prefix'] : '');
+      $end = end($children);
+      if (!isset($element[$end]['#suffix'])) $element[$end]['#suffix'] = '';
+      $element[$end]['#suffix'] .= '</div>';
     }
-    dsm($element[$name]);
-//    $element['additional_settings']['group_categories'] = $element['group_categories'];
-//    $element['additional_settings']['group_links'] = $element['group_links'];
-//    unset($element['group_categories'], $element['group_links']);
-//    $element['additional_settings']['group_links']['#parents'] =
-//      );
-//      // Inject a new fieldset as child, so that form_process_fieldset() processes
-//      // this fieldset like any other fieldset.
-//      $element['group'] = array(
-//        '#type' => 'fieldset',
-//        '#parents' => $element['#parents'],
-//      );
-//
-//      // The JavaScript stores the currently selected tab in this hidden
-//      // field so that the active tab can be restored the next time the
-//      // form is rendered, e.g. on preview pages or when form validation
-//      // fails.
-//      $name = implode('__', $element['#parents']);
-//      if (isset($form_state['values'][$name . '__active_tab'])) {
-//        $element['#default_tab'] = $form_state['values'][$name . '__active_tab'];
-//      }
-//      $element[$name . '__active_tab'] = array(
-//        '#type' => 'hidden',
-//        '#default_value' => $element['#default_tab'],
-//        '#attributes' => array('class' => array('vertical-tabs-active-tab')),
-//      );
   }
 
-  // Place a wrapper around the complete element.
+  // Place a wrapper around the complete build.
   // TODO check if there is no other way to target only a wrapper where the
   //      fieldgroups are located. Currently javascript use this.
   $element['#prefix'] = '<div class="field-group-content-wrapper">';
@@ -636,7 +672,8 @@ function field_group_field_group_pre_render_alter(& $element) {
 
 /**
  * Implements hook_field_group_format_settings().
- * @var unknown_type
+ * @params Object $group The group object.
+ * @return Array $form The form element for the format settings.
  */
 function field_group_field_group_format_settings(& $group) {
   $form = array();
@@ -669,6 +706,7 @@ function field_group_field_group_format_settings(& $group) {
       );
       break;
     case 'accordion':
+    case 'horizontal_tabs':
       $form['fieldgroup_settings'] = array(
         '#title' => t('Fieldgroup settings'),
         '#type' => 'select',
@@ -892,6 +930,12 @@ function field_group_fields_process($element) {
  * @param $form The form object itself.
  */
 function field_group_pre_render(& $element, $group, & $form) {
+  // Only run the pre_render function if the group has elements.
+  if ($element == array()) {
+    return;
+  }
+  // Let modules define their wrapping element.
+  // Note that the group element has no properties, only elements.
   foreach (module_implements('field_group_pre_render') as $module) {
     $function = $module . '_field_group_pre_render';
     if (function_exists($function)) {
@@ -1144,14 +1188,11 @@ function field_group_nest_fields(&$element, &$root_element, $parent = NULL) {
 
     // Add fieldgroups to the current element.
     if ((empty($group->parent_name) && !isset($parent)) || $parent == $group->parent_name) {
-      // Bring extra element wrappers to achieve a grouping of fields.
-      // This will mainly be prefix and suffix altering.
-      // We need some kind of processor, callback or prerender thing,
-      // to be able to alter the form structure (E.g. in case of tabs)
+
+      // We first create a new element wrapper, and loop over the fields
+      // to detect children. After this point, the fields are only stashed
+      // in the group element, removed from the root.
       $element[$group_name] = array();
-
-      field_group_pre_render($element[$group_name], $group, $root_element);
-
       foreach ($group_fields as $groupfield => $groupname) {
         // Stash the field in the group.
         if ($groupname == $group_name && isset($root_element[$groupfield])) {
@@ -1160,6 +1201,11 @@ function field_group_nest_fields(&$element, &$root_element, $parent = NULL) {
           unset($root_element['#group_children'][$groupfield]);
         }
       }
+      // Bring extra element wrappers to achieve a grouping of fields.
+      // This will mainly be prefix and suffix altering.
+      // We need some kind of processor, callback or prerender thing,
+      // to be able to alter the form structure (E.g. in case of tabs)
+      field_group_pre_render($element[$group_name], $group, $root_element);
 
       //unset($root_element['#groups'][$group_name]);
       field_group_nest_fields($element[$group_name], $root_element, $group_name);

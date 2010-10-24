@@ -16,7 +16,36 @@ Drupal.FieldGroup.Effects.processAccordion = {
     var accordionWrapper = $('div.field-group-accordion-wrapper', context);
     accordionWrapper.accordion({ autoHeight: false });
   }
-};
+}
+
+/**
+ * Implements Drupal.FieldGroup.processHook().
+ */
+Drupal.FieldGroup.Effects.processHorizontal_tabs = {
+  execute: function (context, settings) {
+
+    $('div.field-group-horizontal_tabs-wrapper', context).each(function() {
+      var $wrapper = $(this);
+      $tabs = $('<ul class="field-group-horizontal_tabs-tabs tabs secundairy"></ul>');
+      $tabs.prependTo($wrapper);
+      $('span.field-group-format-toggler', this).each(function() {
+        var $toggler = $(this);
+        var $link = $('<a class="field-group-format-title" href="#"></a>');
+        $link.data('container', $toggler.next());
+        $link.prepend($toggler.contents());
+        $('<li></li>').prepend($link).appendTo($tabs);
+        $link.click(function () {
+          $('.field-group-format-wrapper', $wrapper).each(function() {
+            $(this).hide();
+          });
+          $(this).data('container').show();
+          return false;
+        });
+        $toggler.remove();
+      });
+    });
+  }
+}
 
 /**
  * Implements Drupal.FieldGroup.processHook().
@@ -33,8 +62,6 @@ Drupal.FieldGroup.Effects.processDiv = {
       // Turn the legend into a clickable link, but retain span.field-group-format-toggler
       // for CSS positioning.
       var $toggler = $('span.field-group-format-toggler', $wrapper);
-      $('<span class="field-group-format-toggler element-invisible"></span>')
-        .prependTo($toggler).after(' ');
       var $link = $('<a class="field-group-format-title" href="#"></a>');
       $link.prepend($toggler.contents()).appendTo($toggler);
       
