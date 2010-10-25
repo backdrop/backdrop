@@ -414,6 +414,7 @@ Views 3.x-7.x-dev
     o Added missing file: modules/taxonomy/views_handler_filter_vocabulary_machine_name.inc
     o #882800 by rszrama: Fix notice for options['distinct'].
     o #950246 by ZoeN: Fix dbtng in views_handler_argument_aggregator_fid.
+    o #884730 by yched, bojanz, karenS, wundo: Add new UI for formatter settings options to the field settings config.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

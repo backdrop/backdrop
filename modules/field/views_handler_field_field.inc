@@ -51,6 +51,9 @@ class views_handler_field_field extends views_handler_field {
     $options['type'] = array(
       'default' => $field_type['default_formatter'],
     );
+    $options['settings'] = array(
+      'default' => array(),
+    );
 
     return $options;
   }
@@ -66,8 +69,79 @@ class views_handler_field_field extends views_handler_field {
       '#title' => t('Formatter'),
       '#options' => $formatters,
       '#default_value' => $this->options['type'],
+      '#ajax' => array(
+        'path' => views_ui_build_form_url($form_state),
+      ),
+    );
+
+    // Get the currently selected formatter.
+    if (isset($form_state['values']['options']['type'])) {
+      $format = $form_state['values']['options']['type'];
+    }
+    else {
+      $format = $this->options['type'];
+    }
+    $formatter = field_info_formatter_types($format);
+    $settings = $this->options['settings'] + field_info_formatter_settings($format);
+
+    // Provide an instance array for hook_field_formatter_settings_form().
+    $instance = $this->_fake_instance($this->definition['field_name'], $formatter, $settings);
+
+    // Store the settings in a '_dummy' view mode.
+    $instance['display']['_dummy'] = array(
+      'type' => $format,
+      'settings' => $settings,
+    );
+
+    // Get the settings form.
+    $settings_form = array('#value' => array());
+    $function = $formatter['module'] . '_field_formatter_settings_form';
+    if (function_exists($function)) {
+      $settings_form = $function($field, $instance, '_dummy', $form, $form_state);
+    }
+    $form['settings'] = $settings_form;
+  }
+
+  /**
+  * @TODO
+  *    Once views requires ctools change this to the helper method in ctools.
+  */
+  function _fake_instance($field_name, $formatter, $formatter_settings) {
+    $field = field_read_field($field_name);
+
+    $field_type = field_info_field_types($field['type']);
+
+    return array(
+      // Build a fake entity type and bundle.
+      'field_name' => $field_name,
+      'entity_type' => '_dummy',
+      'bundle' => '_dummy',
+
+      // Use the default field settings for settings and widget.
+      'settings' => field_info_instance_settings($field['type']),
+      'widget' => array(
+        'type' => $field_type['default_widget'],
+        'settings' => array(),
+      ),
+
+      // Build a dummy display mode.
+      'display' => array(
+        '_dummy' => array(
+          'type' => $formatter,
+          'settings' => $formatter_settings,
+        ),
+      ),
+
+      // Set the other fields to their default values.
+      // @see _field_write_instance().
+      'required' => FALSE,
+      'label' => $field_name,
+      'description' => '',
+      'deleted' => 0,
     );
   }
+
+
 
   /**
    * Loads the objects providing the field information necessary to render the
@@ -117,6 +191,7 @@ class views_handler_field_field extends views_handler_field {
 
       $display = array(
         'type' => $this->options['type'],
+        'settings' => $this->options['settings'],
         'label' => 'hidden',
       );
 
