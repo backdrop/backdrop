@@ -5,6 +5,7 @@ package = Views
 core = 7.x
 php = 5.2
 files[] = views.module
+dependencies[] = ctools
 ; Handlers
 files[] = handlers/views_handler_area.inc
 files[] = handlers/views_handler_area_text.inc
