@@ -8,3 +8,4 @@ files[] = field_group.module
 files[] = field_group.install
 files[] = field_group.test
 files[] = field_group.admin.inc
+files[] = field_group.features.inc
