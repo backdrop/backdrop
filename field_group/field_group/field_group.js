@@ -13,15 +13,14 @@ Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
  */
 Drupal.FieldGroup.Effects.processAccordion = {
   execute: function (context, settings) {
-    var accordionWrapper = $('div.field-group-accordion-wrapper', context);
-    accordionWrapper.accordion({ autoHeight: false });
+    $('div.field-group-accordion-wrapper', context).accordion({ autoHeight: false });
   }
 }
 
 /**
  * Implements Drupal.FieldGroup.processHook().
  */
-Drupal.FieldGroup.Effects.processHorizontal_tabs = {
+Drupal.FieldGroup.Effects.processHtabs = {
   execute: function (context, settings) {
 
     $('div.field-group-horizontal_tabs-wrapper', context).each(function() {

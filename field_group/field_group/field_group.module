@@ -81,15 +81,6 @@ function field_group_menu() {
             'access arguments' => array('administer site configuration'),
           );
 
-          $items["$path/groups/%field_group_menu/edit"] = array(
-            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
-            'title' => 'Edit',
-            'page callback' => 'drupal_get_form',
-            'page arguments' => array('field_group_edit_form', $group_position),
-            'type' => MENU_CALLBACK,
-            'file' => 'field_group.admin.inc',
-          ) + $access;
-
           $items["$path/groups/%field_group_menu/delete"] = array(
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
             'title' => 'Delete',
@@ -358,29 +349,16 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#suffix' => '</div>',
       );
       if ($display_overview) {
-        $table[$name]['settings_edit']['#suffix'] .= l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete');
+        $table[$name]['settings_edit']['#suffix'] .= l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode);
       }
     }
 
-    // @todo if we use the settings, we might as well remove edit
-    // and move delete to the settings ?
-    // Well, how bad as it sounds, edit would now only change the label,
-    // and delete would be very handy from there. Fields should probably
-    // moved back to root. - Stalski
-    // First try editing label move to configure settings.
-    // Keeping delete butons. little workaround on the displays there.
     if (!$display_overview) {
       $table[$name] += array(
-        /*'edit' => array(
-          '#markup' => l(t('edit'), $params->admin_path . '/groups/' . $name . '/edit'),
-        ),*/
         'delete' => array(
-          '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete'),
+          '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
         ),
       );
-    }
-    else {
-
     }
   }
 
@@ -473,16 +451,20 @@ function field_group_field_group_formats() {
       'hidden' => t('Hidden'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Vertical tabs'),
-      'horizontal_tabs' => t('Horizontal tabs'),
-      'accordion' => t('Accordion')
+      'htabs' => t('Horizontal tabs'),
+      'htab' => t('Horizontal tab item'),
+      'accordion' => t('Accordion'),
+      'accordion-item' => t('Accordion item')
     ),
     'display' => array(
       'hidden' => t('Hidden'),
       'div' => t('Div'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Vertical tabs'),
-      'horizontal_tabs' => t('Horizontal tabs'),
-      'accordion' => t('Accordion')
+      'htabs' => t('Horizontal tabs'),
+      'htab' => t('Horizontal tab item'),
+      'accordion' => t('Accordion'),
+      'accordion-item' => t('Accordion item')
     ),
   );
 }
@@ -495,23 +477,18 @@ function field_group_field_group_formats() {
  * @param Object $group The Field group info.
  */
 function field_group_field_group_pre_render(& $element, $group, & $form) {
-  $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open'));
-  $collapsed = in_array($group->format_settings['fieldgroup_settings'], array('collapsed', 'closed'));
-  $classes = array($group->visible);
-  if ($collapsible) {
-    $classes[] = 'collapsible';
-    if ($collapsed) {
-      $classes[] = 'collapsed';
+
+  if (isset($group->format_settings['fieldgroup_settings'])) {
+    $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open'));
+    $collapsed = in_array($group->format_settings['fieldgroup_settings'], array('collapsed', 'closed'));
+    $classes = array($group->visible);
+    if ($collapsible) {
+      $classes[] = 'collapsible';
+      if ($collapsed) {
+        $classes[] = 'collapsed';
+      }
     }
   }
-  // Push information to the form about what should be taken
-  // care of in the alter hook or theme functions.
-  if (!isset($form['#field_group_processed'])) {
-    $form['#field_group_processed'] = array();
-  }
-  // Set the count as well. Tabs for instance could then use this
-  // to not trigger the rendering if there is only one tab container.
-  $form['#field_group_processed'][$group->visible] = isset($form['#field_group_processed'][$group->visible]) ? $form['#field_group_processed'][$group->visible] + 1 : 1;
   // Javascript has to be able to play along.
   $form['#attached']['js'][] = array(
     'data' => array('field_group' => array($group->visible => TRUE)),
@@ -548,7 +525,16 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       drupal_add_library('system', 'effects.blind');
       break;
+    case 'htabs':
     case 'accordion':
+      $element += array(
+        '#type' => 'markup',
+        '#prefix' => '<div class="field-group-'. $group->visible .'-wrapper">',
+        '#suffix' => '</div>',
+        '#weight' => $group->weight,
+      );
+      break;
+    case 'accordion-item':
       $element += array(
         '#type' => 'markup',
         '#prefix' => '
@@ -563,10 +549,9 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           ),
         ),
       );
-      $form['#field_group_wrap'][$group->visible] = TRUE;
       drupal_add_library('system', 'ui.accordion');
       break;
-    case 'horizontal_tabs':
+    case 'htab':
       $element += array(
         '#type' => 'markup',
         '#prefix' => '
@@ -581,7 +566,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           ),
         ),
       );
-      $form['#field_group_wrap'][$group->visible] = TRUE;
       drupal_add_library('system', 'effects.blind');
       break;
     case 'tabs':
@@ -643,25 +627,15 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
  */
 function field_group_field_group_pre_render_alter(& $element) {
 
-  foreach (array_keys($element['#field_group_wrap']) as $name) {
-    $format = $name;
-    // Accordions needs an own wrapper.
-    if (isset($element['#field_group_processed'][$format]) && $element['#field_group_processed'][$format] > 1) {
-      // Calculate weights of containers to sort. This way we know
-      // the first and the last rendered tab. Putting a wrapper around it,
-      // makes sure that this is the one we can use to target html.
-      $children = array();
-      foreach(array_keys($element['#groups']) as $group_name) {
-        if ($element['#groups'][$group_name]->visible == $format) {
-          $children[$element['#groups'][$group_name]->weight + 200] = $group_name;
+  // Dish the fieldgroups with no fields.
+  if (isset($element['#view_mode'])) {
+    $groups = array_keys($element['#groups']);
+    foreach (element_children($element) as $name) {
+      if (in_array($name, $groups)) {
+        if (field_group_field_group_is_empty($element[$name], $groups)) {
+          unset($element[$name]);
         }
       }
-      ksort($children);
-      $first = reset($children);
-      $element[$first]['#prefix'] = '<div class="field-group-'. $format .'-wrapper">' . (isset($element[$first]['#prefix']) ? $element[$first]['#prefix'] : '');
-      $end = end($children);
-      if (!isset($element[$end]['#suffix'])) $element[$end]['#suffix'] = '';
-      $element[$end]['#suffix'] .= '</div>';
     }
   }
 
@@ -671,6 +645,25 @@ function field_group_field_group_pre_render_alter(& $element) {
   $element['#prefix'] = '<div class="field-group-content-wrapper">';
   $element['#suffix'] = '</div>';
 
+}
+
+/**
+ * Helper function to recursively tell if the group contains
+ * an element.
+ * @param array $element Build array structure
+ * @param array $groups Array of group names
+ * @return Boolean Is field group empty
+ */
+function field_group_field_group_is_empty($element, $groups) {
+  foreach (element_children($element) as $name) {
+    if (in_array($name, $groups)) {
+      return field_group_field_group_is_empty($element[$name], $groups);
+    }
+    else {
+      return FALSE;
+    }
+  }
+  return TRUE;
 }
 
 /**
@@ -708,8 +701,8 @@ function field_group_field_group_format_settings(& $group) {
         //'#required' => TRUE,
       );
       break;
-    case 'accordion':
-    case 'horizontal_tabs':
+    case 'accordion-item':
+    case 'htab':
       $form['fieldgroup_settings'] = array(
         '#title' => t('Fieldgroup settings'),
         '#type' => 'select',
@@ -729,7 +722,10 @@ function field_group_field_group_format_settings(& $group) {
  * Implements hook_field_group_format_summary().
  */
 function field_group_field_group_format_summary(& $group) {
-  $output = '<strong>'. $group->visible .'</strong> '. $group->format_settings['fieldgroup_settings'] .'';
+  $output = '';
+  if (isset($group->format_settings['fieldgroup_settings'])) {
+    $output = '<strong>'. $group->visible .'</strong> '. $group->format_settings['fieldgroup_settings'] .'';
+  }
   if ($group->visible == 'tabs') {
     $options = array(
       FIELD_GROUP_TABS_SEPARATE => t('Seperate from core fieldsets'),
@@ -762,6 +758,8 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $query = db_select('field_group', 'fg');
   $query->fields('fg');
   $query->condition('group_name', $group_name);
+  $query->condition('entity_type', $entity_type);
+  $query->condition('bundle', $bundle_name);
   $group = $query->execute()->fetchObject();
   if ($group->id) {
     // @todo should happen in a proper CRUD API function
@@ -905,13 +903,13 @@ function field_group_formats($display_overview = FALSE) {
  * Form api go through more than a regular build. #process is
  * needed here, where #pre_render is ideal for the regular array.
  * @see called by field_group_attach_groups().
- * @see calls field_group_nest_fields().
+ * @see calls field_group_fields_nest().
  * @param $element Form element
  * @return $element Array with re-arranged fields in forms.
  */
 function field_group_fields_process($element) {
   // Nest the fields in the corresponding field groups.
-  field_group_nest_fields($element, $element);
+  field_group_fields_nest($element, $element);
 
   // Dirty fix to 'deny' the default ones.
   if (isset($element['#node_edit_form'])) {
@@ -926,14 +924,66 @@ function field_group_fields_process($element) {
 }
 
 /**
+ * Recursive function to nest fields in the field groups.
+ * This function will take out all the elements in the form and
+ * place them in the correct container element, a fieldgroup.
+ * The current group element in the loop is passed recursively so we can
+ * stash fields and groups in it while we go deeper in the array.
+ * @param Array $element
+ *   The current element to analyse for grouping.
+ * @param Array $root_element
+ *   The root element to control.
+ * @param String $parent
+ *   the parent name to look for in each level.
+ */
+function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL) {
+  $groups = $root_element['#groups'];
+  $group_fields = $root_element['#group_children'];
+
+  foreach ($groups as $name => $group) {
+
+    // Add fieldgroups to the current element. But only if the parent is the current
+    // group parent or if we are starting from the root.
+    if ((empty($group->parent_name) && !isset($parent_name)) || $parent_name == $group->parent_name) {
+
+      // We first create a new element wrapper, and loop over the fields
+      // to detect children. After this point, the fields are stashed
+      // in the group element and removed from the root.
+      $element[$name] = array();
+      foreach ($group_fields as $groupfield => $groupname) {
+        // Stash the field in the group.
+        if ($groupname == $name && isset($root_element[$groupfield])) {
+          $element[$name][$groupfield] = $root_element[$groupfield];
+          // We can not meet this field again!
+          unset($root_element[$groupfield]);
+          unset($root_element['#group_children'][$groupfield]);
+        }
+        // Or hey, is the field maybe a group, then prepare the array
+        // so the group is not left empty.
+        if ($groupname == $name && isset($root_element['#groups'][$groupfield])) {
+          $element[$name][$groupfield] = array();
+          unset($root_element['#group_children'][$groupfield]);
+        }
+      }
+      // Bring extra element wrappers to achieve a grouping of fields.
+      // This will mainly be prefix and suffix altering.
+      field_group_pre_render($element[$name], $group, $root_element);
+      // Go deeper with the current group element and the parent $name.
+      field_group_fields_nest($element[$name], $root_element, $name);
+    }
+  }
+}
+
+/**
  * Function to pre render the field group element.
- * @see called by field_group_nest_fields().
+ * @see called by field_group_fields_nest().
  * @param $element Array of group element that needs to be created!
  * @param $group Object with the group information.
  * @param $form The form object itself.
  */
 function field_group_pre_render(& $element, $group, & $form) {
   // Only run the pre_render function if the group has elements.
+  // $group->group_name
   if ($element == array()) {
     return;
   }
@@ -1085,7 +1135,6 @@ function field_group_field_overview_submit($form, &$form_state) {
 
     // Store new group information for any additional submit handlers.
     $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
-
     drupal_set_message(t('New group %label succesfully created.', array('%label' => $new_group->label)));
 
     // Replace the newly created group in the $children array, in case it was
@@ -1098,9 +1147,8 @@ function field_group_field_overview_submit($form, &$form_state) {
     }
   }
 
-  $groups = field_group_info_groups($entity_type, $bundle, $mode, TRUE);
-
   // Update existing groups.
+  $groups = field_group_info_groups($entity_type, $bundle, $mode, TRUE);
   foreach ($form['#groups'] as $group_name) {
     $group = $groups[$group_name];
     $group->children = array_keys($children[$group_name]);
@@ -1174,48 +1222,6 @@ function field_group_attach_groups(&$element, $view_mode) {
   // Add a pre render or process callback.
   // This is needed since process seems too early for the front view modes.
   $element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_fields_process';
-}
-
-/**
- * Recursive function to nest fields in the field groups.
- * @param Array $element
- *   The current element to analyse for grouping.
- * @param Array $root_element
- *   The root element to control.
- * @param String $parent
- *   the parent name to look for in each level.
- */
-function field_group_nest_fields(&$element, &$root_element, $parent = NULL) {
-  $groups = $root_element['#groups'];
-  $group_fields = $root_element['#group_children'];
-
-  foreach ($groups as $group_name => $group) {
-
-    // Add fieldgroups to the current element.
-    if ((empty($group->parent_name) && !isset($parent)) || $parent == $group->parent_name) {
-
-      // We first create a new element wrapper, and loop over the fields
-      // to detect children. After this point, the fields are only stashed
-      // in the group element, removed from the root.
-      $element[$group_name] = array();
-      foreach ($group_fields as $groupfield => $groupname) {
-        // Stash the field in the group.
-        if ($groupname == $group_name && isset($root_element[$groupfield])) {
-          $element[$group_name][$groupname][$groupfield] = $root_element[$groupfield];
-          unset($root_element[$groupfield]);
-          unset($root_element['#group_children'][$groupfield]);
-        }
-      }
-      // Bring extra element wrappers to achieve a grouping of fields.
-      // This will mainly be prefix and suffix altering.
-      // We need some kind of processor, callback or prerender thing,
-      // to be able to alter the form structure (E.g. in case of tabs)
-      field_group_pre_render($element[$group_name], $group, $root_element);
-
-      //unset($root_element['#groups'][$group_name]);
-      field_group_nest_fields($element[$group_name], $root_element, $group_name);
-    }
-  }
 }
 
 
