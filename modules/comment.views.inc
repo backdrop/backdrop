@@ -64,7 +64,7 @@ function comment_views_data() {
     'help' => t('The text of the comment.'),
     'field' => array(
       'handler' => 'views_handler_field_markup',
-      'format' => 'format',
+      'format' => array('field' => 'format'),
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',

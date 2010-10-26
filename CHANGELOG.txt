@@ -418,6 +418,7 @@ Views 3.x-7.x-dev
     o by dereine: Add the dependeny ctools.
     o #952576 by yhahn: Use JS_LIBRARY group for adding core library js files.
     o #563020 by dereine: Replace views object cache with ctools object cache.
+    o #952636 by yhahn: Support string format identifiers in field_markup handler.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
