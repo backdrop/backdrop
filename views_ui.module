@@ -237,24 +237,16 @@ function views_ui_theme() {
  * load it.
  */
 function views_ui_cache_load($name) {
-  views_include('cache');
+  ctools_include('object-cache');
   views_include('view');
-  $view = views_object_cache_get('view', $name);
+  $view = ctools_object_cache_get('view', $name);
 
   if (empty($view)) {
     $view = views_get_view($name);
 
     if (!empty($view)) {
       // Check to see if someone else is already editing this view.
-      global $user;
-      $result = db_query("SELECT s.uid, v.updated FROM {views_object_cache} v INNER JOIN {sessions}  s ON v.sid = s.sid WHERE s.sid <> :sid and v.name = :name and v.obj = 'view' ORDER BY v.updated ASC",
-        array(
-          ':sid' => session_id(),
-          ':name' => $view->name,
-        ));
-      foreach ($result as $item) {
-        $view->locked = $item;
-      }
+      $view->locked = ctools_object_cache_test('view', $view->name);
     }
   }
 
@@ -267,10 +259,6 @@ function views_ui_cache_load($name) {
   }
 }
 
-function views_ui_check_lock($view) {
-
-}
-
 /**
  * Specialized cache function to add a flag to our view, include an appropriate
  * include, and cache more easily.
@@ -280,7 +268,7 @@ function views_ui_cache_set(&$view) {
     drupal_set_message(t('Changes cannot be made to a locked view.'), 'error');
     return;
   }
-  views_include('cache');
+  ctools_include('object-cache');
   $view->changed = TRUE; // let any future object know that this view has changed.
 
   // Unset handlers; we don't want to write these into the cache
@@ -292,7 +280,7 @@ function views_ui_cache_set(&$view) {
     unset($view->display[$id]->handler);
     unset($view->display[$id]->default_display);
   }
-  views_object_cache_set('view', $view->name, $view);
+  ctools_object_cache_set('view', $view->name, $view);
 }
 
 

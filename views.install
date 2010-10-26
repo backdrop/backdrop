@@ -462,3 +462,27 @@ function views_update_6010() {
 
   return $ret;
 }
+
+/**
+ * Remove views_object_cache table and move the data to ctools_object_cache.
+ */
+function views_schema_6011() {
+  $schema = views_schema(__FUNCTION__);
+  unset($schema['views_object_cache']);
+  return $schema;
+}
+
+/**
+ * Remove views_object_cache table and move the data to ctools_object_cache.
+ */
+function views_update_6011() {
+  $ret = array();
+
+  $caches = db_query("SELECT * FROM {views_object_cache}")->fetch();
+  foreach ($caches as $item) {
+    drupal_write_record('ctools_object_cache', $item);
+  }
+  db_drop_table($ret, 'views_object_cache');
+
+  return $ret;
+}

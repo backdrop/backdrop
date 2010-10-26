@@ -417,6 +417,7 @@ Views 3.x-7.x-dev
     o #884730 by yched, bojanz, karenS, wundo: Add new UI for formatter settings options to the field settings config.
     o by dereine: Add the dependeny ctools.
     o #952576 by yhahn: Use JS_LIBRARY group for adding core library js files.
+    o #563020 by dereine: Replace views object cache with ctools object cache.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
