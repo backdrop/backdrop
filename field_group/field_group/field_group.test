@@ -4,6 +4,22 @@
 /**
  * @file
  * Unit test file for groups.
+ *
+ * @todo - fill along if we know more.
+ *
+ * - nest a field under a group and see if parent_name is stored in field
+ * - nest a group under another group and see if parent_name is first group
+ * - nest a group under second group and see if parent_name is second group
+ * - settings: open f and verify on front-end (classes)
+ * - settings: collapsible f and verify on front-end (classes)
+ * - settings: collapsed f and verify on front-end (classes)
+ * - settings: vertical tabs and verify on front-end (classes)
+ * - settings: horizontal item and verify on front-end (classes)
+ * - settings: vertical item  and verify on front-end (classes)
+ * - settings: hidden (simple div) and verify on front-end (classes)
+ * - settings: label and verify on front-end
+ * - delete a fieldgroup - make sure we have a couple with the same name
+ *   and make sure the right one is deleted!
  */
 
 /**
@@ -27,35 +43,47 @@ class GroupUITestCase extends DrupalWebTestCase {
 
     // Create random group name.
     $this->group_label = $this->randomName(8);
-    $this->group_name_input =  strtolower($this->randomName(8));
+    $this->group_name_input = strtolower($this->randomName(8));
     $this->group_name = 'group_'. $this->group_name_input;
   }
 
   /**
-   * Main entry point for the group CRUD tests.
-   *
-   * In order to act on the same groups, and not create the groups over and over
-   * again the following tests create, update and delete the same groups.
-   */
-  function testCRUDGroups() {
-    $this->createGroup();
-  }
-
-  /**
-   * Test adding a new group.
+   * Creates a group on the article content type.
    */
   function createGroup() {
-    // Create a test groupp.
-    $edit = array(
+
+    // Setup new group.
+    $group = array(
       'fields[_add_new_group][label]' => $this->group_label,
       'fields[_add_new_group][group_name]' => $this->group_name_input,
     );
 
-    $label = $edit['fields[_add_new_group][label]'];
-    $field_name = $edit['fields[_add_new_group][group_name]'];
+    // Add new group on the 'Manage fields' page.
+    $this->drupalPost('admin/structure/types/manage/article/fields',  $group, t('Save'));
+    $this->assertRaw(t('New group %label succesfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
 
-    // 'Add new group' on the 'Manage fields' page.
-    $this->drupalPost('admin/structure/types/manage/article/fields',  $edit, t('Save'));
-    $this->assertRaw(t('New group %label succesfully created.', array('%label' => $label)), t('Group succesfully saved.'));
+    // Test if group is in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'form');
+    $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
+  }
+
+  /**
+   * Delete a group.
+   */
+  function deleteGroup() {
+    $this->drupalPost('admin/structure/types/manage/article/groups/' . $this->group_name . '/delete/form', array(), t('Delete'));
+    $this->assertRaw(t('The group %label has been deleted from the %article content type.', array('%label' => $this->group_label, '%article' => 'Article')), t('Group removal message displayed on screen.'));
+
+    // Test that group is not in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array'));
+  }
+
+  /**
+   * General CRUD.
+   */
+  function testCRUDgroup() {
+    $this->createGroup();
+    $this->deleteGroup();
   }
 }

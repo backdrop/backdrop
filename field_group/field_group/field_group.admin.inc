@@ -42,7 +42,6 @@ function field_group_delete_form_submit($form, &$form_state) {
   drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => $group->label, '%type' => $bundle_label)));
   cache_clear_all('field_groups', 'cache_field');
 
-  // @todo this shouldn't redirect to fields - this can be display too.
-  $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
+  // Redirect.
   $form_state['redirect'] = $form['#redirect'];
 }
