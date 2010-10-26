@@ -223,20 +223,34 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
     $group = & $params->groups[$name];
 
-    // Save the (re)configured formatter on the fieldgroup.
-    // This needs to be done first, so even the label already is updated
-    // to display the correct one.
-    if (isset($form_state['values']['fields'][$name]) && !empty($form_state['values'][$name .'_formatter_settings_update'])) {
-      field_group_format_settings_submit($group, $form_state['values']['fields'][$name]);
+    // Formatter settings.
+
+    // Check the currently selected formatter, and merge persisted values for
+    // formatter settings for the group.
+    // This needs to be done first, so all fields are updated before creating elements.
+    if (isset($form_state['values']['fields'][$name])) {
+      if (!empty($form_state['values']['fields'][$name]['format']['type'])) {
+        $formatter_type = $form_state['values']['fields'][$name]['format']['type'];
+      }
+      elseif (!empty($form_state['input']['fields'][$name]['format']['type'])) {
+        $formatter_type = $form_state['input']['fields'][$name]['format']['type'];
+      }
+      else {
+        $formatter_type = $group->visible;
+      }
+      // If the region has been updated because of a format selection,
+      // load the format defaults.
+      if ($formatter_type != $group->visible) {
+        $group->visible = $formatter_type;
+        field_group_format_settings_submit($group, $form_state['values']['fields'][$name], TRUE);
+      }
+      // Save the group when the configuration is submitted.
+      if (!empty($form_state['values'][$name .'_formatter_settings_update'])) {
+        field_group_format_settings_submit($group, $form_state['values']['fields'][$name]);
+      }
     }
 
-    // Determine visibility for the group.
-    if (!empty($form_state['values']['fields'][$name]['format']['type'])) {
-      $group->visible = $form_state['values']['fields'][$name]['format']['type'];
-    }
-    elseif (!empty($form_state['input']['fields'][$name]['format']['type'])) {
-      $group->visible = $form_state['input']['fields'][$name]['format']['type'];
-    }
+    $settings = field_group_format_settings_form($group);
 
     $id = strtr($name, '_', '-');
     $js_rows_data[$id] = array('type' => 'group', 'name' => $name);
@@ -309,7 +323,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
           '#markup' => t('Field group format:') .' <span class="formatter-name">'. $group->visible . '</span>',
         ),
         // Create a settings form where hooks can pick in.
-        'settings' => field_group_format_settings_form($group),
+        'settings' => $settings,
         'actions' => array(
           '#type' => 'actions',
           'save_settings' => $base_button + array(
@@ -478,10 +492,10 @@ function field_group_field_group_formats() {
  */
 function field_group_field_group_pre_render(& $element, $group, & $form) {
 
+  $classes = array($group->visible);
   if (isset($group->format_settings['fieldgroup_settings'])) {
     $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open'));
     $collapsed = in_array($group->format_settings['fieldgroup_settings'], array('collapsed', 'closed'));
-    $classes = array($group->visible);
     if ($collapsible) {
       $classes[] = 'collapsible';
       if ($collapsed) {
@@ -490,8 +504,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     }
   }
   else {
-    $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open'));
-    $collapsed = in_array($group->format_settings['fieldgroup_settings'], array('collapsed', 'closed'));
+    $collapsible = TRUE;
+    $collapsed = FALSE;
   }
   // Javascript has to be able to play along.
   $form['#attached']['js'][] = array(
@@ -521,11 +535,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
         '#suffix' => '</div></div>',
         '#weight' => $group->weight,
-        '#attached' => array(
-          'js' => array(
-            drupal_get_path('module', 'field_group') .'/field_group.js',
-          ),
-        ),
       );
       drupal_add_library('system', 'effects.blind');
       break;
@@ -543,15 +552,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#type' => 'markup',
         '#prefix' => '
         <h3 class="field-group-format-toggler '. $group->visible .'">'. $group->label .'</h3>
-        <div class="field-group-format-wrapper">',
+        <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
-        '#attributes' => array('class' => array($group->visible)),
-        '#attached' => array(
-          'js' => array(
-            drupal_get_path('module', 'field_group') .'/field_group.js',
-          ),
-        ),
+        //'#attributes' => array('class' => array($group->visible)),
       );
       drupal_add_library('system', 'ui.accordion');
       break;
@@ -564,11 +568,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#suffix' => '</div>',
         '#weight' => $group->weight,
         '#attributes' => array('class' => $classes),
-        '#attached' => array(
-          'js' => array(
-            drupal_get_path('module', 'field_group') .'/field_group.js',
-          ),
-        ),
       );
       drupal_add_library('system', 'effects.blind');
       break;
@@ -646,6 +645,7 @@ function field_group_field_group_pre_render_alter(& $element) {
   // Place a wrapper around the complete build.
   // TODO check if there is no other way to target only a wrapper where the
   //      fieldgroups are located. Currently javascript use this.
+  $element['#attached']['js'][] = drupal_get_path('module', 'field_group') .'/field_group.js';
   $element['#prefix'] = '<div class="field-group-content-wrapper">';
   $element['#suffix'] = '</div>';
 
@@ -672,6 +672,7 @@ function field_group_field_group_is_empty($element, $groups) {
 
 /**
  * Implements hook_field_group_format_settings().
+ * If the group has no format settings, default ones will be added.
  * @params Object $group The group object.
  * @return Array $form The form element for the format settings.
  */
@@ -679,18 +680,24 @@ function field_group_field_group_format_settings(& $group) {
   $form = array();
   switch ($group->visible) {
     case 'tabs':
+      if (!isset($group->format_settings['tab_settings'])) {
+        $group->format_settings['tab_settings'] = FIELD_GROUP_TABS_MERGED;
+      }
       $form['tab_settings'] = array(
         '#title' => t('Tab settings'),
         '#type' => 'select',
         '#default_value' => $group->format_settings['tab_settings'],
         '#options' => array(
-          FIELD_GROUP_TABS_SEPARATE => t('Seperate from core fieldsets'),
+          FIELD_GROUP_TABS_SEPARATE => t('Separate from core fieldsets'),
           FIELD_GROUP_TABS_MERGED => t('Merged with core fieldsets')),
         '#weight' => 2,
       );
     // Fall through to add extra tabs configuration.
     case 'fieldset':
     case 'div':
+      if (!isset($group->format_settings['fieldgroup_settings'])) {
+        $group->format_settings['fieldgroup_settings'] = 'collapsed';
+      }
       $form['fieldgroup_settings'] = array(
         '#title' => t('Fieldgroup settings'),
         '#type' => 'select',
@@ -707,6 +714,9 @@ function field_group_field_group_format_settings(& $group) {
       break;
     case 'accordion-item':
     case 'htab':
+      if (!isset($group->format_settings['fieldgroup_settings'])) {
+        $group->format_settings['fieldgroup_settings'] = 'closed';
+      }
       $form['fieldgroup_settings'] = array(
         '#title' => t('Fieldgroup settings'),
         '#type' => 'select',
@@ -734,7 +744,7 @@ function field_group_field_group_format_summary(& $group) {
     $options = array(
       FIELD_GROUP_TABS_SEPARATE => t('Seperate from core fieldsets'),
       FIELD_GROUP_TABS_MERGED => t('Merged with core fieldsets'));
-    $output .= '<br />'. t('Tabs') .': ' . (isset($options[$group->format_settings['tab_settings']]) ? $options[$group->format_settings['tab_settings']] : t('No option selected'));
+    $output .= '<br />'. t('Tabs') .': ' . (isset($options[$group->format_settings['tab_settings']]) ? $options[$group->format_settings['tab_settings']] : reset($options));
   }
   return $output;
 }
@@ -1020,10 +1030,19 @@ function field_group_format_settings_form(&$group) {
  * @param Ojbect $group The group object
  * @param Array $settins Configuration settings
  */
-function field_group_format_settings_submit(& $group, $settings) {
-  $group->visible = $settings['format']['type'];
-  $group->label = $settings['format_settings']['settings']['label'];
-  $group->format_settings = $settings['format_settings']['settings'];
+function field_group_format_settings_submit(& $group, $settings, $format_change = FALSE) {
+  // for format changes we load the defaults
+  if ($format_change) {
+    $group->format_settings = NULL;
+    // The group will be saved by reference.
+    field_group_format_settings_form($group);
+  }
+  else {
+    $group->visible = $settings['format']['type'];
+    $group->label = $settings['format_settings']['settings']['label'];
+    $group->format_settings = $settings['format_settings']['settings'];
+  }
+  // Save the group settings.
   field_group_save($group);
   cache_clear_all('field_groups', 'cache_field');
 }

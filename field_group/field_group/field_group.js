@@ -23,9 +23,9 @@ Drupal.FieldGroup.Effects.processAccordion = {
 Drupal.FieldGroup.Effects.processHtabs = {
   execute: function (context, settings) {
 
-    $('div.field-group-horizontal_tabs-wrapper', context).each(function() {
+    $('div.field-group-htabs-wrapper', context).each(function() {
       var $wrapper = $(this);
-      $tabs = $('<ul class="field-group-horizontal_tabs-tabs tabs secundairy"></ul>');
+      $tabs = $('<ul class="field-group-htabs-tabs tabs secundairy"></ul>');
       $tabs.prependTo($wrapper);
       $('span.field-group-format-toggler', this).each(function() {
         var $toggler = $(this);
