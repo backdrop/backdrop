@@ -1,5 +1,5 @@
 <?php
-// $Id $
+// $Id$
 
 /**
  * Menu callback; present a form for removing a group.

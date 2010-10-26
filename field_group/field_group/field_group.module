@@ -1,5 +1,5 @@
 <?php
-// $Id $
+// $Id$
 
 /**
  * @file
@@ -488,6 +488,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         $classes[] = 'collapsed';
       }
     }
+  }
+  else {
+    $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open'));
+    $collapsed = in_array($group->format_settings['fieldgroup_settings'], array('collapsed', 'closed'));
   }
   // Javascript has to be able to play along.
   $form['#attached']['js'][] = array(
