@@ -98,6 +98,14 @@ function field_group_menu() {
 }
 
 /**
+ * Implements hook_features_api().
+ */
+function field_group_features_api() {
+  module_load_include('inc', 'field_group', 'field_group.features');
+  return _field_group_features_api();
+}
+
+/**
  * Implements hook_field_attach_form().
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {

@@ -16,20 +16,20 @@ function field_group_schema() {
         'type' => 'serial',
         'not null' => TRUE,
         'description' => 'The primary identifier for a group',
-  ),
+      ),
       'group_name' => array(
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
         'default' => '',
         'description' => 'The name of this group.',
-  ),
+      ),
       'entity_type' => array(
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
         'default' => '',
-  ),
+      ),
       'bundle' => array(
         'type' => 'varchar',
         'length' => 128,
@@ -41,29 +41,29 @@ function field_group_schema() {
         'length' => 128,
         'not null' => TRUE,
         'default' => ''
-        ),
-        // @todo 'parent_name' is redundant with the data in the 'children'
-        // entry, brings a risk of inconsistent data. This should be removed from
-        // the schema and pre-computed it if needed in field_group_get_groups().
+      ),
+      // @todo 'parent_name' is redundant with the data in the 'children'
+      // entry, brings a risk of inconsistent data. This should be removed from
+      // the schema and pre-computed it if needed in field_group_get_groups().
       'parent_name' => array(
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
         'default' => '',
         'description' => 'The parent name for a group',
-        ),
+      ),
       'data' => array(
         'type' => 'blob',
         'size' => 'big',
         'not null' => TRUE,
         'serialize' => TRUE,
         'description' => 'Serialized data containing the group properties that do not warrant a dedicated column.',
-        ),
-        ),
+      ),
+    ),
     'primary key' => array('id'),
     'indexes' => array(
       'group_name' => array('group_name'),
-        ),
-        );
-        return $schema;
+    ),
+  );
+  return $schema;
 }
