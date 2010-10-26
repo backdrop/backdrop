@@ -494,7 +494,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
 
   $classes = array($group->visible);
   if (isset($group->format_settings['fieldgroup_settings'])) {
-    $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open'));
+    $collapsible = in_array($group->format_settings['fieldgroup_settings'], array('collapsible', 'open', 'collapsed', 'closed'));
     $collapsed = in_array($group->format_settings['fieldgroup_settings'], array('collapsed', 'closed'));
     if ($collapsible) {
       $classes[] = 'collapsible';
@@ -506,6 +506,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
   else {
     $collapsible = TRUE;
     $collapsed = FALSE;
+    $classes[] = 'collapsible';
   }
   // Javascript has to be able to play along.
   $form['#attached']['js'][] = array(
