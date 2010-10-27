@@ -32,7 +32,8 @@ class views_handler_argument_term_node_tid extends views_handler_argument_many_t
     $titles = array();
     $result = db_select('taxonomy_term_data', 'td')
       ->fields('td', array('name'))
-      ->condition('td.tid', $this->value);
+      ->condition('td.tid', $this->value)
+      ->execute();
     foreach ($result as $term) {
       $titles[] = check_plain($term->name);
     }
