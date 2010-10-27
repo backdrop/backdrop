@@ -25,7 +25,7 @@ Drupal.FieldGroup.Effects.processHtabs = {
 
     $('div.field-group-htabs-wrapper', context).each(function() {
       var $wrapper = $(this);
-      $tabs = $('<ul class="field-group-htabs-tabs tabs secundairy"></ul>');
+      $tabs = $('<ul class="field-group-htabs-tabs tabs secundary"></ul>');
       $tabs.prependTo($wrapper);
       $('span.field-group-format-toggler', this).each(function() {
         var $toggler = $(this);
