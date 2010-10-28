@@ -1204,7 +1204,7 @@ class views_join {
           if (is_array($info['value'])) {
             $operator = !empty($info['operator']) ? $info['operator'] : 'IN';
             // Transform from IN() notation to = notation if just one value.
-            if (count($raw_value) == 1) {
+            if (count($info['value']) == 1) {
               $info['value'] = array_shift($info['value']);
               $operator = $operator == 'NOT IN' ? '!=' : '=';
             }
