@@ -221,17 +221,15 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
   // Update existing rows accordingly to the parents.
   foreach (element_children($table) as $name) {
-    $row = &$table[$name];
-    $row['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
-    $row['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
-  }
-  /*foreach (element_children($table) as $name) {
-    if (isset($_POST['refresh_rows']) && $_POST['refresh_rows'] == $name && isset($_POST['fields'][$_POST['refresh_rows']]['type'])) {
-      $params->parents[$name] = '';
-    }
     $table[$name]['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
-    $table[$name]['parent_wrapper']['parent']['#value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
-  }*/
+    $table[$name]['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
+  }
+  // Update rows that are made visible (dragged/selected out of hidden).
+  //if (isset($_POST['refresh_rows']) && $_POST['refresh_rows'] == $name && isset($_POST['fields'][$_POST['refresh_rows']]['type'])) {
+  //  $params->parents[$name] = '';
+  //  // override the #value because at this point in this context, #default_value is too late.
+  //  $table[$name]['parent_wrapper']['parent']['#value'] = $params->parents[$name];
+  //}
 
   // Create the group rows and check actions.
   foreach (array_keys($params->groups) as $name) {
