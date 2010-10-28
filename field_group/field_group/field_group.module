@@ -31,10 +31,6 @@
  *
  */
 
-// Constant to distinguish tabs.
-define('FIELD_GROUP_TABS_SEPARATE', 1);
-define('FIELD_GROUP_TABS_MERGED', 2);
-
 /**
  * Implements hook_menu().
  */
@@ -477,20 +473,22 @@ function field_group_field_group_formats() {
     'form' => array(
       'hidden' => t('Hidden'),
       'fieldset' => t('Fieldset'),
-      'tabs' => t('Vertical tabs'),
-      'htabs' => t('Horizontal tabs'),
+      'tabs' => t('Vertical tabs group'),
+      'tab' => t('Vertical tab'),
+      'htabs' => t('Horizontal tabs group'),
       'htab' => t('Horizontal tab item'),
-      'accordion' => t('Accordion'),
+      'accordion' => t('Accordion group'),
       'accordion-item' => t('Accordion item')
     ),
     'display' => array(
       'hidden' => t('Hidden'),
       'div' => t('Div'),
       'fieldset' => t('Fieldset'),
-      'tabs' => t('Vertical tabs'),
-      'htabs' => t('Horizontal tabs'),
+      'tabs' => t('Vertical tabs group'),
+      'tab' => t('Vertical tab'),
+      'htabs' => t('Horizontal tabs group'),
       'htab' => t('Horizontal tab item'),
-      'accordion' => t('Accordion'),
+      'accordion' => t('Accordion group'),
       'accordion-item' => t('Accordion item')
     ),
   );
@@ -528,6 +526,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
   );
 
   switch ($group->visible) {
+    // Fieldset.
     case 'fieldset':
       $element += array(
         '#type' => 'fieldset',
@@ -541,6 +540,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element['#attached']['js'][] = 'misc/form.js';
       $element['#attached']['js'][] = 'misc/collapse.js';
       break;
+    // Normal or collapsible div.
     case 'div':
       $element += array(
         '#type' => 'markup',
@@ -552,6 +552,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       drupal_add_library('system', 'effects.blind');
       break;
+    // Horizontal tabs group and accordion group.
     case 'htabs':
     case 'accordion':
       $element += array(
@@ -561,6 +562,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#weight' => $group->weight,
       );
       break;
+    // Accordion item.
     case 'accordion-item':
       $element += array(
         '#type' => 'markup',
@@ -573,6 +575,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       drupal_add_library('system', 'ui.accordion');
       break;
+    // Horizontal tab.
     case 'htab':
       $element += array(
         '#type' => 'markup',
@@ -585,55 +588,52 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       drupal_add_library('system', 'effects.blind');
       break;
+    // Vertical tabs group.
     case 'tabs':
-      $tab_container = $group->format_settings['tab_settings'] == FIELD_GROUP_TABS_SEPARATE ? 'form-layout' : 'additional_settings';
-      if (!isset($form[$tab_container])) {
-        $form[$tab_container] = array(
-          '#type' => 'vertical_tabs',
+      $element += array(
+        '#type' => 'vertical_tabs',
+        '#weight' => $group->weight,
+        '#theme_wrappers' => array('vertical_tabs'),
+        '#prefix' => '<div class="field-group-'. $group->visible .'-wrapper">',
+        '#suffix' => '</div>',
+      );
+      $form['#attached']['js'][] = 'misc/form.js';
+      $form['#attached']['js'][] = 'misc/collapse.js';
+      $form['#attached']['js'][] = 'misc/vertical-tabs.js';
+      $form['#attached']['css'][] = 'misc/vertical-tabs.css';
+      break;
+    // Vertical tab.
+    case 'tab':
+      // For the form, we will keep it in the root.
+      if (!isset($form['#view_mode'])) {
+        $form['additional_settings'][$group->group_name] = array(
+          '#type' => 'fieldset',
+          '#title' => $group->label,
           '#weight' => $group->weight,
-          '#theme_wrappers' => array('vertical_tabs'),
+          '#collapsible' => $collapsible,
+          '#collapsed' => $collapsed,
+          '#attributes' => array('class' => array($group->visible)),
+          '#group' => 'additional_settings',
+        );
+        foreach (element_children($element) as $fieldname) {
+          $form['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+          unset($element[$fieldname]);
+        }
+      }
+      else {
+        $element += array(
+          '#type' => 'fieldset',
+          '#title' => $group->label,
+          '#weight' => $group->weight,
+          '#collapsible' => $collapsible,
+          '#collapsed' => $collapsed,
+          '#attributes' => array('class' => array($group->visible)),
+          '#group' => $group->parent_name,
+          // very important. Cannot be added on the form!
+          '#parents' => array($group->parent_name),
         );
       }
-      $form[$tab_container][$group->group_name] = array(
-        '#type' => 'fieldset',
-        '#title' => $group->label,
-        '#weight' => $group->weight,
-        '#collapsible' => $collapsible,
-        '#collapsed' => $collapsed,
-        '#attributes' => array('class' => $classes),
-        '#group' => $tab_container,
-      );
-      // Adding this is very important to bypass form.inc.
-      // Note that form cannot have this for it gives a continuous loop.
-      if (isset($form['#view_mode'])) {
-        $form[$tab_container][$group->group_name]['#parents'] = array($tab_container);
-      }
-      // Stash the elements in the group into #group > fieldgroup.
-      foreach (element_children($element) as $fieldname) {
-        $form[$tab_container][$group->group_name][$fieldname] = $element[$fieldname];
-        unset($element[$fieldname]);
-        // TODO fix this. The code seems to work, but the vertical tabs always
-        // set the wrong default tab. me not unerstand.
-        // Ironic that it works without default tab.
-        /*if ($group->format_settings['fieldgroup_settings'] == 'collapsible') {
-          $form[$tab_container]['#default_tab'] = $group->group_name;
-        }
-        if (isset($form[$tab_container]['#default_tab'])) {
-          $form[$tab_container][$group->group_name .'__active_tab'] = array(
-            '#type' => 'hidden',
-            '#default_value' => $form[$tab_container]['#default_tab'],
-            '#attributes' => array('class' => array('vertical-tabs-active-tab')),
-          );
-        }*/
-      }
 
-      // For the view modes only.
-      if (isset($form['#view_mode']) && !isset($form[$tab_container]['#attached'])) {
-        $form[$tab_container]['#attached']['js'][] = 'misc/form.js';
-        $form[$tab_container]['#attached']['js'][] = 'misc/collapse.js';
-        $form[$tab_container]['#attached']['js'][] = 'misc/vertical-tabs.js';
-        $form[$tab_container]['#attached']['css'][] = 'misc/vertical-tabs.css';
-      }
     break;
   }
 }
@@ -693,20 +693,6 @@ function field_group_field_group_is_empty($element, $groups) {
 function field_group_field_group_format_settings(& $group) {
   $form = array();
   switch ($group->visible) {
-    case 'tabs':
-      if (!isset($group->format_settings['tab_settings'])) {
-        $group->format_settings['tab_settings'] = FIELD_GROUP_TABS_MERGED;
-      }
-      $form['tab_settings'] = array(
-        '#title' => t('Tab settings'),
-        '#type' => 'select',
-        '#default_value' => $group->format_settings['tab_settings'],
-        '#options' => array(
-          FIELD_GROUP_TABS_SEPARATE => t('Separate from core fieldsets'),
-          FIELD_GROUP_TABS_MERGED => t('Merged with core fieldsets')),
-        '#weight' => 2,
-      );
-    // Fall through to add extra tabs configuration.
     case 'fieldset':
     case 'div':
       if (!isset($group->format_settings['fieldgroup_settings'])) {
@@ -726,6 +712,7 @@ function field_group_field_group_format_settings(& $group) {
         //'#required' => TRUE,
       );
       break;
+    case 'tab':
     case 'accordion-item':
     case 'htab':
       if (!isset($group->format_settings['fieldgroup_settings'])) {
@@ -753,12 +740,6 @@ function field_group_field_group_format_summary(& $group) {
   $output = '';
   if (isset($group->format_settings['fieldgroup_settings'])) {
     $output = '<strong>'. $group->visible .'</strong> '. $group->format_settings['fieldgroup_settings'] .'';
-  }
-  if ($group->visible == 'tabs') {
-    $options = array(
-      FIELD_GROUP_TABS_SEPARATE => t('Seperate from core fieldsets'),
-      FIELD_GROUP_TABS_MERGED => t('Merged with core fieldsets'));
-    $output .= '<br />'. t('Tabs') .': ' . (isset($options[$group->format_settings['tab_settings']]) ? $options[$group->format_settings['tab_settings']] : reset($options));
   }
   return $output;
 }
@@ -945,7 +926,6 @@ function field_group_fields_process($element) {
     $element['revision_information']['#weight'] = 30;
     $element['path']['#weight'] = 30;
   }
-
   drupal_alter('field_group_pre_render', $element);
 
   return $element;
