@@ -85,6 +85,9 @@ Drupal.FieldGroup.Effects.processDiv = {
  */
 Drupal.behaviors.fieldGroup = {
   attach: function (context, settings) {
+    if (settings.field_group == undefined) {
+      return;
+    }
     $('.field-group-content-wrapper', context).once('fieldgroup.effects', function () {
       // Execute all of them.
       $.each(Drupal.FieldGroup.Effects, function (func) {

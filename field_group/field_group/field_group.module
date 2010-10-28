@@ -225,8 +225,15 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     $row['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
     $row['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
   }
+  /*foreach (element_children($table) as $name) {
+    if (isset($_POST['refresh_rows']) && $_POST['refresh_rows'] == $name && isset($_POST['fields'][$_POST['refresh_rows']]['type'])) {
+      $params->parents[$name] = '';
+    }
+    $table[$name]['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
+    $table[$name]['parent_wrapper']['parent']['#value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
+  }*/
 
-  // Group rows.
+  // Create the group rows and check actions.
   foreach (array_keys($params->groups) as $name) {
 
     $group = & $params->groups[$name];
