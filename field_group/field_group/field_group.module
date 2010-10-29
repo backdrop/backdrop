@@ -403,7 +403,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   );
 
   $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
-  $form['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group_admin.js';
+  $form['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.admin.js';
 
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
