@@ -7,7 +7,6 @@
  *
  * @todo - fill along if we know more.
  *
- * - nest a field under a group and see if parent_name is stored in field
  * - nest a group under another group and see if parent_name is first group
  * - nest a group under second group and see if parent_name is second group
  * - settings: open f and verify on front-end (classes)
@@ -85,5 +84,19 @@ class GroupUITestCase extends DrupalWebTestCase {
   function testCRUDgroup() {
     $this->createGroup();
     $this->deleteGroup();
+  }
+
+  /**
+   * Nest a field underneath a group.
+   */
+  function testNestField() {
+    $this->createGroup();
+    $edit = array(
+      'fields[field_image][parent]' => $this->group_name,
+    );
+    $this->drupalPost('admin/structure/types/manage/article/fields', $edit, t('Save'));
+    $this->assertRaw(t('Your settings have been saved.'), t('Settings saved'));
+    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $this->assertTrue(in_array('field_image', $groups[$this->group_name]->children), t('Image is a child of %group', array('%group' => $this->group_label)));
   }
 }
