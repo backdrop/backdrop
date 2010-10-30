@@ -377,25 +377,24 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       }
     }
 
-    /**
-     * Special case for region.
-     */
-    if ($group->visible == 'region') {
-      $table[$name]['format']['type']['#access'] = FALSE;
-      $table[$name]['settings_summary']['#access'] = FALSE;
-      $table[$name]['format']['#access'] = FALSE;
-      $table[$name]['#attributes']['class'] = array('draggable', 'tabledrag-root', 'static-region', 'field-group');
-      $table[$name]['#attributes']['no_striping'] = TRUE;
-      // @todo fix collapsed stuff - we could also maybe hide the drag handler - although it's handy
-      // to drag and drop of course.
-    }
-
     if (!$display_overview) {
       $table[$name] += array(
         'delete' => array(
           '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
         ),
       );
+    }
+
+    /**
+     * Special case for region.
+     */
+    if ($group->visible == 'region') {
+      // @todo clean this up - and maybe hide the tabledrag handlers ?
+      $table[$name]['format']['type']['#access'] = FALSE;
+      $table[$name]['settings_summary']['#access'] = FALSE;
+      $table[$name]['format']['#access'] = FALSE;
+      $table[$name]['#attributes']['class'] = array('draggable', 'tabledrag-root', 'static-region', 'field-group');
+      $table[$name]['#attributes']['no_striping'] = TRUE;
     }
   }
 

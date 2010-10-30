@@ -1,5 +1,7 @@
 /* $Id$ */
 
+/* This should probably move to field_group.admin.css no ? */
+
 #field-overview tr.field-group .group-label,
 #field-display-overview tr.field-group .group-label {
   font-weight: bold;
