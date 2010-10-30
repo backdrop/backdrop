@@ -5,24 +5,7 @@
   font-weight: bold;
 }
 
-/* Test for static regions */
-tr.static-region {
-  background-color: #ddd;
-}
-tr.static-region .group-label {
-  font-weight: bold;
-}
-
-.group-left {
-  float: left;
-  width: 60%;
-}
-
-.group-right {
-  float: right;
-  width: 40%;
-}
-
-.group-footer {
-  clear: both;
+#field-overview tr.static-region,
+#field-display-overview tr.static-region {
+	  background-color: #ddd;
 }

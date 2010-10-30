@@ -384,7 +384,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       $table[$name]['format']['type']['#access'] = FALSE;
       $table[$name]['settings_summary']['#access'] = FALSE;
       $table[$name]['format']['#access'] = FALSE;
-      $table[$name]['#attributes']['class'] = array('draggable', 'tabledrag-root', 'static-region');
+      $table[$name]['#attributes']['class'] = array('draggable', 'tabledrag-root', 'static-region', 'field-group');
       $table[$name]['#attributes']['no_striping'] = TRUE;
       // @todo fix collapsed stuff - we could also maybe hide the drag handler - although it's handy
       // to drag and drop of course.
@@ -486,6 +486,7 @@ function field_group_field_group_formats() {
   return array(
     'form' => array(
       'fieldset' => t('Fieldset'),
+      'region' => t('Region'),
       'tabs' => t('Vertical tabs group'),
       'tab' => t('Vertical tab'),
       'htabs' => t('Horizontal tabs group'),
@@ -496,6 +497,7 @@ function field_group_field_group_formats() {
     ),
     'display' => array(
       'div' => t('Div'),
+      'region' => t('Region'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Vertical tabs group'),
       'tab' => t('Vertical tab'),
