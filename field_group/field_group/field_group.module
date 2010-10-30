@@ -105,6 +105,7 @@ function field_group_features_api() {
  * Implements hook_field_attach_form().
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
   field_group_attach_groups($form, 'form');
 }
 
@@ -376,6 +377,19 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       }
     }
 
+    /**
+     * Special case for region.
+     */
+    if ($group->visible == 'region') {
+      $table[$name]['format']['type']['#access'] = FALSE;
+      $table[$name]['settings_summary']['#access'] = FALSE;
+      $table[$name]['format']['#access'] = FALSE;
+      $table[$name]['#attributes']['class'] = array('draggable', 'tabledrag-root', 'static-region');
+      $table[$name]['#attributes']['no_striping'] = TRUE;
+      // @todo fix collapsed stuff - we could also maybe hide the drag handler - although it's handy
+      // to drag and drop of course.
+    }
+
     if (!$display_overview) {
       $table[$name] += array(
         'delete' => array(
@@ -519,6 +533,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     $collapsed = FALSE;
     $classes[] = 'collapsible';
   }
+
   // Javascript has to be able to play along.
   $form['#attached']['js'][] = array(
     'data' => array('field_group' => array($group->visible => TRUE)),
@@ -551,6 +566,20 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#weight' => $group->weight,
       );
       drupal_add_library('system', 'effects.blind');
+      break;
+    // Static region
+    case 'region':
+      // Create a unique region class.
+      // @todo check with jyve for the ideal region class names.
+      if ($group->visible == 'region') {
+        $classes[] = strtr($group->group_name, '_', '-');
+      }
+      $element += array(
+        '#type' => 'markup',
+        '#prefix' => '<div class="field-group-format '. implode(' ', $classes) . '">',
+        '#suffix' => '</div>',
+        '#weight' => $group->weight,
+      );
       break;
     // Horizontal tabs group and accordion group.
     case 'htabs':

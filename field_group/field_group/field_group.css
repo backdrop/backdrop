@@ -1,5 +1,28 @@
 /* $Id$ */
 
-#field-overview tr.field-group .group-label,#field-display-overview tr.field-group .group-label {
+#field-overview tr.field-group .group-label,
+#field-display-overview tr.field-group .group-label {
   font-weight: bold;
+}
+
+/* Test for static regions */
+tr.static-region {
+  background-color: #ddd;
+}
+tr.static-region .group-label {
+  font-weight: bold;
+}
+
+.group-left {
+  float: left;
+  width: 60%;
+}
+
+.group-right {
+  float: right;
+  width: 40%;
+}
+
+.group-footer {
+  clear: both;
 }
