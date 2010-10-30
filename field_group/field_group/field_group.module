@@ -471,17 +471,16 @@ function field_group_add_row($name, $parent_options, $params) {
 function field_group_field_group_formats() {
   return array(
     'form' => array(
-      'hidden' => t('Hidden'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Vertical tabs group'),
       'tab' => t('Vertical tab'),
       'htabs' => t('Horizontal tabs group'),
       'htab' => t('Horizontal tab item'),
       'accordion' => t('Accordion group'),
-      'accordion-item' => t('Accordion item')
+      'accordion-item' => t('Accordion item'),
+      'hidden' => t('<Hidden>'),
     ),
     'display' => array(
-      'hidden' => t('Hidden'),
       'div' => t('Div'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Vertical tabs group'),
@@ -489,7 +488,8 @@ function field_group_field_group_formats() {
       'htabs' => t('Horizontal tabs group'),
       'htab' => t('Horizontal tab item'),
       'accordion' => t('Accordion group'),
-      'accordion-item' => t('Accordion item')
+      'accordion-item' => t('Accordion item'),
+      'hidden' => t('<Hidden>'),
     ),
   );
 }
