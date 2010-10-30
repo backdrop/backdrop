@@ -660,9 +660,8 @@ function field_group_field_group_pre_render_alter(& $element) {
   // TODO check if there is no other way to target only a wrapper where the
   //      fieldgroups are located. Currently javascript use this.
   $element['#attached']['js'][] = drupal_get_path('module', 'field_group') .'/field_group.js';
-  $element['#prefix'] = '<div class="field-group-content-wrapper">';
-  $element['#suffix'] = '</div>';
-
+  $element['#prefix'] = (isset($element['#prefix']) ? $element['#prefix'] : '') . '<div class="field-group-content-wrapper">';
+  $element['#suffix'] = '</div>' . (isset($element['#suffix']) ? $element['#suffix'] : '');
 }
 
 /**
