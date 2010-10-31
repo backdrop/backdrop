@@ -995,11 +995,9 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
           unset($root_element[$groupfield]);
           unset($root_element['#group_children'][$groupfield]);
         }
-        // Or hey, is the field maybe a group, then prepare the array
-        // so the group is not left empty.
+        // Or hey, is the field maybe a group, then prepare the array.
         if ($groupname == $name && isset($root_element['#groups'][$groupfield])) {
           $element[$name][$groupfield] = array();
-          unset($root_element['#group_children'][$groupfield]);
         }
       }
       // Bring extra element wrappers to achieve a grouping of fields.
@@ -1267,58 +1265,10 @@ function field_group_attach_groups(&$element, $view_mode) {
 
   // Add a pre render or process callback.
   // This is needed since process seems too early for the front view modes.
-  $element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_fields_process';
+  // TODO Really check what's the difference on forms to use pre_render or process.
+  $element[$view_mode == 'form' ? '#pre_render': '#pre_render'][] = 'field_group_fields_process';
 }
 
-
-// @todo experiments with setting & summary.
-
-// This does work partially (trying to find out how to save the settings)
-// since we check on the form_state just like field_ui.admin.inc does. Not sure if
-// we should do that like this, seems like much overhead (although I can't see
-// any other way to do that). Should be documented to developers.
-//
-// The irony of all this is that if we treat fieldgroups as fields
-// all this stuff would work out of the box and we could use
-// formatters_info & all those hooks (but there should be  a way to tell
-// field api that this field will not store any data)
-
-// (YC) Groups are not fields, I don't think we can or should treat them that way.
-// You cannot add fields from the 'Manage display' screens - but you can add groups.
-
-// Also, are those settings and summary forms extendable or not from
-// other modules. Just thinking how for example I'd like to add
-// a Styles select box to every field/fieldgroup from the Display Suite
-// module. (I guess form alter should, but will it save also - need to investigate myself)
-//
-// Maybe this isn't necessary at all and all settings
-// should be moved to the edit screen of a field group
-// I think it depends whether we want to make it possible to let
-// other module developers extend on this field group module to
-// add different kinds of fieldgroups or not ...
-// Moving it to the edit screen however makes the flow of
-// managing your display/form a bit slower.
-
-// (YC) We do want to let other modules add other group 'flavors'. Those then become
-// a lot like field formatters. Declared through hook_fieldgroup_formatter_info(),
-// with settings and a default value for each setting.
-// Field_group.module defines the basic ones :
-// - regular group (settings: 'fieldset open', 'collapsible', 'collapsed'),
-// - tabs container (settings: 'default tab' ?),
-// - VT container ?
-// - accordion container ?
-// Then each module declaring its group formatters is responsible for providing
-// the corresponding settings form and settings summary.
-// The 'format' dropdown select lets users pick a group formatter amongst all available formats.
-
-// Or, every possible configuration (like fieldset collapsible, collapsed, open
-// must be an option in the formatters $options above.
-//
-// So as some sort conclusion, these settings stuff should have
-// some helper functions to make it easier for other devs I think,
-// because you need a duplicate a lot of code and is pretty dangerous
-// when Drupal core gets updates
-
-// (YC) Tricky :-/
-
-// (YC) We should probably move the discussion to http://drupal.org/node/824812 :-)
+/**
+ * eof().
+ */
