@@ -114,7 +114,7 @@ function field_group_field_attach_form($entity_type, $entity, &$form, &$form_sta
  */
 function field_group_field_attach_view_alter(&$element, $context) {
   // Check whether the view mode uses custom display settings or the 'default' mode.
-  $view_mode_settings = field_view_mode_settings($element['#entity_type'], $element['#entity_type']);
+  $view_mode_settings = field_view_mode_settings($element['#entity_type'], $element['#bundle']);
   $view_mode = $context['view_mode'];
   $actual_mode = (!empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default');
   field_group_attach_groups($element, $actual_mode);
