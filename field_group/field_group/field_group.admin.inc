@@ -34,11 +34,12 @@ function field_group_delete_form_submit($form, &$form_state) {
   $group = $form['#group'];
   $bundle = $group->bundle;
   $entity_type = $group->entity_type;
+  $mode = $form_state['build_info']['args'][1];
 
   $bundles = field_info_bundles();
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
-  db_delete('field_group')->condition('id', $group->id)->execute();
+  db_delete('field_group')->condition('id', $group->id)->condition('mode', $mode)->execute();
   drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => $group->label, '%type' => $bundle_label)));
   cache_clear_all('field_groups', 'cache_field');
 
