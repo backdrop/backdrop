@@ -7,5 +7,6 @@ core = 7.x
 files[] = field_group.install
 files[] = field_group.module
 files[] = field_group.field_ui.inc
+files[] = field_group.form.inc
 files[] = field_group.features.inc
 files[] = field_group.test

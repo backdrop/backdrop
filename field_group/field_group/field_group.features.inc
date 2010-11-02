@@ -1,19 +1,6 @@
 <?php
 // $Id$
 
-/**
- * Implements hook_features_api().
- */
-function field_group_features_api() {
-  return array(
-    'field_group' => array(
-      'name' => t('Field groups'),
-      'default_hook' => 'field_group_default_field_groups',
-      'default_file' => FEATURES_DEFAULTS_INCLUDED,
-      'feature_source' => TRUE,
-    )
-  );
-}
 
 /**
  * Implements hook_features_export_options().
