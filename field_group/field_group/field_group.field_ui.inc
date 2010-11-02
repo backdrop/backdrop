@@ -1,89 +1,6 @@
 <?php
 // $Id$
 
-
-/**
- * Menu loader; Load a group instance based on group and bundle name.
- *
- * @param $group_name
- *   The name of the group, as contained in the path.
- * @param $entity_type
- *   The name of the entity.
- * @param $bundle_name
- *   The name of the bundle, as contained in the path.
- * @param $bundle_pos
- *   The position of $bundle_name in $map.
- * @param $map
- *   The translated menu router path argument map.
- */
-function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
-  // A unique group is identified by a [entity_type, bundle, group_name, view_mode] tuple.
-  $query = db_select('field_group', 'fg');
-  $query->fields('fg');
-  $query->condition('group_name', $group_name);
-  $query->condition('entity_type', $entity_type);
-  $query->condition('bundle', $bundle_name);
-  $group = $query->execute()->fetchObject();
-  if ($group->id) {
-    // @todo should happen in a proper CRUD API function
-    $data = unserialize($group->data);
-    unset($group->data);
-    $group->label = $data['label'];
-    $group->weight = $data['weight'];
-    $group->children = $data['children'];
-    $group->visible = $data['visible'];
-
-    return $group;
-  }
-  return FALSE;
-}
-
-/**
- * Menu callback; present a form for removing a group.
- */
-function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form') {
-
-  $form['#group'] = $group;
-  $admin_path = _field_ui_bundle_admin_path($group->entity_type, $group->bundle);
-  if ($view_mode == 'form') {
-    $admin_path .= '/fields';
-  }
-  else {
-    $admin_path .= '/display/'. $view_mode;
-  }
-  $form['#redirect'] = array($admin_path);
-  $output = confirm_form($form,
-    t('Are you sure you want to delete the group %group?', array('%group' => $group->label)),
-    $admin_path,
-    t('This action cannot be undone.'),
-    t('Delete'), t('Cancel'),
-    'confirm'
-  );
-  return $output;
-}
-
-/**
- * Remove group from bundle.
- *
- * @todo we'll have to reset all view mode settings - that will be fun :)
- */
-function field_group_delete_form_submit($form, &$form_state) {
-  $group = $form['#group'];
-  $bundle = $group->bundle;
-  $entity_type = $group->entity_type;
-  $mode = $form_state['build_info']['args'][1];
-
-  $bundles = field_info_bundles();
-  $bundle_label = $bundles[$entity_type][$bundle]['label'];
-
-  db_delete('field_group')->condition('id', $group->id)->condition('mode', $mode)->execute();
-  drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => $group->label, '%type' => $bundle_label)));
-  cache_clear_all('field_groups', 'cache_field');
-
-  // Redirect.
-  $form_state['redirect'] = $form['#redirect'];
-}
-
 /**
  * Helper function to get the form parameters to use while
  * building the fields and display overview form.
@@ -161,12 +78,13 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     $table[$name]['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
     $table[$name]['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
   }
+  // TODO : check why it works now?
   // Update rows that are made visible (dragged/selected out of hidden).
-  //if (isset($_POST['refresh_rows']) && $_POST['refresh_rows'] == $name && isset($_POST['fields'][$_POST['refresh_rows']]['type'])) {
-  //  $params->parents[$name] = '';
-  //  // override the #value because at this point in this context, #default_value is too late.
-  //  $table[$name]['parent_wrapper']['parent']['#value'] = $params->parents[$name];
-  //}
+  /*if (isset($_POST['refresh_rows']) && $_POST['refresh_rows'] == $name && isset($_POST['fields'][$_POST['refresh_rows']]['type'])) {
+    $params->parents[$name] = '';
+    // override the #value because at this point in this context, #default_value is too late.
+    $table[$name]['parent_wrapper']['parent']['#value'] = $params->parents[$name];
+  }*/
 
   // Create the group rows and check actions.
   foreach (array_keys($params->groups) as $name) {
@@ -501,6 +419,52 @@ function field_group_format_settings_summary($group_name, $group) {
     '#markup' => '<div class="field-formatter-summary">'. $summary .'</div>',
     '#cell_attributes' => array('class' => array('field-formatter-summary-cell')),
   );
+}
+
+/**
+ * Menu callback; present a form for removing a group.
+ */
+function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form') {
+
+  $form['#group'] = $group;
+  $admin_path = _field_ui_bundle_admin_path($group->entity_type, $group->bundle);
+  if ($view_mode == 'form') {
+    $admin_path .= '/fields';
+  }
+  else {
+    $admin_path .= '/display/'. $view_mode;
+  }
+  $form['#redirect'] = array($admin_path);
+  $output = confirm_form($form,
+    t('Are you sure you want to delete the group %group?', array('%group' => $group->label)),
+    $admin_path,
+    t('This action cannot be undone.'),
+    t('Delete'), t('Cancel'),
+    'confirm'
+  );
+  return $output;
+}
+
+/**
+ * Remove group from bundle.
+ *
+ * @todo we'll have to reset all view mode settings - that will be fun :)
+ */
+function field_group_delete_form_submit($form, &$form_state) {
+  $group = $form['#group'];
+  $bundle = $group->bundle;
+  $entity_type = $group->entity_type;
+  $mode = $form_state['build_info']['args'][1];
+
+  $bundles = field_info_bundles();
+  $bundle_label = $bundles[$entity_type][$bundle]['label'];
+
+  db_delete('field_group')->condition('id', $group->id)->condition('mode', $mode)->execute();
+  drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => $group->label, '%type' => $bundle_label)));
+  cache_clear_all('field_groups', 'cache_field');
+
+  // Redirect.
+  $form_state['redirect'] = $form['#redirect'];
 }
 
 /**

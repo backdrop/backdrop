@@ -20,7 +20,7 @@
  *   hook_field_group_pre_render()
  *     Create an element for the field group
  *
- *   hook_field_group_pre_render_alter()
+ *   hook_field_group_build_pre_render_alter()
  *     Gives the opportunity to do extra things for
  *     some format cases.
  *
@@ -91,6 +91,43 @@ function field_group_menu() {
   }
 
   return $items;
+}
+
+/**
+ * Menu load
+ * Load a group instance based on group and bundle name.
+ *
+ * @param $group_name
+ *   The name of the group, as contained in the path.
+ * @param $entity_type
+ *   The name of the entity.
+ * @param $bundle_name
+ *   The name of the bundle, as contained in the path.
+ * @param $bundle_pos
+ *   The position of $bundle_name in $map.
+ * @param $map
+ *   The translated menu router path argument map.
+ */
+function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
+  // A unique group is identified by a [entity_type, bundle, group_name, view_mode] tuple.
+  $query = db_select('field_group', 'fg');
+  $query->fields('fg');
+  $query->condition('group_name', $group_name);
+  $query->condition('entity_type', $entity_type);
+  $query->condition('bundle', $bundle_name);
+  $group = $query->execute()->fetchObject();
+  if ($group->id) {
+    // @todo should happen in a proper CRUD API function
+    $data = unserialize($group->data);
+    unset($group->data);
+    $group->label = $data['label'];
+    $group->weight = $data['weight'];
+    $group->children = $data['children'];
+    $group->visible = $data['visible'];
+
+    return $group;
+  }
+  return FALSE;
 }
 
 /**
@@ -472,10 +509,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
 }
 
 /**
- * Implements hook_field_group_pre_render_alter().
+ * Implements hook_field_group_build_pre_render_alter().
  * @param Array $elements by address.
  */
-function field_group_field_group_pre_render_alter(& $element) {
+function field_group_field_group_build_pre_render_alter(& $element) {
 
   // Dish the fieldgroups with no fields.
   if (isset($element['#view_mode'])) {
@@ -540,8 +577,6 @@ function field_group_field_group_format_settings(& $group) {
         ),
         '#default_value' => $group->format_settings['fieldgroup_settings'],
         '#weight' => 1,
-        //'#element_validate' => array('_element_validate_integer_positive'),
-        //'#required' => TRUE,
       );
       break;
     case 'tab':
@@ -721,7 +756,9 @@ function field_group_attach_groups(&$element, $view_mode) {
   // Add a pre render or process callback.
   // This is needed since process seems too early for the front view modes.
   // TODO Really check what's the difference on forms to use pre_render or process.
-  $element[$view_mode == 'form' ? '#pre_render': '#pre_render'][] = 'field_group_fields_process';
+  //$element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_group_pre_render';
+  $element['#pre_render'][] = 'field_group_build_pre_render';
+  //$element['#process'][] = 'field_group_build_pre_render';
 }
 
 /**
@@ -734,17 +771,12 @@ function field_group_attach_groups(&$element, $view_mode) {
  * @param $element Form element
  * @return $element Array with re-arranged fields in forms.
  */
-function field_group_fields_process($element) {
+function field_group_build_pre_render($element) {
   // Nest the fields in the corresponding field groups.
   field_group_fields_nest($element, $element);
 
-  // Dirty fix to 'deny' the default ones.
-  if (isset($element['#node_edit_form'])) {
-    $element['menu']['#weight'] = 30;
-    $element['revision_information']['#weight'] = 30;
-    $element['path']['#weight'] = 30;
-  }
-  drupal_alter('field_group_pre_render', $element);
+  // Allow others to alter the pre_rendered build.
+  drupal_alter('field_group_build_pre_render', $element);
 
   return $element;
 }
