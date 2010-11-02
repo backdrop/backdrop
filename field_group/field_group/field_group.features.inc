@@ -4,7 +4,7 @@
 /**
  * Implements hook_features_api().
  */
-function _field_group_features_api() {
+function field_group_features_api() {
   return array(
     'field_group' => array(
       'name' => t('Field groups'),
@@ -14,7 +14,6 @@ function _field_group_features_api() {
     )
   );
 }
-
 
 /**
  * Implements hook_features_export_options().
