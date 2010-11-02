@@ -32,33 +32,6 @@
  */
 
 /**
- * Implements hook_hook_info().
- */
-function field_group_hook_info() {
-  $hooks = array(
-    'menu' => array(
-      'group' => 'field_ui'
-    ),
-    'field_info_max_weight' => array(
-      'group' => 'field_ui'
-    ),
-    'form_field_ui_field_overview_form_alter' => array(
-      'group' => 'field_ui'
-    ),
-    'form_field_ui_display_overview_form_alter' => array(
-      'group' => 'field_ui'
-    ),
-    'features_api' => array(
-      'group' => 'features'
-    ),
-    'field_attach_form' => array(
-      'group' => 'form'
-    ),
-  );
-  return $hooks;
-}
-
-/**
  * Implements hook_menu().
  */
 function field_group_menu() {
