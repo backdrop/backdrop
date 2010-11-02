@@ -205,10 +205,13 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
   $table = &$form['fields'];
 
-  // Add a region for 'add_new' rows.
-  $table['#regions'] += array(
-    'add_new' => array('title' => '&nbsp;'),
-  );
+  // Add a region for 'add_new' rows, but only when fields are
+  // available and thus regions.
+  if (isset($table['#regions'])) {
+    $table['#regions'] += array(
+      'add_new' => array('title' => '&nbsp;'),
+    );
+  }
 
   // Extend available parenting options.
   foreach ($params->groups as $name => $group) {
