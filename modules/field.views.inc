@@ -198,7 +198,7 @@ function field_views_field_default_views_data($field) {
       // Expose additional delta column for multiple value fields.
       if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
         $title = t('@label (!name) - delta', array('@label' => $field['field_name'], '!name' => $field['field_name']));
-        $title_short = t('!name - delta', array('@name' => $field['field_name']));
+        $title_short = t('!name - delta', array('!name' => $field['field_name']));
 
         $data[$table]['delta'] = array(
           'group' => $group,
