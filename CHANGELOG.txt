@@ -425,6 +425,7 @@ Views 3.x-7.x-dev
     o #667950 by merlinofchaos, bojanz and dereine: Revert the states patch and use ctools dependency instead.
     o #960528 by dereine: Clicksort doesn't work for field names that contain special characters.
     o by dereine: Document add_where for formula.
+    o by dereine: Fix notice in ajax.inc.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

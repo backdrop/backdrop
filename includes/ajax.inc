@@ -209,7 +209,8 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     ),
   );
 
-  $output = drupal_render(drupal_build_form($form_id, $form_state));
+  $form = drupal_build_form($form_id, $form_state);
+  $output = drupal_render($form);
 
   // These forms have the title built in, so set the title here:
   if (empty($form_state['ajax']) && !empty($form_state['title'])) {
