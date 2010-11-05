@@ -24,3 +24,14 @@ files[] = includes/views/handlers/example_handler_argument_string.inc
 Note that views_handler_filter_float has been removed.
 This functionality is now handled by views_handler_filter_numeric.
 There's no need for having a special handler any more, thanks to the new DB layer in Drupal 7.
+
+<h3>Ctools dependency</h3>
+Views requires ctools now, so it can use the dependency system of ctools.
+The only thing you have to do is to replace 
+<pre>
+'#process' => array('views_process_dependeny')
+</pre>
+with
+<pre>
+'#process' => array('ctools_dependent_process'),
+</pre>

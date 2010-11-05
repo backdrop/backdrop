@@ -36,10 +36,9 @@ class views_handler_field_user_name extends views_handler_field_user {
       '#title' => t('Text to display for anonymous users'),
       '#type' => 'textfield',
       '#default_value' => $this->options['anonymous_text'],
-      '#states' => array(
-        'invisible' => array(
-          'input[name="options[overwrite_anonymous"]' => array('checked' => FALSE),
-        ),
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-overwrite-anonymous' => array(1),
       ),
     );
   }

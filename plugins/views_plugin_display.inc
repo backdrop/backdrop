@@ -98,7 +98,7 @@ class views_plugin_display extends views_plugin {
               'relationship' => 'none',
               'group_type' => 'group',
               'content' => $content,
-              'format' => !empty($format) ? $format : variable_get('filter_default_format', 1),
+              'format' => !empty($format) ? $format : filter_default_format(),
             );
 
             if ($area != 'empty' && $empty = $this->get_option($area . '_empty')) {

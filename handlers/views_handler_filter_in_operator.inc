@@ -203,6 +203,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
           $form['value']['#prefix'] = '<div id="edit-options-value-wrapper">';
           $form['value']['#suffix'] = '</div>';
         }
+        $process[] = 'ctools_dependent_process';
         $form['value']['#dependency'] = array($source => $this->operator_values(1));
       }
       if (!empty($process)) {

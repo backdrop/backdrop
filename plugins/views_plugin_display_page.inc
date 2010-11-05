@@ -298,24 +298,16 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#default_value' => $menu['title'],
           '#description' => t('If set to normal or tab, enter the text to use for the menu item.'),
+          '#process' => array('ctools_dependent_process'),
           '#dependency' => array('radio:menu[type]' => array('normal', 'tab', 'default tab')),
-          '#states' => array(
-            'visible' => array(
-              ':radio:menu[type]' => array('value' => array('normal', 'tab', 'default tab')),
-            ),
-          ),
         );
         $form['menu']['description'] = array(
           '#title' => t('Description'),
           '#type' => 'textfield',
           '#default_value' => $menu['description'],
           '#description' => t("If set to normal or tab, enter the text to use for the menu item's description."),
+          '#process' => array('ctools_dependent_process'),
           '#dependency' => array('radio:menu[type]' => array('normal', 'tab', 'default tab')),
-          '#states' => array(
-            'visible' => array(
-              ':radio:menu[type]' => array('value' => array('normal', 'tab', 'default tab')),
-            ),
-          ),
         );
 
         // Only display the menu selector if menu module is enabled.
@@ -326,12 +318,8 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $menu['name'],
             '#description' => t('Insert item into an available menu.'), //
+            '#process' => array('ctools_dependent_process'),
             '#dependency' => array('radio:menu[type]' => array('normal')),
-            '#states' => array(
-              'visible' => array(
-                ':radio:menu[type]' => array('value' => array('normal')),
-              ),
-            ),
           );
         }
         else {
@@ -349,12 +337,8 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
           '#description' => t('The lower the weight the higher/further left it will appear.'),
+          '#process' => array('ctools_dependent_process'),
           '#dependency' => array('radio:menu[type]' => array('normal', 'tab', 'default tab')),
-          '#states' => array(
-            'visible' => array(
-              ':radio:menu[type]' => array('value' => array('normal', 'tab', 'default tab')),
-            ),
-          ),
         );
         break;
       case 'tab_options':
@@ -387,24 +371,16 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#default_value' => $tab_options['title'],
           '#description' => t('If creating a parent menu item, enter the title of the item.'),
+          '#process' => array('ctools_dependent_process'),
           '#dependency' => array('radio:tab_options[type]' => array('normal', 'tab')),
-          '#states' => array(
-            'visible' => array(
-              ':radio:tab_options[type]' => array('value' => array('normal', 'tab')),
-            ),
-          ),
         );
         $form['tab_options']['description'] = array(
           '#title' => t('Description'),
           '#type' => 'textfield',
           '#default_value' => $tab_options['description'],
           '#description' => t('If creating a parent menu item, enter the description of the item.'),
+          '#process' => array('ctools_dependent_process'),
           '#dependency' => array('radio:tab_options[type]' => array('normal', 'tab')),
-          '#states' => array(
-            'visible' => array(
-              ':radio:tab_options[type]' => array('value' => array('normal', 'tab')),
-            ),
-          ),
         );
         // Only display the menu selector if menu module is enabled.
         if (module_exists('menu')) {
@@ -414,12 +390,8 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $tab_options['name'],
             '#description' => t('Insert item into an available menu.'),
+            '#process' => array('ctools_dependent_process'),
             '#dependency' => array('radio:tab_options[type]' => array('normal')),
-            '#states' => array(
-              'visible' => array(
-                ':radio:tab_options[type]' => array('value' => array('normal')),
-              ),
-            ),
           );
         }
         else {
@@ -438,12 +410,8 @@ class views_plugin_display_page extends views_plugin_display {
           '#default_value' => $tab_options['weight'],
           '#size' => 5,
           '#description' => t('If the parent menu item is a tab, enter the weight of the tab. The lower the number, the more to the left it will be.'),
+          '#process' => array('ctools_dependent_process'),
           '#dependency' => array('radio:tab_options[type]' => array('tab')),
-          '#states' => array(
-            'visible' => array(
-              ':radio:tab_options[type]' => array('value' => array('tab')),
-            ),
-          ),
         );
         break;
     }

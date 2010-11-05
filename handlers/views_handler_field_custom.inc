@@ -24,7 +24,7 @@ class views_handler_field_custom extends views_handler_field {
 
     // Remove the checkbox
     unset($form['alter']['alter_text']);
-    unset($form['alter']['text']['#states']);
+    unset($form['alter']['text']['#dependency']);
     unset($form['alter']['text']['#process']);
   }
 

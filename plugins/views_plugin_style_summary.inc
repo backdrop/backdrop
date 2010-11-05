@@ -53,11 +53,8 @@ class views_plugin_style_summary extends views_plugin_style {
       '#type' => 'textfield',
       '#title' => t('Items to display'),
       '#default_value' => $this->options['items_per_page'],
-      '#states' => array(
-        'invisible' => array(
-          'input[name="style_options[override]"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array('edit-style-options-override' => array(TRUE)),
     );
   }
 

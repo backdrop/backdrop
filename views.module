@@ -1074,6 +1074,7 @@ function views_exposed_form($form, &$form_state) {
   if ($view->use_ajax) {
     drupal_add_js('misc/jquery.form.js', array('group' => JS_LIBRARY));
   }
+  ctools_include('dependent');
 
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
   $exposed_form_plugin->exposed_form_alter($form, $form_state);

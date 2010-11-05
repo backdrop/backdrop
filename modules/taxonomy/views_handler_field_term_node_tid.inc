@@ -65,13 +65,9 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
       '#title' => t('Vocabularies'),
       '#options' => $options,
       '#default_value' => $this->options['vocabularies'],
-      '#process' => array('form_process_checkboxes'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[limit]"]' => array('checked' => TRUE),
-        ),
-      ),
-   );
+      '#process' => array('form_process_checkboxes', 'ctools_dependent_process'),
+      '#dependency' => array('edit-options-limit' => array(TRUE)),
+    );
   }
 
   /**

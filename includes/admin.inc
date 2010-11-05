@@ -1017,6 +1017,7 @@ function views_ui_edit_view_form_delete($form, &$form_state) {
  */
 function template_preprocess_views_ui_edit_view(&$vars) {
   $view = &$vars['view'];
+  ctools_include('dependent');
 
   // The form has to be saved as variable because of strict warnings.
   $form = drupal_get_form('views_ui_edit_view_form', $view);
@@ -2364,6 +2365,8 @@ function views_ui_add_item_form($form, &$form_state) {
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
 
+  ctools_add_js('dependent');
+
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
@@ -2389,7 +2392,7 @@ function views_ui_add_item_form($form, &$form_state) {
       '#type' => 'select',
       '#title' => t('Groups'),
       '#options' => array(),
-      '#attributes' => array('class' => array('views-master-dependent')),
+      '#attributes' => array('class' => array('ctools-master-dependent')),
     );
 
     $form['name'] = array(
@@ -2409,7 +2412,7 @@ function views_ui_add_item_form($form, &$form_state) {
     }
 
     foreach ($grouped_options as $group => $group_options) {
-      $form['name'][$group . '_start']['#markup'] = '<div class="views-dependent-all views-dependent-' . $group . '">';
+      $form['name'][$group . '_start']['#markup'] = '<div class="ctools-dependent-all ctools-dependent-' . $group . '">';
       foreach ($group_options as $key => $option) {
         $form['name'][$key] = array(
           '#type' => 'checkbox',
@@ -2428,6 +2431,7 @@ function views_ui_add_item_form($form, &$form_state) {
       '#value' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $types[$type]['ltitle'])) . '</div>',
     );
   }
+  ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add'));
 
   return $form;
