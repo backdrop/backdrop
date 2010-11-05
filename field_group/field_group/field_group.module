@@ -7,7 +7,7 @@
  *  like Field formatters api
  *  hook_field_group_formatter_info(), returning group formats each with
  *  their own settings and default settings values
- * field_group_field_group_formats currently looks like nothing familiar -
+ * field_group_field_group_formatter_info currently looks like nothing familiar -
  * sticking to Field API formulation is better DX, and it's a somewhat proofed API
  * no, forms have nothing to do with that. I want to know which settings a group
  * formatter has, and what default values should be used
@@ -711,7 +711,7 @@ function field_group_save(&$group) {
 /**
  * Function to retrieve all format possibilities for the fieldgroups.
  */
-function field_group_formats($display_overview = FALSE) {
+function field_group_formatter_info($display_overview = FALSE) {
   $cache = &drupal_static(__FUNCTION__, array());
   if (empty($cache)) {
     if ($cached = cache_get('field_group_formatter_info', 'cache_field')) {
@@ -843,7 +843,7 @@ function field_group_pre_render(& $element, $group, & $form) {
     $function = $module . '_field_group_pre_render';
     if (function_exists($function)) {
       // The intention here is to have the opportunity to alter the
-      // elements, as defined in hook_field_group_formats.
+      // elements, as defined in hook_field_group_formatter_info.
       // Note, implement $element by reference!
       $function($element, $group, $form);
     }
