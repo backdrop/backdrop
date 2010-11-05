@@ -106,7 +106,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       else {
         $formatter_type = $group->visible;
       }
-      // If the region has been updated because of a format selection,
+      // TODO go through the default from hook info
+      // If the group has been updated because of a format selection,
       // load the format defaults.
       if ($formatter_type != $group->visible) {
         $group->visible = $formatter_type;
@@ -243,18 +244,6 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
           '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
         ),
       );
-    }
-
-    /**
-     * Special case for region.
-     */
-    if ($group->visible == 'region') {
-      // @todo clean this up - and maybe hide the tabledrag handlers ?
-      $table[$name]['format']['type']['#access'] = FALSE;
-      $table[$name]['settings_summary']['#access'] = FALSE;
-      $table[$name]['format']['#access'] = FALSE;
-      $table[$name]['#attributes']['class'] = array('draggable', 'tabledrag-root', 'static-region', 'field-group');
-      $table[$name]['#attributes']['no_striping'] = TRUE;
     }
   }
 

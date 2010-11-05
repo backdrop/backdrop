@@ -2,14 +2,29 @@
 // $Id$
 
 /**
+ * hook_field_group_formatter_info
+ * stalski: swentel: API wise : it would b a good idea IMO to model the "pluggable group style" API just
+ *  like Field formatters api
+ *  hook_field_group_formatter_info(), returning group formats each with
+ *  their own settings and default settings values
+ * field_group_field_group_formats currently looks like nothing familiar -
+ * sticking to Field API formulation is better DX, and it's a somewhat proofed API
+ * no, forms have nothing to do with that. I want to know which settings a group
+ * formatter has, and what default values should be used
+ * stalski: also : make sure you fill in missing defaults when saving and
+ * loading a group definition. That saves you doing lots of isset() checks in all
+ * the rest of the code. $group becomes 'predictable'
+ */
+
+/**
  * @file
  * Fieldgroup module.
  *
  *   PHP HOOKS
  *
- *   hook_field_group_formats()
+ *   hook_field_group_formatter_info()
  *     Creates a format entry for a fieldgroup.
- *     @see field_group_field_group_formats()
+ *     @see field_group_field_group_formatter_info()
  *
  *   hook_field_group_format_settings
  *     Creates a form for the fieldgroup settings of the current group.
@@ -317,26 +332,23 @@ function field_group_field_attach_view_alter(&$element, $context) {
 }
 
 /**
- * Implements hook_field_group_formats().
+ * Implements hook_field_group_formatter_info().
  * @return array of available formatting html controls
  * for form and display overview type.
  */
-function field_group_field_group_formats() {
+function field_group_field_group_formatter_info() {
   return array(
     'form' => array(
       'fieldset' => t('Fieldset'),
-      'region' => t('Region'),
       'tabs' => t('Vertical tabs group'),
       'tab' => t('Vertical tab'),
       'htabs' => t('Horizontal tabs group'),
       'htab' => t('Horizontal tab item'),
       'accordion' => t('Accordion group'),
       'accordion-item' => t('Accordion item'),
-      'hidden' => t('<Hidden>'),
     ),
     'display' => array(
       'div' => t('Div'),
-      'region' => t('Region'),
       'fieldset' => t('Fieldset'),
       'tabs' => t('Vertical tabs group'),
       'tab' => t('Vertical tab'),
@@ -407,20 +419,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#weight' => $group->weight,
       );
       drupal_add_library('system', 'effects.blind');
-      break;
-    // Static region
-    case 'region':
-      // Create a unique region class.
-      // @todo check with jyve for the ideal region class names.
-      if ($group->visible == 'region') {
-        $classes[] = strtr($group->group_name, '_', '-');
-      }
-      $element += array(
-        '#type' => 'markup',
-        '#prefix' => '<div class="field-group-format '. implode(' ', $classes) . '">',
-        '#suffix' => '</div>',
-        '#weight' => $group->weight,
-      );
       break;
     // Horizontal tabs group and accordion group.
     case 'htabs':
@@ -695,10 +693,6 @@ function field_group_save(&$group) {
     'label' => $record->label,
     'weight' => $record->weight,
     'children' => $record->children,
-    // @todo rename to format ? And how to select format/theming on manage fields screen?
-    // Depends on what we will do with Display Suite. If we take on this challenge,
-    // maybe fieldgroups are a very explicable and extendable replacement for object-regions.
-    // - Stalski
     'visible' => $record->visible,
   );
   if (isset($record->format_settings)) {
@@ -720,13 +714,13 @@ function field_group_save(&$group) {
 function field_group_formats($display_overview = FALSE) {
   $cache = &drupal_static(__FUNCTION__, array());
   if (empty($cache)) {
-    if ($cached = cache_get('field_group_formats', 'cache_field')) {
+    if ($cached = cache_get('field_group_formatter_info', 'cache_field')) {
       $format_options = $cached->data;
     }
     else {
       $format_options = array();
-      $format_options += module_invoke_all('field_group_formats');
-      cache_set('field_group_formats', $format_options, 'cache_field');
+      $format_options += module_invoke_all('field_group_formatter_info');
+      cache_set('field_group_formatter_info', $format_options, 'cache_field');
     }
     $cache = $format_options;
   }
