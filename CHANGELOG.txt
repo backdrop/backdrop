@@ -423,6 +423,7 @@ Views 3.x-7.x-dev
     o #954784 by tekante: views_join class produces a SQL error when an array is in definition['extra']['value'].
     o #962756 by bojanz: Field delta shows the placeholder instead of the field name.
     o #667950 by merlinofchaos, bojanz and dereine: Revert the states patch and use ctools dependency instead.
+    o #960528 by dereine: Clicksort doesn't work for field names that contain special characters.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

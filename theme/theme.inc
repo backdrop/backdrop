@@ -344,7 +344,7 @@ function template_preprocess_views_view_table(&$vars) {
           $label .= theme('tablesort_indicator', array('style' => $initial));
         }
 
-        $query['order'] = urlencode($field);
+        $query['order'] = $field;
         $query['sort'] = $initial;
         $link_options = array(
           'html' => TRUE,
