@@ -2,6 +2,39 @@
 
 (function($) {
 
+Drupal.behaviors.fieldUIDisplayOverview = {
+  attach: function (context, settings) {
+    $('table#field-overview', context).once('field-field-overview', function() {
+      Drupal.fieldUIOverview.attach(this, settings.fieldUIRowsData, Drupal.fieldUIFieldOverview);
+    });
+  }
+};
+  
+/**
+ * Row handlers for the 'Manage fields' screen.
+ */
+Drupal.fieldUIFieldOverview = Drupal.fieldUIFieldOverview || {};
+
+Drupal.fieldUIFieldOverview.group = function(row, data) {
+  this.row = row;
+  this.name = data.name;
+  this.region = data.region;
+  this.tableDrag = data.tableDrag;
+
+  // Attach change listener to the 'group format' select.
+  this.$formatSelect = $('select.field-group-type', row);
+  this.$formatSelect.change(Drupal.fieldUIOverview.onChange);
+
+  return this;
+};
+
+Drupal.fieldUIFieldOverview.group.prototype = {
+  getRegion: function () {
+    return 'main';
+  },
+};
+  
+  
 /**
  * Row handlers for the 'Manage display' screen.
  */

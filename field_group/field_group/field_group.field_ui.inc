@@ -264,6 +264,25 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     'settings_edit' => array(),
   );
 
+  if (!$display_overview) {
+    // See field_ui.admin.inc for more details on refresh rows.
+    $form['refresh_rows'] = array('#type' => 'hidden');
+    $form['refresh'] = array(
+      '#type' => 'submit',
+      '#value' => t('Refresh'),
+      '#op' => 'refresh_table',
+      '#submit' => array('field_ui_display_overview_multistep_submit'),
+      '#ajax' => array(
+        'callback' => 'field_ui_display_overview_multistep_js',
+        'wrapper' => 'field-display-overview-wrapper',
+        'effect' => 'fade',
+        // The button stays hidden, so we hide the AJAX spinner too. Ad-hoc
+        // spinners will be added manually by the client-side script.
+        'progress' => 'none',
+      ),
+    );
+  }
+
   $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.css';
   $form['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.js';
 
