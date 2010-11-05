@@ -774,7 +774,7 @@ class views_plugin_query_default extends views_plugin_query {
    * @param $operator
    *   The comparison operator, such as =, <, or >=. It also accepts more complex
    *   options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is an array
-   *   = otherwise.
+   *   = otherwise. If $field is a string you have to use 'formula' here.
    */
   function add_where($group, $field, $value = NULL, $operator = NULL) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
