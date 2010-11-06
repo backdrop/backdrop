@@ -2,7 +2,7 @@
 
 (function($) {
 
-Drupal.behaviors.fieldUIDisplayOverview = {
+Drupal.behaviors.fieldUIFieldsOverview = {
   attach: function (context, settings) {
     $('table#field-overview', context).once('field-field-overview', function() {
       Drupal.fieldUIOverview.attach(this, settings.fieldUIRowsData, Drupal.fieldUIFieldOverview);
