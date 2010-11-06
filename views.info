@@ -286,6 +286,7 @@ files[] = theme/views-view-unformatted.tpl.php
 files[] = theme/views-view.tpl.php
 ; Tests
 files[] = tests/handlers/views_handler_filter_date.test
+files[] = tests/handlers/views_handler_filter_numeric.test
 files[] = tests/views_access.test
 files[] = tests/views_basic.test
 files[] = tests/views_argument_default.test
