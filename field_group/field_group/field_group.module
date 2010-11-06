@@ -339,26 +339,120 @@ function field_group_field_attach_view_alter(&$element, $context) {
 function field_group_field_group_formatter_info() {
   return array(
     'form' => array(
-      'fieldset' => t('Fieldset'),
-      'tabs' => t('Vertical tabs group'),
-      'tab' => t('Vertical tab'),
-      'htabs' => t('Horizontal tabs group'),
-      'htab' => t('Horizontal tab item'),
-      'accordion' => t('Accordion group'),
-      'accordion-item' => t('Accordion item'),
+      'fieldset' => array(
+        'label' => t('Fieldset'),
+        'styles' => array('open', 'collapsible', 'collapsed'),
+        'default' => 'collapsible',
+      ),
+      'tabs' => array(
+        'label' => t('Vertical tabs group'),
+      ),
+      'tab' => array(
+        'label' => t('Vertical tab'),
+        'styles' => array('open', 'collapsible', 'collapsed'),
+        'default' => 'collapsible',
+      ),
+      'htabs' => array(
+        'label' => ('Horizontal tabs group'),
+      ),
+      'htab' => array(
+        'label' => t('Horizontal tab item'),
+        'styles' => array('open', 'collapsible', 'collapsed'),
+        'default' => 'collapsible',
+      ),
+      'accordion' => array(
+        'label' => t('Accordion group'),
+      ),
+      'accordion-item' => array(
+        'label' => t('Accordion item'),
+        'styles' => array('open', 'closed'),
+        'default' => 'closed',
+      ),
     ),
     'display' => array(
-      'div' => t('Div'),
-      'fieldset' => t('Fieldset'),
-      'tabs' => t('Vertical tabs group'),
-      'tab' => t('Vertical tab'),
-      'htabs' => t('Horizontal tabs group'),
-      'htab' => t('Horizontal tab item'),
-      'accordion' => t('Accordion group'),
-      'accordion-item' => t('Accordion item'),
-      'hidden' => t('<Hidden>'),
+      'div' => array(
+        'label' => t('Div'),
+        'styles' => array('open', 'collapsible', 'collapsed'),
+        'default' => 'collapsible',
+      ),
+      'fieldset' => array(
+        'label' => t('Fieldset'),
+        'styles' => array('open', 'collapsible', 'collapsed'),
+        'default' => 'collapsible',
+      ),
+      'tabs' => array(
+        'label' => t('Vertical tabs group'),
+      ),
+      'tab' => array(
+        'label' => t('Vertical tab'),
+        'styles' => array('open', 'collapsible', 'collapsed'),
+        'default' => 'collapsible',
+      ),
+      'htabs' => array(
+        'label' => ('Horizontal tabs group'),
+      ),
+      'htab' => array(
+        'label' => t('Horizontal tab item'),
+        'styles' => array('open', 'collapsible', 'collapsed'),
+        'default' => 'collapsible',
+      ),
+      'accordion' => array(
+        'label' => t('Accordion group'),
+      ),
+      'accordion-item' => array(
+        'label' => t('Accordion item'),
+        'styles' => array('open', 'closed'),
+        'default' => 'closed',
+      ),
     ),
   );
+}
+
+/**
+ * Implements hook_field_group_format_settings().
+ * If the group has no format settings, default ones will be added.
+ * @params Object $group The group object.
+ * @return Array $form The form element for the format settings.
+ */
+function field_group_field_group_format_settings(& $group) {
+  $form = array();
+  switch ($group->visible) {
+    case 'fieldset':
+    case 'div':
+      if (!isset($group->format_settings['fieldgroup_settings'])) {
+        $group->format_settings['fieldgroup_settings'] = 'collapsed';
+      }
+      $form['fieldgroup_settings'] = array(
+        '#title' => t('Fieldgroup settings'),
+        '#type' => 'select',
+        '#options' => array(
+          'open' => t('Open'),
+          'collapsible' => t('Collapsible'),
+          'collapsed' => t('Collapsed'),
+        ),
+        '#default_value' => $group->format_settings['fieldgroup_settings'],
+        '#weight' => 1,
+      );
+      break;
+    case 'tab':
+    case 'accordion-item':
+    case 'htab':
+      if (!isset($group->format_settings['fieldgroup_settings'])) {
+        $group->format_settings['fieldgroup_settings'] = 'closed';
+      }
+      $form['fieldgroup_settings'] = array(
+        '#title' => t('Fieldgroup settings'),
+        '#type' => 'select',
+        '#options' => array(
+          'open' => t('Open'),
+          'closed' => t('Closed'),
+        ),
+        '#default_value' => $group->format_settings['fieldgroup_settings'],
+        '#weight' => 1,
+      );
+      break;
+  }
+  return $form;
 }
 
 /**
@@ -549,53 +643,6 @@ function field_group_field_group_is_empty($element, $groups) {
     }
   }
   return TRUE;
-}
-
-/**
- * Implements hook_field_group_format_settings().
- * If the group has no format settings, default ones will be added.
- * @params Object $group The group object.
- * @return Array $form The form element for the format settings.
- */
-function field_group_field_group_format_settings(& $group) {
-  $form = array();
-  switch ($group->visible) {
-    case 'fieldset':
-    case 'div':
-      if (!isset($group->format_settings['fieldgroup_settings'])) {
-        $group->format_settings['fieldgroup_settings'] = 'collapsed';
-      }
-      $form['fieldgroup_settings'] = array(
-        '#title' => t('Fieldgroup settings'),
-        '#type' => 'select',
-        '#options' => array(
-          'open' => t('Open'),
-          'collapsible' => t('Collapsible'),
-          'collapsed' => t('Collapsed'),
-        ),
-        '#default_value' => $group->format_settings['fieldgroup_settings'],
-        '#weight' => 1,
-      );
-      break;
-    case 'tab':
-    case 'accordion-item':
-    case 'htab':
-      if (!isset($group->format_settings['fieldgroup_settings'])) {
-        $group->format_settings['fieldgroup_settings'] = 'closed';
-      }
-      $form['fieldgroup_settings'] = array(
-        '#title' => t('Fieldgroup settings'),
-        '#type' => 'select',
-        '#options' => array(
-          'open' => t('Open'),
-          'closed' => t('Closed'),
-        ),
-        '#default_value' => $group->format_settings['fieldgroup_settings'],
-        '#weight' => 1,
-      );
-      break;
-  }
-  return $form;
 }
 
 /**

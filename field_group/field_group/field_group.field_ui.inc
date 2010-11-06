@@ -18,12 +18,10 @@ function field_group_field_ui_form_params($form, $display_overview) {
   if ($display_overview) {
     $params->region_callback = 'field_group_display_overview_row_region';
     $params->mode = $form['#view_mode'];
-    $params->format_options = $formatters['display'];
   }
   else {
     $params->region_callback = 'field_group_field_overview_row_region';
     $params->mode = 'form';
-    $params->format_options = $formatters['form'];
   }
 
   $params->groups = field_group_info_groups($params->entity_type, $params->bundle, $params->mode, TRUE);
@@ -85,6 +83,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     // override the #value because at this point in this context, #default_value is too late.
     $table[$name]['parent_wrapper']['parent']['#value'] = $params->parents[$name];
   }*/
+
+  $formatter_options = field_group_field_formatter_options($display_overview ? 'display' : 'form');
 
   // Create the group rows and check actions.
   foreach (array_keys($params->groups) as $name) {
@@ -164,7 +164,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       'format' => array(
         'type' => array(
           '#type' => 'select',
-          '#options' => $params->format_options,
+          '#options' => $formatter_options,
           '#default_value' => $group->visible,
           '#attributes' => array('class' => array('field-group-type')),
         ),
@@ -256,7 +256,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     'format' => array(
       'type' => array(
         '#type' => 'select',
-        '#options' => $params->format_options,
+        '#options' => $formatter_options,
         '#default_value' => 'fieldset',
       ),
     ),
@@ -288,6 +288,23 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
+}
+
+/**
+ * Return an array of field_group_formatter options.
+ */
+function field_group_field_formatter_options($type) {
+  $options = &drupal_static(__FUNCTION__);
+
+  if (!isset($options)) {
+    $options = array();
+    $field_group_types = field_group_formatter_info();
+    foreach ($field_group_types[$type] as $name => $field_group_type) {
+      $options[$name] = $field_group_type['label'];
+    }
+    asort($options);
+  }
+  return $options;
 }
 
 /**
