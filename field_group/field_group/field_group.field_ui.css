@@ -1,7 +1,5 @@
 /* $Id$ */
 
-/* This should probably move to field_group.admin.css no ? */
-
 #field-overview tr.field-group .group-label,
 #field-display-overview tr.field-group .group-label {
   font-weight: bold;
@@ -10,4 +8,8 @@
 #field-overview tr.static-region,
 #field-display-overview tr.static-region {
 	  background-color: #ddd;
+}
+
+#edit-refresh {
+  display:none;
 }
