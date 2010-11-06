@@ -49,7 +49,7 @@ class views_plugin_pager_none extends views_plugin_pager {
     // If we are displaying all items, never count. But we can update the count in post_execute.
   }
 
-  function post_execute($result) {
+  function post_execute(&$result) {
     $this->total_items = count($result);
   }
 

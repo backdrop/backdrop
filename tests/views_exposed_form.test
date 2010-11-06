@@ -16,6 +16,8 @@ class ViewsExposedFormTest extends ViewsSqlTest {
   public function setUp() {
     parent::setUp('views', 'views_ui');
     module_enable(array('views_ui'));
+    // Clear the module_implements cache.
+    module_implements('views_default_views', FALSE, TRUE);
   }
 
   /**
