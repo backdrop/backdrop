@@ -9,3 +9,20 @@
 .vertical-tabs fieldset.collapsible legend {
   display:block;
 }
+
+.vertical-tabs .vertical-tabs-panes {
+  border-bottom-width: 1px;
+  margin-bottom: 20px;
+}
+
+/**
+ * Override the accordion default style for view_modes.
+ */
+.ui-accordion h3, .ui-accordion h3.ui-state-active {
+  padding-left: 2em;
+}
+
+.ui-accordion h3.ui-state-active {
+  background: url("img/ui-bg_glass_75_B0BDCF_1x400.png") repeat-x scroll 50% 50% #E6E6E6;
+  color: #fff;
+}
