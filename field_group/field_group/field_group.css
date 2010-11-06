@@ -1,5 +1,111 @@
+/* $Id$ */
 @CHARSET "UTF-8";
 
+/**
+ * Override for fieldsets in vertical tabs
+ */
 .vertical-tabs fieldset.collapsible legend {
   display:block;
+}
+
+/**
+ * Horizontal tabs css.
+ */
+div.field-group-htabs-wrapper {
+  margin: 0 0 1em 0; /* LTR */
+  padding: 0;
+  border: 1px solid #ccc;
+  position: relative; /* IE6/7 */
+}
+
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs {
+  display: inline-block;
+  margin: 0;
+  border: 0;
+  /* 
+  border-bottom: 1px solid #ccc; 
+  left: -1px;
+  */
+  padding: 0px;
+  position: relative; /* IE6 */
+  list-style: none;
+  list-style-image: none; /* IE6 */
+  background-color: #dedede;
+  border-right: 1px solid #dedede;
+  width: 100%;
+  height: auto;
+  clear: both;
+}
+  
+/* Layout of each tab */
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li,
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li.selected {
+  /*
+  background: #eee;
+  border-left: 1px solid #FFF;
+  */
+  background: #fff;
+  border: 0;
+  border: 1px solid #ccc;
+  border-top: 0;
+  border-bottom: 0;
+  padding: 1px;
+  padding-top: 0;
+ 
+  margin: 0;
+  min-width: 5em; /* IE7 */
+  float: left;
+}
+
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li:hover,
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li:focus {
+  background-color: #ddd;
+}
+
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li a,
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li.selected a {
+  display: block;
+  text-decoration: none;
+  padding: 0.5em 0.6em 0.3em 0.6em;
+  background-color: #eee;
+}
+
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li a:hover ,
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li.selected a:hover {
+  /* inverse rollover 
+  background-color: #0071B3;
+  color: #fff;
+  light rollover
+  */
+  background-color: #ededdd;
+}
+
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li a:focus strong,
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li a:active strong,
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li a:hover strong {
+  text-decoration: none;
+  outline: none;
+}
+
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li.selected {
+  background: #fff;
+  padding: 0 0 1px 0;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #fff;
+}
+
+div.field-group-htabs-wrapper ul.field-group-htabs-tabs li.selected a {
+  background: #fff;
+  border-bottom: 1px solid #FFFFFF;
+  position:relative;
+  top: 0px;
+}
+
+/**
+ * tab content 
+ */
+div.field-group-htabs-wrapper .field-group-format-wrapper { 
+  clear: both;
+  padding: 0.6em;
+  padding-bottom: 0;
 }
