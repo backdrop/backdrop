@@ -1,0 +1,5 @@
+/* $Id*/
+CHANGELOG for field_group for Drupal 7
+
+Views 7.x-1.x-dev
+    o #962072 by mori: Improve CSS for horizontal tabs & accordion.
