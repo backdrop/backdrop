@@ -427,7 +427,8 @@ Views 3.x-7.x-dev
     o by dereine: Document add_where for formula.
     o by dereine: Fix notice in ajax.inc.
     o #963382 by aidanlis: Fix typo in mathematical expression field help text.
-    o #807614 by dereine: Test filter_numerinc
+    o #807614 by dereine: Test filter_numeric.
+    o #928000 by mfer, dereine: form.js dependency missing.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
