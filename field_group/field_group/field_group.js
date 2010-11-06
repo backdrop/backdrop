@@ -22,7 +22,7 @@ Drupal.FieldGroup.Effects.processAccordion = {
  */
 Drupal.FieldGroup.Effects.processHtabs = {
   execute: function (context, settings) {
-
+    /*
     $('div.field-group-htabs-wrapper', context).each(function() {
       var $wrapper = $(this);
       $tabs = $('<ul class="field-group-htabs-tabs tabs secundary"></ul>');
@@ -43,6 +43,7 @@ Drupal.FieldGroup.Effects.processHtabs = {
         $toggler.remove();
       });
     });
+    */
   }
 }
 

@@ -66,7 +66,7 @@ function field_group_menu() {
           // Extract path information from the bundle.
           $path = $bundle_info['admin']['path'];
           // Different bundles can appear on the same path (e.g. %node_type and
-          // %comment_node_type). To allow field_ui_menu_load() to extract the
+          // %comment_node_type). To allow field_group_menu_load() to extract the
           // actual bundle object from the translated menu router path
           // arguments, we need to identify the argument position of the bundle
           // name string ('bundle argument') and pass that position to the menu
@@ -81,7 +81,7 @@ function field_group_menu() {
             $bundle_pos = '0';
           }
 
-          // This is the position of the %group_ui_menu placeholder in the
+          // This is the position of the %field_group_menu placeholder in the
           // items below.
           $group_position = count(explode('/', $path)) + 1;
 
@@ -143,6 +143,17 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
     return $group;
   }
   return FALSE;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function field_group_theme () {
+  return array(
+    'horizontal_tabs' => array(
+      'render element' => 'element',
+    ),
+  );
 }
 
 /**
@@ -514,8 +525,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       drupal_add_library('system', 'effects.blind');
       break;
-    // Horizontal tabs group and accordion group.
-    case 'htabs':
+    // Accordion group.
     case 'accordion':
       $element += array(
         '#type' => 'markup',
@@ -537,18 +547,37 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       drupal_add_library('system', 'ui.accordion');
       break;
+    // Horizontal tabs group.
+    case 'htabs':
+      $element += array(
+        '#type' => 'vertical_tabs',
+        '#weight' => $group->weight,
+        '#theme_wrappers' => array('vertical_tabs'),
+        '#prefix' => '<div class="field-group-'. $group->visible .'-wrapper">',
+        '#suffix' => '</div>',
+      );
+      $form['#attached']['js'][] = 'misc/form.js';
+      $form['#attached']['js'][] = 'misc/collapse.js';
+      $form['#attached']['js'][] = 'misc/vertical-tabs.js';
+      $form['#attached']['css'][] = 'misc/vertical-tabs.css';
+      drupal_add_library('system', 'effects.blind');
+      break;
     // Horizontal tab.
     case 'htab':
       $element += array(
-        '#type' => 'markup',
+        '#type' => 'fieldset',
         '#prefix' => '
         <span class="field-group-format-toggler '. $group->visible .'">'. $group->label .'</span>
         <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
-        '#attributes' => array('class' => $classes),
+        '#collapsible' => $collapsible,
+        '#collapsed' => $collapsed,
+        '#attributes' => array('class' => array($group->visible)),
+        '#group' => $group->parent_name,
+        // very important. Cannot be added on the form!
+        '#parents' => array($group->parent_name),
       );
-      drupal_add_library('system', 'effects.blind');
       break;
     // Vertical tabs group.
     case 'tabs':
