@@ -209,129 +209,6 @@ function field_group_form_field_ui_display_overview_form_alter(&$form, &$form_st
 }
 
 /**
- * Validate handler for the overview screens.
- * @param Array $form The complete form.
- * @param Array $form_state The state of the form.
- */
-function field_group_field_overview_validate($form, &$form_state) {
-  $form_values = $form_state['values']['fields'];
-  $entity_type = $form['#entity_type'];
-  $bundle = $form['#bundle'];
-  $mode = (isset($form['#view_mode']) ? $form['#view_mode'] : 'form');
-
-  $group = $form_values['_add_new_group'];
-
-  // Validate if any information was provided in the 'add new group' row.
-  if (array_filter(array($group['label'], $group['group_name']))) {
-    // Missing label.
-    if (!$group['label']) {
-      form_set_error('fields][_add_new_group][label', t('Add new group: you need to provide a label.'));
-    }
-
-    // Missing group name.
-    if (!$group['group_name']) {
-      form_set_error('fields][_add_new_group][group_name', t('Add new group: you need to provide a group name.'));
-    }
-    // Group name validation.
-    else {
-      $group_name = $group['group_name'];
-
-      // Add the 'group_' prefix.
-      if (substr($group_name, 0, 6) != 'group_') {
-        $group_name = 'group_' . $group_name;
-        form_set_value($form['fields']['_add_new_group']['group_name'], $group_name, $form_state);
-      }
-
-      // Invalid group name.
-      if (!preg_match('!^group_[a-z0-9_]+$!', $group_name)) {
-        form_set_error('fields][_add_new_group][group_name', t('Add new group: the group name %group_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%group_name' => $group_name)));
-      }
-      if (strlen($group_name) > 32) {
-        form_set_error('fields][_add_new_group][group_name', t("Add new group: the group name %group_name is too long. The name is limited to 32 characters, including the 'group_' prefix.", array('%group_name' => $group_name)));
-      }
-
-      // Group name already exists.
-      $groups = field_group_read_groups();
-      if (!empty($groups[$entity_type][$bundle][$mode][$group_name])) {
-        form_set_error('fields][_add_new_group][group_name', t('Add new group: the group name %group_name already exists.', array('%group_name' => $group_name)));
-      }
-    }
-  }
-}
-
-/**
- * Submit handler for the overview screens.
- * @param Array $form The complete form.
- * @param Array $form_state The state of the form.
- */
-function field_group_field_overview_submit($form, &$form_state) {
-  $form_values = $form_state['values']['fields'];
-  $entity_type = $form['#entity_type'];
-  $bundle = $form['#bundle'];
-  $mode = (isset($form['#view_mode']) ? $form['#view_mode'] : 'form');
-
-  // Collect children.
-  $children = array_fill_keys($form['#groups'], array());
-  foreach ($form_values as $name => $value) {
-    if (!empty($value['parent'])) {
-      // Substitute newly added fields, in case they were dragged directly in a
-      // group.
-      if ($name == '_add_new_field' && isset($form_state['fields_added']['_add_new_field'])) {
-        $name = $form_state['fields_added']['_add_new_field'];
-      }
-      elseif ($name == '_add_existing_field' && isset($form_state['fields_added']['_add_existing_field'])) {
-        $name = $form_state['fields_added']['_add_existing_field'];
-      }
-      $children[$value['parent']][$name] = $name;
-    }
-  }
-
-  // Create new group.
-  if (!empty($form_values['_add_new_group']['group_name'])) {
-    $values = $form_values['_add_new_group'];
-    $new_group = (object) array(
-      'group_name' => $values['group_name'],
-      'entity_type' => $entity_type,
-      'bundle' => $bundle,
-      'mode' => $mode,
-      'children' => isset($children['_add_new_group']) ? array_keys($children['_add_new_group']) : array(),
-      'parent_name' => $values['parent'],
-      'weight' => $values['weight'],
-      'label' => $values['label'],
-      // @todo currently not present in 'Manage Fields' screen.
-      'visible' => isset($values['format']['type']) ? $values['format']['type'] : 'visible',
-    );
-    field_group_save($new_group);
-
-    // Store new group information for any additional submit handlers.
-    $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
-    drupal_set_message(t('New group %label succesfully created.', array('%label' => $new_group->label)));
-
-    // Replace the newly created group in the $children array, in case it was
-    // dragged directly in an existing field.
-    foreach (array_keys($children) as $parent) {
-      if (isset($children[$parent]['_add_new_group'])) {
-        unset($children[$parent]['_add_new_group']);
-        $children[$parent][$new_group->group_name] = $new_group->group_name;
-      }
-    }
-  }
-
-  // Update existing groups.
-  $groups = field_group_info_groups($entity_type, $bundle, $mode, TRUE);
-  foreach ($form['#groups'] as $group_name) {
-    $group = $groups[$group_name];
-    $group->children = array_keys($children[$group_name]);
-    $group->parent_name = $form_values[$group_name]['parent'];
-    $group->weight = $form_values[$group_name]['weight'];
-    $group->visible = isset($form_values[$group_name]['format']['type']) ? $form_values[$group_name]['format']['type'] : 'visible';
-    field_group_save($group);
-  }
-
-  cache_clear_all('field_groups', 'cache_field');
-}
-
-/**
  * Implements hook_field_attach_view_alter().
  */
 function field_group_field_attach_view_alter(&$element, $context) {
@@ -446,8 +323,8 @@ function field_group_field_group_format_settings(& $group) {
       );
       break;
     case 'tab':
-    case 'accordion-item':
     case 'htab':
+    case 'accordion-item':
       if (!isset($group->format_settings['fieldgroup_settings'])) {
         $group->format_settings['fieldgroup_settings'] = 'closed';
       }
@@ -550,26 +427,22 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     // Horizontal tabs group.
     case 'htabs':
       $element += array(
-        '#type' => 'vertical_tabs',
+        '#type' => 'horizontal_tabs',
         '#weight' => $group->weight,
-        '#theme_wrappers' => array('vertical_tabs'),
+        '#theme_wrappers' => array('horizontal_tabs'),
         '#prefix' => '<div class="field-group-'. $group->visible .'-wrapper">',
         '#suffix' => '</div>',
       );
       $form['#attached']['js'][] = 'misc/form.js';
       $form['#attached']['js'][] = 'misc/collapse.js';
-      $form['#attached']['js'][] = 'misc/vertical-tabs.js';
-      $form['#attached']['css'][] = 'misc/vertical-tabs.css';
-      drupal_add_library('system', 'effects.blind');
+      //drupal_add_library('field_group', 'horizontal-tabs');
+      //drupal_add_library('system', 'effects.blind');
       break;
     // Horizontal tab.
     case 'htab':
       $element += array(
         '#type' => 'fieldset',
-        '#prefix' => '
-        <span class="field-group-format-toggler '. $group->visible .'">'. $group->label .'</span>
-        <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
-        '#suffix' => '</div>',
+        '#title' => $group->label,
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
@@ -590,13 +463,26 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       $form['#attached']['js'][] = 'misc/form.js';
       $form['#attached']['js'][] = 'misc/collapse.js';
-      $form['#attached']['js'][] = 'misc/vertical-tabs.js';
-      $form['#attached']['css'][] = 'misc/vertical-tabs.css';
+      //$form['#attached']['js'][] = 'misc/vertical-tabs.js';
+      //$form['#attached']['css'][] = 'misc/vertical-tabs.css';
       break;
     // Vertical tab.
     case 'tab':
       // For the form, we will keep it in the root.
-      if (!isset($form['#view_mode'])) {
+      if (isset($form['#view_mode'])) {
+        $element += array(
+          '#type' => 'fieldset',
+          '#title' => $group->label,
+          '#weight' => $group->weight,
+          '#collapsible' => $collapsible,
+          '#collapsed' => $collapsed,
+          '#attributes' => array('class' => array($group->visible)),
+          '#group' => $group->parent_name,
+          // very important. Cannot be added on the form!
+          '#parents' => array($group->parent_name),
+        );
+      }
+      else {
         $form['additional_settings'][$group->group_name] = array(
           '#type' => 'fieldset',
           '#title' => $group->label,
@@ -610,19 +496,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           $form['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
           unset($element[$fieldname]);
         }
-      }
-      else {
-        $element += array(
-          '#type' => 'fieldset',
-          '#title' => $group->label,
-          '#weight' => $group->weight,
-          '#collapsible' => $collapsible,
-          '#collapsed' => $collapsed,
-          '#attributes' => array('class' => array($group->visible)),
-          '#group' => $group->parent_name,
-          // very important. Cannot be added on the form!
-          '#parents' => array($group->parent_name),
-        );
       }
 
     break;
@@ -683,6 +556,98 @@ function field_group_field_group_format_summary(& $group) {
   if (isset($group->format_settings['fieldgroup_settings'])) {
     $output = '<strong>'. $group->visible .'</strong> '. $group->format_settings['fieldgroup_settings'] .'';
   }
+  return $output;
+}
+
+/**
+ * Implements hook_element_info().
+ */
+function field_group_element_info() {
+  $types['horizontal_tabs'] = array(
+    '#theme_wrappers' => array('horizontal_tabs'),
+    '#default_tab' => '',
+    '#process' => array('form_process_horizontal_tabs'),
+  );
+  return $types;
+}
+
+/**
+ * Implements hook_library().
+ */
+function field_group_library() {
+
+  $path = drupal_get_path('module', 'field_group');
+  // Horizontal Tabs.
+  $libraries['horizontal-tabs'] = array(
+    'title' => 'Horizontal Tabs',
+    'website' => 'http://drupal.org/node/323112',
+    'version' => '1.0',
+    'js' => array(
+      $path . '/horizontal-tabs/horizontal-tabs.js' => array(),
+    ),
+    'css' => array(
+      $path . '/horizontal-tabs/horizontal-tabs.css' => array(),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Creates a group formatted as horizontal tabs.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   fieldset.
+ * @param $form_state
+ *   The $form_state array for the form this horizontal tab widget belongs to.
+ * @return
+ *   The processed element.
+ */
+function form_process_horizontal_tabs($element, &$form_state) {
+  // Inject a new fieldset as child, so that form_process_fieldset() processes
+  // this fieldset like any other fieldset.
+  $element['group'] = array(
+    '#type' => 'fieldset',
+    '#theme_wrappers' => array(),
+    '#parents' => $element['#parents'],
+  );
+
+  // The JavaScript stores the currently selected tab in this hidden
+  // field so that the active tab can be restored the next time the
+  // form is rendered, e.g. on preview pages or when form validation
+  // fails.
+  $name = implode('__', $element['#parents']);
+  if (isset($form_state['values'][$name . '__active_tab'])) {
+    $element['#default_tab'] = $form_state['values'][$name . '__active_tab'];
+  }
+  $element[$name . '__active_tab'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $element['#default_tab'],
+    '#attributes' => array('class' => array('horizontal-tabs-active-tab')),
+  );
+
+  return $element;
+}
+
+/**
+ * Returns HTML for an element's children fieldsets as horizontal tabs.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties and children of the
+ *     fieldset. Properties used: #children.
+ *
+ * @ingroup themeable
+ */
+function theme_horizontal_tabs($variables) {
+  $element = $variables['element'];
+  // Add required JavaScript and Stylesheet.
+  drupal_add_library('field_group', 'horizontal-tabs');
+
+  $output = '<h2 class="element-invisible">' . t('Horizontal Tabs') . '</h2>';
+  $output .= '<div class="horizontal-tabs-panes">' . $element['#children'] . '</div>';
+
   return $output;
 }
 
@@ -925,6 +890,129 @@ function field_group_pre_render(& $element, $group, & $form) {
       $function($element, $group, $form);
     }
   }
+}
+
+/**
+ * Validate handler for the overview screens.
+ * @param Array $form The complete form.
+ * @param Array $form_state The state of the form.
+ */
+function field_group_field_overview_validate($form, &$form_state) {
+  $form_values = $form_state['values']['fields'];
+  $entity_type = $form['#entity_type'];
+  $bundle = $form['#bundle'];
+  $mode = (isset($form['#view_mode']) ? $form['#view_mode'] : 'form');
+
+  $group = $form_values['_add_new_group'];
+
+  // Validate if any information was provided in the 'add new group' row.
+  if (array_filter(array($group['label'], $group['group_name']))) {
+    // Missing label.
+    if (!$group['label']) {
+      form_set_error('fields][_add_new_group][label', t('Add new group: you need to provide a label.'));
+    }
+
+    // Missing group name.
+    if (!$group['group_name']) {
+      form_set_error('fields][_add_new_group][group_name', t('Add new group: you need to provide a group name.'));
+    }
+    // Group name validation.
+    else {
+      $group_name = $group['group_name'];
+
+      // Add the 'group_' prefix.
+      if (substr($group_name, 0, 6) != 'group_') {
+        $group_name = 'group_' . $group_name;
+        form_set_value($form['fields']['_add_new_group']['group_name'], $group_name, $form_state);
+      }
+
+      // Invalid group name.
+      if (!preg_match('!^group_[a-z0-9_]+$!', $group_name)) {
+        form_set_error('fields][_add_new_group][group_name', t('Add new group: the group name %group_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%group_name' => $group_name)));
+      }
+      if (strlen($group_name) > 32) {
+        form_set_error('fields][_add_new_group][group_name', t("Add new group: the group name %group_name is too long. The name is limited to 32 characters, including the 'group_' prefix.", array('%group_name' => $group_name)));
+      }
+
+      // Group name already exists.
+      $groups = field_group_read_groups();
+      if (!empty($groups[$entity_type][$bundle][$mode][$group_name])) {
+        form_set_error('fields][_add_new_group][group_name', t('Add new group: the group name %group_name already exists.', array('%group_name' => $group_name)));
+      }
+    }
+  }
+}
+
+/**
+ * Submit handler for the overview screens.
+ * @param Array $form The complete form.
+ * @param Array $form_state The state of the form.
+ */
+function field_group_field_overview_submit($form, &$form_state) {
+  $form_values = $form_state['values']['fields'];
+  $entity_type = $form['#entity_type'];
+  $bundle = $form['#bundle'];
+  $mode = (isset($form['#view_mode']) ? $form['#view_mode'] : 'form');
+
+  // Collect children.
+  $children = array_fill_keys($form['#groups'], array());
+  foreach ($form_values as $name => $value) {
+    if (!empty($value['parent'])) {
+      // Substitute newly added fields, in case they were dragged directly in a
+      // group.
+      if ($name == '_add_new_field' && isset($form_state['fields_added']['_add_new_field'])) {
+        $name = $form_state['fields_added']['_add_new_field'];
+      }
+      elseif ($name == '_add_existing_field' && isset($form_state['fields_added']['_add_existing_field'])) {
+        $name = $form_state['fields_added']['_add_existing_field'];
+      }
+      $children[$value['parent']][$name] = $name;
+    }
+  }
+
+  // Create new group.
+  if (!empty($form_values['_add_new_group']['group_name'])) {
+    $values = $form_values['_add_new_group'];
+    $new_group = (object) array(
+      'group_name' => $values['group_name'],
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'mode' => $mode,
+      'children' => isset($children['_add_new_group']) ? array_keys($children['_add_new_group']) : array(),
+      'parent_name' => $values['parent'],
+      'weight' => $values['weight'],
+      'label' => $values['label'],
+      // @todo currently not present in 'Manage Fields' screen.
+      'visible' => isset($values['format']['type']) ? $values['format']['type'] : 'visible',
+    );
+    field_group_save($new_group);
+
+    // Store new group information for any additional submit handlers.
+    $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
+    drupal_set_message(t('New group %label succesfully created.', array('%label' => $new_group->label)));
+
+    // Replace the newly created group in the $children array, in case it was
+    // dragged directly in an existing field.
+    foreach (array_keys($children) as $parent) {
+      if (isset($children[$parent]['_add_new_group'])) {
+        unset($children[$parent]['_add_new_group']);
+        $children[$parent][$new_group->group_name] = $new_group->group_name;
+      }
+    }
+  }
+
+  // Update existing groups.
+  $groups = field_group_info_groups($entity_type, $bundle, $mode, TRUE);
+  foreach ($form['#groups'] as $group_name) {
+    $group = $groups[$group_name];
+    $group->children = array_keys($children[$group_name]);
+    $group->parent_name = $form_values[$group_name]['parent'];
+    $group->weight = $form_values[$group_name]['weight'];
+    $group->visible = isset($form_values[$group_name]['format']['type']) ? $form_values[$group_name]['format']['type'] : 'visible';
+    field_group_save($group);
+  }
+
+  cache_clear_all('field_groups', 'cache_field');
 }
 
 /**
