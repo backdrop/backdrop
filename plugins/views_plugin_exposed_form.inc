@@ -122,7 +122,8 @@ class views_plugin_exposed_form extends views_plugin {
     }
 
     $form_state['exposed_form_plugin'] = $this;
-    $output = drupal_render(drupal_build_form('views_exposed_form', $form_state));
+    $form = drupal_build_form('views_exposed_form', $form_state);
+    $output = drupal_render($form);
     if (!empty($form_state['js settings'])) {
       $this->view->js_settings = $form_state['js settings'];
     }
