@@ -1,0 +1,5 @@
+@CHARSET "UTF-8";
+
+.vertical-tabs fieldset.collapsible legend {
+  display:block;
+}
