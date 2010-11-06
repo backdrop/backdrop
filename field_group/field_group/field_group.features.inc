@@ -100,7 +100,6 @@ function field_group_features_revert($module) {
  * Rebuilds fields from code defaults.
  */
 function field_group_features_rebuild($module) {
-  dsm($module);
   if ($field_groups = features_get_default('field_group', $module)) {
     cache_clear_all('field_groups', 'cache_field');
 
