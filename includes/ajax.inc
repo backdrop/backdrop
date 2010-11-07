@@ -217,7 +217,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     drupal_set_title($form_state['title']);
   }
 
-  if (!empty($form_state['ajax']) && empty($form_state['executed'])) {
+  if (!empty($form_state['ajax']) && (empty($form_state['executed']) || !empty($form_state['rerender']))) {
     // If the form didn't execute and we're using ajax, build up a
     // Ajax command list to execute.
     $commands = array();
