@@ -44,8 +44,9 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
   $params = field_group_field_ui_form_params($form, $display_overview);
 
+  // Add some things to be able to preserve synced usage of field_ui.
   if (!$display_overview) {
-    // Overview form does not have this key by default.
+    // This key is used to store the current updated field.
     $form_state += array(
       'formatter_settings_edit' => NULL,
     );
@@ -80,20 +81,18 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   $formatter_options = field_group_field_formatter_options($display_overview ? 'display' : 'form');
 
   $refresh_rows = isset($form_state['values']['refresh_rows']) ? $form_state['values']['refresh_rows'] : (isset($form_state['input']['refresh_rows']) ? $form_state['input']['refresh_rows'] : NULL);
-  // TODO : check why it works now?
-  // Update rows that are made visible (dragged/selected out of hidden).
-  /*if (isset($_POST['refresh_rows']) && $_POST['refresh_rows'] == $name && isset($_POST['fields'][$_POST['refresh_rows']]['type'])) {
-    $params->parents[$name] = '';
-    // override the #value because at this point in this context, #default_value is too late.
-    $table[$name]['parent_wrapper']['parent']['#value'] = $params->parents[$name];
-  }*/
 
   // Create the group rows and check actions.
   foreach (array_keys($params->groups) as $name) {
 
-    $group = & $params->groups[$name];
-
-    // Formatter settings.
+    // Play around with form_state so we only need to hold things
+    // between requests, until the save button was hit.
+    if (isset($form_state['field_group'][$name])) {
+      $group = & $form_state['field_group'][$name];
+    }
+    else {
+      $group = & $params->groups[$name];
+    }
 
     // Check the currently selected formatter, and merge persisted values for
     // formatter settings for the group.
@@ -101,7 +100,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     if (isset($refresh_rows) && $refresh_rows == $name) {
       $settings = isset($form_state['values']['fields'][$name]) ? $form_state['values']['fields'][$name] : (isset($form_state['input']['fields'][$name]) ? $form_state['input']['fields'][$name] : NULL);
       if (array_key_exists('settings_edit', $settings)) {
-        $group->visible = $form_state['fg'][$name];
+        //$group->format_type = $form_state['field_group'][$name]->format_type;
+        $group = $form_state['field_group'][$name];
       }
       field_group_formatter_row_update($group, $settings);
     }
@@ -110,7 +110,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     if (!empty($form_state['values'][$name .'_formatter_settings_update'])) {
       field_group_formatter_settings_update($group, $form_state['values']['fields'][$name]);
     }
-    $form_state['fg'][$name] = $group->visible;;
+    // After all updates are finished, let the form_state know.
+    $form_state['field_group'][$name] = $group;
 
     $settings = field_group_format_settings_form($group);
 
@@ -158,7 +159,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         'type' => array(
           '#type' => 'select',
           '#options' => $formatter_options,
-          '#default_value' => $group->visible,
+          '#default_value' => $group->format_type,
           '#attributes' => array('class' => array('field-group-type')),
         ),
       ),
@@ -182,7 +183,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#parents' => array('fields', $name, 'format_settings'),
         '#weight' => -5,
         'label' => array(
-          '#markup' => t('Field group format:') .' <span class="formatter-name">'. $group->visible . '</span>',
+          '#markup' => t('Field group format:') .' <span class="formatter-name">'. $group->format_type . '</span>',
         ),
         // Create a settings form where hooks can pick in.
         'settings' => $settings,
@@ -295,7 +296,6 @@ function field_group_field_formatter_options($type) {
     foreach ($field_group_types[$type] as $name => $field_group_type) {
       $options[$name] = $field_group_type['label'];
     }
-    asort($options);
   }
   return $options;
 }
@@ -404,28 +404,6 @@ function field_group_format_settings_form(&$group) {
 }
 
 /**
- * Submit handler to save the configuration of a fieldgroup.
- * @param Ojbect $group The group object
- * @param Array $settins Configuration settings
- */
-function field_group_format_settings_submit(& $group, $settings, $format_change = FALSE) {
-  // for format changes we load the defaults
-  if ($format_change) {
-    $group->format_settings = NULL;
-    // The group will be saved by reference.
-    field_group_format_settings_form($group);
-  }
-  else {
-    $group->visible = $settings['format']['type'];
-    $group->label = $settings['format_settings']['settings']['label'];
-    $group->format_settings = $settings['format_settings']['settings'];
-  }
-  // Save the group settings.
-  //field_group_save($group);
-  //cache_clear_all('field_groups', 'cache_field');
-}
-
-/**
  * Update the row so that the group variables are updated.
  * The rendering of the elements needs the updated defaults.
  * @param Object $group
@@ -433,27 +411,39 @@ function field_group_format_settings_submit(& $group, $settings, $format_change 
  */
 function field_group_formatter_row_update(& $group, $settings) {
   // if the row has changed formatter type, update the group object
-  if (!empty($settings['format']['type']) && $settings['format']['type'] != $group->visible) {
-    $group->visible = $settings['format']['type'];
+  if (!empty($settings['format']['type']) && $settings['format']['type'] != $group->format_type) {
+    $group->format_type = $settings['format']['type'];
     field_group_formatter_settings_update($group, $settings);
   }
 }
 
+/**
+ * Update handler for field_group configuration settings.
+ * @param Object $group The group object
+ * @param Array $settings Configuration settings
+ */
 function field_group_formatter_settings_update(& $group, $settings) {
-  // for format changes we load the defaults
+
+  // Fetch the field_group formatter defaults.
+  $field_group_types = field_group_formatter_info();
+  $mode = $group->mode == 'form' ? 'form' : 'display';
+  $formatter = $field_group_types[$mode][$group->format_type];
+
+  // for format changes we load the defaults.
   if (empty($settings['format_settings']['settings'])) {
-    $group->format_settings = NULL;
-    // The group will be saved by reference.
-    field_group_format_settings_form($group);
+    $group->format_settings = array(
+      'formatter' => $formatter['default_formatter'],
+      'instance_settings' => $formatter['instance_settings']
+    );
   }
   else {
-    $group->visible = $settings['format']['type'];
+    $group->format_type = $settings['format']['type'];
     $group->label = $settings['format_settings']['settings']['label'];
     $group->format_settings = $settings['format_settings']['settings'];
+    // This is avoided now, cause of the form_state['field_group']
+    //field_group_save($group);
+    //cache_clear_all('field_groups', 'cache_field');
   }
-  // Save the group settings.
-  //field_group_save($group);
-  //cache_clear_all('field_groups', 'cache_field');
 }
 
 /**

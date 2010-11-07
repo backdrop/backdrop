@@ -28,12 +28,8 @@ div.horizontal-tabs {
   border: 0;
 }
 
-.horizontal-tabs legend {
+.horizontal-tabs-pane>legend {
   display: none;
-}
-
-.horizontal-tabs fieldset.collapsible legend {
-  display:block;
 }
 
 /* Layout of each tab */

@@ -6,13 +6,11 @@
  * All legends where displayed none, breaking the 
  * nested field_group formatters.
  */
-.vertical-tabs fieldset.collapsible legend {
-  display:block;
+.vertical-tabs legend {
+  display: block;
 }
-
-.vertical-tabs .vertical-tabs-panes {
-  border-bottom-width: 1px;
-  margin-bottom: 20px;
+.vertical-tabs-pane>legend {
+  display: none;
 }
 
 /**
