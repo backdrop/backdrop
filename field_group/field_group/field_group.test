@@ -62,7 +62,15 @@ class GroupUITestCase extends DrupalWebTestCase {
     $this->assertRaw(t('New group %label succesfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
 
     // Test if group is in the $groups array.
-    $groups = field_group_info_groups('node', 'article', 'form');
+    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
+
+    // Add new group on the 'Manage display' page.
+    $this->drupalPost('admin/structure/types/manage/article/display',  $group, t('Save'));
+    $this->assertRaw(t('New group %label succesfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
+
+    // Test if group is in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
     $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
   }
 
@@ -75,13 +83,20 @@ class GroupUITestCase extends DrupalWebTestCase {
 
     // Test that group is not in the $groups array.
     $groups = field_group_info_groups('node', 'article', 'form', TRUE);
-    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array'));
+    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array while deleting'));
+
+    $this->drupalPost('admin/structure/types/manage/article/groups/' . $this->group_name . '/delete/default', array(), t('Delete'));
+    $this->assertRaw(t('The group %label has been deleted from the %article content type.', array('%label' => $this->group_label, '%article' => 'Article')), t('Group removal message displayed on screen.'));
+
+    // Test that group is not in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array while deleting'));
   }
 
   /**
    * General CRUD.
    */
-  function testCRUDgroup() {
+  function testCRUDGroup() {
     $this->createGroup();
     $this->deleteGroup();
   }
