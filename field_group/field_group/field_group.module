@@ -1067,7 +1067,9 @@ function field_group_field_overview_submit($form, &$form_state) {
     $group->parent_name = $form_values[$group_name]['parent'];
     $group->weight = $form_values[$group_name]['weight'];
     $group->format_type = isset($form_values[$group_name]['format']['type']) ? $form_values[$group_name]['format']['type'] : 'visible';
-    $group->format_settings = $form_state['field_group'][$group_name]->format_settings;
+    if (isset($form_state['field_group'][$group_name]->format_settings)) {
+      $group->format_settings = $form_state['field_group'][$group_name]->format_settings;
+    }
     field_group_save($group);
   }
 
