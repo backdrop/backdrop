@@ -38,7 +38,7 @@ class views_handler_field_group_by_numeric extends views_handler_field_numeric {
     $this->query->add_orderby($this->table, $this->field, $order, $this->field_alias, $params);
   }
 
-  function ui_name() {
-    return $this->get_field(parent::ui_name());
+  function ui_name($short = FALSE) {
+    return $this->get_field(parent::ui_name($short));
   }
 }

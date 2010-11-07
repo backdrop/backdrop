@@ -431,6 +431,8 @@ Views 3.x-7.x-dev
     o #928000 by mfer, dereine: form.js dependency missing.
     o by dereine: Fix some notices.
     o by dereine: Fix views_exposed_form test.
+    o by dereine: Move test files around.
+    o by dereine: Fix notice in group_by_numeric.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
