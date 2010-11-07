@@ -433,6 +433,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix views_exposed_form test.
     o by dereine: Move test files around.
     o by dereine: Fix notice in group_by_numeric.
+    o by eporama: Add a test for views_plugin_argument_validate_user.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
