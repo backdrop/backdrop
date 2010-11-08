@@ -7,4 +7,5 @@ Views 7.x-1.x-dev
     o Changed save action so everything is gathered during form_state to 
       postpone saving until the save button is hit.
     o Changed some important variable name, so it makes more sense and easier to read.
+    o Add basic crud functions.
     

@@ -452,7 +452,7 @@ function field_group_formatter_settings_update(& $group, $settings) {
     $group->label = $settings['format_settings']['settings']['label'];
     $group->format_settings = $settings['format_settings']['settings'];
     // This is avoided now, cause of the form_state['field_group']
-    //field_group_save($group);
+    //field_group_update_field_group($group);
     //cache_clear_all('field_groups', 'cache_field');
   }
 }

@@ -109,8 +109,8 @@ function field_group_features_rebuild($module) {
 
     foreach ($field_groups as $field_group) {
       $field_group = (object) $field_group;
-      // @todo update / delete - also, we can probably ditch the serial id field completely, wuuuuw :)
-      field_group_save($field_group);
+      // @todo update / delete
+      field_group_update_field_group($field_group);
     }
   }
 }

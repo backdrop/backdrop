@@ -781,13 +781,13 @@ function field_group_unpack($group) {
 }
 
 /**
- * Saves a group definition.
- *
+ * Packs a FieldGroup object into a database row.
  * @param $group
- *   A group definition.
+ *   FieldGroup object.
+ * @return $record
+ *   Database row object, ready to be inserted/update
  */
-function field_group_save(& $group) {
-  // Prepare the record.
+function field_group_pack($group) {
   $record = clone $group;
   $record->data = array(
     'label' => $record->label,
@@ -798,14 +798,32 @@ function field_group_save(& $group) {
   if (isset($record->format_settings)) {
     $record->data['format_settings'] = $record->format_settings;
   }
+  return $record;
+}
 
-  if (isset($record->id)) {
-    drupal_write_record('field_group', $record, array('id'));
-  }
-  else {
-    drupal_write_record('field_group', $record);
-    $group->id = $record->id;
-  }
+/**
+ * Creates a field_group.
+ * @param
+ *   Object $group The FieldGroup object.
+ * @return $group
+ *   Field group object.
+ */
+function field_group_create_field_group(& $group) {
+  $record = field_group_pack($group);
+  drupal_write_record('field_group', $record);
+  $group->id = $record->id;
+}
+
+/**
+ * Updates a field_group.
+ * @param
+ *   Object $group The FieldGroup object.
+ * @return $group
+ *   Field group object.
+ */
+function field_group_update_field_group(& $group) {
+  $record = field_group_pack($group);
+  drupal_write_record('field_group', $record, array('id'));
 }
 
 /**
@@ -819,6 +837,27 @@ function field_group_delete_field_group($group, $mode) {
   db_delete('field_group')->condition('id', $group->id)->condition('mode', $mode)->execute();
   cache_clear_all('field_groups', 'cache_field');
   module_invoke_all('field_group_delete_field_group', $group);
+}
+
+/**
+ * Saves a group definition.
+ * This function exists for backward compatibility.
+ * TODO remove this function.
+ *
+ * @param $group
+ *   A group definition.
+ */
+function field_group_save(& $group) {
+  // Prepare the record.
+  $record = field_group_pack($group);
+
+  if (isset($record->id)) {
+    drupal_write_record('field_group', $record, array('id'));
+  }
+  else {
+    drupal_write_record('field_group', $record);
+    $group->id = $record->id;
+  }
 }
 
 /**
@@ -1055,7 +1094,7 @@ function field_group_field_overview_submit($form, &$form_state) {
       'label' => $values['label'],
       'format_type' => isset($values['format']['type']) ? $values['format']['type'] : 'visible',
     );
-    field_group_save($new_group);
+    field_group_create_field_group($new_group);
 
     // Store new group information for any additional submit handlers.
     $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
@@ -1083,7 +1122,7 @@ function field_group_field_overview_submit($form, &$form_state) {
     if (isset($form_state['field_group'][$group_name]->format_settings)) {
       $group->format_settings = $form_state['field_group'][$group_name]->format_settings;
     }
-    field_group_save($group);
+    field_group_update_field_group($group);
   }
 
   cache_clear_all('field_groups', 'cache_field');
