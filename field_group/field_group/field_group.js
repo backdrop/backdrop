@@ -22,28 +22,6 @@ Drupal.FieldGroup.Effects.processAccordion = {
  */
 Drupal.FieldGroup.Effects.processHtabs = {
   execute: function (context, settings) {
-    /*
-    $('div.field-group-htabs-wrapper', context).each(function() {
-      var $wrapper = $(this);
-      $tabs = $('<ul class="field-group-htabs-tabs tabs secundary"></ul>');
-      $tabs.prependTo($wrapper);
-      $('span.field-group-format-toggler', this).each(function() {
-        var $toggler = $(this);
-        var $link = $('<a class="field-group-format-title" href="#"></a>');
-        $link.data('container', $toggler.next());
-        $link.prepend($toggler.contents());
-        $('<li></li>').prepend($link).appendTo($tabs);
-        $link.click(function () {
-          $('.field-group-format-wrapper', $wrapper).each(function() {
-            $(this).hide();
-          });
-          $(this).data('container').show();
-          return false;
-        });
-        $toggler.remove();
-      });
-    });
-    */
   }
 }
 
@@ -86,10 +64,10 @@ Drupal.FieldGroup.Effects.processDiv = {
  */
 Drupal.behaviors.fieldGroup = {
   attach: function (context, settings) {
-    if (settings.field_group == undefined) {
+    if (settings.field_group == undefined || settings.fieldGroupWrapper == undefined) {
       return;
     }
-    $('.field-group-content-wrapper', context).once('fieldgroup.effects', function () {
+    $('#' + settings.fieldGroupWrapper, context).once('fieldgroup-effects', function () {
       // Execute all of them.
       $.each(Drupal.FieldGroup.Effects, function (func) {
         // We check for a wrapper function in Drupal.field_group as 

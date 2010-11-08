@@ -393,6 +393,7 @@ function field_group_field_group_format_settings(& $group) {
  */
 function field_group_field_group_pre_render(& $element, $group, & $form) {
 
+  // Prepare extra classes.
   $classes = array($group->format_type);
   if (isset($group->format_settings['formatter'])) {
     $collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'open', 'collapsed', 'closed'));
@@ -410,10 +411,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     $classes[] = 'collapsible';
   }
 
-  // Javascript has to be able to play along.
+  // Add all field_group format types to the js settings.
   $form['#attached']['js'][] = array(
     'data' => array('field_group' => array($group->format_type => TRUE)),
-    'type' => 'setting'
+    'type' => 'setting',
   );
 
   switch ($group->format_type) {
@@ -550,7 +551,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
 function field_group_field_group_build_pre_render_alter(& $element) {
 
   // Dish the fieldgroups with no fields.
-  if (isset($element['#view_mode'])) {
+  $display = isset($element['#view_mode']);
+  if ($display) {
     $groups = array_keys($element['#groups']);
     foreach (element_children($element) as $name) {
       if (in_array($name, $groups)) {
@@ -559,15 +561,24 @@ function field_group_field_group_build_pre_render_alter(& $element) {
         }
       }
     }
+    // Place a wrapper around the complete build.
+    $element['#prefix'] = (isset($element['#prefix']) ? $element['#prefix'] : '') . '<div id="field-group-content-wrapper">';
+    $element['#suffix'] = '</div>' . (isset($element['#suffix']) ? $element['#suffix'] : '');
+    $element['#attached']['js'][] = array(
+      'type' => 'setting',
+      'data' => array('fieldGroupWrapper' => "field-group-content-wrapper")
+    );
+  }
+  else {
+    $element['#attached']['js'][] = array(
+      'type' => 'setting',
+      'data' => array('fieldGroupWrapper' => str_replace('_', '-', $element['#form_id'])),
+    );
   }
 
-  // Place a wrapper around the complete build.
-  // TODO check if there is no other way to target only a wrapper where the
-  //      fieldgroups are located. Currently javascript use this.
+  // Add the default field_group javascript and stylesheet.
   $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
   $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
-  $element['#prefix'] = (isset($element['#prefix']) ? $element['#prefix'] : '') . '<div class="field-group-content-wrapper">';
-  $element['#suffix'] = '</div>' . (isset($element['#suffix']) ? $element['#suffix'] : '');
 }
 
 /**
@@ -1085,6 +1096,10 @@ function field_group_field_overview_submit($form, &$form_state) {
   // Create new group.
   if (!empty($form_values['_add_new_group']['group_name'])) {
     $values = $form_values['_add_new_group'];
+
+    $field_group_types = field_group_formatter_info();
+    $formatter = $field_group_types[($mode == 'form' ? 'form' : 'display')][$values['format']['type']];
+
     $new_group = (object) array(
       'group_name' => $values['group_name'],
       'entity_type' => $entity_type,
@@ -1094,8 +1109,12 @@ function field_group_field_overview_submit($form, &$form_state) {
       'parent_name' => $values['parent'],
       'weight' => $values['weight'],
       'label' => $values['label'],
-      'format_type' => isset($values['format']['type']) ? $values['format']['type'] : 'visible',
+      'format_type' => $values['format']['type'],
     );
+    $new_group->format_settings = array('formatter' => $formatter['default_formatter']);
+    if (isset($formatter['instance_settings'])) {
+      $new_group->format_settings['instance_settings'] = $formatter['instance_settings'];
+    }
     field_group_create_field_group($new_group);
 
     // Store new group information for any additional submit handlers.
