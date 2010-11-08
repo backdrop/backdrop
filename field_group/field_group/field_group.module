@@ -812,6 +812,7 @@ function field_group_create_field_group(& $group) {
   $record = field_group_pack($group);
   drupal_write_record('field_group', $record);
   $group->id = $record->id;
+  module_invoke_all('field_group_create_field_group', $group);
 }
 
 /**
@@ -824,6 +825,7 @@ function field_group_create_field_group(& $group) {
 function field_group_update_field_group(& $group) {
   $record = field_group_pack($group);
   drupal_write_record('field_group', $record, array('id'));
+  module_invoke_all('field_group_update_field_group', $group);
 }
 
 /**
