@@ -190,9 +190,12 @@ function field_group_form_field_ui_display_overview_form_alter(&$form, &$form_st
  */
 function field_group_field_attach_view_alter(&$element, $context) {
   // Check whether the view mode uses custom display settings or the 'default' mode.
-  $view_mode_settings = field_view_mode_settings($element['#entity_type'], $element['#bundle']);
-  $view_mode = $context['view_mode'];
-  $actual_mode = (!empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default');
+  $actual_mode = 'default';
+  if (isset($element['#entity_type']) && isset($element['#bundle'])) {
+    $view_mode_settings = field_view_mode_settings($element['#entity_type'], $element['#bundle']);
+    $view_mode = $context['view_mode'];
+    $actual_mode = (!empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default');
+  }
   field_group_attach_groups($element, $actual_mode);
 }
 
