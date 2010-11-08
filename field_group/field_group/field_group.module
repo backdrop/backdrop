@@ -335,7 +335,7 @@ function field_group_field_group_formatter_info() {
  * @params Object $group The group object.
  * @return Array $form The form element for the format settings.
  */
-function field_group_field_group_format_settings(& $group) {
+function field_group_field_group_format_settings($group) {
   // Add a wrapper for extra settings to use by others.
   $form = array(
     'instance_settings' => array(
