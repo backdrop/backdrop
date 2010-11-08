@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Features integration for field_group.
+ */
 
 /**
  * Implements hook_features_export_options().

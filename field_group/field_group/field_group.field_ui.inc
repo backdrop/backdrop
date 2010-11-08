@@ -2,6 +2,12 @@
 // $Id$
 
 /**
+ * @file
+ * Field_group.field_ui.inc is a file that contains most functions
+ * needed on the Fields UI Manage forms (display and fields).
+ */
+
+/**
  * Helper function to get the form parameters to use while
  * building the fields and display overview form.
  */
@@ -107,7 +113,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     }
 
     // Save the group when the configuration is submitted.
-    if (!empty($form_state['values'][$name .'_formatter_settings_update'])) {
+    if (!empty($form_state['values'][$name . '_formatter_settings_update'])) {
       field_group_formatter_settings_update($group, $form_state['values']['fields'][$name]);
     }
     // After all updates are finished, let the form_state know.
@@ -183,7 +189,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#parents' => array('fields', $name, 'format_settings'),
         '#weight' => -5,
         'label' => array(
-          '#markup' => t('Field group format:') .' <span class="formatter-name">'. $group->format_type . '</span>',
+          '#markup' => t('Field group format:') . ' <span class="formatter-name">' . $group->format_type . '</span>',
         ),
         // Create a settings form where hooks can pick in.
         'settings' => $settings,
@@ -351,7 +357,7 @@ function field_group_add_row($name, $parent_options, $params) {
       '#type' => 'textfield',
       '#size' => 15,
       '#description' => t('Label'),
-      '#prefix' => '<div class="label-input"><div class="add-new-placeholder">' . t('Add new group') .'</div>',
+      '#prefix' => '<div class="label-input"><div class="add-new-placeholder">' . t('Add new group') . '</div>',
       '#suffix' => '</div>',
     ),
     'weight' => array(
@@ -383,7 +389,7 @@ function field_group_add_row($name, $parent_options, $params) {
       // This field should stay LTR even for RTL languages.
       '#field_prefix' => '<span dir="ltr">group_',
       '#field_suffix' => '</span>&lrm;',
-      '#attributes' => array('dir'=>'ltr'),
+      '#attributes' => array('dir' => 'ltr'),
       '#size' => 15,
       '#description' => t('Group name (a-z, 0-9, _)'),
       '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
@@ -398,7 +404,12 @@ function field_group_add_row($name, $parent_options, $params) {
  */
 function field_group_format_settings_form(&$group) {
   $form = array();
-  $form['label'] = array('#type' => 'textfield', '#title' => t('Field group label'), '#default_value' => $group->label, '#weight' => -5);
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Field group label'),
+    '#default_value' => $group->label,
+    '#weight' => -5
+  );
   $form += module_invoke_all('field_group_format_settings', $group);
   return $form;
 }
@@ -455,7 +466,7 @@ function field_group_formatter_settings_update(& $group, $settings) {
 function field_group_format_settings_summary($group_name, $group) {
   $summary = implode('', module_invoke_all('field_group_format_summary', $group));
   return array(
-    '#markup' => '<div class="field-formatter-summary">'. $summary .'</div>',
+    '#markup' => '<div class="field-formatter-summary">' . $summary . '</div>',
     '#cell_attributes' => array('class' => array('field-formatter-summary-cell')),
   );
 }
@@ -471,7 +482,7 @@ function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form
     $admin_path .= '/fields';
   }
   else {
-    $admin_path .= '/display/'. $view_mode;
+    $admin_path .= '/display/' . $view_mode;
   }
   $form['#redirect'] = array($admin_path);
   $output = confirm_form($form,

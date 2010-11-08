@@ -43,7 +43,7 @@ class GroupUITestCase extends DrupalWebTestCase {
     // Create random group name.
     $this->group_label = $this->randomName(8);
     $this->group_name_input = strtolower($this->randomName(8));
-    $this->group_name = 'group_'. $this->group_name_input;
+    $this->group_name = 'group_' . $this->group_name_input;
   }
 
   /**

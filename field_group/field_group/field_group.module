@@ -125,7 +125,7 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
 /**
  * Implements hook_theme().
  */
-function field_group_theme () {
+function field_group_theme() {
   return array(
     'horizontal_tabs' => array(
       'render element' => 'element',
@@ -435,9 +435,9 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     case 'div':
       $element += array(
         '#type' => 'markup',
-        '#prefix' => '<div class="field-group-format '. implode(' ', $classes) . '">
-        <span class="field-group-format-toggler">'. $group->label .'</span>
-        <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
+        '#prefix' => '<div class="field-group-format ' . implode(' ', $classes) . '">
+        <span class="field-group-format-toggler">' . $group->label . '</span>
+        <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">',
         '#suffix' => '</div></div>',
         '#weight' => $group->weight,
       );
@@ -447,7 +447,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     case 'accordion':
       $element += array(
         '#type' => 'markup',
-        '#prefix' => '<div class="field-group-'. $group->format_type .'-wrapper">',
+        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
       );
@@ -457,8 +457,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element += array(
         '#type' => 'markup',
         '#prefix' => '
-        <h3 class="field-group-format-toggler '. $group->format_type .'">'. $group->label .'</h3>
-        <div class="field-group-format-wrapper" style="display: '. ($collapsed ? 'none' : 'block') .';">',
+        <h3 class="field-group-format-toggler ' . $group->format_type . '">' . $group->label . '</h3>
+        <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
         //'#attributes' => array('class' => array($group->format_type)),
@@ -471,7 +471,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#type' => 'horizontal_tabs',
         '#weight' => $group->weight,
         '#theme_wrappers' => array('horizontal_tabs'),
-        '#prefix' => '<div class="field-group-'. $group->format_type .'-wrapper">',
+        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
         '#suffix' => '</div>',
       );
       $form['#attached']['js'][] = 'misc/form.js';
@@ -499,7 +499,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#type' => 'vertical_tabs',
         '#weight' => $group->weight,
         '#theme_wrappers' => array('vertical_tabs'),
-        '#prefix' => '<div class="field-group-'. $group->format_type .'-wrapper">',
+        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
         '#suffix' => '</div>',
       );
       $form['#attached']['js'][] = 'misc/form.js';
@@ -564,8 +564,8 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   // Place a wrapper around the complete build.
   // TODO check if there is no other way to target only a wrapper where the
   //      fieldgroups are located. Currently javascript use this.
-  $element['#attached']['js'][] = drupal_get_path('module', 'field_group') .'/field_group.js';
-  $element['#attached']['css'][] = drupal_get_path('module', 'field_group') .'/field_group.css';
+  $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
+  $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
   $element['#prefix'] = (isset($element['#prefix']) ? $element['#prefix'] : '') . '<div class="field-group-content-wrapper">';
   $element['#suffix'] = '</div>' . (isset($element['#suffix']) ? $element['#suffix'] : '');
 }
@@ -595,13 +595,13 @@ function field_group_field_group_is_empty($element, $groups) {
 function field_group_field_group_format_summary(& $group) {
   $output = '';
   if (isset($group->format_settings['formatter'])) {
-    $output .= '<strong>'. $group->format_type .'</strong> '. $group->format_settings['formatter'] .'';
+    $output .= '<strong>' . $group->format_type . '</strong> ' . $group->format_settings['formatter'] . '';
   }
   if (isset($group->format_settings['instance_settings'])) {
     $last = end($group->format_settings['instance_settings']);
     $output .= '<br />';
     foreach ($group->format_settings['instance_settings'] as $key => $value) {
-      $output .= '<strong>'. $key . '</strong> '. $value;
+      $output .= '<strong>' . $key . '</strong> ' . $value;
       $output .= $last == $value ? ' ' : ', ';
     }
   }
@@ -836,7 +836,7 @@ function field_group_attach_groups(&$element, $view_mode) {
   $entity_type = $element['#entity_type'];
   $bundle = $element['#bundle'];
 
-  $element['#groups'] = field_group_info_groups($entity_type,$bundle, $view_mode);
+  $element['#groups'] = field_group_info_groups($entity_type, $bundle, $view_mode);
 
   // Create a lookup array.
   $group_children = array();
