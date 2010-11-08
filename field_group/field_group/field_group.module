@@ -786,7 +786,7 @@ function field_group_unpack($group) {
  * @param $group
  *   A group definition.
  */
-function field_group_save(&$group) {
+function field_group_save(& $group) {
   // Prepare the record.
   $record = clone $group;
   $record->data = array(
@@ -806,6 +806,19 @@ function field_group_save(&$group) {
     drupal_write_record('field_group', $record);
     $group->id = $record->id;
   }
+}
+
+/**
+ * Deletes a field_group.
+ * @param
+ *   $group FieldGroup object.
+ * @param
+ *   $mode String for the mode (form or view_mode).
+ */
+function field_group_delete_field_group($group, $mode) {
+  db_delete('field_group')->condition('id', $group->id)->condition('mode', $mode)->execute();
+  cache_clear_all('field_groups', 'cache_field');
+  module_invoke_all('field_group_delete_field_group', $group);
 }
 
 /**
