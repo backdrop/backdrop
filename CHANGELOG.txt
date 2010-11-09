@@ -435,6 +435,7 @@ Views 3.x-7.x-dev
     o by dereine: Fix notice in group_by_numeric.
     o by eporama: Add a test for views_plugin_argument_validate_user.
     o #788950 by merlinofchaos, bojanz, dereine: Fixed ui when clicking override.
+    o #965432 by bojanz: Display column for single column fields, if that column is not "value".
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

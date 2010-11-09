@@ -146,7 +146,7 @@ function field_views_field_default_views_data($field) {
 
     // Note: we don't have a label available here, because we are at the field
     // level, not at the instance level.
-    if (count($field['columns']) == 1) {
+    if (count($field['columns']) == 1 && $column == 'value') {
       $title = t('@label (!name)', array('@label' => $field['field_name'], '!name' => $field['field_name']));
       $title_short = $field['field_name'];
     }
