@@ -58,19 +58,6 @@ function comment_views_data() {
     ),
   );
 
-  // comment (the comment body)
-  $data['comment']['comment'] = array(
-    'title' => t('Body'),
-    'help' => t('The text of the comment.'),
-    'field' => array(
-      'handler' => 'views_handler_field_markup',
-      'format' => array('field' => 'format'),
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-    ),
-  );
-
   // cid
   $data['comment']['cid'] = array(
     'title' => t('ID'),
