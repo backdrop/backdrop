@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.33.4.29 2010/11/05 07:20:54 dereine Exp $
+// $Id: views_handler_field.inc,v 1.33.4.30 2010/11/11 19:41:11 dereine Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -653,8 +653,16 @@ class views_handler_field extends views_handler {
     if (isset($alter['fragment'])) {
       $options['fragment'] = strtr($alter['fragment'], $tokens);
     }
-    if (isset($this->options['alter']['language'])) {
-      $options['language'] = $this->options['alter']['language'];
+    if (isset($alter['language'])) {
+      $options['language'] = $alter['language'];
+    }
+
+    // If the url came from entity_uri(), pass along the required options.
+    if (isset($alter['entity'])) {
+      $options['entity'] = $alter['entity'];
+    }
+    if (isset($alter['entity_type'])) {
+      $options['entity_type'] = $alter['entity_type'];
     }
 
     $value .= l($text, $path, $options);
@@ -845,4 +853,3 @@ class views_handler_field_xss extends views_handler_field {
 /**
  * @}
  */
-

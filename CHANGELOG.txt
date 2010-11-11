@@ -305,7 +305,7 @@ Views 3.x-7.x-dev
     o #746846 by lavamind: url encoding on options could cause visual problems in jump menu.
     o #839214 by AlexisWilke: Improve encoding on help text snippets.
     o #846054 by celeritas: Exposed form "Reset" button failed to reset if the name was changed in form options.
-    o #870770 by bojany: Exposed filter settings can't be saved. The same patch as #645146.
+    o #870770 by bojanz: Exposed filter settings can't be saved. The same patch as #645146.
     o by dereine: Rename re_render to rerender.
     o by dereine: Fix views_import_access by changing the permission to use PHP for settings
     o by bojanz and dereine: Fix a remaining call to vpr.
@@ -437,6 +437,10 @@ Views 3.x-7.x-dev
     o #788950 by merlinofchaos, bojanz, dereine: Fixed ui when clicking override.
     o #965432 by bojanz: Display column for single column fields, if that column is not "value".
     o #965188 by Scott Reynolds: Remove comment.comment column, it does not exist in the database anymore.
+    o #969124 by brenk28: Fix notices in rss feeds related to readmore.
+    o #968286 by bojanz: Let field::render_as_link support entity url options.
+    o #967188 by Island Usurper: Fix exposed data submitted data.
+    o #954916 by becw: taxonomy term id from URL expects taxonomy objects in term fields, none present.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

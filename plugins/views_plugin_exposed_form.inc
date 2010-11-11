@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_exposed_form.inc,v 1.2.2.16 2010/11/06 21:25:06 dereine Exp $
+// $Id: views_plugin_exposed_form.inc,v 1.2.2.17 2010/11/11 19:43:07 dereine Exp $
 
 /**
  * The base plugin to handle exposed filter forms.
@@ -108,6 +108,7 @@ class views_plugin_exposed_form extends views_plugin {
       'method' => 'get',
       'rerender' => TRUE,
       'no_redirect' => TRUE,
+      'always_process' => TRUE,
     );
 
     // Some types of displays (eg. attachments) may wish to use the exposed
