@@ -1,0 +1,8 @@
+; $Id: views_export.info,v 1.1.6.1 2009/11/02 22:01:27 merlinofchaos Exp $
+
+name = Views exporter
+description = Allows exporting multiple views at once.
+package = "Views"
+dependencies[] = views
+core = 7.x
+files[] = views_export.module

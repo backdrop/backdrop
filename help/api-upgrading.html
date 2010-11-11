@@ -1,0 +1,37 @@
+<!-- $Id: api-upgrading.html,v 1.1.2.3 2010/11/05 07:20:54 dereine Exp $ -->
+In order to take advantage of the changes in Drupal 7, Views has gone through several API changes.
+Here's what you should know.
+
+<h3>Handler registry</h3>
+
+Views now uses Drupal's dynamic-loading code registry.
+You can safely remove your implementations of hook_views_handlers(), since they are no longer used.
+
+Please remember to specify the handlers in your module's .info file. For example:
+<pre>
+name = Example module
+description = "Gives an example of a module."
+core = 7.x
+files[] = example.module
+files[] = example.install
+
+; Views handlers
+files[] = includes/views/handlers/example_handler_argument_string.inc
+</pre>
+
+<h3>Removed handlers</h3>
+
+Note that views_handler_filter_float has been removed.
+This functionality is now handled by views_handler_filter_numeric.
+There's no need for having a special handler any more, thanks to the new DB layer in Drupal 7.
+
+<h3>Ctools dependency</h3>
+Views requires ctools now, so it can use the dependency system of ctools.
+The only thing you have to do is to replace 
+<pre>
+'#process' => array('views_process_dependeny')
+</pre>
+with
+<pre>
+'#process' => array('ctools_dependent_process'),
+</pre>

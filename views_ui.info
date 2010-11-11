@@ -1,0 +1,7 @@
+; $Id: views_ui.info,v 1.10.6.1 2009/11/02 22:01:25 merlinofchaos Exp $
+name = Views UI
+description = Administrative interface to views. Without this module, you cannot create or edit your views.
+package = Views
+core = 7.x
+dependencies[] = views
+files[] = views_ui.module
