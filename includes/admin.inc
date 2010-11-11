@@ -6,16 +6,57 @@
  */
 
 /**
- * Page callback to list views in the system.
+ * Page callback to list available views.
+ *
+ * @return
+ *   A renderable page build array.
  */
-function views_ui_list_views($arg = NULL) {
-  if ($arg != NULL) {
-    return drupal_not_found();
+function views_ui_list_views() {
+  include_once(drupal_get_path('module', 'views') . '/includes/admin.inc');
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/views_ui.css');
+
+  $views = views_get_all_views();
+  foreach ($views as $view) {
+    // Exclude code-based and disabled views from the listing, until we have
+    // a UI to deal with them.
+    if ($view->type == t('Default') || !empty($view->disabled)) {
+      continue;
+    }
+
+    // Add a row to the table listing.
+    $rows[] = array(
+      array(
+        'data' => array(
+          '#theme' => 'views_ui_view_info',
+          '#title' => $view->get_title(),
+          '#paths' => _views_ui_get_paths($view),
+          '#displays' => _views_ui_get_displays_list($view),
+        ),
+      ),
+      array(
+        'data' => '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>',
+      ),
+      array(
+        'data' => array(
+          '#theme' => 'links',
+          '#links' => _views_ui_get_operation_links($view),
+          '#attributes' => array('class' => array('links', 'inline')),
+        ),
+      )
+    );
   }
 
-  $output = theme('views_ui_list_views');
-  views_ui_check_advanced_help();
-  return $output;
+  $build = array(
+    '#theme' => 'table',
+    '#header' => array(
+      t('View name'),
+      t('Description'),
+      t('Operations'),
+    ),
+    '#rows' => $rows,
+    '#empty' => t('No views found.'),
+  );
+  return $build;
 }
 
 /**
@@ -40,335 +81,6 @@ function views_ui_check_advanced_help() {
       drupal_set_message(t('If you install the advanced help module from !href, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('!href' => l('http://drupal.org/project/advanced_help', 'http://drupal.org/project/advanced_help'), '@hide' => url('admin/structure/views/tools'))));
     }
   }
-}
-
-/**
- * Preprocess the list views theme
- */
-function template_preprocess_views_ui_list_views(&$vars) {
-  $items = array();
-  $sorts = array();
-
-  $views = views_get_all_views();
-
-  // Respond to a reset command by clearing session and doing a drupal goto
-  // back to the base URL.
-  if (isset($_GET['op']) && $_GET['op'] == t('Reset')) {
-    unset($_SESSION['views']['#admin']);
-    drupal_goto('admin/structure/views');
-  }
-  if (count($_GET) <= 1) {
-    if (isset($_SESSION['views']['#admin']) && is_array($_SESSION['views']['#admin'])) {
-      $_GET += $_SESSION['views']['#admin'];
-    }
-  }
-  else {
-    $_SESSION['views']['#admin'] = $_GET;
-    unset($_SESSION['views']['#admin']['q']);
-  }
-
-  $form_state = array(
-    'views' => $views,
-    'method' => 'get',
-    'rerender' => TRUE,
-    'no_redirect' => TRUE,
-    'always_process' => TRUE,
-    'build_info' => array(
-      'args' => array(),
-    ),
-  );
-
-  $vars['widgets'] = drupal_build_form('views_ui_list_views_form', $form_state);
-  unset($vars['widgets']['form_id']);
-  unset($vars['widgets']['form_build_id']);
-  $vars['widgets'] = drupal_render($vars['widgets']);
-
-  $vars['help_type_icon'] = '';
-  if (module_exists('advanced_help')) {
-    $vars['help_type_icon'] = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'view-type'));
-  }
-
-  $base_tables = views_fetch_base_tables();
-
-  foreach ($views as $view) {
-    if ($form_state['values']['tag'] != 'all') {
-      if ($form_state['values']['tag'] == 'none') {
-        if (!empty($view->tag)) {
-          continue;
-        }
-      }
-      elseif ($form_state['values']['tag'] != $view->tag) {
-        continue;
-      }
-    }
-    if ($form_state['values']['type'] != 'all' && $form_state['values']['type'] != $view->type) {
-      continue;
-    }
-
-    if ($form_state['values']['base'] != 'all' && $form_state['values']['base'] != $view->base_table) {
-      continue;
-    }
-
-    if ($form_state['values']['display'] != 'all' && empty($view->display[$form_state['values']['display']])) {
-      continue;
-    }
-
-    if ($form_state['values']['status'] != 'all' && (!empty($view->disabled) == $form_state['values']['status'])) {
-      continue;
-    }
-
-    $item = new stdClass();
-    $item->ops = array();
-
-    if (empty($view->disabled)) {
-      $item->ops[] = l(t('Edit'), "admin/structure/views/edit/$view->name");
-      $item->ops[] = l(t('Export'), "admin/structure/views/export/$view->name");
-      $item->ops[] = l(t('Clone'), "admin/structure/views/clone/$view->name");
-    }
-    if ($view->type != t('Default')) {
-      $text = $view->type == t('Overridden') ? t('Revert') : t('Delete');
-      $item->ops[] = l($text, "admin/structure/views/delete/$view->name");
-    }
-    else {
-      if (empty($view->disabled)) {
-        $item->ops[] = l(t('Disable'), "admin/structure/views/disable/$view->name", array('query' => drupal_get_destination()));
-      }
-      else {
-        $item->ops[] = l(t('Enable'), "admin/structure/views/enable/$view->name", array('query' => drupal_get_destination()));
-      }
-    }
-
-    $item->ops = implode(' | ', $item->ops);
-    if (empty($view->display)) {
-      $item->path = t('Warning! Broken view!');
-    }
-    else {
-      $view->init_display();   // Make sure all the handlers are set up
-      $all_paths = array();
-      foreach ($view->display as $display) {
-        if (!empty($display->handler) && $display->handler->has_path()) {
-          $one_path = $display->handler->get_option('path');
-          if (empty($path_sort)) {
-            $path_sort = strtolower($one_path);
-          }
-          if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
-            $all_paths[] = l($one_path, $one_path);
-          }
-          else {
-            $all_paths[] = check_plain($one_path);
-          }
-        }
-      }
-      if (!empty($all_paths)) {
-        $item->path = implode(', ', array_unique($all_paths));
-      }
-    }
-
-    $item->type = $view->type;
-    $item->name = $view->name;
-
-    if (!empty($view->tag)) {
-      $item->tag = $view->tag;
-    }
-
-    $item->title = $view->get_title();
-    $item->base = !empty($base_tables[$view->base_table]['title']) ? $base_tables[$view->base_table]['title'] : t('Broken');
-
-    $item->displays = array();
-    foreach ($view->display as $display) {
-      if (!empty($display->handler->definition['admin'])) {
-        $item->displays[$display->handler->definition['admin']] = TRUE;
-      }
-    }
-
-    if ($item->displays) {
-      ksort($item->displays);
-      $item->displays = implode(', ', array_keys($item->displays));
-    }
-
-    $item->description = check_plain($view->description);
-    $item->classes = empty($view->disabled) ? 'view-enabled' : 'view-disabled';
-    $items[] = $item;
-
-    $sort = intval(empty($view->disabled) xor $form_state['values']['sort'] == 'asc');
-
-    switch ($form_state['values']['order']) {
-      case 'name':
-      default:
-        $sort .= strtolower($view->name);
-        break;
-      case 'title':
-        $sort .= strtolower($item->title);
-        break;
-      case 'path':
-        $sort .= strtolower($raw_path); // $path;
-        break;
-      case 'type':
-        $sort .= $view->type . $view->name;
-        break;
-      case 'tag':
-        $sort .= strtolower($view->tag);
-        break;
-      case 'desc':
-        $sort .= strtolower($view->description);
-        break;
-    }
-
-    $sorts[] = $sort;
-  }
-
-  if ($form_state['values']['sort'] == 'desc') {
-    arsort($sorts);
-  }
-  else {
-    asort($sorts);
-  }
-
-  $i = array();
-  foreach ($sorts as $id => $title) {
-    $i[] = $items[$id];
-  }
-
-  views_add_css('views-list');
-  $vars['views'] = $i;
-
-  $getting_started = '';
-  if (module_exists('advanced_help')) {
-    $getting_started = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'getting-started', 'type' => 'title'));
-  }
-  if (!$getting_started) {
-    $getting_started = t('Install the advanced help module for the getting started');
-  }
-
-  $vars['help'] = t('Not sure what to do? Try the "!getting-started" page.', array('!getting-started' => $getting_started));
-}
-
-/**
- * Provide a form for sorting and filtering the list of views.
- */
-function views_ui_list_views_form($form, &$form_state) {
-  if (!variable_get('clean_url', FALSE)) {
-    $form['q'] = array(
-      '#type' => 'hidden',
-      '#value' => $_GET['q'],
-    );
-  }
-
-  $all = array('all' => t('<All>'));
-  $none = array('none' => t('<None>'));
-
-  $form['type'] = array(
-    '#type' => 'select',
-    '#title' => t('Storage'),
-    '#options' => array(
-      'all' => t('<All>'),
-      t('Normal') => t('Normal'),
-      t('Default') => t('Default'),
-      t('Overridden') => t('Overridden'),
-    ),
-    '#default_value' => 'all',
-  );
-
-  $status = array(
-    '0' => t('Disabled'),
-    '1' => t('Enabled'),
-  );
-  $form['status'] = array(
-    '#type' => 'select',
-    '#title' => t('Status'),
-    '#options' => array_merge($all, $status),
-    '#default_value' => 'all',
-  );
-
-  $bases = array();
-  foreach (views_fetch_base_tables() as $table => $info) {
-    $bases[$table] = $info['title'];
-  }
-
-  $form['base'] = array(
-    '#type' => 'select',
-    '#title' => t('Type'),
-    '#options' => array_merge($all, $bases),
-    '#default_value' => 'all',
-  );
-
-  $tags = array();
-
-  $extras = array();
-  if (isset($form_state['views'])) {
-    foreach ($form_state['views'] as $name => $view) {
-      if (!empty($view->tag)) {
-        $tags[$view->tag] = $view->tag;
-      }
-    }
-  }
-
-  asort($tags);
-
-  $form['tag'] = array(
-    '#type' => 'select',
-    '#title' => t('Tag'),
-    '#options' => array_merge($all, $none, $tags),
-    '#default_value' => 'all',
-  );
-
-  $displays = array();
-  foreach (views_fetch_plugin_data('display') as $id => $info) {
-    if (!empty($info['admin'])) {
-      $displays[$id] = $info['admin'];
-    }
-  }
-
-  asort($displays);
-
-  $form['display'] = array(
-    '#type' => 'select',
-    '#title' => t('Displays'),
-    '#options' => array_merge($all, $displays),
-    '#default_value' => 'all',
-  );
-
-  $form['order'] = array(
-    '#type' => 'select',
-    '#title' => t('Sort by'),
-    '#options' => array(
-      'name' => t('Name'),
-      'title' => t('Title'),
-      'tag' => t('Tag'),
-      'path' => t('Path'),
-      'type' => t('Type'),
-      'desc' => t('Description'),
-    ),
-    '#default_value' => 'name',
-  );
-
-  $form['sort'] = array(
-    '#type' => 'select',
-    '#title' => t('Order'),
-    '#options' => array(
-      'asc' => t('Up'),
-      'desc' => t('Down'),
-    ),
-    '#default_value' => 'asc',
-  );
-
-  $form['submit'] = array(
-    '#name' => '', // so it won't in the $_GET args
-    '#type' => 'submit',
-    '#id' => 'edit-views-apply',
-    '#value' => t('Apply'),
-  );
-
-  if (!empty($_SESSION['views']['#admin'])) {
-    $form['reset'] = array(
-      '#type' => 'submit',
-      '#id' => 'edit-views-reset',
-      '#value' => t('Reset'),
-    );
-  }
-  $form['#token'] = FALSE;
-
-  return $form;
 }
 
 /**
@@ -572,9 +284,9 @@ function views_ui_add_page() {
       'args' => array(),
     ),
   );
-
-  $form = drupal_build_form('views_ui_add_form', $form_state);
-  return drupal_render($form);
+  // We use drupal_build_form() instead of drupal_get_form() so we can populate
+  // the $form_state.
+  return drupal_build_form('views_ui_add_form', $form_state);
 }
 
 /**
@@ -593,62 +305,26 @@ function views_ui_clone_page($view) {
 }
 
 /**
- * Form constructor callback to create the views Add Form, phase 1.
+ * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
   $view = $form_state['view'];
   $form = array();
 
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View name'),
-    '#description' => t('This is the unique name of the view. It must contain only alphanumeric characters and underscores; it is used to identify the view internally and to generate unique theming template names for this view. If overriding a module provided view, the name must not be changed or instead a new view will be created.'),
-    '#required' => TRUE,
-    '#maxlength' => 32,
-    '#default_value' => $view ? $view->name : '',
-    '#attributes' => array('dir'=>'ltr'),
-  );
-
   $form['description'] = array(
     '#type' => 'textfield',
-    '#title' => t('View description'),
+    '#title' => t('View name'),
+    '#size' => 32,
     '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
     '#default_value' => $view ? $view->description : '',
     '#maxlength' => 255,
   );
-
-  $form['tag'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View tag'),
-    '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
-    '#default_value' => $view ? $view->tag : '',
-    '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
-  );
-
-  $base_tables = array();
-  foreach (views_fetch_base_tables() as $table => $info) {
-    $base_tables[$table] = $info['title'] . '<div class="description">' . $info['description'] . '</div>';
-  }
-
-  $form['base_table'] = array(
-    '#type' => 'radios',
-    '#title' => t('View type'),
-    '#description' => t('The view type is the primary table for which information is being retrieved. The view type controls what arguments, fields, sort criteria and filters are available, so once this is set it <strong>cannot be changed</strong>.'),
-    '#default_value' => $view ? $view->base_table : 'node',
-    '#options' => $base_tables,
-  );
-
-  if ($view) {
-    $form['base_table']['#disabled'] = TRUE;
-  }
-
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Next'),
     '#validate' => array('views_ui_add_form_validate'),
     '#submit' => array('views_ui_add_form_submit'),
   );
-
   return $form;
 }
 
@@ -656,36 +332,125 @@ function views_ui_add_form($form, &$form_state) {
  * Validate the add view form.
  */
 function views_ui_add_form_validate($form, &$form_state) {
-  $name = $form_state['values']['name'];
-
-  // View name must be alphanumeric or underscores, no other punctuation.
-  if (preg_match('/[^a-zA-Z0-9_]/', $name) || is_numeric($name)) {
-    form_error($form['name'], t('View name must be alphanumeric or underscores only, but cannot be numeric.'));
-  }
-
-  // View name must already exist.
-  $view = views_get_view($form_state['values']['name']);
-  if ($view && $view->type != t('Default')) {
-    form_error($form['name'], t('You must use a unique name for this view.'));
-  }
+  drupal_set_message('stub validate code');
 }
 
 /**
- * Process the add view form
+ * Process the add view form.
  */
 function views_ui_add_form_submit($form, &$form_state) {
-  $view = $form_state['view'] ? $form_state['view'] : views_new_view();
-  $view->name = $form_state['values']['name'];
-  $view->description = $form_state['values']['description'];
-  $view->tag = $form_state['values']['tag'];
-  if (empty($form['base_table']['#disabled'])) {
-    $view->base_table = $form_state['values']['base_table'];
-  }
-
-  views_ui_cache_set($view);
-  $form_state['redirect'] ='admin/structure/views/edit/' . $view->name;
+  drupal_set_message('stub submit code');
+  $form_state['redirect'] = 'admin/structure/views';
 }
 
+/**
+ * Helper function to get a list of available operation links for a given view.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of links as expected by theme_links().
+ */
+function _views_ui_get_operation_links($view) {
+  $links = array();
+
+  if ($view->type != t('Default')) {
+    $text = $view->type == t('Overridden') ? t('revert') : t('delete');
+    $links[] = array('title' => $text, 'href' => "admin/structure/views/view/$view->name/delete");
+  }
+  else {
+    if (empty($view->disabled)) {
+      $links[] = array('title' => t('disable'), 'href' => "admin/structure/views/view/$view->name/disable", 'query' => drupal_get_destination());
+    }
+    else {
+      $links[] = array('title' => t('enable'), 'href' => "admin/structure/views/view/$view->name/enable", 'query' => drupal_get_destination());
+    }
+  }
+
+  if (empty($view->disabled)) {
+    $links[] = array('title' => t('duplicate'), 'href' => "admin/structure/views/view/$view->name/duplicate");
+    $links[] = array('title' => t('edit'), 'href' => "admin/structure/views/view/$view->name/edit");
+  }
+
+  return $links;
+}
+
+/**
+ * Helper function to get a list of paths assigned to a view.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of links to this view's display paths.
+ */
+function _views_ui_get_paths($view) {
+  $all_paths = array();
+  if (empty($view->display)) {
+    $all_paths[] = t('Edit this view to add a display.');
+  }
+  else {
+    $view->init_display();   // Make sure all the handlers are set up
+    foreach ($view->display as $display) {
+      if (!empty($display->handler) && $display->handler->has_path()) {
+        $one_path = $display->handler->get_option('path');
+        if (empty($path_sort)) {
+          $path_sort = strtolower($one_path);
+        }
+        if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
+          $all_paths[] = l($one_path, $one_path);
+        }
+        else {
+          $all_paths[] = check_plain($one_path);
+        }
+      }
+    }
+  }
+
+  return array_unique($all_paths);
+}
+
+/**
+ * Helper function to get a list of displays included in a view.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of display types that this view includes.
+ */
+function _views_ui_get_displays_list($view) {
+  $displays = array();
+  foreach ($view->display as $display) {
+    if (!empty($display->handler->definition['admin'])) {
+      $displays[$display->handler->definition['admin']] = TRUE;
+    }
+  }
+
+  if ($displays) {
+    ksort($displays);
+    $displays = array_keys($displays);
+  }
+  return $displays;
+}
+
+/**
+ * Theme function; returns basic administrative information about a view.
+ *
+ * TODO: template + preprocess
+ */
+function theme_views_ui_view_info($variables) {
+  $title = empty($variables['title']) ? '<em>' . t('No title') . '</em>' : $variables['title'];
+  $paths = empty($variables['paths']) ? t('None') : format_plural(count($variables['paths']), 'Path', 'Paths') . ": " . implode(", ", $variables['paths']);
+  $displays = empty($variables['displays']) ? t('None') : format_plural(count($variables['displays']), 'Display', 'Displays') . ': ' . '<em>' . implode(', ', $variables['displays']) . '</em>';
+
+  $output = '';
+  $output .= '<div class="views-ui-view-title">' . $title . "</div>\n";
+  $output .= '<div class="views-ui-view-displays">' . $displays . "</div>\n";
+  $output .= '<div class="views-ui-view-paths">' . $paths . "</div>\n";
+  return $output;
+}
 /**
  * Page to delete a view.
  */

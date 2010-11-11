@@ -24,8 +24,8 @@ function views_ui_menu() {
 
   $items['admin/structure/views'] = $base + array(
     'title' => 'Views',
+    'description' => 'Manage customized lists of content.',
     'page callback' => 'views_ui_list_views',
-    'description' => 'Views are customized lists of content on your system; they are highly configurable and give you control over how lists of content are presented.',
     'type' => MENU_NORMAL_ITEM
   );
   $items['admin/structure/views/list'] = $base + array(
@@ -35,7 +35,8 @@ function views_ui_menu() {
     'weight' => '-1'
   );
   $items['admin/structure/views/add'] = $base + array(
-    'title' => 'Add new view',
+    'title' => 'Add view',
+    'description' => 'Add new view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
   );
@@ -86,7 +87,7 @@ function views_ui_menu() {
     'page arguments' => array('views_ui_delete_confirm', 4),
   );
   $items['admin/structure/views/break-lock/%views_ui_cache'] = $callback + array(
-    'title' => 'Delete view',
+    'title' => 'Break lock',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_break_lock_confirm', 4),
   );
@@ -206,15 +207,9 @@ function views_ui_theme() {
     ),
 
     // list views
-    'views_ui_list_views' => array(
-      'variables' => array(
-        'views' => array(),
-        'help' => '',
-        'widgets' => '',
-        'help_type_icon' => '',
-      ),
-      'template' => 'views-ui-list-views',
-      'path' => "$path/theme",
+    'views_ui_view_info' => array(
+      'variables' => array('title' => '', 'paths' => array(), 'displays' => array()),
+      'file' => "includes/admin.inc",
     ),
 
     // tab themes
@@ -233,8 +228,14 @@ function views_ui_theme() {
 }
 
 /**
- * Specialized menu callback to load a view either out of the cache or just
- * load it.
+ * Specialized menu callback to load a view and check its locked status.
+ *
+ * @param $name
+ *   The machine name of the view.
+ *
+ * @return
+ *   The view object, with a "locked" property indicating whether or not
+ *   someone else is already editing the view.
  */
 function views_ui_cache_load($name) {
   ctools_include('object-cache');
