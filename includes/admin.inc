@@ -12,7 +12,6 @@
  *   A renderable page build array.
  */
 function views_ui_list_views() {
-  include_once(drupal_get_path('module', 'views') . '/includes/admin.inc');
   drupal_add_css(drupal_get_path('module', 'views_ui') . '/views_ui.css');
 
   $views = views_get_all_views();
@@ -319,11 +318,58 @@ function views_ui_add_form($form, &$form_state) {
     '#default_value' => $view ? $view->description : '',
     '#maxlength' => 255,
   );
+  $form['show'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+  );
+
+  $entity_info = entity_get_info();
+ // drupal_set_message('<pre>'.print_r($entity_info, TRUE));
+  ksort($entity_info);
+  foreach ($entity_info as $entity_type => $info) {
+    $options["$entity_type:"] = $info['label'];
+    if ($entity_type == 'node') {
+      foreach ($info['bundles'] as $bundle => $bundle_info) {
+        $options["$entity_type:$bundle"] = t('!label content', array('!label' => $bundle_info['label']));
+      }
+    }
+  }
+  $default = isset($options['node:blog']) ? 'node:blog' : 'node:';
+  $form['show']['entity_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Show'),
+    '#options' => $options,
+    '#default_value' => $default,
+    '#attributes' => array('class' => array('inline')),
+  );
+  $form['page'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+  );
+  $form['page']['create'] = array(
+    '#title' => t('Create a page'),
+    '#type' => 'checkbox',
+    '#attributes' => array('class' => array('strong')),
+  );
+  $form['block'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+  );
+  $form['block']['create'] = array(
+    '#title' => t('Create a block'),
+    '#type' => 'checkbox',
+    '#attributes' => array('class' => array('strong')),
+  );
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Next'),
-    '#validate' => array('views_ui_add_form_validate'),
-    '#submit' => array('views_ui_add_form_submit'),
+    '#value' => t('Save & continue'),
+    '#validate' => array('views_ui_add_form_save_validate'),
+    '#submit' => array('views_ui_add_form_save_submit'),
+  );
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#submit' => array('views_ui_add_form_cancel_submit'),
   );
   return $form;
 }
@@ -331,15 +377,22 @@ function views_ui_add_form($form, &$form_state) {
 /**
  * Validate the add view form.
  */
-function views_ui_add_form_validate($form, &$form_state) {
+function views_ui_add_form_save_validate($form, &$form_state) {
   drupal_set_message('stub validate code');
 }
 
 /**
  * Process the add view form.
  */
-function views_ui_add_form_submit($form, &$form_state) {
+function views_ui_add_form_save_submit($form, &$form_state) {
   drupal_set_message('stub submit code');
+  $form_state['redirect'] = 'admin/structure/views';
+}
+
+/**
+ * Process the add view form.
+ */
+function views_ui_add_form_cancel_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/views';
 }
 
