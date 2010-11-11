@@ -108,6 +108,7 @@ class views_plugin_exposed_form extends views_plugin {
       'method' => 'get',
       'rerender' => TRUE,
       'no_redirect' => TRUE,
+      'always_process' => TRUE,
     );
 
     // Some types of displays (eg. attachments) may wish to use the exposed
