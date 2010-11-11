@@ -98,7 +98,9 @@ class views_plugin_row_node_rss extends views_plugin_row {
     $item->link = url("node/$node->nid", array('absolute' => TRUE));
     $item->elements = $node->rss_elements;
     $item->nid = $node->nid;
-    $item->readmore = $node->readmore;
+    if (isset($node->readmore)) {
+      $item->readmore = $node->readmore;
+    }
 
     return theme($this->theme_functions(),
       array(
