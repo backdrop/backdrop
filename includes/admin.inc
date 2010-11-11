@@ -12,7 +12,7 @@
  *   A renderable page build array.
  */
 function views_ui_list_views() {
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/views_ui.css');
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
 
   $views = views_get_all_views();
   foreach ($views as $view) {
@@ -277,6 +277,7 @@ function views_ui_preview_form_submit(&$form, &$form_state) {
  * Page callback to add a new view.
  */
 function views_ui_add_page() {
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
   $form_state = array(
     'view' => NULL,
     'build_info' => array(
@@ -321,6 +322,7 @@ function views_ui_add_form($form, &$form_state) {
   $form['show'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
+    '#attributes' => array('class' => array('inline')),
   );
 
   $entity_info = entity_get_info();
@@ -351,6 +353,24 @@ function views_ui_add_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#attributes' => array('class' => array('strong')),
   );
+  $form['page']['title'] = array(
+    '#title' => t('Page title'),
+    '#type' => 'textfield',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['page']['path'] = array(
+    '#title' => t('Path'),
+    '#type' => 'textfield',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['block'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
@@ -359,6 +379,15 @@ function views_ui_add_form($form, &$form_state) {
     '#title' => t('Create a block'),
     '#type' => 'checkbox',
     '#attributes' => array('class' => array('strong')),
+  );
+  $form['block']['title'] = array(
+    '#title' => t('Block title'),
+    '#type' => 'textfield',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="block[create]"]' => array('checked' => TRUE),
+      ),
+    ),
   );
   $form['submit'] = array(
     '#type' => 'submit',
