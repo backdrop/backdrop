@@ -5,7 +5,7 @@
  * Provide structure for the administrative interface to Views.
  */
 
-/*
+/**
  * Implements hook_menu().
  */
 function views_ui_menu() {
@@ -20,13 +20,10 @@ function views_ui_menu() {
 
   $callback = $base + array('type' => MENU_CALLBACK);
 
-  $convert = array('file' => 'includes/convert.inc') + $base;
-
   $items['admin/structure/views'] = $base + array(
     'title' => 'Views',
     'description' => 'Manage customized lists of content.',
     'page callback' => 'views_ui_list_views',
-    'type' => MENU_NORMAL_ITEM
   );
   $items['admin/structure/views/list'] = $base + array(
     'title' => 'List',
@@ -60,27 +57,6 @@ function views_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-
-  $items['admin/structure/views/tools/convert'] = $convert + array(
-    'title' => 'Convert',
-    'description' => 'Convert stored Views 1 views.',
-    'page callback' => 'views_ui_admin_convert',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
-  );
-  $items['admin/structure/views1/delete'] = $convert + array(
-    'title' => 'Delete view',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_delete1_confirm', 4),
-    'type' => MENU_CALLBACK,
-  );
-  $items['admin/structure/views1/convert'] = $convert + array(
-    'title' => 'Convert view',
-    'page callback' => 'views_ui_convert1',
-    'page arguments' => array(4),
-    'type' => MENU_CALLBACK,
-  );
-
   $items['admin/structure/views/delete/%views_ui_cache'] = $callback + array(
     'title' => 'Delete view',
     'page callback' => 'drupal_get_form',
@@ -91,12 +67,12 @@ function views_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_break_lock_confirm', 4),
   );
-  $items['admin/structure/views/export/%views_ui_cache'] = $callback + array(
+  $items['admin/structure/views/export/%views_ui_cache'] = $base + array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_export_page', 4),
     'type' => MENU_LOCAL_TASK
   );
-  $items['admin/structure/views/clone/%views_ui_cache'] = $callback + array(
+  $items['admin/structure/views/clone/%views_ui_cache'] = $base + array(
     'page callback' => 'views_ui_clone_page',
     'page arguments' => array(4),
     'type' => MENU_LOCAL_TASK
@@ -161,14 +137,12 @@ function views_ui_menu() {
   $items['admin/views/ajax/autocomplete/tag'] = $callback + array(
     'page callback' => 'views_ui_autocomplete_tag',
     'access arguments' => array('administer views'),
-    'type' => MENU_CALLBACK,
-    'file' => 'includes/admin.inc',
   );
 
   return $items;
 }
 
-/*
+/**
  * Implements hook_help().
  */
 function views_ui_help($path, $arg = '') {
@@ -178,7 +152,7 @@ function views_ui_help($path, $arg = '') {
   }
 }
 
-/*
+/**
  * Implements hook_theme().
  */
 function views_ui_theme() {
