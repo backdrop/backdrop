@@ -162,11 +162,6 @@ function views_ui_theme() {
 
   return array(
     // edit a view
-    'views_ui_edit_view' => array(
-      'variables' => array('view' => NULL),
-      'template' => 'views-ui-edit-view',
-      'path' => "$path/theme",
-    ),
     'views_ui_edit_display_tab' => array(
       'variables' => array('display_id' => NULL, 'view' => NULL, 'display' => NULL),
       'template' => 'views-ui-edit-display-tab',
