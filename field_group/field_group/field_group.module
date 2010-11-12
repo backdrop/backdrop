@@ -613,7 +613,7 @@ function field_group_field_group_is_empty($element, $groups) {
 /**
  * Implements hook_field_group_format_summary().
  */
-function field_group_field_group_format_summary(& $group) {
+function field_group_field_group_format_summary($group) {
   $output = '';
   if (isset($group->format_settings['formatter'])) {
     $output .= '<strong>' . $group->format_type . '</strong> ' . $group->format_settings['formatter'] . '';

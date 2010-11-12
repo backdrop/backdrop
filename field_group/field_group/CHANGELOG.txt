@@ -2,6 +2,8 @@
 CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
+
+    o #960916 fixed reference warnings.
     o No label anymore with div>open.
     o #969258 Added check for fields and extra_fields.
     o #960916 Fixed notice on for reference on group in field_group_settings.
