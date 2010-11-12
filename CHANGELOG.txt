@@ -441,6 +441,7 @@ Views 3.x-7.x-dev
     o #968286 by bojanz: Let field::render_as_link support entity url options.
     o #967188 by Island Usurper: Fix exposed data submitted data.
     o #954916 by becw: taxonomy term id from URL expects taxonomy objects in term fields, none present.
+    o #968372 by becw: "Taxonomy: Term" filter autocomplete broken.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!

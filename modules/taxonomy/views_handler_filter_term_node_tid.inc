@@ -282,7 +282,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     $query = db_select('taxonomy_term_data', 'td');
-    $query->addJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
+    $query->innerJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
     $query->fields('td');
     $query->condition('td.name', $names);
     $query->condition('tv.machine_name', $this->options['vocabulary']);
