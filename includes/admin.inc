@@ -324,15 +324,13 @@ function views_ui_add_form($form, &$form_state) {
     '#tree' => TRUE,
     '#attributes' => array('class' => array('inline')),
   );
+  $base_tables = views_fetch_base_tables();
 
-  $entity_info = entity_get_info();
- // drupal_set_message('<pre>'.print_r($entity_info, TRUE));
-  ksort($entity_info);
-  foreach ($entity_info as $entity_type => $info) {
-    $options["$entity_type:"] = $info['label'];
-    if ($entity_type == 'node') {
-      foreach ($info['bundles'] as $bundle => $bundle_info) {
-        $options["$entity_type:$bundle"] = t('!label content', array('!label' => $bundle_info['label']));
+  foreach ($base_tables as $table => $info) {
+    $options["$table:"] = $info['title'];
+    if ($table == 'node') {
+      foreach (node_type_get_names()  as $type => $name) {
+        $options["$table:$type"] = t('!label posts', array('!label' => $name));
       }
     }
   }
