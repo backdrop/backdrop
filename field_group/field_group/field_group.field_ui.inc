@@ -48,6 +48,11 @@ function field_group_field_ui_form_params($form, $display_overview) {
  */
 function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display_overview = FALSE) {
 
+  // Only start altering the form if we need to.
+  if (empty($form['#fields']) && empty($form['#extra'])) {
+    return;
+  }
+
   $params = field_group_field_ui_form_params($form, $display_overview);
 
   // Add some things to be able to preserve synced usage of field_ui.
