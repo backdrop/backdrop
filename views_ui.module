@@ -86,6 +86,16 @@ function views_ui_menu() {
     'page arguments' => array(4),
   );
 
+  // Alternate Edit path, as per _views_ui_get_operation_links().
+  // @todo If this is the desired new path, remove the
+  //   'admin/structure/views/edit/%views_ui_cache' one.
+  $items['admin/structure/views/view/%views_ui_cache/edit'] = $base + array(
+    'title' => 'Edit',
+    'page callback' => 'views_ui_edit_page',
+    'page arguments' => array(4),
+    'type' => MENU_LOCAL_TASK
+  );
+
   // Many line items for editing a view.
   $items['admin/structure/views/edit/%views_ui_cache'] = $base + array(
     'title' => 'Edit',
