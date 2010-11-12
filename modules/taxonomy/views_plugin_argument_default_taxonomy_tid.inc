@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_default_taxonomy_tid.inc,v 1.1.2.7 2010/11/05 07:20:54 dereine Exp $
+// $Id: views_plugin_argument_default_taxonomy_tid.inc,v 1.1.2.8 2010/11/12 18:07:45 dereine Exp $
 /**
  * @file
  *   Taxonomy tid default argument.
@@ -104,7 +104,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
             $items = field_get_items('node', $node, $name);
             if (is_array($items)) {
               foreach ($items as $item) {
-                $taxonomy[$item['tid']] = $item['taxonomy_term'];
+                $taxonomy[$item['tid']] = $field_info['settings']['allowed_values'][0]['vocabulary'];
               }
             }
           }
@@ -112,8 +112,8 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
         if (!empty($this->options['limit'])) {
           $tids = array();
           // filter by vocabulary
-          foreach ($taxonomy as $tid => $term) {
-            if (!empty($this->options['vocabularies'][$term->vocabulary_machine_name])) {
+          foreach ($taxonomy as $tid => $vocab) {
+            if (!empty($this->options['vocabularies'][$vocab])) {
               $tids[] = $tid;
             }
           }
