@@ -437,14 +437,21 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       break;
     // Normal or collapsible div.
     case 'div':
-      $element += array(
+      $add = array(
         '#type' => 'markup',
-        '#prefix' => '<div class="field-group-format ' . implode(' ', $classes) . '">
-        <span class="field-group-format-toggler">' . $group->label . '</span>
-        <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">',
-        '#suffix' => '</div></div>',
         '#weight' => $group->weight,
       );
+      if ($group->format_settings['formatter'] != 'open') {
+        $add['#prefix'] = '<div class="field-group-format ' . implode(' ', $classes) . '">
+          <span class="field-group-format-toggler">' . $group->label . '</span>
+          <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
+        $add['#suffix'] = '</div></div>';
+      }
+      else {
+        $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . implode(' ', $classes) . '">';
+        $add['#suffix'] = '</div>';
+      }
+      $element += $add;
       drupal_add_library('system', 'effects.blind');
       break;
     // Accordion group.
