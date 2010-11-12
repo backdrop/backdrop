@@ -371,6 +371,16 @@ function views_ui_add_form($form, &$form_state) {
       ),
     ),
   );
+  $form['page']['display_format'] = array(
+    '#title' => t('Display format'),
+    '#type' => 'select',
+    '#options' => array(),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['page']['items_per_page'] = array(
     '#title' => t('Items per page'),
     '#type' => 'textfield',
@@ -418,6 +428,25 @@ function views_ui_add_form($form, &$form_state) {
       'visible' => array(
       ':input[name="page[link]"]' => array('checked' => TRUE),
       ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['page']['rss'] = array(
+    '#title' => t('Include an RSS feed'),
+    '#type' => 'checkbox',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['page']['rss_properties']['path'] = array(
+    '#title' => t('RSS path'),
+    '#type' => 'textfield',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+        ':input[name="page[rss]"]' => array('checked' => TRUE),
       ),
     ),
   );
