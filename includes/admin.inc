@@ -371,6 +371,56 @@ function views_ui_add_form($form, &$form_state) {
       ),
     ),
   );
+  $form['page']['items_per_page'] = array(
+    '#title' => t('Items per page'),
+    '#type' => 'textfield',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['page']['link'] = array(
+    '#title' => t('Create a menu link'),
+    '#type' => 'checkbox',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['page']['link_properties'] = array();
+  if (module_exists('menu')) {
+    $menu_options = menu_get_menus();
+  }
+  else {
+    // These are not yet translated.
+    $menu_options = menu_list_system_menus();
+    foreach ($menu_options as $name => $title) {
+      $menu_options[$name] = t($title);
+    }
+  }
+  $form['page']['link_properties']['menu_name'] = array(
+    '#title' => t('Menu'),
+    '#type' => 'select',
+    '#options' => $menu_options,
+    '#states' => array(
+      'visible' => array(
+      ':input[name="page[link]"]' => array('checked' => TRUE),
+      ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['page']['link_properties']['title'] = array(
+    '#title' => t('Link text'),
+    '#type' => 'textfield',
+    '#states' => array(
+      'visible' => array(
+      ':input[name="page[link]"]' => array('checked' => TRUE),
+      ':input[name="page[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['block'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
