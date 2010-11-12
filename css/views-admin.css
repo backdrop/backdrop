@@ -11,3 +11,7 @@
   border: 1px solid #CCC;
   padding: 10px;
 }
+
+.js .views-edit-view .ui-tabs-hide {
+  display: none;
+}

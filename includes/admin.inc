@@ -687,13 +687,99 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
 }
 
 /**
- * The main view edit page
+ * Page callback to edit a view.
  */
 function views_ui_edit_page($view) {
-  drupal_set_title(t('Edit view %view', array('%view' => $view->name)), PASS_THROUGH);
-  $output = theme('views_ui_edit_view', array('view' => $view));
-  views_ui_check_advanced_help();
-  return $output;
+  $build = array();
+  drupal_add_library('system', 'ui.tabs');
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
+  drupal_add_js(drupal_get_path('module', 'views_ui') . '/js/views-admin.js');
+
+  $build = array(
+   '#prefix' => '<div class="views-edit-view">',
+   '#suffix' => '</div>',
+  );
+
+  if (isset($view->locked) && is_object($view->locked)) {
+    $build['locked'] = array(
+      '#theme' => 'views_ui_break_lock',
+      '#user' => theme('username', array('account' => user_load($view->locked->uid))),
+      '#lock_age' => format_interval(REQUEST_TIME - $view->locked->updated),
+      '#break_link' => url('admin/structure/views/view/' . $view->name . '/break-lock'),
+    );
+  }
+
+  $build['displays'] = array(
+    '#prefix' => '<h3>' . t('Queries/displays') . "</h3>\n" . '<div class="views-displays">',
+    '#suffix' => '</div>',
+  );
+  $build['displays']['tabs'] = array(
+    '#prefix' => '<ul>',
+    '#suffix' => '</ul>',
+  );
+  $build['displays']['tab_content'] = array();
+
+  // Add a tab for each display.
+  $view->set_display('default');
+  foreach ($view->display as $display) {
+    // The display should already be initialized.
+    if (empty($display->handler)) {
+      continue;
+    }
+    $id = $display->id;
+    // Hide the default display.
+    if ($id === 'default' && !views_ui_show_default_display()) {
+      continue;
+    }
+    $build['displays']['tabs'][$id] = array(
+      '#markup' => "<li><a href='#tab-$id'>" . ucwords($id) . '</a></li>',
+    );
+    $build['displays']['tab_content'][$id] = views_ui_get_display_tab($view, $display);
+  }
+
+  // Show the live preview. TODO: Does each display tab have its own preview?
+  $build['displays']['preview'] = array(
+    '#markup' => $view->preview('default', array()),
+  );
+
+  return $build;
+}
+
+/**
+ * Controls whether or not the default display should have its own tab on edit.
+ *
+ * @return
+ *   Always returns FALSE for now.
+ */
+function views_ui_show_default_display() {
+  return FALSE;
+}
+
+/**
+ * Returns a renderable array representing the edit page for one display.
+ */
+function views_ui_get_display_tab($view, $display) {
+  $build = array(
+    '#prefix' => "<div id='tab-$display->id'>",
+    '#suffix' => '</div>',
+    '#display_id' => $display->id,
+  );
+  $plugin = $display->handler->definition;
+  // If the plugin doesn't exist, display an error message instead of an edit
+  // page.
+  if (empty($plugin)) {
+    $title = isset($display->display_title) ? $display->display_title : t('Invalid');
+    // @TODO: Improved UX for the case where a plugin is missing.
+    $build['#markup'] = t("Error: Display @display refers to a plugin named '@plugin', but that plugin is missing.", array('@display' => $display->id, '@plugin' => $display->display_plugin));
+  }
+  // Build the content of the edit page.
+  else {
+    $build['#theme'] = 'views_ui_edit_display_tab';
+    // TODO: Build actual contents here instead of in preprocess and tpl.
+    $build['#view'] = $view;
+    $build['#display'] = $display;
+  }
+  return $build;
 }
 
 /**
@@ -1080,7 +1166,11 @@ function template_preprocess_views_ui_edit_view(&$vars) {
   drupal_add_js($settings, 'setting');
 }
 
-function template_preprocess_views_ui_edit_tab(&$vars) {
+/**
+ * Theme preprocess for the edit display tab.
+ */
+function template_preprocess_views_ui_edit_display_tab(&$vars) {
+  // TODO: Move logic from here into the build array.
   $view = $vars['view'];
   $display = $vars['display'];
   $plugin = $display->handler->definition;

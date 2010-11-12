@@ -167,9 +167,9 @@ function views_ui_theme() {
       'template' => 'views-ui-edit-view',
       'path' => "$path/theme",
     ),
-    'views_ui_edit_tab' => array(
-      'variables' => array('view' => NULL, 'display' => NULL),
-      'template' => 'views-ui-edit-tab',
+    'views_ui_edit_display_tab' => array(
+      'variables' => array('display_id' => NULL, 'view' => NULL, 'display' => NULL),
+      'template' => 'views-ui-edit-display-tab',
       'path' => "$path/theme",
     ),
     'views_ui_edit_item' => array(
