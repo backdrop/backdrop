@@ -70,6 +70,13 @@ function views_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   ) + $base;
+  // @todo Not sure yet if we'll keep this as a primary tab. Trying it out.
+  $items['admin/structure/views/view/%views_ui_cache/analyze'] = array(
+    'title' => 'Analyze',
+    'page callback' => 'views_ui_analyze_view',
+    'page arguments' => array(FALSE, 4),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/export'] = array(
     'title' => 'Export',
     'page callback' => 'drupal_get_form',
@@ -109,7 +116,6 @@ function views_ui_menu() {
 
   // Nojs/Ajax callbacks used while editing a View.
   $ajax_callbacks = array(
-    'analyze' => 'views_ui_analyze_view',
     'details' => 'views_ui_edit_details',
     'add-display' => 'views_ui_add_display',
     'clone-display' => 'views_ui_clone_display',
