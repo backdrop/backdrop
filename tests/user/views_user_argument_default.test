@@ -8,9 +8,9 @@
 class viewsUserArgumentDefault extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-    'name' => 'Tests user argument default plugin',
-    'description' => 'Tests user argument default plugin',
-    'group' => 'Views',
+      'name' => 'Tests user argument default plugin',
+      'description' => 'Tests user argument default plugin',
+      'group' => 'Views Plugins',
     );
   }
 
