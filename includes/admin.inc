@@ -744,7 +744,11 @@ function views_ui_edit_page($view) {
     $build['displays']['tab_content'][$id] = views_ui_get_display_tab($view, $display);
   }
 
-  // Show the live preview. TODO: Does each display tab have its own preview?
+  // Show the live preview.
+  // @todo Change the preview to match the selected display. The existing
+  //   display tabs need to be AJAXified, or else refactored as secondary local
+  //   tasks.
+  $view->views_ui_context = TRUE;
   $build['displays']['preview'] = array(
     '#markup' => $view->preview('default', array()),
   );

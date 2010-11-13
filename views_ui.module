@@ -192,6 +192,11 @@ function views_ui_theme() {
     'views_ui_style_plugin_table' => array(
       'render element' => 'form',
     ),
+
+    // When previewing a view.
+    'views_ui_view_preview_section' => array(
+      'variables' => array('view' => NULL, 'section' => NULL, 'content' => NULL),
+    ),
   );
 }
 
@@ -264,4 +269,58 @@ function views_ui_default_load($name) {
   }
 
   return FALSE;
+}
+
+/**
+ * Theme preprocess for views-view.tpl.php.
+ */
+function views_ui_preprocess_views_view(&$vars) {
+  $view = $vars['view'];
+  if (!empty($view->views_ui_context)) {
+    $view->hide_admin_links = TRUE;
+    $vars['admin_links'] = '';
+    $vars['admin_links_raw'] = array();
+    foreach (array('header', 'exposed', 'rows', 'pager', 'more', 'footer') as $section) {
+      if (!empty($vars[$section])) {
+        $vars[$section] = theme('views_ui_view_preview_section', array('view' => $view, 'section' => $section, 'content' => $vars[$section]));
+      }
+    }
+  }
+}
+
+/**
+ * Theme preprocess for theme_views_ui_view_preview_section().
+ */
+function template_preprocess_views_ui_view_preview_section(&$vars) {
+  switch ($vars['section']) {
+    case 'header':
+      $vars['title'] = t('Header');
+      break;
+    case 'exposed':
+      // @todo Sorts can be exposed too, so we may need a better title.
+      $vars['title'] = t('Exposed Filters');
+      break;
+    case 'rows':
+      // @todo The title needs to depend on what is being viewed. Also, it is
+      //   now discouraged to use the word "node" in user facing text.
+      $vars['title'] = t('Nodes');
+      break;
+    case 'pager':
+      $vars['title'] = t('Pager');
+      break;
+    case 'more':
+      $vars['title'] = t('More');
+      break;
+    case 'footer':
+      $vars['title'] = t('Footer');
+      break;
+  }
+  $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
+}
+
+/**
+ * Returns the HTML for a section of a View being previewed within the Views UI.
+ */
+function theme_views_ui_view_preview_section($vars) {
+  return '<h2 class="views_ui_view_preview_section_title">' . $vars['title'] . '</h2>' . $vars['content'];
 }
