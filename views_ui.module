@@ -11,32 +11,31 @@
 function views_ui_menu() {
   $items = array();
 
-  // Minor code reduction technique
+  // Minor code reduction technique.
   $base = array(
     'access callback' => 'user_access',
     'access arguments' => array('administer views'),
     'file' => 'includes/admin.inc',
   );
 
-  $callback = $base + array('type' => MENU_CALLBACK);
-
-  $items['admin/structure/views'] = $base + array(
+  // Top-level Views module pages (not tied to a particular View).
+  $items['admin/structure/views'] = array(
     'title' => 'Views',
     'description' => 'Manage customized lists of content.',
     'page callback' => 'views_ui_list_views',
-  );
-  $items['admin/structure/views/list'] = $base + array(
+  ) + $base;
+  $items['admin/structure/views/list'] = array(
     'title' => 'List',
     'page callback' => 'views_ui_list_views',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => '-1'
-  );
-  $items['admin/structure/views/add'] = $base + array(
+  ) + $base;
+  $items['admin/structure/views/add'] = array(
     'title' => 'Add view',
     'description' => 'Add new view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
-  );
+  ) + $base;
   $items['admin/structure/views/import'] = array(
     'title' => 'Import view from code',
     'page callback' => 'drupal_get_form',
@@ -44,101 +43,100 @@ function views_ui_menu() {
     'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
-  $items['admin/structure/views/tools'] = $base + array(
+  $items['admin/structure/views/tools'] = array(
     'title' => 'Tools',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_admin_tools'),
-    'type' => MENU_LOCAL_TASK
-  );
-  $items['admin/structure/views/tools/basic'] = $base + array(
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+
+  // Other modules might want to extend Tools with secondary tabs. Add the
+  // default task here, so they don't have to.
+  $items['admin/structure/views/tools/basic'] = array(
     'title' => 'Basic',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_admin_tools'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
-  );
-  $items['admin/structure/views/view/%views_ui_cache/delete'] = $callback + array(
-    'title' => 'Delete view',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_delete_confirm', 4),
-  );
-  $items['admin/structure/views/view/%views_ui_cache/break-lock'] = $callback + array(
-    'title' => 'Break lock',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_break_lock_confirm', 4),
-  );
-  $items['admin/structure/views/view/%views_ui_cache/export'] = $base + array(
+  ) + $base;
+
+  // Pages that act on a View.
+  $items['admin/structure/views/view/%views_ui_cache'] = array(
+    'title callback' => 'views_ui_edit_page_title',
+    'title arguments' => array(4),
+    'page callback' => 'views_ui_edit_page',
+    'page arguments' => array(4),
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/edit'] = array(
+    'title' => 'Edit',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/export'] = array(
+    'title' => 'Export',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_export_page', 4),
     'type' => MENU_LOCAL_ACTION,
-  );
-  $items['admin/structure/views/view/%views_ui_cache/clone'] = $base + array(
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/clone'] = array(
+    'title' => 'Clone',
     'page callback' => 'views_ui_clone_page',
     'page arguments' => array(4),
-    'type' => MENU_LOCAL_ACTION
-  );
-  $items['admin/structure/views/view/%views_ui_default/enable'] = $callback + array(
+    'type' => MENU_LOCAL_ACTION,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
+    'title' => 'Break lock',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_ui_break_lock_confirm', 4),
+    'type' => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_default/enable'] = array(
+    'title' => 'Enable',
     'page callback' => 'views_ui_enable_page',
     'page arguments' => array(4),
-  );
-  $items['admin/structure/views/view/%views_ui_default/disable'] = $callback + array(
+    'type' => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_default/disable'] = array(
+    'title' => 'Disable',
     'page callback' => 'views_ui_disable_page',
     'page arguments' => array(4),
-  );
+    'type' => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_ui_delete_confirm', 4),
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
-
-  // Many line items for editing a view.
-  $items['admin/structure/views/view/%views_ui_cache/edit'] = $base + array(
-    'title' => 'Edit',
-    'page callback' => 'views_ui_edit_page',
-    'page arguments' => array(4),
-    'type' => MENU_LOCAL_TASK
-  );
+  // Nojs/Ajax callbacks used while editing a View.
   $ajax_callbacks = array(
     'analyze' => 'views_ui_analyze_view',
     'details' => 'views_ui_edit_details',
     'add-display' => 'views_ui_add_display',
+    'clone-display' => 'views_ui_clone_display',
     'preview' => 'views_ui_preview',
+    '%' => 'views_ui_ajax_form',
   );
-
   foreach ($ajax_callbacks as $menu => $menu_callback) {
-    $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache'] = $callback + array(
+    $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache'] = array(
       'page callback' => $menu_callback,
-      'page arguments' => array(FALSE, 5),
-    );
-    $items['admin/structure/views/ajax/' . $menu . '/%views_ui_cache'] = $callback + array(
+      'page arguments' => $menu === '%' ? array(FALSE, 4, 5) : array(FALSE, 5),
+      'type' => MENU_CALLBACK,
+    ) + $base;
+    $items['admin/structure/views/ajax/' . $menu . '/%views_ui_cache'] = array(
       'page callback' => $menu_callback,
-      'page arguments' => array(TRUE, 5),
+      'page arguments' => $menu === '%' ? array(TRUE, 4, 5) : array(TRUE, 5),
       'delivery callback' => 'views_ui_ajax_deliver',
-    );
+      'type' => MENU_CALLBACK,
+    ) + $base;
   }
 
-  $items['admin/build/views/nojs/clone-display/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_clone_display',
-    'page arguments' => array(FALSE, 5, 6),
-  );
-
-  $items['admin/build/views/ajax/clone-display/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_clone_display',
-    'page arguments' => array(TRUE, 5, 6),
-    'delivery callback' => 'views_ui_ajax_deliver',
-  );
-
-  $items['admin/structure/views/nojs/%/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_ajax_form',
-    'page arguments' => array(FALSE, 4, 5),
-  );
-  $items['admin/structure/views/ajax/%/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_ajax_form',
-    'page arguments' => array(TRUE, 4, 5),
-    'delivery callback' => 'views_ui_ajax_deliver',
-  );
-
-  // autocompletes for handlers and such
-  $items['admin/views/ajax/autocomplete/tag'] = $callback + array(
+  // Autocomplete callback for tagging a View.
+  // @todo Are there any other modules relying on this path? If not, change to
+  //   'admin/structure/views/ajax/autocomplete/tag'.
+  $items['admin/views/ajax/autocomplete/tag'] = array(
     'page callback' => 'views_ui_autocomplete_tag',
-    'access arguments' => array('administer views'),
-  );
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
   return $items;
 }

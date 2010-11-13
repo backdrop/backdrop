@@ -687,6 +687,13 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
 }
 
 /**
+ * Page title callback for the Edit View page.
+ */
+function views_ui_edit_page_title($view) {
+  return $view->get_title();
+}
+
+/**
  * Page callback to edit a view.
  */
 function views_ui_edit_page($view) {
@@ -1735,7 +1742,7 @@ function views_ui_clone_display_form($form, &$form_state) {
   );
 
   $form['#id'] = 'views-clone-display-form';
-  $form['#action'] = url("admin/build/views/nojs/clone-display/$view->name/$display_id");
+  $form['#action'] = url("admin/structure/views/nojs/clone-display/$view->name/$display_id");
   $form['#attributes'] = array('class' => 'views-ajax-form');
 
   return $form;
