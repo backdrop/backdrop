@@ -65,14 +65,20 @@ function field_views_field_default_views_data($field) {
     $data[$current_table]['table']['join'][$entity_info['base table']] = array(
       'left_field' => $entity_info['entity keys']['id'],
       'field' => 'entity_id',
-      'extra' => array(array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE)),
+      'extra' => array(
+        array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE),
+        array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
+      ),
     );
 
     if (!empty($entity_info['entity keys']['revision']) && !empty($entity_info['revision table'])) {
       $data[$revision_table]['table']['join'][$entity_info['revision table']] = array(
         'left_field' => $entity_info['entity keys']['revision'],
         'field' => 'revision_id',
-        'extra' => array(array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE)),
+        'extra' => array(
+          array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE),
+          array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
+        ),
       );
 
       $supports_revisions = TRUE;
