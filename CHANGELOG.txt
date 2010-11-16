@@ -446,4 +446,6 @@ Views 3.x-7.x-dev
     o #713078 by achaux: Aggregator not properly using allowed tags from core.
     o #428196 by dereine, funkmasterjones and tic2000: Allow specification of default sort order (asc or desc) per field in table style.
     o #944680 by rvilar: Properly t() untranslated string.
+    o #881680 by brianV and longwave: Avoid unnecessary invoking of view objects for argument validation when no argument validation is necessary.
+    o #881680 by brianV and longwave: Avoid unnecessary invoking of view objects for argument validation when no argument validation is necessary.
 
