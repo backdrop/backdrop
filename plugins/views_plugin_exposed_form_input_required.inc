@@ -85,6 +85,9 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
       $this->view->executed = TRUE;
       $this->view->result = array();
     }
+    else {
+      parent::query();
+    }
   }
 
 }
