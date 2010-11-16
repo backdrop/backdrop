@@ -330,3 +330,55 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
 function theme_views_ui_view_preview_section($vars) {
   return '<h2 class="views_ui_view_preview_section_title">' . $vars['title'] . '</h2>' . $vars['content'];
 }
+
+/**
+ * Implments hook_ctools_plugin_directory().
+ *
+ * Views UI provides wizard plugins on behalf of core base tables.
+ */
+function views_ui_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'views_ui') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Fetch metadata on a specific views ui wizard plugin.
+ *
+ * @param $wizard type
+ *   Name of a panel content type.
+ *
+ * @return
+ *   An array with information about the requested wizard type.
+ */
+function views_ui_get_wizard($wizard) {
+  ctools_include('plugins');
+  return ctools_get_plugins('views_ui', 'views_wizard', $wizard);
+}
+
+/**
+ * Fetch metadata for all content_type plugins.
+ *
+ * @return
+ *   An array of arrays with information about all available views wizards.
+ */
+function views_ui_get_wizards() {
+  ctools_include('plugins');
+  return ctools_get_plugins('views_ui', 'views_wizard');
+}
+
+/**
+ * Inform CTools that the Views wizard plugin can have child plugins.
+ */
+function views_ui_ctools_plugin_type() {
+  return array(
+    'views_wizard' => array(
+      'child plugins' => TRUE,
+      'defaults' => array(
+        // The children may, for example, be a different variant for each node type.
+        'get children' => NULL,
+      ),
+    ),
+  );
+}
+
