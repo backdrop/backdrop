@@ -199,6 +199,14 @@ class views_plugin_style_table extends views_plugin_style {
           '#process' => array('ctools_dependent_process'),
           '#dependency' => array($id => array($field)),
         );
+        $form['info'][$field]['default_sort_order'] = array(
+          '#type' => 'select',
+          '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
+          '#default_value' => !empty($this->options['info'][$field]['default_sort_order']) ? $this->options['info'][$field]['default_sort_order'] : 'asc',
+          '#process' => array('views_process_dependency'),
+          '#dependency_count' => 2,
+          '#dependency' => array($id => array($field), 'edit-style-options-info-' . $safe . '-sortable' => array(1)),
+        );
         // Provide an ID so we can have such things.
         $radio_id = drupal_html_id('edit-default-' . $field);
         $form['default'][$field] = array(

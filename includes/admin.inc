@@ -3353,6 +3353,10 @@ function theme_views_ui_style_plugin_table($variables) {
       'align' => 'center',
     ),
     array(
+      'data' => t('Default order'),
+      'align' => 'center',
+    ),
+    array(
       'data' => t('Default sort'),
       'align' => 'center',
     ),
@@ -3370,6 +3374,10 @@ function theme_views_ui_style_plugin_table($variables) {
         'align' => 'center',
       );
       $row[] = array(
+        'data' => drupal_render($form['info'][$id]['default_sort_order']),
+        'align' => 'center',
+      );
+      $row[] = array(
         'data' => drupal_render($form['default'][$id]),
         'align' => 'center',
       );
@@ -3377,12 +3385,13 @@ function theme_views_ui_style_plugin_table($variables) {
     else {
       $row[] = '';
       $row[] = '';
+      $row[] = '';
     }
     $rows[] = $row;
   }
 
   // Add the special 'None' row.
-  $rows[] = array(t('None'), '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
+  $rows[] = array(t('None'), '', '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
 
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
   $output .= drupal_render_children($form);
