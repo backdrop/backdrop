@@ -51,7 +51,7 @@ class views_handler_field_comment_node_link extends views_handler_field {
 
     // Call comment.module's hook_link: comment_link($type, $node = NULL, $teaser = FALSE)
     // Call node by reference so that something is changed here
-    comment_node_view(&$node, $this->options['teaser'] ? 'teaser' : 'full');
+    comment_node_view($node, $this->options['teaser'] ? 'teaser' : 'full');
     // question: should we run these through:    drupal_alter('link', $links, $node);
     // might this have unexpected consequences if these hooks expect items in $node that we don't have?
 
