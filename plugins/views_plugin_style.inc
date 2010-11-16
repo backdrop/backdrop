@@ -88,7 +88,7 @@ class views_plugin_style extends views_plugin {
     // key to FALSE.
     // @TODO: Document "uses grouping" in docs.php when docs.php is written.
     if ($this->uses_fields() && $this->definition['uses grouping']) {
-      $options = array('' => t('<None>'));
+      $options = array('' => t('- None -'));
       $options += $this->display->handler->get_field_labels();
 
       // If there are no fields, we can't group on them.
