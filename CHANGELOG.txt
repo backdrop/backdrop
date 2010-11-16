@@ -443,6 +443,7 @@ Views 3.x-7.x-dev
     o #954916 by becw: taxonomy term id from URL expects taxonomy objects in term fields, none present.
     o #968372 by becw: "Taxonomy: Term" filter autocomplete broken.
     o #971326 by dereine: Join fieldapi fields additional on deleted = 0.
+    o #713078 by achaux: Aggregator not properly using allowed tags from core.
 
 Views 6.x-3.x-dev
     o #396380 by merlinofchaos, dereine and dagmar: Initial support for GROUP BY queries!!!!!!!!!!!!
