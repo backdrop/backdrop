@@ -275,10 +275,21 @@ function views_menu_alter(&$callbacks) {
  * @param $name
  *   The name of the view. This needs to be specified in the 'load function'
  *   of the menu entry.
+ * @param $display_id
+ *   The display id that will be loaded for this menu item.
  * @param $index
  *   The menu argument index. This counts from 1.
  */
 function views_arg_load($value, $name, $display_id, $index) {
+  static $views = array();
+
+  // Make sure we haven't already loaded this views argument for a similar menu
+  // item elsewhere.
+  $key = $name . ':' . $display_id . ':' . $value . ':' . $index;
+  if (isset($views[$key])) {
+    return $views[$key];
+  }
+
   if ($view = views_get_view($name)) {
     $view->set_display($display_id);
     $view->init_handlers();
@@ -298,6 +309,9 @@ function views_arg_load($value, $name, $display_id, $index) {
       if (isset($view->argument[$indexes[$index]])) {
         $arg = $view->argument[$indexes[$index]]->validate_argument($value) ? $value : FALSE;
         $view->destroy();
+
+        // Store the output in case we load this same menu item again.
+        $views[$key] = $arg;
         return $arg;
       }
     }
