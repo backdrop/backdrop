@@ -459,3 +459,4 @@ Views 3.x-7.x-dev
     o #964266 by dereine: cache_expire() missing $type.
     o #477984 by demeritcowboy, fatstar415, mike dodd, dagmar: Properly handle value for "empty" and "not empty" special operators.
     o #768060 by EmmanueleQuinto, xjm, others: Make sure that render alter options do not accidentally get blown up for empty fields.
+    o #847724 by dereine: Allow jump menu "Summary" style to customize choose text, just like the regular summary style.
