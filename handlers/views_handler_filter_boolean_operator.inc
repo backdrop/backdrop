@@ -135,7 +135,6 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
     $field = "$this->table_alias.$this->real_field";
 
     if (empty($this->value)) {
-
       if ($this->accept_null) {
         $or = db_or()
           ->condition($field, 0, '=')
@@ -147,7 +146,12 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
       }
     }
     else {
-      $this->query->add_where($this->options['group'], $field, 0, '<>');
+      if (!empty($this->definition['use equal'])) {
+        $this->query->add_where($this->options['group'], $field, 1, '=');
+      }
+      else {
+        $this->query->add_where($this->options['group'], $field, 0, '<>');
+      }
     }
   }
 }

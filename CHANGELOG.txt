@@ -453,3 +453,4 @@ Views 3.x-7.x-dev
     o #973496 by das-peter: Don't use call-time-reference for comment_view.
     o #938806 by jenlampton: Node: title field should link to node by default.
     o #956654 by mdupont: Translation for "offset" field in dates needed work.
+    o #931390 by dww: Optimize boolean logic by using "= 1" rather than "<> 0" for faster queries.
