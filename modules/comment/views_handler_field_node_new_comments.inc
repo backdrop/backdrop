@@ -17,7 +17,9 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
 
   function construct() {
     parent::construct();
-    $this->additional_fields = array('nid' => 'nid', 'type' => 'type');
+    $this->additional_fields['nid'] = 'nid';
+    $this->additional_fields['type'] = 'type';
+    $this->additional_fields['comment_count'] = array('table' => 'node_comment_statistics', 'field' => 'comment_count');
   }
 
   function option_definition() {
@@ -87,7 +89,7 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
       $node->type = $values->{$this->aliases['type']};
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = 'node/' . $node->nid;
-      $this->options['alter']['query'] = comment_new_page_count($values->{$this->field_alias}, $values->node_new_comments, $node);
+      $this->options['alter']['query'] = comment_new_page_count($values->{$this->aliases['comment_count']}, $values->{$this->field_alias}, $node);
       $this->options['alter']['fragment'] = 'new';
     }
 

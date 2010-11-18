@@ -461,3 +461,4 @@ Views 3.x-7.x-dev
     o #768060 by EmmanueleQuinto, xjm, others: Make sure that render alter options do not accidentally get blown up for empty fields.
     o #847724 by dereine: Allow jump menu "Summary" style to customize choose text, just like the regular summary style.
     o #669636 by dereine and bojanz: Convert the rest of the field handlers that have link options to use the advanced render.
+    o #871578 by dereine: Comment "new" might not work right without a comment count field.
