@@ -35,12 +35,16 @@ class views_handler_field_accesslog_path extends views_handler_field {
   }
 
   function render($values) {
-    $title = check_plain($values->{$this->field_alias});
+    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+  }
+
+  function render_link($data, $values) {
     if (!empty($this->options['display_as_link'])) {
-      return l($title, $values->{$this->aliases['path']}, array('html' => TRUE));
+      $this->options['alter']['make_link'] = TRUE;
+      $this->options['alter']['path'] = $values->{$this->aliases['path']};
+      $this->options['alter']['html'] = TRUE;
     }
-    else {
-      return $title;
-    }
+
+    return $data;
   }
 }

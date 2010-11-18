@@ -35,9 +35,18 @@ class views_handler_field_user_link extends views_handler_field {
   }
 
   function render($values) {
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
-    $uid = $values->{$this->aliases['uid']};
-    return l($text, "user/$uid");
+    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
   }
+
+  function render_link($data, $values) {
+    $uid = $values->{$this->aliases['uid']};
+    $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
+
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['path'] = "user/" . $uid;
+
+    return $text;
+  }
+
 }
 

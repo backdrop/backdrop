@@ -27,7 +27,8 @@ class views_handler_field_comment_link_edit extends views_handler_field_comment_
     );
   }
 
-  function render($values) {
+  function render_link($data, $values) {
+    parent::render_link($data, $values);
     // ensure user has access to edit this comment.
     $comment = new stdClass();
     $comment->cid = $values->{$this->aliases['cid']};
@@ -37,12 +38,13 @@ class views_handler_field_comment_link_edit extends views_handler_field_comment_
     }
 
     $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
-    if (!$this->options['destination']) {
-      return l($text, "comment/edit/" . $values->{$this->aliases['cid']});
+    unset($this->options['alter']['fragment']);
+
+    if (!empty($this->options['destination'])) {
+      $this->options['alter']['query'] = drupal_get_destination();
     }
-    else {
-      return l($text, "comment/edit/" . $values->{$this->aliases['cid']}, array('query' => drupal_get_destination()));
-    }
+
+    return $text;
   }
 }
 

@@ -10,7 +10,7 @@ class views_handler_field_node_link_edit extends views_handler_field_node_link {
     $this->additional_fields['type'] = 'type';
   }
 
-  function render($values) {
+  function render_link($data, $values) {
     // ensure user has access to edit this node.
     $node = new stdClass();
     $node->nid = $values->{$this->aliases['nid']};
@@ -21,8 +21,12 @@ class views_handler_field_node_link_edit extends views_handler_field_node_link {
       return;
     }
 
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['path'] = "node/$node->nid/edit";
+    $this->options['alter']['query'] = drupal_get_destination();
+
     $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
-    return l($text, "node/$node->nid/edit", array('query' => drupal_get_destination()));
+    return $text;
   }
 }
 

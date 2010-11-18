@@ -18,6 +18,10 @@ class views_handler_field_node_translation_link extends views_handler_field {
   }
 
   function render($values) {
+    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+  }
+
+  function render_link($data, $values) {
     global $language;
     $tnid = $values->{$this->aliases['tnid']};
     // Only load translations if the node isn't in the current language.
@@ -28,6 +32,9 @@ class views_handler_field_node_translation_link extends views_handler_field {
         $values->{$this->aliases['title']} = $translations[$language->language]->title;
       }
     }
-    return l($values->{$this->aliases['title']}, "node/" . $values->{$this->aliases['nid']});
+
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+    return $values->{$this->aliases['title']}
   }
 }
