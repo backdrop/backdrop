@@ -45,21 +45,23 @@ class views_handler_field_node extends views_handler_field {
    * Data should be made XSS safe prior to calling this function.
    */
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_node']) && $data !== NULL && $data !== '') {
-      $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
-      if (isset($this->aliases['language'])) {
-        $languages = language_list();
-        if (isset($languages[$values->{$this->aliases['language']}])) {
-          $this->options['alter']['language'] = $languages[$values->{$this->aliases['language']}];
-        }
-        else {
-          unset($this->options['alter']['language']);
+    if (!empty($this->options['link_to_node'])) {
+      if ($data !== NULL && $data !== '') {
+        $this->options['alter']['make_link'] = TRUE;
+        $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+        if (isset($this->aliases['language'])) {
+          $languages = language_list();
+          if (isset($languages[$values->{$this->aliases['language']}])) {
+            $this->options['alter']['language'] = $languages[$values->{$this->aliases['language']}];
+          }
+          else {
+            unset($this->options['alter']['language']);
+          }
         }
       }
-    }
-    else {
-      $this->options['alter']['make_link'] = FALSE;
+      else {
+        $this->options['alter']['make_link'] = FALSE;
+      } 
     }
     return $data;
   }
