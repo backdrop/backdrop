@@ -504,9 +504,10 @@ If you would like to have the characters %5B and %5D please use the html entity 
 
     if (empty($this->last_render)) {
       if (($this->last_render !== 0 && $this->last_render !== '0') || !empty($this->options['empty_zero'])) {
-        $this->options['alter']['alter_text'] = 1;
-        $this->options['alter']['text'] = $this->options['empty'];
-        $this->last_render = $this->render_text($this->options['alter']);
+        $alter = $this->options['alter'];
+        $alter['alter_text'] = 1;
+        $alter['text'] = $this->options['empty'];
+        $this->last_render = $this->render_text($alter);
       }
     }
 
