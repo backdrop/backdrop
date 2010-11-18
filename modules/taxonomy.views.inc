@@ -257,42 +257,6 @@ function taxonomy_views_data() {
     ),
   );
 
-  // taxonomy_term_relation
-
-  $data['taxonomy_term_relation']['table']['group']  = t('Taxonomy');
-
-  $data['taxonomy_term_relation']['table']['join'] = array(
-    'taxonomy_term_data' => array(
-      // links directly to taxonomy_term_data via tid
-      'left_field' => 'tid',
-      'field' => 'tid1',
-    ),
-    'taxonomy_term_relation' => array(
-      // links to self through left.tid1 = right.tid2
-      'left_field' => 'tid1',
-      'field' => 'tid2',
-    ),
-    'node' => array(
-      'left_table' => 'taxonomy_index',
-      'left_field' => 'tid',
-      'field' => 'tid1',
-    ),
-  );
-
-  $data['taxonomy_term_relation']['tid2'] = array(
-    'title' => t('Related terms'),
-    'help' => t('The related terms of the term. This can produce duplicate entries if there is more than one related term.'),
-    'relationship' => array(
-      'base' => 'taxonomy_term_data',
-      'field' => 'tid2',
-      'label' => t('Related term'),
-    ),
-    'argument' => array(
-      'help' => t('A related term of the term.'),
-      'handler' => 'views_handler_argument_numeric',
-    ),    
-  );
-
   // ----------------------------------------------------------------------
   // term_hierarchy table
 
