@@ -425,51 +425,6 @@ class view extends views_db_object {
   }
 
   /**
-   * Render the exposed filter form.
-   *
-   * This actually does more than that; because it's using FAPI, the form will
-   * also assign data to the appropriate handlers for use in building the
-   * query.
-   */
-  function render_exposed_form($block = FALSE) {
-    // Deal with any exposed filters we may have, before building.
-    $form_state = array(
-      'view' => &$this,
-      'display' => &$this->display_handler->display,
-      'method' => 'get',
-      'rerender' => TRUE,
-      'no_redirect' => TRUE,
-      'build_info' => array(
-        'args' => array(),
-      ),
-    );
-
-    // Some types of displays (eg. attachments) may wish to use the exposed
-    // filters of their parent displays instead of showing an additional
-    // exposed filter form for the attachment as well as that for the parent.
-    if (!$this->display_handler->displays_exposed() || (!$block && $this->display_handler->get_option('exposed_block'))) {
-      unset($form_state['rerender']);
-    }
-
-    if (!empty($this->ajax)) {
-      $form_state['ajax'] = TRUE;
-    }
-
-    $output = drupal_render(drupal_build_form('views_exposed_form', $form_state));
-    if (!empty($form_state['js settings'])) {
-      $this->js_settings = $form_state['js settings'];
-    }
- 
-    // Don't render exposed filter form when there's form errors.
-    // Applies when filters are in a block ("exposed_block" option).
-    if (form_get_errors() && empty($form_state['rerender'])) {
-      return NULL;
-    }
-
-    return $output;
-  }
-
-  /**
    * Build all the arguments.
    */
   function _build_arguments() {
