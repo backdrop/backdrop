@@ -752,29 +752,9 @@ function views_ui_edit_page($view) {
     '#prefix' => '<h3>' . t('Queries/displays') . "</h3>\n" . '<div class="views-displays">',
     '#suffix' => '</div>',
   );
-  $build['displays']['tabs'] = array(
-    '#prefix' => '<ul>',
-    '#suffix' => '</ul>',
-  );
-  $build['displays']['tab_content'] = array();
 
-  // Add a tab for each display.
-  $view->set_display('default');
-  foreach ($view->display as $display) {
-    // The display should already be initialized.
-    if (empty($display->handler)) {
-      continue;
-    }
-    $id = $display->id;
-    // Hide the default display.
-    if ($id === 'default' && !views_ui_show_default_display()) {
-      continue;
-    }
-    $build['displays']['tabs'][$id] = array(
-      '#markup' => "<li><a href='#tab-$id'>" . ucwords($id) . '</a></li>',
-    );
-    $build['displays']['tab_content'][$id] = views_ui_get_display_tab($view, $display);
-  }
+  //$view->set_display('default');
+  //$build['displays']['tab_content'][$id] = views_ui_get_display_tab($view, $display);
 
   // Show the live preview.
   // @todo Change the preview to match the selected display. The existing

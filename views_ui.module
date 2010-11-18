@@ -11,6 +11,8 @@
 function views_ui_menu() {
   $items = array();
 
+  module_load_include('inc', 'views_ui', 'includes/admin');
+
   // Minor code reduction technique.
   $base = array(
     'access callback' => 'user_access',
@@ -58,7 +60,8 @@ function views_ui_menu() {
     'weight' => -10,
   ) + $base;
 
-  // Pages that act on a View.
+  // The primary Edit View page. Secondary tabs for each Display are added in
+  // view_ui_menu_local_tasks_alter().
   $items['admin/structure/views/view/%views_ui_cache'] = array(
     'title callback' => 'views_ui_edit_page_title',
     'title arguments' => array(4),
@@ -70,11 +73,25 @@ function views_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   ) + $base;
-  // @todo Not sure yet if we'll keep this as a primary tab. Trying it out.
+
+  // Local actions for adding a Display to a View.
+  foreach (views_fetch_plugin_names('display') as $key => $label) {
+    $weight = 10;
+    $items['admin/structure/views/view/%views_ui_cache/add-display/' . $key] = array(
+      'title' => 'Add ' . $label,
+      'page callback' => 'views_ui_add_display',
+      'page arguments' => array(FALSE, 4, 6),
+      'type' => MENU_LOCAL_ACTION,
+      'weight' => $weight++,
+    ) + $base;
+  }
+
+  // Additional pages for acting on a View.
   $items['admin/structure/views/view/%views_ui_cache/analyze'] = array(
     'title' => 'Analyze',
     'page callback' => 'views_ui_analyze_view',
     'page arguments' => array(FALSE, 4),
+    // @todo Not sure yet if "Analyze" makes sense as a primary tab. Trying it.
     'type' => MENU_LOCAL_TASK,
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/export'] = array(
@@ -117,10 +134,13 @@ function views_ui_menu() {
   // Nojs/Ajax callbacks used while editing a View.
   $ajax_callbacks = array(
     'details' => 'views_ui_edit_details',
-    'add-display' => 'views_ui_add_display',
     'clone-display' => 'views_ui_clone_display',
     'preview' => 'views_ui_preview',
     '%' => 'views_ui_ajax_form',
+    // @todo Moving the nojs versions to tabs/actions. Will integrate the AJAX
+    //   versions later.
+    //'analyze' => 'views_ui_analyze_view',
+    //'add-display' => 'views_ui_add_display',
   );
   foreach ($ajax_callbacks as $menu => $menu_callback) {
     $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache'] = array(
@@ -145,6 +165,56 @@ function views_ui_menu() {
   ) + $base;
 
   return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ *
+ * Adds secondary tabs for navigating across Displays when editing a View. Since
+ * each view contains its own set of displays, doing this here instead of in
+ * hook_menu() reduces bloat in the {menu_links} table, and avoids requiring a
+ * menu rebuild every time a display is added or removed.
+ */
+function views_ui_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  if ($root_path == 'admin/structure/views/view/%') {
+    $view = $router_item['page_arguments'][0];
+    $active_display = arg(6);
+
+    // Add a secondary tab for each display.
+    if (!isset($data['tabs'][1]['count'])) {
+      $data['tabs'][1]['count'] = 0;
+    }
+    foreach ($view->display as $id => $display) {
+      $data['tabs'][1]['output'][$id] = array(
+        '#theme' => 'menu_local_task',
+        '#link' => array(
+          'title' => $display->display_title,
+          'href' => $router_item['href'] . '/edit/' . $id,
+          'localized_options' => array(),
+        ),
+        '#active' => $id === $active_display,
+      );
+      $data['tabs'][1]['count']++;
+    }
+
+    // If the default display isn't supposed to be shown, don't display its tab,
+    // and make the first "real" display active by default.
+    if (!views_ui_show_default_display()) {
+      $data['tabs'][1]['output']['default']['#access'] = FALSE;
+      if (!$active_display) {
+        foreach ($view->display as $id => $display) {
+          if ($id !== 'default') {
+            $data['tabs'][1]['output'][$id]['#active'] = TRUE;
+            break;
+          }
+        }
+      }
+    }
+    // Otherwise, make the default display active by default.
+    elseif (!$active_display) {
+      $data['tabs'][1]['output']['default']['#active'] = TRUE;
+    }
+  }
 }
 
 /**
