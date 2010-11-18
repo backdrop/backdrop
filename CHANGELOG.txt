@@ -464,3 +464,4 @@ Views 3.x-7.x-dev
     o #871578 by dereine: Comment "new" might not work right without a comment count field.
     o #910864 by Bevan, dereine: exposed filter blocks should not be cached by core block caching.
     o Remove unused/lost view::render_exposed_form.
+    o #776830: Fix pager settings on attachments and feeds.

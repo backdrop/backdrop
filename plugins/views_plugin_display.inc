@@ -291,6 +291,13 @@ class views_plugin_display extends views_plugin {
       'arguments' => array('arguments'),
       'filters' => array('filters'),
     );
+
+    // If the display cannot use a pager, then we cannot default it.
+    if (empty($this->definition['use pager'])) {
+      unset($sections['pager']);
+      unset($sections['items_per_page']);
+    }
+
     if ($section) {
       if (!empty($sections[$section])) {
         return $sections[$section];
@@ -481,9 +488,15 @@ class views_plugin_display extends views_plugin {
         'default' => array(),
         'export' => 'export_handler',
       ),
-
-
     );
+
+    if (empty($this->definition['use pager'])) {
+      $options['defaults']['default']['use_pager'] = FALSE;
+      $options['defaults']['default']['items_per_page'] = FALSE;
+      $options['defaults']['default']['offset'] = FALSE;
+      $options['defaults']['default']['pager'] = FALSE;
+      $options['pager']['contains']['type']['default'] = 'some';
+    }
 
     if ($this->is_default_display()) {
       unset($options['defaults']);
@@ -868,22 +881,24 @@ class views_plugin_display extends views_plugin {
       );
     }
 
-    if (!empty($this->definition['use pager'])) {
+    $pager_plugin = $this->get_plugin('pager');
+    if (!$pager_plugin) {
+      // default to the no pager plugin.
+      $pager_plugin = views_get_plugin('pager', 'none');
+    }
 
-      $pager_plugin = $this->get_plugin('pager');
-      if (!$pager_plugin) {
-        // default to the no pager plugin.
-        $pager_plugin = views_get_plugin('pager', 'none');
-      }
+    $pager_str = $pager_plugin->summary_title();
 
-      $pager_str = $pager_plugin->summary_title();
+    $options['pager'] = array(
+      'category' => 'basic',
+      'title' => t('Use pager'),
+      'value' => $pager_str,
+      'desc' => t("Change this display's pager setting."),
+    );
 
-      $options['pager'] = array(
-        'category' => 'basic',
-        'title' => t('Use pager'),
-        'value' => $pager_str,
-        'desc' => t("Change this display's pager setting."),
-      );
+    // If pagers aren't allowed, change the text of the item:
+    if (empty($this->definition['use pager'])) {
+      $options['pager']['title'] = t('Items to display');
     }
 
     if (!empty($pager_plugin->definition['uses options'])) {
@@ -1578,7 +1593,7 @@ class views_plugin_display extends views_plugin {
         $pager = $this->get_option('pager');
         $form['pager']['type'] =  array(
           '#type' => 'radios',
-          '#options' => views_fetch_plugin_names('pager'),
+          '#options' => views_fetch_plugin_names('pager', empty($this->definition['use pager']) ? 'basic' : NULL),
           '#default_value' => $pager['type'],
         );
 
