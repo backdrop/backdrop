@@ -449,8 +449,6 @@ Views 3.x-7.x-dev
     o #881680 by brianV and longwave: Avoid unnecessary invoking of view objects for argument validation when no argument validation is necessary.
     o #767244 by Magnus: Fix some untranslatable strings due to less than and greater than characters.
     o #855280 by dereine: Exposed forms set "Input required" lose exposed sorts.
-<<<<<<< CHANGELOG.txt
     o #935388 by infojunkie: Add post_build and post_execute hooks similar to post_render.
-=======
     o #973496 by das-peter: Don't use call-time-reference for comment_view.
->>>>>>> 1.344.4.438
+    o #938806 by jenlampton: Node: title field should link to node by default.
