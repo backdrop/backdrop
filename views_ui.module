@@ -152,9 +152,9 @@ function views_ui_menu() {
  */
 function views_ui_help($path, $arg = '') {
   switch ($path) {
-    case 'admin/structure/views/tools/convert':
-      return '<p>' . t('The converter will make a best-effort attempt to convert a Views 1 view to Views 2. This conversion is not reliable; you will very likely have to make adjustments to your view to get it to match. You can import Views 1 views through the normal Import tab.') . '</p>';
+
   }
+ // return '<pre>'.print_r(views_ui_get_wizards(),1);
 }
 
 /**
@@ -374,11 +374,19 @@ function views_ui_ctools_plugin_type() {
   return array(
     'views_wizard' => array(
       'child plugins' => TRUE,
+      'classes' => array(
+        'form_ui_class_file',
+      ),
       'defaults' => array(
         // The children may, for example, be a different variant for each node type.
         'get children' => NULL,
+        'get child' => NULL,
+        'get_instance' => 'views_ui_get_default_wizard_instance',
       ),
     ),
   );
 }
 
+function views_ui_get_default_wizard_instance($wizard) {
+  return new ViewsUiBaseViewsWizard($wizard['base_table'], $wizard['filters']);
+}

@@ -325,17 +325,21 @@ function views_ui_add_form($form, &$form_state) {
     '#attributes' => array('class' => array('inline')),
   );
   $base_tables = views_fetch_base_tables();
-
+  $wizard_plugins = views_ui_get_wizards();
+  $tables = array();
+  foreach ($wizard_plugins as $key => $w) {
+    $options[$key] = $w['title'];
+    $wizard_tables[$w['base_table']] = TRUE;
+  }
+  // Find base tables with no wizard.
+  // @todo - handle this via an alter hook for plugins?
   foreach ($base_tables as $table => $info) {
-    $options["$table:"] = $info['title'];
-    if ($table == 'node') {
-      foreach (node_type_get_names()  as $type => $name) {
-        $options["$table:$type"] = t('!label posts', array('!label' => $name));
-      }
+    if (!isset($wizard_tables[$table]) && !isset($options[$table])) {
+      $options[$table] = $info['title'];
     }
   }
-  $default = isset($options['node:blog']) ? 'node:blog' : 'node:';
-  $form['show']['entity_type'] = array(
+  $default = isset($options['node:blog']) ? 'node:blog' : 'node';
+  $form['show']['wizard_key'] = array(
     '#type' => 'select',
     '#title' => t('Show'),
     '#options' => $options,
@@ -466,11 +470,17 @@ function views_ui_add_form($form, &$form_state) {
       ),
     ),
   );
-  $form['submit'] = array(
+  $form['save'] = array(
     '#type' => 'submit',
-    '#value' => t('Save & continue'),
-    '#validate' => array('views_ui_add_form_save_validate'),
+    '#value' => t('Save'),
+    '#validate' => array('views_ui_add_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
+  );
+  $form['store_edit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Store & edit'),
+    '#validate' => array('views_ui_add_form_validate'),
+    '#submit' => array('views_ui_add_form_store_edit_submit'),
   );
   $form['cancel'] = array(
     '#type' => 'submit',
@@ -483,20 +493,42 @@ function views_ui_add_form($form, &$form_state) {
 /**
  * Validate the add view form.
  */
-function views_ui_add_form_save_validate($form, &$form_state) {
-  drupal_set_message('stub validate code');
+function views_ui_add_form_validate($form, &$form_state) {
+  drupal_set_message(__FUNCTION__);
+  $w = views_ui_get_wizard($form_state['wizard_key']);
+  if (!$w) {
+    // Must be a base table using the default wizard.
+    $form_state['wizard'] = views_ui_get_wizard('views_wizard_default');
+    $form_state['wizard']['base_table'] = $form_state['wizard_key'];
+    $w = $form_state['wizard'];
+  }
+  else {
+    $form_state['wizard'] = $w;
+  }
+  $get_instance = $w['get_instance'];
+  $form_state['wizard_instance'] = $get_instance($w);
 }
 
 /**
  * Process the add view form.
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
-  drupal_set_message('stub submit code');
+  drupal_set_message(__FUNCTION__);
+
+
   $form_state['redirect'] = 'admin/structure/views';
 }
 
 /**
  * Process the add view form.
+ */
+function views_ui_add_form_store_edit_submit($form, &$form_state) {
+  drupal_set_message(__FUNCTION__);
+  $form_state['redirect'] = 'admin/structure/views';
+}
+
+/**
+ * Cancel the add view form.
  */
 function views_ui_add_form_cancel_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/views';

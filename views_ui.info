@@ -5,3 +5,4 @@ package = Views
 core = 7.x
 dependencies[] = views
 files[] = views_ui.module
+files[] = plugins/views_wizard/views_ui_base_views_wizard.class.php
