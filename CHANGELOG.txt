@@ -456,3 +456,4 @@ Views 3.x-7.x-dev
     o #931390 by dww: Optimize boolean logic by using "= 1" rather than "<> 0" for faster queries.
     o #567918 by iamjon: Improve documentation for token replacement.
     o #881468 by longwave: Improve performance by static caching results of argument validation because menu likes to double validate things.
+    o #964266 by dereine: cache_expire() missing $type.
