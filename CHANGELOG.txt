@@ -462,3 +462,4 @@ Views 3.x-7.x-dev
     o #847724 by dereine: Allow jump menu "Summary" style to customize choose text, just like the regular summary style.
     o #669636 by dereine and bojanz: Convert the rest of the field handlers that have link options to use the advanced render.
     o #871578 by dereine: Comment "new" might not work right without a comment count field.
+    o #910864 by Bevan, dereine: exposed filter blocks should not be cached by core block caching.

@@ -2199,6 +2199,7 @@ class views_plugin_display extends views_plugin {
     return array(
       $delta => array(
         'info' => $desc,
+        'cache' => DRUPAL_NO_CACHE,
       )
     );
   }
