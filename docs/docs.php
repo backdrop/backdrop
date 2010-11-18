@@ -583,6 +583,17 @@ function hook_views_pre_build(&$view) {
 }
 
 /**
+ * This hook is called right after the build process. The query is
+ * now fully built, but it has not yet been run through db_rewrite_sql.
+ *
+ * Adding output to the view can be accomplished by placing text on
+ * $view->attachment_before and $view->attachment_after.
+ */
+function hook_views_post_build(&$view) {
+  // example code here
+}
+
+/**
  * This hook is called right before the execute process. The query is
  * now fully built, but it has not yet been run through db_rewrite_sql.
  *
@@ -590,6 +601,19 @@ function hook_views_pre_build(&$view) {
  * $view->attachment_before and $view->attachment_after.
  */
 function hook_views_pre_execute(&$view) {
+  // example code here
+}
+
+/**
+ * This hook is called right after the execute process. The query has
+ * been executed, but the pre_render() phase has not yet happened for
+ * handlers.
+ *
+ * Adding output to the view can be accomplished by placing text on
+ * $view->attachment_before and $view->attachment_after. Altering the
+ * content can be achieved by editing the items of $view->result.
+ */
+function hook_views_post_execute(&$view) {
   // example code here
 }
 
