@@ -467,3 +467,4 @@ Views 3.x-7.x-dev
     o #776830: Fix pager settings on attachments and feeds.
     o #835544 by iamjon: export broke if key contained an apostrophe.
     o #941990 by master-of-magic: Link to node when using relationships could occasionally lose track and create bad links.
+    o #833790: Click sort could break on fields that were actually formulas.
