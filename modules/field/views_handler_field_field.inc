@@ -195,7 +195,8 @@ class views_handler_field_field extends views_handler_field {
         'label' => 'hidden',
       );
 
-      return drupal_render(field_view_field($entity_type, $object, $this->definition['field_name'], $display));
+      $render_array = field_view_field($entity_type, $object, $this->definition['field_name'], $display);
+      return drupal_render($render_array);
     }
     else {
       return '';

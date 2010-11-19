@@ -469,3 +469,4 @@ Views 3.x-7.x-dev
     o #941990 by master-of-magic: Link to node when using relationships could occasionally lose track and create bad links.
     o #833790: Click sort could break on fields that were actually formulas.
     o #963454 by dereine: Remove related terms data definitions.
+    o #976098 by dereine: Fix notice in field field handler render function.
