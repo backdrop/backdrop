@@ -373,10 +373,13 @@ function views_ui_add_form($form, &$form_state) {
       ),
     ),
   );
-  $form['page']['display_format'] = array(
+  // This may change by AJAX as we change the base table of the selected wizard.
+  $form['page']['display_format']['style'] = array(
     '#title' => t('Display format'),
+    '#help_topic' => 'style',
     '#type' => 'select',
-    '#options' => array(),
+    '#options' => views_fetch_plugin_names('style', 'normal', array('node')),
+    '#default_value' => 'default',
     '#states' => array(
       'visible' => array(
         ':input[name="page[create]"]' => array('checked' => TRUE),
@@ -386,6 +389,7 @@ function views_ui_add_form($form, &$form_state) {
   $form['page']['items_per_page'] = array(
     '#title' => t('Items per page'),
     '#type' => 'textfield',
+    '#size' => 5,
     '#states' => array(
       'visible' => array(
         ':input[name="page[create]"]' => array('checked' => TRUE),
@@ -470,6 +474,29 @@ function views_ui_add_form($form, &$form_state) {
       ),
     ),
   );
+  // This may change by AJAX as we change the base table of the selected wizard.
+  $form['block']['display_format']['style'] = array(
+    '#title' => t('Display format'),
+    '#help_topic' => 'style',
+    '#type' => 'select',
+    '#options' => views_fetch_plugin_names('style', 'normal', array('node')),
+    '#default_value' => 'default',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="block[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['block']['items_per_page'] = array(
+    '#title' => t('Items per page'),
+    '#type' => 'textfield',
+    '#size' => 5,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="block[create]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -497,7 +524,7 @@ function views_ui_add_form_validate($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
   $w = views_ui_get_wizard($form_state['wizard_key']);
   if (!$w) {
-    // Must be a base table using the default wizard.
+    // Must be a base table using the default wizard plugin.
     $form_state['wizard'] = views_ui_get_wizard('views_wizard_default');
     $form_state['wizard']['base_table'] = $form_state['wizard_key'];
     $w = $form_state['wizard'];
@@ -506,7 +533,8 @@ function views_ui_add_form_validate($form, &$form_state) {
     $form_state['wizard'] = $w;
   }
   $get_instance = $w['get_instance'];
-  $form_state['wizard_instance'] = $get_instance($w);
+  $form_state['wizard_instance'] = $get_instance($w, $form_state['values']);
+  $form_state['wizard_instance']->validate();
 }
 
 /**
@@ -514,8 +542,7 @@ function views_ui_add_form_validate($form, &$form_state) {
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
-
-
+  $form_state['redirect'] = $form_state['wizard_instance']->save_view();
   $form_state['redirect'] = 'admin/structure/views';
 }
 
@@ -524,6 +551,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
  */
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
+  $form_state['redirect'] = $form_state['wizard_instance']->store_view();
   $form_state['redirect'] = 'admin/structure/views';
 }
 
