@@ -542,7 +542,7 @@ function views_ui_add_form_validate($form, &$form_state) {
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
-  $form_state['redirect'] = $form_state['wizard_instance']->save_view();
+  $form_state['redirect'] = $form_state['wizard_instance']->create_view();
   $form_state['redirect'] = 'admin/structure/views';
 }
 
