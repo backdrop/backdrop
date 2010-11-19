@@ -65,8 +65,8 @@ function views_ui_menu() {
   $items['admin/structure/views/view/%views_ui_cache'] = array(
     'title callback' => 'views_ui_edit_page_title',
     'title arguments' => array(4),
-    'page callback' => 'views_ui_edit_page',
-    'page arguments' => array(4),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_ui_edit_form', 4),
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/edit'] = array(
     'title' => 'Edit',
@@ -122,7 +122,6 @@ function views_ui_menu() {
   // Nojs/Ajax callbacks used while editing a View.
   $ajax_callbacks = array(
     'details' => 'views_ui_edit_details',
-    'clone-display' => 'views_ui_clone_display',
     'preview' => 'views_ui_preview',
     '%' => 'views_ui_ajax_form',
     // @todo Moved "Analyze" to a primary tab, but may restore it to a AJAX
@@ -165,7 +164,7 @@ function views_ui_menu() {
 function views_ui_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   // @todo This is commented out until theming of secondary local tasks is
   //   fixed (see http://drupal.org/node/599706#comment-3620912). In the
-  //   meantime, we add the tabs within views_ui_edit_page().
+  //   meantime, we add the tabs within views_ui_edit_form().
   /*
   if ($root_path == 'admin/structure/views/view/%') {
     module_load_include('inc', 'views_ui', 'includes/admin');

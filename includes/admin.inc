@@ -726,24 +726,31 @@ function views_ui_edit_page_title($view) {
 }
 
 /**
- * Page callback to edit a view.
+ * Form builder callback for editing a View.
  *
  * @todo Remove as many #prefix/#suffix lines as possible. Use #theme_wrappers
  *   instead.
  */
-function views_ui_edit_page($view, $display_id = NULL) {
-  $build = array();
-  drupal_add_library('system', 'ui.tabs');
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
-  drupal_add_js(drupal_get_path('module', 'views_ui') . '/js/views-admin.js');
+function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
+  $form['#tree'] = TRUE;
+  // @todo When more functionality is added to this form, cloning here may be
+  //   too soon. But some of what we do with $view later in this function
+  //   results in making it unserializable due to PDO limitations.
+  $form_state['view'] = clone($view);
 
-  $build = array(
-   '#prefix' => '<div class="views-edit-view">',
-   '#suffix' => '</div>',
+  $form['#attached']['library'][] = array('system', 'ui.tabs');
+  $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.css';
+  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
+
+  $form += array(
+    '#prefix' => '',
+    '#suffix' => '',
   );
+  $form['#prefix'] = $form['#prefix'] . '<div class="views-edit-view">';
+  $form['#suffix'] = '</div>' . $form['#suffix'];
 
   if (isset($view->locked) && is_object($view->locked)) {
-    $build['locked'] = array(
+    $form['locked'] = array(
       '#theme' => 'views_ui_break_lock',
       '#user' => theme('username', array('account' => user_load($view->locked->uid))),
       '#lock_age' => format_interval(REQUEST_TIME - $view->locked->updated),
@@ -751,7 +758,7 @@ function views_ui_edit_page($view, $display_id = NULL) {
     );
   }
 
-  $build['displays'] = array(
+  $form['displays'] = array(
     '#prefix' => '<h3>' . t('Queries/displays') . "</h3>\n" . '<div class="views-displays">',
     '#suffix' => '</div>',
   );
@@ -778,7 +785,7 @@ function views_ui_edit_page($view, $display_id = NULL) {
     }
     $tabs['#prefix'] = '<h2 class="element-invisible">' . t('Secondary tabs') . '</h2><ul class="tabs secondary">';
     $tabs['#suffix'] = '</ul>';
-    $build['displays']['tabs'] = $tabs;
+    $form['displays']['tabs'] = $tabs;
   }
   elseif ($display_id) {
     return MENU_ACCESS_DENIED;
@@ -788,20 +795,100 @@ function views_ui_edit_page($view, $display_id = NULL) {
   }
 
   // Buttons for adding a new display.
-  $build['displays']['add_display'] = drupal_get_form('views_ui_add_display_form', $view);
+  foreach (views_fetch_plugin_names('display') as $type => $label) {
+    $form['displays']['add_display'][$type] = array(
+      '#type' => 'submit',
+      '#value' => t('Add !display', array('!display' => $label)),
+      '#limit_validation_errors' => array(),
+      '#submit' => array('views_ui_edit_form_submit_add_display'),
+    );
+  }
 
+  // The rest requires a display to be selected.
   if ($display_id) {
-    $view->set_display($display_id);
-    $build['displays']['tab_content'] = views_ui_get_display_tab($view, $display_id);
+    $form_state['display_id'] = $display_id;
 
-    // Show the live preview.
+    // The part of the page where editing will take place.
+    $view->set_display($display_id);
+    $form['displays']['tab_content'] = views_ui_get_display_tab($view, $display_id);
+
+    // The "Delete DISPLAY" and "Duplicate DISPLAY" buttons.
+    $plugin = views_fetch_plugin_data('display', $view->display[$display_id]->display_plugin);
+    if (empty($plugin['no remove'])) {
+      $form['displays']['delete'] = array(
+        '#type' => 'submit',
+        '#value' => t('Delete !display', array('!display' => views_ui_get_display_label($view, $display_id))),
+        '#limit_validation_errors' => array(),
+        '#submit' => array('views_ui_edit_form_submit_delete_display'),
+      );
+    }
+    $form['displays']['duplicate'] = array(
+      '#type' => 'submit',
+      '#value' => t('Duplicate !display', array('!display' => views_ui_get_display_label($view, $display_id))),
+      '#limit_validation_errors' => array(),
+      '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
+    );
+
+    // The live preview.
     $view->views_ui_context = TRUE;
-    $build['displays']['preview'] = array(
+    $form['displays']['preview'] = array(
       '#markup' => $view->preview($display_id, array()),
     );
   }
 
-  return $build;
+  return $form;
+}
+
+/**
+ * Submit handler to add a display to a view.
+ */
+function views_ui_edit_form_submit_add_display($form, &$form_state) {
+  $view = $form_state['view'];
+
+  // Create the new display.
+  $parents = $form_state['triggering_element']['#parents'];
+  $display_type = array_pop($parents);
+  $display_id = $view->add_display($display_type);
+  views_ui_cache_set($view);
+
+  // Redirect to the new display's edit page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id;
+}
+
+/**
+ * Submit handler to duplicate a display for a view.
+ */
+function views_ui_edit_form_submit_duplicate_display($form, &$form_state) {
+  $view = $form_state['view'];
+  $display_id = $form_state['display_id'];
+
+  // Create the new display.
+  $display = $view->display[$display_id];
+  $new_display_id = $view->add_display($display->display_plugin);
+  $view->display[$new_display_id] = clone $display;
+  $view->display[$new_display_id]->id = $new_display_id;
+  views_ui_cache_set($view);
+
+  // Redirect to the new display's edit page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/edit/' . $new_display_id;
+}
+
+/**
+ * Submit handler to delete a display from a view.
+ *
+ * @todo Do we want a confirmation step?
+ */
+function views_ui_edit_form_submit_delete_display($form, &$form_state) {
+  $view = $form_state['view'];
+  $display_id = $form_state['display_id'];
+
+  // Mark the display for deletion.
+  $view->display[$display_id]->deleted = TRUE;
+  views_ui_cache_set($view);
+
+  // Redirect to the top-level edit page. The first remaining display will
+  // become the active display.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
 }
 
 /**
@@ -817,12 +904,13 @@ function views_ui_edit_page_display_tabs($view) {
 
   // Create a tab for each display.
   foreach ($view->display as $id => $display) {
+    if (!empty($display->deleted)) {
+      continue;
+    }
     $tabs[$id] = array(
       '#theme' => 'menu_local_task',
       '#link' => array(
-        // @todo Change to $display->display_title when we have an interface to
-        //   edit the title.
-        'title' => $id == 'default' ? t('Master') : ucwords($id),
+        'title' => views_ui_get_display_label($view, $id),
         'href' => 'admin/structure/views/view/' . $view->name . '/edit/' . $id,
         'localized_options' => array(),
       ),
@@ -1127,19 +1215,6 @@ function template_preprocess_views_ui_edit_display_tab(&$vars) {
 
   // If this form was submitted it was already handled, so force it not to
   // submit again.
-
-  $vars['remove'] = '';
-  $vars['clone'] = '';
-  if (empty($plugin['no remove'])) {
-    if (!empty($_POST['form_id']) && in_array($_POST['form_id'], array('views_ui_remove_display_form', 'views_ui_clone_display_form'))) {
-      unset($_POST['form_id']);
-    }
-    $form_state = array('view' => &$view, 'display_id' => $display->id, 'ajax' => FALSE, 'build_info' => array('args' => array()));
-    $remove_form = drupal_build_form('views_ui_remove_display_form', $form_state);
-    $clone_form = drupal_build_form('views_ui_clone_display_form', $form_state);
-    $vars['remove'] = drupal_render($remove_form);
-    $vars['clone'] = drupal_render($clone_form);
-  }
 
   // basic fields
   $vars['title'] = check_plain($display->display_title);
@@ -1695,206 +1770,6 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
   }
 
   return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
-}
-
-/**
- * AJAX callback to add a display.
- */
-function views_ui_add_display($js, $view) {
-  views_include('ajax');
-  $form_state = array(
-    'view' => &$view,
-    'ajax' => $js,
-  );
-
-  $output = views_ajax_form_wrapper('views_ui_add_display_form', $form_state);
-
-  if ($js) {
-    if ($form_state['submitted']) {
-      $id = $form_state['id'];
-
-      // Make sure the new display is active
-      if (!$view->set_display('default')) {
-        views_ajax_error(t('Unable to initialize default display'));
-      }
-
-      // Render the new display
-      list($title, $body) = views_ui_display_tab($view, $view->display[$id]);
-
-      // Instruct the javascript on the browser to render the new tab.
-      $output = array();
-      $output[] = views_ajax_command_add_tab($id, $title, $body);
-    }
-    $output = array('#type' => 'ajax', '#commands' => $output);
-  }
-
-  // But the non-js variant will return output if it didn't redirect us.
-  return $output;
-}
-
-/**
- * Form to add a display to a view.
- */
-function views_ui_add_display_form($form, &$form_state, $view = NULL) {
-  if (isset($view)) {
-    $form_state['view'] = $view;
-  }
-
-  // Add a button for each display type.
-  $form['#tree'] = TRUE;
-  foreach (views_fetch_plugin_names('display') as $key => $label) {
-    $form['add_display'][$key] = array(
-      '#type' => 'submit',
-      '#value' => t('Add !display', array('!display' => $label)),
-    );
-  }
-  return $form;
-}
-
-/**
- * Submit handler to add a display to a view.
- */
-function views_ui_add_display_form_submit($form, &$form_state) {
-  $view = $form_state['view'];
-
-  // Create the new display and redirect to its edit page.
-  $parents = $form_state['triggering_element']['#parents'];
-  if ($parents[0] == 'add_display') {
-    $display_type = $parents[1];
-    $display_id = $view->add_display($display_type);
-    views_ui_cache_set($form_state['view']);
-    $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id;
-  }
-}
-
-/**
- * AJAX callback to add a display.
- */
-function views_ui_clone_display($js, $view, $id) {
-  views_include('ajax');
-  $form_state = array(
-    'view' => &$view,
-    'ajax' => $js,
-    'display_id' => $id,
-  );
-
-  $output = views_ajax_form_wrapper('views_ui_clone_display_form', $form_state);
-
-  if ($js) {
-    // If we don't have an output object, it was submitted. Set up the submission.
-    if (empty($output)) {
-      $id = $form_state['id'];
-
-      // Make sure the new display is active
-      if (!$view->set_display('default')) {
-        views_ajax_render(t('Unable to initialize default display'));
-      }
-
-      // Render the new display
-      list($title, $body) = views_ui_display_tab($view, $view->display[$id]);
-
-      // Instruct the javascript on the browser to render the new tab.
-      $output = new stdClass;
-      $output->tab = array('#views-tab-' . $id => array('title' => $title, 'body' => $body));
-    }
-    // Render the command object. This automatically exits.
-    views_ajax_render($output);
-  }
-
-  // But the non-js variant will return output if it didn't redirect us.
-  return $output;
-}
-
-/**
- * From to clone a display from a view.
- */
-function views_ui_clone_display_form($form, &$form_state) {
-  $view = &$form_state['view'];
-  $display_id = $form_state['display_id'];
-
-  $form['clone_display'] = array(
-    '#type' => 'submit',
-    '#value' => t('Clone display'),
-    '#submit' => array('views_ui_clone_display_form_submit'),
-  );
-
-  $form['#id'] = 'views-clone-display-form';
-  $form['#action'] = url("admin/structure/views/nojs/clone-display/$view->name/$display_id");
-  $form['#attributes'] = array('class' => 'views-ajax-form');
-
-  return $form;
-}
-
-/**
- * Submit handler to add a clone to a display from a view.
- */
-function views_ui_clone_display_form_submit($form, &$form_state) {
-  // Create the new display
-  $id = $form_state['display_id'];
-  $display = $form_state['view']->display[$id];
-
-  $new_id = $form_state['view']->add_display($display->display_plugin);
-  $form_state['id'] = $new_id;
-
-  // Replace the new display by a copy of the old
-  $form_state['view']->display[$new_id] = clone $display;
-  $form_state['view']->display[$new_id]->id = $new_id;
-
-  // Store in cache
-  views_ui_cache_set($form_state['view']);
-
-  // Send it back
-  $form_state['redirect'] = array('admin/structure/views/edit/' . $form_state['view']->name, array('fragment' =>  'views-tab-' . $new_id));
-}
-
-/**
- * Form to remove a display from a view.
- */
-function views_ui_remove_display_form($form, &$form_state) {
-  $view = &$form_state['view'];
-  $display_id = $form_state['display_id'];
-
-  if (empty($view->display[$display_id]->deleted)) {
-    $form['display'] = array(
-      '#prefix' => '<div class="display-button remove-display">',
-      '#suffix' => '</div>',
-    );
-    $form['remove_display'] = array(
-      '#type' => 'submit',
-      '#value' => t('Remove display'),
-      '#submit' => array('views_ui_remove_display_form_submit'),
-    );
-  }
-  else {
-    $form['display'] = array(
-      '#prefix' => '<div class="display-button restore-display">',
-      '#suffix' => '</div>',
-    );
-    $form['restore_display'] = array(
-      '#type' => 'submit',
-      '#value' => t('Restore display'),
-      '#submit' => array('views_ui_remove_display_form_restore'),
-    );
-  }
-  $form['#action'] = url("admin/structure/views/nojs/remove-display/$view->name/$display_id");
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-
-  return $form;
-}
-
-/**
- * Submit handler to add a remove to a display from a view.
- */
-function views_ui_remove_display_form_submit($form, &$form_state) {
-  // Create the new display
-  $plugin = views_fetch_plugin_data('display', $form_state['view']->display[$form_state['display_id']]->display_plugin);
-  if (empty($plugin['no remove'])) {
-    $id = $form_state['display_id'];
-    $form_state['view']->display[$id]->deleted = TRUE;
-
-    // Store in cache
-    views_ui_cache_set($form_state['view']);
-  }
 }
 
 /**
@@ -3341,4 +3216,13 @@ function theme_views_ui_style_plugin_table($variables) {
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
   $output .= drupal_render_children($form);
   return $output;
+}
+
+/**
+ * Placeholder function for overriding $display->display_title.
+ *
+ * @todo Remove this function once editing the display title is possible.
+ */
+function views_ui_get_display_label($view, $display_id) {
+  return $display_id == 'default' ? t('Master') : ucwords($display_id);
 }
