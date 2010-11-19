@@ -730,6 +730,9 @@ function views_ui_edit_page_title($view) {
  *
  * @todo Remove as many #prefix/#suffix lines as possible. Use #theme_wrappers
  *   instead.
+ *
+ * @todo Rename to views_ui_edit_view_form(). See that function for the "old"
+ *   version.
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#tree'] = TRUE;
@@ -758,8 +761,16 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
   }
 
+  $form['actions'] = array('#type' => 'actions', '#weight' => -10);
+  $form['actions']['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    // Taken from the "old" UI.
+    '#validate' => array('views_ui_edit_view_form_validate'),
+    '#submit' => array('views_ui_edit_view_form_submit'),
+  );
   $form['displays'] = array(
-    '#prefix' => '<h3>' . t('Queries/displays') . "</h3>\n" . '<div class="views-displays">',
+    '#prefix' => '<h3 class="clearfix">' . t('Queries/displays') . '</h3>' . "\n" . '<div class="views-displays">',
     '#suffix' => '</div>',
   );
 

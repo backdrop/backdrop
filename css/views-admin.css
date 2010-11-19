@@ -7,6 +7,11 @@
   line-height: 1.5em;
 }
 
+.views-edit-view .form-actions {
+  float: right;
+  margin: 0;
+}
+
 .views-edit-view .views-displays {
   border: 1px solid #CCC;
   padding: 10px;
