@@ -278,15 +278,7 @@ function views_ui_preview_form_submit(&$form, &$form_state) {
  */
 function views_ui_add_page() {
   drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
-  $form_state = array(
-    'view' => NULL,
-    'build_info' => array(
-      'args' => array(),
-    ),
-  );
-  // We use drupal_build_form() instead of drupal_get_form() so we can populate
-  // the $form_state.
-  return drupal_build_form('views_ui_add_form', $form_state);
+  return drupal_get_form('views_ui_add_form');
 }
 
 /**
@@ -308,15 +300,14 @@ function views_ui_clone_page($view) {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-  $view = $form_state['view'];
-  $form = array();
 
   $form['description'] = array(
     '#type' => 'textfield',
     '#title' => t('View name'),
+    '#required' => TRUE,
     '#size' => 32,
     '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
-    '#default_value' => $view ? $view->description : '',
+    '#default_value' => '',
     '#maxlength' => 255,
   );
   $form['show'] = array(
@@ -324,19 +315,11 @@ function views_ui_add_form($form, &$form_state) {
     '#tree' => TRUE,
     '#attributes' => array('class' => array('inline')),
   );
-  $base_tables = views_fetch_base_tables();
+  
   $wizard_plugins = views_ui_get_wizards();
-  $tables = array();
+  $options = array();
   foreach ($wizard_plugins as $key => $w) {
     $options[$key] = $w['title'];
-    $wizard_tables[$w['base_table']] = TRUE;
-  }
-  // Find base tables with no wizard.
-  // @todo - handle this via an alter hook for plugins?
-  foreach ($base_tables as $table => $info) {
-    if (!isset($wizard_tables[$table]) && !isset($options[$table])) {
-      $options[$table] = $info['title'];
-    }
   }
   $default = isset($options['node:blog']) ? 'node:blog' : 'node';
   $form['show']['wizard_key'] = array(
@@ -346,167 +329,28 @@ function views_ui_add_form($form, &$form_state) {
     '#default_value' => $default,
     '#attributes' => array('class' => array('inline')),
   );
-  $form['page'] = array(
-    '#type' => 'fieldset',
-    '#tree' => TRUE,
+  // Since the "Show" dropdown can't trigger a form submission when
+  // JavaScript is disabled, add a submit button to do that. css hides
+  // this button when JavaScript is enabled.
+  $form['update_wizard_key'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+    '#submit' => array('views_ui_show_nojs_submit'),
   );
-  $form['page']['create'] = array(
-    '#title' => t('Create a page'),
-    '#type' => 'checkbox',
-    '#attributes' => array('class' => array('strong')),
-  );
-  $form['page']['title'] = array(
-    '#title' => t('Page title'),
-    '#type' => 'textfield',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['page']['path'] = array(
-    '#title' => t('Path'),
-    '#type' => 'textfield',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  // This may change by AJAX as we change the base table of the selected wizard.
-  $form['page']['display_format']['style'] = array(
-    '#title' => t('Display format'),
-    '#help_topic' => 'style',
-    '#type' => 'select',
-    '#options' => views_fetch_plugin_names('style', 'normal', array('node')),
-    '#default_value' => 'default',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['page']['items_per_page'] = array(
-    '#title' => t('Items per page'),
-    '#type' => 'textfield',
-    '#size' => 5,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['page']['link'] = array(
-    '#title' => t('Create a menu link'),
-    '#type' => 'checkbox',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['page']['link_properties'] = array();
-  if (module_exists('menu')) {
-    $menu_options = menu_get_menus();
-  }
-  else {
-    // These are not yet translated.
-    $menu_options = menu_list_system_menus();
-    foreach ($menu_options as $name => $title) {
-      $menu_options[$name] = t($title);
-    }
-  }
-  $form['page']['link_properties']['menu_name'] = array(
-    '#title' => t('Menu'),
-    '#type' => 'select',
-    '#options' => $menu_options,
-    '#states' => array(
-      'visible' => array(
-      ':input[name="page[link]"]' => array('checked' => TRUE),
-      ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['page']['link_properties']['title'] = array(
-    '#title' => t('Link text'),
-    '#type' => 'textfield',
-    '#states' => array(
-      'visible' => array(
-      ':input[name="page[link]"]' => array('checked' => TRUE),
-      ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['page']['rss'] = array(
-    '#title' => t('Include an RSS feed'),
-    '#type' => 'checkbox',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="page[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['page']['rss_properties']['path'] = array(
-    '#title' => t('RSS path'),
-    '#type' => 'textfield',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="page[create]"]' => array('checked' => TRUE),
-        ':input[name="page[rss]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['block'] = array(
-    '#type' => 'fieldset',
-    '#tree' => TRUE,
-  );
-  $form['block']['create'] = array(
-    '#title' => t('Create a block'),
-    '#type' => 'checkbox',
-    '#attributes' => array('class' => array('strong')),
-  );
-  $form['block']['title'] = array(
-    '#title' => t('Block title'),
-    '#type' => 'textfield',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="block[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  // This may change by AJAX as we change the base table of the selected wizard.
-  $form['block']['display_format']['style'] = array(
-    '#title' => t('Display format'),
-    '#help_topic' => 'style',
-    '#type' => 'select',
-    '#options' => views_fetch_plugin_names('style', 'normal', array('node')),
-    '#default_value' => 'default',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="block[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['block']['items_per_page'] = array(
-    '#title' => t('Items per page'),
-    '#type' => 'textfield',
-    '#size' => 5,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="block[create]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
+  $wizard_key = isset($form_state['show']['wizard_key']) ? $form_state['show']['wizard_key'] : $form['show']['wizard_key']['#default_value'];
+  $get_instance = $wizard_plugins[$wizard_key]['get_instance'];
+  $wizard_instance = $get_instance($w);
+  $form = $wizard_instance->build_form($form, $form_state);
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
-    '#validate' => array('views_ui_add_form_validate'),
+    '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
   );
-  $form['store_edit'] = array(
+  $form['continue'] = array(
     '#type' => 'submit',
-    '#value' => t('Store & edit'),
-    '#validate' => array('views_ui_add_form_validate'),
+    '#value' => t('Continue'),
+    '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
   );
   $form['cancel'] = array(
@@ -518,23 +362,27 @@ function views_ui_add_form($form, &$form_state) {
 }
 
 /**
+ * Update the add view form.
+ */
+function views_ui_show_nojs_submit($form, &$form_state) {
+  $w = views_ui_get_wizard($form_state['values']['show']['wizard_key']);
+  $form_state['wizard'] = $w;
+  $get_instance = $w['get_instance'];
+  $wizard_instance = $get_instance($w);
+}
+
+/**
  * Validate the add view form.
  */
-function views_ui_add_form_validate($form, &$form_state) {
-  drupal_set_message(__FUNCTION__);
-  $w = views_ui_get_wizard($form_state['wizard_key']);
-  if (!$w) {
-    // Must be a base table using the default wizard plugin.
-    $form_state['wizard'] = views_ui_get_wizard('views_wizard_default');
-    $form_state['wizard']['base_table'] = $form_state['wizard_key'];
-    $w = $form_state['wizard'];
-  }
-  else {
-    $form_state['wizard'] = $w;
-  }
+function views_ui_wizard_form_validate($form, &$form_state) {
+  $w = views_ui_get_wizard($form_state['values']['show']['wizard_key']);
+  $form_state['wizard'] = $w;
   $get_instance = $w['get_instance'];
-  $form_state['wizard_instance'] = $get_instance($w, $form_state['values']);
-  $form_state['wizard_instance']->validate();
+  $form_state['wizard_instance'] = $get_instance($w);
+  $errors = $form_state['wizard_instance']->validate($form, $form_state);
+  foreach ($errors as $name => $message) {
+    form_set_error($name, $message);
+  }
 }
 
 /**
@@ -542,7 +390,7 @@ function views_ui_add_form_validate($form, &$form_state) {
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
-  $form_state['redirect'] = $form_state['wizard_instance']->create_view();
+  $view = $form_state['wizard_instance']->create_view($form, $form_state);
   $form_state['redirect'] = 'admin/structure/views';
 }
 
@@ -551,7 +399,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
  */
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
-  $form_state['redirect'] = $form_state['wizard_instance']->store_view();
+  $view = $form_state['wizard_instance']->store_view($form, $form_state);
   $form_state['redirect'] = 'admin/structure/views';
 }
 

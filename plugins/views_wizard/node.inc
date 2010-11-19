@@ -7,8 +7,8 @@ $plugin = array(
   'base_table' => 'node',
   'get children' => 'views_ui_node_views_wizard_get_children',
   'get child' => 'views_ui_node_views_wizard_get_child',
-  'form_ui_class_file' => array(
-    'file' => 'views_ui_node_views_wizard',
+  'form_wizard_class' => array(
+    'file' => 'views_ui_node_views_wizard.class.php',
     'class' => 'ViewsUiNodeViewsWizard',
   ),
   'title' => t('All posts'),
@@ -42,7 +42,6 @@ function views_ui_node_views_wizard_get_children($plugin, $name) {
   }
   return $plugins;
 }
-
 
 function views_ui_node_views_wizard_get_child($plugin, $parent, $type) {
   $child = $plugin;

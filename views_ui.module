@@ -389,15 +389,26 @@ function views_ui_ctools_plugin_directory($module, $plugin) {
 /**
  * Fetch metadata on a specific views ui wizard plugin.
  *
- * @param $wizard type
- *   Name of a panel content type.
+ * @param $wizard_type
+ *   Name of a wizard, or name of a base table.
  *
  * @return
  *   An array with information about the requested wizard type.
  */
-function views_ui_get_wizard($wizard) {
+function views_ui_get_wizard($wizard_type) {
   ctools_include('plugins');
-  return ctools_get_plugins('views_ui', 'views_wizard', $wizard);
+  $w = ctools_get_plugins('views_ui', 'views_wizard', $wizard_type);
+  // @todo - handle this via an alter hook instead.
+  if (!$w) {
+    // Must be a base table using the default wizard plugin.
+    $base_tables = views_fetch_base_tables();
+    if (!empty($base_tables[$wizard_type])) {
+      $w = views_ui_views_wizard_defaults();
+      $w['base_table'] = $wizard_type;
+      $w['title'] = $base_tables[$wizard_type]['title'];
+    }
+  }
+  return $w;
 }
 
 /**
@@ -408,7 +419,45 @@ function views_ui_get_wizard($wizard) {
  */
 function views_ui_get_wizards() {
   ctools_include('plugins');
-  return ctools_get_plugins('views_ui', 'views_wizard');
+  $wizard_plugins = ctools_get_plugins('views_ui', 'views_wizard');
+  $base_tables = views_fetch_base_tables();
+  $default_wizard = views_ui_views_wizard_defaults();
+  // Find base tables with no wizard.
+  // @todo - handle this via an alter hook for plugins?
+  foreach ($base_tables as $table => $info) {
+    if (!isset($wizard_plugins[$table])) {
+      $w = $default_wizard;
+      $w['title'] = $info['title'];
+      $w['base_table'] = $table;
+      $wizard_plugins[$table] = $w;
+    }
+  }
+  return $wizard_plugins;
+}
+
+/**
+ * Helper function to define the default values for a Views wizard plugin.
+ *
+ * @return
+ *   An array of defaults for a views wizard.
+ */
+function views_ui_views_wizard_defaults() {
+  return array(
+    // The children may, for example, be a different variant for each node type.
+    'get children' => NULL,
+    'get child' => NULL,
+    // title and base table must be populated.  They are empty here just
+    // so they are documented.
+    'title' => '',
+    'base_table' => NULL,
+    // This is a callback that takes the wizard as argument and returns
+    // an instantiazed Views UI form wizard object.
+    'get_instance' => 'views_ui_get_form_wizard_instance',
+    'form_wizard_class' => array(
+      'file' => 'views_ui_base_views_wizard',
+      'class' => 'ViewsUiBaseViewsWizard',
+    ),
+  );
 }
 
 /**
@@ -419,18 +468,19 @@ function views_ui_ctools_plugin_type() {
     'views_wizard' => array(
       'child plugins' => TRUE,
       'classes' => array(
-        'form_ui_class_file',
+        'form_wizard_class',
       ),
-      'defaults' => array(
-        // The children may, for example, be a different variant for each node type.
-        'get children' => NULL,
-        'get child' => NULL,
-        'get_instance' => 'views_ui_get_default_wizard_instance',
-      ),
+      'defaults' => views_ui_views_wizard_defaults(),
     ),
   );
 }
 
-function views_ui_get_default_wizard_instance($wizard) {
-  return new ViewsUiBaseViewsWizard($wizard['base_table'], $wizard['filters']);
+function views_ui_get_form_wizard_instance($wizard) {
+  if (isset($wizard['form_wizard_class']['class'])) {
+    $class = $wizard['form_wizard_class']['class'];
+    return new $class($wizard);
+  }
+  else {
+    return new ViewsUiBaseViewsWizard($wizard);
+  }
 }
