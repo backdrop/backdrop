@@ -727,8 +727,11 @@ function views_ui_edit_page_title($view) {
 
 /**
  * Page callback to edit a view.
+ *
+ * @todo Remove as many #prefix/#suffix lines as possible. Use #theme_wrappers
+ *   instead.
  */
-function views_ui_edit_page($view) {
+function views_ui_edit_page($view, $display_id = NULL) {
   $build = array();
   drupal_add_library('system', 'ui.tabs');
   drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
@@ -753,40 +756,106 @@ function views_ui_edit_page($view) {
     '#suffix' => '</div>',
   );
 
-  //$view->set_display('default');
-  //$build['displays']['tab_content'][$id] = views_ui_get_display_tab($view, $display);
+  // Determine the displays available for editing.
+  if ($tabs = views_ui_edit_page_display_tabs($view)) {
+    // If a display isn't specified, use the first one.
+    if (!$display_id) {
+      foreach ($tabs as $id => $tab) {
+        if (!isset($tab['#access']) || $tab['#access']) {
+          $display_id = $id;
+          break;
+        }
+      }
+    }
+    // If a display is specified, but we don't have access to it, return
+    // an access denied page.
+    if ($display_id && (!isset($tabs[$display_id]) || (isset($tabs[$display_id]['#access']) && !$tabs[$display_id]['#access']))) {
+      return MENU_ACCESS_DENIED;
+    }
 
-  // Show the live preview.
-  // @todo Change the preview to match the selected display. The existing
-  //   display tabs need to be AJAXified, or else refactored as secondary local
-  //   tasks.
-  $view->views_ui_context = TRUE;
-  $build['displays']['preview'] = array(
-    '#markup' => $view->preview('default', array()),
-  );
+    if ($display_id) {
+      $tabs[$display_id]['#active'] = TRUE;
+    }
+    $tabs['#prefix'] = '<h2 class="element-invisible">' . t('Secondary tabs') . '</h2><ul class="tabs secondary">';
+    $tabs['#suffix'] = '</ul>';
+    $build['displays']['tabs'] = $tabs;
+  }
+  elseif ($display_id) {
+    return MENU_ACCESS_DENIED;
+  }
+  else {
+    $display_id = NULL;
+  }
+
+  // Buttons for adding a new display.
+  $build['displays']['add_display'] = drupal_get_form('views_ui_add_display_form', $view);
+
+  if ($display_id) {
+    $view->set_display($display_id);
+    $build['displays']['tab_content'] = views_ui_get_display_tab($view, $display_id);
+
+    // Show the live preview.
+    $view->views_ui_context = TRUE;
+    $build['displays']['preview'] = array(
+      '#markup' => $view->preview($display_id, array()),
+    );
+  }
 
   return $build;
 }
 
 /**
- * Controls whether or not the default display should have its own tab on edit.
+ * Adds tabs for navigating across Displays when editing a View.
  *
- * @return
- *   Always returns FALSE for now.
+ * This function can be called from hook_menu_local_tasks_alter() to implement
+ * these tabs as secondary local tasks, or it can be called from elsewhere if
+ * having them as secondary local tasks isn't desired. The caller is responsible
+ * for setting the active tab's #active property to TRUE.
  */
-function views_ui_show_default_display() {
-  return FALSE;
+function views_ui_edit_page_display_tabs($view) {
+  $tabs = array();
+
+  // Create a tab for each display.
+  foreach ($view->display as $id => $display) {
+    $tabs[$id] = array(
+      '#theme' => 'menu_local_task',
+      '#link' => array(
+        // @todo Change to $display->display_title when we have an interface to
+        //   edit the title.
+        'title' => $id == 'default' ? t('Master') : ucwords($id),
+        'href' => 'admin/structure/views/view/' . $view->name . '/edit/' . $id,
+        'localized_options' => array(),
+      ),
+    );
+  }
+
+  // If the default display isn't supposed to be shown, don't display its tab.
+  if (!views_ui_show_default_display($view)) {
+    $tabs['default']['#access'] = FALSE;
+  }
+
+  return $tabs;
+}
+
+/**
+ * Controls whether or not the default display should have its own tab on edit.
+ */
+function views_ui_show_default_display($view) {
+  // @todo For now, show the default display only if there are no others, and
+  //   hide it if there's at least one "real" one. Later, we may add a setting.
+  return (count($view->display) == 1);
 }
 
 /**
  * Returns a renderable array representing the edit page for one display.
  */
-function views_ui_get_display_tab($view, $display) {
+function views_ui_get_display_tab($view, $display_id) {
   $build = array(
-    '#prefix' => "<div id='tab-$display->id'>",
+    '#prefix' => "<div id='tab-$display_id'>",
     '#suffix' => '</div>',
-    '#display_id' => $display->id,
+    '#display_id' => $display_id,
   );
+  $display = $view->display[$display_id];
   $plugin = $display->handler->definition;
   // If the plugin doesn't exist, display an error message instead of an edit
   // page.
@@ -1666,28 +1735,19 @@ function views_ui_add_display($js, $view) {
 /**
  * Form to add a display to a view.
  */
-function views_ui_add_display_form($form, &$form_state) {
-  $view = &$form_state['view'];
+function views_ui_add_display_form($form, &$form_state, $view = NULL) {
+  if (isset($view)) {
+    $form_state['view'] = $view;
+  }
 
-  $form['display']['display'] = array(
-    '#type' => 'select',
-    '#options' => views_fetch_plugin_names('display'),
-    '#default_value' => 'page',
-  );
-
-  $form['display']['add_display'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add display'),
-    '#ajax' => array(
-      'path' => "admin/structure/views/ajax/add-display/$view->name",
-    ),
-    '#submit' => array('views_ui_add_display_form_submit'),
-  );
-
-  $form['#id'] = 'views-add-display-form';
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-  $form['#action'] = url("admin/structure/views/nojs/add-display/$view->name");
-
+  // Add a button for each display type.
+  $form['#tree'] = TRUE;
+  foreach (views_fetch_plugin_names('display') as $key => $label) {
+    $form['add_display'][$key] = array(
+      '#type' => 'submit',
+      '#value' => t('Add !display', array('!display' => $label)),
+    );
+  }
   return $form;
 }
 
@@ -1695,15 +1755,16 @@ function views_ui_add_display_form($form, &$form_state) {
  * Submit handler to add a display to a view.
  */
 function views_ui_add_display_form_submit($form, &$form_state) {
-  // Create the new display
-  $plugin = $form_state['values']['display'];
-  $form_state['id'] = $form_state['view']->add_display($plugin);
+  $view = $form_state['view'];
 
-  // Store in cache
-  views_ui_cache_set($form_state['view']);
-
-  // Send it back
-  $form_state['redirect'] = array('admin/structure/views/edit/' . $form_state['view']->name, array('fragment' => 'views-tab-' . $form_state['id']));
+  // Create the new display and redirect to its edit page.
+  $parents = $form_state['triggering_element']['#parents'];
+  if ($parents[0] == 'add_display') {
+    $display_type = $parents[1];
+    $display_id = $view->add_display($display_type);
+    views_ui_cache_set($form_state['view']);
+    $form_state['redirect'] = 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id;
+  }
 }
 
 /**

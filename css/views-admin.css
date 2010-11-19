@@ -12,6 +12,11 @@
   padding: 10px;
 }
 
+.views-edit-view .views-displays .secondary {
+  text-align: left;
+  float: left;
+}
+
 .js .views-edit-view .ui-tabs-hide {
   display: none;
 }
