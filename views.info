@@ -287,6 +287,7 @@ files[] = tests/handlers/views_handler_sort_random.test
 files[] = tests/handlers/views_handler_sort_date.test
 files[] = tests/handlers/views_handler_sort.test
 files[] = tests/views_access.test
+files[] = tests/views_analyze.test
 files[] = tests/views_basic.test
 files[] = tests/views_argument_default.test
 files[] = tests/views_argument_validator.test

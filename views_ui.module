@@ -358,10 +358,6 @@ function views_ui_ajax_deliver($page_callback_result) {
     $commands[] = ajax_command_replace(NULL, $html);
     $commands[] = ajax_command_prepend(NULL, theme('status_messages'));
   }
-  $js = drupal_add_js();
-  if ($js) {
-    $commands[] = ajax_command_settings($js['settings']['data']);
-  }
 
   // This function needs to do the same thing that drupal_deliver_html_page()
   // does: add any needed http headers, print rendered output, and perform

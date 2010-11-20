@@ -1969,8 +1969,11 @@ function views_ui_analyze_view($js, $view) {
 
   if ($js) {
     // If we don't have an output object, it was submitted. Set up the submission.
-    if (empty($output)) {
-      return views_ui_regenerate_tabs($view);
+    if ($form_state['submitted'] && empty($form_state['rerender'])) {
+      $output = array();
+      $output[] = views_ajax_command_enable_buttons();
+      $output[] = views_ajax_command_dismiss_form();
+      views_ui_regenerate_tabs($view, $output);
     }
     $commands = $output;
     return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
