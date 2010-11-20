@@ -1,5 +1,5 @@
 <?php
-// $Id: plugins.inc,v 1.156.4.11 2010/11/06 16:52:34 dereine Exp $
+// $Id: plugins.inc,v 1.156.4.12 2010/11/18 23:15:37 merlinofchaos Exp $
 /**
  * @file plugins.inc
  * Built in plugins for Views output handling.
@@ -60,6 +60,8 @@ function views_views_plugins() {
         'handler' => 'views_plugin_display_attachment',
         'theme' => 'views_view',
         'use ajax' => TRUE,
+        'use pager' => FALSE,
+        'accept attachments' => FALSE,
         'help topic' => 'display-attachment',
       ),
       'feed' => array(
@@ -271,6 +273,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_pager_none',
         'help topic' => 'pager-none',
         'uses options' => TRUE,
+        'type' => 'basic',
       ),
       'some' => array(
         'title' => t('Display a specified number of items'),
@@ -278,6 +281,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_pager_some',
         'help topic' => 'pager-some',
         'uses options' => TRUE,
+        'type' => 'basic',
       ),
       'full' => array(
         'title' => t('Paged output, full pager'),

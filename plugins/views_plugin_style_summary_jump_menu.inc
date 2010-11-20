@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_summary_jump_menu.inc,v 1.1.6.3 2010/08/13 21:44:28 merlinofchaos Exp $
+// $Id: views_plugin_style_summary_jump_menu.inc,v 1.1.6.4 2010/11/18 01:33:58 merlinofchaos Exp $
 /**
  * @file
  * Contains the default summary style plugin, which displays items in an HTML list.
@@ -17,7 +17,8 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
     $options['base_path'] = array('default' => '');
     $options['count'] = array('default' => TRUE);
     $options['hide'] = array('default' => FALSE);
-    $options['text'] = array('default' => t('Go'), 'translatable' => TRUE);
+    $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
+    $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
 
     return $options;
   }
@@ -57,6 +58,13 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       '#title' => t('Button text'),
       '#default_value' => $this->options['text'],
     );
+
+    $form['choose'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Choose text'),
+      '#default_value' => $this->options['choose'],
+      '#description' => t('The text that will appear as the selected option in the jump menu.'),
+    );
   }
 
   function render() {
@@ -88,6 +96,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
     $settings = array(
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
+      'choose' => $this->options['choose'],
     );
 
     return drupal_get_form('ctools_jump_menu', $options, $settings);

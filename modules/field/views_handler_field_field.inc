@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_field.inc,v 1.1.2.4 2010/10/25 21:40:46 dereine Exp $
+// $Id: views_handler_field_field.inc,v 1.1.2.5 2010/11/19 20:35:46 dereine Exp $
 
 /**
  * Helper function: Return an array of formatter options for a field type.
@@ -195,7 +195,8 @@ class views_handler_field_field extends views_handler_field {
         'label' => 'hidden',
       );
 
-      return drupal_render(field_view_field($entity_type, $object, $this->definition['field_name'], $display));
+      $render_array = field_view_field($entity_type, $object, $this->definition['field_name'], $display);
+      return drupal_render($render_array);
     }
     else {
       return '';

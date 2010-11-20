@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_contact_link.inc,v 1.2.4.3 2010/09/19 09:44:54 dereine Exp $
+// $Id: views_handler_field_contact_link.inc,v 1.2.4.4 2010/11/18 07:29:03 dereine Exp $
 /**
  * A field that links to the user contact page, if access is permitted.
  */
@@ -41,7 +41,7 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
     return TRUE;
   }
 
-  function render($values) {
+  function render_link($data, $values) {
     global $user;
     $uid = $values->{$this->aliases['uid']};
 
@@ -60,14 +60,18 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
       return;
     }
 
+    $this->options['alter']['path'] = 'user/'. $account->uid .'/contact';
+    $this->options['alter']['attributes'] = array('title' => t('Contact %user', array('%user' => $account->name)));
+
     if ($this->options['link_display'] == 'icon') {
-      return l(theme('image', array(
-        'path' => 'misc/forum-new.png'
-      )), 'user/'. $account->uid .'/contact', array('html' => TRUE, 'attributes' => array('title' => t('Contact %user', array('%user' => $account->name)))));
+      $text = theme('image', 'misc/forum-new.png');
+      $this->options['alter']['html'] = TRUE;
     }
     else {
-      return l($this->options['text'], 'user/'. $account->uid .'/contact', array('attributes' => array('title' => t('Contact %user', array('%user' => $account->name)))));
+      $text = $this->options['text'];
     }
+
+    return $text;
   }
 }
 

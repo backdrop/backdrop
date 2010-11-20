@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_pager_some.inc,v 1.1.4.2 2010/02/06 13:29:48 dereine Exp $
+// $Id: views_plugin_pager_some.inc,v 1.1.4.3 2010/11/18 23:15:37 merlinofchaos Exp $
 
 /**
  * Plugin for views without pagers.
@@ -29,7 +29,7 @@ class views_plugin_pager_some extends views_plugin_pager {
     $form['items_per_page'] = array(
       '#title' => t('Items to display'),
       '#type' => 'textfield',
-      '#description' => t('The number of items to display per page. Enter 0 for no limit.'),
+      '#description' => t('The number of items to display per page.'),
       '#default_value' => $this->options['items_per_page'],
     );
 

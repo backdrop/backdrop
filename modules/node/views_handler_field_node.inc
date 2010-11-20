@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node.inc,v 1.7.4.6 2010/10/12 21:10:04 merlinofchaos Exp $
+// $Id: views_handler_field_node.inc,v 1.7.4.8 2010/11/18 23:32:04 merlinofchaos Exp $
 /**
  * @file
  * Contains the basic 'node' field handler.
@@ -22,7 +22,7 @@ class views_handler_field_node extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_node'] = array('default' => FALSE);
+    $options['link_to_node'] = array('default' => TRUE);
     return $options;
   }
 
@@ -45,21 +45,23 @@ class views_handler_field_node extends views_handler_field {
    * Data should be made XSS safe prior to calling this function.
    */
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_node']) && $data !== NULL && $data !== '') {
-      $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
-      if (isset($this->aliases['language'])) {
-        $languages = language_list();
-        if (isset($languages[$values->{$this->aliases['language']}])) {
-          $this->options['alter']['language'] = $languages[$values->{$this->aliases['language']}];
-        }
-        else {
-          unset($this->options['alter']['language']);
+    if (!empty($this->options['link_to_node'])) {
+      if ($data !== NULL && $data !== '') {
+        $this->options['alter']['make_link'] = TRUE;
+        $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+        if (isset($this->aliases['language'])) {
+          $languages = language_list();
+          if (isset($languages[$values->{$this->aliases['language']}])) {
+            $this->options['alter']['language'] = $languages[$values->{$this->aliases['language']}];
+          }
+          else {
+            unset($this->options['alter']['language']);
+          }
         }
       }
-    }
-    else {
-      $this->options['alter']['make_link'] = FALSE;
+      else {
+        $this->options['alter']['make_link'] = FALSE;
+      } 
     }
     return $data;
   }

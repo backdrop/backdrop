@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_locale_link_edit.inc,v 1.1 2009/02/20 23:02:09 merlinofchaos Exp $
+// $Id: views_handler_field_locale_link_edit.inc,v 1.1.6.1 2010/11/18 07:29:03 dereine Exp $
 
 /**
  * Field handler to present a link to edit a translation.
@@ -32,14 +32,23 @@ class views_handler_field_locale_link_edit extends views_handler_field {
     $this->add_additional_fields();
   }
 
-  function render($values) {
+  function access() {
     // Ensure user has access to edit translations.
-    if (!user_access('translate interface')) {
-      return;
-    }
+    return user_access('translate interface');
+  }
 
+  function render($values) {
+    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+  }
+
+  function render_link($data, $values) {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
-    return l($text, 'admin/build/translate/edit/' . $values->{$this->aliases['lid']}, array('query' => drupal_get_destination()));
+
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['path'] = 'admin/build/translate/edit/' . $values->{$this->aliases['lid']};
+    $this->options['alter']['query'] = drupal_get_destination();
+
+    return $text;
   }
 }
 

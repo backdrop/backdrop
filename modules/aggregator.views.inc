@@ -1,5 +1,5 @@
 <?php
-// $Id: aggregator.views.inc,v 1.3.4.6 2010/10/16 08:19:05 dereine Exp $
+// $Id: aggregator.views.inc,v 1.3.4.7 2010/11/16 00:01:25 merlinofchaos Exp $
 /**
  * @file
  * Provide views data and handlers for aggregator.module
@@ -122,7 +122,7 @@ function aggregator_views_data() {
     'help' => t('The author of the original imported item.'),
      // Information for displaying a title as a field
     'field' => array(
-      'handler' => 'views_handler_field_xss',
+      'handler' => 'views_handler_field_aggregator_xss',
       'click sortable' => TRUE,
      ),
     'sort' => array(
@@ -164,7 +164,7 @@ function aggregator_views_data() {
     'help' => t('The actual content of the imported item.'),
      // Information for displaying a title as a field
     'field' => array(
-      'handler' => 'views_handler_field_aggregator_item_description',
+      'handler' => 'views_handler_field_aggregator_xss',
       'click sortable' => FALSE,
      ),
     // Information for accepting a title as a filter

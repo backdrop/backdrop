@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_table.inc,v 1.7.4.7 2010/11/05 07:20:54 dereine Exp $
+// $Id: views_plugin_style_table.inc,v 1.7.4.8 2010/11/16 00:23:12 merlinofchaos Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -198,6 +198,14 @@ class views_plugin_style_table extends views_plugin_style {
           '#default_value' => !empty($this->options['info'][$field]['sortable']),
           '#process' => array('ctools_dependent_process'),
           '#dependency' => array($id => array($field)),
+        );
+        $form['info'][$field]['default_sort_order'] = array(
+          '#type' => 'select',
+          '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
+          '#default_value' => !empty($this->options['info'][$field]['default_sort_order']) ? $this->options['info'][$field]['default_sort_order'] : 'asc',
+          '#process' => array('views_process_dependency'),
+          '#dependency_count' => 2,
+          '#dependency' => array($id => array($field), 'edit-style-options-info-' . $safe . '-sortable' => array(1)),
         );
         // Provide an ID so we can have such things.
         $radio_id = drupal_html_id('edit-default-' . $field);

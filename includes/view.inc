@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.167.4.30 2010/10/14 20:08:16 merlinofchaos Exp $
+// $Id: view.inc,v 1.167.4.33 2010/11/18 23:13:56 dereine Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -327,7 +327,7 @@ class view extends views_db_object {
       return FALSE;
     }
 
-    // init the new display handler with data.
+    // init the new style handler with data.
     $this->style_plugin->init($this, $this->display[$this->current_display], $this->style_options);
     return TRUE;
   }
@@ -422,51 +422,6 @@ class view extends views_db_object {
         unset($handlers[$id]);
       }
     }
-  }
-
-  /**
-   * Render the exposed filter form.
-   *
-   * This actually does more than that; because it's using FAPI, the form will
-   * also assign data to the appropriate handlers for use in building the
-   * query.
-   */
-  function render_exposed_form($block = FALSE) {
-    // Deal with any exposed filters we may have, before building.
-    $form_state = array(
-      'view' => &$this,
-      'display' => &$this->display_handler->display,
-      'method' => 'get',
-      'rerender' => TRUE,
-      'no_redirect' => TRUE,
-      'build_info' => array(
-        'args' => array(),
-      ),
-    );
-
-    // Some types of displays (eg. attachments) may wish to use the exposed
-    // filters of their parent displays instead of showing an additional
-    // exposed filter form for the attachment as well as that for the parent.
-    if (!$this->display_handler->displays_exposed() || (!$block && $this->display_handler->get_option('exposed_block'))) {
-      unset($form_state['rerender']);
-    }
-
-    if (!empty($this->ajax)) {
-      $form_state['ajax'] = TRUE;
-    }
-
-    $output = drupal_render(drupal_build_form('views_exposed_form', $form_state));
-    if (!empty($form_state['js settings'])) {
-      $this->js_settings = $form_state['js settings'];
-    }
- 
-    // Don't render exposed filter form when there's form errors.
-    // Applies when filters are in a block ("exposed_block" option).
-    if (form_get_errors() && empty($form_state['rerender'])) {
-      return NULL;
-    }
-
-    return $output;
   }
 
   /**
@@ -620,7 +575,7 @@ class view extends views_db_object {
       }
     }
 
-    // Let modules modify the view just prior to executing it.
+    // Let modules modify the view just prior to building it.
     foreach (module_implements('views_pre_build') as $module) {
       $function = $module . '_views_pre_build';
       $function($this);
@@ -727,6 +682,13 @@ class view extends views_db_object {
 
     // Attach displays
     $this->attach_displays();
+
+    // Let modules modify the view just after building it.
+    foreach (module_implements('views_post_build') as $module) {
+      $function = $module . '_views_post_build';
+      $function($this);
+    }
+
     return TRUE;
   }
 
@@ -787,6 +749,12 @@ class view extends views_db_object {
       }
     }
 
+    // Let modules modify the view just after executing it.
+    foreach (module_implements('views_post_execute') as $module) {
+      $function = $module . '_views_post_execute';
+      $function($this);
+    }
+
     $this->executed = TRUE;
   }
 
@@ -830,7 +798,7 @@ class view extends views_db_object {
 
       $this->style_plugin->pre_render($this->result);
 
-      // Let modules modify the view just prior to executing it.
+      // Let modules modify the view just prior to rendering it.
       foreach (module_implements('views_pre_render') as $module) {
         $function = $module . '_views_pre_render';
         $function($this);

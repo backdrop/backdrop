@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_date.inc,v 1.3.6.3 2010/03/10 20:27:33 merlinofchaos Exp $
+// $Id: views_handler_filter_date.inc,v 1.3.6.4 2010/11/18 00:38:17 merlinofchaos Exp $
 
 /**
  * Filter to handle dates stored as a timestamp.
@@ -24,7 +24,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
         '#title' => t('Value type'),
         '#options' => array(
           'date' => t('A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred.'),
-          'offset' => t('An offset from the current time such as "+1 day" or "-2 hours -30 minutes"'),
+          'offset' => t('An offset from the current time such as "!example1" or "!example2"', array('!example1' => '+1 day', '!example2' => '-2 hours -30 minutes')),
         ),
         '#default_value' => !empty($this->value['type']) ? $this->value['type'] : 'date',
       );

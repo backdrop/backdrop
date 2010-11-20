@@ -1,5 +1,5 @@
 <?php
-// $Id: views_user_argument_default.test,v 1.1.4.3 2010/11/06 17:56:10 dereine Exp $
+// $Id: views_user_argument_default.test,v 1.1.4.4 2010/11/13 17:53:07 dereine Exp $
 /**
  * @file
  * Tests views user argument default plugin.
@@ -8,9 +8,9 @@
 class viewsUserArgumentDefault extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-    'name' => 'Tests user argument default plugin',
-    'description' => 'Tests user argument default plugin',
-    'group' => 'Views',
+      'name' => 'Tests user argument default plugin',
+      'description' => 'Tests user argument default plugin',
+      'group' => 'Views Plugins',
     );
   }
 

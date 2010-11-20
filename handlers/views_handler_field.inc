@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.33.4.30 2010/11/11 19:41:11 dereine Exp $
+// $Id: views_handler_field.inc,v 1.33.4.33 2010/11/18 23:34:44 merlinofchaos Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -119,7 +119,9 @@ class views_handler_field extends views_handler {
    * Called to determine what to tell the clicksorter.
    */
   function click_sort($order) {
-    $this->query->add_orderby($this->table_alias, $this->real_field, $order, $this->field_alias);
+    // Since fields should always have themselves already added, just
+    // add a sort on the field.
+    $this->query->add_orderby(NULL, NULL, $order, $this->field_alias);
   }
 
   /**
@@ -322,7 +324,8 @@ class views_handler_field extends views_handler {
       $output = t('<p>You must add some additional fields to this display before using this field. These fields may be marked as <em>Exclude from display</em> if you prefer. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>');
       // We have some options, so make a list.
       if (!empty($options)) {
-        $output = t('<p>The following tokens are available for this field. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>');
+        $output = t('<p>The following tokens are available for this field. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.
+If you would like to have the characters %5B and %5D please use the html entity codes \'%5B\' or  \'%5D\' or they will get replaced with empty space.</p>');
         foreach (array_keys($options) as $type) {
           if (!empty($options[$type])) {
             $items = array();
@@ -503,9 +506,10 @@ class views_handler_field extends views_handler {
 
     if (empty($this->last_render)) {
       if (($this->last_render !== 0 && $this->last_render !== '0') || !empty($this->options['empty_zero'])) {
-        $this->options['alter']['alter_text'] = 1;
-        $this->options['alter']['text'] = $this->options['empty'];
-        $this->last_render = $this->render_text($this->options['alter']);
+        $alter = $this->options['alter'];
+        $alter['alter_text'] = 1;
+        $alter['text'] = $this->options['empty'];
+        $this->last_render = $this->render_text($alter);
       }
     }
 

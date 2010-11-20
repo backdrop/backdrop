@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.161.4.58 2010/11/07 19:47:42 dereine Exp $
+// $Id: admin.inc,v 1.161.4.60 2010/11/16 01:03:40 merlinofchaos Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -2118,7 +2118,7 @@ function views_ui_add_item_form($form, &$form_state) {
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
   if (!empty($options)) {
-    $groups = array('all' => t('<All>'));
+    $groups = array('all' => t('- All -'));
     $form['group'] = array(
       '#type' => 'select',
       '#title' => t('Groups'),
@@ -3084,6 +3084,10 @@ function theme_views_ui_style_plugin_table($variables) {
       'align' => 'center',
     ),
     array(
+      'data' => t('Default order'),
+      'align' => 'center',
+    ),
+    array(
       'data' => t('Default sort'),
       'align' => 'center',
     ),
@@ -3101,6 +3105,10 @@ function theme_views_ui_style_plugin_table($variables) {
         'align' => 'center',
       );
       $row[] = array(
+        'data' => drupal_render($form['info'][$id]['default_sort_order']),
+        'align' => 'center',
+      );
+      $row[] = array(
         'data' => drupal_render($form['default'][$id]),
         'align' => 'center',
       );
@@ -3108,12 +3116,13 @@ function theme_views_ui_style_plugin_table($variables) {
     else {
       $row[] = '';
       $row[] = '';
+      $row[] = '';
     }
     $rows[] = $row;
   }
 
   // Add the special 'None' row.
-  $rows[] = array(t('None'), '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
+  $rows[] = array(t('None'), '', '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
 
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
   $output .= drupal_render_children($form);
