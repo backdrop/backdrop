@@ -21,13 +21,6 @@ interface ViewsWizardInterface {
    * @return a view object.
    */
   function create_view($form, &$form_state);
-
-  /**
-   * Store a new View from form values.
-   *
-   * @return a view object.
-   */
-  function store_view($form, &$form_state);  
 }
 
 /**
@@ -228,7 +221,4 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    return NULL;
  }
 
- function store_view($from, &$form_state) {
-   return NULL;
- }
 }

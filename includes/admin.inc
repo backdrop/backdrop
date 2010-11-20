@@ -392,6 +392,12 @@ function views_ui_wizard_form_validate($form, &$form_state) {
 function views_ui_add_form_save_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
   $view = $form_state['temporary']['wizard_instance']->create_view($form, $form_state);
+  // @todo When above works, uncomment the following. See views_ui_edit_view_form_submit().
+  //$view->save();
+  //menu_rebuild();
+  //cache_clear_all('*', 'cache_views');
+  //cache_clear_all();
+  //$form_state['redirect'] = PATH TO THE VIEW IF IT HAS ONE
   $form_state['redirect'] = 'admin/structure/views';
 }
 
@@ -400,7 +406,10 @@ function views_ui_add_form_save_submit($form, &$form_state) {
  */
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
-  $view = $form_state['temporary']['wizard_instance']->store_view($form, $form_state);
+  $view = $form_state['temporary']['wizard_instance']->create_view($form, $form_state);
+  // @todo When above works, uncomment the following.
+  //views_ui_cache_set($view);
+  //$form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
   $form_state['redirect'] = 'admin/structure/views';
 }
 
