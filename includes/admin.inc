@@ -346,9 +346,9 @@ function views_ui_add_form($form, &$form_state) {
     '#value' => t('Update'),
     '#submit' => array('views_ui_show_nojs_submit'),
   );
-  $wizard_key = isset($form_state['show']['wizard_key']) ? $form_state['show']['wizard_key'] : $form['show']['wizard_key']['#default_value'];
+  $wizard_key = isset($form_state['values']['show']['wizard_key']) ? $form_state['values']['show']['wizard_key'] : $form['show']['wizard_key']['#default_value'];
   $get_instance = $wizard_plugins[$wizard_key]['get_instance'];
-  $wizard_instance = $get_instance($w);
+  $wizard_instance = $get_instance($wizard_plugins[$wizard_key]);
   $form = $wizard_instance->build_form($form, $form_state);
   $form['save'] = array(
     '#type' => 'submit',
@@ -374,10 +374,6 @@ function views_ui_add_form($form, &$form_state) {
  * Update the add view form.
  */
 function views_ui_show_nojs_submit($form, &$form_state) {
-  $w = views_ui_get_wizard($form_state['values']['show']['wizard_key']);
-  $form_state['temporary']['wizard'] = $w;
-  $get_instance = $w['get_instance'];
-  $wizard_instance = $get_instance($w);
   $form_state['rebuild'] = TRUE;
 }
 
