@@ -310,6 +310,15 @@ function views_ui_add_form($form, &$form_state) {
     '#default_value' => '',
     '#maxlength' => 255,
   );
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#maxlength' => 32,
+    '#machine_name' => array(
+      'exists' => 'views_get_view',
+      'source' => array('description'),
+    ),
+    '#description' => t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
+  );
   $form['show'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
