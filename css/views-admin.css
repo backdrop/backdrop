@@ -553,6 +553,14 @@ div.changed div.view-changed {
   padding: .5em;
 }
 
+form#views-ui-reorder-displays-button {
+  margin-bottom: 0em;
+  border-bottom: 1px solid #ccc;
+}
+form#views-ui-reorder-displays-button input.form-submit{
+  margin-bottom: 2em;
+}
+
 form#views-add-display-form {
   margin-bottom: 0em;
   border-bottom: 1px solid #ccc;
