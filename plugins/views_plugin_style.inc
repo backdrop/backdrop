@@ -180,30 +180,73 @@ class views_plugin_style extends views_plugin {
    *   The grouped record set.
    */
   function render_grouping($records, $grouping_field = '') {
+    // Make sure fields are rendered
+    $this->render_fields($this->view->result);
     $sets = array();
     if ($grouping_field) {
-      $this->view->row_index = 0;
-      foreach ($records as $row) {
+      foreach ($records as $index => $row) {
         $grouping = '';
         // Group on the rendered version of the field, not the raw.  That way,
         // we can control any special formatting of the grouping field through
         // the admin or theme layer or anywhere else we'd like.
         if (isset($this->view->field[$grouping_field])) {
-          $grouping = $this->view->field[$grouping_field]->theme($row);
-          $this->view->row_index++;
+          $grouping = $this->get_field($index, $grouping_field);
           if ($this->view->field[$grouping_field]->options['label']) {
             $grouping = $this->view->field[$grouping_field]->options['label'] . ': ' . $grouping;
           }
         }
         $sets[$grouping][] = $row;
       }
-      unset($this->view->row_index);
     }
     else {
       // Create a single group with an empty grouping field.
       $sets[''] = $records;
     }
     return $sets;
+  }
+
+  /**
+   * Render all of the fields for a given style and store them on the object.
+   *
+   * @param $result
+   *   The result array from $view->result
+   */
+  function render_fields($result) {
+    if (!$this->uses_fields()) {
+      return;
+    }
+
+    if (isset($this->rendered_fields)) {
+      return $this->rendered_fields;
+    }
+
+    $this->view->row_index = 0;
+    $keys = array_keys($this->view->field);
+    foreach ($result as $count => $row) {
+      foreach ($keys as $id) {
+        $this->rendered_fields[$count][$id] = $this->view->field[$id]->theme($row);
+      }
+      $this->view->row_index = $count;
+    }
+    unset($this->view->row_index);
+  }
+
+  /**
+   * Get a rendered field.
+   *
+   * @param $index
+   *   The index count of the row.
+   * @param $field
+   *    The id of the field.
+   */
+  function get_field($index, $field) {
+    if (!isset($this->rendered_fields)) {
+      $this->render_fields($this->view->result);
+    }
+
+    if (isset($this->rendered_fields[$index][$field])) {
+      return $this->rendered_fields[$index][$field];
+    }
   }
 
   function validate() {
