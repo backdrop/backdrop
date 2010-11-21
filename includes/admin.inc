@@ -352,11 +352,16 @@ function views_ui_list_views_form($form, &$form_state) {
     '#default_value' => 'asc',
   );
 
+  // Autosubmit all form elements.
+  ctools_add_js('auto-submit');
+  $form['#attributes']['class'][] = 'ctools-auto-submit-full-form';
+
   $form['submit'] = array(
     '#name' => '', // so it won't in the $_GET args
     '#type' => 'submit',
     '#id' => 'edit-views-apply',
     '#value' => t('Apply'),
+    '#attributes' => array('class' => array('ctools-use-ajax', 'ctools-auto-submit-click')),
   );
 
   if (!empty($_SESSION['views']['#admin'])) {
