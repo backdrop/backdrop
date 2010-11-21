@@ -203,7 +203,7 @@ class views_plugin_style_table extends views_plugin_style {
           '#type' => 'select',
           '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
           '#default_value' => !empty($this->options['info'][$field]['default_sort_order']) ? $this->options['info'][$field]['default_sort_order'] : 'asc',
-          '#process' => array('views_process_dependency'),
+          '#process' => array('ctools_dependent_process'),
           '#dependency_count' => 2,
           '#dependency' => array($id => array($field), 'edit-style-options-info-' . $safe . '-sortable' => array(1)),
         );
