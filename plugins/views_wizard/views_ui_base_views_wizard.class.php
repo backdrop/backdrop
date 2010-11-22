@@ -57,6 +57,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // The inline dynamic elements will go here.
     $form['show']['base_table'] = array(
       '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '</div>',
+      '#prefix' => '<div id="edit-view-ajax-wrapper">',
+      '#suffix' => '</div>',
     );
     $form['page'] = array(
       '#type' => 'fieldset',

@@ -25,3 +25,7 @@
 .js .views-edit-view .ui-tabs-hide {
   display: none;
 }
+
+.js #edit-update-wizard-key {
+  display: none;
+}
