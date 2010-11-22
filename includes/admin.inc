@@ -371,6 +371,7 @@ function views_ui_add_form($form, &$form_state) {
     '#value' => t('Cancel'),
     '#submit' => array('views_ui_add_form_cancel_submit'),
   );
+
   return $form;
 }
 
@@ -426,10 +427,8 @@ function views_ui_add_form_save_submit($form, &$form_state) {
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
   $view = $form_state['temporary']['wizard_instance']->create_view($form, $form_state);
-  // @todo When above works, uncomment the following.
-  //views_ui_cache_set($view); // Shoudl this use ctools directly?
-  //$form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
-  $form_state['redirect'] = 'admin/structure/views';
+  views_ui_cache_set($view);
+  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
 }
 
 /**

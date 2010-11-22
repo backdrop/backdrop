@@ -420,12 +420,16 @@ function views_ui_get_wizard($wizard_type) {
 function views_ui_get_wizards() {
   ctools_include('plugins');
   $wizard_plugins = ctools_get_plugins('views_ui', 'views_wizard');
+  $wizard_tables = array();
+  foreach ($wizard_plugins as $name => $info) {
+    $wizard_tables[$info['base_table']] = TRUE;
+  }
   $base_tables = views_fetch_base_tables();
   $default_wizard = views_ui_views_wizard_defaults();
   // Find base tables with no wizard.
   // @todo - handle this via an alter hook for plugins?
   foreach ($base_tables as $table => $info) {
-    if (!isset($wizard_plugins[$table])) {
+    if (!isset($wizard_tables[$table])) {
       $w = $default_wizard;
       $w['title'] = $info['title'];
       $w['base_table'] = $table;
