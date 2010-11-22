@@ -339,8 +339,13 @@ function views_ui_add_form($form, &$form_state) {
     '#attributes' => array('class' => array('inline')),
     '#ajax' => array(
       'callback' => 'views_ui_add_form_update',
-      'wrapper' => 'edit-view-ajax-wrapper',
+      'wrapper' => 'edit-view-displays-wrapper',
     ),
+  );
+  // Everything that can be updated by AJAX goes in here.
+  $form['displays'] = array(
+    '#prefix' => '<div id="edit-view-displays-wrapper">',
+    '#suffix' => '</div>',
   );
   // Since the "Show" dropdown can't trigger a form submission when
   // JavaScript is disabled, add a submit button to do that. css hides
@@ -389,7 +394,7 @@ function views_ui_show_nojs_submit($form, &$form_state) {
  *   The part of the form that has changed.
  */
 function views_ui_add_form_update($form, $form_state) {
-  return $form['show']['base_table'];
+  return $form['displays'];
 }
 
 /**

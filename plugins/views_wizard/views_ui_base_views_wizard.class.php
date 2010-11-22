@@ -64,23 +64,23 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   function build_form($form, &$form_state) {
     $style_options = views_fetch_plugin_names('style', 'normal', array($this->base_table));
     $feed_row_options = views_fetch_plugin_names('row', 'feed', array($this->base_table));
+
     // Temporary markup to monitor effect of form updates.
     // The inline dynamic elements will go here.
     $form['show']['base_table'] = array(
       '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '</div>',
-      '#prefix' => '<div id="edit-view-ajax-wrapper">',
-      '#suffix' => '</div>',
     );
-    $form['page'] = array(
+
+    $form['displays']['page'] = array(
       '#type' => 'fieldset',
       '#tree' => TRUE,
     );
-    $form['page']['create'] = array(
+    $form['displays']['page']['create'] = array(
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
     );
-    $form['page']['title'] = array(
+    $form['displays']['page']['title'] = array(
       '#title' => t('Page title'),
       '#type' => 'textfield',
       '#states' => array(
@@ -89,7 +89,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       ),
     );
-    $form['page']['path'] = array(
+    $form['displays']['page']['path'] = array(
       '#title' => t('Path'),
       '#type' => 'textfield',
       '#states' => array(
@@ -98,8 +98,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       ),
     );
-    // This may change by AJAX as we change the base table of the selected wizard.
-    $form['page']['display_format']['style'] = array(
+    $form['displays']['page']['display_format']['style'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
@@ -111,7 +110,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       ),
     );
-    $form['page']['items_per_page'] = array(
+    $form['displays']['page']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
       '#size' => 5,
@@ -121,7 +120,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       ),
     );
-    $form['page']['link'] = array(
+    $form['displays']['page']['link'] = array(
       '#title' => t('Create a menu link'),
       '#type' => 'checkbox',
       '#states' => array(
@@ -130,7 +129,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       ),
     );
-    $form['page']['link_properties'] = array();
+    $form['displays']['page']['link_properties'] = array();
     if (module_exists('menu')) {
       $menu_options = menu_get_menus();
     }
@@ -141,7 +140,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $menu_options[$name] = t($title);
       }
     }
-    $form['page']['link_properties']['menu_name'] = array(
+    $form['displays']['page']['link_properties']['menu_name'] = array(
       '#title' => t('Menu'),
       '#type' => 'select',
       '#options' => $menu_options,
@@ -152,7 +151,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       ),
     );
-    $form['page']['link_properties']['title'] = array(
+    $form['displays']['page']['link_properties']['title'] = array(
       '#title' => t('Link text'),
       '#type' => 'textfield',
       '#states' => array(
@@ -164,7 +163,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
     // Only offer a feed if we have at least one available feed row style.
     if ($feed_row_options) {
-      $form['page']['feed'] = array(
+      $form['displays']['page']['feed'] = array(
         '#title' => t('Include an RSS feed'),
         '#type' => 'checkbox',
         '#states' => array(
@@ -173,7 +172,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           ),
         ),
       );
-      $form['page']['feed_properties']['path'] = array(
+      $form['displays']['page']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),
         '#type' => 'textfield',
         '#states' => array(
@@ -184,7 +183,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       );
       // This will almost never be visible.
-      $form['page']['feed_properties']['row_style'] = array(
+      $form['displays']['page']['feed_properties']['row_style'] = array(
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
@@ -198,16 +197,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       );
     }
-    $form['block'] = array(
+    $form['displays']['block'] = array(
       '#type' => 'fieldset',
       '#tree' => TRUE,
     );
-    $form['block']['create'] = array(
+    $form['displays']['block']['create'] = array(
       '#title' => t('Create a block'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
     );
-    $form['block']['title'] = array(
+    $form['displays']['block']['title'] = array(
       '#title' => t('Block title'),
       '#type' => 'textfield',
       '#states' => array(
@@ -217,7 +216,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       ),
     );
     // This may change by AJAX as we change the base table of the selected wizard.
-    $form['block']['display_format']['style'] = array(
+    $form['displays']['block']['display_format']['style'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
@@ -229,7 +228,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       ),
     );
-    $form['block']['items_per_page'] = array(
+    $form['displays']['block']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
       '#size' => 5,
@@ -241,7 +240,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
     // Only offer a feed if we have at least one available feed row style.
     if ($feed_row_options) {
-      $form['block']['feed'] = array(
+      $form['displays']['block']['feed'] = array(
         '#title' => t('Include an RSS feed'),
         '#type' => 'checkbox',
         '#states' => array(
@@ -250,7 +249,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           ),
         ),
       );
-      $form['block']['feed_properties']['path'] = array(
+      $form['displays']['block']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),
         '#type' => 'textfield',
         '#states' => array(
@@ -261,7 +260,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       );
       // This will almost never be visible.
-      $form['block']['feed_properties']['row_style'] = array(
+      $form['displays']['block']['feed_properties']['row_style'] = array(
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
