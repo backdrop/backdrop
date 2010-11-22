@@ -881,7 +881,7 @@ function views_ui_get_display_tab_details($view, $display) {
     '#type' => 'fieldset',
     '#title' => t('@display_type details', array('@display_type' => ucwords($type))),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE, // @TODO: Respect user preference for this attachment.
+    '#collapsed' => TRUE, // @TODO: Respect user preference for this attachment.
   );
 
   // The Delete and Duplicate buttons.
