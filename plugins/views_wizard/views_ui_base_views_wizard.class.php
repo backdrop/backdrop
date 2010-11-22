@@ -284,20 +284,55 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->tag = 'default';
     $view->base_table = $this->base_table;
 
-    /* Display: Defaults */
+    // Display: Defaults
     $handler = $view->new_display('default', 'Defaults', 'default');
-    $handler->display->display_options['access']['type'] = 'none';
-    $handler->display->display_options['cache']['type'] = 'none';
-    $handler->display->display_options['query']['type'] = 'views_query';
-    $handler->display->display_options['exposed_form']['type'] = 'basic';
-    $handler->display->display_options['pager']['type'] = 'full';
-    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options = $this->default_display_options($from, $form_state);
+
+    // Display: Page
+    if (!empty($form_state['values']['page']['create'])) {
+      $handler = $view->new_display('page', 'Page', 'page');
+      $handler->display->display_options = $this->page_display_options($from, $form_state);
+    }
+
+    // Display: Block
+    if (!empty($form_state['values']['block']['create'])) {
+      $handler = $view->new_display('block', 'Block', 'block_1');
+      $handler->display->display_options = $this->block_display_options($from, $form_state);
+    }
     return $view;
   }
 
+  /**
+   * Most subclasses will need to override this method to provide some fields
+   * or a different row plugin.
+   */
+  protected function default_display_options($from, $form_state) {
+    $display_options = array();
+    $display_options['access']['type'] = 'none';
+    $display_options['cache']['type'] = 'none';
+    $display_options['query']['type'] = 'views_query';
+    $display_options['exposed_form']['type'] = 'basic';
+    $display_options['pager']['type'] = 'full';
+    $display_options['style_plugin'] = 'default';
+    $display_options['row_plugin'] = 'fields';
+    return $display_options;
+  }
+
+  protected function page_display_options($from, $form_state) {
+    $display_options = array();
+    $page = $form_state['values']['page'];
+    $display_options['path'] = $page['path'];
+    return $display_options;
+  }
+
+  protected function block_display_options($from, $form_state) {
+    $display_options = array();
+    return $display_options;
+  }  
+
   protected function retrieve_validated_view($form, $form_state, $unset = TRUE) {
     $key = hash('sha256', serialize($form_state['values']));
-    $view (isset($this->validated_views[$key]) ? $this->validated_views[$key] : NULL);
+    $view = (isset($this->validated_views[$key]) ? $this->validated_views[$key] : NULL);
     if ($unset) {
       unset($this->validated_views[$key]);
     }
@@ -315,8 +350,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   function validate($form, &$form_state) {
     $view = $this->instantiate_view($from, $form_state);
     $errors = $view->validate();
-    if (!$errors) {
+    if (!is_array($errors) || empty($errors)) {
       $this->set_validated_view($form, $form_state, $view);
+      return array();
     }
     return $errors;
   }

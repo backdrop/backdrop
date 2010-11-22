@@ -402,10 +402,10 @@ function views_ui_add_form_update($form, $form_state) {
  */
 function views_ui_wizard_form_validate($form, &$form_state) {
   $w = views_ui_get_wizard($form_state['values']['show']['wizard_key']);
-  $form_state['temporary']['wizard'] = $w;
+  $form_state['wizard'] = $w;
   $get_instance = $w['get_instance'];
-  $form_state['temporary']['wizard_instance'] = $get_instance($w);
-  $errors = $form_state['temporary']['wizard_instance']->validate($form, $form_state);
+  $form_state['wizard_instance'] = $get_instance($w);
+  $errors = $form_state['wizard_instance']->validate($form, $form_state);
   foreach ($errors as $name => $message) {
     form_set_error($name, $message);
   }
@@ -416,7 +416,7 @@ function views_ui_wizard_form_validate($form, &$form_state) {
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
-  $view = $form_state['temporary']['wizard_instance']->create_view($form, $form_state);
+  $view = $form_state['wizard_instance']->create_view($form, $form_state);
   // @todo When above works, uncomment the following. See views_ui_edit_view_form_submit().
   //$view->save();
   //menu_rebuild();
@@ -431,7 +431,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
  */
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
   drupal_set_message(__FUNCTION__);
-  $view = $form_state['temporary']['wizard_instance']->create_view($form, $form_state);
+  $view = $form_state['wizard_instance']->create_view($form, $form_state);
   views_ui_cache_set($view);
   $form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
 }
