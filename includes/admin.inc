@@ -342,23 +342,31 @@ function views_ui_add_form($form, &$form_state) {
       'wrapper' => 'edit-view-displays-wrapper',
     ),
   );
-  // Everything that can be updated by AJAX goes in here.
+
+  // Everything that can be updated by AJAX goes in here. It is triggered by
+  // the "Show" dropdown above.
   $form['displays'] = array(
     '#prefix' => '<div id="edit-view-displays-wrapper">',
     '#suffix' => '</div>',
   );
+
   // Since the "Show" dropdown can't trigger a form submission when
-  // JavaScript is disabled, add a submit button to do that. css hides
+  // JavaScript is disabled, add a submit button to do that. CSS hides
   // this button when JavaScript is enabled.
-  $form['update_wizard_key'] = array(
+  $form['show']['update_wizard_key'] = array(
     '#type' => 'submit',
-    '#value' => t('Update'),
+    '#value' => t('Update displays'),
+    '#limit_validation_errors' => array(
+      array('show'),
+    ),
     '#submit' => array('views_ui_show_nojs_submit'),
   );
+
   $wizard_key = isset($form_state['values']['show']['wizard_key']) ? $form_state['values']['show']['wizard_key'] : $form['show']['wizard_key']['#default_value'];
   $get_instance = $wizard_plugins[$wizard_key]['get_instance'];
   $wizard_instance = $get_instance($wizard_plugins[$wizard_key]);
   $form = $wizard_instance->build_form($form, $form_state);
+
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
