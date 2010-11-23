@@ -22,10 +22,92 @@
   float: left;
 }
 
-.js .views-edit-view .ui-tabs-hide {
-  display: none;
+/**
+ * The attachment details section is a collapsible fieldset, but should not
+ * have a border around it.
+ */
+.views-edit-view .views-displays > fieldset {
+  border: none;
 }
 
-.js #edit-update-wizard-key {
+.views-edit-view .views-displays > fieldset .fieldset-wrapper {
+  padding: 0;
+}
+
+.views-edit-view .views-displays > fieldset .fieldset-legend {
+  text-transform: none;
+  font-size: 1.0769em; /* 14px/13px */
+}
+
+/**
+ * Display the "Delete" and "Duplicate" buttons to the right.
+ */
+.views-edit-view .views-displays > fieldset .actions {
+  float: right;
+}
+
+/**
+ * Create a horizontal rule between the display details and whatever's after it.
+ */
+.views-edit-view .views-displays > fieldset + div {
+  border-top: 3px solid #CCC;
+}
+
+
+/**
+ * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
+ */
+.views-edit-view .views-displays > fieldset .fieldset-wrapper:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+/**
+ * Each of the three columns of information in the display details.
+ */
+.views-edit-view .views-display-column {
+  float: left;
+  width: 32%;
+}
+
+/**
+ * Make sure the "Auto preview" checkbox after the columns displays correctly.
+ */
+.views-edit-view .views-display-column + .form-type-checkbox {
+  clear: both;
+  float: right;
+}
+
+/**
+ * These are the individual "boxes" inside the three columns in the attachment
+ * details section.
+ */
+.views-edit-view .views-display-section {
+  border: 1px solid #ccc;
+  margin: 1em 0;
+}
+
+.views-edit-view .views-display-section h3 {
+  text-transform: uppercase;
+  font-size: 1em;
+  margin: 0;
+  padding: 0.5em;
+}
+
+/**
+ * This is each row within one of the "boxes."
+ */
+.views-edit-view .views-display-section .views-display-setting {
+  padding: 0.25em 0.5em;
+}
+
+.views-edit-view .views-display-section .views-display-setting.even {
+  background-color: #f0f0f0;
+}
+
+.js #edit-show-update-wizard-key {
   display: none;
 }

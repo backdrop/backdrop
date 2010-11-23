@@ -2,7 +2,6 @@
 // $Id$
 
 // Parent plugin.
-// @todo Is the module_exists() necessary?
 if (module_exists('comment')) {
   $plugin = array(
     'name' => 'comment',

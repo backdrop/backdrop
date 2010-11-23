@@ -67,8 +67,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     // Temporary markup to monitor effect of form updates.
     // The inline dynamic elements will go here.
-    $form['show']['base_table'] = array(
-      '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '</div>',
+    $form['displays']['base_table'] = array(
+      '#markup' => '<div>Base table: ' . $this->base_table . '</div>',
     );
 
     $form['displays']['page'] = array(
@@ -92,6 +92,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['page']['path'] = array(
       '#title' => t('Path'),
       '#type' => 'textfield',
+      '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
       '#states' => array(
         'visible' => array(
           ':input[name="page[create]"]' => array('checked' => TRUE),
