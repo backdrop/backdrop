@@ -13,7 +13,7 @@ $plugin = array(
   'filters' => array(
     'status' => array(
       'value' => '1',
-      'table' => 'node_revision',
+      'table' => 'node', // @todo - unclear if this should be node or node_revision
       'field' => 'status',
     ),
   ),

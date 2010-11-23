@@ -1,7 +1,6 @@
 <?php
 // $Id$
 
-
 $plugin = array(
   'name' => 'file_managed',
   'base_table' => 'file_managed',

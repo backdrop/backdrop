@@ -21,30 +21,32 @@ $plugin = array(
   ),
 );
 
+function _views_ui_node_views_wizard_build_child($parent, $type, $name) {
+  $child = $parent;
+  $child['name'] =  $parent['name'] . ':' . $type;
+  $child['title'] = t('!label posts', array('!label' => $name));
+  $child['filters']['type'] = array(
+    'value' => array(
+      $type => $type,
+    ),
+    'table' => 'node',
+    'field' => 'type',
+  );
+  unset($child['get children']);
+  unset($child['get child']);
+  return $child;
+}
+
 function views_ui_node_views_wizard_get_children($plugin, $name) {
   $plugins = array($name => $plugin);
   foreach (node_type_get_names() as $type => $name) {
-    $child = $plugin;
-    $child['name'] =  $plugin['name'] . ':' . $type;
-    $child['title'] = t('!label posts', array('!label' => $name));
-    $child['filters']['type'] = array(
-      'value' => array(
-        $type => $type,
-      ),
-      'table' => 'node',
-      'field' => 'type',
-    );
-    unset($child['get children']);
-    unset($child['get child']);
+    $child = _views_ui_node_views_wizard_build_child($plugin, $type, $name);
     $plugins[$child['name']] = $child;
   }
   return $plugins;
 }
 
 function views_ui_node_views_wizard_get_child($plugin, $parent, $type) {
-  $child = $plugin;
-  $child['name'] =  $plugin['name'] . ':' . $type;
-  unset($child['get children']);
-  unset($child['get child']);
-  return $child;
+  $name = node_type_get_name($type);
+  return _views_ui_node_views_wizard_build_child($plugin, $type, $name);
 }

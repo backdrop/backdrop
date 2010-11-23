@@ -31,6 +31,10 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
     $display_options['style_options']['mission_description'] = 1;
     $display_options['row_plugin'] = $form_state['values']['page']['feed_properties']['row_plugin'];
     $display_options['path'] = $form_state['values']['page']['feed_properties']['path'];
+    $display_options['displays'] = array(
+      'default' => 'default',
+      'page' => 'page',
+    );
     return $display_options;
   }
 }

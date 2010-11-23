@@ -423,7 +423,13 @@ function views_ui_wizard_form_validate($form, &$form_state) {
  * Process the add view form, 'save'.
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
-  $view = $form_state['wizard_instance']->create_view($form, $form_state);
+  try {
+    $view = $form_state['wizard_instance']->create_view($form, $form_state);
+  }
+  catch (ViewsWizardException $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    $form_state['redirect'] = 'admin/structure/views';
+  }
   $view->save();
   menu_rebuild();
   cache_clear_all('*', 'cache_views', TRUE);
@@ -444,7 +450,13 @@ function views_ui_add_form_save_submit($form, &$form_state) {
  * Process the add view form, 'continue'.
  */
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
-  $view = $form_state['wizard_instance']->create_view($form, $form_state);
+  try {
+    $view = $form_state['wizard_instance']->create_view($form, $form_state);
+  }
+  catch (ViewsWizardException $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    $form_state['redirect'] = 'admin/structure/views';
+  }
   // Just cache it temporarily to edit it.
   views_ui_cache_set($view);
   $form_state['redirect'] = 'admin/structure/views/view/' . $view->name;

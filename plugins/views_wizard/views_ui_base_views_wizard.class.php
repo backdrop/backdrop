@@ -50,7 +50,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     foreach ($plugin['filters'] as $name => $info) {
       $default['id'] = $name;
-      $plugin[$name] = $info + $default;
+      $plugin['filters'][$name] = $info + $default;
     }
     $this->plugin = $plugin;
   }
@@ -184,7 +184,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
-        '#default_value' => reset($feed_row_options),
+        '#default_value' => key($feed_row_options),
         '#access' => (count($feed_row_options) > 1),
         '#states' => array(
           'visible' => array(
@@ -263,7 +263,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
-        '#default_value' => reset($feed_row_options),
+        '#default_value' => key($feed_row_options),
         '#access' => (count($feed_row_options) > 1),
         '#states' => array(
           'visible' => array(
@@ -286,7 +286,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Display: Defaults
     $handler = $view->new_display('default', 'Defaults', 'default');
     $handler->display->display_options = $this->default_display_options($from, $form_state);
-    if (!isset($handler->display->display_options['filters'])) {
+    if (!is_array($handler->display->display_options['filters'])) {
       $handler->display->display_options['filters'] = array();
     }
     $handler->display->display_options['filters'] += $this->default_display_filters($from, $form_state);
@@ -332,8 +332,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function default_display_filters($from, $form_state) {
     $filters = array();
     foreach ($this->plugin['filters'] as $name => $info) {
-      $filters[$name]['id'] = $name;
-      $filters[$name] += $info;
+      $filters[$name] = $info;
     }
     return $filters;
   }
@@ -384,8 +383,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Instantiates a view and validates values.
    */
   function validate($form, &$form_state) {
-
-    $view = $this->instantiate_view($from, $form_state);
+    $view = $this->instantiate_view($form, $form_state);
     $errors = $view->validate();
     if (!is_array($errors) || empty($errors)) {
       $this->set_validated_view($form, $form_state, $view);
