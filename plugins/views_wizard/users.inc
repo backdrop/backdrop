@@ -12,7 +12,6 @@ $plugin = array(
   'title' => t('Users'),
   'filters' => array(
     'status' => array(
-      'operator' => '=',
       'value' => '1',
       'table' => 'users',
       'field' => 'status',

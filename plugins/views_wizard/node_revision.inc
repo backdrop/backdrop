@@ -12,7 +12,6 @@ $plugin = array(
   'title' => t('Node revision'),
   'filters' => array(
     'status' => array(
-      'operator' => '=',
       'value' => '1',
       'table' => 'node_revision',
       'field' => 'status',

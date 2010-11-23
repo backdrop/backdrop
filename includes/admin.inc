@@ -27,7 +27,7 @@ function views_ui_list_views() {
       array(
         'data' => array(
           '#theme' => 'views_ui_view_info',
-          '#title' => $view->get_title(),
+          '#title' => check_plain($view->name),
           '#paths' => _views_ui_get_paths($view),
           '#displays' => _views_ui_get_displays_list($view),
         ),
@@ -420,7 +420,7 @@ function views_ui_wizard_form_validate($form, &$form_state) {
 }
 
 /**
- * Process the add view form.
+ * Process the add view form, 'save'.
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
   $view = $form_state['wizard_instance']->create_view($form, $form_state);
@@ -441,7 +441,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
 }
 
 /**
- * Process the add view form.
+ * Process the add view form, 'continue'.
  */
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
   $view = $form_state['wizard_instance']->create_view($form, $form_state);
