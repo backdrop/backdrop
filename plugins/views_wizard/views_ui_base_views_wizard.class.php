@@ -65,7 +65,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#tree' => TRUE,
     );
     // Temporary markup to monitor effect of form updates.
-    // The inline dynamic elements will go here.
     $form['displays']['page']['base_table'] = array(
       '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '</div>',
     );
