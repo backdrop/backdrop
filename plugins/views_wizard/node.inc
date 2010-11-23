@@ -14,8 +14,7 @@ $plugin = array(
   'title' => t('All posts'),
   'filters' => array(
     'status' => array(
-      'operator' => '=',
-      'value' => '1',
+      'value' => NODE_PUBLISHED,
       'table' => 'node',
       'field' => 'status',
     ),
@@ -29,9 +28,8 @@ function views_ui_node_views_wizard_get_children($plugin, $name) {
     $child['name'] =  $plugin['name'] . ':' . $type;
     $child['title'] = t('!label posts', array('!label' => $name));
     $child['filters']['type'] = array(
-      'operator' => 'in',
       'value' => array(
-        'site' => 'site',
+        $type => $type,
       ),
       'table' => 'node',
       'field' => 'type',

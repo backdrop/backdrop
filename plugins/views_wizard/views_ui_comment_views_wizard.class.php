@@ -30,12 +30,7 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
     $display_options['fields']['subject']['hide_empty'] = 0;
     $display_options['fields']['subject']['empty_zero'] = 0;
     $display_options['fields']['subject']['link_to_comment'] = 1;
-    /* Filter: Node: Published */
-    $display_options['filters']['status']['id'] = 'status';
-    $display_options['filters']['status']['table'] = 'node';
-    $display_options['filters']['status']['field'] = 'status';
-    $display_options['filters']['status']['relationship'] = 'nid';
-    $display_options['filters']['status']['value'] = '1';
+
     return $display_options;
   }
 }

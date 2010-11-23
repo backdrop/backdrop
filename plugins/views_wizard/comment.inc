@@ -13,10 +13,15 @@ if (module_exists('comment')) {
     'title' => t('Comments'),
     'filters' => array(
       'status' => array(
-        'operator' => '=',
         'value' => COMMENT_PUBLISHED,
         'table' => 'comment',
         'field' => 'status',
+      ),
+      'status_node' => array(
+        'value' => NODE_PUBLISHED,
+        'table' => 'node',
+        'field' => 'status',
+        'relationship' => 'nid',
       ),
     ),
   );

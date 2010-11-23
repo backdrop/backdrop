@@ -39,15 +39,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected $validated_views = array();
   protected $plugin = array();
   protected $filter_defaults = array(
-    'operator' => '=',
-    'group' => '0',
-    'exposed' => FALSE,
-    'expose' => array(
-      'operator' => FALSE,
-      'label' => '',
-    ),
     'id' => NULL,
-    'relationship' => 'none',
+    'expose' => array('operator' => FALSE),
+    'group' => 0,
   );
 
   function __construct($plugin) {
@@ -292,6 +286,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Display: Defaults
     $handler = $view->new_display('default', 'Defaults', 'default');
     $handler->display->display_options = $this->default_display_options($from, $form_state);
+    if (!isset($handler->display->display_options['filters'])) {
+      $handler->display->display_options['filters'] = array();
+    }
+    $handler->display->display_options['filters'] += $this->default_display_filters($from, $form_state);
 
     // Display: Page
     if (!empty($form_state['values']['page']['create'])) {
@@ -331,12 +329,21 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     return $display_options;
   }
 
+  protected function default_display_filters($from, $form_state) {
+    $filters = array();
+    foreach ($this->plugin['filters'] as $name => $info) {
+      $filters[$name]['id'] = $name;
+      $filters[$name] += $info;
+    }
+    return $filters;
+  }
+
   protected function page_display_options($from, $form_state) {
     $display_options = array();
     $page = $form_state['values']['page'];
     $display_options['path'] = $page['path'];
     $display_options['title'] = $page['title'];
-    if (!$empty($page['link'])) {
+    if (!empty($page['link'])) {
       $display_options['menu']['type'] = 'normal';
       $display_options['menu']['title'] = $page['link_properties']['title'];
       $display_options['menu']['name'] = $page['link_properties']['menu_name'];
