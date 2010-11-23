@@ -300,7 +300,7 @@ function views_ui_clone_page($view) {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-
+  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
   $form['description'] = array(
     '#type' => 'textfield',
     '#title' => t('View name'),
