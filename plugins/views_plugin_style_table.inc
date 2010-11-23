@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_table.inc,v 1.7.4.8 2010/11/16 00:23:12 merlinofchaos Exp $
+// $Id: views_plugin_style_table.inc,v 1.7.4.9 2010/11/21 11:12:04 dereine Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -203,7 +203,7 @@ class views_plugin_style_table extends views_plugin_style {
           '#type' => 'select',
           '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
           '#default_value' => !empty($this->options['info'][$field]['default_sort_order']) ? $this->options['info'][$field]['default_sort_order'] : 'asc',
-          '#process' => array('views_process_dependency'),
+          '#process' => array('ctools_dependent_process'),
           '#dependency_count' => 2,
           '#dependency' => array($id => array($field), 'edit-style-options-info-' . $safe . '-sortable' => array(1)),
         );

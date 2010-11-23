@@ -1,4 +1,4 @@
-// $Id: base.js,v 1.11.4.4 2010/07/27 22:47:49 merlinofchaos Exp $
+// $Id: base.js,v 1.11.4.5 2010/11/20 23:49:29 dereine Exp $
 /**
  * @file base.js
  *
@@ -13,18 +13,30 @@ Drupal.Views = {};
  */
 Drupal.behaviors.viewsTabs = {
   attach: function (context) {
-  if ($.viewsUi && $.viewsUi.tabs) {
-    $('#views-tabset').once('views-processed').viewsTabs({
-      selectedClass: 'active'
-    });
-  }
+    if ($.viewsUi && $.viewsUi.tabs) {
+      $('#views-tabset').once('views-processed').viewsTabs({
+        selectedClass: 'active'
+      });
+    }
 
-  $('a.views-remove-link').once('views-processed').click(function() {
+    $('a.views-remove-link').once('views-processed').click(function() {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
       $('#views-removed-' + id).attr('checked', true);
       return false;
-    });
+   });
+  /**
+    * Here is to handle display deletion 
+    * (checking in the hidden checkbox and hiding out the row) 
+    */
+  $('a.display-remove-link')
+    .addClass('display-processed')
+    .click(function() {
+      var id = $(this).attr('id').replace('display-remove-link-', '');
+      $('#display-row-' + id).hide();
+      $('#display-removed-' + id).attr('checked', true);
+      return false;
+  });
   }
 };
 

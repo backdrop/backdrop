@@ -470,3 +470,10 @@ Views 3.x-7.x-dev
     o #833790: Click sort could break on fields that were actually formulas.
     o #963454 by dereine: Remove related terms data definitions.
     o #976098 by dereine: Fix notice in field field handler render function.
+    o #626732 by dereine: Fix analyze ok-button and added a test for it.
+    o #338584 by superbaloo: Allow displays to be re-ordered in the UI.
+    o #502348: Move advanced rendering up the chain a little bit to allow for non-standard uses of fields, such as grouping, to use advanced rendering features.
+    o #943984 by Kars-T: Remove extraneous line of code.
+    o #751970 by dereine: View list form auto submit on change.
+    o #502348 followup.
+    o #977846 by dereine: Use ctools_process_dependency for table plugin. (follow up of #502348).

@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.84.4.29 2010/11/16 00:23:13 merlinofchaos Exp $
+// $Id: theme.inc,v 1.84.4.31 2010/11/21 11:09:23 dereine Exp $
 
 /**
  * @file theme.inc
@@ -163,7 +163,7 @@ function template_preprocess_views_view_fields(&$vars) {
   $vars['fields'] = array(); // ensure it's at least an empty array.
   foreach ($view->field as $id => $field) {
     // render this even if set to exclude so it can be used elsewhere.
-    $field_output = $view->field[$id]->theme($vars['row']);
+    $field_output = $view->style_plugin->get_field($view->row_index, $id);
     $empty = $field_output !== 0 && empty($field_output);
     if (empty($field->options['exclude']) && (!$empty || (empty($field->options['hide_empty']) && empty($vars['options']['hide_empty'])))) {
       $object = new stdClass();
@@ -313,16 +313,7 @@ function template_preprocess_views_view_table(&$vars) {
 
   // Fields must be rendered in order as of Views 2.3, so we will pre-render
   // everything.
-  $renders = array();
-  $view->row_index = 0;
-  $keys = array_keys($view->field);
-  foreach ($result as $count => $row) {
-    foreach ($keys as $id) {
-      $renders[$count][$id] = $view->field[$id]->theme($row);
-    }
-    $view->row_index = $count;
-  }
-  unset($view->row_index);
+  $renders = $handler->render_fields($result);
 
   foreach ($columns as $field => $column) {
     // render the header labels
