@@ -64,16 +64,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   function build_form($form, &$form_state) {
     $style_options = views_fetch_plugin_names('style', 'normal', array($this->base_table));
     $feed_row_options = views_fetch_plugin_names('row', 'feed', array($this->base_table));
-
-    // Temporary markup to monitor effect of form updates.
-    // The inline dynamic elements will go here.
-    $form['displays']['base_table'] = array(
-      '#markup' => '<div>Base table: ' . $this->base_table . '</div>',
-    );
+    $path_prefix = url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=');
 
     $form['displays']['page'] = array(
       '#type' => 'fieldset',
       '#tree' => TRUE,
+    );
+    // Temporary markup to monitor effect of form updates.
+    // The inline dynamic elements will go here.
+    $form['displays']['page']['base_table'] = array(
+      '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '</div>',
     );
     $form['displays']['page']['create'] = array(
       '#title' => t('Create a page'),
@@ -92,7 +92,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['page']['path'] = array(
       '#title' => t('Path'),
       '#type' => 'textfield',
-      '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
+      '#field_prefix' => $path_prefix,
       '#states' => array(
         'visible' => array(
           ':input[name="page[create]"]' => array('checked' => TRUE),
@@ -114,6 +114,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['page']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
+      '#default_value' => '10',
       '#size' => 5,
       '#states' => array(
         'visible' => array(
@@ -176,6 +177,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $form['displays']['page']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),
         '#type' => 'textfield',
+        '#field_prefix' => $path_prefix,
         '#states' => array(
           'visible' => array(
             ':input[name="page[create]"]' => array('checked' => TRUE),
@@ -184,7 +186,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       );
       // This will almost never be visible.
-      $form['displays']['page']['feed_properties']['row_style'] = array(
+      $form['displays']['page']['feed_properties']['row_plugin'] = array(
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
@@ -232,6 +234,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['block']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
+      '#default_value' => '5',
       '#size' => 5,
       '#states' => array(
         'visible' => array(
@@ -253,6 +256,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $form['displays']['block']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),
         '#type' => 'textfield',
+        '#field_prefix' => $path_prefix,
         '#states' => array(
           'visible' => array(
             ':input[name="block[create]"]' => array('checked' => TRUE),
@@ -261,7 +265,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         ),
       );
       // This will almost never be visible.
-      $form['displays']['block']['feed_properties']['row_style'] = array(
+      $form['displays']['block']['feed_properties']['row_plugin'] = array(
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
@@ -293,12 +297,20 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     if (!empty($form_state['values']['page']['create'])) {
       $handler = $view->new_display('page', 'Page', 'page');
       $handler->display->display_options = $this->page_display_options($from, $form_state);
+      if (!empty($form_state['values']['page']['feed'])) {
+        $handler = $view->new_display('feed', 'Feed', 'feed_page');
+        $handler->display->display_options = $this->page_feed_display_options($from, $form_state);
+      }
     }
 
     // Display: Block
     if (!empty($form_state['values']['block']['create'])) {
-      $handler = $view->new_display('block', 'Block', 'block_1');
+      $handler = $view->new_display('block', 'Block', 'block');
       $handler->display->display_options = $this->block_display_options($from, $form_state);
+      if (!empty($form_state['values']['block']['feed'])) {
+        $handler = $view->new_display('feed', 'Block feed', 'feed_block');
+        $handler->display->display_options = $this->block_feed_display_options($from, $form_state);
+      }
     }
     return $view;
   }
@@ -323,13 +335,29 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options = array();
     $page = $form_state['values']['page'];
     $display_options['path'] = $page['path'];
+    $display_options['title'] = $page['title'];
+    if (!$empty($page['link'])) {
+      $display_options['menu']['type'] = 'normal';
+      $display_options['menu']['title'] = $page['link_properties']['title'];
+      $display_options['menu']['name'] = $page['link_properties']['menu_name'];
+    }
+    return $display_options;
+  }
+
+  protected function page_feed_display_options($from, $form_state) {
+    $display_options = array();
     return $display_options;
   }
 
   protected function block_display_options($from, $form_state) {
     $display_options = array();
     return $display_options;
-  }  
+  }
+
+  protected function block_feed_display_options($from, $form_state) {
+    $display_options = array();
+    return $display_options;
+  }
 
   protected function retrieve_validated_view($form, $form_state, $unset = TRUE) {
     $key = hash('sha256', serialize($form_state['values']));
@@ -349,6 +377,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Instantiates a view and validates values.
    */
   function validate($form, &$form_state) {
+
     $view = $this->instantiate_view($from, $form_state);
     $errors = $view->validate();
     if (!is_array($errors) || empty($errors)) {
