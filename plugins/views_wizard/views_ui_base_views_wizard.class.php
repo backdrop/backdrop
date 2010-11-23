@@ -92,6 +92,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['page']['path'] = array(
       '#title' => t('Path'),
       '#type' => 'textfield',
+      '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
       '#states' => array(
         'visible' => array(
           ':input[name="page[create]"]' => array('checked' => TRUE),
