@@ -711,6 +711,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     // If a display is specified, but we don't have access to it, return
     // an access denied page.
     if ($display_id && (!isset($tabs[$display_id]) || (isset($tabs[$display_id]['#access']) && !$tabs[$display_id]['#access']))) {
+      // TODO: This doesn't work inside a form.
       return MENU_ACCESS_DENIED;
     }
 

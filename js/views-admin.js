@@ -7,16 +7,17 @@ Drupal.behaviors.viewsUiAddView = {};
 
 Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
   var $ = jQuery;
-  // Prepopulate the page title field with the view name.
-  var $pageTitle = $('#edit-page-title');
-  new Drupal.viewsUi.FormFieldFiller($pageTitle);
+  // Prepopulate the page title, block title, and menu link fields with the
+  // view name.
+  var $fields = $('#edit-page-title, #edit-block-title, #edit-page-link-properties-title');
+  new Drupal.viewsUi.FormFieldFiller($fields);
 
   // Prepopulate the path field with a URLified version of the view name.
-  var $path = $('#edit-page-path');
+  var $pathField = $('#edit-page-path');
   // Allow only numbers, letters, and dashes in the path.
   var exclude = new RegExp('[^a-z0-9\\-]+', 'g');
   var replace = '-';
-  new Drupal.viewsUi.FormFieldFiller($path, exclude, replace);
+  new Drupal.viewsUi.FormFieldFiller($pathField, exclude, replace);
 };
 
 /**
