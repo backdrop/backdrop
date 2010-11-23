@@ -423,23 +423,29 @@ function views_ui_wizard_form_validate($form, &$form_state) {
  * Process the add view form.
  */
 function views_ui_add_form_save_submit($form, &$form_state) {
-  drupal_set_message(__FUNCTION__);
   $view = $form_state['wizard_instance']->create_view($form, $form_state);
-  // @todo When above works, uncomment the following. See views_ui_edit_view_form_submit().
-  //$view->save();
-  //menu_rebuild();
-  //cache_clear_all('*', 'cache_views', TRUE);
-  //cache_clear_all();
-  //$form_state['redirect'] = PATH TO THE VIEW IF IT HAS ONE
+  $view->save();
+  menu_rebuild();
+  cache_clear_all('*', 'cache_views', TRUE);
+  cache_clear_all();
   $form_state['redirect'] = 'admin/structure/views';
+  if (!empty($view->display['page'])) {
+    $display = $view->display['page'];
+    if ($display->handler->has_path()) {
+      $one_path = $display->handler->get_option('path');
+      if (strpos($one_path, '%') === FALSE) {
+        $form_state['redirect'] = $one_path;  // PATH TO THE VIEW IF IT HAS ONE
+      }
+    }
+  }
 }
 
 /**
  * Process the add view form.
  */
 function views_ui_add_form_store_edit_submit($form, &$form_state) {
-  drupal_set_message(__FUNCTION__);
   $view = $form_state['wizard_instance']->create_view($form, $form_state);
+  // Just cache it temporarily to edit it.
   views_ui_cache_set($view);
   $form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
 }
