@@ -20,6 +20,7 @@
 .views-edit-view .views-displays .secondary {
   text-align: left;
   float: left;
+  margin: 0;
 }
 
 /**
