@@ -66,7 +66,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
     // Temporary markup to monitor effect of form updates.
     $form['displays']['page']['base_table'] = array(
-      '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '</div>',
+      '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '<br /> Wizard plugin: '. $this->plugin['name'] .'</div>',
     );
     $form['displays']['page']['create'] = array(
       '#title' => t('Create a page'),
