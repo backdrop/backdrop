@@ -647,7 +647,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
       // Convert the query to a string, perform token replacement, and then
       // convert back to an array form for l().
       $options['query'] = drupal_http_build_query($alter['query']);
-      $options['query'] = strtr($alter['query'], $tokens);
+      $options['query'] = strtr($options['query'], $tokens);
       $options['query'] = drupal_get_query_array($options['query']);
     }
     if (isset($alter['alias'])) {
