@@ -478,3 +478,4 @@ Views 3.x-7.x-dev
     o #502348 followup.
     o #977846 by dereine: Use ctools_process_dependency for table plugin. (follow up of #502348).
     o #942106 by andypost: Fix converting from vid to vocabulary in taxonomy handlers.
+    o #870792 by bojanz: Options form needs to be re-rendered if it failed validation.

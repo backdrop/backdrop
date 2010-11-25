@@ -268,10 +268,8 @@ class views_handler_filter extends views_handler {
    * Validate the options form.
    */
   function expose_validate($form, &$form_state) {
-    if (empty($this->options['expose']['identifier'])) {
-      if (empty($form_state['values']['options']['expose']['identifier'])) {
-        form_error($form['expose']['identifier'], t('The identifier is required if the filter is exposed.'));
-      }
+    if (empty($form_state['values']['options']['expose']['identifier'])) {
+      form_error($form['expose']['identifier'], t('The identifier is required if the filter is exposed.'));
     }
 
     if (!empty($form_state['values']['options']['expose']['identifier']) && $form_state['values']['options']['expose']['identifier'] == 'value') {

@@ -2205,15 +2205,15 @@ function theme_views_ui_reorder_displays_form($vars) {
       $form[$key]['weight']['#attributes']['class'] = array('weight');
       $row[] = drupal_render($form[$key]['weight']);
       if (isset($display['removed'])) {
-        $row[] = drupal_render($form[$key]['removed']) . 
-          l('<span>' . t('Remove') . '</span>', 
-            'javascript:void()', 
+        $row[] = drupal_render($form[$key]['removed']) .
+          l('<span>' . t('Remove') . '</span>',
+            'javascript:void()',
             array(
               'attributes' => array(
-                'id' => 'display-remove-link-' . $key, 
+                'id' => 'display-remove-link-' . $key,
                 'class' => array('views-button-remove display-remove-link'),
-                'alt' => t('Remove this display'), 
-                'title' => t('Remove this display')), 
+                'alt' => t('Remove this display'),
+                'title' => t('Remove this display')),
               'html' => TRUE));
       }
       else {
@@ -2358,6 +2358,10 @@ function views_ui_edit_display_form($form, &$form_state) {
 function views_ui_edit_display_form_validate($form, &$form_state) {
   $display = &$form_state['view']->display[$form_state['display_id']];
   $display->handler->options_validate($form, $form_state);
+
+  if (form_get_errors()) {
+    $form_state['rerender'] = TRUE;
+  }
 }
 
 /**
@@ -2819,6 +2823,10 @@ function views_ui_config_item_form($form, &$form_state) {
  */
 function views_ui_config_item_form_validate($form, &$form_state) {
   $form_state['handler']->options_validate($form['options'], $form_state);
+
+  if (form_get_errors()) {
+    $form_state['rerender'] = TRUE;
+  }
 }
 
 /**
