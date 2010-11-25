@@ -241,15 +241,15 @@ function comment_views_data() {
 
   // status (approved or not)
   $data['comment']['status'] = array(
-    'title' => t('In moderation'),
-    'help' => t('Whether or not the comment is currently in the moderation queue.'),
+    'title' => t('Approved'),
+    'help' => t('Whether the comment is approved (or still in the moderation queue).'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
-      'label' => t('In the moderation queue'),
+      'label' => t('Approved comment'),
       'type' => 'yes-no',
     ),
     'sort' => array(

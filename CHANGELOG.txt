@@ -480,3 +480,5 @@ Views 3.x-7.x-dev
     o #942106 by andypost: Fix converting from vid to vocabulary in taxonomy handlers.
     o #870792 by bojanz: Options form needs to be re-rendered if it failed validation.
     o #980628 by bojanz: Fix options-query in field::render_as_link.
+    o #979264 by pwolanin: Account for flipped comment status values in Drupal 7.
+
