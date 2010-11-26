@@ -195,7 +195,7 @@ class views_plugin_style extends views_plugin {
             $grouping = $this->view->field[$grouping_field]->options['label'] . ': ' . $grouping;
           }
         }
-        $sets[$grouping][] = $row;
+        $sets[$grouping][$index] = $row;
       }
     }
     else {
