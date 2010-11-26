@@ -365,6 +365,31 @@ function taxonomy_views_data_alter(&$data) {
 }
 
 /**
+ * Implements hook_field_views_data().
+ *
+ * Views integration for taxonomy_term_reference fields. Adds a term relationship to the default
+ * field data.
+ *
+ * @see field_views_field_default_views_data()
+ */
+function taxonomy_field_views_data($field) {
+  $data = field_views_field_default_views_data($field);
+  foreach ($data as $table_name => $table_data) {
+    foreach ($table_data as $field_name => $field_data) {
+      if (!in_array($field_name, array('table', 'entity_id', 'revision_id'))) {
+        $data[$table_name][$field_name]['relationship'] = array(
+          'handler' => 'views_handler_relationship',
+          'base' => 'taxonomy_term_data',
+          'base field' => 'tid',
+          'label' => t('term from !field_name', array('!field_name' => $field['field_name'])),
+        );
+      }
+    }
+  }
+  return $data;
+}
+
+/**
  * Implements hook_views_plugins
  */
 function taxonomy_views_plugins() {
