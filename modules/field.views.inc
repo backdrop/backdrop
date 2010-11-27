@@ -57,10 +57,12 @@ function field_views_field_default_views_data($field) {
   // The list of entity:bundle that this field is used in.
   $bundles_names = array();
   $supports_revisions = FALSE;
+  $entity_tables = array();
 
   // Build the relationships between the field table and the entity tables.
   foreach ($field['bundles'] as $entity => $bundles) {
     $entity_info = entity_get_info($entity);
+    $entity_tables[$entity_info['base table']] = $entity;
 
     $data[$current_table]['table']['join'][$entity_info['base table']] = array(
       'left_field' => $entity_info['entity keys']['id'],
@@ -95,6 +97,11 @@ function field_views_field_default_views_data($field) {
     $tables[FIELD_LOAD_REVISION] = $revision_table;
   }
 
+  $add_fields = array('etid', 'delta', 'language');
+  foreach ($field['columns'] as $column_name => $attributes) {
+    $add_fields[] = _field_sql_storage_columnname($field['field_name'], $column_name);
+  }
+
   // Add the field handler for this field.
   $title_short = $field['field_name'];
   foreach ($tables as $type => $table) {
@@ -119,7 +126,9 @@ function field_views_field_default_views_data($field) {
       'handler' => 'views_handler_field_field',
       'click sortable' => TRUE,
       'field_name' => $field['field_name'],
-      'additional fields' => array('etid'),
+      'additional fields' => $add_fields,
+      'entity_tables' => $entity_tables,
+      'field_info' => $field,
     );
   }
 

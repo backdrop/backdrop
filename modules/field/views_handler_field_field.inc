@@ -36,10 +36,27 @@ class views_handler_field_field extends views_handler_field {
    * Called to add the field to a query.
    */
   function query() {
-    // TODO: we should try to use the data from the join if possible first.
-    // $join = $this->get_join();
-    // That would avoid joining at all the field table.
-    return parent::query();
+    parent::query();
+
+    $base_table = $this->view->base_table;
+    $this->entity_info = entity_get_info($this->definition['entity_tables'][$base_table]);
+
+    // Query for bundle, revision fields necessary for rendering fields.
+    // @TODO
+    // The bundle system will be fixed in d8, so no special cases should be needed.
+    switch ($base_table) {
+      case 'taxonomy_term_data':
+      case 'comment':
+        $this->aliases[$this->definition['field_name'] . '_' . 'bundle'] = $this->query->add_field($this->table, 'bundle');
+        break;
+      default:
+        foreach ($this->entity_info['entity keys'] as $key => $column) {
+          if (!empty($column) && ($key == 'bundle' || $key == 'revision')) {
+            $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($base_table, $column);
+          }
+        }
+        break;
+    }
   }
 
   function option_definition() {
@@ -148,34 +165,46 @@ class views_handler_field_field extends views_handler_field {
    *   field in the View.
    */
   function pre_render(&$values) {
-    static $entity_type_map;
-
     if (!empty($values)) {
-      // Cache the entity type map for repeat usage.
-      if (empty($entity_type_map)) {
-        $entity_type_map = db_query('SELECT etid, type FROM {field_config_entity_type}')->fetchAllKeyed();
-      }
+      $entity_info = $this->entity_info;
+      $entity_type = $this->definition['entity_tables'][$this->view->base_table];
 
-      // Create an array mapping the Views values to their object types.
-      $objects_by_type = array();
+      // Build the objects.
+      $objects = array();
+      foreach ($values as $key => $row) {
+        if ($row->{$this->field_alias}) {
+          $object = new stdClass();
+          $object->{$entity_info['entity keys']['id']} = $row->{$this->field_alias};
+          $object->{$entity_info['entity keys']['bundle']} = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
+          if (!empty($entity_info['entity keys']['revision'])) {
+            $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
+          }
 
-      foreach ($values as $key => $object) {
-        // Derive the entity type. For some field types, etid might be empty.
-        if (isset($object->{$this->aliases['etid']}) && isset($entity_type_map[$object->{$this->aliases['etid']}])) {
-          $entity_type = $entity_type_map[$object->{$this->aliases['etid']}];
-          $entity_id = $object->{$this->field_alias};
-          $objects_by_type[$entity_type][$key] = $entity_id;
+          $language = $row->{$this->aliases['language']};
+          $delta = $row->{$this->aliases['delta']};
+
+          $field_values = array();
+          foreach (array_keys($this->definition['field_info']['columns']) as $column_name) {
+            $alias = $this->aliases[_field_sql_storage_columnname($this->definition['field_name'], $column_name)];
+            $field_values[$language][$delta][$column_name] = $row->{$alias};
+          }
+          $object->{$this->definition['field_name']} = $field_values;
+          $objects[$row->{$this->field_alias}] = $object;
         }
       }
 
-      // Load the objects.
-      foreach ($objects_by_type as $entity_type => $oids) {
-        $objects = entity_load($entity_type, $oids);
+      // Invoke field-type module's hook_field_load().
+      _field_invoke_multiple('load', $entity_type, $objects);
 
-        foreach ($oids as $key => $entity_id) {
-          $values[$key]->_field_cache[$this->field_alias] = array(
+      // Invoke hook_field_attach_load(): let other modules act on loading the
+      // entity.
+      module_invoke_all('field_attach_load', $entity_type, $objects);
+
+      foreach ($values as $key => $row) {
+        if ($row->{$this->field_alias}) {
+          $values[$key]->_field_data[$this->field_alias] = array(
             'entity_type' => $entity_type,
-            'object' => $objects[$entity_id],
+            'object' => $objects[$row->{$this->field_alias}],
           );
         }
       }
@@ -183,11 +212,11 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function render($values) {
-    if (isset($values->_field_cache[$this->field_alias])) {
+    if (isset($values->_field_data[$this->field_alias])) {
       // Prepare arguments for rendering based on the objects cached in the
       // pre-render phase and the display options for this field.
-      $entity_type = $values->_field_cache[$this->field_alias]['entity_type'];
-      $object = $values->_field_cache[$this->field_alias]['object'];
+      $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
+      $object = $values->_field_data[$this->field_alias]['object'];
 
       $display = array(
         'type' => $this->options['type'],
