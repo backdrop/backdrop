@@ -390,12 +390,12 @@ function template_preprocess_views_view_table(&$vars) {
   $vars['row_classes'][0][] = 'views-row-first';
   $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
 
-  $vars['class'] = array('views-table');
+  $vars['classes_array'] = array('views-table');
   if (!empty($options['sticky'])) {
     drupal_add_js('misc/tableheader.js');
-    $vars['class'][] = "sticky-enabled";
+    $vars['classes_array'][] = "sticky-enabled";
   }
-  $vars['class'][] = 'cols-'. count($vars['rows']);
+  $vars['classes_array'][] = 'cols-'. count($vars['rows']);
 }
 
 /**
