@@ -485,3 +485,4 @@ Views 3.x-7.x-dev
     o #979634 by linclark: Fix field grouping.
     o #972934 by dereine: Fix Node: User posted or commented.
     o by dereine: Preview shouldn't expect to have the sql plugin, always.
+    o #960596 by dereine: Argument in preview aren't escaped.

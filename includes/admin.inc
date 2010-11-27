@@ -437,11 +437,16 @@ function views_ui_preview($js, $view) {
       $rows = array();
       $query = $view->build_info['query'];
       // Only the sql default class has a method getArguments.
-      $arguments = array();
+      $quoted = array();
+
       if (get_class($view->query) == 'views_plugin_query_default') {
         $arguments = $query->getArguments();
+        $connection = Database::getConnection();
+        foreach ((array)$query->arguments() as $key => $val) {
+          $quoted[$key] = $connection->quote($val);
+        }
       }
-      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $arguments)) . '</pre>');
+      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');
       if (!empty($view->additional_queries)) {
         $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
         foreach ($view->additional_queries as $query) {
