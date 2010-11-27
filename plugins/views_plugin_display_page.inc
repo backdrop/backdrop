@@ -322,7 +322,7 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $menu['name'],
             '#description' => t('Insert item into an available menu.'), //
-            '#process' => array('ctools_dependent_process'),
+            '#process' => array('form_process_select', 'ctools_dependent_process'),
             '#dependency' => array('radio:menu[type]' => array('normal')),
           );
         }
@@ -394,7 +394,7 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $tab_options['name'],
             '#description' => t('Insert item into an available menu.'),
-            '#process' => array('ctools_dependent_process'),
+            '#process' => array('form_process_select', 'ctools_dependent_process'),
             '#dependency' => array('radio:tab_options[type]' => array('normal')),
           );
         }

@@ -488,3 +488,4 @@ Views 3.x-7.x-dev
     o #960596 by dereine: Argument in preview aren't escaped.
     o #983166 by dereine: Rename $class to $classes in the table template file and write some updating documentation.
     o #963372 by dereine: Add 'form_process_checkbox' to every checkbox which uses process 'ctools_dependent_process'.
+    o #979082 by dereine: Add 'form_process_select' to every select which uses process 'ctools_dependent_process'.
