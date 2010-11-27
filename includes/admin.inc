@@ -436,7 +436,12 @@ function views_ui_preview($js, $view) {
     if (!empty($view->build_info['query'])) {
       $rows = array();
       $query = $view->build_info['query'];
-      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $query->getArguments())) . '</pre>');
+      // Only the sql default class has a method getArguments.
+      $arguments = array();
+      if (get_class($view->query) == 'views_plugin_query_default') {
+        $arguments = $query->getArguments();
+      }
+      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $arguments)) . '</pre>');
       if (!empty($view->additional_queries)) {
         $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
         foreach ($view->additional_queries as $query) {
