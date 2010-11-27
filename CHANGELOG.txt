@@ -483,3 +483,4 @@ Views 3.x-7.x-dev
     o #979264 by pwolanin: Account for flipped comment status values in Drupal 7.
     o #972864 by bec: Provide term relationship via taxonomy term reference fields.
     o #979634 by linclark: Fix field grouping.
+    o #972934 by dereine: Fix Node: User posted or commented.
