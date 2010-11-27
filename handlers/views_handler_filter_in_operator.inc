@@ -198,7 +198,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
         $process[] = 'views_process_check_options';
       }
       if ($which == 'all') {
-        if (empty($form_state['exposed']) && ($this->value_form_type == 'checkboxes' || $this->value_form_type == 'radios')) {
+        if (empty($form_state['exposed']) && (in_array($this->value_form_type, array('checkbox', 'checkboxes', 'radios')))) {
           $process[] = "form_process_$this->value_form_type";
           $form['value']['#prefix'] = '<div id="edit-options-value-wrapper">';
           $form['value']['#suffix'] = '</div>';

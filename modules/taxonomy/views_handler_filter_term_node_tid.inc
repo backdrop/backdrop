@@ -73,7 +73,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       '#type' => 'checkbox',
       '#title' => t('Show hierarchy in dropdown'),
       '#default_value' => !empty($this->options['hierarchy']),
-      '#process' => array('ctools_dependent_process'),
+      '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[type]' => array('select')),
     );
 

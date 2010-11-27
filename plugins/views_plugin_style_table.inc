@@ -196,7 +196,7 @@ class views_plugin_style_table extends views_plugin_style {
         $form['info'][$field]['sortable'] = array(
           '#type' => 'checkbox',
           '#default_value' => !empty($this->options['info'][$field]['sortable']),
-          '#process' => array('ctools_dependent_process'),
+          '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
           '#dependency' => array($id => array($field)),
         );
         $form['info'][$field]['default_sort_order'] = array(
