@@ -401,7 +401,8 @@ function views_ui_preview($js, $view) {
     ),
   );
 
-  $output = drupal_render(drupal_build_form('views_ui_preview_form', $form_state));
+  $form = drupal_build_form('views_ui_preview_form', $form_state);
+  $output = drupal_render($form);
   $args = array();
   if (isset($form_state['view_args']) && $form_state['view_args'] !== '') {
     $args = explode('/', $form_state['view_args']);
