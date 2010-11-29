@@ -1026,6 +1026,44 @@ function field_group_pre_render(& $element, $group, & $form) {
 }
 
 /**
+ * Returns the region to which a row in the 'Manage fields' screen belongs.
+ * @param Array $row A field or field_group row
+ * @return String the current region.
+ */
+function field_group_field_overview_row_region($row) {
+  switch ($row['#row_type']) {
+    case 'group':
+      return 'main';
+    case 'add_new_group':
+      // If no input in 'label', assume the row has not been dragged out of the
+      // 'add new' section.
+      if (empty($row['label']['#value'])) {
+        return 'add_new';
+      }
+      return 'main';
+  }
+}
+
+/**
+ * Returns the region to which a row in the 'Manage display' screen belongs.
+ * @param Array $row A field or field_group row
+ * @return String the current region.
+ */
+function field_group_display_overview_row_region($row) {
+  switch ($row['#row_type']) {
+    case 'group':
+      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
+    case 'add_new_group':
+      // If no input in 'label', assume the row has not been dragged out of the
+      // 'add new' section.
+      if (empty($row['label']['#value'])) {
+        return 'add_new';
+      }
+      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
+  }
+}
+
+/**
  * Validate handler for the overview screens.
  * @param Array $form The complete form.
  * @param Array $form_state The state of the form.

@@ -312,44 +312,6 @@ function field_group_field_formatter_options($type) {
 }
 
 /**
- * Returns the region to which a row in the 'Manage fields' screen belongs.
- * @param Array $row A field or field_group row
- * @return String the current region.
- */
-function field_group_field_overview_row_region($row) {
-  switch ($row['#row_type']) {
-    case 'group':
-      return 'main';
-    case 'add_new_group':
-      // If no input in 'label', assume the row has not been dragged out of the
-      // 'add new' section.
-      if (empty($row['label']['#value'])) {
-        return 'add_new';
-      }
-      return 'main';
-  }
-}
-
-/**
- * Returns the region to which a row in the 'Manage display' screen belongs.
- * @param Array $row A field or field_group row
- * @return String the current region.
- */
-function field_group_display_overview_row_region($row) {
-  switch ($row['#row_type']) {
-    case 'group':
-      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
-    case 'add_new_group':
-      // If no input in 'label', assume the row has not been dragged out of the
-      // 'add new' section.
-      if (empty($row['label']['#value'])) {
-        return 'add_new';
-      }
-      return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
-  }
-}
-
-/**
  * Helper function to add a row in the overview forms.
  */
 function field_group_add_row($name, $parent_options, $params) {
