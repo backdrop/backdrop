@@ -560,6 +560,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
  */
 function field_group_field_group_build_pre_render_alter(& $element) {
 
+  static $unique = 0;
+
   // Dish the fieldgroups with no fields.
   $display = isset($element['#view_mode']);
   if ($display) {
@@ -573,25 +575,11 @@ function field_group_field_group_build_pre_render_alter(& $element) {
     }
   }
 
-  if ($display || !isset($element['#form_id'])) {
-    // Place a wrapper around the complete build.
-    $element['#prefix'] = (isset($element['#prefix']) ? $element['#prefix'] : '') . '<div id="field-group-content-wrapper">';
-    $element['#suffix'] = '</div>' . (isset($element['#suffix']) ? $element['#suffix'] : '');
-    $element['#attached']['js'][] = array(
-      'type' => 'setting',
-      'data' => array('fieldGroupWrapper' => "field-group-content-wrapper")
-    );
-  }
-  else {
-    $element['#attached']['js'][] = array(
-      'type' => 'setting',
-      'data' => array('fieldGroupWrapper' => str_replace('_', '-', $element['#form_id'])),
-    );
-  }
-
   // Add the default field_group javascript and stylesheet.
   $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
   $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
+
+  $unique++;
 }
 
 /**

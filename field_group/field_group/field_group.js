@@ -64,10 +64,10 @@ Drupal.FieldGroup.Effects.processDiv = {
  */
 Drupal.behaviors.fieldGroup = {
   attach: function (context, settings) {
-    if (settings.field_group == undefined || settings.fieldGroupWrapper == undefined) {
+    if (settings.field_group == undefined) {
       return;
     }
-    $('#' + settings.fieldGroupWrapper, context).once('fieldgroup-effects', function () {
+    $('body', context).once('fieldgroup-effects', function () {
       // Execute all of them.
       $.each(Drupal.FieldGroup.Effects, function (func) {
         // We check for a wrapper function in Drupal.field_group as 
