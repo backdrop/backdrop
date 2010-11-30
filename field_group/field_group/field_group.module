@@ -286,13 +286,14 @@ function field_group_field_group_formatter_info() {
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('effect' => 'none', 'speed' => 'fast'),
+        'instance_settings' => array('effect' => 'none', 'speed' => 'fast', 'classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array('classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'tabs' => array(
@@ -376,8 +377,20 @@ function field_group_field_group_format_settings($group) {
         '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
         '#weight' => 3,
       );
+       $form['instance_settings']['classes'] = array(
+        '#title' => t('Extra CSS classes'),
+        '#type' => 'textfield',
+        '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : $formatter['instance_settings']['classes'],
+        '#weight' => 3,
+      );
       break;
     case 'fieldset':
+      $form['instance_settings']['classes'] = array(
+        '#title' => t('Extra CSS classes'),
+        '#type' => 'textfield',
+        '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : $formatter['instance_settings']['classes'],
+        '#weight' => 3,
+      );
     case 'tab':
     case 'htab':
     case 'accordion-item':
@@ -414,6 +427,11 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     $classes[] = 'collapsible';
   }
 
+  $classes = implode(' ', $classes);
+  if (isset($group->format_settings['instance_settings'], $group->format_settings['instance_settings']['classes'])) {
+    $classes .= ' ' . $group->format_settings['instance_settings']['classes'];
+  }
+
   // Add all field_group format types to the js settings.
   $form['#attached']['js'][] = array(
     'data' => array('field_group' => array($group->format_type => TRUE)),
@@ -430,7 +448,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
         '#pre_render' => array(),
-        '#attributes' => array('class' => $classes),
+        '#attributes' => array('class' => explode(' ', $classes)),
       );
       $element['#attached']['js'][] = 'misc/form.js';
       $element['#attached']['js'][] = 'misc/collapse.js';
@@ -442,13 +460,13 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#weight' => $group->weight,
       );
       if ($group->format_settings['formatter'] != 'open') {
-        $add['#prefix'] = '<div class="field-group-format ' . implode(' ', $classes) . '">
+        $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
           <span class="field-group-format-toggler">' . $group->label . '</span>
           <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
         $add['#suffix'] = '</div></div>';
       }
       else {
-        $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . implode(' ', $classes) . '">';
+        $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
         $add['#suffix'] = '</div>';
       }
       $element += $add;
