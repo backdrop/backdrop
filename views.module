@@ -519,6 +519,7 @@ function views_access() {
     }
 
     list($callback, $arguments) = $arg;
+    $arguments = $arguments ? $arguments : array();
     if (function_exists($callback) && call_user_func_array($callback, $arguments)) {
       return TRUE;
     }
