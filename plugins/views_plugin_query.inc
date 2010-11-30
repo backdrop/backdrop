@@ -18,7 +18,9 @@ class views_plugin_query extends views_plugin {
    * Constructor; Create the basic query object and fill with default values.
    */
   function init($base_table, $base_field, $options) {
-    $this->options = $options;
+    $this->base_table = $base_table;
+    $this->base_field = $base_field;
+    $this->unpack_options($this->options, $options);
   }
 
   /**
