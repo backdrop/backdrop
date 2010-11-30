@@ -496,3 +496,4 @@ Views 3.x-7.x-dev
     o #669636 followup by bojanz: Fix improper use of field_alias by row styles.
     o #979046 by travist: Fix PHP 5.3 problem in views_access with no arguments.
     o #978864 by linclark: Fix title bug with area handlers.
+    o #983460 by dereine: "Default sort" radio is in wrong column on table style settings.
