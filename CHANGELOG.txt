@@ -490,10 +490,11 @@ Views 3.x-7.x-dev
     o #963372 by dereine: Add 'form_process_checkbox' to every checkbox which uses process 'ctools_dependent_process'.
     o #979082 by dereine: Add 'form_process_select' to every select which uses process 'ctools_dependent_process'.
     o #936196 by jmiccolis, yhahn, adrian, bojanz, dereine: Don't use entity_load for the fieldapi-field handler, but use real sql fields.
-    o by dereine: Fix notice in views_ui_preview().>>>>>>> 1.344.4.477
+    o by dereine: Fix notice in views_ui_preview().
     o #965496 by ayalon: Update and Override broke validation of most views admin forms.
     o #868990: Fix undefined call to $view->set_use_pager()
     o #669636 followup by bojanz: Fix improper use of field_alias by row styles.
     o #979046 by travist: Fix PHP 5.3 problem in views_access with no arguments.
     o #978864 by linclark: Fix title bug with area handlers.
     o #983460 by dereine: "Default sort" radio is in wrong column on table style settings.
+    o #783798 by dereine: GROUP BY can cause sort criteria to get incorrectly added to view.
