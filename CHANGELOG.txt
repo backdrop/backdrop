@@ -492,3 +492,4 @@ Views 3.x-7.x-dev
     o #936196 by jmiccolis, yhahn, adrian, bojanz, dereine: Don't use entity_load for the fieldapi-field handler, but use real sql fields.
     o by dereine: Fix notice in views_ui_preview().>>>>>>> 1.344.4.477
     o #965496 by ayalon: Update and Override broke validation of most views admin forms.
+    o #868990: Fix undefined call to $view->set_use_pager()
