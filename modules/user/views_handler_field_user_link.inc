@@ -35,7 +35,7 @@ class views_handler_field_user_link extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    return $this->render_link(check_plain($values->{$this->aliases['uid']}), $values);
   }
 
   function render_link($data, $values) {
@@ -49,4 +49,3 @@ class views_handler_field_user_link extends views_handler_field {
   }
 
 }
-

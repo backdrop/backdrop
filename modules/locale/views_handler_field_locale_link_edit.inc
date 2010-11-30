@@ -38,7 +38,7 @@ class views_handler_field_locale_link_edit extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    return $this->render_link(check_plain($values->{$this->aliases['lid']}), $values);
   }
 
   function render_link($data, $values) {
@@ -51,4 +51,3 @@ class views_handler_field_locale_link_edit extends views_handler_field {
     return $text;
   }
 }
-

@@ -18,7 +18,7 @@ class views_handler_field_node_translation_link extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    return $this->render_link(check_plain($values->{$this->aliases['tnid']}), $values);
   }
 
   function render_link($data, $values) {
