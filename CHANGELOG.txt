@@ -495,3 +495,4 @@ Views 3.x-7.x-dev
     o #868990: Fix undefined call to $view->set_use_pager()
     o #669636 followup by bojanz: Fix improper use of field_alias by row styles.
     o #979046 by travist: Fix PHP 5.3 problem in views_access with no arguments.
+    o #978864 by linclark: Fix title bug with area handlers.
