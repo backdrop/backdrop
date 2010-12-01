@@ -23,7 +23,7 @@ function views_export_menu() {
   $items['admin/structure/views/tools/export/results'] = array(
     'access arguments' => array('use views exporter'),
     'page callback' => 'views_export_export',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
