@@ -396,12 +396,12 @@ class views_plugin_display extends views_plugin {
       // and therefore need special handling.
       'access' => array(
         'contains' => array(
-          'type' => array('default' => 'none', 'export' => 'export_plugin'),
+          'type' => array('default' => 'none', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
          ),
       ),
       'cache' => array(
         'contains' => array(
-          'type' => array('default' => 'none', 'export' => 'export_plugin'),
+          'type' => array('default' => 'none', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
          ),
       ),
       'query' => array(
@@ -418,13 +418,13 @@ class views_plugin_display extends views_plugin {
       // should be copied.
       'exposed_form' => array(
         'contains' => array(
-          'type' => array('default' => 'basic', 'export' => 'export_plugin'),
+          'type' => array('default' => 'basic', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
           'options' => array('default' => array(), 'export' => FALSE),
          ),
       ),
       'pager' => array(
         'contains' => array(
-          'type' => array('default' => 'full', 'export' => 'export_plugin'),
+          'type' => array('default' => 'full', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
           'options' => array('default' => array(), 'export' => FALSE),
          ),
       ),
@@ -435,6 +435,7 @@ class views_plugin_display extends views_plugin {
       'style_plugin' => array(
         'default' => 'default',
         'export' => 'export_style',
+        'unpack_translatable' => 'unpack_style',
       ),
       'style_options' => array(
         'default' => array(),
@@ -443,6 +444,7 @@ class views_plugin_display extends views_plugin {
       'row_plugin' => array(
         'default' => 'fields',
         'export' => 'export_style',
+        'unpack_translatable' => 'unpack_style',
       ),
       'row_options' => array(
         'default' => array(),
@@ -456,14 +458,17 @@ class views_plugin_display extends views_plugin {
       'header' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'footer' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'empty' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
 
       // We want these to export last.
@@ -471,22 +476,28 @@ class views_plugin_display extends views_plugin {
       'relationships' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
+
       ),
       'fields' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'sorts' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'arguments' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'filters' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
     );
 
@@ -2373,6 +2384,82 @@ class views_plugin_display extends views_plugin {
 
       // Pass off to the plugin to export itself.
       $output .= $plugin->export_options($indent, $new_prefix);
+    }
+
+    return $output;
+  }
+
+  function unpack_style($indent, $prefix, $storage, $option, $definition, $parents) {
+    $output = '';
+    $style_plugin = $this->get_plugin();
+    if ($option == 'style_plugin') {
+      $type = 'style';
+      $options_field = 'style_options';
+      $plugin = $style_plugin;
+    }
+    else {
+      if (!$style_plugin || !$style_plugin->uses_row_plugin()) {
+        return;
+      }
+
+      $type = 'row';
+      $options_field = 'row_options';
+      $plugin = $this->get_plugin('row');
+      // If the style plugin doesn't use row plugins, don't even bother.
+    }
+
+    if ($plugin) {
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+  /**
+   * Special handling for plugin unpacking.
+   */
+  function unpack_plugin(&$translatable, $storage, $option, $definition, $parents) {
+    $plugin_type = end($parents);
+    $plugin = $this->get_plugin($plugin_type);
+    if ($plugin) {
+      // Write which plugin to use.
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+    /**
+   * Special method to unpack items that have handlers.
+   *
+   * This method was specified in the option_definition() as the method to utilize to
+   * export fields, filters, sort criteria, relationships and arguments. This passes
+   * the export off to the individual handlers so that they can export themselves
+   * properly.
+   */
+  function unpack_handler(&$translatable, $storage, $option, $definition, $parents) {
+    $output = '';
+
+    // cut the 's' off because the data is stored as the plural form but we need
+    // the singular form. Who designed that anyway? Oh yeah, I did. :(
+    if ($option != 'header' && $option != 'footer' && $option != 'empty') {
+      $type = substr($option, 0, -1);
+    }
+    else {
+      $type = $option;
+    }
+    $types = views_object_types();
+    foreach ($storage[$option] as $id => $info) {
+      if (!empty($types[$type]['type'])) {
+        $handler_type = $types[$type]['type'];
+      }
+      else {
+        $handler_type = $type;
+      }
+      $handler = views_get_handler($info['table'], $info['field'], $handler_type);
+      if ($handler) {
+        $handler->init($this->view, $info);
+        $handler->unpack_translatables($translatable, array_merge($parents, array($handler_type, $info['table'], $info['field'])));
+      }
+
+      // Prevent reference problems.
+      unset($handler);
     }
 
     return $output;

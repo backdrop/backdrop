@@ -24,6 +24,7 @@ class view extends views_db_object {
   // State variables
   var $built = FALSE;
   var $executed = FALSE;
+  var $editing = FALSE;
 
   var $args = array();
   var $build_info = array();
@@ -1460,6 +1461,15 @@ class view extends views_db_object {
       $output .= $display->handler->export_options($indent, '$handler->options');
     }
 
+    // Give the localization system a chance to export translatables to code.
+    if ($this->init_localization()) {
+      $this->export_locale_strings('export');
+      $translatables = $this->localization_plugin->export_render($indent);
+      if (!empty($translatables)) {
+        $output .= $translatables;
+      }
+    }
+
     return $output;
   }
 
@@ -1593,6 +1603,71 @@ class view extends views_db_object {
 
     return $errors ? $errors : TRUE;
   }
+
+  /**
+   * Find and initialize the localizer plugin.
+   */
+  function init_localization() {
+    if (isset($this->localization_plugin) && is_object($this->localization_plugin)) {
+      return TRUE;
+    }
+
+    $this->localization_plugin = views_get_plugin('localization', variable_get('views_localization_plugin', 'core'));
+
+    if (empty($this->localization_plugin)) {
+      return FALSE;
+    }
+
+    /**
+    * Figure out whether there should be options.
+    */
+    $this->localization_plugin->init($this);
+
+    return $this->localization_plugin->translate;
+  }
+
+  /**
+   * Determine whether a view supports admin string translation.
+   */
+  function is_translatable() {
+    // If the view is normal or overridden, use admin string translation.
+    // A newly created view won't have a type. Accept this.
+    return (!isset($this->type) || in_array($this->type, array(t('Normal'), t('Overridden')))) ? TRUE : FALSE;
+  }
+
+  /**
+   * Send strings for localization.
+   */
+  function save_locale_strings() {
+    $this->process_locale_strings('save');
+  }
+
+  /**
+   * Delete localized strings.
+   */
+  function delete_locale_strings() {
+    $this->process_locale_strings('delete');
+  }
+
+ /**
+  * Export localized strings.
+  */
+  function export_locale_strings() {
+    $this->process_locale_strings('export');
+  }
+
+  /**
+   * Process strings for localization, deletion or export to code.
+   */
+  function process_locale_strings($op) {
+    // Ensure this view supports translation, we have a display, and we
+    // have a localization plugin.
+    // @fixme Export does not init every handler.
+    if (($this->is_translatable() || $op == 'export') && $this->init_display() && $this->init_localization()) {
+      $this->localization_plugin->process_locale_strings($op);
+    }
+  }
+
 }
 
 /**

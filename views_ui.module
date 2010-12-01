@@ -253,6 +253,10 @@ function views_ui_cache_load($name) {
     if (!empty($view)) {
       // Check to see if someone else is already editing this view.
       $view->locked = ctools_object_cache_test('view', $view->name);
+      // Set a flag to indicate that this view is being edited.
+      // This flag will be used e.g. to determine whether strings
+      // should be localized.
+      $view->editing = TRUE;
     }
   }
 

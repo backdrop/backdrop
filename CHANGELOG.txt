@@ -498,3 +498,4 @@ Views 3.x-7.x-dev
     o #978864 by linclark: Fix title bug with area handlers.
     o #983460 by dereine: "Default sort" radio is in wrong column on table style settings.
     o #783798 by dereine: GROUP BY can cause sort criteria to get incorrectly added to view.
+    o #357529 by nedjo, dddave, dagmar, dereine, yhahn, others: Implement plugin to handle translations of views configuration data.

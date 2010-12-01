@@ -2855,6 +2855,7 @@ function views_ui_config_item_form_submit($form, &$form_state) {
   // Create a new handler and unpack the options from the form onto it. We
   // can use that for storage.
   $handler = views_get_handler($item['table'], $item['field'], $type);
+  $handler->init($form_state['view'], $item);
 
 
   // Add the incoming options to existing options because items using
@@ -3301,6 +3302,14 @@ function views_ui_admin_tools() {
     '#title' => t('Disable javascript with Views'),
     '#description' => t("If you are having problems with the javascript, you can disable it here; the Views UI should degrade and still be usable without javascript, it just not as good."),
     '#default_value' => variable_get('views_no_javascript', FALSE),
+  );
+
+  $form['views_localization_plugin'] =  array(
+    '#type' => 'radios',
+    '#title' => t('Translation method'),
+    '#options' => views_fetch_plugin_names('localization', NULL, array(), TRUE),
+    '#default_value' => variable_get('views_localization_plugin', 'core'),
+    '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
   );
 
   $regions = system_region_list(variable_get('theme_default', 'garland'));

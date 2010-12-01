@@ -231,6 +231,9 @@ files[] = plugins/views_plugin_exposed_form_basic.inc
 files[] = plugins/views_plugin_exposed_form.inc
 files[] = plugins/views_plugin_exposed_form_input_required.inc
 files[] = plugins/views_plugin_display_page.inc
+files[] = plugins/views_plugin_localization_core.inc
+files[] = plugins/views_plugin_localization.inc
+files[] = plugins/views_plugin_localization_none.inc
 files[] = plugins/views_plugin_pager.inc
 files[] = plugins/views_plugin_pager_full.inc
 files[] = plugins/views_plugin_pager_mini.inc
@@ -250,6 +253,7 @@ files[] = plugins/views_plugin_style_summary.inc
 files[] = plugins/views_plugin_style_summary_jump_menu.inc
 files[] = plugins/views_plugin_style_summary_unformatted.inc
 files[] = plugins/views_plugin_style_table.inc
+
 ; Theme
 files[] = theme/theme.inc
 files[] = theme/views-exposed-form.tpl.php
@@ -296,6 +300,8 @@ files[] = tests/views_glossary.test
 files[] = tests/views_groupby.test
 files[] = tests/views_handlers.test
 files[] = tests/views_pager.test
+files[] = tests/views_plugin_localization_test.inc
+files[] = tests/views_translatable.test
 files[] = tests/views_query.test
 files[] = tests/views_test.views_default.inc
 files[] = tests/user/views_user_argument_default.test
