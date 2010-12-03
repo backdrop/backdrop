@@ -39,20 +39,39 @@ class views_handler_field_field extends views_handler_field {
     parent::query();
 
     $base_table = $this->view->base_table;
-    $this->entity_info = entity_get_info($this->definition['entity_tables'][$base_table]);
+
+    // If the current field is under a relationship you can't be sure that the
+    // base table of the view is the base table of the current field.
+    // For example a field from a node author on a node view does have users as base table.
+    if (!empty($this->relationship)) {
+      foreach ($this->view->relationship as $relationship) {
+        if ($relationship->alias == $this->relationship) {
+          $base_table = $relationship->definition['base'];
+        }
+      }
+    }
+
+    // Get the entity type according to the base table of the field.
+    $this->entity_type = $entity_type = $this->definition['entity_tables'][$base_table];
+    $this->entity_info = entity_get_info($entity_type);
 
     // Query for bundle, revision fields necessary for rendering fields.
     // @TODO
     // The bundle system will be fixed in d8, so no special cases should be needed.
-    switch ($base_table) {
-      case 'taxonomy_term_data':
+    switch ($entity_type) {
+      case 'taxonomy_term':
       case 'comment':
-        $this->aliases[$this->definition['field_name'] . '_' . 'bundle'] = $this->query->add_field($this->table, 'bundle');
+        $this->aliases[$this->definition['field_name'] . '_' . 'bundle'] = $this->query->add_field($this->table_alias, 'bundle');
         break;
       default:
         foreach ($this->entity_info['entity keys'] as $key => $column) {
-          if (!empty($column) && ($key == 'bundle' || $key == 'revision')) {
-            $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($base_table, $column);
+          if (!empty($column)) {
+            if ($key == 'bundle') {
+              $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'bundle');
+            }
+            elseif ($key == 'revision') {
+              $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'revision_id');
+            }
           }
         }
         break;
@@ -167,7 +186,7 @@ class views_handler_field_field extends views_handler_field {
   function pre_render(&$values) {
     if (!empty($values)) {
       $entity_info = $this->entity_info;
-      $entity_type = $this->definition['entity_tables'][$this->view->base_table];
+      $entity_type = $this->entity_type;
 
       // Build the objects.
       $objects = array();
@@ -175,7 +194,10 @@ class views_handler_field_field extends views_handler_field {
         if ($row->{$this->field_alias}) {
           $object = new stdClass();
           $object->{$entity_info['entity keys']['id']} = $row->{$this->field_alias};
-          $object->{$entity_info['entity keys']['bundle']} = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
+          // Not every entity type has bundle and revision.
+          if (!empty($entity_info['entity keys']['bundle'])) {
+            $object->{$entity_info['entity keys']['bundle']} = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
+          }
           if (!empty($entity_info['entity keys']['revision'])) {
             $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
           }
