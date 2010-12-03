@@ -78,12 +78,25 @@ class views_handler_field_field extends views_handler_field {
     }
   }
 
+  /**
+   * Called to determine what to tell the clicksorter.
+   */
+  function click_sort($order) {
+    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_sort_column']);
+    // The field has already been added to the query, just add a sort on it.
+    $this->query->add_orderby(NULL, NULL, $order, $this->aliases[$column]);
+  }
+
   function option_definition() {
     $options = parent::option_definition();
 
     $field = field_info_field($this->definition['field_name']);
     $field_type = field_info_field_types($field['type']);
 
+    // If the field has a "value" column, we probably need that one.
+    $options['click_sort_column'] = array(
+      'default' => in_array('value', $field['columns']) ? 'value' : '',
+    );
     $options['type'] = array(
       'default' => $field_type['default_formatter'],
     );
@@ -99,6 +112,24 @@ class views_handler_field_field extends views_handler_field {
 
     $field = field_info_field($this->definition['field_name']);
     $formatters = _field_view_formatter_options($field['type']);
+    $column_names = array_keys($field['columns']);
+
+    // No need to ask the user anything if the field has only one column.
+    if (count($field['columns']) == 1) {
+      $form['click_sort_column'] = array(
+        '#type' => 'value',
+        '#value' => $column_names[0],
+      );
+    }
+    else {
+      $form['click_sort_column'] = array(
+        '#type' => 'select',
+        '#title' => t('Click sort column'),
+        '#options' => drupal_map_assoc($column_names),
+        '#default_value' => $this->options['click_sort_column'],
+        '#description' => t('Used by Style: Table to determine the actual column to click sort the field on. The default is usually fine.'),
+      );
+    }
 
     $form['type'] = array(
       '#type' => 'select',
