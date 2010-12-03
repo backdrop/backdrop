@@ -504,4 +504,5 @@ Views 3.x-7.x-dev
     o #936196 by rszrama, das-peter, bojanz, dereine: Fix some bugs with the fieldapi field handler.
     o #983272 by bojanz: Support click sorting for Field API fields.
     o by dereine: Fix error in plugin_default_taxonomy_tid.
+    o #974542 by dereine: Use the same signature for pre_render in every handler.
 
