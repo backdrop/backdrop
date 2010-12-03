@@ -250,7 +250,7 @@ function node_views_data() {
       'handler' => 'views_handler_field_node_link_delete',
     ),
   );
-  
+
   $data['node']['path'] = array(
     'field' => array(
       'title' => t('Path'),
@@ -258,7 +258,7 @@ function node_views_data() {
       'handler' => 'views_handler_field_node_path',
     ),
   );
-  
+
 
   // Bogus fields for aliasing purposes.
 
@@ -639,7 +639,7 @@ function template_preprocess_views_view_row_node(&$vars) {
 
   $node->view = $vars['view'];
   // Detect which build module should be used.
-  $node->build_mode = ($options['build_mode'] == 'teaser' || $options['build_mode'] == 'full') ? $options['build_mode'] : 'full';
+  $node->build_mode = (!empty($options['build_mode'])) ? $options['build_mode'] : 'full';
   $content = node_view_multiple(array($node->nid => $node), $node->build_mode);
   $content = $content['nodes'][$node->nid];
   if (!$options['links']) {

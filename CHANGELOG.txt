@@ -500,3 +500,4 @@ Views 3.x-7.x-dev
     o #783798 by dereine: GROUP BY can cause sort criteria to get incorrectly added to view.
     o #357529 by nedjo, dddave, dagmar, dereine, yhahn, others: Implement plugin to handle translations of views configuration data.
     o #983606 by jonathan1055: Breadcrumb disappears on bulk export results.
+    o #945034 by das-peter: Allow any kind of build_mode for node row style.
