@@ -205,7 +205,7 @@ function theme_views_view_field($vars) {
   $view = $vars['view'];
   $field = $vars['field'];
   $row = $vars['row'];
-  return $field->advanced_render($row);
+  return $vars['output'];
 }
 
 /**
