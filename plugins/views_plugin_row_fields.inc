@@ -27,6 +27,7 @@ class views_plugin_row_fields extends views_plugin_row {
    * Provide a form for setting options.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $options = $this->display->handler->get_field_labels();
 
     if (empty($this->options['inline'])) {

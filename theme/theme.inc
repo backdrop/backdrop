@@ -167,6 +167,30 @@ function template_preprocess_views_view_fields(&$vars) {
     $empty = $field_output !== 0 && empty($field_output);
     if (empty($field->options['exclude']) && (!$empty || (empty($field->options['hide_empty']) && empty($vars['options']['hide_empty'])))) {
       $object = new stdClass();
+      $object->handler = &$view->field[$id];
+
+      $object->element_type = $object->handler->element_type(TRUE);
+      if ($object->element_type) {
+        $class = '';
+        if ($object->handler->options['element_default_classes']) {
+          $class = 'field-content';
+        }
+
+        if ($classes = $object->handler->element_classes()) {
+          if ($class) {
+            $class .= ' ';
+          }
+          $class .=  $classes;
+        }
+
+        $field_output = '<' . $object->element_type . ' class="' . $class . '">' . $field_output . '</' . $object->element_type . '>';
+      }
+
+      // Protect ourself somewhat for backward compatibility. This will prevent
+      // old templates from producing invalid HTML when no element type is selected.
+      if (empty($object->element_type)) {
+        $object->element_type = 'span';
+      }
 
       $object->content = $field_output;
       if (isset($view->field[$id]->field_alias) && isset($vars['row']->{$view->field[$id]->field_alias})) {
@@ -175,19 +199,73 @@ function template_preprocess_views_view_fields(&$vars) {
       else {
         $object->raw = NULL; // make sure it exists to reduce NOTICE
       }
-      $object->inline = !empty($vars['options']['inline'][$id]);
-      $object->inline_html = $object->inline ? 'span' : 'div';
+
       if (!empty($vars['options']['separator']) && $inline && $object->inline && $object->content) {
         $object->separator = filter_xss_admin($vars['options']['separator']);
       }
 
-      $inline = $object->inline;
-
-      $object->handler = &$view->field[$id];
-      $object->element_type = $object->handler->element_type();
-
       $object->class = drupal_clean_css_identifier($id);
+      $object->inline = !empty($vars['options']['inline'][$id]);
+      $inline = $object->inline;
+      $object->inline_html = $object->handler->element_wrapper_type(TRUE, TRUE);
+
+      if ($object->inline_html === '') {
+        $object->inline_html = $object->inline ? 'span' : 'div';
+      }
+
+      // Set up the wrapper HTML.
+      $object->wrapper_prefix = '';
+      $object->wrapper_suffix = '';
+
+      if ($object->inline_html) {
+        $class = '';
+        if ($object->handler->options['element_default_classes']) {
+          $class = "views-field views-field-" . $object->class;
+        }
+
+        if ($classes = $object->handler->element_wrapper_classes()) {
+          if ($class) {
+            $class .= ' ';
+          }
+          $class .= ' ' . $classes;
+        }
+
+        $object->wrapper_prefix = '<' . $object->inline_html;
+        if ($class) {
+          $object->wrapper_prefix .= ' class="' . $class . '"';
+        }
+        $object->wrapper_prefix .= '>';
+        $object->wrapper_suffix = '</' . $object->inline_html . '>';
+      }
+
+      // Set up the label for the value and the HTML to make it easier
+      // on the template.
       $object->label = check_plain($view->field[$id]->label());
+      $object->label_html = '';
+      $object->element_label_type = $object->handler->element_label_type(TRUE);
+      if ($object->element_label_type && $object->label) {
+        $class = '';
+        if ($object->handler->options['element_default_classes']) {
+          $class = 'views-label-' . $object->class;
+        }
+
+        $element_label_class = $object->handler->element_label_classes();
+        if ($element_label_class) {
+          if ($class) {
+            $class .= ' ';
+          }
+
+          $class .= $element_label_class;
+        }
+
+        $object->label_html = '<' . $object->element_label_type . ' class="' . $class . '">';
+        $object->label_html .= $object->label;
+        if ($object->handler->options['element_label_colon']) {
+          $object->label_html .= ': ';
+        }
+        $object->label_html .= '</' . $object->element_label_type . '>';
+      }
+
       $vars['fields'][$id] = $object;
     }
   }
@@ -299,6 +377,7 @@ function template_preprocess_views_view_table(&$vars) {
   // Store rows so that they may be used by further preprocess functions.
   $result   = $vars['result'] = $vars['rows'];
   $vars['rows'] = array();
+  $vars['field_classes'] = array();
 
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
@@ -316,6 +395,13 @@ function template_preprocess_views_view_table(&$vars) {
   $renders = $handler->render_fields($result);
 
   foreach ($columns as $field => $column) {
+    // Create a second variable so we can easily find what fields we have and what the
+    // CSS classes should be.
+    $vars['fields'][$field] = drupal_clean_css_identifier($field);
+    if ($active == $field) {
+      $vars['fields'][$field] .= ' active';
+    }
+
     // render the header labels
     if ($field == $column && empty($fields[$field]->options['exclude'])) {
       $label = check_plain(!empty($fields[$field]) ? $fields[$field]->label() : '');
@@ -343,13 +429,28 @@ function template_preprocess_views_view_table(&$vars) {
         );
         $vars['header'][$field] = l($label, $_GET['q'], $link_options);
       }
-    }
 
-    // Create a second variable so we can easily find what fields we have and what the
-    // CSS classes should be.
-    $vars['fields'][$field] = drupal_clean_css_identifier($field);
-    if ($active == $field) {
-      $vars['fields'][$field] .= ' active';
+      $vars['header_classes'][$field] = '';
+      // Set up the header label class.
+      if ($fields[$field]->options['element_default_classes']) {
+        $vars['header_classes'][$field] .= "views-field views-field-" . $vars['fields'][$field];
+      }
+      $class = $fields[$field]->element_label_classes();
+      if ($class) {
+        if ($vars['header_classes'][$field]) {
+          $vars['header_classes'][$field] .= ' ';
+        }
+        $vars['header_classes'][$field] .= $class;
+      }
+
+      // Add a header label wrapper if one was selected.
+      if ($vars['header'][$field]) {
+        $element_label_type = $fields[$field]->element_label_type(TRUE, TRUE);
+        if ($element_label_type) {
+          $vars['header'][$field] = '<' . $element_label_type . '>' . $vars['header'][$field] . '</' . $element_label_type . '>';
+        }
+      }
+
     }
 
     // Add a CSS align class to each field if one was set
@@ -359,8 +460,25 @@ function template_preprocess_views_view_table(&$vars) {
 
     // Render each field into its appropriate column.
     foreach ($result as $num => $row) {
+      // Add field classes
+      $vars['field_classes'][$field][$num] = '';
+      if ($fields[$field]->options['element_default_classes']) {
+        $vars['field_classes'][$field][$num] = "views-field views-field-" . $vars['fields'][$field];
+      }
+      if ($classes = $fields[$field]->element_classes()) {
+        if ($vars['field_classes'][$field][$num]) {
+          $vars['field_classes'][$field][$num] .= ' ';
+        }
+
+        $vars['field_classes'][$field][$num] .= $classes;
+      }
+
       if (!empty($fields[$field]) && empty($fields[$field]->options['exclude'])) {
         $field_output = $renders[$num][$field];
+        $element_type = $fields[$field]->element_type(TRUE, TRUE);
+        if ($element_type) {
+          $field_output = '<' . $element_type . '>' . $field_output . '</' . $element_type . '>';
+        }
 
         // Don't bother with separators and stuff if the field does not show up.
         if (empty($field_output) && !empty($vars['rows'][$num][$column])) {
@@ -385,6 +503,9 @@ function template_preprocess_views_view_table(&$vars) {
   $count = 0;
   foreach ($vars['rows'] as $num => $row) {
     $vars['row_classes'][$num][] = ($count++ % 2 == 0) ? 'odd' : 'even';
+    if ($row_class = $handler->get_row_class($num)) {
+      $vars['row_classes'][$num][] = $row_class;
+    }
   }
 
   $vars['row_classes'][0][] = 'views-row-first';
@@ -460,6 +581,27 @@ function template_preprocess_views_view_grid(&$vars) {
       }
     }
   }
+
+  // Apply the row classes
+  foreach ($vars['rows'] as $row_number => $row) {
+    $row_classes = array();
+    $row_classes[] =  'row-' . ($row_number + 1);
+    if ($row_number == 0) {
+      $row_classes[] =  'row-first';
+    }
+    if (count($rows) == ($row_number + 1)) {
+      $row_classes[] =  'row-last';
+    }
+    $vars['row_classes'][$row_number] = implode(' ', $row_classes);
+    foreach ($rows[$row_number] as $column_number => $item) {
+      $column_classes = array();
+      $column_classes[] = 'col-'. ($column_number + 1);
+      if ($column_class = $view->style_plugin->get_row_class($column_number)) {
+        $column_classes[] = $column_class;
+      }
+      $vars['column_classes'][$row_number][$column_number] = implode(' ', $column_classes);
+    }
+  }
   $vars['rows'] = $rows;
 }
 
@@ -483,6 +625,11 @@ function template_preprocess_views_view_unformatted(&$vars) {
     if ($id == count($rows) -1) {
       $vars['classes'][$id][] = 'views-row-last';
     }
+
+    if ($row_class = $view->style_plugin->get_row_class($id)) {
+      $vars['classes'][$id][] = $row_class;
+    }
+
     // Flatten the classes to a string for each row for the template file.
     $vars['classes_array'][$id] = implode(' ', $vars['classes'][$id]);
   }
@@ -492,6 +639,22 @@ function template_preprocess_views_view_unformatted(&$vars) {
  * Display the view as an HTML list element
  */
 function template_preprocess_views_view_list(&$vars) {
+  $handler  = $vars['view']->style_plugin;
+
+  $vars['class'] = drupal_clean_css_identifier($handler->options['class']);
+  $vars['wrapper_class'] = drupal_clean_css_identifier($handler->options['wrapper_class']);
+  $vars['wrapper_prefix'] = '';
+  $vars['wrapper_suffix'] = '';
+  $vars['list_type_prefix'] = '<' . $handler->options['type'] . '>';
+  $vars['list_type_suffix'] = '</' . $handler->options['type'] . '>';
+  if ($vars['wrapper_class']) {
+    $vars['wrapper_prefix'] = '<div class="' . $vars['wrapper_class'] . '">';
+    $vars['wrapper_suffix'] = '</div>';
+  }
+
+  if ($vars['class']) {
+    $vars['list_type_prefix'] = '<' . $handler->options['type'] . ' class="' . $vars['class'] . '">';
+  }
   template_preprocess_views_view_unformatted($vars);
 }
 
