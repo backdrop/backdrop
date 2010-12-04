@@ -173,7 +173,7 @@ function taxonomy_views_data() {
       'field' => 'description', // the real field
       'group' => t('Taxonomy'), // The group it appears in on the UI,
       'handler' => 'views_handler_field_markup',
-      'format' => filter_default_format(),
+      'format' => array('field' => 'format'),
     ),
   );
 
