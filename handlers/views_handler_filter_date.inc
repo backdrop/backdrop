@@ -139,7 +139,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     }
     // %s is safe here because strtotime scrubbed the input and we might
     // have a string if using offset.
-    $this->query->add_where($this->options['group'], $field, array($a, $b), 'BETWEEN');
+    $this->query->add_where($this->options['group'], "$field BETWEEN $a AND $b", array(), 'formula');
   }
 
   function op_simple($field) {
@@ -147,6 +147,6 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     if (!empty($this->value['type']) && $this->value['type'] == 'offset') {
       $value = '***CURRENT_TIME***' . sprintf('%+d', $value); // keep sign
     }
-    $this->query->add_where($this->options['group'], $field, $value, $this->operator);
+    $this->query->add_where($this->options['group'], "$field $this->operator $value", array(), 'formula');
   }
 }
