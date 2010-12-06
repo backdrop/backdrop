@@ -211,7 +211,7 @@ function views_ui_theme() {
   return array(
     // edit a view
     'views_ui_display_tab_setting' => array(
-      'variables' => array('description' => '', 'link' => '', 'settings_links' => array()),
+      'variables' => array('description' => '', 'link' => '', 'settings_links' => array(), 'overridden' => FALSE, 'defaulted' => FALSE),
       'template' => 'views-ui-display-tab-setting',
       'path' => "$path/theme",
     ),

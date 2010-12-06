@@ -631,7 +631,7 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
     return t('There is no lock on view %view to break.', array('%name' => $view->name));
   }
 
-  $cancel = 'admin/structure/views/edit/' . $view->name;
+  $cancel = 'admin/structure/views/view/' . $view->name . '/edit';
   if (!empty($_REQUEST['cancel'])) {
     $cancel = $_REQUEST['cancel'];
   }
@@ -651,7 +651,7 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
  */
 function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
   ctools_object_cache_clear_all('view', $form_state['view']->name);
-  $form_state['redirect'] = 'admin/structure/views/edit/' . $form_state['view']->name;
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
   drupal_set_message(t('The lock has been broken and you may now edit this view.'));
 }
 
@@ -1191,7 +1191,7 @@ function views_ui_import_validate($form, &$form_state) {
 function views_ui_import_submit($form, &$form_state) {
   // Store in cache and then go to edit.
   views_ui_cache_set($form_state['view']);
-  $form_state['redirect'] = 'admin/structure/views/edit/' . $form_state['view']->name;
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
 }
 
 /**
@@ -1289,7 +1289,7 @@ function views_ui_edit_view_form_cancel($form, &$form_state) {
 function views_ui_edit_view_form_delete($form, &$form_state) {
   unset($_REQUEST['destination']);
   // Redirect to the delete confirm page
-  $form_state['redirect'] = array('admin/structure/views/delete/' . $form_state['view']->name, array('query' => drupal_get_destination() + array('cancel' => 'admin/structure/views/edit/' . $form_state['view']->name)));
+  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/delete', array('query' => drupal_get_destination() + array('cancel' => 'admin/structure/views/view/' . $form_state['view']->name . '/edit')));
 }
 
 /**
@@ -1566,7 +1566,7 @@ function views_ui_standard_submit($form, &$form_state) {
  * Submit handler for cancel button
  */
 function views_ui_standard_cancel($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/views/edit/' . $form_state['view']->name;
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
 }
 
 // --------------------------------------------------------------------------
@@ -1744,7 +1744,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
     }
     elseif (!$js) {
       // if nothing on the stack, non-js forms just go back to the main view editor.
-      return drupal_goto("admin/structure/views/edit/$view->name");
+      return drupal_goto("admin/structure/views/view/$view->name/edit");
     }
     else {
       $output = array();
@@ -1848,7 +1848,7 @@ function views_ui_analyze_view_form($form, &$form_state) {
  * Submit handler for views_ui_analyze_view_form
  */
 function views_ui_analyze_view_form_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/views/edit/' . $form_state['view']->name;
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
 }
 
 /**
@@ -1998,7 +1998,7 @@ function views_ui_reorder_displays_form_submit($form, &$form_state) {
 
   // Store in cache
   views_ui_cache_set($form_state['view']);
-  $form_state['redirect'] = array('admin/structure/views/edit/' . $form_state['view']->name, array('fragment' => 'views-tab-default'));
+  $form_state['redirect'] = array('admin/structure/views/view/' . $form_state['view']->name . '/edit', array('fragment' => 'views-tab-default'));
 }
 
 /**
@@ -2136,7 +2136,7 @@ function views_ui_edit_details_form_submit($form, &$form_state) {
   $form_state['view']->description = $form_state['values']['description'];
   $form_state['view']->tag = $form_state['values']['tag'];
   views_ui_cache_set($form_state['view']);
-  $form_state['redirect'] = 'admin/structure/views/edit/' . $form_state['view']->name;
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
 }
 
 /**
