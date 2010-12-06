@@ -211,18 +211,13 @@ function views_ui_theme() {
   return array(
     // edit a view
     'views_ui_display_tab_setting' => array(
-      'variables' => array('description' => '', 'link' => ''),
+      'variables' => array('description' => '', 'link' => '', 'settings_links' => array()),
       'template' => 'views-ui-display-tab-setting',
       'path' => "$path/theme",
     ),
     'views_ui_display_tab_section' => array(
       'render element' => 'element',
       'template' => 'views-ui-display-tab-section',
-      'path' => "$path/theme",
-    ),
-    'views_ui_display_tab_column' => array(
-      'render element' => 'element',
-      'template' => 'views-ui-display-tab-column',
       'path' => "$path/theme",
     ),
     'views_ui_edit_item' => array(

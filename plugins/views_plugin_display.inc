@@ -798,23 +798,44 @@ class views_plugin_display extends views_plugin {
    */
   function options_summary(&$categories, &$options) {
     $categories = array(
+      'title' => array(
+        'title' => t('Title'),
+        'column' => 'first',
+      ),
+      'format' => array(
+        'title' => t('Format'),
+        'column' => 'first',
+      ),
+      'filters' => array(
+        'title' => t('Filters'),
+        'column' => 'first',
+      ),
+      'fields' => array(
+        'title' => t('Fields'),
+        'column' => 'first',
+      ),
+      // TODO: Remove when empty.
       'basic' => array(
         'title' => t('Basic settings'),
+        'column' => 'first',
       ),
       'advanced' => array(
         'title' => t('Advanced settings'),
+        'column' => 'first',
       ),
       'style' => array(
         'title' => t('Style settings'),
+        'column' => 'first',
       ),
       'exposed' => array(
         'title' => t('Exposed form'),
+        'column' => 'second',
       ),
     );
 
     if ($this->display->id != 'default') {
       $options['display_id'] = array(
-        'category' => 'basic',
+        'category' => 'advanced',
         'title' => t('Machine Name'),
         'value' => !empty($this->display->new_id) ? check_plain($this->display->new_id) : check_plain($this->display->id),
         'desc' => t('Change the machine name of this display.'),
@@ -822,7 +843,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['display_title'] = array(
-      'category' => 'basic',
+      'category' => 'top',
       'title' => t('Name'),
       'value' => check_plain($this->display->display_title),
       'desc' => t('Change the name of this display.'),
@@ -834,7 +855,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['title'] = array(
-      'category' => 'basic',
+      'category' => 'top',
       'title' => t('Title'),
       'value' => $title,
       'desc' => t('Change the title that this display will use.'),
@@ -846,15 +867,15 @@ class views_plugin_display extends views_plugin {
     $style = '';
 
     $options['style_plugin'] = array(
-      'category' => 'style',
-      'title' => t('Style'),
+      'category' => 'format',
+      'title' => t('Format'),
       'value' => $style_title,
-      'desc' => t('Change the style plugin.'),
+      'desc' => t('Change the way content is formatted.'),
     );
 
     // This adds a 'Settings' link to the style_options setting if the style has options.
     if (!empty($style_plugin['uses options'])) {
-      $options['style_plugin']['links']['style_options'] = t('Change settings for this style');
+      $options['style_plugin']['links']['style_options'] = t('Change settings for this format');
     }
 
     if (!empty($style_plugin['uses row plugin'])) {
@@ -862,8 +883,8 @@ class views_plugin_display extends views_plugin {
       $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin['title'];
 
       $options['row_plugin'] = array(
-        'category' => 'style',
-        'title' => t('Row style'),
+        'category' => 'format',
+        'title' => t('Show'),
         'value' => $row_title,
         'desc' => t('Change the row plugin.'),
       );
@@ -890,7 +911,7 @@ class views_plugin_display extends views_plugin {
     $pager_str = $pager_plugin->summary_title();
 
     $options['pager'] = array(
-      'category' => 'basic',
+      'category' => 'pager',
       'title' => t('Use pager'),
       'value' => $pager_str,
       'desc' => t("Change this display's pager setting."),
@@ -907,7 +928,7 @@ class views_plugin_display extends views_plugin {
 
     if (!empty($this->definition['use more'])) {
       $options['use_more'] = array(
-        'category' => 'basic',
+        'category' => 'advanced',
         'title' => t('More link'),
         'value' => $this->get_option('use_more') ? t('Yes') : t('No'),
         'desc' => t('Specify whether this display will provide a "more" link.'),
@@ -940,7 +961,7 @@ class views_plugin_display extends views_plugin {
     $access_str = $access_plugin->summary_title();
 
     $options['access'] = array(
-      'category' => 'basic',
+      'category' => 'format',
       'title' => t('Access'),
       'value' => $access_str,
       'desc' => t('Specify access control type for this display.'),
@@ -1029,14 +1050,14 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['css_class'] = array(
-      'category' => 'style',
+      'category' => 'advanced',
       'title' => t('CSS class'),
       'value' => $css_class,
       'desc' => t('Change the CSS class name(s) that will be added to this display.'),
     );
 
     $options['analyze-theme'] = array(
-      'category' => 'style',
+      'category' => 'advanced',
       'title' => t('Theme'),
       'value' => t('Information'),
       'desc' => t('Get information on how to theme this display'),

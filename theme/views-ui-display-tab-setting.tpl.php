@@ -9,5 +9,8 @@
   <?php if ($description): ?>
     <?php print $description; ?>:
   <?php endif; ?>
+  <?php if ($gear): ?>
+    <?php print $gear; ?>
+  <?php endif; ?>
   <?php print $link; ?>
 </div>

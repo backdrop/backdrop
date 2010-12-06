@@ -926,6 +926,55 @@ function views_ui_get_display_tab_details($view, $display) {
     '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
   );
 
+  // Each option (e.g. title, access, display as grid/table/list) fits into one
+  // of several "buckets" (Format, Fields, Sort, and so on).
+  $buckets = array();
+
+  // Fetch options from the display plugin, with a list of buckets they go into.
+  $options = array();
+  $display->handler->options_summary($buckets, $options);
+
+  // Place each option into its bucket.
+  foreach ($options as $id => $option) {
+    // Each option self-identifies as belonging in a given category.
+    $bucket = $option['category'];
+
+    if (empty($buckets[$bucket]['build'])) {
+      $buckets[$bucket]['build'] = array();
+    }
+    $buckets[$bucket]['build'][$id] = array();
+    $option_build = &$buckets[$bucket]['build'][$id];
+    $option_build['#theme'] = 'views_ui_display_tab_setting';
+
+    $option_build['#description'] = $option['title'];
+
+    $option_build['#link'] = $display->handler->option_link($option['value'], $id, '', empty($option['desc']) ? '' : $option['desc']);
+
+    $option_build['#links'] = array();
+    if (!empty($option['links']) && is_array($option['links'])) {
+      foreach ($option['links'] as $link_id => $link_value) {
+        $option_build['#optional_links'][] = $display->handler->option_link($link_value, $link_id, 'views-button-configure');
+      }
+    }
+
+    if (!empty($display->handler->options['defaults'][$id])) {
+      $display_id = 'default';
+      $option_build['#defaulted'] = TRUE;
+    }
+    else {
+      $display_id = $display->id;
+      if (!$display->handler->is_default_display()) {
+        if ($display->handler->defaultable_sections($id)) {
+          $option_build['#overridden'] = TRUE;
+        }
+      }
+    }
+    $option_build['#attributes']['class'][] = drupal_clean_css_identifier($display_id . '-' . $id);
+    if (!empty($view->changed_sections[$display_id . '-' . $id])) {
+      $option_build['#changed'] = TRUE;
+    }
+  }
+
   // The area above the three columns.
   $build['top']['view_name'] = array(
     '#theme' => 'views_ui_display_tab_setting',
@@ -934,49 +983,41 @@ function views_ui_get_display_tab_details($view, $display) {
     '#link' => check_plain($display->id),
   );
 
-  $build['first']['#theme_wrappers'] = array('views_ui_display_tab_column');
-  $build['first']['#column'] = 'first';
-  $build['first']['title'] = array(
-    '#theme_wrappers' => array('views_ui_display_tab_section'),
-    '#title' => t('Title'),
-    'title' => array(
-      '#theme' => 'views_ui_display_tab_setting',
-      '#description' => t('Title'),
-      '#link' => '(link to title edit dialog here)',
-    ),
-  );
-  $build['first']['format'] = array(
-    '#theme_wrappers' => array('views_ui_display_tab_section'),
-    '#title' => t('Format'),
-    'format' => array(
-      '#theme' => 'views_ui_display_tab_setting',
-      '#description' => t('Format'),
-      '#link' => '(format link here)',
-    ),
-    'show' => array(
-      '#theme' => 'views_ui_display_tab_setting',
-      '#description' => t('Show'),
-      '#link' => '(row styles link here)',
-    ),
-  );
-  $build['first']['filters'] = array();
-  $build['first']['sort_criteria'] = array();
+  $build['columns'] = array();
+  $build['columns']['#theme_wrappers'] = array('container');
+  $build['columns']['#attributes'] = array('class' => array('clearfix', 'views-display-columns'));
 
-  $build['second']['#theme_wrappers'] = array('views_ui_display_tab_column');
-  $build['second']['#column'] = 'second';
+  $build['columns']['first']['#theme_wrappers'] = array('container');
+  $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first'));
 
-  $build['second']['settings'] = array();
-  $build['second']['header'] = array();
-  $build['second']['footer'] = array();
-  $build['second']['pager'] = array();
+  $build['columns']['second']['#theme_wrappers'] = array('container');
+  $build['columns']['second']['#attributes'] = array('class' => array('views-display-column', 'second'));
 
-  $build['third']['#theme_wrappers'] = array('views_ui_display_tab_column');
-  $build['third']['#column'] = 'third';
+  $build['columns']['second']['settings'] = array();
+  $build['columns']['second']['header'] = array();
+  $build['columns']['second']['footer'] = array();
+  $build['columns']['second']['pager'] = array();
 
-  $build['third']['dynamic_filters'] = array();
-  $build['third']['relationships'] = array();
-  $build['third']['exposed_forms'] = array();
-  $build['third']['other'] = array();
+  $build['columns']['third']['#theme_wrappers'] = array('container');
+  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third'));
+
+  // Place each bucket into the proper column.
+  foreach ($buckets as $id => $bucket) {
+    // Let buckets identify themselves as belonging in a column.
+    if (isset($bucket['column']) && isset($build['columns'][$bucket['column']])) {
+      $column = $bucket['column'];
+    }
+    // If a bucket doesn't pick one of our predefined columns to belong to, put
+    // it in the last one.
+    else {
+      $column = 'third';
+    }
+    if (isset($bucket['build']) && is_array($bucket['build'])) {
+      $build['columns'][$column][$id] = $bucket['build'];
+      $build['columns'][$column][$id]['#theme_wrappers'][] = 'views_ui_display_tab_section';
+      $build['columns'][$column][$id]['#title'] = $bucket['title'];
+    }
+  }
 
 
   // Add a checkbox controlling whether or not this display auto-previews.
@@ -993,6 +1034,8 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   static $zebra = 0;
   $variables['zebra'] = ($zebra % 2 === 0 ? 'odd' : 'even');
   $zebra++;
+
+  $variables['gear'] = implode($variables['settings_links']);
 }
 
 function template_preprocess_views_ui_display_tab_section(&$variables) {
