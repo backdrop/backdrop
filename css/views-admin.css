@@ -1,5 +1,30 @@
 /* $Id: views-admin.css,v 1.14.4.11 2010/11/20 23:49:29 dereine Exp $ */
 
+/**
+ * Right now the "add" icon is scoped way too narrowly to the action-links ul. This should
+ * be defined at the link level, not the list level.  So here is the correct styling that
+ * we should port back to D8 eventually.
+ */
+.views-edit-view .views-displays .icon {
+  background-attachment: scroll;
+  background-image: url("../images/sprites.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+  display: inline-block;
+  height: 12px;
+  position: relative;
+  width: 16px
+}
+
+.views-edit-view .views-displays .icon-add {
+  background-position: left -96px;
+  top: 1px;
+}
+
+/**
+ * The attachment details section, its tabs for each section and the buttons
+ * to add a new section
+ */
 .views-alt-ui-view-displays,
 .views-alt-ui-view-paths,
 .views-alt-ui-view-description {
@@ -14,13 +39,130 @@
 
 .views-edit-view .views-displays {
   border: 1px solid #CCC;
-  padding: 10px;
+  position: relative;
 }
 
 .views-edit-view .views-displays .secondary {
+  background-color: #F9F9F9;
+  border-bottom: 1px solid #CCCCCC;
+  margin: 0 0 14px;
+  overflow: visible;
+  padding: 8px 8px 6px;
   text-align: left;
-  float: left;
+}
+
+/**
+ * The attachment details tabs that switch between sections
+ */
+
+.views-edit-view .views-displays .secondary > li {
+  padding-left: 0;
+}
+
+.views-edit-view .views-displays .secondary > li + li {
+  margin-left: 3px
+}
+
+.views-edit-view .views-displays .secondary a {
+  background-color: #f1f1f1;
+  border: 1px solid #cbcbcb;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  color: #008BCB;
+  display: inline-block;
+  padding: 2px 7px 3px;
+}
+
+.views-edit-view .views-displays .secondary a:focus {
+  outline: none
+}
+
+.views-edit-view .views-displays .secondary a:hover,
+.views-edit-view .views-displays .secondary .active a {
+  background-color: #666666;
+  color: #ffffff;
+}
+
+.views-edit-view .views-displays .secondary .open > a {
+  -moz-border-radius: 7px 7px 0 0;
+  -webkit-border-radius: 7px 7px 0 0;
+  border-radius: 7px 7px 0 0;
+  border-bottom: medium none;
+  position: relative;
+  z-index: 1001;
+}
+
+.views-edit-view .views-displays .secondary .open a:hover {
+  background-color: #f1f1f1;
+  color: #008BCB;
+}
+
+.views-edit-view .views-displays .secondary a:hover > .icon-add {
+  background-position: left -108px;
+}
+
+.views-edit-view .views-displays .secondary .open a:hover > .icon-add {
+  background-position: left -96px;
+}
+
+/**
+ * The attachment details add new section buttons
+ */
+.views-edit-view .views-displays .secondary li.add {
+  position: relative;
+}
+
+.views-edit-view .views-displays .secondary .action-list {
+  left: 0;
   margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 18px;
+  z-index: 1000;
+}
+
+.views-edit-view .views-displays .secondary .action-list  li {
+  background-color: #f1f1f1;
+  border-color: #cbcbcb;
+  border-style: solid;
+  border-width: 0 1px;
+  display: block;
+  margin-left: 0;
+  padding: 2px 9px;
+}
+
+.views-edit-view .views-displays .secondary .action-list  li:first-child {
+  -moz-border-radius: 0 7px 0 0;
+  -webkit-border-radius: 0 7px 0 0;
+  border-radius: 0 7px 0 0;
+  border-width: 1px 1px 0;
+}
+
+.views-edit-view .views-displays .secondary .action-list  li:last-child {
+  -moz-border-radius: 0 0 7px 7px;
+  -webkit-border-radius: 0 0 7px 7px;
+  border-radius: 0 0 7px 7px;
+  border-width: 0 1px 1px;
+}
+
+.views-edit-view .views-displays .secondary .action-list input.form-submit {
+  background: none repeat scroll 0 0 transparent;
+  border: medium none;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  color: #008BCB;
+  margin: 0;
+  padding: 0;
+}
+
+.views-edit-view .views-displays .secondary .action-list li:hover {
+  background-color: #666666;
+}
+
+.views-edit-view .views-displays .secondary .action-list li:hover input.form-submit {
+  color: #ffffff;
 }
 
 /**
@@ -50,15 +192,20 @@
 /**
  * Create a horizontal rule between the display details and whatever's after it.
  */
-.views-edit-view .views-displays > fieldset + div {
+.views-edit-view .views-displays > fieldset + * > *:first-child {
   border-top: 3px solid #CCC;
+}
+
+.views-edit-view .views-displays > fieldset + * {
+  padding: 0 12px;
 }
 
 
 /**
  * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
-.views-edit-view .views-displays > fieldset .fieldset-wrapper:after {
+.views-edit-view .views-displays > fieldset .fieldset-wrapper:after,
+.views-edit-view .views-displays > fieldset .fieldset-wrapper::after {
   content: ".";
   display: block;
   height: 0;

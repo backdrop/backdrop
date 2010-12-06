@@ -89,3 +89,48 @@ Drupal.behaviors.viewsUiEditView = {};
 Drupal.behaviors.viewsUiEditView.attach = function (context, settings) {
   //jQuery('.views-displays').once('views-ui-edit-view').tabs();
 };
+
+/**
+ * The input field items that add displays must be rendered as <input> elements.
+ * The following behavior detaches the <input> elements from the DOM, wraps them
+ * in an unordered list, then appends them to the list of tabs.
+ */
+Drupal.behaviors.viewsUiRenderAddViewButton = {};
+
+Drupal.behaviors.viewsUiRenderAddViewButton.attach = function (context, settings) {
+  var $ = jQuery;
+  // Build the add display menu, pull the display input buttons into it
+  // and mpve them to the add display menu
+  var $addDisplayDropdown = $('<li class="add"><a href="#"><span class="icon icon-add"></span>Add</a><ul class="action-list" style="display:none;"></ul></li>');
+  var $menu = $('.secondary', '#views-ui-edit-form');
+  var $displayButtons = $menu.nextAll('[type="submit"]').detach();
+  $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>');
+  $addDisplayDropdown.appendTo($menu);
+  
+  // Add the click handler for the add display button
+  $('li.add > a', $menu).bind('click', function (event) {
+    event.preventDefault();
+    var $trigger = $(this);
+    Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
+  });
+  // Add a mouseleave handler to close the dropdown when the user mouses
+  // away from the item. We use mouseleave instead of mouseout because
+  // the user is going to trigger mouseout when she moves from the trigger
+  // link to the sub menu items.
+  // We use the live binder because the open class on this item will be 
+  // toggled on and off and we want the handler to take effect in the cases
+  // that the class is present, but not when it isn't.
+  $('li.add', $menu).live('mouseleave', function (event) {
+    var $trigger = $(this).children('a[href="#"]');
+    Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
+  });
+};
+
+/**
+ * @note [@jessebeach] I feel like the following should be a more generic function and
+ * not written specifically for this UI, but I'm not sure where to put it.
+ */
+Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu = function ($trigger) {
+  $trigger.parent().toggleClass('open');
+  $trigger.next().slideToggle('fast');
+}
