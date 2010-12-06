@@ -4,7 +4,22 @@
  * Right now the "add" icon is scoped way too narrowly to the action-links ul. This should
  * be defined at the link level, not the list level.  So here is the correct styling that
  * we should port back to D8 eventually.
+ * 
+ * @note [@jessebeach] I updated the spacing of all .form-submit buttons to space internally
+ * instead of externally so that the right and left edges of sets of buttons will align
+ * with the edges of their containers by default.
  */
+ 
+.views-edit-view .form-submit,
+.views-edit-view a.button {
+  margin-right: 0;
+}
+
+.views-edit-view .form-submit + .form-submit,
+.views-edit-view a.button + a.button {
+  margin-left: 1em;
+}
+ 
 .views-edit-view .views-displays .icon {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
@@ -19,6 +34,14 @@
 .views-edit-view .views-displays .icon-add {
   background-position: left -96px;
   top: 1px;
+}
+
+.views-displays > fieldset {
+  padding-top: 0;
+}
+
+.views-displays > fieldset .fieldset-legend {
+  position: relative;
 }
 
 /**
@@ -158,11 +181,7 @@
 }
 
 .views-edit-view .views-displays .secondary .action-list li:hover {
-  background-color: #666666;
-}
-
-.views-edit-view .views-displays .secondary .action-list li:hover input.form-submit {
-  color: #ffffff;
+  background-color: #dddddd;
 }
 
 /**
@@ -171,22 +190,39 @@
  */
 .views-edit-view .views-displays > fieldset {
   border: none;
-}
-
-.views-edit-view .views-displays > fieldset .fieldset-wrapper {
-  padding: 0;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .views-edit-view .views-displays > fieldset .fieldset-legend {
   text-transform: none;
-  font-size: 1.0769em; /* 14px/13px */
+  font-size: 14px;
+  left: -5px; 
+}
+
+.views-edit-view .views-displays > fieldset .fieldset-wrapper {
+  padding: 14px 0 0;
+  position: relative;
 }
 
 /**
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
 .views-edit-view .views-displays > fieldset .actions {
-  float: right;
+  position: absolute;
+  right: 0;
+  top: -14px;
+}
+
+.views-edit-view .views-displays > fieldset .actions input {
+  margin-bottom: 0;
+}
+
+/**
+ * The auto-preview checkbox line. This may have mor stuff added to it.
+ */
+.form-item-displays-tab-content-details-auto-preview {
+  text-align: right;
 }
 
 /**
@@ -216,9 +252,16 @@
 /**
  * Each of the three columns of information in the display details.
  */
-.views-edit-view .views-display-column {
+.views-edit-view .views-display-columns > * {
   float: left;
+  margin-left: 1%;
+  padding-left: 1%;
   width: 32%;
+}
+
+.views-edit-view .views-display-columns > *:first-child {
+  margin-left: 0;
+  padding-left: 0;
 }
 
 /**
@@ -234,26 +277,28 @@
  * details section.
  */
 .views-edit-view .views-display-section {
-  border: 1px solid #ccc;
+  border: 1px solid #f3f3f3;
   margin: 1em 0;
 }
 
 .views-edit-view .views-display-section h3 {
-  text-transform: uppercase;
-  font-size: 1em;
+  font-size: 12px;
   margin: 0;
-  padding: 0.5em;
+  padding: 4px 6px;
+  text-transform: uppercase;
 }
 
 /**
  * This is each row within one of the "boxes."
  */
 .views-edit-view .views-display-section .views-display-setting {
-  padding: 0.25em 0.5em;
+  color: #666666;
+  font-size: 12px;
+  padding: 2px 6px;
 }
 
 .views-edit-view .views-display-section .views-display-setting.even {
-  background-color: #f0f0f0;
+  background-color: #f9f9f9;
 }
 
 .js #edit-show-update-wizard-key {

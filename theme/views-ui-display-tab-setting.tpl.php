@@ -5,7 +5,7 @@
  * Template for each row inside the "boxes" on the display query edit screen.
  */
 ?>
-<div class="views-display-setting <?php print $zebra; ?>">
+<div class="views-display-setting clearfix <?php print $zebra; ?>">
   <?php if ($description): ?>
     <?php print $description; ?>:
   <?php endif; ?>
