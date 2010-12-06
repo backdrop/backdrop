@@ -509,4 +509,4 @@ Views 3.x-7.x-dev
     o #740686 by dereine, dagmar: Integrate the functionality of Semantic Views (though it takes a significantly diffrent form).
     o #988726 by yhahn: Use taxonomy_term_data 'format' column for description field.
     o #988520 by dereine: Fix sql of date handler for offset.
-
+    o #952636 by yhahn, jmiccolis, dagmar, dereine: Support string format identifiers.
