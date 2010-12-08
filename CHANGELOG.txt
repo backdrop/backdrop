@@ -513,3 +513,4 @@ Views 3.x-7.x-dev
     o #960810: Fixed merge error of semantic views patch.
     o #769458 by anrikun: Fix double encoding of alt/title text on link rewriting.
     o #318944 by dereine: Prevent warning in table view when user has no permission to view any fields.
+    o #949526 by dereine: External database not used.

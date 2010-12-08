@@ -1025,8 +1025,14 @@ class views_plugin_query_default extends views_plugin_query {
       $this->get_count_optimized = TRUE;
     }
 
+    $options = array();
+    // Detect an external database.
+    if (isset($this->view->base_database)) {
+      $options['target'] = $this->view->base_database;
+    }
+
     // Go ahead and build the query.
-    $query = db_select($this->base_table, $this->base_table)->addTag('views');
+    $query = db_select($this->base_table, $this->base_table, $options)->addTag('views');
 
     $joins = $where = $having = $orderby = $groupby = '';
     $fields = $distinct = array();
@@ -1156,12 +1162,6 @@ class views_plugin_query_default extends views_plugin_query {
         // $count_query->where('1 = 1', $additional_arguments);
       }
 
-      // Detect an external database.
-      if (isset($view->base_database)) {
-        db_set_active($view->base_database);
-        $external = TRUE;
-      }
-
       $start = microtime(TRUE);
 
       if ($this->pager->use_count_query() || !empty($view->get_total_rows)) {
@@ -1195,10 +1195,6 @@ class views_plugin_query_default extends views_plugin_query {
       catch (Exception $e) {
         $view->result = array();
         debug('Exception: ' . $e->getMessage());
-      }
-
-      if ($external) {
-        db_set_active();
       }
 
     }
