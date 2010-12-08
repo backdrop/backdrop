@@ -18,6 +18,7 @@ class views_plugin_style_rss extends views_plugin_style {
     if ($input) {
       $url_options['query'] = $input;
     }
+    $url_options['absolute'] = TRUE;
 
     $url = url($this->view->get_url(NULL, $path), $url_options);
     if ($display->has_path()) {
