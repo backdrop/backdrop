@@ -926,8 +926,34 @@ function views_ui_get_display_tab_details($view, $display) {
     '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
   );
 
+  // The area above the three columns.
+  $build['top']['view_name'] = array(
+    '#theme' => 'views_ui_display_tab_setting',
+    '#description' => t('Display name'),
+    // @TODO: Are we letting them edit the display id, or some other property?
+    '#link' => check_plain($display->id),
+  );
+
+  $build['columns'] = array();
+  $build['columns']['#theme_wrappers'] = array('container');
+  $build['columns']['#attributes'] = array('class' => array('clearfix', 'views-display-columns'));
+
+  $build['columns']['first']['#theme_wrappers'] = array('container');
+  $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first'));
+
+  $build['columns']['second']['#theme_wrappers'] = array('container');
+  $build['columns']['second']['#attributes'] = array('class' => array('views-display-column', 'second'));
+
+  $build['columns']['second']['settings'] = array();
+  $build['columns']['second']['header'] = array();
+  $build['columns']['second']['footer'] = array();
+  $build['columns']['second']['pager'] = array();
+
+  $build['columns']['third']['#theme_wrappers'] = array('container');
+  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third'));
+
   // Each option (e.g. title, access, display as grid/table/list) fits into one
-  // of several "buckets" (Format, Fields, Sort, and so on).
+  // of several "buckets," or boxes (Format, Fields, Sort, and so on).
   $buckets = array();
 
   // Fetch options from the display plugin, with a list of buckets they go into.
@@ -936,7 +962,7 @@ function views_ui_get_display_tab_details($view, $display) {
 
   // Place each option into its bucket.
   foreach ($options as $id => $option) {
-    // Each option self-identifies as belonging in a given category.
+    // Each option self-identifies as belonging in a particular bucket.
     $bucket = $option['category'];
 
     if (empty($buckets[$bucket]['build'])) {
@@ -975,32 +1001,6 @@ function views_ui_get_display_tab_details($view, $display) {
     }
   }
 
-  // The area above the three columns.
-  $build['top']['view_name'] = array(
-    '#theme' => 'views_ui_display_tab_setting',
-    '#description' => t('Display name'),
-    // @TODO: Are we letting them edit the display id, or some other property?
-    '#link' => check_plain($display->id),
-  );
-
-  $build['columns'] = array();
-  $build['columns']['#theme_wrappers'] = array('container');
-  $build['columns']['#attributes'] = array('class' => array('clearfix', 'views-display-columns'));
-
-  $build['columns']['first']['#theme_wrappers'] = array('container');
-  $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first'));
-
-  $build['columns']['second']['#theme_wrappers'] = array('container');
-  $build['columns']['second']['#attributes'] = array('class' => array('views-display-column', 'second'));
-
-  $build['columns']['second']['settings'] = array();
-  $build['columns']['second']['header'] = array();
-  $build['columns']['second']['footer'] = array();
-  $build['columns']['second']['pager'] = array();
-
-  $build['columns']['third']['#theme_wrappers'] = array('container');
-  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third'));
-
   // Place each bucket into the proper column.
   foreach ($buckets as $id => $bucket) {
     // Let buckets identify themselves as belonging in a column.
@@ -1014,10 +1014,24 @@ function views_ui_get_display_tab_details($view, $display) {
     }
     if (isset($bucket['build']) && is_array($bucket['build'])) {
       $build['columns'][$column][$id] = $bucket['build'];
-      $build['columns'][$column][$id]['#theme_wrappers'][] = 'views_ui_display_tab_section';
+      $build['columns'][$column][$id]['#theme_wrappers'][] = 'views_ui_display_tab_bucket';
       $build['columns'][$column][$id]['#title'] = $bucket['title'];
     }
   }
+
+  // Fetch style plugin info because it has some effect on how/what we render.
+  $style_plugin = $display->handler->get_plugin();
+
+  $no_fields = !($style_plugin && $style_plugin->uses_fields());
+  $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display, $no_fields);
+
+  $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
+  $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
+  $build['columns']['second']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
+  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
+  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
+  $build['columns']['first']['filters'] = views_ui_edit_form_get_bucket('filter', $view, $display);
+  $build['columns']['first']['sorts'] = views_ui_edit_form_get_bucket('sort', $view, $display);
 
 
   // Add a checkbox controlling whether or not this display auto-previews.
@@ -1038,11 +1052,15 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   $variables['gear'] = implode($variables['settings_links']);
 }
 
-function template_preprocess_views_ui_display_tab_section(&$variables) {
+function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   $element = $variables['element'];
 
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
+  $variables['overridden'] = !empty($element['#overridden']);
+//  $variables['fields'] = empty($element['#fields']) ? '' : $element['#fields'];
+  $variables['rearrange'] = $element['#rearrange'];
+  $variables['add'] = $element['#add'];
 }
 
 function template_preprocess_views_ui_display_tab_column(&$variables) {
@@ -1318,42 +1336,46 @@ function views_ui_display_tab($view, $display) {
 /**
  * Add information about a section to a display.
  */
-function template_preprocess_views_ui_edit_item(&$vars) {
-  $type = $vars['type'];
-  $view = $vars['view'];
-  $display = $vars['display'];
-
+function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALSE) {
+  $build = array(
+    '#theme' => 'views_ui_display_tab_bucket',
+  );
   $types = views_object_types();
 
-  $vars['overridden'] = FALSE;
-  $vars['defaulted'] = FALSE;
-  $vars['item_help_icon'] = module_exists('advanced_help') ? theme('advanced_help_topic', array('module' => 'views', 'topic' => $type)) : '';
-
-  if ($vars['no_fields']) {
-    $vars['title'] = $types[$type]['title'];
-    $vars['rearrange'] = NULL;
-    $vars['add'] = NULL;
-    return;
+  $build['#overridden'] = FALSE;
+  $build['#defaulted'] = FALSE;
+  if (module_exists('advanced_help')) {
+    $build['item_help_icon'] = array(
+      '#theme' => 'advanced_help_topic',
+      '#module' => 'views',
+      '#topic' => $type,
+    );
+  }
+  
+  if ($no_fields) {
+    $build['#title'] = $types[$type]['title'];
+    $build['#rearrange'] = '';
+    $build['#add'] = '';
+    return $build;
   }
 
-  $vars['rearrange'] = l('<span>' . t('Rearrange') . '</span>', "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-rearrange', 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => true));
-
-  $vars['add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => true));
+  $build['#rearrange'] = l('<span>' . t('Rearrange') . '</span>', "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-rearrange', 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => true));
+  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => true));
 
   if (!$display->handler->is_default_display()) {
     if (!$display->handler->is_defaulted($types[$type]['plural'])) {
-      $vars['overridden'] = TRUE;
+      $build['#overridden'] = TRUE;
     }
     else {
-      $vars['defaulted'] = TRUE;
+      $build['#defaulted'] = TRUE;
     }
   }
 
   if ($display->display_plugin != 'default') {
-    $vars['title'] = l($types[$type]['title'], "admin/structure/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-title-' . $type)));
+    $build['#title'] = l($types[$type]['title'], "admin/structure/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-title-' . $type)));
   }
   else {
-    $vars['title'] = $types[$type]['title'];
+    $build['#title'] = $types[$type]['title'];
   }
 
   $fields = array();
@@ -1418,7 +1440,9 @@ function template_preprocess_views_ui_edit_item(&$vars) {
     }
   }
 
-  $vars['fields'] = $fields;
+  $build['#fields'] = $fields;
+
+  return $build;
 }
 
 /**

@@ -215,9 +215,9 @@ function views_ui_theme() {
       'template' => 'views-ui-display-tab-setting',
       'path' => "$path/theme",
     ),
-    'views_ui_display_tab_section' => array(
+    'views_ui_display_tab_bucket' => array(
       'render element' => 'element',
-      'template' => 'views-ui-display-tab-section',
+      'template' => 'views-ui-display-tab-bucket',
       'path' => "$path/theme",
     ),
     'views_ui_edit_item' => array(

@@ -843,7 +843,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['display_title'] = array(
-      'category' => 'top',
+      'category' => 'basic',
       'title' => t('Name'),
       'value' => check_plain($this->display->display_title),
       'desc' => t('Change the name of this display.'),
@@ -855,7 +855,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['title'] = array(
-      'category' => 'top',
+      'category' => 'basic',
       'title' => t('Title'),
       'value' => $title,
       'desc' => t('Change the title that this display will use.'),
