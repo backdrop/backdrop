@@ -511,3 +511,4 @@ Views 3.x-7.x-dev
     o #988520 by dereine: Fix sql of date handler for offset.
     o #952636 by yhahn, jmiccolis, dagmar, dereine: Support string format identifiers.
     o #960810: Fixed merge error of semantic views patch.
+    o #769458 by anrikun: Fix double encoding of alt/title text on link rewriting.

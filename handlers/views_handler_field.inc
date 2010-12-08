@@ -853,7 +853,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
     $alt = strtr($alter['alt'], $tokens);
     // Set the title attribute of the link only if it improves accessibility
     if ($alt && $alt != $text) {
-      $options['attributes']['title'] = $alt;
+      $options['attributes']['title'] = html_entity_decode($alt, ENT_QUOTES);
     }
 
     $class = strtr($alter['link_class'], $tokens);
