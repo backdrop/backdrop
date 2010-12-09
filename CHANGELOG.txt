@@ -519,3 +519,4 @@ Views 3.x-7.x-dev
     o #768802 by dereine: Allow sort by node language.
     o #600742 by dagmar: Allow displays to be disabled.
     o reported by swentel: Remove left over debugging dsm.
+    o #468484 by dereine: Filter by unread not relationship safe.
