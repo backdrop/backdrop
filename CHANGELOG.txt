@@ -523,4 +523,5 @@ Views 3.x-7.x-dev
     o #833790 redux by dereine: Make sure field actually exists.
     o #607942 by dashton: Support "rel" attribute in link rewriting.
     o #994014 by idflood: Add missing semicolon to node translation link handler.
+    o #909886: -Any- option shows up on boolean exposed filters even when not optional.
     o #972934 by dereine: Fix sql of subquery of comment_user_uid argument handler.
