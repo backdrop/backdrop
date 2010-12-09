@@ -516,3 +516,4 @@ Views 3.x-7.x-dev
     o #416178 by dereine: Profile field checkboxes did not properly filter false values.
     o #949526 by dereine: External database not used.
     o #913688 by dereine: Fix feed icon path.
+    o #768802 by dereine: Allow sort by node language.
