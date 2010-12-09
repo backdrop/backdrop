@@ -258,7 +258,6 @@ class views_handler_field extends views_handler {
       }
       else {
         $tokens = $last_field->get_render_tokens($fake_item);
-        dsm($tokens);
       }
 
       $value = strip_tags($this->render_altered($fake_item, $tokens));

@@ -518,3 +518,4 @@ Views 3.x-7.x-dev
     o #913688 by dereine: Fix feed icon path.
     o #768802 by dereine: Allow sort by node language.
     o #600742 by dagmar: Allow displays to be disabled.
+    o reported by swentel: Remove left over debugging dsm.
