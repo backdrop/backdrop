@@ -6,9 +6,19 @@
  */
 ?>
 <div class="views-display-bucket">
+  <ul class="horizontal right actions links">
+    <?php if ($rearrange) : ?>
+    <li>
+      <?php print $rearrange; ?>
+    </li>
+    <?php endif; ?>
+    <?php if ($add) : ?>
+    <li>
+      <?php print $add; ?>
+    </li>
+    <?php endif; ?>
+  </ul>
   <h3><?php print $title; ?></h3>
-  <?php print $rearrange; ?>
-  <?php print $add; ?>
   <?php print $fields; ?>
   <?php print $content; ?>
 </div>

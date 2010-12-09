@@ -679,7 +679,19 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form_state['view'] = clone($view);
 
   $form['#attached']['library'][] = array('system', 'ui.tabs');
-  $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.css';
+  $form['#attached']['css'][] = array(
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css'),
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
+      array(
+        'group' => CSS_DEFAULT,
+        'browsers' => array(
+          'IE' => 'lte IE 7',
+          '!IE' => FALSE
+        ),
+        'preprocess' => FALSE,
+      )
+    ),
+  );
   $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
 
   $form += array(

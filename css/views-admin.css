@@ -9,6 +9,83 @@
  * instead of externally so that the right and left edges of sets of buttons will align
  * with the edges of their containers by default.
  */
+
+/* @group Reset */
+
+.views-edit-view .links {
+  list-style: none outside none;
+  margin: 0;
+}
+
+.views-edit-view .links li {
+  padding-right: 0;
+}
+
+/* @end */
+ 
+/* @group Inline lists */
+ 
+.views-edit-view .horizontal > * {
+  clear: none;
+  float: left;
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+.views-edit-view .horizontal.right {
+  float: right;
+}
+
+.views-edit-view .horizontal > * + * {
+  margin-left: 9px;
+  padding-left: 9px;
+}
+ 
+ /* @end */
+ 
+ /* @group Actions */
+ 
+.views-edit-view ul.actions a {
+  background-attachment: scroll;
+  background-image: url("../images/sprites.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+  display: block;
+  height: 17px;
+  overflow: hidden;
+  text-indent: -9999px;
+  width: 17px;
+}
+
+.views-edit-view ul.actions a:hover {
+  text-decoration: none;
+}
+
+.views-edit-view ul.actions .views-button-add {
+  background-position: left -120px;
+}
+
+.views-edit-view ul.actions .views-button-rearrange {
+  background-position: left -174px;
+}
+
+.views-edit-view ul.actions .views-button-add:hover {
+  background-position: left -138px;
+}
+
+.views-edit-view ul.actions .views-button-rearrange:hover {
+  background-position: left -192px;
+}
+
+.views-edit-view ul.actions .views-button-add:active {
+  background-position: left -156px;
+}
+
+.views-edit-view ul.actions .views-button-rearrange:active {
+  background-position: left -210px;
+}
+ 
+ /* @end */
  
 .views-edit-view .form-submit,
 .views-edit-view a.button {
@@ -62,6 +139,7 @@
 
 .views-edit-view .views-displays {
   border: 1px solid #CCC;
+  padding-bottom: 18px;
   position: relative;
 }
 
@@ -116,7 +194,7 @@
   z-index: 1001;
 }
 
-.views-edit-view .views-displays .secondary .open a:hover {
+.views-edit-view .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
   color: #008BCB;
 }
@@ -208,13 +286,13 @@
 /**
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
-.views-edit-view .views-displays > fieldset .actions {
+.views-edit-view .views-displays > fieldset .fieldset-wrapper > .actions {
   position: absolute;
   right: 0;
   top: -14px;
 }
 
-.views-edit-view .views-displays > fieldset .actions input {
+.views-edit-view .views-displays > fieldset .fieldset-wrapper > .actions input {
   margin-bottom: 0;
 }
 
@@ -284,8 +362,17 @@
 .views-edit-view .views-display-bucket h3 {
   font-size: 12px;
   margin: 0;
-  padding: 4px 6px;
   text-transform: uppercase;
+}
+
+.views-edit-view .views-display-bucket h3,
+.views-edit-view .views-display-bucket > .actions {
+  padding: 6px 6px 4px;
+}
+
+.views-edit-view .views-display-bucket > .actions * + * {
+  margin-left: 3px;
+  padding-left: 3px;
 }
 
 /**
@@ -303,4 +390,11 @@
 
 .js #edit-show-update-wizard-key {
   display: none;
+}
+
+/**
+ * Live preview elements
+ */
+.views-edit-view .views-row + .views-row {
+  margin-top: 36px;
 }
