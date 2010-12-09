@@ -520,3 +520,4 @@ Views 3.x-7.x-dev
     o #600742 by dagmar: Allow displays to be disabled.
     o reported by swentel: Remove left over debugging dsm.
     o #468484 by dereine: Filter by unread not relationship safe.
+    o #833790 redux by dereine: Make sure field actually exists.
