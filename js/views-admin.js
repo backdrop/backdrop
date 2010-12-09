@@ -121,8 +121,11 @@ Drupal.behaviors.viewsUiRenderAddViewButton.attach = function (context, settings
   // toggled on and off and we want the handler to take effect in the cases
   // that the class is present, but not when it isn't.
   $('li.add', $menu).live('mouseleave', function (event) {
-    var $trigger = $(this).children('a[href="#"]');
-    Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
+    var $this = $(this);
+    var $trigger = $this.children('a[href="#"]');
+    if ($this.children('.action-list').is(':visible')) {
+      Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu($trigger);
+    }
   });
 };
 
