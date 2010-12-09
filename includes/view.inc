@@ -728,6 +728,12 @@ class view extends views_db_object {
       return TRUE;
     }
 
+    // Don't allow to use deactivated displays.
+    if (!$this->display[$this->current_display]->handler->get_option('enabled')) {
+      $this->build_info['fail'] = TRUE;
+      return FALSE;
+    }
+
     // Let modules modify the view just prior to executing it.
     foreach (module_implements('views_pre_execute') as $module) {
       $function = $module . '_views_pre_execute';
