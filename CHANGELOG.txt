@@ -521,4 +521,5 @@ Views 3.x-7.x-dev
     o reported by swentel: Remove left over debugging dsm.
     o #468484 by dereine: Filter by unread not relationship safe.
     o #833790 redux by dereine: Make sure field actually exists.
+    o #607942 by dashton: Support "rel" attribute in link rewriting.
     o #994014 by idflood: Add missing semicolon to node translation link handler.
