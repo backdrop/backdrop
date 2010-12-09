@@ -35,6 +35,6 @@ class views_handler_field_node_translation_link extends views_handler_field {
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
-    return $values->{$this->aliases['title']}
+    return $values->{$this->aliases['title']};
   }
 }
