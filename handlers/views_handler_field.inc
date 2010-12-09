@@ -492,7 +492,7 @@ class views_handler_field extends views_handler {
         '#type' => 'textfield',
         '#default_value' => $this->options['alter']['rel'],
         '#description' => t('Include Rel attribute for use in lightbox2 or other javascript utility.'),
-        '#process' => array('views_process_dependency'),
+        '#process' => array('ctools_dependent_process'),
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1)
         ),

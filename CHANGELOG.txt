@@ -525,3 +525,4 @@ Views 3.x-7.x-dev
     o #994014 by idflood: Add missing semicolon to node translation link handler.
     o #909886: -Any- option shows up on boolean exposed filters even when not optional.
     o #972934 by dereine: Fix sql of subquery of comment_user_uid argument handler.
+    o Follow up #607942, use ctools_dependent_process.
