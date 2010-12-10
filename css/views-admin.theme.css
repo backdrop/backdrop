@@ -10,6 +10,10 @@
   margin: 0;
 }
 
+.page-admin-structure-views #content a:hover {
+  text-decoration: none;
+}
+
 /* @end */
 
 /* @group Forms */
@@ -21,19 +25,17 @@
 
 /* @end */
  
-/* @group Actions */
+/* @group Icons */
 
-/**
- * Right now the "add" icon is scoped way too narrowly to the action-links ul. This should
- * be defined at the link level, not the list level.  So here is the correct styling that
- * we should port back to D8 eventually.
- * 
- */
-.page-admin-structure-views #content ul.actions a {
+.page-admin-structure-views #content ul.actions a,
+.page-admin-structure-views #content .icon {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
-  background-position: left top;
+  background-position: center top;
   background-repeat: no-repeat;
+}
+
+.page-admin-structure-views #content ul.actions a {
   display: block;
   height: 17px;
   overflow: hidden;
@@ -41,52 +43,48 @@
   width: 17px;
 }
 
-.page-admin-structure-views #content ul.actions a:hover {
-  text-decoration: none;
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add {
-  background-position: left -120px;
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange {
-  background-position: left -174px;
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add:hover {
-  background-position: left -138px;
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
-  background-position: left -192px;
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add:active {
-  background-position: left -156px;
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange:active {
-  background-position: left -210px;
-}
- 
-/* @end */
-
-/* @group Icons */
- 
-.page-admin-structure-views #content .views-displays .icon {
-  background-attachment: scroll;
-  background-image: url("../images/sprites.png");
-  background-position: left top;
-  background-repeat: no-repeat;
+/* Targets a <span> element */
+.page-admin-structure-views #content .icon {
   display: inline-block;
   height: 12px;
   position: relative;
   width: 16px;
 }
+
+.page-admin-structure-views #content ul.actions .views-button-add {
+  background-position: center -39px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange {
+  background-position: center -96px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add:hover {
+  background-position: center -58px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
+  background-position: center -115px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add:active {
+  background-position: center -77px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange:active {
+  background-position: center -134px;
+}
  
 .page-admin-structure-views #content .views-displays .icon-add {
-  background-position: left -96px;
-  top: 1px;
+  background-position: center -3px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
+  background-position: center -21px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
+  background-position: center -3px;
 }
 
 /* @end */
@@ -162,14 +160,6 @@
 .page-admin-structure-views #content .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
   color: #008BCB;
-}
-
-.page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
-  background-position: left -108px;
-}
-
-.page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
-  background-position: left -96px;
 }
 
 .page-admin-structure-views #content .views-displays .secondary .action-list  li {
