@@ -44,10 +44,7 @@
 
 /* @group Lists */
 
-.page-admin-structure-views #content ul,
-.page-admin-structure-views #content ol,
 .page-admin-structure-views #content ul.secondary,
-.page-admin-structure-views #content .block ul,
 .page-admin-structure-views #content .item-list ul {
   margin: 0;
   padding: 0;

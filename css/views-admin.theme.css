@@ -16,22 +16,14 @@
 
 /* @end */
 
-/* @group Forms */
-
-.page-admin-structure-views #content .form-submit + .form-submit,
-.page-admin-structure-views #content a.button + a.button {
-  margin-left: 1em;
-}
-
-/* @end */
- 
 /* @group Icons */
 
 .page-admin-structure-views #content ul.actions a,
-.page-admin-structure-views #content .icon {
+.page-admin-structure-views #content .icon,
+.page-admin-structure-views #content .icon-text {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
-  background-position: center top;
+  background-position: left top;
   background-repeat: no-repeat;
 }
 
@@ -43,7 +35,7 @@
   width: 17px;
 }
 
-/* Targets a <span> element */
+/* Targets a <span> element. This assumes no visible text from the span. */
 .page-admin-structure-views #content .icon {
   display: inline-block;
   height: 12px;
@@ -51,40 +43,62 @@
   width: 16px;
 }
 
+/* Targets any element with an icon -> text combo */
+.page-admin-structure-views #content .icon-text {
+  padding-left: 19px;
+}
+
+.page-admin-structure-views #content .icon-linked {
+  background-position: left -153px;
+}
+
+.page-admin-structure-views #content .icon-unlinked {
+  background-position: left -195px;
+}
+
 .page-admin-structure-views #content ul.actions .views-button-add {
-  background-position: center -39px;
+  background-position: left -39px;
 }
 
 .page-admin-structure-views #content ul.actions .views-button-rearrange {
-  background-position: center -96px;
+  background-position: left -96px;
 }
 
 .page-admin-structure-views #content ul.actions .views-button-add:hover {
-  background-position: center -58px;
+  background-position: left -58px;
 }
 
 .page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
-  background-position: center -115px;
+  background-position: left -115px;
 }
 
 .page-admin-structure-views #content ul.actions .views-button-add:active {
-  background-position: center -77px;
+  background-position: left -77px;
 }
 
 .page-admin-structure-views #content ul.actions .views-button-rearrange:active {
-  background-position: center -134px;
+  background-position: left -134px;
 }
  
 .page-admin-structure-views #content .views-displays .icon-add {
-  background-position: center -3px;
+  background-position: left -3px;
 }
 
 .page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
-  background-position: center -21px;
+  background-position: left -21px;
 }
 
 .page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
-  background-position: center -3px;
+  background-position: left -3px;
+}
+
+/* @end */
+
+/* @group Forms */
+
+.page-admin-structure-views #content .form-submit + .form-submit,
+.page-admin-structure-views #content a.button + a.button {
+  margin-left: 1em;
 }
 
 /* @end */
@@ -243,7 +257,9 @@
  */
 .page-admin-structure-views #content .views-display-bucket {
   border: 1px solid #f3f3f3;
+  line-height: 20px;
   margin: 1em 0;
+  padding-top: 4px;
 }
 
 .page-admin-structure-views #content .views-display-bucket h3 {
@@ -251,9 +267,20 @@
   text-transform: uppercase;
 }
 
-.page-admin-structure-views #content .views-display-bucket h3,
-.page-admin-structure-views #content .views-display-bucket > .actions {
-  padding: 6px 6px 4px;
+.page-admin-structure-views #content .views-display-bucket > * {
+  padding: 2px 6px 4px;
+}
+
+.page-admin-structure-views #content .views-display-bucket .icon-text {
+  padding-left: 25px;
+}
+
+.page-admin-structure-views #content .views-display-bucket .icon-linked {
+  background-position: 6px -151px;
+}
+
+.page-admin-structure-views #content .views-display-bucket .icon-unlinked {
+  background-position: 6px -193px;
 }
 
 .page-admin-structure-views #content .views-display-bucket > .actions * + * {
@@ -267,7 +294,7 @@
 .page-admin-structure-views #content .views-display-bucket .views-display-setting {
   color: #666666;
   font-size: 12px;
-  padding: 2px 6px;
+  padding-bottom: 2px;
 }
 
 .page-admin-structure-views #content .views-display-bucket .even {
