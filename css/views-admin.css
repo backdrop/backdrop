@@ -10,6 +10,18 @@
 .page-admin-structure-views #content .horizontal.right {
   float: right;
 }
+
+.page-admin-structure-views #content .horizontal label {
+  position: absolute;
+}
+
+.page-admin-structure-views #content .horizontal .form-item > [class] {
+  margin-top: 25px;  
+}
+
+.page-admin-structure-views #content .horizontal .form-item > [class] + [class] {
+  margin-top: 0;
+}
  
  /* @end */
 
@@ -82,7 +94,9 @@
  * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
 .page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper:after,
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper::after {
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper::after,
+.page-admin-structure-views #content .horizontal:after,
+.page-admin-structure-views #content .horizontal::after {
   content: ".";
   display: block;
   height: 0;
