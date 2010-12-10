@@ -18,21 +18,23 @@
 }
 
 .page-admin-structure-views #content fieldset .fieldset-wrapper {
-  padding: 12px;
-}
-
-.page-admin-structure-views #content fieldset legend {
-  padding-top: 12px;
+  padding: 10px 12px 12px;
 }
 
 .page-admin-structure-views #content fieldset legend + .fieldset-wrapper {
-  padding-top: 0;
+  padding-top: 2.5em;
 }
 
-.page-admin-structure-views #content .views-edit-view .form-submit,
-.page-admin-structure-views #content .views-edit-view a.button {
+.page-admin-structure-views #content .form-submit,
+.page-admin-structure-views #content a.button {
   margin-bottom: 0;
   margin-right: 0;
+}
+
+.page-admin-structure-views #content .form-item {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  padding-top: 0;
 }
 
 .page-admin-structure-views #content .form-actions {
@@ -50,7 +52,7 @@
   padding: 0;
 }
 
-.page-admin-structure-views #content .views-edit-view .links li {
+.page-admin-structure-views #content .links li {
   padding-right: 0;
 }
 

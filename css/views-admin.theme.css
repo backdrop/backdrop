@@ -96,14 +96,22 @@
 
 /* @group Forms */
 
+.page-admin-structure-views #content input.form-checkbox, input.form-radio {
+  vertical-align: baseline;
+}
+
 .page-admin-structure-views #content .form-submit + .form-submit,
 .page-admin-structure-views #content a.button + a.button {
   margin-left: 1em;
 }
 
+.page-admin-structure-views #content .fieldset-wrapper > * + * {
+  margin-top: 18px;
+}
+
 /* @end */
 
-/* @Group Lists */
+/* @group Lists */
 
 .page-admin-structure-views #content .horizontal > * + * {
   margin-left: 9px;
