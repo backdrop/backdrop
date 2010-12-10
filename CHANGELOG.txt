@@ -530,3 +530,4 @@ Views 3.x-7.x-dev
     o #898990 by dereine: Fix bad SQL generated on related terms relationship if no vocabularies selected.
     o #833220 by dereine: Properly validate value on date filter.
     o #910256 by dagmar: Add an - All - option to exposed items per page.
+    o #779668 by esteewhy: Fix not technically valid use of break statements.
