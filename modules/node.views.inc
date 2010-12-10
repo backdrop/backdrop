@@ -676,6 +676,15 @@ function node_views_analyze($view) {
         // check for no access control
         $access = $display->handler->get_option('access');
         if (empty($access['type']) || $access['type'] == 'none') {
+          $result = db_query("SELECT r.name, p.perm FROM {role} r INNER JOIN {permission} p ON p.rid = r.rid WHERE r.name IN ('anonymous user', 'authenticated user')");
+          while ($role = db_fetch_object($result)) {
+            $role->perm = explode(', ', $role->perm);
+            $role->safe = in_array('access content', $role->perm);
+            $roles[$role->name] = $role;
+          }
+          if (!($roles['anonymous user']->safe && $roles['authenticated user']->safe)) {
+            $ret[] = views_ui_analysis(t('Some roles lack permission to access content, but display %display has no access control.', array('%display' => $display->display_title)), 'warning');
+          }
           $filters = $display->handler->get_option('filters');
           foreach ($filters as $filter) {
             if ($filter['table'] == 'node' && ($filter['field'] == 'status' || $filter['field'] == 'status_extra')) {
