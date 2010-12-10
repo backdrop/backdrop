@@ -1,0 +1,294 @@
+/**
+ * The .theme.css file is intended to contain presentation declarations including
+ * images, borders, colors, and fonts.
+ */
+  
+/* @group Reset */
+
+.page-admin-structure-views #content .links {
+  list-style: none outside none;
+  margin: 0;
+}
+
+/* @end */
+
+/* @group Forms */
+
+.page-admin-structure-views #content .form-submit + .form-submit,
+.page-admin-structure-views #content a.button + a.button {
+  margin-left: 1em;
+}
+
+/* @end */
+ 
+/* @group Actions */
+
+/**
+ * Right now the "add" icon is scoped way too narrowly to the action-links ul. This should
+ * be defined at the link level, not the list level.  So here is the correct styling that
+ * we should port back to D8 eventually.
+ * 
+ */
+.page-admin-structure-views #content ul.actions a {
+  background-attachment: scroll;
+  background-image: url("../images/sprites.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+  display: block;
+  height: 17px;
+  overflow: hidden;
+  text-indent: -9999px;
+  width: 17px;
+}
+
+.page-admin-structure-views #content ul.actions a:hover {
+  text-decoration: none;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add {
+  background-position: left -120px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange {
+  background-position: left -174px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add:hover {
+  background-position: left -138px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
+  background-position: left -192px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add:active {
+  background-position: left -156px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange:active {
+  background-position: left -210px;
+}
+ 
+/* @end */
+
+/* @group Icons */
+ 
+.page-admin-structure-views #content .views-displays .icon {
+  background-attachment: scroll;
+  background-image: url("../images/sprites.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+  display: inline-block;
+  height: 12px;
+  position: relative;
+  width: 16px;
+}
+ 
+.page-admin-structure-views #content .views-displays .icon-add {
+  background-position: left -96px;
+  top: 1px;
+}
+
+/* @end */
+
+/* @Group Lists */
+
+.page-admin-structure-views #content .horizontal > * + * {
+  margin-left: 9px;
+  padding-left: 9px;
+}
+
+/* @end */
+
+/* @group Thing */
+
+.page-admin-structure-views #content .views-displays {
+  border: 1px solid #CCC;
+  padding-bottom: 18px;
+}
+
+.page-admin-structure-views #content .views-alt-ui-view-displays,
+.page-admin-structure-views #content .views-alt-ui-view-paths,
+.page-admin-structure-views #content .views-alt-ui-view-description {
+  font-size: 0.9167em; /* 11px/12px */
+  line-height: 1.5em;
+}
+
+.page-admin-structure-views #content .views-displays .secondary {
+  background-color: #F9F9F9;
+  border-bottom: 1px solid #CCCCCC;
+  margin-bottom: 14px;
+  padding: 8px 8px 6px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary > li + li {
+  margin-left: 3px
+}
+
+/**
+ * The attachment details tabs that switch between sections
+ */
+
+.page-admin-structure-views #content .views-displays .secondary a {
+  background-color: #f1f1f1;
+  border: 1px solid #cbcbcb;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  color: #008BCB;
+  display: inline-block;
+  padding: 2px 7px 3px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary a:focus {
+  outline: none
+}
+
+.page-admin-structure-views #content .views-displays .secondary a:hover,
+.page-admin-structure-views #content .views-displays .secondary .active a {
+  background-color: #666666;
+  color: #ffffff;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .open > a {
+  -moz-border-radius: 7px 7px 0 0;
+  -webkit-border-radius: 7px 7px 0 0;
+  border-radius: 7px 7px 0 0;
+  border-bottom: 1px solid transparent;
+  position: relative;
+  z-index: 1001;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .open > a:hover {
+  background-color: #f1f1f1;
+  color: #008BCB;
+}
+
+.page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
+  background-position: left -108px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
+  background-position: left -96px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .action-list  li {
+  background-color: #f1f1f1;
+  border-color: #cbcbcb;
+  border-style: solid;
+  border-width: 0 1px;
+  padding: 2px 9px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .action-list  li:first-child {
+  -moz-border-radius: 0 7px 0 0;
+  -webkit-border-radius: 0 7px 0 0;
+  border-radius: 0 7px 0 0;
+  border-width: 1px 1px 0;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .action-list  li:last-child {
+  -moz-border-radius: 0 0 7px 7px;
+  -webkit-border-radius: 0 0 7px 7px;
+  border-radius: 0 0 7px 7px;
+  border-width: 0 1px 1px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .action-list input.form-submit {
+  background: none repeat scroll 0 0 transparent;
+  border: medium none;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  color: #008BCB;
+  padding: 0;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .action-list li:hover {
+  background-color: #dddddd;
+}
+
+/**
+ * The attachment details section is a collapsible fieldset, but should not
+ * have a border around it.
+ */
+.page-admin-structure-views #content .views-displays > fieldset {
+  border: none;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-legend {
+  text-transform: none;
+  font-size: 14px;
+  left: -5px; 
+}
+
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper {
+  padding: 14px 0 0;
+  position: relative;
+}
+
+/**
+ * The auto-preview checkbox line. This may have mor stuff added to it.
+ */
+.form-item-displays-tab-content-details-auto-preview {
+  text-align: right;
+}
+
+/**
+ * Create a horizontal rule between the display details and whatever's after it.
+ */
+.page-admin-structure-views #content .views-displays > fieldset + * > *:first-child {
+  border-top: 3px solid #CCC;
+}
+
+.page-admin-structure-views #content .views-displays > fieldset + * {
+  padding: 0 12px;
+}
+
+/**
+ * These are the individual "buckets," or boxes, inside the three columns in the
+ * attachment details section.
+ */
+.page-admin-structure-views #content .views-display-bucket {
+  border: 1px solid #f3f3f3;
+  margin: 1em 0;
+}
+
+.page-admin-structure-views #content .views-display-bucket h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.page-admin-structure-views #content .views-display-bucket h3,
+.page-admin-structure-views #content .views-display-bucket > .actions {
+  padding: 6px 6px 4px;
+}
+
+.page-admin-structure-views #content .views-display-bucket > .actions * + * {
+  margin-left: 3px;
+  padding-left: 3px;
+}
+
+/**
+ * This is each row within one of the "boxes."
+ */
+.page-admin-structure-views #content .views-display-bucket .views-display-setting {
+  color: #666666;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.page-admin-structure-views #content .views-display-bucket .even {
+  background-color: #f9f9f9;
+}
+
+/**
+ * Live preview elements
+ */
+.page-admin-structure-views #content .views-row + .views-row {
+  margin-top: 36px;
+}
+
+/* @end */

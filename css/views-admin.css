@@ -1,123 +1,19 @@
 /* $Id: views-admin.css,v 1.14.4.11 2010/11/20 23:49:29 dereine Exp $ */
-
-/**
- * Right now the "add" icon is scoped way too narrowly to the action-links ul. This should
- * be defined at the link level, not the list level.  So here is the correct styling that
- * we should port back to D8 eventually.
- * 
- * @note [@jessebeach] I updated the spacing of all .form-submit buttons to space internally
- * instead of externally so that the right and left edges of sets of buttons will align
- * with the edges of their containers by default.
- */
-
-/* @group Reset */
-
-.views-edit-view .links {
-  list-style: none outside none;
-  margin: 0;
-}
-
-.views-edit-view .links li {
-  padding-right: 0;
-}
-
-/* @end */
  
 /* @group Inline lists */
  
-.views-edit-view .horizontal > * {
+.page-admin-structure-views #content .horizontal > * {
   clear: none;
   float: left;
-  margin-bottom: 0;
-  overflow: visible;
 }
 
-.views-edit-view .horizontal.right {
+.page-admin-structure-views #content .horizontal.right {
   float: right;
 }
-
-.views-edit-view .horizontal > * + * {
-  margin-left: 9px;
-  padding-left: 9px;
-}
  
  /* @end */
- 
- /* @group Actions */
- 
-.views-edit-view ul.actions a {
-  background-attachment: scroll;
-  background-image: url("../images/sprites.png");
-  background-position: left top;
-  background-repeat: no-repeat;
-  display: block;
-  height: 17px;
-  overflow: hidden;
-  text-indent: -9999px;
-  width: 17px;
-}
 
-.views-edit-view ul.actions a:hover {
-  text-decoration: none;
-}
-
-.views-edit-view ul.actions .views-button-add {
-  background-position: left -120px;
-}
-
-.views-edit-view ul.actions .views-button-rearrange {
-  background-position: left -174px;
-}
-
-.views-edit-view ul.actions .views-button-add:hover {
-  background-position: left -138px;
-}
-
-.views-edit-view ul.actions .views-button-rearrange:hover {
-  background-position: left -192px;
-}
-
-.views-edit-view ul.actions .views-button-add:active {
-  background-position: left -156px;
-}
-
-.views-edit-view ul.actions .views-button-rearrange:active {
-  background-position: left -210px;
-}
- 
- /* @end */
- 
-.views-edit-view .form-submit,
-.views-edit-view a.button {
-  margin-right: 0;
-}
-
-.views-edit-view .form-submit + .form-submit,
-.views-edit-view a.button + a.button {
-  margin-left: 1em;
-}
- 
-.views-edit-view .views-displays .icon {
-  background-attachment: scroll;
-  background-image: url("../images/sprites.png");
-  background-position: left top;
-  background-repeat: no-repeat;
-  display: inline-block;
-  height: 12px;
-  position: relative;
-  width: 16px
-}
-
-.views-edit-view .views-displays .icon-add {
-  background-position: left -96px;
-  top: 1px;
-}
-
-.views-displays > fieldset {
-  padding-top: 0;
-}
-
-.views-displays > fieldset .fieldset-legend {
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-legend {
   position: relative;
 }
 
@@ -125,201 +21,68 @@
  * The attachment details section, its tabs for each section and the buttons
  * to add a new section
  */
-.views-alt-ui-view-displays,
-.views-alt-ui-view-paths,
-.views-alt-ui-view-description {
-  font-size: 0.9167em; /* 11px/12px */
-  line-height: 1.5em;
-}
 
-.views-edit-view .form-actions {
+.page-admin-structure-views #content .form-actions {
   float: right;
-  margin: 0;
 }
 
-.views-edit-view .views-displays {
-  border: 1px solid #CCC;
-  padding-bottom: 18px;
-  position: relative;
-}
-
-.views-edit-view .views-displays .secondary {
-  background-color: #F9F9F9;
-  border-bottom: 1px solid #CCCCCC;
-  margin: 0 0 14px;
+.page-admin-structure-views #content .views-displays .secondary {
   overflow: visible;
-  padding: 8px 8px 6px;
-  text-align: left;
 }
 
 /**
  * The attachment details tabs that switch between sections
  */
 
-.views-edit-view .views-displays .secondary > li {
-  padding-left: 0;
-}
-
-.views-edit-view .views-displays .secondary > li + li {
-  margin-left: 3px
-}
-
-.views-edit-view .views-displays .secondary a {
-  background-color: #f1f1f1;
-  border: 1px solid #cbcbcb;
-  -moz-border-radius: 7px;
-  -webkit-border-radius: 7px;
-  border-radius: 7px;
-  color: #008BCB;
-  display: inline-block;
-  padding: 2px 7px 3px;
-}
-
-.views-edit-view .views-displays .secondary a:focus {
-  outline: none
-}
-
-.views-edit-view .views-displays .secondary a:hover,
-.views-edit-view .views-displays .secondary .active a {
-  background-color: #666666;
-  color: #ffffff;
-}
-
-.views-edit-view .views-displays .secondary .open > a {
-  -moz-border-radius: 7px 7px 0 0;
-  -webkit-border-radius: 7px 7px 0 0;
-  border-radius: 7px 7px 0 0;
-  border-bottom: 1px solid transparent;
+.page-admin-structure-views #content .views-displays .secondary .open > a {
   position: relative;
   z-index: 1001;
-}
-
-.views-edit-view .views-displays .secondary .open > a:hover {
-  background-color: #f1f1f1;
-  color: #008BCB;
-}
-
-.views-edit-view .views-displays .secondary a:hover > .icon-add {
-  background-position: left -108px;
-}
-
-.views-edit-view .views-displays .secondary .open a:hover > .icon-add {
-  background-position: left -96px;
 }
 
 /**
  * The attachment details add new section buttons
  */
-.views-edit-view .views-displays .secondary li.add {
+.page-admin-structure-views #content .views-displays .secondary li.add {
   position: relative;
 }
 
-.views-edit-view .views-displays .secondary .action-list {
+.page-admin-structure-views #content .views-displays .secondary .action-list {
   left: 0;
-  margin: 0;
-  padding: 0;
   position: absolute;
   top: 19px;
   z-index: 1000;
 }
 
-.views-edit-view .views-displays .secondary .action-list  li {
-  background-color: #f1f1f1;
-  border-color: #cbcbcb;
-  border-style: solid;
-  border-width: 0 1px;
+.page-admin-structure-views #content .views-displays .secondary .action-list  li {
   display: block;
-  margin-left: 0;
-  padding: 2px 9px;
-}
-
-.views-edit-view .views-displays .secondary .action-list  li:first-child {
-  -moz-border-radius: 0 7px 0 0;
-  -webkit-border-radius: 0 7px 0 0;
-  border-radius: 0 7px 0 0;
-  border-width: 1px 1px 0;
-}
-
-.views-edit-view .views-displays .secondary .action-list  li:last-child {
-  -moz-border-radius: 0 0 7px 7px;
-  -webkit-border-radius: 0 0 7px 7px;
-  border-radius: 0 0 7px 7px;
-  border-width: 0 1px 1px;
-}
-
-.views-edit-view .views-displays .secondary .action-list input.form-submit {
-  background: none repeat scroll 0 0 transparent;
-  border: medium none;
-  -moz-border-radius: 0;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  color: #008BCB;
-  margin: 0;
-  padding: 0;
-}
-
-.views-edit-view .views-displays .secondary .action-list li:hover {
-  background-color: #dddddd;
 }
 
 /**
  * The attachment details section is a collapsible fieldset, but should not
  * have a border around it.
  */
-.views-edit-view .views-displays > fieldset {
-  border: none;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-.views-edit-view .views-displays > fieldset .fieldset-legend {
-  text-transform: none;
-  font-size: 14px;
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-legend {
   left: -5px; 
 }
 
-.views-edit-view .views-displays > fieldset .fieldset-wrapper {
-  padding: 14px 0 0;
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper {
   position: relative;
 }
 
 /**
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
-.views-edit-view .views-displays > fieldset .fieldset-wrapper > .actions {
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper > .actions {
   position: absolute;
   right: 0;
   top: -14px;
 }
 
-.views-edit-view .views-displays > fieldset .fieldset-wrapper > .actions input {
-  margin-bottom: 0;
-}
-
-/**
- * The auto-preview checkbox line. This may have mor stuff added to it.
- */
-.form-item-displays-tab-content-details-auto-preview {
-  text-align: right;
-}
-
-/**
- * Create a horizontal rule between the display details and whatever's after it.
- */
-.views-edit-view .views-displays > fieldset + * > *:first-child {
-  border-top: 3px solid #CCC;
-}
-
-.views-edit-view .views-displays > fieldset + * {
-  padding: 0 12px;
-}
-
-
 /**
  * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
-.views-edit-view .views-displays > fieldset .fieldset-wrapper:after,
-.views-edit-view .views-displays > fieldset .fieldset-wrapper::after {
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper:after,
+.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper::after {
   content: ".";
   display: block;
   height: 0;
@@ -330,71 +93,21 @@
 /**
  * Each of the three columns of information in the display details.
  */
-.views-edit-view .views-display-columns > * {
+.page-admin-structure-views #content .views-display-columns > * {
   float: left;
   margin-left: 1%;
   padding-left: 1%;
   width: 32%;
 }
 
-.views-edit-view .views-display-columns > *:first-child {
+.page-admin-structure-views #content .views-display-columns > *:first-child {
   margin-left: 0;
   padding-left: 0;
 }
 
 /**
- * Make sure the "Auto preview" checkbox after the columns displays correctly.
- */
-.views-edit-view .views-display-column + .form-type-checkbox {
-  clear: both;
-  float: right;
-}
-
-/**
- * These are the individual "buckets," or boxes, inside the three columns in the
- * attachment details section.
- */
-.views-edit-view .views-display-bucket {
-  border: 1px solid #f3f3f3;
-  margin: 1em 0;
-}
-
-.views-edit-view .views-display-bucket h3 {
-  font-size: 12px;
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.views-edit-view .views-display-bucket h3,
-.views-edit-view .views-display-bucket > .actions {
-  padding: 6px 6px 4px;
-}
-
-.views-edit-view .views-display-bucket > .actions * + * {
-  margin-left: 3px;
-  padding-left: 3px;
-}
-
-/**
  * This is each row within one of the "boxes."
  */
-.views-edit-view .views-display-bucket .views-display-setting {
-  color: #666666;
-  font-size: 12px;
-  padding: 2px 6px;
-}
-
-.views-edit-view .views-display-bucket .views-display-setting.even {
-  background-color: #f9f9f9;
-}
-
 .js #edit-show-update-wizard-key {
   display: none;
-}
-
-/**
- * Live preview elements
- */
-.views-edit-view .views-row + .views-row {
-  margin-top: 36px;
 }

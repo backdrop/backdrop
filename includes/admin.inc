@@ -12,7 +12,31 @@
  *   A renderable page build array.
  */
 function views_ui_list_views() {
+  // @todo Find a way to load the views-admin.seven.css only when Seven is the
+  // admin theme
   drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
+    array(
+      'group' => CSS_DEFAULT,
+      'browsers' => array(
+        'IE' => 'lte IE 7',
+        '!IE' => FALSE
+      ),
+      'preprocess' => FALSE,
+    )
+  );
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css', 
+    array(
+      'group' => CSS_DEFAULT,
+      'preprocess' => TRUE,
+    )
+  );
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css', 
+    array(
+      'group' => CSS_THEME,
+      'preprocess' => TRUE,
+    )
+  );
 
   $views = views_get_all_views();
   foreach ($views as $view) {
@@ -277,7 +301,31 @@ function views_ui_preview_form_submit(&$form, &$form_state) {
  * Page callback to add a new view.
  */
 function views_ui_add_page() {
+  // @todo Find a way to load the views-admin.seven.css only when Seven is the
+  // admin theme
   drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
+    array(
+      'group' => CSS_DEFAULT,
+      'browsers' => array(
+        'IE' => 'lte IE 7',
+        '!IE' => FALSE
+      ),
+      'preprocess' => FALSE,
+    )
+  );
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css', 
+    array(
+      'group' => CSS_DEFAULT,
+      'preprocess' => TRUE,
+    )
+  );
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css', 
+    array(
+      'group' => CSS_THEME,
+      'preprocess' => TRUE,
+    )
+  );
   return drupal_get_form('views_ui_add_form');
 }
 
@@ -679,6 +727,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form_state['view'] = clone($view);
 
   $form['#attached']['library'][] = array('system', 'ui.tabs');
+  // @todo Find a way to load the views-admin.seven.css only when Seven is the
+  // admin theme
   $form['#attached']['css'][] = array(
     drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css'),
     drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
@@ -689,6 +739,18 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
           '!IE' => FALSE
         ),
         'preprocess' => FALSE,
+      )
+    ),
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css', 
+      array(
+        'group' => CSS_DEFAULT,
+        'preprocess' => TRUE,
+      )
+    ),
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css', 
+      array(
+        'group' => CSS_THEME,
+        'preprocess' => TRUE,
       )
     ),
   );
@@ -1584,8 +1646,32 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   if (!empty($form['#title'])) {
     drupal_set_title($form['#title']);
   }
-  $form['#attached']['css'] = array(
-    drupal_get_path('module', 'views') . "/css/views-admin.css",
+  // @todo Find a way to load the views-admin.seven.css only when Seven is the
+  // admin theme
+  $form['#attached']['css'][] = array(
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css'),
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
+      array(
+        'group' => CSS_DEFAULT,
+        'browsers' => array(
+          'IE' => 'lte IE 7',
+          '!IE' => FALSE
+        ),
+        'preprocess' => FALSE,
+      )
+    ),
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css', 
+      array(
+        'group' => CSS_DEFAULT,
+        'preprocess' => TRUE,
+      )
+    ),
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css', 
+      array(
+        'group' => CSS_THEME,
+        'preprocess' => TRUE,
+      )
+    ),
   );
 }
 

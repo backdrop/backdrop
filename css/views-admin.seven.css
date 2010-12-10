@@ -1,0 +1,72 @@
+/* @group Content */
+
+.page-admin-structure-views #content .form-wrapper h1,
+.page-admin-structure-views #content .form-wrapper h2,
+.page-admin-structure-views #content .form-wrapper h3,
+.page-admin-structure-views #content .form-wrapper h4,
+.page-admin-structure-views #content .form-wrapper h5 {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+/* @end */
+
+/* @group Forms */
+
+.page-admin-structure-views #content fieldset {
+  padding: 0;
+}
+
+.page-admin-structure-views #content fieldset .fieldset-wrapper {
+  padding: 12px;
+}
+
+.page-admin-structure-views #content fieldset legend {
+  padding-top: 12px;
+}
+
+.page-admin-structure-views #content fieldset legend + .fieldset-wrapper {
+  padding-top: 0;
+}
+
+.page-admin-structure-views #content .views-edit-view .form-submit,
+.page-admin-structure-views #content .views-edit-view a.button {
+  margin-bottom: 0;
+  margin-right: 0;
+}
+
+.page-admin-structure-views #content .form-actions {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+/* @end */
+
+/* @group Lists */
+
+.page-admin-structure-views #content ul,
+.page-admin-structure-views #content ol,
+.page-admin-structure-views #content ul.secondary,
+.page-admin-structure-views #content .block ul,
+.page-admin-structure-views #content .item-list ul {
+  margin: 0;
+  padding: 0;
+}
+
+.page-admin-structure-views #content .views-edit-view .links li {
+  padding-right: 0;
+}
+
+/* @end */
+
+/* @group Stuff */
+
+.page-admin-structure-views #content .views-displays .secondary {
+  text-align: left;
+}
+
+.page-admin-structure-views #content .views-displays .secondary > li {
+  padding-left: 0;
+}
+
+/* @end */
