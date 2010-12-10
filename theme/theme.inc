@@ -598,6 +598,12 @@ function template_preprocess_views_view_grid(&$vars) {
     foreach ($rows[$row_number] as $column_number => $item) {
       $column_classes = array();
       $column_classes[] = 'col-'. ($column_number + 1);
+      if ($column_number == 0) {
+        $column_classes[] = 'col-first';
+      }
+      elseif (count($rows[$row_number]) == ($column_number + 1)) {
+        $column_classes[] = 'col-last';
+      }
       if ($column_class = $view->style_plugin->get_row_class($column_number)) {
         $column_classes[] = $column_class;
       }
