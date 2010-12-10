@@ -73,7 +73,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
 
     if ($operators[$operator]['values'] == 1) {
       $convert = strtotime($value['value']);
-      if ($convert == -1 || $convert === FALSE) {
+      if (!empty($form['value']) && ($convert == -1 || $convert === FALSE)) {
         form_error($form['value'], t('Invalid date format.'));
       }
     }
