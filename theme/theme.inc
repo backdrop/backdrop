@@ -533,23 +533,29 @@ function template_preprocess_views_view_grid(&$vars) {
   $columns  = $options['columns'];
 
   $rows = array();
+  $row_indexes = array();
 
   if ($options['alignment'] == 'horizontal') {
     $row = array();
+    $col_count = 0;
     $row_count = 0;
-    foreach ($vars['rows'] as $count => $item) {
+    $count = 0;
+    foreach ($vars['rows'] as $row_index => $item) {
+      $count++;
       $row[] = $item;
-      $row_count++;
-      if (($count + 1) % $columns == 0) {
+      $row_indexes[$row_count][$col_count] = $row_index;
+      $col_count++;
+      if ($count % $columns == 0) {
         $rows[] = $row;
         $row = array();
-        $row_count = 0;
+        $col_count = 0;
+        $row_count++;
       }
     }
     if ($row) {
       // Fill up the last line only if it's configured, but this is default.
       if (!empty($handler->options['fill_single_line']) || count($rows)) {
-        for ($i = 0; $i < ($columns - $row_count); $i++) {
+        for ($i = 0; $i < ($columns - $col_count); $i++) {
           $row[] = '';
         }
       }
@@ -564,6 +570,7 @@ function template_preprocess_views_view_grid(&$vars) {
     $col = 0;
     foreach ($vars['rows'] as $count => $item) {
       $rows[$row][$col] = $item;
+      $row_indexes[$row][$col] = $count;
       $row++;
 
       if (!$remainders && $row == $num_rows) {
@@ -585,7 +592,7 @@ function template_preprocess_views_view_grid(&$vars) {
   }
 
   // Apply the row classes
-  foreach ($vars['rows'] as $row_number => $row) {
+  foreach ($rows as $row_number => $row) {
     $row_classes = array();
     $row_classes[] =  'row-' . ($row_number + 1);
     if ($row_number == 0) {
@@ -604,7 +611,7 @@ function template_preprocess_views_view_grid(&$vars) {
       elseif (count($rows[$row_number]) == ($column_number + 1)) {
         $column_classes[] = 'col-last';
       }
-      if ($column_class = $view->style_plugin->get_row_class($column_number)) {
+      if (isset($row_indexes[$row_number][$column_number]) && $column_class = $view->style_plugin->get_row_class($row_indexes[$row_number][$column_number])) {
         $column_classes[] = $column_class;
       }
       $vars['column_classes'][$row_number][$column_number] = implode(' ', $column_classes);
@@ -623,14 +630,17 @@ function template_preprocess_views_view_unformatted(&$vars) {
   $vars['classes_array'] = array();
   $vars['classes'] = array();
   // Set up striping values.
+  $count = 0;
+  $max = count($rows);
   foreach ($rows as $id => $row) {
+    $count++;
     $vars['classes'][$id][] = 'views-row';
-    $vars['classes'][$id][] = 'views-row-' . ($id + 1);
-    $vars['classes'][$id][] = 'views-row-' . ($id % 2 ? 'even' : 'odd');
-    if ($id == 0) {
+    $vars['classes'][$id][] = 'views-row-' . $count;
+    $vars['classes'][$id][] = 'views-row-' . ($count % 2 ? 'odd' : 'even');
+    if ($count == 1) {
       $vars['classes'][$id][] = 'views-row-first';
     }
-    if ($id == count($rows) -1) {
+    if ($count == $max) {
       $vars['classes'][$id][] = 'views-row-last';
     }
 

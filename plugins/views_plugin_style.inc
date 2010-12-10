@@ -218,7 +218,7 @@ class views_plugin_style extends views_plugin {
         $rows = array();
         foreach ($records as $row_index => $row) {
           $this->view->row_index = $row_index;
-          $rows[] = $this->row_plugin->render($row);
+          $rows[$row_index] = $this->row_plugin->render($row);
         }
       }
       else {
