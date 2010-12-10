@@ -25,6 +25,8 @@ class views_plugin_pager_full extends views_plugin_pager {
         'items_per_page' => array('default' => FALSE, 'bool' => TRUE),
         'items_per_page_label' => array('default' => 'Items per page', 'translatable' => TRUE),
         'items_per_page_options' => array('default' => '5, 10, 20, 40, 60'),
+        'items_per_page_options_all' => array('default' => FALSE),
+        'items_per_page_options_all_label' => array('default' => '- All -', 'translatable' => TRUE),
 
         'offset' => array('default' => FALSE, 'bool' => TRUE),
         'offset_label' => array('default' => 'Offset', 'translatable' => TRUE),
@@ -106,6 +108,25 @@ class views_plugin_pager_full extends views_plugin_pager {
       ),
     );
 
+
+    $form['expose']['items_per_page_options_all'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Include all items option'),
+      '#description' => t('If checked, an extra item will be included to items per page to display all items'),
+      '#default_value' => $this->options['expose']['items_per_page_options_all'],
+    );
+
+    $form['expose']['items_per_page_options_all_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('All items label'),
+      '#description' => t('Which label will be used to display all items'),
+      '#default_value' => $this->options['expose']['items_per_page_options_all_label'],
+      '#process' => array('views_process_depency'),
+      '#dependency' => array(
+        'edit-items-per-page-options-all' => array(1),
+      ),
+    );
+
     $form['expose']['offset'] = array(
       '#type' => 'checkbox',
       '#title' => t('Expose Offset'),
@@ -151,12 +172,15 @@ class views_plugin_pager_full extends views_plugin_pager {
 
   function query() {
     if ($this->items_per_page_exposed()) {
-      if (!empty($_GET['items_per_page']) && $_GET['items_per_page'] > 0){
+      if (!empty($_GET['items_per_page']) && $_GET['items_per_page'] > 0) {
         $this->options['items_per_page'] = $_GET['items_per_page'];
+      }
+      elseif (!empty($_GET['items_per_page']) && $_GET['items_per_page'] == 'All' && $this->options['expose']['items_per_page_options_all']) {
+        $this->options['items_per_page'] = 0;
       }
     }
     if ($this->offset_exposed()) {
-      if (isset($_GET['offset']) && $_GET['offset'] >= 0){
+      if (isset($_GET['offset']) && $_GET['offset'] >= 0) {
         $this->options['offset'] = $_GET['offset'];
       }
     }
@@ -205,7 +229,7 @@ class views_plugin_pager_full extends views_plugin_pager {
       $this->current_page = intval($pager_page_array[$this->options['id']]);
     }
   }
-  
+
   function get_pager_total() {
     if ($items_per_page = intval($this->get_items_per_page())) {
       return ceil($this->total_items / $items_per_page);
@@ -274,7 +298,9 @@ class views_plugin_pager_full extends views_plugin_pager {
         foreach ($options as $option) {
           $sanitized_options[intval($option)] = intval($option);
         }
-
+        if (!empty($this->options['expose']['items_per_page_options_all']) && !empty($this->options['expose']['items_per_page_options_all_label'])) {
+          $sanitized_options['All'] = $this->options['expose']['items_per_page_options_all_label'];
+        }
         $form['items_per_page'] = array(
           '#type' => 'select',
           '#title' => $this->options['expose']['items_per_page_label'],
