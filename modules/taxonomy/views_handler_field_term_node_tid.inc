@@ -98,7 +98,7 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
       $query->orderby('td.name');
       $query->condition('tn.nid', $vids);
       $query->addTag('term_access');
-      if (!empty($this->options['limit']) && !empty($this->options['vocabularies'])) {
+      if (!empty($this->options['limit']) && !empty(array_filter($this->options['vocabularies']))) {
         $query->condition('tv.machine_name', $this->options['vocabularies']);
       }
       $result = $query->execute();
