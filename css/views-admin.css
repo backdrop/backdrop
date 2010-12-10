@@ -60,6 +60,7 @@
 
 .page-admin-structure-views #content .views-displays .secondary .action-list {
   left: 0;
+  margin: 0;
   position: absolute;
   top: 19px;
   z-index: 1000;

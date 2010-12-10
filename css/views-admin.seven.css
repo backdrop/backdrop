@@ -17,11 +17,11 @@
   padding: 0;
 }
 
-.page-admin-structure-views #content fieldset .fieldset-wrapper {
+.page-admin-structure-views #content .fieldset-wrapper {
   padding: 10px 12px 12px;
 }
 
-.page-admin-structure-views #content fieldset legend + .fieldset-wrapper {
+.page-admin-structure-views #content legend + .fieldset-wrapper {
   padding-top: 2.5em;
 }
 
