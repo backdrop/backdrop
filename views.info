@@ -63,6 +63,7 @@ files[] = modules/aggregator/views_handler_argument_aggregator_category_cid.inc
 files[] = modules/aggregator/views_handler_field_aggregator_title_link.inc
 files[] = modules/aggregator/views_handler_field_aggregator_category.inc
 files[] = modules/aggregator/views_handler_field_aggregator_item_description.inc
+files[] = modules/aggregator/views_handler_field_aggregator_xss.inc
 files[] = modules/aggregator/views_handler_filter_aggregator_category_cid.inc
 files[] = modules/aggregator/views_plugin_row_aggregator_rss.inc
 files[] = modules/book.views.inc

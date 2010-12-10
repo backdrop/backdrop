@@ -534,3 +534,4 @@ Views 3.x-7.x-dev
     o #909332 by dereine: Add col-first and col-last classes to grid style.
     o #989092 by dereine: Semantic views integration broke grid view a little.
     o #868972 by dereine: Add a "summary" attribute for accessibility on table and grid styles.
+    o #992174 by dereine: Add missing field handler aggregator_xss in the views.info file.
