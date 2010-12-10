@@ -519,6 +519,10 @@ function template_preprocess_views_view_table(&$vars) {
     $vars['classes_array'][] = "sticky-enabled";
   }
   $vars['classes_array'][] = 'cols-'. count($vars['rows']);
+
+  if (!empty($handler->options['summary'])) {
+    $vars['attributes_array'] = array('summary' => $handler->options['summary']);
+  }
 }
 
 /**
@@ -618,6 +622,10 @@ function template_preprocess_views_view_grid(&$vars) {
     }
   }
   $vars['rows'] = $rows;
+
+  if (!empty($handler->options['summary'])) {
+    $vars['attributes_array'] = array('summary' => $handler->options['summary']);
+  }
 }
 
 /**
