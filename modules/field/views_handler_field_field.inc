@@ -153,7 +153,7 @@ class views_handler_field_field extends views_handler_field {
 
     // Provide an instance array for hook_field_formatter_settings_form().
     ctools_include('fields');
-    $instance = ctools_fields_fake_field_instance($this->definition['field_name'], 'ctools', $formatter, $settings);
+    $instance = ctools_fields_fake_field_instance($this->definition['field_name'], '_dummy', $formatter, $settings);
 
     // Store the settings in a '_dummy' view mode.
     $instance['display']['_dummy'] = array(
