@@ -10,8 +10,7 @@ Views 3.x-7.x-dev
     o #550560 by donquixote: Fix unterminated string in views.help.ini that breaks under php 5.3
     o #592476 by Garrett Albright: Remove redundant CSS from views-list.css
     o #581616 by cangeceiro: Defend text color from themes in Views UI.
-    o #589484 by Markus Petrux: External styles could not properly provide advanced help files.  o #494490 by Niels Hackius: User picture incorrectly set as an inline element when it should be block.
-    o #616956 by neochief: Exposed form labels should have "for" keyword.
+    o #589484 by Markus Petrux: External styles could not properly provide advanced help files.  o #494490 by Niels Hackius: User picture incorrectly set as an inline element when it should be block.  o #616956 by neochief: Exposed form labels should have "for" keyword.
     o #620046 by cedric: Date validate handler does not fallback properly causing sporadic improper validation.
     o #515564: Views UI would fail to rearrange with > 25 fields.
     o #452384: Fix PHP 5.3 compatibility.
@@ -535,3 +534,4 @@ Views 3.x-7.x-dev
     o #868972 by dereine: Add a "summary" attribute for accessibility on table and grid styles.
     o #992174 by dereine: Add missing field handler aggregator_xss in the views.info file.
     o by dereine: Fix fatal error in the field term_node_tid handler.
+    o #994856 by dereine: Replace views dependecy with ctools... again.

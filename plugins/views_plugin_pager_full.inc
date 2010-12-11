@@ -121,7 +121,7 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#title' => t('All items label'),
       '#description' => t('Which label will be used to display all items'),
       '#default_value' => $this->options['expose']['items_per_page_options_all_label'],
-      '#process' => array('views_process_depency'),
+      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-items-per-page-options-all' => array(1),
       ),
