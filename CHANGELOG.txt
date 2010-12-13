@@ -536,3 +536,4 @@ Views 3.x-7.x-dev
     o #994856 by dereine: Replace views dependecy with ctools... again.
     o by dereine: Replace _fake_instance in field field handler with a ctools helper function.
     o #996634 by das-peter: Add missing rel to option_definition of the field handler.
+    o #610418 by joachim: Add handler descriptions to handler edit forms.

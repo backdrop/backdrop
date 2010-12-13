@@ -2810,6 +2810,14 @@ function views_ui_config_item_form($form, &$form_state) {
       $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
       $form['#title'] .= t('Configure @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
+      $form['form_description'] = array(
+        '#type' => 'markup',
+        '#weight' => -1000,
+        '#prefix' => '<div class="form-item description">',
+        '#suffix' => '</div>',
+        '#value' => $handler->definition['help'],
+      );
+
       $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
       // Get form from the handler.
