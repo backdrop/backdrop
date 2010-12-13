@@ -295,6 +295,7 @@ class views_handler_field extends views_handler {
         'path' => array('default' => '', 'translatable' => TRUE),
         'absolute' => array('default' => '', 'translatable' => FALSE),
         'alt' => array('default' => '', 'translatable' => TRUE),
+        'rel' => array('default' => ''),
         'link_class' => array('default' => ''),
         'prefix' => array('default' => '', 'translatable' => TRUE),
         'suffix' => array('default' => '', 'translatable' => TRUE),
