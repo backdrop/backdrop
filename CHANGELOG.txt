@@ -538,3 +538,4 @@ Views 3.x-7.x-dev
     o #996634 by das-peter: Add missing rel to option_definition of the field handler.
     o #610418 by joachim: Add handler descriptions to handler edit forms.
     o #368687 by dereine: Allow a relationship from node revision to master node.
+    o #759082 by dereine: Prevent invalid argument warning with no relationships.
