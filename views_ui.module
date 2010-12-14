@@ -121,12 +121,8 @@ function views_ui_menu() {
 
   // Nojs/Ajax callbacks used while editing a View.
   $ajax_callbacks = array(
-    'details' => 'views_ui_edit_details',
     'preview' => 'views_ui_preview',
     '%' => 'views_ui_ajax_form',
-    // @todo Moved "Analyze" to a primary tab, but may restore it to a AJAX
-    //   callback again.
-    //'analyze' => 'views_ui_analyze_view',
   );
   foreach ($ajax_callbacks as $menu => $menu_callback) {
     $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache'] = array(

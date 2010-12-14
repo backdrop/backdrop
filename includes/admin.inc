@@ -1543,31 +1543,15 @@ function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALS
 }
 
 /**
- * Regenerate the tabs for AJAX updates.
+ * Regenerate the current tab for AJAX updates.
  */
-function views_ui_regenerate_tabs(&$view, &$output, $display_id = NULL) {
-  if (empty($display_id)) {
-    $displays = array_keys($view->display);
-  }
-  elseif (!is_array($display_id)) {
-    $displays = array($display_id);
-    if ($display_id != 'default') {
-      $displays[] = 'default';
-    }
-  }
-  else {
-    $displays = $display_id;
-  }
-
+function views_ui_regenerate_tab(&$view, &$output, $display_id) {
   if (!$view->set_display('default')) {
     return;
   }
 
-  foreach ($displays as $id) {
-    list($title, $body) = views_ui_display_tab($view, $view->display[$id]);
-    $output[] = ajax_command_html('#views-tab-' . $id, $body);
-    $output[] = ajax_command_html('#views-tab-title-' . $id, check_plain($title));
-  }
+  $build = views_ui_get_display_tab($view, $display_id);
+  $output[] = ajax_command_html('#views-tab-' . $display_id, drupal_render($build));
 }
 
 /**
@@ -1897,7 +1881,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
       $output[] = views_ajax_command_dismiss_form();
       $output[] = views_ajax_command_trigger_preview();
     }
-    views_ui_regenerate_tabs($view, $output);
+    views_ui_regenerate_tab($view, $output, $display_id);
   }
   elseif ($js) {
     $output[] = views_ajax_command_disable_buttons();
@@ -1922,26 +1906,11 @@ function views_ui_remove_display_form_restore($form, &$form_state) {
  * Page callback to display analysis information on a view.
  */
 function views_ui_analyze_view($js, $view) {
-  views_include('ajax');
   $form_state = array(
     'view' => &$view,
-    'ajax' => $js,
   );
 
-  $output = views_ajax_form_wrapper('views_ui_analyze_view_form', $form_state);
-
-  if ($js) {
-    // If we don't have an output object, it was submitted. Set up the submission.
-    if ($form_state['submitted'] && empty($form_state['rerender'])) {
-      $output = array();
-      $output[] = views_ajax_command_enable_buttons();
-      $output[] = views_ajax_command_dismiss_form();
-      views_ui_regenerate_tabs($view, $output);
-    }
-    $commands = $output;
-    return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
-  }
-  return $output;
+  return drupal_build_form('views_ui_analyze_view_form', $form_state);
 }
 
 /**
@@ -1994,38 +1963,6 @@ function views_ui_analyze_view_form($form, &$form_state) {
  */
 function views_ui_analyze_view_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
-}
-
-/**
- * Page callback to display analysis information on a view.
- */
-function views_ui_reorder_view($js, $view) {
-  views_include('ajax');
-  $form_state = array(
-    'view' => &$view,
-    'ajax' => $js,
-  );
-
-  $output = views_ajax_form_wrapper('views_ui_reorder_displays_form', $form_state);
-
-  if ($js) {
-    if ($form_state['submitted'] && empty($form_state['rerender'])) {
-      // I don't want preprocess to modify the views -> no references
-      $vars = array('view' => $view);
-      template_preprocess_views_ui_edit_view($vars);
-      $output = array();
-      $output[] = ajax_command_replace('.views-tabset', $vars['tabs']);
-      // Not the right place to have html i know !
-      $output[] = ajax_command_replace('.views-quick-links', '<div class="views-quick-links">'. $vars['quick_links'] .'</div>');
-      $output[] = views_ajax_command_enable_buttons();
-      $output[] = views_ajax_command_dismiss_form();
-      // Doesn't work yet, maybe we should reload the page dunno
-      views_ui_regenerate_tabs($view, $output);
-    }
-    $commands = $output;
-    return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
-  }
-  return $output;
 }
 
 /**
@@ -2221,67 +2158,6 @@ function views_ui_reorder_displays_button($form, &$form_state, $view) {
   );
 
   return $form;
-}
-
-/**
- * Page callback to edit details of a view.
- */
-function views_ui_edit_details($js, $view) {
-  views_include('ajax');
-  $form_state = array(
-    'view' => &$view,
-    'ajax' => $js,
-  );
-
-  $output = views_ajax_form_wrapper('views_ui_edit_details_form', $form_state);
-
-  if ($js) {
-    // If we don't have an output object, it was submitted. Set up the submission.
-    if (empty($output)) {
-      return views_ui_regenerate_tabs($view);
-    }
-    return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
-
-  }
-  return $output;
-}
-
-/**
- * Form constructor callback to edit details of a view
- */
-function views_ui_edit_details_form($form, &$form_state) {
-  $view = &$form_state['view'];
-
-  $form['#title'] = t('View details');
-  $form['#section'] = 'details';
-
-  $form['description'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View description'),
-    '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
-    '#default_value' => $view->description,
-  );
-
-  $form['tag'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View tag'),
-    '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
-    '#default_value' => $view->tag,
-    '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
-  );
-
-  views_ui_standard_form_buttons($form, $form_state, 'views_ui_edit_details_form');
-  return $form;
-}
-
-/**
- * Submit handler for views_ui_edit_details_form
- */
-function views_ui_edit_details_form_submit($form, &$form_state) {
-  $form_state['view']->description = $form_state['values']['description'];
-  $form_state['view']->tag = $form_state['values']['tag'];
-  views_ui_cache_set($form_state['view']);
-  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
 }
 
 /**
