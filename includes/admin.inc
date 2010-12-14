@@ -839,6 +839,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     // The part of the page where editing will take place.
     $view->set_display($display_id);
     $form['displays']['tab_content'] = views_ui_get_display_tab($view, $display_id);
+    $form['displays']['tab_content']['#theme_wrappers'] = array('container');
+    $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
+    $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
 
     // The live preview.
     $view->views_ui_context = TRUE;
