@@ -101,8 +101,11 @@ Drupal.behaviors.viewsUiRenderAddViewButton.attach = function (context, settings
   var $ = jQuery;
   // Build the add display menu, pull the display input buttons into it
   // and mpve them to the add display menu
+  var $menu = $('.secondary', '#views-ui-edit-form', context).once('views-ui-render-add-view-button-processed');
+  if (!$menu.length) {
+    return;
+  }
   var $addDisplayDropdown = $('<li class="add"><a href="#"><span class="icon icon-add"></span>Add</a><ul class="action-list" style="display:none;"></ul></li>');
-  var $menu = $('.secondary', '#views-ui-edit-form');
   var $displayButtons = $menu.nextAll('[type="submit"]').detach();
   $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>');
   $addDisplayDropdown.appendTo($menu);

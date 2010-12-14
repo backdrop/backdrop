@@ -6,7 +6,7 @@
  */
 (function ($) {
 
-  Drupal.ajax.prototype.commands.viewsSetForm = function(ajax, response, status) {
+  Drupal.ajax.prototype.commands.viewsSetForm = function (ajax, response, status) {
     var ajax_title = Drupal.settings.views.ajax.title;
     var ajax_area = Drupal.settings.views.ajax.id;
     $(ajax_title).html(response.title);
@@ -19,15 +19,19 @@
       })
       $('form', ajax_area).once('views-ajax-submit-processed').each(function() {
         var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'throbber' } };
-        var form = $(this)[0];
+        var $form = $(this);
+        var id = $form.attr('id');
+        var form = $form[0];
         form.form = form;
-        Drupal.ajax[$(this).attr('id')] = new Drupal.ajax($(this).attr('id'), form, element_settings);
+        Drupal.ajax[id] = new Drupal.ajax(id, form, element_settings);
       });
     }
+    $('#views-ajax-pad').dialog('open');
   };
 
   Drupal.ajax.prototype.commands.viewsDismissForm = function(ajax, response, status) {
     Drupal.ajax.prototype.commands.viewsSetForm({}, {'title': '', 'output': Drupal.settings.views.ajax.defaultForm});
+    $("#views-ajax-pad").dialog('close');
   }
 
   Drupal.ajax.prototype.commands.viewsHilite = function(ajax, response, status) {
@@ -74,7 +78,7 @@
    * Sync preview display.
    */
   Drupal.behaviors.syncPreviewDisplay = {
-    attach: function(context) {
+    attach: function (context) {
       $("#views-tabset a").once('views-ajax-processed').click(function() {
         var href = $(this).attr('href');
         // Cut of #views-tabset.
@@ -86,7 +90,11 @@
   }
 
   Drupal.behaviors.viewsAjax = {
-    attach: function(context) {
+    attach: function (context) {
+      // Create a jQuery UI dialog, but leave it closed.
+      var dialog_area = $("#views-ajax-pad", context);
+      dialog_area.dialog({'autoOpen': false});
+
       var base_element_settings = {
         'event': 'click',
         'progress': { 'type': 'throbber' }

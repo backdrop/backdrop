@@ -19,6 +19,5 @@
     <?php endif; ?>
   </ul>
   <h3><?php print $title; ?></h3>
-  <?php print $fields; ?>
   <?php print $content; ?>
 </div>

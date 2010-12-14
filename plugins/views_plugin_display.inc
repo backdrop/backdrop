@@ -775,7 +775,7 @@ class views_plugin_display extends views_plugin {
    * an easy URL to exactly the right section. Don't override this.
    */
   function option_link($text, $section, $class = '', $title = '') {
-    //views_add_js('ajax');
+    views_add_js('ajax');
     if (!empty($class)) {
       $text = '<span>' . $text . '</span>';
     }

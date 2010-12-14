@@ -727,6 +727,10 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form_state['view'] = clone($view);
 
   $form['#attached']['library'][] = array('system', 'ui.tabs');
+  $form['#attached']['library'][] = array('system', 'ui.dialog');
+  $form['#attached']['library'][] = array('system', 'drupal.ajax');
+  $form['#attached']['library'][] = array('system', 'jquery.form');
+
   $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.css';
   $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css';
   $form['#attached']['css'][] = array(
@@ -748,6 +752,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   }
 
   $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
+  $form['#attached']['js'][] = array(
+    'data' => array('views' => array('ajax' => array(
+      'id' => '#views-ajax-pad',
+      'title' => '#views-ajax-title',
+      'defaultForm' => views_ui_get_default_ajax_message(),
+    ))),
+    'type' => 'setting',
+  );
 
   $form += array(
     '#prefix' => '',
@@ -833,9 +845,20 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['preview'] = array(
       '#markup' => $view->preview($display_id, array()),
     );
+
+    // The content of the popup dialog.
+    $form['ajax-area'] = array(
+      '#theme' => 'container',
+      '#id' => 'views-ajax-pad',
+      'message' => array('#markup' => views_ui_get_default_ajax_message()),
+    );
   }
 
   return $form;
+}
+
+function views_ui_get_default_ajax_message() {
+  return '<div class="message">' . t("Click on an item to edit that item's details.") . '</div>';
 }
 
 /**
@@ -1129,9 +1152,8 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
   $variables['overridden'] = !empty($element['#overridden']);
-//  $variables['fields'] = empty($element['#fields']) ? '' : $element['#fields'];
-  $variables['rearrange'] = $element['#rearrange'];
-  $variables['add'] = $element['#add'];
+  $variables['rearrange'] = !empty($element['#rearrange']) ? $element['#rearrange'] : '';
+  $variables['add'] = !empty($element['#add']) ? $element['#add'] : '';
 }
 
 function template_preprocess_views_ui_display_tab_column(&$variables) {
