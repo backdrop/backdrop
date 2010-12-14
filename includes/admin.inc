@@ -1030,42 +1030,7 @@ function views_ui_get_display_tab_details($view, $display) {
   // Place each option into its bucket.
   foreach ($options as $id => $option) {
     // Each option self-identifies as belonging in a particular bucket.
-    $bucket = $option['category'];
-
-    if (empty($buckets[$bucket]['build'])) {
-      $buckets[$bucket]['build'] = array();
-    }
-    $buckets[$bucket]['build'][$id] = array();
-    $option_build = &$buckets[$bucket]['build'][$id];
-    $option_build['#theme'] = 'views_ui_display_tab_setting';
-
-    $option_build['#description'] = $option['title'];
-
-    $option_build['#link'] = $display->handler->option_link($option['value'], $id, '', empty($option['desc']) ? '' : $option['desc']);
-
-    $option_build['#links'] = array();
-    if (!empty($option['links']) && is_array($option['links'])) {
-      foreach ($option['links'] as $link_id => $link_value) {
-        $option_build['#optional_links'][] = $display->handler->option_link($link_value, $link_id, 'views-button-configure');
-      }
-    }
-
-    if (!empty($display->handler->options['defaults'][$id])) {
-      $display_id = 'default';
-      $option_build['#defaulted'] = TRUE;
-    }
-    else {
-      $display_id = $display->id;
-      if (!$display->handler->is_default_display()) {
-        if ($display->handler->defaultable_sections($id)) {
-          $option_build['#overridden'] = TRUE;
-        }
-      }
-    }
-    $option_build['#attributes']['class'][] = drupal_clean_css_identifier($display_id . '-' . $id);
-    if (!empty($view->changed_sections[$display_id . '-' . $id])) {
-      $option_build['#changed'] = TRUE;
-    }
+    $buckets[$option['category']]['build'][$id] = views_ui_edit_form_get_build_from_option($id, $option, $view, $display);
   }
 
   // Place each bucket into the proper column.
@@ -1082,16 +1047,15 @@ function views_ui_get_display_tab_details($view, $display) {
     if (isset($bucket['build']) && is_array($bucket['build'])) {
       $build['columns'][$column][$id] = $bucket['build'];
       $build['columns'][$column][$id]['#theme_wrappers'][] = 'views_ui_display_tab_bucket';
-      $build['columns'][$column][$id]['#title'] = $bucket['title'];
+      $build['columns'][$column][$id]['#title'] = !empty($bucket['title']) ? $bucket['title'] : '';
     }
   }
 
-  // Fetch style plugin info because it has some effect on how/what we render.
+  // Fetch the style plugin info so we know whether to list fields or not.
   $style_plugin = $display->handler->get_plugin();
-
   $no_fields = !($style_plugin && $style_plugin->uses_fields());
-  $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display, $no_fields);
 
+  $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display, $no_fields);
   $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
   $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
   $build['columns']['second']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
@@ -1109,6 +1073,46 @@ function views_ui_get_display_tab_details($view, $display) {
   );
 
   return $build;
+}
+
+/**
+ * Build a renderable array representing one option on the edit form.
+ *
+ * This function might be more logical as a method on an object, if a suitable
+ * object emerges out of refactoring.
+ */
+function views_ui_edit_form_get_build_from_option($id, $option, $view, $display) {
+  $option_build = array();
+  $option_build['#theme'] = 'views_ui_display_tab_setting';
+
+  $option_build['#description'] = $option['title'];
+
+  $option_build['#link'] = $display->handler->option_link($option['value'], $id, '', empty($option['desc']) ? '' : $option['desc']);
+
+  $option_build['#links'] = array();
+  if (!empty($option['links']) && is_array($option['links'])) {
+    foreach ($option['links'] as $link_id => $link_value) {
+      $option_build['#optional_links'][] = $display->handler->option_link($link_value, $link_id, 'views-button-configure');
+    }
+  }
+
+  if (!empty($display->handler->options['defaults'][$id])) {
+    $display_id = 'default';
+    $option_build['#defaulted'] = TRUE;
+  }
+  else {
+    $display_id = $display->id;
+    if (!$display->handler->is_default_display()) {
+      if ($display->handler->defaultable_sections($id)) {
+        $option_build['#overridden'] = TRUE;
+      }
+    }
+  }
+  $option_build['#attributes']['class'][] = drupal_clean_css_identifier($display_id . '-' . $id);
+  if (!empty($view->changed_sections[$display_id . '-' . $id])) {
+    $option_build['#changed'] = TRUE;
+  }
+  return $option_build;
 }
 
 function template_preprocess_views_ui_display_tab_setting(&$variables) {
@@ -1405,7 +1409,7 @@ function views_ui_display_tab($view, $display) {
  */
 function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALSE) {
   $build = array(
-    '#theme' => 'views_ui_display_tab_bucket',
+    '#theme_wrappers' => array('views_ui_display_tab_bucket'),
   );
   $types = views_object_types();
 
@@ -1445,8 +1449,6 @@ function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALS
     $build['#title'] = $types[$type]['title'];
   }
 
-  $fields = array();
-
   static $relationships = NULL;
   if (!isset($relationships)) {
     // Get relationship labels
@@ -1458,14 +1460,15 @@ function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALS
   }
 
   foreach ($display->handler->get_option($types[$type]['plural']) as $id => $field) {
-    $fields[$id] = array();
+    // Build the option link for this handler ("Node: ID = article").
+    $build[$id] = array();
+    $build[$id]['#theme'] = 'views_ui_display_tab_setting';
 
     $handler = $display->handler->get_handler($type, $id);
     if (empty($handler)) {
-      $fields[$id]['class'][] = 'broken';
+      $build[$id]['#attributes']['class'][] = 'broken';
       $field_name = t('Broken/missing handler: @table > @field', array('@table' => $field['table'], '@field' => $field['field']));
-      $fields[$id]['title'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
-      $fields[$id]['info'] = '';
+      $build[$id]['#link'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
       continue;
     }
 
@@ -1474,40 +1477,42 @@ function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALS
       $field_name = '(' . $relationships[$field['relationship']] . ') ' . $field_name;
     }
 
-    $fields[$id]['title'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
-    $fields[$id]['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
+    $description = $handler->admin_summary();
+    $link_text = $field_name . (empty($description) ? '' : " = $description");
+    $build[$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
+    $build[$id]['#attributes']['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
     if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $id])) {
-      $fields[$id]['changed'] = TRUE;
+      $build[$id]['#changed'] = TRUE;
     }
-    $fields[$id]['info'] = $handler->admin_summary();
 
     if ($display->handler->use_group_by()) {
-      $fields[$id]['links'] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
+      $build[$id]['#links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
     }
 
     if ($handler->has_extra_options()) {
-      $fields[$id]['links'] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+      $build[$id]['#links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
     }
 
     if ($handler->needs_style_plugin()) {
+      // Add a second option link for the style plugin.
       $style_plugin = views_fetch_plugin_data('style', $handler->options['style_plugin']);
       $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin['title'];
       $pid = $id . '-style-plugin';
 
+      $build[$pid] = array();
+      $build[$pid]['#theme'] = 'views_ui_display_tab_setting';
+
       if (!empty($style_plugin['uses options'])) {
-        $fields[$pid]['links'] = l('<span>' . t('Change settings for this style') . '</span>', "admin/structure/views/nojs/config-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+        $build[$pid]['#links'][] = l('<span>' . t('Change settings for this style') . '</span>', "admin/structure/views/nojs/config-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
       }
 
-      $fields[$pid]['title'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
-      $fields[$pid]['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
+      $build[$pid]['#link'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
+      $build[$pid]['#attributes']['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
       if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $pid])) {
-        $fields[$pid]['changed'] = TRUE;
+        $build[$pid]['#changed'] = TRUE;
       }
-      $fields[$pid]['info'] = '';
     }
   }
-
-  $build['#fields'] = $fields;
 
   return $build;
 }
