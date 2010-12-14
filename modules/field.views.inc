@@ -68,7 +68,7 @@ function field_views_field_default_views_data($field) {
       'left_field' => $entity_info['entity keys']['id'],
       'field' => 'entity_id',
       'extra' => array(
-        array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE),
+        array('field' => 'entity_type', 'value' => $entity),
         array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
       ),
     );
@@ -78,7 +78,7 @@ function field_views_field_default_views_data($field) {
         'left_field' => $entity_info['entity keys']['revision'],
         'field' => 'revision_id',
         'extra' => array(
-          array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE),
+          array('field' => 'entity_type', 'value' => $entity),
           array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
         ),
       );
@@ -97,7 +97,7 @@ function field_views_field_default_views_data($field) {
     $tables[FIELD_LOAD_REVISION] = $revision_table;
   }
 
-  $add_fields = array('etid', 'delta', 'language');
+  $add_fields = array('entity_type', 'delta', 'language');
   foreach ($field['columns'] as $column_name => $attributes) {
     $add_fields[] = _field_sql_storage_columnname($field['field_name'], $column_name);
   }
