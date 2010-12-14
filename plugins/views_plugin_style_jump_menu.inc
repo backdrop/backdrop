@@ -18,6 +18,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     $options['path'] = array('default' => '');
     $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
     $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
+    $options['default_value'] = array('default' => FALSE);
 
     return $options;
   }
@@ -73,6 +74,13 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       '#default_value' => $this->options['choose'],
       '#description' => t('The text that will appear as the selected option in the jump menu.'),
     );
+
+    $form['default_value'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Select the current argument.'),
+      '#default_value' => !empty($this->options['default_value']),
+      '#description' => t('If checked, the current path will be displayed as the default option in the jump menu, if applicable.'),
+    );
   }
 
   /**
@@ -108,6 +116,8 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     // Turn this all into an $options array for the jump menu.
     $this->view->row_index = 0;
     $options = array();
+    $paths = array();
+
     foreach ($sets as $title => $records) {
       foreach ($records as $row) {
         $path = strip_tags($this->get_field($this->view->row_index, $this->options['path']));
@@ -138,16 +148,23 @@ class views_plugin_style_jump_menu extends views_plugin_style {
         else {
           $options[$path] = $field;
         }
+        $paths[$path] = $path;
         $this->view->row_index++;
       }
     }
     unset($this->view->row_index);
+
+    $default_value = '';
+    if ($this->options['default_value'] && !empty($paths[url($_GET['q'])])) {
+      $default_value = url($_GET['q']);
+    }
 
     ctools_include('jump-menu');
     $settings = array(
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
       'choose' => $this->options['choose'],
+      'default_value' => $default_value,
     );
 
     return drupal_render(drupal_get_form('ctools_jump_menu', $options, $settings));
