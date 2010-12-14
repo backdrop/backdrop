@@ -11,15 +11,15 @@
 class views_plugin_argument_default_user extends views_plugin_argument_default {
   function option_definition() {
     $options = parent::option_definition();
-    $options['user'] = array('default' => '');
+    $options['user'] = array('default' => '', 'bool' => TRUE, 'translatable' => FALSE);
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     $form['user'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Default argument'),
+      '#type' => 'checkbox',
+      '#title' => t('Also look for a node and use the node author'),
       '#default_value' => $this->options['user'],
     );
   }
@@ -58,10 +58,12 @@ class views_plugin_argument_default_user extends views_plugin_argument_default {
       return arg(1);
     }
 
-    if (arg(0) == 'node' && is_numeric(arg(1))) {
-      $node = node_load(arg(1));
-      if ($node) {
-        return $node->uid;
+    if (!empty($this->options['user'])) {
+      if (arg(0) == 'node' && is_numeric(arg(1))) {
+        $node = node_load(arg(1));
+        if ($node) {
+          return $node->uid;
+        }
       }
     }
   }
