@@ -683,10 +683,16 @@ function node_views_analyze($view) {
         // check for no access control
         $access = $display->handler->get_option('access');
         if (empty($access['type']) || $access['type'] == 'none') {
-          $result = db_query("SELECT r.name, p.perm FROM {role} r INNER JOIN {permission} p ON p.rid = r.rid WHERE r.name IN ('anonymous user', 'authenticated user')");
-          while ($role = db_fetch_object($result)) {
-            $role->perm = explode(', ', $role->perm);
-            $role->safe = in_array('access content', $role->perm);
+          $select = db_select('role', 'r');
+          $select->innerJoin('role_permission', 'p', 'r.rid = p.rid');
+          $result = $select->fields('r', array('name'))
+            ->fields('p', array('permission'))
+            ->condition('r.name', array('anonymous user', 'authenticated user'), 'IN')
+            ->condition('p.permission', 'access content')
+            ->execute();
+    
+          foreach ($result as $role) {
+            $role->safe = TRUE;
             $roles[$role->name] = $role;
           }
           if (!($roles['anonymous user']->safe && $roles['authenticated user']->safe)) {

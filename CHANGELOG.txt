@@ -541,3 +541,4 @@ Views 3.x-7.x-dev
     o #759082 by dereine: Prevent invalid argument warning with no relationships.
     o #946368 by dereine: User argument default ignoring node author checkbox in some cases.
     o #867636 by chromix: Give jump menu an option to set default value to current path.
+    o #997772 by dereine: Fix node_view_analyze by using dbtng and d7 role_permission database schema.
