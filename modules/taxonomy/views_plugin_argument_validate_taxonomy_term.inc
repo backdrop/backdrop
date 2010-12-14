@@ -164,6 +164,9 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         $query->leftJoin('taxonomy_vocabulary', 'tv', 'td.vid = tv.vid');
         $query->fields('td');
         $query->fields('tv', array('machine_name'));
+        if (!empty($vocabularies)) {
+          $query->condition('tv.machine_name', $vocabularies);
+        }
         if ($transform) {
           $query->where("replace(td.name, ' ', '-') = :name", array(':name' => $argument));
         }
