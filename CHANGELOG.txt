@@ -544,4 +544,5 @@ Views 3.x-7.x-dev
     o #997772 by dereine: Fix node_view_analyze by using dbtng and d7 role_permission database schema.
     o #998278 by dereine: Update field.views.inc based on #986992.
     o #998400 by das-peter: Use vocabulary in "term name converted to term id".
+    o #785036 by dereine and bojanz: Properly validate display IDs.
 
