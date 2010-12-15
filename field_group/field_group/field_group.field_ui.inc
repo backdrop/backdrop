@@ -165,7 +165,9 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     );
 
     $table[$name] += array(
-      'label' => array(),
+      'group_name' => array(
+        '#markup' => check_plain($name),
+      ),
       'format' => array(
         'type' => array(
           '#type' => 'select',
