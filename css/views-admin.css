@@ -48,7 +48,7 @@
 
 .page-admin-structure-views #content .views-displays .secondary .open > a {
   position: relative;
-  z-index: 1001;
+  z-index: 51;
 }
 
 /**
@@ -63,7 +63,7 @@
   margin: 0;
   position: absolute;
   top: 18px;
-  z-index: 1000;
+  z-index: 50;
 }
 
 .page-admin-structure-views #content .views-displays .secondary .action-list  li {

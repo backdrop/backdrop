@@ -176,7 +176,6 @@
   border-radius: 7px 7px 0 0;
   border-bottom: 1px solid transparent;
   position: relative;
-  z-index: 1001;
 }
 
 .page-admin-structure-views #content .views-displays .secondary .open > a:hover {
