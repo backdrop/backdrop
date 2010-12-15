@@ -109,6 +109,22 @@ function field_group_menu() {
  *   The translated menu router path argument map.
  */
 function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
+
+  // Extract the actual bundle name from the translated argument map.
+  // The menu router path to manage fields of an entity can be shared among
+  // multiple bundles. For example:
+  // - admin/structure/types/manage/%node_type/fields/%field_ui_menu
+  // - admin/structure/types/manage/%comment_node_type/fields/%field_ui_menu
+  // The menu system will automatically load the correct bundle depending on the
+  // actual path arguments, but this menu loader function only receives the node
+  // type string as $bundle_name, which is not the bundle name for comments.
+  // We therefore leverage the dynamically translated $map provided by the menu
+  // system to retrieve the actual bundle and bundle name for the current path.
+  if ($bundle_pos > 0) {
+    $bundle = $map[$bundle_pos];
+    $bundle_name = field_extract_bundle($entity_type, $bundle);
+  }
+
   // A unique group is identified by a [entity_type, bundle, group_name, view_mode] tuple.
   $query = db_select('field_group', 'fg');
   $query->fields('fg');
@@ -116,7 +132,7 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $query->condition('entity_type', $entity_type);
   $query->condition('bundle', $bundle_name);
   $group = $query->execute()->fetchObject();
-  if ($group->id) {
+  if ($group && $group->id) {
     return field_group_unpack($group);
   }
   return FALSE;
