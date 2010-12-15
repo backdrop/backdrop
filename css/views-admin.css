@@ -25,7 +25,7 @@
  
  /* @end */
 
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-legend {
+.page-admin-structure-views #content .views-display-tab .fieldset-legend {
   position: relative;
 }
 
@@ -62,7 +62,7 @@
   left: 0;
   margin: 0;
   position: absolute;
-  top: 19px;
+  top: 18px;
   z-index: 1000;
 }
 
@@ -74,18 +74,18 @@
  * The attachment details section is a collapsible fieldset, but should not
  * have a border around it.
  */
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-legend {
+.page-admin-structure-views #content .views-display-tab .fieldset-legend {
   left: -5px; 
 }
 
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper {
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper {
   position: relative;
 }
 
 /**
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper > .actions {
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper > .actions {
   position: absolute;
   right: 0;
   top: -14px;
@@ -94,8 +94,8 @@
 /**
  * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper:after,
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper::after,
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper:after,
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper::after,
 .page-admin-structure-views #content .horizontal:after,
 .page-admin-structure-views #content .horizontal::after {
   content: ".";

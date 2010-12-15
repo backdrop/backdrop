@@ -224,19 +224,19 @@
  * The attachment details section is a collapsible fieldset, but should not
  * have a border around it.
  */
-.page-admin-structure-views #content .views-displays > fieldset {
+.page-admin-structure-views #content .views-display-tab fieldset {
   border: none;
   padding-left: 12px;
   padding-right: 12px;
 }
 
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-legend {
+.page-admin-structure-views #content .views-display-tab .fieldset-legend {
   text-transform: none;
   font-size: 14px;
   left: -5px; 
 }
 
-.page-admin-structure-views #content .views-displays > fieldset .fieldset-wrapper {
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper {
   padding: 0;
   position: relative;
 }
@@ -251,11 +251,11 @@
 /**
  * Create a horizontal rule between the display details and whatever's after it.
  */
-.page-admin-structure-views #content .views-displays > fieldset + * > *:first-child {
+.page-admin-structure-views #content .views-display-tab + * > *:first-child {
   border-top: 3px solid #CCC;
 }
 
-.page-admin-structure-views #content .views-displays > fieldset + * {
+.page-admin-structure-views #content .views-display-tab + * {
   padding: 0 12px;
 }
 
