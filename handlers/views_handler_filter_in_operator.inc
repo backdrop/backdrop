@@ -5,6 +5,8 @@
  *
  * Definition items:
  * - numeric: If set to true, this item will use numeric operators instead of string.
+ * - options callback: The function to call in order to generate the value options. If omitted, the options 'Yes' and 'No' will be used.
+ * - options arguments: An array of arguments to pass to the options callback.
  *
  */
 class views_handler_filter_in_operator extends views_handler_filter {
@@ -30,7 +32,12 @@ class views_handler_filter_in_operator extends views_handler_filter {
     }
 
     if (isset($this->definition['options callback']) && is_callable($this->definition['options callback'])) {
-      $this->value_options = call_user_func($this->definition['options callback']);
+      if (isset($this->definition['options arguments']) && is_array($this->definition['options arguments'])) {
+        $this->value_options = call_user_func_array($this->definition['options callback'], $this->definition['options arguments']);
+      }
+      else {
+        $this->value_options = call_user_func($this->definition['options callback']);
+      }
     }
     else {
       $this->value_options = array(t('Yes'), t('No'));
