@@ -36,7 +36,7 @@ class views_handler_field_markup extends views_handler_field {
     }
   }
 
-  function element_type() {
+  function element_type($none_supported = FALSE, $default_empty = FALSE) {
     if (isset($this->definition['element type'])) {
       return $this->definition['element type'];
     }

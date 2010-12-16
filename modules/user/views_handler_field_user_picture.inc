@@ -12,7 +12,7 @@ class views_handler_field_user_picture extends views_handler_field {
     $this->additional_fields['mail'] = 'mail';   
   }
 
-  function element_type() {
+  function element_type($none_supported = FALSE, $default_empty = FALSE) {
     return 'div';
   }
 
