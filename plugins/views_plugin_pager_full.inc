@@ -201,7 +201,7 @@ class views_plugin_pager_full extends views_plugin_pager {
   function render($input) {
     $pager_theme = views_theme_functions('pager', $this->view, $this->display);
     $output = theme($pager_theme, array(
-      'tags' => $input, 'quantity' => $this->options['items_per_page'], 'element' => $this->options['id']));
+      'tags' => $input, 'element' => $this->options['id']));
     return $output;
   }
 

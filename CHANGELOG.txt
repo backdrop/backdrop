@@ -550,5 +550,6 @@ Views 3.x-7.x-dev
     o #497936: Profile fields with dashes in their names cause bad queries.
     o #608926 by Longwave: Remove unused theme("nodate") functionality.
     o #993002 by alex_b, dereine: Fix notice in views_plugin_display_page.inc.
-    o #100044 by pivica: Fix notice for element_type in some field handlers.
+    o #1000044 by pivica: Fix notice for element_type in some field handlers.
+    o #984390 by yhahn: Fix full pager variables.
 
