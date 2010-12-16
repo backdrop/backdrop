@@ -62,7 +62,7 @@ class views_plugin_display_page extends views_plugin_display {
     foreach($bits as $pos => $bit) {
       if ($bit == '%') {
         $argument = array_shift($view_arguments);
-        if ($argument['validate_type'] != 'none') {
+        if (isset($argument['validate_type']) && $argument['validate_type'] != 'none') {
           $bits[$pos] = '%views_arg';
         }
         $page_arguments[] = $pos;

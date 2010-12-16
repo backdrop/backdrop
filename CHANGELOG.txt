@@ -549,4 +549,5 @@ Views 3.x-7.x-dev
     o #927270 by Cyberwolf: Allow the "options callback" for the in_operator filter handler to also have an "options argument" in the definition.
     o #497936: Profile fields with dashes in their names cause bad queries.
     o #608926 by Longwave: Remove unused theme("nodate") functionality.
+    o #993002 by alex_b, dereine: Fix notice in views_plugin_display_page.inc.
 
