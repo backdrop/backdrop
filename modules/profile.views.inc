@@ -33,8 +33,8 @@ function profile_views_data() {
   );
 
   $fields = profile_views_get_fields();
-  foreach($fields as $field) {
-    $table_name = 'profile_value_' . $field->name;
+  foreach ($fields as $field) {
+    $table_name = 'profile_value_' . str_replace('-', '_', $field->name);
     $data[$table_name] = array(
       'table' => array(
         'group' => t('Profile'),

@@ -547,4 +547,5 @@ Views 3.x-7.x-dev
     o #785036 by dereine and bojanz: Properly validate display IDs.
     o #958312 by tim.plunkett: Exports could have extraneous whitespace when exported from other modules like features.
     o #927270 by Cyberwolf: Allow the "options callback" for the in_operator filter handler to also have an "options argument" in the definition.
+    o #497936: Profile fields with dashes in their names cause bad queries.
 
