@@ -1455,7 +1455,7 @@ class view extends views_db_object {
     $output .= $indent . '$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */' . "\n";
 
     foreach ($this->display as $id => $display) {
-      $output .= $indent . "\n/* Display: $display->display_title */\n";
+      $output .= "\n" . $indent . "/* Display: $display->display_title */\n";
       $output .= $indent . '$handler = $view->new_display(' . views_var_export($display->display_plugin, $indent) . ', ' . views_var_export($display->display_title, $indent) . ', \'' . $id . "');\n";
       if (empty($display->handler)) {
         // @todo -- probably need a method of exporting broken displays as
