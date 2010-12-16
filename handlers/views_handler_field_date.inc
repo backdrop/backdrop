@@ -50,10 +50,7 @@ class views_handler_field_date extends views_handler_field {
       $custom_format = $this->options['custom_date_format'];
     }
 
-    if (!$value) {
-      return theme('views_nodate');
-    }
-    else {
+    if ($value) {
       $time_diff = REQUEST_TIME - $value; // will be positive for a datetime in the past (ago), and negative for a datetime in the future (hence)
       switch ($format) {
         case 'raw time ago':
