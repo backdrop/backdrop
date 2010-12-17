@@ -26,12 +26,12 @@
         Drupal.ajax[id] = new Drupal.ajax(id, form, element_settings);
       });
     }
-    $('#views-ajax-pad').dialog('open');
+    $(ajax_area).dialog('open');
   };
 
   Drupal.ajax.prototype.commands.viewsDismissForm = function(ajax, response, status) {
     Drupal.ajax.prototype.commands.viewsSetForm({}, {'title': '', 'output': Drupal.settings.views.ajax.defaultForm});
-    $("#views-ajax-pad").dialog('close');
+    $(Drupal.settings.views.ajax.id).dialog('close');
   }
 
   Drupal.ajax.prototype.commands.viewsHilite = function(ajax, response, status) {
@@ -90,10 +90,14 @@
   }
 
   Drupal.behaviors.viewsAjax = {
-    attach: function (context) {
+    attach: function (context, settings) {
       // Create a jQuery UI dialog, but leave it closed.
-      var dialog_area = $("#views-ajax-pad", context);
-      dialog_area.dialog({'autoOpen': false});
+      var dialog_area = $(settings.views.ajax.id, context);
+      dialog_area.dialog({
+        'autoOpen': false,
+        'dialogClass': 'views-ui-dialog',
+        'width': 750
+      });
 
       var base_element_settings = {
         'event': 'click',

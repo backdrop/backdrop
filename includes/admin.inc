@@ -627,6 +627,7 @@ function theme_views_ui_view_info($variables) {
   $output .= '<div class="views-ui-view-paths">' . $paths . "</div>\n";
   return $output;
 }
+
 /**
  * Page to delete a view.
  */

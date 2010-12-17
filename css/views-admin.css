@@ -126,3 +126,12 @@
 .js #edit-show-update-wizard-key {
   display: none;
 }
+
+/**
+ * The modal dialog box.
+ */
+ .views-ui-dialog .ui-dialog-content {
+}
+.views-ui-dialog .ui-dialog-titlebar {
+  display: none;
+}
