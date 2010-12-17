@@ -62,6 +62,7 @@ class views_handler_sort extends views_handler {
    * Basic options for all sort criteria
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }

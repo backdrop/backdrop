@@ -112,6 +112,7 @@ class views_handler_argument extends views_handler {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $defaults = $this->default_actions();
 
     $form['title'] = array(

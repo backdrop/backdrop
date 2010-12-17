@@ -165,6 +165,7 @@ class views_handler extends views_object {
     $options['field'] = array('default' => '');
     $options['relationship'] = array('default' => 'none');
     $options['group_type'] = array('default' => 'group');
+    $options['ui_name'] = array('default' => '');
 
     return $options;
   }
@@ -173,6 +174,10 @@ class views_handler extends views_object {
    * Return a string representing this handler's name in the UI.
    */
   function ui_name($short = FALSE) {
+    if (!empty($this->options['ui_name'])) {
+      $title = check_plain($this->options['ui_name']);
+      return $title;
+    }
     $title = ($short && isset($this->definition['title short'])) ? $this->definition['title short'] : $this->definition['title'];
     return t('!group: !title', array('!group' => $this->definition['group'], '!title' => $title));
   }
@@ -210,7 +215,14 @@ class views_handler extends views_object {
    */
   function options_validate(&$form, &$form_state) { }
 
-  function options_form(&$form, &$form_state) { }
+  function options_form(&$form, &$form_state) {
+    $form['ui_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Administrative Title'),
+      '#description' => t('This title will be displayed on the views edit page instead of the default one. This might be useful if you have the same item twice.'),
+      '#default_value' => $this->options['ui_name'],
+    );
+  }
   /**
    * Perform any necessary changes to the form values prior to storage.
    * There is no need for this function to actually store the data.
