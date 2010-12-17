@@ -554,4 +554,5 @@ Views 3.x-7.x-dev
     o #984390 by yhahn: Fix full pager variables.
     o #972620 by dereine: Add an administrative title field for all handlers to make it more possible to distinguish similar fields from each other in the UI.
     o #627378: Allow specifying that your module provides specialized views templates via hook_views_api.
+    o #627378 follow up: Remove debug calls.
 

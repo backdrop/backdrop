@@ -142,7 +142,6 @@ function _views_find_module_templates($cache, $path) {
   // Because drupal_system_listing works the way it does, we check for real
   // templates separately from checking for patterns.
   $files = drupal_system_listing($regex, $path, 'name', 0);
-  debug($files);
   foreach ($files as $template => $file) {
     // Chop off the remaining extensions if there are any. $template already
     // has the rightmost extension removed, but there might still be more,
@@ -170,7 +169,6 @@ function _views_find_module_templates($cache, $path) {
 
   $patterns = array_keys($files);
 
-  debug($cache);
   foreach ($cache as $hook => $info) {
     if (!empty($info['pattern'])) {
       // Transform _ in pattern to - to match file naming scheme
@@ -182,7 +180,6 @@ function _views_find_module_templates($cache, $path) {
         foreach ($matches as $match) {
           $file = substr($match, 0, strpos($match, '.'));
           // Put the underscores back in for the hook name and register this pattern.
-          debug($info);
           $templates[strtr($file, '-', '_')] = array(
             'template' => $file,
             'path' => dirname($files[$match]->filename),
@@ -719,7 +716,6 @@ function views_get_module_apis($reset = FALSE) {
     }
   }
 
-  debug($cache);
   return $cache;
 }
 
