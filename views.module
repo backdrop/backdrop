@@ -33,7 +33,7 @@ function views_init() {
 /**
  * Implement hook_theme(). Register views theming functions.
  */
-function views_theme() {
+function views_theme($existing, $type, $theme, $path) {
   $path = drupal_get_path('module', 'views');
   include_once $path . '/theme/theme.inc';
 
@@ -116,7 +116,86 @@ function views_theme() {
     'pattern' => 'views_more__',
     'variables' => array('more_url' => NULL, 'link_text' => 'more'),
   );
+
+  // Add theme suggestions which are part of modules.
+  foreach (views_get_module_apis() as $info) {
+    if (isset($info['template path'])) {
+      $hooks += _views_find_module_templates($hooks, $info['template path']);
+    }
+  }
   return $hooks;
+}
+
+/**
+ * Scans a directory of a module for template files.
+ *
+ * @param $cache
+ *   The existing cache of theme hooks to test against.
+ * @param $path
+ *   The path to search.
+ * 
+ * @see drupal_find_theme_templates
+ */
+function _views_find_module_templates($cache, $path) {
+  $regex = '\.tpl\.php' . '$';
+
+  // Because drupal_system_listing works the way it does, we check for real
+  // templates separately from checking for patterns.
+  $files = drupal_system_listing($regex, $path, 'name', 0);
+  debug($files);
+  foreach ($files as $template => $file) {
+    // Chop off the remaining extensions if there are any. $template already
+    // has the rightmost extension removed, but there might still be more,
+    // such as with .tpl.php, which still has .tpl in $template at this point.
+    if (($pos = strpos($template, '.')) !== FALSE) {
+      $template = substr($template, 0, $pos);
+    }
+    // Transform - in filenames to _ to match function naming scheme
+    // for the purposes of searching.
+    $hook = strtr($template, '-', '_');
+    if (isset($cache[$hook])) {
+      $templates[$hook] = array(
+        'template' => $template,
+        'path' => dirname($file->filename),
+        'include files' => $cache[$hook]['include files'],
+      );
+    }
+    // Ensure that the pattern is maintained from base themes to its sub-themes.
+    // Each sub-theme will have their templates scanned so the pattern must be
+    // held for subsequent runs.
+    if (isset($cache[$hook]['pattern'])) {
+      $templates[$hook]['pattern'] = $cache[$hook]['pattern'];
+    }
+  }
+
+  $patterns = array_keys($files);
+
+  debug($cache);
+  foreach ($cache as $hook => $info) {
+    if (!empty($info['pattern'])) {
+      // Transform _ in pattern to - to match file naming scheme
+      // for the purposes of searching.
+      $pattern = strtr($info['pattern'], '_', '-');
+
+      $matches = preg_grep('/^'. $pattern .'/', $patterns);
+      if ($matches) {
+        foreach ($matches as $match) {
+          $file = substr($match, 0, strpos($match, '.'));
+          // Put the underscores back in for the hook name and register this pattern.
+          debug($info);
+          $templates[strtr($file, '-', '_')] = array(
+            'template' => $file,
+            'path' => dirname($files[$match]->filename),
+            'variables' => $info['arguments'],
+            'original hook' => $hook,
+            'include files' => $info['include files'],
+          );
+        }
+      }
+    }
+  }
+
+  return $templates;
 }
 
 /**
@@ -640,6 +719,7 @@ function views_get_module_apis($reset = FALSE) {
     }
   }
 
+  debug($cache);
   return $cache;
 }
 

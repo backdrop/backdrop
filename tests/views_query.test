@@ -312,6 +312,10 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     return $data;
   }
 
+  protected function viewsPlugins() {
+    return array();
+  }
+
   /**
    * A very simple test dataset.
    */
