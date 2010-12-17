@@ -782,7 +782,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
-    // Taken from the "old" UI.
+    // Taken from the "old" UI. @TODO: Review and rename.
     '#validate' => array('views_ui_edit_view_form_validate'),
     '#submit' => array('views_ui_edit_view_form_submit'),
   );
@@ -901,8 +901,6 @@ function views_ui_edit_form_submit_duplicate_display($form, &$form_state) {
 
 /**
  * Submit handler to delete a display from a view.
- *
- * @todo Do we want a confirmation step?
  */
 function views_ui_edit_form_submit_delete_display($form, &$form_state) {
   $view = $form_state['view'];
@@ -982,7 +980,7 @@ function views_ui_get_display_tab($view, $display_id) {
 }
 
 /**
- * Helper function to get the body of the page query edit UI.
+ * Helper function to get the display details section of the edit UI.
  *
  * @param $view
  * @param $display
@@ -1183,7 +1181,7 @@ function views_ui_export_page($form, &$form_state, $view) {
 }
 
 /**
- * Import a view from cut & paste
+ * Import a view from cut & paste.
  */
 function views_ui_import_page($form, &$form_state) {
   $form['name'] = array(
@@ -1208,7 +1206,7 @@ function views_ui_import_page($form, &$form_state) {
 }
 
 /**
- * Validate handler to import a view
+ * Validate handler to import a view.
  */
 function views_ui_import_validate($form, &$form_state) {
   $view = '';
@@ -1301,41 +1299,12 @@ function views_ui_import_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for view import
+ * Submit handler for view import.
  */
 function views_ui_import_submit($form, &$form_state) {
   // Store in cache and then go to edit.
   views_ui_cache_set($form_state['view']);
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
-}
-
-/**
- * The main edit view form, which is really just a save/cancel/delete button.
- */
-function views_ui_edit_view_form($form, &$form_state, $view) {
-  $form['buttons']['save'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-    '#validate' => array('views_ui_edit_view_form_validate'),
-    '#submit' => array('views_ui_edit_view_form_submit'),
-  );
-
-  $form['buttons']['cancel'] = array(
-    '#type' => 'submit',
-    '#value' => t('Cancel'),
-    '#submit' => array('views_ui_edit_view_form_cancel'),
-  );
-
-  if (is_numeric($view->vid)) {
-    $form['buttons']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => $view->type == t('Overridden') ? t('Revert') : t('Delete'),
-      '#submit' => array('views_ui_edit_view_form_delete'),
-    );
-  }
-
-  $form_state['view'] = &$view;
-  return $form;
 }
 
 /**
@@ -1408,29 +1377,6 @@ function views_ui_edit_view_form_delete($form, &$form_state) {
 }
 
 /**
- * Generate the summary output for a single display to render in a tab.
- */
-function views_ui_display_tab($view, $display) {
-  if (isset($display->handler)) {
-    $plugin = $display->handler->definition;
-  }
-  if (empty($plugin)) {
-    $title = isset($display->display_title) ? $display->display_title : t('Invalid');
-    return array($title, t("Error: Display @display refers to a plugin named '@plugin', but that plugin doesn't exist!", array('@display' => $display->id, '@plugin' => $display->display_plugin)));
-
-    // @todo We can do a better 'plugin does not exist' tab.
-  }
-
-  // The display should always be initialized prior to this call.
-  if (empty($display->handler)) {
-    return FALSE;
-  }
-
-  $body = theme('views_ui_edit_tab', array('view' => $view, 'display' => $display));
-  return array($display->display_title, $body);
-}
-
-/**
  * Add information about a section to a display.
  */
 function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALSE) {
@@ -1448,7 +1394,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALS
       '#topic' => $type,
     );
   }
-  
+
   if ($no_fields) {
     $build['#title'] = $types[$type]['title'];
     $build['#rearrange'] = '';
@@ -1756,7 +1702,7 @@ function views_ui_ajax_forms($key = NULL) {
 /**
  * Build a form identifier that we can use to see if one form
  * is the same as another. Since the arguments differ slightly
- * we do a lot of spiffy concenation here.
+ * we do a lot of spiffy concatenation here.
  */
 function views_ui_build_identifier($key, $view, $display_id, $args) {
   $form = views_ui_ajax_forms($key);
