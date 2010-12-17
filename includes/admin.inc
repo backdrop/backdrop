@@ -1103,14 +1103,14 @@ function template_preprocess_views_ui_edit_view(&$vars) {
   }
 
   $vars['quick_links_raw'] = array(
-    array(
+    'views-export' => array(
       'title' => t('Export'),
-      'alt' => t("Export this view"),
+      'attributes' => array('title' => t("Export this view")),
       'href' => "admin/structure/views/export/$view->name",
     ),
-    array(
+    'views-clone' => array(
       'title' => t('Clone'),
-      'alt' => t("Create a copy of this view"),
+      'attributes' => array('title' => t("Create a copy of this view")),
       'href' => "admin/structure/views/clone/$view->name",
     ),
   );
@@ -1120,9 +1120,9 @@ function template_preprocess_views_ui_edit_view(&$vars) {
     if (!empty($display->handler) && $display->handler->has_path()) {
       $path = $display->handler->get_path();
       if (strpos($path, '%') === FALSE && !isset($paths[$path])) {
-        $vars['quick_links_raw'][] = array(
+        $vars['quick_links_raw']['views-view-' . $display->id] = array(
           'title' => t('View "@display"', array('@display' => $display->display_title)),
-          'alt' => t("Go to the real page for this display"),
+          'attributes' => array('title' => t("Go to the real page for this display")),
           'href' => $path,
         );
         // Displays can have the same path; no point in showing more than one link.
