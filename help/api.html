@@ -20,4 +20,6 @@ Often these versions are basically compatible with each other and Views won't ca
 </dd>
 <dt><strong>path</strong></dt>
 <dd>If your *.views*.inc files are not in the same directory as the .module file, then return the full path here. You should probably use something like drupal_get_path('module', 'yourmodulename') . '/includepath'.</dd>
+<dt><strong>template path</strong></dt>
+<dd>A path where the module has stored it's views template files. When you have specificed this key views automatically uses the template files for the views. You can use the same naming conventions like for normal views template files.</dd>
 </dl>
