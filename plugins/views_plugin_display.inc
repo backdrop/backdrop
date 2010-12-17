@@ -1933,54 +1933,6 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
-   * Add an override button for a given section, allowing the user to
-   * change whether this info is stored on the default display or on
-   * the current display.
-   */
-  function add_override_button(&$form, &$form_state, $section) {
-    if ($this->is_default_display()) {
-      return;
-    }
-
-    $form['override'] = array(
-      '#prefix' => '<div class="views-override clearfix">',
-      '#suffix' => '</div>',
-    );
-    if ($this->is_defaulted($section)) {
-      $form['override']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Override'),
-        '#submit' => array('views_ui_edit_display_form_override'),
-      );
-      $help = '';
-      if (module_exists('advanced_help')) {
-        $help = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'overrides'));
-      }
-      $form['override']['markup'] = array(
-        '#markup' => '<div class="description">' . $help . t('Status: using default values.') . '</div>',
-      );
-
-      $form_state['update_name'] = t('Update default display');
-    }
-    else {
-      $form['override']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Use default'),
-        '#submit' => array('views_ui_edit_display_form_override'),
-      );
-      $help = '';
-      if (module_exists('advanced_help')) {
-        $help = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'overrides'));
-      }
-      $form['override']['markup'] = array(
-        '#markup' => '<div class="description">' . $help . t('Status: using overridden values.') . '</div>',
-      );
-
-      $form_state['update_name'] = NULL;
-    }
-  }
-
-  /**
    * If override/revert was clicked, perform the proper toggle.
    */
   function options_override($form, &$form_state) {

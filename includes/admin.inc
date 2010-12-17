@@ -1502,9 +1502,12 @@ function views_ui_regenerate_tab(&$view, &$output, $display_id) {
 }
 
 /**
- * Provide standard buttons for the forms to make it easy. Also provide
+ * Provide a standard set of Apply/Cancel/OK buttons for the forms. Also provide
  * a hidden op operator because the forms plugin doesn't seem to properly
  * provide which button was clicked.
+ *
+ * TODO: Is the hidden op operator still here somewhere, or is that part of the
+ * docblock outdated?
  */
 function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = NULL, $third = NULL, $submit = NULL) {
   $form['buttons'] = array(
@@ -1513,39 +1516,33 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   );
 
   if (empty($name)) {
-    $name = t('Update');
+    $name = t('Apply');
   }
 
-  // remove default validate handler
+  // Remove default validate handler, so it runs only on "Apply" (not "Cancel").
+  // We will add it back to the appropriate submit buttons below.
   $form['#validate'] = array();
 
-    // Add the override and update button
-  if ($name == t('Update default display')) {
-    $form['buttons']['override_update'] = array(
-      '#type' => 'submit',
-      '#value' => t('Update and override'),
-      '#submit' => array(
-        'views_ui_edit_display_form_override_update_section',
-        'views_ui_standard_submit',
-        'views_ui_edit_display_form_override_update',
-      ),
-    );
-  }
-
+  // Forms that are purely informational set an ok_button flag, so we know not
+  // to create an "Apply" button for them.
   if (empty($form_state['ok_button'])) {
-    // but be sure submit button validates!
     $form['buttons']['submit'] = array(
       '#type' => 'submit',
       '#value' => $name,
-      '#submit' => array('views_ui_standard_submit', $form_id . '_submit'),
+      // The regular submit handler ($form_id . '_submit') does not apply if
+      // we're updating the default display. It does apply if we're updating
+      // the current display. Since we have no way of knowing at this point
+      // which display the user wants to update, views_ui_standard_submit will
+      // take care of running the regular submit handler as appropriate.
+      '#submit' => array('views_ui_standard_submit'),
     );
-    // Take sure that the validation handler exists.
+    // If a validation handler exists for the form, assign it to this button.
     if (function_exists($form_id . '_validate')) {
       $form['buttons']['submit']['#validate'][] = $form_id . '_validate';
     }
-
   }
 
+  // Create a "Cancel" button. For purely informational forms, label it "OK".
   $cancel_submit = function_exists($form_id . '_cancel') ? $form_id . '_cancel' : 'views_ui_standard_cancel';
   $form['buttons']['cancel'] = array(
     '#type' => 'submit',
@@ -1554,6 +1551,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     '#validate' => array(),
   );
 
+  // Some forms specify a third button, with a name and submit handler.
   if ($third) {
     if (empty($submit)) {
       $submit = 'third';
@@ -1568,7 +1566,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     );
   }
 
-  // Compatibility, to be removed later:
+  // Compatibility, to be removed later: // TODO: When is "later"?
   // We used to set these items on the form, but now we want them on the $form_state:
   if (isset($form['#title'])) {
     $form_state['title'] = $form['#title'];
@@ -1600,41 +1598,77 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   if (!empty($form['#title'])) {
     drupal_set_title($form['#title']);
   }
-  // @todo Find a way to load the views-admin.seven.css only when Seven is the
-  // admin theme
-  $form['#attached']['css'][] = array(
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css'),
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
-      array(
-        'group' => CSS_DEFAULT,
-        'browsers' => array(
-          'IE' => 'lte IE 7',
-          '!IE' => FALSE
-        ),
-        'preprocess' => FALSE,
-      )
-    ),
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css', 
-      array(
-        'group' => CSS_DEFAULT,
-        'preprocess' => TRUE,
-      )
-    ),
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css', 
-      array(
-        'group' => CSS_THEME,
-        'preprocess' => TRUE,
-      )
-    ),
-  );
 }
 
 /**
- * Basic submit handler applicable to all 'standard' forms
+ * Basic submit handler applicable to all 'standard' forms.
+ *
+ * This submit handler determines whether the user wants the submitted changes
+ * to apply to the default display or to the current display, and dispatches
+ * control appropriately.
  */
 function views_ui_standard_submit($form, &$form_state) {
+  // Determine whether the values the user entered are intended to apply to
+  // the current display or the default display.
+
+  // Make sure the dropdown exists in the first place.
+  if (isset($form_state['values']['options']['override']['dropdown'])) {
+    $was_defaulted = (bool) ($form['options']['override']['dropdown']['#default_value'] === 'defaults');
+    $is_defaulted = (bool) ($form_state['values']['options']['override']['dropdown'] === 'default');
+
+    if ($was_defaulted !== $is_defaulted) {
+      // We're changing which display these values apply to.
+      // Update the #section so it knows what to mark changed.
+      $form['#section'] = str_replace('default-', $form_state['display_id'] . '-', $form['#section']);
+    }
+  }
+  else {
+    // The user didn't get the dropdown for overriding the default display.
+    $was_defaulted = FALSE;
+    $is_defaulted = FALSE;
+  }
+
+  // Mark the changed section of the view as changed. // TODO: Document why we are doing this.
   if (!empty($form['#section'])) {
     $form_state['view']->changed_sections[$form['#section']] = TRUE;
+  }
+
+  // Based on the user's choice in the display dropdown, determine which display
+  // these changes apply to.
+  if ($was_defaulted === $is_defaulted) {
+    // We're not changing which display these form values apply to.
+    // Run the regular submit handler for this form.
+    $submit_handler = $form['#form_id'] . '_submit';
+    if (function_exists($submit_handler)) {
+      $submit_handler($form, $form_state);
+    }
+  }
+  elseif ($was_defaulted && !$is_defaulted) {
+    // We were using the default display's values, but we're now overriding
+    // the default display and saving values specific to this display.
+    // TODO: Document why the regular form submit handler isn't necessary in
+    // this case.
+    $display = &$form_state['view']->display[$form_state['display_id']];
+    $display->handler->options_override($form, $form_state);
+    $display->handler->options_submit($form, $form_state);
+    views_ui_cache_set($form_state['view']);
+  }
+  elseif (!$was_defaulted && $is_defaulted) {
+    // We used to have an override for this display, but the user now wants
+    // to go back to the default display.
+    // Overwrite the default display with the current form values, and make
+    // the current display use the new default values.
+    $display = &$form_state['view']->display[$form_state['display_id']];
+    $display->handler->options_override($form, $form_state);
+    $display->handler->options_submit($form, $form_state);
+
+    // TODO: This is copy/paste code. Refactor.
+    $submit_handler = $form['#form_id'] . '_submit';
+    if (function_exists($submit_handler)) {
+      $submit_handler($form, $form_state);
+    }
+
+    views_ui_cache_set($form_state['view']);
   }
 }
 
@@ -1644,6 +1678,54 @@ function views_ui_standard_submit($form, &$form_state) {
 function views_ui_standard_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
 }
+
+/**
+ * Add a <select> dropdown for a given section, allowing the user to
+ * change whether this info is stored on the default display or on
+ * the current display.
+ */
+function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
+  $view = &$form_state['view'];
+  $display_id = $form_state['display_id'];
+  $displays = $view->display;
+  $current_display = $view->display[$display_id];
+
+  if ($current_display->handler->is_default_display()) {
+    return;
+  }
+
+  // Determine whether any other displays have overrides for this section.
+  $section_overrides = FALSE;
+  foreach ($displays as $id => $display) {
+    if ($id === 'default' || $id === $display_id) {
+      continue;
+    }
+    if ($display->handler && !$display->handler->is_defaulted($section)) {
+      $section_overrides = TRUE;
+    }
+  }
+
+  $display_dropdown['default'] = ($section_overrides ? t('All displays (except overridden)') : t('All displays'));
+  $display_dropdown[$display_id] = t('This @display_type (override)', array('@display_type' => $current_display->display_plugin));
+
+  $form['override'] = array(
+    '#prefix' => '<div class="views-override clearfix">',
+    '#suffix' => '</div>',
+  );
+  $form['override']['dropdown'] = array(
+    '#type' => 'select',
+    '#title' => t('For'), // @TODO: Translators may need more context than this.
+    '#options' => $display_dropdown,
+  );
+  if ($current_display->handler->is_defaulted($section)) {
+    $form['override']['dropdown']['#default_value'] = 'defaults';
+  }
+  else {
+    $form['override']['dropdown']['#default_value'] = $display_id;
+  }
+}
+
+
 
 // --------------------------------------------------------------------------
 // Various subforms for editing the pieces of a view.
@@ -1754,7 +1836,7 @@ function views_ui_build_form_url($form_state) {
 }
 
 /**
- * Add another form to the stack; clicking 'update' will go to this form
+ * Add another form to the stack; clicking 'apply' will go to this form
  * rather than closing the ajax pad.
  */
 function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FALSE) {
@@ -2151,6 +2233,8 @@ function views_ui_edit_display_form_submit($form, &$form_state) {
 
 /**
  * Override handler for views_ui_edit_display_form
+ *
+ * @TODO: Not currently used. Remove unless we implement an override toggle.
  */
 function views_ui_edit_display_form_override($form, &$form_state) {
   $display = &$form_state['view']->display[$form_state['display_id']];
@@ -2159,23 +2243,6 @@ function views_ui_edit_display_form_override($form, &$form_state) {
   views_ui_cache_set($form_state['view']);
   $form_state['rerender'] = TRUE;
   $form_state['rebuild'] = TRUE;
-}
-/**
- * Override handler and submit views_ui_edit_display_form
- */
-function views_ui_edit_display_form_override_update(&$form, &$form_state) {
-  $display = &$form_state['view']->display[$form_state['display_id']];
-  $display->handler->options_override($form, $form_state);
-  $display->handler->options_submit($form, $form_state);
-  views_ui_cache_set($form_state['view']);
-}
-
-/**
- * Override handler and submit views_ui_edit_display_form
- */
-function views_ui_edit_display_form_override_update_section(&$form, &$form_state) {
-  // Update the #section so it knows what to mark changed.
-  $form['#section'] = str_replace('default-', $form_state['display_id'] . '-', $form['#section']);
 }
 
 /**
@@ -2197,7 +2264,7 @@ function views_ui_config_type_form($form, &$form_state) {
 
   if ($display->handler->defaultable_sections($types[$type]['plural'])) {
     $form_state['section'] = $types[$type]['plural'];
-    $display->handler->add_override_button($form, $form_state, $form_state['section']);
+    views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
   }
 
   if (!empty($types[$type]['options']) && function_exists($types[$type]['options'])) {
@@ -2252,7 +2319,7 @@ function views_ui_rearrange_form($form, &$form_state) {
 
   if ($display->handler->defaultable_sections($types[$type]['plural'])) {
     $form_state['section'] = $types[$type]['plural'];
-    $display->handler->add_override_button($form, $form_state, $form_state['section']);
+    views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
   }
 
   $count = 0;
@@ -2394,7 +2461,6 @@ function views_ui_add_item_form($form, &$form_state) {
     $type = $types[$type]['type'];
   }
 
-  $form['#title'] = check_plain($display->display_title) . ': ';
   $form['#title'] .= t('Add @type', array('@type' => $types[$type]['ltitle']));
   $form['#section'] = $display_id . 'add-item';
 
@@ -2448,7 +2514,7 @@ function views_ui_add_item_form($form, &$form_state) {
     );
   }
   ctools_include('dependent');
-  views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add'));
+  views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Apply and continue'));
 
   return $form;
 }
@@ -2509,9 +2575,11 @@ function views_ui_config_item_form($form, &$form_state) {
     else {
       $types = views_object_types();
 
+      // If this item can come from the default display, show a dropdown
+      // that lets the user choose which display the changes should apply to.
       if ($view->display_handler->defaultable_sections($types[$type]['plural'])) {
         $form_state['section'] = $types[$type]['plural'];
-        $view->display_handler->add_override_button($form['options'], $form_state, $form_state['section']);
+        views_ui_standard_display_dropdown($form['options'], $form_state, $form_state['section']);
       }
 
       // A whole bunch of code to figure out what relationships are valid for
@@ -2588,7 +2656,7 @@ function views_ui_config_item_form($form, &$form_state) {
       $name = $form_state['update_name'];
     }
 
-    views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name, t('Remove'), 'remove');
+    views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name);
   }
   return $form;
 }
