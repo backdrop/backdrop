@@ -168,6 +168,10 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
+    $options['slave'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
 
     return $options;
   }
@@ -188,6 +192,12 @@ class views_plugin_query_default extends views_plugin_query {
       '#title' => t('Distinct'),
       '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
       '#default_value' => !empty($this->options['distinct']),
+    );
+    $form['slave'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use Slave Server'),
+      '#description' => t('This will make the query attempt to connect to a slave server if available.  If no slave server is defined or available, it will fall back to the default server.'),
+      '#default_value' => !empty($this->options['slave']),
     );
   }
 
@@ -1029,6 +1039,11 @@ class views_plugin_query_default extends views_plugin_query {
     // Detect an external database.
     if (isset($this->view->base_database)) {
       $options['target'] = $this->view->base_database;
+    }
+
+    // Set the slave target if the slave option is set
+    if (!empty($this->options['slave'])) {
+      $options['target'] = 'slave';
     }
 
     // Go ahead and build the query.

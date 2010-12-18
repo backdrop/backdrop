@@ -22,8 +22,7 @@ Views 3.x-7.x-dev
     o #324873 by dagmar: Show all paths when listing views, not just the first path.
     o #651244 by dagmar: Other instances of <Any> are not translatable and should not be run through t().
     o #653628: init declaration for views_handler_filter_many_to_one() did not match parent init.
-    o #657700: Fixed 'Override normal sorting if click sorting is used' setting on the table style plugin that was broken by #622602.
-    o #473698 by jrglasgow: Fix error in help text regarding custom theming.
+    o #657700: Fixed 'Override normal sorting if click sorting is used' setting on the table style plugin that was broken by #622602.  o #473698 by jrglasgow: Fix error in help text regarding custom theming.
     o #387448 by johttp://drupal.org/files/issues/fix-pager.patchachim: Provide better help text to describe how to use sticky sort.
     o #652716 by dagmar: "no single" flag on filter objects not completely respected, causing improper default filters.
     o #648438 by dww: In rare circumstances, unnecessary term_node tables could be joined in when adding term_data relationships.
@@ -557,5 +556,6 @@ Views 3.x-7.x-dev
     o #627378 follow up: Remove debug calls.
     o #1001442 by dboulet: Add classes/title text to contextual links.
     o #999042 by bojanz: Remove the option to use the site mission for the RSS feed description, because drupal doesn't have this field anymore.
+    o #985602 by bblake, bojanz, dereine: Support slave server.
 
 
