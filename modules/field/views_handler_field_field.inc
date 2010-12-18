@@ -171,39 +171,55 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
-   * Loads the objects providing the field information necessary to render the
-   *   field in the View.
+   * Builds a fake entity object for each row fetched from the database,
+   * creating the field structure required for rendering.
    */
   function pre_render(&$values) {
     if (!empty($values)) {
       $entity_info = $this->entity_info;
       $entity_type = $this->entity_type;
 
-      // Build the objects.
       $objects = array();
       foreach ($values as $key => $row) {
-        if ($row->{$this->field_alias}) {
-          $object = new stdClass();
-          $object->{$entity_info['entity keys']['id']} = $row->{$this->field_alias};
-          // Not every entity type has bundle and revision.
-          if (!empty($entity_info['entity keys']['bundle'])) {
-            $object->{$entity_info['entity keys']['bundle']} = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
-          }
-          if (!empty($entity_info['entity keys']['revision'])) {
-            $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
-          }
-
-          $language = $row->{$this->aliases['language']};
-          $delta = $row->{$this->aliases['delta']};
-
-          $field_values = array();
-          foreach (array_keys($this->definition['field_info']['columns']) as $column_name) {
-            $alias = $this->aliases[_field_sql_storage_columnname($this->definition['field_name'], $column_name)];
-            $field_values[$language][$delta][$column_name] = $row->{$alias};
-          }
-          $object->{$this->definition['field_name']} = $field_values;
-          $objects[$row->{$this->field_alias}] = $object;
+        // This entity doesn't contain our field, move along.
+        if (!$row->{$this->field_alias}) {
+          continue;
         }
+
+        $object = new stdClass();
+        $object->{$entity_info['entity keys']['id']} = $row->{$this->field_alias};
+        // Not every entity type has bundle and revision.
+        $bundle = '';
+        if (!empty($entity_info['entity keys']['bundle'])) {
+          $object->{$entity_info['entity keys']['bundle']} = $bundle = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
+        }
+        if (!empty($entity_info['entity keys']['revision'])) {
+          $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
+        }
+
+        $language = $row->{$this->aliases['language']};
+        $delta = $row->{$this->aliases['delta']};
+
+        // The entity object needs to contain all fields, not just the one
+        // being displayed, in order for field_view_field() to work properly.
+        foreach (field_info_instances($entity_type, $bundle) as $instance) {
+          $field_values = array();
+          $field_info = field_info_field($instance['field_name']);
+          foreach (array_keys($field_info['columns']) as $column_name) {
+            $sql_column = _field_sql_storage_columnname($instance['field_name'], $column_name);
+
+            // We might not have this field in the database results
+            if (isset($this->aliases[$sql_column])) {
+              $alias = $this->aliases[$sql_column];
+              $field_values[$language][$delta][$column_name] = $row->{$alias};
+            }
+            else {
+              $field_values[$language][$delta][$column_name] = '';
+            }
+          }
+          $object->{$instance['field_name']} = $field_values;
+        }
+        $objects[$row->{$this->field_alias}] = $object;
       }
 
       // Invoke field-type module's hook_field_load().
