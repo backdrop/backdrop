@@ -68,7 +68,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
 
     // Overrides for standard stuff:
     $options['style_plugin']['default'] = 'rss';
-    $options['style_options']['default']  = array('mission_description' => FALSE, 'description' => '');
+    $options['style_options']['default']  = array('description' => '');
     $options['sitename_title']['default'] = FALSE;
     $options['row_plugin']['default'] = '';
     $options['defaults']['default']['style_plugin'] = FALSE;

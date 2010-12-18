@@ -513,7 +513,6 @@ function hook_views_default_views() {
     'style_plugin' => 'rss',
     'style_options' =>
     array (
-      'mission_description' => 1,
       'description' => '',
     ),
     'row_plugin' => 'node_rss',

@@ -45,7 +45,6 @@ class views_plugin_style_rss extends views_plugin_style {
     $options = parent::option_definition();
 
     $options['description'] = array('default' => '', 'translatable' => TRUE);
-    $options['mission_description'] = array('default' => '', 'translatable' => TRUE);
 
     return $options;
   }
@@ -53,11 +52,6 @@ class views_plugin_style_rss extends views_plugin_style {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['mission_description'] = array(
-      '#type' => 'checkbox',
-      '#default_value' => !empty($this->options['mission_description']),
-      '#title' => t('Use the site mission for the description'),
-    );
     $form['description'] = array(
       '#type' => 'textfield',
       '#title' => t('RSS description'),

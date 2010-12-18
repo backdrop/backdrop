@@ -556,4 +556,6 @@ Views 3.x-7.x-dev
     o #627378: Allow specifying that your module provides specialized views templates via hook_views_api.
     o #627378 follow up: Remove debug calls.
     o #1001442 by dboulet: Add classes/title text to contextual links.
+    o #999042 by bojanz: Remove the option to use the site mission for the RSS feed description, because drupal doesn't have this field anymore.
+
 

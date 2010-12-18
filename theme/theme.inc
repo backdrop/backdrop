@@ -697,16 +697,10 @@ function template_preprocess_views_view_rss(&$vars) {
 
   $style    = &$view->style_plugin;
 
-  if (!empty($options['mission_description'])) {
-    $description = variable_get('site_mission', '');
-  }
-  else {
-    $description = $options['description'];
-  }
   // The RSS 2.0 "spec" doesn't indicate HTML can be used in the description.
   // We strip all HTML tags, but need to prevent double encoding from properly
   // escaped source data (such as &amp becoming &amp;amp;).
-  $vars['description'] = check_plain(decode_entities(strip_tags($description)));
+  $vars['description'] = check_plain(decode_entities(strip_tags($options['description'])));
 
   if ($view->display_handler->get_option('sitename_title')) {
     $title = variable_get('site_name', 'Drupal');

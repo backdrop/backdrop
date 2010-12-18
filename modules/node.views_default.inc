@@ -91,7 +91,6 @@ function node_views_default_views() {
   $handler->override_option('sitename_title', '1');
   $handler->override_option('title', 'Front page feed');
   $handler->override_option('style_options', array(
-    'mission_description' => 1,
     'description' => '',
   ));
   $handler->override_option('row_plugin', 'node_rss');
