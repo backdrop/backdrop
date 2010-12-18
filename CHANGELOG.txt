@@ -557,5 +557,4 @@ Views 3.x-7.x-dev
     o #1001442 by dboulet: Add classes/title text to contextual links.
     o #999042 by bojanz: Remove the option to use the site mission for the RSS feed description, because drupal doesn't have this field anymore.
     o #985602 by bblake, bojanz, dereine: Support slave server.
-
-
+    o by dereine: Fix views.info file.
