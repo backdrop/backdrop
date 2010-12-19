@@ -8,6 +8,11 @@ class views_handler_field_term_link_edit extends views_handler_field {
   function construct() {
     parent::construct();
     $this->additional_fields['tid'] = 'tid';
+    $this->additional_fields['vid'] = 'vid';
+    $this->additional_fields['vocabulary_machine_name'] = array(
+      'table' => 'taxonomy_vocabulary',
+      'field' => 'machine_name',
+    );
   }
 
   function option_definition() {
@@ -33,7 +38,13 @@ class views_handler_field_term_link_edit extends views_handler_field {
   }
 
   function render($values) {
-    if (user_access('administer taxonomy')) {
+    // Mock a term object for taxonomy_term_edit_access(). Use machine name and
+    // vid to ensure compatibility with vid based and machine name based
+    // access checks. See http://drupal.org/node/995156
+    $term = new stdClass();
+    $term->vid = $values->{$this->aliases['vid']};
+    $term->vocabulary_machine_name = $values->{$this->aliases['vocabulary_machine_name']};
+    if (taxonomy_term_edit_access($term)) {
       $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
       return l($text, 'taxonomy/term/'. $values->{$this->aliases['tid']} .'/edit', array('query' => drupal_get_destination()));
     }
