@@ -561,3 +561,4 @@ Views 3.x-7.x-dev
     o #987478 by bojanz: Let field field handler properly handle field language.
     o #1002060 by troky: COMMENT_NODE_* constants have new names
     o #996306 by alex_b: Respect 'edit terms in ' settings
+    o #987478 by bojanz: Fix some more edge cases in field field handler.
