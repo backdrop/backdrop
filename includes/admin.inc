@@ -1723,6 +1723,21 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
   else {
     $form['override']['dropdown']['#default_value'] = $display_id;
   }
+
+  // Add the "2 of 3" progress indicator.
+  // @TODO: Move this to a separate function if it's needed on any forms that
+  // don't have the display dropdown.
+  if (!empty($view->stack)) {
+    $stack = $view->stack;
+    // The forms on the stack have integer keys that don't change as the forms
+    // are completed, so we can see which ones are still left.
+    $keys = array_keys($view->stack);
+    // Add 1 to the array keys for the benefit of humans, who start counting
+    // from 1 and not 0.
+    $current = reset($keys) + 1;
+    $total = end($keys) + 1;
+    $form['progress']['#markup'] = t('@current of @total', array('@current' => $current, '@total' => $total));
+  }
 }
 
 
@@ -1845,11 +1860,30 @@ function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FAL
   }
 
   $stack = array(views_ui_build_identifier($key, $view, $display_id, $args), $key, &$view, $display_id, $args);
-  if ($top) {
-    array_unshift($view->stack, $stack);
-  }
-  else {
+  // If we're being asked to add this form to the bottom of the stack, no
+  // special logic is required. Our work is equally easy if we were asked to add
+  // to the top of the stack, but there's nothing in it yet.
+  if (!$top || empty($view->stack)) {
     $view->stack[] = $stack;
+  }
+  // If we're adding to the top of an existing stack, we have to maintain the
+  // existing integer keys, so they can be used for the "2 of 3" progress
+  // indicator (which will now read "2 of 4").
+  else {
+    $keys = array_keys($view->stack);
+    $first = current($keys);
+    $last = end($keys);
+    for ($i = $last; $i >= $first; $i--) {
+      if (!isset($view->stack[$i])) {
+        continue;
+      }
+      // Move form number $i to the next position in the stack.
+      $view->stack[$i + 1] = $view->stack[$i];
+      unset($view->stack[$i]);
+    }
+    // Now that the previously $first slot is free, move the new form into it.
+    $view->stack[$first] = $stack;
+    ksort($view->stack);
   }
 }
 
@@ -1878,7 +1912,12 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
   // now irrelevant.
   if (!empty($view->stack)) {
     $identifier = views_ui_build_identifier($key, $view, $display_id, $args);
-    $top = array_shift($view->stack);
+    // Retrieve the first form from the stack without changing the integer keys,
+    // as they're being used for the "2 of 3" progress indicator.
+    reset($view->stack);
+    list($key, $top) = each($view->stack);
+    unset($view->stack[$key]);
+
     if (array_shift($top) != $identifier) {
       $view->stack = array();
     }
