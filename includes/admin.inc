@@ -2517,7 +2517,7 @@ function views_ui_add_item_form($form, &$form_state) {
     );
 
     $form['name'] = array(
-      '#prefix' => '<div class="views-radio-box form-checkboxes">',
+      '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
       '#suffix' => '</div>',
       '#tree' => TRUE,
       '#default_value' => 'all',
@@ -2534,13 +2534,18 @@ function views_ui_add_item_form($form, &$form_state) {
 
     foreach ($grouped_options as $group => $group_options) {
       $form['name'][$group . '_start']['#markup'] = '<div class="ctools-dependent-all ctools-dependent-' . $group . '">';
+      $zebra = 0;
       foreach ($group_options as $key => $option) {
+        $zebra_class = ($zebra % 2) ? 'odd' : 'even';
         $form['name'][$key] = array(
           '#type' => 'checkbox',
           '#title' => t('!group: !field', array('!group' => $option['group'], '!field' => $option['title'])),
           '#description' => $option['help'],
           '#return_value' => $key,
+          '#prefix' => "<div class='$zebra_class'>",
+          '#suffix' => '</div>',
         );
+        $zebra++;
       }
       $form['name'][$group . '_end']['#markup'] = '</div>';
     }

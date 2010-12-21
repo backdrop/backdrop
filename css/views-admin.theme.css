@@ -309,6 +309,28 @@
 }
 
 /**
+ * The contents of the popup dialog on the views edit form.
+ */
+.page-admin-structure-views .views-filterable-options .form-type-checkbox {
+  border: 1px solid #CCC;
+  padding: 5px 8px;
+  border-top: none;
+}
+
+.page-admin-structure-views .views-filterable-options .even:first-child .form-type-checkbox {
+  border-top:  1px solid #CCC;
+}
+
+.page-admin-structure-views .views-filterable-options .even .form-type-checkbox {
+  background-color: #F3F4EE;
+}
+
+.page-admin-structure-views .views-filterable-options .form-type-checkbox .description {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/**
  * Live preview elements
  */
 .page-admin-structure-views #content .views-row + .views-row {
