@@ -2512,10 +2512,15 @@ function views_ui_add_item_form($form, &$form_state) {
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
   if (!empty($options)) {
+    $form['search'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Search'),
+    );
+
     $groups = array('all' => t('- All -'));
     $form['group'] = array(
       '#type' => 'select',
-      '#title' => t('Groups'),
+      '#title' => t('Filter'),
       '#options' => array(),
       '#attributes' => array('class' => array('ctools-master-dependent')),
     );
