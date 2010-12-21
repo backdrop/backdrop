@@ -140,3 +140,104 @@ Drupal.behaviors.viewsUiRenderAddViewButton.toggleMenu = function ($trigger) {
   $trigger.parent().toggleClass('open');
   $trigger.next().slideToggle('fast');
 }
+
+
+Drupal.behaviors.viewsUiSearchOptions = {};
+
+Drupal.behaviors.viewsUiSearchOptions.attach = function (context) {
+  var $ = jQuery;
+  // The add item form may have an id of views-ui-add-item-form--n.
+  var $form = $(context).find('form[id^="views-ui-add-item-form"]').first();
+  // Make sure we don't add more than one event handler to the same form.
+  $form = $form.once('views-ui-filter-options');
+  if ($form.length) {
+    new Drupal.viewsUi.OptionsSearch($form);
+  }
+};
+
+/**
+ * Constructor for the viewsUi.OptionsSearch object.
+ *
+ * The OptionsSearch object filters the available options on a form according
+ * to the user's search term. Typing in "taxonomy" will show only those options
+ * containing "taxonomy" in their label.
+ */
+Drupal.viewsUi.OptionsSearch = function ($form) {
+  this.$form = $form;
+  // Add a keyup handler to the search box.
+  this.$searchBox = this.$form.find('#edit-options-search');
+  this.$searchBox.keyup(jQuery.proxy(this.handleKeyup, this));
+  // Get a list of option labels and their corresponding divs and maintain it
+  // in memory, so we have as little overhead as possible at keyup time.
+  this.options = this.getOptions(this.$form.find('.filterable-option'));
+};
+
+/**
+ * Assemble a list of all the filterable options on the form.
+ *
+ * @param $allOptions
+ *   A jQuery object representing the rows of filterable options to be
+ *   shown and hidden depending on the user's search terms.
+ */
+Drupal.viewsUi.OptionsSearch.prototype.getOptions = function ($allOptions) {
+  var $ = jQuery;
+  var i, $label, $option;
+  var options = [];
+  var length = $allOptions.length;
+  for (i = 0; i < length; i++) {
+    $option = $($allOptions[i]);
+    $label = $option.find('label');
+    options[i] = {
+      // Search on the lowercase version of the label text.
+      'labelText': $label.text().toLowerCase(),
+      // Maintain a reference to the jQuery object for each row, so we don't
+      // have to create a new object inside the performance-sensitive keyup
+      // handler.
+      '$div': $option
+    }
+  }
+  return options;
+};
+
+/**
+ * Keyup handler for the search box that hides or shows the relevant options.
+ */
+Drupal.viewsUi.OptionsSearch.prototype.handleKeyup = function (event) {
+  var found, i, j, option, search, words, wordsLength, zebraClass, zebraCounter;
+
+  // Determine the user's search query. The label text has been converted to
+  // lowercase.
+  search = this.$searchBox.val().toLowerCase();
+  words = search.split(' ');
+  wordsLength = words.length;
+
+  // Start the counter for restriping rows.
+  zebraCounter = 0;
+
+  // Search through the labels in the form for matching text.
+  var length = this.options.length;
+  for (i = 0; i < length; i++) {
+    // Use a local variable for the option being searched, for performance.
+    option = this.options[i];
+    found = true;
+    // Each word in the search string has to match the label in order for the
+    // label to be shown.
+    for (j = 0; j < wordsLength; j++) {
+      if (option.labelText.indexOf(words[j]) === -1) {
+        found = false;
+      }
+    }
+    if (found) {
+      // Show the checkbox row, and restripe it.
+      zebraClass = (zebraCounter % 2) ? 'odd' : 'even';
+      option.$div.show();
+      option.$div.removeClass('even odd');
+      option.$div.addClass(zebraClass);
+      zebraCounter++;
+    }
+    else {
+      // The search string wasn't found; hide this item.
+      option.$div.hide();
+    }
+  }
+};

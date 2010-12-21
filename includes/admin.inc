@@ -2512,7 +2512,7 @@ function views_ui_add_item_form($form, &$form_state) {
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
   if (!empty($options)) {
-    $form['search'] = array(
+    $form['options_search'] = array(
       '#type' => 'textfield',
       '#title' => t('Search'),
     );
@@ -2551,7 +2551,7 @@ function views_ui_add_item_form($form, &$form_state) {
           '#title' => t('!group: !field', array('!group' => $option['group'], '!field' => $option['title'])),
           '#description' => $option['help'],
           '#return_value' => $key,
-          '#prefix' => "<div class='$zebra_class'>",
+          '#prefix' => "<div class='$zebra_class filterable-option'>",
           '#suffix' => '</div>',
         );
         $zebra++;

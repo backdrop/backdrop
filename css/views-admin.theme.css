@@ -317,7 +317,7 @@
   border-top: none;
 }
 
-.page-admin-structure-views .views-filterable-options .even:first-child .form-type-checkbox {
+.page-admin-structure-views .views-filterable-options {
   border-top:  1px solid #CCC;
 }
 
