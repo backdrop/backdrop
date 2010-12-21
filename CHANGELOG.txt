@@ -564,3 +564,4 @@ Views 3.x-7.x-dev
     o #987478 by bojanz: Fix some more edge cases in field field handler.
     o #1003034 by das-peter: Use preg_slit instead of split.
     o #905712 by dagmar: Add Published/Not published as text options to published field.
+    o #816354 by dereine: Provide a field to create administrative comments on displays.

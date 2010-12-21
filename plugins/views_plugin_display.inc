@@ -317,6 +317,7 @@ class views_plugin_display extends views_plugin {
           'cache' => TRUE,
           'query' => TRUE,
           'title' => TRUE,
+          'display_comment' => TRUE,
           'enabled' => TRUE,
           'css_class' => TRUE,
 
@@ -360,6 +361,9 @@ class views_plugin_display extends views_plugin {
         'default' => TRUE,
         'translatable' => FALSE,
         'bool' => TRUE,
+      ),
+      'display_comment' => array(
+        'default' => '',
       ),
       'css_class' => array(
         'default' => '',
@@ -850,6 +854,14 @@ class views_plugin_display extends views_plugin {
       'desc' => t('Change the name of this display.'),
     );
 
+    $display_comment = drupal_substr($this->get_option('display_comment'), 0, 10);
+    $options['display_comment'] = array(
+      'category' => 'basic',
+      'title' => t('Comment'),
+      'value' => !empty($display_comment) ? $display_comment : t('No comment'),
+      'desc' => t('Comment or document this display.'),
+    );
+
     $title = strip_tags($this->get_option('title'));
     if (!$title) {
       $title = t('None');
@@ -1109,6 +1121,14 @@ class views_plugin_display extends views_plugin {
           '#type' => 'textfield',
           '#description' => t('This title will appear only in the administrative interface for the View.'),
           '#default_value' => $this->display->display_title,
+        );
+        break;
+      case 'display_comment':
+        $form['#title'] .= t("This display's comments");
+        $form['display_comment'] = array(
+          '#type' => 'textarea',
+          '#description' => t('This value will be seen and used only within the Views UI and can be used to document this display. You can use this to provide notes for other or future maintainers of your site about how or why this display is configured.'),
+          '#default_value' => $this->get_option('display_comment'),
         );
         break;
       case 'title':
@@ -1837,6 +1857,7 @@ class views_plugin_display extends views_plugin {
       case 'title':
       case 'css_class':
       case 'link_display':
+      case 'display_comment':
         $this->set_option($section, $form_state['values'][$section]);
         break;
       case 'enabled':
