@@ -161,6 +161,9 @@ function node_views_data() {
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
+      'output formats' => array(
+        'published-notpublished' => array(t('Published'), t('Not published')),
+      ),
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
