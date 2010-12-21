@@ -1,0 +1,132 @@
+<?php
+// $Id$
+
+/**
+ * Views UI wizard test.
+ */
+class ViewsUIWizardTestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => t('Views UI wizard test'),
+      'description' => t('Basic Views UI wizard test.'),
+      'group' => t('Views')
+    );
+  }
+
+  /**
+   * Implementation of setUp().
+   */
+  function setUp() {
+    // Enable views_ui.
+    parent::setUp('views_ui');
+    
+    // Create and log in user with administer views permission.
+    $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks'));
+    $this->drupalLogin($views_admin);
+  }
+
+  function testViewsWizard() {
+    // Check if we can access the main views admin page.
+    $this->drupalGet('admin/structure/views');
+    $this->assertText(t('No views found.'));
+    $this->assertText(t('Add view'));
+    
+    // Create a simple and not at all useful view.
+    $view1 = array();
+    $view1['description'] = $this->randomName(32);
+    $view1['name'] = strtolower($this->randomName(32));
+    $this->drupalPost('admin/structure/views/add', $view1, t('Save'));
+    $this->assertText(t('Your view was saved. You may edit it from the list below.'));
+    $this->assertText($view1['description']);
+    $this->assertText($view1['name']);
+    foreach(array('delete', 'duplicate', 'edit') as $operation) {
+      $this->assertRaw(url('admin/structure/views/view/' . $view1['name'] . '/' . $operation));
+    }
+    
+    // This view should not have a block.
+    $this->drupalGet('admin/structure/block');
+    $this->assertNoText($view1['name'] . ': Block');
+
+    // Create two nodes.
+    $node1 = $this->drupalCreateNode(array('type' => 'page'));
+    $node2 = $this->drupalCreateNode(array('type' => 'article'));
+
+    // Now create a page with simple listing.
+    $view2 = array();
+    $view2['description'] = $this->randomName(32);
+    $view2['name'] = strtolower($this->randomName(32));
+    $view2['page[create]'] = 1;
+    $view2['page[title]'] = $this->randomName(32);
+    $view2['page[path]'] = $this->randomName(32);
+    $view2['page[feed]'] = 1;
+    $view2['page[feed_properties][path]'] = $this->randomName(32);
+    $this->drupalPost('admin/structure/views/add', $view2, t('Save'));
+    $this->assertText($node1->title);
+    $this->assertText($node2->title);
+    
+    // Check if we have the feed.
+    $this->assertRaw(url($view2['page[feed_properties][path]']));
+    $this->drupalGet($view2['page[feed_properties][path]']);
+    $this->assertRaw('<rss version="2.0"');
+    $this->assertRaw(url('node/' . $node1->nid, array('absolute' => TRUE)));
+    $this->assertText($node1->title);
+    $this->assertRaw(url('node/' . $node2->nid, array('absolute' => TRUE)));
+    $this->assertText($node2->title);
+
+    // Go back to the views page and check if this view is there.
+    $this->drupalGet('admin/structure/views');
+    $this->assertText($view2['description']);
+    $this->assertRaw(url($view2['page[path]']));
+
+    // This view should not have a block.
+    $this->drupalGet('admin/structure/block');
+    $this->assertNoText($view2['name'] . ': Block');
+
+    // Derive a 3rd view from the 2nd. Create a block and filter the listing.
+    $view3 = $view2;
+    $view3['description'] = $this->randomName(32);
+    $view3['name'] = strtolower($this->randomName(32));
+    $view3['show[wizard_key]'] = 'node:page';
+    $view3['page[title]'] = $this->randomName(32);
+    $view3['page[path]'] = $this->randomName(32);
+    $view3['page[feed_properties][path]'] = $this->randomName(32);
+    $view3['block[create]'] = 1;
+    $view3['block[title]'] = $this->randomName(32);
+    $this->drupalPost('admin/structure/views/add', $view3, t('Save'));
+    $this->assertText($node1->title);
+    $this->assertNoText($node2->title);
+    
+    // Go back to the views page and check if this view is there.
+    $this->drupalGet('admin/structure/views');
+    $this->assertText($view3['description']);
+    $this->assertRaw(url($view3['page[path]']));
+    
+    $this->drupalGet('admin/structure/block');
+    $this->assertText($view3['name'] . ': Block');
+    $content = $this->drupalGetContent();
+    if (preg_match('! name="(blocks\\[views_.+\\]\\[region\\])"!', $content, $found)) {
+      // The views block ID does not seem to be derived from the view name
+      // in practice when running the tests, so we need to grab it.
+      $block_id = $found[1];
+      // Put this block into the A sidebar.
+      $edit = array();
+      $edit[$block_id] = 'sidebar_first';
+      $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+
+      // Look for the node title in the block where it is not on the page.
+      $this->drupalGet('user');
+      $this->assertText($node1->title);
+      $this->assertNoText($node2->title);
+    }
+    else {
+     $this->fail(t('Views block ID found.'));
+    }
+    
+    // Check if the export screen works.
+    $this->drupalGet('admin/structure/views/view/' . $view3['name'] . '/export');
+    $this->assertRaw('$view = new view;');
+    $this->assertRaw($view3['description']);
+  }
+}
+

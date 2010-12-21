@@ -272,5 +272,4 @@ files[] = theme/views-view-table.tpl.php
 files[] = theme/views-view-unformatted.tpl.php
 files[] = theme/views-view.tpl.php
 ; Tests
-; temporarily deleted
-
+files[] = tests/views_ui.test
