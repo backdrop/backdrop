@@ -1517,6 +1517,10 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
 
   if (empty($name)) {
     $name = t('Apply');
+    $view = $form_state['view'];
+    if (count($view->stack) > 1) {
+      $name = t('Apply and continue');
+    }
   }
 
   // Remove default validate handler, so it runs only on "Apply" (not "Cancel").
