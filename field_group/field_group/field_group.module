@@ -234,7 +234,7 @@ function field_group_field_attach_view_alter(&$element, $context) {
  *       // required, String with default value of the style.
         'default_formatter' => 'collapsible',
  *       // optional, Array with key => default_value pairs.
- *       'instance_settings' => 'collapsible',
+ *       'instance_settings' => array('key' => 'value'),
  *     ),
  *   ),
  *   'display' => array(
@@ -248,7 +248,7 @@ function field_group_field_attach_view_alter(&$element, $context) {
  *       // required, String with default value of the style.
         'default_formatter' => 'collapsible',
  *       // optional, Array with key => default_value pairs.
- *       'instance_settings' => 'collapsible',
+ *       'instance_settings' => array('key' => 'value'),
  *     ),
  *   ),
  * ),
@@ -264,6 +264,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array('classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'tabs' => array(
