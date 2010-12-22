@@ -820,7 +820,7 @@ function field_group_unpack($group) {
   $group->label = $data['label'];
   $group->weight = $data['weight'];
   $group->children = $data['children'];
-  $group->format_type = $data['format_type'];
+  $group->format_type = !empty($data['format_type']) ? $data['format_type'] : 'fieldset';
   if (isset($data['format_settings'])) {
     $group->format_settings = $data['format_settings'];
   }
@@ -840,7 +840,7 @@ function field_group_pack($group) {
     'label' => $record->label,
     'weight' => $record->weight,
     'children' => $record->children,
-    'format_type' => $record->format_type,
+    'format_type' => !empty($record->format_type) ? $record->format_type : 'fieldset',
   );
   if (isset($record->format_settings)) {
     $record->data['format_settings'] = $record->format_settings;
