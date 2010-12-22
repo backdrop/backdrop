@@ -460,7 +460,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     case 'fieldset':
       $element += array(
         '#type' => 'fieldset',
-        '#title' => $group->label,
+        '#title' => t($group->label),
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
@@ -478,7 +478,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       if ($group->format_settings['formatter'] != 'open') {
         $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
-          <span class="field-group-format-toggler">' . $group->label . '</span>
+          <span class="field-group-format-toggler">' . t($group->label) . '</span>
           <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
         $add['#suffix'] = '</div></div>';
       }
@@ -503,7 +503,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element += array(
         '#type' => 'markup',
         '#prefix' => '
-        <h3 class="field-group-format-toggler ' . $group->format_type . '">' . $group->label . '</h3>
+        <h3 class="field-group-format-toggler ' . $group->format_type . '">' . t($group->label) . '</h3>
         <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
@@ -529,7 +529,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     case 'htab':
       $element += array(
         '#type' => 'fieldset',
-        '#title' => $group->label,
+        '#title' => t($group->label),
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
@@ -559,7 +559,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       if (isset($form['#view_mode'])) {
         $element += array(
           '#type' => 'fieldset',
-          '#title' => $group->label,
+          '#title' => t($group->label),
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
@@ -572,7 +572,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       else {
         $form['additional_settings'][$group->group_name] = array(
           '#type' => 'fieldset',
-          '#title' => $group->label,
+          '#title' => t($group->label),
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
