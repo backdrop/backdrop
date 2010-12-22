@@ -107,10 +107,21 @@ function field_group_features_rebuild($module) {
   if ($field_groups = features_get_default('field_group', $module)) {
     cache_clear_all('field_groups', 'cache_field');
 
+    // Get existing field groups to be able to know if we should create or
+    // update when rebuilding.
+    $existing_field_groups = field_group_read_groups();
+
     foreach ($field_groups as $field_group) {
       $field_group = (object) $field_group;
-      // @todo update / delete
-      field_group_update_field_group($field_group);
+      // Check to see if the field group already exists.
+      if (isset($existing_field_groups[$field_group->entity_type][$field_group->bundle][$field_group->group_name])) {
+      // Update the existing feature.
+        field_group_update_field_group($field_group);
+      }
+      else {
+        // Create the field group.
+        field_group_create_field_group($field_group);
+      }
     }
   }
 }
