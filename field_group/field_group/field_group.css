@@ -16,7 +16,7 @@
 /**
  * Override the accordion default style for view_modes.
  */
-.ui-accordion h3, .ui-accordion h3.ui-state-active {
+form .ui-accordion h3, form .ui-accordion h3.ui-state-active {
   padding-left: 2em;
 }
 

@@ -1185,7 +1185,7 @@ function field_group_field_overview_submit($form, &$form_state) {
       'label' => $values['label'],
       'format_type' => $values['format']['type'],
     );
-    $new_group->format_settings = array('formatter' => $formatter['default_formatter']);
+    $new_group->format_settings = array('formatter' => isset($formatter['default_formatter']) ? $formatter['default_formatter'] : '');
     if (isset($formatter['instance_settings'])) {
       $new_group->format_settings['instance_settings'] = $formatter['instance_settings'];
     }
