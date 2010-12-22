@@ -334,6 +334,22 @@
   margin-bottom: 0;
 }
 
+.page-admin-structure-views #views-filterable-options-controls {
+  margin: 1em 0;
+}
+
+.page-admin-structure-views #views-filterable-options-controls .form-item {
+  width: 45%;
+  margin-right: 2%;
+}
+
+.page-admin-structure-views #views-filterable-options-controls input,
+.page-admin-structure-views #views-filterable-options-controls select {
+  width: 200px;
+}
+
+
+
 /**
  * Live preview elements
  */

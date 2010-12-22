@@ -2512,13 +2512,18 @@ function views_ui_add_item_form($form, &$form_state) {
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
   if (!empty($options)) {
-    $form['options_search'] = array(
+    $form['controls'] = array(
+      '#theme_wrappers' => array('container'),
+      '#id' => 'views-filterable-options-controls',
+      '#attributes' => array('class' => array('container-inline')),
+    );
+    $form['controls']['options_search'] = array(
       '#type' => 'textfield',
       '#title' => t('Search'),
     );
 
     $groups = array('all' => t('- All -'));
-    $form['group'] = array(
+    $form['controls']['group'] = array(
       '#type' => 'select',
       '#title' => t('Filter'),
       '#options' => array(),
@@ -2559,7 +2564,7 @@ function views_ui_add_item_form($form, &$form_state) {
       $form['name'][$group . '_end']['#markup'] = '</div>';
     }
 
-    $form['group']['#options'] = $groups;
+    $form['controls']['group']['#options'] = $groups;
   }
   else {
     $form['markup'] = array(
