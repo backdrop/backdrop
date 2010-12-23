@@ -478,7 +478,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       if ($group->format_settings['formatter'] != 'open') {
         $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
-          <span class="field-group-format-toggler">' . t($group->label) . '</span>
+          <span class="field-group-format-toggler">' . t(check_plain($group->label)) . '</span>
           <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
         $add['#suffix'] = '</div></div>';
       }
