@@ -64,7 +64,7 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
     $this->options['alter']['attributes'] = array('title' => t('Contact %user', array('%user' => $account->name)));
 
     if ($this->options['link_display'] == 'icon') {
-      $text = theme('image', 'misc/forum-new.png');
+      $text = theme('image', array('path' => 'misc/forum-new.png'));
       $this->options['alter']['html'] = TRUE;
     }
     else {
