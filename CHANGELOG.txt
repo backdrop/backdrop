@@ -568,3 +568,4 @@ Views 3.x-7.x-dev
     o #1004596 by pillarsdotnet:  Wrong usage of theme('image'...) in contact field handler.
     o #1006088 by aspilicious: Remove unneeded files from .info file.
     o #1005662 by troky: Change original hook to base hook in views hook_theme.
+    o #808016 by dereine: Clarify short/medium/long date formats.

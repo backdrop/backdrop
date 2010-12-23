@@ -22,9 +22,9 @@ class views_handler_field_date extends views_handler_field {
       '#type' => 'select',
       '#title' => t('Date format'),
       '#options' => array(
-        'small' => format_date(REQUEST_TIME, 'small'),
-        'medium' => format_date(REQUEST_TIME, 'medium'),
-        'large' => format_date(REQUEST_TIME, 'large'),
+        'small' => t('Short date format') . ' ' . format_date(REQUEST_TIME, 'small'),
+        'medium' => t('Medium date format') . ' ' . format_date(REQUEST_TIME, 'medium'),
+        'large' => t('Long date format') . ' ' . format_date(REQUEST_TIME, 'large'),
         'custom' => t('Custom'),
         'raw time ago' => t('Time ago'),
         'time ago' => t('Time ago (with "ago" appended)'),
