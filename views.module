@@ -184,7 +184,7 @@ function _views_find_module_templates($cache, $path) {
             'template' => $file,
             'path' => dirname($files[$match]->filename),
             'variables' => $info['arguments'],
-            'original hook' => $hook,
+            'base hook' => $hook,
             'include files' => $info['include files'],
           );
         }
