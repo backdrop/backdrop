@@ -305,6 +305,7 @@ class views_handler_field extends views_handler {
         'word_boundary' => array('default' => TRUE),
         'ellipsis' => array('default' => TRUE),
         'strip_tags' => array('default' => FALSE),
+        'preserve_tags' => array('default' => ''),
         'html' => array('default' => FALSE),
       ),
     );
@@ -640,6 +641,16 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#default_value' => $this->options['alter']['strip_tags'],
         '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       );
+      $form['alter']['preserve_tags'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Preserve certain tags'),
+        '#description' => t('List the tags that need to be preserved during the stripping process. example &quot;&lt;p&gt; &lt;br&gt;&quot; which will preserve all p and br elements'),
+        '#default_value' => $this->options['alter']['preserve_tags'],
+        '#dependency' => array(
+          'edit-options-alter-strip-tags' => array(1),
+        ),
+        '#process' => array('ctools_dependent_process'),
+      );
     }
 
     // Use prefix and suffix to fake a fieldset because we use #tree.
@@ -772,7 +783,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
     }
 
     if (!empty($alter['strip_tags'])) {
-      $value = strip_tags($value);
+      $value = strip_tags($value, $alter['preserve_tags']);
     }
 
     if (!empty($alter['trim']) && !empty($alter['max_length'])) {
