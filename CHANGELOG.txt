@@ -566,3 +566,4 @@ Views 3.x-7.x-dev
     o #905712 by dagmar: Add Published/Not published as text options to published field.
     o #816354 by dereine: Provide a field to create administrative comments on displays.
     o #1004596 by pillarsdotnet:  Wrong usage of theme('image'...) in contact field handler.
+    o #1006088 by aspilicious: Remove unneeded files from .info file.

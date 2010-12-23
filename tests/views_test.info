@@ -5,6 +5,3 @@ package = Views
 core = 7.x
 dependencies[] = views
 hidden = TRUE
-files[] = views_test.module
-files[] = views_test.install
-files[] = views_test.views_default.inc
