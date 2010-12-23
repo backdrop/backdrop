@@ -997,7 +997,7 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
 
     // Add fieldgroups to the current element. But only if the parent is the current
     // group parent or if we are starting from the root.
-    if ((empty($group->parent_name) && !isset($parent_name)) || $parent_name == $group->parent_name) {
+    if (!isset($parent_name) || (!empty($group->parent_name) && $parent_name == $group->parent_name)) {
 
       // We first create a new element wrapper, and loop over the fields
       // to detect children. After this point, the fields are stashed
