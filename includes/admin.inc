@@ -625,6 +625,13 @@ function views_ui_add_form($form, &$form_state) {
     '#attributes' => array('dir'=>'ltr'),
   );
 
+  $form['human_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Human readable name'),
+    '#description' => t('You can use a more descriptive name for this view here. Spaces are allowed'),
+    '#default_value' => $view ? $view->human_name : '',
+  );
+
   $form['description'] = array(
     '#type' => 'textfield',
     '#title' => t('View description'),
@@ -692,6 +699,7 @@ function views_ui_add_form_validate($form, &$form_state) {
 function views_ui_add_form_submit($form, &$form_state) {
   $view = $form_state['view'] ? $form_state['view'] : views_new_view();
   $view->name = $form_state['values']['name'];
+  $view->human_name = $form_state['values']['human_name'];
   $view->description = $form_state['values']['description'];
   $view->tag = $form_state['values']['tag'];
   if (empty($form['base_table']['#disabled'])) {
@@ -1201,15 +1209,31 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
   $vars['title'] = check_plain($display->display_title);
   $vars['description'] = check_plain($plugin['help']);
 
-  // Special fields if tihs is the default display.
+  // Special fields if this is the default display.
   $vars['default'] = ($display->id == 'default');
   $vars['details_class'] = drupal_clean_css_identifier('details');
   if (!empty($view->changed_sections['details'])) {
     $vars['details_changed'] = TRUE;
   }
 
-  $tag = empty($view->tag) ? t('None') : $view->tag;
-  $vars['details'] = t('Description') . '/' . t('Tag') . ': ' . l($tag, "admin/structure/views/nojs/details/$view->name", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-tag')));
+  foreach (array('human_name', 'tag', 'description') as $property) {
+    if (!empty($view->changed_sections[$property])) {
+      $vars['details_changed'][$property] = TRUE;
+    }
+    switch ($property) {
+      case 'human_name':
+        $title = t('Human name');
+        break;
+      case 'tag':
+        $title = t('Tag');
+        break;
+      case 'description':
+        $title = t('Description');
+        break;
+    }
+    $value = empty($view->{$property}) ? t('None') : check_plain($view->{$property});
+    $vars['details'][$property] = $title . ': ' . l($value, "admin/structure/views/nojs/$property/$view->name", array('attributes' => array('class' => 'views-ajax-link')));
+  }
 
   // Calculate options from display plugin.
   $options = $categories = array();
@@ -2281,22 +2305,26 @@ function views_ui_reorder_displays_button($form, &$form_state, $view) {
 /**
  * Page callback to edit details of a view.
  */
-function views_ui_edit_details($js, $view) {
+function views_ui_edit_details($property, $js, $view) {
   views_include('ajax');
   $form_state = array(
     'view' => &$view,
     'ajax' => $js,
+    'property' => $property,
   );
 
   $output = views_ajax_form_wrapper('views_ui_edit_details_form', $form_state);
 
   if ($js) {
     // If we don't have an output object, it was submitted. Set up the submission.
-    if (empty($output)) {
-      return views_ui_regenerate_tabs($view);
+    if ($form_state['submitted'] && empty($form_state['rerender'])) {
+      $output = array();
+      $output[] = views_ajax_command_enable_buttons();
+      $output[] = views_ajax_command_dismiss_form();
+      views_ui_regenerate_tabs($view, $output);
     }
-    return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
-
+    $commands = $output;
+    return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
   }
   return $output;
 }
@@ -2310,20 +2338,35 @@ function views_ui_edit_details_form($form, &$form_state) {
   $form['#title'] = t('View details');
   $form['#section'] = 'details';
 
-  $form['description'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View description'),
-    '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
-    '#default_value' => $view->description,
-  );
+  switch ($form_state['property']) {
+    case 'human_name':
+      $form['human_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Human readable name'),
+        '#description' => t('You can use a more descriptive name for this view here. Spaces are allowed'),
+        '#default_value' => $view->human_name,
+      );
+      break;
 
-  $form['tag'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View tag'),
-    '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
-    '#default_value' => $view->tag,
-    '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
-  );
+    case 'tag':
+      $form['tag'] = array(
+        '#type' => 'textfield',
+        '#title' => t('View tag'),
+        '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
+        '#default_value' => $view->tag,
+        '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
+      );
+      break;
+
+    case 'description':
+      $form['description'] = array(
+        '#type' => 'textfield',
+        '#title' => t('View description'),
+        '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
+        '#default_value' => $view->description,
+      );
+      break;
+  }
 
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_edit_details_form');
   return $form;
@@ -2333,8 +2376,7 @@ function views_ui_edit_details_form($form, &$form_state) {
  * Submit handler for views_ui_edit_details_form
  */
 function views_ui_edit_details_form_submit($form, &$form_state) {
-  $form_state['view']->description = $form_state['values']['description'];
-  $form_state['view']->tag = $form_state['values']['tag'];
+  $form_state['view']->{$form_state['property']} = $form_state['values'][$form_state['property']];
   views_ui_cache_set($form_state['view']);
   $form_state['redirect'] = 'admin/structure/views/edit/' . $form_state['view']->name;
 }

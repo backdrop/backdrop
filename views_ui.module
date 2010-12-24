@@ -118,7 +118,6 @@ function views_ui_menu() {
   );
   $ajax_callbacks = array(
     'analyze' => 'views_ui_analyze_view',
-    'details' => 'views_ui_edit_details',
     'add-display' => 'views_ui_add_display',
     'preview' => 'views_ui_preview',
     'reorder-displays' => 'views_ui_reorder_view',
@@ -135,6 +134,34 @@ function views_ui_menu() {
       'delivery callback' => 'views_ui_ajax_deliver',
     );
   }
+
+  $items['admin/structure/views/nojs/human_name/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('human_name', FALSE, 5),
+  );
+  $items['admin/structure/views/ajax/human_name/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('human_name', TRUE, 5),
+    'delivery callback' => 'views_ui_ajax_deliver',
+  );
+  $items['admin/structure/views/nojs/tag/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('tag', FALSE, 5),
+  );
+  $items['admin/structure/views/ajax/tag/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('tag', TRUE, 5),
+    'delivery callback' => 'views_ui_ajax_deliver',
+  );
+  $items['admin/structure/views/nojs/description/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('description', FALSE, 5),
+  );
+  $items['admin/structure/views/ajax/description/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('description', TRUE, 5),
+    'delivery callback' => 'views_ui_ajax_deliver',
+  );
 
   $items['admin/build/views/nojs/clone-display/%views_ui_cache'] = $callback + array(
     'page callback' => 'views_ui_clone_display',

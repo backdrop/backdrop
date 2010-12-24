@@ -571,3 +571,4 @@ Views 3.x-7.x-dev
     o #808016 by dereine: Clarify short/medium/long date formats.
     o #829928 by gordon: Allow strip tags to get a list of tags to keep.
     o #1004538 by ngmaloney, bojanz: Support timestamps before 1970 in views date sql.
+    o #522318 by dereine: Provide a "human readable" name for all Views.

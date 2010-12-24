@@ -503,3 +503,31 @@ function views_update_6012() {
   
   return $ret;
 }
+
+
+/**
+ * Add a human readable name.
+ */
+function views_schema_6013() {
+  $schema = views_schema(__FUNCTION__);
+  $schema['views_view']['fields']['human_name'] = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'default' => '',
+    'description' => 'A human readable name used to be displayed in the admin interface',
+  );
+  return $schema;
+}
+
+function views_update_6013() {
+  $ret = array();
+
+  $new_field = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'default' => '',
+    'description' => 'A human readable name used to be displayed in the admin interface',
+  );
+
+  db_add_field($ret, 'views_view', 'human_name', $new_field);
+}

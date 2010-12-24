@@ -33,9 +33,11 @@
         <div class="views-category">
           <div class="views-category-title"><?php print t('View settings'); ?></div>
           <div class="views-category-content">
-            <div class="<?php $details_class; if (!empty($details_changed)) { print ' changed'; }?>">
-              <?php print $details ?>
+          <?php foreach ($details as $name => $detail): ?>
+            <div class="<?php $details_class[$name]; if (!empty($details_changed[$name])) { print ' changed'; }?>">
+              <?php print $detail ?>
             </div>
+          <?php endforeach; ?>
           </div>
         </div>
       <?php endif; ?>
