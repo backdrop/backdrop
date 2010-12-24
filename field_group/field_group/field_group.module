@@ -446,7 +446,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
 
   $classes = implode(' ', $classes);
   if (isset($group->format_settings['instance_settings'], $group->format_settings['instance_settings']['classes'])) {
-    $classes .= ' ' . $group->format_settings['instance_settings']['classes'];
+    $classes .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
   }
 
   // Add all field_group format types to the js settings.
@@ -648,7 +648,7 @@ function field_group_field_group_format_summary($group) {
     $last = end($group->format_settings['instance_settings']);
     $output .= '<br />';
     foreach ($group->format_settings['instance_settings'] as $key => $value) {
-      $output .= '<strong>' . $key . '</strong> ' . $value;
+      $output .= '<strong>' . $key . '</strong> ' . check_plain($value);
       $output .= $last == $value ? ' ' : ', ';
     }
   }
