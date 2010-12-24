@@ -1157,9 +1157,11 @@ function template_preprocess_views_ui_edit_view(&$vars) {
   }
   views_add_css('views-admin');
   views_add_js('ajax');
+  drupal_add_js('misc/tabledrag.js', array('weight' => -1));
   drupal_add_js('misc/jquery.form.js', array('group' => JS_LIBRARY));
   // @TODO Remove this line when http://drupal.org/node/561858 is in.
-  drupal_add_js('misc/jquery.cookie.js', array('group' => JS_LIBRARY));
+  drupal_add_library('system', 'jquery.cookie');
+
 
   // Also add any js files required by plugins:
   $plugins = views_fetch_plugin_data();
@@ -1352,7 +1354,17 @@ function template_preprocess_views_ui_edit_item(&$vars) {
     return;
   }
 
-  $vars['rearrange'] = l('<span>' . t('Rearrange') . '</span>', "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-rearrange', 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => true));
+  // Different types now have different rearrange forms, so we use this switch
+  // to get the right one.
+  switch ($type) {
+    case 'filter':
+      $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
+      break;
+    default:
+      $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
+  }
+
+  $vars['rearrange'] = l('<span>' . t('Rearrange') . '</span>', $rearrange_url, array('attributes' => array('class' => array('views-button-rearrange', 'views-ajax-link'), 'title' => t('Rearrange')), 'html' => TRUE));
 
   $vars['add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => true));
 
@@ -1384,6 +1396,17 @@ function template_preprocess_views_ui_edit_item(&$vars) {
       foreach ($handlers as $id => $handler) {
         $relationships[$id] = $handler->label();
       }
+    }
+  }
+
+  // Filters can now be grouped so we do a little bit extra:
+  $groups = array();
+  $grouping = FALSE;
+  if ($type == 'filter') {
+    $group_info = $view->display_handler->get_option('filter_groups');
+    if (!empty($group_info['groups']) && count($group_info['groups']) > 1) {
+      $grouping = TRUE;
+      $groups = array(0 => array());
     }
   }
 
@@ -1435,6 +1458,50 @@ function template_preprocess_views_ui_edit_item(&$vars) {
       }
       $fields[$pid]['info'] = '';
     }
+
+    if ($grouping) {
+      $gid = $handler->options['group'];
+
+      // Show in default group if the group does not exist.
+      if (empty($group_info['groups'][$gid])) {
+        $gid = 0;
+      }
+      $groups[$gid][] = $id;
+    }
+  }
+
+  // If using grouping, re-order fields so that they show up properly in the list.
+  if ($type == 'filter' && $grouping) {
+    $store = $fields;
+    $fields = array();
+    foreach ($groups as $gid => $contents) {
+      if (!empty($fields)) {
+        $operator = ') ' . ($group_info['operator'] == 'OR' ? t('OR') : t('AND')) . ' (';
+      }
+      else {
+        $operator = '(';
+      }
+      $fields[] = array(
+        'class' => 'views-group-text',
+        'title' => $operator,
+        'info' => '',
+      );
+      $started = FALSE;
+      foreach ($contents as $pid) {
+        $operator = '&nbsp;&nbsp;';
+        if ($started) {
+          $operator .= ($group_info['groups'][$gid] == 'OR' ? t('OR') : t('AND')) . ' ';
+        }
+        $store[$pid]['title'] = $operator . $store[$pid]['title'];
+        $started = TRUE;
+        $fields[$pid] = $store[$pid];
+      }
+    }
+    $fields[] = array(
+      'class' => 'views-group-text',
+      'title' => ')',
+      'info' => '',
+    );
   }
 
   $vars['fields'] = $fields;
@@ -1582,6 +1649,11 @@ function views_ui_standard_submit($form, &$form_state) {
  * Submit handler for cancel button
  */
 function views_ui_standard_cancel($form, &$form_state) {
+  if (!empty($form_state['view']->changed) && isset($form_state['view']->form_cache)) {
+    unset($form_state['view']->form_cache);
+    views_ui_cache_set($form_state['view']);
+  }
+
   $form_state['redirect'] = 'admin/structure/views/edit/' . $form_state['view']->name;
 }
 
@@ -1604,6 +1676,10 @@ function views_ui_ajax_forms($key = NULL) {
     ),
     'rearrange' => array(
       'form_id' => 'views_ui_rearrange_form',
+      'args' => array('type'),
+    ),
+    'rearrange-filter' => array(
+      'form_id' => 'views_ui_rearrange_filter_form',
       'args' => array('type'),
     ),
     'add-item' => array(
@@ -1646,6 +1722,8 @@ function views_ui_ajax_forms($key = NULL) {
  */
 function views_ui_build_identifier($key, $view, $display_id, $args) {
   $form = views_ui_ajax_forms($key);
+  // Automatically remove the single-form cache if it exists and
+  // does not match the key.
   $identifier = implode('-', array($key, $view->name, $display_id));
 
   foreach ($form['args'] as $id) {
@@ -1740,6 +1818,13 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
     if (array_shift($top) != $identifier) {
       $view->stack = array();
     }
+  }
+
+  // Automatically remove the form cache if it is set and the key does
+  // not match. This way navigating away from the form without hitting
+  // update will work.
+  if (isset($view->form_cache) && $view->form_cache['key'] != $key) {
+    unset($view->form_cache);
   }
 
   $output = views_ajax_form_wrapper($form_state['form_id'], $form_state);
@@ -2544,8 +2629,7 @@ function views_ui_rearrange_form($form, &$form_state) {
   foreach ($display->handler->get_option($types[$type]['plural']) as $id => $field) {
     $form[$id] = array('#tree' => TRUE);
     $form[$id]['weight'] = array(
-      '#type' => 'weight',
-      '#delta' => 200,
+      '#type' => 'textfield',
       '#default_value' => ++$count,
     );
     $handler = $display->handler->get_handler($type, $id);
@@ -2602,7 +2686,7 @@ function theme_views_ui_rearrange_form($variables) {
       $row[] = drupal_render($form[$id]['name']);
       $form[$id]['weight']['#attributes']['class'] = array('weight');
       $row[] = drupal_render($form[$id]['weight']);
-      $row[] = drupal_render($form[$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-button-remove', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
+      $row[] = drupal_render($form[$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => TRUE));
       $rows[] = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
     }
   }
@@ -2646,6 +2730,376 @@ function views_ui_rearrange_form_submit($form, &$form_state) {
     $new_fields[$field] = $old_fields[$field];
   }
   $display->handler->set_option($types[$form_state['type']]['plural'], $new_fields);
+
+  // Store in cache
+  views_ui_cache_set($form_state['view']);
+}
+
+/**
+ * Form to rearrange items in the views UI.
+ */
+function views_ui_rearrange_filter_form($form, &$form_state) {
+  $view = &$form_state['view'];
+  $display_id = $form_state['display_id'];
+  $type = $form_state['type'];
+
+  $types = views_object_types();
+  if (!$view->set_display($display_id)) {
+    views_ajax_render(t('Invalid display id @display', array('@display' => $display_id)));
+  }
+  $display = &$view->display[$display_id];
+  $form['#title'] = check_plain($display->display_title) . ': ';
+  $form['#title'] .= t('Rearrange @type', array('@type' => $types[$type]['ltitle']));
+  $form['#section'] = $display_id . 'rearrange-item';
+
+  if ($display->handler->defaultable_sections($types[$type]['plural'])) {
+    $form_state['section'] = $types[$type]['plural'];
+    $display->handler->add_override_button($form, $form_state, $form_state['section']);
+  }
+
+  if (!empty($view->form_cache)) {
+    $groups = $view->form_cache['groups'];
+    $handlers = $view->form_cache['handlers'];
+  }
+  else {
+    $groups = $display->handler->get_option('filter_groups');
+    $handlers = $display->handler->get_option($types[$type]['plural']);
+  }
+  $count = 0;
+
+  // Get relationship labels
+  $relationships = array();
+  foreach ($display->handler->get_handlers('relationship') as $id => $handler) {
+    $relationships[$id] = $handler->label();
+  }
+
+  $group_options = array();
+
+  /**
+   * Filter groups is an array that contains:
+   * array(
+   *   'operator' => 'and' || 'or',
+   *   'groups' => array(
+   *     $group_id => 'and' || 'or',
+   *   ),
+   * );
+   */
+
+  $grouping = count(array_keys($groups['groups'])) > 1;
+
+  $form['filter_groups']['#tree'] = TRUE;
+  $form['filter_groups']['operator'] = array(
+    '#type' => 'select',
+    '#options' => array (
+      'AND' => t('And'),
+      'OR' => t('Or'),
+    ),
+    '#default_value' => $groups['operator'],
+    '#attributes' => array(
+      'class' => 'warning-on-change',
+    ),
+    '#title' => t('Operator to use on all groups'),
+    '#description' => t('Either "group 0 AND group 1 AND group 2" or "group 0 OR group 1 OR group 2", etc'),
+    '#access' => $grouping,
+  );
+
+  $form['remove_groups']['#tree'] = TRUE;
+
+  foreach ($groups['groups'] as $id => $group) {
+    $form['filter_groups']['groups'][$id] = array(
+      '#title' => t('Group operator'),
+      '#type' => 'select',
+      '#options' => array(
+        'AND' => t('And'),
+        'OR' => t('Or'),
+      ),
+      '#default_value' => $group,
+      '#attributes' => array(
+        'class' => array('warning-on-change'),
+      ),
+    );
+
+    $form['remove_groups'][$id] = array(); // to prevent a notice
+    if ($id != 0) {
+      $form['remove_groups'][$id] = array(
+        '#type' => 'submit',
+        '#value' => t('Remove group @group', array('@group' => $id)),
+        '#group' => $id,
+      );
+    }
+    $group_options[$id] = $id == 0 ? t('Default group') : t('Group @group', array('@group' => $id));
+    $form['#group_renders'][$id] = array();
+  }
+
+  $form['#group_options'] = $group_options;
+  $form['#groups'] = $groups;
+  // We don't use get_handlers() because we want items without handlers to
+  // appear and show up as 'broken' so that the user can see them.
+  $form['filters'] = array('#tree' => TRUE);
+  foreach ($handlers as $id => $field) {
+    // If the group does not exist, move the filters to the default group.
+    if (empty($field['group']) || empty($groups['groups'][$field['group']])) {
+      $field['group'] = 0;
+    }
+
+    $handler = $display->handler->get_handler($type, $id);
+    if ($grouping && $handler && !$handler->can_group()) {
+      $field['group'] = 'ungroupable';
+    }
+
+    // If not grouping and the handler is set ungroupable, move it back to
+    // the default group to prevent weird errors from having it be in its
+    // own group:
+    if (!$grouping && $field['group'] == 'ungroupable') {
+      $field['group'] = 0;
+    }
+
+    // Place this item into the proper group for rendering.
+    $form['#group_renders'][$field['group']][] = $id;
+
+    $form['filters'][$id]['weight'] = array(
+      '#type' => 'textfield',
+      '#default_value' => ++$count,
+    );
+    $form['filters'][$id]['group'] = array(
+      '#type' => 'select',
+      '#options' => $group_options,
+      '#default_value' => $field['group'],
+      '#attributes' => array(
+        'class' => array('views-region-select', 'views-region-' . $id),
+      ),
+      '#access' => $field['group'] !== 'ungroupable',
+    );
+
+    if ($handler) {
+      $name = $handler->ui_name() . ' ' . $handler->admin_summary();
+      if (!empty($field['relationship']) && !empty($relationships[$field['relationship']])) {
+        $name = '(' . $relationships[$field['relationship']] . ') ' . $name;
+      }
+
+      $form['filters'][$id]['name'] = array(
+        '#markup' => $name,
+      );
+    }
+    else {
+      $form['filters'][$id]['name'] = array('#markup' => t('Broken field @id', array('@id' => $id)));
+    }
+    $form['filters'][$id]['removed'] = array(
+      '#type' => 'checkbox',
+      '#id' => 'views-removed-' . $id,
+      '#attributes' => array('class' => array('views-remove-checkbox')),
+      '#default_value' => 0,
+    );
+  }
+
+  // Add javascript settings that will be added via $.extend for tabledragging
+  // Equivalent: drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
+  $form['#js']['tableDrag']['arrange']['weight'][0] = array(
+    'target' => 'weight',
+    'source' => NULL,
+    'relationship' => 'sibling',
+    'action' => 'order',
+    'hidden' => TRUE,
+    'limit' => 0,
+  );
+
+  $form['#js']['tableDrag']['ungroupable_arrange']['weight'][0] = array(
+    'target' => 'weight',
+    'source' => NULL,
+    'relationship' => 'sibling',
+    'action' => 'order',
+    'hidden' => TRUE,
+    'limit' => 0,
+  );
+
+  foreach ($form['#group_renders'] as $group_id => $title) {
+    // Add javascript settings that will be added via $.extend for tabledragging
+    // Equivalent: drupal_add_tabledrag('arrange', 'match', 'sibling', 'views-group-select', 'views-group-' . $group_id);
+    $form['#js']['tableDrag']['arrange']['views-group-select'][] = array(
+      'target' => 'views-group-' . $group_id,
+      'source' => 'views-group-' . $group_id,
+      'relationship' => 'sibling',
+      'action' => 'match',
+      'hidden' => FALSE,
+      'limit' => 0,
+    );
+  }
+
+  if (isset($form_state['update_name'])) {
+    $name = $form_state['update_name'];
+  }
+
+  views_ui_standard_form_buttons($form, $form_state, 'views_ui_rearrange_filter_form');
+  $form['buttons']['add_group'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add new group'),
+    '#id' => 'views-add-group',
+    '#group' => 'add',
+  );
+
+  return $form;
+}
+
+/**
+ * Turn the rearrange form into a proper table
+ */
+function theme_views_ui_rearrange_filter_form(&$vars) {
+  $form = $vars['form'];
+  $rows = $ungroupable_rows = array();
+  // Enable grouping only if > 1 group.
+  $grouping = count(array_keys($form['#group_options'])) > 1;
+
+  foreach ($form['#group_renders'] as $group_id => $contents) {
+    // Header row for the group.
+    if ($grouping && $group_id !== 'ungroupable') {
+      $row = array();
+      $row[] = array('class' => array('group', 'group-title'), 'data' => $form['#group_options'][$group_id]);
+      $row[] = array('class' => array('group', 'container-inline'), 'data' => drupal_render($form['filter_groups']['groups'][$group_id]), 'colspan' => 3);
+      $rows[] = array('class' => array('views-group'), 'data' => $row, 'id' => 'views-group-' . $group_id);
+      // Row which will only appear if the group has nothing in it:
+      $row = array();
+      $class = 'group-' . (count($contents) ? 'populated' : 'empty');
+      $row[] = array('colspan' => 4, 'data' => '<span>' . t('This group is empty') . '</span> ' .
+      drupal_render($form['remove_groups'][$group_id]));
+      $rows[] = array('class' => array("group-message", "group-$group_id-message", $class), 'data' => $row, 'id' => 'views-group-' . $group_id);
+    }
+
+    foreach ($contents as $id) {
+      if (isset($form['filters'][$id]['name'])) {
+        $row = array();
+        $row[] = drupal_render($form['filters'][$id]['name']);
+        $form['filters'][$id]['weight']['#attributes']['class'] = array('weight');
+        $row[] = drupal_render($form['filters'][$id]['weight']);
+        $form['filters'][$id]['group']['#attributes']['class'] = array('views-group-select views-group-' . $group_id);
+        $row[] = drupal_render($form['filters'][$id]['group']);
+        $row[] = drupal_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
+
+        $row = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
+        if ($group_id !== 'ungroupable') {
+          $rows[] = $row;
+        }
+        else {
+          $ungroupable_rows[] = $row;
+        }
+      }
+    }
+  }
+  if (empty($rows)) {
+    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
+  }
+
+  $output = drupal_render($form['override']);
+  if ($grouping) {
+    $output .= drupal_render($form['filter_groups']['operator']);
+  }
+  else {
+    $form['filter_groups']['groups'][0]['#title'] = t('Operator');
+    $output .= drupal_render($form['filter_groups']['groups'][0]);
+  }
+
+  if (!empty($ungroupable_rows)) {
+    drupal_add_tabledrag('ungroupable_arrange', 'order', 'sibling', 'weight');
+    $header = array(t('Ungroupable filters'), t('Weight'), array('class' => array('views-hide-label'), 'data' => t('Group')), array('class' => array('views-hide-label'), 'data' => t('Remove')));
+    $output .= theme('table', array('header' => $header, 'rows' => $ungroupable_rows, 'attributes' => array('id' => 'ungroupable_arrange', 'class' => array('arrange'))));
+  }
+
+  drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
+  $header = array('', t('Weight'), t('Group'), t('Remove'));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange', 'class' => array('arrange'))));
+  $output .= drupal_render_children($form);
+  return $output;
+
+}
+
+/**
+ * Submit handler for rearranging form
+ */
+function views_ui_rearrange_filter_form_submit($form, &$form_state) {
+  $types = views_object_types();
+  $display = &$form_state['view']->display[$form_state['display_id']];
+  $remember_groups = array();
+
+  if (!empty($form_state['view']->form_cache)) {
+    $old_fields = $form_state['view']->form_cache['handlers'];
+  }
+  else {
+    $old_fields = $display->handler->get_option($types[$form_state['type']]['plural']);
+  }
+  $count = 0;
+
+  $groups = $form_state['values']['filter_groups'];
+  // Whatever button was clicked, re-calculate field information.
+  $new_fields = $order = array();
+
+  // Make an array with the weights
+  foreach ($form_state['values']['filters'] as $field => $info) {
+    // add each value that is a field with a weight to our list, but only if
+    // it has had its 'removed' checkbox checked.
+    if (is_array($info) && empty($info['removed'])) {
+      if (isset($info['weight'])) {
+        $order[$field] = $info['weight'];
+      }
+
+      if (isset($info['group'])) {
+        $old_fields[$field]['group'] = $info['group'];
+        $remember_groups[$info['group']][] = $field;
+      }
+    }
+  }
+
+  // Sort the array
+  asort($order);
+
+  // Create a new list of fields in the new order.
+  foreach (array_keys($order) as $field) {
+    $new_fields[$field] = $old_fields[$field];
+  }
+
+  // Save if the actual update button was clicked.
+  if (!empty($form_state['clicked_button']['#group'])) {
+    if ($form_state['clicked_button']['#group'] == 'add') {
+      // Add a new group
+      $groups['groups'][] = 'AND';
+    }
+    else {
+      // Renumber groups above the removed one down.
+      foreach (array_keys($groups['groups']) as $group_id) {
+        if ($group_id >= $form_state['clicked_button']['#group']) {
+          $old_group = $group_id + 1;
+          if (isset($groups['groups'][$old_group])) {
+            $groups['groups'][$group_id] = $groups['groups'][$old_group];
+            if (isset($remember_groups[$old_group])) {
+              foreach ($remember_groups[$old_group] as $id) {
+                $new_fields[$id]['group'] = $group_id;
+              }
+            }
+          }
+          else {
+            // If this is the last one, just unset it.
+            unset($groups['groups'][$group_id]);
+          }
+        }
+      }
+    }
+    // Update our cache with values so that cancel still works the way
+    // people expect.
+    $form_state['view']->form_cache = array(
+      'key' => 'rearrange-filter',
+      'groups' => $groups,
+      'handlers' => $new_fields,
+    );
+
+    // Return to this form except on actual Update.
+    views_ui_add_form_to_stack('rearrange-filter', $form_state['view'], $form_state['display_id'], array($form_state['type']));
+  }
+  else {
+    // Actually write changed handler values.
+    $display->handler->set_option($types[$form_state['type']]['plural'], $new_fields);
+    $display->handler->set_option('filter_groups', $groups);
+    if (isset($form_state['view']->form_cache)) {
+      unset($form_state['view']->form_cache);
+    }
+  }
 
   // Store in cache
   views_ui_cache_set($form_state['view']);
@@ -2723,7 +3177,7 @@ function views_ui_add_item_form($form, &$form_state) {
   }
   else {
     $form['markup'] = array(
-      '#value' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $ltitle)) . '</div>',
+      '#markup' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $types[$type]['ltitle'])) . '</div>',
     );
   }
   ctools_include('dependent');
@@ -2758,6 +3212,10 @@ function views_ui_add_item_form_submit($form, &$form_state) {
       // Then add the form to the stack
       views_ui_add_form_to_stack('config-item', $form_state['view'], $form_state['display_id'], array($type, $id));
     }
+  }
+
+  if (isset($form_state['view']->form_cache)) {
+    unset($form_state['view']->form_cache);
   }
 
   // Store in cache

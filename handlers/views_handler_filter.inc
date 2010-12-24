@@ -508,6 +508,18 @@ class views_handler_filter extends views_handler {
     $this->ensure_my_table();
     $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field", $this->value, $this->operator);
   }
+
+  /**
+   * Can this filter be used in OR groups?
+   *
+   * Some filters have complicated where clauses that cannot be easily used
+   * with OR groups. Some filters must also use HAVING which also makes
+   * them not groupable. These filters will end up in a special group
+   * if OR grouping is in use.
+   */
+   function can_group() {
+     return TRUE;
+   }
 }
 
 

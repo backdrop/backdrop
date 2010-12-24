@@ -620,6 +620,17 @@ class view extends views_db_object {
     // Build all the relationships first thing.
     $this->_build('relationship');
 
+    // Set the filtering groups.
+    if (!empty($this->filter)) {
+      $filter_groups = $this->display_handler->get_option('filter_groups');
+      if ($filter_groups) {
+        $this->query->set_group_operator($filter_groups['operator']);
+        foreach($filter_groups['groups'] as $id => $operator) {
+          $this->query->set_where_group($operator, $id);
+        }
+      }
+    }
+
     // Build all the filters.
     $this->_build('filter');
 

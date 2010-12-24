@@ -232,6 +232,10 @@ function views_ui_theme() {
     'views_ui_rearrange_form' => array(
       'render element' => 'form',
     ),
+    'views_ui_rearrange_filter_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/admin.inc',
+    ),
 
     // list views
     'views_ui_list_views' => array(
