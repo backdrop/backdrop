@@ -137,7 +137,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       '#region_callback' => $params->region_callback,
       '#js_settings' => array('rowHandler' => 'group'),
       'human_name' => array(
-        '#markup' => check_plain($group->label),
+        '#markup' => check_plain(t($group->label)),
         '#prefix' => '<span class="group-label">',
         '#suffix' => '</span>',
       ),
@@ -455,7 +455,7 @@ function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form
   }
   $form['#redirect'] = array($admin_path);
   $output = confirm_form($form,
-    t('Are you sure you want to delete the group %group?', array('%group' => $group->label)),
+    t('Are you sure you want to delete the group %group?', array('%group' => check_plain(t($group->label)))),
     $admin_path,
     t('This action cannot be undone.'),
     t('Delete'), t('Cancel'),
@@ -479,7 +479,7 @@ function field_group_delete_form_submit($form, &$form_state) {
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
   field_group_delete_field_group($group, $mode);
-  drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => $group->label, '%type' => $bundle_label)));
+  drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => check_plain(t($group->label)), '%type' => $bundle_label)));
 
   // Redirect.
   $form_state['redirect'] = $form['#redirect'];
