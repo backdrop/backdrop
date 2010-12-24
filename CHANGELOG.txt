@@ -574,3 +574,4 @@ Views 3.x-7.x-dev
     o #522318 by dereine: Provide a "human readable" name for all Views.
     o #1003112 by ralf: Add configure line to views_ui.info
     o #118672: Allow an OR in filters by adding groups in the filter UI.
+    o by dereine: Add a test for field math, and fix the field math :)
