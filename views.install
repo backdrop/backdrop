@@ -529,5 +529,7 @@ function views_update_6013() {
     'description' => 'A human readable name used to be displayed in the admin interface',
   );
 
-  db_add_field($ret, 'views_view', 'human_name', $new_field);
+  db_add_field('views_view', 'human_name', $new_field);
+
+  return $ret;
 }
