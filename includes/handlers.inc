@@ -921,7 +921,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
     case 'mysqli':
       switch ($field_type) {
         case 'int':
-          $field = "FROM_UNIXTIME($field)";
+          $field = "DATE_ADD('19700101', INTERVAL $field SECOND)";
           break;
         case 'datetime':
           break;
@@ -933,7 +933,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
     case 'pgsql':
       switch ($field_type) {
         case 'int':
-          $field = "$field::ABSTIME";
+          $field = "TO_TIMESTAMP($field)";
           break;
         case 'datetime':
           break;
