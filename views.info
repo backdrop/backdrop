@@ -234,6 +234,7 @@ files[] = tests/handlers/views_handler_field_math.test
 files[] = tests/handlers/views_handler_field_url.test
 files[] = tests/handlers/views_handler_field_xss.test
 files[] = tests/handlers/views_handler_filter_date.test
+files[] = tests/handlers/views_handler_filter_equality.test
 files[] = tests/handlers/views_handler_filter_in_operator.test
 files[] = tests/handlers/views_handler_filter_numeric.test
 files[] = tests/handlers/views_handler_sort_random.test
