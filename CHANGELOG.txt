@@ -577,3 +577,4 @@ Views 3.x-7.x-dev
     o by dereine: Add a test for field math, and fix the field math :)
     o #1007036 by bojanz: Fix Node: Has new content filter.
     o by dereine: Add a test for filter equality.
+    o by dereine: Add a test for field counter.
