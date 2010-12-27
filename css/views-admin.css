@@ -107,7 +107,6 @@
  
  /* Reset the rendering context for all modern browsers */
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper:after,
-.page-admin-structure-views #content .horizontal:after,
 .page-admin-structure-views #content ul.secondary:after {
   clear: both;
   content: " x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
@@ -121,7 +120,6 @@
 
 /* Reset the rendering context for IE */
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
-.page-admin-structure-views #content .horizontal,
 .page-admin-structure-views #content ul.secondary {
   *zoom: 1;
 }
