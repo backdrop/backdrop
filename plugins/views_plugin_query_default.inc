@@ -66,8 +66,6 @@ class views_plugin_query_default extends views_plugin_query {
    */
   var $distinct = FALSE;
 
-  var $placeholder_counter = 0;
-
   var $has_aggregate = FALSE;
 
   /**
@@ -876,6 +874,20 @@ class views_plugin_query_default extends views_plugin_query {
     // Only add it if it's not already in there.
     if (!in_array($clause, $this->groupby)) {
       $this->groupby[] = $clause;
+    }
+  }
+
+  /**
+   * Generates a unique placeholder used in the db query.
+   */
+  function placeholder($base = 'views') {
+    static $placeholders = array();
+    if (!isset($placeholders[$base])) {
+      $placeholders[$base] = 0;
+      return ':' . $base;
+    }
+    else {
+      return ':' . $base . ++$placeholders[$base];
     }
   }
 

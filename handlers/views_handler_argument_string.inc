@@ -176,10 +176,11 @@ class views_handler_argument_string extends views_handler_argument {
     }
 
     if ($formula) {
-      $field .= ' = :views_handler_argument_string';
+      $placeholder = $this->placeholder();
+      $field .= ' = ' . $placeholder;
       $placeholders = array(
         ':length' => intval($this->options['limit']),
-        ':views_handler_argument_string' => $argument,
+        $placeholder => $argument,
       );
       $this->query->add_where(0, $field, $placeholders, 'formula');
     }

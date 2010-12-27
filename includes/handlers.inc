@@ -414,6 +414,13 @@ class views_handler extends views_object {
   function pre_query() { }
 
   /**
+   * Provides a unique placeholders for handlers.
+   */
+  function placeholder() {
+    return $this->query->placeholder($this->options['table'] . '_' . $this->options['field']);
+  }
+
+  /**
    * Called just prior to query(), this lets a handler set up any relationship
    * it needs.
    */

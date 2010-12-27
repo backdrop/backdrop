@@ -238,6 +238,7 @@ files[] = tests/handlers/views_handler_filter_date.test
 files[] = tests/handlers/views_handler_filter_equality.test
 files[] = tests/handlers/views_handler_filter_in_operator.test
 files[] = tests/handlers/views_handler_filter_numeric.test
+files[] = tests/handlers/views_handler_filter_string.test
 files[] = tests/handlers/views_handler_sort_random.test
 files[] = tests/handlers/views_handler_sort_date.test
 files[] = tests/handlers/views_handler_sort.test
