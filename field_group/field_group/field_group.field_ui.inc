@@ -479,7 +479,7 @@ function field_group_delete_form_submit($form, &$form_state) {
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
   field_group_delete_field_group($group, $mode);
-  drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => check_plain(t($group->label)), '%type' => $bundle_label)));
+  drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
 
   // Redirect.
   $form_state['redirect'] = $form['#redirect'];
