@@ -559,7 +559,7 @@ function node_views_data() {
       'left_field' => 'nid',
       'field' => 'nid',
       'extra' => array(
-        array('field' => 'uid', 'value' => ':user-current-user', 'numeric' => TRUE),
+        array('field' => 'uid', 'value' => '***CURRENT_USER***', 'numeric' => TRUE),
       ),
     ),
   );
