@@ -198,6 +198,10 @@
   border-width: 1px 1px 0;
 }
 
+.page-admin-structure-views #content .views-displays .secondary .action-list  li.last {
+  border-width: 0 1px 1px;
+}
+
 .page-admin-structure-views #content .views-displays .secondary .action-list  li:last-child {
   -moz-border-radius: 0 0 7px 7px;
   -webkit-border-radius: 0 0 7px 7px;

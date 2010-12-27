@@ -38,6 +38,11 @@
   float: right;
 }
 
+.page-admin-structure-views #content .views-displays {
+  clear: both;
+  float:left;
+}
+
 .page-admin-structure-views #content .views-displays .secondary {
   overflow: visible;
 }
@@ -45,6 +50,11 @@
 /**
  * The attachment details tabs that switch between sections
  */
+
+.page-admin-structure-views #content .views-displays .secondary > li {
+  display: inline-block;
+  float: left;
+}
 
 .page-admin-structure-views #content .views-displays .secondary .open > a {
   position: relative;
@@ -62,7 +72,7 @@
   left: 0;
   margin: 0;
   position: absolute;
-  top: 18px;
+  top: 22px;
   z-index: 50;
 }
 
@@ -94,15 +104,26 @@
 /**
  * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
+ 
+ /* Reset the rendering context for all modern browsers */
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper:after,
-.page-admin-structure-views #content .views-display-tab .fieldset-wrapper::after,
 .page-admin-structure-views #content .horizontal:after,
-.page-admin-structure-views #content .horizontal::after {
-  content: ".";
-  display: block;
-  height: 0;
+.page-admin-structure-views #content ul.secondary:after {
   clear: both;
+  content: " x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
+  display: block;
+  font-size: xx-large;
+  height: 0 !important;
+  line-height: 0;
+  overflow: hidden;
   visibility: hidden;
+}
+
+/* Reset the rendering context for IE */
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
+.page-admin-structure-views #content .horizontal,
+.page-admin-structure-views #content ul.secondary {
+  *zoom: 1;
 }
 
 /**
