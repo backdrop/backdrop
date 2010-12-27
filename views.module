@@ -137,7 +137,7 @@ function views_theme($existing, $type, $theme, $path) {
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {
-  $regex = '\.tpl\.php' . '$';
+  $regex = '/' . '\.tpl\.php' . '$' . '/';
 
   // Because drupal_system_listing works the way it does, we check for real
   // templates separately from checking for patterns.
@@ -156,7 +156,7 @@ function _views_find_module_templates($cache, $path) {
       $templates[$hook] = array(
         'template' => $template,
         'path' => dirname($file->filename),
-        'include files' => $cache[$hook]['include files'],
+        'includes' => isset($cache[$hook]['includes']) ? $cache[$hook]['includes'] : NULL,
       );
     }
     // Ensure that the pattern is maintained from base themes to its sub-themes.
@@ -183,9 +183,9 @@ function _views_find_module_templates($cache, $path) {
           $templates[strtr($file, '-', '_')] = array(
             'template' => $file,
             'path' => dirname($files[$match]->filename),
-            'variables' => $info['arguments'],
+            'variables' => $info['variables'],
             'base hook' => $hook,
-            'include files' => $info['include files'],
+            'includes' => isset($info['includes']) ? $info['includes'] : NULL,
           );
         }
       }
