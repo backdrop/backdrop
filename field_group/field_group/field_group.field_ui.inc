@@ -455,7 +455,7 @@ function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form
   }
   $form['#redirect'] = array($admin_path);
   $output = confirm_form($form,
-    t('Are you sure you want to delete the group %group?', array('%group' => check_plain(t($group->label)))),
+    t('Are you sure you want to delete the group %group?', array('%group' => t($group->label))),
     $admin_path,
     t('This action cannot be undone.'),
     t('Delete'), t('Cancel'),
