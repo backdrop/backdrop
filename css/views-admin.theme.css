@@ -348,6 +348,10 @@
   width: 200px;
 }
 
+.page-admin-structure-views .views-ui-dialog .views-filterable-options {
+  margin-bottom: 10px;
+}
+
 .page-admin-structure-views .views-ui-dialog #views-ajax-title,
 .page-admin-structure-views .views-ui-dialog .views-override {
   background-color: #F3F4EE;
@@ -363,6 +367,12 @@
 
 .page-admin-structure-views .views-ui-dialog #views-ajax-title {
   font-size: 15px;
+}
+
+.page-admin-structure-views .views-ui-dialog #views-progress-indicator {
+  position: absolute;
+  right: 10px;
+  font-size: 10px;
 }
 
 .views-ui-dialog #views-ajax-title,

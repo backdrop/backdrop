@@ -1069,7 +1069,7 @@ class views_plugin_display extends views_plugin {
    */
   function options_form(&$form, &$form_state) {
     if ($this->defaultable_sections($form_state['section'])) {
-      $this->add_override_button($form, $form_state, $form_state['section']);
+      views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
     }
     $form['#title'] = check_plain($this->display->display_title) . ': ';
 

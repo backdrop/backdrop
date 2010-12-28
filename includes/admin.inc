@@ -1702,6 +1702,13 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
   $displays = $view->display;
   $current_display = $view->display[$display_id];
 
+  // Add the "2 of 3" progress indicator.
+  // @TODO: Move this to a separate function if it's needed on any forms that
+  // don't have the display dropdown.
+  if ($form_progress = views_ui_get_form_progress($view)) {
+    $form['progress']['#markup'] = '<div id="views-progress-indicator">&lt; ' . t('@current of @total', array('@current' => $form_progress['current'], '@total' => $form_progress['total'])) . ' &gt;</div>';
+  }
+
   if ($current_display->handler->is_default_display()) {
     return;
   }
@@ -1721,7 +1728,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
   $display_dropdown[$display_id] = t('This @display_type (override)', array('@display_type' => $current_display->display_plugin));
 
   $form['override'] = array(
-    '#prefix' => '<div class="views-override clearfix">',
+    '#prefix' => '<div class="views-override clearfix container-inline">',
     '#suffix' => '</div>',
   );
   $form['override']['dropdown'] = array(
@@ -1736,9 +1743,22 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
     $form['override']['dropdown']['#default_value'] = $display_id;
   }
 
-  // Add the "2 of 3" progress indicator.
-  // @TODO: Move this to a separate function if it's needed on any forms that
-  // don't have the display dropdown.
+}
+
+/**
+ * Get the user's current progress through the form stack.
+ *
+ * @param $view
+ *   The current view.
+ *
+ * @return
+ *   FALSE if the user is not currently in a multiple-form stack. Otherwise,
+ *   an associative array with the following keys:
+ *   - current: The number of the current form on the stack.
+ *   - total: The total number of forms originally on the stack.
+ */
+function views_ui_get_form_progress($view) {
+  $progress = FALSE;
   if (!empty($view->stack)) {
     $stack = $view->stack;
     // The forms on the stack have integer keys that don't change as the forms
@@ -1748,8 +1768,13 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
     // from 1 and not 0.
     $current = reset($keys) + 1;
     $total = end($keys) + 1;
-    $form['progress']['#markup'] = t('@current of @total', array('@current' => $current, '@total' => $total));
+    if ($total > 1) {
+      $progress = array();
+      $progress['current'] = $current;
+      $progress['total'] = $total;
+    }
   }
+  return $progress;
 }
 
 

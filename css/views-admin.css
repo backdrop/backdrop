@@ -151,11 +151,30 @@
  */
  .views-ui-dialog .ui-dialog-content {
 }
+
 .views-ui-dialog .ui-dialog-titlebar {
   display: none;
 }
 
-#views-ajax-pad .views-filterable-options {
+.views-ui-dialog #views-ajax-popup {
+  padding: 0;
+}
+
+.views-ui-dialog #views-ajax-title,
+.views-ui-dialog #views-ajax-body {
+  padding: 0.5em 1em;
+  margin: 0;
+}
+
+.views-ui-dialog .views-filterable-options {
   max-height: 350px;
   overflow: auto;
+}
+
+.page-admin-structure-views #views-filterable-options-controls {
+  display: none;
+}
+
+.page-admin-structure-views .views-ui-dialog #views-filterable-options-controls {
+  display: block;
 }
