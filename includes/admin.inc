@@ -1086,9 +1086,10 @@ function views_ui_get_display_tab_details($view, $display) {
 
   // Fetch the style plugin info so we know whether to list fields or not.
   $style_plugin = $display->handler->get_plugin();
-  $no_fields = !($style_plugin && $style_plugin->uses_fields());
-
-  $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display, $no_fields);
+  $uses_fields = $style_plugin && $style_plugin->uses_fields();
+  if ($uses_fields) {
+    $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display);
+  }
   $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
   $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
   $build['columns']['second']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
@@ -1387,7 +1388,7 @@ function views_ui_edit_view_form_delete($form, &$form_state) {
 /**
  * Add information about a section to a display.
  */
-function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALSE) {
+function views_ui_edit_form_get_bucket($type, $view, $display) {
   $build = array(
     '#theme_wrappers' => array('views_ui_display_tab_bucket'),
   );
@@ -1401,13 +1402,6 @@ function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALS
       '#module' => 'views',
       '#topic' => $type,
     );
-  }
-
-  if ($no_fields) {
-    $build['#title'] = $types[$type]['title'];
-    $build['#rearrange'] = '';
-    $build['#add'] = '';
-    return $build;
   }
 
   $build['#rearrange'] = l('<span>' . t('Rearrange') . '</span>', "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-rearrange', 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => true));
