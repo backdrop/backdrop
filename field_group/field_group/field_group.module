@@ -399,6 +399,7 @@ function field_group_field_group_format_settings($group) {
         '#type' => 'textfield',
         '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : $formatter['instance_settings']['classes'],
         '#weight' => 3,
+        '#element_validate' => array('field_group_validate_css_class'),
       );
       break;
     case 'fieldset':
@@ -407,6 +408,7 @@ function field_group_field_group_format_settings($group) {
         '#type' => 'textfield',
         '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : $formatter['instance_settings']['classes'],
         '#weight' => 3,
+        '#element_validate' => array('field_group_validate_css_class'),
       );
     case 'tab':
     case 'htab':
@@ -1221,6 +1223,17 @@ function field_group_field_overview_submit($form, &$form_state) {
   }
 
   cache_clear_all('field_groups', 'cache_field');
+}
+
+/**
+ * Validate the entered css class from the submitted format settings.
+ * @param Array $element The validated element
+ * @param Array $form_state The state of the form.
+ */
+function field_group_validate_css_class($element, &$form_state) {
+  if (!preg_match('!^[a-z0-9-_]+$!', $form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes'])) {
+    form_error($element, t('The css class must include only letters, numbers, underscores and dashes.'));
+  }
 }
 
 /**
