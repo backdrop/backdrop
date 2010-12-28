@@ -849,6 +849,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $view->views_ui_context = TRUE;
     $form['displays']['preview'] = array(
       '#markup' => $view->preview($display_id, array()),
+      '#prefix' => '<div id="views-live-preview">',
+      '#suffix' => '</div>',
     );
 
     // The content of the popup dialog.
@@ -1101,9 +1103,10 @@ function views_ui_get_display_tab_details($view, $display) {
 
   // Add a checkbox controlling whether or not this display auto-previews.
   // TODO: Wire it up to actual functionality.
-  $build['auto_preview'] = array(
+  $build['live_preview'] = array(
     '#type' => 'checkbox',
     '#title' => t('Auto preview'),
+    '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
   );
 
   return $build;
@@ -1494,13 +1497,16 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 /**
  * Regenerate the current tab for AJAX updates.
  */
-function views_ui_regenerate_tab(&$view, &$output, $display_id) {
+function views_ui_regenerate_tab(&$view, &$output, $display_id, $show_preview = TRUE) {
   if (!$view->set_display('default')) {
     return;
   }
 
   $build = views_ui_get_display_tab($view, $display_id);
   $output[] = ajax_command_html('#views-tab-' . $display_id, drupal_render($build));
+  if ($show_preview) {
+    $output[] = ajax_command_html('div#views-live-preview', $view->preview($display_id, array()));
+  }
 }
 
 /**
