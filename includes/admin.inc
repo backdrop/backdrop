@@ -755,8 +755,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
   $form['#attached']['js'][] = array(
     'data' => array('views' => array('ajax' => array(
-      'id' => '#views-ajax-pad',
+      'id' => '#views-ajax-body',
       'title' => '#views-ajax-title',
+      'popup' => '#views-ajax-popup',
       'defaultForm' => views_ui_get_default_ajax_message(),
     ))),
     'type' => 'setting',
@@ -852,9 +853,16 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
     // The content of the popup dialog.
     $form['ajax-area'] = array(
-      '#theme' => 'container',
-      '#id' => 'views-ajax-pad',
-      'message' => array('#markup' => views_ui_get_default_ajax_message()),
+      '#theme_wrappers' => array('container'),
+      '#id' => 'views-ajax-popup',
+    );
+    $form['ajax-area']['ajax-title'] = array(
+      '#markup' => '<h2 id="views-ajax-title"></h2>',
+    );
+    $form['ajax-area']['ajax-body'] = array(
+      '#theme_wrappers' => array('container'),
+      '#id' => 'views-ajax-body',
+      '#markup' => views_ui_get_default_ajax_message(),
     );
   }
 
@@ -1450,7 +1458,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display, $no_fields = FALS
     }
 
     $description = $handler->admin_summary();
-    $link_text = $field_name . (empty($description) ? '' : " = $description");
+    $link_text = $field_name . (empty($description) ? '' : " ($description)");
     $build[$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
     $build[$id]['#attributes']['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
     if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $id])) {
@@ -1856,7 +1864,7 @@ function views_ui_build_form_url($form_state) {
 
 /**
  * Add another form to the stack; clicking 'apply' will go to this form
- * rather than closing the ajax pad.
+ * rather than closing the ajax popup.
  */
 function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FALSE) {
   if (empty($view->stack)) {
@@ -2301,8 +2309,7 @@ function views_ui_config_type_form($form, &$form_state) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
   $display = &$view->display[$display_id];
-  $form['#title'] = check_plain($display->display_title) . ': ';
-  $form['#title'] .= t('Configure @type', array('@type' => $types[$type]['ltitle']));
+  $form['#title'] = t('Configure @type', array('@type' => $types[$type]['ltitle']));
   $form['#section'] = $display_id . 'config-item';
 
   if ($display->handler->defaultable_sections($types[$type]['plural'])) {
@@ -2356,8 +2363,7 @@ function views_ui_rearrange_form($form, &$form_state) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
   $display = &$view->display[$display_id];
-  $form['#title'] = check_plain($display->display_title) . ': ';
-  $form['#title'] .= t('Rearrange @type', array('@type' => $types[$type]['ltitle']));
+  $form['#title'] = t('Rearrange @type', array('@type' => $types[$type]['ltitle']));
   $form['#section'] = $display_id . 'rearrange-item';
 
   if ($display->handler->defaultable_sections($types[$type]['plural'])) {
@@ -2504,7 +2510,7 @@ function views_ui_add_item_form($form, &$form_state) {
     $type = $types[$type]['type'];
   }
 
-  $form['#title'] .= t('Add @type', array('@type' => $types[$type]['ltitle']));
+  $form['#title'] = t('Add @type', array('@type' => $types[$type]['ltitle']));
   $form['#section'] = $display_id . 'add-item';
 
   // Figure out all the base tables allowed based upon what the relationships provide.
@@ -2699,8 +2705,7 @@ function views_ui_config_item_form($form, &$form_state) {
         );
       }
 
-      $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-      $form['#title'] .= t('Configure @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
+      $form['#title'] = t('Configure @type: @item', array('@type' => $types[$type]['lstitle'], '@item' => $handler->ui_name()));
 
       $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
@@ -2790,8 +2795,7 @@ function views_ui_config_item_group_form($type, &$form_state) {
       $handler->init($view, $item);
       $types = views_object_types();
 
-      $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-      $form['#title'] .= t('Configure group settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
+      $form['#title'] = t('Configure group settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
       $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
@@ -2887,8 +2891,7 @@ function views_ui_config_item_extra_form($form, &$form_state) {
       $handler->init($view, $item);
       $types = views_object_types();
 
-      $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-      $form['#title'] .= t('Configure extra settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
+      $form['#title'] = t('Configure extra settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
       $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
@@ -3038,8 +3041,7 @@ function views_ui_config_style_form($form, &$form_state) {
     $handler->init($view, $item);
     $types = views_object_types();
 
-    $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-    $form['#title'] .= t('Configure summary style for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
+    $form['#title'] = t('Configure summary style for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
     $form['#section'] = $display_id . '-' . $type . '-style-options';
 

@@ -8,16 +8,17 @@
 
   Drupal.ajax.prototype.commands.viewsSetForm = function (ajax, response, status) {
     var ajax_title = Drupal.settings.views.ajax.title;
-    var ajax_area = Drupal.settings.views.ajax.id;
+    var ajax_body = Drupal.settings.views.ajax.id;
+    var ajax_popup = Drupal.settings.views.ajax.popup;
     $(ajax_title).html(response.title);
-    $(ajax_area).html(response.output);
-    Drupal.attachBehaviors($(ajax_area).add($(ajax_title)), ajax.settings);
+    $(ajax_body).html(response.output);
+    Drupal.attachBehaviors($(ajax_popup), ajax.settings);
     if (response.url) {
-      var submit = $('input[type=submit]', ajax_area).unbind('click').click(function() {
-        $('form', ajax_area).append('<input type="hidden" name="' + $(this).attr('name') + '" value="' + $(this).val() + '">');
+      var submit = $('input[type=submit]', ajax_body).unbind('click').click(function() {
+        $('form', ajax_body).append('<input type="hidden" name="' + $(this).attr('name') + '" value="' + $(this).val() + '">');
         $(this).after('<span class="views-throbbing">&nbsp</span>');
       })
-      $('form', ajax_area).once('views-ajax-submit-processed').each(function() {
+      $('form', ajax_body).once('views-ajax-submit-processed').each(function() {
         var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'throbber' } };
         var $form = $(this);
         var id = $form.attr('id');
@@ -26,12 +27,12 @@
         Drupal.ajax[id] = new Drupal.ajax(id, form, element_settings);
       });
     }
-    $(ajax_area).dialog('open');
+    $(ajax_popup).dialog('open');
   };
 
   Drupal.ajax.prototype.commands.viewsDismissForm = function(ajax, response, status) {
     Drupal.ajax.prototype.commands.viewsSetForm({}, {'title': '', 'output': Drupal.settings.views.ajax.defaultForm});
-    $(Drupal.settings.views.ajax.id).dialog('close');
+    $(Drupal.settings.views.ajax.popup).dialog('close');
   }
 
   Drupal.ajax.prototype.commands.viewsHilite = function(ajax, response, status) {
@@ -92,10 +93,11 @@
   Drupal.behaviors.viewsAjax = {
     attach: function (context, settings) {
       // Create a jQuery UI dialog, but leave it closed.
-      var dialog_area = $(settings.views.ajax.id, context);
+      var dialog_area = $(settings.views.ajax.popup, context);
       dialog_area.dialog({
         'autoOpen': false,
         'dialogClass': 'views-ui-dialog',
+        'resizable': false,
         'width': 750
       });
 

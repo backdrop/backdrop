@@ -348,6 +348,27 @@
   width: 200px;
 }
 
+.page-admin-structure-views .views-ui-dialog #views-ajax-title,
+.page-admin-structure-views .views-ui-dialog .views-override {
+  background-color: #F3F4EE;
+}
+
+.page-admin-structure-views .views-ui-dialog .views-override {
+  margin: -8px -13px 13px;
+}
+
+.page-admin-structure-views .views-ui-dialog .views-override > * {
+  margin: 8px 13px;
+}
+
+.page-admin-structure-views .views-ui-dialog #views-ajax-title {
+  font-size: 15px;
+}
+
+.views-ui-dialog #views-ajax-title,
+.views-ui-dialog #views-ajax-body {
+  padding: 8px 13px;
+}
 
 
 /**
