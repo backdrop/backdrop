@@ -1705,7 +1705,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
   // @TODO: Move this to a separate function if it's needed on any forms that
   // don't have the display dropdown.
   if ($form_progress = views_ui_get_form_progress($view)) {
-    $form['progress']['#markup'] = '<div id="views-progress-indicator">&lt; ' . t('@current of @total', array('@current' => $form_progress['current'], '@total' => $form_progress['total'])) . ' &gt;</div>';
+    $form['progress']['#markup'] = '<div id="views-progress-indicator">' . t('@current of @total', array('@current' => $form_progress['current'], '@total' => $form_progress['total'])) . '</div>';
   }
 
   if ($current_display->handler->is_default_display()) {
