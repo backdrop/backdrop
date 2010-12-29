@@ -2602,7 +2602,7 @@ function views_ui_add_item_form($form, &$form_state) {
     );
   }
   ctools_include('dependent');
-  views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Apply and continue'));
+  views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $types[$type]['ltitle'])));
 
   return $form;
 }
