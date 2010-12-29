@@ -97,6 +97,7 @@
       dialog_area.dialog({
         'autoOpen': false,
         'dialogClass': 'views-ui-dialog',
+        'modal': true,
         'resizable': false,
         'width': 750
       });
