@@ -772,10 +772,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
   if (isset($view->locked) && is_object($view->locked)) {
     $form['locked'] = array(
-      '#theme' => 'views_ui_break_lock',
-      '#user' => theme('username', array('account' => user_load($view->locked->uid))),
-      '#lock_age' => format_interval(REQUEST_TIME - $view->locked->updated),
-      '#break_link' => url('admin/structure/views/view/' . $view->name . '/break-lock'),
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('view-locked', 'messages', 'warning')),
+      '#markup' => t('This view is being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_interval(REQUEST_TIME - $view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
     );
   }
 
