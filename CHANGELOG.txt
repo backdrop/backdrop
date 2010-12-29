@@ -581,3 +581,4 @@ Views 3.x-7.x-dev
     o #1007036 by dereine: Fix join condition for Node: Has new content filter.
     o by dereine: Fix tests for detecting module template files.
     o #1007730 by bojanz, merlinofchaos, dereine: Fix views_handler_filter_string, add tests and add a general placeholder method.
+    o #1006644 by bojanz, dereine: Allow field field handler to work with users.

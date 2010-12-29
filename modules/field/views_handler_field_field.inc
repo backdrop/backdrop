@@ -189,7 +189,7 @@ class views_handler_field_field extends views_handler_field {
         $object = new stdClass();
         $object->{$entity_info['entity keys']['id']} = $row->{$this->field_alias};
         // Not every entity type has bundle and revision.
-        $bundle = '';
+        $bundle = NULL;
         if (!empty($entity_info['entity keys']['bundle'])) {
           $object->{$entity_info['entity keys']['bundle']} = $bundle = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
         }
@@ -202,6 +202,11 @@ class views_handler_field_field extends views_handler_field {
 
         // The entity object needs to contain all fields, not just the one
         // being displayed, in order for field_view_field() to work properly.
+        if (!isset($bundle)) {
+          // Entities without a bundle have $entity_type as $bundle name.
+          $bundle = $entity_type;
+        }
+
         foreach (field_info_instances($entity_type, $bundle) as $instance) {
           $field_values = array();
           $field_info = field_info_field($instance['field_name']);

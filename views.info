@@ -224,6 +224,7 @@ files[] = plugins/views_plugin_style_summary_unformatted.inc
 files[] = plugins/views_plugin_style_table.inc
 
 ; Tests
+files[] = tests/field/views_handler_field_field.test
 files[] = tests/handlers/views_handler_area_text.test
 files[] = tests/handlers/views_handler_argument_null.test
 files[] = tests/handlers/views_handler_field_boolean.test
