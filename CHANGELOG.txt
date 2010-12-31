@@ -584,3 +584,4 @@ Views 3.x-7.x-dev
     o #1006644 by bojanz, dereine: Allow field field handler to work with users.
     o #759082 by dereine: Fix whitescreen due to incorrect relationship loop code.
     o by dereine: Remove old comment about select::countQuery.
+    o #863478 by damz, dereine: Allow basic distinct support.
