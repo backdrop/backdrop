@@ -1231,7 +1231,7 @@ function field_group_field_overview_submit($form, &$form_state) {
  * @param Array $form_state The state of the form.
  */
 function field_group_validate_css_class($element, &$form_state) {
-  if (!empty($form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes']) && !preg_match('!^[A-Za-z0-9-_]+$!', $form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes'])) {
+  if (!empty($form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes']) && !preg_match('!^[A-Za-z0-9-_ ]+$!', $form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes'])) {
     form_error($element, t('The css class must include only letters, numbers, underscores and dashes.'));
   }
 }
