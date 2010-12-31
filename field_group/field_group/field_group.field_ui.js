@@ -32,6 +32,9 @@ Drupal.fieldUIFieldOverview.group.prototype = {
   getRegion: function () {
     return 'main';
   },
+  regionChange: function (region, recurse) {
+    return {};
+  }
 };
   
   
