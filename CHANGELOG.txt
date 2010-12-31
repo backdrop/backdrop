@@ -583,3 +583,4 @@ Views 3.x-7.x-dev
     o #1007730 by bojanz, merlinofchaos, dereine: Fix views_handler_filter_string, add tests and add a general placeholder method.
     o #1006644 by bojanz, dereine: Allow field field handler to work with users.
     o #759082 by dereine: Fix whitescreen due to incorrect relationship loop code.
+    o by dereine: Remove old comment about select::countQuery.
