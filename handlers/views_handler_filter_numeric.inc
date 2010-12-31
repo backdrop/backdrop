@@ -143,7 +143,6 @@ class views_handler_filter_numeric extends views_handler_filter {
     }
 
     if ($which == 'all') {
-      dsm($source);
       $form['value']['value'] = array(
         '#type' => 'textfield',
         '#title' => empty($form_state['exposed']) ? t('Value') : '',
