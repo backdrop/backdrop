@@ -589,4 +589,5 @@ Views 3.x-7.x-dev
     o #1011266 by sime: Fix whitescreen due to changes in #759082.
     o #1011220 by aspilicious: Auto-Generate View's Machine-Readable Name.
     o #1001542 by mikeytown2: view::set_display() has wrong return code when it fails.
+    o #1011220 follow-up: Add missing point on machine_name.
 

@@ -618,7 +618,7 @@ function views_ui_add_form($form, &$form_state) {
   $form['human_name'] = array(
     '#type' => 'textfield',
     '#title' => t('View name'),
-    '#description' => t('A descriptive name for this view. Spaces are allowed'),
+    '#description' => t('A descriptive name for this view. Spaces are allowed.'),
     '#default_value' => $view ? $view->human_name : '',
     '#required' => TRUE,
     '#size' => 32,
