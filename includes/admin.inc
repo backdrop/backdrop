@@ -705,6 +705,7 @@ function views_ui_add_form_submit($form, &$form_state) {
   $view->human_name = $form_state['values']['human_name'];
   $view->description = $form_state['values']['description'];
   $view->tag = $form_state['values']['tag'];
+  $view->core = VERSION;
   if (empty($form['base_table']['#disabled'])) {
     $view->base_table = $form_state['values']['base_table'];
   }

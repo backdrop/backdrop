@@ -533,3 +533,30 @@ function views_update_6013() {
 
   return $ret;
 }
+
+function views_schema_6014() {
+  $schema = views_schema(__FUNCTION__);
+  $schema['views_view']['fields']['core'] = array(
+    'type' => 'int',
+    'default' => 0,
+    'description' => 'Stores the drupal core version of the view.',
+  );
+  return $schema;
+}
+
+/**
+ * Add a drupal core version field.
+ */
+function views_update_6014() {
+  $ret = array();
+  $new_field = array(
+    'type' => 'int',
+    'default' => 0,
+    'description' => 'Stores the drupal core version of the view.',
+  );
+
+  db_add_field('views_view', 'core', $new_field);
+
+  return $ret;
+}
+
