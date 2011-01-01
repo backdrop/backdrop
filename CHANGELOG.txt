@@ -585,3 +585,4 @@ Views 3.x-7.x-dev
     o #759082 by dereine: Fix whitescreen due to incorrect relationship loop code.
     o by dereine: Remove old comment about select::countQuery.
     o #863478 by damz, dereine: Allow basic distinct support.
+    o #667950 by bec : Remove workaround for filter_numeric dependency.

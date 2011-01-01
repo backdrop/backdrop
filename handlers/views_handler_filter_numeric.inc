@@ -149,7 +149,7 @@ class views_handler_filter_numeric extends views_handler_filter {
         '#size' => 30,
         '#default_value' => $this->value['value'],
         '#process' => array('ctools_dependent_process'),
-        '#dependency' => array($source => array_map('htmlentities', $this->operator_values(1))),
+        '#dependency' => array($source => $this->operator_values(1)),
       );
       if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['value'])) {
         $form_state['input'][$identifier]['value'] = $this->value['value'];
