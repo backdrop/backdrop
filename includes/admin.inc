@@ -615,21 +615,24 @@ function views_ui_add_form($form, &$form_state) {
   $view = $form_state['view'];
   $form = array();
 
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View name'),
-    '#description' => t('This is the unique name of the view. It must contain only alphanumeric characters and underscores; it is used to identify the view internally and to generate unique theming template names for this view. If overriding a module provided view, the name must not be changed or instead a new view will be created.'),
-    '#required' => TRUE,
-    '#maxlength' => 32,
-    '#default_value' => $view ? $view->name : '',
-    '#attributes' => array('dir'=>'ltr'),
-  );
-
   $form['human_name'] = array(
     '#type' => 'textfield',
-    '#title' => t('Human readable name'),
-    '#description' => t('You can use a more descriptive name for this view here. Spaces are allowed'),
+    '#title' => t('View name'),
+    '#description' => t('A descriptive name for this view. Spaces are allowed'),
     '#default_value' => $view ? $view->human_name : '',
+    '#required' => TRUE,
+    '#size' => 32,
+    '#maxlength' => 255,
+  );
+  
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#maxlength' => 32,
+    '#machine_name' => array(
+      'exists' => 'views_get_view',
+      'source' => array('human_name'),
+    ),
+    '#description' => t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
   );
 
   $form['description'] = array(
