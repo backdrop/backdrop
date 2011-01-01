@@ -1393,7 +1393,8 @@ function template_preprocess_views_ui_edit_item(&$vars) {
     // @todo: get_handlers()
     $handlers = $display->handler->get_option('relationships');
     if ($handlers) {
-      foreach ($handlers as $id => $handler) {
+      foreach ($handlers as $id => $info) {
+        $handler = $display->handler->get_handler('relationship', $id);
         $relationships[$id] = $handler->label();
       }
     }
