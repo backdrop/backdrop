@@ -25,6 +25,9 @@ Note that views_handler_filter_float has been removed.
 This functionality is now handled by views_handler_filter_numeric.
 There's no need for having a special handler any more, thanks to the new DB layer in Drupal 7.
 
+views_handler_sort_formula has been removed.
+Everyone who used it can extend from views_handler_sort, too.
+
 <h3>Ctools dependency</h3>
 Views requires ctools now, so it can use the dependency system of ctools.
 The only thing you have to do is to replace 
