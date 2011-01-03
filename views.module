@@ -133,7 +133,7 @@ function views_theme($existing, $type, $theme, $path) {
  *   The existing cache of theme hooks to test against.
  * @param $path
  *   The path to search.
- * 
+ *
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {
@@ -256,9 +256,11 @@ function views_menu() {
   $items['views/ajax'] = array(
     'title' => 'Views',
     'page callback' => 'views_ajax',
+    'delivery callback' => 'ajax_deliver',
     'access callback' => TRUE,
     'description' => 'Ajax callback for view loading.',
     'type' => MENU_CALLBACK,
+    'file' => 'includes/ajax.inc',
   );
   // Path is not admin/structure/views due to menu complications with the wildcards from
   // the generic ajax callback.
@@ -738,17 +740,17 @@ function views_add_js($file) {
   if (variable_get('views_no_javascript', FALSE)) {
     return;
   }
-
   static $base = TRUE, $ajax = TRUE;
   if ($base) {
     drupal_add_js(drupal_get_path('module', 'views') . "/js/base.js");
     $base = FALSE;
   }
-  if ($ajax && $file == 'ajax') {
-    drupal_add_js('misc/ajax.js', array('group' => JS_LIBRARY));
-    $ajax = TRUE;
+  if ($ajax && in_array($file, array('ajax', 'ajax_view'))) {
+    drupal_add_library('system', 'drupal.ajax');
+    drupal_add_library('system', 'jquery.form');
+    $ajax = FALSE;
   }
-  drupal_add_js(drupal_get_path('module', 'views') . "/js/$file.js");
+  ctools_add_js($file, 'views');
 }
 
 /**

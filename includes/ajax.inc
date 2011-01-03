@@ -26,44 +26,36 @@ function views_ajax() {
 
     $arg = explode('/', $_REQUEST['view_path']);
 
-    if ($arg[0] == 'admin' || (variable_get('node_admin_theme', '0') && $arg[0] == 'node' && ($arg[1] == 'add' || $arg[2] == 'edit'))) {
-        global $custom_theme;
-        $custom_theme = variable_get('admin_theme', '0');
-        drupal_add_css(drupal_get_path('module', 'system') .'/admin.css', 'module');
-    }
     // Load the view.
-    if ($view = views_get_view($name)) {
-      if ($view->access($display_id)) {
+    $view = views_get_view($name);
+    if ($view && $view->access($display_id)) {
+      // Fix 'q' for paging.
+      if (!empty($path)) {
+        $_GET['q'] = $path;
+      }
 
-        // Fix 'q' for paging.
-        if (!empty($path)) {
-          $_GET['q'] = $path;
-        }
+      // Add all $_POST data, because AJAX is always a post and many things,
+      // such as tablesorts, exposed filters and paging assume $_GET.
+      $_GET += $_POST;
 
-        // Override the display's pager_element with the one actually used.
-        if (isset($pager_element)) {
-          $view->display[$display_id]->handler->set_option('pager_element', $pager_element);
-        }
-        // Reuse the same DOM id so it matches that in Drupal.settings.
-        $view->dom_id = $dom_id;
+      // Override the display's pager_element with the one actually used.
+      if (isset($pager_element)) {
+        $view->display[$display_id]->handler->set_option('pager_element', $pager_element);
+      }
+      // Reuse the same DOM id so it matches that in Drupal.settings.
+      $view->dom_id = $dom_id;
 
-        $errors = $view->validate();
-        if ($errors === TRUE) {
-          $commands[] = ajax_command_replace('#' . $domid, $view->get_title());
-          $commands[] = ajax_command_replace('#' . $dom_id, $view->preview($display_id, $args));
-        }
-        else {
-          foreach ($errors as $error) {
-            drupal_set_message($error, 'error');
-          }
+      $errors = $view->validate();
+      if ($errors === TRUE) {
+        $commands[] = ajax_command_replace('.view-dom-id-' . $dom_id, $view->preview($display_id, $args));
+      }
+      else {
+        foreach ($errors as $error) {
+          drupal_set_message($error, 'error');
         }
       }
     }
-
-    $messages = theme('status_messages');
-    $commands[] = ajax_command_replace('.views-messages', $messages);
-
-    return $commands;
+    return array('#type' => 'ajax', '#commands' => $commands);
   }
 }
 

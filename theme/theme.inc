@@ -109,21 +109,25 @@ function template_preprocess_views_view(&$vars) {
     $vars['admin_links_raw'] = array();
   }
 
-  // Our JavaScript needs to have some means to find the HTML belonging to this
-  // view.
-  //
-  // It is true that the DIV wrapper has classes denoting the name of the view
-  // and its display ID, but this is not enough to unequivocally match a view
-  // with its HTML, because one view may appear several times on the page. So
-  // we set up a running counter, $dom_id, to issue a "unique" identifier for
-  // each view. This identifier is written to both Drupal.settings and the DIV
-  // wrapper.
-  static $dom_id = 1;
-  $vars['dom_id'] = !empty($view->dom_id) ? $view->dom_id : $dom_id++;
-  $vars['classes_array'][] = 'view-dom-id-' . $vars['dom_id'];
+  // Attachments are always updated with the outer view, never by themselves,
+  // so they do not have dom ids.
+  if (empty($view->is_attachment)) {
+    // Our JavaScript needs to have some means to find the HTML belonging to this
+    // view.
+    //
+    // It is true that the DIV wrapper has classes denoting the name of the view
+    // and its display ID, but this is not enough to unequivocally match a view
+    // with its HTML, because one view may appear several times on the page. So
+    // we set up a running counter, $dom_id, to issue a "unique" identifier for
+    // each view. This identifier is written to both Drupal.settings and the DIV
+    // wrapper.
+    static $dom_id = 1;
+    $vars['dom_id'] = !empty($view->dom_id) ? $view->dom_id : $dom_id++;
+    $vars['classes_array'][] = 'view-dom-id-' . $vars['dom_id'];
+  }
 
   // If using AJAX, send identifying data about this view.
-  if ($view->use_ajax) {
+  if ($view->use_ajax && empty($view->is_attachment)) {
     $settings = array(
       'views' => array(
         'ajax_path' => url('views/ajax'),
