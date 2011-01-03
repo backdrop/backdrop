@@ -48,9 +48,10 @@ class views_handler_argument_formula extends views_handler_argument {
   function query() {
     $this->ensure_my_table();
     // Now that our table is secure, get our formula.
-    $formula = $this->get_formula() .' = :views_handler_argument_formula';
+    $placeholder = $this->placeholder();
+    $formula = $this->get_formula() .' = ' . $placeholder;
     $placeholders = array(
-      ':views_handler_argument_formula' => $this->argument,
+      $placeholder => $this->argument,
     );
     $this->query->add_where(0, $formula, $placeholders, 'formula');
   }
