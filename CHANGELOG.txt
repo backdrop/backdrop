@@ -593,3 +593,4 @@ Views 3.x-7.x-dev
     o #722330 by dereine: Views should include core version for updates.
     o #1008706 by dereine: Convert placeholders to new api.
     o #807616 by damz, dereine: Remove views_handler_sort_formula and add a short entry in api-upgrading.html
+    o #873238 follow up by dereine: Remove adding cookie.js all the time. Ajax loading works now.
