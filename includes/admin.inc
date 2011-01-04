@@ -624,7 +624,7 @@ function views_ui_add_form($form, &$form_state) {
     '#size' => 32,
     '#maxlength' => 255,
   );
-  
+
   $form['name'] = array(
     '#type' => 'machine_name',
     '#maxlength' => 32,
@@ -1800,6 +1800,12 @@ function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FAL
  * use with this system.
  */
 function views_ui_ajax_form($js, $key, $view, $display_id) {
+  // Reset the cache of IDs. Drupal rather aggressively prevents id duplication
+  // but this causes it to remember IDs that are no longer even being used.
+  if (isset($_POST['ajax_html_ids'])) {
+    unset($_POST['ajax_html_ids']);
+  }
+
   $form = views_ui_ajax_forms($key);
   if (empty($form)) {
     return drupal_not_found();
