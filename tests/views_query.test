@@ -142,6 +142,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
       $query->values($record);
     }
     $query->execute();
+    $this->checkPermissions(array(), TRUE);
   }
 
   /**

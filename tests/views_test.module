@@ -36,3 +36,11 @@ function views_test_views_data() {
 function views_test_views_plugins() {
   return variable_get('views_test_views_plugins', array());
 }
+
+function views_test_test_static_access_callback($access) {
+  return $access;
+}
+
+function views_test_test_dynamic_access_callback($access, $argument1, $argument2) {
+  return $access && $argument1 == variable_get('test_dynamic_access_argument1', NULL) && $argument2 == variable_get('test_dynamic_access_argument2', NULL);
+}

@@ -598,6 +598,12 @@ function views_access() {
 
     list($callback, $arguments) = $arg;
     $arguments = $arguments ? $arguments : array();
+    // Bring dynamic arguments to the access callback.
+    foreach ($arguments as $key => $value) {
+      if (is_int($value) && isset($args[$value])) {
+        $arguments[$key] = $args[$value];
+      }
+    }
     if (function_exists($callback) && call_user_func_array($callback, $arguments)) {
       return TRUE;
     }

@@ -601,3 +601,4 @@ Views 3.x-7.x-dev
     o #1007466 by aspilicious, dereine: Provide a api function for adding complex queries: add_where_expression, add_having_condition.
     o #1008170 by dereine: Fix views_handler_filter_groupby_numeric by using add_having_expression.
     o #1013170 by das-peter: Fix broken view::preview which was broken on #1001542.
+    o #644008 by Cyberwolf and dereine: Allow access plugins access to arguments.
