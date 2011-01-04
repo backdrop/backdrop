@@ -35,8 +35,33 @@ class views_handler_field_field extends views_handler_field {
   /**
    * Called to add the field to a query.
    */
-  function query() {
-    parent::query();
+  function query($use_groupby = FALSE) {
+    $this->ensure_my_table();
+
+    $params = array();
+    if ($use_groupby) {
+      // When grouping on a "field API" field (whose "real_field" is set to
+      // entity_id), retrieve the minimum entity_id to have a valid entity_id to
+      // pass to field_view_field().
+      $params = array(
+        'function' => 'min',
+      );
+    }
+
+    // Add the field.
+    $this->field_alias = $this->query->add_field($this->table_alias, $this->real_field, '', $params);
+
+    $fields = $this->additional_fields;
+    if ($use_groupby) {
+      // Remove additional fields that are not the group_column or are not in
+      // the additional group_columns as their presence in the query inhibits
+      // grouping.
+      $group_field_name = $this->definition['field_name'] . '_' . $this->options['group_column'];
+      if (in_array($group_field_name, $fields)) {
+        $fields = array($group_field_name => $group_field_name) + $this->options['group_columns'];
+      }
+    }
+    $this->add_additional_fields($fields);
 
     $base_table = $this->view->base_table;
 
@@ -55,26 +80,23 @@ class views_handler_field_field extends views_handler_field {
     $this->entity_type = $entity_type = $this->definition['entity_tables'][$base_table];
     $this->entity_info = entity_get_info($entity_type);
 
-    // Query for bundle, revision fields necessary for rendering fields.
+    if ($use_groupby) {
+      // The extra fields are not needed and their inclusion inhibits grouping.
+      // Check this condtion here because other methods need the entity_info and
+      // entity_type properties.
+      return;
+    }
+
+    // Query for revision field necessary for rendering fields and not otherwise
+    // included in additional_fields.
     // @TODO
     // The bundle system will be fixed in d8, so no special cases should be needed.
-    switch ($entity_type) {
-      case 'taxonomy_term':
-      case 'comment':
-        $this->aliases[$this->definition['field_name'] . '_' . 'bundle'] = $this->query->add_field($this->table_alias, 'bundle');
-        break;
-      default:
-        foreach ($this->entity_info['entity keys'] as $key => $column) {
-          if (!empty($column)) {
-            if ($key == 'bundle') {
-              $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'bundle');
-            }
-            elseif ($key == 'revision') {
-              $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'revision_id');
-            }
-          }
+    if (!in_array($entity_type, array('taxonomy_term', 'comment'))) {
+      foreach ($this->entity_info['entity keys'] as $key => $column) {
+        if (!empty($column) && $key == 'revision') {
+          $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'revision_id');
         }
-        break;
+      }
     }
   }
 
@@ -92,15 +114,22 @@ class views_handler_field_field extends views_handler_field {
 
     $field = field_info_field($this->definition['field_name']);
     $field_type = field_info_field_types($field['type']);
+    $column_names = array_keys($field['columns']);
 
     // If the field has a "value" column, we probably need that one.
     $options['click_sort_column'] = array(
-      'default' => in_array('value', $field['columns']) ? 'value' : '',
+      'default' => in_array('value', $column_names) ? 'value' : '',
     );
     $options['type'] = array(
       'default' => $field_type['default_formatter'],
     );
     $options['settings'] = array(
+      'default' => array(),
+    );
+    $options['group_column'] = array(
+      'default' => in_array('value', $column_names) ? 'value' : $column_names[0],
+    );
+    $options['group_columns'] = array(
       'default' => array(),
     );
 
@@ -171,6 +200,47 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
+   * Extend the groupby form with group columns.
+   */
+  function groupby_form(&$form, &$form_state) {
+    parent::groupby_form($form, $form_state);
+    // With "field API" fields, the column target of the grouping function
+    // and any additional grouping columns must be specified.
+    $group_columns = drupal_map_assoc(array_keys($this->definition['field_info']['columns']), 'ucfirst');
+    $form['group_column'] = array(
+      '#type' => 'select',
+      '#title' => t('Group column'),
+      '#default_value' => $this->options['group_column'],
+      '#description' => t('Select the column of this field to apply the grouping function selected above.'),
+      '#options' => $group_columns,
+    );
+
+    $options = drupal_map_assoc(array('bundle', 'language', 'entity_type'), 'ucfirst');
+    $form['group_columns'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Group columns (additional)'),
+      '#default_value' => $this->options['group_columns'],
+      '#description' => t('Select any additional columns of this field to include in the query and to group on.'),
+      '#options' => $options,
+    );
+  }
+
+  function groupby_form_submit(&$form, &$form_state) {
+    parent::groupby_form_submit($form, $form_state);
+    $item =& $form_state['handler']->options;
+
+    if ($item['group_type'] != 'group') {
+      unset($item['group_column']);
+      unset($item['group_columns']);
+    }
+    else {
+      // Add settings for "field API" fields.
+      $item['group_column'] = $form_state['values']['group_column'];
+      $item['group_columns'] = array_filter($form_state['values']['group_columns']);
+    }
+  }
+
+  /**
    * Builds a fake entity object for each row fetched from the database,
    * creating the field structure required for rendering.
    */
@@ -191,14 +261,30 @@ class views_handler_field_field extends views_handler_field {
         // Not every entity type has bundle and revision.
         $bundle = NULL;
         if (!empty($entity_info['entity keys']['bundle'])) {
-          $object->{$entity_info['entity keys']['bundle']} = $bundle = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
+          if (isset($row->{$this->aliases[$this->definition['field_name'] . '_bundle']})) {
+            $object->{$entity_info['entity keys']['bundle']} = $bundle = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
+          }
+          else {
+            // @todo Is the bundle absolutely necessary?
+            // @todo We know this when the query is built if there is a node.type condition with one value.
+            // Is it reasonable to assume there is a node.type condition that matches the bundle?
+            // We could retrieve the bundle as MIN(.._bundle).
+            $entity_type = $this->definition['entity_tables'][$this->view->base_table];
+            $object->{$entity_info['entity keys']['bundle']} = $bundle = $this->definition['field_info']['bundles'][$entity_type][0];
+          }
         }
         if (!empty($entity_info['entity keys']['revision'])) {
-          $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
+          if (isset($row->{$this->aliases[$this->definition['field_name'] . '_revision']})) {
+            $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
+          }
+          else {
+            $object->{$entity_info['entity keys']['revision']} = 0;
+          }
         }
 
-        $language = $row->{$this->aliases['language']};
-        $delta = $row->{$this->aliases['delta']};
+        // Provide fine default values for language and delta.
+        $language = isset($row->{$this->aliases['language']}) ? $row->{$this->aliases['language']} : LANGUAGE_NONE;
+        $delta = isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
 
         // The entity object needs to contain all fields, not just the one
         // being displayed, in order for field_view_field() to work properly.
@@ -238,7 +324,7 @@ class views_handler_field_field extends views_handler_field {
 
       foreach ($values as $key => $row) {
         if ($row->{$this->field_alias}) {
-          $delta = $row->{$this->aliases['delta']};
+          $delta = isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
           $entity_id = $row->{$this->field_alias};
 
           $values[$key]->_field_data[$this->field_alias] = array(

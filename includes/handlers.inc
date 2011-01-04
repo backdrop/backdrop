@@ -223,11 +223,51 @@ class views_handler extends views_object {
       '#default_value' => $this->options['ui_name'],
     );
   }
+
   /**
    * Perform any necessary changes to the form values prior to storage.
    * There is no need for this function to actually store the data.
    */
   function options_submit(&$form, &$form_state) { }
+
+  /**
+   * Provide a form for groupby settings.
+   */
+  function groupby_form(&$form, &$form_state) {
+    $view = &$form_state['view'];
+    $display_id = $form_state['display_id'];
+    $types = views_object_types();
+    $type = $form_state['type'];
+    $id = $form_state['id'];
+
+    $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
+    $form['#title'] .= t('Configure group settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $this->ui_name()));
+
+    $form['#section'] = $display_id . '-' . $type . '-' . $id;
+
+    $info = $view->query->get_aggregation_info();
+    foreach ($info as $id => $aggregate) {
+      $group_types[$id] = $aggregate['title'];
+    }
+
+    $form['group_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Group type'),
+      '#default_value' => $this->options['group_type'],
+      '#description' => t('Grouping is enabled for this display. You must select what function to use on this field.'),
+      '#options' => $group_types,
+    );
+  }
+
+  /**
+   * Perform any necessary changes to the form values prior to storage.
+   * There is no need for this function to actually store the data.
+   */
+  function groupby_form_submit(&$form, &$form_state) {
+    $item =& $form_state['handler']->options;
+
+    $item['group_type'] = $form_state['values']['group_type'];
+  }
 
   /**
    * If a handler has 'extra options' it will get a little settings widget and

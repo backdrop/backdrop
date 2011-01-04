@@ -3419,25 +3419,7 @@ function views_ui_config_item_group_form($type, &$form_state) {
     }
     else {
       $handler->init($view, $item);
-      $types = views_object_types();
-
-      $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-      $form['#title'] .= t('Configure group settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
-
-      $form['#section'] = $display_id . '-' . $type . '-' . $id;
-
-      $info = $view->query->get_aggregation_info();
-      foreach ($info as $id => $aggregate) {
-        $group_types[$id] = $aggregate['title'];
-      }
-
-      $form['group_type'] = array(
-        '#type' => 'select',
-        '#title' => t('Group type'),
-        '#default_value' => $handler->options['group_type'],
-        '#description' => t('Grouping is enabled for this display. You must select what function to use on this field.'),
-        '#options' => $group_types,
-      );
+      $handler->groupby_form($form, $form_state);
       $form_state['handler'] = &$handler;
     }
 
@@ -3450,9 +3432,14 @@ function views_ui_config_item_group_form($type, &$form_state) {
  * Submit handler for configing group settings on a view.
  */
 function views_ui_config_item_group_form_submit($form, &$form_state) {
-  $item = $form_state['handler']->options;
+  $item =& $form_state['handler']->options;
+  $type = $form_state['type'];
+  $id = $form_state['id'];
 
-  $item['group_type'] = $form_state['values']['group_type'];
+  $handler = views_get_handler($item['table'], $item['field'], $type);
+  $handler->init($form_state['view'], $item);
+
+  $handler->groupby_form_submit($form, $form_state);
 
   // Store the item back on the view
   $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
@@ -3533,7 +3520,7 @@ function views_ui_config_item_extra_form($form, &$form_state) {
 }
 
 /**
- * Submit handler for configing new item(s) to a view.
+ * Validation handler for configing new item(s) to a view.
  */
 function views_ui_config_item_extra_form_validate($form, &$form_state) {
   $form_state['handler']->extra_options_validate($form['options'], $form_state);
