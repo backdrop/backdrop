@@ -898,20 +898,25 @@ class views_plugin_query_default extends views_plugin_query {
    *   'where' or 'having'.
    */
   function build_condition($where = 'where') {
+    $has_condition = FALSE;
     $main_group = $this->group_operator == 'OR' ? db_or() : db_and();
     foreach ($this->$where as $group => $info) {
       $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
       foreach ($info['conditions'] as $key => $clause) {
         if ($clause['operator'] == 'formula') {
+          $has_condition = TRUE;
           $sub_group->where($clause['field'], $clause['value']);
         }
         else {
+          $has_condition = TRUE;
           $sub_group->condition($clause['field'], $clause['value'], $clause['operator']);
         }
       }
       $main_group->condition($sub_group);
     }
-    return $main_group;
+    if ($has_condition) {
+      return $main_group;
+    }
   }
 
   /**
@@ -1053,8 +1058,8 @@ class views_plugin_query_default extends views_plugin_query {
       foreach ($groupby as $field) {
         $query->groupBy($field);
       }
-      if (!empty($this->having)) {
-        $query->havingCondition($this->build_condition('having'));
+      if (!empty($this->having) && $condition = $this->build_condition('having')) {
+        $query->havingCondition($condition);
       }
     }
 
@@ -1067,8 +1072,8 @@ class views_plugin_query_default extends views_plugin_query {
       }
     }
 
-    if (!empty($this->where)) {
-      $query->condition($this->build_condition('where'));
+    if (!empty($this->where) && $condition = $this->build_condition('where')) {
+      $query->condition($condition);
     }
 
     // Add all query substitutions as metadata.

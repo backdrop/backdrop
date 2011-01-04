@@ -596,3 +596,4 @@ Views 3.x-7.x-dev
     o #873238 follow up by dereine: Remove adding cookie.js all the time. Ajax loading works now.
     o #591302 by yhahn: Update ajax_view.js for ajax framework.
     o #972638 by bojanz: Mini pager hasn't been ported.
+    o #1011334 by dereine: Exposed filters without input broke sql.
