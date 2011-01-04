@@ -752,6 +752,8 @@ class views_plugin_query_default extends views_plugin_query {
    *   The comparison operator, such as =, <, or >=. It also accepts more complex
    *   options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is an array
    *   = otherwise. If $field is a string you have to use 'formula' here.
+   *
+   * @see QueryConditionInterface::condition()
    */
   function add_where($group, $field, $value = NULL, $operator = NULL) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
@@ -773,9 +775,49 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Add a simple HAVING clause to the query. The caller is responsible for
-   * ensuring that all fields are fully qualified (TABLE.FIELD) and that
-   * the table and an appropriate GROUP BY already exist in the query.
+   * Add a complex WHERE clause to the query.
+   *
+   * The caller is reponsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table already exists in the query.
+   * Internally the dbtng method "where" is used.
+   * 
+   * @param $group
+   *   The WHERE group to add these to; groups are used to create AND/OR
+   *   sections. Groups cannot be nested. Use 0 as the default group.
+   *   If the group does not yet exist it will be created as an AND group.
+   * @param $snippet
+   *   The snippet to check. This can be either a column or
+   *   a complex expression like "UPPER(table.field) = 'value'"
+   * @param $args
+   *   An associative array of arguments.
+   *
+   * @see QueryConditionInterface::where()
+   */
+  function add_where_expression($group, $snippet, $args = array()) {
+    // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
+    // the default group.
+    if (empty($group)) {
+      $group = 0;
+    }
+
+    // Check for a group.
+    if (!isset($this->where[$group])) {
+      $this->set_where_group('AND', $group);
+    }
+
+    $this->where[$group]['conditions'][] = array(
+      'field' => $snippet,
+      'value' => $args,
+      'operator' => 'formula',
+    );
+  }
+
+  /**
+   * Add a simple HAVING clause to the query.
+   * 
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
+   * Internally the dbtng method "havingCondition" is used.
    *
    * @param $group
    *   The HAVING group to add these to; groups are used to create AND/OR
@@ -790,7 +832,9 @@ class views_plugin_query_default extends views_plugin_query {
    * @param $operator
    *   The comparison operator, such as =, <, or >=. It also accepts more complex
    *   options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is an array
-   *   = otherwise.
+   *   = otherwise.  If $field is a string you have to use 'formula' here.
+   *
+   * @see SelectQueryInterface::havingCondition()
    */
   function add_having($group, $field, $value = NULL, $operator = NULL) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
@@ -809,6 +853,44 @@ class views_plugin_query_default extends views_plugin_query {
       'field' => $field,
       'value' => $value,
       'operator' => $operator,
+    );
+  }
+
+  /**
+   * Add a complex HAVING clause to the query.
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
+   * Internally the dbtng method "having" is used.
+   *
+   * @param $group
+   *   The HAVING group to add these to; groups are used to create AND/OR
+   *   sections. Groups cannot be nested. Use 0 as the default group.
+   *   If the group does not yet exist it will be created as an AND group.
+   * @param $snippet
+   *   The snippet to check. This can be either a column or
+   *   a complex expression like "COUNT(table.field) > 3"
+   * @param $args
+   *   An associative array of arguments.
+   *
+   * @see QueryConditionInterface::having()
+   */
+  function add_having_expression($group, $snippet, $args = array()) {
+    // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
+    // the default group.
+    if (empty($group)) {
+      $group = 0;
+    }
+
+    // Check for a group.
+    if (!isset($this->having[$group])) {
+      $this->set_where_group('AND', $group, 'having');
+    }
+
+    // Add the clause and the args.
+    $this->having[$group]['conditions'][] = array(
+      'field' => $snippet,
+      'value' => $args,
+      'operator' => 'formula',
     );
   }
 

@@ -38,3 +38,27 @@ with
 <pre>
 '#process' => array('ctools_dependent_process'),
 </pre>
+
+<h3>Changed add_where api</h3>
+If your field is a plain sql field:
+<code>
+    $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field " . $this->operator . " '%s'", $this->value);
+</code>
+has to be converted to
+<code>
+    $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field", $this->value, $this->operator);
+</code>
+If your field is a complex where condition:
+<code>
+    $this->query->add_where($this->options['group'], "$upper($field) NOT LIKE $upper('%%%s')", $this->value);
+</code>
+has to be converted to
+<code>
+    $placeholder = $this->placeholder();
+    $this->query->add_where_expression($this->options['group'], "$field LIKE $placeholder", array($placeholder => '%' . db_like($this->value)));
+</code>
+placeholder() generates a automatic unique placeholder for you.
+
+add_where with operator 'formula' can be converted to add_where_expression.
+add_having with operator 'formula' can be converted to add_having_expression.
+
