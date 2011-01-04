@@ -597,3 +597,4 @@ Views 3.x-7.x-dev
     o #591302 by yhahn: Update ajax_view.js for ajax framework.
     o #972638 by bojanz: Mini pager hasn't been ported.
     o #1011334 by dereine: Exposed filters without input broke sql.
+    o #990088 by yhahn: Fix taxonomy integration by changing vid to nid for taxonomy_index.
