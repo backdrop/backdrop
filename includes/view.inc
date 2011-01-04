@@ -914,7 +914,7 @@ class view extends views_db_object {
    * normalized output.
    */
   function preview($display_id = NULL, $args = array()) {
-    if (empty($this->current_display) || $this->current_display != $display_id) {
+    if (empty($this->current_display) || ((!empty($display_id)) && $this->current_display != $display_id)) {
       if (!$this->set_display($display_id)) {
         return FALSE;
       }
@@ -1092,8 +1092,8 @@ class view extends views_db_object {
   function build_title() {
     $this->init_display();
 
-    if (empty($this->built)) {   
-      $this->init_query();    
+    if (empty($this->built)) {
+      $this->init_query();
     }
 
     $this->init_handlers();
