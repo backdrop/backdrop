@@ -133,7 +133,7 @@ function views_theme($existing, $type, $theme, $path) {
  *   The existing cache of theme hooks to test against.
  * @param $path
  *   The path to search.
- *
+ * 
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {

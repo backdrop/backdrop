@@ -822,8 +822,13 @@ function template_preprocess_views_exposed_form(&$vars) {
   $vars['button'] = drupal_render_children($form);
 }
 
-function theme_views_mini_pager($tags = array(), $limit = 10, $element = 0, $parameters = array(), $quantity = 9) {
+function theme_views_mini_pager($vars) {
   global $pager_page_array, $pager_total;
+
+  $tags = $vars['tags'];
+  $element = $vars['element'];
+  $parameters = $vars['parameters'];
+  $quantity = $vars['quantity'];
 
   // Calculate various markers within this pager piece:
   // Middle is used to "center" pages around the current page.
@@ -838,7 +843,6 @@ function theme_views_mini_pager($tags = array(), $limit = 10, $element = 0, $par
   $li_previous = theme('pager_previous',
     array(
       'text' => (isset($tags[1]) ? $tags[1] : t('‹‹')),
-      'limit' => $limit,
       'element' => $element,
       'interval' => 1,
       'parameters' => $parameters,
@@ -851,7 +855,6 @@ function theme_views_mini_pager($tags = array(), $limit = 10, $element = 0, $par
   $li_next = theme('pager_next',
     array(
       'text' => (isset($tags[3]) ? $tags[3] : t('››')),
-      'limit' => $limit,
       'element' => $element,
       'interval' => 1,
       'parameters' => $parameters,
