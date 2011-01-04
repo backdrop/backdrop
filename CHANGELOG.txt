@@ -602,3 +602,4 @@ Views 3.x-7.x-dev
     o #1008170 by dereine: Fix views_handler_filter_groupby_numeric by using add_having_expression.
     o #1013170 by das-peter: Fix broken view::preview which was broken on #1001542.
     o #644008 by Cyberwolf and dereine: Allow access plugins access to arguments.
+    o #997424 by dereine: Use drupal_add_library instead of drupal_add_js where it's possible.

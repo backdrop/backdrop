@@ -1171,7 +1171,7 @@ function views_exposed_form($form, &$form_state) {
 
   // If using AJAX, we need the form plugin.
   if ($view->use_ajax) {
-    drupal_add_js('misc/jquery.form.js', array('group' => JS_LIBRARY));
+    drupal_add_library('system', 'jquery.form');
   }
   ctools_include('dependent');
 
