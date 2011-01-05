@@ -1830,7 +1830,12 @@ class views_db_object {
       }
       $value = $this->$field;
       if ($info['type'] == 'int') {
-        $value = ($info['size'] == 'tiny') ? (bool) $value : (int) $value;
+        if (isset($info['size']) && $info['size'] == 'tiny') {
+          $value = (bool) $value;
+        }
+        else {
+          $value = (int) $value;
+        }
       }
 
       $output .= $indent . '$' . $identifier . '->' . $field . ' = ' . views_var_export($value, $indent) . ";\n";

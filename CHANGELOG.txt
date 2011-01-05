@@ -610,3 +610,4 @@ Views 3.x-7.x-dev
     o #1015856 by solotandem: Eliminate PHP notices related to recent groupby changes.
     o #1016058 by dereine: Fix string contain all words.
     o #940316 by merlinofchaos: Allow to rescan template files from non-current themes.
+    o by mikejoconnor, dereine: Fix notice for exporting view->core.
