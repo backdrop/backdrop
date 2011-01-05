@@ -604,3 +604,4 @@ Views 3.x-7.x-dev
     o #644008 by Cyberwolf and dereine: Allow access plugins access to arguments.
     o #997424 by dereine: Use drupal_add_library instead of drupal_add_js where it's possible.
     o #992704 by solotandem, bojanz, dereine: support to groupby entity_id.
+    o #970514 by moshe, dereine: Provide basic drush integration for views.
