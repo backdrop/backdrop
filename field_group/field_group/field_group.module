@@ -177,9 +177,8 @@ function field_group_field_attach_form($entity_type, $entity, &$form, &$form_sta
  * Using hook_form_field_ui_field_overview_form_alter.
  */
 function field_group_form_field_ui_field_overview_form_alter(&$form, &$form_state) {
-  module_load_include('inc', 'field_group', 'field_group.field_ui');
+  form_load_include($form_state, 'inc', 'field_group', 'field_group.field_ui');
   field_group_field_ui_overview_form_alter($form, $form_state);
-  $form_state['build_info']['files']['field_group'] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.inc';
 }
 
 /**
@@ -187,9 +186,8 @@ function field_group_form_field_ui_field_overview_form_alter(&$form, &$form_stat
  * Using hook_form_field_ui_display_overview_form_alter.
  */
 function field_group_form_field_ui_display_overview_form_alter(&$form, &$form_state) {
-  module_load_include('inc', 'field_group', 'field_group.field_ui');
+  form_load_include($form_state, 'inc', 'field_group', 'field_group.field_ui');
   field_group_field_ui_overview_form_alter($form, $form_state, TRUE);
-  $form_state['build_info']['files']['field_group'] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.inc';
 }
 
 /**
