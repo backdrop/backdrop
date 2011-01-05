@@ -242,7 +242,8 @@ class views_handler_filter_string extends views_handler_filter {
       $words = trim($match[2], ',?!();:-');
       $words = $phrase ? array($words) : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
       foreach ($words as $word) {
-        $where->condition($field, trim($word, " ,!?"), 'LIKE');
+        $placeholder = $this->placeholder();
+        $where->where("$field LIKE $placeholder", array($placeholder => '%' . db_like(trim($word, " ,!?")) . '%'));
       }
     }
 
@@ -250,15 +251,9 @@ class views_handler_filter_string extends views_handler_filter {
       return;
     }
 
-    if ($this->operator == 'word') {
-      $where = '(' . implode(' OR ', $where) . ')';
-    }
-    else {
-      $where = implode(' AND ', $where);
-    }
     // previously this was a call_user_func_array but that's unnecessary
     // as views will unpack an array that is a single arg.
-    $this->query->add_where($this->options['group'], $where, $values, 'formula');
+    $this->query->add_where($this->options['group'], $where);
   }
 
   function op_starts($field) {
