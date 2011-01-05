@@ -615,3 +615,4 @@ Views 3.x-7.x-dev
     o #957206 by dereine: Add missing views.info entry for aggregator iid argument handler.
     o #1002744 by bojanz: Refactor views_field_field by renaming some variables/comments.
     o by dereine: Bring vpr and views_debug back.
+    o #955464 by dereine: Fix glossary and many to one mode handler.

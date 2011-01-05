@@ -124,9 +124,10 @@ class views_handler_argument_string extends views_handler_argument {
     else {
       // Add the field.
       $formula = $this->get_formula();
+      $placeholder_length = $this->placeholder_length;
       $params = array(
         'placeholders' => array(
-          ':length' => intval($this->options['limit']),
+          $placeholder_length => intval($this->options['limit']),
         ),
       );
 
@@ -143,7 +144,7 @@ class views_handler_argument_string extends views_handler_argument {
    * $this->ensure_my_table() MUST have been called prior to this.
    */
   function get_formula() {
-    return "SUBSTRING($this->table_alias.$this->real_field, 1, :length)";
+    return "SUBSTRING($this->table_alias.$this->real_field, 1, $this->placeholder_length)";
   }
 
   /**
@@ -154,6 +155,7 @@ class views_handler_argument_string extends views_handler_argument {
     if (!empty($this->options['transform_dash'])) {
       $argument = strtr($argument, '-', ' ');
     }
+    $this->placeholder_length = $this->placeholder();
 
     if (!empty($this->definition['many to one'])) {
       if (!empty($this->options['glossary'])) {
@@ -161,6 +163,8 @@ class views_handler_argument_string extends views_handler_argument {
       }
       $this->value = array($argument);
       $this->helper->ensure_my_table();
+
+      $this->helper->placeholders = array($this->placeholder_length => intval($this->options['limit']));
       $this->helper->add_filter();
       return;
     }
@@ -177,12 +181,13 @@ class views_handler_argument_string extends views_handler_argument {
 
     if ($formula) {
       $placeholder = $this->placeholder();
+      $placeholder_length = $this->placeholder_length;
       $field .= ' = ' . $placeholder;
       $placeholders = array(
-        ':length' => intval($this->options['limit']),
+        $placeholder_length => intval($this->options['limit']),
         $placeholder => $argument,
       );
-      $this->query->add_where(0, $field, $placeholders, 'formula');
+      $this->query->add_where_expression(0, $field, $placeholders);
     }
     else {
       $this->query->add_where(0, $field, $argument);

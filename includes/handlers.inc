@@ -92,7 +92,7 @@ function views_get_table_join($table, $base_table) {
     return $handler;
   }
   // DEBUG -- identify missing handlers
-  debug("Missing join: $table $base_table");
+  vpr("Missing join: $table $base_table");
 }
 
 /**
@@ -811,6 +811,13 @@ class views_many_to_one_helper {
     return $this->handler->table_alias;
   }
 
+  /**
+   * Provides a unique placeholders for handlers.
+   */
+  function placeholder() {
+    return $this->handler->query->placeholder($this->handler->options['table'] . '_' . $this->handler->options['field']);
+  }
+
   function add_filter() {
     if (empty($this->handler->value)) {
       return;
@@ -821,22 +828,47 @@ class views_many_to_one_helper {
     $field = $this->get_field();
     $options = $this->handler->options;
     $operator = $this->handler->operator;
+    $formula = !empty($this->formula);
     if (empty($options['group'])) {
       $options['group'] = 0;
     }
 
+    $add_condition = TRUE;
     if ($operator == 'not') {
-      $this->handler->query->add_where($options['group'], $field, NULL, 'IS NULL');
+      $value = NULL;
+      $operator = 'IS NULL';
+      $add_condition = FALSE;
     }
     elseif ($operator == 'or' && empty($options['reduce_duplicates'])) {
       if (count($this->handler->value) > 1) {
-        $this->handler->query->add_where($options['group'], $field, $this->handler->value, 'IN');
+        $value = $this->handler->value;
+        $operator = 'IN';
       }
       else {
-        $this->handler->query->add_where($options['group'], $field, $this->handler->value);
+        $value = is_array($this->handler->value) ? array_pop($this->handler->value) : $this->handler->value;
+        $operator = '=';
       }
+      $add_condition = FALSE;
+    }
+
+    if ($formula) {
+      $placeholder = $this->placeholder();
+      if ($operator == 'IN') {
+        $operator = "$operator IN($placeholder)";
+      }
+      else {
+        $operator = "$operator $placeholder";
+      }
+      $placeholders = array(
+        $placeholder => $value,
+      ) + $this->placeholders;
+      $this->handler->query->add_where_expression($options['group'], "$field $operator", $placeholders);
     }
     else {
+      $this->handler->query->add_where($options['group'], $field, $value, $operator);
+    }
+
+    if ($add_condition) {
       $field = $this->handler->real_field;
       $clause = $operator == 'or' ? db_or() : db_and();
       foreach ($this->handler->table_aliases as $value => $alias) {
