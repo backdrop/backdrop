@@ -617,3 +617,4 @@ Views 3.x-7.x-dev
     o by dereine: Bring vpr and views_debug back.
     o #955464 by dereine: Fix glossary and many to one mode handler.
     o #1016430 by bojanz: fix two small bugs in field_field handler.
+    o by dereine: Add $view->version to all default views.
