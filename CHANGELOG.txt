@@ -606,3 +606,4 @@ Views 3.x-7.x-dev
     o #992704 by solotandem, bojanz, dereine: support to groupby entity_id.
     o #970514 by moshe, dereine: Provide basic drush integration for views.
     o #1015306 by dereine: Fix index in field_field.
+    o by solotandem: Make a better description for the group_type field in groupby form.

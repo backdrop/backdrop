@@ -254,7 +254,7 @@ class views_handler extends views_object {
       '#type' => 'select',
       '#title' => t('Group type'),
       '#default_value' => $this->options['group_type'],
-      '#description' => t('Grouping is enabled for this display. You must select what function to use on this field.'),
+      '#description' => t('Select the grouping function to use on this field.'),
       '#options' => $group_types,
     );
   }
