@@ -474,10 +474,13 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       break;
     // Normal or collapsible div.
     case 'div':
+      $effect = $group->format_settings['instance_settings']['effect'];
+      $speed = $group->format_settings['instance_settings']['speed'];
       $add = array(
         '#type' => 'markup',
         '#weight' => $group->weight,
       );
+      $classes .= " speed-$speed effect-$effect";
       if ($group->format_settings['formatter'] != 'open') {
         $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
           <span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span>
@@ -489,7 +492,11 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         $add['#suffix'] = '</div>';
       }
       $element += $add;
-      drupal_add_library('system', 'effects.blind');
+
+      if ($group->format_settings['instance_settings']['effect'] == 'blind') {
+        drupal_add_library('system', 'effects.blind');
+      }
+
       break;
     // Accordion group.
     case 'accordion':

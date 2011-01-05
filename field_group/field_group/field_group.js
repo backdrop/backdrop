@@ -52,7 +52,16 @@ Drupal.FieldGroup.Effects.processDiv = {
         // Don't animate multiple times.
         if (!wrapper.animating) {
           wrapper.animating = true;
-          $('> .field-group-format-wrapper', wrapper).toggle('blind', {}, 500);
+          var speed = $wrapper.hasClass('speed-fast') ? 300 : 1000;
+          if ($wrapper.hasClass('effect-none') && $wrapper.hasClass('speed-none')) {
+            $('> .field-group-format-wrapper', wrapper).toggle();
+          }
+          else if ($wrapper.hasClass('effect-blind')) {
+            $('> .field-group-format-wrapper', wrapper).toggle('blind', {}, speed);
+          }
+          else {
+            $('> .field-group-format-wrapper', wrapper).toggle(speed);
+          }
           wrapper.animating = false;
         }
         return false;
