@@ -87,28 +87,17 @@ class views_handler_field_field extends views_handler_field {
       return;
     }
 
-    // Query for revision, bundle field necessary for rendering fields and not otherwise
+    // Query for revision field necessary for rendering fields and not otherwise
     // included in additional_fields.
     // @TODO
     // The bundle system will be fixed in d8, so no special cases should be needed.
-    switch ($entity_type) {
-      case 'taxonomy_term':
-      case 'comment':
-        $this->aliases[$this->definition['field_name'] . '_' . 'bundle'] = $this->query->add_field($this->table_alias, 'bundle');
-        break;
-      default:
-        foreach ($this->entity_info['entity keys'] as $key => $column) {
-          if (!empty($column)) {
-            if ($key == 'bundle') {
-              $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'bundle');
-            }
-            elseif ($key == 'revision') {
-              $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'revision_id');
-            }
-          }
+    if (!in_array($entity_type, array('taxonomy_term', 'comment'))) {
+      foreach ($this->entity_info['entity keys'] as $key => $column) {
+        if (!empty($column) && $key == 'revision') {
+          $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'revision_id');
         }
-        break;
-     }
+      }
+    }
   }
 
   /**
@@ -272,7 +261,7 @@ class views_handler_field_field extends views_handler_field {
         // Not every entity type has bundle and revision.
         $bundle = NULL;
         if (!empty($entity_info['entity keys']['bundle'])) {
-          if (isset($row->{$this->aliases[$this->definition['field_name'] . '_bundle']})) {
+          if (isset($this->aliases[$this->definition['field_name'] . '_bundle']) && isset($row->{$this->aliases[$this->definition['field_name'] . '_bundle']})) {
             $object->{$entity_info['entity keys']['bundle']} = $bundle = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
           }
           else {
@@ -285,7 +274,7 @@ class views_handler_field_field extends views_handler_field {
           }
         }
         if (!empty($entity_info['entity keys']['revision'])) {
-          if (isset($row->{$this->aliases[$this->definition['field_name'] . '_revision']})) {
+          if (isset($this->aliases[$this->definition['field_name'] . '_revision']) && isset($row->{$this->aliases[$this->definition['field_name'] . '_revision']})) {
             $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
           }
           else {
@@ -294,8 +283,8 @@ class views_handler_field_field extends views_handler_field {
         }
 
         // Provide fine default values for language and delta.
-        $language = isset($row->{$this->aliases['language']}) ? $row->{$this->aliases['language']} : LANGUAGE_NONE;
-        $delta = isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
+        $language = isset($this->aliases['language']) && isset($row->{$this->aliases['language']}) ? $row->{$this->aliases['language']} : LANGUAGE_NONE;
+        $delta = isset($this->aliases['delta']) && isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
 
         // The entity object needs to contain all fields, not just the one
         // being displayed, in order for field_view_field() to work properly.
@@ -335,7 +324,7 @@ class views_handler_field_field extends views_handler_field {
 
       foreach ($values as $key => $row) {
         if ($row->{$this->field_alias}) {
-          $delta = isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
+          $delta = isset($this->aliases['delta']) && isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
           $entity_id = $row->{$this->field_alias};
 
           $values[$key]->_field_data[$this->field_alias] = array(
