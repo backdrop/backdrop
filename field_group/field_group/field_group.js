@@ -13,7 +13,10 @@ Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
  */
 Drupal.FieldGroup.Effects.processAccordion = {
   execute: function (context, settings) {
-    $('div.field-group-accordion-wrapper', context).accordion({ autoHeight: false });
+    $('div.field-group-accordion-wrapper', context).accordion({
+      autoHeight: false,
+      active: '.field-group-accordion-active',
+    });
   }
 }
 
