@@ -1078,6 +1078,33 @@ function views_get_view($name, $reset = FALSE) {
 // Views debug helper functions
 
 /**
+ * Provide debug output for Views. This relies on devel.module
+ */
+function views_debug($message) {
+  if (module_exists('devel') && variable_get('views_devel_output', FALSE) && user_access('access devel information')) {
+    if (is_string($message)) {
+      $output = $message;
+    }
+    else {
+      $output = var_export($message, TRUE);
+    }
+    if (variable_get('views_devel_region', 'footer') != 'watchdog') {
+      drupal_set_content(variable_get('views_devel_region', 'footer'), '<pre>' . $output . '</pre>');
+    }
+    else {
+      watchdog('views_logging', '<pre>' . $output . '</pre>');
+    }
+  }
+}
+
+/**
+ * Shortcut to views_debug()
+ */
+function vpr($message) {
+  views_debug($message);
+}
+
+/**
  * Debug messages
  */
 function vsm($message) {
