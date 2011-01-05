@@ -260,7 +260,7 @@ class views_handler_field_field extends views_handler_field {
       // Divide the entity ids by entity type, so they can be loaded in bulk.
       $entities_by_type = array();
       foreach ($values as $key => $object) {
-        if (isset($object->{$this->field_alias})) {
+        if (isset($object->{$this->field_alias}) && !isset($values[$key]->_field_data[$this->field_alias])) {
           $entity_type = $object->{$this->aliases['entity_type']};
           $entity_id = $object->{$this->field_alias};
           $entities_by_type[$entity_type][$key] = $entity_id;
@@ -287,6 +287,11 @@ class views_handler_field_field extends views_handler_field {
       // pre-render phase and the display options for this field.
       $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
       $entity = $values->_field_data[$this->field_alias]['entity'];
+
+      // The field we are trying to display doesn't exist on this entity.
+      if (!isset($entity->{$this->definition['field_name']})) {
+        return '';
+      }
 
       $display = array(
         'type' => $this->options['type'],
