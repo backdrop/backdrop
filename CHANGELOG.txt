@@ -611,3 +611,4 @@ Views 3.x-7.x-dev
     o #1016058 by dereine: Fix string contain all words.
     o #940316 by merlinofchaos: Allow to rescan template files from non-current themes.
     o by mikejoconnor, dereine: Fix notice for exporting view->core.
+    o #1002744 by bojanz: Use entity_load for fieldapi field handlers.

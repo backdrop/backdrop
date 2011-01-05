@@ -34,9 +34,30 @@ function _field_view_formatter_options($field_type = NULL) {
 class views_handler_field_field extends views_handler_field {
   /**
    * Called to add the field to a query.
+   *
+   * By default, the only columns added to the query are entity_id and
+   * entity_type. This is because other needed data is fetched by entity_load().
+   * Other columns are added only if they are used in groupings, or if
+   * 'add fields to query' is specifically set to TRUE in the field definition.
+   *
+   * The 'add fields to query' switch is used by modules which need all data
+   * present in the query itself (such as "sphinx").
    */
   function query($use_groupby = FALSE) {
-    $this->ensure_my_table();
+    $base_table = $this->view->base_table;
+    $base_field = $this->view->base_field;
+
+    // If the current field is under a relationship you can't be sure that the
+    // base table of the view is the base table of the current field.
+    // For example a field from a node author on a node view does have users as base table.
+    if (!empty($this->relationship)) {
+      foreach ($this->view->relationship as $relationship) {
+        if ($relationship->alias == $this->relationship) {
+          $base_table = $relationship->definition['base'];
+          $base_field = $relationship->definition['base field'];
+        }
+      }
+    }
 
     $params = array();
     if ($use_groupby) {
@@ -48,10 +69,23 @@ class views_handler_field_field extends views_handler_field {
       );
     }
 
-    // Add the field.
-    $this->field_alias = $this->query->add_field($this->table_alias, $this->real_field, '', $params);
+    // We always need the base field (entity_id / revision_id).
+    $this->field_alias = $this->query->add_field($base_table, $base_field, '', $params);
+
+    // Get the entity type according to the base table of the field.
+    // Then add it to the query as a formula. That way we can avoid joining
+    // the field table if all we need is entity_id and entity_type.
+    $entity_type = $this->definition['entity_tables'][$base_table];
+    $this->aliases['entity_type'] = $this->query->add_field(NULL, "'$entity_type'", $this->table_alias . '_entity_type');
 
     $fields = $this->additional_fields;
+
+    // We've already added entity_type, so we can remove it from the list.
+    $entity_type_key = array_search('entity_type', $fields);
+    if ($entity_type_key !== FALSE) {
+      unset($fields[$entity_type_key]);
+    }
+
     if ($use_groupby) {
       // Remove additional fields that are not the group_column or are not in
       // the additional group_columns as their presence in the query inhibits
@@ -61,43 +95,21 @@ class views_handler_field_field extends views_handler_field {
         $fields = array($group_field_name => $group_field_name) + $this->options['group_columns'];
       }
     }
-    $this->add_additional_fields($fields);
 
-    $base_table = $this->view->base_table;
-
-    // If the current field is under a relationship you can't be sure that the
-    // base table of the view is the base table of the current field.
-    // For example a field from a node author on a node view does have users as base table.
-    if (!empty($this->relationship)) {
-      foreach ($this->view->relationship as $relationship) {
-        if ($relationship->alias == $this->relationship) {
-          $base_table = $relationship->definition['base'];
-        }
-      }
+    // Add additional fields (and the table join itself) if needed.
+    if ($use_groupby || !empty($this->definition['add fields to query'])) {
+      $this->ensure_my_table();
+      $this->add_additional_fields($fields);
     }
 
-    // Get the entity type according to the base table of the field.
-    $this->entity_type = $entity_type = $this->definition['entity_tables'][$base_table];
-    $this->entity_info = entity_get_info($entity_type);
-
-    if ($use_groupby) {
-      // The extra fields are not needed and their inclusion inhibits grouping.
-      // Check this condtion here because other methods need the entity_info and
-      // entity_type properties.
+    // The revision id inhibits grouping.
+    // So, stop here if we're using grouping, or if aren't adding all columns to
+    // the query.
+    if ($use_groupby || empty($this->definition['add fields to query'])) {
       return;
     }
 
-    // Query for revision field necessary for rendering fields and not otherwise
-    // included in additional_fields.
-    // @TODO
-    // The bundle system will be fixed in d8, so no special cases should be needed.
-    if (!in_array($entity_type, array('taxonomy_term', 'comment'))) {
-      foreach ($this->entity_info['entity keys'] as $key => $column) {
-        if (!empty($column) && $key == 'revision') {
-          $this->aliases[$this->definition['field_name'] . '_' . $key] = $this->query->add_field($this->table_alias, 'revision_id');
-        }
-      }
-    }
+    $this->add_additional_fields(array('revision_id'));
   }
 
   /**
@@ -246,90 +258,24 @@ class views_handler_field_field extends views_handler_field {
    */
   function pre_render(&$values) {
     if (!empty($values)) {
-      $entity_info = $this->entity_info;
-      $entity_type = $this->entity_type;
-
-      $objects = array();
-      foreach ($values as $key => $row) {
-        // This entity doesn't contain our field, move along.
-        if (!$row->{$this->field_alias}) {
-          continue;
+      // Create an array mapping the Views values to their object types.
+      $objects_by_type = array();
+      foreach ($values as $key => $object) {
+        if (isset($object->{$this->field_alias})) {
+          $entity_type = $object->{$this->aliases['entity_type']};
+          $entity_id = $object->{$this->field_alias};
+          $objects_by_type[$entity_type][$key] = $entity_id;
         }
-
-        $object = new stdClass();
-        $object->{$entity_info['entity keys']['id']} = $row->{$this->field_alias};
-        // Not every entity type has bundle and revision.
-        $bundle = NULL;
-        if (!empty($entity_info['entity keys']['bundle'])) {
-          if (isset($this->aliases[$this->definition['field_name'] . '_bundle']) && isset($row->{$this->aliases[$this->definition['field_name'] . '_bundle']})) {
-            $object->{$entity_info['entity keys']['bundle']} = $bundle = $row->{$this->aliases[$this->definition['field_name'] . '_bundle']};
-          }
-          else {
-            // @todo Is the bundle absolutely necessary?
-            // @todo We know this when the query is built if there is a node.type condition with one value.
-            // Is it reasonable to assume there is a node.type condition that matches the bundle?
-            // We could retrieve the bundle as MIN(.._bundle).
-            $entity_type = $this->definition['entity_tables'][$this->view->base_table];
-            $object->{$entity_info['entity keys']['bundle']} = $bundle = $this->definition['field_info']['bundles'][$entity_type][0];
-          }
-        }
-        if (!empty($entity_info['entity keys']['revision'])) {
-          if (isset($this->aliases[$this->definition['field_name'] . '_revision']) && isset($row->{$this->aliases[$this->definition['field_name'] . '_revision']})) {
-            $object->{$entity_info['entity keys']['revision']} = $row->{$this->aliases[$this->definition['field_name'] . '_revision']};
-          }
-          else {
-            $object->{$entity_info['entity keys']['revision']} = 0;
-          }
-        }
-
-        // Provide fine default values for language and delta.
-        $language = isset($this->aliases['language']) && isset($row->{$this->aliases['language']}) ? $row->{$this->aliases['language']} : LANGUAGE_NONE;
-        $delta = isset($this->aliases['delta']) && isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
-
-        // The entity object needs to contain all fields, not just the one
-        // being displayed, in order for field_view_field() to work properly.
-        if (!isset($bundle)) {
-          // Entities without a bundle have $entity_type as $bundle name.
-          $bundle = $entity_type;
-        }
-
-        foreach (field_info_instances($entity_type, $bundle) as $instance) {
-          $field_values = array();
-          $field_info = field_info_field($instance['field_name']);
-          foreach (array_keys($field_info['columns']) as $column_name) {
-            $sql_column = _field_sql_storage_columnname($instance['field_name'], $column_name);
-
-            // We might not have this field in the database results
-            if (isset($this->aliases[$sql_column])) {
-              $alias = $this->aliases[$sql_column];
-              $field_values[$language][0][$column_name] = $row->{$alias};
-            }
-            else {
-              $field_values[$language][0][$column_name] = '';
-            }
-          }
-          $object->{$instance['field_name']} = $field_values;
-        }
-        $objects[$delta][$row->{$this->field_alias}] = $object;
       }
 
-      foreach ($objects as $delta => &$entities) {
-        // Invoke field-type module's hook_field_load().
-        _field_invoke_multiple('load', $entity_type, $entities);
+      // Load the objects.
+      foreach ($objects_by_type as $entity_type => $object_ids) {
+        $objects = entity_load($entity_type, $object_ids);
 
-        // Invoke hook_field_attach_load(): let other modules act on loading the
-        // entity.
-        module_invoke_all('field_attach_load', $entity_type, $entities);
-      }
-
-      foreach ($values as $key => $row) {
-        if ($row->{$this->field_alias}) {
-          $delta = isset($this->aliases['delta']) && isset($row->{$this->aliases['delta']}) ? $row->{$this->aliases['delta']} : 0;
-          $entity_id = $row->{$this->field_alias};
-
+        foreach ($object_ids as $key => $entity_id) {
           $values[$key]->_field_data[$this->field_alias] = array(
             'entity_type' => $entity_type,
-            'object' => $objects[$delta][$entity_id],
+            'object' => $objects[$entity_id],
           );
         }
       }
