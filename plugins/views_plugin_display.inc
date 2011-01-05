@@ -1412,15 +1412,72 @@ class views_plugin_display extends views_plugin {
         $form['#help_topic'] = 'analyze-theme';
 
         if (isset($_POST['theme'])) {
-          $this->view->theme = $_POST['theme'];
+          $this->theme = $_POST['theme'];
         }
-        elseif (empty($this->view->theme)) {
-          $this->view->theme = variable_get('theme_default', 'garland');
+        elseif (empty($this->theme)) {
+          $this->theme = variable_get('theme_default', 'bartik');
         }
 
-        global $custom_theme;
-        $custom_theme = $this->view->theme;
-        drupal_theme_initialize();
+        if (isset($GLOBALS['theme']) && $GLOBALS['theme'] == $this->theme) {
+          $this->theme_registry = theme_get_registry();
+          $theme_engine = $GLOBALS['theme_engine'];
+        }
+        else {
+          $themes = list_themes();
+          $theme = $themes[$this->theme];
+
+          // Find all our ancestor themes and put them in an array.
+          $base_theme = array();
+          $ancestor = $this->theme;
+          while ($ancestor && isset($themes[$ancestor]->base_theme)) {
+            $ancestor = $themes[$ancestor]->base_theme;
+            $base_theme[] = $themes[$ancestor];
+          }
+
+          // The base themes should be initialized in the right order.
+          $base_theme = array_reverse($base_theme);
+
+          // This code is copied directly from _drupal_theme_initialize()
+          $theme_engine = NULL;
+
+          // Initialize the theme.
+          if (isset($theme->engine)) {
+            // Include the engine.
+            include_once DRUPAL_ROOT . '/' . $theme->owner;
+
+            $theme_engine = $theme->engine;
+            if (function_exists($theme_engine . '_init')) {
+              foreach ($base_theme as $base) {
+                call_user_func($theme_engine . '_init', $base);
+              }
+              call_user_func($theme_engine . '_init', $theme);
+            }
+          }
+          else {
+            // include non-engine theme files
+            foreach ($base_theme as $base) {
+              // Include the theme file or the engine.
+              if (!empty($base->owner)) {
+                include_once DRUPAL_ROOT . '/' . $base->owner;
+              }
+            }
+            // and our theme gets one too.
+            if (!empty($theme->owner)) {
+              include_once DRUPAL_ROOT . '/' . $theme->owner;
+            }
+          }
+          $this->theme_registry = _theme_load_registry($theme, $base_theme, $theme_engine);
+        }
+
+        // If there's a theme engine involved, we also need to know its extension
+        // so we can give the proper filename.
+        $this->theme_extension = '.tpl.php';
+        if (isset($theme_engine)) {
+          $extension_function = $theme_engine . '_extension';
+          if (function_exists($extension_function)) {
+            $this->theme_extension = $extension_function();
+          }
+        }
 
         $funcs = array();
         // Get theme functions for the display. Note that some displays may
@@ -1489,7 +1546,7 @@ class views_plugin_display extends views_plugin {
         $form['box']['theme'] = array(
           '#type' => 'select',
           '#options' => $options,
-          '#default_value' => $this->view->theme,
+          '#default_value' => $this->theme,
         );
 
         $form['box']['change'] = array(
@@ -1704,17 +1761,8 @@ class views_plugin_display extends views_plugin {
    * Format a list of theme templates for output by the theme info helper.
    */
   function format_themes($themes) {
-    $registry = theme_get_registry();
-
-    // Run through the theme engine variables, if necessary
-    global $theme_engine;
-    $extension = '.tpl.php';
-    if (isset($theme_engine)) {
-      $extension_function = $theme_engine . '_extension';
-      if (function_exists($extension_function)) {
-        $extension = $extension_function();
-      }
-    }
+    $registry = $this->theme_registry;
+    $extension = $this->theme_extension;
 
     $output = '';
     $picked = FALSE;
