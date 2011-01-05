@@ -53,6 +53,7 @@ files[] = includes/tabs.inc
 files[] = includes/view.inc
 ; Modules
 files[] = modules/aggregator/views_handler_argument_aggregator_fid.inc
+files[] = modules/aggregator/views_handler_argument_aggregator_iid.inc
 files[] = modules/aggregator/views_handler_argument_aggregator_category_cid.inc
 files[] = modules/aggregator/views_handler_field_aggregator_title_link.inc
 files[] = modules/aggregator/views_handler_field_aggregator_category.inc
