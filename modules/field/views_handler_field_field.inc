@@ -253,29 +253,28 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
-   * Builds a fake entity object for each row fetched from the database,
-   * creating the field structure required for rendering.
+   * Load the entities for all fields that are about to be displayed.
    */
   function pre_render(&$values) {
     if (!empty($values)) {
-      // Create an array mapping the Views values to their object types.
-      $objects_by_type = array();
+      // Divide the entity ids by entity type, so they can be loaded in bulk.
+      $entities_by_type = array();
       foreach ($values as $key => $object) {
         if (isset($object->{$this->field_alias})) {
           $entity_type = $object->{$this->aliases['entity_type']};
           $entity_id = $object->{$this->field_alias};
-          $objects_by_type[$entity_type][$key] = $entity_id;
+          $entities_by_type[$entity_type][$key] = $entity_id;
         }
       }
 
-      // Load the objects.
-      foreach ($objects_by_type as $entity_type => $object_ids) {
-        $objects = entity_load($entity_type, $object_ids);
+      // Load the entities.
+      foreach ($entities_by_type as $entity_type => $entity_ids) {
+        $entities = entity_load($entity_type, $entity_ids);
 
-        foreach ($object_ids as $key => $entity_id) {
+        foreach ($entity_ids as $key => $entity_id) {
           $values[$key]->_field_data[$this->field_alias] = array(
             'entity_type' => $entity_type,
-            'object' => $objects[$entity_id],
+            'entity' => $entities[$entity_id],
           );
         }
       }
@@ -287,7 +286,7 @@ class views_handler_field_field extends views_handler_field {
       // Prepare arguments for rendering based on the objects cached in the
       // pre-render phase and the display options for this field.
       $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
-      $object = $values->_field_data[$this->field_alias]['object'];
+      $entity = $values->_field_data[$this->field_alias]['entity'];
 
       $display = array(
         'type' => $this->options['type'],
@@ -295,7 +294,7 @@ class views_handler_field_field extends views_handler_field {
         'label' => 'hidden',
       );
 
-      $render_array = field_view_field($entity_type, $object, $this->definition['field_name'], $display);
+      $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display);
       return drupal_render($render_array);
     }
     else {
