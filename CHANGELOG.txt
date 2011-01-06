@@ -266,5 +266,8 @@ by dereine: Bring vpr and views_debug back.
 #1016430 by bojanz: fix two small bugs in field_field handler.
 by dereine: Add $view->version to all default views.
 #1006176 by das-peter, bojanz: Add support for field based translation.
+
+Views 3.x-7.x-dev
+==================================
 #1017128 by bojanz, dereine: Add support to render a single delta.
 follow up by bojanz: Better description for the delta.
