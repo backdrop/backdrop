@@ -177,17 +177,19 @@ class views_handler_field_field extends views_handler_field {
       if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
         $type = 'textfield';
         $options = array();
+        $description = t('The sequence number of the value to show. Numbers start from 0. Leave empty to display all values.');
       }
       else {
         $type = 'select';
         $options = array_merge(array('' => t('All')), range(0, $field['cardinality'] - 1));
+        $description = t('The sequence number of the value to show.');
       }
       $form['delta'] = array(
         '#title' => t('Delta'),
         '#type' => $type,
         '#options' => $options,
         '#default_value' => $this->options['delta'],
-        '#description' => t('Numbers start from 0. Leave empty to display all values.'),
+        '#description' => $description,
       );
     }
 
