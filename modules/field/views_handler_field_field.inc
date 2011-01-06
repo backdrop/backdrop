@@ -109,6 +109,12 @@ class views_handler_field_field extends views_handler_field {
         $column = $this->table_alias . ".language";
         $this->query->add_where(0, $column, $this->query->options['field_language']);
       }
+
+      // Do we need to filter by delta?
+      if (is_numeric($this->options['delta'])) {
+        $column = $this->table_alias . ".delta";
+        $this->query->add_where(0, $column, (int) $this->options['delta']);
+      }
     }
 
     // The revision id inhibits grouping.
@@ -137,6 +143,9 @@ class views_handler_field_field extends views_handler_field {
     $field_type = field_info_field_types($field['type']);
     $column_names = array_keys($field['columns']);
 
+    $options['delta'] = array(
+      'default' => '',
+    );
     // If the field has a "value" column, we probably need that one.
     $options['click_sort_column'] = array(
       'default' => in_array('value', $column_names) ? 'value' : '',
@@ -163,6 +172,24 @@ class views_handler_field_field extends views_handler_field {
     $field = $this->definition['field_info'];
     $formatters = _field_view_formatter_options($field['type']);
     $column_names = array_keys($field['columns']);
+
+    if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+      if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+        $type = 'textfield';
+        $options = array();
+      }
+      else {
+        $type = 'select';
+        $options = array_merge(array('' => t('All')), range(0, $field['cardinality'] - 1));
+      }
+      $form['delta'] = array(
+        '#title' => t('Delta'),
+        '#type' => $type,
+        '#options' => $options,
+        '#default_value' => $this->options['delta'],
+        '#description' => t('Numbers start from 0. Leave empty to display all values.'),
+      );
+    }
 
     // No need to ask the user anything if the field has only one column.
     if (count($field['columns']) == 1) {
@@ -296,10 +323,21 @@ class views_handler_field_field extends views_handler_field {
       // pre-render phase and the display options for this field.
       $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
       $entity = $values->_field_data[$this->field_alias]['entity'];
+      $display_entity = clone $entity;
+      $langcode = $this->field_language();
 
       // The field we are trying to display doesn't exist on this entity.
-      if (!isset($entity->{$this->definition['field_name']})) {
+      if (!isset($display_entity->{$this->definition['field_name']})) {
         return '';
+      }
+
+      // The user wants to render only one value from a multivalue field.
+      // The Field API doesn't support this, so we just hack out the
+      // values we don't want to render.
+      if (is_numeric($this->options['delta'])) {
+        $delta = (int) $this->options['delta'];
+
+        $display_entity->{$this->definition['field_name']}[$langcode] = array($display_entity->{$this->definition['field_name']}[$langcode][$delta]);
       }
 
       $display = array(
@@ -308,8 +346,7 @@ class views_handler_field_field extends views_handler_field {
         'label' => 'hidden',
       );
 
-      $langcode = $this->field_language();
-      $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
+      $render_array = field_view_field($entity_type, $display_entity, $this->definition['field_name'], $display, $langcode);
       return drupal_render($render_array);
     }
     else {
