@@ -133,7 +133,7 @@ function views_theme($existing, $type, $theme, $path) {
  *   The existing cache of theme hooks to test against.
  * @param $path
  *   The path to search.
- * 
+ *
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {
@@ -1290,13 +1290,12 @@ function views_theme_functions($hook, $view, $display = NULL) {
  * Substitute current time; this works with cached queries.
  */
 function views_views_query_substitutions($view) {
-  global $language;
+  global $language_content;
   return array(
     '***CURRENT_VERSION***' => VERSION,
     '***CURRENT_TIME***' => REQUEST_TIME,
-    '***CURRENT_LANGUAGE***' => $language->language,
+    '***CURRENT_LANGUAGE***' => $language_content->language,
     '***DEFAULT_LANGUAGE***' => language_default('language'),
-    '***NO_LANGUAGE***' => '',
   );
 }
 

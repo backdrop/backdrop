@@ -170,6 +170,9 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
+    $options['field_language'] = array(
+      'default' => '***CURRENT_LANGUAGE***',
+    );
 
     return $options;
   }
@@ -197,6 +200,37 @@ class views_plugin_query_default extends views_plugin_query {
       '#description' => t('This will make the query attempt to connect to a slave server if available.  If no slave server is defined or available, it will fall back to the default server.'),
       '#default_value' => !empty($this->options['slave']),
     );
+
+    $entities = entity_get_info();
+    $entity_tables = array();
+    $has_translation_handlers = FALSE;
+    foreach ($entities as $type => $entity_info) {
+      $entity_tables[] = $entity_info['base table'];
+
+      if (!empty($entity_info['translation'])) {
+        $has_translation_handlers = TRUE;
+      }
+    }
+
+    // Doesn't make sense to show a field setting here if we aren't querying
+    // an entity base table. Also, we make sure that there's at least one
+    // entity type with a translation handler attached.
+    if (in_array($this->base_table, $entity_tables) && $has_translation_handlers) {
+      $languages = array(
+        '***CURRENT_LANGUAGE***' => t("Current user's language"),
+        '***DEFAULT_LANGUAGE***' => t("Default site language"),
+        LANGUAGE_NONE => t('No language')
+      );
+      $languages = array_merge($languages, locale_language_list());
+
+      $form['field_language'] = array(
+        '#type' => 'select',
+        '#title' => t('Field Language'),
+        '#description' => t('All fields which support translations will be displayed in the selected language.'),
+        '#options' => $languages,
+        '#default_value' => $this->options['field_language'],
+      );
+    }
   }
 
   // ----------------------------------------------------------------
@@ -780,7 +814,7 @@ class views_plugin_query_default extends views_plugin_query {
    * The caller is reponsible for ensuring that all fields are fully qualified
    * (TABLE.FIELD) and that the table already exists in the query.
    * Internally the dbtng method "where" is used.
-   * 
+   *
    * @param $group
    *   The WHERE group to add these to; groups are used to create AND/OR
    *   sections. Groups cannot be nested. Use 0 as the default group.
@@ -814,7 +848,7 @@ class views_plugin_query_default extends views_plugin_query {
 
   /**
    * Add a simple HAVING clause to the query.
-   * 
+   *
    * The caller is responsible for ensuring that all fields are fully qualified
    * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
    * Internally the dbtng method "havingCondition" is used.

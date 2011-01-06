@@ -75,8 +75,10 @@ class views_handler_field_field extends views_handler_field {
     // Get the entity type according to the base table of the field.
     // Then add it to the query as a formula. That way we can avoid joining
     // the field table if all we need is entity_id and entity_type.
-    $entity_type = $this->definition['entity_tables'][$base_table];
-    $this->aliases['entity_type'] = $this->query->add_field(NULL, "'$entity_type'", $this->table_alias . '_entity_type');
+    $this->entity_type = $entity_type = $this->definition['entity_tables'][$base_table];
+    // The alias needs to be unique, so we use both the field table and the entity type.
+    $entity_type_alias = $this->definition['table'] . '_' . $entity_type . '_entity_type';
+    $this->aliases['entity_type'] = $this->query->add_field(NULL, "'$entity_type'", $entity_type_alias);
 
     $fields = $this->additional_fields;
 
@@ -100,6 +102,13 @@ class views_handler_field_field extends views_handler_field {
     if ($use_groupby || !empty($this->definition['add fields to query'])) {
       $this->ensure_my_table();
       $this->add_additional_fields($fields);
+
+      // Filter by language, if field translation is enabled.
+      $field = $this->definition['field_info'];
+      if (field_is_translatable($entity_type, $field)) {
+        $column = $this->table_alias . ".language";
+        $this->query->add_where(0, $column, $this->query->options['field_language']);
+      }
     }
 
     // The revision id inhibits grouping.
@@ -124,7 +133,7 @@ class views_handler_field_field extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $field = field_info_field($this->definition['field_name']);
+    $field = $this->definition['field_info'];
     $field_type = field_info_field_types($field['type']);
     $column_names = array_keys($field['columns']);
 
@@ -151,7 +160,7 @@ class views_handler_field_field extends views_handler_field {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $field = field_info_field($this->definition['field_name']);
+    $field = $this->definition['field_info'];
     $formatters = _field_view_formatter_options($field['type']);
     $column_names = array_keys($field['columns']);
 
@@ -299,11 +308,32 @@ class views_handler_field_field extends views_handler_field {
         'label' => 'hidden',
       );
 
-      $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display);
+      $langcode = $this->field_language();
+      $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
       return drupal_render($render_array);
     }
     else {
       return '';
+    }
+  }
+
+  /**
+   * Return the language code of the language the field should be displayed in,
+   * according to the settings.
+   */
+  function field_language() {
+    global $language_content;
+
+    if (field_is_translatable($this->entity_type, $this->definition['field_info'])) {
+      $default_language = language_default('language');
+      $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
+                              array($language_content->language, $default_language),
+                              $this->query->options['field_language']);
+
+      return $language;
+    }
+    else {
+      return LANGUAGE_NONE;
     }
   }
 }
