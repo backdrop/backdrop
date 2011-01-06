@@ -109,6 +109,7 @@ class views_handler_argument_string extends views_handler_argument {
    * Build the summary query based on a string
    */
   function summary_query() {
+    $this->placeholder_length = $this->placeholder();
     if (empty($this->definition['many to one'])) {
       $this->ensure_my_table();
     }
@@ -124,10 +125,9 @@ class views_handler_argument_string extends views_handler_argument {
     else {
       // Add the field.
       $formula = $this->get_formula();
-      $placeholder_length = $this->placeholder_length;
       $params = array(
         'placeholders' => array(
-          $placeholder_length => intval($this->options['limit']),
+          $this->placeholder_length => intval($this->options['limit']),
         ),
       );
 
