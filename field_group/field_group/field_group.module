@@ -463,8 +463,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       break;
     // Normal or collapsible div.
     case 'div':
-      $effect = $group->format_settings['instance_settings']['effect'];
-      $speed = $group->format_settings['instance_settings']['speed'];
+      $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+      $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
       $add = array(
         '#type' => 'markup',
         '#weight' => $group->weight,
@@ -482,7 +482,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       }
       $element += $add;
 
-      if ($group->format_settings['instance_settings']['effect'] == 'blind') {
+      if ($effect == 'blind') {
         drupal_add_library('system', 'effects.blind');
       }
 
