@@ -279,3 +279,4 @@ follow up by bojanz: Better description for the delta.
 #1018766 by solotandem: Fix click_sort for fieldapi fields.
 #960648 by dereine: Addjust comment link to d7 changes.
 #997662 by das-peter: Saving a machine name of a display throws Notice "Undefined property new_id".
+#955464 by davereid: Fix notice in views_many_to_one_helper when $operator = 'and'.

@@ -829,6 +829,7 @@ class views_many_to_one_helper {
     $options = $this->handler->options;
     $operator = $this->handler->operator;
     $formula = !empty($this->formula);
+    $value = $this->handler->value;
     if (empty($options['group'])) {
       $options['group'] = 0;
     }
