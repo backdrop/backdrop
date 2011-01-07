@@ -278,3 +278,4 @@ follow up by bojanz: Better description for the delta.
 #1018802 by dereine: Convert 'formula' add_where to add_where_expression.
 #1018766 by solotandem: Fix click_sort for fieldapi fields.
 #960648 by dereine: Addjust comment link to d7 changes.
+#997662 by das-peter: Saving a machine name of a display throws Notice "Undefined property new_id".
