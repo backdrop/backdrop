@@ -273,3 +273,4 @@ Views 3.x-7.x-dev
 follow up by bojanz: Better description for the delta.
 #1017254 by dereine: Fix undefined property error in argument_string handler.
 #1007886 by dereine: Relationship-fields in field_field handler should use the table alias.
+#1018766 by bojanz: Fix click_sort for fieldapi fields.
