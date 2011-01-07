@@ -44,7 +44,7 @@ class views_handler_field_field extends views_handler_field {
    * present in the query itself (such as "sphinx").
    */
   function query($use_groupby = FALSE) {
-    $base_table = $this->view->base_table;
+    $base_table_alias = $base_table = $this->view->base_table;
     $base_field = $this->view->base_field;
 
     // If the current field is under a relationship you can't be sure that the
@@ -55,6 +55,7 @@ class views_handler_field_field extends views_handler_field {
         if ($relationship->alias == $this->relationship) {
           $base_table = $relationship->definition['base'];
           $base_field = $relationship->definition['base field'];
+          $base_table_alias = $relationship->alias;
         }
       }
     }
@@ -70,7 +71,7 @@ class views_handler_field_field extends views_handler_field {
     }
 
     // We always need the base field (entity_id / revision_id).
-    $this->field_alias = $this->query->add_field($base_table, $base_field, '', $params);
+    $this->field_alias = $this->query->add_field($base_table_alias, $base_field, '', $params);
 
     // Get the entity type according to the base table of the field.
     // Then add it to the query as a formula. That way we can avoid joining
