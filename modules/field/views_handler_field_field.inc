@@ -332,8 +332,9 @@ class views_handler_field_field extends views_handler_field {
       $display_entity = clone $entity;
       $langcode = $this->field_language();
 
-      // The field we are trying to display doesn't exist on this entity.
-      if (!isset($display_entity->{$this->definition['field_name']})) {
+      // The field we are trying to display is empty, or doesn't exist on
+      // this entity.
+      if (empty($display_entity->{$this->definition['field_name']})) {
         return '';
       }
 
