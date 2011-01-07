@@ -132,10 +132,11 @@ class views_handler_field_field extends views_handler_field {
    * Called to determine what to tell the clicksorter.
    */
   function click_sort($order) {
-    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_sort_column']);
     $this->ensure_my_table();
+    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_sort_column']);
     if (!isset($this->aliases[$column])) {
-      $this->aliases[$column] = $this->query->add_field($this->table_alias, $column);
+      // Column is not in query; add a sort on it (without adding the column).
+      $this->aliases[$column] = $this->table_alias . '.' . $column;
     }
     $this->query->add_orderby(NULL, NULL, $order, $this->aliases[$column]);
   }

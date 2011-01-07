@@ -276,3 +276,4 @@ follow up by bojanz: Better description for the delta.
 #1018766 by bojanz: Fix click_sort for fieldapi fields.
 #1017128 by bojanz: Follow up: Hide field_field if field value is empty.
 #1018802 by dereine: Convert 'formula' add_where to add_where_expression.
+#1018766 by solotandem: Fix click_sort for fieldapi fields.
