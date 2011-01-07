@@ -1,5 +1,5 @@
 <?php
-// $Id: views_ui.module,v 1.109.6.15 2010/11/20 23:49:29 dereine Exp $
+// $Id: views_ui.module,v 1.109.6.18 2010/12/24 13:42:00 dereine Exp $
 /**
  * @file views_ui.module
  * Provide structure for the administrative interface to Views.
@@ -138,6 +138,55 @@ function views_ui_menu() {
     ) + $base;
   }
 
+//  $items['admin/structure/views/nojs/human_name/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_edit_details',
+//    'page arguments' => array('human_name', FALSE, 5),
+//  );
+//  $items['admin/structure/views/ajax/human_name/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_edit_details',
+//    'page arguments' => array('human_name', TRUE, 5),
+//    'delivery callback' => 'views_ui_ajax_deliver',
+//  );
+//  $items['admin/structure/views/nojs/tag/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_edit_details',
+//    'page arguments' => array('tag', FALSE, 5),
+//  );
+//  $items['admin/structure/views/ajax/tag/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_edit_details',
+//    'page arguments' => array('tag', TRUE, 5),
+//    'delivery callback' => 'views_ui_ajax_deliver',
+//  );
+//  $items['admin/structure/views/nojs/description/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_edit_details',
+//    'page arguments' => array('description', FALSE, 5),
+//  );
+//  $items['admin/structure/views/ajax/description/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_edit_details',
+//    'page arguments' => array('description', TRUE, 5),
+//    'delivery callback' => 'views_ui_ajax_deliver',
+//  );
+//
+//  $items['admin/build/views/nojs/clone-display/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_clone_display',
+//    'page arguments' => array(FALSE, 5, 6),
+//  );
+//
+//  $items['admin/build/views/ajax/clone-display/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_clone_display',
+//    'page arguments' => array(TRUE, 5, 6),
+//    'delivery callback' => 'views_ui_ajax_deliver',
+//  );
+//
+//  $items['admin/structure/views/nojs/%/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_ajax_form',
+//    'page arguments' => array(FALSE, 4, 5),
+//  );
+//  $items['admin/structure/views/ajax/%/%views_ui_cache'] = $callback + array(
+//    'page callback' => 'views_ui_ajax_form',
+//    'page arguments' => array(TRUE, 4, 5),
+//    'delivery callback' => 'views_ui_ajax_deliver',
+//  );
+
   // Autocomplete callback for tagging a View.
   // @todo Are there any other modules relying on this path? If not, change to
   //   'admin/structure/views/ajax/autocomplete/tag'.
@@ -224,6 +273,10 @@ function views_ui_theme() {
     'views_ui_rearrange_form' => array(
       'render element' => 'form',
     ),
+    'views_ui_rearrange_filter_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/admin.inc',
+    ),
 
     // list views
     'views_ui_view_info' => array(
@@ -277,6 +330,10 @@ function views_ui_cache_load($name) {
     if (!empty($view)) {
       // Check to see if someone else is already editing this view.
       $view->locked = ctools_object_cache_test('view', $view->name);
+      // Set a flag to indicate that this view is being edited.
+      // This flag will be used e.g. to determine whether strings
+      // should be localized.
+      $view->editing = TRUE;
     }
   }
 

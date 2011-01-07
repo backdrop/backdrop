@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_area.inc,v 1.1.4.2 2010/02/07 13:44:07 dereine Exp $
+// $Id: views_handler_area.inc,v 1.1.4.3 2010/12/17 21:42:19 merlinofchaos Exp $
 /**
  * @file
  * Views area handlers.
@@ -46,6 +46,7 @@ class views_handler_area extends views_handler {
    * should have.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),

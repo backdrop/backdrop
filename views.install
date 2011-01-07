@@ -1,5 +1,5 @@
 <?php
-// $Id: views.install,v 1.50.4.9 2010/11/18 07:57:06 dereine Exp $
+// $Id: views.install,v 1.50.4.12 2011/01/01 23:51:28 dereine Exp $
 /**
  * @file views.install
  * Contains install and update functions for Views.
@@ -503,3 +503,60 @@ function views_update_6012() {
   
   return $ret;
 }
+
+
+/**
+ * Add a human readable name.
+ */
+function views_schema_6013() {
+  $schema = views_schema(__FUNCTION__);
+  $schema['views_view']['fields']['human_name'] = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'default' => '',
+    'description' => 'A human readable name used to be displayed in the admin interface',
+  );
+  return $schema;
+}
+
+function views_update_6013() {
+  $ret = array();
+
+  $new_field = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'default' => '',
+    'description' => 'A human readable name used to be displayed in the admin interface',
+  );
+
+  db_add_field('views_view', 'human_name', $new_field);
+
+  return $ret;
+}
+
+function views_schema_6014() {
+  $schema = views_schema(__FUNCTION__);
+  $schema['views_view']['fields']['core'] = array(
+    'type' => 'int',
+    'default' => 0,
+    'description' => 'Stores the drupal core version of the view.',
+  );
+  return $schema;
+}
+
+/**
+ * Add a drupal core version field.
+ */
+function views_update_6014() {
+  $ret = array();
+  $new_field = array(
+    'type' => 'int',
+    'default' => 0,
+    'description' => 'Stores the drupal core version of the view.',
+  );
+
+  db_add_field('views_view', 'core', $new_field);
+
+  return $ret;
+}
+

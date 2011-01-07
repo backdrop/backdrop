@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_search_score.inc,v 1.2 2009/02/23 23:30:38 merlinofchaos Exp $
+// $Id: views_handler_field_search_score.inc,v 1.2.6.1 2010/12/09 21:31:10 merlinofchaos Exp $
 
 /**
  * Field handler to provide simple renderer that allows linking to a node.
@@ -63,12 +63,6 @@ class views_handler_field_search_score extends views_handler_field_numeric {
         $this->view->style_plugin->options['default'] = $this->options['alternate_sort'];
         $this->view->style_plugin->options['order'] = $this->options['alternate_order'];
       }
-    }
-  }
-
-  function click_sort($order) {
-    if (isset($this->table_alias)) {
-       $this->query->add_orderby(NULL, NULL, $order, $this->field_alias);
     }
   }
 

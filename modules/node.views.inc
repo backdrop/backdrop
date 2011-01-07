@@ -1,5 +1,5 @@
 <?php
-// $Id: node.views.inc,v 1.97.4.19 2010/11/18 00:43:18 merlinofchaos Exp $
+// $Id: node.views.inc,v 1.97.4.25 2010/12/27 08:02:28 dereine Exp $
 /**
  * @file
  * Provide views data and handlers for node.module
@@ -161,6 +161,9 @@ function node_views_data() {
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
+      'output formats' => array(
+        'published-notpublished' => array(t('Published'), t('Not published')),
+      ),
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
@@ -250,7 +253,7 @@ function node_views_data() {
       'handler' => 'views_handler_field_node_link_delete',
     ),
   );
-  
+
   $data['node']['path'] = array(
     'field' => array(
       'title' => t('Path'),
@@ -258,7 +261,7 @@ function node_views_data() {
       'handler' => 'views_handler_field_node_path',
     ),
   );
-  
+
 
   // Bogus fields for aliasing purposes.
 
@@ -439,6 +442,13 @@ function node_views_data() {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
+    'relationship' => array(
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'nid',
+      'title' => t('Node'),
+      'label' => t('Get the actual node from a node revision.'),
+    ),
   );
 
   // title
@@ -549,7 +559,7 @@ function node_views_data() {
       'left_field' => 'nid',
       'field' => 'nid',
       'extra' => array(
-        array('field' => 'uid', 'value' => ':user-current-user', 'numeric' => TRUE),
+        array('field' => 'uid', 'value' => '***CURRENT_USER***', 'numeric' => TRUE),
       ),
     ),
   );
@@ -639,7 +649,7 @@ function template_preprocess_views_view_row_node(&$vars) {
 
   $node->view = $vars['view'];
   // Detect which build module should be used.
-  $node->build_mode = ($options['build_mode'] == 'teaser' || $options['build_mode'] == 'full') ? $options['build_mode'] : 'full';
+  $node->build_mode = (!empty($options['build_mode'])) ? $options['build_mode'] : 'full';
   $content = node_view_multiple(array($node->nid => $node), $node->build_mode);
   $content = $content['nodes'][$node->nid];
   if (!$options['links']) {
@@ -676,6 +686,21 @@ function node_views_analyze($view) {
         // check for no access control
         $access = $display->handler->get_option('access');
         if (empty($access['type']) || $access['type'] == 'none') {
+          $select = db_select('role', 'r');
+          $select->innerJoin('role_permission', 'p', 'r.rid = p.rid');
+          $result = $select->fields('r', array('name'))
+            ->fields('p', array('permission'))
+            ->condition('r.name', array('anonymous user', 'authenticated user'), 'IN')
+            ->condition('p.permission', 'access content')
+            ->execute();
+    
+          foreach ($result as $role) {
+            $role->safe = TRUE;
+            $roles[$role->name] = $role;
+          }
+          if (!($roles['anonymous user']->safe && $roles['authenticated user']->safe)) {
+            $ret[] = views_ui_analysis(t('Some roles lack permission to access content, but display %display has no access control.', array('%display' => $display->display_title)), 'warning');
+          }
           $filters = $display->handler->get_option('filters');
           foreach ($filters as $filter) {
             if ($filter['table'] == 'node' && ($filter['field'] == 'status' || $filter['field'] == 'status_extra')) {

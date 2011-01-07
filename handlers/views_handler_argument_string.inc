@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_argument_string.inc,v 1.5.4.5 2010/11/05 07:20:54 dereine Exp $
+// $Id: views_handler_argument_string.inc,v 1.5.4.8 2011/01/06 18:07:56 dereine Exp $
 
 /**
  * Basic argument handler to implement string arguments that may have length
@@ -109,6 +109,7 @@ class views_handler_argument_string extends views_handler_argument {
    * Build the summary query based on a string
    */
   function summary_query() {
+    $this->placeholder_length = $this->placeholder();
     if (empty($this->definition['many to one'])) {
       $this->ensure_my_table();
     }
@@ -126,7 +127,7 @@ class views_handler_argument_string extends views_handler_argument {
       $formula = $this->get_formula();
       $params = array(
         'placeholders' => array(
-          ':length' => intval($this->options['limit']),
+          $this->placeholder_length => intval($this->options['limit']),
         ),
       );
 
@@ -143,7 +144,7 @@ class views_handler_argument_string extends views_handler_argument {
    * $this->ensure_my_table() MUST have been called prior to this.
    */
   function get_formula() {
-    return "SUBSTRING($this->table_alias.$this->real_field, 1, :length)";
+    return "SUBSTRING($this->table_alias.$this->real_field, 1, $this->placeholder_length)";
   }
 
   /**
@@ -154,6 +155,7 @@ class views_handler_argument_string extends views_handler_argument {
     if (!empty($this->options['transform_dash'])) {
       $argument = strtr($argument, '-', ' ');
     }
+    $this->placeholder_length = $this->placeholder();
 
     if (!empty($this->definition['many to one'])) {
       if (!empty($this->options['glossary'])) {
@@ -161,6 +163,8 @@ class views_handler_argument_string extends views_handler_argument {
       }
       $this->value = array($argument);
       $this->helper->ensure_my_table();
+
+      $this->helper->placeholders = array($this->placeholder_length => intval($this->options['limit']));
       $this->helper->add_filter();
       return;
     }
@@ -176,12 +180,14 @@ class views_handler_argument_string extends views_handler_argument {
     }
 
     if ($formula) {
-      $field .= ' = :views_handler_argument_string';
+      $placeholder = $this->placeholder();
+      $placeholder_length = $this->placeholder_length;
+      $field .= ' = ' . $placeholder;
       $placeholders = array(
-        ':length' => intval($this->options['limit']),
-        ':views_handler_argument_string' => $argument,
+        $placeholder_length => intval($this->options['limit']),
+        $placeholder => $argument,
       );
-      $this->query->add_where(0, $field, $placeholders, 'formula');
+      $this->query->add_where_expression(0, $field, $placeholders);
     }
     else {
       $this->query->add_where(0, $field, $argument);

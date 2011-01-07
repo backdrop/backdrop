@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_table.inc,v 1.7.4.9 2010/11/21 11:12:04 dereine Exp $
+// $Id: views_plugin_style_table.inc,v 1.7.4.12 2010/12/10 08:19:15 dereine Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -20,6 +20,7 @@ class views_plugin_style_table extends views_plugin_style {
     $options['override'] = array('default' => TRUE);
     $options['sticky'] = array('default' => FALSE);
     $options['order'] = array('default' => 'asc');
+    $options['summary'] = array('default' => '');
 
     return $options;
   }
@@ -163,6 +164,13 @@ class views_plugin_style_table extends views_plugin_style {
       '#description' => t('If a default sort order is selected, what order should it use by default.'),
     );
 
+    $form['summary'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Table summary'),
+      '#description' => t('This value will be displayed as table-summary attribute in the html. Set this for better accessiblity of your site.'),
+      '#default_value' => $this->options['summary'],
+    );
+
     // Note: views UI registers this theme handler on our behalf. Your module
     // will have to register your theme handlers if you do stuff like this.
     $form['#theme'] = 'views_ui_style_plugin_table';
@@ -196,7 +204,7 @@ class views_plugin_style_table extends views_plugin_style {
         $form['info'][$field]['sortable'] = array(
           '#type' => 'checkbox',
           '#default_value' => !empty($this->options['info'][$field]['sortable']),
-          '#process' => array('ctools_dependent_process'),
+          '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
           '#dependency' => array($id => array($field)),
         );
         $form['info'][$field]['default_sort_order'] = array(
@@ -230,7 +238,7 @@ class views_plugin_style_table extends views_plugin_style {
           'views-align-center' => t('Center'),
           'views-align-right' => t('Right'),
           ),
-        '#process' => array('ctools_dependent_process'),
+        '#process' => array('form_process_select', 'ctools_dependent_process'),
         '#dependency' => array($id => array($field)),
       );
       $form['info'][$field]['separator'] = array(

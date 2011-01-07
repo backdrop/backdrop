@@ -1,4 +1,4 @@
-<!-- $Id: api-default-views.html,v 1.3.6.3 2010/08/04 05:54:08 dereine Exp $ -->
+<!-- $Id: api-default-views.html,v 1.3.6.4 2010/12/23 22:11:34 dereine Exp $ -->
 Views can be stored in the database, which is typical of smaller sites and hobby sites. However, Views may also be stored directly in the code as "default" views, (which simply means they're available by default). Modules often come with views that are specific to the module data, but it's also possible -- and <b>highly</b> recommended -- that sites which have separate "development" and "production" sites export their views into default views in a site-specific module. This makes it very easy to transfer views from dev to production without making database changes.
 
 <h3>Creating a module</h3>
@@ -51,7 +51,7 @@ To do this, you need to implement <em>hook_theme()</em> in your module:
     'views_view__viewname__displayid' => array (
       'arguments' => array('view' => NULL),
       'template' => 'views-view--viewname--displayid',
-      'original hook' => 'views_view',
+      'base hook' => 'views_view',
       'path' => drupal_get_path('module', 'mymodule'),
     ),
   );
@@ -74,14 +74,14 @@ Be sure to use the right arguments line or the theme system will not properly tr
 </li>
 <li>The 'template' line should never include the extension, so drop the .tpl.php from it.</li>
 
-<li>You need to make sure that the Views preprocess functions get registered. The 'original hook' line in the definition does that, but it can only do it if it comes after the Views registration, which actually happens very late in theme building. 99% of the time, your module will come before Views. You have two choices to deal with this:
+<li>You need to make sure that the Views preprocess functions get registered. The 'base hook' line in the definition does that, but it can only do it if it comes after the Views registration, which actually happens very late in theme building. 99% of the time, your module will come before Views. You have two choices to deal with this:
 <ol>
   <li>Set your module's weight to 11 or higher in the database. Views' weight is 10. You can make this happen automatically when the module is first installed by creating a mymodule.install file and using this code:
   <pre>function mymodule_install() {
   db_query("UPDATE {system} SET weight = 11 WHERE name = 'mymodule'");
 }
 </pre>
-  If you use this method, the <em>original hook</em> should be set to the name of the original template being used. i.e, if this is a variate of views-view-list.tpl.php, this should be 'views_view_list'.
+  If you use this method, the <em>base hook</em> should be set to the name of the original template being used. i.e, if this is a variate of views-view-list.tpl.php, this should be 'views_view_list'.
   </li>
   <li>You can also just force it to list the preprocessors without actually having to detect them. This doesn't require modifying your module's weight, which is not always possible, you can insert this code into the array:
   <pre>      'preprocess functions' => array(
@@ -93,7 +93,7 @@ Be sure to use the right arguments line or the theme system will not properly tr
 
   The first one is the global 'template_preprocess' function which all templates utilize. It does some basic things such as setting up $zebra and a few other items. See <a href="http://api.drupal.org/api/function/template_preprocess/6">api.drupal.org</a> for specifics.
 
-  The second one is the plugin specific preprocess. Like 'original hook' it should conform to the name used by the original template. i.e, if the original template was <em>views-view-list.tpl.php</em> then that preprocess function would be named <em>template_preprocess_views_view_list</em>.
+  The second one is the plugin specific preprocess. Like 'base hook' it should conform to the name used by the original template. i.e, if the original template was <em>views-view-list.tpl.php</em> then that preprocess function would be named <em>template_preprocess_views_view_list</em>.
 
   The third one is your module's preprocess function, if it needs one. In general, you probably will not need one, and you should only attempt to use one if you are reasonably familiar with the concept of preprocess functions and Drupal's theme system in general. See Drupal's theme documentation for more information.
   </li>

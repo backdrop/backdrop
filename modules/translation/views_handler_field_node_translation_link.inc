@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_translation_link.inc,v 1.1.6.1 2010/11/18 07:29:03 dereine Exp $
+// $Id: views_handler_field_node_translation_link.inc,v 1.1.6.3 2010/12/09 21:45:49 dereine Exp $
 /**
  * Field handler to present a link to the node.
  */
@@ -18,7 +18,7 @@ class views_handler_field_node_translation_link extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    return $this->render_link(check_plain($values->{$this->aliases['tnid']}), $values);
   }
 
   function render_link($data, $values) {
@@ -35,6 +35,6 @@ class views_handler_field_node_translation_link extends views_handler_field {
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
-    return $values->{$this->aliases['title']}
+    return $values->{$this->aliases['title']};
   }
 }

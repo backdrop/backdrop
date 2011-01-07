@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_upload_fid.inc,v 1.10.4.4 2010/10/16 08:39:36 dereine Exp $
+// $Id: views_handler_field_upload_fid.inc,v 1.10.4.5 2010/12/03 20:46:32 dereine Exp $
 /**
  * Field handler to provide a list of roles.
  */
@@ -30,7 +30,7 @@ class views_handler_field_upload_fid extends views_handler_field_prerender_list 
     );
   }
 
-  function pre_render($values) {
+  function pre_render(&$values) {
     $vids = array();
     $this->items = array();
 

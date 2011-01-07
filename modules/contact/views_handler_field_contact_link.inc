@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_contact_link.inc,v 1.2.4.4 2010/11/18 07:29:03 dereine Exp $
+// $Id: views_handler_field_contact_link.inc,v 1.2.4.5 2010/12/23 05:44:54 dereine Exp $
 /**
  * A field that links to the user contact page, if access is permitted.
  */
@@ -64,7 +64,7 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
     $this->options['alter']['attributes'] = array('title' => t('Contact %user', array('%user' => $account->name)));
 
     if ($this->options['link_display'] == 'icon') {
-      $text = theme('image', 'misc/forum-new.png');
+      $text = theme('image', array('path' => 'misc/forum-new.png'));
       $this->options['alter']['html'] = TRUE;
     }
     else {

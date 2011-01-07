@@ -1,12 +1,12 @@
 <?php
-// $Id: views_handler_area_text.inc,v 1.1.4.6 2010/10/16 05:43:01 dereine Exp $
+// $Id: views_handler_area_text.inc,v 1.1.4.7 2010/12/06 17:13:49 dereine Exp $
 
 class views_handler_area_text extends views_handler_area {
 
   function option_definition() {
     $options = parent::option_definition();
     $options['content'] = array('default' => '', 'translatable' => TRUE);
-    $options['format'] = array('default' => variable_get('filter_default_format', 1));
+    $options['format'] = array('default' => filter_default_format());
     return $options;
   }
 
@@ -41,8 +41,9 @@ class views_handler_area_text extends views_handler_area {
     static $formats = array();
 
     if (!array_key_exists($format, $formats)) {
-      $filter = filter_format_load($format);
-      $formats[$format] = $filter->name;
+      if ($filter = filter_format_load($format)) {
+        $formats[$format] = $filter->name;
+      }
     }
 
     if (!isset($formats[$format])) {

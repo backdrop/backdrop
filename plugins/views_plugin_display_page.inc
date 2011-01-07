@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_page.inc,v 1.8.4.11 2010/11/16 00:58:15 merlinofchaos Exp $
+// $Id: views_plugin_display_page.inc,v 1.8.4.14 2011/01/04 21:26:47 dereine Exp $
 /**
  * @file
  * Contains the page display plugin.
@@ -62,7 +62,7 @@ class views_plugin_display_page extends views_plugin_display {
     foreach($bits as $pos => $bit) {
       if ($bit == '%') {
         $argument = array_shift($view_arguments);
-        if ($argument['validate_type'] != 'none') {
+        if (isset($argument['validate_type']) && $argument['validate_type'] != 'none') {
           $bits[$pos] = '%views_arg';
         }
         $page_arguments[] = $pos;
@@ -75,6 +75,36 @@ class views_plugin_display_page extends views_plugin_display {
     if (!isset($access_plugin)) {
       $access_plugin = views_get_plugin('access', 'none');
     }
+
+    // Get access callback might return an array of the callback + the dynamic arguments.
+    $access_plugin_callback = $access_plugin->get_access_callback();
+
+    if (is_array($access_plugin_callback)) {
+      $access_arguments = array();
+
+      // Find the plugin arguments.
+      $access_plugin_method = array_shift($access_plugin_callback);
+      $access_plugin_arguments = array_shift($access_plugin_callback);
+      if (!is_array($access_plugin_arguments)) {
+        $access_plugin_arguments = array();
+      }
+
+      $access_arguments[0] = array($access_plugin_method, &$access_plugin_arguments);
+
+      // Move the plugin arguments to the access arguments array.
+      $i = 1;
+      foreach ($access_plugin_arguments as $key => $value) {
+        if (is_int($value)) {
+          $access_arguments[$i] = $value;
+          $access_plugin_arguments[$key] = $i;
+          $i++;
+        }
+      }
+    }
+    else {
+      $access_arguments = array($access_plugin_callback);
+    }
+
     if ($path) {
       $items[$path] = array(
         // default views page entry
@@ -82,7 +112,7 @@ class views_plugin_display_page extends views_plugin_display {
         'page arguments' => $page_arguments,
         // Default access check (per display)
         'access callback' => 'views_access',
-        'access arguments' => array($access_plugin->get_access_callback()),
+        'access arguments' => $access_arguments,
         // Identify URL embedded arguments and correlate them to a handler
         'load arguments'  => array($this->view->name, $this->display->id, '%index'),
       );
@@ -322,7 +352,7 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $menu['name'],
             '#description' => t('Insert item into an available menu.'), //
-            '#process' => array('ctools_dependent_process'),
+            '#process' => array('form_process_select', 'ctools_dependent_process'),
             '#dependency' => array('radio:menu[type]' => array('normal')),
           );
         }
@@ -394,7 +424,7 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $tab_options['name'],
             '#description' => t('Insert item into an available menu.'),
-            '#process' => array('ctools_dependent_process'),
+            '#process' => array('form_process_select', 'ctools_dependent_process'),
             '#dependency' => array('radio:tab_options[type]' => array('normal')),
           );
         }

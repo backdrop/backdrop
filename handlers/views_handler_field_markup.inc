@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_markup.inc,v 1.3.6.4 2010/10/26 20:26:37 dereine Exp $
+// $Id: views_handler_field_markup.inc,v 1.3.6.5 2010/12/16 18:23:42 dereine Exp $
 
 /**
  * A handler to run a field through check_markup, using a companion
@@ -36,7 +36,7 @@ class views_handler_field_markup extends views_handler_field {
     }
   }
 
-  function element_type() {
+  function element_type($none_supported = FALSE, $default_empty = FALSE) {
     if (isset($this->definition['element type'])) {
       return $this->definition['element type'];
     }

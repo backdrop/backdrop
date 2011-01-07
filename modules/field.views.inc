@@ -1,5 +1,5 @@
 <?php
-// $Id: field.views.inc,v 1.1.2.14 2010/11/14 12:45:56 dereine Exp $
+// $Id: field.views.inc,v 1.1.2.18 2011/01/06 16:10:00 dereine Exp $
 
 /**
  * @file
@@ -57,16 +57,18 @@ function field_views_field_default_views_data($field) {
   // The list of entity:bundle that this field is used in.
   $bundles_names = array();
   $supports_revisions = FALSE;
+  $entity_tables = array();
 
   // Build the relationships between the field table and the entity tables.
   foreach ($field['bundles'] as $entity => $bundles) {
     $entity_info = entity_get_info($entity);
+    $entity_tables[$entity_info['base table']] = $entity;
 
     $data[$current_table]['table']['join'][$entity_info['base table']] = array(
       'left_field' => $entity_info['entity keys']['id'],
       'field' => 'entity_id',
       'extra' => array(
-        array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE),
+        array('field' => 'entity_type', 'value' => $entity),
         array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
       ),
     );
@@ -76,7 +78,7 @@ function field_views_field_default_views_data($field) {
         'left_field' => $entity_info['entity keys']['revision'],
         'field' => 'revision_id',
         'extra' => array(
-          array('field' => 'etid', 'value' => _field_sql_storage_etid($entity), 'numeric' => TRUE),
+          array('field' => 'entity_type', 'value' => $entity),
           array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
         ),
       );
@@ -93,6 +95,11 @@ function field_views_field_default_views_data($field) {
   $tables[FIELD_LOAD_CURRENT] = $current_table;
   if ($supports_revisions) {
     $tables[FIELD_LOAD_REVISION] = $revision_table;
+  }
+
+  $add_fields = array('entity_type', 'delta', 'language', 'bundle');
+  foreach ($field['columns'] as $column_name => $attributes) {
+    $add_fields[] = _field_sql_storage_columnname($field['field_name'], $column_name);
   }
 
   // Add the field handler for this field.
@@ -119,7 +126,9 @@ function field_views_field_default_views_data($field) {
       'handler' => 'views_handler_field_field',
       'click sortable' => TRUE,
       'field_name' => $field['field_name'],
-      'additional fields' => array('etid'),
+      'additional fields' => $add_fields,
+      'entity_tables' => $entity_tables,
+      'field_info' => $field,
     );
   }
 
@@ -196,42 +205,6 @@ function field_views_field_default_views_data($field) {
           'field' => $column_real_name,
           'table' => $table,
           'handler' => $sort,
-          'additional fields' => $additional_fields,
-          'field_name' => $field['field_name'],
-        );
-      }
-
-      // Expose additional delta column for multiple value fields.
-      if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-        $title = t('@label (!name) - delta', array('@label' => $field['field_name'], '!name' => $field['field_name']));
-        $title_short = t('!name - delta', array('!name' => $field['field_name']));
-
-        $data[$table]['delta'] = array(
-          'group' => $group,
-          'title' => $title,
-          'title short' => $title_short,
-          'help' => t('Delta - Appears in: @bundles', array('@bundles' => implode(', ', $bundles_names))),
-        );
-        $data[$table]['delta']['argument'] = array(
-          'field' => 'delta',
-          'table' => $table,
-          'handler' => 'views_handler_argument_numeric',
-          'additional fields' => $additional_fields,
-          'empty field name' => t('<No value>'),
-          'field_name' => $field['field_name'],
-        );
-        $data[$table]['delta']['filter'] = array(
-          'field' => 'delta',
-          'table' => $table,
-          'handler' => 'views_handler_filter_numeric',
-          'additional fields' => $additional_fields,
-          'field_name' => $field['field_name'],
-          'allow empty' => TRUE,
-        );
-        $data[$table]['delta']['sort'] = array(
-          'field' => 'delta',
-          'table' => $table,
-          'handler' => 'views_handler_sort',
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
         );

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_upload_description.inc,v 1.5.4.2 2010/04/07 23:40:26 merlinofchaos Exp $
+// $Id: views_handler_field_upload_description.inc,v 1.5.4.3 2010/12/03 20:46:32 dereine Exp $
 
 /**
  * Field handler to provide a list of roles.
@@ -27,7 +27,7 @@ class views_handler_field_upload_description extends views_handler_field {
     );
   }
 
-  function pre_render($values) {
+  function pre_render(&$values) {
     if (empty($this->options['link_to_file'])) {
       return;
     }

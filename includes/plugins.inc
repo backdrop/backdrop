@@ -1,5 +1,5 @@
 <?php
-// $Id: plugins.inc,v 1.156.4.12 2010/11/18 23:15:37 merlinofchaos Exp $
+// $Id: plugins.inc,v 1.156.4.14 2010/12/04 07:39:35 dereine Exp $
 /**
  * @file plugins.inc
  * Built in plugins for Views output handling.
@@ -84,6 +84,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_style_default',
         'theme' => 'views_view_unformatted',
         'uses row plugin' => TRUE,
+        'uses row class' => TRUE,
         'uses grouping' => TRUE,
         'uses options' => TRUE,
         'type' => 'normal',
@@ -95,6 +96,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_style_list',
         'theme' => 'views_view_list',
         'uses row plugin' => TRUE,
+        'uses row class' => TRUE,
         'uses options' => TRUE,
         'type' => 'normal',
         'help topic' => 'style-list',
@@ -105,6 +107,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_style_grid',
         'theme' => 'views_view_grid',
         'uses row plugin' => TRUE,
+        'uses row class' => TRUE,
         'uses options' => TRUE,
         'type' => 'normal',
         'help topic' => 'style-grid',
@@ -115,6 +118,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_style_table',
         'theme' => 'views_view_table',
         'uses row plugin' => FALSE,
+        'uses row class' => TRUE,
         'uses fields' => TRUE,
         'uses options' => TRUE,
         'type' => 'normal',
@@ -299,7 +303,30 @@ function views_views_plugins() {
         'parent' => 'full',
       ),
     ),
+    'localization' => array(
+      'parent' => array(
+        'no ui' => TRUE,
+        'handler' => 'views_plugin_localization',
+        'parent' => '',
+      ),
+     'none' => array(
+        'title' => t('None'),
+        'help' => t('Do not pass admin strings for translation.'),
+        'handler' => 'views_plugin_localization_none',
+        'help topic' => 'localization-none',
+      ),
+      'core' => array(
+        'title' => t('Core'),
+        'help' => t("Use Drupal core t() function. Not recommended, as it doesn't support updates to existing strings."),
+        'handler' => 'views_plugin_localization_core',
+        'help topic' => 'localization-core',
+      ),
+    ),
   );
+  // Add a help message pointing to the i18views module if it is not present.
+  if (!module_exists('i18nviews')) {
+    $plugins['localization']['core']['help'] .= ' ' . t('If you need to translate Views labels into other languages, consider installing the <a href="!path">Internationalization</a> package\'s Views translation module.', array('!path' => url('http://drupal.org/project/i18n', array('absolute' => TRUE))));
+  }
 
   if (module_invoke('ctools', 'api_version', '1.3')) {
     $plugins['style']['jump_menu_summary'] = array(

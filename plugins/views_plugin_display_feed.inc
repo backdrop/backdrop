@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_feed.inc,v 1.7.4.4 2010/11/05 07:20:54 dereine Exp $
+// $Id: views_plugin_display_feed.inc,v 1.7.4.5 2010/12/18 08:02:38 dereine Exp $
 /**
  * @file
  * Contains the feed display plugin.
@@ -68,7 +68,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
 
     // Overrides for standard stuff:
     $options['style_plugin']['default'] = 'rss';
-    $options['style_options']['default']  = array('mission_description' => FALSE, 'description' => '');
+    $options['style_options']['default']  = array('description' => '');
     $options['sitename_title']['default'] = FALSE;
     $options['row_plugin']['default'] = '';
     $options['defaults']['default']['style_plugin'] = FALSE;

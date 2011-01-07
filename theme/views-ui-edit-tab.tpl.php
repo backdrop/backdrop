@@ -1,5 +1,5 @@
 <?php
-// $Id: views-ui-edit-tab.tpl.php,v 1.11.6.3 2010/08/23 09:47:07 dereine Exp $
+// $Id: views-ui-edit-tab.tpl.php,v 1.11.6.4 2010/12/24 08:25:02 dereine Exp $
 /**
  * @file views-ui-edit-tab.tpl.php
  * Template for the primary view editing window.
@@ -33,9 +33,11 @@
         <div class="views-category">
           <div class="views-category-title"><?php print t('View settings'); ?></div>
           <div class="views-category-content">
-            <div class="<?php $details_class; if (!empty($details_changed)) { print ' changed'; }?>">
-              <?php print $details ?>
+          <?php foreach ($details as $name => $detail): ?>
+            <div class="<?php $details_class[$name]; if (!empty($details_changed[$name])) { print ' changed'; }?>">
+              <?php print $detail ?>
             </div>
+          <?php endforeach; ?>
           </div>
         </div>
       <?php endif; ?>

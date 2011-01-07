@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row_node_view.inc,v 1.3.6.2 2010/07/04 11:04:36 dereine Exp $
+// $Id: views_plugin_row_node_view.inc,v 1.3.6.3 2010/12/03 11:26:09 dereine Exp $
 /**
  * @file
  * Contains the node view row style plugin.
@@ -39,23 +39,20 @@ class views_plugin_row_node_view extends views_plugin_row {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    // CCK holds the registry of available build modes, but can hardly
-    // push them as options for the node row style, so we break the normal
-    // rule of not directly relying on non-core modules.
-    if ($modes = module_invoke('content', 'build_modes')) {
-      $options = array();
-      foreach ($modes as $key => $value) {
-        if (isset($value['views style']) && $value['views style']) {
-          $options[$key] = $value['title'];
-        }
+    $entity_info = entity_get_info('node');
+    $options = array();
+    if (!empty($entity_info['view modes'])) {
+      foreach ($entity_info['view modes'] as $mode => $settings) {
+        $options[$mode] = $settings['label'];
       }
     }
-    else {
+    if (empty($options)) {
       $options = array(
         'teaser' => t('Teaser'),
         'full' => t('Full node')
       );
     }
+
     $form['build_mode'] = array(
       '#type' => 'select',
       '#options' => $options,

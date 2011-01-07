@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query_default.inc,v 1.1.4.30 2010/11/05 13:47:14 dereine Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.4.39 2011/01/06 00:37:05 dereine Exp $
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the
@@ -65,8 +65,6 @@ class views_plugin_query_default extends views_plugin_query {
    * A flag as to whether or not to make the primary field distinct.
    */
   var $distinct = FALSE;
-
-  var $placeholder_counter = 0;
 
   var $has_aggregate = FALSE;
 
@@ -168,6 +166,13 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
+    $options['slave'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
+    $options['field_language'] = array(
+      'default' => '***CURRENT_LANGUAGE***',
+    );
 
     return $options;
   }
@@ -189,6 +194,43 @@ class views_plugin_query_default extends views_plugin_query {
       '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
       '#default_value' => !empty($this->options['distinct']),
     );
+    $form['slave'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use Slave Server'),
+      '#description' => t('This will make the query attempt to connect to a slave server if available.  If no slave server is defined or available, it will fall back to the default server.'),
+      '#default_value' => !empty($this->options['slave']),
+    );
+
+    $entities = entity_get_info();
+    $entity_tables = array();
+    $has_translation_handlers = FALSE;
+    foreach ($entities as $type => $entity_info) {
+      $entity_tables[] = $entity_info['base table'];
+
+      if (!empty($entity_info['translation'])) {
+        $has_translation_handlers = TRUE;
+      }
+    }
+
+    // Doesn't make sense to show a field setting here if we aren't querying
+    // an entity base table. Also, we make sure that there's at least one
+    // entity type with a translation handler attached.
+    if (in_array($this->base_table, $entity_tables) && $has_translation_handlers) {
+      $languages = array(
+        '***CURRENT_LANGUAGE***' => t("Current user's language"),
+        '***DEFAULT_LANGUAGE***' => t("Default site language"),
+        LANGUAGE_NONE => t('No language')
+      );
+      $languages = array_merge($languages, locale_language_list());
+
+      $form['field_language'] = array(
+        '#type' => 'select',
+        '#title' => t('Field Language'),
+        '#description' => t('All fields which support translations will be displayed in the selected language.'),
+        '#options' => $languages,
+        '#default_value' => $this->options['field_language'],
+      );
+    }
   }
 
   // ----------------------------------------------------------------
@@ -726,37 +768,6 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Create a new grouping for the WHERE or HAVING clause.
-   *
-   * @param $type
-   *   Either 'AND' or 'OR'. All items within this group will be added
-   *   to the WHERE clause with this logical operator.
-   * @param $group
-   *   An ID to use for this group. If unspecified, an ID will be generated.
-   * @param $where
-   *   'where' or 'having'.
-   *
-   * @return $group
-   *   The group ID generated.
-   */
-  function set_where_group($type = 'AND', $group = NULL, $where = 'where') {
-    // Set an alias.
-    $groups = &$this->$where;
-
-    if (!isset($group)) {
-      $group = empty($groups) ? 1 : max(array_keys($groups)) + 1;
-    }
-
-    // Create an empty group
-    if (empty($groups[$group])) {
-      $groups[$group] = array('clauses' => array(), 'args' => array());
-    }
-
-    $groups[$group]['type'] = strtoupper($type);
-    return $group;
-  }
-
-  /**
    * Add a simple WHERE clause to the query. The caller is responsible for
    * ensuring that all fields are fully qualified (TABLE.FIELD) and that
    * the table already exists in the query.
@@ -775,6 +786,8 @@ class views_plugin_query_default extends views_plugin_query {
    *   The comparison operator, such as =, <, or >=. It also accepts more complex
    *   options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is an array
    *   = otherwise. If $field is a string you have to use 'formula' here.
+   *
+   * @see QueryConditionInterface::condition()
    */
   function add_where($group, $field, $value = NULL, $operator = NULL) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
@@ -796,9 +809,49 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Add a simple HAVING clause to the query. The caller is responsible for
-   * ensuring that all fields are fully qualified (TABLE.FIELD) and that
-   * the table and an appropriate GROUP BY already exist in the query.
+   * Add a complex WHERE clause to the query.
+   *
+   * The caller is reponsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table already exists in the query.
+   * Internally the dbtng method "where" is used.
+   *
+   * @param $group
+   *   The WHERE group to add these to; groups are used to create AND/OR
+   *   sections. Groups cannot be nested. Use 0 as the default group.
+   *   If the group does not yet exist it will be created as an AND group.
+   * @param $snippet
+   *   The snippet to check. This can be either a column or
+   *   a complex expression like "UPPER(table.field) = 'value'"
+   * @param $args
+   *   An associative array of arguments.
+   *
+   * @see QueryConditionInterface::where()
+   */
+  function add_where_expression($group, $snippet, $args = array()) {
+    // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
+    // the default group.
+    if (empty($group)) {
+      $group = 0;
+    }
+
+    // Check for a group.
+    if (!isset($this->where[$group])) {
+      $this->set_where_group('AND', $group);
+    }
+
+    $this->where[$group]['conditions'][] = array(
+      'field' => $snippet,
+      'value' => $args,
+      'operator' => 'formula',
+    );
+  }
+
+  /**
+   * Add a simple HAVING clause to the query.
+   *
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
+   * Internally the dbtng method "havingCondition" is used.
    *
    * @param $group
    *   The HAVING group to add these to; groups are used to create AND/OR
@@ -813,7 +866,9 @@ class views_plugin_query_default extends views_plugin_query {
    * @param $operator
    *   The comparison operator, such as =, <, or >=. It also accepts more complex
    *   options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is an array
-   *   = otherwise.
+   *   = otherwise.  If $field is a string you have to use 'formula' here.
+   *
+   * @see SelectQueryInterface::havingCondition()
    */
   function add_having($group, $field, $value = NULL, $operator = NULL) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
@@ -832,6 +887,44 @@ class views_plugin_query_default extends views_plugin_query {
       'field' => $field,
       'value' => $value,
       'operator' => $operator,
+    );
+  }
+
+  /**
+   * Add a complex HAVING clause to the query.
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
+   * Internally the dbtng method "having" is used.
+   *
+   * @param $group
+   *   The HAVING group to add these to; groups are used to create AND/OR
+   *   sections. Groups cannot be nested. Use 0 as the default group.
+   *   If the group does not yet exist it will be created as an AND group.
+   * @param $snippet
+   *   The snippet to check. This can be either a column or
+   *   a complex expression like "COUNT(table.field) > 3"
+   * @param $args
+   *   An associative array of arguments.
+   *
+   * @see QueryConditionInterface::having()
+   */
+  function add_having_expression($group, $snippet, $args = array()) {
+    // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
+    // the default group.
+    if (empty($group)) {
+      $group = 0;
+    }
+
+    // Check for a group.
+    if (!isset($this->having[$group])) {
+      $this->set_where_group('AND', $group, 'having');
+    }
+
+    // Add the clause and the args.
+    $this->having[$group]['conditions'][] = array(
+      'field' => $snippet,
+      'value' => $args,
+      'operator' => 'formula',
     );
   }
 
@@ -901,26 +994,45 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
+   * Generates a unique placeholder used in the db query.
+   */
+  function placeholder($base = 'views') {
+    static $placeholders = array();
+    if (!isset($placeholders[$base])) {
+      $placeholders[$base] = 0;
+      return ':' . $base;
+    }
+    else {
+      return ':' . $base . ++$placeholders[$base];
+    }
+  }
+
+  /**
    * Construct the "WHERE" or "HAVING" part of the query.
    *
    * @param $where
    *   'where' or 'having'.
    */
   function build_condition($where = 'where') {
+    $has_condition = FALSE;
     $main_group = $this->group_operator == 'OR' ? db_or() : db_and();
     foreach ($this->$where as $group => $info) {
       $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
       foreach ($info['conditions'] as $key => $clause) {
         if ($clause['operator'] == 'formula') {
+          $has_condition = TRUE;
           $sub_group->where($clause['field'], $clause['value']);
         }
         else {
+          $has_condition = TRUE;
           $sub_group->condition($clause['field'], $clause['value'], $clause['operator']);
         }
       }
       $main_group->condition($sub_group);
     }
-    return $main_group;
+    if ($has_condition) {
+      return $main_group;
+    }
   }
 
   /**
@@ -937,7 +1049,7 @@ class views_plugin_query_default extends views_plugin_query {
       $fieldname = (!empty($field['alias']) ? $field['alias'] : $string);
 
       if (!empty($field['distinct'])) {
-        throw new Exception("d7cx: Column-level distinct is not supported yet.");
+        throw new Exception("Column-level distinct is not supported anymore.");
       }
 
       if (!empty($field['count'])) {
@@ -1001,7 +1113,7 @@ class views_plugin_query_default extends views_plugin_query {
   function query($get_count = FALSE) {
     // Check query distinct value.
     if (empty($this->no_distinct) && $this->distinct && !empty($this->fields)) {
-      $base_field_alias = $this->add_field($this->base_table, $this->base_field, NULL, array('distinct' => TRUE));
+      $base_field_alias = $this->add_field($this->base_table, $this->base_field);
       $this->add_groupby($base_field_alias);
     }
 
@@ -1025,8 +1137,19 @@ class views_plugin_query_default extends views_plugin_query {
       $this->get_count_optimized = TRUE;
     }
 
+    $options = array();
+    // Detect an external database.
+    if (isset($this->view->base_database)) {
+      $options['target'] = $this->view->base_database;
+    }
+
+    // Set the slave target if the slave option is set
+    if (!empty($this->options['slave'])) {
+      $options['target'] = 'slave';
+    }
+
     // Go ahead and build the query.
-    $query = db_select($this->base_table, $this->base_table)->addTag('views');
+    $query = db_select($this->base_table, $this->base_table, $options)->addTag('views');
 
     $joins = $where = $having = $orderby = $groupby = '';
     $fields = $distinct = array();
@@ -1051,8 +1174,8 @@ class views_plugin_query_default extends views_plugin_query {
       foreach ($groupby as $field) {
         $query->groupBy($field);
       }
-      if (!empty($this->having)) {
-        $query->havingCondition($this->build_condition('having'));
+      if (!empty($this->having) && $condition = $this->build_condition('having')) {
+        $query->havingCondition($condition);
       }
     }
 
@@ -1065,8 +1188,8 @@ class views_plugin_query_default extends views_plugin_query {
       }
     }
 
-    if (!empty($this->where)) {
-      $query->condition($this->build_condition('where'));
+    if (!empty($this->where) && $condition = $this->build_condition('where')) {
+      $query->condition($condition);
     }
 
     // Add all query substitutions as metadata.
@@ -1105,7 +1228,7 @@ class views_plugin_query_default extends views_plugin_query {
   function build(&$view) {
     // Make the query distinct if the option was set.
     if (!empty($this->options['distinct'])) {
-      // $this->set_distinct();
+      $this->set_distinct();
     }
 
     $view->init_pager();
@@ -1144,7 +1267,7 @@ class views_plugin_query_default extends views_plugin_query {
     $items = array();
     if ($query) {
       $additional_arguments = module_invoke_all('views_query_substitutions', $view);
-      // Build the count query. db_select::countQuery does not work with groupby.
+      // Build the count query.
       $count_query = $count_query->countQuery();
       //  $count_query->distinct = FALSE;
 
@@ -1154,12 +1277,6 @@ class views_plugin_query_default extends views_plugin_query {
       if (!empty($additional_arguments)) {
         // $query->where('1 = 1', $additional_arguments);
         // $count_query->where('1 = 1', $additional_arguments);
-      }
-
-      // Detect an external database.
-      if (isset($view->base_database)) {
-        db_set_active($view->base_database);
-        $external = TRUE;
       }
 
       $start = microtime(TRUE);
@@ -1195,10 +1312,6 @@ class views_plugin_query_default extends views_plugin_query {
       catch (Exception $e) {
         $view->result = array();
         debug('Exception: ' . $e->getMessage());
-      }
-
-      if ($external) {
-        db_set_active();
       }
 
     }

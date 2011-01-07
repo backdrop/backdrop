@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_argument_term_node_tid_depth.inc,v 1.3.4.6 2010/11/05 07:20:54 dereine Exp $
+// $Id: views_handler_argument_term_node_tid_depth.inc,v 1.3.4.7 2010/11/27 20:53:28 dereine Exp $
 /**
  * Argument handler for taxonomy terms with depth.
  *
@@ -46,7 +46,7 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
       '#title' => t("Use Drupal's taxonomy term path to create breadcrumb links"),
       '#description' => t('If selected, the links in the breadcrumb trail will be created using the standard drupal method instead of the custom views method. This is useful if you are using modules like taxonomy redirect to modify your taxonomy term links.'),
       '#default_value' => !empty($this->options['use_taxonomy_term_path']),
-      '#process' => array('ctools_dependent_process'),
+      '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       '#dependency' => array('edit-options-set-breadcrumb' => array(TRUE)),
     );
   }

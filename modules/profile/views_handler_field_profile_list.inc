@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_profile_list.inc,v 1.4.4.2 2010/03/22 19:28:19 merlinofchaos Exp $
+// $Id: views_handler_field_profile_list.inc,v 1.4.4.4 2010/12/20 20:14:28 dereine Exp $
 /**
  * Field handler display a profile list item.
  */
@@ -7,12 +7,12 @@ class views_handler_field_profile_list extends views_handler_field_prerender_lis
   /**
    * Break up our field into a proper list.
    */
-  function pre_render($values) {
+  function pre_render(&$values) {
     $this->items = array();
     foreach ($values as $value) {
       $field = $value->{$this->field_alias};
       $this->items[$field] = array();
-      foreach (split("[,\n\r]", $field) as $item) {
+      foreach (preg_split("/[,\n\r]/", $field) as $item) {
         if ($item != '' && $item !== NULL) {
           $this->items[$field][] = array('item' => $item);
         }

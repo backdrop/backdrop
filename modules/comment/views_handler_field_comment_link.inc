@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_comment_link.inc,v 1.2.6.1 2010/11/18 07:29:03 dereine Exp $
+// $Id: views_handler_field_comment_link.inc,v 1.2.6.2 2010/11/30 20:36:00 merlinofchaos Exp $
 /**
  * Base field handler to present a link.
  */
@@ -31,7 +31,7 @@ class views_handler_field_comment_link extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    return $this->render_link(check_plain($values->{$this->aliases['nid']}), $values);
   }
 
   function render_link($data, $values) {
@@ -45,4 +45,3 @@ class views_handler_field_comment_link extends views_handler_field {
     return $text;
   }
 }
-

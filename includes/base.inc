@@ -1,5 +1,5 @@
 <?php
-// $Id: base.inc,v 1.3.4.5 2010/08/26 09:41:55 dereine Exp $
+// $Id: base.inc,v 1.3.4.6 2010/12/01 20:05:06 dereine Exp $
 /**
  * @file
  *
@@ -76,7 +76,7 @@ class views_object {
    * Unpack options over our existing defaults, drilling down into arrays
    * so that defaults don't get totally blown away.
    */
-  function unpack_options(&$storage, $options, $definition = NULL, $all = TRUE, $check = TRUE) {
+  function unpack_options(&$storage, $options, $definition = NULL, $all = TRUE, $check = TRUE, $localization_keys = array()) {
     if ($check && !is_array($options)) {
       return;
     }
@@ -84,6 +84,12 @@ class views_object {
     if (!isset($definition)) {
       $definition = $this->option_definition();
     }
+
+    if (!empty($this->view)) {
+      // Ensure we have a localization plugin.
+      $this->view->init_localization();
+    }
+
     foreach ($options as $key => $value) {
       if (is_array($value)) {
         // Ignore arrays with no definition.
@@ -107,6 +113,27 @@ class views_object {
       }
       elseif (!empty($definition[$key]['translatable']) && !empty($value)) {
         $storage[$key] = t($value);
+        $this->unpack_options($storage[$key], array(), isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all, FALSE, array_merge($localization_keys, array($key)));
+      }
+      // Don't localize strings during editing. When editing, we need to work with
+      // the original data, not the translated version.
+      else if (empty($this->view->editing) && !empty($definition[$key]['translatable']) && !empty($value) || !empty($definition['contains'][$key]['translatable']) && !empty($value)) {
+        if (!empty($this->view) && $this->view->is_translatable()) {
+          // Allow other modules to make changes to the string before it's
+          // sent for translation.
+          // The $keys array is built from the view name, any localization keys
+          // sent in, and the name of the property being processed.
+          $translation_data = array(
+          'value' => $value,
+          'format' => isset($options[$key . '_format']) ? $options[$key . '_format'] : NULL,
+          'keys' => array_merge(array($this->view->name), $localization_keys, array($key)),
+          );
+          $storage[$key] = $this->view->localization_plugin->translate($translation_data);
+        }
+        // Otherwise, this is a code-based string, so we can use t().
+        else {
+          $storage[$key] = t($value);
+        }
       }
       else if ($all || !empty($definition[$key])) {
         $storage[$key] = $value;
@@ -195,5 +222,83 @@ class views_object {
       }
     }
     return $output;
+  }
+
+  /**
+   * Unpacks each handler to store translatable texts.
+   */
+  function unpack_translatables(&$translatable, $parents = array()) {
+    foreach ($this->option_definition() as $option => $definition) {
+      $this->unpack_translatable($translatable, $this->options, $option, $definition, $parents, array());
+    }
+  }
+
+  /**
+   * Unpack a single option definition.
+   *
+   * This function run's through all suboptions recursive.
+   *
+   * @param $translatable
+   *   Stores all availible translatable items.
+   * @param $storage
+   * @param $option
+   * @param $definition
+   * @param $parents
+   * @param $keys
+   */
+  function unpack_translatable(&$translatable, $storage, $option, $definition, $parents, $keys = array()) {
+    // Do not export options for which we have no settings.
+    if (!isset($storage[$option])) {
+      return;
+    }
+
+    // Special handling for some items
+    if (isset($definition['unpack_translatable']) && method_exists($this, $definition['unpack_translatable'])) {
+      return $this->{$definition['unpack_translatable']}($translatable, $storage, $option, $definition, $parents, $keys);
+    }
+
+    if (isset($definition['translatable'])) {
+      if ($definition['translatable'] === FALSE) {
+        return;
+      }
+    }
+
+    // Add the current option to the parents tree.
+    $parents[] = $option;
+
+    // If it has child items, unpack those separately.
+    if (isset($definition['contains'])) {
+      foreach ($definition['contains'] as $sub_option => $sub_definition) {
+        $translation_keys = array_merge($keys, array($sub_option));
+        $this->unpack_translatable($translatable, $storage[$option], $sub_option, $sub_definition, $parents, $translation_keys);
+      }
+    }
+
+    // @todo Figure out this double definition stuff.
+    $options = $storage[$option];
+    if (is_array($options)) {
+      foreach ($options as $key => $value) {
+        $translation_keys = array_merge($keys, array($key));
+        if (is_array($value)) {
+          $this->unpack_translatable($translatable, $storage, $key, $definition, $parents, $translation_keys);
+        }
+        else if (!empty($definition[$key]['translatable']) && !empty($value)) {
+          // Build source data and add to the array
+          $translatable[] = array(
+            'value' => $value,
+            'keys' => $translation_keys,
+            'format' => isset($options[$key . '_format']) ? $options[$key . '_format'] : NULL,
+          );
+        }
+      }
+    }
+    else if (!empty($definition['translatable']) && !empty($options)) {
+      $value = $options;
+      // Build source data and add to the array
+      $translatable[] = array(
+        'value' => $value,
+        'keys' => isset($translation_keys) ? $translation_keys : $parents,
+      );
+    }
   }
 }

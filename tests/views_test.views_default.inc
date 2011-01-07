@@ -1,5 +1,5 @@
 <?php
-// $Id: views_test.views_default.inc,v 1.1.2.4 2010/03/14 08:28:32 dereine Exp $
+// $Id: views_test.views_default.inc,v 1.1.2.5 2011/01/05 23:14:39 dereine Exp $
 /**
  * @file
  *   Test views
@@ -17,6 +17,7 @@ function views_test_views_default_views() {
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
+  $view->version = 7;
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -38,6 +39,7 @@ function views_test_views_default_views() {
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
+  $view->version = 7;
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -73,6 +75,7 @@ function views_test_views_default_views() {
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
+  $view->version = 7;
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -112,6 +115,7 @@ function views_test_views_default_views() {
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
+  $view->version = 7;
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_date.inc,v 1.3.6.4 2010/11/18 00:38:17 merlinofchaos Exp $
+// $Id: views_handler_filter_date.inc,v 1.3.6.7 2011/01/03 17:46:33 dereine Exp $
 
 /**
  * Filter to handle dates stored as a timestamp.
@@ -73,7 +73,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
 
     if ($operators[$operator]['values'] == 1) {
       $convert = strtotime($value['value']);
-      if ($convert == -1 || $convert === FALSE) {
+      if (!empty($form['value']) && ($convert == -1 || $convert === FALSE)) {
         form_error($form['value'], t('Invalid date format.'));
       }
     }
@@ -139,7 +139,9 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     }
     // %s is safe here because strtotime scrubbed the input and we might
     // have a string if using offset.
-    $this->query->add_where($this->options['group'], $field, array($a, $b), 'BETWEEN');
+    $placeholder1 = $this->placeholder();
+    $placeholder2 = $this->placeholder();
+    $this->query->add_where($this->options['group'], "$field BETWEEN $placeholder1 AND $placeholder2", array($placeholder1 => $a, $placeholder2 => $b), 'formula');
   }
 
   function op_simple($field) {
@@ -147,6 +149,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     if (!empty($this->value['type']) && $this->value['type'] == 'offset') {
       $value = '***CURRENT_TIME***' . sprintf('%+d', $value); // keep sign
     }
-    $this->query->add_where($this->options['group'], $field, $value, $this->operator);
+    $placeholder = $this->placeholder();
+    $this->query->add_where($this->options['group'], "$field $this->operator $placeholder", array($placeholder => $value), 'formula');
   }
 }

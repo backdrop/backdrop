@@ -1,5 +1,5 @@
 <?php
-// $Id: views_exposed_form.test,v 1.1.2.5 2010/11/06 21:25:06 dereine Exp $
+// $Id: views_exposed_form.test,v 1.1.2.6 2010/11/25 20:07:44 dereine Exp $
 /**
  * @file
  * Test exposed forms.
@@ -70,12 +70,24 @@ class ViewsExposedFormTest extends ViewsSqlTest {
     // Check the label of the expose button
     $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide'));
 
+    // Check the validations of the filter handler.
+    $edit = array();
+    $edit['options[expose][identifier]'] = '';
+    $this->drupalPost(NULL, $edit, t('Update'));
+    $this->assertText(t('The identifier is required if the filter is exposed.'));
+    
+    $edit = array();
+    $edit['options[expose][identifier]'] = 'value';
+    $this->drupalPost(NULL, $edit, t('Update'));
+    $this->assertText(t('This identifier is not allowed.'));
+
     // Now check the sort criteria.
     $this->drupalGet('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created');
     $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose'));
     $this->assertNoFieldById('edit-options-expose-label', '', t('Take sure no label field is shown'));
 
     // Click the Expose button.
+    $edit = array();
     $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created', $edit, t('Expose'));
     // Check the label of the expose button
     $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide'));

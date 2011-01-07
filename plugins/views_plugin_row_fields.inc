@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row_fields.inc,v 1.2.4.3 2010/05/12 22:29:46 dereine Exp $
+// $Id: views_plugin_row_fields.inc,v 1.2.4.4 2010/12/04 07:39:35 dereine Exp $
 /**
  * @file
  * Contains the base row style plugin.
@@ -27,6 +27,7 @@ class views_plugin_row_fields extends views_plugin_row {
    * Provide a form for setting options.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $options = $this->display->handler->get_field_labels();
 
     if (empty($this->options['inline'])) {

@@ -11,14 +11,16 @@ D/tests////
 D/theme////
 D/translations////
 D/views_export////
-/D7UPGRADE.txt/1.1.2.1/Thu Nov 11 16:11:30 2010//TDRUPAL-7--3
-/README.txt/1.26.6.1/Thu Nov 11 16:11:30 2010//TDRUPAL-7--3
-/documentation-standards.txt/1.1/Thu Nov 11 16:11:30 2010//TDRUPAL-7--3
-/views2.doxy/1.2/Thu Nov 11 16:11:30 2010//TDRUPAL-7--3
-/views3.doxy/1.1.2.1/Thu Nov 11 16:11:30 2010//TDRUPAL-7--3
-/views_ui.info/1.10.6.1/Thu Nov 11 16:11:30 2010//TDRUPAL-7--3
-/views.install/1.50.4.9/Sat Nov 20 02:22:59 2010//TDRUPAL-7--3
-/views.module/1.341.4.42/Sat Nov 20 02:22:59 2010//TDRUPAL-7--3
-/CHANGELOG.txt/1.344.4.463/Tue Nov 23 16:24:03 2010//TDRUPAL-7--3
-/views.info/1.7.6.47/Result of merge+Tue Nov 23 16:24:03 2010//TDRUPAL-7--3
-/views_ui.module/1.109.6.15/Result of merge+Tue Nov 23 16:24:03 2010//TDRUPAL-7--3
+/CHANGELOG.txt/1.344.4.614/Thu Jan  6 23:31:37 2011//TDRUPAL-7--3
+/D7UPGRADE.txt/1.1.2.1/Thu Jan  6 23:29:45 2011//TDRUPAL-7--3
+/README.txt/1.26.6.1/Thu Jan  6 23:29:45 2011//TDRUPAL-7--3
+/documentation-standards.txt/1.1/Thu Jan  6 23:29:45 2011//TDRUPAL-7--3
+/views.drush.inc/1.1.6.2/Wed Jan  5 00:09:12 2011//TDRUPAL-7--3
+/views.info/1.7.6.60/Result of merge+Thu Jan  6 23:31:38 2011//TDRUPAL-7--3
+/views.install/1.50.4.12/Thu Jan  6 23:31:38 2011//TDRUPAL-7--3
+/views.module/1.341.4.53/Thu Jan  6 23:31:38 2011//TDRUPAL-7--3
+/views2.doxy/1.2/Thu Jan  6 23:29:45 2011//TDRUPAL-7--3
+/views3.doxy/1.1.2.1/Thu Jan  6 23:29:45 2011//TDRUPAL-7--3
+/views_ui.info/1.10.6.2/Result of merge//TDRUPAL-7--3
+/views_ui.module/1.109.6.18/Result of merge+Thu Jan  6 23:31:38 2011//TDRUPAL-7--3
+D/po////

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter.inc,v 1.10.4.12 2010/11/18 01:05:04 merlinofchaos Exp $
+// $Id: views_handler_filter.inc,v 1.10.4.15 2010/12/24 13:42:00 dereine Exp $
 /**
  * @defgroup views_filter_handlers Views' filter handlers
  * @{
@@ -83,6 +83,7 @@ class views_handler_filter extends views_handler {
    * are called.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }
@@ -268,10 +269,8 @@ class views_handler_filter extends views_handler {
    * Validate the options form.
    */
   function expose_validate($form, &$form_state) {
-    if (empty($this->options['expose']['identifier'])) {
-      if (empty($form_state['values']['options']['expose']['identifier'])) {
-        form_error($form['expose']['identifier'], t('The identifier is required if the filter is exposed.'));
-      }
+    if (empty($form_state['values']['options']['expose']['identifier'])) {
+      form_error($form['expose']['identifier'], t('The identifier is required if the filter is exposed.'));
     }
 
     if (!empty($form_state['values']['options']['expose']['identifier']) && $form_state['values']['options']['expose']['identifier'] == 'value') {
@@ -509,6 +508,18 @@ class views_handler_filter extends views_handler {
     $this->ensure_my_table();
     $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field", $this->value, $this->operator);
   }
+
+  /**
+   * Can this filter be used in OR groups?
+   *
+   * Some filters have complicated where clauses that cannot be easily used
+   * with OR groups. Some filters must also use HAVING which also makes
+   * them not groupable. These filters will end up in a special group
+   * if OR grouping is in use.
+   */
+   function can_group() {
+     return TRUE;
+   }
 }
 
 

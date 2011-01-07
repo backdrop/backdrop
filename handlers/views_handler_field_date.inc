@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_date.inc,v 1.3.4.4 2010/11/05 07:20:54 dereine Exp $
+// $Id: views_handler_field_date.inc,v 1.3.4.6 2010/12/23 22:34:37 dereine Exp $
 /**
  * A handler to provide proper displays for dates.
  *
@@ -22,9 +22,9 @@ class views_handler_field_date extends views_handler_field {
       '#type' => 'select',
       '#title' => t('Date format'),
       '#options' => array(
-        'small' => format_date(REQUEST_TIME, 'small'),
-        'medium' => format_date(REQUEST_TIME, 'medium'),
-        'large' => format_date(REQUEST_TIME, 'large'),
+        'small' => t('Short date format') . ' ' . format_date(REQUEST_TIME, 'small'),
+        'medium' => t('Medium date format') . ' ' . format_date(REQUEST_TIME, 'medium'),
+        'large' => t('Long date format') . ' ' . format_date(REQUEST_TIME, 'large'),
         'custom' => t('Custom'),
         'raw time ago' => t('Time ago'),
         'time ago' => t('Time ago (with "ago" appended)'),
@@ -50,10 +50,7 @@ class views_handler_field_date extends views_handler_field {
       $custom_format = $this->options['custom_date_format'];
     }
 
-    if (!$value) {
-      return theme('views_nodate');
-    }
-    else {
+    if ($value) {
       $time_diff = REQUEST_TIME - $value; // will be positive for a datetime in the past (ago), and negative for a datetime in the future (hence)
       switch ($format) {
         case 'raw time ago':

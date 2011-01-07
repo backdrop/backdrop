@@ -1,5 +1,5 @@
 <?php
-// $Id: comment.views_default.inc,v 1.7.6.6 2010/10/16 08:41:24 dereine Exp $
+// $Id: comment.views_default.inc,v 1.7.6.7 2011/01/05 23:14:39 dereine Exp $
 /**
  * @file
  * Contains default views on behalf of the comment module.
@@ -15,6 +15,7 @@ function comment_views_default_views() {
   $view->tag = 'default';
   $view->base_table = 'comment';
   $view->api_version = 2;
+  $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -108,6 +109,7 @@ function comment_views_default_views() {
   $view->tag = 'default';
   $view->base_table = 'node';
   $view->api_version = 2;
+  $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(

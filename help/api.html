@@ -1,4 +1,4 @@
-<!-- $Id: api.html,v 1.5.6.1 2009/11/02 22:01:26 merlinofchaos Exp $ -->
+<!-- $Id: api.html,v 1.5.6.2 2010/12/17 21:13:16 merlinofchaos Exp $ -->
 Views allows modules to describe their tables relationships to each other, as well as fields, filters, sort criteria and arguments via <strong>hook_views_data()</strong>. Whenever Views deems it necessary, this hook is called, the data aggregated together and cached. <strong>hook_views_data_alter()</strong> may also be used to modify existing data, changing other module's handlers or adding handlers to other module's tables.
 
 Views also allows modules to create new display types, style types, row styles, argument default handlers and argument validators via <strong>hook_views_handlers()</strong> and <strong>hook_views_plugins()</strong>.
@@ -20,4 +20,6 @@ Often these versions are basically compatible with each other and Views won't ca
 </dd>
 <dt><strong>path</strong></dt>
 <dd>If your *.views*.inc files are not in the same directory as the .module file, then return the full path here. You should probably use something like drupal_get_path('module', 'yourmodulename') . '/includepath'.</dd>
+<dt><strong>template path</strong></dt>
+<dd>A path where the module has stored it's views template files. When you have specificed this key views automatically uses the template files for the views. You can use the same naming conventions like for normal views template files.</dd>
 </dl>

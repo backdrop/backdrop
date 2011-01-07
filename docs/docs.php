@@ -1,5 +1,5 @@
 <?php
-// $Id: docs.php,v 1.16.4.8 2010/11/18 00:43:18 merlinofchaos Exp $
+// $Id: docs.php,v 1.16.4.10 2010/12/18 08:02:37 dereine Exp $
 /**
  * @file
  * This file contains no working PHP code; it exists to provide additional documentation
@@ -270,6 +270,9 @@ function hook_views_plugins_alter(&$plugins) {
  *   - path: (optional) If includes are stored somewhere other than within
  *       the root module directory or a subdirectory called includes, specify
  *       its path here.
+ *   - template path: (optional) A path where the module has stored it's views template files.
+ *        When you have specificed this key views automatically uses the template files for the views.
+ *        You can use the same naming conventions like for normal views template files.
  */
 function hook_views_api() {
   return array(
@@ -510,7 +513,6 @@ function hook_views_default_views() {
     'style_plugin' => 'rss',
     'style_options' =>
     array (
-      'mission_description' => 1,
       'description' => '',
     ),
     'row_plugin' => 'node_rss',

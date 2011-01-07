@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_sort.inc,v 1.2.4.3 2010/02/22 10:15:28 dereine Exp $
+// $Id: views_handler_sort.inc,v 1.2.4.4 2010/12/17 21:42:19 merlinofchaos Exp $
 /**
  * @defgroup views_sort_handlers Views' sort handlers
  * @{
@@ -62,6 +62,7 @@ class views_handler_sort extends views_handler {
    * Basic options for all sort criteria
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }

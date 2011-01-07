@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_date.test,v 1.1.4.2 2010/10/16 07:31:34 dereine Exp $
+// $Id: views_handler_filter_date.test,v 1.1.4.3 2010/11/25 20:07:44 dereine Exp $
 
 /**
  * Tests the handler filter_date.
@@ -28,6 +28,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $this->map = array(
       'nid' => 'nid',
     );
+    $this->enableViewsUi();
   }
 
   /**
@@ -126,6 +127,26 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
     $view->delete();
+  }
+
+  /**
+   * Take sure the validation callbacks works.
+   */
+  function testUiValidation() {
+    $view = $this->views_test_between();
+    $view->save();
+
+    $admin_user =   $this->drupalCreateUser(array('administer views', 'administer site configuration'));
+    $this->drupalLogin($admin_user);
+    menu_rebuild();
+    $this->drupalGet('admin/structure/views/edit/test_filter_date_between');
+    $this->drupalGet('admin/structure/views/nojs/config-item/test_filter_date_between/default/filter/created');
+
+    $edit = array();
+    // Generate a definitive wrong value, which should be checked by validation.
+    $edit['options[value][value]'] = $this->randomString() . '-------';
+    $this->drupalPost(NULL, $edit, t('Update'));
+    $this->assertText(t('Invalid date format.'), 'Take sure that validation is runned and the invalidate date format is identified.');
   }
 
   function views_test_between() {

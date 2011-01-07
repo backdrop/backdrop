@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.341.4.42 2010/11/18 23:16:51 merlinofchaos Exp $
+// $Id: views.module,v 1.341.4.53 2011/01/06 00:37:05 dereine Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -33,7 +33,7 @@ function views_init() {
 /**
  * Implement hook_theme(). Register views theming functions.
  */
-function views_theme() {
+function views_theme($existing, $type, $theme, $path) {
   $path = drupal_get_path('module', 'views');
   include_once $path . '/theme/theme.inc';
 
@@ -116,7 +116,83 @@ function views_theme() {
     'pattern' => 'views_more__',
     'variables' => array('more_url' => NULL, 'link_text' => 'more'),
   );
+
+  // Add theme suggestions which are part of modules.
+  foreach (views_get_module_apis() as $info) {
+    if (isset($info['template path'])) {
+      $hooks += _views_find_module_templates($hooks, $info['template path']);
+    }
+  }
   return $hooks;
+}
+
+/**
+ * Scans a directory of a module for template files.
+ *
+ * @param $cache
+ *   The existing cache of theme hooks to test against.
+ * @param $path
+ *   The path to search.
+ *
+ * @see drupal_find_theme_templates
+ */
+function _views_find_module_templates($cache, $path) {
+  $regex = '/' . '\.tpl\.php' . '$' . '/';
+
+  // Because drupal_system_listing works the way it does, we check for real
+  // templates separately from checking for patterns.
+  $files = drupal_system_listing($regex, $path, 'name', 0);
+  foreach ($files as $template => $file) {
+    // Chop off the remaining extensions if there are any. $template already
+    // has the rightmost extension removed, but there might still be more,
+    // such as with .tpl.php, which still has .tpl in $template at this point.
+    if (($pos = strpos($template, '.')) !== FALSE) {
+      $template = substr($template, 0, $pos);
+    }
+    // Transform - in filenames to _ to match function naming scheme
+    // for the purposes of searching.
+    $hook = strtr($template, '-', '_');
+    if (isset($cache[$hook])) {
+      $templates[$hook] = array(
+        'template' => $template,
+        'path' => dirname($file->filename),
+        'includes' => isset($cache[$hook]['includes']) ? $cache[$hook]['includes'] : NULL,
+      );
+    }
+    // Ensure that the pattern is maintained from base themes to its sub-themes.
+    // Each sub-theme will have their templates scanned so the pattern must be
+    // held for subsequent runs.
+    if (isset($cache[$hook]['pattern'])) {
+      $templates[$hook]['pattern'] = $cache[$hook]['pattern'];
+    }
+  }
+
+  $patterns = array_keys($files);
+
+  foreach ($cache as $hook => $info) {
+    if (!empty($info['pattern'])) {
+      // Transform _ in pattern to - to match file naming scheme
+      // for the purposes of searching.
+      $pattern = strtr($info['pattern'], '_', '-');
+
+      $matches = preg_grep('/^'. $pattern .'/', $patterns);
+      if ($matches) {
+        foreach ($matches as $match) {
+          $file = substr($match, 0, strpos($match, '.'));
+          // Put the underscores back in for the hook name and register this pattern.
+          $templates[strtr($file, '-', '_')] = array(
+            'template' => $file,
+            'path' => dirname($files[$match]->filename),
+            'variables' => $info['variables'],
+            'base hook' => $hook,
+            'includes' => isset($info['includes']) ? $info['includes'] : NULL,
+          );
+        }
+      }
+    }
+  }
+
+  return $templates;
 }
 
 /**
@@ -180,9 +256,11 @@ function views_menu() {
   $items['views/ajax'] = array(
     'title' => 'Views',
     'page callback' => 'views_ajax',
+    'delivery callback' => 'ajax_deliver',
     'access callback' => TRUE,
     'description' => 'Ajax callback for view loading.',
     'type' => MENU_CALLBACK,
+    'file' => 'includes/ajax.inc',
   );
   // Path is not admin/structure/views due to menu complications with the wildcards from
   // the generic ajax callback.
@@ -519,6 +597,13 @@ function views_access() {
     }
 
     list($callback, $arguments) = $arg;
+    $arguments = $arguments ? $arguments : array();
+    // Bring dynamic arguments to the access callback.
+    foreach ($arguments as $key => $value) {
+      if (is_int($value) && isset($args[$value])) {
+        $arguments[$key] = $args[$value];
+      }
+    }
     if (function_exists($callback) && call_user_func_array($callback, $arguments)) {
       return TRUE;
     }
@@ -661,17 +746,17 @@ function views_add_js($file) {
   if (variable_get('views_no_javascript', FALSE)) {
     return;
   }
-
   static $base = TRUE, $ajax = TRUE;
   if ($base) {
     drupal_add_js(drupal_get_path('module', 'views') . "/js/base.js");
     $base = FALSE;
   }
-  if ($ajax && $file == 'ajax') {
-    drupal_add_js('misc/ajax.js', array('group' => JS_LIBRARY));
-    $ajax = TRUE;
+  if ($ajax && in_array($file, array('ajax', 'ajax_view'))) {
+    drupal_add_library('system', 'drupal.ajax');
+    drupal_add_library('system', 'jquery.form');
+    $ajax = FALSE;
   }
-  drupal_add_js(drupal_get_path('module', 'views') . "/js/$file.js");
+  ctools_add_js($file, 'views');
 }
 
 /**
@@ -993,6 +1078,33 @@ function views_get_view($name, $reset = FALSE) {
 // Views debug helper functions
 
 /**
+ * Provide debug output for Views. This relies on devel.module
+ */
+function views_debug($message) {
+  if (module_exists('devel') && variable_get('views_devel_output', FALSE) && user_access('access devel information')) {
+    if (is_string($message)) {
+      $output = $message;
+    }
+    else {
+      $output = var_export($message, TRUE);
+    }
+    if (variable_get('views_devel_region', 'footer') != 'watchdog') {
+      drupal_set_content(variable_get('views_devel_region', 'footer'), '<pre>' . $output . '</pre>');
+    }
+    else {
+      watchdog('views_logging', '<pre>' . $output . '</pre>');
+    }
+  }
+}
+
+/**
+ * Shortcut to views_debug()
+ */
+function vpr($message) {
+  views_debug($message);
+}
+
+/**
  * Debug messages
  */
 function vsm($message) {
@@ -1086,7 +1198,7 @@ function views_exposed_form($form, &$form_state) {
 
   // If using AJAX, we need the form plugin.
   if ($view->use_ajax) {
-    drupal_add_js('misc/jquery.form.js', array('group' => JS_LIBRARY));
+    drupal_add_library('system', 'jquery.form');
   }
   ctools_include('dependent');
 
@@ -1178,13 +1290,12 @@ function views_theme_functions($hook, $view, $display = NULL) {
  * Substitute current time; this works with cached queries.
  */
 function views_views_query_substitutions($view) {
-  global $language;
+  global $language_content;
   return array(
     '***CURRENT_VERSION***' => VERSION,
     '***CURRENT_TIME***' => REQUEST_TIME,
-    '***CURRENT_LANGUAGE***' => $language->language,
+    '***CURRENT_LANGUAGE***' => $language_content->language,
     '***DEFAULT_LANGUAGE***' => language_default('language'),
-    '***NO_LANGUAGE***' => '',
   );
 }
 
