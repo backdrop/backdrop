@@ -38,7 +38,7 @@ class views_handler_field_comment_link extends views_handler_field {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+    $this->options['alter']['path'] = "comment/" . $values->{$this->aliases['cid']};
     $this->options['alter']['html'] = TRUE;
     $this->options['alter']['fragment'] = "comment-" . $values->{$this->aliases['cid']};
 
