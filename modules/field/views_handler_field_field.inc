@@ -181,7 +181,7 @@ class views_handler_field_field extends views_handler_field {
     if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
       if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
         $type = 'textfield';
-        $options = array();
+        $options = NULL;
         $description = t('The sequence number of the value to show. Numbers start from 0. Leave empty to display all values.');
       }
       else {
