@@ -20,6 +20,10 @@ Description:
 Module project page:
   http://drupal.org/project/field_group
   
+Documentation page: 
+  http://drupal.org/node/1017838
+  http://drupal.org/node/1017962
+  
 To submit bug reports and feature suggestions, or to track changes:
   http://drupal.org/project/issues/field_group
 

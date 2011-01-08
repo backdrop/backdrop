@@ -544,8 +544,8 @@ function field_group_field_overview_submit($form, &$form_state) {
   $children = array_fill_keys($form['#groups'], array());
   foreach ($form_values as $name => $value) {
     if (!empty($value['parent'])) {
-      // Substitute newly added fields, in case they were dragged directly in a
-      // group.
+      // Substitute newly added fields, in case they were dragged
+      // directly in a group.
       if ($name == '_add_new_field' && isset($form_state['fields_added']['_add_new_field'])) {
         $name = $form_state['fields_added']['_add_new_field'];
       }
