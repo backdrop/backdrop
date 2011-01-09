@@ -566,6 +566,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       break;
     // Vertical tabs group.
+    // Vertical tabs for forms need a little tricky approach, to be
+    // able to optionally merge field(groups) with the "additional_settings"
     case 'tabs':
       $element += array(
         '#type' => 'vertical_tabs',
@@ -610,8 +612,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       }
       // For the form, we will keep it in the core additional_settings.
       else {
-        //$form['additional_settings'][$group->group_name] = array(
-        $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = array(
+        // Create the fieldgroup element.
+        $child_element = array(
           '#type' => 'fieldset',
           '#title' => check_plain(t($group->label)) . $required,
           '#weight' => -30, // hardcoded to bring our extra additional vtabs on top.
@@ -620,12 +622,36 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           '#attributes' => array('class' => array($group->format_type)),
           '#group' => 'additional_settings'
         );
-        $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
-        foreach (element_children($element) as $fieldname) {
-          //$form['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
-          $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
-          unset($element[$fieldname]);
+        // Check if the additional_settings exist for this type of form,
+        // if not, add the vertical_tabs wrapper.
+        if (!isset($form['additional_settings']['#type'])) {
+          $form['additional_settings'] = array(
+            '#type' => 'vertical_tabs',
+            '#weight' => $group->weight,
+            '#theme_wrappers' => array('vertical_tabs'),
+            '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
+            '#suffix' => '</div>',
+          );
+          $form['#attached']['js'][] = 'misc/form.js';
+          $form['#attached']['js'][] = 'misc/collapse.js';
+          $form['additional_settings'][$group->group_name] = $child_element;
+          // Nest the fields inside the appropriate structure.
+          foreach (element_children($element) as $fieldname) {
+            $form['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+            unset($element[$fieldname]);
+          }
         }
+        // Merge fieldgroups with the core additional settings.
+        else {
+          $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $child_element;
+          $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
+          // Nest the fields inside the appropriate structure.
+          foreach (element_children($element) as $fieldname) {
+            $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+            unset($element[$fieldname]);
+          }
+        }
+
       }
 
     break;
