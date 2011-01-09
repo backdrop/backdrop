@@ -529,8 +529,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element += array(
         '#type' => 'markup',
         '#prefix' => '
-        <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . '</h3>
-        ' . $required . '<div class="field-group-format-wrapper">',
+        <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . $required . '</h3>
+        <div class="field-group-format-wrapper">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
         //'#attributes' => array('class' => array($group->format_type)),
