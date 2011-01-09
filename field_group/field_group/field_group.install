@@ -73,18 +73,20 @@ function field_group_schema() {
  */
 function _update_7000_field_group_read_groups() {
   $groups = array();
-  $query = db_select('content_group', 'cg', array('fetch' => PDO::FETCH_ASSOC))
-    ->fields('cg');
-  foreach ($query->execute() as $record) {
-      $record['settings'] = unserialize($record['settings']);
-    $groups[$record['group_name']] = $record;
-  }
-  foreach ($groups as $key => $group) {
-    $query2 = db_select('content_group_fields', 'cgf', array('fetch' => PDO::FETCH_ASSOC))
-      ->fields('cgf')
-      ->condition('group_name', $group['group_name']);
-    foreach ($query2->execute() as $field) {
-      $groups[$field['group_name']]['children'][] = $field;
+  if (db_table_exists('content_group')) {
+    $query = db_select('content_group', 'cg', array('fetch' => PDO::FETCH_ASSOC))
+      ->fields('cg');
+    foreach ($query->execute() as $record) {
+        $record['settings'] = unserialize($record['settings']);
+      $groups[$record['group_name']] = $record;
+    }
+    foreach ($groups as $key => $group) {
+      $query2 = db_select('content_group_fields', 'cgf', array('fetch' => PDO::FETCH_ASSOC))
+        ->fields('cgf')
+        ->condition('group_name', $group['group_name']);
+      foreach ($query2->execute() as $field) {
+        $groups[$field['group_name']]['children'][] = $field;
+      }
     }
   }
   return $groups;
@@ -97,55 +99,60 @@ function field_group_update_7000() {
 
   $groups = _update_7000_field_group_read_groups();
 
-  module_load_include('module', 'field_group');
+  if (!empty($groups)) {
 
-  foreach ($groups as $group) {
+    module_load_include('module', 'field_group');
 
-    $group = (object) $group;
+    foreach ($groups as $group) {
 
-    $new = new stdClass();
-    $new->group_name = $group->group_name;
-    $new->entity_type = 'node';
-    $new->bundle = $group->type_name;
-    $new->label = $group->label;
-    $new->parent_name = '';
-    $new->children = array();
-    foreach ($group->children as $child) {
-      $new->children[] = $child['field_name'];
+      $group = (object) $group;
+
+      $new = new stdClass();
+      $new->group_name = $group->group_name;
+      $new->entity_type = 'node';
+      $new->bundle = $group->type_name;
+      $new->label = $group->label;
+      $new->parent_name = '';
+      $new->children = array();
+      foreach ($group->children as $child) {
+        $new->children[] = $child['field_name'];
+      }
+
+      // The form.
+      $new->id = NULL;
+      $new->weight = $group->weight;
+      $new->mode = 'form';
+      $new->format_type = 'fieldset';
+      $new->format_settings = array(
+        'formatter' => preg_match("/fieldset/", $group->settings['form']['style']) ? 'collapsible' : 'collapsed',
+        'instance_settings' => array(),
+      );
+      field_group_create_field_group($new);
+
+      // The full node.
+      $new->id = NULL;
+      $new->weight = $group->weight;
+      $new->mode = 'default';
+      $new->format_type = $group->settings['display']['full']['format'];
+      $new->format_settings = array(
+        'formatter' => 'collapsible',
+        'instance_settings' => array(),
+      );
+      field_group_create_field_group($new);
+
+      // The teaser node.
+      $new->id = NULL;
+      $new->weight = $group->weight;
+      $new->mode = 'teaser';
+      $new->format_type = $group->settings['display']['teaser']['format'];
+      $new->format_settings = array(
+        'formatter' => 'collapsible',
+        'instance_settings' => array(),
+      );
+      field_group_create_field_group($new);
+
     }
 
-    // The form.
-    $new->id = NULL;
-    $new->weight = $group->weight;
-    $new->mode = 'form';
-    $new->format_type = 'fieldset';
-    $new->format_settings = array(
-      'formatter' => preg_match("/fieldset/", $group->settings['form']['style']) ? 'collapsible' : 'collapsed',
-      'instance_settings' => array(),
-    );
-    field_group_create_field_group($new);
-
-    // The full node.
-    $new->id = NULL;
-    $new->weight = $group->weight;
-    $new->mode = 'default';
-    $new->format_type = $group->settings['display']['full']['format'];
-    $new->format_settings = array(
-      'formatter' => 'collapsible',
-      'instance_settings' => array(),
-    );
-    field_group_create_field_group($new);
-
-    // The teaser node.
-    $new->id = NULL;
-    $new->weight = $group->weight;
-    $new->mode = 'teaser';
-    $new->format_type = $group->settings['display']['teaser']['format'];
-    $new->format_settings = array(
-      'formatter' => 'collapsible',
-      'instance_settings' => array(),
-    );
-    field_group_create_field_group($new);
-
   }
+
 }
