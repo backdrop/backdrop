@@ -439,6 +439,8 @@ function field_group_field_group_format_settings($group) {
  */
 function field_group_field_group_pre_render(& $element, $group, & $form) {
 
+  $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
+
   // Prepare extra classes.
   $classes = array($group->format_type);
   if (isset($group->format_settings['formatter'])) {
@@ -548,8 +550,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       $form['#attached']['js'][] = 'misc/form.js';
       $form['#attached']['js'][] = 'misc/collapse.js';
-      //drupal_add_library('field_group', 'horizontal-tabs');
-      //drupal_add_library('system', 'effects.blind');
       break;
     // Horizontal tab.
     case 'htab':
@@ -576,13 +576,13 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       );
       $form['#attached']['js'][] = 'misc/form.js';
       $form['#attached']['js'][] = 'misc/collapse.js';
-      //$form['#attached']['js'][] = 'misc/vertical-tabs.js';
-      //$form['#attached']['css'][] = 'misc/vertical-tabs.css';
       break;
     // Vertical tab.
     case 'tab':
-      // For the form, we will keep it in the root.
-      if (isset($form['#view_mode'])) {
+      // Front-end and back-end on configuration will lead
+      // to vertical tabs nested in a separate vertical group.
+      if ($view_mode != 'form') {
+        $parent_name = empty($group->parent_name) ? 'additional_settings' : $group->parent_name;
         $element += array(
           '#type' => 'fieldset',
           '#title' => check_plain(t($group->label)) . $required,
@@ -590,23 +590,40 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
           '#attributes' => array('class' => array($group->format_type)),
-          '#group' => $group->parent_name,
-          // very important. Cannot be added on the form!
-          '#parents' => array($group->parent_name),
+          '#group' => $parent_name,
+          '#parents' => array($parent_name),
         );
       }
-      else {
-        $form['additional_settings'][$group->group_name] = array(
+      // Form fieldgroups which are nested into a vertical tab group
+      // are handled a little different.
+      elseif (!empty($group->parent_name)) {
+        $parent_name = $group->parent_name;
+        $element += array(
           '#type' => 'fieldset',
           '#title' => check_plain(t($group->label)) . $required,
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
           '#attributes' => array('class' => array($group->format_type)),
-          '#group' => 'additional_settings',
+          '#group' => $parent_name
         );
+      }
+      // For the form, we will keep it in the core additional_settings.
+      else {
+        //$form['additional_settings'][$group->group_name] = array(
+        $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = array(
+          '#type' => 'fieldset',
+          '#title' => check_plain(t($group->label)) . $required,
+          '#weight' => -30, // hardcoded to bring our extra additional vtabs on top.
+          '#collapsible' => $collapsible,
+          '#collapsed' => $collapsed,
+          '#attributes' => array('class' => array($group->format_type)),
+          '#group' => 'additional_settings'
+        );
+        $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
         foreach (element_children($element) as $fieldname) {
-          $form['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+          //$form['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+          $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
           unset($element[$fieldname]);
         }
       }
@@ -620,8 +637,6 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
  * @param Array $elements by address.
  */
 function field_group_field_group_build_pre_render_alter(& $element) {
-
-  static $unique = 0;
 
   // Dish the fieldgroups with no fields.
   $display = isset($element['#view_mode']);
@@ -640,7 +655,6 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
   $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
 
-  $unique++;
 }
 
 /**
@@ -987,7 +1001,7 @@ function field_group_attach_groups(&$element, $view_mode) {
   // Add a pre render or process callback.
   // This is needed since process seems too early for the front view modes.
   // TODO Really check what's the difference on forms to use pre_render or process.
-  //$element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_group_pre_render';
+  //$element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_build_pre_render';
   $element['#pre_render'][] = 'field_group_build_pre_render';
   //$element['#process'][] = 'field_group_build_pre_render';
 }
@@ -1028,6 +1042,7 @@ function field_group_build_pre_render($element) {
  *   the parent name to look for in each level.
  */
 function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL) {
+
   $groups = $root_element['#groups'];
   $group_fields = $root_element['#group_children'];
 
