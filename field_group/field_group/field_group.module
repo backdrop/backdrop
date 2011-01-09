@@ -90,7 +90,29 @@ function field_group_menu() {
     }
   }
 
+  // Configuration for field_group.
+  $items['admin/config/user-interface/field_group'] = array(
+    'title' => 'Fieldgroups',
+    'description' => 'Configure fieldgroup.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('field_group_admin_settings'),
+    'access arguments' => array('administer fieldgroups'),
+    'file' => 'field_group.admin.inc',
+  );
+
   return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function field_group_permission() {
+  return array(
+    'administer fieldgroups' => array(
+      'title' => t('Administer fieldgroups'),
+      'description' => t('Display the administration for fieldgroups.'),
+    ),
+  );
 }
 
 /**
@@ -446,12 +468,18 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     'type' => 'setting',
   );
 
+  // If field is required, add asterisx.
+  $required = '';
+  if(!empty($group->required)) {
+    $required = t('<span title="This group has required fields" class="form-required"> *</span>');
+  }
+
   switch ($group->format_type) {
     // Fieldset.
     case 'fieldset':
       $element += array(
         '#type' => 'fieldset',
-        '#title' => check_plain(t($group->label)),
+        '#title' => check_plain(t($group->label)) . $required,
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
@@ -502,7 +530,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#type' => 'markup',
         '#prefix' => '
         <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . '</h3>
-        <div class="field-group-format-wrapper">',
+        ' . $required . '<div class="field-group-format-wrapper">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
         //'#attributes' => array('class' => array($group->format_type)),
@@ -527,7 +555,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     case 'htab':
       $element += array(
         '#type' => 'fieldset',
-        '#title' => check_plain(t($group->label)),
+        '#title' => check_plain(t($group->label)) . $required,
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
@@ -557,7 +585,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       if (isset($form['#view_mode'])) {
         $element += array(
           '#type' => 'fieldset',
-          '#title' => check_plain(t($group->label)),
+          '#title' => check_plain(t($group->label)) . $required,
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
@@ -570,7 +598,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       else {
         $form['additional_settings'][$group->group_name] = array(
           '#type' => 'fieldset',
-          '#title' => check_plain(t($group->label)),
+          '#title' => check_plain(t($group->label)) . $required,
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
@@ -790,6 +818,8 @@ function field_group_read_groups($params = array()) {
   $groups = array();
   $query = db_select('field_group', 'fg');
   $query->fields('fg');
+  // This makes sure the parents are always set first.
+  $query->orderBy('parent_name', 'ASC');
 
   // Turn the conditions into a query.
   foreach ($params as $key => $value) {
@@ -944,6 +974,14 @@ function field_group_attach_groups(&$element, $view_mode) {
       $group_children[$child] = $group_name;
     }
   }
+
+  // Check required fields if configured so.
+  if (variable_get('field_group_mark_as_required', FALSE) == TRUE) {
+    field_group_mark_as_required($element['#groups'], $element);
+    // Reverse the order as it was intended.
+    arsort($group_children);
+  }
+
   $element['#group_children'] = $group_children;
 
   // Add a pre render or process callback.
@@ -956,6 +994,7 @@ function field_group_attach_groups(&$element, $view_mode) {
 
 /**
  * Process/ Pre-render callback.
+ *
  * Depending on whether it is a form build or content build.
  * Form api go through more than a regular build. #process is
  * needed here, where #pre_render is ideal for the regular array.
@@ -976,6 +1015,7 @@ function field_group_build_pre_render($element) {
 
 /**
  * Recursive function to nest fields in the field groups.
+ *
  * This function will take out all the elements in the form and
  * place them in the correct container element, a fieldgroup.
  * The current group element in the loop is passed recursively so we can
@@ -1021,6 +1061,42 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
       field_group_fields_nest($element[$name], $root_element, $name);
     }
   }
+}
+
+/**
+ * Helper function to mark fieldgroups as required.
+ */
+function field_group_mark_as_required(& $element_groups, & $element) {
+
+  $rgroups = $element_groups;
+  //Reverse order for so deepest first
+  arsort($rgroups);
+
+  foreach ($rgroups as $group_name => $group) {
+    $group->required = isset($group->required)? $group->required : FALSE;
+    foreach ($group->children as $child) {
+      // Check if this is a field and group isn't already true, if so check if required
+      if (isset($element[$child]) && !$group->required) {
+        if (isset($element[$child]['#required'])) {
+          $group->required = $element[$child]['#required'] ? TRUE : $group->required;
+        }
+        elseif (isset($element[$child]['#tree']) && $element[$child]['#tree'] == TRUE) {
+          foreach (element_children($element[$child]) as $element_child) {
+            if (isset($element[$child][$element_child]['#required'])) {
+              $group->required = $element[$child][$element_child]['#required'] ? TRUE : $group->required;
+            }
+          }
+        }
+      }
+    }
+    // Set results after iterating through array.
+    $element['#groups'][$group_name]->required = $group->required;
+    // If array has parents set TRUE
+    if (isset($element['#groups'][$element['#groups'][$group_name]->parent_name]) && $group->required) {
+      $element_groups[$element['#groups'][$group_name]->parent_name]->required = $group->required;
+    }
+  }
+
 }
 
 /**
