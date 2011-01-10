@@ -335,24 +335,13 @@ class views_handler_field extends views_handler {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    // Use prefix and suffix to fake a fieldset because we use #tree.
-    $form['style_prefix'] = array(
-      '#value' => '<fieldset id="views-validator-options"><legend>' . t('Style settings') . '</legend>',
-    );
-
-    $form['exclude'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Exclude from display'),
-      '#default_value' => $this->options['exclude'],
-      '#description' => t('Check this box to not display this field, but still load it in the view. Use this option to not show a grouping field in each record, or when doing advanced theming, or when you want to use this field as a token in other fields.'),
-    );
-
     $form['element_type'] = array(
       '#title' => t('HTML element'),
       '#options' => $this->get_elements(),
       '#type' => 'select',
       '#default_value' => $this->options['element_type'],
       '#description' => t('Most styles provide wrappers for fields. If the chosen style supports wrappers, wrap the field in this HTML element. The default will usually be either DIV or SPAN.'),
+      '#fieldset' => 'style_settings',
     );
 
     $form['element_class'] = array(
@@ -360,13 +349,34 @@ class views_handler_field extends views_handler {
       '#description' => t('The class to provide on the wrapper element. You may enter data from this view as per the "Replacement patterns" used in "Rewrite the output of this field".'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_class'],
+      '#fieldset' => 'style_settings',
+    );
+
+    $form['custom_label'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create a label'),
+      '#description' => t('Enable to create a custom label for this field.'),
+      '#default_value' => (bool) ($this->definition['title'] !== $this->label()),
     );
 
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
       '#default_value' => isset($this->options['label']) ? $this->options['label'] : '',
-      '#description' => t('The label for this field that will be displayed to end users if the style requires it.'),
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-custom-label' => array(1)
+      ),
+    );
+
+    $form['element_label_colon'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Place a colon after the label'),
+      '#default_value' => $this->options['element_label_colon'],
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-custom-label' => array(1)
+      ),
     );
 
     $form['element_label_type'] = array(
@@ -374,7 +384,8 @@ class views_handler_field extends views_handler {
       '#options' => $this->get_elements(FALSE),
       '#type' => 'select',
       '#default_value' => $this->options['element_label_type'],
-      '#description' => t('What HTML Element type to use to wrap the label.'),
+      '#description' => t('What HTML element type to use to wrap the label.'),
+      '#fieldset' => 'style_settings',
     );
 
     $form['element_label_class'] = array(
@@ -382,13 +393,7 @@ class views_handler_field extends views_handler {
       '#description' => t('The class to provide on the label wrapper element.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_label_class'],
-    );
-
-    $form['element_label_colon'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Place a colon after the label'),
-      '#default_value' => $this->options['element_label_colon'],
-      '#description' => t('If the label is to be inline with the value, place a colon between them. Not valid for styles such as table where the label is not placed with the value.'),
+      '#fieldset' => 'style_settings',
     );
 
     $form['element_wrapper_type'] = array(
@@ -397,6 +402,7 @@ class views_handler_field extends views_handler {
       '#type' => 'select',
       '#default_value' => $this->options['element_wrapper_type'],
       '#description' => t('What HTML Element type to use to wrap the field (and the label). This is not supported by some styles such as tables.'),
+      '#fieldset' => 'style_settings',
     );
 
     $form['element_wrapper_class'] = array(
@@ -404,6 +410,7 @@ class views_handler_field extends views_handler {
       '#description' => t('The class to provide on the wrapper element.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_wrapper_class'],
+      '#fieldset' => 'style_settings',
     );
 
     $form['element_default_classes'] = array(
@@ -411,15 +418,29 @@ class views_handler_field extends views_handler {
       '#title' => t('Add default classes'),
       '#default_value' => $this->options['element_default_classes'],
       '#description' => t('Use default Views classes to identify the field, field label and field content.'),
+      '#fieldset' => 'style_settings',
     );
 
-    $form['style_suffix'] = array(
-      '#value' => '</fieldset>',
+    $form['exclude'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Exclude from display'),
+      '#default_value' => $this->options['exclude'],
+      '#description' => t('Check this box to not display this field, but still load it in the view. Use this option to not show a grouping field in each record, or when doing advanced theming, or when you want to use this field as a token in other fields.'),
+      '#fieldset' => 'style_settings',
+    );
+
+    $form['style_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Style settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     );
 
     $form['alter'] = array(
-      '#title' => t('Rewriting'),
+      '#title' => t('Rewrite results'),
       '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     );
 
     if ($this->allow_advanced_render()) {
@@ -653,36 +674,46 @@ If you would like to have the characters %5B and %5D please use the html entity 
       );
     }
 
-    // Use prefix and suffix to fake a fieldset because we use #tree.
-    $form['empty_prefix'] = array(
-      '#value' => '<fieldset id="views-validator-options"><legend>' . t('Empty field behavior') . '</legend>',
+    $form['empty_field_behavior'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('No results behavior'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     );
 
     $form['empty'] = array(
       '#type' => 'textfield',
-      '#title' => t('Empty text'),
+      '#title' => t('No results text'),
       '#default_value' => $this->options['empty'],
-      '#description' => t('If the field is empty, display this text instead.'),
+      '#description' => t('Provide text to display if this field returns no results.'),
+      '#fieldset' => 'empty_field_behavior',
     );
 
     $form['empty_zero'] = array(
       '#type' => 'checkbox',
       '#title' => t('Count the number 0 as empty'),
       '#default_value' => $this->options['empty_zero'],
-      '#description' => t('If the field contains the number zero, display the empty text instead'),
+      '#description' => t('Enable to display the "no results text" if the field contains the number 0.'),
+      '#fieldset' => 'empty_field_behavior',
     );
 
     $form['hide_empty'] = array(
       '#type' => 'checkbox',
       '#title' => t('Hide if empty'),
       '#default_value' => $this->options['hide_empty'],
-      '#description' => t('Do not display anything for this field if it is empty. Note that the field label may still be displayed. Check style or row style settings to hide labels for empty fields.'),
+      '#description' => t('Enable to hide this field if it is empty. Note that the field label may still be displayed. Check style or row style settings to hide labels for empty fields.'),
+      '#fieldset' => 'empty_field_behavior',
     );
 
-    $form['empty_suffix'] = array(
-      '#value' => '</fieldset>',
+    // This form is long and messy enough that the "Administrative title" option
+    // belongs in a "more options" fieldset at the bottom of the form.
+    $form['more'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('More'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     );
-
+    $form['ui_name']['#fieldset'] = 'more';
   }
 
   /**

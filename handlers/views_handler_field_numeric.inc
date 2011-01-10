@@ -27,8 +27,6 @@ class views_handler_field_numeric extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
     if (!empty($this->definition['float'])) {
       $form['set_precision'] = array(
         '#type' => 'checkbox',
@@ -94,6 +92,8 @@ class views_handler_field_numeric extends views_handler_field {
       '#default_value' => $this->options['suffix'],
       '#description' => t('Text to put after the number, such as currency symbol.'),
     );
+
+    parent::options_form($form, $form_state);
   }
 
   function render($values) {

@@ -39,7 +39,6 @@ class views_handler_field_boolean extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     foreach ($this->formats as $key => $item) {
       $options[$key] = implode('/', $item);
     }
@@ -56,6 +55,7 @@ class views_handler_field_boolean extends views_handler_field {
       '#description' => t('If checked, true will be displayed as false.'),
       '#default_value' => $this->options['not'],
     );
+    parent::options_form($form, $form_state);
   }
 
   function render($values) {

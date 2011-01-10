@@ -59,8 +59,6 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
     $field = field_info_field($this->definition['field_name']);
     $formatters = _field_view_formatter_options($field['type']);
 
@@ -100,6 +98,8 @@ class views_handler_field_field extends views_handler_field {
       $settings_form = $function($field, $instance, '_dummy', $form, $form_state);
     }
     $form['settings'] = $settings_form;
+
+    parent::options_form($form, $form_state);
   }
 
   /**

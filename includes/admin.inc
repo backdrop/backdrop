@@ -1189,6 +1189,33 @@ function template_preprocess_views_ui_display_tab_column(&$variables) {
 }
 
 /**
+ * Move form elements into fieldsets for presentation purposes.
+ *
+ * Many views forms use #tree = TRUE to keep their values in a hierarchy for
+ * easier storage. Moving the form elements into fieldsets during form building
+ * would break up that hierarchy. Therefore, we wait until the pre_render stage,
+ * where any changes we make affect presentation only and aren't reflected in
+ * $form_state['values'].
+ */
+function views_ui_pre_render_add_fieldset_markup($form) {
+  $keys = element_children($form);
+
+  foreach ($keys as $key) {
+    $element = $form[$key];
+    // In our form builder functions, we added an arbitrary #fieldset property
+    // to any element that belongs in a fieldset. If this form element has that
+    // property, move it into its fieldset.
+    if (isset($element['#type']) && isset($element['#fieldset']) && isset($form[$element['#fieldset']])) {
+      $form[$element['#fieldset']][$key] = $element;
+      // Remove the original element this duplicates.
+      unset($form[$key]);
+    }
+  }
+
+  return $form;
+}
+
+/**
  * Export a view for cut & paste.
  */
 function views_ui_export_page($form, &$form_state, $view) {

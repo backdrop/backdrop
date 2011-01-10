@@ -16,8 +16,6 @@ class views_handler_field_date extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
     $form['date_format'] = array(
       '#type' => 'select',
       '#title' => t('Date format'),
@@ -41,6 +39,8 @@ class views_handler_field_date extends views_handler_field {
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-options-date-format' => array('custom', 'raw time ago', 'time ago', 'raw time span', 'time span')),
     );
+
+    parent::options_form($form, $form_state);
   }
 
   function render($values) {

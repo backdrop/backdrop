@@ -9,8 +9,6 @@ class views_handler_field_counter extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
     $form['counter_start'] = array(
       '#type' => 'textfield',
       '#title' => t('Starting value'),
@@ -19,6 +17,8 @@ class views_handler_field_counter extends views_handler_field {
       //'#process' => array('ctools_dependent_process'),
       '#size' => 2,
     );
+
+    parent::options_form($form, $form_state);
   }
 
   function query() {

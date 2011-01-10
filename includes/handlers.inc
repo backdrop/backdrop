@@ -215,10 +215,19 @@ class views_handler extends views_object {
    */
   function options_validate(&$form, &$form_state) { }
 
+  /**
+   * Build the options form.
+   */
   function options_form(&$form, &$form_state) {
+    // Some form elements belong in a fieldset for presentation, but can't
+    // be moved into one because of the form_state['values'] hierarchy. Those
+    // elements can add a #fieldset => 'fieldset_name' property, and they'll
+    // be moved to their fieldset during pre_render.
+    $form['#pre_render'][] = 'views_ui_pre_render_add_fieldset_markup';
+
     $form['ui_name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Administrative Title'),
+      '#title' => t('Administrative title'),
       '#description' => t('This title will be displayed on the views edit page instead of the default one. This might be useful if you have the same item twice.'),
       '#default_value' => $this->options['ui_name'],
     );

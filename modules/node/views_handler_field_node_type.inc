@@ -17,11 +17,13 @@ class views_handler_field_node_type extends views_handler_field_node {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+
     $form['machine_name'] = array(
       '#title' => t('Output machine name'),
       '#description' => t('Display field as the node type machine name.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['machine_name']),
+      '#fieldset' => 'more',
     );
   }
 
