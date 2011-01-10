@@ -378,7 +378,15 @@ function views_ui_add_form($form, &$form_state) {
     ),
     '#description' => t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
   );
-  $form['show'] = array(
+
+  // Everything that can be updated by AJAX goes in here. It is triggered by
+  // the "Show" dropdown below.
+  $form['displays'] = array(
+    '#prefix' => '<div id="edit-view-displays-wrapper">',
+    '#suffix' => '</div>',
+  );
+
+  $form['displays']['show'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#attributes' => array('class' => array('inline')),
@@ -390,7 +398,7 @@ function views_ui_add_form($form, &$form_state) {
     $options[$key] = $w['title'];
   }
   $default = isset($options['node:blog']) ? 'node:blog' : 'node';
-  $form['show']['wizard_key'] = array(
+  $form['displays']['show']['wizard_key'] = array(
     '#type' => 'select',
     '#title' => t('Show'),
     '#options' => $options,
@@ -402,26 +410,21 @@ function views_ui_add_form($form, &$form_state) {
     ),
   );
 
-  // Everything that can be updated by AJAX goes in here. It is triggered by
-  // the "Show" dropdown above.
-  $form['displays'] = array(
-    '#prefix' => '<div id="edit-view-displays-wrapper">',
-    '#suffix' => '</div>',
-  );
-
   // Since the "Show" dropdown can't trigger a form submission when
-  // JavaScript is disabled, add a submit button to do that. CSS hides
-  // this button when JavaScript is enabled.
-  $form['show']['update_wizard_key'] = array(
+  // JavaScript is disabled, add a submit button to do that.
+  $form['displays']['show']['update_wizard_key'] = array(
     '#type' => 'submit',
     '#value' => t('Update displays'),
+    // Hide this button when JavaScript is enabled.
+    '#attributes' => array('class' => array('js-hide')),
+    // Do not trigger form validation errors elsewhere on the page.
     '#limit_validation_errors' => array(
       array('show'),
     ),
     '#submit' => array('views_ui_show_nojs_submit'),
   );
 
-  $wizard_key = isset($form_state['values']['show']['wizard_key']) ? $form_state['values']['show']['wizard_key'] : $form['show']['wizard_key']['#default_value'];
+  $wizard_key = isset($form_state['values']['show']['wizard_key']) ? $form_state['values']['show']['wizard_key'] : $form['displays']['show']['wizard_key']['#default_value'];
   $get_instance = $wizard_plugins[$wizard_key]['get_instance'];
   $wizard_instance = $get_instance($wizard_plugins[$wizard_key]);
   $form = $wizard_instance->build_form($form, $form_state);

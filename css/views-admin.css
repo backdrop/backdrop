@@ -140,13 +140,6 @@
 }
 
 /**
- * This is each row within one of the "boxes."
- */
-.js #edit-show-update-wizard-key {
-  display: none;
-}
-
-/**
  * The modal dialog box.
  */
  .views-ui-dialog .ui-dialog-content {
