@@ -24,13 +24,13 @@ class views_handler_field_file extends views_handler_field {
    * Provide link to file option
    */
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_to_file'] = array(
       '#title' => t('Link this field to download the file'),
-      '#description' => t('This will override any other link you have set.'),
+      '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_file']),
     );
+    parent::options_form($form, $form_state);
   }
 
   /**

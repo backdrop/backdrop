@@ -12,7 +12,6 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_display'] = array(
       '#title' => t('Type of link'),
       '#default_value' => $this->options['link_display'],
@@ -25,6 +24,7 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
     $form['text']['#title'] = t('Link label');
     $form['text']['#required'] = TRUE;
     $form['text']['#default_value'] = empty($this->options['text']) ? t('contact') : $this->options['text'];
+    parent::options_form($form, $form_state);
   }
 
   // An example of field level access control.

@@ -24,13 +24,12 @@ class views_handler_field_user_name extends views_handler_field_user {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
     $form['overwrite_anonymous'] = array(
       '#title' => t('Overwrite the value to display for anonymous users'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['overwrite_anonymous']),
-      '#description' => t('If selected, you will see a field to enter the text to use for anonymous users.'),
+      '#description' => t('Enable to display different text for anonymous users.'),
+      '#fieldset' => 'more',
     );
     $form['anonymous_text'] = array(
       '#title' => t('Text to display for anonymous users'),
@@ -40,7 +39,10 @@ class views_handler_field_user_name extends views_handler_field_user {
       '#dependency' => array(
         'edit-options-overwrite-anonymous' => array(1),
       ),
+      '#fieldset' => 'more',
     );
+
+    parent::options_form($form, $form_state);
   }
 
   function render_link($data, $values) {

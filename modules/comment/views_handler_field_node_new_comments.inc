@@ -31,13 +31,14 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_to_comment'] = array(
       '#title' => t('Link this field to new comments'),
-      '#description' => t('This will override any other link you have set.'),
+      '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_comment'],
     );
+
+    parent::options_form($form, $form_state);
   }
 
   function query() {

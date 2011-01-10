@@ -26,13 +26,13 @@ class views_handler_field_node_revision extends views_handler_field_node {
    * Provide link to revision option.
    */
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_to_node_revision'] = array(
       '#title' => t('Link this field to its node revision'),
       '#description' => t('This will override any other link you have set.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_node_revision']),
     );
+    parent::options_form($form, $form_state);
   }
 
   /**
