@@ -2303,6 +2303,13 @@ class views_plugin_display extends views_plugin {
       }
     }
 
+    // Validate query plugin.
+    $query = $this->get_plugin('query');
+    $result = $query->validate();
+    if (!empty($result) && is_array($result)) {
+      $errors = array_merge($errors, $result);
+    }
+
     // Validate handlers
     foreach (views_object_types() as $type => $info) {
       foreach ($this->get_handlers($type) as $handler) {
