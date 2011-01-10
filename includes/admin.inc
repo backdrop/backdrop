@@ -742,6 +742,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#attached']['library'][] = array('system', 'ui.dialog');
   $form['#attached']['library'][] = array('system', 'drupal.ajax');
   $form['#attached']['library'][] = array('system', 'jquery.form');
+  // TODO: This should be getting added to the page when an ajax popup calls
+  // for it, instead of having to add it manually here.
+  $form['#attached']['js'][] = 'misc/tabledrag.js';
 
   $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.css';
   $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css';
