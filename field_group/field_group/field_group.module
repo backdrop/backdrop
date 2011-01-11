@@ -472,7 +472,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
 
   // If field is required, add asterisx.
   $required = '';
-  if(!empty($group->required)) {
+  if (!empty($group->required)) {
     $required = t('<span title="This group has required fields" class="form-required"> *</span>');
   }
 
