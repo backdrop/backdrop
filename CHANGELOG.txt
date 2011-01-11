@@ -285,4 +285,4 @@ by dereine: Bring vpr and views_debug back.
 by dereine: Add $view->version to all default views.
 #1006176 by das-peter, bojanz: Add support for field based translation.
 #1023062 by mikejoconnor: Replace views_process_dependency with ctools_dependent_process again.
-
+#1023558 by mariusz.slonina: Add a user cancel account link.

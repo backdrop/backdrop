@@ -253,6 +253,14 @@ function user_views_data() {
     ),
   );
 
+  $data['users']['cancel_node'] = array(
+    'field' => array(
+      'title' => t('Cancel link'),
+      'help' => t('Provide a simple link to cancel the user.'),
+      'handler' => 'views_handler_field_user_link_cancel',
+    ),
+  );
+
   $data['users']['delete_node'] = array(
     'field' => array(
       'title' => t('Delete link'),
