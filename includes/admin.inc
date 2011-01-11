@@ -415,12 +415,12 @@ function views_ui_add_form($form, &$form_state) {
   $form['displays']['show']['update_wizard_key'] = array(
     '#type' => 'submit',
     '#value' => t('Update displays'),
-    // Hide this button when JavaScript is enabled.
-    '#attributes' => array('class' => array('js-hide')),
     // Do not trigger form validation errors elsewhere on the page.
     '#limit_validation_errors' => array(
       array('show'),
     ),
+    // Hide this button when JavaScript is enabled.
+    '#attributes' => array('class' => array('js-hide')),
     '#submit' => array('views_ui_show_nojs_submit'),
   );
 
