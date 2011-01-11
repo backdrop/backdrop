@@ -250,7 +250,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view = views_new_view();
     $view->name = $form_state['values']['name'];
     $view->human_name = $form_state['values']['human_name'];
-    $view->description = $form_state['values']['description'];
     $view->tag = 'default';
     $view->core = VERSION;
     $view->base_table = $this->base_table;
@@ -258,7 +257,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Display: Defaults
     $handler = $view->new_display('default', 'Defaults', 'default');
     $handler->display->display_options = $this->default_display_options($from, $form_state);
-    if (!is_array($handler->display->display_options['filters'])) {
+    if (!isset($handler->display->display_options['filters'])) {
       $handler->display->display_options['filters'] = array();
     }
     $handler->display->display_options['filters'] += $this->default_display_filters($from, $form_state);
