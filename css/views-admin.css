@@ -155,13 +155,17 @@
 
 .views-ui-dialog #views-ajax-title,
 .views-ui-dialog #views-ajax-body {
-  padding: 0.5em 1em;
+  padding: 0;
   margin: 0;
 }
 
-.views-ui-dialog .views-filterable-options {
-  max-height: 350px;
+.views-ui-dialog #views-ajax-popup {
+  overflow: hidden;
+}
+
+.views-ui-dialog .scroll {
   overflow: auto;
+  max-height: 400px;
 }
 
 .page-admin-structure-views #views-filterable-options-controls {

@@ -1821,6 +1821,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
   // don't have the display dropdown.
   if ($form_progress = views_ui_get_form_progress($view)) {
     $form['progress']['#markup'] = '<div id="views-progress-indicator">' . t('@current of @total', array('@current' => $form_progress['current'], '@total' => $form_progress['total'])) . '</div>';
+    $form['progress']['#weight'] = -1001;
   }
 
   if ($current_display->handler->is_default_display()) {
@@ -1844,6 +1845,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
   $form['override'] = array(
     '#prefix' => '<div class="views-override clearfix container-inline">',
     '#suffix' => '</div>',
+    '#weight' => -1000,
   );
   $form['override']['dropdown'] = array(
     '#type' => 'select',
@@ -3178,7 +3180,13 @@ function views_ui_config_item_form($form, &$form_state) {
   $type = $form_state['type'];
   $id = $form_state['id'];
 
-  $form = array('options' => array('#tree' => TRUE));
+  $form = array(
+    'options' => array(
+      '#tree' => TRUE,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('scroll')),
+    ),
+  );
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
@@ -3196,7 +3204,7 @@ function views_ui_config_item_form($form, &$form_state) {
       // that lets the user choose which display the changes should apply to.
       if ($view->display_handler->defaultable_sections($types[$type]['plural'])) {
         $form_state['section'] = $types[$type]['plural'];
-        views_ui_standard_display_dropdown($form['options'], $form_state, $form_state['section']);
+        views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
       }
 
       // A whole bunch of code to figure out what relationships are valid for
@@ -3344,7 +3352,13 @@ function views_ui_config_item_group_form($type, &$form_state) {
   $type = $form_state['type'];
   $id = $form_state['id'];
 
-  $form = array('options' => array('#tree' => TRUE));
+  $form = array(
+    'options' => array(
+      '#tree' => TRUE,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('scroll')),
+    ),
+  );
   if (!$view->set_display($display_id)) {
     views_ajax_render(t('Invalid display id @display', array('@display' => $display_id)));
   }
@@ -3430,7 +3444,13 @@ function views_ui_config_item_extra_form($form, &$form_state) {
   $type = $form_state['type'];
   $id = $form_state['id'];
 
-  $form = array('options' => array('#tree' => TRUE));
+  $form = array(
+    'options' => array(
+      '#tree' => TRUE,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('scroll')),
+    ),
+  );
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
@@ -3495,7 +3515,13 @@ function views_ui_change_style_form($form, &$form_state) {
   $type = $form_state['type'];
   $id = $form_state['id'];
 
-  $form = array('options' => array('#tree' => TRUE));
+  $form = array(
+    'options' => array(
+      '#tree' => TRUE,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('scroll')),
+    ),
+  );
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
@@ -3580,7 +3606,13 @@ function views_ui_config_style_form($form, &$form_state) {
   $type = $form_state['type'];
   $id = $form_state['id'];
 
-  $form = array('options' => array('#tree' => TRUE));
+  $form = array(
+    'options' => array(
+      '#tree' => TRUE,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('scroll')),
+    ),
+  );
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }

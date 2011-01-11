@@ -315,6 +315,10 @@
 /**
  * The contents of the popup dialog on the views edit form.
  */
+.page-admin-structure-views .views-ui-dialog {
+  padding: 0;
+}
+
 .page-admin-structure-views .views-filterable-options .form-type-checkbox {
   border: 1px solid #CCC;
   padding: 5px 8px;
@@ -358,7 +362,8 @@
 }
 
 .page-admin-structure-views .views-ui-dialog .views-override {
-  margin: -8px -13px 13px;
+  margin: -8px -13px 0;
+  padding: 8px 13px;
 }
 
 .page-admin-structure-views .views-ui-dialog .views-override > * {
@@ -367,20 +372,28 @@
 
 .page-admin-structure-views .views-ui-dialog #views-ajax-title {
   font-size: 15px;
-}
-
-.page-admin-structure-views .views-ui-dialog #views-progress-indicator {
-  position: absolute;
-  right: 10px;
-  font-size: 10px;
-}
-
-.views-ui-dialog #views-ajax-title,
-.views-ui-dialog #views-ajax-body {
   padding: 8px 13px;
 }
 
+.page-admin-structure-views .views-ui-dialog #views-progress-indicator {
+  font-size: 10px;
+  position: absolute;
+  right: 10px;
+}
 
+.page-admin-structure-views .views-ui-dialog .scroll {
+  border: 1px solid #CCC;
+  border-width: 1px 0;
+  padding: 8px 13px;
+}
+
+.page-admin-structure-views .views-ui-dialog .form-buttons {
+  background-color: #F3F4EE;
+  padding: 8px 13px;
+}
+.page-admin-structure-views .views-ui-dialog .form-buttons input {
+  margin-bottom: 0;
+}
 /**
  * Live preview elements
  */
