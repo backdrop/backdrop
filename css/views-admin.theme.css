@@ -376,9 +376,18 @@
 }
 
 .page-admin-structure-views .views-ui-dialog #views-progress-indicator {
-  font-size: 10px;
+  font-size: 11px;
   position: absolute;
   right: 10px;
+  top: 8px;
+}
+
+.page-admin-structure-views .views-ui-dialog #views-progress-indicator:before {
+  content: "< ";
+}
+
+.page-admin-structure-views .views-ui-dialog #views-progress-indicator:after {
+  content: " >";
 }
 
 .page-admin-structure-views .views-ui-dialog .scroll {
