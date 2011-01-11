@@ -2630,7 +2630,9 @@ function theme_views_ui_rearrange_form($variables) {
 
   $header = array('', t('Weight'), t('Remove'));
   $output = drupal_render($form['override']);
+  $output .= '<div class="scroll">';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
+  $output .= '</div>';
   $output .= drupal_render_children($form);
   drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
 
@@ -3047,6 +3049,13 @@ function views_ui_add_item_form($form, &$form_state) {
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
 
+  $form = array(
+    'options' => array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('scroll')),
+    ),
+  );
+
   ctools_add_js('dependent');
 
   if (!$view->set_display($display_id)) {
@@ -3069,25 +3078,25 @@ function views_ui_add_item_form($form, &$form_state) {
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
   if (!empty($options)) {
-    $form['controls'] = array(
+    $form['options']['controls'] = array(
       '#theme_wrappers' => array('container'),
       '#id' => 'views-filterable-options-controls',
       '#attributes' => array('class' => array('container-inline')),
     );
-    $form['controls']['options_search'] = array(
+    $form['options']['controls']['options_search'] = array(
       '#type' => 'textfield',
       '#title' => t('Search'),
     );
 
     $groups = array('all' => t('- All -'));
-    $form['controls']['group'] = array(
+    $form['options']['controls']['group'] = array(
       '#type' => 'select',
       '#title' => t('Filter'),
       '#options' => array(),
       '#attributes' => array('class' => array('ctools-master-dependent')),
     );
 
-    $form['name'] = array(
+    $form['options']['name'] = array(
       '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
       '#suffix' => '</div>',
       '#tree' => TRUE,
@@ -3104,11 +3113,11 @@ function views_ui_add_item_form($form, &$form_state) {
     }
 
     foreach ($grouped_options as $group => $group_options) {
-      $form['name'][$group . '_start']['#markup'] = '<div class="ctools-dependent-all ctools-dependent-' . $group . '">';
+      $form['options']['name'][$group . '_start']['#markup'] = '<div class="ctools-dependent-all ctools-dependent-' . $group . '">';
       $zebra = 0;
       foreach ($group_options as $key => $option) {
         $zebra_class = ($zebra % 2) ? 'odd' : 'even';
-        $form['name'][$key] = array(
+        $form['options']['name'][$key] = array(
           '#type' => 'checkbox',
           '#title' => t('!group: !field', array('!group' => $option['group'], '!field' => $option['title'])),
           '#description' => $option['help'],
@@ -3118,13 +3127,13 @@ function views_ui_add_item_form($form, &$form_state) {
         );
         $zebra++;
       }
-      $form['name'][$group . '_end']['#markup'] = '</div>';
+      $form['options']['name'][$group . '_end']['#markup'] = '</div>';
     }
 
-    $form['controls']['group']['#options'] = $groups;
+    $form['options']['controls']['group']['#options'] = $groups;
   }
   else {
-    $form['markup'] = array(
+    $form['options']['markup'] = array(
       '#markup' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $types[$type]['ltitle'])) . '</div>',
     );
   }
