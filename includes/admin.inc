@@ -3260,13 +3260,14 @@ function views_ui_config_item_form($form, &$form_state) {
 
       $form['#title'] = t('Configure @type: @item', array('@type' => $types[$type]['lstitle'], '@item' => $handler->ui_name()));
 
-      $form['form_description'] = array(
-        '#type' => 'markup',
-        '#weight' => -1000,
-        '#prefix' => '<div class="form-item description">',
-        '#suffix' => '</div>',
-        '#value' => $handler->definition['help'],
-      );
+      if (!empty($handler->definition['help'])) {
+        $form['options']['form_description'] = array(
+          '#markup' => $handler->definition['help'],
+          '#theme_wrappers' => array('container'),
+          '#attributes' => array('class' => array('form-item description')),
+          '#weight' => -1000,
+        );
+      }
 
       $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
