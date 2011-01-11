@@ -73,58 +73,46 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
     );
-    $form['displays']['page']['title'] = array(
-      '#title' => t('Page title'),
-      '#type' => 'textfield',
+
+    // All options for the page display are included in this container so they
+    // can be hidden en masse when the "Create a page" checkbox is unchecked.
+    $form['displays']['page']['options'] = array(
+      '#type' => 'container',
       '#states' => array(
         'visible' => array(
           ':input[name="page[create]"]' => array('checked' => TRUE),
         ),
       ),
+      '#parents' => array('page'),
     );
-    $form['displays']['page']['path'] = array(
+
+    $form['displays']['page']['options']['title'] = array(
+      '#title' => t('Page title'),
+      '#type' => 'textfield',
+    );
+    $form['displays']['page']['options']['path'] = array(
       '#title' => t('Path'),
       '#type' => 'textfield',
       '#field_prefix' => $path_prefix,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[create]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
-    $form['displays']['page']['display_format']['style'] = array(
+    $form['displays']['page']['options']['display_format']['style'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
       '#options' => $style_options,
       '#default_value' => 'default',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[create]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
-    $form['displays']['page']['items_per_page'] = array(
+    $form['displays']['page']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
       '#default_value' => '10',
       '#size' => 5,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[create]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
-    $form['displays']['page']['link'] = array(
+    $form['displays']['page']['options']['link'] = array(
       '#title' => t('Create a menu link'),
       '#type' => 'checkbox',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[create]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
-    $form['displays']['page']['link_properties'] = array();
+    $form['displays']['page']['options']['link_properties'] = array();
     if (module_exists('menu')) {
       $menu_options = menu_get_menus();
     }
@@ -135,51 +123,43 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $menu_options[$name] = t($title);
       }
     }
-    $form['displays']['page']['link_properties']['menu_name'] = array(
+    $form['displays']['page']['options']['link_properties']['menu_name'] = array(
       '#title' => t('Menu'),
       '#type' => 'select',
       '#options' => $menu_options,
       '#states' => array(
         'visible' => array(
-        ':input[name="page[link]"]' => array('checked' => TRUE),
-        ':input[name="page[create]"]' => array('checked' => TRUE),
+          ':input[name="page[link]"]' => array('checked' => TRUE),
         ),
       ),
     );
-    $form['displays']['page']['link_properties']['title'] = array(
+    $form['displays']['page']['options']['link_properties']['title'] = array(
       '#title' => t('Link text'),
       '#type' => 'textfield',
       '#states' => array(
         'visible' => array(
-        ':input[name="page[link]"]' => array('checked' => TRUE),
-        ':input[name="page[create]"]' => array('checked' => TRUE),
+          ':input[name="page[link]"]' => array('checked' => TRUE),
         ),
       ),
     );
     // Only offer a feed if we have at least one available feed row style.
     if ($feed_row_options) {
-      $form['displays']['page']['feed'] = array(
+      $form['displays']['page']['options']['feed'] = array(
         '#title' => t('Include an RSS feed'),
         '#type' => 'checkbox',
-        '#states' => array(
-          'visible' => array(
-            ':input[name="page[create]"]' => array('checked' => TRUE),
-          ),
-        ),
       );
-      $form['displays']['page']['feed_properties']['path'] = array(
+      $form['displays']['page']['options']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),
         '#type' => 'textfield',
         '#field_prefix' => $path_prefix,
         '#states' => array(
           'visible' => array(
-            ':input[name="page[create]"]' => array('checked' => TRUE),
             ':input[name="page[feed]"]' => array('checked' => TRUE),
           ),
         ),
       );
       // This will almost never be visible.
-      $form['displays']['page']['feed_properties']['row_plugin'] = array(
+      $form['displays']['page']['options']['feed_properties']['row_plugin'] = array(
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
@@ -187,12 +167,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#access' => (count($feed_row_options) > 1),
         '#states' => array(
           'visible' => array(
-            ':input[name="page[create]"]' => array('checked' => TRUE),
             ':input[name="page[feed]"]' => array('checked' => TRUE),
           ),
         ),
       );
     }
+
     $form['displays']['block'] = array(
       '#type' => 'fieldset',
       '#tree' => TRUE,
@@ -202,63 +182,55 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
     );
-    $form['displays']['block']['title'] = array(
-      '#title' => t('Block title'),
-      '#type' => 'textfield',
+
+    // All options for the block display are included in this container so they
+    // can be hidden en masse when the "Create a block" checkbox is unchecked.
+    $form['displays']['block']['options'] = array(
+      '#type' => 'container',
       '#states' => array(
         'visible' => array(
           ':input[name="block[create]"]' => array('checked' => TRUE),
         ),
       ),
+      '#parents' => array('block'),
+    );
+
+    $form['displays']['block']['options']['title'] = array(
+      '#title' => t('Block title'),
+      '#type' => 'textfield',
     );
     // This may change by AJAX as we change the base table of the selected wizard.
-    $form['displays']['block']['display_format']['style'] = array(
+    $form['displays']['block']['options']['display_format']['style'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
       '#options' => views_fetch_plugin_names('style', 'normal', array($this->base_table)),
       '#default_value' => 'default',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="block[create]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
-    $form['displays']['block']['items_per_page'] = array(
+    $form['displays']['block']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
       '#default_value' => '5',
       '#size' => 5,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="block[create]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
     // Only offer a feed if we have at least one available feed row style.
     if ($feed_row_options) {
-      $form['displays']['block']['feed'] = array(
+      $form['displays']['block']['options']['feed'] = array(
         '#title' => t('Include an RSS feed'),
         '#type' => 'checkbox',
-        '#states' => array(
-          'visible' => array(
-            ':input[name="block[create]"]' => array('checked' => TRUE),
-          ),
-        ),
       );
-      $form['displays']['block']['feed_properties']['path'] = array(
+      $form['displays']['block']['options']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),
         '#type' => 'textfield',
         '#field_prefix' => $path_prefix,
         '#states' => array(
           'visible' => array(
-            ':input[name="block[create]"]' => array('checked' => TRUE),
             ':input[name="block[feed]"]' => array('checked' => TRUE),
           ),
         ),
       );
       // This will almost never be visible.
-      $form['displays']['block']['feed_properties']['row_plugin'] = array(
+      $form['displays']['block']['options']['feed_properties']['row_plugin'] = array(
         '#title' => t('Feed row style'),
         '#type' => 'select',
         '#options' => $feed_row_options,
@@ -266,7 +238,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#access' => (count($feed_row_options) > 1),
         '#states' => array(
           'visible' => array(
-            ':input[name="block[create]"]' => array('checked' => TRUE),
             ':input[name="block[feed]"]' => array('checked' => TRUE),
           ),
         ),
