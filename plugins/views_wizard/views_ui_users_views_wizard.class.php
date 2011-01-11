@@ -1,7 +1,7 @@
 <?php
 
 class ViewsUiUsersViewsWizard extends ViewsUiBaseViewsWizard {
-  protected function default_display_options($from, $form_state) {
+  protected function default_display_options($form, $form_state) {
     /* Display: Defaults */
     $display_options['access']['type'] = 'perm';
     $display_options['access']['perm'] = 'access user profiles';

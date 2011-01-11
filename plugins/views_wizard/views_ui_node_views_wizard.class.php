@@ -5,7 +5,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   /**
    * @override
    */
-  protected function default_display_options($from, $form_state) {
+  protected function default_display_options($form, $form_state) {
     $display_options = array();
     $display_options['access']['type'] = 'perm';
     $display_options['access']['perm'] = 'access content';
@@ -22,7 +22,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   /**
    * @override
    */
-  protected function page_feed_display_options($from, $form_state) {
+  protected function page_feed_display_options($form, $form_state) {
     $display_options = array();
     $display_options['defaults']['title'] = FALSE;
     $display_options['title'] = $form_state['values']['page']['title'];

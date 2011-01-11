@@ -246,7 +246,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     return $form;
   }
 
-  protected function instantiate_view($from, &$form_state) {
+  protected function instantiate_view($form, &$form_state) {
     $view = views_new_view();
     $view->name = $form_state['values']['name'];
     $view->human_name = $form_state['values']['human_name'];
@@ -256,29 +256,29 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     // Display: Defaults
     $handler = $view->new_display('default', 'Defaults', 'default');
-    $handler->display->display_options = $this->default_display_options($from, $form_state);
+    $handler->display->display_options = $this->default_display_options($form, $form_state);
     if (!isset($handler->display->display_options['filters'])) {
       $handler->display->display_options['filters'] = array();
     }
-    $handler->display->display_options['filters'] += $this->default_display_filters($from, $form_state);
+    $handler->display->display_options['filters'] += $this->default_display_filters($form, $form_state);
 
     // Display: Page
     if (!empty($form_state['values']['page']['create'])) {
       $handler = $view->new_display('page', 'Page', 'page');
-      $handler->display->display_options = $this->page_display_options($from, $form_state);
+      $handler->display->display_options = $this->page_display_options($form, $form_state);
       if (!empty($form_state['values']['page']['feed'])) {
         $handler = $view->new_display('feed', 'Feed', 'feed_page');
-        $handler->display->display_options = $this->page_feed_display_options($from, $form_state);
+        $handler->display->display_options = $this->page_feed_display_options($form, $form_state);
       }
     }
 
     // Display: Block
     if (!empty($form_state['values']['block']['create'])) {
       $handler = $view->new_display('block', 'Block', 'block');
-      $handler->display->display_options = $this->block_display_options($from, $form_state);
+      $handler->display->display_options = $this->block_display_options($form, $form_state);
       if (!empty($form_state['values']['block']['feed'])) {
         $handler = $view->new_display('feed', 'Block feed', 'feed_block');
-        $handler->display->display_options = $this->block_feed_display_options($from, $form_state);
+        $handler->display->display_options = $this->block_feed_display_options($form, $form_state);
       }
     }
     return $view;
@@ -288,7 +288,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Most subclasses will need to override this method to provide some fields
    * or a different row plugin.
    */
-  protected function default_display_options($from, $form_state) {
+  protected function default_display_options($form, $form_state) {
     $display_options = array();
     $display_options['access']['type'] = 'none';
     $display_options['cache']['type'] = 'none';
@@ -300,7 +300,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     return $display_options;
   }
 
-  protected function default_display_filters($from, $form_state) {
+  protected function default_display_filters($form, $form_state) {
     $filters = array();
     foreach ($this->plugin['filters'] as $name => $info) {
       $filters[$name] = $info;
@@ -308,7 +308,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     return $filters;
   }
 
-  protected function page_display_options($from, $form_state) {
+  protected function page_display_options($form, $form_state) {
     $display_options = array();
     $page = $form_state['values']['page'];
     $display_options['path'] = $page['path'];
@@ -321,17 +321,17 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     return $display_options;
   }
 
-  protected function page_feed_display_options($from, $form_state) {
+  protected function page_feed_display_options($form, $form_state) {
     $display_options = array();
     return $display_options;
   }
 
-  protected function block_display_options($from, $form_state) {
+  protected function block_display_options($form, $form_state) {
     $display_options = array();
     return $display_options;
   }
 
-  protected function block_feed_display_options($from, $form_state) {
+  protected function block_feed_display_options($form, $form_state) {
     $display_options = array();
     return $display_options;
   }
