@@ -658,7 +658,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#title' => t('Convert newlines to HTML &lt;br&gt; tags'),
         '#description' => t('If checked, all newlines chars (e.g. \n) are converted into HTML &lt;br&gt; tags.'),
         '#default_value' => $this->options['alter']['nl2br'],
-        '#process' => array('views_process_dependency'),
+        '#process' => array('ctools_dependent_process'),
       );
     }
 
