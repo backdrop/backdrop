@@ -37,7 +37,7 @@ Drupal.behaviors.ViewsAjaxView.attach = function() {
       .filter(':not(.views-processed)')
       .each(function () {
         var button = $('input[type=submit]', this);
-        button.form = this;
+        button = button[0];
 
         var ajax = new Drupal.ajax($(button).attr('id'), button, element_settings);
       })
