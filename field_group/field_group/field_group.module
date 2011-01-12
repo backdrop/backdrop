@@ -643,11 +643,11 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         }
         // Merge fieldgroups with the core additional settings.
         else {
-          $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $child_element;
-          $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
+          $form['additional_settings']['group']['#fieldgroups']['additional_settings'][$group->group_name] = $child_element;
+          $form['additional_settings']['group']['#fieldgroups'][$group->group_name] = array('#group_exists' => TRUE);
           // Nest the fields inside the appropriate structure.
           foreach (element_children($element) as $fieldname) {
-            $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+            $form['additional_settings']['group']['#fieldgroups']['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
             unset($element[$fieldname]);
           }
         }
@@ -667,7 +667,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   // Dish the fieldgroups with no fields.
   $display = isset($element['#view_mode']);
   if ($display) {
-    $groups = array_keys($element['#groups']);
+    $groups = array_keys($element['#fieldgroups']);
     foreach (element_children($element) as $name) {
       if (in_array($name, $groups)) {
         if (field_group_field_group_is_empty($element[$name], $groups)) {
@@ -1005,11 +1005,11 @@ function field_group_attach_groups(&$element, $view_mode) {
   $entity_type = $element['#entity_type'];
   $bundle = $element['#bundle'];
 
-  $element['#groups'] = field_group_info_groups($entity_type, $bundle, $view_mode);
+  $element['#fieldgroups'] = field_group_info_groups($entity_type, $bundle, $view_mode);
 
   // Create a lookup array.
   $group_children = array();
-  foreach ($element['#groups'] as $group_name => $group) {
+  foreach ($element['#fieldgroups'] as $group_name => $group) {
     foreach ($group->children as $child) {
       $group_children[$child] = $group_name;
     }
@@ -1017,7 +1017,7 @@ function field_group_attach_groups(&$element, $view_mode) {
 
   // Check required fields if configured so.
   if (variable_get('field_group_mark_as_required', FALSE) == TRUE) {
-    field_group_mark_as_required($element['#groups'], $element);
+    field_group_mark_as_required($element['#fieldgroups'], $element);
     // Reverse the order as it was intended.
     arsort($group_children);
   }
@@ -1069,7 +1069,7 @@ function field_group_build_pre_render($element) {
  */
 function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL) {
 
-  $groups = $root_element['#groups'];
+  $groups = $root_element['#fieldgroups'];
   $group_fields = $root_element['#group_children'];
 
   foreach ($groups as $name => $group) {
@@ -1091,7 +1091,7 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
           unset($root_element['#group_children'][$groupfield]);
         }
         // Or hey, is the field maybe a group, then prepare the array.
-        if ($groupname == $name && isset($root_element['#groups'][$groupfield])) {
+        if ($groupname == $name && isset($root_element['#fieldgroups'][$groupfield])) {
           $element[$name][$groupfield] = array();
         }
       }
@@ -1131,10 +1131,10 @@ function field_group_mark_as_required(& $element_groups, & $element) {
       }
     }
     // Set results after iterating through array.
-    $element['#groups'][$group_name]->required = $group->required;
+    $element['#fieldgroups'][$group_name]->required = $group->required;
     // If array has parents set TRUE
-    if (isset($element['#groups'][$element['#groups'][$group_name]->parent_name]) && $group->required) {
-      $element_groups[$element['#groups'][$group_name]->parent_name]->required = $group->required;
+    if (isset($element['#fieldgroups'][$element['#fieldgroups'][$group_name]->parent_name]) && $group->required) {
+      $element_groups[$element['#fieldgroups'][$group_name]->parent_name]->required = $group->required;
     }
   }
 

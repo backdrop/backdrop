@@ -3,6 +3,7 @@ CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
 
+    o #1006464 Change #groups to #fieldgroups because of name collapsing with form_process_fieldset
     o #1024184 fix collapsible when mode is set to open
     o #1020278 by mori: Update fails.
     o #1020116 by mikegfx: Confusing verbage across group types.
