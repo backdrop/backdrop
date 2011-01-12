@@ -384,11 +384,11 @@
 }
 
 .page-admin-structure-views .views-ui-dialog #views-progress-indicator:before {
-  content: "< ";
+  content: "\003C\00A0";
 }
 
 .page-admin-structure-views .views-ui-dialog #views-progress-indicator:after {
-  content: " >";
+  content: "\00A0\003E";
 }
 
 .page-admin-structure-views .views-ui-dialog .scroll {

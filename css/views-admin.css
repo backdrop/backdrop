@@ -1,4 +1,9 @@
 /* $Id: views-admin.css,v 1.14.4.12 2010/12/24 13:42:00 dereine Exp $ */
+
+/**
+ * The .css file is intended to only contain positioning and size declarations 
+ * For example: display, position, float, clear, and overflow.
+ */
  
 /* @group Inline lists */
  
@@ -102,44 +107,6 @@
 }
 
 /**
- * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
- */
- 
- /* Reset the rendering context for all modern browsers */
-.page-admin-structure-views #content .views-display-tab .fieldset-wrapper:after,
-.page-admin-structure-views #content ul.secondary:after {
-  clear: both;
-  content: " x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
-  display: block;
-  font-size: xx-large;
-  height: 0 !important;
-  line-height: 0;
-  overflow: hidden;
-  visibility: hidden;
-}
-
-/* Reset the rendering context for IE */
-.page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
-.page-admin-structure-views #content ul.secondary {
-  *zoom: 1;
-}
-
-/**
- * Each of the three columns of information in the display details.
- */
-.page-admin-structure-views #content .views-display-columns > * {
-  float: left;
-  margin-left: 1%;
-  padding-left: 1%;
-  width: 32%;
-}
-
-.page-admin-structure-views #content .views-display-columns > *:first-child {
-  margin-left: 0;
-  padding-left: 0;
-}
-
-/**
  * The modal dialog box.
  */
  .views-ui-dialog .ui-dialog-content {
@@ -174,4 +141,42 @@
 
 .page-admin-structure-views .views-ui-dialog #views-filterable-options-controls {
   display: block;
+}
+
+/**
+ * Each of the three columns of information in the display details.
+ */
+.page-admin-structure-views #content .views-display-columns > * {
+  float: left;
+  margin-left: 1%;
+  padding-left: 1%;
+  width: 32%;
+}
+
+.page-admin-structure-views #content .views-display-columns > *:first-child {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/**
+ * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
+ */
+ 
+ /* Reset the formatting context for all modern browsers */
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper:after,
+.page-admin-structure-views #content ul.secondary:after {
+  clear: both;
+  content: " x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
+  display: block;
+  font-size: xx-large;
+  height: 0 !important;
+  line-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* Reset the formatting context for IE */
+.page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
+.page-admin-structure-views #content ul.secondary {
+  *zoom: 1;
 }
