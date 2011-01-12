@@ -444,7 +444,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
   // Prepare extra classes.
   $classes = array($group->format_type);
   if (isset($group->format_settings['formatter'])) {
-    $collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'open', 'collapsed', 'closed'));
+    $collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
     $collapsed = in_array($group->format_settings['formatter'], array('collapsed', 'closed'));
     if ($collapsible) {
       $classes[] = 'collapsible';

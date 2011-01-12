@@ -3,6 +3,7 @@ CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
 
+    o #1024184 fix collapsible when mode is set to open
     o #1020278 by mori: Update fails.
     o #1020116 by mikegfx: Confusing verbage across group types.
     o #1018012 by mikegfx: Adding required asterisk to group tabs that have required fields.
