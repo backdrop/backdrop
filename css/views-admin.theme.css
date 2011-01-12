@@ -121,7 +121,7 @@
 
 /* @end */
 
-/* @group Thing */
+/* @group Attachments */
 
 .page-admin-structure-views #content .views-displays {
   border: 1px solid #CCC;
@@ -146,8 +146,11 @@
   margin-left: 3px
 }
 
-/**
- * The attachment details tabs that switch between sections
+/* @end */
+
+/* @group Attachment details tabs
+ * 
+ * The tabs that switch between sections
  */
 
 .page-admin-structure-views #content .views-displays .secondary a {
@@ -224,7 +227,10 @@
   background-color: #dddddd;
 }
 
-/**
+/* @end */
+
+/* @group Attachment details collapsible fieldset
+ *
  * The attachment details section is a collapsible fieldset, but should not
  * have a border around it.
  */
@@ -245,9 +251,13 @@
   position: relative;
 }
 
-/**
- * The auto-preview checkbox line. This may have mor stuff added to it.
+/* @end */
+
+/* @group Auto preview
+ *
+ * The auto-preview checkbox line. This may have more stuff added to it.
  */
+ 
 .form-item-displays-tab-content-details-auto-preview {
   text-align: right;
 }
@@ -263,10 +273,14 @@
   padding: 0 12px;
 }
 
-/**
+/* @end */
+
+/* @group Attachment buckets
+ *
  * These are the individual "buckets," or boxes, inside the three columns in the
  * attachment details section.
  */
+ 
 .page-admin-structure-views #content .views-display-bucket {
   border: 1px solid #f3f3f3;
   line-height: 20px;
@@ -300,9 +314,13 @@
   padding-left: 3px;
 }
 
-/**
+/* @end */
+
+/* @group Attachment bucket rows
+ *
  * This is each row within one of the "boxes."
  */
+ 
 .page-admin-structure-views #content .views-display-bucket .views-display-setting {
   color: #666666;
   font-size: 12px;
@@ -313,9 +331,13 @@
   background-color: #f9f9f9;
 }
 
-/**
+/* @end */
+
+/* @group Modal dialog box
+ *
  * The contents of the popup dialog on the views edit form.
  */
+ 
 .page-admin-structure-views .views-ui-dialog {
   padding: 0;
 }
@@ -404,9 +426,11 @@
 .page-admin-structure-views .views-ui-dialog .form-buttons input {
   margin-bottom: 0;
 }
-/**
- * Live preview elements
- */
+
+/* @end */
+
+/* @group Live preview elements */
+
 .page-admin-structure-views #content .views-row + .views-row {
   margin-top: 36px;
 }

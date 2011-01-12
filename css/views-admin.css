@@ -30,11 +30,8 @@
  
  /* @end */
 
-.page-admin-structure-views #content .views-display-tab .fieldset-legend {
-  position: relative;
-}
-
-/**
+/* @group Attachment details
+ *
  * The attachment details section, its tabs for each section and the buttons
  * to add a new section
  */
@@ -52,8 +49,11 @@
   overflow: visible;
 }
 
-/**
- * The attachment details tabs that switch between sections
+/* @end */
+
+/* @group Attachment details tabs
+ * 
+ * The tabs that switch between sections
  */
 
 .page-admin-structure-views #content .views-displays .secondary > li {
@@ -66,9 +66,10 @@
   z-index: 51;
 }
 
-/**
- * The attachment details add new section buttons
- */
+/* @end */
+
+/* @group Attachment details new section button */
+
 .page-admin-structure-views #content .views-displays .secondary li.add {
   position: relative;
 }
@@ -85,19 +86,23 @@
   display: block;
 }
 
-/**
- * The attachment details section is a collapsible fieldset, but should not
- * have a border around it.
- */
+/* @end */
+
+/* @group Attachment details collapsible fieldset */
+
 .page-admin-structure-views #content .views-display-tab .fieldset-legend {
-  left: -5px; 
+  left: -5px;
+  position: relative;
 }
 
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper {
   position: relative;
 }
 
-/**
+/* @end */
+
+/* @group Attachment details actions
+ *
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper > .actions {
@@ -106,9 +111,26 @@
   top: -14px;
 }
 
-/**
- * The modal dialog box.
- */
+/* @end */
+
+/* @group Attachment configuration columns */
+
+.page-admin-structure-views #content .views-display-columns > * {
+  float: left;
+  margin-left: 1%;
+  padding-left: 1%;
+  width: 32%;
+}
+
+.page-admin-structure-views #content .views-display-columns > *:first-child {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* @end */
+
+/* @group Modal dialog box */
+
  .views-ui-dialog .ui-dialog-content {
 }
 
@@ -143,23 +165,11 @@
   display: block;
 }
 
-/**
- * Each of the three columns of information in the display details.
- */
-.page-admin-structure-views #content .views-display-columns > * {
-  float: left;
-  margin-left: 1%;
-  padding-left: 1%;
-  width: 32%;
-}
+/* @end */
 
-.page-admin-structure-views #content .views-display-columns > *:first-child {
-  margin-left: 0;
-  padding-left: 0;
-}
-
-/**
- * Clearfix: http://perishablepress.com/press/2009/12/06/new-clearfix-hack
+/* @group Clearfix
+ * 
+ * @see http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
  
  /* Reset the formatting context for all modern browsers */
@@ -180,3 +190,5 @@
 .page-admin-structure-views #content ul.secondary {
   *zoom: 1;
 }
+
+/* @end */
