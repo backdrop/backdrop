@@ -65,7 +65,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     $form['fields']['#prefix'] = '<div id="field-display-overview-wrapper">';
     $form['fields']['#suffix'] = '</div>';
   }
-  $form['#fieldgroups'] = array_keys($params->groups);
+  $form['#groups'] = array_keys($params->groups);
 
   $table = &$form['fields'];
 
@@ -541,7 +541,7 @@ function field_group_field_overview_submit($form, &$form_state) {
   $mode = (isset($form['#view_mode']) ? $form['#view_mode'] : 'form');
 
   // Collect children.
-  $children = array_fill_keys($form['#fieldgroups'], array());
+  $children = array_fill_keys($form['#groups'], array());
   foreach ($form_values as $name => $value) {
     if (!empty($value['parent'])) {
       // Substitute newly added fields, in case they were dragged
@@ -596,7 +596,7 @@ function field_group_field_overview_submit($form, &$form_state) {
 
   // Update existing groups.
   $groups = field_group_info_groups($entity_type, $bundle, $mode, TRUE);
-  foreach ($form['#fieldgroups'] as $group_name) {
+  foreach ($form['#groups'] as $group_name) {
     $group = $groups[$group_name];
     $group->label = $form_state['field_group'][$group_name]->label;
     $group->children = array_keys($children[$group_name]);
