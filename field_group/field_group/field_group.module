@@ -472,7 +472,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
 
   // If field is required, add asterisx.
   $required = '';
-  if (!empty($group->required)) {
+  if(!empty($group->required)) {
     $required = t('<span title="This group has required fields" class="form-required"> *</span>');
   }
 
@@ -664,10 +664,14 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
  */
 function field_group_field_group_build_pre_render_alter(& $element) {
 
-  // Dish the fieldgroups with no fields.
   $display = isset($element['#view_mode']);
+  $groups = array_keys($element['#fieldgroups']);
+
+  // Always perform access checks.
+  field_group_field_group_check_access($element, $groups, $display);
+
+  // Dish the fieldgroups with no fields.
   if ($display) {
-    $groups = array_keys($element['#fieldgroups']);
     foreach (element_children($element) as $name) {
       if (in_array($name, $groups)) {
         if (field_group_field_group_is_empty($element[$name], $groups)) {
@@ -686,8 +690,12 @@ function field_group_field_group_build_pre_render_alter(& $element) {
 /**
  * Helper function to recursively tell if the group contains
  * an empty element or maybe one of its children.
- * @param array $element Build array structure
- * @param array $groups Array of group names
+
+ *
+ * @param array $element
+ *   array structure of the element.
+ * @param array $groups
+ *   Array of group names.
  * @return Boolean Is field group empty
  */
 function field_group_field_group_is_empty($element, $groups) {
@@ -700,6 +708,32 @@ function field_group_field_group_is_empty($element, $groups) {
     }
   }
   return TRUE;
+}
+
+/**
+ * Helper function to recursively check groups with restricted fields only.
+ * TODO Create this function.
+ *
+ * @param array $element
+ *   array structure of the element.
+ * @param array $groups
+ *   Array of group names.
+ * @param boolean $display
+ *   Display is true when we are not on a form.
+ * @return Boolean Is field group empty
+ */
+function field_group_field_group_check_access(& $element, $groups, $display) {
+//  foreach (element_children($element) as $name) {
+//    if (isset($element[$name]['#access']) && $element[$name]['#access'] == FALSE) {
+//      continue;
+//    }
+//    elseif (isset($element[$name]['und'][0]['#access']) && $element[$name]['und'][0]['#access'] == FALSE) {
+//      continue;
+//    }
+//    else {
+//      field_group_field_group_check_access($element[$name], $groups, $display);
+//    }
+//  }
 }
 
 /**
@@ -1047,6 +1081,11 @@ function field_group_build_pre_render($element) {
   // Nest the fields in the corresponding field groups.
   field_group_fields_nest($element, $element);
 
+  // Cleanup nested groups from root element.
+  foreach ($element['#group_children'] as $groupname => $parent) {
+    //unset($element[$groupname]);
+  }
+  
   // Allow others to alter the pre_rendered build.
   drupal_alter('field_group_build_pre_render', $element);
 
