@@ -1,5 +1,5 @@
 <?php
-//$Id: user.views.inc,v 1.59.4.13 2010/09/22 21:31:29 dereine Exp $
+//$Id: user.views.inc,v 1.59.4.14 2011/01/11 22:27:42 dereine Exp $
 /**
  * @file
  * Provide views data and handlers for user.module
@@ -250,6 +250,14 @@ function user_views_data() {
       'title' => t('Edit link'),
       'help' => t('Provide a simple link to edit the user.'),
       'handler' => 'views_handler_field_user_link_edit',
+    ),
+  );
+
+  $data['users']['cancel_node'] = array(
+    'field' => array(
+      'title' => t('Cancel link'),
+      'help' => t('Provide a simple link to cancel the user.'),
+      'handler' => 'views_handler_field_user_link_cancel',
     ),
   );
 

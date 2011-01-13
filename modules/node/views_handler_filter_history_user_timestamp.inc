@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_history_user_timestamp.inc,v 1.3.4.4 2010/12/25 22:03:47 dereine Exp $
+// $Id: views_handler_filter_history_user_timestamp.inc,v 1.3.4.5 2011/01/07 18:10:54 dereine Exp $
 /**
  * Filter for new content
  *
@@ -62,7 +62,7 @@ class views_handler_filter_history_user_timestamp extends views_handler_filter {
     // NULL means a history record doesn't exist. That's clearly new content.
     // Unless it's very very old content. Everything in the query is already
     // type safe cause none of it is coming from outside here.
-    $this->query->add_where($this->options['group'], "($field IS NULL AND ($node.changed > (***CURRENT_TIME*** - $limit) $clause)) OR $field < $node.changed $clause2", array(), 'formula');
+    $this->query->add_where_expresion($this->options['group'], "($field IS NULL AND ($node.changed > (***CURRENT_TIME*** - $limit) $clause)) OR $field < $node.changed $clause2");
   }
 
   function admin_summary() {
