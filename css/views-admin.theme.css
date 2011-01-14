@@ -385,12 +385,11 @@
 }
 
 .page-admin-structure-views .views-ui-dialog .views-override {
-  margin: -8px -13px 0;
   padding: 8px 13px;
 }
 
 .page-admin-structure-views .views-ui-dialog .views-override > * {
-  margin: 8px 13px;
+  margin: 0;
 }
 
 .page-admin-structure-views .views-ui-dialog #views-ajax-title {
