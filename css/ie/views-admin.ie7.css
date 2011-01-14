@@ -61,7 +61,7 @@
 /**
  * IE7 does not interpret div > * correctly
  */
-.page-admin-structure-views #content .views-display-bucket {
+.page-admin-structure-views #content .views-ui-display-tab-bucket {
   padding-left: 0;
   padding-right: 0;
   zoom: 1;

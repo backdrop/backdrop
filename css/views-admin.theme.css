@@ -281,35 +281,35 @@
  * attachment details section.
  */
  
-.page-admin-structure-views #content .views-display-bucket {
+.page-admin-structure-views #content .views-ui-display-tab-bucket {
   border: 1px solid #f3f3f3;
   line-height: 20px;
   margin: 1em 0;
   padding-top: 4px;
 }
 
-.page-admin-structure-views #content .views-display-bucket h3 {
+.page-admin-structure-views #content .views-ui-display-tab-bucket h3 {
   font-size: 12px;
   text-transform: uppercase;
 }
 
-.page-admin-structure-views #content .views-display-bucket > * {
+.page-admin-structure-views #content .views-ui-display-tab-bucket > * {
   padding: 2px 6px 4px;
 }
 
-.page-admin-structure-views #content .views-display-bucket .icon-text {
+.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-text {
   padding-left: 25px;
 }
 
-.page-admin-structure-views #content .views-display-bucket .icon-linked {
+.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-linked {
   background-position: 6px -151px;
 }
 
-.page-admin-structure-views #content .views-display-bucket .icon-unlinked {
+.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-unlinked {
   background-position: 6px -193px;
 }
 
-.page-admin-structure-views #content .views-display-bucket > .actions * + * {
+.page-admin-structure-views #content .views-ui-display-tab-bucket > .actions * + * {
   margin-left: 3px;
   padding-left: 3px;
 }
@@ -321,13 +321,13 @@
  * This is each row within one of the "boxes."
  */
  
-.page-admin-structure-views #content .views-display-bucket .views-display-setting {
+.page-admin-structure-views #content .views-ui-display-tab-bucket .views-display-setting {
   color: #666666;
   font-size: 12px;
   padding-bottom: 2px;
 }
 
-.page-admin-structure-views #content .views-display-bucket .even {
+.page-admin-structure-views #content .views-ui-display-tab-bucket .even {
   background-color: #f9f9f9;
 }
 

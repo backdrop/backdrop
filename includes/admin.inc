@@ -1228,6 +1228,10 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
 function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   $element = $variables['element'];
 
+  if (!empty($element['#name'])) {
+    $variables['classes_array'][] = drupal_clean_css_identifier(strtolower($element['#name']));
+  }
+
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
   $variables['overridden'] = !empty($element['#overridden']);
@@ -1527,6 +1531,8 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   else {
     $build['#title'] = $types[$type]['title'];
   }
+
+  $build['#name'] = $types[$type]['title'];
 
   static $relationships = NULL;
   if (!isset($relationships)) {

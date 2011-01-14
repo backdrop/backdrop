@@ -5,7 +5,7 @@
  * Template for each "box" on the display query edit screen.
  */
 ?>
-<div class="views-display-bucket">
+<div class="<?php print $classes; ?>">
   <ul class="horizontal right actions links">
     <?php if ($rearrange) : ?>
     <li>
