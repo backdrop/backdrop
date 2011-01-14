@@ -5,6 +5,7 @@
 $plugin = array(
   'name' => 'node_revision',
   'base_table' => 'node_revision',
+  'created_column' => 'timestamp',
   'form_wizard_class' => array(
     'file' => 'views_ui_node_revision_views_wizard.class.php',
     'class' => 'ViewsUiNodeRevisionViewsWizard',
