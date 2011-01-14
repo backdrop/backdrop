@@ -34,6 +34,11 @@ function _views_ui_node_views_wizard_build_child($parent, $type, $name) {
   );
   unset($child['get children']);
   unset($child['get child']);
+
+  // For nodes, each child corresponds to a content type, i.e. a specific field
+  // API bundle that the view will be limited to.
+  $child['bundles'] = array($type);
+
   return $child;
 }
 

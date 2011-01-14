@@ -60,6 +60,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $feed_row_options = views_fetch_plugin_names('row', 'feed', array($this->base_table));
     $path_prefix = url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=');
 
+    $this->build_filters($form, $form_state);
+
     $form['displays']['page'] = array(
       '#type' => 'fieldset',
       '#tree' => TRUE,
@@ -246,6 +248,84 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     return $form;
   }
 
+  /**
+   * Build the part of the form that allows the user to select the view's filters.
+   *
+   * By default, this adds two filters (when they are available), "tagged with"
+   * and "sorted by [date]".
+   */
+  protected function build_filters(&$form, &$form_state) {
+    // Find all the fields we are allowed to filter by.
+    $fields = views_fetch_fields($this->base_table, 'filter');
+
+    // Check if we are allowed to filter by taxonomy. We will construct our
+    // filters using taxonomy_index.tid (which limits the filtering to a
+    // specific vocabulary) rather than taxonomy_term_data.name (which matches
+    // terms in any vocabulary) because it is a more commonly-used filter that
+    // works better with the autocomplete UI, and also to avoid confusion with
+    // other vocabularies on the site that may have terms with the same name
+    // but are not used for free tagging. The downside is that if there *is*
+    // more than one vocabulary on the site that is used for free tagging, the
+    // wizard will only be able to make the "tagged with" filter apply to one
+    // of them (see below).
+    if (isset($fields['taxonomy_index.tid'])) {
+      // Check if this view will be displaying fieldable entities.
+      $entities = entity_get_info();
+      $displays_entities = FALSE;
+      foreach ($entities as $entity_type => $entity_info) {
+        if ($this->base_table == $entity_info['base table']) {
+          $displays_entities = TRUE;
+          // $entity_type and $entity_info will now store information about the
+          // type of entity this view can display.
+          break;
+        }
+      }
+      if ($displays_entities && $entity_info['fieldable']) {
+        // Find all "tag-like" taxonomy fields associated with the view's
+        // entities. If the plugin has already added filters that will restrict
+        // the selected entities to certain bundles, then we only search for
+        // taxonomy fields associated with those bundles. Otherwise, we use all
+        // bundles (for example, if we are filtering by "All content").
+        $bundles = isset($this->plugin['bundles']) ? array_intersect($this->plugin['bundles'], array_keys($entity_info['bundles'])) : array_keys($entity_info['bundles']);
+        $tag_fields = array();
+        foreach ($bundles as $bundle) {
+          foreach (field_info_instances($entity_type, $bundle) as $instance) {
+            // We define "tag-like" taxonomy fields as ones that use the
+            // "Autocomplete term widget (tagging)" widget.
+            if ($instance['widget']['type'] == 'taxonomy_autocomplete') {
+              $tag_fields[] = $instance['field_name'];
+            }
+          }
+        }
+        $tag_fields = array_unique($tag_fields);
+        if (!empty($tag_fields)) {
+          // If there is more than one "tag-like" taxonomy field available to
+          // the view, we can only make our filter apply to one of them (as
+          // described above). We choose 'field_tags' if it is available, since
+          // that is created by the Standard install profile in core and also
+          // commonly used by contrib modules; thus, it is most likely to be
+          // associated with the "main" free-tagging vocabulary on the site.
+          if (in_array('field_tags', $tag_fields)) {
+            $tag_field_name = 'field_tags';
+          }
+          else {
+            $tag_field_name = reset($tag_fields);
+          }
+          // Add the "tagged with" autocomplete textfield.
+          $form['displays']['show']['tagged_with'] = array(
+            '#type' => 'textfield',
+            '#title' => t('tagged with'),
+            '#autocomplete_path' => 'taxonomy/autocomplete/' . $tag_field_name,
+            '#size' => 30,
+            '#maxlength' => 1024,
+            '#field_name' => $tag_field_name,
+            '#element_validate' => array('views_ui_taxonomy_autocomplete_validate'),
+          );
+        }
+      }
+    }
+  }
+
   protected function instantiate_view($form, &$form_state) {
     $view = views_new_view();
     $view->name = $form_state['values']['name'];
@@ -302,9 +382,28 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
   protected function default_display_filters($form, $form_state) {
     $filters = array();
+
+    // Add the filters provided by the plugin.
     foreach ($this->plugin['filters'] as $name => $info) {
       $filters[$name] = $info;
     }
+
+    // Add any filters specified by the user when filling out the wizard.
+    if (!empty($form_state['values']['show']['tagged_with']['tids'])) {
+      $filters['tid'] = array(
+        'id' => 'tid',
+        'table' => 'taxonomy_index',
+        'field' => 'tid',
+        'value' => $form_state['values']['show']['tagged_with']['tids'],
+        'vocabulary' => $form_state['values']['show']['tagged_with']['vocabulary'],
+      );
+      // If the user entered more than one valid term in the autocomplete
+      // field, they probably intended both of them to be applied.
+      if (count($form_state['values']['show']['tagged_with']['tids']) > 1) {
+        $filters['tid']['operator'] = 'and';
+      }
+    }
+
     return $filters;
   }
 

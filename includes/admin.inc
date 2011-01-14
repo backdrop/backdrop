@@ -414,10 +414,10 @@ function views_ui_add_form($form, &$form_state) {
   // JavaScript is disabled, add a submit button to do that.
   $form['displays']['show']['update_wizard_key'] = array(
     '#type' => 'submit',
-    '#value' => t('Update displays'),
+    '#value' => t('Update options'),
     // Do not trigger form validation errors elsewhere on the page.
     '#limit_validation_errors' => array(
-      array('show'),
+      array('show', 'wizard_key'),
     ),
     // Hide this button when JavaScript is enabled.
     '#attributes' => array('class' => array('js-hide')),
@@ -531,6 +531,54 @@ function views_ui_add_form_store_edit_submit($form, &$form_state) {
  */
 function views_ui_add_form_cancel_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/views';
+}
+
+/**
+ * Form element validation handler for a taxonomy autocomplete field.
+ *
+ * This allows a taxonomy autocomplete field to be validated outside the
+ * standard Field API workflow, without passing in a complete field widget.
+ * Instead, all that is required is that $element['#field_name'] contain the
+ * name of the taxonomy autocomplete field that is being validated.
+ *
+ * This function is currently not used for validation directly, although it
+ * could be. Instead, it is only used to store the term IDs and vocabulary name
+ * in the element value, based on the tags that the user typed in.
+ *
+ * @see taxonomy_autocomplete_validate()
+ */
+function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
+  $value = array();
+  if ($tags = $element['#value']) {
+    // Get the machine names of the vocabularies we will search, keyed by the
+    // vocabulary IDs.
+    $field = field_info_field($element['#field_name']);
+    $vocabularies = array();
+    if (!empty($field['settings']['allowed_values'])) {
+      foreach ($field['settings']['allowed_values'] as $tree) {
+        if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
+          $vocabularies[$vocabulary->vid] = $tree['vocabulary'];
+        }
+      }
+    }
+    // Store the term ID of each (valid) tag that the user typed.
+    $typed_terms = drupal_explode_tags($tags);
+    foreach ($typed_terms as $typed_term) {
+      if ($terms = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array_keys($vocabularies)))) {
+        $term = array_pop($terms);
+        $value['tids'][] = $term->tid;
+      }
+    }
+    // Store the term IDs along with the name of the vocabulary. Currently
+    // Views (as well as the Field UI) assumes that there will only be one
+    // vocabulary, although technically the API allows there to be more than
+    // one.
+    if (!empty($value['tids'])) {
+      $value['tids'] = array_unique($value['tids']);
+      $value['vocabulary'] = array_pop($vocabularies);
+    }
+  }
+  form_set_value($element, $value, $form_state);
 }
 
 /**
