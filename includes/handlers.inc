@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.119.4.23 2011/01/07 20:49:58 dereine Exp $
+// $Id: handlers.inc,v 1.119.4.24 2011/01/14 23:32:32 dereine Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -861,21 +861,23 @@ class views_many_to_one_helper {
       $add_condition = FALSE;
     }
 
-    if ($formula) {
-      $placeholder = $this->placeholder();
-      if ($operator == 'IN') {
-        $operator = "$operator IN($placeholder)";
+    if (!$add_condition) {
+      if ($formula) {
+        $placeholder = $this->placeholder();
+        if ($operator == 'IN') {
+          $operator = "$operator IN($placeholder)";
+        }
+        else {
+          $operator = "$operator $placeholder";
+        }
+        $placeholders = array(
+          $placeholder => $value,
+        ) + $this->placeholders;
+        $this->handler->query->add_where_expression($options['group'], "$field $operator", $placeholders);
       }
       else {
-        $operator = "$operator $placeholder";
+        $this->handler->query->add_where($options['group'], $field, $value, $operator);
       }
-      $placeholders = array(
-        $placeholder => $value,
-      ) + $this->placeholders;
-      $this->handler->query->add_where_expression($options['group'], "$field $operator", $placeholders);
-    }
-    else {
-      $this->handler->query->add_where($options['group'], $field, $value, $operator);
     }
 
     if ($add_condition) {
