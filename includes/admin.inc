@@ -895,6 +895,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#value' => t('Add !display', array('!display' => $label)),
       '#limit_validation_errors' => array(),
       '#submit' => array('views_ui_edit_form_submit_add_display'),
+      '#attributes' => array('class' => array('add-display'))
     );
   }
 
