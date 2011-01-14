@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.119.4.22 2011/01/05 22:40:08 dereine Exp $
+// $Id: handlers.inc,v 1.119.4.23 2011/01/07 20:49:58 dereine Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -838,6 +838,7 @@ class views_many_to_one_helper {
     $options = $this->handler->options;
     $operator = $this->handler->operator;
     $formula = !empty($this->formula);
+    $value = $this->handler->value;
     if (empty($options['group'])) {
       $options['group'] = 0;
     }

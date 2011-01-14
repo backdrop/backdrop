@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.27.4.49 2011/01/05 20:36:27 dereine Exp $
+// $Id: views_plugin_display.inc,v 1.27.4.51 2011/01/10 22:40:54 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -1824,7 +1824,7 @@ class views_plugin_display extends views_plugin {
           }
 
           foreach ($this->view->display as $id => $display) {
-            if ($id != $this->view->current_display && ($form_state['values']['display_id'] == $id || $form_state['values']['display_id'] == $display->new_id)) {
+            if ($id != $this->view->current_display && ($form_state['values']['display_id'] == $id || (isset($display->new_id) && $form_state['values']['display_id'] == $display->new_id))) {
               form_error($form['display_id'], t('Display id should be unique.'));
             }
           }
@@ -2274,6 +2274,13 @@ class views_plugin_display extends views_plugin {
       if (!empty($result) && is_array($result)) {
         $errors = array_merge($errors, $result);
       }
+    }
+
+    // Validate query plugin.
+    $query = $this->get_plugin('query');
+    $result = $query->validate();
+    if (!empty($result) && is_array($result)) {
+      $errors = array_merge($errors, $result);
     }
 
     // Validate handlers

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.33.4.44 2010/12/23 22:38:54 dereine Exp $
+// $Id: views_handler_field.inc,v 1.33.4.46 2011/01/11 16:09:58 dereine Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -301,6 +301,7 @@ class views_handler_field extends views_handler {
         'suffix' => array('default' => '', 'translatable' => TRUE),
         'target' => array('default' => '', 'translatable' => TRUE),
         'trim' => array('default' => FALSE),
+        'nl2br' => array('default' => FALSE),
         'max_length' => array('default' => ''),
         'word_boundary' => array('default' => TRUE),
         'ellipsis' => array('default' => TRUE),
@@ -672,6 +673,14 @@ If you would like to have the characters %5B and %5D please use the html entity 
         ),
         '#process' => array('ctools_dependent_process'),
       );
+
+      $form['alter']['nl2br'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Convert newlines to HTML &lt;br&gt; tags'),
+        '#description' => t('If checked, all newlines chars (e.g. \n) are converted into HTML &lt;br&gt; tags.'),
+        '#default_value' => $this->options['alter']['nl2br'],
+        '#process' => array('ctools_dependent_process'),
+      );
     }
 
     $form['empty_field_behavior'] = array(
@@ -819,6 +828,10 @@ If you would like to have the characters %5B and %5D please use the html entity 
 
     if (!empty($alter['trim']) && !empty($alter['max_length'])) {
       $value = $this->render_trim_text($alter, $value);
+    }
+
+    if (!empty($alter['nl2br'])) {
+      $value = nl2br($value);
     }
 
     if (!empty($alter['make_link']) && !empty($alter['path'])) {

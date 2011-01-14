@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.161.4.86 2011/01/04 23:54:35 dereine Exp $
+// $Id: admin.inc,v 1.161.4.87 2011/01/08 13:10:36 dereine Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -2956,7 +2956,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
         $row[] = drupal_render($form['filters'][$id]['weight']);
         $form['filters'][$id]['group']['#attributes']['class'] = array('views-group-select views-group-' . $group_id);
         $row[] = drupal_render($form['filters'][$id]['group']);
-        $row[] = drupal_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
+        $row[] = drupal_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
 
         $row = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
         if ($group_id !== 'ungroupable') {
