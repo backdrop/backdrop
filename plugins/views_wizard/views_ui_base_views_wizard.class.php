@@ -436,8 +436,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       // field, they probably intended both of them to be applied.
       if (count($form_state['values']['show']['tagged_with']['tids']) > 1) {
         $filters['tid']['operator'] = 'and';
-        // Sort the terms so they'll be displayed as they normally would be on
-        // the edit screen.
+        // Sort the terms so the filter will be displayed as it normally would
+        // on the edit screen.
         sort($filters['tid']['value']);
       }
     }
