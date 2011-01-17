@@ -119,24 +119,17 @@ function views_ui_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
-  // Nojs/Ajax callbacks used while editing a View.
-  $ajax_callbacks = array(
-    'preview' => 'views_ui_preview',
-    '%' => 'views_ui_ajax_form',
-  );
-  foreach ($ajax_callbacks as $menu => $menu_callback) {
-    $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache'] = array(
-      'page callback' => $menu_callback,
-      'page arguments' => $menu === '%' ? array(FALSE, 4, 5) : array(FALSE, 5),
-      'type' => MENU_CALLBACK,
-    ) + $base;
-    $items['admin/structure/views/ajax/' . $menu . '/%views_ui_cache'] = array(
-      'page callback' => $menu_callback,
-      'page arguments' => $menu === '%' ? array(TRUE, 4, 5) : array(TRUE, 5),
-      'delivery callback' => 'ajax_deliver',
-      'type' => MENU_CALLBACK,
-    ) + $base;
-  }
+  $items['admin/structure/views/nojs/%/%views_ui_cache'] = array(
+    'page callback' => 'views_ui_ajax_form',
+    'page arguments' => array(FALSE, 4, 5),
+    'type' => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/structure/views/ajax/%/%views_ui_cache'] = array(
+    'page callback' => 'views_ui_ajax_form',
+    'page arguments' => array(TRUE, 4, 5),
+    'delivery callback' => 'ajax_deliver',
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
 //  $items['admin/structure/views/nojs/human_name/%views_ui_cache'] = $callback + array(
 //    'page callback' => 'views_ui_edit_details',

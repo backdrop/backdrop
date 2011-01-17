@@ -107,45 +107,17 @@ function views_ui_check_advanced_help() {
 }
 
 /**
- * Page callback for the live preview.
- *
- * @todo make this use a template
+ * Returns the results of the live preview.
  */
-function views_ui_preview($js, $view) {
-  // Take off the items we know so that we can have just the args passed
-  // in for later use.
-  $func_args = func_get_args();
-  array_shift($func_args); // $js
-  array_shift($func_args); // $view
-  $display_id = (count($func_args)) ? array_shift($func_args) : 'default';
-
-  $form_state = array(
-    'display_id' => $display_id,
-    'view_args' => $func_args ? implode('/', $func_args) : '',
-    'rerender' => TRUE,
-    'no_redirect' => TRUE,
-    'view' => &$view,
-    'ajax' => $js,
-    'build_info' => array(
-      'args' => array(),
-    ),
-  );
-
-  $form = drupal_build_form('views_ui_preview_form', $form_state);
-  $output = drupal_render($form);
-  $args = array();
-  if (isset($form_state['view_args']) && $form_state['view_args'] !== '') {
-    $args = explode('/', $form_state['view_args']);
-  }
-
+function views_ui_preview($view, $display_id, $args) {
   $errors = $view->validate();
   if ($errors === TRUE) {
-    $view->ajax = $js;
+    $view->ajax = TRUE;
     $view->live_preview = TRUE;
     $view->set_exposed_input($_POST);
 
     // Store the current view URL for later use:
-    $view->set_display($form_state['display_id']);
+    $view->set_display($display_id);
     $view->set_arguments($args);
 
     if ($view->display_handler->get_option('path')) {
@@ -153,15 +125,19 @@ function views_ui_preview($js, $view) {
     }
 
     // Make view links come back to preview.
-    $view->override_path = 'admin/structure/views/nojs/preview/' . $view->name . '/' . $form_state['display_id'];
+    $view->override_path = 'admin/structure/views/nojs/preview/' . $view->name . '/' . $display_id;
 
     // also override $_GET['q'] so we get the pager
     $_GET['q'] = $view->override_path;
-    if ($form_state['view_args']) {
-      $_GET['q'] .= '/' . $form_state['view_args'];
+    if ($args) {
+      $_GET['q'] .= '/' . implode('/', $args);
     }
 
-    $preview = $view->preview($form_state['display_id'], $args);
+    $preview = $view->preview($display_id, $args);
+
+    // TODO: Expose a UI for the user to request that the query information be
+    // displayed. For now, just return the preview without query info appended.
+    return $preview;
 
     // Get information from the preview for display.
     if (!empty($view->build_info['query'])) {
@@ -222,90 +198,30 @@ function views_ui_preview($js, $view) {
   $info = '<div class="views-query-info">' . $info . '</div>';
 
   if (variable_get('views_ui_query_on_top', FALSE)) {
-    $output .= $info . $preview;
+    $output = $info . $preview;
   }
   else {
-    $output .= $preview . $info;
+    $output = $preview . $info;
   }
 
-  if (!$js) {
-    views_add_css('views-admin');
-    drupal_set_title($view->get_title());
-    return $output;
-  }
-  else {
-    $commands = array();
-    if (!empty($view->js_settings)) {
-      $commands[] = ajax_command_settings($view->js_settings);
-    }
-    $display = '';
-    if ($messages = theme('status_messages')) {
-      $display = '<div class="views-messages">' . $messages . '</div>';
-    }
-    $display .= $output;
-    if ($display) {
-      $commands[] = ajax_command_html('div#views-live-preview', $display);
-    }
-    return $js ? array('#type' => 'ajax', '#commands' => $commands) : $commands;
-  }
+  return $output;
 }
 
 /**
- * Form for generating argument information for the live preview.
+ * AJAX callback that returns the preview section of the edit form.
  */
-function views_ui_preview_form($form, &$form_state) {
-  $view = &$form_state['view'];
-  $view->init_display();
-  $options = array();
-  foreach ($view->display as $id => $display) {
-    $options[$id] = $display->display_title;
+function views_ui_preview_callback($form, $form_state) {
+  // Reload the view from cache, so we get the most recent version instead of
+  // the version from the form cache.
+  $view = views_ui_cache_load($form_state['view']->name);
+  if (isset($form_state['values']['displays']['preview']['form']['view_args']) && $form_state['values']['displays']['preview']['form']['view_args'] !== '') {
+    $args = explode('/', $form_state['values']['displays']['preview']['form']['view_args']);
   }
-
-  $form['#attributes'] = array(
-    'class' => array('clearfix'),
-  );
-
-  $form['display_id'] = array(
-    '#type' => 'select',
-    '#title' => t('Display'),
-    '#options' => $options,
-    '#default_value' => $form_state['display_id'],
-    '#id' => 'preview-display-id',
-  );
-
-  $form['args'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Arguments'),
-    '#default_value' => $form_state['view_args'],
-    '#description' => t('Separate arguments with a / as though they were a URL path.'),
-    '#id' => 'preview-args',
-  );
-
-  $form['preview'] = array(
-    '#type' => 'submit',
-    '#value' => t('Preview'),
-    '#id' => 'preview-submit',
-  );
-
-  $form['live_preview'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Automatic live preview'),
-    '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
-  );
-
-  $form['#action'] = url("admin/structure/views/nojs/preview/$view->name");
-  return $form;
-}
-
-/**
- * Submit the preview form.
- *
- * This just takes the data and stores it on the form state in a
- * known location. The caller will be responsible for using it.
- */
-function views_ui_preview_form_submit(&$form, &$form_state) {
-  $form_state['display_id'] = $form_state['values']['display_id'];
-  $form_state['view_args'] = $form_state['values']['args'];
+  else {
+    $args = array();
+  }
+  $form['displays']['preview']['preview']['#markup'] = views_ui_preview($view, $form_state['display_id'], $args);
+  return $form['displays']['preview'];
 }
 
 /**
@@ -910,12 +826,44 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
     $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
 
+  // Add a checkbox controlling whether or not this display auto-previews.
+  $form['displays']['live_preview'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Auto preview'),
+    '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
+  );
+
+
     // The live preview.
     $view->views_ui_context = TRUE;
+
     $form['displays']['preview'] = array(
-      '#markup' => $view->preview($display_id, array()),
-      '#prefix' => '<div id="views-live-preview">',
-      '#suffix' => '</div>',
+      '#theme_wrappers' => array('container'),
+      '#id' => 'views-live-preview',
+    );
+
+    $form['displays']['preview']['form'] = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('arguments-preview')),
+    );
+    $form['displays']['preview']['form']['view_args'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Arguments'),
+      '#description' => t('Separate arguments with a / as though they were a URL path.'),
+      '#id' => 'preview-args',
+    );
+    $form['displays']['preview']['form']['button'] = array(
+      '#type' => 'submit',
+      '#value' => t('Preview'),
+      '#id' => 'preview-submit',
+      '#ajax' => array(
+        'callback' => 'views_ui_preview_callback',
+        'wrapper' => 'views-live-preview',
+      ),
+    );
+
+    $form['displays']['preview']['preview'] = array(
+      '#markup' => views_ui_preview($view, $display_id, array()),
     );
 
     // The content of the popup dialog.
@@ -1166,14 +1114,6 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['columns']['first']['filters'] = views_ui_edit_form_get_bucket('filter', $view, $display);
   $build['columns']['first']['sorts'] = views_ui_edit_form_get_bucket('sort', $view, $display);
 
-
-  // Add a checkbox controlling whether or not this display auto-previews.
-  // TODO: Wire it up to actual functionality.
-  $build['live_preview'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Auto preview'),
-    '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
-  );
 
   return $build;
 }
@@ -1665,16 +1605,13 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 /**
  * Regenerate the current tab for AJAX updates.
  */
-function views_ui_regenerate_tab(&$view, &$output, $display_id, $show_preview = TRUE) {
+function views_ui_regenerate_tab(&$view, &$output, $display_id) {
   if (!$view->set_display('default')) {
     return;
   }
 
   $build = views_ui_get_display_tab($view, $display_id);
   $output[] = ajax_command_html('#views-tab-' . $display_id, drupal_render($build));
-  if ($show_preview) {
-    $output[] = ajax_command_html('div#views-live-preview', $view->preview($display_id, array()));
-  }
 }
 
 /**
@@ -2468,7 +2405,17 @@ function views_ui_edit_display_form($form, &$form_state) {
   $display = &$view->display[$display_id];
 
   // Get form from the handler.
-  $display->handler->options_form($form, $form_state);
+  $form['options'] = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('class' => array('scroll')),
+  );
+  $display->handler->options_form($form['options'], $form_state);
+
+  // The handler options form sets $form['#title'], which we need on the entire
+  // $form instead of just the ['options'] section.
+  $form['#title'] = $form['options']['#title'];
+  unset($form['options']['#title']);
+
   $name = NULL;
   if (isset($form_state['update_name'])) {
     $name = $form_state['update_name'];

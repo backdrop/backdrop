@@ -84,12 +84,6 @@ Drupal.viewsUi.FormFieldFiller.prototype.unbind = function () {
 
 
 
-Drupal.behaviors.viewsUiEditView = {};
-
-Drupal.behaviors.viewsUiEditView.attach = function (context, settings) {
-  //jQuery('.views-displays').once('views-ui-edit-view').tabs();
-};
-
 /**
  * The input field items that add displays must be rendered as <input> elements.
  * The following behavior detaches the <input> elements from the DOM, wraps them
@@ -239,5 +233,19 @@ Drupal.viewsUi.OptionsSearch.prototype.handleKeyup = function (event) {
       // The search string wasn't found; hide this item.
       option.$div.hide();
     }
+  }
+};
+
+Drupal.behaviors.viewsUiPreview = {};
+Drupal.behaviors.viewsUiPreview.attach = function (context, settings) {
+  // If the display has no arguments, hide the form where you enter arguments
+  // for the live preview.
+  var $ = jQuery;
+  var arguments = $('.views-display-column .arguments .views-display-setting a', context);
+  if (arguments.length) {
+    $('.arguments-preview').show();
+  }
+  else {
+    $('.arguments-preview').hide();
   }
 };

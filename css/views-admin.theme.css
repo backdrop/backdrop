@@ -258,19 +258,19 @@
  * The auto-preview checkbox line. This may have more stuff added to it.
  */
  
-.form-item-displays-tab-content-details-auto-preview {
+.page-admin-structure-views #content div.form-item-displays-live-preview {
   text-align: right;
+  margin: 0 12px;
+  padding-bottom: 12px;
 }
 
 /**
  * Create a horizontal rule between the display details and whatever's after it.
  */
-.page-admin-structure-views #content .views-display-tab + * > *:first-child {
+.page-admin-structure-views #content #views-live-preview {
   border-top: 3px solid #CCC;
-}
-
-.page-admin-structure-views #content .views-display-tab + * {
-  padding: 0 12px;
+  margin: 0 12px;
+  padding-top: 12px;
 }
 
 /* @end */
