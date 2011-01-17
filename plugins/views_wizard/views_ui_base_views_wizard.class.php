@@ -60,7 +60,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $feed_row_options = views_fetch_plugin_names('row', 'feed', array($this->base_table));
     $path_prefix = url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=');
 
+    // Add filters and sorts which apply to the view as a whole.
     $this->build_filters($form, $form_state);
+    $this->build_sorts($form, $form_state);
 
     $form['displays']['page'] = array(
       '#type' => 'fieldset',
@@ -251,8 +253,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   /**
    * Build the part of the form that allows the user to select the view's filters.
    *
-   * By default, this adds two filters (when they are available), "tagged with"
-   * and "sorted by [date]".
+   * By default, this adds a "tagged with" filter (when it is available).
    */
   protected function build_filters(&$form, &$form_state) {
     // Find all the fields we are allowed to filter by.
@@ -326,6 +327,26 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     }
   }
 
+  /**
+   * Build the part of the form that allows the user to select the view's sort order.
+   *
+   * By default, this adds a "sorted by [date]" filter (when it is available).
+   */
+  protected function build_sorts(&$form, &$form_state) {
+    // Check if we are allowed to sort by creation date.
+    if (!empty($this->plugin['created_column'])) {
+      $form['displays']['show']['sort_created_order'] = array(
+        '#type' => 'select',
+        '#title' => t('sorted by'),
+        '#options' => array(
+          'DESC' => t('newest first'),
+          'ASC' => t('oldest first'),
+        ),
+        '#default_value' => 'DESC',
+      );
+    }
+  }
+
   protected function instantiate_view($form, &$form_state) {
     $view = views_new_view();
     $view->name = $form_state['values']['name'];
@@ -341,6 +362,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $handler->display->display_options['filters'] = array();
     }
     $handler->display->display_options['filters'] += $this->default_display_filters($form, $form_state);
+    if (!isset($handler->display->display_options['sorts'])) {
+      $handler->display->display_options['sorts'] = array();
+    }
+    $handler->display->display_options['sorts'] += $this->default_display_sorts($form, $form_state);
 
     // Display: Page
     if (!empty($form_state['values']['page']['create'])) {
@@ -383,12 +408,22 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function default_display_filters($form, $form_state) {
     $filters = array();
 
-    // Add the filters provided by the plugin.
-    foreach ($this->plugin['filters'] as $name => $info) {
-      $filters[$name] = $info;
+    // Add any filters provided by the plugin.
+    if (isset($this->plugin['filters'])) {
+      foreach ($this->plugin['filters'] as $name => $info) {
+        $filters[$name] = $info;
+      }
     }
 
     // Add any filters specified by the user when filling out the wizard.
+    $filters = array_merge($filters, $this->default_display_filters_user($form, $form_state));
+
+    return $filters;
+  }
+
+  protected function default_display_filters_user($form, $form_state) {
+    $filters = array();
+
     if (!empty($form_state['values']['show']['tagged_with']['tids'])) {
       $filters['tid'] = array(
         'id' => 'tid',
@@ -401,10 +436,45 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       // field, they probably intended both of them to be applied.
       if (count($form_state['values']['show']['tagged_with']['tids']) > 1) {
         $filters['tid']['operator'] = 'and';
+        // Sort the terms so the filter will be displayed as it normally would
+        // on the edit screen.
+        sort($filters['tid']['value']);
       }
     }
 
     return $filters;
+  }
+
+  protected function default_display_sorts($form, $form_state) {
+    $sorts = array();
+
+    // Add any sorts provided by the plugin.
+    if (isset($this->plugin['sorts'])) {
+      foreach ($this->plugin['sorts'] as $name => $info) {
+        $sorts[$name] = $info;
+      }
+    }
+
+    // Add any sorts specified by the user when filling out the wizard.
+    $sorts = array_merge($sorts, $this->default_display_sorts_user($form, $form_state));
+
+    return $sorts;
+  }
+
+  protected function default_display_sorts_user($form, $form_state) {
+    $sorts = array();
+
+    if (!empty($form_state['values']['show']['sort_created_order'])) {
+      $column = $this->plugin['created_column'];
+      $sorts[$column] = array(
+        'id' => $column,
+        'table' => $this->base_table,
+        'field' => $column,
+        'order' => $form_state['values']['show']['sort_created_order'],
+      );
+    }
+
+    return $sorts;
   }
 
   protected function page_display_options($form, $form_state) {

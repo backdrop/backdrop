@@ -6,6 +6,7 @@ if (module_exists('comment')) {
   $plugin = array(
     'name' => 'comment',
     'base_table' => 'comment',
+    'created_column' => 'created',
     'form_wizard_class' => array(
       'file' => 'views_ui_comment_views_wizard.class.php',
       'class' => 'ViewsUiCommentViewsWizard',

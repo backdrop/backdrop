@@ -5,6 +5,7 @@
 $plugin = array(
   'name' => 'node',
   'base_table' => 'node',
+  'created_column' => 'created',
   'get children' => 'views_ui_node_views_wizard_get_children',
   'get child' => 'views_ui_node_views_wizard_get_child',
   'form_wizard_class' => array(

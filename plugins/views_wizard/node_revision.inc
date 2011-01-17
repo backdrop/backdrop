@@ -5,11 +5,12 @@
 $plugin = array(
   'name' => 'node_revision',
   'base_table' => 'node_revision',
+  'created_column' => 'timestamp',
   'form_wizard_class' => array(
     'file' => 'views_ui_node_revision_views_wizard.class.php',
     'class' => 'ViewsUiNodeRevisionViewsWizard',
   ),
-  'title' => t('Node revision'),
+  'title' => t('Node revisions'),
   'filters' => array(
     'status' => array(
       'value' => '1',

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_field.inc,v 1.1.2.5 2010/11/19 20:35:46 dereine Exp $
+// $Id: views_handler_field_field.inc,v 1.1.2.27 2011/01/08 12:42:26 dereine Exp $
 
 /**
  * Helper function: Return an array of formatter options for a field type.
@@ -34,24 +34,137 @@ function _field_view_formatter_options($field_type = NULL) {
 class views_handler_field_field extends views_handler_field {
   /**
    * Called to add the field to a query.
+   *
+   * By default, the only columns added to the query are entity_id and
+   * entity_type. This is because other needed data is fetched by entity_load().
+   * Other columns are added only if they are used in groupings, or if
+   * 'add fields to query' is specifically set to TRUE in the field definition.
+   *
+   * The 'add fields to query' switch is used by modules which need all data
+   * present in the query itself (such as "sphinx").
    */
-  function query() {
-    // TODO: we should try to use the data from the join if possible first.
-    // $join = $this->get_join();
-    // That would avoid joining at all the field table.
-    return parent::query();
+  function query($use_groupby = FALSE) {
+    $base_table_alias = $base_table = $this->view->base_table;
+    $base_field = $this->view->base_field;
+
+    // If the current field is under a relationship you can't be sure that the
+    // base table of the view is the base table of the current field.
+    // For example a field from a node author on a node view does have users as base table.
+    if (!empty($this->relationship)) {
+      foreach ($this->view->relationship as $relationship) {
+        if ($relationship->alias == $this->relationship) {
+          $base_table = $relationship->definition['base'];
+          $base_field = $relationship->definition['base field'];
+          $base_table_alias = $relationship->alias;
+        }
+      }
+    }
+
+    $params = array();
+    if ($use_groupby) {
+      // When grouping on a "field API" field (whose "real_field" is set to
+      // entity_id), retrieve the minimum entity_id to have a valid entity_id to
+      // pass to field_view_field().
+      $params = array(
+        'function' => 'min',
+      );
+    }
+
+    // We always need the base field (entity_id / revision_id).
+    $this->field_alias = $this->query->add_field($base_table_alias, $base_field, '', $params);
+
+    // Get the entity type according to the base table of the field.
+    // Then add it to the query as a formula. That way we can avoid joining
+    // the field table if all we need is entity_id and entity_type.
+    $this->entity_type = $entity_type = $this->definition['entity_tables'][$base_table];
+    // The alias needs to be unique, so we use both the field table and the entity type.
+    $entity_type_alias = $this->definition['table'] . '_' . $entity_type . '_entity_type';
+    $this->aliases['entity_type'] = $this->query->add_field(NULL, "'$entity_type'", $entity_type_alias);
+
+    $fields = $this->additional_fields;
+
+    // We've already added entity_type, so we can remove it from the list.
+    $entity_type_key = array_search('entity_type', $fields);
+    if ($entity_type_key !== FALSE) {
+      unset($fields[$entity_type_key]);
+    }
+
+    if ($use_groupby) {
+      // Remove additional fields that are not the group_column or are not in
+      // the additional group_columns as their presence in the query inhibits
+      // grouping.
+      $group_field_name = $this->definition['field_name'] . '_' . $this->options['group_column'];
+      if (in_array($group_field_name, $fields)) {
+        $fields = array($group_field_name => $group_field_name) + $this->options['group_columns'];
+      }
+    }
+
+    // Add additional fields (and the table join itself) if needed.
+    if ($use_groupby || !empty($this->definition['add fields to query'])) {
+      $this->ensure_my_table();
+      $this->add_additional_fields($fields);
+
+      // Filter by language, if field translation is enabled.
+      $field = $this->definition['field_info'];
+      if (field_is_translatable($entity_type, $field)) {
+        $column = $this->table_alias . ".language";
+        $this->query->add_where(0, $column, $this->query->options['field_language']);
+      }
+
+      // Do we need to filter by delta?
+      if (is_numeric($this->options['delta'])) {
+        $column = $this->table_alias . ".delta";
+        $this->query->add_where(0, $column, (int) $this->options['delta']);
+      }
+    }
+
+    // The revision id inhibits grouping.
+    // So, stop here if we're using grouping, or if aren't adding all columns to
+    // the query.
+    if ($use_groupby || empty($this->definition['add fields to query'])) {
+      return;
+    }
+
+    $this->add_additional_fields(array('revision_id'));
+  }
+
+  /**
+   * Called to determine what to tell the clicksorter.
+   */
+  function click_sort($order) {
+    $this->ensure_my_table();
+    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_sort_column']);
+    if (!isset($this->aliases[$column])) {
+      // Column is not in query; add a sort on it (without adding the column).
+      $this->aliases[$column] = $this->table_alias . '.' . $column;
+    }
+    $this->query->add_orderby(NULL, NULL, $order, $this->aliases[$column]);
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $field = field_info_field($this->definition['field_name']);
+    $field = $this->definition['field_info'];
     $field_type = field_info_field_types($field['type']);
+    $column_names = array_keys($field['columns']);
 
+    $options['delta'] = array(
+      'default' => '',
+    );
+    // If the field has a "value" column, we probably need that one.
+    $options['click_sort_column'] = array(
+      'default' => in_array('value', $column_names) ? 'value' : '',
+    );
     $options['type'] = array(
       'default' => $field_type['default_formatter'],
     );
     $options['settings'] = array(
+      'default' => array(),
+    );
+    $options['group_column'] = array(
+      'default' => in_array('value', $column_names) ? 'value' : $column_names[0],
+    );
+    $options['group_columns'] = array(
       'default' => array(),
     );
 
@@ -59,8 +172,46 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    $field = field_info_field($this->definition['field_name']);
+    $field = $this->definition['field_info'];
     $formatters = _field_view_formatter_options($field['type']);
+    $column_names = array_keys($field['columns']);
+
+    if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+      if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+        $type = 'textfield';
+        $options = NULL;
+        $description = t('The sequence number of the value to show. Numbers start from 0. Leave empty to display all values.');
+      }
+      else {
+        $type = 'select';
+        $options = array_merge(array('' => t('All')), range(0, $field['cardinality'] - 1));
+        $description = t('The sequence number of the value to show.');
+      }
+      $form['delta'] = array(
+        '#title' => t('Delta'),
+        '#type' => $type,
+        '#options' => $options,
+        '#default_value' => $this->options['delta'],
+        '#description' => $description,
+      );
+    }
+
+    // No need to ask the user anything if the field has only one column.
+    if (count($field['columns']) == 1) {
+      $form['click_sort_column'] = array(
+        '#type' => 'value',
+        '#value' => $column_names[0],
+      );
+    }
+    else {
+      $form['click_sort_column'] = array(
+        '#type' => 'select',
+        '#title' => t('Click sort column'),
+        '#options' => drupal_map_assoc($column_names),
+        '#default_value' => $this->options['click_sort_column'],
+        '#description' => t('Used by Style: Table to determine the actual column to click sort the field on. The default is usually fine.'),
+      );
+    }
 
     $form['type'] = array(
       '#type' => 'select',
@@ -83,7 +234,8 @@ class views_handler_field_field extends views_handler_field {
     $settings = $this->options['settings'] + field_info_formatter_settings($format);
 
     // Provide an instance array for hook_field_formatter_settings_form().
-    $instance = $this->_fake_instance($this->definition['field_name'], $formatter, $settings);
+    ctools_include('fields');
+    $instance = ctools_fields_fake_field_instance($this->definition['field_name'], '_dummy', $formatter, $settings);
 
     // Store the settings in a '_dummy' view mode.
     $instance['display']['_dummy'] = array(
@@ -103,79 +255,69 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
-  * @TODO
-  *    Once views requires ctools change this to the helper method in ctools.
-  */
-  function _fake_instance($field_name, $formatter, $formatter_settings) {
-    $field = field_read_field($field_name);
+   * Extend the groupby form with group columns.
+   */
+  function groupby_form(&$form, &$form_state) {
+    parent::groupby_form($form, $form_state);
+    // With "field API" fields, the column target of the grouping function
+    // and any additional grouping columns must be specified.
+    $group_columns = drupal_map_assoc(array_keys($this->definition['field_info']['columns']), 'ucfirst');
+    $form['group_column'] = array(
+      '#type' => 'select',
+      '#title' => t('Group column'),
+      '#default_value' => $this->options['group_column'],
+      '#description' => t('Select the column of this field to apply the grouping function selected above.'),
+      '#options' => $group_columns,
+    );
 
-    $field_type = field_info_field_types($field['type']);
-
-    return array(
-      // Build a fake entity type and bundle.
-      'field_name' => $field_name,
-      'entity_type' => '_dummy',
-      'bundle' => '_dummy',
-
-      // Use the default field settings for settings and widget.
-      'settings' => field_info_instance_settings($field['type']),
-      'widget' => array(
-        'type' => $field_type['default_widget'],
-        'settings' => array(),
-      ),
-
-      // Build a dummy display mode.
-      'display' => array(
-        '_dummy' => array(
-          'type' => $formatter,
-          'settings' => $formatter_settings,
-        ),
-      ),
-
-      // Set the other fields to their default values.
-      // @see _field_write_instance().
-      'required' => FALSE,
-      'label' => $field_name,
-      'description' => '',
-      'deleted' => 0,
+    $options = drupal_map_assoc(array('bundle', 'language', 'entity_type'), 'ucfirst');
+    $form['group_columns'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Group columns (additional)'),
+      '#default_value' => $this->options['group_columns'],
+      '#description' => t('Select any additional columns of this field to include in the query and to group on.'),
+      '#options' => $options,
     );
   }
 
+  function groupby_form_submit(&$form, &$form_state) {
+    parent::groupby_form_submit($form, $form_state);
+    $item =& $form_state['handler']->options;
 
+    if ($item['group_type'] != 'group') {
+      unset($item['group_column']);
+      unset($item['group_columns']);
+    }
+    else {
+      // Add settings for "field API" fields.
+      $item['group_column'] = $form_state['values']['group_column'];
+      $item['group_columns'] = array_filter($form_state['values']['group_columns']);
+    }
+  }
 
   /**
-   * Loads the objects providing the field information necessary to render the
-   *   field in the View.
+   * Load the entities for all fields that are about to be displayed.
    */
   function pre_render(&$values) {
-    static $entity_type_map;
-
     if (!empty($values)) {
-      // Cache the entity type map for repeat usage.
-      if (empty($entity_type_map)) {
-        $entity_type_map = db_query('SELECT etid, type FROM {field_config_entity_type}')->fetchAllKeyed();
-      }
-
-      // Create an array mapping the Views values to their object types.
-      $objects_by_type = array();
-
+      // Divide the entity ids by entity type, so they can be loaded in bulk.
+      $entities_by_type = array();
       foreach ($values as $key => $object) {
-        // Derive the entity type. For some field types, etid might be empty.
-        if (isset($object->{$this->aliases['etid']}) && isset($entity_type_map[$object->{$this->aliases['etid']}])) {
-          $entity_type = $entity_type_map[$object->{$this->aliases['etid']}];
+        if (isset($object->{$this->field_alias}) && !isset($values[$key]->_field_data[$this->field_alias])) {
+          $entity_type = $object->{$this->aliases['entity_type']};
           $entity_id = $object->{$this->field_alias};
-          $objects_by_type[$entity_type][$key] = $entity_id;
+          $entities_by_type[$entity_type][$key] = $entity_id;
         }
       }
 
-      // Load the objects.
-      foreach ($objects_by_type as $entity_type => $oids) {
-        $objects = entity_load($entity_type, $oids);
+      // Load the entities.
+      foreach ($entities_by_type as $entity_type => $entity_ids) {
+        $entities = entity_load($entity_type, $entity_ids);
 
-        foreach ($oids as $key => $entity_id) {
-          $values[$key]->_field_cache[$this->field_alias] = array(
+        foreach ($entity_ids as $key => $entity_id) {
+          $values[$key]->_field_data[$this->field_alias] = array(
             'entity_type' => $entity_type,
-            'object' => $objects[$entity_id],
+            'entity' => $entities[$entity_id],
           );
         }
       }
@@ -183,11 +325,28 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function render($values) {
-    if (isset($values->_field_cache[$this->field_alias])) {
+    if (isset($values->_field_data[$this->field_alias])) {
       // Prepare arguments for rendering based on the objects cached in the
       // pre-render phase and the display options for this field.
-      $entity_type = $values->_field_cache[$this->field_alias]['entity_type'];
-      $object = $values->_field_cache[$this->field_alias]['object'];
+      $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
+      $entity = $values->_field_data[$this->field_alias]['entity'];
+      $display_entity = clone $entity;
+      $langcode = $this->field_language();
+
+      // The field we are trying to display is empty, or doesn't exist on
+      // this entity.
+      if (empty($display_entity->{$this->definition['field_name']})) {
+        return '';
+      }
+
+      // The user wants to render only one value from a multivalue field.
+      // The Field API doesn't support this, so we just hack out the
+      // values we don't want to render.
+      if (is_numeric($this->options['delta'])) {
+        $delta = (int) $this->options['delta'];
+
+        $display_entity->{$this->definition['field_name']}[$langcode] = array($display_entity->{$this->definition['field_name']}[$langcode][$delta]);
+      }
 
       $display = array(
         'type' => $this->options['type'],
@@ -195,11 +354,31 @@ class views_handler_field_field extends views_handler_field {
         'label' => 'hidden',
       );
 
-      $render_array = field_view_field($entity_type, $object, $this->definition['field_name'], $display);
+      $render_array = field_view_field($entity_type, $display_entity, $this->definition['field_name'], $display, $langcode);
       return drupal_render($render_array);
     }
     else {
       return '';
+    }
+  }
+
+  /**
+   * Return the language code of the language the field should be displayed in,
+   * according to the settings.
+   */
+  function field_language() {
+    global $language_content;
+
+    if (field_is_translatable($this->entity_type, $this->definition['field_info'])) {
+      $default_language = language_default('language');
+      $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
+                              array($language_content->language, $default_language),
+                              $this->query->options['field_language']);
+
+      return $language;
+    }
+    else {
+      return LANGUAGE_NONE;
     }
   }
 }
