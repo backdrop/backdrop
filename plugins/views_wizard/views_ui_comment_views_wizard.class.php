@@ -34,19 +34,4 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
 
     return $display_options;
   }
-
-  /**
-   * @override
-   */
-  protected function page_feed_display_options($form, $form_state) {
-    $display_options = array();
-    $display_options['defaults']['title'] = FALSE;
-    $display_options['title'] = $form_state['values']['page']['title'];
-    $display_options['pager']['type'] = 'some';
-    $display_options['style_plugin'] = 'rss';
-    $display_options['style_options']['mission_description'] = 1;
-    $display_options['row_plugin'] = $form_state['values']['page']['feed_properties']['row_plugin'];
-    $display_options['path'] = $form_state['values']['page']['feed_properties']['path'];
-    return $display_options;
-  }
 }

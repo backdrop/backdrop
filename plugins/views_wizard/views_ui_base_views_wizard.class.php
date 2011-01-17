@@ -372,7 +372,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $handler = $view->new_display('page', 'Page', 'page');
       $handler->display->display_options = $this->page_display_options($form, $form_state);
       if (!empty($form_state['values']['page']['feed'])) {
-        $handler = $view->new_display('feed', 'Feed', 'feed_page');
+        $handler = $view->new_display('feed', 'Page feed', 'feed_page');
         $handler->display->display_options = $this->page_feed_display_options($form, $form_state);
       }
     }
@@ -386,6 +386,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $handler->display->display_options = $this->block_feed_display_options($form, $form_state);
       }
     }
+
     return $view;
   }
 
@@ -490,18 +491,36 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     return $display_options;
   }
 
-  protected function page_feed_display_options($form, $form_state) {
-    $display_options = array();
-    return $display_options;
-  }
-
   protected function block_display_options($form, $form_state) {
     $display_options = array();
     return $display_options;
   }
 
+  protected function page_feed_display_options($form, $form_state) {
+    $display_options = array();
+    $display_options['pager']['type'] = 'some';
+    $display_options['style_plugin'] = 'rss';
+    $display_options['row_plugin'] = $form_state['values']['page']['feed_properties']['row_plugin'];
+    $display_options['path'] = $form_state['values']['page']['feed_properties']['path'];
+    $display_options['title'] = $form_state['values']['page']['title'];
+    $display_options['displays'] = array(
+      'default' => 'default',
+      'page' => 'page',
+    );
+    return $display_options;
+  }
+
   protected function block_feed_display_options($form, $form_state) {
     $display_options = array();
+    $display_options['pager']['type'] = 'some';
+    $display_options['style_plugin'] = 'rss';
+    $display_options['row_plugin'] = $form_state['values']['block']['feed_properties']['row_plugin'];
+    $display_options['path'] = $form_state['values']['block']['feed_properties']['path'];
+    $display_options['title'] = $form_state['values']['block']['title'];
+    $display_options['displays'] = array(
+      'default' => 'default',
+      'block' => 'block',
+    );
     return $display_options;
   }
 
