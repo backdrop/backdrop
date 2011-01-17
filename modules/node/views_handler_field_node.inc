@@ -31,7 +31,7 @@ class views_handler_field_node extends views_handler_field {
    */
   function options_form(&$form, &$form_state) {
     $form['link_to_node'] = array(
-      '#title' => t('Link this field to its original post'),
+      '#title' => t('Link this field to the original piece of content'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_node']),

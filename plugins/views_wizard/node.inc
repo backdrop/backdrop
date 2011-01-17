@@ -12,7 +12,7 @@ $plugin = array(
     'file' => 'views_ui_node_views_wizard.class.php',
     'class' => 'ViewsUiNodeViewsWizard',
   ),
-  'title' => t('All posts'),
+  'title' => t('All content'),
   'filters' => array(
     'status' => array(
       'value' => NODE_PUBLISHED,
@@ -25,7 +25,7 @@ $plugin = array(
 function _views_ui_node_views_wizard_build_child($parent, $type, $name) {
   $child = $parent;
   $child['name'] =  $parent['name'] . ':' . $type;
-  $child['title'] = t('!label posts', array('!label' => $name));
+  $child['title'] = t('!label content', array('!label' => $name));
   $child['filters']['type'] = array(
     'value' => array(
       $type => $type,
