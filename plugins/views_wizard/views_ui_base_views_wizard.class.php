@@ -68,10 +68,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'fieldset',
       '#tree' => TRUE,
     );
-    // Temporary markup to monitor effect of form updates.
-    $form['displays']['page']['base_table'] = array(
-      '#markup' => '<div style="float: right">Base table: ' . $this->base_table . '<br /> Wizard plugin: '. $this->plugin['name'] .'</div>',
-    );
     $form['displays']['page']['create'] = array(
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
