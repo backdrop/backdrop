@@ -1639,7 +1639,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   if (empty($name)) {
     $name = t('Apply');
     $view = $form_state['view'];
-    if (count($view->stack) > 1) {
+    if (!empty($view->stack) && count($view->stack) > 1) {
       $name = t('Apply and continue');
     }
   }
@@ -1733,11 +1733,11 @@ function views_ui_standard_submit($form, &$form_state) {
   // the current display or the default display.
 
   // Make sure the dropdown exists in the first place.
-  if (isset($form_state['values']['options']['override']['dropdown'])) {
+  if (isset($form_state['values']['override']['dropdown'])) {
     $was_defaulted = (bool) ($form['options']['override']['dropdown']['#default_value'] === 'defaults');
-    $is_defaulted = (bool) ($form_state['values']['options']['override']['dropdown'] === 'default');
+    $is_defaulted = (bool) ($form_state['values']['override']['dropdown'] === 'default');
 
-    if ($was_defaulted !== $is_defaulted) {
+    if ($was_defaulted !== $is_defaulted && isset($form['#section'])) {
       // We're changing which display these values apply to.
       // Update the #section so it knows what to mark changed.
       $form['#section'] = str_replace('default-', $form_state['display_id'] . '-', $form['#section']);
@@ -1749,7 +1749,8 @@ function views_ui_standard_submit($form, &$form_state) {
     $is_defaulted = FALSE;
   }
 
-  // Mark the changed section of the view as changed. // TODO: Document why we are doing this.
+  // Mark the changed section of the view as changed.
+  // TODO: Document why we are doing this, and see if we still need it.
   if (!empty($form['#section'])) {
     $form_state['view']->changed_sections[$form['#section']] = TRUE;
   }
@@ -1846,6 +1847,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
     '#prefix' => '<div class="views-override clearfix container-inline">',
     '#suffix' => '</div>',
     '#weight' => -1000,
+    '#tree' => TRUE,
   );
   $form['override']['dropdown'] = array(
     '#type' => 'select',

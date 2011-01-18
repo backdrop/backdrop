@@ -2,28 +2,29 @@
 // $Id$
 
 /**
- * Views UI wizard test.
+ * Views UI wizard tests.
  */
-class ViewsUIWizardTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => t('Views UI wizard test'),
-      'description' => t('Basic Views UI wizard test.'),
-      'group' => t('Views')
-    );
-  }
-
+class ViewsUIWizardHelper extends DrupalWebTestCase {
   /**
    * Implementation of setUp().
    */
   function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui');
-    
+
     // Create and log in user with administer views permission.
     $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks'));
     $this->drupalLogin($views_admin);
+  }
+}
+
+class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'Views UI wizard basic test',
+      'description' => 'Test creating basic views with the wizard and viewing them on the listing page.',
+      'group' => 'Views UI',
+    );
   }
 
   function testViewsWizardAndListing() {
@@ -31,12 +32,12 @@ class ViewsUIWizardTestCase extends DrupalWebTestCase {
     $this->drupalGet('admin/structure/views');
     $this->assertText(t('No views found.'));
     $this->assertText(t('Add view'));
-    
+
     // Create a simple and not at all useful view.
     $view1 = array();
-    //$view1['description'] = $this->randomName(32);
-    $view1['human_name'] = $this->randomName(32);
-    $view1['name'] = strtolower($this->randomName(32));
+    //$view1['description'] = $this->randomName(16);
+    $view1['human_name'] = $this->randomName(16);
+    $view1['name'] = strtolower($this->randomName(16));
     $this->drupalPost('admin/structure/views/add', $view1, t('Save'));
     $this->assertText(t('Your view was saved. You may edit it from the list below.'));
     //$this->assertText($view1['description']);
@@ -44,7 +45,7 @@ class ViewsUIWizardTestCase extends DrupalWebTestCase {
     foreach(array('delete', 'duplicate', 'edit') as $operation) {
       $this->assertRaw(url('admin/structure/views/view/' . $view1['name'] . '/' . $operation));
     }
-    
+
     // This view should not have a block.
     $this->drupalGet('admin/structure/block');
     $this->assertNoText($view1['name'] . ': Block');
@@ -55,18 +56,18 @@ class ViewsUIWizardTestCase extends DrupalWebTestCase {
 
     // Now create a page with simple listing.
     $view2 = array();
-    //$view2['description'] = $this->randomName(32);
-    $view2['human_name'] = $this->randomName(32);
-    $view2['name'] = strtolower($this->randomName(32));
+    //$view2['description'] = $this->randomName(16);
+    $view2['human_name'] = $this->randomName(16);
+    $view2['name'] = strtolower($this->randomName(16));
     $view2['page[create]'] = 1;
-    $view2['page[title]'] = $this->randomName(32);
-    $view2['page[path]'] = $this->randomName(32);
+    $view2['page[title]'] = $this->randomName(16);
+    $view2['page[path]'] = $this->randomName(16);
     $view2['page[feed]'] = 1;
-    $view2['page[feed_properties][path]'] = $this->randomName(32);
+    $view2['page[feed_properties][path]'] = $this->randomName(16);
     $this->drupalPost('admin/structure/views/add', $view2, t('Save'));
     $this->assertText($node1->title);
     $this->assertText($node2->title);
-    
+
     // Check if we have the feed.
     $this->assertRaw(url($view2['page[feed_properties][path]']));
     $this->drupalGet($view2['page[feed_properties][path]']);
@@ -87,46 +88,37 @@ class ViewsUIWizardTestCase extends DrupalWebTestCase {
 
     // Derive a 3rd view from the 2nd. Create a block and filter the listing.
     $view3 = $view2;
-    //$view3['description'] = $this->randomName(32);
-    $view3['human_name'] = $this->randomName(32);
-    $view3['name'] = strtolower($this->randomName(32));
+    //$view3['description'] = $this->randomName(16);
+    $view3['human_name'] = $this->randomName(16);
+    $view3['name'] = strtolower($this->randomName(16));
     $view3['show[wizard_key]'] = 'node:page';
-    $view3['page[title]'] = $this->randomName(32);
-    $view3['page[path]'] = $this->randomName(32);
-    $view3['page[feed_properties][path]'] = $this->randomName(32);
+    $view3['page[title]'] = $this->randomName(16);
+    $view3['page[path]'] = $this->randomName(16);
+    $view3['page[feed_properties][path]'] = $this->randomName(16);
     $view3['block[create]'] = 1;
-    $view3['block[title]'] = $this->randomName(32);
+    $view3['block[title]'] = $this->randomName(16);
     $this->drupalPost('admin/structure/views/add', $view3, t('Save'));
     $this->assertText($node1->title);
     $this->assertNoText($node2->title);
-    
+
     // Go back to the views page and check if this view is there.
     $this->drupalGet('admin/structure/views');
     //$this->assertText($view3['description']);
     $this->assertText($view3['human_name']);
     $this->assertRaw(url($view3['page[path]']));
-    
+
+    // Put the block into the first sidebar region.
     $this->drupalGet('admin/structure/block');
     $this->assertText($view3['name'] . ': Block');
-    $content = $this->drupalGetContent();
-    if (preg_match('! name="(blocks\\[views_.+\\]\\[region\\])"!', $content, $found)) {
-      // The views block ID does not seem to be derived from the view name
-      // in practice when running the tests, so we need to grab it.
-      $block_id = $found[1];
-      // Put this block into the A sidebar.
-      $edit = array();
-      $edit[$block_id] = 'sidebar_first';
-      $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $edit = array();
+    $edit["blocks[views_{$view3['name']}-block][region]"] = 'sidebar_first';
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
 
-      // Look for the node title in the block where it is not on the page.
-      $this->drupalGet('user');
-      $this->assertText($node1->title);
-      $this->assertNoText($node2->title);
-    }
-    else {
-     $this->fail(t('Views block ID found.'));
-    }
-    
+    // Look for the node title in the block where it is not on the page.
+    $this->drupalGet('user');
+    $this->assertText($node1->title);
+    $this->assertNoText($node2->title);
+
     // Check if the export screen works.
     $this->drupalGet('admin/structure/views/view/' . $view3['name'] . '/export');
     $this->assertRaw('$view = new view;');
@@ -138,3 +130,70 @@ class ViewsUIWizardTestCase extends DrupalWebTestCase {
   }
 }
 
+class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'Views UI overridden displays',
+      'description' => 'Test that displays can be overridden via the user interface.',
+      'group' => 'Views UI',
+    );
+  }
+
+  /**
+   * Test that displays can be overridden via the UI.
+   */
+  function testOverrideDisplays() {
+    // Create a basic view that shows all content, with a page and a block
+    // display.
+    $view['human_name'] = $this->randomName(16);
+    $view['name'] = strtolower($this->randomName(16));
+    $view['page[create]'] = 1;
+    $view['page[path]'] = $this->randomName(16);
+    $view['block[create]'] = 1;
+    $view_path = $view['page[path]'];
+    $this->drupalPost('admin/structure/views/add', $view, t('Save'));
+
+    // Configure its title for both displays.
+    $edit = array();
+    $edit['title'] = $original_title = $this->randomName(16);
+    $edit['override[dropdown]'] = 'default';
+    $this->drupalPost("admin/structure/views/nojs/display/{$view['name']}/page/title", $edit, t('Apply'));
+    $this->drupalPost("admin/structure/views/view/{$view['name']}/edit/page", array(), t('Save'));
+
+    // Put the block into the first sidebar region, and make sure it does not
+    // display on the view's page display (since we will be searching for the
+    // presence/absence of the view's title in both the page and the block).
+    $this->drupalGet('admin/structure/block');
+    $edit = array();
+    $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $edit = array();
+    $edit['visibility'] = BLOCK_VISIBILITY_NOTLISTED;
+    $edit['pages'] = $view_path;
+    $this->drupalPost("admin/structure/block/manage/views/{$view['name']}-block/configure", $edit, t('Save block'));
+
+    // Add a node that will appear in the view, so that the block will actually
+    // be displayed.
+    $this->drupalCreateNode();
+
+    // Make sure the title appears in both the page and the block.
+    $this->drupalGet($view_path);
+    $this->assertText($original_title);
+    $this->drupalGet('');
+    $this->assertText($original_title);
+
+    // Change the title for the page display only, and make sure that is the
+    // only one that is changed.
+    $edit = array();
+    $edit['title'] = $new_title = $this->randomName(16);
+    $edit['override[dropdown]'] = 'page';
+    $this->drupalPost("admin/structure/views/nojs/display/{$view['name']}/page/title", $edit, t('Apply'));
+    $this->drupalPost("admin/structure/views/view/{$view['name']}/edit/page", array(), t('Save'));
+    $this->drupalGet($view_path);
+    $this->assertText($new_title);
+    $this->assertNoText($original_title);
+    $this->drupalGet('');
+    $this->assertText($original_title);
+    $this->assertNoText($new_title);
+  }
+}
