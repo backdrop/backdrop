@@ -295,6 +295,13 @@ function views_ui_add_form($form, &$form_state) {
     ),
     '#description' => t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
   );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Description'),
+    '#size' => 32,
+    '#default_value' => !empty($form_state['view']) ? $form_state['view']->description : '',
+    '#rows' => 1,
+  );
 
   // Everything that can be updated by AJAX goes in here. It is triggered by
   // the "Show" dropdown below.
