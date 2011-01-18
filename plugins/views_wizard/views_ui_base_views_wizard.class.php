@@ -204,7 +204,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
-      '#options' => views_fetch_plugin_names('style', 'normal', array($this->base_table)),
+      '#options' => $style_options,
       '#default_value' => 'default',
     );
     $form['displays']['block']['options']['items_per_page'] = array(
