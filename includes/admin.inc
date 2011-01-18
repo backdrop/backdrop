@@ -39,6 +39,7 @@ function views_ui_list_views() {
   );
 
   $views = views_get_all_views();
+  $rows = array();
   foreach ($views as $view) {
     // Exclude code-based and disabled views from the listing, until we have
     // a UI to deal with them.
@@ -51,7 +52,7 @@ function views_ui_list_views() {
       array(
         'data' => array(
           '#theme' => 'views_ui_view_info',
-          '#title' => check_plain($view->name),
+          '#title' => check_plain($view->human_name),
           '#paths' => _views_ui_get_paths($view),
           '#displays' => _views_ui_get_displays_list($view),
         ),
