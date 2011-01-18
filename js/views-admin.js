@@ -36,7 +36,7 @@ Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
  */
 Drupal.viewsUi.FormFieldFiller = function ($target, exclude, replace) {
   var $ = jQuery;
-  this.source = $('#edit-description');
+  this.source = $('#edit-human-name');
   this.target = $target;
   this.exclude = exclude || false;
   this.replace = replace || '';
