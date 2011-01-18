@@ -231,7 +231,7 @@ function template_preprocess_views_view_fields(&$vars) {
           if ($class) {
             $class .= ' ';
           }
-          $class .= ' ' . $classes;
+          $class .= $classes;
         }
 
         $object->wrapper_prefix = '<' . $object->inline_html;

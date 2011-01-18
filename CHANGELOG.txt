@@ -18,6 +18,7 @@ follow up by bojanz: Better description for the delta.
 #1011004 by dereine: Add validation for query plugin option forms.
 #991202 by helmo: Add option to turn linebreaks into br tags in field rewriting.
 #1001302 by dagmar: Enable attachment displays to have more links.
+#1021784 by tim.plunkett: Extra space added in some classes erroneously.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
