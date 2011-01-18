@@ -281,32 +281,38 @@ function field_group_field_group_formatter_info() {
       'tabs' => array(
         'label' => t('Vertical tabs group'),
         'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
+        'instance_settings' => array('classes' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array('classes' => ''),
         'default_formatter' => 'open',
       ),
       'htabs' => array(
         'label' => ('Horizontal tabs group'),
         'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
+        'instance_settings' => array('classes' => ''),
       ),
       'htab' => array(
         'label' => t('Horizontal tab item'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'open',
+        'instance_settings' => array('classes' => ''),
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
         'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
+        'instance_settings' => array('classes' => ''),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a div, part of accordion group.'),
         'default_formatter' => 'closed',
+        'instance_settings' => array('classes' => ''),
       ),
     ),
     'display' => array(
@@ -327,31 +333,37 @@ function field_group_field_group_formatter_info() {
       'tabs' => array(
         'label' => t('Vertical tabs group'),
         'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
+        'instance_settings' => array('classes' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array('classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'htabs' => array(
         'label' => ('Horizontal tabs group'),
         'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
+        'instance_settings' => array('classes' => ''),
       ),
       'htab' => array(
         'label' => t('Horizontal tab item'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
+        'instance_settings' => array('classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
         'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
+        'instance_settings' => array('classes' => ''),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a div, part of accordion group.'),
+        'instance_settings' => array('classes' => ''),
         'default_formatter' => 'closed',
       ),
     ),
@@ -387,6 +399,13 @@ function field_group_field_group_format_settings($group) {
       '#weight' => 1,
     );
   }
+  $form['instance_settings']['classes'] = array(
+    '#title' => t('Extra CSS classes'),
+    '#type' => 'textfield',
+    '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : (isset($formatter['instance_settings']['classes']) ? $formatter['instance_settings']['classes'] : ''),
+    '#weight' => 3,
+    '#element_validate' => array('field_group_validate_css_class'),
+  );
 
   // Add optional instance_settings.
   switch ($group->format_type) {
@@ -404,13 +423,6 @@ function field_group_field_group_format_settings($group) {
         '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
         '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
         '#weight' => 3,
-      );
-       $form['instance_settings']['classes'] = array(
-        '#title' => t('Extra CSS classes'),
-        '#type' => 'textfield',
-        '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : $formatter['instance_settings']['classes'],
-        '#weight' => 3,
-        '#element_validate' => array('field_group_validate_css_class'),
       );
       break;
     case 'fieldset':
@@ -521,7 +533,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     case 'accordion':
       $element += array(
         '#type' => 'markup',
-        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
+        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
       );
@@ -532,7 +544,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#type' => 'markup',
         '#prefix' => '
         <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . $required . '</h3>
-        <div class="field-group-format-wrapper">',
+        <div class="field-group-format-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
         //'#attributes' => array('class' => array($group->format_type)),
@@ -545,7 +557,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#type' => 'horizontal_tabs',
         '#weight' => $group->weight,
         '#theme_wrappers' => array('horizontal_tabs'),
-        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
+        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
       );
       $form['#attached']['js'][] = 'misc/form.js';
@@ -559,7 +571,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
-        '#attributes' => array('class' => array($group->format_type)),
+        '#attributes' => array('class' => explode(" ", $classes)),
         '#group' => $group->parent_name,
         // very important. Cannot be added on the form!
         '#parents' => array($group->parent_name),
@@ -573,7 +585,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#type' => 'vertical_tabs',
         '#weight' => $group->weight,
         '#theme_wrappers' => array('vertical_tabs'),
-        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
+        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
       );
       $form['#attached']['js'][] = 'misc/form.js';
@@ -591,7 +603,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
-          '#attributes' => array('class' => array($group->format_type)),
+          '#attributes' => array('class' => explode(" ", $classes)),
           '#group' => $parent_name,
           '#parents' => array($parent_name),
         );
@@ -606,22 +618,26 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
-          '#attributes' => array('class' => array($group->format_type)),
+          '#attributes' => array('class' => explode(" ", $classes)),
           '#group' => $parent_name
         );
       }
-      // For the form, we will keep it in the core additional_settings.
+      // For the form, we will keep it in the core additional_settings,
+      // or in a custom created parallel one.
       else {
+        $group->parent_name = 'additional_settings';
         // Create the fieldgroup element.
         $child_element = array(
           '#type' => 'fieldset',
           '#title' => check_plain(t($group->label)) . $required,
-          '#weight' => -30, // hardcoded to bring our extra additional vtabs on top.
+          '#weight' => -30 + $group->weight, // hardcoded to bring our extra additional vtabs on top.
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
-          '#attributes' => array('class' => array($group->format_type)),
-          '#group' => 'additional_settings'
+          '#attributes' => array('class' => explode(" ", $classes)),
+          '#group' => 'additional_settings',
+          '#parents' => array($group->parent_name),
         );
+
         // Check if the additional_settings exist for this type of form,
         // if not, add the vertical_tabs wrapper.
         if (!isset($form['additional_settings']['#type'])) {
@@ -1040,6 +1056,7 @@ function field_group_attach_groups(&$element, $view_mode) {
   $bundle = $element['#bundle'];
 
   $element['#groups'] = field_group_info_groups($entity_type, $bundle, $view_mode);
+  $element['#fieldgroups'] = $element['#groups'];
 
   // Create a lookup array.
   $group_children = array();
@@ -1078,6 +1095,10 @@ function field_group_attach_groups(&$element, $view_mode) {
  * @return $element Array with re-arranged fields in forms.
  */
 function field_group_build_pre_render($element) {
+
+  // Merge our #fieldgroups with #groups to avoid conflicts on fieldset types.
+  $element['#groups'] = array_merge($element['#groups'], $element['#fieldgroups']);
+
   // Nest the fields in the corresponding field groups.
   field_group_fields_nest($element, $element);
 
@@ -1088,7 +1109,7 @@ function field_group_build_pre_render($element) {
 
   // Allow others to alter the pre_rendered build.
   drupal_alter('field_group_build_pre_render', $element);
-
+  
   return $element;
 }
 
