@@ -26,7 +26,7 @@ class ViewsUIWizardTestCase extends DrupalWebTestCase {
     $this->drupalLogin($views_admin);
   }
 
-  function testViewsWizard() {
+  function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->drupalGet('admin/structure/views');
     $this->assertText(t('No views found.'));
@@ -132,6 +132,9 @@ class ViewsUIWizardTestCase extends DrupalWebTestCase {
     $this->assertRaw('$view = new view;');
     //$this->assertRaw($view3['description']);
     $this->assertRaw($view3['human_name']);
+
+    // Make sure the listing page doesn't show disabled default views.
+    $this->assertNoText('tracker', t('Default tracker view does not show on the listing page.'));
   }
 }
 
