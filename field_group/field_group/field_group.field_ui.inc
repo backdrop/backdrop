@@ -48,6 +48,9 @@ function field_group_field_ui_form_params($form, $display_overview) {
  */
 function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display_overview = FALSE) {
 
+  // Add extra guidelines for webmaster.
+  $form['#prefix'] = (isset($form['#prefix']) ? $form['#prefix'] : '') . t('Fields can be dragged into groups with unlimited nesting. Each fieldgroup format comes with a configuration form, specific for that format type.<br />Note that some formats come in pair. These types have a html wrapper to nest its fieldgroup children. E.g. Place accordion items into the accordion, vertical tabs in vertical tab group and horizontal tabs in the horizontal tab group. There is one exception to this rule, you can use a vertical tab without a wrapper when the additional settings tabs are available. E.g. node forms.');
+
   // Only start altering the form if we need to.
   if (empty($form['#fields']) && empty($form['#extra'])) {
     return;
