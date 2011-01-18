@@ -1109,7 +1109,7 @@ function field_group_build_pre_render($element) {
 
   // Allow others to alter the pre_rendered build.
   drupal_alter('field_group_build_pre_render', $element);
-  
+
   return $element;
 }
 
@@ -1180,6 +1180,9 @@ function field_group_mark_as_required(& $element_groups, & $element) {
       if (isset($element[$child]) && !$group->required) {
         if (isset($element[$child]['#required'])) {
           $group->required = $element[$child]['#required'] ? TRUE : $group->required;
+        }
+        elseif (isset($element[$child]['und'][0]['#required'])) {
+          $group->required = $element[$child]['und'][0]['#required'] ? TRUE : $group->required;
         }
         elseif (isset($element[$child]['#tree']) && $element[$child]['#tree'] == TRUE) {
           foreach (element_children($element[$child]) as $element_child) {
