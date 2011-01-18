@@ -213,36 +213,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#default_value' => '5',
       '#size' => 5,
     );
-    // Only offer a feed if we have at least one available feed row style.
-    if ($feed_row_options) {
-      $form['displays']['block']['options']['feed'] = array(
-        '#title' => t('Include an RSS feed'),
-        '#type' => 'checkbox',
-      );
-      $form['displays']['block']['options']['feed_properties']['path'] = array(
-        '#title' => t('Feed path'),
-        '#type' => 'textfield',
-        '#field_prefix' => $path_prefix,
-        '#states' => array(
-          'visible' => array(
-            ':input[name="block[feed]"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
-      // This will almost never be visible.
-      $form['displays']['block']['options']['feed_properties']['row_plugin'] = array(
-        '#title' => t('Feed row style'),
-        '#type' => 'select',
-        '#options' => $feed_row_options,
-        '#default_value' => key($feed_row_options),
-        '#access' => (count($feed_row_options) > 1),
-        '#states' => array(
-          'visible' => array(
-            ':input[name="block[feed]"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
-    }
+
     return $form;
   }
 
@@ -369,7 +340,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $handler = $view->new_display('page', 'Page', 'page');
       $handler->display->display_options = $this->page_display_options($form, $form_state);
       if (!empty($form_state['values']['page']['feed'])) {
-        $handler = $view->new_display('feed', 'Page feed', 'feed_page');
+        $handler = $view->new_display('feed', 'Feed', 'feed');
         $handler->display->display_options = $this->page_feed_display_options($form, $form_state);
       }
     }
@@ -378,10 +349,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     if (!empty($form_state['values']['block']['create'])) {
       $handler = $view->new_display('block', 'Block', 'block');
       $handler->display->display_options = $this->block_display_options($form, $form_state);
-      if (!empty($form_state['values']['block']['feed'])) {
-        $handler = $view->new_display('feed', 'Block feed', 'feed_block');
-        $handler->display->display_options = $this->block_feed_display_options($form, $form_state);
-      }
     }
 
     return $view;
@@ -503,20 +470,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['displays'] = array(
       'default' => 'default',
       'page' => 'page',
-    );
-    return $display_options;
-  }
-
-  protected function block_feed_display_options($form, $form_state) {
-    $display_options = array();
-    $display_options['pager']['type'] = 'some';
-    $display_options['style_plugin'] = 'rss';
-    $display_options['row_plugin'] = $form_state['values']['block']['feed_properties']['row_plugin'];
-    $display_options['path'] = $form_state['values']['block']['feed_properties']['path'];
-    $display_options['title'] = $form_state['values']['block']['title'];
-    $display_options['displays'] = array(
-      'default' => 'default',
-      'block' => 'block',
     );
     return $display_options;
   }
