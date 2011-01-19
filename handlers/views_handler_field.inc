@@ -338,7 +338,7 @@ class views_handler_field extends views_handler {
 
     // Use prefix and suffix to fake a fieldset because we use #tree.
     $form['style_prefix'] = array(
-      '#value' => '<fieldset id="views-validator-options"><legend>' . t('Style settings') . '</legend>',
+      '#markup' => '<fieldset class="form-wrapper" id="views-validator-options"><legend><span class="fieldset-legend">' . t('Style settings') . '</span></legend>',
     );
 
     $form['exclude'] = array(
@@ -415,7 +415,7 @@ class views_handler_field extends views_handler {
     );
 
     $form['style_suffix'] = array(
-      '#value' => '</fieldset>',
+      '#markup' => '</fieldset>',
     );
 
     $form['alter'] = array(
@@ -664,7 +664,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
 
     // Use prefix and suffix to fake a fieldset because we use #tree.
     $form['empty_prefix'] = array(
-      '#value' => '<fieldset id="views-validator-options"><legend>' . t('Empty field behavior') . '</legend>',
+      '#markup' => '<fieldset class="form-wrapper" id="views-validator-options"><legend><span class="fieldset-legend">' . t('Empty field behavior') . '</span></legend>',
     );
 
     $form['empty'] = array(
@@ -689,7 +689,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
     );
 
     $form['empty_suffix'] = array(
-      '#value' => '</fieldset>',
+      '#markup' => '</fieldset>',
     );
 
   }

@@ -20,6 +20,7 @@ follow up by bojanz: Better description for the delta.
 #1001302 by dagmar: Enable attachment displays to have more links.
 #1021784 by tim.plunkett: Extra space added in some classes erroneously.
 #862072 by jhedstrom: Allow argument validator to test if user has edit or delete access to a node.
+Fix fieldsets in field handler.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
