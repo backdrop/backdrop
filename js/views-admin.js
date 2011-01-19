@@ -9,15 +9,34 @@ Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
   var $ = jQuery;
   // Prepopulate the page title, block title, and menu link fields with the
   // view name.
-  var $fields = $('#edit-page-title, #edit-block-title, #edit-page-link-properties-title');
-  new Drupal.viewsUi.FormFieldFiller($fields);
+  var $fields = $(context).find('[id^="edit-page-title"], [id^="edit-block-title"], [id^="edit-page-link-properties-title"]');
+  if ($fields.length) {
+    if (!this.fieldsFiller) {
+      this.fieldsFiller = new Drupal.viewsUi.FormFieldFiller($fields);
+    }
+    else {
+      // After an AJAX response, this.fieldsFiller will still have event
+      // handlers bound to the old version of the form fields (which don't exist
+      // anymore). The event handlers need to be unbound and then rebound to the
+      // new markup. Note that jQuery.live is difficult to make work in this
+      // case because the IDs of the form fields change on every AJAX response.
+      this.fieldsFiller.rebind($fields);
+    }
+  }
 
   // Prepopulate the path field with a URLified version of the view name.
-  var $pathField = $('#edit-page-path');
-  // Allow only numbers, letters, and dashes in the path.
-  var exclude = new RegExp('[^a-z0-9\\-]+', 'g');
-  var replace = '-';
-  new Drupal.viewsUi.FormFieldFiller($pathField, exclude, replace);
+  var $pathField = $(context).find('[id^="edit-page-path"]');
+  if ($pathField.length) {
+    if (!this.pathFiller) {
+      // Allow only numbers, letters, and dashes in the path.
+      var exclude = new RegExp('[^a-z0-9\\-]+', 'g');
+      var replace = '-';
+      this.pathFiller = new Drupal.viewsUi.FormFieldFiller($pathField, exclude, replace);
+    }
+    else {
+      this.pathFiller.rebind($pathField);
+    }
+  }
 };
 
 /**
@@ -40,19 +59,29 @@ Drupal.viewsUi.FormFieldFiller = function ($target, exclude, replace) {
   this.target = $target;
   this.exclude = exclude || false;
   this.replace = replace || '';
-  this.initialize();
+
+  // Create bound versions of this instance's object methods to use as event
+  // handlers. This will let us easily unbind those specific handlers later on.
+  // NOTE: jQuery.proxy will not work for this because it assumes we want only
+  // one bound version of an object method, whereas we need one version per
+  // object instance.
+  var self = this;
+  this.populate = function () { return self._populate.call(self); };
+  this.unbind = function () { return self._unbind.call(self); };
+
+  this.bind();
   // Object constructor; no return value.
 };
 
 /**
  * Bind the form-filling behavior.
  */
-Drupal.viewsUi.FormFieldFiller.prototype.initialize = function () {
-  var $ = jQuery;
+Drupal.viewsUi.FormFieldFiller.prototype.bind = function () {
+  this.unbind();
   // Populate the form field when the source changes.
-  this.source.bind('keyup.viewsUi change.viewsUi', $.proxy(this, 'populate'));
+  this.source.bind('keyup.viewsUi change.viewsUi', this.populate);
   // Quit populating the field as soon as it gets focus.
-  this.target.bind('focus.viewsUi', $.proxy(this, 'unbind'));
+  this.target.bind('focus.viewsUi', this.unbind);
 };
 
 /**
@@ -69,19 +98,26 @@ Drupal.viewsUi.FormFieldFiller.prototype.getTransliterated = function () {
 /**
  * Populate the target form field with the altered source field value.
  */
-Drupal.viewsUi.FormFieldFiller.prototype.populate = function () {
+Drupal.viewsUi.FormFieldFiller.prototype._populate = function () {
   var transliterated = this.getTransliterated();
   this.target.val(transliterated);
 };
 
 /**
- * Stop prepopulating the form field.
+ * Stop prepopulating the form fields.
  */
-Drupal.viewsUi.FormFieldFiller.prototype.unbind = function () {
-  this.source.unbind('.viewsUi');
-  this.target.unbind('.viewsUi');
+Drupal.viewsUi.FormFieldFiller.prototype._unbind = function () {
+  this.source.unbind('keyup.viewsUi change.viewsUi', this.populate);
+  this.target.unbind('focus.viewsUi', this.unbind);
 };
 
+/**
+ * Bind event handlers to the new form fields, after they're replaced via AJAX.
+ */
+Drupal.viewsUi.FormFieldFiller.prototype.rebind = function ($fields) {
+  this.target = $fields;
+  this.initialize();
+}
 
 
 /**
