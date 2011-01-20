@@ -25,6 +25,7 @@ Fix fieldsets in field handler.
 #672864 by dboulet: cols- class incorrect on table, grid.
 #981872 by infojunkie: Option to hide attachments in summary views.
 #839810 by marcp: Get UID from URL argument default plugin should accept uids from Views pages.
+#1012584 by dereine: Allow filtering on term descriptions.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
