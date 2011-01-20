@@ -24,6 +24,7 @@ Fix fieldsets in field handler.
 #962564 by joshuajabbour: Allow link attributes to be rewritten (internally).
 #672864 by dboulet: cols- class incorrect on table, grid.
 #981872 by infojunkie: Option to hide attachments in summary views.
+#839810 by marcp: Get UID from URL argument default plugin should accept uids from Views pages.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
