@@ -522,7 +522,7 @@ function template_preprocess_views_view_table(&$vars) {
     drupal_add_js('misc/tableheader.js');
     $vars['classes_array'][] = "sticky-enabled";
   }
-  $vars['classes_array'][] = 'cols-'. count($vars['rows']);
+  $vars['classes_array'][] = 'cols-'. count($vars['header']);
 
   if (!empty($handler->options['summary'])) {
     $vars['attributes_array'] = array('summary' => $handler->options['summary']);
@@ -626,7 +626,7 @@ function template_preprocess_views_view_grid(&$vars) {
     }
   }
   $vars['rows'] = $rows;
-
+  $vars['class'] = 'views-view-grid cols-' . $columns;
   if (!empty($handler->options['summary'])) {
     $vars['attributes_array'] = array('summary' => $handler->options['summary']);
   }

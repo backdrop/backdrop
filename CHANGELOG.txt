@@ -22,6 +22,7 @@ follow up by bojanz: Better description for the delta.
 #862072 by jhedstrom: Allow argument validator to test if user has edit or delete access to a node.
 Fix fieldsets in field handler.
 #962564 by joshuajabbour: Allow link attributes to be rewritten (internally).
+#672864 by dboulet: cols- class incorrect on table, grid.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
