@@ -13,7 +13,7 @@ class ViewsUIWizardHelper extends DrupalWebTestCase {
     parent::setUp('views_ui');
 
     // Create and log in user with administer views permission.
-    $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks'));
+    $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks', 'bypass node access'));
     $this->drupalLogin($views_admin);
   }
 }
@@ -140,6 +140,67 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
 
     // Make sure the listing page doesn't show disabled default views.
     $this->assertNoText('tracker', t('Default tracker view does not show on the listing page.'));
+  }
+}
+
+class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'Views UI wizard taxonomy functionality',
+      'description' => 'Test the ability of the views wizard to create views filtered by taxonomy.',
+      'group' => 'Views UI',
+    );
+  }
+
+  /**
+   * Test the "tagged with" functionality.
+   */
+  function testTaggedWith() {
+    // Create three article nodes, with different tags.
+    $tag_field = 'field_tags[' . LANGUAGE_NONE . ']';
+    $edit = array();
+    $edit['title'] = $node_tag1_title = $this->randomName();
+    $edit[$tag_field] = 'tag1';
+    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $edit = array();
+    $edit['title'] = $node_tag1_tag2_title = $this->randomName();
+    $edit[$tag_field] = 'tag1, tag2';
+    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $edit = array();
+    $edit['title'] = $node_no_tags_title = $this->randomName();
+    $this->drupalPost('node/add/article', $edit, t('Save'));
+
+    // Create a view that filters by taxonomy term "tag1". It should show only
+    // the two nodes from above that are tagged with "tag1".
+    $view1 = array();
+    $view1['human_name'] = $this->randomName(16);
+    $view1['name'] = strtolower($this->randomName(16));
+    $view1['description'] = $this->randomName(16);
+    $view1['show[tagged_with]'] = 'tag1';
+    $view1['page[create]'] = 1;
+    $view1['page[title]'] = $this->randomName(16);
+    $view1['page[path]'] = $this->randomName(16);
+    $this->drupalPost('admin/structure/views/add', $view1, t('Save'));
+    $this->drupalGet($view1['page[path]']);
+    $this->assertText($node_tag1_title);
+    $this->assertText($node_tag1_tag2_title);
+    $this->assertNoText($node_no_tags_title);
+
+    // Create a view that filters by taxonomy term "tag2". It should show only
+    // the one node from above that is tagged with "tag2".
+    $view2 = array();
+    $view2['human_name'] = $this->randomName(16);
+    $view2['name'] = strtolower($this->randomName(16));
+    $view2['description'] = $this->randomName(16);
+    $view2['show[tagged_with]'] = 'tag2';
+    $view2['page[create]'] = 1;
+    $view2['page[title]'] = $this->randomName(16);
+    $view2['page[path]'] = $this->randomName(16);
+    $this->drupalPost('admin/structure/views/add', $view2, t('Save'));
+    $this->drupalGet($view2['page[path]']);
+    $this->assertNoText($node_tag1_title);
+    $this->assertText($node_tag1_tag2_title);
+    $this->assertNoText($node_no_tags_title);
   }
 }
 
