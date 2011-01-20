@@ -3,15 +3,11 @@
 class ViewsUiTaxonomyTermViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function default_display_options($form, $form_state) {
-    $display_options = array();
+    $display_options = parent::default_display_options($form, $form_state);
+
+    // Add permission-based access control.
     $display_options['access']['type'] = 'perm';
-    $display_options['access']['perm'] = 'access content';
-    $display_options['cache']['type'] = 'none';
-    $display_options['query']['type'] = 'views_query';
-    $display_options['exposed_form']['type'] = 'basic';
-    $display_options['pager']['type'] = 'full';
-    $display_options['style_plugin'] = 'default';
-    $display_options['row_plugin'] = 'fields';
+
     /* Field: Taxonomy: Term */
     $display_options['fields']['name']['id'] = 'name';
     $display_options['fields']['name']['table'] = 'taxonomy_term_data';
@@ -27,6 +23,7 @@ class ViewsUiTaxonomyTermViewsWizard extends ViewsUiBaseViewsWizard {
     $display_options['fields']['name']['hide_empty'] = 0;
     $display_options['fields']['name']['empty_zero'] = 0;
     $display_options['fields']['name']['link_to_taxonomy'] = 1;
+
     return $display_options;
   }
 }

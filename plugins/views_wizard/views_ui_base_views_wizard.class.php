@@ -95,7 +95,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'textfield',
       '#field_prefix' => $path_prefix,
     );
-    $form['displays']['page']['options']['display_format']['style'] = array(
+    $form['displays']['page']['options']['style_plugin'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
@@ -200,7 +200,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'textfield',
     );
     // This may change by AJAX as we change the base table of the selected wizard.
-    $form['displays']['block']['options']['display_format']['style'] = array(
+    $form['displays']['block']['options']['style_plugin'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
@@ -324,31 +324,48 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->base_table = $this->base_table;
 
     // Display: Defaults
-    $handler = $view->new_display('default', 'Defaults', 'default');
-    $handler->display->display_options = $this->default_display_options($form, $form_state);
-    if (!isset($handler->display->display_options['filters'])) {
-      $handler->display->display_options['filters'] = array();
+    $default_display = $view->new_display('default', 'Defaults', 'default');
+    $options = $this->default_display_options($form, $form_state);
+    if (!isset($options['filters'])) {
+      $options['filters'] = array();
     }
-    $handler->display->display_options['filters'] += $this->default_display_filters($form, $form_state);
-    if (!isset($handler->display->display_options['sorts'])) {
-      $handler->display->display_options['sorts'] = array();
+    $options['filters'] += $this->default_display_filters($form, $form_state);
+    if (!isset($options['sorts'])) {
+      $options['sorts'] = array();
     }
-    $handler->display->display_options['sorts'] += $this->default_display_sorts($form, $form_state);
+    $options['sorts'] += $this->default_display_sorts($form, $form_state);
+    foreach ($options as $option => $value) {
+      $default_display->set_option($option, $value);
+    }
 
     // Display: Page
     if (!empty($form_state['values']['page']['create'])) {
-      $handler = $view->new_display('page', 'Page', 'page');
-      $handler->display->display_options = $this->page_display_options($form, $form_state);
+      $display = $view->new_display('page', 'Page', 'page');
+      $options = $this->page_display_options($form, $form_state);
+      // The page display is usually the main one (from the user's point of
+      // view). Its options should therefore become the overall view defaults,
+      // so that new displays which are added later automatically inherit them.
+      $this->set_default_options($options, $display, $default_display);
+      // Display: Feed (attached to the page)
       if (!empty($form_state['values']['page']['feed'])) {
-        $handler = $view->new_display('feed', 'Feed', 'feed');
-        $handler->display->display_options = $this->page_feed_display_options($form, $form_state);
+        $display = $view->new_display('feed', 'Feed', 'feed');
+        $options = $this->page_feed_display_options($form, $form_state);
+        $this->set_override_options($options, $display, $default_display);
       }
     }
 
     // Display: Block
     if (!empty($form_state['values']['block']['create'])) {
-      $handler = $view->new_display('block', 'Block', 'block');
-      $handler->display->display_options = $this->block_display_options($form, $form_state);
+      $display = $view->new_display('block', 'Block', 'block');
+      $options = $this->block_display_options($form, $form_state);
+      // When there is no page, the block display options should become the
+      // overall view defaults.
+      if (empty($form_state['values']['page']['create'])) {
+        $this->set_default_options($options, $display, $default_display);
+      }
+      else {
+        $this->set_override_options($options, $display, $default_display);
+      }
     }
 
     return $view;
@@ -445,8 +462,11 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function page_display_options($form, $form_state) {
     $display_options = array();
     $page = $form_state['values']['page'];
-    $display_options['path'] = $page['path'];
     $display_options['title'] = $page['title'];
+    $display_options['path'] = $page['path'];
+    $display_options['style_plugin'] = $page['style_plugin'];
+    $display_options['pager']['type'] = 'full';
+    $display_options['pager']['options']['items_per_page'] = $page['items_per_page'];
     if (!empty($page['link'])) {
       $display_options['menu']['type'] = 'normal';
       $display_options['menu']['title'] = $page['link_properties']['title'];
@@ -457,6 +477,11 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
   protected function block_display_options($form, $form_state) {
     $display_options = array();
+    $block = $form_state['values']['block'];
+    $display_options['title'] = $block['title'];
+    $display_options['style_plugin'] = $block['style_plugin'];
+    $display_options['pager']['type'] = 'full';
+    $display_options['pager']['options']['items_per_page'] = $block['items_per_page'];
     return $display_options;
   }
 
@@ -472,6 +497,75 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       'page' => 'page',
     );
     return $display_options;
+  }
+
+  /**
+   * Sets options for a display and makes them the default options if possible.
+   *
+   * This function can be used to set options for a display when it is desired
+   * that the options also become the defaults for the view whenever possible.
+   * This should be done for the "primary" display created in the view wizard,
+   * so that new displays which the user adds later will be similar to this
+   * one.
+   *
+   * @param $options
+   *   An array whose keys are the name of each option and whose values are the
+   *   desired values to set.
+   * @param $display
+   *   The display which the options will be applied to. The default display
+   *   will actually be assigned the options (and this display will inherit
+   *   them) when possible.
+   * @param $default_display
+   *   The default display, which will store the options when possible.
+   */
+  protected function set_default_options($options, $display, $default_display) {
+    foreach ($options as $option => $value) {
+      // If the default display supports this option, set the value there.
+      // Otherwise, set it on the provided display.
+      $default_value = $default_display->get_option($option);
+      if (isset($default_value)) {
+        $default_display->set_option($option, $value);
+      }
+      else {
+        $display->set_option($option, $value);
+      }
+    }
+  }
+
+  /**
+   * Sets options for a display, inheriting from the defaults when possible.
+   *
+   * This function can be used to set options for a display when it is desired
+   * that the options inherit from the default display whenever possible. This
+   * avoids setting too many options as overrides, which will be harder for the
+   * user to modify later. For example, if $this->set_default_options() was
+   * previously called on a page display and then this function is called on a
+   * block display, and if the user entered the same title for both displays in
+   * the views wizard, then the view will wind up with the title stored as the
+   * default (with the page and block both inheriting from it).
+   *
+   * @param $options
+   *   An array whose keys are the name of each option and whose values are the
+   *   desired values.
+   * @param $display
+   *   The display which the options will apply to. It will get the options by
+   *   inheritance from the default display when possible.
+   * @param $default_display
+   *   The default display, from which the options will be inherited when
+   *   possible.
+   */
+  protected function set_override_options($options, $display, $default_display) {
+    foreach ($options as $option => $value) {
+      // Only override the default value if it is different from the value that
+      // was provided.
+      $default_value = $default_display->get_option($option);
+      if (!isset($default_value)) {
+        $display->set_option($option, $value);
+      }
+      elseif ($default_value !== $value) {
+        $display->override_option($option, $value);
+      }
+    }
   }
 
   protected function retrieve_validated_view($form, $form_state, $unset = TRUE) {

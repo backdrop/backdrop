@@ -3,15 +3,12 @@
 class ViewsUiNodeRevisionViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function default_display_options($form, $form_state) {
-    $display_options = array();
+    $display_options = parent::default_display_options($form, $form_state);
+
+    // Add permission-based access control.
     $display_options['access']['type'] = 'perm';
     $display_options['access']['perm'] = 'view revisions';
-    $display_options['cache']['type'] = 'none';
-    $display_options['query']['type'] = 'views_query';
-    $display_options['exposed_form']['type'] = 'basic';
-    $display_options['pager']['type'] = 'full';
-    $display_options['style_plugin'] = 'default';
-    $display_options['row_plugin'] = 'fields';
+
     /* Field: Node revision: Created date */
     $display_options['fields']['timestamp']['id'] = 'timestamp';
     $display_options['fields']['timestamp']['table'] = 'node_revision';
@@ -26,6 +23,7 @@ class ViewsUiNodeRevisionViewsWizard extends ViewsUiBaseViewsWizard {
     $display_options['fields']['timestamp']['alter']['html'] = 0;
     $display_options['fields']['timestamp']['hide_empty'] = 0;
     $display_options['fields']['timestamp']['empty_zero'] = 0;
+
     /* Field: Node revision: Title */
     $display_options['fields']['title']['id'] = 'title';
     $display_options['fields']['title']['table'] = 'node_revision';
@@ -42,6 +40,7 @@ class ViewsUiNodeRevisionViewsWizard extends ViewsUiBaseViewsWizard {
     $display_options['fields']['title']['empty_zero'] = 0;
     $display_options['fields']['title']['link_to_node'] = 0;
     $display_options['fields']['title']['link_to_node_revision'] = 1;
+
     return $display_options;
   }
 }
