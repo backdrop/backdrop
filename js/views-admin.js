@@ -116,7 +116,7 @@ Drupal.viewsUi.FormFieldFiller.prototype._unbind = function () {
  */
 Drupal.viewsUi.FormFieldFiller.prototype.rebind = function ($fields) {
   this.target = $fields;
-  this.initialize();
+  this.bind();
 }
 
 
