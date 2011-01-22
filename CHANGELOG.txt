@@ -303,3 +303,4 @@ by dereine: Add $view->version to all default views.
 #935176 by benoit.borrel: Add "system" table to Views data.
 #839236: Fields named "buttons" would disappear from the rearrange UI due to conflict with the buttons on the form.
 #783514 by dereine: Allow breaking of strings with + and ,
+#1000760 by dereine: Prevent htmlspecialchars() error with string arguments.
