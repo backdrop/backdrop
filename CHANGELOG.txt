@@ -298,3 +298,4 @@ by dereine: Add $view->version to all default views.
 #1015960 by duellj: View js should use DOM element not jquery object.
 #1027552 by david_Rothstein: Fix Node: Has new content fatal error.
 #955464 by dereine: Fix many_to_one helper in the case of have no condition and operator = 'and'.
+#696550: Taxonomy validator should always set title when it successfully validates.

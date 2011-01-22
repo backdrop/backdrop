@@ -178,8 +178,8 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         if ($term && (empty($vocabularies) || !empty($vocabularies[$term->machine_name]))) {
           if ($type == 'convert') {
             $this->argument->argument = $term->tid;
-            $this->argument->validated_title = check_plain($term->name);
           }
+          $this->argument->validated_title = check_plain($term->name);
           return TRUE;
         }
         return FALSE;
