@@ -304,3 +304,4 @@ by dereine: Add $view->version to all default views.
 #839236: Fields named "buttons" would disappear from the rearrange UI due to conflict with the buttons on the form.
 #783514 by dereine: Allow breaking of strings with + and ,
 #1000760 by dereine: Prevent htmlspecialchars() error with string arguments.
+#1033494 by dereine: Fix filter by user picture: change used handler.

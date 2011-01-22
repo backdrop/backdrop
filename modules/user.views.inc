@@ -158,7 +158,7 @@ function user_views_data() {
       'handler' => 'views_handler_sort',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator_string',
+      'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Has Avatar'),
       'type' => 'yes-no',
     ),
