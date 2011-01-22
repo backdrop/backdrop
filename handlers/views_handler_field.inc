@@ -294,6 +294,7 @@ class views_handler_field extends views_handler {
         'make_link' => array('default' => FALSE),
         'path' => array('default' => '', 'translatable' => TRUE),
         'absolute' => array('default' => '', 'translatable' => FALSE),
+        'external' => array('default' => '', 'translatable' => FALSE),
         'alt' => array('default' => '', 'translatable' => TRUE),
         'rel' => array('default' => ''),
         'link_class' => array('default' => ''),
@@ -460,15 +461,25 @@ class views_handler_field extends views_handler {
         ),
         '#maxlength' => 255,
       );
-       $form['alter']['absolute'] = array(
-         '#type' => 'checkbox',
-         '#title' => t('Use absolute path'),
-         '#default_value' => $this->options['alter']['absolute'],
-         '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
-         '#dependency' => array(
-           'edit-options-alter-make-link' => array(1)
-         ),
-       );
+      $form['alter']['absolute'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Use absolute path'),
+        '#default_value' => $this->options['alter']['absolute'],
+        '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
+        '#dependency' => array(
+          'edit-options-alter-make-link' => array(1)
+        ),
+      );
+      $form['alter']['external'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('External server URL'),
+        '#default_value' => $this->options['alter']['external'],
+        '#description' => t("Links to an external server using a full URL: e.g. 'http://www.example.com' or 'www.example.com'."),
+        '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
+        '#dependency' => array(
+          'edit-options-alter-make-link' => array(1)
+        ),
+      );
 
       $form['alter']['link_class'] = array(
         '#title' => t('Link class'),
@@ -865,14 +876,33 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $path = strip_tags(html_entity_decode(strtr($path, $tokens)));
     }
 
-    // If the path is empty do not build a link around the given text and return
-    // it as is.
-    if (empty($path)) {
+    // Parse the URL and move any query and fragment parameters out of the path.
+    $url = parse_url($path);
+
+    // Seriously malformed URLs may return FALSE or empty arrays.
+    if (empty($url)) {
       return $text;
     }
 
-    // Parse the URL and move any query and fragment parameters out of the path.
-    $url = parse_url($path);
+    // If the path is empty do not build a link around the given text and return
+    // it as is.
+    // http://www.example.com URLs will not have a $url['path'], so check host as well.
+    if (empty($url['path']) && empty($url['host'])) {
+      return $text;
+    }
+
+    // If no scheme is provided in the $path, assign the default 'http://'.
+    // This allows a url of 'www.example.com' to be converted to 'http://www.example.com'.
+    // Only do this on for external URLs.
+    if ($alter['external']){
+      if (!isset($url['scheme'])) {
+        // There is no scheme, add the default 'http://' to the $path.
+        $path = "http://$path";
+        // Reset the $url array to include the new scheme.
+        $url = parse_url($path);
+      }
+    }
+
     if (isset($url['query'])) {
       $path = strtr($path, array('?' . $url['query'] => ''));
       $options['query'] = drupal_get_query_array($url['query']);
