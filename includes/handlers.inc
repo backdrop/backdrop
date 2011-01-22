@@ -889,6 +889,58 @@ class views_many_to_one_helper {
  *
  * @param $str
  *   The string to parse.
+ * @param $handler
+ *   The handler object to use as a base.
+ *
+ * @return $handler
+ *   The new handler object.
+ */
+function views_break_phrase_string($str, &$handler) {
+  if (!$handler) {
+    $handler = new stdClass();
+  }
+
+  // Set up defaults:
+  if (!isset($handler->value)) {
+    $handler->value = array();
+  }
+
+  if (!isset($handler->operator)) {
+    $handler->operator = 'or';
+  }
+
+  if ($str == '') {
+    return $handler;
+  }
+
+  if (preg_match('/^(\w+[+ ])+\w+$/', $str)) {
+    // The '+' character in a query string may be parsed as ' '.
+    $handler->operator = 'or';
+    $handler->value = preg_split('/[+ ]/', $str);
+  }
+  else if (preg_match('/^(\w+,)*\w+$/', $str)) {
+    $handler->operator = 'and';
+    $handler->value = explode(',', $str);
+  }
+
+  // Keep an 'error' value if invalid strings were given.
+  if (!empty($str) && (empty($handler->value) || !is_array($handler->value))) {
+    $handler->value = array(-1);
+    return $handler;
+  }
+
+  // Doubly ensure that all values are strings only.
+  foreach ($handler->value as $id => $value) {
+    $handler->value[$id] = (string) $value;
+  }
+
+  return $handler;
+}
+/*
+ * Break x,y,z and x+y+z into an array. Numeric only.
+ *
+ * @param $str
+ *   The string to parse.
  * @param $filter
  *   The filter object to use as a base. If not specified one will
  *   be created.
@@ -896,47 +948,47 @@ class views_many_to_one_helper {
  * @return $filter
  *   The new filter object.
  */
-function views_break_phrase($str, $filter = NULL) {
-  if (!$filter) {
-    $filter = new stdClass();
+function views_break_phrase($str, $handler = NULL) {
+  if (!$handler) {
+    $handler = new stdClass();
   }
 
   // Set up defaults:
 
-  if (!isset($filter->value)) {
-    $filter->value = array();
+  if (!isset($handler->value)) {
+    $handler->value = array();
   }
 
-  if (!isset($filter->operator)) {
-    $filter->operator = 'or';
+  if (!isset($handler->operator)) {
+    $handler->operator = 'or';
   }
 
   if (empty($str)) {
-    return $filter;
+    return $handler;
   }
 
   if (preg_match('/^([0-9]+[+ ])+[0-9]+$/', $str)) {
     // The '+' character in a query string may be parsed as ' '.
-    $filter->operator = 'or';
-    $filter->value = preg_split('/[+ ]/', $str);
+    $handler->operator = 'or';
+    $handler->value = preg_split('/[+ ]/', $str);
   }
   elseif (preg_match('/^([0-9]+,)*[0-9]+$/', $str)) {
-    $filter->operator = 'and';
-    $filter->value = explode(',', $str);
+    $handler->operator = 'and';
+    $handler->value = explode(',', $str);
   }
 
   // Keep an 'error' value if invalid strings were given.
-  if (!empty($str) && (empty($filter->value) || !is_array($filter->value))) {
-    $filter->value = array(-1);
-    return $filter;
+  if (!empty($str) && (empty($handler->value) || !is_array($handler->value))) {
+    $handler->value = array(-1);
+    return $handler;
   }
 
   // Doubly ensure that all values are numeric only.
-  foreach ($filter->value as $id => $value) {
-    $filter->value[$id] = intval($value);
+  foreach ($handler->value as $id => $value) {
+    $handler->value[$id] = intval($value);
   }
 
-  return $filter;
+  return $handler;
 }
 
 // --------------------------------------------------------------------------
