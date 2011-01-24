@@ -33,6 +33,29 @@ function _field_view_formatter_options($field_type = NULL) {
  */
 class views_handler_field_field extends views_handler_field {
   /**
+   * An array to store field renderable arrays for use by render_items.
+   */
+  public $items = array();
+
+  function init(&$view, $options) {
+    parent::init($view, $options);
+
+    $field = $this->definition['field_info'];
+    $this->multiple = FALSE;
+    $this->limit_values = FALSE;
+
+    if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+      $this->multiple = TRUE;
+
+      // We should only limit values if the user hasn't selected "all", or the
+      // value matching field cardinality (which also means "give me everything")
+      if (is_numeric($this->options['delta_limit']) && ($this->options['delta_limit'] != $field['cardinality'])) {
+        $this->limit_values = TRUE;
+      }
+    }
+  }
+
+  /**
    * Called to add the field to a query.
    *
    * By default, the only columns added to the query are entity_id and
@@ -82,7 +105,6 @@ class views_handler_field_field extends views_handler_field {
     $this->aliases['entity_type'] = $this->query->add_field(NULL, "'$entity_type'", $entity_type_alias);
 
     $fields = $this->additional_fields;
-
     // We've already added entity_type, so we can remove it from the list.
     $entity_type_key = array_search('entity_type', $fields);
     if ($entity_type_key !== FALSE) {
@@ -100,7 +122,7 @@ class views_handler_field_field extends views_handler_field {
     }
 
     // Add additional fields (and the table join itself) if needed.
-    if ($use_groupby || !empty($this->definition['add fields to query'])) {
+    if ($this->add_field_table($use_groupby)) {
       $this->ensure_my_table();
       $this->add_additional_fields($fields);
 
@@ -111,10 +133,20 @@ class views_handler_field_field extends views_handler_field {
         $this->query->add_where(0, $column, $this->query->options['field_language']);
       }
 
-      // Do we need to filter by delta?
-      if (is_numeric($this->options['delta'])) {
+      // Limit a multiple value field.
+      // Only done when we are explicitly told to add everything to the query.
+      if ($this->limit_values && empty($this->options['group_rows'])) {
         $column = $this->table_alias . ".delta";
-        $this->query->add_where(0, $column, (int) $this->options['delta']);
+        $offset = intval($this->options['delta_offset']);
+        // We need to create a range of $delta_limit deltas starting from
+        // $offset to limit the query to. Since we include $offset itself,
+        // subtract one. i., 5 values starting from 0 is is array(0, 1, 2, 3, 4).
+        $deltas = range($offset, $this->options['delta_limit'] + $offset - 1);
+        $or = db_or()
+          ->condition($column, $deltas)
+          ->condition($column, NULL);
+
+        $this->query->add_where(0, $or);
       }
     }
 
@@ -126,6 +158,38 @@ class views_handler_field_field extends views_handler_field {
     }
 
     $this->add_additional_fields(array('revision_id'));
+  }
+
+  /**
+   * Determine if the field table should be added to the query.
+   */
+  function add_field_table($use_groupby) {
+    // Grouping is enabled, or we are explicitly required to do this.
+    if ($use_groupby || !empty($this->definition['add fields to query'])) {
+      return TRUE;
+    }
+    // This a multiple value field, but "group multiple values" is not checked.
+    if ($this->multiple && !$this->options['group_rows']) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Determine if this field is click sortable.
+   */
+  function click_sortable() {
+    // Not click sortable in any case.
+    if (empty($this->definition['click sortable'])) {
+      return FALSE;
+    }
+    // A field is not click sortable if it's a multiple field with
+    // "group multiple values" checked, since a click sort in that case would
+    // add a join to the field table, which would produce unwanted duplicates.
+    if ($this->multiple && $this->options['group_rows']) {
+      return FALSE;
+    }
+    return TRUE;
   }
 
   /**
@@ -148,9 +212,6 @@ class views_handler_field_field extends views_handler_field {
     $field_type = field_info_field_types($field['type']);
     $column_names = array_keys($field['columns']);
 
-    $options['delta'] = array(
-      'default' => '',
-    );
     // If the field has a "value" column, we probably need that one.
     $options['click_sort_column'] = array(
       'default' => in_array('value', $column_names) ? 'value' : '',
@@ -168,6 +229,33 @@ class views_handler_field_field extends views_handler_field {
       'default' => array(),
     );
 
+    // Options used for multiple value fields.
+    $options['group_rows'] = array(
+      'default' => TRUE,
+    );
+    // If we know the exact number of allowed values, then that can be
+    // the default. Otherwise, default to 'all'.
+    $options['delta_limit'] = array(
+      'default' => ($field['cardinality'] > 1) ? $field['cardinality'] : 'all',
+    );
+    $options['delta_offset'] = array(
+      'default' => 0,
+    );
+    $options['delta_reversed'] = array(
+      'default' => FALSE,
+    );
+
+    $options['multi_type'] = array(
+      'default' => 'separator'
+    );
+    $options['separator'] = array(
+      'default' => ', '
+    );
+
+    $options['entity_api_classes'] = array(
+      'default' => FALSE,
+    );
+
     return $options;
   }
 
@@ -178,24 +266,9 @@ class views_handler_field_field extends views_handler_field {
     $formatters = _field_view_formatter_options($field['type']);
     $column_names = array_keys($field['columns']);
 
-    if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-      if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-        $type = 'textfield';
-        $options = NULL;
-        $description = t('The sequence number of the value to show. Numbers start from 0. Leave empty to display all values.');
-      }
-      else {
-        $type = 'select';
-        $options = array_merge(array('' => t('All')), range(0, $field['cardinality'] - 1));
-        $description = t('The sequence number of the value to show.');
-      }
-      $form['delta'] = array(
-        '#title' => t('Delta'),
-        '#type' => $type,
-        '#options' => $options,
-        '#default_value' => $this->options['delta'],
-        '#description' => $description,
-      );
+    // If this is a multiple value field, add its options.
+    if ($this->multiple) {
+      $this->multiple_options_form($form, $form_state);
     }
 
     // No need to ask the user anything if the field has only one column.
@@ -225,6 +298,17 @@ class views_handler_field_field extends views_handler_field {
       ),
     );
 
+    $form['entity_api_classes'] = array(
+      '#title' => t('Use field template'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->options['entity_api_classes'],
+      '#description' => t('If checked, field api classes will be added using field.tpl.php (or equivalent). This is not recommended unless your CSS depends upon these classes. If not checked, template will not be used.'),
+    );
+
+    if ($this->multiple) {
+      $form['entity_api_classes']['#description'] .= ' ' . t('Checking this option will cause the group Display Type and Separator values to be ignored.');
+    }
+
     // Get the currently selected formatter.
     if (isset($form_state['values']['options']['type'])) {
       $format = $form_state['values']['options']['type'];
@@ -252,6 +336,97 @@ class views_handler_field_field extends views_handler_field {
       $settings_form = $function($field, $instance, '_dummy', $form, $form_state);
     }
     $form['settings'] = $settings_form;
+  }
+
+  /**
+   * Provide options for multiple value fields.
+   */
+  function multiple_options_form(&$form, &$form_state) {
+    $field = $this->definition['field_info'];
+
+    $form['multiple_prefix'] = array(
+      '#markup' => '<fieldset class="form-wrapper" id="views-multiple-options"><legend><span class="fieldset-legend">' . t('Multiple field settings') . '</span></legend>',
+    );
+
+    $form['group_rows'] = array(
+      '#title' => t('Display all values in the same row'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->options['group_rows'],
+      '#description' => t('If checked, multiple values for this field will be shown in the same row. If not checked, each value in this field will create a new row.'),
+    );
+
+    // Make the string translatable by keeping it as a whole rather than
+    // translating prefix and suffix separately.
+    list($prefix, $suffix) = explode('@count', t('Display @count value(s)'));
+
+    if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+      $type = 'textfield';
+      $options = NULL;
+      $size = 5;
+    }
+    else {
+      $type = 'select';
+      $options = drupal_map_assoc(range(1, $field['cardinality']));
+      $size = 1;
+    }
+    $form['multi_type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Display type'),
+      '#options' => array(
+        'ul' => t('Unordered list'),
+        'ol' => t('Ordered list'),
+        'separator' => t('Simple separator'),
+      ),
+      '#process' => array('form_process_radios', 'ctools_dependent_process'),
+      '#dependency' => array('edit-options-group-rows' => array(TRUE)),
+      '#default_value' => $this->options['multi_type'],
+    );
+
+    $form['separator'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Separator'),
+      '#default_value' => $this->options['separator'],
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'radio:options[multi_type]' => array('separator'),
+        'edit-options-group-rows' => array(TRUE),
+      ),
+      '#dependency_count' => 2,
+    );
+
+    $form['delta_limit'] = array(
+      '#type' => $type,
+      '#size' => $size,
+      '#field_prefix' => $prefix,
+      '#field_suffix' => $suffix,
+      '#options' => $options,
+      '#default_value' => $this->options['delta_limit'],
+      '#prefix' => '<div class="container-inline">',
+    );
+
+    list($prefix, $suffix) = explode('@count', t('starting from @count'));
+    $form['delta_offset'] = array(
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#field_prefix' => $prefix,
+      '#field_suffix' => $suffix,
+      '#default_value' => $this->options['delta_offset'],
+      '#description' => t('(first item is 0)'),
+    );
+    $form['delta_reversed'] = array(
+      '#title' => t('Reversed'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->options['delta_reversed'],
+      '#suffix' => '</div>',
+      '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
+      '#dependency' => array('edit-options-group-rows' => array(TRUE)),
+      '#description' => t('(start from last values)'),
+    );
+
+    $form['multiple_suffix'] = array(
+      '#markup' => '</fieldset>',
+    );
+
   }
 
   /**
@@ -324,41 +499,130 @@ class views_handler_field_field extends views_handler_field {
     }
   }
 
-  function render($values) {
-    if (isset($values->_field_data[$this->field_alias])) {
-      // Prepare arguments for rendering based on the objects cached in the
-      // pre-render phase and the display options for this field.
-      $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
-      $entity = $values->_field_data[$this->field_alias]['entity'];
-      $display_entity = clone $entity;
-      $langcode = $this->field_language();
-
-      // The field we are trying to display is empty, or doesn't exist on
-      // this entity.
-      if (empty($display_entity->{$this->definition['field_name']})) {
-        return '';
+  /**
+   * Render all items in this field together.
+   *
+   * When using advanced render, each possible item in the list is rendered
+   * individually. Then the items are all pasted together.
+   */
+  function render_items($items) {
+    if (!empty($items)) {
+      if (!$this->options['group_rows']) {
+        return implode('', $items);
       }
 
-      // The user wants to render only one value from a multivalue field.
-      // The Field API doesn't support this, so we just hack out the
-      // values we don't want to render.
-      if (is_numeric($this->options['delta'])) {
-        $delta = (int) $this->options['delta'];
-
-        $display_entity->{$this->definition['field_name']}[$langcode] = array($display_entity->{$this->definition['field_name']}[$langcode][$delta]);
+      if ($this->options['multi_type'] == 'separator') {
+        return implode(check_plain($this->options['separator']), $items);
       }
-
-      $display = array(
-        'type' => $this->options['type'],
-        'settings' => $this->options['settings'],
-        'label' => 'hidden',
-      );
-
-      $render_array = field_view_field($entity_type, $display_entity, $this->definition['field_name'], $display, $langcode);
-      return drupal_render($render_array);
+      else {
+        return theme('item_list',
+          array(
+            'items' => $items,
+            'title' => NULL,
+            'type' => $this->options['multi_type']
+          ));
+      }
     }
-    else {
-      return '';
+  }
+
+  /**
+   * Return an array of items for the field.
+   *
+   * Items should be stored in the result array, if possible, as an array
+   * with 'value' as the actual displayable value of the item, plus
+   * any items that might be found in the 'alter' options array for
+   * creating links, such as 'path', 'fragment', 'query' etc, such a thing
+   * is to be made. Additionally, items that might be turned into tokens
+   * should also be in this array.
+   */
+  function get_items($values) {
+    if (empty($values->_field_data[$this->field_alias])) {
+      return array();
+    }
+
+    $langcode = $this->field_language();
+
+    // Go ahead and render and store in $this->items.
+    $entity = clone $values->_field_data[$this->field_alias]['entity'];
+    $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
+
+    // The field we are trying to display is empty, or doesn't exist on
+    // this entity.
+    if (empty($entity->{$this->definition['field_name']})) {
+      return array();
+    }
+
+    // if delta_limit is a non-zero value, this is either an error or they
+    // mean to display all values. Let's just display all values.
+    if ($this->limit_values && intval($this->options['delta_limit']) != 0) {
+      $all_values = $entity->{$this->definition['field_name']}[$langcode];
+      if ($this->options['delta_reversed']) {
+        $all_values = array_reverse($all_values);
+      }
+
+
+      // Offset is calculated differently when row grouping for a field is
+      // not enabled. Since there are multiple rows, the delta needs to be
+      // taken into account, so that different values are shown per row.
+      if (!$this->options['group_rows'] && isset($values->{$this->aliases['delta']})) {
+        $delta_limit = 1;
+        $offset = $values->{$this->aliases['delta']};
+      }
+      else {
+        $delta_limit = $this->options['delta_limit'];
+        $offset = intval($this->options['delta_offset']);
+      }
+
+      $new_values = array();
+      for ($i = 0; $i < $delta_limit; $i++) {
+        $new_delta = $offset + $i;
+
+        if (isset($all_values[$new_delta])) {
+          $new_values[] = $all_values[$new_delta];
+        }
+      }
+      $entity->{$this->definition['field_name']}[$langcode] = $new_values;
+    }
+
+    $display = array(
+      'type' => $this->options['type'],
+      'settings' => $this->options['settings'],
+      'label' => 'hidden',
+    );
+
+    $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
+
+    $items = array();
+    if ($this->options['entity_api_classes']) {
+      // Make a copy.
+      $array = $render_array;
+      return array(array('rendered' => drupal_render($render_array)));
+    }
+
+    foreach (element_children($render_array) as $count) {
+      $items[$count]['rendered'] = $render_array[$count];
+      $items[$count]['raw'] = $render_array['#items'][$count];
+    }
+    return $items;
+  }
+
+  function render_item($count, $item) {
+    return render($item['rendered']);
+  }
+
+  function document_self_tokens(&$tokens) {
+    $field = $this->definition['field_info'];
+    foreach ($field['columns'] as $id => $column) {
+      $tokens['[' . $this->options['id'] . '-' . $id . ']'] = t('Raw @column', array('@column' => $id));
+    }
+  }
+
+  function add_self_tokens(&$tokens, $item) {
+    $field = $this->definition['field_info'];
+    foreach ($field['columns'] as $id => $column) {
+      // Use filter_xss_admin because it's user data and we can't be sure it is safe.
+      // We know nothing about the data, though, so we can't really do much else.
+      $tokens['[' . $this->options['id'] . '-' . $id . ']'] = filter_xss_admin($item['raw'][$id]);
     }
   }
 

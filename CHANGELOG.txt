@@ -26,6 +26,7 @@ Fix fieldsets in field handler.
 #981872 by infojunkie: Option to hide attachments in summary views.
 #839810 by marcp: Get UID from URL argument default plugin should accept uids from Views pages.
 #1012584 by dereine: Allow filtering on term descriptions.
+#895046 by bojanz, dereine, merlinofchaos: Implement proper multiple field api handling and improve field api rendering in general.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

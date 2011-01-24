@@ -129,6 +129,8 @@ function field_views_field_default_views_data($field) {
       'additional fields' => $add_fields,
       'entity_tables' => $entity_tables,
       'field_info' => $field,
+      // Default the element type to div, let the UI change it if necessary.
+      'element type' => 'div',
     );
   }
 
