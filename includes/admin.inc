@@ -766,15 +766,28 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#markup' => t('This view is being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_interval(REQUEST_TIME - $view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
     );
   }
+  if (!empty($view->changed)) {
+    $form['changed'] = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('view-changed', 'messages', 'warning')),
+      '#markup' => t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.'),
+    );
+  }
 
-  $form['actions'] = array('#type' => 'actions', '#weight' => -10);
+  $form['help_text'] = array(
+    '#markup' => t('Modify the displays of your view below or add new displays.'),
+  );
+
+  $form['actions'] = array('#type' => 'actions', '#weight' => 0);
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
     // Taken from the "old" UI. @TODO: Review and rename.
     '#validate' => array('views_ui_edit_view_form_validate'),
     '#submit' => array('views_ui_edit_view_form_submit'),
+    '#access' => !empty($view->changed),
   );
+
   $form['displays'] = array(
     '#prefix' => '<h3 class="clearfix">' . t('Queries/displays') . '</h3>' . "\n" . '<div class="views-displays">',
     '#suffix' => '</div>',
