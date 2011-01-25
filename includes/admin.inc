@@ -321,12 +321,11 @@ function views_ui_add_form($form, &$form_state) {
   foreach ($wizard_plugins as $key => $w) {
     $options[$key] = $w['title'];
   }
-  $default = isset($options['node:blog']) ? 'node:blog' : 'node';
   $form['displays']['show']['wizard_key'] = array(
     '#type' => 'select',
     '#title' => t('Show'),
     '#options' => $options,
-    '#default_value' => $default,
+    '#default_value' => 'node',
     '#ajax' => array(
       'callback' => 'views_ui_add_form_update',
       'wrapper' => 'edit-view-displays-wrapper',
