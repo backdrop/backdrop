@@ -313,7 +313,7 @@ function views_ui_add_form($form, &$form_state) {
   $form['displays']['show'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
-    '#attributes' => array('class' => array('inline')),
+    '#attributes' => array('class' => array('container-inline')),
   );
   
   $wizard_plugins = views_ui_get_wizards();
@@ -327,7 +327,6 @@ function views_ui_add_form($form, &$form_state) {
     '#title' => t('Show'),
     '#options' => $options,
     '#default_value' => $default,
-    '#attributes' => array('class' => array('inline')),
     '#ajax' => array(
       'callback' => 'views_ui_add_form_update',
       'wrapper' => 'edit-view-displays-wrapper',
