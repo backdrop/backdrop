@@ -37,6 +37,21 @@ Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
       this.pathFiller.rebind($pathField);
     }
   }
+
+  // Populate the RSS feed field with a URLified version of the view name, and
+  // an .xml suffix (to make it unique).
+  var $feedField = $(context).find('[id^="edit-page-feed-properties-path"]');
+  if ($feedField.length) {
+    if (!this.feedFiller) {
+      var exclude = new RegExp('[^a-z0-9\\-]+', 'g');
+      var replace = '-';
+      var suffix = '.xml';
+      this.feedFiller = new Drupal.viewsUi.FormFieldFiller($feedField, exclude, replace, suffix);
+    }
+    else {
+      this.feedFiller.rebind($feedField);
+    }
+  }
 };
 
 /**
@@ -52,13 +67,16 @@ Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
  * @param replace
  *   Optional. A string to use as the replacement value for disallowed
  *   characters.
+ * @param suffix
+ *   Optional. A suffix to append at the end of the target field content.
  */
-Drupal.viewsUi.FormFieldFiller = function ($target, exclude, replace) {
+Drupal.viewsUi.FormFieldFiller = function ($target, exclude, replace, suffix) {
   var $ = jQuery;
   this.source = $('#edit-human-name');
   this.target = $target;
   this.exclude = exclude || false;
   this.replace = replace || '';
+  this.suffix = suffix || '';
 
   // Create bound versions of this instance's object methods to use as event
   // handlers. This will let us easily unbind those specific handlers later on.
@@ -85,14 +103,14 @@ Drupal.viewsUi.FormFieldFiller.prototype.bind = function () {
 };
 
 /**
- * Get the source form field value as altered by the regular expression.
+ * Get the source form field value as altered by the passed-in parameters.
  */
 Drupal.viewsUi.FormFieldFiller.prototype.getTransliterated = function () {
   var from = this.source.val();
   if (this.exclude) {
     from = from.toLowerCase().replace(this.exclude, this.replace);
   }
-  return from;
+  return from + this.suffix;
 };
 
 /**
