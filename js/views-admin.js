@@ -5,10 +5,19 @@ Drupal.viewsUi = {};
 
 Drupal.behaviors.viewsUiAddView = {};
 
+/**
+ * In the add view wizard, use the view name to prepopulate form fields such as
+ * page title and menu link.
+ */
 Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
   var $ = jQuery;
-  // Prepopulate the page title, block title, and menu link fields with the
-  // view name.
+  var exclude, replace, suffix;
+  // Set up regular expressions to allow only numbers, letters, and dashes.
+  exclude = new RegExp('[^a-z0-9\\-]+', 'g');
+  replace = '-';
+
+  // The page title, block title, and menu link fields can all be prepopulated
+  // with the view name - no regular expression needed.
   var $fields = $(context).find('[id^="edit-page-title"], [id^="edit-block-title"], [id^="edit-page-link-properties-title"]');
   if ($fields.length) {
     if (!this.fieldsFiller) {
@@ -28,9 +37,6 @@ Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
   var $pathField = $(context).find('[id^="edit-page-path"]');
   if ($pathField.length) {
     if (!this.pathFiller) {
-      // Allow only numbers, letters, and dashes in the path.
-      var exclude = new RegExp('[^a-z0-9\\-]+', 'g');
-      var replace = '-';
       this.pathFiller = new Drupal.viewsUi.FormFieldFiller($pathField, exclude, replace);
     }
     else {
@@ -43,9 +49,7 @@ Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
   var $feedField = $(context).find('[id^="edit-page-feed-properties-path"]');
   if ($feedField.length) {
     if (!this.feedFiller) {
-      var exclude = new RegExp('[^a-z0-9\\-]+', 'g');
-      var replace = '-';
-      var suffix = '.xml';
+      suffix = '.xml';
       this.feedFiller = new Drupal.viewsUi.FormFieldFiller($feedField, exclude, replace, suffix);
     }
     else {
