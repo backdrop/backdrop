@@ -995,9 +995,13 @@ function views_ui_edit_page_display_tabs($view) {
  * Controls whether or not the default display should have its own tab on edit.
  */
 function views_ui_show_default_display($view) {
-  // @todo For now, show the default display only if there are no others, and
-  //   hide it if there's at least one "real" one. Later, we may add a setting.
-  return (count($view->display) == 1);
+  // Always show the default display for advanced users who prefer that mode.
+  $advanced_mode = variable_get('views_ui_show_master_display', FALSE);
+  // For other users, show the default display only if there are no others, and
+  // hide it if there's at least one "real" display.
+  $additional_displays = (count($view->display) == 1);
+
+  return $advanced_mode || $additional_displays;
 }
 
 /**
