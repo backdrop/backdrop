@@ -47,9 +47,15 @@ class views_handler_field_field extends views_handler_field {
     if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
       $this->multiple = TRUE;
 
-      // We should only limit values if the user hasn't selected "all", or the
-      // value matching field cardinality (which also means "give me everything")
-      if (is_numeric($this->options['delta_limit']) && ($this->options['delta_limit'] != $field['cardinality'])) {
+      // If "Display all values in the same row" is FALSE, then we always limit
+      // in order to show a single unique value per row.
+      if (!$this->options['group_rows']) {
+        $this->limit_values = TRUE;
+      }
+
+      // Otherwise, we only limit values if the user hasn't selected "all", 0, or
+      // the value matching field cardinality.
+      if (intval($this->options['delta_limit']) && ($this->options['delta_limit'] != $field['cardinality'])) {
         $this->limit_values = TRUE;
       }
     }
@@ -131,22 +137,6 @@ class views_handler_field_field extends views_handler_field {
       if (field_is_translatable($entity_type, $field)) {
         $column = $this->table_alias . ".language";
         $this->query->add_where(0, $column, $this->query->options['field_language']);
-      }
-
-      // Limit a multiple value field.
-      // Only done when we are explicitly told to add everything to the query.
-      if ($this->limit_values && empty($this->options['group_rows'])) {
-        $column = $this->table_alias . ".delta";
-        $offset = intval($this->options['delta_offset']);
-        // We need to create a range of $delta_limit deltas starting from
-        // $offset to limit the query to. Since we include $offset itself,
-        // subtract one. i., 5 values starting from 0 is is array(0, 1, 2, 3, 4).
-        $deltas = range($offset, $this->options['delta_limit'] + $offset - 1);
-        $or = db_or()
-          ->condition($column, $deltas)
-          ->condition($column, NULL);
-
-        $this->query->add_where(0, $or);
       }
     }
 
@@ -252,7 +242,7 @@ class views_handler_field_field extends views_handler_field {
       'default' => ', '
     );
 
-    $options['entity_api_classes'] = array(
+    $options['field_api_classes'] = array(
       'default' => FALSE,
     );
 
@@ -298,15 +288,15 @@ class views_handler_field_field extends views_handler_field {
       ),
     );
 
-    $form['entity_api_classes'] = array(
+    $form['field_api_classes'] = array(
       '#title' => t('Use field template'),
       '#type' => 'checkbox',
-      '#default_value' => $this->options['entity_api_classes'],
+      '#default_value' => $this->options['field_api_classes'],
       '#description' => t('If checked, field api classes will be added using field.tpl.php (or equivalent). This is not recommended unless your CSS depends upon these classes. If not checked, template will not be used.'),
     );
 
     if ($this->multiple) {
-      $form['entity_api_classes']['#description'] .= ' ' . t('Checking this option will cause the group Display Type and Separator values to be ignored.');
+      $form['field_api_classes']['#description'] .= ' ' . t('Checking this option will cause the group Display Type and Separator values to be ignored.');
     }
 
     // Get the currently selected formatter.
@@ -363,11 +353,13 @@ class views_handler_field_field extends views_handler_field {
       $type = 'textfield';
       $options = NULL;
       $size = 5;
+      $process = array();
     }
     else {
       $type = 'select';
       $options = drupal_map_assoc(range(1, $field['cardinality']));
       $size = 1;
+      $process = array('form_process_select');
     }
     $form['multi_type'] = array(
       '#type' => 'radios',
@@ -402,6 +394,8 @@ class views_handler_field_field extends views_handler_field {
       '#options' => $options,
       '#default_value' => $this->options['delta_limit'],
       '#prefix' => '<div class="container-inline">',
+      '#process' => $process + array('ctools_dependent_process'),
+      '#dependency' => array('edit-options-group-rows' => array(TRUE)),
     );
 
     list($prefix, $suffix) = explode('@count', t('starting from @count'));
@@ -411,6 +405,8 @@ class views_handler_field_field extends views_handler_field {
       '#field_prefix' => $prefix,
       '#field_suffix' => $suffix,
       '#default_value' => $this->options['delta_offset'],
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#description' => t('(first item is 0)'),
     );
     $form['delta_reversed'] = array(
@@ -552,14 +548,12 @@ class views_handler_field_field extends views_handler_field {
       return array();
     }
 
-    // if delta_limit is a non-zero value, this is either an error or they
-    // mean to display all values. Let's just display all values.
-    if ($this->limit_values && intval($this->options['delta_limit']) != 0) {
+    // We are supposed to show only certain deltas.
+    if ($this->limit_values) {
       $all_values = $entity->{$this->definition['field_name']}[$langcode];
       if ($this->options['delta_reversed']) {
         $all_values = array_reverse($all_values);
       }
-
 
       // Offset is calculated differently when row grouping for a field is
       // not enabled. Since there are multiple rows, the delta needs to be
@@ -593,7 +587,7 @@ class views_handler_field_field extends views_handler_field {
     $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
 
     $items = array();
-    if ($this->options['entity_api_classes']) {
+    if ($this->options['field_api_classes']) {
       // Make a copy.
       $array = $render_array;
       return array(array('rendered' => drupal_render($render_array)));

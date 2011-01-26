@@ -211,6 +211,42 @@ function field_views_field_default_views_data($field) {
           'field_name' => $field['field_name'],
         );
       }
+
+      // Expose additional delta column for multiple value fields.
+      if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+        $title = t('@label (!name) - delta', array('@label' => $field['field_name'], '!name' => $field['field_name']));
+        $title_short = t('!name - delta', array('!name' => $field['field_name']));
+
+        $data[$table]['delta'] = array(
+          'group' => $group,
+          'title' => $title,
+          'title short' => $title_short,
+          'help' => t('Delta - Appears in: @bundles', array('@bundles' => implode(', ', $bundles_names))),
+        );
+        $data[$table]['delta']['argument'] = array(
+          'field' => 'delta',
+          'table' => $table,
+          'handler' => 'views_handler_argument_numeric',
+          'additional fields' => $additional_fields,
+          'empty field name' => t('<No value>'),
+          'field_name' => $field['field_name'],
+        );
+        $data[$table]['delta']['filter'] = array(
+          'field' => 'delta',
+          'table' => $table,
+          'handler' => 'views_handler_filter_numeric',
+          'additional fields' => $additional_fields,
+          'field_name' => $field['field_name'],
+          'allow empty' => TRUE,
+        );
+        $data[$table]['delta']['sort'] = array(
+          'field' => 'delta',
+          'table' => $table,
+          'handler' => 'views_handler_sort',
+          'additional fields' => $additional_fields,
+          'field_name' => $field['field_name'],
+        );
+      }
     }
   }
 
