@@ -3744,9 +3744,142 @@ function views_ui_disable_page($view) {
 }
 
 /**
- * Page callback for the tools - other page
+ * Form builder for the admin display settings page.
  */
-function views_ui_admin_tools() {
+function views_ui_admin_settings_display() {
+  ctools_include('dependent');
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
+
+  $form = array();
+  $form['view_list'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('View list'),
+  );
+  $form['view_list']['views_ui_show_listing_filters'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show filters on the list of views'),
+    '#default_value' => variable_get('views_ui_show_listing_filters', FALSE),
+  );
+  $form['edit_view_form'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Edit view form'),
+  );
+  $form['edit_view_form']['views_ui_trim_display_names'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Trim long display names'),
+    '#description' => t('Avoid wrapping of display names by trimming long names.'),
+    '#default_value' => variable_get('views_ui_trim_display_names', FALSE),
+  );
+  $form['edit_view_form']['views_ui_show_sql_query'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show the SQL query'),
+    '#default_value' => variable_get('views_ui_show_sql_query', FALSE),
+  );
+  $form['edit_view_form']['views_ui_show_sql_query_where'] = array(
+    '#type' => 'radios',
+    '#options' => array(
+      'above' => t('Show the query above the automatic preview'),
+      'below' => t('Show the query below the automatic preview'),
+    ),
+    '#default_value' => 'above',
+    '#process' => array('form_process_radios', 'ctools_dependent_process'),
+    '#dependency' => array('edit-views-ui-show-sql-query' => array(TRUE)),
+    '#prefix' => '<div id="edit-show-sql-wrapper" class="views-dependent"><div id="edit-show-sql">',
+    '#suffix' => '</div></div>',
+  );
+  $form['edit_view_form']['views_ui_show_performance_statistics'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show performance statistics'),
+    '#default_value' => variable_get('views_ui_show_performance_statistics', FALSE),
+  );
+  $form['edit_view_form']['views_ui_show_performance_statistics_where'] = array(
+    '#type' => 'radios',
+    '#options' => array(
+      'above' => t('Show the statistics above the automatic preview'),
+      'below' => t('Show the statistics below the automatic preview'),
+    ),
+    '#default_value' => 'above',
+    '#process' => array('form_process_radios', 'ctools_dependent_process'),
+    '#dependency' => array('edit-views-ui-show-performance-statistics' => array(TRUE)),
+    '#prefix' => '<div id="edit-show-performance-wrapper" class="views-dependent"><div id="edit-show-performance">',
+    '#suffix' => '</div></div>',
+  );
+  $form['edit_view_form']['views_ui_show_advanced_help_warning'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show advanced help warning'),
+    '#default_value' => variable_get('views_ui_show_advanced_help_warning', TRUE),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Form builder for the admin display defaults page.
+ */
+function views_ui_admin_settings_defaults() {
+  $form = array();
+  $form['view_list'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('View list'),
+  );
+  $form['view_list']['views_ui_combine_templates'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Combine view templates and user-generated views'),
+    '#default_value' => variable_get('views_ui_combine_templates', FALSE),
+  );
+
+  $form['create_view_form'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Create view form'),
+  );
+  $form['create_view_form']['views_ui_wizard_create_page'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('"Create a page" is enabled by default'),
+    '#default_value' => variable_get('views_ui_wizard_create_page', TRUE),
+  );
+  $form['create_view_form']['views_ui_wizard_autofill'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Autofill form values with the name of the view'),
+    '#description' => t('Accelerate view creation by prefilling form values based on the name of the view.'),
+    '#default_value' => variable_get('views_ui_wizard_autofill', TRUE),
+  );
+
+  $form['edit_view_form'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Edit view form'),
+  );
+  $form['edit_view_form']['views_ui_show_master_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Always show the master query'),
+    '#description' => t('Legacy users of views may choose to see the master (i.e. default) display.'),
+    '#default_value' => variable_get('views_ui_show_master_display', FALSE),
+  );
+  $form['edit_view_form']['views_exposed_filter_any_label'] = array(
+    '#type' => 'select',
+    '#title' => t('Label for "Any" value on optional single-select exposed filters'),
+    '#options' => array('old_any' => '<Any>', 'new_any' => t('- Any -')),
+    '#default_value' => variable_get('views_exposed_filter_any_label', 'old_any'),
+  );
+
+  $form['view_output'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('View output'),
+  );
+  $form['view_output']['views_ui_hover_links'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show "edit" and "duplicate" hover links'),
+    '#description' => t("Disable to require views administrators to navigate to Structure > Views to edit a view."),
+    '#default_value' => variable_get('views_ui_hover_links', TRUE),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Form builder for the admin performance settings page.
+ */
+function views_ui_admin_settings_performance() {
+  $form = array();
   $form['clear_cache'] = array(
     '#type' => 'submit',
     '#value' => t("Clear Views' cache"),
@@ -3765,13 +3898,6 @@ function views_ui_admin_tools() {
     '#title' => t('Disable views data caching'),
     '#description' => t("Views caches data about tables, modules and views available, to increase performance. By checking this box, Views will skip this cache and always rebuild this data when needed. This can have a serious performance impact on your site."),
     '#default_value' => variable_get('views_skip_cache', FALSE),
-  );
-
-  $form['views_hide_help_message'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Ignore missing advanced help module'),
-    '#description' => t("Views uses the advanced help module to provide help text; if this module is not present Views will complain, unless this setting is checked."),
-    '#default_value' => variable_get('views_hide_help_message', FALSE),
   );
 
   $form['views_ui_query_on_top'] = array(
@@ -3793,13 +3919,6 @@ function views_ui_admin_tools() {
     '#title' => t('Show other queries run during render during live preview'),
     '#description' => t("Drupal has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."),
     '#default_value' => variable_get('views_show_additional_queries', FALSE),
-  );
-
-  $form['views_no_hover_links'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Do not show hover links over views'),
-    '#description' => t("To make it easier to administrate your views, Views provides 'hover' links to take you to the edit and export screen of a view whenever the view is used. This can be distracting on some themes, though; if it is problematic, you can turn it off here."),
-    '#default_value' => variable_get('views_no_hover_links', FALSE),
   );
 
   $form['views_devel_output'] = array(
@@ -3832,13 +3951,6 @@ function views_ui_admin_tools() {
     '#title' => t('Page region to output performance statistics'),
     '#default_value' => variable_get('views_devel_region', 'footer'),
     '#options' => $regions,
-  );
-
-  $form['views_exposed_filter_any_label'] = array(
-    '#type' => 'select',
-    '#title' => t('Label for "Any" value on optional single-select exposed filters'),
-    '#options' => array('old_any' => '<Any>', 'new_any' => t('- Any -')),
-    '#default_value' => variable_get('views_exposed_filter_any_label', 'old_any'),
   );
 
   return system_settings_form($form);

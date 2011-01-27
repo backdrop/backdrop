@@ -45,19 +45,28 @@ function views_ui_menu() {
     'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
-  $items['admin/structure/views/tools'] = array(
-    'title' => 'Tools',
+
+  $items['admin/structure/views/settings'] = array(
+    'title' => 'Settings',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_admin_tools'),
+    'page arguments' => array('views_ui_admin_settings_display'),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
-
-  // Other modules might want to extend Tools with secondary tabs. Add the
-  // default task here, so they don't have to.
-  $items['admin/structure/views/tools/basic'] = array(
-    'title' => 'Basic',
+  $items['admin/structure/views/settings/display'] = array(
+    'title' => 'Display',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'page arguments' => array('views_ui_admin_settings_display'),
     'weight' => -10,
+  ) + $base;
+  $items['admin/structure/views/settings/defaults'] = array(
+    'title' => 'Defaults',
+    'page arguments' => array('views_ui_admin_settings_defaults'),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/structure/views/settings/performance'] = array(
+    'title' => 'Performance',
+    'page arguments' => array('views_ui_admin_settings_performance'),
+    'type' => MENU_LOCAL_TASK,
   ) + $base;
 
   // The primary Edit View page. Secondary tabs for each Display are added in

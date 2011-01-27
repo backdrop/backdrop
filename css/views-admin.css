@@ -4,7 +4,7 @@
  * The .css file is intended to only contain positioning and size declarations 
  * For example: display, position, float, clear, and overflow.
  */
- 
+
 /* @group Inline lists */
  
 .page-admin-structure-views #content .horizontal > * {
@@ -189,6 +189,14 @@
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
 .page-admin-structure-views #content ul.secondary {
   *zoom: 1;
+}
+
+/* @end */
+
+/* @group Settings forms */
+
+.views-dependent {
+  margin-left: 1.5em;
 }
 
 /* @end */
