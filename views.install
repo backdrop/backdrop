@@ -560,3 +560,34 @@ function views_update_6014() {
   return $ret;
 }
 
+/**
+ * Rename some system variables.
+ */
+function views_update_7000() {
+  // Views now lets users turn off query details on live preview.
+  $query_on_top = variable_get('views_ui_query_on_top');
+  if (isset($query_on_top)) {
+    variable_set('views_ui_show_sql_query', TRUE);
+    if ($query_on_top) {
+      variable_set('views_ui_show_sql_query_where', 'above');
+    }
+    else {
+      variable_set('views_ui_show_sql_query_where', 'below');
+    }
+    variable_del('views_ui_query_on_top');
+  }
+
+  // Rename the views_hide_help_message variable from negative to positive.
+  $hide_help = variable_get('views_hide_help_message');
+  if (isset($hide_help)) {
+    variable_set('views_ui_show_advanced_help_warning', !$hide_help);
+    variable_del('views_hide_help_message');
+  }
+
+  // Rename the views_no_hover_links variable from negative to positive.
+  $hide_hover = variable_get('views_no_hover_links');
+  if (isset($hide_hover)) {
+    variable_set('views_ui_hover_links', !$hide_hover);
+    variable_del('views_no_hover_links');
+  }
+}
