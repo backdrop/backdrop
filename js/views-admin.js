@@ -10,6 +10,11 @@ Drupal.behaviors.viewsUiAddView = {};
  * page title and menu link.
  */
 Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
+  // Users can turn this behavior off on the settings page.
+  if (settings.viewsUiWizardAutofill === 0) {
+    return;
+  }
+
   var $ = jQuery;
   var exclude, replace, suffix;
   // Set up regular expressions to allow only numbers, letters, and dashes.

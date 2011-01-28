@@ -70,7 +70,9 @@ function views_ui_list_views() {
     );
   }
 
-  $build = array(
+  $build = array();
+  $build['filters'] = array();
+  $build['table'] = array(
     '#theme' => 'table',
     '#header' => array(
       t('View name'),
@@ -80,6 +82,11 @@ function views_ui_list_views() {
     '#rows' => $rows,
     '#empty' => t('No views found.'),
   );
+
+  // Let advanced users filter the list of views by type, tag, etc.
+  if (variable_get('views_ui_show_listing_filters', FALSE)) {
+    // TODO: Add filters.
+  }
   return $build;
 }
 
@@ -136,57 +143,60 @@ function views_ui_preview($view, $display_id, $args) {
 
     $preview = $view->preview($display_id, $args);
 
-    // TODO: Expose a UI for the user to request that the query information be
-    // displayed. For now, just return the preview without query info appended.
-    return $preview;
+    // Append query information and statistics.
+    if (variable_get('views_ui_show_sql_query', FALSE)) {
+      // Get information from the preview for display.
+      if (!empty($view->build_info['query'])) {
+        $rows = array();
+        $query = $view->build_info['query'];
+        // Only the sql default class has a method getArguments.
+        $quoted = array();
 
-    // Get information from the preview for display.
-    if (!empty($view->build_info['query'])) {
-      $rows = array();
-      $query = $view->build_info['query'];
-      // Only the sql default class has a method getArguments.
-      $quoted = array();
-
-      if (get_class($view->query) == 'views_plugin_query_default') {
-        $arguments = $query->getArguments();
-        $connection = Database::getConnection();
-        foreach ((array)$query->arguments() as $key => $val) {
-          $quoted[$key] = $connection->quote($val);
-        }
-      }
-      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');
-      if (!empty($view->additional_queries)) {
-        $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
-        foreach ($view->additional_queries as $query) {
-          if ($queries) {
-            $queries .= "\n";
+        if (get_class($view->query) == 'views_plugin_query_default') {
+          $arguments = $query->getArguments();
+          $connection = Database::getConnection();
+          foreach ((array)$query->arguments() as $key => $val) {
+            $quoted[$key] = $connection->quote($val);
           }
-          $queries .= t('[@time ms]', array('@time' => intval($query[1] * 100000) / 100)) . ' ' . $query[0];
+        }
+        $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');
+        if (!empty($view->additional_queries)) {
+          $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
+          foreach ($view->additional_queries as $query) {
+            if ($queries) {
+              $queries .= "\n";
+            }
+            $queries .= t('[@time ms]', array('@time' => intval($query[1] * 100000) / 100)) . ' ' . $query[0];
+          }
+
+          $rows[] = array('<strong>' . t('Other queries') . '</strong>', '<pre>' . $queries . '</pre>');
         }
 
-        $rows[] = array('<strong>' . t('Other queries') . '</strong>', '<pre>' . $queries . '</pre>');
-      }
+        $rows[] = array('<strong>' . t('Title') . '</strong>', filter_xss_admin($view->get_title()));
+        if (isset($path)) {
+          $path = l($path, $path);
+        }
+        else {
+          $path = t('This display has no path.');
+        }
 
-      $rows[] = array('<strong>' . t('Title') . '</strong>', filter_xss_admin($view->get_title()));
-      if (isset($path)) {
-        $path = l($path, $path);
+        $rows[] = array('<strong>' . t('Path') . '</strong>', $path);
+
+        $rows[] = array('<strong>' . t('Query build time') . '</strong>', t('@time ms', array('@time' => intval($view->build_time * 100000) / 100)));
+        $rows[] = array('<strong>' . t('Query execute time') . '</strong>', t('@time ms', array('@time' => intval($view->execute_time * 100000) / 100)));
+        $rows[] = array('<strong>' . t('View render time') . '</strong>', t('@time ms', array('@time' => intval($view->render_time * 100000) / 100)));
+        drupal_alter('views_preview_info', $rows, $view);
+
+        $info = theme('table', array('rows' => $rows));
       }
       else {
-        $path = t('This display has no path.');
+        $info = theme('table', array('rows' => array(array('<strong>' . t('Query') . '</strong>', t('No query was run')))));
       }
-
-      $rows[] = array('<strong>' . t('Path') . '</strong>', $path);
-
-      $rows[] = array('<strong>' . t('Query build time') . '</strong>', t('@time ms', array('@time' => intval($view->build_time * 100000) / 100)));
-      $rows[] = array('<strong>' . t('Query execute time') . '</strong>', t('@time ms', array('@time' => intval($view->execute_time * 100000) / 100)));
-      $rows[] = array('<strong>' . t('View render time') . '</strong>', t('@time ms', array('@time' => intval($view->render_time * 100000) / 100)));
-      drupal_alter('views_preview_info', $rows, $view);
-
-      $info = theme('table', array('rows' => $rows));
     }
     else {
-      $info = theme('table', array('rows' => array(array('<strong>' . t('Query') . '</strong>', t('No query was run')))));
+      $info = '';
     }
+
   }
   else {
     foreach ($errors as $error) {
@@ -198,7 +208,7 @@ function views_ui_preview($view, $display_id, $args) {
 
   $info = '<div class="views-query-info">' . $info . '</div>';
 
-  if (variable_get('views_ui_query_on_top', FALSE)) {
+  if (variable_get('views_ui_show_sql_query_where', 'above') === 'above') {
     $output = $info . $preview;
   }
   else {
@@ -277,6 +287,9 @@ function views_ui_clone_page($view) {
  */
 function views_ui_add_form($form, &$form_state) {
   $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
+  // Let users turn off the wizard autofill behavior on the views settings page.
+  $form['#attached']['js'][] = array('type' => 'setting', 'data' => array('viewsUiWizardAutofill' => variable_get('views_ui_wizard_autofill', TRUE)));
+
   $form['human_name'] = array(
     '#type' => 'textfield',
     '#title' => t('View name'),

@@ -72,6 +72,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
+      '#default_value' => variable_get('views_ui_wizard_create_page', TRUE),
     );
 
     // All options for the page display are included in this container so they
