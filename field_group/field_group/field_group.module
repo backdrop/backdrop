@@ -406,6 +406,12 @@ function field_group_field_group_format_settings($group) {
     '#weight' => 3,
     '#element_validate' => array('field_group_validate_css_class'),
   );
+  $form['instance_settings']['description'] = array(
+    '#title' => t('Description'),
+    '#type' => 'textarea',
+    '#default_value' => isset($group->format_settings['instance_settings']['description']) ? $group->format_settings['instance_settings']['description'] : (isset($formatter['instance_settings']['description']) ? $formatter['instance_settings']['description'] : ''),
+    '#weight' => 0,
+  );
 
   // Add optional instance_settings.
   switch ($group->format_type) {
@@ -433,6 +439,12 @@ function field_group_field_group_format_settings($group) {
         '#weight' => 3,
         '#element_validate' => array('field_group_validate_css_class'),
       );
+      break;
+    case 'tabs':
+    case 'htabs':
+    case 'accordion':
+      unset($form['instance_settings']['description']);
+      break;
     case 'tab':
     case 'htab':
     case 'accordion-item':
@@ -475,30 +487,26 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
   if (isset($group->format_settings['instance_settings'], $group->format_settings['instance_settings']['classes'])) {
     $classes .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
   }
+  $description = isset($group->format_settings['instance_settings']['description']) ? check_plain($group->format_settings['instance_settings']['description']) : '';
 
   // Add all field_group format types to the js settings.
   $form['#attached']['js'][] = array(
-    'data' => array('field_group' => array($group->format_type => TRUE)),
+    'data' => array('field_group' => array($group->format_type => $view_mode)),
     'type' => 'setting',
   );
-
-  // If field is required, add asterisx.
-  $required = '';
-  if(!empty($group->required)) {
-    $required = t('<span title="This group has required fields" class="form-required"> *</span>');
-  }
 
   switch ($group->format_type) {
     // Fieldset.
     case 'fieldset':
       $element += array(
         '#type' => 'fieldset',
-        '#title' => check_plain(t($group->label)) . $required,
+        '#title' => check_plain(t($group->label)),
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
         '#pre_render' => array(),
         '#attributes' => array('class' => explode(' ', $classes)),
+        '#description' => $description,
       );
       $element['#attached']['js'][] = 'misc/form.js';
       $element['#attached']['js'][] = 'misc/collapse.js';
@@ -522,6 +530,9 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
         $add['#suffix'] = '</div>';
       }
+      if (!empty($description)) {
+        $add['#prefix'] .= '<div class="description">' . $description . '</div>';
+      }
       $element += $add;
 
       if ($effect == 'blind') {
@@ -543,12 +554,15 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element += array(
         '#type' => 'markup',
         '#prefix' => '
-        <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . $required . '</h3>
+        <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . '</h3>
         <div class="field-group-format-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
         '#weight' => $group->weight,
         //'#attributes' => array('class' => array($group->format_type)),
       );
+      if (!empty($description)) {
+        $element['#prefix'] .= '<div class="description">' . $description . '</div>';
+      }
       drupal_add_library('system', 'ui.accordion');
       break;
     // Horizontal tabs group.
@@ -567,7 +581,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     case 'htab':
       $element += array(
         '#type' => 'fieldset',
-        '#title' => check_plain(t($group->label)) . $required,
+        '#title' => check_plain(t($group->label)),
         '#weight' => $group->weight,
         '#collapsible' => $collapsible,
         '#collapsed' => $collapsed,
@@ -575,6 +589,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#group' => $group->parent_name,
         // very important. Cannot be added on the form!
         '#parents' => array($group->parent_name),
+        '#description' => $description,
       );
       break;
     // Vertical tabs group.
@@ -593,19 +608,25 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       break;
     // Vertical tab.
     case 'tab':
+      // Could be it never runs through htab.
+      $form['#attached']['js'][] = array(
+        'data' => array('field_group' => array('tabs' => $view_mode)),
+        'type' => 'setting',
+      );
       // Front-end and back-end on configuration will lead
       // to vertical tabs nested in a separate vertical group.
       if ($view_mode != 'form') {
         $parent_name = empty($group->parent_name) ? 'additional_settings' : $group->parent_name;
         $element += array(
           '#type' => 'fieldset',
-          '#title' => check_plain(t($group->label)) . $required,
+          '#title' => check_plain(t($group->label)),
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
           '#attributes' => array('class' => explode(" ", $classes)),
           '#group' => $parent_name,
           '#parents' => array($parent_name),
+          '#description' => $description,
         );
       }
       // Form fieldgroups which are nested into a vertical tab group
@@ -614,28 +635,31 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         $parent_name = $group->parent_name;
         $element += array(
           '#type' => 'fieldset',
-          '#title' => check_plain(t($group->label)) . $required,
+          '#title' => check_plain(t($group->label)),
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
           '#attributes' => array('class' => explode(" ", $classes)),
-          '#group' => $parent_name
+          '#group' => $parent_name,
+          '#description' => $description,
         );
       }
       // For the form, we will keep it in the core additional_settings,
       // or in a custom created parallel one.
       else {
         $group->parent_name = 'additional_settings';
+        $parent_name = 'additional_settings';
         // Create the fieldgroup element.
         $child_element = array(
           '#type' => 'fieldset',
-          '#title' => check_plain(t($group->label)) . $required,
+          '#title' => check_plain(t($group->label)),
           '#weight' => -30 + $group->weight, // hardcoded to bring our extra additional vtabs on top.
           '#collapsible' => $collapsible,
           '#collapsed' => $collapsed,
           '#attributes' => array('class' => explode(" ", $classes)),
           '#group' => 'additional_settings',
           '#parents' => array($group->parent_name),
+          '#description' => $description,
         );
 
         // Check if the additional_settings exist for this type of form,
@@ -686,7 +710,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   // Always perform access checks.
   field_group_field_group_check_access($element, $groups, $display);
 
-  // Dish the fieldgroups with no fields.
+  // Dish the fieldgroups with no fields for non-forms.
   if ($display) {
     foreach (element_children($element) as $name) {
       if (in_array($name, $groups)) {
@@ -695,6 +719,10 @@ function field_group_field_group_build_pre_render_alter(& $element) {
         }
       }
     }
+  }
+  else {
+    // Fix the problem on forms with additional settings.
+    //dsm($element);
   }
 
   // Add the default field_group javascript and stylesheet.
@@ -706,7 +734,6 @@ function field_group_field_group_build_pre_render_alter(& $element) {
 /**
  * Helper function to recursively tell if the group contains
  * an empty element or maybe one of its children.
-
  *
  * @param array $element
  *   array structure of the element.
@@ -974,10 +1001,7 @@ function field_group_pack($group) {
  *   Field group object.
  */
 function field_group_create_field_group(& $group) {
-  $record = field_group_pack($group);
-  drupal_write_record('field_group', $record);
-  $group->id = $record->id;
-  module_invoke_all('field_group_create_field_group', $group);
+  field_group_save($group);
 }
 
 /**
@@ -988,9 +1012,7 @@ function field_group_create_field_group(& $group) {
  *   Field group object.
  */
 function field_group_update_field_group(& $group) {
-  $record = field_group_pack($group);
-  drupal_write_record('field_group', $record, array('id'));
-  module_invoke_all('field_group_update_field_group', $group);
+  field_group_save($group);
 }
 
 /**
@@ -1018,13 +1040,18 @@ function field_group_save(& $group) {
   // Prepare the record.
   $record = field_group_pack($group);
 
-  if (isset($record->id)) {
+  if (isset($record->id) && $record->id > 0) {
     drupal_write_record('field_group', $record, array('id'));
+    $group->id = $record->id;
+    module_invoke_all('field_group_update_field_group', $group);
   }
   else {
     drupal_write_record('field_group', $record);
     $group->id = $record->id;
+    module_invoke_all('field_group_create_field_group', $group);
   }
+
+  return $group->id;
 }
 
 /**
@@ -1066,13 +1093,6 @@ function field_group_attach_groups(&$element, $view_mode) {
     }
   }
 
-  // Check required fields if configured so.
-  if (variable_get('field_group_mark_as_required', FALSE) == TRUE) {
-    field_group_mark_as_required($element['#groups'], $element);
-    // Reverse the order as it was intended.
-    arsort($group_children);
-  }
-
   $element['#group_children'] = $group_children;
 
   // Add a pre render or process callback.
@@ -1104,7 +1124,7 @@ function field_group_build_pre_render($element) {
 
   // Cleanup nested groups from root element.
   foreach ($element['#group_children'] as $groupname => $parent) {
-    //unset($element[$groupname]);
+    unset($element[$groupname]);
   }
 
   // Allow others to alter the pre_rendered build.
@@ -1162,45 +1182,6 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
       field_group_fields_nest($element[$name], $root_element, $name);
     }
   }
-}
-
-/**
- * Helper function to mark fieldgroups as required.
- */
-function field_group_mark_as_required(& $element_groups, & $element) {
-
-  $rgroups = $element_groups;
-  //Reverse order for so deepest first
-  arsort($rgroups);
-
-  foreach ($rgroups as $group_name => $group) {
-    $group->required = isset($group->required)? $group->required : FALSE;
-    foreach ($group->children as $child) {
-      // Check if this is a field and group isn't already true, if so check if required
-      if (isset($element[$child]) && !$group->required) {
-        if (isset($element[$child]['#required'])) {
-          $group->required = $element[$child]['#required'] ? TRUE : $group->required;
-        }
-        elseif (isset($element[$child]['und'][0]['#required'])) {
-          $group->required = $element[$child]['und'][0]['#required'] ? TRUE : $group->required;
-        }
-        elseif (isset($element[$child]['#tree']) && $element[$child]['#tree'] == TRUE) {
-          foreach (element_children($element[$child]) as $element_child) {
-            if (isset($element[$child][$element_child]['#required'])) {
-              $group->required = $element[$child][$element_child]['#required'] ? TRUE : $group->required;
-            }
-          }
-        }
-      }
-    }
-    // Set results after iterating through array.
-    $element['#groups'][$group_name]->required = $group->required;
-    // If array has parents set TRUE
-    if (isset($element['#groups'][$element['#groups'][$group_name]->parent_name]) && $group->required) {
-      $element_groups[$element['#groups'][$group_name]->parent_name]->required = $group->required;
-    }
-  }
-
 }
 
 /**
