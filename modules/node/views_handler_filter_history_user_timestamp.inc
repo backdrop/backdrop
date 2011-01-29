@@ -53,6 +53,8 @@ class views_handler_filter_history_user_timestamp extends views_handler_filter {
     $field = "$this->table_alias.$this->real_field";
     $node = $this->query->ensure_table('node', $this->relationship);
 
+    $clause = '';
+    $clause2 = '';
     if (module_exists('comment')) {
       $ncs = $this->query->ensure_table('node_comment_statistics', $this->relationship);
       $clause = ("OR $ncs.last_comment_timestamp > (***CURRENT_TIME*** - $limit)");
