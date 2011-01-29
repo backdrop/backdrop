@@ -1,5 +1,5 @@
 <?php
-// $Id: taxonomy.views.inc,v 1.57.4.18 2010/12/04 07:46:13 dereine Exp $
+// $Id: taxonomy.views.inc,v 1.57.4.19 2011/01/20 22:07:03 merlinofchaos Exp $
 /**
  * @file
  *
@@ -162,6 +162,9 @@ function taxonomy_views_data() {
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
     ),
   );
 

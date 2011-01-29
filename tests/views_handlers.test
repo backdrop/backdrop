@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handlers.test,v 1.1.4.4 2010/05/24 19:58:36 dereine Exp $
+// $Id: views_handlers.test,v 1.1.4.5 2011/01/22 23:26:59 dereine Exp $
 
 /**
 * @file
@@ -35,5 +35,52 @@ class ViewsHandlersTest extends ViewsSqlTest {
     $this->drupalPost($path, $edit, t('Update'));
     $this->drupalGet($path);
     $this->assertFieldByName('options[expose][reduce]', TRUE);
+  }
+
+  function test_views_break_phrase_string() {
+    $empty_stdclass = new stdClass();
+    $empty_stdclass->operator = 'or';
+    $empty_stdclass->value = array();
+    
+    $null = NULL;
+    // check defaults
+    $this->assertEqual($empty_stdclass, views_break_phrase_string('', $null));
+
+    $handler = views_get_handler('node', 'title', 'argument');
+    $this->assertEqual($handler, views_break_phrase_string('', $handler));
+
+    // test ors
+    $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1 word2+word', $handler));
+    $this->assertEqual('or', $handler->operator);
+    $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1+word2+word', $handler));
+    $this->assertEqual('or', $handler->operator);
+    $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1 word2 word', $handler));
+    $this->assertEqual('or', $handler->operator);
+    $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1 word2++word', $handler));
+    $this->assertEqual('or', $handler->operator);
+
+    // test ands.
+    $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1,word2,word', $handler));
+    $this->assertEqual('and', $handler->operator);
+    $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1,,word2,word', $handler));
+    $this->assertEqual('and', $handler->operator);
+  }
+  
+  /**
+   * Check to see if two values are equal.
+   *
+   * @param $first
+   *   The first value to check.
+   * @param $second
+   *   The second value to check.
+   * @param $message
+   *   The message to display along with the assertion.
+   * @param $group
+   *   The type of assertion - examples are "Browser", "PHP".
+   * @return
+   *   TRUE if the assertion succeeded, FALSE otherwise.
+   */
+  protected function assertEqualValue($first, $handler, $message = '', $group = 'Other') {
+    return $this->assert($first == $handler->value, $message ? $message : t('First value is equal to second value'), $group);
   }
 }

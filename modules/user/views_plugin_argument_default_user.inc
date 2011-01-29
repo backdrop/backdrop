@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_default_user.inc,v 1.1.6.2 2010/12/14 00:00:52 merlinofchaos Exp $
+// $Id: views_plugin_argument_default_user.inc,v 1.1.6.3 2011/01/20 20:12:29 merlinofchaos Exp $
 /**
  * @file
  * Contains the user from URL argument default plugin.
@@ -65,6 +65,13 @@ class views_plugin_argument_default_user extends views_plugin_argument_default {
           return $node->uid;
         }
       }
+    }
+
+    // If the current page is a view that takes uid as an argument, return the uid.
+    $views_page = views_get_page_view();
+
+    if ($views_page && isset($views_page->view->argument['uid'])) {
+      return $views_page->view->argument['uid']->argument;
     }
   }
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: plugins.inc,v 1.156.4.14 2010/12/04 07:39:35 dereine Exp $
+// $Id: plugins.inc,v 1.156.4.15 2011/01/18 20:53:08 merlinofchaos Exp $
 /**
  * @file plugins.inc
  * Built in plugins for Views output handling.
@@ -61,6 +61,7 @@ function views_views_plugins() {
         'theme' => 'views_view',
         'use ajax' => TRUE,
         'use pager' => FALSE,
+        'use more' => TRUE,
         'accept attachments' => FALSE,
         'help topic' => 'display-attachment',
       ),

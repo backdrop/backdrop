@@ -1,5 +1,5 @@
 <?php
-//$Id: user.views.inc,v 1.59.4.14 2011/01/11 22:27:42 dereine Exp $
+//$Id: user.views.inc,v 1.59.4.15 2011/01/22 23:37:21 dereine Exp $
 /**
  * @file
  * Provide views data and handlers for user.module
@@ -158,7 +158,7 @@ function user_views_data() {
       'handler' => 'views_handler_sort',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator_string',
+      'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Has Avatar'),
       'type' => 'yes-no',
     ),

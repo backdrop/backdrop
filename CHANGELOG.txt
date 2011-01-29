@@ -17,6 +17,16 @@ follow up by bojanz: Better description for the delta.
 #1019506 by dereine: Fix the remove items element on the rearrange filter_group form.
 #1011004 by dereine: Add validation for query plugin option forms.
 #991202 by helmo: Add option to turn linebreaks into br tags in field rewriting.
+#1001302 by dagmar: Enable attachment displays to have more links.
+#1021784 by tim.plunkett: Extra space added in some classes erroneously.
+#862072 by jhedstrom: Allow argument validator to test if user has edit or delete access to a node.
+Fix fieldsets in field handler.
+#962564 by joshuajabbour: Allow link attributes to be rewritten (internally).
+#672864 by dboulet: cols- class incorrect on table, grid.
+#981872 by infojunkie: Option to hide attachments in summary views.
+#839810 by marcp: Get UID from URL argument default plugin should accept uids from Views pages.
+#1012584 by dereine: Allow filtering on term descriptions.
+#895046 by bojanz, dereine, merlinofchaos: Implement proper multiple field api handling and improve field api rendering in general.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
@@ -289,4 +299,11 @@ by dereine: Add $view->version to all default views.
 #1015960 by duellj: View js should use DOM element not jquery object.
 #1027552 by david_Rothstein: Fix Node: Has new content fatal error.
 #955464 by dereine: Fix many_to_one helper in the case of have no condition and operator = 'and'.
-
+#696550: Taxonomy validator should always set title when it successfully validates.
+#869172 by bendiy: Add an "external" parameter to field link rewriting so that external URLs can be formed properly even without a scheme.
+#935176 by benoit.borrel: Add "system" table to Views data.
+#839236: Fields named "buttons" would disappear from the rearrange UI due to conflict with the buttons on the form.
+#783514 by dereine: Allow breaking of strings with + and ,
+#1000760 by dereine: Prevent htmlspecialchars() error with string arguments.
+#1033494 by dereine: Fix filter by user picture: change used handler.
+#895046 by bojanz: Follow up of the multiple field handler. Fixes an issue with group-by and rename entity_api_classes.
