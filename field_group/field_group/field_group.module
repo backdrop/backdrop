@@ -187,6 +187,20 @@ function field_group_features_api() {
 }
 
 /**
+ * Implements hook_field_attach_delete_bundle().
+ *
+ * @param String $entity_type
+ * @param String $bundle
+ */
+function field_group_field_attach_delete_bundle($entity_type, $bundle) {
+  // Delete the entity's entry from field_group of all entities.
+  db_delete('field_group')
+    ->condition('bundle', $bundle)
+    ->condition('entity_type', $entity_type)
+    ->execute();
+}
+
+/**
  * Implements hook_field_attach_form().
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
@@ -664,16 +678,18 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
 
         // Check if the additional_settings exist for this type of form,
         // if not, add the vertical_tabs wrapper.
-        if (!isset($form['additional_settings']['#type'])) {
-          $form['additional_settings'] = array(
-            '#type' => 'vertical_tabs',
-            '#weight' => $group->weight,
-            '#theme_wrappers' => array('vertical_tabs'),
-            '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
-            '#suffix' => '</div>',
-          );
-          $form['#attached']['js'][] = 'misc/form.js';
-          $form['#attached']['js'][] = 'misc/collapse.js';
+        if (!isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
+          if (!isset($form['additional_settings']['#type'])) {
+            $form['additional_settings'] = array(
+              '#type' => 'vertical_tabs',
+              '#weight' => $group->weight,
+              '#theme_wrappers' => array('vertical_tabs'),
+              '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
+              '#suffix' => '</div>',
+            );
+            $form['#attached']['js'][] = 'misc/form.js';
+            $form['#attached']['js'][] = 'misc/collapse.js';
+          }
           $form['additional_settings'][$group->group_name] = $child_element;
           // Nest the fields inside the appropriate structure.
           foreach (element_children($element) as $fieldname) {
@@ -722,7 +738,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   }
   else {
     // Fix the problem on forms with additional settings.
-    //dsm($element);
+    // @TODO check latest status: No problems to be solved here?
   }
 
   // Add the default field_group javascript and stylesheet.
@@ -792,7 +808,7 @@ function field_group_field_group_format_summary($group) {
     $output .= '<br />';
     foreach ($group->format_settings['instance_settings'] as $key => $value) {
       $output .= '<strong>' . $key . '</strong> ' . check_plain($value);
-      $output .= $last == $value ? ' ' : ', ';
+      $output .= $last == $value ? ' ' : '<br />';
     }
   }
   return $output;
@@ -1079,6 +1095,7 @@ function field_group_formatter_info($display_overview = FALSE) {
  * @param String $view_mode The mode for the build.
  */
 function field_group_attach_groups(&$element, $view_mode) {
+
   $entity_type = $element['#entity_type'];
   $bundle = $element['#bundle'];
 
@@ -1092,7 +1109,6 @@ function field_group_attach_groups(&$element, $view_mode) {
       $group_children[$child] = $group_name;
     }
   }
-
   $element['#group_children'] = $group_children;
 
   // Add a pre render or process callback.
@@ -1163,6 +1179,7 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
       // in the group element and removed from the root.
       $element[$name] = array();
       foreach ($group_fields as $groupfield => $groupname) {
+
         // Stash the field in the group.
         if ($groupname == $name && isset($root_element[$groupfield])) {
           $element[$name][$groupfield] = $root_element[$groupfield];
@@ -1175,11 +1192,13 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
           $element[$name][$groupfield] = array();
         }
       }
+      // Go deeper with the current group element and the parent $name.
+      // @TODO check if the order of these two functions are correct.
+      // Recently changed to fix unnested fieldgroups. Needs revision & testing.
+      field_group_fields_nest($element[$name], $root_element, $name);
       // Bring extra element wrappers to achieve a grouping of fields.
       // This will mainly be prefix and suffix altering.
       field_group_pre_render($element[$name], $group, $root_element);
-      // Go deeper with the current group element and the parent $name.
-      field_group_fields_nest($element[$name], $root_element, $name);
     }
   }
 }
