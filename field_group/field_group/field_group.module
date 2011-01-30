@@ -470,7 +470,7 @@ function field_group_field_group_format_settings($group) {
 
 /**
  * Implements hook_field_group_pre_render().
- * This function (only) gives you the oppertunity to 'create' the given
+ * This function (only) gives you the oppertunity to create the given
  * wrapper field.
  * @param Array $elements by address.
  * @param Object $group The Field group info.
@@ -771,7 +771,6 @@ function field_group_field_group_is_empty($element, $groups) {
 
 /**
  * Helper function to recursively check groups with restricted fields only.
- * TODO Create this function.
  *
  * @param array $element
  *   array structure of the element.
@@ -780,6 +779,8 @@ function field_group_field_group_is_empty($element, $groups) {
  * @param boolean $display
  *   Display is true when we are not on a form.
  * @return Boolean Is field group empty
+ *
+ * @TODO Create this function.
  */
 function field_group_field_group_check_access(& $element, $groups, $display) {
 //  foreach (element_children($element) as $name) {
@@ -1046,8 +1047,6 @@ function field_group_delete_field_group($group, $mode) {
 
 /**
  * Saves a group definition.
- * This function exists for backward compatibility.
- * TODO remove this function.
  *
  * @param $group
  *   A group definition.
