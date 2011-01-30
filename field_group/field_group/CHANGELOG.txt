@@ -2,7 +2,9 @@
 CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
-
+    o #1043834 by amsri: Field Group module just does not work with profiles 2.
+    
+Field_group 7.x-1.0-rc1
     o #1006464 Change #groups to #fieldgroups because of name collapsing with form_process_fieldset
     o #1024184 fix collapsible when mode is set to open
     o #1020278 by mori: Update fails.
