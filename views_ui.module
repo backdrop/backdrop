@@ -36,14 +36,14 @@ function views_ui_menu() {
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
-  $items['admin/structure/views/browse'] = array(
+  $items['admin/structure/views/templates'] = array(
     'title' => 'Browse view templates',
     'page callback' => 'views_ui_list_disabled_views',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
   // Copy the "Add view" item so that it will also appear as a local action on
   // the view templates page.
-  $items['admin/structure/views/browse/add'] = $items['admin/structure/views/add'];
+  $items['admin/structure/views/templates/add'] = $items['admin/structure/views/add'];
   $items['admin/structure/views/import'] = array(
     'title' => 'Import view from code',
     'page callback' => 'drupal_get_form',
