@@ -45,7 +45,7 @@
 
 /* Targets any element with an icon -> text combo */
 .page-admin-structure-views #content .icon-text {
-  padding-left: 19px;
+  padding-left: 19px; /* LTR */
 }
 
 .page-admin-structure-views #content .icon-linked {
@@ -102,7 +102,7 @@
 
 .page-admin-structure-views #content .form-submit + .form-submit,
 .page-admin-structure-views #content a.button + a.button {
-  margin-left: 1em;
+  margin-left: 1em; /* LTR */
 }
 
 .page-admin-structure-views #content .fieldset-wrapper > * + *,
@@ -115,8 +115,8 @@
 /* @group Lists */
 
 .page-admin-structure-views #content .horizontal > * + * {
-  margin-left: 9px;
-  padding-left: 9px;
+  margin-left: 9px; /* LTR */
+  padding-left: 9px; /* LTR */
 }
 
 /* @end */
@@ -139,11 +139,11 @@
   background-color: #F9F9F9;
   border-bottom: 1px solid #CCCCCC;
   margin-bottom: 14px;
-  padding: 8px 8px 6px;
+  padding: 8px 8px 6px; /* LTR */
 }
 
 .page-admin-structure-views #content .views-displays .secondary > li + li {
-  margin-left: 3px
+  margin-left: 3px; /* LTR */
 }
 
 /* @end */
@@ -165,7 +165,7 @@
 }
 
 .page-admin-structure-views #content .views-displays .secondary a:focus {
-  outline: none
+  outline: none;
 }
 
 .page-admin-structure-views #content .views-displays .secondary a:hover,
@@ -243,7 +243,7 @@
 .page-admin-structure-views #content .views-display-tab .fieldset-legend {
   text-transform: none;
   font-size: 14px;
-  left: -5px; 
+  left: -5px; /* LTR */
 }
 
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper {
@@ -309,7 +309,7 @@
 }
 
 .page-admin-structure-views #content .views-ui-display-tab-bucket .icon-text {
-  padding-left: 25px;
+  padding-left: 25px; /* LTR */
 }
 
 .page-admin-structure-views #content .views-ui-display-tab-bucket .icon-linked {
@@ -321,8 +321,8 @@
 }
 
 .page-admin-structure-views #content .views-ui-display-tab-bucket > .actions * + * {
-  margin-left: 3px;
-  padding-left: 3px;
+  margin-left: 3px; /* LTR */
+  padding-left: 3px; /* LTR */
 }
 
 /* @end */
@@ -343,7 +343,7 @@
 }
 
 .views-display-setting .label {
-  margin-right: 3pt;
+  margin-right: 3pt; /* LTR */
 }
 
 /* @end */
@@ -382,7 +382,7 @@
 
 .page-admin-structure-views #views-filterable-options-controls .form-item {
   width: 45%;
-  margin-right: 2%;
+  margin-right: 2%; /* LTR */
 }
 
 .page-admin-structure-views #views-filterable-options-controls input,
@@ -415,7 +415,7 @@
 .page-admin-structure-views .views-ui-dialog #views-progress-indicator {
   font-size: 11px;
   position: absolute;
-  right: 10px;
+  right: 10px; /* LTR */
   top: 8px;
 }
 
@@ -479,7 +479,7 @@
 
 .page-admin-structure-views #views-live-preview .view-content > .item-list > ul {
   list-style-position: outside;
-  padding-left: 21px;
+  padding-left: 21px; /* LTR */
 }
 
 /* @end */

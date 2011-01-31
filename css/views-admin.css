@@ -9,11 +9,11 @@
  
 .page-admin-structure-views #content .horizontal > * {
   clear: none;
-  float: left;
+  float: left; /* LTR */
 }
 
 .page-admin-structure-views #content .horizontal.right {
-  float: right;
+  float: right; 
 }
 
 .page-admin-structure-views #content .horizontal label {
@@ -37,12 +37,12 @@
  */
 
 .page-admin-structure-views #content .form-actions {
-  float: right;
+  float: right; /* LTR */
 }
 
 .page-admin-structure-views #content .views-displays {
   clear: both;
-  float:left;
+  float:left; /* LTR */
 }
 
 .page-admin-structure-views #content .views-displays .secondary {
@@ -58,7 +58,7 @@
 
 .page-admin-structure-views #content .views-displays .secondary > li {
   display: inline-block;
-  float: left;
+  float: left; /* LTR */
 }
 
 .page-admin-structure-views #content .views-displays .secondary .open > a {
@@ -75,7 +75,7 @@
 }
 
 .page-admin-structure-views #content .views-displays .secondary .action-list {
-  left: 0;
+  left: 0; /* LTR */
   margin: 0;
   position: absolute;
   top: 22px;
@@ -91,7 +91,7 @@
 /* @group Attachment details collapsible fieldset */
 
 .page-admin-structure-views #content .views-display-tab .fieldset-legend {
-  left: -5px;
+  left: -5px; /* LTR */
   position: relative;
 }
 
@@ -107,7 +107,7 @@
  */
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper > .actions {
   position: absolute;
-  right: 0;
+  right: 0; /* LTR */
   top: -14px;
 }
 
@@ -116,23 +116,20 @@
 /* @group Attachment configuration columns */
 
 .page-admin-structure-views #content .views-display-columns > * {
-  float: left;
-  margin-left: 1%;
-  padding-left: 1%;
+  float: left; /* LTR */
+  margin-left: 1%; /* LTR */
+  padding-left: 1%; /* LTR */
   width: 32%;
 }
 
 .page-admin-structure-views #content .views-display-columns > *:first-child {
-  margin-left: 0;
-  padding-left: 0;
+  margin-left: 0; /* LTR */
+  padding-left: 0; /* LTR */
 }
 
 /* @end */
 
 /* @group Modal dialog box */
-
- .views-ui-dialog .ui-dialog-content {
-}
 
 .views-ui-dialog .ui-dialog-titlebar {
   display: none;
@@ -170,13 +167,13 @@
 /* @group Settings forms */
 
 .views-dependent {
-  margin-left: 1.5em;
+  margin-left: 1.5em; /* LTR */
 }
 
 .views-display-setting .label,
 .views-display-setting .views-ajax-link {
   display: inline-block;
-  float: left;
+  float: left; /* LTR */
 }
 
 /* @end */
@@ -202,7 +199,7 @@
 /* Reset the formatting context for IE */
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
 .page-admin-structure-views #content ul.secondary {
-  *zoom: 1;
+  zoom: 1;
 }
 
 /* @end */
