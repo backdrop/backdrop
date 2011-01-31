@@ -280,7 +280,7 @@ function views_ui_preview_callback($form, $form_state) {
  */
 function views_ui_add_page() {
   views_ui_add_admin_css();
-  drupal_set_title(t('Add view'));
+  drupal_set_title(t('Add new view'));
   return drupal_get_form('views_ui_add_form');
 }
 

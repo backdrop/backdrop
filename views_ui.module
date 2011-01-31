@@ -32,7 +32,7 @@ function views_ui_menu() {
     'weight' => '-1'
   ) + $base;
   $items['admin/structure/views/add'] = array(
-    'title' => 'Add view',
+    'title' => 'Add new view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
