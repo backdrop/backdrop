@@ -105,8 +105,7 @@
   margin-left: 1em;
 }
 
-.page-admin-structure-views #content .fieldset-wrapper > * + *,
-.page-admin-structure-views #content .fieldset-wrapper .form-wrapper > * + * {
+.page-admin-structure-views #content .fieldset-wrapper > * + * {
   margin-top: 18px;
 }
 
