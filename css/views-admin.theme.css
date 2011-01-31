@@ -105,7 +105,8 @@
   margin-left: 1em;
 }
 
-.page-admin-structure-views #content .fieldset-wrapper > * + * {
+.page-admin-structure-views #content .fieldset-wrapper > * + *,
+.page-admin-structure-views #content .form-wrapper > * + * {
   margin-top: 18px;
 }
 
@@ -251,6 +252,17 @@
 }
 
 /* @end */
+
+/* @group Attachment columns
+ *
+ * The columns that contain the option buckets e.g. Format and Basic Settings
+ */
+ 
+ .page-admin-structure-views #content .views-display-columns > * + * {
+   margin-top: 0;
+ }
+ 
+ /* @end */
 
 /* @group Auto preview
  *
