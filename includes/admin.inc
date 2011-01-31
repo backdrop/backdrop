@@ -32,7 +32,7 @@ function views_ui_list_enabled_views() {
  */
 function views_ui_list_disabled_views() {
   views_ui_add_admin_css();
-  drupal_set_title(t('View templates'));
+  drupal_set_title(t('Browse view templates'));
   $views = views_get_disabled_views();
   return views_ui_build_view_list($views);
 }
