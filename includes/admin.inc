@@ -2471,6 +2471,12 @@ function views_ui_edit_display_form($form, &$form_state) {
   $form['#title'] = $form['options']['#title'];
   unset($form['options']['#title']);
 
+  // Move the override dropdown out of the scrollable section of the form.
+  if (isset($form['override'])) {
+    $form['override'] = $form['options']['override'];
+    unset($form['options']['override']);
+  }
+
   $name = NULL;
   if (isset($form_state['update_name'])) {
     $name = $form_state['update_name'];
