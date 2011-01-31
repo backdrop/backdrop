@@ -559,3 +559,18 @@ function views_ui_get_form_wizard_instance($wizard) {
     return new ViewsUiBaseViewsWizard($wizard);
   }
 }
+
+/**
+ * Implements hook_library_alter().
+ *
+ * Remove the Contextual module JavaScript
+ * We do not want the user to edit nodes while they are in the context
+ * of building and configuring a view.
+ */
+function views_ui_library_alter(&$libraries, $module) {
+  if (path_is_admin(current_path())) {
+    if ($module == 'contextual' && isset($libraries['contextual-links'])) {
+      unset($libraries['contextual-links']['js']);
+    }
+  }
+}
