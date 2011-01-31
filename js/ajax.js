@@ -16,10 +16,9 @@
     if (response.url) {
       var submit = $('input[type=submit]', ajax_body).unbind('click').click(function() {
         $('form', ajax_body).append('<input type="hidden" name="' + $(this).attr('name') + '" value="' + $(this).val() + '">');
-        $(this).after('<span class="views-throbbing">&nbsp</span>');
-      })
+      });
       $('form', ajax_body).once('views-ajax-submit-processed').each(function() {
-        var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'throbber' } };
+        var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'none' } };
         var $form = $(this);
         var id = $form.attr('id');
         var form = $form[0];
