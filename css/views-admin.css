@@ -167,6 +167,20 @@
 
 /* @end */
 
+/* @group Settings forms */
+
+.views-dependent {
+  margin-left: 1.5em;
+}
+
+.views-display-setting .label,
+.views-display-setting .views-ajax-link {
+  display: inline-block;
+  float: left;
+}
+
+/* @end */
+
 /* @group Clearfix
  * 
  * @see http://perishablepress.com/press/2009/12/06/new-clearfix-hack
@@ -189,14 +203,6 @@
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
 .page-admin-structure-views #content ul.secondary {
   *zoom: 1;
-}
-
-/* @end */
-
-/* @group Settings forms */
-
-.views-dependent {
-  margin-left: 1.5em;
 }
 
 /* @end */

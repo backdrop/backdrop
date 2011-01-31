@@ -342,6 +342,10 @@
   background-color: #f9f9f9;
 }
 
+.views-display-setting .label {
+  margin-right: 3pt;
+}
+
 /* @end */
 
 /* @group Modal dialog box

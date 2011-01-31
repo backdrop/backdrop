@@ -7,7 +7,7 @@
 ?>
 <div class="views-display-setting clearfix <?php print $zebra; ?>">
   <?php if ($description): ?>
-    <?php print $description; ?>:
+    <span class="label"><?php print ($description . t(':')); ?></span>
   <?php endif; ?>
   <?php if ($gear): ?>
     <?php print $gear; ?>
