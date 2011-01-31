@@ -11,6 +11,22 @@ Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
 /**
  * Implements Drupal.FieldGroup.processHook().
  */
+Drupal.FieldGroup.Effects.processFieldset = {
+  execute: function (context, settings, type) {
+    if (type == 'form') {
+      // Add required fields mark to any fieldsets containing required fields
+      $('fieldset.fieldset').each(function(i){
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
+          $('legend span').eq(i).append('&nbsp;').append($('.form-required').eq(0).clone());
+        }
+      });
+    }
+  }
+}
+
+/**
+ * Implements Drupal.FieldGroup.processHook().
+ */
 Drupal.FieldGroup.Effects.processAccordion = {
   execute: function (context, settings, type) {
     $('div.field-group-accordion-wrapper', context).accordion({
@@ -20,7 +36,7 @@ Drupal.FieldGroup.Effects.processAccordion = {
     if (type == 'form') {
       // Add required fields mark to any element containing required fields
       $('div.accordion-item').each(function(i){
-        if ($(this).find('.form-required').length > 0) {
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
           $('h3.ui-accordion-header').eq(i).append('&nbsp;').append($('.form-required').eq(0).clone());
         }
       });
@@ -36,7 +52,7 @@ Drupal.FieldGroup.Effects.processHtabs = {
     if (type == 'form') {
       // Add required fields mark to any element containing required fields
       $('fieldset.horizontal-tabs-pane').each(function(i){
-        if ($(this).find('.form-required').length > 0) {
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
           $('li.horizontal-tab-button').eq(i).children('a').find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
         }
       });
@@ -52,7 +68,7 @@ Drupal.FieldGroup.Effects.processTabs = {
     if (type == 'form') {
       // Add required fields mark to any fieldsets containing required fields
       $('fieldset.vertical-tabs-pane').each(function(i){
-        if ($(this).find('.form-required').length > 0) {
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
           $('li.vertical-tab-button').eq(i).children('a').find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
         }
       });

@@ -289,7 +289,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'required_fields' => 1),
         'default_formatter' => 'collapsible',
       ),
       'tabs' => array(
@@ -301,7 +301,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'required_fields' => 1),
         'default_formatter' => 'closed',
       ),
       'htabs' => array(
@@ -314,7 +314,7 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'required_fields' => 1),
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
@@ -326,7 +326,7 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a div, part of accordion group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('classes' => '', 'required_fields' => 1),
       ),
     ),
     'display' => array(
@@ -413,6 +413,14 @@ function field_group_field_group_format_settings($group) {
       '#weight' => 1,
     );
   }
+  if ($mode == 'form') {
+    $form['instance_settings']['required_fields'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Mark group for required fields.'),
+      '#default_value' => isset($group->format_settings['instance_settings']['required_fields']) ? $group->format_settings['instance_settings']['required_fields'] : (isset($formatter['instance_settings']['required_fields']) ? $formatter['instance_settings']['required_fields'] : ''),
+      '#weight' => 2,
+    );
+  }
   $form['instance_settings']['classes'] = array(
     '#title' => t('Extra CSS classes'),
     '#type' => 'textfield',
@@ -458,6 +466,9 @@ function field_group_field_group_format_settings($group) {
     case 'htabs':
     case 'accordion':
       unset($form['instance_settings']['description']);
+      if (isset($form['instance_settings']['required_fields'])) {
+        unset($form['instance_settings']['required_fields']);
+      }
       break;
     case 'tab':
     case 'htab':
@@ -499,6 +510,11 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     $collapsible = TRUE;
     $collapsed = FALSE;
     $classes[] = 'collapsible';
+  }
+
+  // Add a required-fields class to trigger the js.
+  if (isset($group->format_settings['instance_settings']) && !empty($group->format_settings['instance_settings']['required_fields'])) {
+    $classes[] = 'required-fields';
   }
 
   $classes = implode(' ', $classes);
