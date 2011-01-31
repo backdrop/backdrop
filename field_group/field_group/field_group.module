@@ -300,9 +300,9 @@ function field_group_field_group_formatter_info() {
       'tab' => array(
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'format_types' => array('open', 'closed'),
         'instance_settings' => array('classes' => ''),
-        'default_formatter' => 'open',
+        'default_formatter' => 'closed',
       ),
       'htabs' => array(
         'label' => ('Horizontal tabs group'),
@@ -311,9 +311,9 @@ function field_group_field_group_formatter_info() {
       ),
       'htab' => array(
         'label' => t('Horizontal tab item'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
-        'default_formatter' => 'open',
+        'default_formatter' => 'closed',
         'instance_settings' => array('classes' => ''),
       ),
       'accordion' => array(
@@ -352,9 +352,9 @@ function field_group_field_group_formatter_info() {
       'tab' => array(
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'format_types' => array('open', 'closed'),
         'instance_settings' => array('classes' => ''),
-        'default_formatter' => 'collapsible',
+        'default_formatter' => 'closed',
       ),
       'htabs' => array(
         'label' => ('Horizontal tabs group'),
@@ -363,10 +363,10 @@ function field_group_field_group_formatter_info() {
       ),
       'htab' => array(
         'label' => t('Horizontal tab item'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'instance_settings' => array('classes' => ''),
-        'default_formatter' => 'collapsible',
+        'default_formatter' => 'closed',
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
@@ -483,6 +483,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
   $classes = array($group->format_type);
   if (isset($group->format_settings['formatter'])) {
     $collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
+    // Open or closed horizontal or vertical tabs will be collapsible by default.
+    if ($group->format_type == 'tab' || $group->format_type == 'htab') {
+      $collapsible = TRUE;
+    }
     $collapsed = in_array($group->format_settings['formatter'], array('collapsed', 'closed'));
     if ($collapsible) {
       $classes[] = 'collapsible';
@@ -617,8 +621,13 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
       );
-      $form['#attached']['js'][] = 'misc/form.js';
-      $form['#attached']['js'][] = 'misc/collapse.js';
+      $element[$group->group_name . '__active_tab'] = array(
+        '#type' => 'hidden',
+        '#default_value' => '',
+        '#attributes' => array('class' => array('vertical-tabs-active-tab')),
+      );
+      $form['#attached']['library'][] = array('system', 'drupal.form');
+      $form['#attached']['library'][] = array('system', 'drupal.collapse');
       break;
     // Vertical tab.
     case 'tab':
@@ -633,6 +642,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         $parent_name = empty($group->parent_name) ? 'additional_settings' : $group->parent_name;
         $element += array(
           '#type' => 'fieldset',
+          '#id' => 'edit-' . $group->group_name,
           '#title' => check_plain(t($group->label)),
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
@@ -649,6 +659,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         $parent_name = $group->parent_name;
         $element += array(
           '#type' => 'fieldset',
+          '#id' => 'edit-' . $group->group_name,
           '#title' => check_plain(t($group->label)),
           '#weight' => $group->weight,
           '#collapsible' => $collapsible,
@@ -666,6 +677,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         // Create the fieldgroup element.
         $child_element = array(
           '#type' => 'fieldset',
+          '#id' => 'edit-' . $group->group_name,
           '#title' => check_plain(t($group->label)),
           '#weight' => -30 + $group->weight, // hardcoded to bring our extra additional vtabs on top.
           '#collapsible' => $collapsible,
@@ -966,6 +978,23 @@ function field_group_read_groups($params = array()) {
   }
 
   return $groups;
+}
+
+/**
+ * Checks if a field_group exists in required context.
+ *
+ * @param String $group_name
+ *   The name of the group.
+ * @param String $entity_type
+ *   The name of the entity.
+ * @param String $bundle
+ *   The bundle for the entity.
+ * @param String $mode
+ *   The view mode context the group will be rendered.
+ */
+function field_group_exists($group_name, $entity_type, $bundle, $mode) {
+  $groups = field_group_read_groups();
+  return !empty($groups[$entity_type][$bundle][$mode][$group_name]);
 }
 
 /**
