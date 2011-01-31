@@ -105,8 +105,7 @@
   margin-left: 1em;
 }
 
-.page-admin-structure-views #content .fieldset-wrapper > * + *,
-.page-admin-structure-views #content .fieldset-wrapper .form-wrapper > * + * {
+.page-admin-structure-views #content .fieldset-wrapper > * + * {
   margin-top: 18px;
 }
 
@@ -430,8 +429,51 @@
 
 /* @group Live preview elements */
 
-.page-admin-structure-views #content .views-row + .views-row {
+.page-admin-structure-views #views-live-preview a,
+.page-admin-structure-views #views-live-preview a:link,
+.page-admin-structure-views #views-live-preview a:visited {
+  color: #000000;
+}
+
+.page-admin-structure-views #views-live-preview .views-row {
+  border: 1px dashed #DEDEDE;
+  padding: 6px;
+}
+
+.page-admin-structure-views #views-live-preview .views_ui_view_preview_section_title + *,
+.page-admin-structure-views #views-live-preview li.views-row + li.views-row {
+  margin-top: 18px;
+}
+
+/* The div.views-row is intentional and excludes li.views-row, for example */
+.page-admin-structure-views #views-live-preview div.views-row + div.views-row {
   margin-top: 36px;
 }
+
+/* @group Grid */
+
+.page-admin-structure-views #views-live-preview .views-view-grid th,
+.page-admin-structure-views #views-live-preview .views-view-grid td {
+  vertical-align: top;
+}
+
+/* @end */
+
+/* @group HTML list */
+
+.page-admin-structure-views #views-live-preview .view-content > .item-list > ul {
+  list-style-position: outside;
+  padding-left: 21px;
+}
+
+/* @end */
+
+/* @group Jump list */
+
+.page-admin-structure-views #views-live-preview .ctools-jump-menu-select{
+  max-width: 450px;
+}
+
+/* @end */
 
 /* @end */
