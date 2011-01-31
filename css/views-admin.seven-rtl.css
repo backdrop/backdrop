@@ -1,0 +1,29 @@
+/**
+ * The .seven.css file is intended to contain styles that override declarations
+ * in the Seven admin theme.
+ */
+
+/* @group Forms */
+
+.page-admin-structure-views #content .form-submit,
+.page-admin-structure-views #content a.button {
+  margin-left: 0;
+}
+
+/* @end */
+
+/* @group Lists */
+
+.page-admin-structure-views #content .links li {
+  padding-left: 0;
+}
+
+/* @end */
+
+/* @group Attachments */
+
+.page-admin-structure-views #content .views-displays .secondary {
+  text-align: right;
+}
+
+/* @end */

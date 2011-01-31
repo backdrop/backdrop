@@ -23,7 +23,7 @@
 .page-admin-structure-views #content .icon-text {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
-  background-position: left top;
+  background-position: left top; /* LTR */
   background-repeat: no-repeat;
 }
 
@@ -49,47 +49,47 @@
 }
 
 .page-admin-structure-views #content .icon-linked {
-  background-position: left -153px;
+  background-position: left -153px; /* LTR */
 }
 
 .page-admin-structure-views #content .icon-unlinked {
-  background-position: left -195px;
+  background-position: left -195px; /* LTR */
 }
 
 .page-admin-structure-views #content ul.actions .views-button-add {
-  background-position: left -39px;
+  background-position: left -39px; /* LTR */
 }
 
 .page-admin-structure-views #content ul.actions .views-button-rearrange {
-  background-position: left -96px;
+  background-position: left -96px; /* LTR */
 }
 
 .page-admin-structure-views #content ul.actions .views-button-add:hover {
-  background-position: left -58px;
+  background-position: left -58px; /* LTR */
 }
 
 .page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
-  background-position: left -115px;
+  background-position: left -115px; /* LTR */
 }
 
 .page-admin-structure-views #content ul.actions .views-button-add:active {
-  background-position: left -77px;
+  background-position: left -77px; /* LTR */
 }
 
 .page-admin-structure-views #content ul.actions .views-button-rearrange:active {
-  background-position: left -134px;
+  background-position: left -134px; /* LTR */
 }
  
 .page-admin-structure-views #content .views-displays .icon-add {
-  background-position: left -3px;
+  background-position: left -3px; /* LTR */
 }
 
 .page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
-  background-position: left -21px;
+  background-position: left -21px; /* LTR */
 }
 
 .page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
-  background-position: left -3px;
+  background-position: left -3px; /* LTR */
 }
 
 /* @end */
@@ -270,7 +270,7 @@
  */
  
 .page-admin-structure-views #content div.form-item-displays-live-preview {
-  text-align: right;
+  text-align: right; /* LTR */
   margin: 0 12px;
   padding-bottom: 12px;
 }

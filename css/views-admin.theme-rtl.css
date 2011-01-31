@@ -1,0 +1,189 @@
+/**
+ * The .theme.css file is intended to contain presentation declarations including
+ * images, borders, colors, and fonts.
+ */
+
+/* @end */
+
+/* @group Icons */
+
+.page-admin-structure-views #content ul.actions a,
+.page-admin-structure-views #content .icon,
+.page-admin-structure-views #content .icon-text {
+  background-position: right top;
+}
+
+/* Targets any element with an icon -> text combo */
+.page-admin-structure-views #content .icon-text {
+  padding-right: 19px;
+}
+
+.page-admin-structure-views #content .icon-linked {
+  background-position: right -153px;
+}
+
+.page-admin-structure-views #content .icon-unlinked {
+  background-position: right -195px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add {
+  background-position: right -39px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange {
+  background-position: right -96px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add:hover {
+  background-position: right -58px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
+  background-position: right -115px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-add:active {
+  background-position: right -77px;
+}
+
+.page-admin-structure-views #content ul.actions .views-button-rearrange:active {
+  background-position: right -134px;
+}
+
+.page-admin-structure-views #content .views-displays .icon-add {
+  background-position: right -3px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
+  background-position: right -21px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
+  background-position: right -3px;
+}
+
+/* @end */
+
+/* @group Forms */
+
+.page-admin-structure-views #content .form-submit + .form-submit,
+.page-admin-structure-views #content a.button + a.button {
+  margin-right: 1em;
+}
+
+/* @end */
+
+/* @group Lists */
+
+.page-admin-structure-views #content .horizontal > * + * {
+  margin-right: 9px;
+  padding-right: 9px;
+}
+
+/* @end */
+
+/* @group Attachments */
+
+.page-admin-structure-views #content .views-displays .secondary {
+  padding: 6px 8px 8px;
+}
+
+.page-admin-structure-views #content .views-displays .secondary > li + li {
+  margin-right: 3px;
+}
+
+/* @end */
+
+/* @group Attachment details tabs
+ *
+ * The tabs that switch between sections
+ */
+
+.page-admin-structure-views #content .views-displays .secondary .action-list  li:first-child {
+  -moz-border-radius: 7px 0 0 0;
+  -webkit-border-top-left-radius: 7px;
+  -webkit-border-top-right-radius: 0;
+  border-radius: 7px 0 0 0;
+}
+
+/* @end */
+
+/* @group Attachment details collapsible fieldset
+ *
+ * The attachment details section is a collapsible fieldset, but should not
+ * have a border around it.
+ */
+
+.page-admin-structure-views #content .views-display-tab .fieldset-legend {
+  left: auto;
+  right: -5px;
+}
+
+/* @end */
+
+/* @group Auto preview
+ *
+ * The auto-preview checkbox line. This may have more stuff added to it.
+ */
+
+.page-admin-structure-views #content div.form-item-displays-live-preview {
+  text-align: left;
+}
+
+/* @end */
+
+/* @group Attachment buckets
+ *
+ * These are the individual "buckets," or boxes, inside the three columns in the
+ * attachment details section.
+ */
+
+.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-text {
+  padding-right: 25px;
+}
+
+.page-admin-structure-views #content .views-ui-display-tab-bucket > .actions * + * {
+  margin-right: 3px;
+  padding-right: 3px;
+}
+
+/* @end */
+
+/* @group Attachment bucket rows
+ *
+ * This is each row within one of the "boxes."
+ */
+
+.views-display-setting .label {
+  margin-left: 3pt;
+}
+
+/* @end */
+
+/* @group Modal dialog box
+ *
+ * The contents of the popup dialog on the views edit form.
+ */
+
+.page-admin-structure-views #views-filterable-options-controls .form-item {
+  margin-left: 2%;
+}
+
+.page-admin-structure-views .views-ui-dialog #views-progress-indicator {
+  left: 10px;
+  right: auto;
+}
+
+/* @end */
+
+/* @group Live preview elements */
+
+/* @group HTML list */
+
+.page-admin-structure-views #views-live-preview .view-content > .item-list > ul {
+  padding-right: 21px;
+}
+
+/* @end */
+
+/* @end */
