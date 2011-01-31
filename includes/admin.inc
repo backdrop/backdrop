@@ -6,45 +6,60 @@
  */
 
 /**
- * Page callback to list available views.
+ * Page callback to list enabled views.
  *
  * @return
  *   A renderable page build array.
  */
-function views_ui_list_views() {
-  // @todo Find a way to load the views-admin.seven.css only when Seven is the
-  // admin theme
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
-    array(
-      'group' => CSS_DEFAULT,
-      'browsers' => array(
-        'IE' => 'lte IE 7',
-        '!IE' => FALSE
-      ),
-      'preprocess' => FALSE,
-    )
-  );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css', 
-    array(
-      'group' => CSS_DEFAULT,
-      'preprocess' => TRUE,
-    )
-  );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css', 
-    array(
-      'group' => CSS_THEME,
-      'preprocess' => TRUE,
-    )
-  );
+function views_ui_list_enabled_views() {
+  views_ui_add_admin_css();
+  $build = array();
+  $build['filters'] = array();
+  $views = views_get_enabled_views();
+  $build['table'] = views_ui_build_view_list($views);
+  // Let advanced users filter the list of views by type, tag, etc.
+  if (variable_get('views_ui_show_listing_filters', FALSE)) {
+    // TODO: Add filters.
+  }
+  return $build;
+}
 
-  $views = views_get_all_views();
+/**
+ * Page callback to list disabled views.
+ *
+ * @return
+ *   A renderable page build array.
+ */
+function views_ui_list_disabled_views() {
+  views_ui_add_admin_css();
+  drupal_set_title(t('Browse view templates'));
+  $views = views_get_disabled_views();
+  return views_ui_build_view_list($views);
+}
+
+/**
+ * Builds a renderable array of views, for display in a table.
+ *
+ * @param $views
+ *   The list of views to render, as returned, for example, from
+ *   views_get_all_views().
+ *
+ * @return
+ *   A renderable array.
+ */
+function views_ui_build_view_list($views) {
   $rows = array();
   foreach ($views as $view) {
-    // Exclude code-based and disabled views from the listing, until we have
-    // a UI to deal with them.
-    if ($view->type == t('Default') || !empty($view->disabled)) {
-      continue;
+    // Determine the display title based on the view's human name, current
+    // (dynamic) title, or machine name, in that order.
+    if (!empty($view->human_name)) {
+      $title = $view->human_name;
+    }
+    else {
+      $title = $view->get_title();
+      if (empty($title)) {
+        $title = $view->name;
+      }
     }
 
     // Add a row to the table listing.
@@ -52,7 +67,7 @@ function views_ui_list_views() {
       array(
         'data' => array(
           '#theme' => 'views_ui_view_info',
-          '#title' => check_plain($view->human_name),
+          '#title' => check_plain($title),
           '#paths' => _views_ui_get_paths($view),
           '#displays' => _views_ui_get_displays_list($view),
         ),
@@ -70,9 +85,7 @@ function views_ui_list_views() {
     );
   }
 
-  $build = array();
-  $build['filters'] = array();
-  $build['table'] = array(
+  $build = array(
     '#theme' => 'table',
     '#header' => array(
       t('View name'),
@@ -83,11 +96,38 @@ function views_ui_list_views() {
     '#empty' => t('No views found.'),
   );
 
-  // Let advanced users filter the list of views by type, tag, etc.
-  if (variable_get('views_ui_show_listing_filters', FALSE)) {
-    // TODO: Add filters.
-  }
   return $build;
+}
+
+/**
+ * Adds standard Views administration CSS to the current page.
+ */
+function views_ui_add_admin_css() {
+  // @todo Find a way to load the views-admin.seven.css only when Seven is the
+  // admin theme
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css',
+    array(
+      'group' => CSS_DEFAULT,
+      'browsers' => array(
+        'IE' => 'lte IE 7',
+        '!IE' => FALSE
+      ),
+      'preprocess' => FALSE,
+    )
+  );
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css',
+    array(
+      'group' => CSS_DEFAULT,
+      'preprocess' => TRUE,
+    )
+  );
+  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css',
+    array(
+      'group' => CSS_THEME,
+      'preprocess' => TRUE,
+    )
+  );
 }
 
 /**
@@ -239,31 +279,8 @@ function views_ui_preview_callback($form, $form_state) {
  * Page callback to add a new view.
  */
 function views_ui_add_page() {
-  // @todo Find a way to load the views-admin.seven.css only when Seven is the
-  // admin theme
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css', 
-    array(
-      'group' => CSS_DEFAULT,
-      'browsers' => array(
-        'IE' => 'lte IE 7',
-        '!IE' => FALSE
-      ),
-      'preprocess' => FALSE,
-    )
-  );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css', 
-    array(
-      'group' => CSS_DEFAULT,
-      'preprocess' => TRUE,
-    )
-  );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css', 
-    array(
-      'group' => CSS_THEME,
-      'preprocess' => TRUE,
-    )
-  );
+  views_ui_add_admin_css();
+  drupal_set_title(t('Add view'));
   return drupal_get_form('views_ui_add_form');
 }
 
@@ -534,10 +551,10 @@ function _views_ui_get_operation_links($view) {
   }
   else {
     if (empty($view->disabled)) {
-      $links[] = array('title' => t('disable'), 'href' => "admin/structure/views/view/$view->name/disable", 'query' => drupal_get_destination());
+      $links[] = array('title' => t('disable'), 'href' => "admin/structure/views/view/$view->name/disable");
     }
     else {
-      $links[] = array('title' => t('enable'), 'href' => "admin/structure/views/view/$view->name/enable", 'query' => drupal_get_destination());
+      $links[] = array('title' => t('enable'), 'href' => "admin/structure/views/view/$view->name/enable");
     }
   }
 

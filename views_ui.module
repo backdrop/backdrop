@@ -24,20 +24,26 @@ function views_ui_menu() {
   $items['admin/structure/views'] = array(
     'title' => 'Views',
     'description' => 'Manage customized lists of content.',
-    'page callback' => 'views_ui_list_views',
+    'page callback' => 'views_ui_list_enabled_views',
   ) + $base;
   $items['admin/structure/views/list'] = array(
     'title' => 'List',
-    'page callback' => 'views_ui_list_views',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => '-1'
   ) + $base;
   $items['admin/structure/views/add'] = array(
     'title' => 'Add view',
-    'description' => 'Add new view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
+  $items['admin/structure/views/browse'] = array(
+    'title' => 'Browse view templates',
+    'page callback' => 'views_ui_list_disabled_views',
+    'type' => MENU_LOCAL_ACTION,
+  ) + $base;
+  // Copy the "Add view" item so that it will also appear as a local action on
+  // the view templates page.
+  $items['admin/structure/views/browse/add'] = $items['admin/structure/views/add'];
   $items['admin/structure/views/import'] = array(
     'title' => 'Import view from code',
     'page callback' => 'drupal_get_form',
