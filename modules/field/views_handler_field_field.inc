@@ -334,8 +334,12 @@ class views_handler_field_field extends views_handler_field {
   function multiple_options_form(&$form, &$form_state) {
     $field = $this->definition['field_info'];
 
-    $form['multiple_prefix'] = array(
-      '#markup' => '<fieldset class="form-wrapper" id="views-multiple-options"><legend><span class="fieldset-legend">' . t('Multiple field settings') . '</span></legend>',
+    $form['multiple_field_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Multiple field settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 5,
     );
 
     $form['group_rows'] = array(
@@ -343,6 +347,7 @@ class views_handler_field_field extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['group_rows'],
       '#description' => t('If checked, multiple values for this field will be shown in the same row. If not checked, each value in this field will create a new row.'),
+      '#fieldset' => 'multiple_field_settings',
     );
 
     // Make the string translatable by keeping it as a whole rather than
@@ -372,6 +377,7 @@ class views_handler_field_field extends views_handler_field {
       '#process' => array('form_process_radios', 'ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#default_value' => $this->options['multi_type'],
+      '#fieldset' => 'multiple_field_settings',
     );
 
     $form['separator'] = array(
@@ -384,6 +390,7 @@ class views_handler_field_field extends views_handler_field {
         'edit-options-group-rows' => array(TRUE),
       ),
       '#dependency_count' => 2,
+      '#fieldset' => 'multiple_field_settings',
     );
 
     $form['delta_limit'] = array(
@@ -396,6 +403,7 @@ class views_handler_field_field extends views_handler_field {
       '#prefix' => '<div class="container-inline">',
       '#process' => $process + array('ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
+      '#fieldset' => 'multiple_field_settings',
     );
 
     list($prefix, $suffix) = explode('@count', t('starting from @count'));
@@ -408,6 +416,7 @@ class views_handler_field_field extends views_handler_field {
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#description' => t('(first item is 0)'),
+      '#fieldset' => 'multiple_field_settings',
     );
     $form['delta_reversed'] = array(
       '#title' => t('Reversed'),
@@ -417,12 +426,8 @@ class views_handler_field_field extends views_handler_field {
       '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#description' => t('(start from last values)'),
+      '#fieldset' => 'multiple_field_settings',
     );
-
-    $form['multiple_suffix'] = array(
-      '#markup' => '</fieldset>',
-    );
-
   }
 
   /**
