@@ -2753,7 +2753,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
 
   if ($display->handler->defaultable_sections($types[$type]['plural'])) {
     $form_state['section'] = $types[$type]['plural'];
-    $display->handler->add_override_button($form, $form_state, $form_state['section']);
+    views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
   }
 
   if (!empty($view->form_cache)) {
@@ -2988,6 +2988,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   }
 
   $output = drupal_render($form['override']);
+  $output .= '<div class="scroll">';
   if ($grouping) {
     $output .= drupal_render($form['filter_groups']['operator']);
   }
@@ -3005,6 +3006,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
   $header = array('', t('Weight'), t('Group'), t('Remove'));
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange', 'class' => array('arrange'))));
+  $output .= '</div>';
   $output .= drupal_render_children($form);
   return $output;
 

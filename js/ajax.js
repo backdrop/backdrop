@@ -10,6 +10,7 @@
     var ajax_title = Drupal.settings.views.ajax.title;
     var ajax_body = Drupal.settings.views.ajax.id;
     var ajax_popup = Drupal.settings.views.ajax.popup;
+    $(ajax_popup).dialog('open');
     $(ajax_title).html(response.title);
     $(ajax_body).html(response.output);
     Drupal.attachBehaviors($(ajax_popup), ajax.settings);
@@ -26,7 +27,6 @@
         Drupal.ajax[id] = new Drupal.ajax(id, form, element_settings);
       });
     }
-    $(ajax_popup).dialog('open');
   };
 
   Drupal.ajax.prototype.commands.viewsDismissForm = function(ajax, response, status) {
