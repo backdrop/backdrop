@@ -110,6 +110,11 @@
   margin-top: 18px;
 }
 
+.page-admin-structure-views #content .container-inline > * + *,
+.page-admin-structure-views #content .container-inline .fieldset-wrapper > * + * {
+  padding-left: 4pt; /* LTR */
+}
+
 /* @end */
 
 /* @group Lists */
