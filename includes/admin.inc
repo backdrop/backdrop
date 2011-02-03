@@ -545,6 +545,11 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
 function _views_ui_get_operation_links($view) {
   $links = array();
 
+  if (empty($view->disabled)) {
+    $links[] = array('title' => t('edit'), 'href' => "admin/structure/views/view/$view->name/edit");
+    $links[] = array('title' => t('duplicate'), 'href' => "admin/structure/views/view/$view->name/duplicate");
+  }
+
   if ($view->type != t('Default')) {
     $text = $view->type == t('Overridden') ? t('revert') : t('delete');
     $links[] = array('title' => $text, 'href' => "admin/structure/views/view/$view->name/delete");
@@ -556,11 +561,6 @@ function _views_ui_get_operation_links($view) {
     else {
       $links[] = array('title' => t('enable'), 'href' => "admin/structure/views/view/$view->name/enable");
     }
-  }
-
-  if (empty($view->disabled)) {
-    $links[] = array('title' => t('duplicate'), 'href' => "admin/structure/views/view/$view->name/duplicate");
-    $links[] = array('title' => t('edit'), 'href' => "admin/structure/views/view/$view->name/edit");
   }
 
   return $links;
