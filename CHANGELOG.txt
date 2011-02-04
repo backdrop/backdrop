@@ -28,6 +28,7 @@ Fix fieldsets in field handler.
 #1012584 by dereine: Allow filtering on term descriptions.
 #895046 by bojanz, dereine, merlinofchaos: Implement proper multiple field api handling and improve field api rendering in general.
 #1035168 by Ao: Fix strict warning in unread node filter.
+#1044916 by dagmar: Fix improper use of set_current_page member variable.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

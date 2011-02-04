@@ -113,7 +113,7 @@ class views_plugin_cache extends views_plugin {
           if (!$cutoff || $cache->created > $cutoff) {
             $this->view->result = $cache->data['result'];
             $this->view->total_rows = $cache->data['total_rows'];
-            $this->view->set_current_page = $cache->data['current_page'];
+            $this->view->set_current_page($cache->data['current_page']);
             $this->view->execute_time = 0;
             return TRUE;
           }
