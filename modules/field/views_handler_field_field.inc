@@ -37,7 +37,7 @@ class views_handler_field_field extends views_handler_field {
    */
   public $items = array();
 
-  function init(&$view, $options) {
+  function init(&$view, &$options) {
     parent::init($view, $options);
 
     $field = $this->definition['field_info'];
