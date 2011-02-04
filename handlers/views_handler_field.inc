@@ -279,7 +279,11 @@ class views_handler_field extends views_handler {
    * Return the class of the field's wrapper.
    */
   function element_wrapper_classes() {
-    return drupal_clean_css_identifier($this->options['element_wrapper_class']);
+    $classes = explode(' ', $this->options['element_wrapper_class']);
+    foreach ($classes as $key => $class) {
+      $classes[$key] = drupal_clean_css_identifier($class);
+    }
+    return implode(' ', $classes);
   }
 
   function option_definition() {
@@ -403,7 +407,7 @@ class views_handler_field extends views_handler {
 
     $form['element_wrapper_class'] = array(
       '#title' => t('Wrapper class'),
-      '#description' => t('The class to provide on the wrapper element.'),
+      '#description' => t('The class to provide on the wrapper element. Separate multiple classes with a space.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_wrapper_class'],
     );
