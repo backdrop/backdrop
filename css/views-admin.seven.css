@@ -5,11 +5,11 @@
 
 /* @group Content */
 
-.page-admin-structure-views #content .views-display-tab h1,
-.page-admin-structure-views #content .views-display-tab h2,
-.page-admin-structure-views #content .views-display-tab h3,
-.page-admin-structure-views #content .views-display-tab h4,
-.page-admin-structure-views #content .views-display-tab h5 {
+.page-admin-structure-views #content .views-ui-display-tab-bucket h1,
+.page-admin-structure-views #content .views-ui-display-tab-bucket h2,
+.page-admin-structure-views #content .views-ui-display-tab-bucket h3,
+.page-admin-structure-views #content .views-ui-display-tab-bucket h4,
+.page-admin-structure-views #content .views-ui-display-tab-bucket h5 {
   margin-bottom: 0;
   margin-top: 0;
 }

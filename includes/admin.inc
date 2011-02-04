@@ -103,8 +103,6 @@ function views_ui_build_view_list($views) {
  * Adds standard Views administration CSS to the current page.
  */
 function views_ui_add_admin_css() {
-  // @todo Find a way to load the views-admin.seven.css only when Seven is the
-  // admin theme
   drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
   drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css',
     array(
@@ -122,12 +120,14 @@ function views_ui_add_admin_css() {
       'preprocess' => TRUE,
     )
   );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css',
-    array(
-      'group' => CSS_THEME,
-      'preprocess' => TRUE,
-    )
-  );
+  if ($GLOBALS['theme'] === 'seven' || (isset($GLOBALS['theme_info']->base_theme) && $GLOBALS['theme_info']->base_theme === 'seven')) {
+    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css',
+      array(
+        'group' => CSS_THEME,
+        'preprocess' => TRUE,
+      )
+    );
+  }
 }
 
 /**
@@ -749,10 +749,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // for it, instead of having to add it manually here.
   $form['#attached']['js'][] = 'misc/tabledrag.js';
 
-  $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.css';
-  $form['#attached']['css'][] = drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css';
+  $module_path = drupal_get_path('module', 'views_ui');
+  $form['#attached']['css'][] = $module_path . '/css/views-admin.css';
+  $form['#attached']['css'][] = $module_path . '/css/views-admin.theme.css';
   $form['#attached']['css'][] = array(
-    'data' => drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css',
+    'data' => $module_path . '/css/ie/views-admin.ie7.css',
     'group' => CSS_DEFAULT,
     'browsers' => array(
       'IE' => 'lte IE 7',
@@ -762,14 +763,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
 
   // Add CSS specific to the Seven theme.
-  if ($GLOBALS['theme'] === 'seven') {
-    $form['#attached']['css'][drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css'] = array(
+  if ($GLOBALS['theme'] === 'seven' || (isset($GLOBALS['theme_info']->base_theme) && $GLOBALS['theme_info']->base_theme === 'seven')) {
+    $form['#attached']['css'][$module_path . '/css/views-admin.seven.css'] = array(
       'group' => CSS_THEME,
       'preprocess' => TRUE,
     );
   }
 
-  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
+  $form['#attached']['js'][] = $module_path . '/js/views-admin.js';
   $form['#attached']['js'][] = array(
     'data' => array('views' => array('ajax' => array(
       'id' => '#views-ajax-body',
