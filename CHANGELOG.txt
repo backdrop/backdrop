@@ -310,3 +310,4 @@ by dereine: Add $view->version to all default views.
 #1044250 by dereine: Fix notice in views_handler_filter_history_user_timestamp for disabled comment module.
 #1018872 by dereine: field_field handler shouldn't force to set base field in relationship.
 #1049586 by fgm: Fix strict error in field_field::init.
+#1049276 by david_Rothstein: Commit the 6.11 patch to d7.
