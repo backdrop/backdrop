@@ -545,6 +545,11 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
 function _views_ui_get_operation_links($view) {
   $links = array();
 
+  if (empty($view->disabled)) {
+    $links[] = array('title' => t('edit'), 'href' => "admin/structure/views/view/$view->name/edit");
+    $links[] = array('title' => t('duplicate'), 'href' => "admin/structure/views/view/$view->name/duplicate");
+  }
+
   if ($view->type != t('Default')) {
     $text = $view->type == t('Overridden') ? t('revert') : t('delete');
     $links[] = array('title' => $text, 'href' => "admin/structure/views/view/$view->name/delete");
@@ -556,11 +561,6 @@ function _views_ui_get_operation_links($view) {
     else {
       $links[] = array('title' => t('enable'), 'href' => "admin/structure/views/view/$view->name/enable");
     }
-  }
-
-  if (empty($view->disabled)) {
-    $links[] = array('title' => t('duplicate'), 'href' => "admin/structure/views/view/$view->name/duplicate");
-    $links[] = array('title' => t('edit'), 'href' => "admin/structure/views/view/$view->name/edit");
   }
 
   return $links;
@@ -2754,7 +2754,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
 
   if ($display->handler->defaultable_sections($types[$type]['plural'])) {
     $form_state['section'] = $types[$type]['plural'];
-    $display->handler->add_override_button($form, $form_state, $form_state['section']);
+    views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
   }
 
   if (!empty($view->form_cache)) {
@@ -2807,7 +2807,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
 
   foreach ($groups['groups'] as $id => $group) {
     $form['filter_groups']['groups'][$id] = array(
-      '#title' => t('Group operator'),
+      '#title' => t('Operator'),
       '#type' => 'select',
       '#options' => array(
         'AND' => t('And'),
@@ -2860,6 +2860,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
     $form['filters'][$id]['weight'] = array(
       '#type' => 'textfield',
       '#default_value' => ++$count,
+      '#size' => 8,
     );
     $form['filters'][$id]['group'] = array(
       '#type' => 'select',
@@ -2892,39 +2893,6 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
     );
   }
 
-  // Add javascript settings that will be added via $.extend for tabledragging
-  // Equivalent: drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
-  $form['#js']['tableDrag']['arrange']['weight'][0] = array(
-    'target' => 'weight',
-    'source' => NULL,
-    'relationship' => 'sibling',
-    'action' => 'order',
-    'hidden' => TRUE,
-    'limit' => 0,
-  );
-
-  $form['#js']['tableDrag']['ungroupable_arrange']['weight'][0] = array(
-    'target' => 'weight',
-    'source' => NULL,
-    'relationship' => 'sibling',
-    'action' => 'order',
-    'hidden' => TRUE,
-    'limit' => 0,
-  );
-
-  foreach ($form['#group_renders'] as $group_id => $title) {
-    // Add javascript settings that will be added via $.extend for tabledragging
-    // Equivalent: drupal_add_tabledrag('arrange', 'match', 'sibling', 'views-group-select', 'views-group-' . $group_id);
-    $form['#js']['tableDrag']['arrange']['views-group-select'][] = array(
-      'target' => 'views-group-' . $group_id,
-      'source' => 'views-group-' . $group_id,
-      'relationship' => 'sibling',
-      'action' => 'match',
-      'hidden' => FALSE,
-      'limit' => 0,
-    );
-  }
-
   if (isset($form_state['update_name'])) {
     $name = $form_state['update_name'];
   }
@@ -2951,16 +2919,24 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
 
   foreach ($form['#group_renders'] as $group_id => $contents) {
     // Header row for the group.
-    if ($grouping && $group_id !== 'ungroupable') {
+    if ($group_id !== 'ungroupable') {
+      // Set up tabledrag so that it changes the group dropdown when rows are
+      // dragged between groups.
+      drupal_add_tabledrag('views-rearrange-filters', 'match', 'sibling', 'views-group-select', 'views-group-select-' . $group_id);
+
+      // Title row, spanning all columns.
       $row = array();
-      $row[] = array('class' => array('group', 'group-title'), 'data' => $form['#group_options'][$group_id]);
-      $row[] = array('class' => array('group', 'container-inline'), 'data' => drupal_render($form['filter_groups']['groups'][$group_id]), 'colspan' => 3);
-      $rows[] = array('class' => array('views-group'), 'data' => $row, 'id' => 'views-group-' . $group_id);
+      // Add a cell to the first row, containing the group operator.
+      $row[] = array('class' => array('group', 'group-operator', 'container-inline'), 'data' => drupal_render($form['filter_groups']['groups'][$group_id]), 'rowspan' => max(array(2, count($contents) + 1)));
+      // Title.
+      $row[] = array('class' => array('group', 'group-title'), 'data' => '<span>' . $form['#group_options'][$group_id] . '</span>', 'colspan' => 4);
+      $rows[] = array('class' => array('views-group-title'), 'data' => $row, 'id' => 'views-group-title-' . $group_id);
+
       // Row which will only appear if the group has nothing in it:
       $row = array();
       $class = 'group-' . (count($contents) ? 'populated' : 'empty');
-      $row[] = array('colspan' => 4, 'data' => '<span>' . t('This group is empty') . '</span> ' .
-      drupal_render($form['remove_groups'][$group_id]));
+      $instructions = '<span>' . t('No filters have been added.') . '</span> <span class="js-only">' . t('Drag to add filters.') . '</span>';
+      $row[] = array('colspan' => 5, 'data' => $instructions . drupal_render($form['remove_groups'][$group_id]));
       $rows[] = array('class' => array("group-message", "group-$group_id-message", $class), 'data' => $row, 'id' => 'views-group-' . $group_id);
     }
 
@@ -2970,8 +2946,9 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
         $row[] = drupal_render($form['filters'][$id]['name']);
         $form['filters'][$id]['weight']['#attributes']['class'] = array('weight');
         $row[] = drupal_render($form['filters'][$id]['weight']);
-        $form['filters'][$id]['group']['#attributes']['class'] = array('views-group-select views-group-' . $group_id);
+        $form['filters'][$id]['group']['#attributes']['class'] = array('views-group-select views-group-select-' . $group_id);
         $row[] = drupal_render($form['filters'][$id]['group']);
+        $form['filters'][$id]['removed']['#attributes']['class'][] = 'js-hide';
         $row[] = drupal_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
 
         $row = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
@@ -2989,6 +2966,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   }
 
   $output = drupal_render($form['override']);
+  $output .= '<div class="scroll">';
   if ($grouping) {
     $output .= drupal_render($form['filter_groups']['operator']);
   }
@@ -2998,14 +2976,15 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   }
 
   if (!empty($ungroupable_rows)) {
-    drupal_add_tabledrag('ungroupable_arrange', 'order', 'sibling', 'weight');
+    drupal_add_tabledrag('views-rearrange-filters-ungroupable', 'order', 'sibling', 'weight');
     $header = array(t('Ungroupable filters'), t('Weight'), array('class' => array('views-hide-label'), 'data' => t('Group')), array('class' => array('views-hide-label'), 'data' => t('Remove')));
-    $output .= theme('table', array('header' => $header, 'rows' => $ungroupable_rows, 'attributes' => array('id' => 'ungroupable_arrange', 'class' => array('arrange'))));
+    $output .= theme('table', array('header' => $header, 'rows' => $ungroupable_rows, 'attributes' => array('id' => 'views-rearrange-filters-ungroupable', 'class' => array('arrange'))));
   }
 
-  drupal_add_tabledrag('arrange', 'order', 'sibling', 'weight');
-  $header = array('', t('Weight'), t('Group'), t('Remove'));
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange', 'class' => array('arrange'))));
+  // Set up tabledrag so that the weights are changed when rows are dragged.
+  drupal_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
+  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange'))));
+  $output .= '</div>';
   $output .= drupal_render_children($form);
   return $output;
 

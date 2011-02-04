@@ -19,11 +19,11 @@ Drupal.behaviors.viewsTabs = {
       });
     }
 
-    $('a.views-remove-link').once('views-processed').click(function() {
+    $('a.views-remove-link').once('views-processed').click(function(event) {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
       $('#views-removed-' + id).attr('checked', true);
-      return false;
+      event.preventDefault();
    });
   /**
     * Here is to handle display deletion 
