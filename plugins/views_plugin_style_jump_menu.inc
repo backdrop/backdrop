@@ -32,7 +32,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     if (empty($handlers)) {
       $form['error_markup'] = array(
         '#value' => t('You need at least one field before you can configure your jump menu settings'),
-        '#prefix' => '<div class="error form-item description">',
+        '#prefix' => '<div class="error messages">',
         '#suffix' => '</div>',
       );
       return;
