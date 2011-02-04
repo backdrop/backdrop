@@ -128,7 +128,7 @@ class views_handler_argument_string extends views_handler_argument {
 
     if (empty($this->options['glossary'])) {
       // Add the field.
-      $this->base_alias = $this->name_alias = $this->query->add_field($this->table_alias, $this->real_field);
+      $this->base_alias = $this->query->add_field($this->table_alias, $this->real_field);
       $this->query->set_count_field($this->table_alias, $this->real_field);
     }
     else {
@@ -140,10 +140,11 @@ class views_handler_argument_string extends views_handler_argument {
         ),
       );
 
-      $this->base_alias = $this->name_alias = $this->query->add_field(NULL, $formula, $this->field . '_truncated', $params);
+      $this->base_alias = $this->query->add_field(NULL, $formula, $this->field . '_truncated', $params);
       $this->query->set_count_field(NULL, $formula, $this->field, $this->field . '_truncated');
     }
 
+    $this->summary_name_field();
     return $this->summary_basics(FALSE);
   }
 
