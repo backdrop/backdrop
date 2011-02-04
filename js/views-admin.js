@@ -312,3 +312,171 @@ Drupal.behaviors.viewsUiPreview.attach = function (context, settings) {
     $('.arguments-preview').hide();
   }
 };
+
+
+Drupal.behaviors.viewsUiRearrangeFilter = {};
+Drupal.behaviors.viewsUiRearrangeFilter.attach = function (context, settings) {
+  var $ = jQuery;
+  // Only act on the rearrange filter form.
+  if (typeof Drupal.tableDrag == 'undefined' || typeof Drupal.tableDrag['views-rearrange-filters'] == 'undefined') {
+    return;
+  }
+
+  var table = $('#views-rearrange-filters', context).once('views-rearrange-filters');
+  var operator = $('.form-item-filter-groups-operator', context).once('views-rearrange-filters');
+  if (table.length && operator.length) {
+    new Drupal.viewsUi.rearrangeFilterHandler(table, operator);
+  }
+};
+
+/**
+ * Improve the UI of the rearrange filters dialog box.
+ */
+Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
+  var $ = jQuery;
+  // Keep a reference to the <table> being altered and to the div containing
+  // the filter groups operator dropdown.
+  this.table = table;
+  this.operator = operator;
+
+  // Create duplicates of the filter groups operator dropdown between each
+  // filter group.
+  this.dropdowns = this.duplicateGroupsOperator();
+  this.syncGroupsOperators();
+
+  // Add methods to the tableDrag instance to account for the operator cells,
+  // which span multiple rows.
+  this.modifyTableDrag();
+
+  $('a.views-groups-remove-link')
+    .once('views-rearrange-filter-handler')
+    .bind('click.views-rearrange-filter-handler', $.proxy(this, 'updateRowspans'));
+};
+
+/**
+ * Move the groups operator so that it's between the first two groups, and
+ * duplicate it between any subsequent groups.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.duplicateGroupsOperator = function () {
+  var $ = jQuery;
+  var dropdowns, newRow;
+
+  var titleRows = $('tr.views-group-title'), titleRow;
+
+  // Get rid of the explanatory text around the operator; its placement is
+  // explanatory enough.
+  this.operator.find('label').add('div.description').addClass('element-invisible');
+  this.operator.find('select').addClass('form-select');
+
+  // Keep a list of the operator dropdowns, so we can sync their behavior later.
+  dropdowns = this.operator;
+
+  // Move the operator to a new row just above the second group.
+  titleRow = $('tr#views-group-title-1');
+  newRow = $('<tr class="filter-group-operator-row"><td colspan="5"></td></tr>');
+  newRow.find('td').append(this.operator);
+  newRow.insertBefore(titleRow);
+  var i, length = titleRows.length;
+  // Starting with the third group, copy the operator to a new row above the
+  // group title.
+  for (i = 2; i < length; i++) {
+    titleRow = $(titleRows[i]);
+    // Make a copy of the operator dropdown and put it in a new table row.
+    var fakeOperator = this.operator.clone();
+    fakeOperator.attr('id', '');
+    newRow = $('<tr class="filter-group-operator-row"><td colspan="5"></td></tr>');
+    newRow.find('td').append(fakeOperator);
+    newRow.insertBefore(titleRow);
+    dropdowns = dropdowns.add(fakeOperator);
+  }
+
+  return dropdowns;
+};
+
+/**
+ * Make the duplicated groups operators change in sync with each other.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.syncGroupsOperators = function () {
+  if (this.dropdowns.length < 2) {
+    // We only have one dropdown (or none at all), so there's nothing to sync.
+    return;
+  }
+
+  this.dropdowns.change(jQuery.proxy(this, 'operatorChangeHandler'));
+};
+
+/**
+ * Click handler for the operators that appear between filter groups.
+ *
+ * Forces all operator dropdowns to have the same value.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.operatorChangeHandler = function (event) {
+  var $ = jQuery;
+  var $target = $(event.target);
+  var operators = this.dropdowns.find('select').not($target);
+
+  // Change the other operators to match this new value.
+  operators.val($target.val());
+};
+
+Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
+  var tableDrag = Drupal.tableDrag['views-rearrange-filters'];
+  var filterHandler = this;
+
+  /**
+   * Override the row.onSwap method from tabledrag.js.
+   *
+   * When a row is dragged to another place in the table, two things need
+   * to happen: 1) the row needs to be moved so that it's within one of the
+   * filter groups, and 2) the operator cells that span multiple rows need their
+   * rowspan attributes updated to reflect the number of rows in each group.
+   */
+  tableDrag.row.prototype.onSwap = function () {
+    // Make sure the row that just got moved (this.group) is inside one of the
+    // filter groups (i.e. below an empty marker row or a draggable). If it
+    // isn't, move it down one.
+    var thisRow = jQuery(this.group);
+    var previousRow = thisRow.prev('tr');
+    if (previousRow.length && !previousRow.hasClass('group-message') && !previousRow.hasClass('draggable')) {
+      // Move the dragged row down one.
+      var next = thisRow.next();
+      if (next.is('tr')) {
+        this.swap('after', next);
+      }
+    }
+    filterHandler.updateRowspans();
+  };
+
+};
+
+/**
+ * Update the rowspan attribute of each cell containing an operator dropdown.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.updateRowspans = function () {
+  var $ = jQuery;
+  var i, $row, $currentEmptyRow, draggableCount, $operatorCell;
+  var rows = $(this.table).find('tr');
+  var length = rows.length;
+  for (i = 0; i < length; i++) {
+    $row = $(rows[i]);
+    if ($row.hasClass('views-group-title')) {
+      // This row is a title row.
+      // Keep a reference to the cell containing the dropdown operator.
+      $operatorCell = $($row.find('td.group-operator'));
+      // Assume this filter group is empty, until we find otherwise.
+      draggableCount = 0;
+      $currentEmptyRow = $row.next('tr');
+      $currentEmptyRow.removeClass('group-populated').addClass('group-empty');
+      // The cell with the dropdown operator should span the title row and
+      // the "this group is empty" row.
+      $operatorCell.attr('rowspan', 2);
+    }
+    else if (($row).hasClass('draggable') && $row.css('display') !== 'none') {
+      // We've found a visible filter row, so we now know the group isn't empty.
+      draggableCount++;
+      $currentEmptyRow.removeClass('group-empty').addClass('group-populated');
+      // The operator cell should span all draggable rows, plus the title.
+      $operatorCell.attr('rowspan', draggableCount + 1);
+    }
+  }
+};

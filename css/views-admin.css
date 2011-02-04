@@ -215,3 +215,40 @@
 }
 
 /* @end */
+
+.group-populated {
+  display: none;
+}
+
+td.group-title {
+  font-weight: bold;
+}
+
+.views-ui-dialog td.group-title {
+  margin: 0;
+  padding: 0;
+}
+
+.views-ui-dialog td.group-title span {
+  display: block;
+  height: 1px;
+  overflow: hidden;
+}
+
+.group-message .form-submit,
+#views-add-group {
+  float: right;
+  clear: both;
+}
+
+.js-only {
+  display: none;
+}
+
+html.js .js-only {
+  display: inherit;
+}
+
+html.js span.js-only {
+  display: inline;
+}

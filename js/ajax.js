@@ -91,6 +91,9 @@
 
   Drupal.behaviors.viewsAjax = {
     attach: function (context, settings) {
+      if (!settings.views) {
+        return;
+      }
       // Create a jQuery UI dialog, but leave it closed.
       var dialog_area = $(settings.views.ajax.popup, context);
       dialog_area.dialog({
