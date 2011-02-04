@@ -308,3 +308,4 @@ by dereine: Add $view->version to all default views.
 #1033494 by dereine: Fix filter by user picture: change used handler.
 #895046 by bojanz: Follow up of the multiple field handler. Fixes an issue with group-by and rename entity_api_classes.
 #1044250 by dereine: Fix notice in views_handler_filter_history_user_timestamp for disabled comment module.
+#1018872 by dereine: field_field handler shouldn't force to set base field in relationship.

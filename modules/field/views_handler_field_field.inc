@@ -83,8 +83,10 @@ class views_handler_field_field extends views_handler_field {
       foreach ($this->view->relationship as $relationship) {
         if ($relationship->alias == $this->relationship) {
           $base_table = $relationship->definition['base'];
-          $base_field = $relationship->definition['base field'];
           $base_table_alias = $relationship->alias;
+
+          $table_data = views_fetch_data($base_table);
+          $base_field = empty($relationship->definition['base field']) ? $table_data['table']['base']['field'] : $relationship->definition['base field'];
         }
       }
     }
