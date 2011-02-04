@@ -816,6 +816,12 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#submit' => array('views_ui_edit_view_form_submit'),
     '#access' => !empty($view->changed),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#submit' => array('views_ui_edit_view_form_cancel'),
+    '#access' => !empty($view->changed),
+  );
 
   $form['displays'] = array(
     '#prefix' => '<h3 class="clearfix">' . t('Queries/displays') . '</h3>' . "\n" . '<div class="views-displays">',
