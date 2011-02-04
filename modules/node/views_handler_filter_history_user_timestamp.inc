@@ -9,7 +9,7 @@ class views_handler_filter_history_user_timestamp extends views_handler_filter {
   // Don't display empty space where the operator would be.
   var $no_operator = TRUE;
 
-  function expose_form_right() {
+  function expose_form_right(&$form, &$form_state) {
     // We don't want any of the usual options for exposed filters.
   }
 
