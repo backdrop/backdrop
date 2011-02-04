@@ -25,9 +25,10 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
   }
 
   function query() {
+    // Copy the offset option.
     $pager = array(
       'type' => 'none',
-      'options' => array(),
+      'options' => $this->display->handler->options['pager']['options'],
     );
     $this->display->handler->set_option('pager', $pager);
   }
