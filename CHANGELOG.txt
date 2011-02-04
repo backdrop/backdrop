@@ -312,3 +312,4 @@ by dereine: Add $view->version to all default views.
 #1049586 by fgm: Fix strict error in field_field::init.
 #1049276 by david_Rothstein: Commit the 6.11 patch to d7.
 #1011226 by Chris Gillis, Sutharsan: Fix display of error messages in the views inteface.
+#1050962 by Sutharsan: Convert #value to #markup in validate methods.

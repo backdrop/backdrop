@@ -434,7 +434,7 @@ class views_plugin_display_page extends views_plugin_display {
             '#value' => $tab_options['name'],
           );
           $form['tab_options']['markup'] = array(
-            '#value' => t('Menu selection requires the activation of menu module.'),
+            '#markup' => t('Menu selection requires the activation of menu module.'),
           );
         }
         $form['tab_options']['weight'] = array(

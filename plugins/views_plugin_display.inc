@@ -1732,7 +1732,7 @@ class views_plugin_display extends views_plugin {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
             '#suffix' => '</div>',
-            '#value' => t('You may also adjust the !settings for the currently selected style by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'exposed_form_options'))),
+            '#markup' => t('You may also adjust the !settings for the currently selected style by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'exposed_form_options'))),
           );
         }
         break;
@@ -1768,7 +1768,7 @@ class views_plugin_display extends views_plugin {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
             '#suffix' => '</div>',
-            '#value' => t('You may also adjust the !settings for the currently selected pager by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'pager_options'))),
+            '#markup' => t('You may also adjust the !settings for the currently selected pager by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'pager_options'))),
           );
         }
 
