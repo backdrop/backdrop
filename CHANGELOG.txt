@@ -34,6 +34,7 @@ Fix fieldsets in field handler.
 #1018160 by zhangtaihao: unpack_translatable could infinitely recurse when options are arrays but not declared as such.
 #776830: Attachments and other displays lost "Items to display" controls.
 #747782 by dereine: Improve jump menu grouping.
+#1026014 by dereine and alex_b: Use more always should not ask for the count query to see if we need to show the more link.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

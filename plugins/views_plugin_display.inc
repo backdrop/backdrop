@@ -2275,7 +2275,7 @@ class views_plugin_display extends views_plugin {
    */
   function pre_execute() {
     $this->view->set_use_ajax($this->use_ajax());
-    if ($this->use_more()) {
+    if ($this->use_more() && !$this->use_more_always()) {
       $this->view->get_total_rows = TRUE;
     }
     $this->view->init_handlers();
