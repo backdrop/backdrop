@@ -1552,46 +1552,46 @@ class view extends views_db_object {
         $this->display[$display_id]->handler->destroy();
         unset($this->display[$display_id]->handler);
       }
-
-      foreach (views_object_types() as $type => $info) {
-        if (isset($this->$type)) {
-          $handlers = &$this->$type;
-          foreach ($handlers as $id => $item) {
-            $handlers[$id]->destroy();
-          }
-          unset($handlers);
-        }
-      }
-
-      if (isset($this->style_plugin)) {
-        $this->style_plugin->destroy();
-        unset($this->style_plugin);
-      }
-
-      // Clear these to make sure the view can be processed/used again.
-      if (isset($this->display_handler)) {
-        unset($this->display_handler);
-      }
-
-      if (isset($this->current_display)) {
-        unset($this->current_display);
-      }
-
-      if (isset($this->query)) {
-        unset($this->query);
-      }
-
-      $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
-      foreach ($keys as $key) {
-        if (isset($this->$key)) {
-          unset($this->$key);
-        }
-      }
-      $this->built = $this->executed = FALSE;
-      $this->build_info = array();
-      $this->attachment_before = '';
-      $this->attachment_after = '';
     }
+
+    foreach (views_object_types() as $type => $info) {
+      if (isset($this->$type)) {
+        $handlers = &$this->$type;
+        foreach ($handlers as $id => $item) {
+          $handlers[$id]->destroy();
+        }
+        unset($handlers);
+      }
+    }
+
+    if (isset($this->style_plugin)) {
+      $this->style_plugin->destroy();
+      unset($this->style_plugin);
+    }
+
+    // Clear these to make sure the view can be processed/used again.
+    if (isset($this->display_handler)) {
+      unset($this->display_handler);
+    }
+
+    if (isset($this->current_display)) {
+      unset($this->current_display);
+    }
+
+    if (isset($this->query)) {
+      unset($this->query);
+    }
+
+    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
+    foreach ($keys as $key) {
+      if (isset($this->$key)) {
+        unset($this->$key);
+      }
+    }
+    $this->built = $this->executed = FALSE;
+    $this->build_info = array();
+    $this->attachment_before = '';
+    $this->attachment_after = '';
   }
 
   /**
