@@ -25,6 +25,13 @@
  * @ingroup views_display_plugins
  */
 class views_plugin_display extends views_plugin {
+  /**
+   * The top object of a view.
+   * 
+   * @var view
+   */
+  var $view = NULL;
+
   var $handlers = array();
 
   function init(&$view, &$display, $options = NULL) {

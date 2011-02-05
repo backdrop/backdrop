@@ -419,6 +419,20 @@ function views_discover_plugins() {
  */
 class views_plugin extends views_object {
   /**
+   * The top object of a view.
+   * 
+   * @var view
+   */
+  var $view = NULL;
+  
+  /**
+   * The current used display plugin.
+   *
+   * @var views_plugin_display
+   */
+  var $display = NULL;
+
+  /**
    * Init will be called after construct, when the plugin is attached to a
    * view and a display.
    */

@@ -74,6 +74,13 @@ class views_plugin_query_default extends views_plugin_query {
   var $get_count_optimized = NULL;
 
   /**
+   * The current used pager plugin.
+   *
+   * @var views_plugin_pager
+   */
+   var $pager = NULL;
+
+  /**
    * Constructor; Create the basic query object and fill with default values.
    */
   function init($base_table = 'node', $base_field = 'nid', $options) {

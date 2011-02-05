@@ -35,6 +35,8 @@ Fix fieldsets in field handler.
 #776830: Attachments and other displays lost "Items to display" controls.
 #747782 by dereine: Improve jump menu grouping.
 #1026014 by dereine and alex_b: Use more always should not ask for the count query to see if we need to show the more link.
+#1012596 by dereine: More inline documentation of class variables.
+#988680 by mikeytown2: Fix Views memory leak with attachments.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

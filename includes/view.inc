@@ -51,8 +51,26 @@ class view extends views_db_object {
   // Used to store views that were previously running if we recurse.
   var $old_view = array();
 
-  // Where the $query object will reside:
+  /**
+   * Where the $query object will reside:
+   *
+   * @var views_plugin_query
+   */
   var $query = NULL;
+
+   /**
+   * The current used display plugin.
+   *
+   * @var views_plugin_display
+   */
+  var $display_handler;
+
+  /**
+   * The current used style plugin.
+   *
+   * @var views_plugin_style
+   */
+   var $style_plugin;
 
   /**
    * Constructor
@@ -1275,7 +1293,8 @@ class view extends views_db_object {
    *  The name of the view or its internal view id (vid)
    * @param $reset
    *  If TRUE, reset this entry in the load cache.
-   * @return A view object or NULL if it was not available.
+   * @return view
+   *   A view object or NULL if it was not available.
    */
   static function &load($arg, $reset = FALSE) {
     static $cache = array();
@@ -1512,6 +1531,9 @@ class view extends views_db_object {
    * view. This gets ugly fast.
    *
    * This will completely wipe a view clean so it can be considered fresh.
+   *
+   * @return view
+   *    The cloned view.
    */
   function clone_view() {
     $clone = version_compare(phpversion(), '5.0') < 0 ? $this : clone($this);
@@ -1919,7 +1941,7 @@ class views_db_object {
    *   The title of the display; optional, may be filled in from default.
    * @param $id
    *   The id to use.
-   * @return
+   * @return views_plugin_display
    *   A reference to the new handler object.
    */
   function &new_display($type = 'page', $title = NULL, $id = NULL) {
