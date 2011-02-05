@@ -2168,6 +2168,13 @@ class views_plugin_display extends views_plugin {
   function render_filters() { }
 
   /**
+   * Not all display plugins will suppert pager rendering.
+   */
+  function render_pager() {
+    return TRUE;
+  }
+
+  /**
    * Render the 'more' link
    */
   function render_more_link() {

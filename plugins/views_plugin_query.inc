@@ -96,11 +96,11 @@ class views_plugin_query extends views_plugin {
   /**
    * Render the pager, if necessary.
    */
-  function render_pager() {
+  function render_pager($exposed_input) {
     if (!empty($this->pager) && $this->pager->use_pager()) {
-      $exposed_input = isset($this->view->exposed_data_raw) ? $this->view->exposed_data_raw : NULL;
       return $this->pager->render($exposed_input);
     }
+
     return '';
   }
 
