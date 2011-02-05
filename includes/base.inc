@@ -280,7 +280,7 @@ class views_object {
       foreach ($options as $key => $value) {
         $translation_keys = array_merge($keys, array($key));
         if (is_array($value)) {
-          $this->unpack_translatable($translatable, $storage, $key, $definition, $parents, $translation_keys);
+          $this->unpack_translatable($translatable, $options, $key, $definition, $parents, $translation_keys);
         }
         else if (!empty($definition[$key]['translatable']) && !empty($value)) {
           // Build source data and add to the array
