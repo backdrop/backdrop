@@ -101,7 +101,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
       case 'nids':
         $nids = new stdClass();
         $nids->value = array($argument);
-        $nids = views_nid_type($argument, $nids);
+        $nids = views_break_phrase($argument, $nids);
         if ($nids->value == -1) {
           return FALSE;
         }
