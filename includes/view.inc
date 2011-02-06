@@ -236,6 +236,7 @@ class view extends views_db_object {
       }
       $this->display[$id]->handler = views_get_plugin('display', $this->display[$id]->display_plugin);
       if (!empty($this->display[$id]->handler)) {
+        $this->display[$id]->handler->localization_keys = array($id);
         // Initialize the new display handler with data.
         $this->display[$id]->handler->init($this, $this->display[$id]);
         // If this is NOT the default display handler, let it know which is

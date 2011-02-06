@@ -701,6 +701,9 @@ class views_plugin_display extends views_plugin {
         $plugin->init($this->view, $this->display, $options);
       }
       else {
+        $display_id = $this->is_defaulted($option_name) ? $this->display->id : 'default';
+        $plugin->localization_keys = array($display_id, $type);
+
         if (!isset($this->base_field)) {
           $views_data = views_fetch_data($this->view->base_table);
           $this->view->base_field = $views_data['table']['base']['field'];
@@ -766,6 +769,11 @@ class views_plugin_display extends views_plugin {
 
         $handler = views_get_handler($info['table'], $info['field'], $handler_type, $override);
         if ($handler) {
+          // Special override for area types so they know where they come from.
+          if ($handler_type == 'area') {
+            $handler->handler_type = $type;
+          }
+
           $handler->init($this->view, $info);
           $this->handlers[$type][$id] = &$handler;
         }

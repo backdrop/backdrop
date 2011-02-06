@@ -61,6 +61,7 @@ Fix fieldsets in field handler.
 #534452 by dereine: Remove non-functional "optional" setting on string filters.
 #1019826 by penguin25: Respect contact page access overrides when displaying contact link.
 #652684 by dereine: Search and replace error resulted in invalid function name in nid argument validator.
+#1008358: Updated for translation plugin to work properly with i18nviews.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

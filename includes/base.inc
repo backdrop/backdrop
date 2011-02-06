@@ -96,6 +96,18 @@ class views_object {
     if (!empty($this->view)) {
       // Ensure we have a localization plugin.
       $this->view->init_localization();
+
+      // Set up default localization keys. Handlers and such set this for us
+      if (empty($localization_keys) && isset($this->localization_keys)) {
+        $localization_keys = $this->localization_keys;
+      }
+      // but plugins don't because there isn't a common init() these days.
+      else if (!empty($this->is_plugin)) {
+        if ($this->plugin_type != 'display') {
+          $localization_keys = array($this->view->current_display);
+          $localization_keys[] = $this->plugin_type;
+        }
+      }
     }
 
     foreach ($options as $key => $value) {
