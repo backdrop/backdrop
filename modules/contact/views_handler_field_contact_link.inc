@@ -56,7 +56,8 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
 
     // Check access when we pull up the user account so we know
     // if the user has made the contact page available.
-    if (!_contact_personal_tab_access($account) || empty($account->contact)) {
+    $menu_item = menu_get_item("user/$uid/contact");
+    if (!$menu_item['access'] || empty($account->contact)) {
       return;
     }
 
