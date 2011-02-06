@@ -37,6 +37,28 @@ Fix fieldsets in field handler.
 #1026014 by dereine and alex_b: Use more always should not ask for the count query to see if we need to show the more link.
 #1012596 by dereine: More inline documentation of class variables.
 #988680 by mikeytown2: Fix Views memory leak with attachments.
+#1023062 by mikejoconnor: Replace views_process_dependency with ctools_dependent_process again.
+#1023558 by mariusz.slonina: Add a user cancel account link.
+#1015960 by duellj: View js should use DOM element not jquery object.
+#1027552 by david_Rothstein: Fix Node: Has new content fatal error.
+#955464 by dereine: Fix many_to_one helper in the case of have no condition and operator = 'and'.
+#696550: Taxonomy validator should always set title when it successfully validates.
+#869172 by bendiy: Add an "external" parameter to field link rewriting so that external URLs can be formed properly even without a scheme.
+#935176 by benoit.borrel: Add "system" table to Views data.
+#839236: Fields named "buttons" would disappear from the rearrange UI due to conflict with the buttons on the form.
+#783514 by dereine: Allow breaking of strings with + and ,
+#1000760 by dereine: Prevent htmlspecialchars() error with string arguments.
+#1033494 by dereine: Fix filter by user picture: change used handler.
+#895046 by bojanz: Follow up of the multiple field handler. Fixes an issue with group-by and rename entity_api_classes.
+#1044250 by dereine: Fix notice in views_handler_filter_history_user_timestamp for disabled comment module.
+#1018872 by dereine: field_field handler shouldn't force to set base field in relationship.
+#1049586 by fgm: Fix strict error in field_field::init.
+#1049276 by david_Rothstein: Commit the 6.11 patch to d7.
+#1011226 by Chris Gillis, Sutharsan: Fix display of error messages in the views inteface.
+#1050962 by Sutharsan: Convert #value to #markup in validate methods.
+#1051034 by Manuel Garcia: Allow field wrapper class to take multiple classes.
+#957284 by dereine: Fix search filter to work with d7 version of search.module's api.
+#534452 by dereine: Remove non-functional "optional" setting on string filters.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
@@ -304,24 +326,3 @@ by dereine: Bring vpr and views_debug back.
 #1016430 by bojanz: fix two small bugs in field_field handler.
 by dereine: Add $view->version to all default views.
 #1006176 by das-peter, bojanz: Add support for field based translation.
-#1023062 by mikejoconnor: Replace views_process_dependency with ctools_dependent_process again.
-#1023558 by mariusz.slonina: Add a user cancel account link.
-#1015960 by duellj: View js should use DOM element not jquery object.
-#1027552 by david_Rothstein: Fix Node: Has new content fatal error.
-#955464 by dereine: Fix many_to_one helper in the case of have no condition and operator = 'and'.
-#696550: Taxonomy validator should always set title when it successfully validates.
-#869172 by bendiy: Add an "external" parameter to field link rewriting so that external URLs can be formed properly even without a scheme.
-#935176 by benoit.borrel: Add "system" table to Views data.
-#839236: Fields named "buttons" would disappear from the rearrange UI due to conflict with the buttons on the form.
-#783514 by dereine: Allow breaking of strings with + and ,
-#1000760 by dereine: Prevent htmlspecialchars() error with string arguments.
-#1033494 by dereine: Fix filter by user picture: change used handler.
-#895046 by bojanz: Follow up of the multiple field handler. Fixes an issue with group-by and rename entity_api_classes.
-#1044250 by dereine: Fix notice in views_handler_filter_history_user_timestamp for disabled comment module.
-#1018872 by dereine: field_field handler shouldn't force to set base field in relationship.
-#1049586 by fgm: Fix strict error in field_field::init.
-#1049276 by david_Rothstein: Commit the 6.11 patch to d7.
-#1011226 by Chris Gillis, Sutharsan: Fix display of error messages in the views inteface.
-#1050962 by Sutharsan: Convert #value to #markup in validate methods.
-#1051034 by Manuel Garcia: Allow field wrapper class to take multiple classes.
-#957284 by dereine: Fix search filter to work with d7 version of search.module's api.
