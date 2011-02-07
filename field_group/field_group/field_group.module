@@ -489,6 +489,7 @@ function field_group_field_group_format_settings($group) {
 function field_group_field_group_pre_render(& $element, $group, & $form) {
 
   $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
+  $id = $form['#entity_type'] . '_' . $form['#bundle'] . '_' . $view_mode . '_' . $group->group_name;
 
   // Prepare extra classes.
   $classes = array($group->format_type, str_replace('_', '-', $group->group_name));
@@ -534,6 +535,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     // Fieldset.
     case 'fieldset':
       $element += array(
+        '#id' => $id,
         '#type' => 'fieldset',
         '#title' => check_plain(t($group->label)),
         '#weight' => $group->weight,
@@ -553,6 +555,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $add = array(
         '#type' => 'markup',
         '#weight' => $group->weight,
+        '#id' => $id,
       );
       $classes .= " speed-$speed effect-$effect";
       if ($group->format_settings['formatter'] != 'open') {
@@ -578,6 +581,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     // Accordion group.
     case 'accordion':
       $element += array(
+        '#id' => $id,
         '#type' => 'markup',
         '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
@@ -587,6 +591,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     // Accordion item.
     case 'accordion-item':
       $element += array(
+        '#id' => $id,
         '#type' => 'markup',
         '#prefix' => '
         <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . '</h3>
@@ -603,6 +608,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     // Horizontal tabs group.
     case 'htabs':
       $element += array(
+        '#id' => $id,
         '#type' => 'horizontal_tabs',
         '#weight' => $group->weight,
         '#theme_wrappers' => array('horizontal_tabs'),
@@ -615,6 +621,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     // Horizontal tab.
     case 'htab':
       $element += array(
+        '#id' => $id,
         '#type' => 'fieldset',
         '#title' => check_plain(t($group->label)),
         '#weight' => $group->weight,
@@ -632,6 +639,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     // able to optionally merge field(groups) with the "additional_settings"
     case 'tabs':
       $element += array(
+        '#id' => $id,
         '#type' => 'vertical_tabs',
         '#weight' => $group->weight,
         '#theme_wrappers' => array('vertical_tabs'),
@@ -658,6 +666,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       if ($view_mode != 'form') {
         $parent_name = empty($group->parent_name) ? 'additional_settings' : $group->parent_name;
         $element += array(
+          '#id' => $id,
           '#type' => 'fieldset',
           '#id' => 'edit-' . $group->group_name,
           '#title' => check_plain(t($group->label)),
@@ -675,6 +684,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       elseif (!empty($group->parent_name)) {
         $parent_name = $group->parent_name;
         $element += array(
+          '#id' => $id,
           '#type' => 'fieldset',
           '#id' => 'edit-' . $group->group_name,
           '#title' => check_plain(t($group->label)),
@@ -693,6 +703,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         $parent_name = 'additional_settings';
         // Create the fieldgroup element.
         $child_element = array(
+          '#id' => $id,
           '#type' => 'fieldset',
           '#id' => 'edit-' . $group->group_name,
           '#title' => check_plain(t($group->label)),

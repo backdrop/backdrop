@@ -2,6 +2,7 @@
 CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
+    o Added ID's to fieldgroups.
     o Removed unsed field_group.admin.inc. Required asterix moving to field_group setting.
     o #1045526 by stalski: Make formatter options more user-friendly and logical.
     o #1041880 by robertgarrigos: duplicated entries in field_group table.
