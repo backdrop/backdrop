@@ -63,6 +63,7 @@ Fix fieldsets in field handler.
 #652684 by dereine: Search and replace error resulted in invalid function name in nid argument validator.
 #1008358: Updated for translation plugin to work properly with i18nviews.
 #1055378 by mfb: Fix rss_namespaces.
+#957284: by dereine: Followup for filter_search fix.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
