@@ -586,7 +586,7 @@ function node_views_plugins() {
     'module' => 'views', // This just tells our themes are elsewhere.
     'row' => array(
       'node' => array(
-        'title' => t('Node'),
+        'title' => t('Content'),
         'help' => t('Display the node with standard node view.'),
         'handler' => 'views_plugin_row_node_view',
         'path' => drupal_get_path('module', 'views') . '/modules/node', // not necessary for most modules
@@ -597,7 +597,7 @@ function node_views_plugins() {
         'help topic' => 'style-node',
       ),
       'node_rss' => array(
-        'title' => t('Node'),
+        'title' => t('Content'),
         'help' => t('Display the node with standard node view.'),
         'handler' => 'views_plugin_row_node_rss',
         'path' => drupal_get_path('module', 'views') . '/modules/node', // not necessary for most modules
