@@ -1038,7 +1038,7 @@ class views_plugin_display extends views_plugin {
     $access_str = $access_plugin->summary_title();
 
     $options['access'] = array(
-      'category' => 'format',
+      'category' => 'basic',
       'title' => t('Access'),
       'value' => $access_str,
       'desc' => t('Specify access control type for this display.'),
