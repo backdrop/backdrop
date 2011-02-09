@@ -72,9 +72,20 @@
 }
 
 /**
- * IE7 is interpreting a top margin of 18px from somwhere. remove it
+ * IE7 is interpreting a top margin of 18px from somewhere. remove it
  */ 
  
 .page-admin-structure-views #content .views-display-setting {
   margin-top: 0;
+}
+
+/**
+ * IE7 can't handle the + selector that indents form wrappers after a checkbox on the add page
+ * zoom is necessary to trigger has layout. !imporant is necessary because IE7 is precedent
+ * to the theme.css stylesheet, even though it is included before this file.
+ */
+
+.page-admin-structure-views #content .form-type-checkbox + .form-wrapper {
+  margin-left: 27px !important;
+  zoom: 1;
 }

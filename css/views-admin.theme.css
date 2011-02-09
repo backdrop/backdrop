@@ -115,6 +115,10 @@
   padding-left: 4pt; /* LTR */
 }
 
+.page-admin-structure-views #content .form-type-checkbox + .form-wrapper {
+  margin-left: 16px;
+}
+
 /* @end */
 
 /* @group Lists */
