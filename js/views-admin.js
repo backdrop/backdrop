@@ -523,7 +523,7 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.redrawOperatorLabels = function 
       if ($nextRow.hasClass('draggable') && $nextRow.is(':visible')) {
         // If an operator label was already there, replace it with the new one.
         if ($existingOperatorLabel.length) {
-          $existingOperatorLabel.html(operatorLabel);
+          $existingOperatorLabel.replaceWith(operatorLabel);
         }
         // Otherwise, append the operator label to the end of the table cell.
         else {
