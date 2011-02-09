@@ -804,6 +804,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   }
 
   $form['help_text'] = array(
+    '#prefix' => '<div>',
+    '#suffix' => '</div>',
     '#markup' => t('Modify the displays of your view below or add new displays.'),
   );
 
@@ -824,7 +826,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
 
   $form['displays'] = array(
-    '#prefix' => '<h3 class="clearfix">' . t('Queries/displays') . '</h3>' . "\n" . '<div class="views-displays">',
+    '#prefix' => '<h1 class="clearfix">' . t('Queries/displays') . '</h1>' . "\n" . '<div class="views-displays">',
     '#suffix' => '</div>',
   );
 

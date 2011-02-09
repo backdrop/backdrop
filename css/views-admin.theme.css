@@ -126,6 +126,25 @@
 
 /* @end */
 
+/* @group Messages */
+
+.page-admin-structure-views .view-changed {
+  margin-bottom: 21px;
+}
+
+/* @end */
+
+/* @group Headings */
+
+.page-admin-structure-views #content h1 {
+  font-size: 15px;
+  line-height: 1.6154;
+  margin-bottom: 0;
+  margin-top: 18px;
+}
+
+/* @end */
+
 /* @group Attachments */
 
 .page-admin-structure-views #content .views-displays {
@@ -286,7 +305,6 @@
 .page-admin-structure-views #content #views-live-preview {
   border-top: 3px solid #CCC;
   margin: 0 12px;
-  padding-top: 12px;
 }
 
 /* @end */

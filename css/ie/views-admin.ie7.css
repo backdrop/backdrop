@@ -70,3 +70,11 @@
 .page-admin-structure-views #content .views-display-column + .views-display-column {
   margin-top: 0;
 }
+
+/**
+ * IE7 is interpreting a top margin of 18px from somwhere. remove it
+ */ 
+ 
+.page-admin-structure-views #content .views-display-setting {
+  margin-top: 0;
+}

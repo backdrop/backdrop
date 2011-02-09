@@ -34,6 +34,7 @@
 .page-admin-structure-views #content a.button {
   margin-bottom: 0;
   margin-right: 0; /* LTR */
+  margin-top: 0;
 }
 
 .page-admin-structure-views #content .form-item {
