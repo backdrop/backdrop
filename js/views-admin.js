@@ -514,13 +514,13 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.redrawOperatorLabels = function 
       // group.
       var operatorValue = $draggableRow.prevAll('.views-group-title').find('option:selected').html();
       var operatorLabel = '<span class="views-operator-label">' + operatorValue + '</span>';
-      // If the next row after this one is a visible, draggable filter row,
+      // If the next visible row after this one is a draggable filter row,
       // display the operator label next to the current row. (Checking for
       // visibility is necessary here since the "Remove" links hide the removed
       // row but don't actually remove it from the document).
-      var $nextRow = $draggableRow.next();
+      var $nextRow = $draggableRow.nextAll(':visible').eq(0);
       var $existingOperatorLabel = $firstCell.find('.views-operator-label');
-      if ($nextRow.hasClass('draggable') && $nextRow.is(':visible')) {
+      if ($nextRow.hasClass('draggable')) {
         // If an operator label was already there, replace it with the new one.
         if ($existingOperatorLabel.length) {
           $existingOperatorLabel.replaceWith(operatorLabel);
