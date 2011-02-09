@@ -216,6 +216,11 @@
 
 /* @end */
 
+/* @group Rearrange filters
+ *
+ * Styling for the form that allows views filters to be rearranged.
+ */
+
 .group-populated {
   display: none;
 }
@@ -241,6 +246,13 @@ td.group-title {
   clear: both;
 }
 
+.views-operator-label {
+  font-style: italic;
+  font-weight: bold;
+  padding-left: 0.5em; /* LTR */
+  text-transform: uppercase;
+}
+
 .js-only {
   display: none;
 }
@@ -252,3 +264,5 @@ html.js .js-only {
 html.js span.js-only {
   display: inline;
 }
+
+/* @end */

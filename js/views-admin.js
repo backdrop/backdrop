@@ -324,7 +324,7 @@ Drupal.behaviors.viewsUiRearrangeFilter.attach = function (context, settings) {
 
   var table = $('#views-rearrange-filters', context).once('views-rearrange-filters');
   var operator = $('.form-item-filter-groups-operator', context).once('views-rearrange-filters');
-  if (table.length && operator.length) {
+  if (table.length) {
     new Drupal.viewsUi.rearrangeFilterHandler(table, operator);
   }
 };
@@ -335,22 +335,45 @@ Drupal.behaviors.viewsUiRearrangeFilter.attach = function (context, settings) {
 Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
   var $ = jQuery;
   // Keep a reference to the <table> being altered and to the div containing
-  // the filter groups operator dropdown.
+  // the filter groups operator dropdown (if it exists).
   this.table = table;
   this.operator = operator;
+  this.hasGroupOperator = this.operator.length > 0;
 
-  // Create duplicates of the filter groups operator dropdown between each
-  // filter group.
-  this.dropdowns = this.duplicateGroupsOperator();
-  this.syncGroupsOperators();
+  // Keep a reference to all draggable rows within the table.
+  this.draggableRows = $('.draggable', table);
 
-  // Add methods to the tableDrag instance to account for the operator cells,
-  // which span multiple rows.
+  // When there is a filter groups operator dropdown on the page, create
+  // duplicates of the dropdown between each pair of filter groups.
+  if (this.hasGroupOperator) {
+    this.dropdowns = this.duplicateGroupsOperator();
+    this.syncGroupsOperators();
+  }
+
+  // Add methods to the tableDrag instance to account for the operator cells
+  // (which span multiple rows) and to allow the operator labels next to each
+  // filter (e.g., "And" or "Or") to appropriately change as the rows are
+  // dragged.
   this.modifyTableDrag();
 
-  $('a.views-groups-remove-link')
+  // Initialize the operator labels (e.g., "And" or "Or") that are displayed
+  // next to the filters in each group, and bind a handler so that they change
+  // based on the values of the operator dropdown within that group.
+  this.redrawOperatorLabels();
+  $('.views-group-title select', table)
     .once('views-rearrange-filter-handler')
-    .bind('click.views-rearrange-filter-handler', $.proxy(this, 'updateRowspans'));
+    .bind('click.views-rearrange-filter-handler', $.proxy(this, 'redrawOperatorLabels'));
+
+  // Bind handlers so that when a "Remove" link is clicked, we:
+  // - Update the rowspans of cells containing an operator dropdown (since they
+  //   need to change to reflect the number of rows in each group).
+  // - Redraw the operator labels next to the filters in the group (since
+  //   whichever filter in the group that is currently displayed last is not
+  //   supposed to have a label display next to it).
+  $('a.views-groups-remove-link', this.table)
+    .once('views-rearrange-filter-handler')
+    .bind('click.views-rearrange-filter-handler', $.proxy(this, 'updateRowspans'))
+    .bind('click.views-rearrange-filter-handler', $.proxy(this, 'redrawOperatorLabels'));
 };
 
 /**
@@ -426,27 +449,97 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
   /**
    * Override the row.onSwap method from tabledrag.js.
    *
-   * When a row is dragged to another place in the table, two things need
-   * to happen: 1) the row needs to be moved so that it's within one of the
-   * filter groups, and 2) the operator cells that span multiple rows need their
-   * rowspan attributes updated to reflect the number of rows in each group.
+   * When a row is dragged to another place in the table, several things need
+   * to occur.
+   * - The row needs to be moved so that it's within one of the filter groups.
+   * - The operator cells that span multiple rows need their rowspan attributes
+   *   updated to reflect the number of rows in each group.
+   * - The operator labels that are displayed next to each filter need to be
+   *   redrawn, to account for the row's new location.
    */
   tableDrag.row.prototype.onSwap = function () {
-    // Make sure the row that just got moved (this.group) is inside one of the
-    // filter groups (i.e. below an empty marker row or a draggable). If it
-    // isn't, move it down one.
-    var thisRow = jQuery(this.group);
-    var previousRow = thisRow.prev('tr');
-    if (previousRow.length && !previousRow.hasClass('group-message') && !previousRow.hasClass('draggable')) {
-      // Move the dragged row down one.
-      var next = thisRow.next();
-      if (next.is('tr')) {
-        this.swap('after', next);
+    if (filterHandler.hasGroupOperator) {
+      // Make sure the row that just got moved (this.group) is inside one of
+      // the filter groups (i.e. below an empty marker row or a draggable). If
+      // it isn't, move it down one.
+      var thisRow = jQuery(this.group);
+      var previousRow = thisRow.prev('tr');
+      if (previousRow.length && !previousRow.hasClass('group-message') && !previousRow.hasClass('draggable')) {
+        // Move the dragged row down one.
+        var next = thisRow.next();
+        if (next.is('tr')) {
+          this.swap('after', next);
+        }
       }
+      filterHandler.updateRowspans();
     }
-    filterHandler.updateRowspans();
+    // Redraw the operator labels that are displayed next to each filter, to
+    // account for the row's new location.
+    filterHandler.redrawOperatorLabels();
   };
 
+  /**
+   * Override the onDrop method from tabledrag.js.
+   */
+  tableDrag.onDrop = function () {
+    // If the tabledrag change marker (i.e., the "*") has been inserted inside
+    // a row after the operator label (i.e., "And" or "Or") rearrange the items
+    // so the operator label continues to appear last.
+    var changeMarker = jQuery(this.oldRowElement).find('.tabledrag-changed');
+    if (changeMarker.length) {
+      // Search for occurrences of the operator label before the change marker.
+      var operatorLabel = changeMarker.prevAll('.views-operator-label');
+      if (operatorLabel.length) {
+        operatorLabel.insertAfter(changeMarker);
+      }
+    }
+  };
+};
+
+
+/**
+ * Redraw the operator labels that are displayed next to each filter.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.redrawOperatorLabels = function () {
+  var $ = jQuery;
+  for (i = 0; i < this.draggableRows.length; i++) {
+    // Within the row, the operator labels are displayed inside the first table
+    // cell (next to the filter name).
+    var $draggableRow = $(this.draggableRows[i]);
+    var $firstCell = $('td:first', $draggableRow);
+    if ($firstCell.length) {
+      // The value of the operator label ("And" or "Or") is taken from the
+      // first operator dropdown we encounter, going backwards from the current
+      // row. This dropdown is the one associated with the current row's filter
+      // group.
+      var operatorValue = $draggableRow.prevAll('.views-group-title').find('option:selected').html();
+      var operatorLabel = '<span class="views-operator-label">' + operatorValue + '</span>';
+      // If the next row after this one is a visible, draggable filter row,
+      // display the operator label next to the current row. (Checking for
+      // visibility is necessary here since the "Remove" links hide the removed
+      // row but don't actually remove it from the document).
+      var $nextRow = $draggableRow.next();
+      var $existingOperatorLabel = $firstCell.find('.views-operator-label');
+      if ($nextRow.hasClass('draggable') && $nextRow.is(':visible')) {
+        // If an operator label was already there, replace it with the new one.
+        if ($existingOperatorLabel.length) {
+          $existingOperatorLabel.html(operatorLabel);
+        }
+        // Otherwise, append the operator label to the end of the table cell.
+        else {
+          $firstCell.append(operatorLabel);
+        }
+      }
+      // If the next row doesn't contain a filter, then this is the last row
+      // in the group. We don't want to display the operator there (since
+      // operators should only display between two related filters, e.g.
+      // "filter1 AND filter2 AND filter3"). So we remove any existing label
+      // that this row has.
+      else {
+        $existingOperatorLabel.remove();
+      }
+    }
+  }
 };
 
 /**
@@ -471,7 +564,7 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.updateRowspans = function () {
       // the "this group is empty" row.
       $operatorCell.attr('rowspan', 2);
     }
-    else if (($row).hasClass('draggable') && $row.css('display') !== 'none') {
+    else if (($row).hasClass('draggable') && $row.is(':visible')) {
       // We've found a visible filter row, so we now know the group isn't empty.
       draggableCount++;
       $currentEmptyRow.removeClass('group-empty').addClass('group-populated');
