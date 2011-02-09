@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.161.4.88 2011/01/22 22:55:06 dereine Exp $
+// $Id: admin.inc,v 1.161.4.90 2011/02/04 14:13:16 dereine Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -556,10 +556,18 @@ function _views_ui_get_operation_links($view) {
   }
   else {
     if (empty($view->disabled)) {
-      $links[] = array('title' => t('disable'), 'href' => "admin/structure/views/view/$view->name/disable");
+      $links[] = array(
+        'title' => t('disable'),
+        'href' => "admin/structure/views/view/$view->name/disable",
+        'query' => array('token' => drupal_get_token('views-disable')),
+      );
     }
     else {
-      $links[] = array('title' => t('enable'), 'href' => "admin/structure/views/view/$view->name/enable");
+      $links[] = array(
+        'title' => t('enable'),
+        'href' => "admin/structure/views/view/$view->name/enable",
+        'query' => array('token' => drupal_get_token('views-enable')),
+      );
     }
   }
 
@@ -3255,7 +3263,7 @@ function views_ui_config_item_form($form, &$form_state) {
   if ($item) {
     $handler = $view->display_handler->get_handler($type, $id);
     if (empty($handler)) {
-      $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
+      $form['markup'] = array('#markup' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
     }
     else {
       $types = views_object_types();
@@ -3430,7 +3438,7 @@ function views_ui_config_item_group_form($type, &$form_state) {
   if ($item) {
     $handler = $view->display_handler->get_handler($type, $id);
     if (empty($handler)) {
-      $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
+      $form['markup'] = array('#markup' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
     }
     else {
       $handler->init($view, $item);
@@ -3519,7 +3527,7 @@ function views_ui_config_item_extra_form($form, &$form_state) {
   if ($item) {
     $handler = views_get_handler($item['table'], $item['field'], $type);
     if (empty($handler)) {
-      $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
+      $form['markup'] = array('#markup' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
     }
     else {
       $handler->init($view, $item);
@@ -3590,7 +3598,7 @@ function views_ui_change_style_form($form, &$form_state) {
   if ($item) {
     $handler = views_get_handler($item['table'], $item['field'], $type);
     if (empty($handler)) {
-      $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
+      $form['markup'] = array('#markup' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
     }
     else {
       $handler->init($view, $item);
@@ -3681,7 +3689,7 @@ function views_ui_config_style_form($form, &$form_state) {
   if ($item) {
     $handler = views_get_handler($item['table'], $item['field'], $type);
     if (empty($handler)) {
-      $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
+      $form['markup'] = array('#markup' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
     }
     else {
       $handler->init($view, $item);
@@ -3747,24 +3755,34 @@ function views_ui_get_roles() {
  * Page callback for the Views enable page.
  */
 function views_ui_enable_page($view) {
-  $views_status = variable_get('views_defaults', array());
-  $views_status[$view->name] = FALSE; // FALSE is enabled
-  variable_set('views_defaults', $views_status);
-  views_invalidate_cache();
-  menu_rebuild();
-  drupal_goto('admin/structure/views');
+  if (isset($_GET['token']) && drupal_valid_token($_GET['token'], 'views-enable')) {
+    $views_status = variable_get('views_defaults', array());
+    $views_status[$view->name] = FALSE; // FALSE is enabled
+    variable_set('views_defaults', $views_status);
+    views_invalidate_cache();
+    menu_rebuild();
+    drupal_goto('admin/structure/views');
+  }
+  else {
+    return drupal_access_denied();
+  }
 }
 
 /**
  * Page callback for the Views enable page
  */
 function views_ui_disable_page($view) {
-  $views_status = variable_get('views_defaults', array());
-  $views_status[$view->name] = TRUE; // True is disabled
-  variable_set('views_defaults', $views_status);
-  views_invalidate_cache();
-  menu_rebuild();
-  drupal_goto('admin/structure/views');
+  if (isset($_GET['token']) && drupal_valid_token($_GET['token'], 'views-disable')) {
+    $views_status = variable_get('views_defaults', array());
+    $views_status[$view->name] = TRUE; // True is disabled
+    variable_set('views_defaults', $views_status);
+    views_invalidate_cache();
+    menu_rebuild();
+    drupal_goto('admin/structure/views');
+  }
+  else {
+    return drupal_access_denied();
+  }
 }
 
 /**

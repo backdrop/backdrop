@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_summary_jump_menu.inc,v 1.1.6.6 2010/12/14 00:47:26 merlinofchaos Exp $
+// $Id: views_plugin_style_summary_jump_menu.inc,v 1.1.6.7 2011/02/04 23:44:02 merlinofchaos Exp $
 /**
  * @file
  * Contains the default summary style plugin, which displays items in an HTML list.
@@ -25,9 +25,10 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
   }
 
   function query() {
+    // Copy the offset option.
     $pager = array(
       'type' => 'none',
-      'options' => array(),
+      'options' => $this->display->handler->options['pager']['options'],
     );
     $this->display->handler->set_option('pager', $pager);
   }

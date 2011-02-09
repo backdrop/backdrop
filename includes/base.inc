@@ -1,5 +1,5 @@
 <?php
-// $Id: base.inc,v 1.3.4.6 2010/12/01 20:05:06 dereine Exp $
+// $Id: base.inc,v 1.3.4.9 2011/02/06 14:29:02 dereine Exp $
 /**
  * @file
  *
@@ -14,6 +14,14 @@ class views_object {
    * Except for displays, options for the object will be held here.
    */
   var $options = array();
+  
+  /**
+   * The top object of a view.
+   * 
+   * @var view
+   */
+  var $view = NULL;
+
   /**
    * Information about options for all kinds of purposes will be held here.
    * @code
@@ -88,6 +96,18 @@ class views_object {
     if (!empty($this->view)) {
       // Ensure we have a localization plugin.
       $this->view->init_localization();
+
+      // Set up default localization keys. Handlers and such set this for us
+      if (empty($localization_keys) && isset($this->localization_keys)) {
+        $localization_keys = $this->localization_keys;
+      }
+      // but plugins don't because there isn't a common init() these days.
+      else if (!empty($this->is_plugin)) {
+        if ($this->plugin_type != 'display') {
+          $localization_keys = array($this->view->current_display);
+          $localization_keys[] = $this->plugin_type;
+        }
+      }
     }
 
     foreach ($options as $key => $value) {
@@ -280,7 +300,7 @@ class views_object {
       foreach ($options as $key => $value) {
         $translation_keys = array_merge($keys, array($key));
         if (is_array($value)) {
-          $this->unpack_translatable($translatable, $storage, $key, $definition, $parents, $translation_keys);
+          $this->unpack_translatable($translatable, $options, $key, $definition, $parents, $translation_keys);
         }
         else if (!empty($definition[$key]['translatable']) && !empty($value)) {
           // Build source data and add to the array

@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.84.4.45 2011/01/20 20:07:03 merlinofchaos Exp $
+// $Id: theme.inc,v 1.84.4.46 2011/02/05 00:39:32 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -73,7 +73,13 @@ function template_preprocess_views_view(&$vars) {
   $vars['exposed']    = !empty($view->exposed_widgets) ? $view->exposed_widgets : '';
   $vars['more']       = $view->display_handler->render_more_link();
   $vars['feed_icon']  = !empty($view->feed_icon) ? $view->feed_icon : '';
-  $vars['pager']      = $view->query->render_pager();
+
+  $vars['pager']      = '';
+
+  if ($view->display_handler->render_pager()) {
+    $exposed_input = isset($view->exposed_data_raw) ? $view->exposed_data_raw : NULL;
+    $vars['pager']      = $view->query->render_pager($exposed_input);
+  }
 
   $vars['attachment_before'] = !empty($view->attachment_before) ? $view->attachment_before : '';
   $vars['attachment_after'] = !empty($view->attachment_after) ? $view->attachment_after : '';

@@ -1,11 +1,19 @@
 <?php
-// $Id: views_handler_filter_search.inc,v 1.5.6.2 2009/12/24 00:37:00 merlinofchaos Exp $
+// $Id: views_handler_filter_search.inc,v 1.5.6.4 2011/02/08 22:50:11 dereine Exp $
 
 /**
  * Field handler to provide simple renderer that allows linking to a node.
  */
 class views_handler_filter_search extends views_handler_filter {
   var $no_single = TRUE;
+
+  /**
+   * Stores a viewsSearchQuery object to be able to use the search.module "api".
+   *
+   * @var viewsSearchQuery
+   */
+  var $search_query = NULL;
+
   function option_definition() {
     $options = parent::option_definition();
 
@@ -47,23 +55,31 @@ class views_handler_filter_search extends views_handler_filter {
   /**
    * Validate the options form.
    */
-  function exposed_validate($form, &$form_state) {
+  function exposed_validate(&$form, &$form_state) {
     if (!isset($this->options['expose']['identifier'])) {
       return;
     }
 
     $key = $this->options['expose']['identifier'];
     if (!empty($form_state['values'][$key])) {
-      $this->search_query = search_parse_query($form_state['values'][$key]);
+      $this->query_parse_search_expression($form_state['values'][$key]);
+      if (count($this->search_query->words()) == 0) {
+        form_set_error($key, format_plural(variable_get('minimum_word_size', 3), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'));
+      }
+    }
+  }
 
-      if ($this->search_query[2] == '') {
-        form_set_error($key, t('You must include at least one positive keyword with @count characters or more.', array('@count' => variable_get('minimum_word_size', 3))));
-      }
-      if ($this->search_query[6]) {
-        if ($this->search_query[6] == 'or') {
-          drupal_set_message(t('Search for either of the two terms with uppercase <strong>OR</strong>. For example, <strong>cats OR dogs</strong>.'));
-        }
-      }
+  /**
+   * Take sure that parseSearchExpression is runned and everything is set up for it.
+   *
+   * @param $input
+   *    The search phrase which was input by the user.
+   */
+  function query_parse_search_expression($input) {
+    if (!isset($this->search_query)) {
+      $this->search_query = db_select('search_index', 'i', array('target' => 'slave'))->extend('viewsSearchQuery');
+      $this->search_query->searchExpression($input, $this->view->base_table);
+      $this->search_query->publicParseSearchExpression();
     }
   }
 
@@ -75,14 +91,28 @@ class views_handler_filter_search extends views_handler_filter {
    * and $this->value respectively.
    */
   function query() {
-    if (!isset($this->search_query) || empty($this->search_query[3])) {
+    $required = FALSE;
+    if (!isset($this->search_query)) {
+      $required = TRUE;
+    }
+    else {
+      $words = $this->search_query->words();
+      if (empty($words)) {
+        $required = TRUE;
+      }
+    }
+    if ($required) {
       if ($this->operator == 'required') {
         $this->query->add_where($this->options['group'], 'FALSE');
       }
     }
     else {
       $search_index = $this->ensure_my_table();
-      $this->search_query[2] = str_replace('i.', "$search_index.", $this->search_query[2]);
+
+      $or = db_or();
+      foreach ($words as $word) {
+        $or->condition("$search_index.word", $word);
+      }
 
       // Create a new join to relate the 'serach_total' table to our current 'search_index' table.
       $join = new views_join;
@@ -91,7 +121,7 @@ class views_handler_filter_search extends views_handler_filter {
 
       $this->search_score = $this->query->add_field('', "SUM($search_index.score * $search_total.count)", 'score', array('aggregate' => TRUE));
 
-      $this->query->add_where($this->options['group'], $this->search_query[2], $this->search_query[3]);
+      $this->query->add_where($this->options['group'], $or);
 
       if (empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;
@@ -99,15 +129,60 @@ class views_handler_filter_search extends views_handler_filter {
       else {
         $base_table = $this->query->relationships[$this->relationship]['base'];
       }
-      $this->query->add_where($this->options['group'], "$search_index.type = '%s'", $base_table);
-      if (!$this->search_query[5]) {
+      $this->query->add_where($this->options['group'], "$search_index.type", $base_table);
+      if (!$this->search_query->simple()) {
         $search_dataset = $this->query->add_table('search_dataset');
-        $this->search_query[0] = str_replace('d.', "$search_dataset.", $this->search_query[0]);
-        $this->query->add_where($this->options['group'], $this->search_query[0], $this->search_query[1]);
+        $conditions = $this->search_query->conditions();
+        $condition_conditions =& $conditions->conditions();
+        foreach ($condition_conditions  as $key => &$condition) {
+          // Take sure we just look at real conditions.
+          if (is_numeric($key)) {
+            // Replace the conditions with the table alias of views.
+            $this->condition_replace_string('d.', "$search_dataset.", $condition);
+          }
+        }
+        $this->query->add_where($this->options['group'], $conditions);
       }
 
       $this->query->add_groupby("$search_index.sid");
-      $this->query->add_having($this->options['group'], 'COUNT(*)', $this->search_query[4], '>=');
+      $matches = $this->search_query->matches();
+      $placeholder = $this->placeholder();
+      $this->query->add_having_expression($this->options['group'], "COUNT(*) >= $placeholder", array($placeholder => $matches));
     }
+  }
+
+  function condition_replace_string($search, $replace, &$condition) {
+    if ($condition['field'] instanceof DatabaseCondition) {
+      $conditions =& $condition['field']->conditions();
+      foreach ($conditions as $key => &$subcondition) {
+        if (is_numeric($key)) {
+          $this->condition_replace_string($search, $replace, $subcondition);
+        }
+      }
+    }
+    else {
+      $condition['field'] = str_replace($search, $replace, $condition['field']);
+    }
+  }
+}
+
+class viewsSearchQuery extends searchQuery {
+  public function &conditions() {
+    return $this->conditions;
+  }
+  public function words() {
+    return $this->words;
+  }
+
+  public function simple() {
+    return $this->simple;
+  }
+
+  public function matches() {
+    return $this->matches;
+  }
+
+  public function publicParseSearchExpression() {
+    return $this->parseSearchExpression();
   }
 }

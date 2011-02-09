@@ -1,4 +1,4 @@
-// $Id: ajax.js,v 1.26.4.12 2010/08/03 05:54:01 dereine Exp $
+// $Id: ajax.js,v 1.26.4.13 2011/02/04 22:36:27 merlinofchaos Exp $
 /**
  * @file ajax_admin.js
  *
@@ -47,7 +47,7 @@
     // Update the preview widget to preview the new tab.
     var display_id = id.replace('#views-tab-', '');
     $("#preview-display-id").append('<option selected="selected" value="' + display_id + '">' + response.title + '</option>');
- 
+
     Drupal.attachBehaviors(id);
     var instance = $.viewsUi.tabs.instances[$('#views-tabset').get(0).UI_TABS_UUID];
     $('#views-tabset').viewsClickTab(instance.$tabs.length);

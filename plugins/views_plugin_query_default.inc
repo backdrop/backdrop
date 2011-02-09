@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query_default.inc,v 1.1.4.39 2011/01/06 00:37:05 dereine Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.4.40 2011/02/05 16:50:37 dereine Exp $
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the
@@ -72,6 +72,13 @@ class views_plugin_query_default extends views_plugin_query {
    * Should this query be optimized for counts, for example no sorts.
    */
   var $get_count_optimized = NULL;
+
+  /**
+   * The current used pager plugin.
+   *
+   * @var views_plugin_pager
+   */
+   var $pager = NULL;
 
   /**
    * Constructor; Create the basic query object and fill with default values.

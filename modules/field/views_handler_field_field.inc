@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_field.inc,v 1.1.2.29 2011/01/26 21:20:12 dereine Exp $
+// $Id: views_handler_field_field.inc,v 1.1.2.31 2011/02/04 12:03:56 dereine Exp $
 
 /**
  * Helper function: Return an array of formatter options for a field type.
@@ -37,7 +37,7 @@ class views_handler_field_field extends views_handler_field {
    */
   public $items = array();
 
-  function init(&$view, $options) {
+  function init(&$view, &$options) {
     parent::init($view, $options);
 
     $field = $this->definition['field_info'];
@@ -83,8 +83,10 @@ class views_handler_field_field extends views_handler_field {
       foreach ($this->view->relationship as $relationship) {
         if ($relationship->alias == $this->relationship) {
           $base_table = $relationship->definition['base'];
-          $base_field = $relationship->definition['base field'];
           $base_table_alias = $relationship->alias;
+
+          $table_data = views_fetch_data($base_table);
+          $base_field = empty($relationship->definition['base field']) ? $table_data['table']['base']['field'] : $relationship->definition['base field'];
         }
       }
     }

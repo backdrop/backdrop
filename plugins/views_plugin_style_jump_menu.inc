@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_jump_menu.inc,v 1.1.6.7 2010/12/14 00:47:26 merlinofchaos Exp $
+// $Id: views_plugin_style_jump_menu.inc,v 1.1.6.10 2011/02/05 01:08:29 merlinofchaos Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -31,15 +31,15 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     $handlers = $this->display->handler->get_handlers('field');
     if (empty($handlers)) {
       $form['error_markup'] = array(
-        '#value' => t('You need at least one field before you can configure your jump menu settings'),
-        '#prefix' => '<div class="error form-item description">',
+        '#markup' => t('You need at least one field before you can configure your jump menu settings'),
+        '#prefix' => '<div class="error messages">',
         '#suffix' => '</div>',
       );
       return;
     }
 
     $form['markup'] = array(
-      '#value' => t('To properly configure a jump menu, you must select one field that will represent the path to utilize. You should then set that field to exclude. All other displayed fields will be part of the menu. Please note that all HTML will be stripped from this output as select boxes cannot show HTML.'),
+      '#markup' => t('To properly configure a jump menu, you must select one field that will represent the path to utilize. You should then set that field to exclude. All other displayed fields will be part of the menu. Please note that all HTML will be stripped from this output as select boxes cannot show HTML.'),
       '#prefix' => '<div class="form-item description">',
       '#suffix' => '</div>',
     );
@@ -89,29 +89,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
    * This is overridden so that we can render our grouping specially.
    */
   function render() {
-    $result = $this->view->result;
-    // Group the rows according to the grouping field, if specified.
-    $fields = $this->render_fields($result);
-    $sets = array();
-    if ($this->options['grouping']) {
-      foreach ($result as $index => $row) {
-        $grouping = '';
-        // Group on the rendered version of the field, not the raw.  That way,
-        // we can control any special formatting of the grouping field through
-        // the admin or theme layer or anywhere else we'd like.
-        if (isset($this->view->field[$this->options['grouping']])) {
-          $grouping = strip_tags($this->get_field($index, $this->options['grouping']));
-          if ($this->view->field[$this->options['grouping']]->options['label']) {
-            $grouping = $this->view->field[$this->options['grouping']]->options['label'] . ': ' . $grouping;
-          }
-        }
-        $sets[$grouping][] = $row;
-      }
-    }
-    else {
-      // Create a single group with an empty grouping field.
-      $sets[''] = $result;
-    }
+    $sets = $this->render_grouping($this->view->result, $this->options['grouping']);
 
     // Turn this all into an $options array for the jump menu.
     $this->view->row_index = 0;
@@ -119,7 +97,8 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     $paths = array();
 
     foreach ($sets as $title => $records) {
-      foreach ($records as $row) {
+      foreach ($records as $row_index => $row) {
+        $this->view->row_index = $row_index;
         $path = strip_tags($this->get_field($this->view->row_index, $this->options['path']));
         // Putting a '/' in front messes up url() so let's take that out
         // so users don't shoot themselves in the foot.

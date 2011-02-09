@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row_node_rss.inc,v 1.7.4.7 2010/11/11 19:41:11 dereine Exp $
+// $Id: views_plugin_row_node_rss.inc,v 1.7.4.8 2011/02/08 22:36:01 dereine Exp $
 /**
  * @file
  * Contains the node RSS row style plugin.
@@ -70,10 +70,10 @@ class views_plugin_row_node_rss extends views_plugin_row {
 
     $item_text = '';
 
-    $node->rss_namespaces = array();
+    $node->rss_namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
     $node->rss_elements = array(
       array('key' => 'pubDate', 'value' => gmdate('r', $node->created)),
-      array('key' => 'dc:creator', 'value' => $node->name, 'namespace' => array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/')),
+      array('key' => 'dc:creator', 'value' => $node->name),
       array('key' => 'guid', 'value' => $node->nid . ' at ' . $base_url, 'attributes' => array('isPermaLink' => 'false'))
     );
 
@@ -81,11 +81,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
     // and $node->rss_namespaces.
     node_build_content($node, 'rss');
 
-    foreach ($node->rss_elements as $element) {
-      if (isset($element['namespace'])) {
-        $this->view->style_plugin->namespaces = array_merge($this->view->style_plugin->namespaces, $element['namespace']);
-      }
-    }
+    $this->view->style_plugin->namespaces = array_merge($this->view->style_plugin->namespaces, $node->rss_namespaces);
 
     if ($item_length != 'title' && !empty($node->content)) {
       // We render node contents and force links to be last.

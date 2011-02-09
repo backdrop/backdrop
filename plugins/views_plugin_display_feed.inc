@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_feed.inc,v 1.7.4.5 2010/12/18 08:02:38 dereine Exp $
+// $Id: views_plugin_display_feed.inc,v 1.7.4.6 2011/02/05 16:45:32 dereine Exp $
 /**
  * @file
  * Contains the feed display plugin.
@@ -193,6 +193,10 @@ class views_plugin_display_feed extends views_plugin_display_page {
       $clone->set_display($this->display->id);
       $clone->build_title();
       $plugin->attach_to($display_id, $this->get_path(), $clone->get_title());
+
+      // Clean up
+      $clone->destroy();
+      unset($clone);
     }
   }
 

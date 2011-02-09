@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_validate_node.inc,v 1.2.4.4 2011/01/18 21:52:17 merlinofchaos Exp $
+// $Id: views_plugin_argument_validate_node.inc,v 1.2.4.5 2011/02/06 14:23:20 dereine Exp $
 /**
  * @file
  * Contains the 'node' argument validator plugin.
@@ -101,7 +101,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
       case 'nids':
         $nids = new stdClass();
         $nids->value = array($argument);
-        $nids = views_nid_type($argument, $nids);
+        $nids = views_break_phrase($argument, $nids);
         if ($nids->value == -1) {
           return FALSE;
         }

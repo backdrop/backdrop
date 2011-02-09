@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_page.inc,v 1.8.4.14 2011/01/04 21:26:47 dereine Exp $
+// $Id: views_plugin_display_page.inc,v 1.8.4.15 2011/02/04 14:13:16 dereine Exp $
 /**
  * @file
  * Contains the page display plugin.
@@ -434,7 +434,7 @@ class views_plugin_display_page extends views_plugin_display {
             '#value' => $tab_options['name'],
           );
           $form['tab_options']['markup'] = array(
-            '#value' => t('Menu selection requires the activation of menu module.'),
+            '#markup' => t('Menu selection requires the activation of menu module.'),
           );
         }
         $form['tab_options']['weight'] = array(

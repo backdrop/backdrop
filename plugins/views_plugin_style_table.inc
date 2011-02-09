@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_table.inc,v 1.7.4.12 2010/12/10 08:19:15 dereine Exp $
+// $Id: views_plugin_style_table.inc,v 1.7.4.13 2011/02/04 13:51:01 dereine Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -138,7 +138,7 @@ class views_plugin_style_table extends views_plugin_style {
     $handlers = $this->display->handler->get_handlers('field');
     if (empty($handlers)) {
       $form['error_markup'] = array(
-        '#markup' => '<div class="error form-item description">' . t('You need at least one field before you can configure your table settings') . '</div>',
+        '#markup' => '<div class="error messages">' . t('You need at least one field before you can configure your table settings') . '</div>',
       );
       return;
     }

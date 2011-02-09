@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.341.4.53 2011/01/06 00:37:05 dereine Exp $
+// $Id: views.module,v 1.341.4.54 2011/02/06 14:29:01 dereine Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -133,7 +133,7 @@ function views_theme($existing, $type, $theme, $path) {
  *   The existing cache of theme hooks to test against.
  * @param $path
  *   The path to search.
- *
+ * 
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {
@@ -830,7 +830,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
       $data[$field][$key]['override handler'] = $override;
     }
 
-    $handler = _views_prepare_handler($data[$field][$key], $data, $field);
+    $handler = _views_prepare_handler($data[$field][$key], $data, $field, $key);
   }
 
   if ($handler) {
@@ -845,7 +845,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
     'table' => $table,
     'field' => $field,
   );
-  return _views_create_handler($broken);
+  return _views_create_handler($broken, 'handler', $type);
 }
 
 /**
@@ -1272,7 +1272,7 @@ function views_exposed_form_submit(&$form, &$form_state) {
   $exclude = array('q', 'submit', 'form_build_id', 'form_id', 'form_token', 'exposed_form_plugin', '');
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
   $exposed_form_plugin->exposed_form_submit($form, $form_state, $exclude);
-
+  
   foreach ($form_state['values'] as $key => $value) {
     if (!in_array($key, $exclude)) {
       $form_state['view']->exposed_raw_input[$key] = $value;
