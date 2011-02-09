@@ -367,9 +367,9 @@ Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
   // Bind handlers so that when a "Remove" link is clicked, we:
   // - Update the rowspans of cells containing an operator dropdown (since they
   //   need to change to reflect the number of rows in each group).
-  // - Redraw the operator labels next to the filters in the group (since
-  //   whichever filter in the group that is currently displayed last is not
-  //   supposed to have a label display next to it).
+  // - Redraw the operator labels next to the filters in the group (since the
+  //   filter that is currently displayed last in each group is not supposed to
+  //   have a label display next to it).
   $('a.views-groups-remove-link', this.table)
     .once('views-rearrange-filter-handler')
     .bind('click.views-rearrange-filter-handler', $.proxy(this, 'updateRowspans'))
