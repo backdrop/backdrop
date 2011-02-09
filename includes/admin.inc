@@ -1788,7 +1788,7 @@ function views_ui_standard_submit($form, &$form_state) {
 
   // Make sure the dropdown exists in the first place.
   if (isset($form_state['values']['override']['dropdown'])) {
-    $was_defaulted = (bool) ($form['options']['override']['dropdown']['#default_value'] === 'defaults');
+    $was_defaulted = (bool) ($form['override']['dropdown']['#default_value'] === 'defaults');
     $is_defaulted = (bool) ($form_state['values']['override']['dropdown'] === 'default');
 
     if ($was_defaulted !== $is_defaulted && isset($form['#section'])) {
