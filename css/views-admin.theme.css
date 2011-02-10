@@ -119,6 +119,11 @@
   margin-left: 16px;
 }
 
+/* Hide 'remove' checkboxes. This might be scoped too widely. */
+.page-admin-structure-views [class*="form-type-checkbox"][class*="remove"] {
+  display: none;
+}
+
 /* @end */
 
 /* @group Lists */
