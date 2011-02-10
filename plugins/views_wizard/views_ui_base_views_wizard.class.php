@@ -113,7 +113,15 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a menu link'),
       '#type' => 'checkbox',
     );
-    $form['displays']['page']['options']['link_properties'] = array();
+    $form['displays']['page']['options']['link_properties'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="page[link]"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#parents' => array('options'),
+    );
     if (module_exists('menu')) {
       $menu_options = menu_get_menus();
     }
@@ -128,20 +136,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Menu'),
       '#type' => 'select',
       '#options' => $menu_options,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[link]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
     $form['displays']['page']['options']['link_properties']['title'] = array(
       '#title' => t('Link text'),
       '#type' => 'textfield',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[link]"]' => array('checked' => TRUE),
-        ),
-      ),
     );
     // Only offer a feed if we have at least one available feed row style.
     if ($feed_row_options) {
@@ -149,15 +147,19 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#title' => t('Include an RSS feed'),
         '#type' => 'checkbox',
       );
-      $form['displays']['page']['options']['feed_properties']['path'] = array(
-        '#title' => t('Feed path'),
-        '#type' => 'textfield',
-        '#field_prefix' => $path_prefix,
+      $form['displays']['page']['options']['feed_properties'] = array(
+        '#type' => 'container',
         '#states' => array(
           'visible' => array(
             ':input[name="page[feed]"]' => array('checked' => TRUE),
           ),
         ),
+        '#parents' => array('options'),
+      );
+      $form['displays']['page']['options']['feed_properties']['path'] = array(
+        '#title' => t('Feed path'),
+        '#type' => 'textfield',
+        '#field_prefix' => $path_prefix,
       );
       // This will almost never be visible.
       $form['displays']['page']['options']['feed_properties']['row_plugin'] = array(
