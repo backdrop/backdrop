@@ -470,6 +470,41 @@
 
 /* @end */
 
+/* @group Rearrange filter criteria */
+
+#views-ui-rearrange-filter-form table {
+  border-collapse: collapse;
+}
+
+#views-ui-rearrange-filter-form tr td[rowspan] {
+  border-color: #CDCDCD;
+  border-style: solid;
+  border-width: 0 1px 1px 1px;
+}
+
+#views-ui-rearrange-filter-form tr[id^="views-row"] {
+  border-right: 1px solid #CDCDCD;
+}
+
+#views-ui-rearrange-filter-form tr[id^="views-row"].even td {
+  background-color: #F3F4ED;
+}
+
+#views-ui-rearrange-filter-form .views-group-title {
+  border-top: 1px solid #CDCDCD;
+}
+
+#views-ui-rearrange-filter-form .group-empty {
+  border-bottom: 1px solid #CDCDCD;
+}
+
+/* This is causing a 1px gap */
+#views-ui-rearrange-filter-form .views-group-title .group-title {
+  display: none;
+}
+
+/* @end */
+
 /* @group Live preview elements */
 
 .page-admin-structure-views #views-live-preview a,

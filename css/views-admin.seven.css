@@ -69,6 +69,35 @@
 
 /* @end */
 
+/* @group Rearrange filter criteria */
+
+#views-ui-rearrange-filter-form table {
+  border: medium none;
+}
+
+#views-ui-rearrange-filter-form [id^="views-row"] {
+  border: medium none;
+}
+
+#views-ui-rearrange-filter-form tr td:last-child {
+  border-right: medium none;
+}
+
+#views-ui-rearrange-filter-form .filter-group-operator-row {
+  border-left: 1px solid transparent !important;
+  border-right: 1px solid transparent !important;
+}
+
+#views-ui-rearrange-filter-form tr.drag td {
+  background-color: #FFEE77 !important;
+}
+
+#views-ui-rearrange-filter-form tr.drag-previous td {
+  background-color: #FFFFBB !important;
+}
+
+/* @end */
+
 /* @group Attachments */
 
 .page-admin-structure-views #content .views-displays .secondary {
