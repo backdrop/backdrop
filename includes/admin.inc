@@ -2660,6 +2660,12 @@ function views_ui_rearrange_form($form, &$form_state) {
     else {
       $form['fields'][$id]['name'] = array('#markup' => t('Broken field @id', array('@id' => $id)));
     }
+    $form['fields'][$id]['removed'] = array(
+      '#type' => 'checkbox',
+      '#id' => 'views-removed-' . $id,
+      '#attributes' => array('class' => array('views-remove-checkbox')),
+      '#default_value' => 0,
+    );
   }
 
   // Add javascript settings that will be added via $.extend for tabledragging
