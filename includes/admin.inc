@@ -3211,6 +3211,13 @@ function views_ui_add_item_form($form, &$form_state) {
       '#markup' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $types[$type]['ltitle'])) . '</div>',
     );
   }
+  // Add a div to show the selected items
+  $form['selected'] = array(
+    '#type' => 'item',
+    '#markup' => '<div class="views-selected-options"></div>',
+    '#title' => t('Selected') . ':',
+    '#suffix' => '</div>',
+  );
   ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $types[$type]['ltitle'])));
 
