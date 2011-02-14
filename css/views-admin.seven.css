@@ -26,6 +26,10 @@
   padding: 10px 12px 12px;
 }
 
+.page-admin-structure-views #content fieldset.box-padding .fieldset-wrapper {
+  padding: 0;
+}
+
 .page-admin-structure-views #content legend + .fieldset-wrapper {
   padding-top: 2.5em;
 }
