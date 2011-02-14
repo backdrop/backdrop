@@ -489,7 +489,8 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
     // so the operator label continues to appear last.
     var changeMarker = jQuery(this.oldRowElement).find('.tabledrag-changed');
     if (changeMarker.length) {
-      // Search for occurrences of the operator label before the change marker.
+      // Search for occurrences of the operator label before the change marker,
+      // and reverse them.
       var operatorLabel = changeMarker.prevAll('.views-operator-label');
       if (operatorLabel.length) {
         operatorLabel.insertAfter(changeMarker);
