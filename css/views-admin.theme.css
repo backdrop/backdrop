@@ -503,11 +503,6 @@
   border-bottom: 1px solid #CDCDCD;
 }
 
-/* This is causing a 1px gap */
-#views-ui-rearrange-filter-form .views-group-title .group-title {
-  display: none;
-}
-
 /* @end */
 
 /* @group Live preview elements */

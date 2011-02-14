@@ -120,7 +120,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           ':input[name="page[link]"]' => array('checked' => TRUE),
         ),
       ),
-      '#parents' => array('options'),
     );
     if (module_exists('menu')) {
       $menu_options = menu_get_menus();
@@ -154,7 +153,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
             ':input[name="page[feed]"]' => array('checked' => TRUE),
           ),
         ),
-        '#parents' => array('options'),
       );
       $form['displays']['page']['options']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),

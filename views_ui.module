@@ -37,7 +37,7 @@ function views_ui_menu() {
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
   $items['admin/structure/views/templates'] = array(
-    'title' => 'Browse view templates',
+    'title' => 'Add view from template',
     'page callback' => 'views_ui_list_disabled_views',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
