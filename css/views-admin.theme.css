@@ -119,6 +119,11 @@
   margin-left: 16px;
 }
 
+/* Hide 'remove' checkboxes. This might be scoped too widely. */
+.page-admin-structure-views [class*="form-type-checkbox"][class*="remove"] {
+  display: none;
+}
+
 /* @end */
 
 /* @group Lists */
@@ -496,11 +501,6 @@
 
 #views-ui-rearrange-filter-form .group-empty {
   border-bottom: 1px solid #CDCDCD;
-}
-
-/* This is causing a 1px gap */
-#views-ui-rearrange-filter-form .views-group-title .group-title {
-  display: none;
 }
 
 /* @end */
