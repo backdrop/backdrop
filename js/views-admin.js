@@ -166,7 +166,7 @@ Drupal.behaviors.viewsUiRenderAddViewButton.attach = function (context, settings
   $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>')
     .parent().first().addClass('first').end().last().addClass('last');
   $addDisplayDropdown.appendTo($menu);
-  
+
   // Add the click handler for the add display button
   $('li.add > a', $menu).bind('click', function (event) {
     event.preventDefault();
@@ -177,7 +177,7 @@ Drupal.behaviors.viewsUiRenderAddViewButton.attach = function (context, settings
   // away from the item. We use mouseleave instead of mouseout because
   // the user is going to trigger mouseout when she moves from the trigger
   // link to the sub menu items.
-  // We use the live binder because the open class on this item will be 
+  // We use the live binder because the open class on this item will be
   // toggled on and off and we want the handler to take effect in the cases
   // that the class is present, but not when it isn't.
   $('li.add', $menu).live('mouseleave', function (event) {
@@ -301,15 +301,22 @@ Drupal.viewsUi.OptionsSearch.prototype.handleKeyup = function (event) {
 
 Drupal.behaviors.viewsUiPreview = {};
 Drupal.behaviors.viewsUiPreview.attach = function (context, settings) {
+  var $ = jQuery;
+  var argumentsBucket = $('.views-display-column .arguments', context);
+
+  // Only act on the edit view form.
+  if (argumentsBucket.length == 0) {
+    return;
+  }
+
   // If the display has no arguments, hide the form where you enter arguments
   // for the live preview.
-  var $ = jQuery;
   var arguments = $('.views-display-column .arguments .views-display-setting a', context);
   if (arguments.length) {
-    $('.arguments-preview').show();
+    $('.form-item-displays-preview-form-view-args').show();
   }
   else {
-    $('.arguments-preview').hide();
+    $('.form-item-displays-preview-form-view-args').hide();
   }
 };
 

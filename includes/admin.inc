@@ -344,7 +344,7 @@ function views_ui_add_form($form, &$form_state) {
     '#tree' => TRUE,
     '#attributes' => array('class' => array('container-inline')),
   );
-  
+
   $wizard_plugins = views_ui_get_wizards();
   $options = array();
   foreach ($wizard_plugins as $key => $w) {
@@ -758,6 +758,9 @@ function views_ui_edit_page_title($view) {
  *   version.
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
+  ctools_include('dependent');
+  ctools_add_js('dependent');
+
   $form['#tree'] = TRUE;
   // @todo When more functionality is added to this form, cloning here may be
   //   too soon. But some of what we do with $view later in this function
@@ -907,13 +910,12 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
     $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
 
-  // Add a checkbox controlling whether or not this display auto-previews.
-  $form['displays']['live_preview'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Auto preview'),
-    '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
-  );
-
+    // Add a checkbox controlling whether or not this display auto-previews.
+    $form['displays']['live_preview'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Auto preview'),
+      '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
+    );
 
     // The live preview.
     $view->views_ui_context = TRUE;
@@ -926,6 +928,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['preview']['form'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array('class' => array('arguments-preview')),
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array('edit-displays-live-preview' => array(0)),
+      '#id' => 'preview-form',
+      '#prefix' => '<div id="preview-form-wrapper">',
+      '#suffix' => '</div>',
     );
     $form['displays']['preview']['form']['view_args'] = array(
       '#type' => 'textfield',
