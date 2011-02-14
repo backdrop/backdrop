@@ -415,10 +415,10 @@ Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
     this.syncGroupsOperators();
   }
 
-  // Add methods to the tableDrag instance to account for the operator cells
-  // (which span multiple rows) and to allow the operator labels next to each
-  // filter (e.g., "And" or "Or") to appropriately change as the rows are
-  // dragged.
+  // Add methods to the tableDrag instance to account for operator cells (which
+  // span multiple rows), the operator labels next to each filter (e.g., "And"
+  // or "Or"), the filter groups, and other special aspects of this tableDrag
+  // instance.
   this.modifyTableDrag();
 
   // Initialize the operator labels (e.g., "And" or "Or") that are displayed
@@ -547,10 +547,12 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
    * Override the onDrop method from tabledrag.js.
    */
   tableDrag.onDrop = function () {
+    var $ = jQuery;
+
     // If the tabledrag change marker (i.e., the "*") has been inserted inside
     // a row after the operator label (i.e., "And" or "Or") rearrange the items
     // so the operator label continues to appear last.
-    var changeMarker = jQuery(this.oldRowElement).find('.tabledrag-changed');
+    var changeMarker = $(this.oldRowElement).find('.tabledrag-changed');
     if (changeMarker.length) {
       // Search for occurrences of the operator label before the change marker,
       // and reverse them.
@@ -558,6 +560,18 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
       if (operatorLabel.length) {
         operatorLabel.insertAfter(changeMarker);
       }
+    }
+
+    // Make sure the "group" dropdown is properly updated when rows are dragged
+    // into an empty filter group. This is borrowed heavily from the block.js
+    // implementation of tableDrag.onDrop().
+    var groupRow = $(this.rowObject.element).prevAll('tr.group-message').get(0);
+    var groupName = groupRow.className.replace(/([^ ]+[ ]+)*group-([^ ]+)-message([ ]+[^ ]+)*/, '$2');
+    var groupField = $('select.views-group-select', this.rowObject.element);
+    if ($(this.rowObject.element).prev('tr').is('.group-message') && !groupField.is('.views-group-select-' + groupName)) {
+      var oldGroupName = groupField.attr('class').replace(/([^ ]+[ ]+)*views-group-select-([^ ]+)([ ]+[^ ]+)*/, '$2');
+      groupField.removeClass('views-group-select-' + oldGroupName).addClass('views-group-select-' + groupName);
+      groupField.val(groupName);
     }
   };
 };
