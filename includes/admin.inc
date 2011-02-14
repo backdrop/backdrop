@@ -3966,17 +3966,6 @@ function views_ui_admin_settings_defaults() {
     '#default_value' => variable_get('views_exposed_filter_any_label', 'old_any'),
   );
 
-  $form['view_output'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('View output'),
-  );
-  $form['view_output']['views_ui_hover_links'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show "edit" and "duplicate" hover links'),
-    '#description' => t("Disable to require views administrators to navigate to Structure > Views to edit a view."),
-    '#default_value' => variable_get('views_ui_hover_links', TRUE),
-  );
-
   return system_settings_form($form);
 }
 

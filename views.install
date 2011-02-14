@@ -500,7 +500,7 @@ function views_update_6012() {
     ->condition('module', 'views')
     ->condition('delta', db_like('-exp-') . '%', 'LIKE')
     ->fields(array('cache' => DRUPAL_NO_CACHE));
-  
+
   return $ret;
 }
 
@@ -584,10 +584,6 @@ function views_update_7000() {
     variable_del('views_hide_help_message');
   }
 
-  // Rename the views_no_hover_links variable from negative to positive.
-  $hide_hover = variable_get('views_no_hover_links');
-  if (isset($hide_hover)) {
-    variable_set('views_ui_hover_links', !$hide_hover);
-    variable_del('views_no_hover_links');
-  }
+  // Rename the unused views_no_hover_links variable.
+  variable_del('views_no_hover_links');
 }

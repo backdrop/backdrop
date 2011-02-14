@@ -85,7 +85,7 @@ function template_preprocess_views_view(&$vars) {
   $vars['attachment_after'] = !empty($view->attachment_after) ? $view->attachment_after : '';
 
   // if administrator, add some links. These used to be tabs, but this is better.
-  if (user_access('administer views') && module_exists('views_ui') && module_exists('contextual') && empty($view->hide_admin_links) && !variable_get('views_no_hover_links', FALSE)) {
+  if (user_access('administer views') && module_exists('views_ui') && module_exists('contextual') && empty($view->hide_admin_links)) {
     $links = array(
       'views-edit' => array(
         'title' => t('Edit view'),
