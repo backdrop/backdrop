@@ -146,6 +146,62 @@ Drupal.viewsUi.FormFieldFiller.prototype.rebind = function ($fields) {
   this.bind();
 }
 
+Drupal.behaviors.addItemForm = {};
+Drupal.behaviors.addItemForm.attach = function (context) {
+  var $ = jQuery;
+  // The add item form may have an id of views-ui-add-item-form--n.
+  var $form = $(context).find('form[id^="views-ui-add-item-form"]').first();
+  // Make sure we don't add more than one event handler to the same form.
+  $form = $form.once('views-ui-filter-options');
+  if ($form.length) {
+    new Drupal.viewsUi.addItemForm($form);
+  }
+}
+
+Drupal.viewsUi.addItemForm = function($form) {
+  this.$form = $form;
+  this.$form.find('.views-filterable-options :checkbox').click(jQuery.proxy(this.handleCheck, this));
+  // Find the wrapper of the displayed text.
+  this.$selected_div = this.$form.find('.views-selected-options').parent();
+  this.$selected_div.hide();
+  this.checkedItems = [];
+}
+
+Drupal.viewsUi.addItemForm.prototype.handleCheck = function (event) {
+  var $target = jQuery(event.target);
+  var label = jQuery.trim($target.next().text());
+  // Add/remove the checked item to the list.
+  if ($target.is(':checked')) {
+    this.$selected_div.show();
+    this.checkedItems.push(label);
+  }
+  else {
+    var length = this.checkedItems.length;
+    var position = jQuery.inArray(label, this.checkedItems);
+    // Delete the item from the list and take sure that the list doesn't have undefined items left.
+    for (var i = 0; i < this.checkedItems.length; i++) {
+      if (i == position) {
+        this.checkedItems.splice(i, 1);
+        i--;
+      }
+    }
+    // Hide it again if none item is selected.
+    if (this.checkedItems.length == 0) {
+      this.$selected_div.hide();
+    }
+  }
+  this.refreshCheckedItems();
+}
+
+
+/**
+ * Refresh the display of the checked items.
+ */
+Drupal.viewsUi.addItemForm.prototype.refreshCheckedItems = function() {
+  // Perhaps we should precache the text div, too.
+  this.$selected_div.find('.views-selected-options').html(this.checkedItems.join(', '));
+}
+
 
 /**
  * The input field items that add displays must be rendered as <input> elements.
@@ -359,10 +415,10 @@ Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
     this.syncGroupsOperators();
   }
 
-  // Add methods to the tableDrag instance to account for the operator cells
-  // (which span multiple rows) and to allow the operator labels next to each
-  // filter (e.g., "And" or "Or") to appropriately change as the rows are
-  // dragged.
+  // Add methods to the tableDrag instance to account for operator cells (which
+  // span multiple rows), the operator labels next to each filter (e.g., "And"
+  // or "Or"), the filter groups, and other special aspects of this tableDrag
+  // instance.
   this.modifyTableDrag();
 
   // Initialize the operator labels (e.g., "And" or "Or") that are displayed
@@ -491,10 +547,12 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
    * Override the onDrop method from tabledrag.js.
    */
   tableDrag.onDrop = function () {
+    var $ = jQuery;
+
     // If the tabledrag change marker (i.e., the "*") has been inserted inside
     // a row after the operator label (i.e., "And" or "Or") rearrange the items
     // so the operator label continues to appear last.
-    var changeMarker = jQuery(this.oldRowElement).find('.tabledrag-changed');
+    var changeMarker = $(this.oldRowElement).find('.tabledrag-changed');
     if (changeMarker.length) {
       // Search for occurrences of the operator label before the change marker,
       // and reverse them.
@@ -502,6 +560,18 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
       if (operatorLabel.length) {
         operatorLabel.insertAfter(changeMarker);
       }
+    }
+
+    // Make sure the "group" dropdown is properly updated when rows are dragged
+    // into an empty filter group. This is borrowed heavily from the block.js
+    // implementation of tableDrag.onDrop().
+    var groupRow = $(this.rowObject.element).prevAll('tr.group-message').get(0);
+    var groupName = groupRow.className.replace(/([^ ]+[ ]+)*group-([^ ]+)-message([ ]+[^ ]+)*/, '$2');
+    var groupField = $('select.views-group-select', this.rowObject.element);
+    if ($(this.rowObject.element).prev('tr').is('.group-message') && !groupField.is('.views-group-select-' + groupName)) {
+      var oldGroupName = groupField.attr('class').replace(/([^ ]+[ ]+)*views-group-select-([^ ]+)([ ]+[^ ]+)*/, '$2');
+      groupField.removeClass('views-group-select-' + oldGroupName).addClass('views-group-select-' + groupName);
+      groupField.val(groupName);
     }
   };
 };

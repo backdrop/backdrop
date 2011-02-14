@@ -230,6 +230,10 @@ class views_plugin_display_page extends views_plugin_display {
 
     $categories['page'] = array(
       'title' => t('Page settings'),
+      'column' => 'second',
+      'build' => array(
+        '#weight' => -10,
+      ),
     );
 
     $path = strip_tags($this->get_option('path'));

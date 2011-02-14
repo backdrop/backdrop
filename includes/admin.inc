@@ -1209,14 +1209,13 @@ function views_ui_get_display_tab_details($view, $display) {
   if ($uses_fields) {
     $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display);
   }
-  $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
-  $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
-  $build['columns']['second']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
-  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
-  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
   $build['columns']['first']['filters'] = views_ui_edit_form_get_bucket('filter', $view, $display);
   $build['columns']['first']['sorts'] = views_ui_edit_form_get_bucket('sort', $view, $display);
-
+  $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
+  $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
+  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
+  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
+  $build['columns']['third']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
 
   return $build;
 }
@@ -3229,6 +3228,12 @@ function views_ui_add_item_form($form, &$form_state) {
       '#markup' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $types[$type]['ltitle'])) . '</div>',
     );
   }
+  // Add a div to show the selected items
+  $form['selected'] = array(
+    '#type' => 'item',
+    '#markup' => '<div class="views-selected-options"></div>',
+    '#title' => t('Selected') . ':',
+  );
   ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $types[$type]['ltitle'])));
 
@@ -3358,6 +3363,7 @@ function views_ui_config_item_form($form, &$form_state) {
           '#title' => t('Relationship'),
           '#options' => $relationship_options,
           '#default_value' => $rel,
+          '#fieldset' => 'more',
         );
       }
       else {

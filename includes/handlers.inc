@@ -273,6 +273,17 @@ class views_handler extends views_object {
       '#title' => t('Administrative title'),
       '#description' => t('This title will be displayed on the views edit page instead of the default one. This might be useful if you have the same item twice.'),
       '#default_value' => $this->options['ui_name'],
+      '#fieldset' => 'more',
+    );
+
+    // This form is long and messy enough that the "Administrative title" option
+    // belongs in a "more options" fieldset at the bottom of the form.
+    $form['more'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('More'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 50,
     );
   }
 

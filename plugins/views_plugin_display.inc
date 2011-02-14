@@ -27,7 +27,7 @@
 class views_plugin_display extends views_plugin {
   /**
    * The top object of a view.
-   * 
+   *
    * @var view
    */
   var $view = NULL;
@@ -883,28 +883,29 @@ class views_plugin_display extends views_plugin {
         'title' => t('Fields'),
         'column' => 'first',
       ),
-      // TODO: Remove when empty.
-      'basic' => array(
-        'title' => t('Basic settings'),
-        'column' => 'first',
-      ),
-      'advanced' => array(
-        'title' => t('Advanced settings'),
-        'column' => 'third',
-      ),
-      'style' => array(
-        'title' => t('Style settings'),
-        'column' => 'first',
+      'pager' => array(
+        'title' => t('Pager'),
+        'column' => 'second',
       ),
       'exposed' => array(
         'title' => t('Exposed form'),
-        'column' => 'second',
+        'column' => 'third',
+        'build' => array(
+          '#weight' => 1,
+        ),
+      ),
+      'other' => array(
+        'title' => t('Other'),
+        'column' => 'third',
+        'build' => array(
+          '#weight' => 2,
+        ),
       ),
     );
 
     if ($this->display->id != 'default') {
       $options['display_id'] = array(
-        'category' => 'advanced',
+        'category' => 'other',
         'title' => t('Machine Name'),
         'value' => !empty($this->display->new_id) ? check_plain($this->display->new_id) : check_plain($this->display->id),
         'desc' => t('Change the machine name of this display.'),
@@ -912,7 +913,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['display_title'] = array(
-      'category' => 'basic',
+      'category' => 'other',
       'title' => t('Name'),
       'value' => check_plain($this->display->display_title),
       'desc' => t('Change the name of this display.'),
@@ -920,7 +921,7 @@ class views_plugin_display extends views_plugin {
 
     $display_comment = drupal_substr($this->get_option('display_comment'), 0, 10);
     $options['display_comment'] = array(
-      'category' => 'basic',
+      'category' => 'other',
       'title' => t('Comment'),
       'value' => !empty($display_comment) ? $display_comment : t('No comment'),
       'desc' => t('Comment or document this display.'),
@@ -932,14 +933,14 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['title'] = array(
-      'category' => 'basic',
+      'category' => 'title',
       'title' => t('Title'),
       'value' => $title,
       'desc' => t('Change the title that this display will use.'),
     );
 
     $options['enabled'] = array(
-      'category' => 'basic',
+      'category' => 'other',
       'title' => t('Display status'),
       'value' => $this->get_option('enabled') ? t('Enabled') : t('Disabled'),
       'desc' => t('Define if this display is or is not enabled.'),
@@ -979,7 +980,7 @@ class views_plugin_display extends views_plugin {
     }
     if (!empty($this->definition['use ajax'])) {
       $options['use_ajax'] = array(
-        'category' => 'advanced',
+        'category' => 'other',
         'title' => t('Use AJAX'),
         'value' => $this->get_option('use_ajax') ? t('Yes') : t('No'),
         'desc' => t('Change whether or not this display will use AJAX.'),
@@ -987,7 +988,7 @@ class views_plugin_display extends views_plugin {
     }
     if (!empty($this->definition['accept attachments'])) {
       $options['hide_attachment_summary'] = array(
-        'category' => 'advanced',
+        'category' => 'other',
         'title' => t('Hide attachments in summary'),
         'value' => $this->get_option('hide_attachment_summary') ? t('Yes') : t('No'),
         'desc' => t('Change whether or not to display attachments when displaying an argument summary.'),
@@ -1020,7 +1021,7 @@ class views_plugin_display extends views_plugin {
 
     if (!empty($this->definition['use more'])) {
       $options['use_more'] = array(
-        'category' => 'advanced',
+        'category' => 'pager',
         'title' => t('More link'),
         'value' => $this->get_option('use_more') ? t('Yes') : t('No'),
         'desc' => t('Specify whether this display will provide a "more" link.'),
@@ -1030,7 +1031,7 @@ class views_plugin_display extends views_plugin {
     $this->view->init_query();
     if ($this->view->query->get_aggregation_info()) {
       $options['group_by'] = array(
-        'category' => 'advanced',
+        'category' => 'other',
         'title' => t('Use grouping'),
         'value' => $this->get_option('group_by') ? t('Yes') : t('No'),
         'desc' => t('Allow grouping and aggregation (calculation) of fields.'),
@@ -1038,7 +1039,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['query'] = array(
-      'category' => 'advanced',
+      'category' => 'other',
       'title' => t('Query settings'),
       'value' => t('Settings'),
       'desc' => t('Allow to set some advanced settings for the query plugin'),
@@ -1053,7 +1054,7 @@ class views_plugin_display extends views_plugin {
     $access_str = $access_plugin->summary_title();
 
     $options['access'] = array(
-      'category' => 'basic',
+      'category' => 'page',
       'title' => t('Access'),
       'value' => $access_str,
       'desc' => t('Specify access control type for this display.'),
@@ -1072,7 +1073,7 @@ class views_plugin_display extends views_plugin {
     $cache_str = $cache_plugin->summary_title();
 
     $options['cache'] = array(
-      'category' => 'advanced',
+      'category' => 'other',
       'title' => t('Caching'),
       'value' => $cache_str,
       'desc' => t('Specify caching type for this display.'),
@@ -1102,7 +1103,7 @@ class views_plugin_display extends views_plugin {
         $display_id = $this->get_link_display();
         $link_display = empty($this->view->display[$display_id]) ? t('None') : check_plain($this->view->display[$display_id]->display_title);
         $options['link_display'] = array(
-          'category' => 'basic',
+          'category' => 'other',
           'title' => t('Link display'),
           'value' => $link_display,
           'desc' => t('Specify which display this display will link to.'),
@@ -1142,14 +1143,14 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['css_class'] = array(
-      'category' => 'advanced',
+      'category' => 'other',
       'title' => t('CSS class'),
       'value' => $css_class,
       'desc' => t('Change the CSS class name(s) that will be added to this display.'),
     );
 
     $options['analyze-theme'] = array(
-      'category' => 'advanced',
+      'category' => 'other',
       'title' => t('Theme'),
       'value' => t('Information'),
       'desc' => t('Get information on how to theme this display'),
@@ -2618,4 +2619,3 @@ class views_plugin_display extends views_plugin {
 /**
  * @}
  */
-
