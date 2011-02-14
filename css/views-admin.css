@@ -4,6 +4,15 @@
  * The .css file is intended to only contain positioning and size declarations 
  * For example: display, position, float, clear, and overflow.
  */
+ 
+/* @group Layout */
+
+.page-admin-structure-views #content .box-padding {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* @end */
 
 /* @group Inline lists */
  

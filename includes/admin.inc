@@ -158,6 +158,9 @@ function views_ui_check_advanced_help() {
  * Returns the results of the live preview.
  */
 function views_ui_preview($view, $display_id, $args) {
+  // Save $_GET['q'] so it can be restored before returning from this function.
+  $q = $_GET['q'];
+
   $errors = $view->validate();
   if ($errors === TRUE) {
     $view->ajax = TRUE;
@@ -259,6 +262,7 @@ function views_ui_preview($view, $display_id, $args) {
     $output = $preview . $info;
   }
 
+  $_GET['q'] = $q;
   return $output;
 }
 
@@ -762,10 +766,11 @@ function views_ui_edit_page_title($view) {
  *   version.
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
-  // @todo: Go back to using ctools_include() rather than form_load_include(),
-  //   once that works with form caching.
-  //ctools_include('dependent');
-  form_load_include($form_state, 'inc', 'ctools', 'includes/dependent');
+  // @todo Change $form_state['view'] to $form_state['temporary']['view'] so
+  //   that this isn't necessary.
+  $form_state['no_cache'] = TRUE;
+
+  ctools_include('dependent');
   ctools_add_js('dependent');
 
   $form['#tree'] = TRUE;
@@ -917,11 +922,56 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
     $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
 
+
+    // Add preview controls
+    $form['displays']['preview_controls'] = array(
+      '#theme_wrappers' => array('container'),
+    );
+
+    // Wrap the controls in a fieldset used for standard left/right padding
+    $form['displays']['preview_controls']['preview_fieldset'] = array(
+      '#type' => 'fieldset',
+      '#id' => 'edit-displays-preview-fieldset',
+      '#attributes' => array('class' => array('box-padding')),
+    );
+
     // Add a checkbox controlling whether or not this display auto-previews.
-    $form['displays']['live_preview'] = array(
+    $form['displays']['preview_controls']['preview_fieldset']['live_preview'] = array(
       '#type' => 'checkbox',
+      '#id' => 'edit-displays-live-preview',
       '#title' => t('Auto preview'),
       '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
+    );
+    // Add a wrapper that contains the preview button and arguments textfield
+    $form['displays']['preview_controls']['preview_fieldset']['form'] = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('arguments-preview')),
+      '#process' => array('ctools_dependent_process'),
+      '#states' => array(
+        'visible' => array(   // action to take.
+          ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
+        ),
+      ),
+      '#id' => 'preview-form',
+    );
+
+    // Add the arguments textfield
+    $form['displays']['preview_controls']['preview_fieldset']['form']['view_args'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Arguments'),
+      '#description' => t('Separate arguments with a / as though they were a URL path.'),
+      '#id' => 'preview-args',
+    );
+
+    // Add the preview button
+    $form['displays']['preview_controls']['preview_fieldset']['form']['button'] = array(
+      '#type' => 'submit',
+      '#value' => t('Preview'),
+      '#id' => 'preview-submit',
+      '#ajax' => array(
+        'callback' => 'views_ui_preview_callback',
+        'wrapper' => 'views-live-preview',
+      ),
     );
 
     // The live preview.
@@ -930,31 +980,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['preview'] = array(
       '#theme_wrappers' => array('container'),
       '#id' => 'views-live-preview',
-    );
-
-    $form['displays']['preview']['form'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('arguments-preview')),
-      '#process' => array('ctools_dependent_process'),
-      '#dependency' => array('edit-displays-live-preview' => array(0)),
-      '#id' => 'preview-form',
-      '#prefix' => '<div id="preview-form-wrapper">',
-      '#suffix' => '</div>',
-    );
-    $form['displays']['preview']['form']['view_args'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Arguments'),
-      '#description' => t('Separate arguments with a / as though they were a URL path.'),
-      '#id' => 'preview-args',
-    );
-    $form['displays']['preview']['form']['button'] = array(
-      '#type' => 'submit',
-      '#value' => t('Preview'),
-      '#id' => 'preview-submit',
-      '#ajax' => array(
-        'callback' => 'views_ui_preview_callback',
-        'wrapper' => 'views-live-preview',
-      ),
     );
 
     $form['displays']['preview']['preview'] = array(
@@ -1117,6 +1142,7 @@ function views_ui_get_display_tab_details($view, $display) {
     '#title' => t('@display_type details', array('@display_type' => ucwords($type))),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE, // @TODO: Close by default after contextual links are added.
+    '#attributes' => array('class' => array('box-padding')),
   );
 
   // The Delete and Duplicate buttons.
@@ -1205,14 +1231,13 @@ function views_ui_get_display_tab_details($view, $display) {
   if ($uses_fields) {
     $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display);
   }
-  $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
-  $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
-  $build['columns']['second']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
-  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
-  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
   $build['columns']['first']['filters'] = views_ui_edit_form_get_bucket('filter', $view, $display);
   $build['columns']['first']['sorts'] = views_ui_edit_form_get_bucket('sort', $view, $display);
-
+  $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
+  $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
+  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
+  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
+  $build['columns']['third']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
 
   return $build;
 }
