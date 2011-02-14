@@ -227,6 +227,8 @@ Drupal.viewsUi.OptionsSearch = function ($form) {
   // Get a list of option labels and their corresponding divs and maintain it
   // in memory, so we have as little overhead as possible at keyup time.
   this.options = this.getOptions(this.$form.find('.filterable-option'));
+  // Restripe on initial loading.
+  this.handleKeyup();
 };
 
 /**
@@ -494,7 +496,8 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.modifyTableDrag = function () {
     // so the operator label continues to appear last.
     var changeMarker = jQuery(this.oldRowElement).find('.tabledrag-changed');
     if (changeMarker.length) {
-      // Search for occurrences of the operator label before the change marker.
+      // Search for occurrences of the operator label before the change marker,
+      // and reverse them.
       var operatorLabel = changeMarker.prevAll('.views-operator-label');
       if (operatorLabel.length) {
         operatorLabel.insertAfter(changeMarker);
