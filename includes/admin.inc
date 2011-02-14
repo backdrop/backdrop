@@ -93,7 +93,7 @@ function views_ui_build_view_list($views) {
       t('Operations'),
     ),
     '#rows' => $rows,
-    '#empty' => t('No views found.'),
+    '#empty' => t('No views have been added.'),
   );
 
   return $build;
@@ -551,8 +551,19 @@ function _views_ui_get_operation_links($view) {
   }
 
   if ($view->type != t('Default')) {
-    $text = $view->type == t('Overridden') ? t('revert') : t('delete');
-    $links[] = array('title' => $text, 'href' => "admin/structure/views/view/$view->name/delete");
+    if ($view->type == t('Overridden')) {
+      $links[] = array(
+        'title' => t('revert'),
+        'href' => "admin/structure/views/view/$view->name/delete",
+        'attributes' => array('title' => t('Reverting a view deletes your changes and replaces it with the original default view')),
+      );
+    }
+    else {
+      $links[] = array(
+        'title' => t('delete'),
+        'href' => "admin/structure/views/view/$view->name/delete",
+      );
+    }
   }
   else {
     if (empty($view->disabled)) {
@@ -687,7 +698,12 @@ function views_ui_delete_confirm($form, &$form_state, $view) {
 function views_ui_delete_confirm_submit(&$form, &$form_state) {
   $form_state['view']->delete();
   ctools_object_cache_clear('view', $form_state['view']->name);
-  drupal_set_message(t('The view has been deleted.'));
+  if ($form_state['view']->type == t('Overridden')) {
+    drupal_set_message(t('The view has been reverted.'));
+  }
+  else {
+    drupal_set_message(t('The view has been deleted.'));
+  }
   $form_state['redirect'] = 'admin/structure/views';
 }
 
@@ -3761,6 +3777,7 @@ function views_ui_enable_page($view) {
     variable_set('views_defaults', $views_status);
     views_invalidate_cache();
     menu_rebuild();
+    drupal_set_message(t('The view has been enabled.'));
     drupal_goto('admin/structure/views');
   }
   else {
@@ -3778,6 +3795,7 @@ function views_ui_disable_page($view) {
     variable_set('views_defaults', $views_status);
     views_invalidate_cache();
     menu_rebuild();
+    drupal_set_message(t('The view has been disabled.'));
     drupal_goto('admin/structure/views');
   }
   else {

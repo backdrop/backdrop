@@ -30,7 +30,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->drupalGet('admin/structure/views');
-    $this->assertText(t('No views found.'));
+    $this->assertText(t('No views have been added.'));
     $this->assertText(t('Add new view'));
 
     // Create a simple and not at all useful view.
