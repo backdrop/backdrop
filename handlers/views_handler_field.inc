@@ -728,16 +728,6 @@ If you would like to have the characters %5B and %5D please use the html entity 
       '#description' => t('Enable to hide this field if it is empty. Note that the field label may still be displayed. Check style or row style settings to hide labels for empty fields.'),
       '#fieldset' => 'empty_field_behavior',
     );
-
-    // This form is long and messy enough that the "Administrative title" option
-    // belongs in a "more options" fieldset at the bottom of the form.
-    $form['more'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('More'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['ui_name']['#fieldset'] = 'more';
   }
 
   /**
