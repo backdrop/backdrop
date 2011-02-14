@@ -3226,7 +3226,6 @@ function views_ui_add_item_form($form, &$form_state) {
     '#type' => 'item',
     '#markup' => '<div class="views-selected-options"></div>',
     '#title' => t('Selected') . ':',
-    '#suffix' => '</div>',
   );
   ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $types[$type]['ltitle'])));
