@@ -1201,14 +1201,13 @@ function views_ui_get_display_tab_details($view, $display) {
   if ($uses_fields) {
     $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display);
   }
-  $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
-  $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
-  $build['columns']['second']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
-  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
-  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
   $build['columns']['first']['filters'] = views_ui_edit_form_get_bucket('filter', $view, $display);
   $build['columns']['first']['sorts'] = views_ui_edit_form_get_bucket('sort', $view, $display);
-
+  $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
+  $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
+  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
+  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
+  $build['columns']['third']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
 
   return $build;
 }
