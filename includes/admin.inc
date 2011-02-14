@@ -758,7 +758,10 @@ function views_ui_edit_page_title($view) {
  *   version.
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
-  ctools_include('dependent');
+  // @todo: Go back to using ctools_include() rather than form_load_include(),
+  //   once that works with form caching.
+  //ctools_include('dependent');
+  form_load_include($form_state, 'inc', 'ctools', 'includes/dependent');
   ctools_add_js('dependent');
 
   $form['#tree'] = TRUE;
