@@ -76,15 +76,15 @@ class views_handler_relationship extends views_handler {
     parent::options_form($form, $form_state);
     $form['label'] = array(
       '#type' => 'textfield',
-      '#title' => t('Label'),
+      '#title' => t('Identifier'),
       '#default_value' => isset($this->options['label']) ? $this->options['label'] : '',
-      '#description' => t('The label for this relationship that will be displayed only administratively.'),
+      '#description' => t('Edit the administrative label displayed when referencing this relationship form filters, etc.'),
     );
 
     $form['required'] = array(
       '#type' => 'checkbox',
       '#title' => t('Require this relationship'),
-      '#description' => t('If required, items that do not contain this relationship will not appear.'),
+      '#description' => t('Enable to hide items that do not contain this relationship'),
       '#default_value' => !empty($this->options['required']),
     );
   }
