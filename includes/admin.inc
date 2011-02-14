@@ -158,6 +158,9 @@ function views_ui_check_advanced_help() {
  * Returns the results of the live preview.
  */
 function views_ui_preview($view, $display_id, $args) {
+  // Save $_GET['q'] so it can be restored before returning from this function.
+  $q = $_GET['q'];
+
   $errors = $view->validate();
   if ($errors === TRUE) {
     $view->ajax = TRUE;
@@ -255,6 +258,7 @@ function views_ui_preview($view, $display_id, $args) {
     $output = $preview . $info;
   }
 
+  $_GET['q'] = $q;
   return $output;
 }
 
@@ -758,6 +762,10 @@ function views_ui_edit_page_title($view) {
  *   version.
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
+  // @todo Change $form_state['view'] to $form_state['temporary']['view'] so
+  //   that this isn't necessary.
+  $form_state['no_cache'] = TRUE;
+
   // @todo: Go back to using ctools_include() rather than form_load_include(),
   //   once that works with form caching.
   //ctools_include('dependent');
