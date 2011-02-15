@@ -90,7 +90,7 @@ function template_preprocess_views_view(&$vars) {
       'views-edit' => array(
         'title' => t('Edit view'),
         'attributes' => array('title' => t("Edit this view")),
-        'href' => "admin/structure/views/edit/$view->name",
+        'href' => "admin/structure/views/view/$view->name",
         'fragment' => 'views-tab-' . $view->current_display,
         'query' => drupal_get_destination(),
       ),
