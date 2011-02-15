@@ -474,17 +474,13 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
       '#links' => $links,
       '#attributes' => array('class' => array('contextual-links')),
       '#attached' => array(
-        'library' => array('contextual', 'contextual-links'),
+        'library' => array(array('contextual', 'contextual-links')),
       ),
     );
     $vars['links'] = drupal_render($build);
   }
 
   $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
-
-  $vars['#theme_wrapper'] = array('views_container');
-  drupal_add_library('contextual', 'contextual-links');
-  $vars['#attributes']['class'][] = 'contextual-links-region';
 }
 
 /**
