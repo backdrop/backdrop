@@ -165,7 +165,17 @@ function views_ui_preview($view, $display_id, $args) {
   if ($errors === TRUE) {
     $view->ajax = TRUE;
     $view->live_preview = TRUE;
-    $view->set_exposed_input($_POST);
+
+    // AJAX happens via $_POST but everything expects exposed data to
+    // be in GET. Copy stuff but remove ajax-framework specific keys.
+    $exposed_input = $_POST;
+    foreach (array('ajax_html_ids', 'ajax_page_state', 'view_name', 'view_args', 'view_path') as $key) {
+      if (isset($exposed_input[$key])) {
+        unset($exposed_input[$key]);
+      }
+    }
+
+    $view->set_exposed_input($exposed_input);
 
     // Store the current view URL for later use:
     $view->set_display($display_id);
