@@ -895,7 +895,7 @@ class views_plugin_display extends views_plugin {
         ),
       ),
       'access' => array(
-        'title' => '',
+        'title' => t('Access'),
         'column' => 'second',
         'build' => array(
           '#weight' => -5,
