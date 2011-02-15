@@ -953,6 +953,25 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#id' => 'edit-displays-preview-fieldset',
       '#attributes' => array('class' => array('box-padding')),
     );
+    
+    // Add the preview button
+    $form['displays']['preview_controls']['preview_fieldset']['button'] = array(
+      '#type' => 'submit',
+      '#value' => t('Preview'),
+      '#attributes' => array('class' => array('arguments-preview')),
+      '#process' => array('ctools_dependent_process'),
+      '#states' => array(
+        'visible' => array(   // action to take.
+          ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
+        ),
+      ),
+      '#id' => 'preview-submit',
+      '#ajax' => array(
+        'path' => 'admin/structure/views/view/' . $view->name . '/edit/ajax',
+        'callback' => 'views_ui_preview_callback',
+        'wrapper' => 'views-live-preview',
+      ),
+    );
 
     // Add a checkbox controlling whether or not this display auto-previews.
     $form['displays']['preview_controls']['preview_fieldset']['live_preview'] = array(
@@ -961,9 +980,12 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#title' => t('Auto preview'),
       '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
     );
-    // Add a wrapper that contains the preview button and arguments textfield
-    $form['displays']['preview_controls']['preview_fieldset']['form'] = array(
-      '#theme_wrappers' => array('container'),
+
+    // Add the arguments textfield
+    $form['displays']['preview_controls']['preview_fieldset']['view_args'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Arguments'),
+      '#description' => t('Separate arguments with a / as though they were a URL path.'),
       '#attributes' => array('class' => array('arguments-preview')),
       '#process' => array('ctools_dependent_process'),
       '#states' => array(
@@ -971,27 +993,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
           ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
         ),
       ),
-      '#id' => 'preview-form',
-    );
-
-    // Add the arguments textfield
-    $form['displays']['preview_controls']['preview_fieldset']['form']['view_args'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Arguments'),
-      '#description' => t('Separate arguments with a / as though they were a URL path.'),
       '#id' => 'preview-args',
-    );
-
-    // Add the preview button
-    $form['displays']['preview_controls']['preview_fieldset']['form']['button'] = array(
-      '#type' => 'submit',
-      '#value' => t('Preview'),
-      '#id' => 'preview-submit',
-      '#ajax' => array(
-        'path' => 'admin/structure/views/view/' . $view->name . '/edit/ajax',
-        'callback' => 'views_ui_preview_callback',
-        'wrapper' => 'views-live-preview',
-      ),
     );
 
     // The live preview.

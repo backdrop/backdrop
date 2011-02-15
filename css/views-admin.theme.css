@@ -378,6 +378,45 @@
 
 /* @end */
 
+/* @group Preview
+ *
+ * The preview controls and the preview pane
+ */
+ 
+.page-admin-structure-views #edit-displays-preview-controls .fieldset-wrapper > * {
+  float: left;
+}
+
+.page-admin-structure-views #edit-displays-preview-controls .fieldset-wrapper > .form-item {
+  margin-top: 0.3333em;
+}
+
+.page-admin-structure-views #edit-displays-preview-controls .form-submit {
+  display: inline-block;
+  margin-right: 1em;
+}
+
+.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield {
+  margin-left: 1em;
+  position: relative;
+}
+
+.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield label {
+  border-left: 1px solid #999;
+  padding-left: 1em;
+  position: absolute;
+}
+
+.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield label:after {
+  content: ":";
+}
+
+.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield label ~ * {
+  margin-left: 10em;
+}
+ 
+/* @end */
+
 /* @group Modal dialog box
  *
  * The contents of the popup dialog on the views edit form.

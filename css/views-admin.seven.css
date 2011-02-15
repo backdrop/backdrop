@@ -41,6 +41,12 @@
   margin-top: 0;
 }
 
+/* Override for a button on the edit display screen */
+.page-admin-structure-views #edit-displays-preview-controls .form-submit {
+  display: inline-block;
+  margin-right: 1em;
+}
+
 .page-admin-structure-views #content .form-item {
   margin-bottom: 0;
   padding-bottom: 0;
