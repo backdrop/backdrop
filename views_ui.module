@@ -154,10 +154,8 @@ function views_ui_menu() {
   ) + $base;
 
   $ajax_callbacks = array(
-    'analyze' => 'views_ui_analyze_view',
-    'add-display' => 'views_ui_add_display',
+    //'analyze' => 'views_ui_analyze_view',
     'preview' => 'views_ui_preview',
-    'reorder-displays' => 'views_ui_reorder_view',
   );
 
   foreach ($ajax_callbacks as $menu => $menu_callback) {
@@ -596,18 +594,53 @@ function views_ui_get_form_wizard_instance($wizard) {
 }
 
 /**
- * Implements hook_library_alter().
+ * Implements hook_contextual_links_view_alter().
  *
- * Remove the Contextual module JavaScript
- * We do not want the user to edit nodes while they are in the context
- * of building and configuring a view.
+ * Removes contextual links from being rendered, when so desired, such as within
+ * a View preview.
  */
-function views_ui_library_alter(&$libraries, $module) {
-  if (path_is_admin(current_path())) {
-    if ($module == 'contextual' && isset($libraries['contextual-links'])) {
-      unset($libraries['contextual-links']['js']);
-    }
+function views_ui_contextual_links_view_alter(&$element, $items) {
+  if (views_ui_contextual_links_suppress()) {
+    $element['#links'] = array();
   }
+}
+
+/**
+ * Sets a static variable for controlling whether contextual links are rendered.
+ *
+ * @see views_ui_contextual_links_view_alter()
+ */
+function views_ui_contextual_links_suppress($set = NULL) {
+  $suppress = &drupal_static(__FUNCTION__);
+  if (isset($set)) {
+    $suppress = $set;
+  }
+  return $suppress;
+}
+
+/**
+ * Increments the views_ui_contextual_links_suppress() static variable.
+ *
+ * When this function is added to the #pre_render of an element, and
+ * 'views_ui_contextual_links_suppress_pop' is added to the #post_render of the
+ * same element, then all contextual links within the element and its
+ * descendants are suppressed from being rendered. This is used, for example,
+ * during a View preview, when it is not desired for nodes in the Views result
+ * to have contextual links.
+ *
+ * @see views_ui_contextual_links_suppress_pop()
+ */
+function views_ui_contextual_links_suppress_push() {
+  views_ui_contextual_links_suppress(((int) views_ui_contextual_links_suppress())+1);
+}
+
+/**
+ * Decrements the views_ui_contextual_links_suppress() static variable.
+ *
+ * @see views_ui_contextual_links_suppress_push()
+ */
+function views_ui_contextual_links_suppress_pop() {
+  views_ui_contextual_links_suppress(((int) views_ui_contextual_links_suppress())-1);
 }
 
 /**

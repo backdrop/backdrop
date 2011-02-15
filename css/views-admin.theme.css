@@ -321,8 +321,12 @@
 .page-admin-structure-views #content .views-ui-display-tab-bucket {
   border: 1px solid #f3f3f3;
   line-height: 20px;
-  margin: 1em 0;
+  margin: 0;
   padding-top: 4px;
+}
+
+.page-admin-structure-views #content .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
+  border-top: medium none;
 }
 
 .page-admin-structure-views #content .views-ui-display-tab-bucket h3 {

@@ -193,12 +193,14 @@ function views_ui_preview($view, $display_id, $args) {
     if ($args) {
       $_GET['q'] .= '/' . implode('/', $args);
     }
+    views_ui_contextual_links_suppress_push();
     try {
       $preview = $view->preview($display_id, $args);
     }
     catch (Exception $e) {
       drupal_set_message($e->getMessage(), 'error');
     }
+    views_ui_contextual_links_suppress_pop();
 
     // Append query information and statistics.
     if (variable_get('views_ui_show_sql_query', FALSE)) {
@@ -1077,6 +1079,21 @@ function views_ui_edit_form_submit_delete_display($form, &$form_state) {
 }
 
 /**
+ * Submit handler to add a restore a removed display to a view.
+ */
+function views_ui_edit_form_submit_undo_delete_display($form, &$form_state) {
+  // Create the new display
+  $id = $form_state['display_id'];
+  $form_state['view']->display[$id]->deleted = FALSE;
+
+  // Store in cache
+  views_ui_cache_set($form_state['view']);
+  
+  // Redirect to the top-level edit page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+}
+
+/**
  * Adds tabs for navigating across Displays when editing a View.
  *
  * This function can be called from hook_menu_local_tasks_alter() to implement
@@ -1089,9 +1106,6 @@ function views_ui_edit_page_display_tabs($view) {
 
   // Create a tab for each display.
   foreach ($view->display as $id => $display) {
-    if (!empty($display->deleted)) {
-      continue;
-    }
     $tabs[$id] = array(
       '#theme' => 'menu_local_task',
       '#link' => array(
@@ -1100,6 +1114,9 @@ function views_ui_edit_page_display_tabs($view) {
         'localized_options' => array(),
       ),
     );
+    if (!empty($display->deleted)) {
+      $tabs[$id]['#link']['localized_options']['attributes']['class'][] = 'views-display-deleted-link';
+    }
   }
 
   // If the default display isn't supposed to be shown, don't display its tab.
@@ -1169,20 +1186,33 @@ function views_ui_get_display_tab_details($view, $display) {
     '#suffix' => '</div>',
   );
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
-  if (empty($plugin['no remove'])) {
-    $build['actions']['delete'] = array(
+  if (empty($display->deleted)) {
+    if (empty($plugin['no remove'])) {
+      $build['actions']['delete'] = array(
+        '#type' => 'submit',
+        '#value' => t('Delete'),
+        '#limit_validation_errors' => array(),
+        '#submit' => array('views_ui_edit_form_submit_delete_display'),
+      );
+    }
+    // The master display cannot be cloned.
+    if ($display->id != 'default') {
+      $build['actions']['duplicate'] = array(
+        '#type' => 'submit',
+        '#value' => t('Duplicate'),
+        '#limit_validation_errors' => array(),
+        '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
+      );
+    }
+  }
+  else {
+    $build['actions']['undo_delete'] = array(
       '#type' => 'submit',
-      '#value' => t('Delete'),
+      '#value' => t('Undo delete'),
       '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_delete_display'),
+      '#submit' => array('views_ui_edit_form_submit_undo_delete_display'),
     );
   }
-  $build['actions']['duplicate'] = array(
-    '#type' => 'submit',
-    '#value' => t('Duplicate'),
-    '#limit_validation_errors' => array(),
-    '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
-  );
 
   // The area above the three columns.
   $build['top']['view_name'] = array(
