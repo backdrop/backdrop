@@ -1068,6 +1068,21 @@ function views_ui_edit_form_submit_delete_display($form, &$form_state) {
 }
 
 /**
+ * Submit handler to add a restore a removed display to a view.
+ */
+function views_ui_edit_form_submit_undo_delete_display($form, &$form_state) {
+  // Create the new display
+  $id = $form_state['display_id'];
+  $form_state['view']->display[$id]->deleted = FALSE;
+
+  // Store in cache
+  views_ui_cache_set($form_state['view']);
+  
+  // Redirect to the top-level edit page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+}
+
+/**
  * Adds tabs for navigating across Displays when editing a View.
  *
  * This function can be called from hook_menu_local_tasks_alter() to implement
@@ -1160,20 +1175,30 @@ function views_ui_get_display_tab_details($view, $display) {
     '#suffix' => '</div>',
   );
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
-  if (empty($plugin['no remove'])) {
-    $build['actions']['delete'] = array(
+  if (empty($display->deleted)) {
+    if (empty($plugin['no remove'])) {
+      $build['actions']['delete'] = array(
+        '#type' => 'submit',
+        '#value' => t('Delete'),
+        '#limit_validation_errors' => array(),
+        '#submit' => array('views_ui_edit_form_submit_delete_display'),
+      );
+    }
+    $build['actions']['duplicate'] = array(
       '#type' => 'submit',
-      '#value' => t('Delete'),
+      '#value' => t('Duplicate'),
       '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_delete_display'),
+      '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
     );
   }
-  $build['actions']['duplicate'] = array(
-    '#type' => 'submit',
-    '#value' => t('Duplicate'),
-    '#limit_validation_errors' => array(),
-    '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
-  );
+  else {
+    $build['actions']['undo_delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Undo delete'),
+      '#limit_validation_errors' => array(),
+      '#submit' => array('views_ui_edit_form_submit_undo_delete_display'),
+    );
+  }
 
   // The area above the three columns.
   $build['top']['view_name'] = array(
