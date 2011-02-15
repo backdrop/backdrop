@@ -444,17 +444,21 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
     case 'exposed':
       // @todo Sorts can be exposed too, so we may need a better title.
       $vars['title'] = t('Exposed Filters');
+      $links = views_ui_view_preview_section_plugin_links($vars['view'], $vars['section']);
       break;
     case 'rows':
       // @todo The title needs to depend on what is being viewed. Also, it is
       //   now discouraged to use the word "node" in user facing text.
       $vars['title'] = t('Nodes');
+      $links = views_ui_view_preview_section_rows_links($vars['view']);
       break;
     case 'pager':
       $vars['title'] = t('Pager');
+      $links = views_ui_view_preview_section_plugin_links($vars['view'], $vars['section']);
       break;
     case 'more':
       $vars['title'] = t('More');
+//       $links = views_ui_view_preview_section_plugin_links($vars['view'], $vars['section']);
       break;
     case 'footer':
       $vars['title'] = t('Footer');
@@ -496,20 +500,65 @@ function theme_views_ui_view_preview_section($vars) {
  * @TODO
  *   Bring in relationships
  *   Refactor this function to use much stuff of views_ui_edit_form_get_bucket.
+ *
+ * @param $title
+ *   Add a bolded title of this section.
  */
-function views_ui_view_preview_section_handler_links($view, $type) {
+function views_ui_view_preview_section_handler_links($view, $type, $title = FALSE) {
   $display = $view->display_handler->display;
   $handlers = $view->display_handler->get_handlers($type);
+
+  $types = views_object_types();
+  if ($title) {
+    $links[$type . '-title'] = array(
+      'title' => $types[$type]['title'],
+    );
+  }
 
   $links = array();
   foreach ($handlers as $id => $handler) {
     $field_name = $handler->ui_name(TRUE);
     $links[$type . '-edit-' . $id] = array(
-      'title' => $field_name,
+      'title' => t('Edit @section', array('@section' => $field_name)),
 //       'attributes' => array('title' => t("Edit this view")),
       'href' => "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id",
     );
   }
+  $links[$type . '-add'] = array(
+    'title' => t('Add new'),
+    'href' => "admin/structure/views/nojs/add-item/$view->name/$display->id/$type",
+  );
+
+  return $links;
+}
+
+/**
+ * Returns a contextual link for the plugin type.
+ */
+function views_ui_view_preview_section_plugin_links($view, $type) {
+  $display = $view->display_handler->display;
+  $plugin = $view->display_handler->get_plugin($type);
+  $plugin_name = '';
+  $links = array(
+    $type . '-edit' => array(
+      'title' => t('Edit @section', array('@section' => $plugin_name)),
+      'href' => "admin/structure/views/nojs/display/$view->name/$display->id/$type",
+    ),
+  );
+  return $links;
+}
+
+/**
+ * Returns all contextual links for the main content part of the view.
+ */
+function views_ui_view_preview_section_rows_links($view) {
+  $display = $view->display_handler->display;
+  $links = array();
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'filter'), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'field'), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'sort'), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'argument'), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'relationship'), $links);
 
   return $links;
 }
