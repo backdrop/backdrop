@@ -319,7 +319,7 @@ function views_ui_theme() {
     // is not desired.
     'views_container' => array(
       'render element' => 'element',
-      'path' => "$path/theme",
+      'file' => "theme/theme.inc",
     ),
   );
 }
