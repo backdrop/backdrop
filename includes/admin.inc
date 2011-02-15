@@ -1223,12 +1223,10 @@ function views_ui_get_display_tab_details($view, $display) {
   }
 
   // The area above the three columns.
-  $build['top']['view_name'] = array(
+  $build['top']['display_name'] = array(
     '#theme' => 'views_ui_display_tab_setting',
-    '#description' => t('View name'),
-    // @TODO: Are we letting them edit the view name, the display id, or some
-    // other property?
-    '#link' => $view->human_name,
+    '#description' => t('Display name'),
+    '#link' => check_plain($display->display_title),
   );
 
   $build['columns'] = array();
