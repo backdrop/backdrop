@@ -314,6 +314,12 @@ function views_ui_theme() {
     'views_ui_view_preview_section' => array(
       'variables' => array('view' => NULL, 'section' => NULL, 'content' => NULL),
     ),
+
+    // Generic container wrapper, to use instead of theme_container when an id
+    // is not desired.
+    'views_container' => array(
+      'render element' => 'element',
+    ),
   );
 }
 
