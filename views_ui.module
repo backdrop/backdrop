@@ -507,6 +507,7 @@ function theme_views_ui_view_preview_section($vars) {
 function views_ui_view_preview_section_handler_links($view, $type, $title = FALSE) {
   $display = $view->display_handler->display;
   $handlers = $view->display_handler->get_handlers($type);
+  $links = array();
 
   $types = views_object_types();
   if ($title) {
@@ -515,7 +516,6 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
     );
   }
 
-  $links = array();
   foreach ($handlers as $id => $handler) {
     $field_name = $handler->ui_name(TRUE);
     $links[$type . '-edit-' . $id] = array(
@@ -554,11 +554,11 @@ function views_ui_view_preview_section_plugin_links($view, $type) {
 function views_ui_view_preview_section_rows_links($view) {
   $display = $view->display_handler->display;
   $links = array();
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'filter'), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'field'), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'sort'), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'argument'), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'relationship'), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'filter', TRUE), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'field', TRUE), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'sort', TRUE), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'argument', TRUE), $links);
+  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'relationship', TRUE), $links);
 
   return $links;
 }
