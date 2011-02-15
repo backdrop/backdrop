@@ -188,11 +188,16 @@ function views_ui_preview($view, $display_id, $args) {
     // Make view links come back to preview.
     $view->override_path = 'admin/structure/views/nojs/preview/' . $view->name . '/' . $display_id;
 
-    // also override $_GET['q'] so we get the pager
+    // Also override $_GET['q'] so we get the pager.
     $_GET['q'] = $view->override_path;
     if ($args) {
       $_GET['q'] .= '/' . implode('/', $args);
     }
+
+    // Suppress contextual links of entities within the result set during a
+    // Preview.
+    // @todo We'll want to add contextual links specific to editing the View, so
+    //   the suppression may need to be moved deeper into the Preview pipeline.
     views_ui_contextual_links_suppress_push();
     try {
       $preview = $view->preview($display_id, $args);
