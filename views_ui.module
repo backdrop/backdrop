@@ -458,7 +458,7 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
       break;
     case 'more':
       $vars['title'] = t('More');
-//       $links = views_ui_view_preview_section_plugin_links($vars['view'], $vars['section']);
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'use_more', $vars['title']);
       break;
     case 'footer':
       $vars['title'] = t('Footer');
@@ -547,6 +547,22 @@ function views_ui_view_preview_section_plugin_links($view, $type) {
       'attributes' => array('class' => array('views-ajax-link')),
     ),
   );
+  return $links;
+}
+
+/**
+ * Returns a link to editing a certain display setting.
+ */
+function views_ui_view_preview_section_display_category_links($view, $type, $title) {
+  $display = $view->display_handler->display;
+  $links = array(
+    $type . '-edit' => array(
+      'title' => t('Edit @section', array('@section' => $title)),
+      'href' => "admin/structure/views/nojs/display/$view->name/$display->id/$type",
+      'attributes' => array('class' => array('views-ajax-link')),
+    ),
+  );
+  
   return $links;
 }
 
