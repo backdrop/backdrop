@@ -183,12 +183,14 @@ function views_ui_preview($view, $display_id, $args) {
     if ($args) {
       $_GET['q'] .= '/' . implode('/', $args);
     }
+    views_ui_contextual_links_suppress_push();
     try {
       $preview = $view->preview($display_id, $args);
     }
     catch (Exception $e) {
       drupal_set_message($e->getMessage(), 'error');
     }
+    views_ui_contextual_links_suppress_pop();
 
     // Append query information and statistics.
     if (variable_get('views_ui_show_sql_query', FALSE)) {
