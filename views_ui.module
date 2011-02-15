@@ -365,6 +365,8 @@ function views_ui_cache_set(&$view) {
   }
   ctools_include('object-cache');
   $view->changed = TRUE; // let any future object know that this view has changed.
+  // Add the knowledge of the changed display, too.
+  $view->changed_display[$view->current_display] = TRUE;
 
   // Unset handlers; we don't want to write these into the cache
   unset($view->display_handler);

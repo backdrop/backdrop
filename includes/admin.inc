@@ -4396,5 +4396,10 @@ function theme_views_ui_style_plugin_table($variables) {
  * @todo Remove this function once editing the display title is possible.
  */
 function views_ui_get_display_label($view, $display_id) {
-  return $display_id == 'default' ? t('Master') : ucwords($display_id);
+  $changed = '';
+  if (!empty($view->changed_display[$display_id])) {
+    $changed = '*';
+  }
+  $title = $display_id == 'default' ? t('Master') : ucwords($display_id);
+  return $title . $changed;
 }
