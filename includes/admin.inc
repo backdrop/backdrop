@@ -3418,7 +3418,7 @@ function views_ui_config_item_form($form, &$form_state) {
       $name = $form_state['update_name'];
     }
 
-    views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name);
+    views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name, t('Remove'), 'remove');
   }
   return $form;
 }
