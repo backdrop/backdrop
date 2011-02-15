@@ -482,10 +482,6 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
 //   $vars['#attributes']['class'][] = 'contextual-links-region';
 //   $vars['#theme_wrappers'] = array('views_container');
 
-  // @TODO fix this again
-  drupal_add_js(drupal_get_path('module', 'contextual') . '/contextual.js');
-  drupal_add_js(drupal_get_path('module', 'contextual') . '/contextual.css');
-
   $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
 }
 
@@ -552,6 +548,17 @@ function views_ui_view_preview_section_plugin_links($view, $type) {
     ),
   );
   return $links;
+}
+
+/**
+ * Implements hook_contextual_links_view_alter().
+ */
+function views_ui_contextual_links_view_alter(&$element, $items) {
+  // Hide every normal added contextual link on admin pages.
+  if (path_is_admin(current_path())) {
+    // Views build's his own renderable array so they don't get removed.
+    $element['#links'] = array();
+  }
 }
 
 /**
@@ -681,21 +688,6 @@ function views_ui_get_form_wizard_instance($wizard) {
   }
   else {
     return new ViewsUiBaseViewsWizard($wizard);
-  }
-}
-
-/**
- * Implements hook_library_alter().
- *
- * Remove the Contextual module JavaScript
- * We do not want the user to edit nodes while they are in the context
- * of building and configuring a view.
- */
-function views_ui_library_alter(&$libraries, $module) {
-  if (path_is_admin(current_path())) {
-    if ($module == 'contextual' && isset($libraries['contextual-links'])) {
-      unset($libraries['contextual-links']['js']);
-    }
   }
 }
 
