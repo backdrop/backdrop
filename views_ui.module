@@ -419,7 +419,15 @@ function views_ui_preprocess_views_view(&$vars) {
     $vars['admin_links_raw'] = array();
     foreach (array('header', 'exposed', 'rows', 'pager', 'more', 'footer') as $section) {
       if (!empty($vars[$section])) {
-        $vars[$section] = theme('views_ui_view_preview_section', array('view' => $view, 'section' => $section, 'content' => $vars[$section]));
+        $vars[$section] = array(
+          '#theme' => 'views_ui_view_preview_section',
+          '#view' => $view,
+          '#section' => $section,
+          '#content' => $vars[$section],
+          '#theme_wrappers' => array('views_container'),
+          '#attributes' => array('class' => 'contextual-links-region'),
+        );
+        $vars[$section] = drupal_render($vars[$section]);
       }
     }
   }
@@ -479,9 +487,6 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
     );
     $vars['links'] = drupal_render($build);
   }
-//   $vars['#attributes']['class'][] = 'contextual-links-region';
-//   $vars['#theme_wrappers'] = array('views_container');
-
   $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
 }
 
@@ -489,8 +494,7 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
  * Returns the HTML for a section of a View being previewed within the Views UI.
  */
 function theme_views_ui_view_preview_section($vars) {
-  // @todo: the contextual-links-region should be added via a form wrapper, but this doesn't work at the moment.
-  return '<div class="contextual-links-region"><h1 class="views_ui_view_preview_section_title">' . $vars['links'] . $vars['title'] . '</h1>' . $vars['content'] . '</div>';
+  return '<h1 class="views_ui_view_preview_section_title">' . $vars['links'] . $vars['title'] . '</h1>' . $vars['content'];
 }
 
 /**
