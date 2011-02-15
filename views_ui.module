@@ -479,6 +479,12 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
     );
     $vars['links'] = drupal_render($build);
   }
+//   $vars['#attributes']['class'][] = 'contextual-links-region';
+//   $vars['#theme_wrappers'] = array('views_container');
+
+  // @TODO fix this again
+  drupal_add_js(drupal_get_path('module', 'contextual') . '/contextual.js');
+  drupal_add_js(drupal_get_path('module', 'contextual') . '/contextual.css');
 
   $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
 }
@@ -487,7 +493,8 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
  * Returns the HTML for a section of a View being previewed within the Views UI.
  */
 function theme_views_ui_view_preview_section($vars) {
-  return '<h1 class="views_ui_view_preview_section_title">' . $vars['links'] . $vars['title'] . '</h1>' . $vars['content'];
+  // @todo: the contextual-links-region should be added via a form wrapper, but this doesn't work at the moment.
+  return '<div class="contextual-links-region"><h1 class="views_ui_view_preview_section_title">' . $vars['links'] . $vars['title'] . '</h1>' . $vars['content'] . '</div>';
 }
 
 /**
@@ -509,6 +516,7 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
   if ($title) {
     $links[$type . '-title'] = array(
       'title' => $types[$type]['title'],
+      'attributes' => array('class' => array('views-ajax-link')),
     );
   }
 
@@ -516,13 +524,14 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
     $field_name = $handler->ui_name(TRUE);
     $links[$type . '-edit-' . $id] = array(
       'title' => t('Edit @section', array('@section' => $field_name)),
-//       'attributes' => array('title' => t("Edit this view")),
       'href' => "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id",
+      'attributes' => array('class' => array('views-ajax-link')),
     );
   }
   $links[$type . '-add'] = array(
     'title' => t('Add new'),
     'href' => "admin/structure/views/nojs/add-item/$view->name/$display->id/$type",
+    'attributes' => array('class' => array('views-ajax-link')),
   );
 
   return $links;
@@ -539,6 +548,7 @@ function views_ui_view_preview_section_plugin_links($view, $type) {
     $type . '-edit' => array(
       'title' => t('Edit @section', array('@section' => $plugin_name)),
       'href' => "admin/structure/views/nojs/display/$view->name/$display->id/$type",
+      'attributes' => array('class' => array('views-ajax-link')),
     ),
   );
   return $links;
