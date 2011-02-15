@@ -1891,8 +1891,6 @@ class views_db_object {
 
 
     if (empty($id)) {
-      $title = $plugin['title'];
-
       $id = $this->generate_display_id($type);
       $count = str_replace($type . '_', '', $id);
       if (empty($title)) {
