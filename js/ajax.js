@@ -138,6 +138,7 @@
         }
 
         element_settings.wrapper = 'views-live-preview';
+        element_settings.method = 'html';
         var base = $(this).attr('id');
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });
