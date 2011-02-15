@@ -88,6 +88,13 @@ function views_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/edit/ajax'] = array(
+    'page callback' => 'views_ui_ajax_get_form',
+    'page arguments' => array('views_ui_edit_form', 4),
+    'delivery callback' => 'ajax_deliver',
+    'theme callback' => 'ajax_base_page_theme',
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
   // Additional pages for acting on a View.
   $items['admin/structure/views/view/%views_ui_cache/analyze'] = array(
@@ -319,7 +326,7 @@ function views_ui_theme() {
     // is not desired.
     'views_container' => array(
       'render element' => 'element',
-      'file' => "theme/theme.inc",
+      'file' => "$path/theme/theme.inc",
     ),
   );
 }
@@ -581,5 +588,49 @@ function views_ui_library_alter(&$libraries, $module) {
     if ($module == 'contextual' && isset($libraries['contextual-links'])) {
       unset($libraries['contextual-links']['js']);
     }
+  }
+}
+
+/**
+ * Menu callback; handles AJAX form submissions similar to ajax_form_callback(), but can be used for uncached forms.
+ *
+ * ajax_form_callback(), the menu callback for the system/ajax path, requires
+ * the form to be retrievable from the form cache, because it lacks a trusted
+ * $form_id argument with which to call drupal_retrieve_form(). When AJAX is
+ * wanted on a non-cacheable form, #ajax['path'] can be set to a path whose
+ * menu router item's 'page callback' is this function, and whose
+ * 'page arguments' is the form id, optionally followed by additional build
+ * arguments, as expected by drupal_get_form().
+ *
+ * The same caution must be used when defining a hook_menu() entry with this
+ * page callback as is used when defining a hook_menu() entry with the
+ * 'drupal_get_form' page callback: a 'page arguments' must be specified with a
+ * literal value as the first argument, because $form_id determines which form
+ * builder function gets called, so must be safe from user tampering.
+ *
+ * @see drupal_get_form()
+ * @see ajax_form_callback()
+ * @see http://drupal.org/node/774876
+ */
+function views_ui_ajax_get_form($form_id) {
+  // @see ajax_get_form()
+  $form_state = array(
+    'no_redirect' => TRUE,
+  );
+  $form_state['rebuild_info']['copy']['#build_id'] = TRUE;
+  $form_state['rebuild_info']['copy']['#action'] = TRUE;
+
+  // @see drupal_get_form()
+  $args = func_get_args();
+  array_shift($args);
+  $form_state['build_info']['args'] = $args;
+  $form = drupal_build_form($form_id, $form_state);
+
+  // @see ajax_form_callback()
+  if (!empty($form_state['triggering_element'])) {
+    $callback = $form_state['triggering_element']['#ajax']['callback'];
+  }
+  if (!empty($callback) && function_exists($callback)) {
+    return $callback($form, $form_state);
   }
 }
