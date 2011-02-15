@@ -600,17 +600,6 @@ function views_ui_view_preview_section_display_category_links($view, $type, $tit
 }
 
 /**
- * Implements hook_contextual_links_view_alter().
- */
-function views_ui_contextual_links_view_alter(&$element, $items) {
-  // Hide every normal added contextual link on admin pages.
-  if (path_is_admin(current_path())) {
-    // Views build's his own renderable array so they don't get removed.
-    $element['#links'] = array();
-  }
-}
-
-/**
  * Returns all contextual links for the main content part of the view.
  */
 function views_ui_view_preview_section_rows_links($view) {
@@ -742,8 +731,10 @@ function views_ui_get_form_wizard_instance($wizard) {
 
 /**
  * Implements hook_contextual_links_view_alter().
+ *
  * Removes contextual links from being rendered, when so desired, such as within
  * a View preview.
+ */
 function views_ui_contextual_links_view_alter(&$element, $items) {
   if (views_ui_contextual_links_suppress()) {
     $element['#links'] = array();
@@ -786,6 +777,9 @@ function views_ui_contextual_links_suppress_push() {
  */
 function views_ui_contextual_links_suppress_pop() {
   views_ui_contextual_links_suppress(((int) views_ui_contextual_links_suppress())-1);
+}
+
+/**
  * Menu callback; handles AJAX form submissions similar to ajax_form_callback(), but can be used for uncached forms.
  *
  * ajax_form_callback(), the menu callback for the system/ajax path, requires
