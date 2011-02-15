@@ -57,6 +57,10 @@ class views_plugin_display_attachment extends views_plugin_display {
 
     $categories['attachment'] = array(
       'title' => t('Attachment settings'),
+      'column' => 'second',
+      'build' => array(
+        '#weight' => -10,
+      ),
     );
 
     $options['inherit_arguments'] = array(

@@ -64,6 +64,10 @@ class views_plugin_display_block extends views_plugin_display {
 
     $categories['block'] = array(
       'title' => t('Block settings'),
+      'column' => 'second',
+      'build' => array(
+        '#weight' => -10,
+      ),
     );
 
     $block_description = strip_tags($this->get_option('block_description'));

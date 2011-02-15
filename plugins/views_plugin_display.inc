@@ -894,6 +894,13 @@ class views_plugin_display extends views_plugin {
           '#weight' => 1,
         ),
       ),
+      'access' => array(
+        'title' => '',
+        'column' => 'second',
+        'build' => array(
+          '#weight' => -5,
+        ),
+      ),
       'other' => array(
         'title' => t('Other'),
         'column' => 'third',
@@ -1054,7 +1061,7 @@ class views_plugin_display extends views_plugin {
     $access_str = $access_plugin->summary_title();
 
     $options['access'] = array(
-      'category' => 'page',
+      'category' => 'access',
       'title' => t('Access'),
       'value' => $access_str,
       'desc' => t('Specify access control type for this display.'),

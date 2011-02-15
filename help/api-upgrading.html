@@ -62,3 +62,15 @@ placeholder() generates a automatic unique placeholder for you.
 add_where with operator 'formula' can be converted to add_where_expression.
 add_having with operator 'formula' can be converted to add_having_expression.
 
+<h3>Changed place for display specific settings</h3>
+In the new ui the new place for display settings is at the top of the second column.
+Therefore use something like this code in your display plugin:
+<code>
+$categories['block'] = array(
+  'title' => t('Block settings'),
+  'column' => 'second',
+  'build' => array(
+    '#weight' => -10,
+  ),
+);
+</code>
