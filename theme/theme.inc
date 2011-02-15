@@ -901,6 +901,14 @@ function theme_views_mini_pager($vars) {
 }
 
 /**
+ * Generic <div> container function.
+ */
+function theme_views_container($variables) {
+  $element = $variables['element'];
+  return '<div' . drupal_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
+}
+
+/**
  * @defgroup views_templates Views' template files
  * @{
  * All views templates can be overridden with a variety of names, using

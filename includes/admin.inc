@@ -3255,6 +3255,8 @@ function views_ui_add_item_form($form, &$form_state) {
     '#type' => 'item',
     '#markup' => '<div class="views-selected-options"></div>',
     '#title' => t('Selected') . ':',
+    '#theme_wrappers' => array('form_element', 'views_container'),
+    '#attributes' => array('class' => array('container-inline', 'views-add-form-selected')),
   );
   ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $types[$type]['ltitle'])));
@@ -3418,7 +3420,7 @@ function views_ui_config_item_form($form, &$form_state) {
       $name = $form_state['update_name'];
     }
 
-    views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name);
+    views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name, t('Remove'), 'remove');
   }
   return $form;
 }

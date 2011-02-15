@@ -420,6 +420,10 @@
   margin-bottom: 10px;
 }
 
+.page-admin-structure-views .views-ui-dialog .views-add-form-selected {
+  margin: 5px 16px;
+}
+
 .page-admin-structure-views .views-ui-dialog #views-ajax-title,
 .page-admin-structure-views .views-ui-dialog .views-override {
   background-color: #F3F4EE;
