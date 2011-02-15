@@ -592,11 +592,11 @@ function views_ui_library_alter(&$libraries, $module) {
 }
 
 /**
- * Menu callback; handles AJAX requests similar to ajax_form_callback(), but works for uncached forms.
+ * Menu callback; handles AJAX form submissions similar to ajax_form_callback(), but can be used for uncached forms.
  *
  * ajax_form_callback(), the menu callback for the system/ajax path, requires
  * the form to be retrievable from the form cache, because it lacks a trusted
- * $form_id variable with which to call drupal_retrieve_form(). When AJAX is
+ * $form_id argument with which to call drupal_retrieve_form(). When AJAX is
  * wanted on a non-cacheable form, #ajax['path'] can be set to a path whose
  * menu router item's 'page callback' is this function, and whose
  * 'page arguments' is the form id, optionally followed by additional build
