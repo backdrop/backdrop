@@ -10,9 +10,9 @@
     var ajax_title = Drupal.settings.views.ajax.title;
     var ajax_body = Drupal.settings.views.ajax.id;
     var ajax_popup = Drupal.settings.views.ajax.popup;
-    $(ajax_popup).dialog('open');
     $(ajax_title).html(response.title);
     $(ajax_body).html(response.output);
+    $(ajax_popup).dialog('open');
     Drupal.attachBehaviors($(ajax_popup), ajax.settings);
     if (response.url) {
       var submit = $('input[type=submit]', ajax_body).unbind('click').click(function() {
@@ -100,6 +100,7 @@
         'autoOpen': false,
         'dialogClass': 'views-ui-dialog',
         'modal': true,
+        'position': 'center',
         'resizable': false,
         'width': 750
       });
