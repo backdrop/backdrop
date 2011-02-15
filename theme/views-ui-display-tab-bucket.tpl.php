@@ -6,6 +6,9 @@
  */
 ?>
 <div class="<?php print $classes; ?>">
+  <?php if ($overridden): ?>
+    <div class="icon-linked"></div>
+  <?php endif; ?>
   <ul class="horizontal right actions links">
     <?php if ($rearrange) : ?>
     <li>
