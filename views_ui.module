@@ -417,7 +417,7 @@ function views_ui_preprocess_views_view(&$vars) {
     $view->hide_admin_links = TRUE;
     $vars['admin_links'] = '';
     $vars['admin_links_raw'] = array();
-    foreach (array('header', 'exposed', 'rows', 'pager', 'more', 'footer') as $section) {
+    foreach (array('header', 'exposed', 'rows', 'pager', 'more', 'footer', 'empty', 'attachment_after', 'attachment_before') as $section) {
       if (!empty($vars[$section])) {
         $vars[$section] = array(
           '#theme' => 'views_ui_view_preview_section',
@@ -471,6 +471,14 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
     case 'footer':
       $vars['title'] = t('Footer');
       $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      break;
+    case 'attachment_before':
+      // @todo: Add links to the attachment configuration page.
+      $vars['title'] = t('Attachment before');
+      break;
+    case 'attachment_after':
+      // @todo: Add links to the attachment configuration page.
+      $vars['title'] = t('Attachment after');
       break;
   }
 
