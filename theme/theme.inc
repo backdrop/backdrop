@@ -76,6 +76,12 @@ function template_preprocess_views_view(&$vars) {
 
   $vars['pager']      = '';
 
+  // @todo: Figure out whether this belongs into views_ui_preprocess_views_view.
+  // Render title for the admin preview.
+  if (!empty($view->views_ui_context)) {
+    $vars['title'] = filter_xss_admin($view->get_title());
+  }
+
   if ($view->display_handler->render_pager()) {
     $exposed_input = isset($view->exposed_data_raw) ? $view->exposed_data_raw : NULL;
     $vars['pager']      = $view->query->render_pager($exposed_input);

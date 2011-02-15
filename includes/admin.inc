@@ -1002,6 +1002,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
 
     // The live preview.
+    // @todo: Figure out whether $view->preview and $view->editing might be enough already.
     $view->views_ui_context = TRUE;
 
     $form['displays']['preview'] = array(
