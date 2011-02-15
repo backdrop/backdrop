@@ -153,6 +153,25 @@ function views_ui_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
+  $ajax_callbacks = array(
+    'analyze' => 'views_ui_analyze_view',
+    'add-display' => 'views_ui_add_display',
+    'preview' => 'views_ui_preview',
+    'reorder-displays' => 'views_ui_reorder_view',
+  );
+
+  foreach ($ajax_callbacks as $menu => $menu_callback) {
+    $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache/%'] = array(
+      'page callback' => $menu_callback,
+      'page arguments' => array(5, 6),
+    ) + $base;
+    $items['admin/structure/views/ajax/' . $menu . '/%views_ui_cache/%'] = array(
+      'page callback' => $menu_callback,
+      'page arguments' => array(5, 6),
+      'delivery callback' => 'ajax_deliver',
+    ) + $base;
+  }
+
 //  $items['admin/structure/views/nojs/human_name/%views_ui_cache'] = $callback + array(
 //    'page callback' => 'views_ui_edit_details',
 //    'page arguments' => array('human_name', FALSE, 5),
