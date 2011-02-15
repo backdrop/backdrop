@@ -165,7 +165,17 @@ function views_ui_preview($view, $display_id, $args) {
   if ($errors === TRUE) {
     $view->ajax = TRUE;
     $view->live_preview = TRUE;
-    $view->set_exposed_input($_POST);
+
+    // AJAX happens via $_POST but everything expects exposed data to
+    // be in GET. Copy stuff but remove ajax-framework specific keys.
+    $exposed_input = $_POST;
+    foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state') as $key) {
+      if (isset($exposed_input[$key])) {
+        unset($exposed_input[$key]);
+      }
+    }
+
+    $view->set_exposed_input($exposed_input);
 
     // Store the current view URL for later use:
     $view->set_display($display_id);
@@ -183,12 +193,14 @@ function views_ui_preview($view, $display_id, $args) {
     if ($args) {
       $_GET['q'] .= '/' . implode('/', $args);
     }
+    views_ui_contextual_links_suppress_push();
     try {
       $preview = $view->preview($display_id, $args);
     }
     catch (Exception $e) {
       drupal_set_message($e->getMessage(), 'error');
     }
+    views_ui_contextual_links_suppress_pop();
 
     // Append query information and statistics.
     if (variable_get('views_ui_show_sql_query', FALSE)) {
@@ -1184,12 +1196,15 @@ function views_ui_get_display_tab_details($view, $display) {
         '#submit' => array('views_ui_edit_form_submit_delete_display'),
       );
     }
-    $build['actions']['duplicate'] = array(
-      '#type' => 'submit',
-      '#value' => t('Duplicate'),
-      '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
-    );
+    // The master display cannot be cloned.
+    if ($display->id != 'default') {
+      $build['actions']['duplicate'] = array(
+        '#type' => 'submit',
+        '#value' => t('Duplicate'),
+        '#limit_validation_errors' => array(),
+        '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
+      );
+    }
   }
   else {
     $build['actions']['undo_delete'] = array(

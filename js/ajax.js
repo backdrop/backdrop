@@ -137,6 +137,7 @@
           element_settings.url = $(this.form).attr('action');
         }
 
+        element_settings.wrapper = 'views-live-preview';
         var base = $(this).attr('id');
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });

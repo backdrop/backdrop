@@ -139,7 +139,7 @@ function template_preprocess_views_view(&$vars) {
   }
 
   // If using AJAX, send identifying data about this view.
-  if ($view->use_ajax && empty($view->is_attachment)) {
+  if ($view->use_ajax && empty($view->is_attachment) && empty($view->live_preview)) {
     $settings = array(
       'views' => array(
         'ajax_path' => url('views/ajax'),
