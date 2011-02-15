@@ -4404,6 +4404,6 @@ function views_ui_get_display_label($view, $display_id) {
   if (!empty($view->changed_display[$display_id])) {
     $changed = '*';
   }
-  $title = $display_id == 'default' ? t('Master') : ucwords($display_id);
+  $title = $display_id == 'default' ? t('Master') : check_plain($view->display[$display_id]->display_title);
   return $title . $changed;
 }
