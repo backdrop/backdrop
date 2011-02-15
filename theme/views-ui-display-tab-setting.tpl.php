@@ -9,8 +9,8 @@
   <?php if ($description): ?>
     <span class="label"><?php print ($description . t(':')); ?></span>
   <?php endif; ?>
-  <?php if ($gear): ?>
-    <?php print $gear; ?>
-  <?php endif; ?>
   <?php print $link; ?>
+  <?php if ($settings): ?>
+    | <?php print $settings; ?>
+  <?php endif; ?>
 </div>

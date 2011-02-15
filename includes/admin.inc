@@ -1259,7 +1259,7 @@ function views_ui_edit_form_get_build_from_option($id, $option, $view, $display)
   $option_build['#links'] = array();
   if (!empty($option['links']) && is_array($option['links'])) {
     foreach ($option['links'] as $link_id => $link_value) {
-      $option_build['#optional_links'][] = $display->handler->option_link($link_value, $link_id, 'views-button-configure');
+      $option_build['#settings_links'][] = $display->handler->option_link(t('settings'), $link_id, 'views-button-configure', $link_value);
     }
   }
 
@@ -1287,7 +1287,7 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   $variables['zebra'] = ($zebra % 2 === 0 ? 'odd' : 'even');
   $zebra++;
 
-  $variables['gear'] = implode($variables['settings_links']);
+  $variables['settings'] = implode($variables['settings_links']);
 }
 
 function template_preprocess_views_ui_display_tab_bucket(&$variables) {
