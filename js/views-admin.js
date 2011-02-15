@@ -152,7 +152,7 @@ Drupal.behaviors.addItemForm.attach = function (context) {
   // The add item form may have an id of views-ui-add-item-form--n.
   var $form = $(context).find('form[id^="views-ui-add-item-form"]').first();
   // Make sure we don't add more than one event handler to the same form.
-  $form = $form.once('views-ui-filter-options');
+  $form = $form.once('views-ui-add-item-form');
   if ($form.length) {
     new Drupal.viewsUi.addItemForm($form);
   }
