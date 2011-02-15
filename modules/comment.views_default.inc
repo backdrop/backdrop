@@ -14,6 +14,7 @@ function comment_views_default_views() {
   $view->description = 'Contains a block and a page to list recent comments; the block will automatically link to the page, which displays the comment body as well as a link to the node.';
   $view->tag = 'default';
   $view->base_table = 'comment';
+  $view->human_name = 'Recent comments';
   $view->api_version = 2;
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
@@ -108,6 +109,7 @@ function comment_views_default_views() {
   $view->description = 'Shows all new activity on system.';
   $view->tag = 'default';
   $view->base_table = 'node';
+  $view->human_name = 'Tracker';
   $view->api_version = 2;
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
