@@ -1183,12 +1183,15 @@ function views_ui_get_display_tab_details($view, $display) {
         '#submit' => array('views_ui_edit_form_submit_delete_display'),
       );
     }
-    $build['actions']['duplicate'] = array(
-      '#type' => 'submit',
-      '#value' => t('Duplicate'),
-      '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
-    );
+    // The master display cannot be cloned.
+    if ($display->id != 'default') {
+      $build['actions']['duplicate'] = array(
+        '#type' => 'submit',
+        '#value' => t('Duplicate'),
+        '#limit_validation_errors' => array(),
+        '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
+      );
+    }
   }
   else {
     $build['actions']['undo_delete'] = array(
