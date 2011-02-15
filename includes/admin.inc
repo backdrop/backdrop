@@ -169,7 +169,7 @@ function views_ui_preview($view, $display_id, $args) {
     // AJAX happens via $_POST but everything expects exposed data to
     // be in GET. Copy stuff but remove ajax-framework specific keys.
     $exposed_input = $_POST;
-    foreach (array('ajax_html_ids', 'ajax_page_state', 'view_name', 'view_args', 'view_path') as $key) {
+    foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state') as $key) {
       if (isset($exposed_input[$key])) {
         unset($exposed_input[$key]);
       }
