@@ -554,11 +554,11 @@ function views_ui_view_preview_section_plugin_links($view, $type) {
 function views_ui_view_preview_section_rows_links($view) {
   $display = $view->display_handler->display;
   $links = array();
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'filter', TRUE), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'field', TRUE), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'sort', TRUE), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'argument', TRUE), $links);
-  $links = array_merge(views_ui_view_preview_section_handler_links($view, 'relationship', TRUE), $links);
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'filter', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'field', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'sort', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'argument', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'relationship', TRUE));
 
   return $links;
 }
