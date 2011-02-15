@@ -1,10 +1,10 @@
 /* $Id: views-admin.css,v 1.14.4.12 2010/12/24 13:42:00 dereine Exp $ */
 
 /**
- * The .css file is intended to only contain positioning and size declarations 
+ * The .css file is intended to only contain positioning and size declarations
  * For example: display, position, float, clear, and overflow.
  */
- 
+
 /* @group Layout */
 
 .page-admin-structure-views #content .box-padding {
@@ -15,14 +15,14 @@
 /* @end */
 
 /* @group Inline lists */
- 
+
 .page-admin-structure-views #content .horizontal > * {
   clear: none;
   float: left; /* LTR */
 }
 
 .page-admin-structure-views #content .horizontal.right {
-  float: right; 
+  float: right;
 }
 
 .page-admin-structure-views #content .horizontal label {
@@ -30,13 +30,13 @@
 }
 
 .page-admin-structure-views #content .horizontal .form-item > [class] {
-  margin-top: 25px;  
+  margin-top: 25px;
 }
 
 .page-admin-structure-views #content .horizontal .form-item > [class] + [class] {
   margin-top: 0;
 }
- 
+
  /* @end */
 
 /* @group Attachment details
@@ -61,7 +61,7 @@
 /* @end */
 
 /* @group Attachment details tabs
- * 
+ *
  * The tabs that switch between sections
  */
 
@@ -200,10 +200,10 @@
 /* @end */
 
 /* @group Clearfix
- * 
+ *
  * @see http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
- 
+
  /* Reset the formatting context for all modern browsers */
 .page-admin-structure-views #content .views-display-tab .fieldset-wrapper:after,
 .page-admin-structure-views #content ul.secondary:after {
@@ -272,6 +272,14 @@ html.js .js-only {
 
 html.js span.js-only {
   display: inline;
+}
+
+.form-item-show-wizard-key label {
+  float: left;
+}
+
+.form-item-show-wizard-key select {
+  margin-left: 5px;
 }
 
 /* @end */
