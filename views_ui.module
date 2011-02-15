@@ -319,7 +319,7 @@ function views_ui_theme() {
 
     // When previewing a view.
     'views_ui_view_preview_section' => array(
-      'variables' => array('view' => NULL, 'section' => NULL, 'content' => NULL),
+      'variables' => array('view' => NULL, 'section' => NULL, 'content' => NULL, 'links' => ''),
     ),
 
     // Generic container wrapper, to use instead of theme_container when an id
@@ -427,11 +427,19 @@ function views_ui_preprocess_views_view(&$vars) {
 
 /**
  * Theme preprocess for theme_views_ui_view_preview_section().
+ *
+ * @TODO
+ *    Perhaps move this to includes/admin.inc or theme/theme.inc
  */
 function template_preprocess_views_ui_view_preview_section(&$vars) {
   switch ($vars['section']) {
     case 'header':
       $vars['title'] = t('Header');
+      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      break;
+    case 'empty':
+      $vars['title'] = t('No results behavior');
+      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
       break;
     case 'exposed':
       // @todo Sorts can be exposed too, so we may need a better title.
@@ -450,17 +458,62 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
       break;
     case 'footer':
       $vars['title'] = t('Footer');
+      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
       break;
   }
+
+  if ($links) {
+    $build = array(
+      '#prefix' => '<div class="contextual-links-wrapper">',
+      '#suffix' => '</div>',
+      '#theme' => 'links__contextual',
+      '#links' => $links,
+      '#attributes' => array('class' => array('contextual-links')),
+      '#attached' => array(
+        'library' => array('contextual', 'contextual-links'),
+      ),
+    );
+    $vars['links'] = drupal_render($build);
+  }
+
   $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
+
+  $vars['#theme_wrapper'] = array('views_container');
+  drupal_add_library('contextual', 'contextual-links');
+  $vars['#attributes']['class'][] = 'contextual-links-region';
 }
 
 /**
  * Returns the HTML for a section of a View being previewed within the Views UI.
  */
 function theme_views_ui_view_preview_section($vars) {
-  return '<h1 class="views_ui_view_preview_section_title">' . $vars['title'] . '</h1>' . $vars['content'];
+  return '<h1 class="views_ui_view_preview_section_title">' . $vars['links'] . $vars['title'] . '</h1>' . $vars['content'];
 }
+
+/**
+ * Returns contextual links for each handler of a certain section.
+ *
+ * @TODO
+ *   Bring in relationships
+ *   Refactor this function to use much stuff of views_ui_edit_form_get_bucket.
+ */
+function views_ui_view_preview_section_handler_links($view, $type) {
+  $display = $view->display_handler->display;
+  $handlers = $view->display_handler->get_handlers($type);
+
+  $links = array();
+  foreach ($handlers as $id => $handler) {
+    $field_name = $handler->ui_name(TRUE);
+    $links[$type . '-edit-' . $id] = array(
+      'title' => $field_name,
+//       'attributes' => array('title' => t("Edit this view")),
+      'href' => "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id",
+    );
+  }
+
+  return $links;
+}
+
 
 /**
  * Implments hook_ctools_plugin_directory().
