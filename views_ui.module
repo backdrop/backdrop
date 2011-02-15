@@ -51,7 +51,6 @@ function views_ui_menu() {
     'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
-
   $items['admin/structure/views/settings'] = array(
     'title' => 'Settings',
     'page callback' => 'drupal_get_form',
@@ -101,7 +100,6 @@ function views_ui_menu() {
     'title' => 'Analyze',
     'page callback' => 'views_ui_analyze_view',
     'page arguments' => array(FALSE, 4),
-    // @todo Not sure yet if "Analyze" makes sense as a primary tab. Trying it.
     'type' => MENU_LOCAL_TASK,
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/export'] = array(
@@ -141,6 +139,7 @@ function views_ui_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
+  // NoJS/AJAX callbacks that can use the default Views AJAX form system.
   $items['admin/structure/views/nojs/%/%views_ui_cache'] = array(
     'page callback' => 'views_ui_ajax_form',
     'page arguments' => array(FALSE, 4, 5),
@@ -153,11 +152,11 @@ function views_ui_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
+  // NoJS/AJAX callbacks that require custom page callbacks.
   $ajax_callbacks = array(
     //'analyze' => 'views_ui_analyze_view',
     'preview' => 'views_ui_preview',
   );
-
   foreach ($ajax_callbacks as $menu => $menu_callback) {
     $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache/%'] = array(
       'page callback' => $menu_callback,
@@ -170,58 +169,11 @@ function views_ui_menu() {
     ) + $base;
   }
 
-//  $items['admin/structure/views/nojs/human_name/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_edit_details',
-//    'page arguments' => array('human_name', FALSE, 5),
-//  );
-//  $items['admin/structure/views/ajax/human_name/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_edit_details',
-//    'page arguments' => array('human_name', TRUE, 5),
-//    'delivery callback' => 'views_ui_ajax_deliver',
-//  );
-//  $items['admin/structure/views/nojs/tag/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_edit_details',
-//    'page arguments' => array('tag', FALSE, 5),
-//  );
-//  $items['admin/structure/views/ajax/tag/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_edit_details',
-//    'page arguments' => array('tag', TRUE, 5),
-//    'delivery callback' => 'views_ui_ajax_deliver',
-//  );
-//  $items['admin/structure/views/nojs/description/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_edit_details',
-//    'page arguments' => array('description', FALSE, 5),
-//  );
-//  $items['admin/structure/views/ajax/description/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_edit_details',
-//    'page arguments' => array('description', TRUE, 5),
-//    'delivery callback' => 'views_ui_ajax_deliver',
-//  );
-//
-//  $items['admin/build/views/nojs/clone-display/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_clone_display',
-//    'page arguments' => array(FALSE, 5, 6),
-//  );
-//
-//  $items['admin/build/views/ajax/clone-display/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_clone_display',
-//    'page arguments' => array(TRUE, 5, 6),
-//    'delivery callback' => 'views_ui_ajax_deliver',
-//  );
-//
-//  $items['admin/structure/views/nojs/%/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_ajax_form',
-//    'page arguments' => array(FALSE, 4, 5),
-//  );
-//  $items['admin/structure/views/ajax/%/%views_ui_cache'] = $callback + array(
-//    'page callback' => 'views_ui_ajax_form',
-//    'page arguments' => array(TRUE, 4, 5),
-//    'delivery callback' => 'views_ui_ajax_deliver',
-//  );
-
   // Autocomplete callback for tagging a View.
-  // @todo Are there any other modules relying on this path? If not, change to
-  //   'admin/structure/views/ajax/autocomplete/tag'.
+  // Views module uses admin/views/... instead of admin/structure/views/... for
+  // autocomplete paths, so be consistent with that.
+  // @todo Change to admin/structure/views/... when the change can be made to
+  //   Views module as well.
   $items['admin/views/ajax/autocomplete/tag'] = array(
     'page callback' => 'views_ui_autocomplete_tag',
     'type' => MENU_CALLBACK,
