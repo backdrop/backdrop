@@ -11,6 +11,6 @@
   <?php endif; ?>
   <?php print $link; ?>
   <?php if ($settings): ?>
-    <span class="views-ajax-link">|</span> <?php print $settings; ?>
+    <span class="views-ajax-link">&nbsp;|&nbsp;</span> <?php print $settings; ?>
   <?php endif; ?>
 </div>
