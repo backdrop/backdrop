@@ -372,6 +372,11 @@
   background-color: #f9f9f9;
 }
 
+.page-admin-structure-views #content .views-ui-display-tab-bucket .views-group-text {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
 .views-display-setting .label {
   margin-right: 3pt; /* LTR */
 }
