@@ -1079,9 +1079,6 @@ function views_ui_edit_page_display_tabs($view) {
 
   // Create a tab for each display.
   foreach ($view->display as $id => $display) {
-    if (!empty($display->deleted)) {
-      continue;
-    }
     $tabs[$id] = array(
       '#theme' => 'menu_local_task',
       '#link' => array(
@@ -1090,6 +1087,9 @@ function views_ui_edit_page_display_tabs($view) {
         'localized_options' => array(),
       ),
     );
+    if (!empty($display->deleted)) {
+      $tabs[$id]['#link']['localized_options']['attributes']['class'][] = 'views-display-deleted-link';
+    }
   }
 
   // If the default display isn't supposed to be shown, don't display its tab.
