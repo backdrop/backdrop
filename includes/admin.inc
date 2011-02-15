@@ -766,8 +766,15 @@ function views_ui_edit_page_title($view) {
  *   version.
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
-  // @todo Change $form_state['view'] to $form_state['temporary']['view'] so
-  //   that this isn't necessary.
+  // Do not allow the form to be cached, because $form_state['view'] can become
+  // stale between page requests.
+  // @see views_ui_ajax_get_form() for how this affects #ajax.
+  // @todo To remove this and allow the form to be cacheable:
+  //   - Change $form_state['view'] to $form_state['temporary']['view'].
+  //   - Add a #process function to initialize $form_state['temporary']['view']
+  //     on cached form submissions.
+  //   - Update ctools_include() to support cached forms, or else use
+  //     form_load_include().
   $form_state['no_cache'] = TRUE;
 
   ctools_include('dependent');
@@ -969,6 +976,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#value' => t('Preview'),
       '#id' => 'preview-submit',
       '#ajax' => array(
+        'path' => 'admin/structure/views/view/' . $view->name . '/edit/ajax',
         'callback' => 'views_ui_preview_callback',
         'wrapper' => 'views-live-preview',
       ),
