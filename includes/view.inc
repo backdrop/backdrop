@@ -51,6 +51,9 @@ class view extends views_db_object {
   // Used to store views that were previously running if we recurse.
   var $old_view = array();
 
+  // To avoid recursion in views embebed into areas
+  var $parent_views = array();
+
   /**
    * Where the $query object will reside:
    *
