@@ -86,7 +86,7 @@ function node_views_data() {
      // Information for displaying a title as a field
     'field' => array(
       'field' => 'title', // the real field. This could be left out since it is the same.
-      'group' => t('Node'), // The group it appears in on the UI. Could be left out.
+      'group' => t('Content'), // The group it appears in on the UI. Could be left out.
       'handler' => 'views_handler_field_node',
       'click sortable' => TRUE,
      ),
@@ -134,7 +134,7 @@ function node_views_data() {
     ),
   );
 
-  // Node type
+  // Content type
   $data['node']['type'] = array(
     'title' => t('Type'), // The item it appears as on the UI,
     'help' => t('The content type (for example, "blog entry", "forum post", "story", etc).'), // The help that appears on the UI,
@@ -385,7 +385,7 @@ function node_views_data() {
   );
 
   // ----------------------------------------------------------------------
-  // Node revision table
+  // Content revision table
 
   // Define the base group of this table. Fields that don't
   // have a group defined will go into this field by default.
@@ -445,7 +445,7 @@ function node_views_data() {
       'handler' => 'views_handler_relationship',
       'base' => 'node',
       'base field' => 'nid',
-      'title' => t('Node'),
+      'title' => t('Content'),
       'label' => t('Get the actual content from a content revision.'),
     ),
   );
@@ -548,7 +548,7 @@ function node_views_data() {
   // We're actually defining a specific instance of the table, so let's
   // alias it so that we can later add the real table for other purposes if we
   // need it.
-  $data['history']['table']['group']  = t('Node');
+  $data['history']['table']['group']  = t('Content');
 
   // Explain how this table joins to others.
   $data['history']['table']['join'] = array(
@@ -615,7 +615,7 @@ function node_views_plugins() {
     ),
     'argument default' => array(
       'node' => array(
-        'title' => t('Node ID from URL'),
+        'title' => t('Content ID from URL'),
         'handler' => 'views_plugin_argument_default_node'
       ),
     ),

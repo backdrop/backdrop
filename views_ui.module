@@ -433,9 +433,8 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
       $links = views_ui_view_preview_section_plugin_links($vars['view'], 'exposed_form');
       break;
     case 'rows':
-      // @todo The title needs to depend on what is being viewed. Also, it is
-      //   now discouraged to use the word "node" in user facing text.
-      $vars['title'] = t('Nodes');
+      // @todo The title needs to depend on what is being viewed.
+      $vars['title'] = t('Content');
       $links = views_ui_view_preview_section_rows_links($vars['view']);
       break;
     case 'pager':
