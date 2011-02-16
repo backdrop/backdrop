@@ -227,6 +227,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Find all the fields we are allowed to filter by.
     $fields = views_fetch_fields($this->base_table, 'filter');
 
+    $entities = entity_get_info();
+    // If the current base table support bundles and has more then one (like user).
+
     // Check if we are allowed to filter by taxonomy. We will construct our
     // filters using taxonomy_index.tid (which limits the filtering to a
     // specific vocabulary) rather than taxonomy_term_data.name (which matches
@@ -239,7 +242,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // of them (see below).
     if (isset($fields['taxonomy_index.tid'])) {
       // Check if this view will be displaying fieldable entities.
-      $entities = entity_get_info();
       $displays_entities = FALSE;
       foreach ($entities as $entity_type => $entity_info) {
         if ($this->base_table == $entity_info['base table']) {
