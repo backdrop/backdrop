@@ -346,7 +346,13 @@ class views_handler_field extends views_handler {
       '#options' => $this->get_elements(),
       '#type' => 'select',
       '#default_value' => $this->options['element_type'],
-      '#description' => t('Most styles provide wrappers for fields. If the chosen style supports wrappers, wrap the field in this HTML element. The default will usually be either DIV or SPAN.'),
+      '#description' => t('Choose the HTML element to wrap around this field, e.g. H1, H2, etc.'),
+      '#fieldset' => 'style_settings',
+    );
+
+    $form['element_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create a CSS class'),
       '#fieldset' => 'style_settings',
     );
 
@@ -356,6 +362,10 @@ class views_handler_field extends views_handler {
       '#type' => 'textfield',
       '#default_value' => $this->options['element_class'],
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-class-enable' => array(1)
+      ),
     );
 
     $form['custom_label'] = array(
@@ -390,7 +400,13 @@ class views_handler_field extends views_handler {
       '#options' => $this->get_elements(FALSE),
       '#type' => 'select',
       '#default_value' => $this->options['element_label_type'],
-      '#description' => t('What HTML element type to use to wrap the label.'),
+      '#description' => t('Choose the HTML element to wrap around this label, e.g. H1, H2, etc.'),
+      '#fieldset' => 'style_settings',
+    );
+
+    $form['element_label_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create a CSS class'),
       '#fieldset' => 'style_settings',
     );
 
@@ -400,6 +416,10 @@ class views_handler_field extends views_handler {
       '#type' => 'textfield',
       '#default_value' => $this->options['element_label_class'],
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-label-class-enable' => array(1)
+      ),
     );
 
     $form['element_wrapper_type'] = array(
@@ -407,7 +427,13 @@ class views_handler_field extends views_handler {
       '#options' => $this->get_elements(FALSE),
       '#type' => 'select',
       '#default_value' => $this->options['element_wrapper_type'],
-      '#description' => t('What HTML Element type to use to wrap the field (and the label). This is not supported by some styles such as tables.'),
+      '#description' => t('Choose the HTML element to wrap around this field and label, e.g. H1, H2, etc.'),
+      '#fieldset' => 'style_settings',
+    );
+
+    $form['element_wrapper_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create a CSS class'),
       '#fieldset' => 'style_settings',
     );
 
@@ -417,6 +443,10 @@ class views_handler_field extends views_handler {
       '#type' => 'textfield',
       '#default_value' => $this->options['element_wrapper_class'],
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-wrapper-class-enable' => array(1)
+      ),
     );
 
     $form['element_default_classes'] = array(
