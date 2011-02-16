@@ -430,7 +430,7 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
     case 'exposed':
       // @todo Sorts can be exposed too, so we may need a better title.
       $vars['title'] = t('Exposed Filters');
-      $links = views_ui_view_preview_section_plugin_links($vars['view'], 'exposed_form');
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'exposed_form_options', $vars['title']);
       break;
     case 'rows':
       // @todo The title needs to depend on what is being viewed.
@@ -439,7 +439,7 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
       break;
     case 'pager':
       $vars['title'] = t('Pager');
-      $links = views_ui_view_preview_section_plugin_links($vars['view'], $vars['section']);
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'pager_options', $vars['title']);
       break;
     case 'more':
       $vars['title'] = t('More');
@@ -519,23 +519,6 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
     'attributes' => array('class' => array('views-ajax-link')),
   );
 
-  return $links;
-}
-
-/**
- * Returns a contextual link for the plugin type.
- */
-function views_ui_view_preview_section_plugin_links($view, $type) {
-  $display = $view->display_handler->display;
-  $plugin = $view->display_handler->get_plugin($type);
-  $plugin_name = '';
-  $links = array(
-    $type . '-edit' => array(
-      'title' => t('Edit @section', array('@section' => $plugin_name)),
-      'href' => "admin/structure/views/nojs/display/$view->name/$display->id/$type",
-      'attributes' => array('class' => array('views-ajax-link')),
-    ),
-  );
   return $links;
 }
 
