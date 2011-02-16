@@ -160,12 +160,12 @@ class views_handler_filter_in_operator extends views_handler_filter {
       if (!empty($this->options['expose']['reduce'])) {
         $options = $this->reduce_value_options();
 
-        if (empty($this->options['expose']['single']) && empty($this->options['expose']['required'])) {
+        if (!empty($this->options['expose']['multiple']) && empty($this->options['expose']['required'])) {
           $default_value = array();
         }
       }
 
-      if (!empty($this->options['expose']['single'])) {
+      if (empty($this->options['expose']['multiple'])) {
         if (empty($this->options['expose']['required']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
           $default_value = 'All';
         }
@@ -257,9 +257,9 @@ class views_handler_filter_in_operator extends views_handler_filter {
       return TRUE;
     }
 
-    // If this is single and non-required, this says that yes this filter will
+    // If this is non-multiple and non-required, then this filter will
     // participate, but using the default settings, *if* 'limit is true.
-    if (!empty($this->options['expose']['single']) && empty($this->options['expose']['required']) && !empty($this->options['expose']['limit'])) {
+    if (empty($this->options['expose']['multiple']) && empty($this->options['expose']['required']) && !empty($this->options['expose']['limit'])) {
       $identifier = $this->options['expose']['identifier'];
       if ($input[$identifier] == 'All') {
         return TRUE;

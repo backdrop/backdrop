@@ -5,7 +5,7 @@
  */
 class views_handler_filter_equality extends views_handler_filter {
   // exposed filter options
-  var $no_single = TRUE;
+  var $always_multiple = TRUE;
 
   /**
    * Provide simple equality operator
@@ -36,4 +36,3 @@ class views_handler_filter_equality extends views_handler_filter {
     }
   }
 }
-

@@ -156,12 +156,12 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         if (!empty($this->options['expose']['reduce'])) {
           $options = $this->reduce_value_options($options);
 
-          if (empty($this->options['expose']['single']) && empty($this->options['expose']['required'])) {
+          if (!empty($this->options['expose']['multiple']) && empty($this->options['expose']['required'])) {
             $default_value = array();
           }
         }
 
-        if (!empty($this->options['expose']['single'])) {
+        if (empty($this->options['expose']['multiple'])) {
           if (empty($this->options['expose']['required']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
             $default_value = 'All';
           }

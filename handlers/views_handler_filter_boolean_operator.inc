@@ -13,7 +13,7 @@
  */
 class views_handler_filter_boolean_operator extends views_handler_filter {
   // exposed filter options
-  var $no_single = TRUE;
+  var $always_multiple = TRUE;
   // Don't display empty space where the operator would be.
   var $no_operator = TRUE;
   // Whether to accept NULL as a false value or not

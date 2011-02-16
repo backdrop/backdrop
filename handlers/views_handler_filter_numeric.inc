@@ -5,7 +5,7 @@
  * Simple filter to handle greater than/less than filters
  */
 class views_handler_filter_numeric extends views_handler_filter {
-  var $no_single = TRUE;
+  var $always_multiple = TRUE;
   function option_definition() {
     $options = parent::option_definition();
 

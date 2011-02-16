@@ -7,8 +7,8 @@
  */
 class views_handler_filter_string extends views_handler_filter {
   // exposed filter options
-  var $no_single = TRUE;
-  var $no_optional = TRUE;
+  var $always_multiple = TRUE;
+  var $always_required = TRUE;
 
   function option_defintion() {
     $options = parent::option_defintion();
