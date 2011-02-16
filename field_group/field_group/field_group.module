@@ -7,10 +7,6 @@
  *
  *   PHP HOOKS
  *
- *   hook_field_group_formatter_info()
- *     Creates a format entry for a fieldgroup.
- *     @see field_group_field_group_formatter_info()
- *
  *   hook_field_group_format_settings
  *     Creates a form for the fieldgroup settings of the current group.
  *
@@ -89,16 +85,6 @@ function field_group_menu() {
       }
     }
   }
-
-  // Configuration for field_group.
-  $items['admin/config/user-interface/field_group'] = array(
-    'title' => 'Fieldgroups',
-    'description' => 'Configure fieldgroup.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('field_group_admin_settings'),
-    'access arguments' => array('administer fieldgroups'),
-    'file' => 'field_group.admin.inc',
-  );
 
   return $items;
 }
@@ -242,44 +228,6 @@ function field_group_field_attach_view_alter(&$element, $context) {
 
 /**
  * Implements hook_field_group_formatter_info().
- *
- * You can use all keys you want although there are some required ones.
- *
- * structure:
- * @code
- * array(
- *   'form' => array(
- *     'fieldset' => array(
- *       // required, String with the name of the formatter type.
- *       'label' => t('Fieldset'),
- *       // optional, String description of the formatter type.
- *       'description' => t('This is field group that ...'),
- *       // required, Array of available formatter options.
- *       'format_types' => array('open', 'collapsible', 'collapsed'),
- *       // required, String with default value of the style.
-        'default_formatter' => 'collapsible',
- *       // optional, Array with key => default_value pairs.
- *       'instance_settings' => array('key' => 'value'),
- *     ),
- *   ),
- *   'display' => array(
- *     'fieldset' => array(
- *       // required, String with the name of the formatter type.
- *       'label' => t('Fieldset'),
- *       // optional, String description of the formatter type.
- *       'description' => t('This is field group that ...'),
- *       // required, Array of available formatter options.
- *       'format_types' => array('open', 'collapsible', 'collapsed'),
- *       // required, String with default value of the style.
-        'default_formatter' => 'collapsible',
- *       // optional, Array with key => default_value pairs.
- *       'instance_settings' => array('key' => 'value'),
- *     ),
- *   ),
- * ),
- *
- * @return array of available formatting html controls
- * for form and display overview type.
  */
 function field_group_field_group_formatter_info() {
 
