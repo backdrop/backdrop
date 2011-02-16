@@ -6,6 +6,9 @@ $plugin = array(
   'name' => 'node',
   'base_table' => 'node',
   'created_column' => 'created',
+  'available_sorts' => array(
+    'title:DESC' => t('By title')
+  ),
   'get children' => 'views_ui_node_views_wizard_get_children',
   'get child' => 'views_ui_node_views_wizard_get_child',
   'form_wizard_class' => array(

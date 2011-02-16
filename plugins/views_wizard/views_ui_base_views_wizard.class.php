@@ -302,15 +302,20 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    */
   protected function build_sorts(&$form, &$form_state) {
     // Check if we are allowed to sort by creation date.
+    $sorts = array();
     if (!empty($this->plugin['created_column'])) {
-      $form['displays']['show']['sort_created_order'] = array(
+      $sorts = array(
+        $this->plugin['created_column'] . ':DESC' => t('Newest first'),
+        $this->plugin['created_column'] . ':ASC' => t('Oldest first'),
+      );
+      $sorts += $this->plugin['available_sorts'];
+    }
+    if (!empty($sorts)) {
+      $form['displays']['show']['sort'] = array(
         '#type' => 'select',
         '#title' => t('sorted by'),
-        '#options' => array(
-          'DESC' => t('newest first'),
-          'ASC' => t('oldest first'),
-        ),
-        '#default_value' => 'DESC',
+        '#options' => $sorts,
+        '#default_value' => isset($this->plugin['created_column']) ? $this->plugin['created_column'] . ':DESC' : NULL,
       );
     }
   }
@@ -447,13 +452,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function default_display_sorts_user($form, $form_state) {
     $sorts = array();
 
-    if (!empty($form_state['values']['show']['sort_created_order'])) {
-      $column = $this->plugin['created_column'];
+    if (!empty($form_state['values']['show']['sort'])) {
+      list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
       $sorts[$column] = array(
         'id' => $column,
         'table' => $this->base_table,
         'field' => $column,
-        'order' => $form_state['values']['show']['sort_created_order'],
+        'order' => $sort,
       );
     }
 
