@@ -119,3 +119,16 @@
 }
 
 /* @end */
+
+.form-item {
+  padding: 0 !important;
+}
+
+#edit-options-value {
+  width: 190px;
+  overflow: auto;
+  max-height: 210px;
+  border-color: #CCCCCC;
+  border-style: solid;
+  border-width: 1px;
+}

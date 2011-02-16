@@ -205,6 +205,36 @@ class views_handler_filter extends views_handler {
   function value_submit($form, &$form_state) { }
 
   /**
+   * Shortcut to display the expose/hide button.
+   */
+  function show_expose_button(&$form, &$form_state) {
+    $form['expose_button'] = array(
+      '#prefix' => '<div class="views-expose clearfix">',
+      '#suffix' => '</div>',
+    );
+    if (empty($this->options['exposed'])) {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description">' . t('This filter is not exposed. Expose it to allow the users to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Expose filter'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+    else {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description">' . t('This filter is exposed. If you hide it, users will not be able to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Hide filter'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+  }
+
+  /**
    * Handle the 'left' side fo the exposed options form.
    */
   function expose_form_left(&$form, &$form_state) {
