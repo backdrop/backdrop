@@ -37,9 +37,20 @@ class views_handler_filter extends views_handler {
     $this->operator = $this->options['operator'];
     $this->value = $this->options['value'];
 
+    // Compatibility: The new UI changes several settings.
+    if (!empty($options['exposed']) && !empty($options['expose']['optional']) && !isset($options['expose']['required'])) {
+      $this->options['expose']['required'] = !$options['expose']['optional'];
+    }
+    if (!empty($options['exposed']) && !empty($options['expose']['single']) && !isset($options['expose']['multiple'])) {
+      $this->options['expose']['multiple'] = !$options['expose']['single'];
+    }
+    if (!empty($options['exposed']) && !empty($options['expose']['operator']) && !isset($options['expose']['operator_id'])) {
+      $this->options['expose']['operator_id'] = $options['expose']['operator_id'] = $options['expose']['operator'];
+    }
+
     // Compatibility: Set use_operator to true if the old way of using
     // the operator is set and use_operator is NULL (was never set).
-    if (!empty($options['exposed']) && !empty($options['expose']['operator']) && !isset($options['expose']['use_operator'])) {
+    if (!empty($options['exposed']) && !empty($options['expose']['operator_id']) && !isset($options['expose']['use_operator'])) {
       $this->options['expose']['use_operator'] = TRUE;
     }
 
@@ -48,14 +59,6 @@ class views_handler_filter extends views_handler {
     // allow empty, but string and numeric do and that covers enough.
     if ($this->view->display_handler->get_option('relationships')) {
       $this->definition['allow empty'] = TRUE;
-    }
-
-    // Compatibility: The new UI switches the meanings of several settings.
-    if (!empty($options['exposed']) && !empty($options['expose']['optional']) && !isset($options['expose']['required'])) {
-      $this->options['expose']['required'] = !$options['expose']['optional'];
-    }
-    if (!empty($options['exposed']) && !empty($options['expose']['single']) && !isset($options['expose']['multiple'])) {
-      $this->options['expose']['multiple'] = !$options['expose']['single'];
     }
   }
 
@@ -68,7 +71,7 @@ class views_handler_filter extends views_handler {
     $options['exposed'] = array('default' => FALSE);
     $options['expose'] = array(
       'contains' => array(
-        'operator' => array('default' => FALSE),
+        'operator_id' => array('default' => FALSE),
         'label' => array('default' => '', 'translatable' => TRUE),
         'use_operator' => array('default' => 0),
         'operator' => array('default' => ''),
@@ -219,6 +222,8 @@ class views_handler_filter extends views_handler {
     $form['expose_button'] = array(
       '#prefix' => '<div class="views-expose clearfix">',
       '#suffix' => '</div>',
+      // Should always come first
+      '#weight' => -1000,
     );
     if (empty($this->options['exposed'])) {
       $form['expose_button']['markup'] = array(
@@ -243,6 +248,32 @@ class views_handler_filter extends views_handler {
   }
 
   function expose_form(&$form, &$form_state) {
+    // #flatten will move everything from $form['expose'][$key] to $form[$key]
+    // prior to rendering. That's why the pre_render for it needs to run first,
+    // so that when the next pre_render (the one for fieldsets) runs, it gets
+    // the flattened data.
+    array_unshift($form['#pre_render'], 'views_ui_pre_render_flatten_data');
+    $form['expose']['#flatten'] = TRUE;
+    // Move the value options up a bit.
+    $form['operator']['#weight'] = -8;
+    $form['value']['#weight'] = -8;
+
+    if (empty($this->always_required)) {
+      $form['expose']['required'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Required'),
+        '#default_value' => $this->options['expose']['required'],
+        '#weight' => -9,
+      );
+    }
+    $form['expose']['label'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->options['expose']['label'],
+      '#title' => t('Label'),
+      '#size' => 40,
+      '#weight' => -8,
+    );
+
     if (!empty($form['operator']['#type'])) {
       $form['expose']['use_operator'] = array(
         '#type' => 'checkbox',
@@ -250,9 +281,9 @@ class views_handler_filter extends views_handler {
         '#description' => t('Allow the user to choose the operator.'),
         '#default_value' => !empty($this->options['expose']['use_operator']),
       );
-      $form['expose']['operator'] = array(
+      $form['expose']['operator_id'] = array(
         '#type' => 'textfield',
-        '#default_value' => $this->options['expose']['operator'],
+        '#default_value' => $this->options['expose']['operator_id'],
         '#title' => t('Operator identifier'),
         '#size' => 40,
         '#description' => t('This will appear in the URL after the ? to identify this operator.'),
@@ -260,10 +291,11 @@ class views_handler_filter extends views_handler {
         '#dependency' => array(
           'edit-options-expose-use-operator' => array(1)
         ),
+        '#fieldset' => 'more',
       );
     }
     else {
-      $form['expose']['operator'] = array(
+      $form['expose']['operator_id'] = array(
         '#type' => 'value',
         '#value' => '',
       );
@@ -275,21 +307,9 @@ class views_handler_filter extends views_handler {
       '#title' => t('Filter identifier'),
       '#size' => 40,
       '#description' => t('This will appear in the URL after the ? to identify this filter. Cannot be blank.'),
-    );
-    $form['expose']['label'] = array(
-      '#type' => 'textfield',
-      '#default_value' => $this->options['expose']['label'],
-      '#title' => t('Label'),
-      '#size' => 40,
+      '#fieldset' => 'more',
     );
 
-    if (empty($this->always_required)) {
-      $form['expose']['required'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Required'),
-        '#default_value' => $this->options['expose']['required'],
-      );
-    }
     if (empty($this->always_multiple)) {
       $form['expose']['multiple'] = array(
         '#type' => 'checkbox',
@@ -349,8 +369,8 @@ class views_handler_filter extends views_handler {
     }
 
     // Build the exposed form, when its based on an operator.
-    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator'])) {
-      $operator = $this->options['expose']['operator'];
+    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id'])) {
+      $operator = $this->options['expose']['operator_id'];
       $this->operator_form($form, $form_state);
       $form[$operator] = $form['operator'];
 
@@ -438,7 +458,7 @@ class views_handler_filter extends views_handler {
     }
 
     return array(
-      'operator' => $this->options['expose']['operator'],
+      'operator' => $this->options['expose']['operator_id'],
       'value' => $this->options['expose']['identifier'],
       'label' => $this->options['expose']['label'],
     );
@@ -454,8 +474,8 @@ class views_handler_filter extends views_handler {
     }
 
 
-    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator']) && isset($input[$this->options['expose']['operator']])) {
-      $this->operator = $input[$this->options['expose']['operator']];
+    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id']) && isset($input[$this->options['expose']['operator_id']])) {
+      $this->operator = $input[$this->options['expose']['operator_id']];
     }
 
     if (!empty($this->options['expose']['identifier'])) {
@@ -507,14 +527,14 @@ class views_handler_filter extends views_handler {
     $display_id = ($this->view->display_handler->is_defaulted('filters')) ? 'default' : $this->view->current_display;
 
     // shortcut test.
-    $operator = !empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator']);
+    $operator = !empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id']);
 
     // false means that we got a setting that means to recuse ourselves,
     // so we should erase whatever happened to be there.
     if (!$status && isset($_SESSION['views'][$this->view->name][$display_id])) {
       $session = &$_SESSION['views'][$this->view->name][$display_id];
-      if ($operator && isset($session[$this->options['expose']['operator']])) {
-        unset($session[$this->options['expose']['operator']]);
+      if ($operator && isset($session[$this->options['expose']['operator_id']])) {
+        unset($session[$this->options['expose']['operator_id']]);
       }
 
       if (isset($session[$this->options['expose']['identifier']])) {
@@ -529,8 +549,8 @@ class views_handler_filter extends views_handler {
 
       $session = &$_SESSION['views'][$this->view->name][$display_id];
 
-      if ($operator && isset($input[$this->options['expose']['operator']])) {
-        $session[$this->options['expose']['operator']] = $input[$this->options['expose']['operator']];
+      if ($operator && isset($input[$this->options['expose']['operator_id']])) {
+        $session[$this->options['expose']['operator_id']] = $input[$this->options['expose']['operator_id']];
       }
 
       $session[$this->options['expose']['identifier']] = $input[$this->options['expose']['identifier']];

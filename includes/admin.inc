@@ -1383,9 +1383,7 @@ function template_preprocess_views_ui_display_tab_column(&$variables) {
  * $form_state['values'].
  */
 function views_ui_pre_render_add_fieldset_markup($form) {
-  $keys = element_children($form);
-
-  foreach ($keys as $key) {
+  foreach (element_children($form) as $key) {
     $element = $form[$key];
     // In our form builder functions, we added an arbitrary #fieldset property
     // to any element that belongs in a fieldset. If this form element has that
@@ -1393,6 +1391,29 @@ function views_ui_pre_render_add_fieldset_markup($form) {
     if (isset($element['#type']) && isset($element['#fieldset']) && isset($form[$element['#fieldset']])) {
       $form[$element['#fieldset']][$key] = $element;
       // Remove the original element this duplicates.
+      unset($form[$key]);
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Flattens the structure of an element containing the #flatten property.
+ *
+ * If a form element has #flatten = TRUE, then all of it's children
+ * get moved to the same level as the element itself.
+ * So $form['to_be_flattened'][$key] becomes $form[$key], and
+ * $form['to_be_flattened'] gets unset.
+ */
+function views_ui_pre_render_flatten_data($form) {
+  foreach (element_children($form) as $key) {
+    $element = $form[$key];
+    if (!empty($element['#flatten'])) {
+      foreach (element_children($element) as $child_key) {
+        $form[$child_key] = $form[$key][$child_key];
+      }
+      // All done, remove the now-empty parent.
       unset($form[$key]);
     }
   }

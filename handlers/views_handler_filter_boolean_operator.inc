@@ -131,7 +131,7 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
 
   function expose_options() {
     parent::expose_options();
-    $this->options['expose']['operator'] = '';
+    $this->options['expose']['operator_id'] = '';
     $this->options['expose']['label'] = $this->value_value;
     $this->options['expose']['required'] = TRUE;
   }

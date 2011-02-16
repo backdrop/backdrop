@@ -140,7 +140,7 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $handler->display->display_options['filters']['nid']['table'] = 'node';
     $handler->display->display_options['filters']['nid']['field'] = 'nid';
     $handler->display->display_options['filters']['nid']['exposed'] = TRUE;
-    $handler->display->display_options['filters']['nid']['expose']['operator'] = 'nid_op';
+    $handler->display->display_options['filters']['nid']['expose']['operator_id'] = 'nid_op';
     $handler->display->display_options['filters']['nid']['expose']['label'] = 'filterlabel1';
     $handler->display->display_options['filters']['nid']['expose']['identifier'] = 'nid';
     $handler->display->display_options['filters']['nid']['expose']['multiple'] = 1;

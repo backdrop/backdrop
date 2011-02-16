@@ -441,10 +441,6 @@ class views_handler extends views_object {
       return;
     }
 
-    $form['expose'] = array(
-      '#prefix' => '<div class="views-expose-options clearfix">',
-      '#suffix' => '</div>',
-    );
     $this->expose_form($form, $form_state);
 
     // When we click the expose button, we add new gadgets to the form but they

@@ -54,8 +54,8 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     }
 
     $value = &$form_state['values'][$this->options['expose']['identifier']];
-    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator'])) {
-      $operator = $form_state['values'][$this->options['expose']['operator']];
+    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id'])) {
+      $operator = $form_state['values'][$this->options['expose']['operator_id']];
     }
     else {
       $operator = $this->operator;
@@ -100,8 +100,8 @@ class views_handler_filter_date extends views_handler_filter_numeric {
 
     // Don't filter if value(s) are empty.
     $operators = $this->operators();
-    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator'])) {
-      $operator = $input[$this->options['expose']['operator']];
+    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id'])) {
+      $operator = $input[$this->options['expose']['operator_id']];
     }
     else {
       $operator = $this->operator;
