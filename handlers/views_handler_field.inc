@@ -461,7 +461,7 @@ class views_handler_field extends views_handler {
       '#type' => 'checkbox',
       '#title' => t('Exclude from display'),
       '#default_value' => $this->options['exclude'],
-      '#description' => t('Check this box to not display this field, but still load it in the view. Use this option to not show a grouping field in each record, or when doing advanced theming, or when you want to use this field as a token in other fields.'),
+      '#description' => t('Enable to load this field as hidden. Often used to group fields, or to use as token in another field.'),
       '#fieldset' => 'style_settings',
     );
 
