@@ -25,6 +25,10 @@ $plugin = array(
   ),
 );
 
+if (module_exists('statistics')) {
+  $plugin['available_sorts']['node_counter-totalcount:DESC'] = t('By number of hits');
+}
+
 function _views_ui_node_views_wizard_build_child($parent, $type, $name) {
   $child = $parent;
   $child['name'] =  $parent['name'] . ':' . $type;

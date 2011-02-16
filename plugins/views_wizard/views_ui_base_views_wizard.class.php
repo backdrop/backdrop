@@ -454,9 +454,21 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     if (!empty($form_state['values']['show']['sort'])) {
       list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
+      // Column either be a column-name or the table-columnn-ame.
+      $column = explode('-', $column);
+      dsm($column);
+      if (count($column) > 1) {
+        $table = $column[0];
+        $column = $column[1];
+      }
+      else {
+        $table = $this->base_table;
+        $column = $column[0];
+      }
+
       $sorts[$column] = array(
         'id' => $column,
-        'table' => $this->base_table,
+        'table' => $table,
         'field' => $column,
         'order' => $sort,
       );
