@@ -696,8 +696,12 @@ function hook_views_admin_links_alter(&$links, $view) {
  * This must either be in the same directory as the .module file or in a subdirectory
  * named 'includes'.
  *
- * Alter the rows that appear with a view, which includes path and query information.
- * The rows are suitable for theme('table').
+ * Alter the rows that appear with a view preview, which include query and
+ * performance statistics. $rows is an associative array with two keys:
+ * - query: An array of rows suitable for theme('table'), containing information
+ *   about the query and the display title and path.
+ * - statistics: An array of rows suitable for theme('table'), containing
+ *   performance statistics.
  *
  * Warning: $view is not a reference in PHP4 and cannot be modified here. But it IS
  * a reference in PHP5, and can be modified. Please be careful with it.

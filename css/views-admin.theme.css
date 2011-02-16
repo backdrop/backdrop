@@ -303,11 +303,15 @@
 }
 
 /**
- * Create a horizontal rule between the display details and whatever's after it.
+ * Create a horizontal rule above the live preview area.
  */
 .page-admin-structure-views #content #views-live-preview {
   border-top: 3px solid #CCC;
   margin: 0 12px;
+}
+
+.page-admin-structure-views .views-query-info {
+  margin: 12px 0;
 }
 
 /* @end */

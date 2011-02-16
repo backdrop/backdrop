@@ -161,6 +161,20 @@ function views_ui_preview($view, $display_id, $args) {
   // Save $_GET['q'] so it can be restored before returning from this function.
   $q = $_GET['q'];
 
+  // Determine where the query and performance statistics should be output.
+  $show_query = variable_get('views_ui_show_sql_query', FALSE);
+  if ($show_query) {
+    $show_query = variable_get('views_ui_show_sql_query_where', 'above');
+  }
+  $show_stats = variable_get('views_ui_show_performance_statistics', FALSE);
+  if ($show_stats) {
+    $show_stats = variable_get('views_ui_show_performance_statistics_where', 'above');
+  }
+  $combined = ($show_query === $show_stats);
+
+  $rows = array('query' => array(), 'statistics' => array());
+  $output = '';
+
   $errors = $view->validate();
   if ($errors === TRUE) {
     $view->ajax = TRUE;
@@ -207,76 +221,98 @@ function views_ui_preview($view, $display_id, $args) {
     }
     views_ui_contextual_links_suppress_pop();
 
-    // Append query information and statistics.
-    if (variable_get('views_ui_show_sql_query', FALSE)) {
+    // Prepare the query information and statistics to show either above or
+    // below the view preview.
+    if ($show_query || $show_stats) {
       // Get information from the preview for display.
       if (!empty($view->build_info['query'])) {
-        $rows = array();
-        $query = $view->build_info['query'];
-        // Only the sql default class has a method getArguments.
-        $quoted = array();
+        if ($show_query) {
+          $query = $view->build_info['query'];
+          // Only the sql default class has a method getArguments.
+          $quoted = array();
 
-        if (get_class($view->query) == 'views_plugin_query_default') {
-          $arguments = $query->getArguments();
-          $connection = Database::getConnection();
-          foreach ((array)$query->arguments() as $key => $val) {
-            $quoted[$key] = $connection->quote($val);
-          }
-        }
-        $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');
-        if (!empty($view->additional_queries)) {
-          $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
-          foreach ($view->additional_queries as $query) {
-            if ($queries) {
-              $queries .= "\n";
+          if (get_class($view->query) == 'views_plugin_query_default') {
+            $arguments = $query->getArguments();
+            $connection = Database::getConnection();
+            foreach ((array)$query->arguments() as $key => $val) {
+              $quoted[$key] = $connection->quote($val);
             }
-            $queries .= t('[@time ms]', array('@time' => intval($query[1] * 100000) / 100)) . ' ' . $query[0];
           }
+          $rows['query'][] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');
+          if (!empty($view->additional_queries)) {
+            $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
+            foreach ($view->additional_queries as $query) {
+              if ($queries) {
+                $queries .= "\n";
+              }
+              $queries .= t('[@time ms]', array('@time' => intval($query[1] * 100000) / 100)) . ' ' . $query[0];
+            }
 
-          $rows[] = array('<strong>' . t('Other queries') . '</strong>', '<pre>' . $queries . '</pre>');
+            $rows['query'][] = array('<strong>' . t('Other queries') . '</strong>', '<pre>' . $queries . '</pre>');
+          }
+          $rows['query'][] = array('<strong>' . t('Title') . '</strong>', filter_xss_admin($view->get_title()));
+          if (isset($path)) {
+            $path = l($path, $path);
+          }
+          else {
+            $path = t('This display has no path.');
+          }
+          $rows['query'][] = array('<strong>' . t('Path') . '</strong>', $path);
         }
 
-        $rows[] = array('<strong>' . t('Title') . '</strong>', filter_xss_admin($view->get_title()));
-        if (isset($path)) {
-          $path = l($path, $path);
-        }
-        else {
-          $path = t('This display has no path.');
-        }
+        if ($show_stats) {
+          $rows['statistics'][] = array('<strong>' . t('Query build time') . '</strong>', t('@time ms', array('@time' => intval($view->build_time * 100000) / 100)));
+          $rows['statistics'][] = array('<strong>' . t('Query execute time') . '</strong>', t('@time ms', array('@time' => intval($view->execute_time * 100000) / 100)));
+          $rows['statistics'][] = array('<strong>' . t('View render time') . '</strong>', t('@time ms', array('@time' => intval($view->render_time * 100000) / 100)));
 
-        $rows[] = array('<strong>' . t('Path') . '</strong>', $path);
-
-        $rows[] = array('<strong>' . t('Query build time') . '</strong>', t('@time ms', array('@time' => intval($view->build_time * 100000) / 100)));
-        $rows[] = array('<strong>' . t('Query execute time') . '</strong>', t('@time ms', array('@time' => intval($view->execute_time * 100000) / 100)));
-        $rows[] = array('<strong>' . t('View render time') . '</strong>', t('@time ms', array('@time' => intval($view->render_time * 100000) / 100)));
+        }
         drupal_alter('views_preview_info', $rows, $view);
-
-        $info = theme('table', array('rows' => $rows));
       }
       else {
-        $info = theme('table', array('rows' => array(array('<strong>' . t('Query') . '</strong>', t('No query was run')))));
+        // No query was run. Display that information in place of either the
+        // query or the performance statistics, whichever comes first.
+        if ($combined || ($show_query === 'above')) {
+          $rows['query'] = array(array('<strong>' . t('Query') . '</strong>', t('No query was run')));
+        }
+        else {
+          $rows['statistics'] = array(array('<strong>' . t('Query') . '</strong>', t('No query was run')));
+        }
       }
     }
-    else {
-      $info = '';
-    }
-
   }
   else {
     foreach ($errors as $error) {
       drupal_set_message($error, 'error');
     }
     $preview = t('Unable to preview due to validation errors.');
-    $info = '';
   }
 
-  $info = '<div class="views-query-info">' . $info . '</div>';
-
-  if (variable_get('views_ui_show_sql_query_where', 'above') === 'above') {
-    $output = $info . $preview;
+  // Assemble the preview, the query info, and the query statistics in the
+  // requested order.
+  if ($show_query === 'above') {
+    if ($combined) {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => array_merge($rows['query'], $rows['statistics']))) . '</div>';
+    }
+    else {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['query'])) . '</div>';
+    }
   }
-  else {
-    $output = $preview . $info;
+  elseif ($show_stats === 'above') {
+    $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['statistics'])) . '</div>';
+  }
+
+  $output .= $preview;
+
+  if ($show_query === 'below') {
+    if ($combined) {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => array_merge($rows['query'], $rows['statistics']))) . '</div>';
+    }
+    else {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['query'])) . '</div>';
+    }
+  }
+  elseif ($show_stats === 'below') {
+    $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['statistics'])) . '</div>';
   }
 
   $_GET['q'] = $q;
@@ -3990,7 +4026,7 @@ function views_ui_admin_settings_display() {
       'above' => t('Show the query above the automatic preview'),
       'below' => t('Show the query below the automatic preview'),
     ),
-    '#default_value' => 'above',
+    '#default_value' => variable_get('views_ui_show_sql_query_where', 'above'),
     '#process' => array('form_process_radios', 'ctools_dependent_process'),
     '#dependency' => array('edit-views-ui-show-sql-query' => array(TRUE)),
     '#prefix' => '<div id="edit-show-sql-wrapper" class="views-dependent"><div id="edit-show-sql">',
@@ -4007,7 +4043,7 @@ function views_ui_admin_settings_display() {
       'above' => t('Show the statistics above the automatic preview'),
       'below' => t('Show the statistics below the automatic preview'),
     ),
-    '#default_value' => 'above',
+    '#default_value' => variable_get('views_ui_show_performance_statistics_where', 'above'),
     '#process' => array('form_process_radios', 'ctools_dependent_process'),
     '#dependency' => array('edit-views-ui-show-performance-statistics' => array(TRUE)),
     '#prefix' => '<div id="edit-show-performance-wrapper" class="views-dependent"><div id="edit-show-performance">',
