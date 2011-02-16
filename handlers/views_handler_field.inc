@@ -353,12 +353,20 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_type'],
       '#description' => t('Choose the HTML element to wrap around this field, e.g. H1, H2, etc.'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-type-enable' => array(1)
+      ),
     );
 
     $form['element_class_enable'] = array(
       '#type' => 'checkbox',
       '#title' => t('Create a CSS class'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-type-enable' => array(1)
+      ),
     );
 
     $form['element_class'] = array(
@@ -413,12 +421,20 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_label_type'],
       '#description' => t('Choose the HTML element to wrap around this label, e.g. H1, H2, etc.'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-label-type-enable' => array(1)
+      ),
     );
 
     $form['element_label_class_enable'] = array(
       '#type' => 'checkbox',
       '#title' => t('Create a CSS class'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-label-type-enable' => array(1)
+      ),
     );
 
     $form['element_label_class'] = array(
@@ -446,12 +462,20 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_wrapper_type'],
       '#description' => t('Choose the HTML element to wrap around this field and label, e.g. H1, H2, etc.'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-wrapper-type-enable' => array(1)
+      ),
     );
 
     $form['element_wrapper_class_enable'] = array(
       '#type' => 'checkbox',
       '#title' => t('Create a CSS class'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-wrapper-type-enable' => array(1)
+      ),
     );
 
     $form['element_wrapper_class'] = array(
