@@ -275,6 +275,7 @@ class views_handler_field_field extends views_handler_field {
         '#options' => drupal_map_assoc($column_names),
         '#default_value' => $this->options['click_sort_column'],
         '#description' => t('Used by Style: Table to determine the actual column to click sort the field on. The default is usually fine.'),
+        '#fieldset' => 'more',
       );
     }
 
@@ -293,6 +294,7 @@ class views_handler_field_field extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['field_api_classes'],
       '#description' => t('If checked, field api classes will be added using field.tpl.php (or equivalent). This is not recommended unless your CSS depends upon these classes. If not checked, template will not be used.'),
+      '#fieldset' => 'more',
     );
 
     if ($this->multiple) {

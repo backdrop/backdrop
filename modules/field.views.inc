@@ -107,13 +107,16 @@ function field_views_field_default_views_data($field) {
   foreach ($tables as $type => $table) {
     if ($type == FIELD_LOAD_CURRENT) {
       $group = t('Fields');
-      $column = 'entity_id';
+      $old_column = 'entity_id';
+      $column = $field['field_name'];
     }
     else {
       $group = t('Fields (historical data)');
-      $column = 'revision_id';
+      $old_column = 'revision_id';
+      $column = $field['field_name'] . '-' . $old_column;
     }
 
+    $data[$table][$old_column]['field']['moved to'] = array($table, $column);
     $data[$table][$column] = array(
       'group' => $group,
       'title' => $title_short,

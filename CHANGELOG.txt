@@ -64,6 +64,7 @@ Fix fieldsets in field handler.
 #1008358: Updated for translation plugin to work properly with i18nviews.
 #1055378 by mfb: Fix rss_namespaces.
 #957284: by dereine: Followup for filter_search fix.
+#1024586 by merlinofchaos, dereine: Provide a way to move old fields in views data. Additional move field-api data to it.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

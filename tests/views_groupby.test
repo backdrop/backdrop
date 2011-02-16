@@ -77,7 +77,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['type'] = 'some';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'title';
@@ -91,7 +91,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
     $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
     $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
-    /* Argument: Node: Type */
+    /* Argument: Content: Type */
     $handler->display->display_options['arguments']['type']['id'] = 'type';
     $handler->display->display_options['arguments']['type']['table'] = 'node';
     $handler->display->display_options['arguments']['type']['field'] = 'type';
@@ -160,7 +160,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['type'] = 'some';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
@@ -175,7 +175,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
     $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
     $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
-    /* Field: Node: Type */
+    /* Field: Content: Type */
     $handler->display->display_options['fields']['type']['id'] = 'type';
     $handler->display->display_options['fields']['type']['table'] = 'node';
     $handler->display->display_options['fields']['type']['field'] = 'type';
@@ -300,5 +300,3 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     return $view;
   }
 }
-
-

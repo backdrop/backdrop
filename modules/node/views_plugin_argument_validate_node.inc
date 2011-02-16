@@ -30,12 +30,12 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
       '#title' => t('Types'),
       '#options' => $options,
       '#default_value' => $this->options['types'],
-      '#description' => t('If you wish to validate for specific node types, check them; if none are checked, all nodes will pass.'),
+      '#description' => t('If you wish to validate for specific content types, check them; if none are checked, all content will pass.'),
     );
 
     $form['access'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Validate user has access to the node'),
+      '#title' => t('Validate user has access to the content'),
       '#default_value' => $this->options['access'],
     );
     $form['access_op'] = array(
@@ -131,4 +131,3 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
     }
   }
 }
-

@@ -68,6 +68,20 @@ function views_ui_preview($view, $display_id, $args) {
   // Save $_GET['q'] so it can be restored before returning from this function.
   $q = $_GET['q'];
 
+  // Determine where the query and performance statistics should be output.
+  $show_query = variable_get('views_ui_show_sql_query', FALSE);
+  if ($show_query) {
+    $show_query = variable_get('views_ui_show_sql_query_where', 'above');
+  }
+  $show_stats = variable_get('views_ui_show_performance_statistics', FALSE);
+  if ($show_stats) {
+    $show_stats = variable_get('views_ui_show_performance_statistics_where', 'above');
+  }
+  $combined = ($show_query === $show_stats);
+
+  $rows = array('query' => array(), 'statistics' => array());
+  $output = '';
+
   $errors = $view->validate();
   if ($errors === TRUE) {
     $view->ajax = TRUE;
@@ -114,76 +128,98 @@ function views_ui_preview($view, $display_id, $args) {
     }
     views_ui_contextual_links_suppress_pop();
 
-    // Append query information and statistics.
-    if (variable_get('views_ui_show_sql_query', FALSE)) {
+    // Prepare the query information and statistics to show either above or
+    // below the view preview.
+    if ($show_query || $show_stats) {
       // Get information from the preview for display.
       if (!empty($view->build_info['query'])) {
-        $rows = array();
-        $query = $view->build_info['query'];
-        // Only the sql default class has a method getArguments.
-        $quoted = array();
+        if ($show_query) {
+          $query = $view->build_info['query'];
+          // Only the sql default class has a method getArguments.
+          $quoted = array();
 
-        if (get_class($view->query) == 'views_plugin_query_default') {
-          $arguments = $query->getArguments();
-          $connection = Database::getConnection();
-          foreach ((array)$query->arguments() as $key => $val) {
-            $quoted[$key] = $connection->quote($val);
-          }
-        }
-        $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');
-        if (!empty($view->additional_queries)) {
-          $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
-          foreach ($view->additional_queries as $query) {
-            if ($queries) {
-              $queries .= "\n";
+          if (get_class($view->query) == 'views_plugin_query_default') {
+            $arguments = $query->getArguments();
+            $connection = Database::getConnection();
+            foreach ((array)$query->arguments() as $key => $val) {
+              $quoted[$key] = $connection->quote($val);
             }
-            $queries .= t('[@time ms]', array('@time' => intval($query[1] * 100000) / 100)) . ' ' . $query[0];
           }
+          $rows['query'][] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');
+          if (!empty($view->additional_queries)) {
+            $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
+            foreach ($view->additional_queries as $query) {
+              if ($queries) {
+                $queries .= "\n";
+              }
+              $queries .= t('[@time ms]', array('@time' => intval($query[1] * 100000) / 100)) . ' ' . $query[0];
+            }
 
-          $rows[] = array('<strong>' . t('Other queries') . '</strong>', '<pre>' . $queries . '</pre>');
+            $rows['query'][] = array('<strong>' . t('Other queries') . '</strong>', '<pre>' . $queries . '</pre>');
+          }
+          $rows['query'][] = array('<strong>' . t('Title') . '</strong>', filter_xss_admin($view->get_title()));
+          if (isset($path)) {
+            $path = l($path, $path);
+          }
+          else {
+            $path = t('This display has no path.');
+          }
+          $rows['query'][] = array('<strong>' . t('Path') . '</strong>', $path);
         }
 
-        $rows[] = array('<strong>' . t('Title') . '</strong>', filter_xss_admin($view->get_title()));
-        if (isset($path)) {
-          $path = l($path, $path);
-        }
-        else {
-          $path = t('This display has no path.');
-        }
+        if ($show_stats) {
+          $rows['statistics'][] = array('<strong>' . t('Query build time') . '</strong>', t('@time ms', array('@time' => intval($view->build_time * 100000) / 100)));
+          $rows['statistics'][] = array('<strong>' . t('Query execute time') . '</strong>', t('@time ms', array('@time' => intval($view->execute_time * 100000) / 100)));
+          $rows['statistics'][] = array('<strong>' . t('View render time') . '</strong>', t('@time ms', array('@time' => intval($view->render_time * 100000) / 100)));
 
-        $rows[] = array('<strong>' . t('Path') . '</strong>', $path);
-
-        $rows[] = array('<strong>' . t('Query build time') . '</strong>', t('@time ms', array('@time' => intval($view->build_time * 100000) / 100)));
-        $rows[] = array('<strong>' . t('Query execute time') . '</strong>', t('@time ms', array('@time' => intval($view->execute_time * 100000) / 100)));
-        $rows[] = array('<strong>' . t('View render time') . '</strong>', t('@time ms', array('@time' => intval($view->render_time * 100000) / 100)));
+        }
         drupal_alter('views_preview_info', $rows, $view);
-
-        $info = theme('table', array('rows' => $rows));
       }
       else {
-        $info = theme('table', array('rows' => array(array('<strong>' . t('Query') . '</strong>', t('No query was run')))));
+        // No query was run. Display that information in place of either the
+        // query or the performance statistics, whichever comes first.
+        if ($combined || ($show_query === 'above')) {
+          $rows['query'] = array(array('<strong>' . t('Query') . '</strong>', t('No query was run')));
+        }
+        else {
+          $rows['statistics'] = array(array('<strong>' . t('Query') . '</strong>', t('No query was run')));
+        }
       }
     }
-    else {
-      $info = '';
-    }
-
   }
   else {
     foreach ($errors as $error) {
       drupal_set_message($error, 'error');
     }
     $preview = t('Unable to preview due to validation errors.');
-    $info = '';
   }
 
-  $info = '<div class="views-query-info">' . $info . '</div>';
-
-  if (variable_get('views_ui_show_sql_query_where', 'above') === 'above') {
-    $output = $info . $preview;
+  // Assemble the preview, the query info, and the query statistics in the
+  // requested order.
+  if ($show_query === 'above') {
+    if ($combined) {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => array_merge($rows['query'], $rows['statistics']))) . '</div>';
+    }
+    else {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['query'])) . '</div>';
+    }
   }
-  else {
-    $output = $preview . $info;
+  elseif ($show_stats === 'above') {
+    $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['statistics'])) . '</div>';
+  }
+
+  $output .= $preview;
+
+  if ($show_query === 'below') {
+    if ($combined) {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => array_merge($rows['query'], $rows['statistics']))) . '</div>';
+    }
+    else {
+      $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['query'])) . '</div>';
+    }
+  }
+  elseif ($show_stats === 'below') {
+    $output .= '<div class="views-query-info">' . theme('table', array('rows' => $rows['statistics'])) . '</div>';
   }
 
   $_GET['q'] = $q;
@@ -220,16 +256,13 @@ function views_ui_add_page() {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
-  // Let users turn off the wizard autofill behavior on the views settings page.
-  $form['#attached']['js'][] = array('type' => 'setting', 'data' => array('viewsUiWizardAutofill' => variable_get('views_ui_wizard_autofill', TRUE)));
+  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';;
 
   $form['human_name'] = array(
     '#type' => 'textfield',
     '#title' => t('View name'),
     '#required' => TRUE,
     '#size' => 32,
-    '#description' => t('A descriptive name for this view. Spaces are allowed.'),
     '#default_value' => !empty($form_state['view']) ? $form_state['view']->human_name : '',
     '#maxlength' => 255,
   );
@@ -628,7 +661,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['help_text'] = array(
     '#prefix' => '<div>',
     '#suffix' => '</div>',
-    '#markup' => t('Modify the displays of your view below or add new displays.'),
+    '#markup' => t('Modify the display(s) of your view below or add new displays.'),
   );
 
   $form['actions'] = array('#type' => 'actions', '#weight' => 0);
@@ -648,7 +681,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
 
   $form['displays'] = array(
-    '#prefix' => '<h1 class="clearfix">' . t('Queries/displays') . '</h1>' . "\n" . '<div class="views-displays">',
+    '#prefix' => '<h1 class="clearfix">' . t('Displays') . '</h1>' . "\n" . '<div class="views-displays">',
     '#suffix' => '</div>',
   );
 
@@ -983,12 +1016,10 @@ function views_ui_get_display_tab_details($view, $display) {
   }
 
   // The area above the three columns.
-  $build['top']['view_name'] = array(
+  $build['top']['display_name'] = array(
     '#theme' => 'views_ui_display_tab_setting',
-    '#description' => t('View name'),
-    // @TODO: Are we letting them edit the view name, the display id, or some
-    // other property?
-    '#link' => $view->human_name,
+    '#description' => t('Display name'),
+    '#link' => check_plain($display->display_title),
   );
 
   $build['columns'] = array();
@@ -1104,6 +1135,14 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   $zebra++;
 
   $variables['settings'] = implode($variables['settings_links']);
+
+  // Add classes associated with this display tab to the overall list.
+  $variables['classes_array'] = array_merge($variables['classes_array'], $variables['class']);
+
+  // Append a colon to the description, if requested.
+  if ($variables['description'] && $variables['description_separator']) {
+    $variables['description'] .= t(':');
+  }
 }
 
 function template_preprocess_views_ui_display_tab_bucket(&$variables) {
@@ -1137,9 +1176,7 @@ function template_preprocess_views_ui_display_tab_column(&$variables) {
  * $form_state['values'].
  */
 function views_ui_pre_render_add_fieldset_markup($form) {
-  $keys = element_children($form);
-
-  foreach ($keys as $key) {
+  foreach (element_children($form) as $key) {
     $element = $form[$key];
     // In our form builder functions, we added an arbitrary #fieldset property
     // to any element that belongs in a fieldset. If this form element has that
@@ -1155,6 +1192,29 @@ function views_ui_pre_render_add_fieldset_markup($form) {
 }
 
 /**
+ * Flattens the structure of an element containing the #flatten property.
+ *
+ * If a form element has #flatten = TRUE, then all of it's children
+ * get moved to the same level as the element itself.
+ * So $form['to_be_flattened'][$key] becomes $form[$key], and
+ * $form['to_be_flattened'] gets unset.
+ */
+function views_ui_pre_render_flatten_data($form) {
+  foreach (element_children($form) as $key) {
+    $element = $form[$key];
+    if (!empty($element['#flatten'])) {
+      foreach (element_children($element) as $child_key) {
+        $form[$child_key] = $form[$key][$child_key];
+      }
+      // All done, remove the now-empty parent.
+      unset($form[$key]);
+    }
+  }
+
+  return $form;
+}
+
+/*
  * Import a view from cut & paste.
  */
 function views_ui_import_page($form, &$form_state) {
@@ -1424,22 +1484,27 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   $grouping = FALSE;
   if ($type == 'filter') {
     $group_info = $view->display_handler->get_option('filter_groups');
-    if (!empty($group_info['groups']) && count($group_info['groups']) > 1) {
+    // If there is only one group but it is using the "OR" filter, we still
+    // treat it as a group for display purposes, since we want to display the
+    // "OR" label next to items within the group.
+    if (!empty($group_info['groups']) && (count($group_info['groups']) > 1 || current($group_info['groups']) == 'OR')) {
       $grouping = TRUE;
       $groups = array(0 => array());
     }
   }
 
+  $build['fields'] = array();
+
   foreach ($display->handler->get_option($types[$type]['plural']) as $id => $field) {
     // Build the option link for this handler ("Node: ID = article").
-    $build[$id] = array();
-    $build[$id]['#theme'] = 'views_ui_display_tab_setting';
+    $build['fields'][$id] = array();
+    $build['fields'][$id]['#theme'] = 'views_ui_display_tab_setting';
 
     $handler = $display->handler->get_handler($type, $id);
     if (empty($handler)) {
-      $build[$id]['#attributes']['class'][] = 'broken';
+      $build['fields'][$id]['#class'][] = 'broken';
       $field_name = t('Broken/missing handler: @table > @field', array('@table' => $field['table'], '@field' => $field['field']));
-      $build[$id]['#link'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
+      $build['fields'][$id]['#link'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
       continue;
     }
 
@@ -1450,18 +1515,21 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
     $description = $handler->admin_summary();
     $link_text = $field_name . (empty($description) ? '' : " ($description)");
-    $build[$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
-    $build[$id]['#attributes']['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
+    $build['fields'][$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
+    $build['fields'][$id]['#class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
     if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $id])) {
-      $build[$id]['#changed'] = TRUE;
+      // @TODO: #changed is no longer being used?
+      $build['fields'][$id]['#changed'] = TRUE;
     }
 
     if ($display->handler->use_group_by()) {
-      $build[$id]['#links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
+      // @TODO: #links is no longer being used?
+      $build['fields'][$id]['#links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
     }
 
     if ($handler->has_extra_options()) {
-      $build[$id]['#links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+      // @TODO: #links is no longer being used?
+      $build['fields'][$id]['#links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
     }
 
     if ($handler->needs_style_plugin()) {
@@ -1470,17 +1538,19 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin['title'];
       $pid = $id . '-style-plugin';
 
-      $build[$pid] = array();
-      $build[$pid]['#theme'] = 'views_ui_display_tab_setting';
+      $build['fields'][$pid] = array();
+      $build['fields'][$pid]['#theme'] = 'views_ui_display_tab_setting';
 
       if (!empty($style_plugin['uses options'])) {
-        $build[$pid]['#links'][] = l('<span>' . t('Change settings for this style') . '</span>', "admin/structure/views/nojs/config-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+        // @TODO: #links is no longer being used?
+        $build['fields'][$pid]['#links'][] = l('<span>' . t('Change settings for this style') . '</span>', "admin/structure/views/nojs/config-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
       }
 
-      $build[$pid]['#link'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
-      $build[$pid]['#attributes']['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
+      $build['fields'][$pid]['#link'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
+      $build['fields'][$pid]['#class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
       if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $pid])) {
-        $build[$pid]['#changed'] = TRUE;
+        // @TODO: #changed is no longer being used?
+        $build['fields'][$pid]['#changed'] = TRUE;
       }
     }
 
@@ -1497,36 +1567,27 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
   // If using grouping, re-order fields so that they show up properly in the list.
   if ($type == 'filter' && $grouping) {
-    $store = $fields;
-    $fields = array();
+    $store = $build['fields'];
+    $build['fields'] = array();
     foreach ($groups as $gid => $contents) {
-      if (!empty($fields)) {
-        $operator = ') ' . ($group_info['operator'] == 'OR' ? t('OR') : t('AND')) . ' (';
+      // Display an operator between each group.
+      if (!empty($build['fields'])) {
+        $build['fields'][] = array(
+          '#theme' => 'views_ui_display_tab_setting',
+          '#class' => array('views-group-text'),
+          '#link' => ($group_info['operator'] == 'OR' ? t('OR') : t('AND')),
+        );
       }
-      else {
-        $operator = '(';
-      }
-      $fields[] = array(
-        'class' => 'views-group-text',
-        'title' => $operator,
-        'info' => '',
-      );
-      $started = FALSE;
-      foreach ($contents as $pid) {
-        $operator = '&nbsp;&nbsp;';
-        if ($started) {
-          $operator .= ($group_info['groups'][$gid] == 'OR' ? t('OR') : t('AND')) . ' ';
+      // Display an operator between each pair of filters within the group.
+      $keys = array_keys($contents);
+      $last = end($keys);
+      foreach ($contents as $key => $pid) {
+        if ($key != $last) {
+          $store[$pid]['#link'] .= '&nbsp;&nbsp;' . ($group_info['groups'][$gid] == 'OR' ? t('OR') : t('AND'));
         }
-        $store[$pid]['title'] = $operator . $store[$pid]['title'];
-        $started = TRUE;
-        $fields[$pid] = $store[$pid];
+        $build['fields'][$pid] = $store[$pid];
       }
     }
-    $fields[] = array(
-      'class' => 'views-group-text',
-      'title' => ')',
-      'info' => '',
-    );
   }
 
   return $build;
@@ -2580,6 +2641,44 @@ function theme_views_ui_rearrange_form($variables) {
 }
 
 /**
+ * Theme the expose filter form.
+ */
+function theme_views_ui_expose_filter_form($variables) {
+  $form = $variables['form'];
+  $more = drupal_render($form['more']);
+
+  $output = drupal_render($form['form_description']);
+  $output .= drupal_render($form['expose_button']);
+  if (isset($form['required'])) {
+    $output .= drupal_render($form['required']);
+  }
+  $output .= drupal_render($form['label']);
+
+  $output .= drupal_render($form['operator']);
+  $output .= drupal_render($form['value']);
+
+  if (isset($form['use_operator'])) {
+    $output .= '<div class="views-left-40">';
+    $output .= drupal_render($form['use_operator']);
+    $output .= '</div>';
+  }
+
+  // Only output the right column markup if there's a left column to begin with
+  if (!empty($form['operator']['#type'])) {
+    $output .= '<div class="views-right-60">';
+    $output .= drupal_render_children($form);
+    $output .= '</div>';
+  }
+  else {
+    $output .= drupal_render_children($form);
+  }
+
+  $output .= $more;
+
+  return $output;
+}
+
+/**
  * Submit handler for rearranging form
  */
 function views_ui_rearrange_form_submit($form, &$form_state) {
@@ -2910,10 +3009,11 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
     $new_fields[$field] = $old_fields[$field];
   }
 
-  // Save if the actual update button was clicked.
+  // If the #group property is set on the clicked button, that means we are
+  // either adding or removing a group, not actually updating the filters.
   if (!empty($form_state['clicked_button']['#group'])) {
     if ($form_state['clicked_button']['#group'] == 'add') {
-      // Add a new group
+      // Add a new group.
       $groups['groups'][] = 'AND';
     }
     else {
@@ -2948,7 +3048,19 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
     views_ui_add_form_to_stack('rearrange-filter', $form_state['view'], $form_state['display_id'], array($form_state['type']));
   }
   else {
-    // Actually write changed handler values.
+    // The actual update button was clicked. Remove the empty groups, and
+    // renumber them sequentially.
+    ksort($remember_groups);
+    $groups['groups'] = array_values(array_intersect_key($groups['groups'], $remember_groups));
+    // Change the 'group' key on each field to match. Here, $mapping is an
+    // array whose keys are the old group numbers and whose values are the new
+    // (sequentially numbered) ones.
+    $mapping = array_flip(array_keys($remember_groups));
+    foreach ($new_fields as &$new_field) {
+      $new_field['group'] = $mapping[$new_field['group']];
+    }
+
+    // Write the changed handler values.
     $display->handler->set_option($types[$form_state['type']]['plural'], $new_fields);
     $display->handler->set_option('filter_groups', $groups);
     if (isset($form_state['view']->form_cache)) {
@@ -2956,7 +3068,7 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
     }
   }
 
-  // Store in cache
+  // Store in cache.
   views_ui_cache_set($form_state['view']);
 }
 
@@ -3658,7 +3770,7 @@ function views_ui_admin_settings_display() {
       'above' => t('Show the query above the automatic preview'),
       'below' => t('Show the query below the automatic preview'),
     ),
-    '#default_value' => 'above',
+    '#default_value' => variable_get('views_ui_show_sql_query_where', 'above'),
     '#process' => array('form_process_radios', 'ctools_dependent_process'),
     '#dependency' => array('edit-views-ui-show-sql-query' => array(TRUE)),
     '#prefix' => '<div id="edit-show-sql-wrapper" class="views-dependent"><div id="edit-show-sql">',
@@ -3675,7 +3787,7 @@ function views_ui_admin_settings_display() {
       'above' => t('Show the statistics above the automatic preview'),
       'below' => t('Show the statistics below the automatic preview'),
     ),
-    '#default_value' => 'above',
+    '#default_value' => variable_get('views_ui_show_performance_statistics_where', 'above'),
     '#process' => array('form_process_radios', 'ctools_dependent_process'),
     '#dependency' => array('edit-views-ui-show-performance-statistics' => array(TRUE)),
     '#prefix' => '<div id="edit-show-performance-wrapper" class="views-dependent"><div id="edit-show-performance">',
@@ -3705,22 +3817,6 @@ function views_ui_admin_settings_defaults() {
     '#default_value' => variable_get('views_ui_combine_templates', FALSE),
   );
 
-  $form['create_view_form'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Create view form'),
-  );
-  $form['create_view_form']['views_ui_wizard_create_page'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('"Create a page" is enabled by default'),
-    '#default_value' => variable_get('views_ui_wizard_create_page', TRUE),
-  );
-  $form['create_view_form']['views_ui_wizard_autofill'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Autofill form values with the name of the view'),
-    '#description' => t('Accelerate view creation by prefilling form values based on the name of the view.'),
-    '#default_value' => variable_get('views_ui_wizard_autofill', TRUE),
-  );
-
   $form['edit_view_form'] = array(
     '#type' => 'fieldset',
     '#title' => t('Edit view form'),
@@ -3733,7 +3829,7 @@ function views_ui_admin_settings_defaults() {
   );
   $form['edit_view_form']['views_exposed_filter_any_label'] = array(
     '#type' => 'select',
-    '#title' => t('Label for "Any" value on optional single-select exposed filters'),
+    '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
     '#options' => array('old_any' => '<Any>', 'new_any' => t('- Any -')),
     '#default_value' => variable_get('views_exposed_filter_any_label', 'old_any'),
   );
@@ -3742,9 +3838,9 @@ function views_ui_admin_settings_defaults() {
 }
 
 /**
- * Form builder for the admin performance settings page.
+ * Form builder for the advanced admin settings page.
  */
-function views_ui_admin_settings_performance() {
+function views_ui_admin_settings_advanced() {
   $form = array();
   $form['clear_cache'] = array(
     '#type' => 'submit',
@@ -3766,17 +3862,10 @@ function views_ui_admin_settings_performance() {
     '#default_value' => variable_get('views_skip_cache', FALSE),
   );
 
-  $form['views_ui_query_on_top'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show query above live preview'),
-    '#description' => t("The live preview feature will show you the output of the view you're creating, as well as the view. Check here to show the query and other information above the view; leave this unchecked to show that information below the view."),
-    '#default_value' => variable_get('views_ui_query_on_top', FALSE),
-  );
-
   $form['views_ui_disable_live_preview'] = array(
     '#type' => 'checkbox',
     '#title' => t('Disable automatic live preview'),
-    '#description' => t("Don't automatically update the preview. This can speed up the editing of views a bit.'"),
+    '#description' => t("Don't automatically update the preview. This can speed up the editing of views a bit."),
     '#default_value' => variable_get('views_ui_disable_live_preview', 0),
   );
 
@@ -3796,8 +3885,8 @@ function views_ui_admin_settings_performance() {
 
   $form['views_no_javascript'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Disable javascript with Views'),
-    '#description' => t("If you are having problems with the javascript, you can disable it here; the Views UI should degrade and still be usable without javascript, it just not as good."),
+    '#title' => t('Disable JavaScript with Views'),
+    '#description' => t("If you are having problems with the JavaScript, you can disable it here. The Views UI should degrade and still be usable without javascript; it's just not as good."),
     '#default_value' => variable_get('views_no_javascript', FALSE),
   );
 
@@ -3993,6 +4082,10 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
               foreach ((array) $info['skip base'] as $base_name) {
                 $skip_bases[$field][$key][$base_name] = TRUE;
               }
+            }
+            // Don't show old fields. The real field will be added right.
+            if (isset($info[$key]['moved to'])) {
+              continue;
             }
             foreach (array('title', 'group', 'help', 'base') as $string) {
               // First, try the lowest possible level

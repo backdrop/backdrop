@@ -52,10 +52,11 @@ function views_ui_menu() {
     'page arguments' => array('views_ui_admin_settings_defaults'),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
-  $items['admin/structure/views/settings/performance'] = array(
-    'title' => 'Performance',
-    'page arguments' => array('views_ui_admin_settings_performance'),
+  $items['admin/structure/views/settings/advanced'] = array(
+    'title' => 'Advanced',
+    'page arguments' => array('views_ui_admin_settings_advanced'),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
   ) + $base;
 
   // The primary Edit View page. Secondary tabs for each Display are added in
@@ -86,21 +87,7 @@ function views_ui_menu() {
     'page arguments' => array(FALSE, 4),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
- /*
-  $items['admin/structure/views/view/%views_ui_cache/export'] = array(
-    'title' => 'Export',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_export_page', 4),
-    'type' => MENU_LOCAL_ACTION,
-  ) + $base;
 
-  $items['admin/structure/views/view/%views_ui_cache/clone'] = array(
-    'title' => 'Clone',
-    'page callback' => 'views_ui_clone_page',
-    'page arguments' => array(4),
-    'type' => MENU_LOCAL_ACTION,
-  ) + $base;
-*/
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
     'page callback' => 'drupal_get_form',
@@ -209,7 +196,7 @@ function views_ui_theme() {
   return array(
     // edit a view
     'views_ui_display_tab_setting' => array(
-      'variables' => array('description' => '', 'link' => '', 'settings_links' => array(), 'overridden' => FALSE, 'defaulted' => FALSE),
+      'variables' => array('description' => '', 'link' => '', 'settings_links' => array(), 'overridden' => FALSE, 'defaulted' => FALSE, 'description_separator' => TRUE, 'class' => array()),
       'template' => 'views-ui-display-tab-setting',
       'path' => "$path/theme",
     ),
@@ -227,6 +214,10 @@ function views_ui_theme() {
       'render element' => 'form',
     ),
     'views_ui_rearrange_filter_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/admin.inc',
+    ),
+    'views_ui_expose_filter_form' => array(
       'render element' => 'form',
       'file' => 'includes/admin.inc',
     ),
@@ -394,17 +385,16 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
     case 'exposed':
       // @todo Sorts can be exposed too, so we may need a better title.
       $vars['title'] = t('Exposed Filters');
-      $links = views_ui_view_preview_section_plugin_links($vars['view'], 'exposed_form');
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'exposed_form_options', $vars['title']);
       break;
     case 'rows':
-      // @todo The title needs to depend on what is being viewed. Also, it is
-      //   now discouraged to use the word "node" in user facing text.
-      $vars['title'] = t('Nodes');
+      // @todo The title needs to depend on what is being viewed.
+      $vars['title'] = t('Content');
       $links = views_ui_view_preview_section_rows_links($vars['view']);
       break;
     case 'pager':
       $vars['title'] = t('Pager');
-      $links = views_ui_view_preview_section_plugin_links($vars['view'], $vars['section']);
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'pager_options', $vars['title']);
       break;
     case 'more':
       $vars['title'] = t('More');
@@ -484,23 +474,6 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
     'attributes' => array('class' => array('views-ajax-link')),
   );
 
-  return $links;
-}
-
-/**
- * Returns a contextual link for the plugin type.
- */
-function views_ui_view_preview_section_plugin_links($view, $type) {
-  $display = $view->display_handler->display;
-  $plugin = $view->display_handler->get_plugin($type);
-  $plugin_name = '';
-  $links = array(
-    $type . '-edit' => array(
-      'title' => t('Edit @section', array('@section' => $plugin_name)),
-      'href' => "admin/structure/views/nojs/display/$view->name/$display->id/$type",
-      'attributes' => array('class' => array('views-ajax-link')),
-    ),
-  );
   return $links;
 }
 

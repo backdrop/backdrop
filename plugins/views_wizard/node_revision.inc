@@ -10,7 +10,7 @@ $plugin = array(
     'file' => 'views_ui_node_revision_views_wizard.class.php',
     'class' => 'ViewsUiNodeRevisionViewsWizard',
   ),
-  'title' => t('Node revisions'),
+  'title' => t('Content revisions'),
   'filters' => array(
     'status' => array(
       'value' => '1',
@@ -19,4 +19,3 @@ $plugin = array(
     ),
   ),
 );
-

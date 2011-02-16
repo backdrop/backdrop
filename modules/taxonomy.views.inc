@@ -221,8 +221,8 @@ function taxonomy_views_data() {
   );
 
   $data['taxonomy_index']['nid'] = array(
-    'title' => t('Node'),
-    'help' => t('Get all nodes tagged with a term.'),
+    'title' => t('Content'),
+    'help' => t('Get all content tagged with a term.'),
     'relationship' => array(
       'handler' => 'views_handler_relationship',
       'base' => 'node',

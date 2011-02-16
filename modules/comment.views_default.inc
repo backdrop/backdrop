@@ -51,7 +51,7 @@ function comment_views_default_views() {
   $handler->display->display_options['sorts']['timestamp']['table'] = 'comment';
   $handler->display->display_options['sorts']['timestamp']['field'] = 'changed';
   $handler->display->display_options['sorts']['timestamp']['order'] = 'DESC';
-  /* Filter: Node: Published or admin */
+  /* Filter: Content: Published or admin */
   $handler->display->display_options['filters']['status_extra']['id'] = 'status_extra';
   $handler->display->display_options['filters']['status_extra']['table'] = 'node';
   $handler->display->display_options['filters']['status_extra']['field'] = 'status_extra';
@@ -73,7 +73,7 @@ function comment_views_default_views() {
   $handler->display->display_options['row_options']['separator'] = '&nbsp;';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Node: Title */
+  /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';

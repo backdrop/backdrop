@@ -128,6 +128,12 @@
   display: none;
 }
 
+/* sizes the labels of checkboxes and radio button to the height of the text */
+.page-admin-structure-views .form-type-checkbox label,
+.page-admin-structure-views .form-type-radio label {
+  line-height: 2;
+}
+
 /* @end */
 
 /* @group Lists */
@@ -303,11 +309,15 @@
 }
 
 /**
- * Create a horizontal rule between the display details and whatever's after it.
+ * Create a horizontal rule above the live preview area.
  */
 .page-admin-structure-views #content #views-live-preview {
   border-top: 3px solid #CCC;
   margin: 0 12px;
+}
+
+.page-admin-structure-views .views-query-info {
+  margin: 12px 0;
 }
 
 /* @end */
@@ -370,6 +380,11 @@
 
 .page-admin-structure-views #content .views-ui-display-tab-bucket .even {
   background-color: #f9f9f9;
+}
+
+.page-admin-structure-views #content .views-ui-display-tab-bucket .views-group-text {
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .views-display-setting .label {
@@ -512,6 +527,21 @@
 }
 .page-admin-structure-views .views-ui-dialog .form-buttons input {
   margin-bottom: 0;
+}
+
+/* @end */
+
+/* @group Configure filter criteria */
+
+/* @todo the width and border info could be moved into a more generic class */ 
+#edit-options-value {
+  border-color: #CCCCCC;
+  border-style: solid;
+  border-width: 1px;
+  max-height: 210px;
+  overflow: auto;
+  padding: 0 0 0 2px;
+  width: 190px;
 }
 
 /* @end */

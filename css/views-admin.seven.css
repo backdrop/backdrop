@@ -63,6 +63,16 @@
   margin-top: 0;
 }
 
+.page-admin-structure-views input.form-checkbox,
+.page-admin-structure-views input.form-radio {
+  vertical-align: baseline;
+}
+ 
+.page-admin-structure-views .form-item .form-item {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
 /* @end */
 
 /* @group Lists */

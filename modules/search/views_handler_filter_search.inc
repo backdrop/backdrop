@@ -5,7 +5,7 @@
  * Field handler to provide simple renderer that allows linking to a node.
  */
 class views_handler_filter_search extends views_handler_filter {
-  var $no_single = TRUE;
+  var $always_multiple = TRUE;
 
   /**
    * Stores a viewsSearchQuery object to be able to use the search.module "api".
