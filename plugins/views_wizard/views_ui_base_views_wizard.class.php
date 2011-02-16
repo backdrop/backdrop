@@ -310,7 +310,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $this->plugin['created_column'] . ':DESC' => t('Newest first'),
         $this->plugin['created_column'] . ':ASC' => t('Oldest first'),
       );
-      $sorts += $this->plugin['available_sorts'];
+      if (isset($this->plugin['available_sorts'])) {
+        $sorts += $this->plugin['available_sorts'];
+      }
     }
     if (!empty($sorts)) {
       $form['displays']['show']['sort'] = array(
