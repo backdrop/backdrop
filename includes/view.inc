@@ -1363,7 +1363,6 @@ class view extends views_db_object {
   static function load_views() {
     $result = db_query("SELECT DISTINCT v.* FROM {views_view} v");
     $views = array();
-    $vids = array();
 
     // Load all the views.
     foreach ($result as $data) {
@@ -1380,7 +1379,6 @@ class view extends views_db_object {
       return array();
     }
 
-    $vids = implode(', ', array_keys($names));
     // Now load all the subtables:
     foreach (view::db_objects() as $key) {
       $object_name = "views_$key";
@@ -1490,7 +1488,7 @@ class view extends views_db_object {
 
     foreach ($this->display as $id => $display) {
       $output .= "\n" . $indent . "/* Display: $display->display_title */\n";
-      $output .= $indent . '$handler = $view->new_display(' . views_var_export($display->display_plugin, $indent) . ', ' . views_var_export($display->display_title, $indent) . ', \'' . $id . "');\n";
+      $output .= $indent . '$handler = $view->new_display(' . ctools_var_export($display->display_plugin, $indent) . ', ' . ctools_var_export($display->display_title, $indent) . ', \'' . $id . "');\n";
       if (empty($display->handler)) {
         // @todo -- probably need a method of exporting broken displays as
         // they may simply be broken because a module is not installed. That
@@ -1830,6 +1828,8 @@ class views_db_object {
    *   An optional indentation for prettifying nested code.
    */
   function export_row($identifier = NULL, $indent = '') {
+    ctools_include('export');
+
     if (!$identifier) {
       $identifier = $this->db_table;
     }
@@ -1864,7 +1864,7 @@ class views_db_object {
         }
       }
 
-      $output .= $indent . '$' . $identifier . '->' . $field . ' = ' . views_var_export($value, $indent) . ";\n";
+      $output .= $indent . '$' . $identifier . '->' . $field . ' = ' . ctools_var_export($value, $indent) . ";\n";
     }
     return $output;
   }

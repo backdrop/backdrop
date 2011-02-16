@@ -133,7 +133,7 @@ function views_get_table_join($table, $base_table) {
 class views_handler extends views_object {
   /**
    * The top object of a view.
-   * 
+   *
    * @var view
    */
   var $view = NULL;
@@ -1448,51 +1448,3 @@ class views_join {
  * @}
  */
 
-// Declare API compatibility on behalf of core modules:
-
-/**
- * Implements hook_views_api().
- *
- * This one is used as the base to reduce errors when updating.
- */
-function views_views_api() {
-  return array(
-    // in your modules do *not* use views_api_version()!!!
-    'api' => views_api_version(),
-    'path' => drupal_get_path('module', 'views') . '/modules',
-  );
-}
-
-function aggregator_views_api() { return views_views_api(); }
-
-function book_views_api() { return views_views_api(); }
-
-function comment_views_api() { return views_views_api(); }
-
-function locale_views_api() { return views_views_api(); }
-
-function field_views_api() { return views_views_api(); }
-
-function filter_views_api() { return views_views_api(); }
-
-function node_views_api() { return views_views_api(); }
-
-function poll_views_api() { return views_views_api(); }
-
-function profile_views_api() { return views_views_api(); }
-
-function search_views_api() { return views_views_api(); }
-
-function statistics_views_api() { return views_views_api(); }
-
-function system_views_api() { return views_views_api(); }
-
-function taxonomy_views_api() { return views_views_api(); }
-
-function translation_views_api() { return views_views_api(); }
-
-function upload_views_api() { return views_views_api(); }
-
-function user_views_api() { return views_views_api(); }
-
-function contact_views_api() { return views_views_api(); }
