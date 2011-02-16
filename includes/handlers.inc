@@ -391,31 +391,9 @@ class views_handler extends views_object {
   function exposed_submit(&$form, &$form_state) { }
 
   /**
-   * Overridable form for exposed handler options.
-   *
-   * If overridden, it is best to call the parent or re-implement
-   * the stuff here.
-   *
-   * Many handlers will need to override this in order to provide options
-   * that are nicely tailored to the given filter.
+   * Form for exposed handler options.
    */
-  function expose_form(&$form, &$form_state) {
-    $form['expose']['start_left'] = array(
-      '#markup' => '<div class="views-left-50">',
-    );
-
-    $form['expose']['end_left'] = array(
-      '#markup' => '</div>',
-    );
-
-    $form['expose']['start_checkboxes'] = array(
-      '#markup' => '<div class="form-checkboxes views-left-40 clearfix">',
-    );
-
-    $form['expose']['end_checkboxes'] = array(
-      '#markup' => '</div>',
-    );
-  }
+  function expose_form(&$form, &$form_state) { }
 
   /**
    * Validate the options form.
