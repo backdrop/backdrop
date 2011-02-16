@@ -655,17 +655,22 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.updateRowspans = function () {
 };
 
 Drupal.behaviors.viewsFilterConfigSelectAll = {};
+
 /**
  * Add a select all checkbox, which checks each checkbox at once.
  */
 Drupal.behaviors.viewsFilterConfigSelectAll.attach = function(context) {
   var $ = jQuery;
-  $('#views-ui-config-item-form #edit-options-value-all', context).click(function() {
-    // Allow to uncheck the select all checkbox.
-    if ($(this).is(':checked')) {
-      $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function() {
-        $(this).attr('checked', true);
-      });
-    }
+  // Show the select all checkbox.
+  $('#views-ui-config-item-form div.form-item-options-value-all', context).once(function() {
+    $(this).show();
+  })
+  .find('input[type=checkbox]')
+  .click(function() {
+    var checked = $(this).is(':checked');
+    // Update all checkbox beside the select all checkbox.
+    $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function() {
+      $(this).attr('checked', checked);
+    });
   });
 };
