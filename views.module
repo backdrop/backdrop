@@ -817,10 +817,34 @@ function views_include_default_views($reset = FALSE) {
  *   An instance of a handler object. May be views_handler_broken.
  */
 function views_get_handler($table, $field, $key, $override = NULL) {
+  static $recursion_protection = array();
+
   $data = views_fetch_data($table);
   $handler = NULL;
 
   if (isset($data[$field][$key])) {
+    // Support old views_data entries conversion.
+    if (isset($data[$field][$key]['moved to'])) {
+      list($moved_table, $moved_field) = $data[$field][$key]['moved to'];
+      if (!empty($recursion_protection[$moved_table][$moved_field])) {
+        // recursion detected!
+        return NULL;
+      }
+      $recursion_protection[$moved_table][$moved_field] = TRUE;
+      $handler = views_get_handler($moved_table, $moved_field, $key, $override);
+      $recursion_protection = array();
+      if ($handler) {
+        // store these values so we know what we were originally called.
+        $handler->original_table = $table;
+        $handler->original_field = $field;
+        if (empty($handler->actual_table)) {
+          $handler->actual_table = $moved_table;
+          $handler->actual_field = $moved_field;
+        }
+      }
+      return $handler;
+    }
+
     // Set up a default handler:
     if (empty($data[$field][$key]['handler'])) {
       $data[$field][$key]['handler'] = 'views_handler_' . $key;
@@ -838,7 +862,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
   }
 
   // DEBUG -- identify missing handlers
-  debug("Missing handler: $table $field $key");
+  vpr("Missing handler: $table $field $key");
   $broken = array(
     'title' => t('Broken handler @table.@field', array('@table' => $table, '@field' => $field)),
     'handler' => 'views_handler_' . $key . '_broken',
