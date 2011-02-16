@@ -306,7 +306,6 @@ class views_handler_filter extends views_handler {
         '#title' => t('Allow multiple selections'),
         '#description' => t('Enable to allow users to select multiple items.'),
         '#default_value' => $this->options['expose']['multiple'],
-
       );
     }
     $form['expose']['remember'] = array(
