@@ -58,6 +58,16 @@
   margin-top: 0;
 }
 
+.page-admin-structure-views input.form-checkbox,
+.page-admin-structure-views input.form-radio {
+  vertical-align: baseline;
+}
+ 
+.page-admin-structure-views .form-item .form-item {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
 /* @end */
 
 /* @group Lists */
@@ -119,16 +129,3 @@
 }
 
 /* @end */
-
-.form-item {
-  padding: 0 !important;
-}
-
-#edit-options-value {
-  width: 190px;
-  overflow: auto;
-  max-height: 210px;
-  border-color: #CCCCCC;
-  border-style: solid;
-  border-width: 1px;
-}
