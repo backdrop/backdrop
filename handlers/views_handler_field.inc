@@ -503,7 +503,6 @@ class views_handler_field extends views_handler {
       '#title' => t('Exclude from display'),
       '#default_value' => $this->options['exclude'],
       '#description' => t('Enable to load this field as hidden. Often used to group fields, or to use as token in another field.'),
-      '#fieldset' => 'style_settings',
     );
 
     $form['style_settings'] = array(
