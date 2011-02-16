@@ -3170,10 +3170,11 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
     $new_fields[$field] = $old_fields[$field];
   }
 
-  // Save if the actual update button was clicked.
+  // If the #group property is set on the clicked button, that means we are
+  // either adding or removing a group, not actually updating the filters.
   if (!empty($form_state['clicked_button']['#group'])) {
     if ($form_state['clicked_button']['#group'] == 'add') {
-      // Add a new group
+      // Add a new group.
       $groups['groups'][] = 'AND';
     }
     else {
@@ -3208,7 +3209,18 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
     views_ui_add_form_to_stack('rearrange-filter', $form_state['view'], $form_state['display_id'], array($form_state['type']));
   }
   else {
-    // Actually write changed handler values.
+    // The actual update button was clicked. Remove the empty groups, and
+    // renumber them sequentially.
+    $groups['groups'] = array_values(array_intersect_key($groups['groups'], $remember_groups));
+    // Change the 'group' key on each field to match. Here, $mapping is an
+    // array whose keys are the old group numbers and whose values are the new
+    // (sequentially numbered) ones.
+    $mapping = array_flip(array_keys($remember_groups));
+    foreach ($new_fields as &$new_field) {
+      $new_field['group'] = $mapping[$new_field['group']];
+    }
+
+    // Write the changed handler values.
     $display->handler->set_option($types[$form_state['type']]['plural'], $new_fields);
     $display->handler->set_option('filter_groups', $groups);
     if (isset($form_state['view']->form_cache)) {
@@ -3216,7 +3228,7 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
     }
   }
 
-  // Store in cache
+  // Store in cache.
   views_ui_cache_set($form_state['view']);
 }
 
