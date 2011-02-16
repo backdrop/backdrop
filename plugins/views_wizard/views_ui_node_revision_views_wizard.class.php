@@ -1,6 +1,6 @@
 <?php
 
-class ViewsUiNodeRevisionViewsWizard extends ViewsUiBaseViewsWizard {
+class ViewsUiNodeRevisionViewsWizard extends ViewsUiNodeViewsWizard {
 
   protected function default_display_options($form, $form_state) {
     $display_options = parent::default_display_options($form, $form_state);
