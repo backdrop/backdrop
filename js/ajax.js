@@ -15,16 +15,15 @@
     $(ajax_popup).dialog('open');
     Drupal.attachBehaviors($(ajax_popup), ajax.settings);
     if (response.url) {
-      var submit = $('input[type=submit]', ajax_body).unbind('click').click(function() {
-        $('form', ajax_body).append('<input type="hidden" name="' + $(this).attr('name') + '" value="' + $(this).val() + '">');
+      $('input[type=submit], button', ajax_body).click(function(event) {
+        this.form.clk = this;
       });
       $('form', ajax_body).once('views-ajax-submit-processed').each(function() {
         var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'none' } };
         var $form = $(this);
         var id = $form.attr('id');
-        var form = $form[0];
-        form.form = form;
-        Drupal.ajax[id] = new Drupal.ajax(id, form, element_settings);
+        Drupal.ajax[id] = new Drupal.ajax(id, this, element_settings);
+        Drupal.ajax[id].form = $form;
       });
     }
   };
