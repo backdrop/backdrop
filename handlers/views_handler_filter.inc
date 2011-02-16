@@ -108,10 +108,8 @@ class views_handler_filter extends views_handler {
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }
-    $form['op_val_start'] = array('#markup' => '<div class="clearfix">');
     $this->show_operator_form($form, $form_state);
     $this->show_value_form($form, $form_state);
-    $form['op_val_end'] = array('#markup' => '</div>');
     if ($this->can_expose()) {
       $this->show_expose_form($form, $form_state);
     }
@@ -126,7 +124,6 @@ class views_handler_filter extends views_handler {
     if (!empty($this->options['exposed'])) {
       $this->expose_validate($form, $form_state);
     }
-
   }
 
   /**
@@ -255,9 +252,6 @@ class views_handler_filter extends views_handler {
     // the flattened data.
     array_unshift($form['#pre_render'], 'views_ui_pre_render_flatten_data');
     $form['expose']['#flatten'] = TRUE;
-    // Move the value options up a bit.
-    $form['operator']['#weight'] = -8;
-    $form['value']['#weight'] = -8;
 
     if (empty($this->always_required)) {
       $form['expose']['required'] = array(
@@ -274,6 +268,12 @@ class views_handler_filter extends views_handler {
     );
 
     if (!empty($form['operator']['#type'])) {
+       // Increase the width of the left (operator) column.
+      $form['operator']['#prefix'] = '<div class="views-left-40">';
+      $form['operator']['#suffix'] = '</div>';
+      $form['value']['#prefix'] = '<div class="views-right-60">';
+      $form['value']['#suffix'] = '</div>';
+
       $form['expose']['use_operator'] = array(
         '#type' => 'checkbox',
         '#title' => t('Expose operator'),
