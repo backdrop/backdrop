@@ -357,7 +357,8 @@ function views_ui_clone_page($view) {
   );
 
   drupal_set_title(t('Clone view %view', array('%view' => $view->name)), PASS_THROUGH);
-  return drupal_render(drupal_build_form('views_ui_add_form', $form_state));
+  $form = drupal_build_form('views_ui_add_form', $form_state);
+  return drupal_render($form);
 }
 
 /**
