@@ -4074,9 +4074,9 @@ function views_ui_admin_settings_defaults() {
 }
 
 /**
- * Form builder for the admin performance settings page.
+ * Form builder for the advanced admin settings page.
  */
-function views_ui_admin_settings_performance() {
+function views_ui_admin_settings_advanced() {
   $form = array();
   $form['clear_cache'] = array(
     '#type' => 'submit',
@@ -4098,17 +4098,10 @@ function views_ui_admin_settings_performance() {
     '#default_value' => variable_get('views_skip_cache', FALSE),
   );
 
-  $form['views_ui_query_on_top'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show query above live preview'),
-    '#description' => t("The live preview feature will show you the output of the view you're creating, as well as the view. Check here to show the query and other information above the view; leave this unchecked to show that information below the view."),
-    '#default_value' => variable_get('views_ui_query_on_top', FALSE),
-  );
-
   $form['views_ui_disable_live_preview'] = array(
     '#type' => 'checkbox',
     '#title' => t('Disable automatic live preview'),
-    '#description' => t("Don't automatically update the preview. This can speed up the editing of views a bit.'"),
+    '#description' => t("Don't automatically update the preview. This can speed up the editing of views a bit."),
     '#default_value' => variable_get('views_ui_disable_live_preview', 0),
   );
 
@@ -4128,8 +4121,8 @@ function views_ui_admin_settings_performance() {
 
   $form['views_no_javascript'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Disable javascript with Views'),
-    '#description' => t("If you are having problems with the javascript, you can disable it here; the Views UI should degrade and still be usable without javascript, it just not as good."),
+    '#title' => t('Disable JavaScript with Views'),
+    '#description' => t("If you are having problems with the JavaScript, you can disable it here. The Views UI should degrade and still be usable without javascript; it's just not as good."),
     '#default_value' => variable_get('views_no_javascript', FALSE),
   );
 

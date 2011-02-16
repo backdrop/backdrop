@@ -68,10 +68,11 @@ function views_ui_menu() {
     'page arguments' => array('views_ui_admin_settings_defaults'),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
-  $items['admin/structure/views/settings/performance'] = array(
-    'title' => 'Performance',
-    'page arguments' => array('views_ui_admin_settings_performance'),
+  $items['admin/structure/views/settings/advanced'] = array(
+    'title' => 'Advanced',
+    'page arguments' => array('views_ui_admin_settings_advanced'),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
   ) + $base;
 
   // The primary Edit View page. Secondary tabs for each Display are added in
