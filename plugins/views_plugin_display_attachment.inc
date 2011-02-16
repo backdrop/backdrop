@@ -84,6 +84,12 @@ class views_plugin_display_attachment extends views_plugin_display {
       'value' => $attach_to,
     );
 
+    $options['attachment_position'] = array(
+      'category' => 'attachment',
+      'title' => t('Attachment position'),
+      'value' => $this->attachment_positions($this->get_option('attachment_position')),
+    );
+
     $options['inherit_arguments'] = array(
       'category' => 'attachment',
       'title' => t('Inherit arguments'),
@@ -108,11 +114,6 @@ class views_plugin_display_attachment extends views_plugin_display {
       'value' => $this->get_option('render_pager') ? t('Yes') : t('No'),
     );
 
-    $options['attachment_position'] = array(
-      'category' => 'attachment',
-      'title' => t('Position'),
-      'value' => $this->attachment_positions($this->get_option('attachment_position')),
-    );
   }
 
   /**
