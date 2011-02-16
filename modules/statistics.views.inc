@@ -21,7 +21,7 @@ function statistics_views_data() {
   // ----------------------------------------------------------------
   // node_counter table
 
-  $data['node_counter']['table']['group']  = t('Node statistics');
+  $data['node_counter']['table']['group']  = t('Content statistics');
 
   $data['node_counter']['table']['join'] = array(
     // ...to the node table

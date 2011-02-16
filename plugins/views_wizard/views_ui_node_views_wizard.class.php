@@ -17,7 +17,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
 
     // Add the title field, so that the display has content if the user switches
     // to a row style that uses fields.
-    /* Field: Node: Title */
+    /* Field: Content: Title */
     $display_options['fields']['title']['id'] = 'title';
     $display_options['fields']['title']['table'] = 'node';
     $display_options['fields']['title']['field'] = 'title';

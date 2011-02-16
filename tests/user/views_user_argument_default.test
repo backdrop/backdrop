@@ -18,7 +18,7 @@ class viewsUserArgumentDefault extends ViewsSqlTest {
     // Create a user to test.
     $account = $this->drupalCreateUser();
 
-    // Switch the user, we have to check the global user too, because drupalLogin is only for the simpletest browser. 
+    // Switch the user, we have to check the global user too, because drupalLogin is only for the simpletest browser.
     $this->drupalLogin($account);
     global $user;
     $admin = $user;
@@ -59,7 +59,7 @@ class viewsUserArgumentDefault extends ViewsSqlTest {
     $handler->display->display_options['pager']['options']['id'] = '0';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Title */
+    /* Field: Content: Title */
     $handler->display->display_options['fields']['title']['id'] = 'title';
     $handler->display->display_options['fields']['title']['table'] = 'node';
     $handler->display->display_options['fields']['title']['field'] = 'title';

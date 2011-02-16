@@ -77,7 +77,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['options']['id'] = '0';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Title */
+    /* Field: Content: Title */
     $handler->display->display_options['fields']['title']['id'] = 'title';
     $handler->display->display_options['fields']['title']['table'] = 'node';
     $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -104,4 +104,3 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     return $view;
   }
 }
-
