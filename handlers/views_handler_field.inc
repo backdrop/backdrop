@@ -454,7 +454,7 @@ class views_handler_field extends views_handler {
       $form['alter']['alter_text'] = array(
         '#type' => 'checkbox',
         '#title' => t('Rewrite the output of this field'),
-        '#description' => t('If checked, you can alter the output of this field by specifying a string of text with replacement tokens that can use any existing field output.'),
+        '#description' => t('Enable to override the output of this field with custom text or replacement tokens.'),
         '#default_value' => $this->options['alter']['alter_text'],
       );
 
@@ -623,7 +623,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $form['alter']['trim'] = array(
         '#type' => 'checkbox',
         '#title' => t('Trim this field to a maximum length'),
-        '#description' => t('If checked, this field be trimmed to a maximum length in characters.'),
+        '#description' => t('Enable to trim the field to a maximum length of characters'),
         '#default_value' => $this->options['alter']['trim'],
       );
 
