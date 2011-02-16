@@ -60,13 +60,8 @@ class views_handler_area_view extends views_handler_area {
       $view->set_display($view_display);
 
       // Avoid recursion
-      if (isset($view->parent_views)) {
-        $view->parent_views += $this->view->parent_views;
-        $view->parent_views[] = "$view_name:$view_display";
-      }
-      else {
-        $view->parent_views = array();
-      }
+      $view->parent_views += $this->view->parent_views;
+      $view->parent_views[] = "$view_name:$view_display";
 
       // Check if the view is part of the parent views of this view
       $search = "$view_name:$view_display";
