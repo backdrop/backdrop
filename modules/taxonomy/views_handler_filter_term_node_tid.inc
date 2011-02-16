@@ -156,13 +156,13 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         if (!empty($this->options['expose']['reduce'])) {
           $options = $this->reduce_value_options($options);
 
-          if (empty($this->options['expose']['single']) && !empty($this->options['expose']['optional'])) {
+          if (!empty($this->options['expose']['multiple']) && empty($this->options['expose']['required'])) {
             $default_value = array();
           }
         }
 
-        if (!empty($this->options['expose']['single'])) {
-          if (!empty($this->options['expose']['optional']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
+        if (empty($this->options['expose']['multiple'])) {
+          if (empty($this->options['expose']['required']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
             $default_value = 'All';
           }
           elseif (empty($default_value)) {
@@ -215,8 +215,8 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       return TRUE;
     }
 
-    // If it's optional and there's no value don't bother filtering.
-    if ($this->options['expose']['optional'] && empty($this->validated_exposed_input)) {
+    // If it's non-required and there's no value don't bother filtering.
+    if (!$this->options['expose']['required'] && empty($this->validated_exposed_input)) {
       return FALSE;
     }
 

@@ -13,7 +13,7 @@
  */
 class views_handler_filter_boolean_operator extends views_handler_filter {
   // exposed filter options
-  var $no_single = TRUE;
+  var $always_multiple = TRUE;
   // Don't display empty space where the operator would be.
   var $no_operator = TRUE;
   // Whether to accept NULL as a false value or not
@@ -99,7 +99,7 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
         $form_state['input'][$identifier] = $this->value;
       }
       // If we're configuring an exposed filter, add an <Any> option.
-      if (empty($form_state['exposed']) || !empty($this->options['optional'])) {
+      if (empty($form_state['exposed']) || empty($this->options['required'])) {
         $any_label = variable_get('views_exposed_filter_any_label', 'old_any') == 'old_any' ? '<Any>' : t('- Any -');
         if ($form['value']['#type'] != 'select') {
           $any_label = check_plain($any_label);
@@ -110,8 +110,8 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
   }
 
   function value_validate($form, &$form_state) {
-    if ($form_state['values']['options']['value'] == 'All' && empty($form_state['values']['options']['expose']['optional'])) {
-      form_set_error('value', t('You must select a value unless this is an optional exposed filter.'));
+    if ($form_state['values']['options']['value'] == 'All' && !empty($form_state['values']['options']['expose']['required'])) {
+      form_set_error('value', t('You must select a value unless this is an non-required exposed filter.'));
     }
   }
 
@@ -133,7 +133,7 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
     parent::expose_options();
     $this->options['expose']['operator'] = '';
     $this->options['expose']['label'] = $this->value_value;
-    $this->options['expose']['optional'] = FALSE;
+    $this->options['expose']['required'] = TRUE;
   }
 
   function query() {

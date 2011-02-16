@@ -13,11 +13,11 @@
  *  You can set some specific behavior by setting up the following flags on
  *  your custom class.
  *
- * - no_single:
+ * - always_multiple:
  *    Disable the possibility to force a single value.
  * - no_operator:
  *    Disable the possibility to use operators.
- * - no_optional:
+ * - always_required:
  *    Disable the possibility to allow a exposed input to be optional.
  */
 
@@ -49,6 +49,14 @@ class views_handler_filter extends views_handler {
     if ($this->view->display_handler->get_option('relationships')) {
       $this->definition['allow empty'] = TRUE;
     }
+
+    // Compatibility: The new UI switches the meanings of several settings.
+    if (!empty($options['exposed']) && !empty($options['expose']['optional']) && !isset($options['expose']['required'])) {
+      $this->options['expose']['required'] = !$options['expose']['optional'];
+    }
+    if (!empty($options['exposed']) && !empty($options['expose']['single']) && !isset($options['expose']['multiple'])) {
+      $this->options['expose']['multiple'] = !$options['expose']['single'];
+    }
   }
 
   function option_definition() {
@@ -65,9 +73,9 @@ class views_handler_filter extends views_handler {
         'use_operator' => array('default' => 0),
         'operator' => array('default' => ''),
         'identifier' => array('default' => ''),
-        'optional' => array('default' => 1),
+        'required' => array('default' => 0),
         'remember' => array('default' => 0),
-        'single' => array('default' => 1),
+        'multiple' => array('default' => 0),
       ),
     );
 
@@ -205,14 +213,41 @@ class views_handler_filter extends views_handler {
   function value_submit($form, &$form_state) { }
 
   /**
-   * Handle the 'left' side fo the exposed options form.
+   * Shortcut to display the expose/hide button.
    */
-  function expose_form_left(&$form, &$form_state) {
+  function show_expose_button(&$form, &$form_state) {
+    $form['expose_button'] = array(
+      '#prefix' => '<div class="views-expose clearfix">',
+      '#suffix' => '</div>',
+    );
+    if (empty($this->options['exposed'])) {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description">' . t('This filter is not exposed. Expose it to allow the users to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Expose filter'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+    else {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description">' . t('This filter is exposed. If you hide it, users will not be able to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Hide filter'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+  }
+
+  function expose_form(&$form, &$form_state) {
     if (!empty($form['operator']['#type'])) {
       $form['expose']['use_operator'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Unlock operator'),
-        '#description' => t('When checked, the operator will be exposed to the user'),
+        '#title' => t('Expose operator'),
+        '#description' => t('Allow the user to choose the operator.'),
         '#default_value' => !empty($this->options['expose']['use_operator']),
       );
       $form['expose']['operator'] = array(
@@ -247,32 +282,26 @@ class views_handler_filter extends views_handler {
       '#title' => t('Label'),
       '#size' => 40,
     );
-  }
 
-  /**
-   * Handle the 'right' side fo the exposed options form.
-   */
-  function expose_form_right(&$form, &$form_state) {
-    if (empty($this->no_optional)) {
-      $form['expose']['optional'] = array(
+    if (empty($this->always_required)) {
+      $form['expose']['required'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Optional'),
-        '#description' => t('This exposed filter is optional and will have added options to allow it not to be set.'),
-        '#default_value' => $this->options['expose']['optional'],
+        '#title' => t('Required'),
+        '#default_value' => $this->options['expose']['required'],
       );
     }
-    if (empty($this->no_single)) {
-      $form['expose']['single'] = array(
+    if (empty($this->always_multiple)) {
+      $form['expose']['multiple'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Force single'),
-        '#description' => t('Force this exposed filter to accept only one option.'),
-        '#default_value' => $this->options['expose']['single'],
+        '#title' => t('Allow multiple selections'),
+        '#description' => t('Enable to allow users to select multiple items.'),
+        '#default_value' => $this->options['expose']['multiple'],
       );
     }
     $form['expose']['remember'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Remember'),
-      '#description' => t('Remember the last setting the user gave this filter.'),
+      '#title' => t('Remember the last selection'),
+      '#description' => t('Enable to remember the last selection made by the user.'),
       '#default_value' => $this->options['expose']['remember'],
     );
   }
@@ -304,8 +333,8 @@ class views_handler_filter extends views_handler {
       'identifier' => $this->options['id'],
       'label' => $this->ui_name(),
       'remember' => FALSE,
-      'single' => TRUE,
-      'optional' => TRUE,
+      'multiple' => FALSE,
+      'required' => FALSE,
     );
   }
 
@@ -374,19 +403,19 @@ class views_handler_filter extends views_handler {
     }
     // Checkboxes don't work so well in exposed forms due to GET conversions.
     if ($form['#type'] == 'checkboxes') {
-      if (empty($form['#no_convert']) || !empty($this->options['expose']['single'])) {
+      if (empty($form['#no_convert']) || empty($this->options['expose']['multiple'])) {
         $form['#type'] = 'select';
       }
-      if (empty($this->options['expose']['single'])) {
+      if (!empty($this->options['expose']['multiple'])) {
         $form['#multiple'] = TRUE;
       }
     }
-    if (!empty($this->options['expose']['single']) && isset($form['#multiple'])) {
+    if (empty($this->options['expose']['multiple']) && isset($form['#multiple'])) {
       unset($form['#multiple']);
       $form['#size'] = NULL;
     }
 
-    if ($type == 'value' && empty($this->no_optional) && !empty($this->options['expose']['optional']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
+    if ($type == 'value' && empty($this->always_required) && empty($this->options['expose']['required']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
       $any_label = variable_get('views_exposed_filter_any_label', 'old_any') == 'old_any' ? t('<Any>') : t('- Any -');
       $form['#options'] = array('All' => $any_label) + $form['#options'];
       $form['#default_value'] = 'All';
@@ -432,9 +461,8 @@ class views_handler_filter extends views_handler {
     if (!empty($this->options['expose']['identifier'])) {
       $value = $input[$this->options['expose']['identifier']];
 
-      // Various ways to check for the absence of optional input.
-      if (empty($this->no_optional) && !empty($this->options['expose']['optional'])) {
-
+      // Various ways to check for the absence of non-required input.
+      if (empty($this->always_required) && empty($this->options['expose']['required'])) {
         if (($this->operator == 'empty' || $this->operator == 'not empty') && $value === '') {
           $value = ' ';
         }
@@ -445,7 +473,7 @@ class views_handler_filter extends views_handler {
           }
         }
 
-        if (!empty($this->no_single) && $value === '') {
+        if (!empty($this->always_multiple) && $value === '') {
           return FALSE;
         }
       }
@@ -453,7 +481,7 @@ class views_handler_filter extends views_handler {
 
       if (isset($value)) {
         $this->value = $value;
-        if (empty($this->no_single) && !empty($this->options['expose']['single'])) {
+        if (empty($this->always_multiple) && empty($this->options['expose']['multiple'])) {
           $this->value = array($value);
         }
       }

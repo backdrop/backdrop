@@ -958,7 +958,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#id' => 'edit-displays-preview-fieldset',
       '#attributes' => array('class' => array('box-padding')),
     );
-    
+
     // Add the preview button
     $form['displays']['preview_controls']['preview_fieldset']['button'] = array(
       '#type' => 'submit',
@@ -1096,7 +1096,7 @@ function views_ui_edit_form_submit_undo_delete_display($form, &$form_state) {
 
   // Store in cache
   views_ui_cache_set($form_state['view']);
-  
+
   // Redirect to the top-level edit page.
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
 }
@@ -4029,7 +4029,7 @@ function views_ui_admin_settings_defaults() {
   );
   $form['edit_view_form']['views_exposed_filter_any_label'] = array(
     '#type' => 'select',
-    '#title' => t('Label for "Any" value on optional single-select exposed filters'),
+    '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
     '#options' => array('old_any' => '<Any>', 'new_any' => t('- Any -')),
     '#default_value' => variable_get('views_exposed_filter_any_label', 'old_any'),
   );

@@ -133,7 +133,7 @@ function views_get_table_join($table, $base_table) {
 class views_handler extends views_object {
   /**
    * The top object of a view.
-   * 
+   *
    * @var view
    */
   var $view = NULL;
@@ -404,8 +404,6 @@ class views_handler extends views_object {
       '#markup' => '<div class="views-left-50">',
     );
 
-    $this->expose_form_left($form, $form_state);
-
     $form['expose']['end_left'] = array(
       '#markup' => '</div>',
     );
@@ -414,16 +412,10 @@ class views_handler extends views_object {
       '#markup' => '<div class="form-checkboxes views-left-40 clearfix">',
     );
 
-    $this->expose_form_right($form, $form_state);
-
     $form['expose']['end_checkboxes'] = array(
       '#markup' => '</div>',
     );
   }
-
-  function expose_form_left(&$form, &$form_state) { }
-
-  function expose_form_right(&$form, &$form_state){ }
 
   /**
    * Validate the options form.
@@ -436,34 +428,10 @@ class views_handler extends views_object {
    */
   function expose_submit($form, &$form_state) { }
 
-    /**
+  /**
    * Shortcut to display the expose/hide button.
    */
-  function show_expose_button(&$form, &$form_state) {
-    $form['expose_button'] = array(
-      '#prefix' => '<div class="views-expose clearfix">',
-      '#suffix' => '</div>',
-    );
-    if (empty($this->options['exposed'])) {
-      $form['expose_button']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Expose'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-      );
-      $form['expose_button']['markup'] = array(
-        '#markup' => '<div class="description">' . t('This item is currently not exposed. If you <strong>expose</strong> it, users will be able to change the filter as they view it.') . '</div>',
-      );
-    }
-    else {
-      $form['expose_button']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Hide'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-      );
-      $form['expose_button']['markup'] = array(
-        '#markup' => '<div class="description">' . t('This item is currently exposed. If you <strong>hide</strong> it, users will not be able to change the filter as they view it.') . '</div>',      );
-    }
-  }
+  function show_expose_button(&$form, &$form_state) { }
 
   /**
    * Shortcut to display the exposed options form.

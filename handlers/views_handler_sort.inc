@@ -75,6 +75,36 @@ class views_handler_sort extends views_handler {
   }
 
   /**
+   * Shortcut to display the expose/hide button.
+   */
+  function show_expose_button(&$form, &$form_state) {
+    $form['expose_button'] = array(
+      '#prefix' => '<div class="views-expose clearfix">',
+      '#suffix' => '</div>',
+    );
+    if (empty($this->options['exposed'])) {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description" style="float: left; margin-right:10px">' . t('This sort is not exposed. Expose it to allow the users to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Expose filter'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+    else {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description">' . t('This sort is exposed. If you hide it, users will not be able to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Hide filter'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+  }
+
+  /**
    * Simple validate handler
    */
   function options_validate(&$form, &$form_state) {
@@ -118,23 +148,14 @@ class views_handler_sort extends views_handler {
    * Provide a list of options for the default sort form.
    * Should be overridden by classes that don't override sort_form
    */
-  function sort_options() { 
+  function sort_options() {
     return array(
-      'ASC' => t('Sort ascending'), 
+      'ASC' => t('Sort ascending'),
       'DESC' => t('Sort descending'),
-    ); 
+    );
   }
 
-  /**
-   * Since all exposed sorts are grouped into one select box.
-   * We don't return nothing when views call to exposed_form()
-   */ 
-  function exposed_form(&$form, &$form_state) { }
-
-  /**
-   * Handle the 'left' side fo the exposed options form.
-   */
- function expose_form_left(&$form, &$form_state) {
+  function expose_form(&$form, &$form_state) {
     $form['expose']['label'] = array(
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['label'],
@@ -142,12 +163,6 @@ class views_handler_sort extends views_handler {
       '#required' => TRUE,
       '#size' => 40,
    );
-  }
-  
-  /**
-   * Handle the 'right' side fo the exposed options form.
-   */
-  function expose_form_right(&$form, &$form_state) {
     $form['expose']['order'] = array(
       '#type' => 'value',
       '#value' => 'ASC',
