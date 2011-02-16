@@ -1685,7 +1685,10 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   $grouping = FALSE;
   if ($type == 'filter') {
     $group_info = $view->display_handler->get_option('filter_groups');
-    if (!empty($group_info['groups']) && count($group_info['groups']) > 1) {
+    // If there is only one group but it is using the "OR" filter, we still
+    // treat it as a group for display purposes, since we want to display the
+    // "OR" label next to items within the group.
+    if (!empty($group_info['groups']) && (count($group_info['groups']) > 1 || current($group_info['groups']) == 'OR')) {
       $grouping = TRUE;
       $groups = array(0 => array());
     }
@@ -1777,13 +1780,12 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
         );
       }
       // Display an operator between each pair of filters within the group.
-      $started = FALSE;
-      foreach ($contents as $pid) {
-        if ($started) {
-          $store[$pid]['#description'] = ($group_info['groups'][$gid] == 'OR' ? t('OR') : t('AND'));
-          $store[$pid]['#description_suffix'] = FALSE;
+      $keys = array_keys($contents);
+      $last = end($keys);
+      foreach ($contents as $key => $pid) {
+        if ($key != $last) {
+          $store[$pid]['#link'] .= '&nbsp;&nbsp;' . ($group_info['groups'][$gid] == 'OR' ? t('OR') : t('AND'));
         }
-        $started = TRUE;
         $build['fields'][$pid] = $store[$pid];
       }
     }
