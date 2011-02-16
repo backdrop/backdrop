@@ -608,7 +608,7 @@ function _views_ui_get_operation_links($view) {
 
   if (empty($view->disabled)) {
     $links[] = array('title' => t('edit'), 'href' => "admin/structure/views/view/$view->name/edit");
-    $links[] = array('title' => t('duplicate'), 'href' => "admin/structure/views/view/$view->name/duplicate");
+    $links[] = array('title' => t('duplicate'), 'href' => "admin/structure/views/view/$view->name/clone");
   }
 
   if ($view->type != t('Default')) {
