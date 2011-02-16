@@ -365,9 +365,7 @@ function views_ui_clone_page($view) {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
-  // Let users turn off the wizard autofill behavior on the views settings page.
-  $form['#attached']['js'][] = array('type' => 'setting', 'data' => array('viewsUiWizardAutofill' => variable_get('views_ui_wizard_autofill', TRUE)));
+  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';;
 
   $form['human_name'] = array(
     '#type' => 'textfield',
@@ -4109,22 +4107,6 @@ function views_ui_admin_settings_defaults() {
     '#type' => 'checkbox',
     '#title' => t('Combine view templates and user-generated views'),
     '#default_value' => variable_get('views_ui_combine_templates', FALSE),
-  );
-
-  $form['create_view_form'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Create view form'),
-  );
-  $form['create_view_form']['views_ui_wizard_create_page'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('"Create a page" is enabled by default'),
-    '#default_value' => variable_get('views_ui_wizard_create_page', TRUE),
-  );
-  $form['create_view_form']['views_ui_wizard_autofill'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Autofill form values with the name of the view'),
-    '#description' => t('Accelerate view creation by prefilling form values based on the name of the view.'),
-    '#default_value' => variable_get('views_ui_wizard_autofill', TRUE),
   );
 
   $form['edit_view_form'] = array(
