@@ -1223,12 +1223,10 @@ function views_ui_get_display_tab_details($view, $display) {
   }
 
   // The area above the three columns.
-  $build['top']['view_name'] = array(
+  $build['top']['display_name'] = array(
     '#theme' => 'views_ui_display_tab_setting',
-    '#description' => t('View name'),
-    // @TODO: Are we letting them edit the view name, the display id, or some
-    // other property?
-    '#link' => $view->human_name,
+    '#description' => t('Display name'),
+    '#link' => check_plain($display->display_title),
   );
 
   $build['columns'] = array();
@@ -1344,6 +1342,14 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   $zebra++;
 
   $variables['settings'] = implode($variables['settings_links']);
+
+  // Add classes associated with this display tab to the overall list.
+  $variables['classes_array'] = array_merge($variables['classes_array'], $variables['class']);
+
+  // Append a colon to the description, if requested.
+  if ($variables['description'] && $variables['description_suffix']) {
+    $variables['description'] .= t(':');
+  }
 }
 
 function template_preprocess_views_ui_display_tab_bucket(&$variables) {
@@ -1685,16 +1691,18 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
     }
   }
 
+  $build['fields'] = array();
+
   foreach ($display->handler->get_option($types[$type]['plural']) as $id => $field) {
     // Build the option link for this handler ("Node: ID = article").
-    $build[$id] = array();
-    $build[$id]['#theme'] = 'views_ui_display_tab_setting';
+    $build['fields'][$id] = array();
+    $build['fields'][$id]['#theme'] = 'views_ui_display_tab_setting';
 
     $handler = $display->handler->get_handler($type, $id);
     if (empty($handler)) {
-      $build[$id]['#attributes']['class'][] = 'broken';
+      $build['fields'][$id]['#class'][] = 'broken';
       $field_name = t('Broken/missing handler: @table > @field', array('@table' => $field['table'], '@field' => $field['field']));
-      $build[$id]['#link'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
+      $build['fields'][$id]['#link'] = l($field_name, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
       continue;
     }
 
@@ -1705,18 +1713,21 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
     $description = $handler->admin_summary();
     $link_text = $field_name . (empty($description) ? '' : " ($description)");
-    $build[$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
-    $build[$id]['#attributes']['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
+    $build['fields'][$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
+    $build['fields'][$id]['#class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
     if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $id])) {
-      $build[$id]['#changed'] = TRUE;
+      // @TODO: #changed is no longer being used?
+      $build['fields'][$id]['#changed'] = TRUE;
     }
 
     if ($display->handler->use_group_by()) {
-      $build[$id]['#links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
+      // @TODO: #links is no longer being used?
+      $build['fields'][$id]['#links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
     }
 
     if ($handler->has_extra_options()) {
-      $build[$id]['#links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+      // @TODO: #links is no longer being used?
+      $build['fields'][$id]['#links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
     }
 
     if ($handler->needs_style_plugin()) {
@@ -1725,17 +1736,19 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin['title'];
       $pid = $id . '-style-plugin';
 
-      $build[$pid] = array();
-      $build[$pid]['#theme'] = 'views_ui_display_tab_setting';
+      $build['fields'][$pid] = array();
+      $build['fields'][$pid]['#theme'] = 'views_ui_display_tab_setting';
 
       if (!empty($style_plugin['uses options'])) {
-        $build[$pid]['#links'][] = l('<span>' . t('Change settings for this style') . '</span>', "admin/structure/views/nojs/config-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+        // @TODO: #links is no longer being used?
+        $build['fields'][$pid]['#links'][] = l('<span>' . t('Change settings for this style') . '</span>', "admin/structure/views/nojs/config-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
       }
 
-      $build[$pid]['#link'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
-      $build[$pid]['#attributes']['class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
+      $build['fields'][$pid]['#link'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
+      $build['fields'][$pid]['#class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
       if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $pid])) {
-        $build[$pid]['#changed'] = TRUE;
+        // @TODO: #changed is no longer being used?
+        $build['fields'][$pid]['#changed'] = TRUE;
       }
     }
 
@@ -1752,36 +1765,28 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
   // If using grouping, re-order fields so that they show up properly in the list.
   if ($type == 'filter' && $grouping) {
-    $store = $fields;
-    $fields = array();
+    $store = $build['fields'];
+    $build['fields'] = array();
     foreach ($groups as $gid => $contents) {
-      if (!empty($fields)) {
-        $operator = ') ' . ($group_info['operator'] == 'OR' ? t('OR') : t('AND')) . ' (';
+      // Display an operator between each group.
+      if (!empty($build['fields'])) {
+        $build['fields'][] = array(
+          '#theme' => 'views_ui_display_tab_setting',
+          '#class' => array('views-group-text'),
+          '#link' => ($group_info['operator'] == 'OR' ? t('OR') : t('AND')),
+        );
       }
-      else {
-        $operator = '(';
-      }
-      $fields[] = array(
-        'class' => 'views-group-text',
-        'title' => $operator,
-        'info' => '',
-      );
+      // Display an operator between each pair of filters within the group.
       $started = FALSE;
       foreach ($contents as $pid) {
-        $operator = '&nbsp;&nbsp;';
         if ($started) {
-          $operator .= ($group_info['groups'][$gid] == 'OR' ? t('OR') : t('AND')) . ' ';
+          $store[$pid]['#description'] = ($group_info['groups'][$gid] == 'OR' ? t('OR') : t('AND'));
+          $store[$pid]['#description_suffix'] = FALSE;
         }
-        $store[$pid]['title'] = $operator . $store[$pid]['title'];
         $started = TRUE;
-        $fields[$pid] = $store[$pid];
+        $build['fields'][$pid] = $store[$pid];
       }
     }
-    $fields[] = array(
-      'class' => 'views-group-text',
-      'title' => ')',
-      'info' => '',
-    );
   }
 
   return $build;
