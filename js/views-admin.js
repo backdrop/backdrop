@@ -14,7 +14,7 @@ Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
   var exclude, replace, suffix;
   // Set up regular expressions to allow only numbers, letters, and dashes.
   exclude = new RegExp('[^a-z0-9\\-]+', 'g');
-  replace = '_';
+  replace = '-';
 
   // The page title, block title, and menu link fields can all be prepopulated
   // with the view name - no regular expression needed.
