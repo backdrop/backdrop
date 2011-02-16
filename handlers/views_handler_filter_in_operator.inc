@@ -137,9 +137,15 @@ class views_handler_filter_in_operator extends views_handler_filter {
 
   function value_form(&$form, &$form_state) {
     $form['value'] = array();
+    $options = array();
+
+    if (empty($form_state['exposed'])) {
+      // Add a select all option to the value form.
+      $options = array('all' => t('Select all'));
+    }
 
     $this->get_value_options();
-    $options = $this->value_options;
+    $options += $this->value_options;
     $default_value = (array) $this->value;
 
     $which = 'all';

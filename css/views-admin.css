@@ -187,6 +187,12 @@
 
 /* @end */
 
+/* @group Filter Settings form */
+.page-admin-structure-views div.form-item-options-value-all {
+  display: none;
+}
+/* @end */
+
 /* @group Drupal overrides */
 
 /* The .progress-disabled class added to the form on submit floats the element
