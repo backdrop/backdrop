@@ -3213,6 +3213,7 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
   else {
     // The actual update button was clicked. Remove the empty groups, and
     // renumber them sequentially.
+    ksort($remember_groups);
     $groups['groups'] = array_values(array_intersect_key($groups['groups'], $remember_groups));
     // Change the 'group' key on each field to match. Here, $mapping is an
     // array whose keys are the old group numbers and whose values are the new
