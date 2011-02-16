@@ -2917,13 +2917,20 @@ function theme_views_ui_expose_filter_form($variables) {
   $output .= drupal_render($form['value']);
 
   if (isset($form['use_operator'])) {
-    $output .= '<div class="views-left-30">';
+    $output .= '<div class="views-left-40">';
     $output .= drupal_render($form['use_operator']);
     $output .= '</div>';
   }
-  $output .= '<div class="views-right-70">';
-  $output .= drupal_render_children($form);
-  $output .= '</div>';
+
+  // Only output the right column markup if there's a left column to begin with
+  if (!empty($form['operator']['#type'])) {
+    $output .= '<div class="views-right-60">';
+    $output .= drupal_render_children($form);
+    $output .= '</div>';
+  }
+  else {
+    $output .= drupal_render_children($form);
+  }
 
   $output .= $more;
 
