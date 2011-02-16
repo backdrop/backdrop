@@ -456,7 +456,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
       // Column either be a column-name or the table-columnn-ame.
       $column = explode('-', $column);
-      dsm($column);
       if (count($column) > 1) {
         $table = $column[0];
         $column = $column[1];
