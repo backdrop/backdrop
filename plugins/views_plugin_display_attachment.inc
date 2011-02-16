@@ -18,12 +18,12 @@ class views_plugin_display_attachment extends views_plugin_display {
   function option_definition () {
     $options = parent::option_definition();
 
+    $options['displays'] = array('default' => array());
     $options['attachment_position'] = array('default' => 'before');
     $options['inherit_arguments'] = array('default' => TRUE);
     $options['inherit_exposed_filters'] = array('default' => FALSE);
     $options['inherit_pager'] = array('default' => FALSE);
     $options['render_pager'] = array('default' => FALSE);
-    $options['displays'] = array('default' => array());
 
     return $options;
   }
@@ -63,6 +63,27 @@ class views_plugin_display_attachment extends views_plugin_display {
       ),
     );
 
+    $displays = array_filter($this->get_option('displays'));
+    if (count($displays) > 1) {
+      $attach_to = t('Multiple displays');
+    }
+    elseif (count($displays) == 1) {
+      $display = array_shift($displays);
+      if (!empty($this->view->display[$display])) {
+        $attach_to = check_plain($this->view->display[$display]->display_title);
+      }
+    }
+
+    if (!isset($attach_to)) {
+      $attach_to = t('Not defined');
+    }
+
+    $options['displays'] = array(
+      'category' => 'attachment',
+      'title' => t('Attach to'),
+      'value' => $attach_to,
+    );
+
     $options['inherit_arguments'] = array(
       'category' => 'attachment',
       'title' => t('Inherit arguments'),
@@ -91,27 +112,6 @@ class views_plugin_display_attachment extends views_plugin_display {
       'category' => 'attachment',
       'title' => t('Position'),
       'value' => $this->attachment_positions($this->get_option('attachment_position')),
-    );
-
-    $displays = array_filter($this->get_option('displays'));
-    if (count($displays) > 1) {
-      $attach_to = t('Multiple displays');
-    }
-    elseif (count($displays) == 1) {
-      $display = array_shift($displays);
-      if (!empty($this->view->display[$display])) {
-        $attach_to = check_plain($this->view->display[$display]->display_title);
-      }
-    }
-
-    if (!isset($attach_to)) {
-      $attach_to = t('None');
-    }
-
-    $options['displays'] = array(
-      'category' => 'attachment',
-      'title' => t('Attach to'),
-      'value' => $attach_to,
     );
   }
 
