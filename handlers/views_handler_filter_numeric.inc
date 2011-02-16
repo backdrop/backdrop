@@ -278,8 +278,8 @@ class views_handler_filter_numeric extends views_handler_filter {
 
     $rc = parent::accept_exposed_input($input);
 
-    if (!empty($this->options['expose']['optional'])) {
-      // We have to do some of our own optional checking.
+    if (empty($this->options['expose']['required'])) {
+      // We have to do some of our own checking for non-required filters.
       $info = $this->operators();
       if (!empty($info[$this->operator]['values'])) {
         switch ($info[$this->operator]['values']) {

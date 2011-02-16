@@ -404,8 +404,6 @@ class views_handler extends views_object {
       '#markup' => '<div class="views-left-50">',
     );
 
-    $this->expose_form_left($form, $form_state);
-
     $form['expose']['end_left'] = array(
       '#markup' => '</div>',
     );
@@ -414,16 +412,10 @@ class views_handler extends views_object {
       '#markup' => '<div class="form-checkboxes views-left-40 clearfix">',
     );
 
-    $this->expose_form_right($form, $form_state);
-
     $form['expose']['end_checkboxes'] = array(
       '#markup' => '</div>',
     );
   }
-
-  function expose_form_left(&$form, &$form_state) { }
-
-  function expose_form_right(&$form, &$form_state){ }
 
   /**
    * Validate the options form.

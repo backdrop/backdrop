@@ -13,7 +13,7 @@ class views_handler_filter_string extends views_handler_filter {
   function option_defintion() {
     $options = parent::option_defintion();
 
-    $options['expose']['contains']['optional'] = array('default' => FALSE);
+    $options['expose']['contains']['required'] = array('default' => TRUE);
 
     return $options;
   }

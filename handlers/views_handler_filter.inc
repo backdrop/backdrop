@@ -49,6 +49,11 @@ class views_handler_filter extends views_handler {
     if ($this->view->display_handler->get_option('relationships')) {
       $this->definition['allow empty'] = TRUE;
     }
+
+    // Compatibility: Instead of "required" we had "optional" in the old UI.
+    if (!empty($options['exposed']) && !empty($options['expose']['optional']) && !isset($options['expose']['required'])) {
+      $this->options['expose']['required'] = !$options['expose']['optional'];
+    }
   }
 
   function option_definition() {
@@ -65,7 +70,7 @@ class views_handler_filter extends views_handler {
         'use_operator' => array('default' => 0),
         'operator' => array('default' => ''),
         'identifier' => array('default' => ''),
-        'optional' => array('default' => 1),
+        'required' => array('default' => 0),
         'remember' => array('default' => 0),
         'single' => array('default' => 1),
       ),
@@ -234,10 +239,7 @@ class views_handler_filter extends views_handler {
     }
   }
 
-  /**
-   * Handle the 'left' side fo the exposed options form.
-   */
-  function expose_form_left(&$form, &$form_state) {
+  function expose_form(&$form, &$form_state) {
     if (!empty($form['operator']['#type'])) {
       $form['expose']['use_operator'] = array(
         '#type' => 'checkbox',
@@ -277,18 +279,12 @@ class views_handler_filter extends views_handler {
       '#title' => t('Label'),
       '#size' => 40,
     );
-  }
 
-  /**
-   * Handle the 'right' side fo the exposed options form.
-   */
-  function expose_form_right(&$form, &$form_state) {
     if (empty($this->no_optional)) {
-      $form['expose']['optional'] = array(
+      $form['expose']['required'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Optional'),
-        '#description' => t('This exposed filter is optional and will have added options to allow it not to be set.'),
-        '#default_value' => $this->options['expose']['optional'],
+        '#title' => t('Required'),
+        '#default_value' => $this->options['expose']['required'],
       );
     }
     if (empty($this->no_single)) {
@@ -335,7 +331,7 @@ class views_handler_filter extends views_handler {
       'label' => $this->ui_name(),
       'remember' => FALSE,
       'single' => TRUE,
-      'optional' => TRUE,
+      'required' => FALSE,
     );
   }
 
@@ -416,7 +412,7 @@ class views_handler_filter extends views_handler {
       $form['#size'] = NULL;
     }
 
-    if ($type == 'value' && empty($this->no_optional) && !empty($this->options['expose']['optional']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
+    if ($type == 'value' && empty($this->no_optional) && empty($this->options['expose']['required']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
       $any_label = variable_get('views_exposed_filter_any_label', 'old_any') == 'old_any' ? t('<Any>') : t('- Any -');
       $form['#options'] = array('All' => $any_label) + $form['#options'];
       $form['#default_value'] = 'All';
@@ -462,9 +458,8 @@ class views_handler_filter extends views_handler {
     if (!empty($this->options['expose']['identifier'])) {
       $value = $input[$this->options['expose']['identifier']];
 
-      // Various ways to check for the absence of optional input.
-      if (empty($this->no_optional) && !empty($this->options['expose']['optional'])) {
-
+      // Various ways to check for the absence of non-required input.
+      if (empty($this->no_optional) && empty($this->options['expose']['required'])) {
         if (($this->operator == 'empty' || $this->operator == 'not empty') && $value === '') {
           $value = ' ';
         }

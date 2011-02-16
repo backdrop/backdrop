@@ -155,16 +155,7 @@ class views_handler_sort extends views_handler {
     );
   }
 
-  /**
-   * Since all exposed sorts are grouped into one select box.
-   * We don't return nothing when views call to exposed_form()
-   */
-  function exposed_form(&$form, &$form_state) { }
-
-  /**
-   * Handle the 'left' side fo the exposed options form.
-   */
- function expose_form_left(&$form, &$form_state) {
+  function expose_form(&$form, &$form_state) {
     $form['expose']['label'] = array(
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['label'],
@@ -172,12 +163,6 @@ class views_handler_sort extends views_handler {
       '#required' => TRUE,
       '#size' => 40,
    );
-  }
-
-  /**
-   * Handle the 'right' side fo the exposed options form.
-   */
-  function expose_form_right(&$form, &$form_state) {
     $form['expose']['order'] = array(
       '#type' => 'value',
       '#value' => 'ASC',
