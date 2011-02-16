@@ -103,13 +103,13 @@ class views_plugin_display_attachment extends views_plugin_display {
     );
 
     $options['inherit_pager'] = array(
-      'category' => 'attachment',
+      'category' => 'pager',
       'title' => t('Inherit pager'),
       'value' => $this->get_option('inherit_pager') ? t('Yes') : t('No'),
     );
 
     $options['render_pager'] = array(
-      'category' => 'attachment',
+      'category' => 'pager',
       'title' => t('Render pager'),
       'value' => $this->get_option('render_pager') ? t('Yes') : t('No'),
     );
