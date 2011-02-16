@@ -14,6 +14,19 @@ class viewsModuleTest extends ViewsSqlTest {
     parent::setUp();
   }
 
+  public function viewsData() {
+    $data = parent::viewsData();
+    $data['views_test_previous'] = array();
+    $data['views_test_previous']['id']['field']['moved to'] = array('views_test', 'id');
+    $data['views_test_previous']['id']['filter']['moved to'] = array('views_test', 'id');
+    $data['views_test']['age_previous']['field']['moved to'] = array('views_test', 'age');
+    $data['views_test']['age_previous']['sort']['moved to'] = array('views_test', 'age');
+    $data['views_test_previous']['name_previous']['field']['moved to'] = array('views_test', 'name');
+    $data['views_test_previous']['name_previous']['argument']['moved to'] = array('views_test', 'name');
+
+    return $data;
+  }
+
   public function test_views_trim_text() {
     // Test unicode, @see http://drupal.org/node/513396#comment-2839416
     $text = array(
@@ -75,5 +88,64 @@ class viewsModuleTest extends ViewsSqlTest {
 
     $registry = theme_get_registry();
     $this->assertTrue(isset($registry['views_view__frontpage']));
+  }
+
+  /**
+   * Test the views_get_handler method.
+   */
+  function testviews_get_handler() {
+    $types = array('field', 'area', 'filter');
+    foreach ($types as $type) {
+      $handler = views_get_handler($this->randomName(), $this->randomName(), $type);
+      $this->assertEqual('views_handler_' . $type . '_broken', get_class($handler), t('Take sure that a broken handler of type: @type are created', array('@type' => $type)));
+    }
+
+    $views_data = $this->viewsData();
+    $test_tables = array('views_test' => array('id', 'name'));
+    foreach ($test_tables as $table => $fields) {
+      foreach ($fields as $field) {
+        $data = $views_data[$table][$field];
+        foreach ($data as $id => $field_data) {
+          if (!in_array($id, array('title', 'help'))) {
+            $handler = views_get_handler($table, $field, $id);
+            $this->assertInstanceHandler($handler, $table, $field, $id);
+          }
+        }
+      }
+    }
+
+    // Test the automatic conversion feature.
+
+    // Test the automatic table renaming.
+    $handler = views_get_handler('views_test_previous', 'id', 'field');
+    $this->assertInstanceHandler($handler, 'views_test', 'id', 'field');
+    $handler = views_get_handler('views_test_previous', 'id', 'filter');
+    $this->assertInstanceHandler($handler, 'views_test', 'id', 'filter');
+
+    // Test the automatic field renaming.
+    $handler = views_get_handler('views_test', 'age_previous', 'field');
+    $this->assertInstanceHandler($handler, 'views_test', 'age', 'field');
+    $handler = views_get_handler('views_test', 'age_previous', 'sort');
+    $this->assertInstanceHandler($handler, 'views_test', 'age', 'sort');
+
+    // Test the automatic table and field renaming.
+    $handler = views_get_handler('views_test_previous', 'name_previous', 'field');
+    $this->assertInstanceHandler($handler, 'views_test', 'name', 'field');
+    $handler = views_get_handler('views_test_previous', 'name_previous', 'argument');
+    $this->assertInstanceHandler($handler, 'views_test', 'name', 'argument');
+
+    // Test the override handler feature.
+    $handler = views_get_handler('views_test', 'job', 'filter', 'views_handler_filter');
+    $this->assertEqual('views_handler_filter', get_class($handler));
+  }
+
+  /**
+   * Ensure that a certain handler is a instance of a certain table/field.
+   */
+  function assertInstanceHandler($handler, $table, $field, $id) {
+    $table_data = views_fetch_data($table);
+    $field_data = $table_data[$field][$id];
+
+    $this->assertEqual($field_data['handler'], get_class($handler));
   }
 }
