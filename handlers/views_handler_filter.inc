@@ -227,6 +227,7 @@ class views_handler_filter extends views_handler {
         '#markup' => '<div class="description exposed-description">' . t('This filter is not exposed. Expose it to allow the users to change it.') . '</div>',
       );
       $form['expose_button']['button'] = array(
+        '#limit_validation_errors' => array(),
         '#type' => 'submit',
         '#value' => t('Expose filter'),
         '#submit' => array('views_ui_config_item_form_expose'),
@@ -237,6 +238,7 @@ class views_handler_filter extends views_handler {
         '#markup' => '<div class="description exposed-description">' . t('This filter is exposed. If you hide it, users will not be able to change it.') . '</div>',
       );
       $form['expose_button']['button'] = array(
+        '#limit_validation_errors' => array(),
         '#type' => 'submit',
         '#value' => t('Hide filter'),
         '#submit' => array('views_ui_config_item_form_expose'),
