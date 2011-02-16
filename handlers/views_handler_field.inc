@@ -341,6 +341,11 @@ class views_handler_field extends views_handler {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
+    $form['element_type_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Wrap field in HTML'),
+      '#fieldset' => 'style_settings',
+    );
     $form['element_type'] = array(
       '#title' => t('HTML element'),
       '#options' => $this->get_elements(),
@@ -357,8 +362,8 @@ class views_handler_field extends views_handler {
     );
 
     $form['element_class'] = array(
-      '#title' => t('Element class'),
-      '#description' => t('The class to provide on the wrapper element. You may enter data from this view as per the "Replacement patterns" used in "Rewrite the output of this field".'),
+      '#title' => t('CSS class'),
+      '#description' => t('Provide a CSS class to...'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_class'],
       '#fieldset' => 'style_settings',
@@ -395,6 +400,12 @@ class views_handler_field extends views_handler {
       ),
     );
 
+    $form['element_label_type_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Wrap label in HTML'),
+      '#fieldset' => 'style_settings',
+    );
+
     $form['element_label_type'] = array(
       '#title' => t('Label HTML element'),
       '#options' => $this->get_elements(FALSE),
@@ -411,8 +422,8 @@ class views_handler_field extends views_handler {
     );
 
     $form['element_label_class'] = array(
-      '#title' => t('Label class'),
-      '#description' => t('The class to provide on the label wrapper element.'),
+      '#title' => t('CSS class'),
+      '#description' => t('Provide a CSS class to...'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_label_class'],
       '#fieldset' => 'style_settings',
@@ -420,6 +431,12 @@ class views_handler_field extends views_handler {
       '#dependency' => array(
         'edit-options-element-label-class-enable' => array(1)
       ),
+    );
+
+    $form['element_wrapper_type_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Wrap field and label in HTML'),
+      '#fieldset' => 'style_settings',
     );
 
     $form['element_wrapper_type'] = array(
@@ -438,8 +455,8 @@ class views_handler_field extends views_handler {
     );
 
     $form['element_wrapper_class'] = array(
-      '#title' => t('Wrapper class'),
-      '#description' => t('The class to provide on the wrapper element. Separate multiple classes with a space.'),
+      '#title' => t('CSS class'),
+      '#description' => t('Provide a CSS class to...'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_wrapper_class'],
       '#fieldset' => 'style_settings',
