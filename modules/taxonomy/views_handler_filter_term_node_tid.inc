@@ -307,8 +307,8 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     // prevent array_filter from messing up our arrays in parent submit.
   }
 
-  function expose_form_right(&$form, &$form_state) {
-    parent::expose_form_right($form, $form_state);
+  function expose_form(&$form, &$form_state) {
+    parent::expose_form($form, $form_state);
     if ($this->options['type'] != 'select') {
       unset($form['expose']['reduce']);
     }

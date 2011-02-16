@@ -248,6 +248,7 @@ class views_handler_filter extends views_handler {
   }
 
   function expose_form(&$form, &$form_state) {
+    $form['#theme'] = 'views_ui_expose_filter_form';
     // #flatten will move everything from $form['expose'][$key] to $form[$key]
     // prior to rendering. That's why the pre_render for it needs to run first,
     // so that when the next pre_render (the one for fieldsets) runs, it gets
@@ -263,7 +264,6 @@ class views_handler_filter extends views_handler {
         '#type' => 'checkbox',
         '#title' => t('Required'),
         '#default_value' => $this->options['expose']['required'],
-        '#weight' => -9,
       );
     }
     $form['expose']['label'] = array(
@@ -271,7 +271,6 @@ class views_handler_filter extends views_handler {
       '#default_value' => $this->options['expose']['label'],
       '#title' => t('Label'),
       '#size' => 40,
-      '#weight' => -8,
     );
 
     if (!empty($form['operator']['#type'])) {
@@ -301,21 +300,13 @@ class views_handler_filter extends views_handler {
       );
     }
 
-    $form['expose']['identifier'] = array(
-      '#type' => 'textfield',
-      '#default_value' => $this->options['expose']['identifier'],
-      '#title' => t('Filter identifier'),
-      '#size' => 40,
-      '#description' => t('This will appear in the URL after the ? to identify this filter. Cannot be blank.'),
-      '#fieldset' => 'more',
-    );
-
     if (empty($this->always_multiple)) {
       $form['expose']['multiple'] = array(
         '#type' => 'checkbox',
         '#title' => t('Allow multiple selections'),
         '#description' => t('Enable to allow users to select multiple items.'),
         '#default_value' => $this->options['expose']['multiple'],
+
       );
     }
     $form['expose']['remember'] = array(
@@ -323,6 +314,15 @@ class views_handler_filter extends views_handler {
       '#title' => t('Remember the last selection'),
       '#description' => t('Enable to remember the last selection made by the user.'),
       '#default_value' => $this->options['expose']['remember'],
+    );
+
+    $form['expose']['identifier'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->options['expose']['identifier'],
+      '#title' => t('Filter identifier'),
+      '#size' => 40,
+      '#description' => t('This will appear in the URL after the ? to identify this filter. Cannot be blank.'),
+      '#fieldset' => 'more',
     );
   }
 

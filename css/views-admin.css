@@ -318,4 +318,8 @@ html.js span.js-only {
   float: right;
 }
 
+#edit-options-more {
+  clear: both;
+}
+
 /* @end */

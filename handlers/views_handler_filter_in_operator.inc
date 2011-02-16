@@ -49,8 +49,8 @@ class views_handler_filter_in_operator extends views_handler_filter {
     $this->options['expose']['reduce'] = FALSE;
   }
 
-  function expose_form_right(&$form, &$form_state) {
-    parent::expose_form_right($form, $form_state);
+  function expose_form(&$form, &$form_state) {
+    parent::expose_form($form, $form_state);
     $form['expose']['reduce'] = array(
       '#type' => 'checkbox',
       '#title' => t('Limit list to selected items'),

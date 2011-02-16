@@ -2899,6 +2899,37 @@ function theme_views_ui_rearrange_form($variables) {
 }
 
 /**
+ * Theme the expose filter form.
+ */
+function theme_views_ui_expose_filter_form($variables) {
+  $form = $variables['form'];
+  $more = drupal_render($form['more']);
+
+  $output = drupal_render($form['form_description']);
+  $output .= drupal_render($form['expose_button']);
+  if (isset($form['required'])) {
+    $output .= drupal_render($form['required']);
+  }
+  $output .= drupal_render($form['label']);
+
+  $output .= drupal_render($form['operator']);
+  $output .= drupal_render($form['value']);
+
+  if (isset($form['use_operator'])) {
+    $output .= '<div class="views-left-30">';
+    $output .= drupal_render($form['use_operator']);
+    $output .= '</div>';
+  }
+  $output .= '<div class="views-right-70">';
+  $output .= drupal_render_children($form);
+  $output .= '</div>';
+
+  $output .= $more;
+
+  return $output;
+}
+
+/**
  * Submit handler for rearranging form
  */
 function views_ui_rearrange_form_submit($form, &$form_state) {

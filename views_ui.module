@@ -262,6 +262,10 @@ function views_ui_theme() {
       'render element' => 'form',
       'file' => 'includes/admin.inc',
     ),
+    'views_ui_expose_filter_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/admin.inc',
+    ),
 
     // list views
     'views_ui_view_info' => array(
@@ -548,7 +552,7 @@ function views_ui_view_preview_section_display_category_links($view, $type, $tit
       'attributes' => array('class' => array('views-ajax-link')),
     ),
   );
-  
+
   return $links;
 }
 
