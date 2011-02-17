@@ -247,7 +247,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       }
       $form['displays']['show']['type'] = array(
         '#type' => 'select',
-        '#title' => t('Type'),
+        '#title' => t('of type'),
         '#options' => $options,
         '#default_value' => 'all',
       );
