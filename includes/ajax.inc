@@ -150,19 +150,6 @@ function views_ajax_command_add_tab($id, $title, $body) {
 }
 
 /**
- * Hides Save, Undo changes buttons.
- *
- * @return
- *   An array suitable for use with the ajax_render() function.
- */
-function views_ajax_command_hide_buttons() {
-  $command = array(
-    'command' => 'viewsHideButtons',
-  );
-  return $command;
-}
-
-/**
  * Shows Save, Undo changes buttons.
  *
  * @return
