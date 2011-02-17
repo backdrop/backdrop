@@ -10,10 +10,10 @@
  * Adds standard Views administration CSS to the current page.
  */
 function views_ui_add_admin_css() {
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css',
+  $module_path = drupal_get_path('module', 'views_ui');
+  drupal_add_css($module_path . '/css/views-admin.css');
+  drupal_add_css($module_path . '/css/ie/views-admin.ie7.css',
     array(
-      'group' => CSS_DEFAULT,
       'browsers' => array(
         'IE' => 'lte IE 7',
         '!IE' => FALSE
@@ -21,19 +21,17 @@ function views_ui_add_admin_css() {
       'preprocess' => FALSE,
     )
   );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css',
-    array(
-      'group' => CSS_DEFAULT,
-      'preprocess' => TRUE,
-    )
-  );
+  drupal_add_css($module_path . '/css/views-admin.theme.css');
+
   if ($GLOBALS['theme'] === 'seven' || (isset($GLOBALS['theme_info']->base_theme) && $GLOBALS['theme_info']->base_theme === 'seven')) {
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css',
+    drupal_add_css($module_path . '/css/views-admin.seven.css',
       array(
         'group' => CSS_THEME,
-        'preprocess' => TRUE,
       )
     );
+  }
+  if (module_exists('contextual')) {
+    drupal_add_css($module_path . '/css/views-admin.contextual.css');
   }
 }
 
@@ -45,7 +43,7 @@ function views_ui_add_admin_css() {
  * be useful.
  */
 function views_ui_check_advanced_help() {
-  if (variable_get('views_hide_help_message', FALSE)) {
+  if (!variable_get('views_ui_show_advanced_help_warning', TRUE)) {
     return;
   }
 
@@ -53,10 +51,10 @@ function views_ui_check_advanced_help() {
     $filename = db_query_range("SELECT filename FROM {system} WHERE type = 'module' AND name = 'advanced_help'", 0, 1)
       ->fetchField();
     if ($filename && file_exists($filename)) {
-      drupal_set_message(t('If you <a href="@modules">enable the advanced help module</a>, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('@modules' => url('admin/modules'),'@hide' => url('admin/structure/views/tools'))));
+      drupal_set_message(t('If you <a href="@modules">enable the advanced help module</a>, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('@modules' => url('admin/modules'),'@hide' => url('admin/structure/views/settings'))));
     }
     else {
-      drupal_set_message(t('If you install the advanced help module from !href, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('!href' => l('http://drupal.org/project/advanced_help', 'http://drupal.org/project/advanced_help'), '@hide' => url('admin/structure/views/tools'))));
+      drupal_set_message(t('If you install the advanced help module from !href, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('!href' => l('http://drupal.org/project/advanced_help', 'http://drupal.org/project/advanced_help'), '@hide' => url('admin/structure/views/settings'))));
     }
   }
 }
@@ -626,6 +624,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       'group' => CSS_THEME,
       'preprocess' => TRUE,
     );
+  }
+
+  // Add CSS specific to the contextual module.
+  if (module_exists('contextual')) {
+    $form['#attached']['css'][$module_path . '/css/views-admin.contextual.css'] = array();
   }
 
   $form['#attached']['js'][] = $module_path . '/js/views-admin.js';

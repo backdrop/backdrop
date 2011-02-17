@@ -37,7 +37,7 @@ class ViewsWizardException extends Exception {
 class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected $base_table;
   protected $entity_type;
-  protected $entity_info;
+  protected $entity_info = array();
   protected $validated_views = array();
   protected $plugin = array();
   protected $filter_defaults = array(
@@ -234,16 +234,17 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   /**
    * Build the part of the form that allows the user to select the view's filters.
    *
-   * By default, this adds a "tagged with" filter (when it is available).
+   * By default, this adds "of type" and "tagged with" filters (when they are
+   * available).
    */
   protected function build_filters(&$form, &$form_state) {
     // Find all the fields we are allowed to filter by.
     $fields = views_fetch_fields($this->base_table, 'filter');
 
     $entity_info = $this->entity_info;
-    // If the current base table support bundles and has more then one (like user).
+    // If the current base table support bundles and has more than one (like user).
     if (isset($entity_info['bundle keys']) && isset($entity_info['bundles'])) {
-      // Get all bundles in a human readable name
+      // Get all bundles and their human readable names.
       $options = array('all' => t('All'));
       foreach ($entity_info['bundles'] as $type => $bundle) {
         $options[$type] = $bundle['label'];
@@ -258,28 +259,45 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           'wrapper' => 'edit-view-displays-wrapper',
         ),
       );
+      // Add this to the "Update options" button's form validation so the
+      // submitted type will always be available in $form_state['values'].
+      // This allows us to use $form_state['values']['show']['type'] to
+      // dynamically build the rest of the form.
+      $form['displays']['show']['update_wizard_key']['#limit_validation_errors'][] = array('show', 'type');
     }
 
-    // Check if we are allowed to filter by taxonomy. We will construct our
-    // filters using taxonomy_index.tid (which limits the filtering to a
-    // specific vocabulary) rather than taxonomy_term_data.name (which matches
-    // terms in any vocabulary) because it is a more commonly-used filter that
-    // works better with the autocomplete UI, and also to avoid confusion with
-    // other vocabularies on the site that may have terms with the same name
-    // but are not used for free tagging. The downside is that if there *is*
-    // more than one vocabulary on the site that is used for free tagging, the
-    // wizard will only be able to make the "tagged with" filter apply to one
-    // of them (see below).
+    // Check if we are allowed to filter by taxonomy, and if so, add the
+    // "tagged with" filter to the view.
+    //
+    // We construct this filter using taxonomy_index.tid (which limits the
+    // filtering to a specific vocabulary) rather than taxonomy_term_data.name
+    // (which matches terms in any vocabulary). This is because it is a more
+    // commonly-used filter that works better with the autocomplete UI, and
+    // also to avoid confusion with other vocabularies on the site that may
+    // have terms with the same name but are not used for free tagging.
+    //
+    // The downside is that if there *is* more than one vocabulary on the site
+    // that is used for free tagging, the wizard will only be able to make the
+    // "tagged with" filter apply to one of them (see below for the method it
+    // uses to choose).
     if (isset($fields['taxonomy_index.tid'])) {
       // Check if this view will be displaying fieldable entities.
-      $displays_entities = !empty($this->entity_info);
-      if ($displays_entities && $entity_info['fieldable']) {
+      if (!empty($entity_info['fieldable'])) {
         // Find all "tag-like" taxonomy fields associated with the view's
-        // entities. If the plugin has already added filters that will restrict
-        // the selected entities to certain bundles, then we only search for
-        // taxonomy fields associated with those bundles. Otherwise, we use all
-        // bundles (for example, if we are filtering by "All content").
-        $bundles = isset($this->plugin['bundles']) ? array_intersect($this->plugin['bundles'], array_keys($entity_info['bundles'])) : array_keys($entity_info['bundles']);
+        // entities. If a particular entity type (i.e., bundle) has been
+        // selected above, then we only search for taxonomy fields associated
+        // with that bundle. Otherwise, we use all bundles.
+        $bundles = array_keys($entity_info['bundles']);
+        $selected_bundle = NULL;
+        if (isset($form_state['values']['show']['type'])) {
+          $selected_bundle = $form_state['values']['show']['type'];
+        }
+        elseif (isset($form['displays']['show']['type']['#default_value'])) {
+          $selected_bundle = $form['displays']['show']['type']['#default_value'];
+        }
+        if (isset($selected_bundle) && in_array($selected_bundle, $bundles)) {
+          $bundles = array($selected_bundle);
+        }
         $tag_fields = array();
         foreach ($bundles as $bundle) {
           foreach (field_info_instances($this->entity_type, $bundle) as $instance) {
@@ -304,7 +322,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           else {
             $tag_field_name = reset($tag_fields);
           }
-          // Add the "tagged with" autocomplete textfield.
+          // Add the autocomplete textfield to the wizard.
           $form['displays']['show']['tagged_with'] = array(
             '#type' => 'textfield',
             '#title' => t('tagged with'),

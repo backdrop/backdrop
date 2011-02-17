@@ -5,15 +5,6 @@
  * For example: display, position, float, clear, and overflow.
  */
 
-/* @group Layout */
-
-.box-padding {
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-/* @end */
-
 /* @group Inline lists */
 
 .horizontal > * {

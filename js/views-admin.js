@@ -736,3 +736,33 @@ Drupal.behaviors.viewsFilterConfigSelectAll.attach = function(context) {
     });
   });
 };
+
+Drupal.behaviors.viewsDisplayBucketDropList = {};
+
+/**
+ * Reformat the action links in the display buckets to look like a droplist.
+ */
+Drupal.behaviors.viewsDisplayBucketDropList.attach = function(context) {
+  var $ = jQuery;
+  // Show the select all checkbox.
+  $('.views-display-columns .views-ui-display-tab-bucket', context).once(function () {
+    $this = $(this);
+    $this.find('.actions a').removeClass('icon');
+    $this.find('.actions').children().eq(0).nextAll().hide();
+    $list = $this.find('.actions')
+      .removeClass('horizontal right');
+    $list.wrap($('<div>').addClass('drop-list horizontal right'))
+      .parent().prepend($('<a>', {
+        html: $('<span>'),
+        href: "#"
+      })
+      .addClass('trigger'));
+    $this.find('.drop-list .trigger')
+      .bind('click', function (event) {
+        event.preventDefault();
+        $target = $(event.currentTarget);
+        $target.parent().toggleClass('open');
+        $target.next().children().not(':eq(0)').slideToggle('fast');
+      });
+  });
+};
