@@ -1,0 +1,30 @@
+/**
+ * The .contextual.css file is intended to contain styles that override declarations
+ * in the Contextual module.
+ */
+
+a.contextual-links-trigger {
+  display: block;
+}
+
+.contextual-links-region-active {
+  outline: medium none;
+}
+
+div.contextual-links-wrapper {
+  right: auto;
+  top: auto;
+}
+
+html.js div.contextual-links-wrapper {
+  display: inline;
+}
+
+#views-live-preview h1 {
+  display: inline-block;
+  margin-top: 0;
+}
+
+div.contextual-links-wrapper ul.contextual-links {
+  right: auto;
+}

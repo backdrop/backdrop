@@ -697,34 +697,29 @@ function views_include($file) {
 /**
  * Load views files on behalf of modules.
  */
-function views_module_include($file, $reset = FALSE) {
-  foreach (views_get_module_apis($reset) as $module => $info) {
-    if (file_exists(DRUPAL_ROOT . "/$info[path]/$module.$file")) {
-      require_once DRUPAL_ROOT . "/$info[path]/$module.$file";
+function views_module_include($api, $reset = FALSE) {
+  if ($reset) {
+    $cache = &drupal_static('ctools_plugin_api_info');
+    if (isset($cache['views']['views'])) {
+      unset($cache['views']['views']);
     }
   }
+  ctools_include('plugins');
+  return ctools_plugin_api_include('views', $api, views_api_minimum_version(), views_api_version());
 }
 
 /**
  * Get a list of modules that support the current views API.
  */
-function views_get_module_apis($reset = FALSE) {
-  static $cache = NULL;
-  if (!isset($cache) || $reset) {
-    $cache = array();
-    foreach (module_implements('views_api') as $module) {
-      $info = module_invoke($module, 'views_api');
-      if (version_compare($info['api'], views_api_minimum_version(), '>=') &&
-          version_compare($info['api'], views_api_version(), '<=')) {
-        if (!isset($info['path'])) {
-          $info['path'] = drupal_get_path('module', $module);
-        }
-        $cache[$module] = $info;
-      }
+function views_get_module_apis($api = 'views', $reset = FALSE) {
+  if ($reset) {
+    $cache = &drupal_static('ctools_plugin_api_info');
+    if (isset($cache['views']['views'])) {
+      unset($cache['views']['views']);
     }
   }
-
-  return $cache;
+  ctools_include('plugins');
+  return ctools_plugin_api_info('views', $api, views_api_minimum_version(), views_api_version());
 }
 
 /**
@@ -773,7 +768,7 @@ function views_include_handlers($reset = FALSE) {
   views_include('handlers');
   views_include('cache');
   views_include('plugins');
-  _views_include_handlers();
+  views_module_include('views', $reset);
   $finished = TRUE;
 }
 
@@ -885,6 +880,29 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
 
 // -----------------------------------------------------------------------
 // Views database functions
+
+/**
+ * Get all view templates.
+ *
+ * Templates are special in-code views that are never active, but exist only
+ * to be cloned into real views as though they were templates.
+ */
+function views_get_all_templates() {
+  $templates = array();
+  $modules = views_module_include('views_template');
+
+  foreach ($modules as $module => $info) {
+    $function = $module . '_views_templates';
+    if (function_exists($function)) {
+      $new = $function();
+      if ($new && is_array($new)) {
+        $templates = array_merge($new, $templates);
+      }
+    }
+  }
+
+  return $templates;
+}
 
 /**
  * Create an empty view to work with.
@@ -1581,7 +1599,10 @@ function views_trim_text($alter, $value) {
   return $value;
 }
 
-function views_views_default_hook_name() {
+/**
+ * Report to CTools that we use hook_views_api instead of hook_ctools_plugin_api()
+ */
+function views_ctools_plugin_api_hook_name() {
   return 'views_api';
 }
 

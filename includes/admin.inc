@@ -10,10 +10,10 @@
  * Adds standard Views administration CSS to the current page.
  */
 function views_ui_add_admin_css() {
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css',
+  $module_path = drupal_get_path('module', 'views_ui');
+  drupal_add_css($module_path . '/css/views-admin.css');
+  drupal_add_css($module_path . '/css/ie/views-admin.ie7.css',
     array(
-      'group' => CSS_DEFAULT,
       'browsers' => array(
         'IE' => 'lte IE 7',
         '!IE' => FALSE
@@ -21,19 +21,17 @@ function views_ui_add_admin_css() {
       'preprocess' => FALSE,
     )
   );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css',
-    array(
-      'group' => CSS_DEFAULT,
-      'preprocess' => TRUE,
-    )
-  );
+  drupal_add_css($module_path . '/css/views-admin.theme.css');
+
   if ($GLOBALS['theme'] === 'seven' || (isset($GLOBALS['theme_info']->base_theme) && $GLOBALS['theme_info']->base_theme === 'seven')) {
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css',
+    drupal_add_css($module_path . '/css/views-admin.seven.css',
       array(
         'group' => CSS_THEME,
-        'preprocess' => TRUE,
       )
     );
+  }
+  if (module_exists('contextual')) {
+    drupal_add_css($module_path . '/css/views-admin.contextual.css');
   }
 }
 
@@ -626,6 +624,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       'group' => CSS_THEME,
       'preprocess' => TRUE,
     );
+  }
+
+  // Add CSS specific to the contextual module.
+  if (module_exists('contextual')) {
+    $form['#attached']['css'][$module_path . '/css/views-admin.contextual.css'] = array();
   }
 
   $form['#attached']['js'][] = $module_path . '/js/views-admin.js';
@@ -4459,4 +4462,26 @@ function views_ui_get_display_label($view, $display_id) {
   }
   $title = $display_id == 'default' ? t('Master') : check_plain($view->display[$display_id]->display_title);
   return $title . $changed;
+}
+
+function views_ui_add_template_page() {
+  $templates = views_get_all_templates();
+
+  $header = array(
+    t('Name'),
+    t('Description'),
+    t('Operation'),
+  );
+
+  $rows = array();
+  foreach ($templates as $name => $template) {
+    $rows[] = array(
+      array('data' => check_plain($template->get_human_name())),
+      array('data' => check_plain($template->description)),
+      array('data' => l('add', 'admin/structure/views/template/' . $template->name . '/add')),
+    );
+  }
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows));
+  return $output;
 }
