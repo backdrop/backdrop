@@ -544,14 +544,13 @@ class views_handler_field_field extends views_handler_field {
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
     $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
 
-    // The field we are trying to display is empty, or doesn't exist on
-    // this entity.
-    if (empty($entity->{$this->definition['field_name']})) {
+    // The field we are trying to display doesn't exist on this entity.
+    if (!isset($entity->{$this->definition['field_name']})) {
       return array();
     }
 
     // We are supposed to show only certain deltas.
-    if ($this->limit_values) {
+    if ($this->limit_values && !empty($entity->{$this->definition['field_name']})) {
       $all_values = $entity->{$this->definition['field_name']}[$langcode];
       if ($this->options['delta_reversed']) {
         $all_values = array_reverse($all_values);
