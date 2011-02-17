@@ -752,6 +752,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#attributes' => array('class' => array('box-padding')),
     );
 
+    // Add a checkbox controlling whether or not this display auto-previews.
+    $form['displays']['preview_controls']['preview_fieldset']['live_preview'] = array(
+      '#type' => 'checkbox',
+      '#id' => 'edit-displays-live-preview',
+      '#title' => t('Auto preview'),
+      '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
+    );
+
     // Add the preview button
     $form['displays']['preview_controls']['preview_fieldset']['button'] = array(
       '#type' => 'submit',
@@ -769,14 +777,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
         'callback' => 'views_ui_preview_callback',
         'wrapper' => 'views-live-preview',
       ),
-    );
-
-    // Add a checkbox controlling whether or not this display auto-previews.
-    $form['displays']['preview_controls']['preview_fieldset']['live_preview'] = array(
-      '#type' => 'checkbox',
-      '#id' => 'edit-displays-live-preview',
-      '#title' => t('Auto preview'),
-      '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
     );
 
     // Add the arguments textfield
