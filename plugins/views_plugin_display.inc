@@ -948,6 +948,7 @@ class views_plugin_display extends views_plugin {
 
     $style_plugin = views_fetch_plugin_data('style', $this->get_option('style_plugin'));
     $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin['title'];
+    $style_plugin_instance = $this->get_plugin('style');
 
     $style = '';
 
@@ -955,6 +956,7 @@ class views_plugin_display extends views_plugin {
       'category' => 'format',
       'title' => t('Format'),
       'value' => $style_title,
+      'setting' => $style_plugin_instance->plugin_title(),
       'desc' => t('Change the way content is formatted.'),
     );
 
@@ -966,11 +968,13 @@ class views_plugin_display extends views_plugin {
     if (!empty($style_plugin['uses row plugin'])) {
       $row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
       $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin['title'];
+      $row_plugin_instance = $this->get_plugin('row');
 
       $options['row_plugin'] = array(
         'category' => 'format',
         'title' => t('Show'),
         'value' => $row_title,
+        'setting' => $row_plugin_instance->plugin_title(),
         'desc' => t('Change the row plugin.'),
       );
       // This adds a 'Settings' link to the row_options setting if the row style has options.
@@ -1006,7 +1010,8 @@ class views_plugin_display extends views_plugin {
     $options['pager'] = array(
       'category' => 'pager',
       'title' => t('Use pager'),
-      'value' => $pager_str,
+      'value' => $pager_plugin->plugin_title(),
+      'setting' => $pager_str,
       'desc' => t("Change this display's pager setting."),
     );
 
@@ -1057,6 +1062,7 @@ class views_plugin_display extends views_plugin {
       'category' => 'access',
       'title' => t('Access'),
       'value' => $access_str,
+      'setting' => $access_plugin->plugin_title(),
       'desc' => t('Specify access control type for this display.'),
     );
 
@@ -1076,6 +1082,7 @@ class views_plugin_display extends views_plugin {
       'category' => 'other',
       'title' => t('Caching'),
       'value' => $cache_str,
+      'setting' => $cache_plugin->plugin_title(),
       'desc' => t('Specify caching type for this display.'),
     );
 
@@ -1130,6 +1137,7 @@ class views_plugin_display extends views_plugin {
       'category' => 'exposed',
       'title' => t('Exposed form style'),
       'value' => $exposed_form_str,
+      'setting' => $exposed_form_plugin->plugin_title(),
       'desc' => t('Select the kind of exposed filter to use.'),
     );
 

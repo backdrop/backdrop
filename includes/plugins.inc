@@ -485,5 +485,14 @@ class views_plugin extends views_object {
    *   plugin.
    */
   function validate() { return array(); }
+
+  /**
+   * Return the human readable name of the display.
+   *
+   * This appears on the ui beside each plugin and beside the settings link.
+   */
+  function plugin_title() {
+    return check_plain($this->definition['title']);
+  }
 }
 
