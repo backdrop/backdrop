@@ -255,4 +255,73 @@ class views_ui extends ctools_export_ui {
     return array('data' => $link, 'class' => $class);
   }
 
+  function clone_page($js, $input, $item, $step = NULL) {
+    drupal_set_title($this->get_page_title('clone', $item));
+
+    $name = $item->{$this->plugin['export']['key']};
+
+    $form_state = array(
+      'plugin' => $this->plugin,
+      'object' => &$this,
+      'ajax' => $js,
+      'item' => $item,
+      'op' => 'add',
+      'form type' => 'clone',
+      'original name' => $name,
+      'rerender' => TRUE,
+      'no_redirect' => TRUE,
+      'step' => $step,
+      // Store these in case additional args are needed.
+      'function args' => func_get_args(),
+    );
+
+    $output = drupal_build_form('views_ui_clone_form', $form_state);
+    if (!empty($form_state['executed'])) {
+      $item->name = $form_state['values']['name'];
+      $item->human_name = $form_state['values']['human_name'];
+      views_ui_cache_set($item);
+
+      drupal_goto(ctools_export_ui_plugin_menu_path($this->plugin, 'edit', $item->name));
+    }
+
+    return $output;
+  }
+
+}
+
+/**
+ * Form callback to edit an exportable item using the wizard
+ *
+ * This simply loads the object defined in the plugin and hands it off.
+ */
+function views_ui_clone_form($form, &$form_state) {
+  $counter = 1;
+  do {
+    $name = format_plural($counter++, 'Clone of', 'Clone @count of') . ' ' . $form_state['original name'];
+    $machine_name = preg_replace('/[^a-z0-9_]+/', '_', drupal_strtolower($name));
+  } while (ctools_export_crud_load($form_state['plugin']['schema'], $machine_name));
+
+  $form['human_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('View name'),
+    '#default_value' => $name,
+  );
+
+  $form['name'] = array(
+    '#title' => t('View name'),
+    '#type' => 'machine_name',
+    '#required' => TRUE,
+    '#maxlength' => 255,
+    '#machine_name' => array(
+      'exists' => 'ctools_export_ui_edit_name_exists',
+      'source' => array('human_name'),
+    ),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Continue'),
+  );
+
+  return $form;
 }
