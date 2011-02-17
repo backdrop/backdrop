@@ -45,7 +45,7 @@ function views_ui_add_admin_css() {
  * be useful.
  */
 function views_ui_check_advanced_help() {
-  if (variable_get('views_hide_help_message', FALSE)) {
+  if (!variable_get('views_ui_show_advanced_help_warning', TRUE)) {
     return;
   }
 
