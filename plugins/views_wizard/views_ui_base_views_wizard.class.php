@@ -116,10 +116,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#options' => $style_options,
       '#default_value' => 'default',
       '#ajax' => array(
-        'callback' => 'views_ui_add_form_update_style',
-        'wrapper' => 'edit-block-style-plugin',,
+        'callback' => 'views_ui_add_form_update_style_page',
+        'wrapper' => 'edit-block-style-plugin',
       ),
     );
+    if (isset($form_state['values'])) {
+      $this->build_form_style($form, $form_state, 'page');
+    }
     $form['displays']['page']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
@@ -225,11 +228,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#options' => $style_options,
       '#default_value' => 'default',
       '#ajax' => array(
-        'callback' => 'views_ui_add_form_update_style',
+        'callback' => 'views_ui_add_form_update_style_block',
         'wrapper' => 'edit-page-style-plugin',
       ),
     );
-    $this->build_form_style($form, $form_state, 'block');
+    if (isset($form_state['values'])) {
+      $this->build_form_style($form, $form_state, 'block');
+    }
     $form['displays']['block']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
@@ -244,10 +249,30 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Build the part of the form that builds the display format options.
    */
   protected function build_form_style(&$form, &$form_state, $type) {
-    if ($style = $form_state['values']['display'][$type]['options']['style_plugin']) {
+//     dsm($form_state);
+//     dsm($form);
+//     dsm($form_state);
+    if ($style = $form_state['values']['displays'][$type]['options']['style_plugin']) {
       $style_plugin = views_get_plugin('style', $style);
-      dsm($style_plugin);
+      $options = $this->row_style_options($type);
+      $form_state['values']['displays'][$type]['options']['row_style'] = array(
+        '#type' => 'select',
+        '#title' => t('of'),
+        '#options' => $options,
+      );
     }
+  }
+
+  /**
+   * Add possible row style options.
+   *
+   * Per default use fields with base field.
+   */
+  protected function row_style_options($type) {
+    $data = views_fetch_data($this->base_table);
+    return array(
+      'fields:' . $data['table']['base']['field'] => $data[$data['table']['base']['field']]['title'],
+    );
   }
 
   /**
