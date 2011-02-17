@@ -5,9 +5,6 @@
  * Views UI wizard tests.
  */
 class ViewsUIWizardHelper extends DrupalWebTestCase {
-  /**
-   * Implementation of setUp().
-   */
   function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui');
@@ -248,6 +245,12 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
 }
 
 class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
+  protected $node_type_with_tags;
+  protected $node_type_without_tags;
+  protected $tag_vocabulary;
+  protected $tag_field;
+  protected $tag_instance;
+
   public static function getInfo() {
     return array(
       'name' => 'Views UI wizard taxonomy functionality',
@@ -256,27 +259,89 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     );
   }
 
+  function setUp() {
+    parent::setUp();
+
+    // Create two content types. One will have an autocomplete tagging field,
+    // and one won't.
+    $this->node_type_with_tags = $this->drupalCreateContentType();
+    $this->node_type_without_tags = $this->drupalCreateContentType();
+
+    // Create the vocabulary for the tag field.
+    $this->tag_vocabulary = new stdClass();
+    $this->tag_vocabulary->name = 'Views testing tags';
+    $this->tag_vocabulary->machine_name = 'views_testing_tags';
+    taxonomy_vocabulary_save($this->tag_vocabulary);
+
+    // Create the tag field itself.
+    $this->tag_field = array(
+      'field_name' => 'field_views_testing_tags',
+      'type' => 'taxonomy_term_reference',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $this->tag_vocabulary->machine_name,
+            'parent' => 0,
+          ),
+        ),
+      ),
+    );
+    field_create_field($this->tag_field);
+
+    // Create an instance of the tag field on one of the content types, and
+    // configure it to display an autocomplete widget.
+    $this->tag_instance = array(
+      'field_name' => 'field_views_testing_tags',
+      'entity_type' => 'node',
+      'bundle' => $this->node_type_with_tags->type,
+      'widget' => array(
+        'type' => 'taxonomy_autocomplete',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => 10,
+        ),
+        'teaser' => array(
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => 10,
+        ),
+      ),
+    );
+    field_create_instance($this->tag_instance);
+  }
+
   /**
    * Test the "tagged with" functionality.
    */
   function testTaggedWith() {
-    // Create three article nodes, with different tags.
-    $tag_field = 'field_tags[' . LANGUAGE_NONE . ']';
+    // In this test we will only create nodes that have an instance of the tag
+    // field.
+    $node_add_path = 'node/add/' . $this->node_type_with_tags->type;
+
+    // Create three nodes, with different tags.
+    $tag_field = $this->tag_field['field_name'] . '[' . LANGUAGE_NONE . ']';
     $edit = array();
     $edit['title'] = $node_tag1_title = $this->randomName();
     $edit[$tag_field] = 'tag1';
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->drupalPost($node_add_path, $edit, t('Save'));
     $edit = array();
     $edit['title'] = $node_tag1_tag2_title = $this->randomName();
     $edit[$tag_field] = 'tag1, tag2';
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->drupalPost($node_add_path, $edit, t('Save'));
     $edit = array();
     $edit['title'] = $node_no_tags_title = $this->randomName();
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->drupalPost($node_add_path, $edit, t('Save'));
 
     // Create a view that filters by taxonomy term "tag1". It should show only
     // the two nodes from above that are tagged with "tag1".
     $view1 = array();
+    // First select the node type and update the form so the correct tag field
+    // is used.
+    $view1['show[type]'] = $this->node_type_with_tags->type;
+    $this->drupalPost('admin/structure/views/add', $view1, t('Update options'));
+    // Now resubmit the entire form to the same URL.
     $view1['human_name'] = $this->randomName(16);
     $view1['name'] = strtolower($this->randomName(16));
     $view1['description'] = $this->randomName(16);
@@ -284,7 +349,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $view1['page[create]'] = 1;
     $view1['page[title]'] = $this->randomName(16);
     $view1['page[path]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view1, t('Save'));
+    $this->drupalPost(NULL, $view1, t('Save'));
     $this->drupalGet($view1['page[path]']);
     $this->assertText($node_tag1_title);
     $this->assertText($node_tag1_tag2_title);
@@ -293,6 +358,11 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     // Create a view that filters by taxonomy term "tag2". It should show only
     // the one node from above that is tagged with "tag2".
     $view2 = array();
+    // First select the node type and update the form so the correct tag field
+    // is used.
+    $view2['show[type]'] = $this->node_type_with_tags->type;
+    $this->drupalPost('admin/structure/views/add', $view2, t('Update options'));
+    // Now resubmit the entire form to the same URL.
     $view2['human_name'] = $this->randomName(16);
     $view2['name'] = strtolower($this->randomName(16));
     $view2['description'] = $this->randomName(16);
@@ -300,7 +370,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $view2['page[create]'] = 1;
     $view2['page[title]'] = $this->randomName(16);
     $view2['page[path]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view2, t('Save'));
+    $this->drupalPost(NULL, $view2, t('Save'));
     $this->drupalGet($view2['page[path]']);
     $this->assertNoText($node_tag1_title);
     $this->assertText($node_tag1_tag2_title);
