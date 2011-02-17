@@ -217,6 +217,9 @@ function views_ui_theme() {
       'render element' => 'form',
       'file' => 'includes/admin.inc',
     ),
+    'views_ui_item_delete_form' => array(
+      'render element' => 'form',
+    ),
     'views_ui_expose_filter_form' => array(
       'render element' => 'form',
       'file' => 'includes/admin.inc',
