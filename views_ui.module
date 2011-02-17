@@ -87,18 +87,6 @@ function views_ui_menu() {
     'page arguments' => array(FALSE, 4),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
-  $items['admin/structure/views/view/%views_ui_cache/export'] = array(
-    'title' => 'Export',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_export_page', 4),
-    'type' => MENU_CALLBACK,
-  ) + $base;
-  $items['admin/structure/views/view/%views_ui_cache/clone'] = array(
-    'title' => 'Clone',
-    'page callback' => 'views_ui_clone_page',
-    'page arguments' => array(4),
-    'type' => MENU_CALLBACK,
-  ) + $base;
 
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
