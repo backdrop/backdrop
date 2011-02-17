@@ -36,6 +36,8 @@ class ViewsWizardException extends Exception {
  */
 class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected $base_table;
+  protected $entity_type;
+  protected $entity_info;
   protected $validated_views = array();
   protected $plugin = array();
   protected $filter_defaults = array(
@@ -53,6 +55,14 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $plugin['filters'][$name] = $info + $default;
     }
     $this->plugin = $plugin;
+
+    $entities = entity_get_info();
+    foreach ($entities as $entity_type => $entity_info) {
+      if ($this->base_table == $entity_info['base table']) {
+        $this->entity_info = $entity_info;
+        $this->entity_type = $entity_type;
+      }
+    }
   }
 
   function build_form($form, &$form_state) {
@@ -72,7 +82,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
-      '#default_value' => variable_get('views_ui_wizard_create_page', TRUE),
+      '#default_value' => TRUE,
     );
 
     // All options for the page display are included in this container so they
@@ -227,6 +237,26 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Find all the fields we are allowed to filter by.
     $fields = views_fetch_fields($this->base_table, 'filter');
 
+    $entity_info = $this->entity_info;
+    // If the current base table support bundles and has more then one (like user).
+    if (isset($entity_info['bundle keys']) && isset($entity_info['bundles'])) {
+      // Get all bundles in a human readable name
+      $options = array('all' => t('All'));
+      foreach ($entity_info['bundles'] as $type => $bundle) {
+        $options[$type] = $bundle['label'];
+      }
+      $form['displays']['show']['type'] = array(
+        '#type' => 'select',
+        '#title' => t('of type'),
+        '#options' => $options,
+        '#default_value' => 'all',
+        '#ajax' => array(
+          'callback' => 'views_ui_add_form_update',
+          'wrapper' => 'edit-view-displays-wrapper',
+        ),
+      );
+    }
+
     // Check if we are allowed to filter by taxonomy. We will construct our
     // filters using taxonomy_index.tid (which limits the filtering to a
     // specific vocabulary) rather than taxonomy_term_data.name (which matches
@@ -239,16 +269,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // of them (see below).
     if (isset($fields['taxonomy_index.tid'])) {
       // Check if this view will be displaying fieldable entities.
-      $entities = entity_get_info();
-      $displays_entities = FALSE;
-      foreach ($entities as $entity_type => $entity_info) {
-        if ($this->base_table == $entity_info['base table']) {
-          $displays_entities = TRUE;
-          // $entity_type and $entity_info will now store information about the
-          // type of entity this view can display.
-          break;
-        }
-      }
+      $displays_entities = !empty($this->entity_info);
       if ($displays_entities && $entity_info['fieldable']) {
         // Find all "tag-like" taxonomy fields associated with the view's
         // entities. If the plugin has already added filters that will restrict
@@ -258,7 +279,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $bundles = isset($this->plugin['bundles']) ? array_intersect($this->plugin['bundles'], array_keys($entity_info['bundles'])) : array_keys($entity_info['bundles']);
         $tag_fields = array();
         foreach ($bundles as $bundle) {
-          foreach (field_info_instances($entity_type, $bundle) as $instance) {
+          foreach (field_info_instances($this->entity_type, $bundle) as $instance) {
             // We define "tag-like" taxonomy fields as ones that use the
             // "Autocomplete term widget (tagging)" widget.
             if ($instance['widget']['type'] == 'taxonomy_autocomplete') {
@@ -302,15 +323,22 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    */
   protected function build_sorts(&$form, &$form_state) {
     // Check if we are allowed to sort by creation date.
+    $sorts = array();
     if (!empty($this->plugin['created_column'])) {
-      $form['displays']['show']['sort_created_order'] = array(
+      $sorts = array(
+        $this->plugin['created_column'] . ':DESC' => t('Newest first'),
+        $this->plugin['created_column'] . ':ASC' => t('Oldest first'),
+      );
+      if (isset($this->plugin['available_sorts'])) {
+        $sorts += $this->plugin['available_sorts'];
+      }
+    }
+    if (!empty($sorts)) {
+      $form['displays']['show']['sort'] = array(
         '#type' => 'select',
         '#title' => t('sorted by'),
-        '#options' => array(
-          'DESC' => t('newest first'),
-          'ASC' => t('oldest first'),
-        ),
-        '#default_value' => 'DESC',
+        '#options' => $sorts,
+        '#default_value' => isset($this->plugin['created_column']) ? $this->plugin['created_column'] . ':DESC' : NULL,
       );
     }
   }
@@ -407,6 +435,15 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function default_display_filters_user($form, $form_state) {
     $filters = array();
 
+    if (!empty($form_state['values']['show']['type']) && $form_state['values']['show']['type'] != 'all') {
+      $bundle_key = $this->entity_info['bundle keys']['bundle'];
+      $filters[$bundle_key] = array(
+        'id' => $bundle_key,
+        'table' => $this->base_table,
+        'field' => $bundle_key,
+        'value' => drupal_map_assoc(array($form_state['values']['show']['type'])),
+      );
+    }
     if (!empty($form_state['values']['show']['tagged_with']['tids'])) {
       $filters['tid'] = array(
         'id' => 'tid',
@@ -447,13 +484,24 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function default_display_sorts_user($form, $form_state) {
     $sorts = array();
 
-    if (!empty($form_state['values']['show']['sort_created_order'])) {
-      $column = $this->plugin['created_column'];
+    if (!empty($form_state['values']['show']['sort'])) {
+      list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
+      // Column either be a column-name or the table-columnn-ame.
+      $column = explode('-', $column);
+      if (count($column) > 1) {
+        $table = $column[0];
+        $column = $column[1];
+      }
+      else {
+        $table = $this->base_table;
+        $column = $column[0];
+      }
+
       $sorts[$column] = array(
         'id' => $column,
-        'table' => $this->base_table,
+        'table' => $table,
         'field' => $column,
-        'order' => $form_state['values']['show']['sort_created_order'],
+        'order' => $sort,
       );
     }
 

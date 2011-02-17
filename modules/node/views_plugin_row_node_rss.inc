@@ -41,6 +41,11 @@ class views_plugin_row_node_rss extends views_plugin_row {
     );
   }
 
+  function summary_title() {
+    return check_plain($this->options['item_length']);
+  }
+
+
   function pre_render($values) {
     foreach ($values as $row) {
       $nids[] = $row->{$this->field_alias};

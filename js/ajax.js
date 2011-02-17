@@ -15,16 +15,15 @@
     $(ajax_popup).dialog('open');
     Drupal.attachBehaviors($(ajax_popup), ajax.settings);
     if (response.url) {
-      var submit = $('input[type=submit]', ajax_body).unbind('click').click(function() {
-        $('form', ajax_body).append('<input type="hidden" name="' + $(this).attr('name') + '" value="' + $(this).val() + '">');
+      $('input[type=submit], button', ajax_body).click(function(event) {
+        this.form.clk = this;
       });
       $('form', ajax_body).once('views-ajax-submit-processed').each(function() {
         var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'none' } };
         var $form = $(this);
         var id = $form.attr('id');
-        var form = $form[0];
-        form.form = form;
-        Drupal.ajax[id] = new Drupal.ajax(id, form, element_settings);
+        Drupal.ajax[id] = new Drupal.ajax(id, this, element_settings);
+        Drupal.ajax[id].form = $form;
       });
     }
   };
@@ -63,7 +62,7 @@
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function(ajax, response, status) {
     if ($('input#edit-displays-live-preview').is(':checked')) {
-      $('#preview-submit').trigger('click');
+      $('#preview-submit').trigger('mousedown');
     }
   }
 
@@ -120,7 +119,7 @@
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });
 
-      $('div#views-live-preview form input[type=submit], div#views-live-preview a')
+      $('div#views-live-preview a')
         .once('views-ajax-processed').each(function () {
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
@@ -137,6 +136,8 @@
           element_settings.url = $(this.form).attr('action');
         }
 
+        element_settings.wrapper = 'views-live-preview';
+        element_settings.method = 'html';
         var base = $(this).attr('id');
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });

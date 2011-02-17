@@ -27,7 +27,7 @@ class views_handler_argument_node_type extends views_handler_argument {
   function node_type($type) {
     $output = node_type_get_name($type);
     if (empty($output)) {
-      $output = t('Unknown node type');
+      $output = t('Unknown content type');
     }
     return check_plain($output);
   }

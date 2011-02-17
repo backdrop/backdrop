@@ -10,11 +10,6 @@ Drupal.behaviors.viewsUiAddView = {};
  * page title and menu link.
  */
 Drupal.behaviors.viewsUiAddView.attach = function (context, settings) {
-  // Users can turn this behavior off on the settings page.
-  if (settings.viewsUiWizardAutofill === 0) {
-    return;
-  }
-
   var $ = jQuery;
   var exclude, replace, suffix;
   // Set up regular expressions to allow only numbers, letters, and dashes.
@@ -652,4 +647,25 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.updateRowspans = function () {
       $operatorCell.attr('rowspan', draggableCount + 1);
     }
   }
+};
+
+Drupal.behaviors.viewsFilterConfigSelectAll = {};
+
+/**
+ * Add a select all checkbox, which checks each checkbox at once.
+ */
+Drupal.behaviors.viewsFilterConfigSelectAll.attach = function(context) {
+  var $ = jQuery;
+  // Show the select all checkbox.
+  $('#views-ui-config-item-form div.form-item-options-value-all', context).once(function() {
+    $(this).show();
+  })
+  .find('input[type=checkbox]')
+  .click(function() {
+    var checked = $(this).is(':checked');
+    // Update all checkbox beside the select all checkbox.
+    $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function() {
+      $(this).attr('checked', checked);
+    });
+  });
 };

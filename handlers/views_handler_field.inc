@@ -341,21 +341,44 @@ class views_handler_field extends views_handler {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
+    $form['element_type_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Wrap field in HTML'),
+      '#fieldset' => 'style_settings',
+    );
     $form['element_type'] = array(
       '#title' => t('HTML element'),
       '#options' => $this->get_elements(),
       '#type' => 'select',
       '#default_value' => $this->options['element_type'],
-      '#description' => t('Most styles provide wrappers for fields. If the chosen style supports wrappers, wrap the field in this HTML element. The default will usually be either DIV or SPAN.'),
+      '#description' => t('Choose the HTML element to wrap around this field, e.g. H1, H2, etc.'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-type-enable' => array(1)
+      ),
+    );
+
+    $form['element_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create a CSS class'),
+      '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-type-enable' => array(1)
+      ),
     );
 
     $form['element_class'] = array(
-      '#title' => t('Element class'),
-      '#description' => t('The class to provide on the wrapper element. You may enter data from this view as per the "Replacement patterns" used in "Rewrite the output of this field".'),
+      '#title' => t('CSS class'),
+      '#description' => t('Provide a CSS class to...'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_class'],
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-class-enable' => array(1)
+      ),
     );
 
     $form['custom_label'] = array(
@@ -385,20 +408,50 @@ class views_handler_field extends views_handler {
       ),
     );
 
+    $form['element_label_type_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Wrap label in HTML'),
+      '#fieldset' => 'style_settings',
+    );
+
     $form['element_label_type'] = array(
       '#title' => t('Label HTML element'),
       '#options' => $this->get_elements(FALSE),
       '#type' => 'select',
       '#default_value' => $this->options['element_label_type'],
-      '#description' => t('What HTML element type to use to wrap the label.'),
+      '#description' => t('Choose the HTML element to wrap around this label, e.g. H1, H2, etc.'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-label-type-enable' => array(1)
+      ),
+    );
+
+    $form['element_label_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create a CSS class'),
+      '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-label-type-enable' => array(1)
+      ),
     );
 
     $form['element_label_class'] = array(
-      '#title' => t('Label class'),
-      '#description' => t('The class to provide on the label wrapper element.'),
+      '#title' => t('CSS class'),
+      '#description' => t('Provide a CSS class to...'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_label_class'],
+      '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-label-class-enable' => array(1)
+      ),
+    );
+
+    $form['element_wrapper_type_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Wrap field and label in HTML'),
       '#fieldset' => 'style_settings',
     );
 
@@ -407,16 +460,34 @@ class views_handler_field extends views_handler {
       '#options' => $this->get_elements(FALSE),
       '#type' => 'select',
       '#default_value' => $this->options['element_wrapper_type'],
-      '#description' => t('What HTML Element type to use to wrap the field (and the label). This is not supported by some styles such as tables.'),
+      '#description' => t('Choose the HTML element to wrap around this field and label, e.g. H1, H2, etc.'),
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-wrapper-type-enable' => array(1)
+      ),
+    );
+
+    $form['element_wrapper_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create a CSS class'),
+      '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-wrapper-type-enable' => array(1)
+      ),
     );
 
     $form['element_wrapper_class'] = array(
-      '#title' => t('Wrapper class'),
-      '#description' => t('The class to provide on the wrapper element. Separate multiple classes with a space.'),
+      '#title' => t('CSS class'),
+      '#description' => t('Provide a CSS class to...'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_wrapper_class'],
       '#fieldset' => 'style_settings',
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array(
+        'edit-options-element-wrapper-class-enable' => array(1)
+      ),
     );
 
     $form['element_default_classes'] = array(
@@ -431,8 +502,7 @@ class views_handler_field extends views_handler {
       '#type' => 'checkbox',
       '#title' => t('Exclude from display'),
       '#default_value' => $this->options['exclude'],
-      '#description' => t('Check this box to not display this field, but still load it in the view. Use this option to not show a grouping field in each record, or when doing advanced theming, or when you want to use this field as a token in other fields.'),
-      '#fieldset' => 'style_settings',
+      '#description' => t('Enable to load this field as hidden. Often used to group fields, or to use as token in another field.'),
     );
 
     $form['style_settings'] = array(
@@ -454,7 +524,7 @@ class views_handler_field extends views_handler {
       $form['alter']['alter_text'] = array(
         '#type' => 'checkbox',
         '#title' => t('Rewrite the output of this field'),
-        '#description' => t('If checked, you can alter the output of this field by specifying a string of text with replacement tokens that can use any existing field output.'),
+        '#description' => t('Enable to override the output of this field with custom text or replacement tokens.'),
         '#default_value' => $this->options['alter']['alter_text'],
       );
 
@@ -623,7 +693,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $form['alter']['trim'] = array(
         '#type' => 'checkbox',
         '#title' => t('Trim this field to a maximum length'),
-        '#description' => t('If checked, this field be trimmed to a maximum length in characters.'),
+        '#description' => t('Enable to trim the field to a maximum length of characters'),
         '#default_value' => $this->options['alter']['trim'],
       );
 

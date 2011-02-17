@@ -7,58 +7,58 @@
 
 /* @group Icons */
 
-.page-admin-structure-views #content ul.actions a,
-.page-admin-structure-views #content .icon,
-.page-admin-structure-views #content .icon-text {
+.actions a,
+.views-admin .icon,
+.views-admin .icon-text {
   background-position: right top;
 }
 
 /* Targets any element with an icon -> text combo */
-.page-admin-structure-views #content .icon-text {
+.views-admin .icon-text {
   padding-right: 19px;
 }
 
-.page-admin-structure-views #content .icon-linked {
+.views-admin .icon-linked {
   background-position: right -153px;
 }
 
-.page-admin-structure-views #content .icon-unlinked {
+.views-admin .icon-unlinked {
   background-position: right -195px;
 }
 
-.page-admin-structure-views #content ul.actions .views-button-add {
+.actions .views-button-add {
   background-position: right -39px;
 }
 
-.page-admin-structure-views #content ul.actions .views-button-rearrange {
+.actions .views-button-rearrange {
   background-position: right -96px;
 }
 
-.page-admin-structure-views #content ul.actions .views-button-add:hover {
+.actions .views-button-add:hover {
   background-position: right -58px;
 }
 
-.page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
+.actions .views-button-rearrange:hover {
   background-position: right -115px;
 }
 
-.page-admin-structure-views #content ul.actions .views-button-add:active {
+.actions .views-button-add:active {
   background-position: right -77px;
 }
 
-.page-admin-structure-views #content ul.actions .views-button-rearrange:active {
+.actions .views-button-rearrange:active {
   background-position: right -134px;
 }
 
-.page-admin-structure-views #content .views-displays .icon-add {
+.views-displays .icon-add {
   background-position: right -3px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
+.views-displays .secondary a:hover > .icon-add {
   background-position: right -21px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
+.views-displays .secondary .open a:hover > .icon-add {
   background-position: right -3px;
 }
 
@@ -66,13 +66,13 @@
 
 /* @group Forms */
 
-.page-admin-structure-views #content .form-submit + .form-submit,
-.page-admin-structure-views #content a.button + a.button {
+.form-submit + .form-submit,
+.views-admin a.button + a.button {
   margin-right: 1em;
 }
 
-.page-admin-structure-views #content .container-inline > * + *,
-.page-admin-structure-views #content .container-inline .fieldset-wrapper > * + * {
+.container-inline > * + *,
+.container-inline .fieldset-wrapper > * + * {
   padding-left: 0;
   padding-right: 4pt;
 }
@@ -81,7 +81,7 @@
 
 /* @group Lists */
 
-.page-admin-structure-views #content .horizontal > * + * {
+.horizontal > * + * {
   margin-right: 9px;
   padding-right: 9px;
 }
@@ -90,11 +90,11 @@
 
 /* @group Attachments */
 
-.page-admin-structure-views #content .views-displays .secondary {
+.views-displays .secondary {
   padding: 6px 8px 8px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary > li + li {
+.views-displays .secondary > li + li {
   margin-right: 3px;
 }
 
@@ -105,7 +105,7 @@
  * The tabs that switch between sections
  */
 
-.page-admin-structure-views #content .views-displays .secondary .action-list  li:first-child {
+.views-displays .secondary .action-list  li:first-child {
   -moz-border-radius: 7px 0 0 0;
   -webkit-border-top-left-radius: 7px;
   -webkit-border-top-right-radius: 0;
@@ -120,7 +120,7 @@
  * have a border around it.
  */
 
-.page-admin-structure-views #content .views-display-tab .fieldset-legend {
+.views-display-tab .fieldset-legend {
   left: auto;
   right: -5px;
 }
@@ -132,7 +132,7 @@
  * The auto-preview checkbox line. This may have more stuff added to it.
  */
 
-.page-admin-structure-views #content div.form-item-displays-live-preview {
+div.form-item-displays-live-preview {
   text-align: left;
 }
 
@@ -144,11 +144,11 @@
  * attachment details section.
  */
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-text {
+.views-ui-display-tab-bucket .icon-text {
   padding-right: 25px;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket > .actions * + * {
+.views-ui-display-tab-bucket > .actions * + * {
   margin-right: 3px;
   padding-right: 3px;
 }
@@ -171,11 +171,11 @@
  * The contents of the popup dialog on the views edit form.
  */
 
-.page-admin-structure-views #views-filterable-options-controls .form-item {
+#views-filterable-options-controls .form-item {
   margin-left: 2%;
 }
 
-.page-admin-structure-views .views-ui-dialog #views-progress-indicator {
+.views-ui-dialog #views-progress-indicator {
   left: 10px;
   right: auto;
 }
@@ -186,7 +186,7 @@
 
 /* @group HTML list */
 
-.page-admin-structure-views #views-live-preview .view-content > .item-list > ul {
+#views-live-preview .view-content > .item-list > ul {
   padding-right: 21px;
 }
 

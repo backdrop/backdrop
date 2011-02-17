@@ -76,6 +76,10 @@ function template_preprocess_views_view(&$vars) {
 
   $vars['pager']      = '';
 
+  // @todo: Figure out whether this belongs into views_ui_preprocess_views_view.
+  // Render title for the admin preview.
+  $vars['title'] = !empty($view->views_ui_context) ? filter_xss_admin($view->get_title()) : '';
+
   if ($view->display_handler->render_pager()) {
     $exposed_input = isset($view->exposed_data_raw) ? $view->exposed_data_raw : NULL;
     $vars['pager']      = $view->query->render_pager($exposed_input);
@@ -90,7 +94,7 @@ function template_preprocess_views_view(&$vars) {
       'views-edit' => array(
         'title' => t('Edit view'),
         'attributes' => array('title' => t("Edit this view")),
-        'href' => "admin/structure/views/edit/$view->name",
+        'href' => "admin/structure/views/view/$view->name",
         'fragment' => 'views-tab-' . $view->current_display,
         'query' => drupal_get_destination(),
       ),
@@ -133,7 +137,7 @@ function template_preprocess_views_view(&$vars) {
   }
 
   // If using AJAX, send identifying data about this view.
-  if ($view->use_ajax && empty($view->is_attachment)) {
+  if ($view->use_ajax && empty($view->is_attachment) && empty($view->live_preview)) {
     $settings = array(
       'views' => array(
         'ajax_path' => url('views/ajax'),

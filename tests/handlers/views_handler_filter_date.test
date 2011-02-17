@@ -167,18 +167,18 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['type'] = 'full';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
-    /* Filter: Node: Updated date */
+    /* Filter: Content: Updated date */
     $handler->display->display_options['filters']['created']['id'] = 'created';
     $handler->display->display_options['filters']['created']['table'] = 'node';
     $handler->display->display_options['filters']['created']['field'] = 'created';
 
     return $view;
   }
-  
+
   function views_test_offset() {
     $view = $this->views_test_between();
     return $view;

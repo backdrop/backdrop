@@ -30,6 +30,9 @@
  */
 ?>
 <div class="<?php print $classes; ?>">
+  <?php if ($title): ?>
+    <?php print $title; ?>
+  <?php endif; ?>
   <?php if ($admin_links): ?>
     <?php print $admin_links; ?>
   <?php endif; ?>

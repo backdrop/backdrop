@@ -40,8 +40,8 @@ function upload_views_data() {
   );
 
   $data['upload']['vid'] = array(
-    'title' => t('Node'),
-    'help' => t('The node the uploaded file is attached to'),
+    'title' => t('Content'),
+    'help' => t('The content the uploaded file is attached to'),
     'relationship' => array(
       'label' => t('upload'),
       'base' => 'node',

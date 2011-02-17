@@ -5,11 +5,11 @@
 
 /* @group Content */
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket h1,
-.page-admin-structure-views #content .views-ui-display-tab-bucket h2,
-.page-admin-structure-views #content .views-ui-display-tab-bucket h3,
-.page-admin-structure-views #content .views-ui-display-tab-bucket h4,
-.page-admin-structure-views #content .views-ui-display-tab-bucket h5 {
+.views-ui-display-tab-bucket h1,
+.views-ui-display-tab-bucket h2,
+.views-ui-display-tab-bucket h3,
+.views-ui-display-tab-bucket h4,
+.views-ui-display-tab-bucket h5 {
   margin-bottom: 0;
   margin-top: 0;
 }
@@ -18,51 +18,74 @@
 
 /* @group Forms */
 
-.page-admin-structure-views #content fieldset {
+fieldset {
   padding: 0;
 }
 
-.page-admin-structure-views #content .fieldset-wrapper {
+.fieldset-wrapper {
   padding: 10px 12px 12px;
 }
 
-.page-admin-structure-views #content fieldset.box-padding .fieldset-wrapper {
+fieldset.box-padding .fieldset-wrapper {
   padding: 0;
 }
 
-.page-admin-structure-views #content legend + .fieldset-wrapper {
+legend + .fieldset-wrapper {
   padding-top: 2.5em;
 }
 
-.page-admin-structure-views #content .form-submit,
-.page-admin-structure-views #content a.button {
+.views-admin input.form-submit,
+.views-ui-dialog input.form-submit,
+.views-admin a.button,
+.views-ui-dialog a.button {
   margin-bottom: 0;
   margin-right: 0; /* LTR */
   margin-top: 0;
 }
 
-.page-admin-structure-views #content .form-item {
+/* Override for a button on the edit display screen */
+#edit-displays-preview-controls .form-submit {
+  display: inline-block;
+  margin-right: 1em;
+}
+
+/* Override for filter button on the vies list screen */
+#ctools-export-ui-list-form .form-submit {
+  margin-top: 1.3em;
+}
+
+.form-item {
   margin-bottom: 0;
   padding-bottom: 0;
   padding-top: 0;
 }
 
-.page-admin-structure-views #content .form-actions {
+.form-actions {
   margin-bottom: 0;
   margin-top: 0;
+}
+
+input.form-checkbox,
+input.form-radio {
+  vertical-align: baseline;
+}
+ 
+.form-item .form-item {
+  padding-bottom: 0;
+  padding-top: 0;
 }
 
 /* @end */
 
 /* @group Lists */
 
-.page-admin-structure-views #content ul.secondary,
-.page-admin-structure-views #content .item-list ul {
+.views-admin ul.secondary,
+.views-admin .item-list ul {
   margin: 0;
   padding: 0;
 }
 
-.page-admin-structure-views #content .links li {
+.views-admin .links li {
   padding-right: 0; /* LTR */
 }
 
@@ -104,11 +127,11 @@
 
 /* @group Attachments */
 
-.page-admin-structure-views #content .views-displays .secondary {
+.views-displays .secondary {
   text-align: left; /* LTR */
 }
 
-.page-admin-structure-views #content .views-displays .secondary > li {
+.views-displays .secondary > li {
   padding-left: 0;
 }
 

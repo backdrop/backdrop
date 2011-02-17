@@ -49,7 +49,7 @@ class views_plugin_row_node_view extends views_plugin_row {
     if (empty($options)) {
       $options = array(
         'teaser' => t('Teaser'),
-        'full' => t('Full node')
+        'full' => t('Full content')
       );
     }
 
@@ -66,9 +66,13 @@ class views_plugin_row_node_view extends views_plugin_row {
     );
     $form['comments'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display node comments'),
+      '#title' => t('Display comments'),
       '#default_value' => $this->options['comments'],
     );
+  }
+
+  function summary_title() {
+    return check_plain($this->options['build_mode']);
   }
 
   function pre_render($values) {

@@ -120,7 +120,7 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['options']['expose']['offset_label'] = 'Offset1';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
@@ -135,15 +135,15 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
     $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
     $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
-    /* Filter: Node: Nid */
+    /* Filter: Content: Nid */
     $handler->display->display_options['filters']['nid']['id'] = 'nid';
     $handler->display->display_options['filters']['nid']['table'] = 'node';
     $handler->display->display_options['filters']['nid']['field'] = 'nid';
     $handler->display->display_options['filters']['nid']['exposed'] = TRUE;
-    $handler->display->display_options['filters']['nid']['expose']['operator'] = 'nid_op';
+    $handler->display->display_options['filters']['nid']['expose']['operator_id'] = 'nid_op';
     $handler->display->display_options['filters']['nid']['expose']['label'] = 'filterlabel1';
     $handler->display->display_options['filters']['nid']['expose']['identifier'] = 'nid';
-    $handler->display->display_options['filters']['nid']['expose']['single'] = 0;
+    $handler->display->display_options['filters']['nid']['expose']['multiple'] = 1;
     $handler->display->display_options['filters']['nid']['expose']['reduce'] = 0;
 
     return $view;

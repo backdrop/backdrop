@@ -275,6 +275,7 @@ class views_handler_field_field extends views_handler_field {
         '#options' => drupal_map_assoc($column_names),
         '#default_value' => $this->options['click_sort_column'],
         '#description' => t('Used by Style: Table to determine the actual column to click sort the field on. The default is usually fine.'),
+        '#fieldset' => 'more',
       );
     }
 
@@ -293,6 +294,7 @@ class views_handler_field_field extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['field_api_classes'],
       '#description' => t('If checked, field api classes will be added using field.tpl.php (or equivalent). This is not recommended unless your CSS depends upon these classes. If not checked, template will not be used.'),
+      '#fieldset' => 'more',
     );
 
     if ($this->multiple) {
@@ -549,14 +551,13 @@ class views_handler_field_field extends views_handler_field {
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
     $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
 
-    // The field we are trying to display is empty, or doesn't exist on
-    // this entity.
-    if (empty($entity->{$this->definition['field_name']})) {
+    // The field we are trying to display doesn't exist on this entity.
+    if (!isset($entity->{$this->definition['field_name']})) {
       return array();
     }
 
     // We are supposed to show only certain deltas.
-    if ($this->limit_values) {
+    if ($this->limit_values && !empty($entity->{$this->definition['field_name']})) {
       $all_values = $entity->{$this->definition['field_name']}[$langcode];
       if ($this->options['delta_reversed']) {
         $all_values = array_reverse($all_values);

@@ -184,7 +184,7 @@ function comment_views_data() {
       'handler' => 'views_handler_filter_date',
     ),
   );
-  
+
   $data['comments']['timestamp_fulldate'] = array(
     'title' => t('Created date'),
     'help' => t('In the form of CCYYMMDD.'),
@@ -307,13 +307,13 @@ function comment_views_data() {
   );
 
   $data['comment']['nid'] = array(
-    'title' => t('Node'),
-    'help' => t('The node the comment is a reply to.'),
+    'title' => t('Content'),
+    'help' => t('The content to which the comment is a reply to.'),
     'relationship' => array(
       'base' => 'node',
       'base field' => 'nid',
       'handler' => 'views_handler_relationship',
-      'label' => t('Node'),
+      'label' => t('Content'),
     ),
   );
 
@@ -348,7 +348,7 @@ function comment_views_data() {
   // node_comment_statistics table
 
   // define the group
-  $data['node_comment_statistics']['table']['group']  = t('Node');
+  $data['node_comment_statistics']['table']['group']  = t('Content');
 
   // joins
   $data['node_comment_statistics']['table']['join'] = array(
