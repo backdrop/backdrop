@@ -60,12 +60,14 @@
     $('#views-tabset').viewsClickTab(instance.$tabs.length);
   };
 
-  Drupal.ajax.prototype.commands.viewsDisableButtons = function(ajax, response, status) {
-    $('#views-ui-edit-view-form input').attr('disabled', 'disabled');
+  Drupal.ajax.prototype.commands.viewsHideButtons = function(ajax, response, status) {
+    $('div.views-edit-view div.form-actions').addClass('js-hide');
   }
 
-  Drupal.ajax.prototype.commands.viewsEnableButtons = function(ajax, response, status) {
-    $('#views-ui-edit-view-form input').removeAttr('disabled');
+  Drupal.ajax.prototype.commands.viewsShowButtons = function(ajax, response, status) {
+    $('div.views-edit-view div.form-actions').removeClass('js-hide');
+    console.log($('div.views-edit-view div.form-actions'));
+    console.log($('div.views-edit-view div.form-actions').attr('class'));
   }
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function(ajax, response, status) {
