@@ -41,6 +41,11 @@ class views_plugin_row_node_rss extends views_plugin_row {
     );
   }
 
+  function summary_title() {
+    return check_plain($this->options['item_length']);
+  }
+
+
   function pre_render($values) {
     foreach ($values as $row) {
       $nids[] = $row->{$this->field_alias};
@@ -89,6 +94,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
       $item_text .= drupal_render($node->content) . $links;
     }
 
+    $item = new stdClass;
     $item->description = $item_text;
     $item->title = $node->title;
     $item->link = url("node/$node->nid", array('absolute' => TRUE));

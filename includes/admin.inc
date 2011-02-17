@@ -256,7 +256,9 @@ function views_ui_add_page() {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';;
+  ctools_include('dependent');
+  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
+  $form['#attributes']['class'] = array('views-admin');
 
   $form['human_name'] = array(
     '#type' => 'textfield',
@@ -275,11 +277,20 @@ function views_ui_add_form($form, &$form_state) {
     ),
     '#description' => t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
   );
+
+  $form['description_enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Description'),
+  );
   $form['description'] = array(
     '#type' => 'textfield',
-    '#title' => t('Description'),
     '#size' => 64,
     '#default_value' => !empty($form_state['view']) ? $form_state['view']->description : '',
+    '#states' => array(
+      'visible' => array(   // action to take.
+        ':input[name="description_enable"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   // Everything that can be updated by AJAX goes in here. It is triggered by
@@ -640,7 +651,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#prefix' => '',
     '#suffix' => '',
   );
-  $form['#prefix'] = $form['#prefix'] . '<div class="views-edit-view">';
+  $form['#prefix'] = $form['#prefix'] . '<div class="views-edit-view views-admin clearfix">';
   $form['#suffix'] = '</div>' . $form['#suffix'];
 
   if (isset($view->locked) && is_object($view->locked)) {
@@ -786,7 +797,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#type' => 'submit',
       '#value' => t('Preview'),
       '#attributes' => array('class' => array('arguments-preview')),
-      '#process' => array('ctools_dependent_process'),
       '#states' => array(
         'visible' => array(   // action to take.
           ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
@@ -806,7 +816,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#title' => t('Arguments'),
       '#description' => t('Separate arguments with a / as though they were a URL path.'),
       '#attributes' => array('class' => array('arguments-preview')),
-      '#process' => array('ctools_dependent_process'),
       '#states' => array(
         'visible' => array(   // action to take.
           ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
@@ -1132,7 +1141,7 @@ function views_ui_edit_form_get_build_from_option($id, $option, $view, $display)
   $option_build['#links'] = array();
   if (!empty($option['links']) && is_array($option['links'])) {
     foreach ($option['links'] as $link_id => $link_value) {
-      $option_build['#settings_links'][] = $display->handler->option_link(t('settings'), $link_id, 'views-button-configure', $link_value);
+      $option_build['#settings_links'][] = $display->handler->option_link($option['setting'], $link_id, 'views-button-configure', $link_value);
     }
   }
 
@@ -1461,16 +1470,18 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   switch ($type) {
     case 'filter':
       $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
+      $rearrange_text = t('And/Or');
       // TODO: Add another class to have another symbol for filter rearrange.
       $class = 'views-button-rearrange';
       break;
     default:
       $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
+      $rearrange_text = t('Sort');
       $class = 'views-button-rearrange';
   }
 
   if (count($display->handler->get_handlers($type)) > 1) {
-    $build['#rearrange'] = l('<span>' . t('Rearrange') . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
+    $build['#rearrange'] = l('<span>' . $rearrange_text . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
   }
   $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
   $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
@@ -2803,7 +2814,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
     ),
     '#default_value' => $groups['operator'],
     '#attributes' => array(
-      'class' => 'warning-on-change',
+      'class' => array('warning-on-change'),
     ),
     '#title' => t('Operator to use on all groups'),
     '#description' => t('Either "group 0 AND group 1 AND group 2" or "group 0 OR group 1 OR group 2", etc'),
@@ -2831,6 +2842,10 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
       $form['remove_groups'][$id] = array(
         '#type' => 'submit',
         '#value' => t('Remove group @group', array('@group' => $id)),
+        '#id' => "views-remove-group-$id",
+        '#attributes' => array(
+          'class' => array('views-remove-group'),
+        ),
         '#group' => $id,
       );
     }
@@ -2907,7 +2922,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_rearrange_filter_form');
   $form['buttons']['add_group'] = array(
     '#type' => 'submit',
-    '#value' => t('Add new group'),
+    '#value' => t('Create new filter group'),
     '#id' => 'views-add-group',
     '#group' => 'add',
   );
@@ -2939,10 +2954,16 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
       $row[] = array('class' => array('group', 'group-title'), 'data' => '<span>' . $form['#group_options'][$group_id] . '</span>', 'colspan' => 4);
       $rows[] = array('class' => array('views-group-title'), 'data' => $row, 'id' => 'views-group-title-' . $group_id);
 
-      // Row which will only appear if the group has nothing in it:
+      // Row which will only appear if the group has nothing in it.
       $row = array();
       $class = 'group-' . (count($contents) ? 'populated' : 'empty');
       $instructions = '<span>' . t('No filters have been added.') . '</span> <span class="js-only">' . t('Drag to add filters.') . '</span>';
+      // When JavaScript is enabled, the button for removing the group (if it's
+      // present) should be hidden, since it will be replaced by a link on the
+      // client side.
+      if (!empty($form['remove_groups'][$group_id]['#type']) && $form['remove_groups'][$group_id]['#type'] == 'submit') {
+        $form['remove_groups'][$group_id]['#attributes']['class'][] = 'js-hide';
+      }
       $row[] = array('colspan' => 5, 'data' => $instructions . drupal_render($form['remove_groups'][$group_id]));
       $rows[] = array('class' => array("group-message", "group-$group_id-message", $class), 'data' => $row, 'id' => 'views-group-' . $group_id);
     }
@@ -2992,9 +3013,14 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   drupal_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
   $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange'))));
   $output .= '</div>';
+
+  // When JavaScript is enabled, the button for adding a new group should be
+  // hidden, since it will be replaced by a link on the client side.
+  $form['buttons']['add_group']['#attributes']['class'][] = 'js-hide';
+
+  // Render the rest of the form and return.
   $output .= drupal_render_children($form);
   return $output;
-
 }
 
 /**

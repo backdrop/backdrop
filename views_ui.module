@@ -28,7 +28,7 @@ function views_ui_menu() {
   ) + $base;
 
   $items['admin/structure/views/import'] = array(
-    'title' => 'Import view from code',
+    'title' => 'Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_import_page'),
     'access callback' => 'views_import_access',

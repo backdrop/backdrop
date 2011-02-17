@@ -5,12 +5,12 @@
 
 /* @group Reset */
 
-.page-admin-structure-views #content .links {
+.views-admin .links {
   list-style: none outside none;
   margin: 0;
 }
 
-.page-admin-structure-views #content a:hover {
+.views-admin a:hover {
   text-decoration: none;
 }
 
@@ -18,77 +18,44 @@
 
 /* @group Icons */
 
-.page-admin-structure-views #content ul.actions a,
-.page-admin-structure-views #content .icon,
-.page-admin-structure-views #content .icon-text {
+.views-admin .icon,
+.views-admin .icon-text {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
   background-position: left top; /* LTR */
   background-repeat: no-repeat;
 }
 
-.page-admin-structure-views #content ul.actions a {
-  display: block;
-  height: 17px;
-  overflow: hidden;
-  text-indent: -9999px;
-  width: 17px;
-}
-
 /* Targets a <span> element. This assumes no visible text from the span. */
-.page-admin-structure-views #content .icon {
+.views-admin .icon {
   display: inline-block;
   height: 12px;
   position: relative;
   width: 16px;
-}
+} 
 
 /* Targets any element with an icon -> text combo */
-.page-admin-structure-views #content .icon-text {
+.views-admin .icon-text {
   padding-left: 19px; /* LTR */
 }
 
-.page-admin-structure-views #content .icon-linked {
+.views-admin .icon-linked {
   background-position: left -153px; /* LTR */
 }
 
-.page-admin-structure-views #content .icon-unlinked {
+.views-admin .icon-unlinked {
   background-position: left -195px; /* LTR */
 }
 
-.page-admin-structure-views #content ul.actions .views-button-add {
-  background-position: left -39px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange {
-  background-position: left -96px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add:hover {
-  background-position: left -58px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
-  background-position: left -115px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add:active {
-  background-position: left -77px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange:active {
-  background-position: left -134px; /* LTR */
-}
-
-.page-admin-structure-views #content .views-displays .icon-add {
+.views-displays .icon-add {
   background-position: left -3px; /* LTR */
 }
 
-.page-admin-structure-views #content .views-displays .secondary a:hover > .icon-add {
+.views-displays .secondary a:hover > .icon-add {
   background-position: left -21px; /* LTR */
 }
 
-.page-admin-structure-views #content .views-displays .secondary .open a:hover > .icon-add {
+.views-displays .secondary .open a:hover > .icon-add {
   background-position: left -3px; /* LTR */
 }
 
@@ -96,41 +63,52 @@
 
 /* @group Forms */
 
-.page-admin-structure-views #content fieldset.box-padding {
+fieldset.box-padding {
   border: none;
 }
 
-.page-admin-structure-views #content input.form-checkbox, input.form-radio {
+.form-item {
+  margin-top: 15px;
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+input.form-checkbox, 
+input.form-radio {
   vertical-align: baseline;
 }
 
-.page-admin-structure-views #content .form-submit + .form-submit,
-.page-admin-structure-views #content a.button + a.button {
+.form-submit + .form-submit,
+.views-admin a.button + a.button {
   margin-left: 1em; /* LTR */
 }
 
-.page-admin-structure-views #content .fieldset-wrapper > * + *,
-.page-admin-structure-views #content .form-wrapper > * + * {
-  margin-top: 18px;
+.fieldset-wrapper > * + *,
+.form-wrapper > * + * {
+  margin-top: 15px;
 }
 
-.page-admin-structure-views #content .container-inline > * + *,
-.page-admin-structure-views #content .container-inline .fieldset-wrapper > * + * {
+.container-inline {
+  padding-top: 15px;
+}
+
+.container-inline > * + *,
+.container-inline .fieldset-wrapper > * + * {
   padding-left: 4pt; /* LTR */
 }
 
-.page-admin-structure-views #content .form-type-checkbox + .form-wrapper {
+.form-type-checkbox + .form-wrapper {
   margin-left: 16px;
 }
 
 /* Hide 'remove' checkboxes. This might be scoped too widely. */
-.page-admin-structure-views [class*="form-type-checkbox"][class*="remove"] {
+[class*="form-type-checkbox"][class*="remove"] {
   display: none;
 }
 
 /* sizes the labels of checkboxes and radio button to the height of the text */
-.page-admin-structure-views .form-type-checkbox label,
-.page-admin-structure-views .form-type-radio label {
+.form-type-checkbox label,
+.form-type-radio label {
   line-height: 2;
 }
 
@@ -138,7 +116,7 @@
 
 /* @group Lists */
 
-.page-admin-structure-views #content .horizontal > * + * {
+.horizontal > * + * {
   margin-left: 9px; /* LTR */
   padding-left: 9px; /* LTR */
 }
@@ -165,7 +143,7 @@
 
 /* @group Messages */
 
-.page-admin-structure-views .view-changed {
+.view-changed {
   margin-bottom: 21px;
 }
 
@@ -173,7 +151,7 @@
 
 /* @group Headings */
 
-.page-admin-structure-views #content h1 {
+.views-admin h1 {
   font-size: 15px;
   line-height: 1.6154;
   margin-bottom: 0;
@@ -184,34 +162,34 @@
 
 /* @group Attachments */
 
-.page-admin-structure-views #content .views-displays {
+.views-displays {
   border: 1px solid #CCC;
   padding-bottom: 18px;
 }
 
-.page-admin-structure-views #content .views-alt-ui-view-displays,
-.page-admin-structure-views #content .views-alt-ui-view-paths,
-.page-admin-structure-views #content .views-alt-ui-view-description {
+.views-alt-ui-view-displays,
+.views-alt-ui-view-paths,
+.views-alt-ui-view-description {
   font-size: 0.9167em; /* 11px/12px */
   line-height: 1.5em;
 }
 
-.page-admin-structure-views #content .views-displays .secondary {
+.views-displays .secondary {
   background-color: #F9F9F9;
 }
 
-.page-admin-structure-views #content .views-displays .views-display-top {
+.views-displays .views-display-top {
   background-color: #F9F9F9;
   border-bottom: 1px solid #CCCCCC;
   margin-bottom: 14px;
   padding: 8px 8px 6px; /* LTR */
 }
 
-.page-admin-structure-views #content .views-displays .views-extra-actions {
+.views-displays .views-extra-actions {
   
 }
 
-.page-admin-structure-views #content .views-displays .secondary > li + li {
+.views-displays .secondary > li + li {
   margin-left: 3px; /* LTR */
 }
 
@@ -222,7 +200,7 @@
  * The tabs that switch between sections
  */
 
-.page-admin-structure-views #content .views-displays .secondary a {
+.views-displays .secondary a {
   background-color: #f1f1f1;
   border: 1px solid #cbcbcb;
   -moz-border-radius: 7px;
@@ -233,17 +211,17 @@
   padding: 2px 7px 3px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary a:focus {
+.views-displays .secondary a:focus {
   outline: none;
 }
 
-.page-admin-structure-views #content .views-displays .secondary a:hover,
-.page-admin-structure-views #content .views-displays .secondary .active a {
+.views-displays .secondary a:hover,
+.views-displays .secondary .active a {
   background-color: #666666;
   color: #ffffff;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .open > a {
+.views-displays .secondary .open > a {
   -moz-border-radius: 7px 7px 0 0;
   -webkit-border-radius: 7px 7px 0 0;
   border-radius: 7px 7px 0 0;
@@ -251,12 +229,12 @@
   position: relative;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .open > a:hover {
+.views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
   color: #008BCB;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list  li {
+.views-displays .secondary .action-list  li {
   background-color: #f1f1f1;
   border-color: #cbcbcb;
   border-style: solid;
@@ -264,26 +242,26 @@
   padding: 2px 9px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list  li:first-child {
+.views-displays .secondary .action-list  li:first-child {
   -moz-border-radius: 0 7px 0 0;
   -webkit-border-radius: 0 7px 0 0;
   border-radius: 0 7px 0 0;
   border-width: 1px 1px 0;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list  li.last {
+.views-displays .secondary .action-list  li.last {
   border-width: 0 1px 1px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list  li:last-child {
+.views-displays .secondary .action-list  li:last-child {
   -moz-border-radius: 0 0 7px 7px;
   -webkit-border-radius: 0 0 7px 7px;
   border-radius: 0 0 7px 7px;
   border-width: 0 1px 1px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list input.form-submit,
-.page-admin-structure-views #content .views-display-tab input.form-submit {
+.views-displays .secondary .action-list input.form-submit,
+.views-display-tab input.form-submit {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
   -moz-border-radius: 0;
@@ -293,7 +271,7 @@
   padding: 0;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list li:hover {
+.views-displays .secondary .action-list li:hover {
   background-color: #dddddd;
 }
 
@@ -305,7 +283,7 @@
  * have a border around it.
  */
 
-.page-admin-structure-views #content .views-display-tab .fieldset-legend {
+.views-display-tab .fieldset-legend {
   text-transform: none;
   font-size: 14px;
   left: -5px; /* LTR */
@@ -318,7 +296,7 @@
  * The columns that contain the option buckets e.g. Format and Basic Settings
  */
 
- .page-admin-structure-views #content .views-display-columns > * + * {
+.views-display-columns > * + * {
    margin-top: 0;
  }
 
@@ -329,26 +307,18 @@
  * The auto-preview checkbox line. This may have more stuff added to it.
  */
 
-.page-admin-structure-views #content input.arguments-preview {
+input.arguments-preview {
   margin-left: 10px;
   margin-right: -5px;
 }
 
-.page-admin-structure-views #content div.form-item-displays-live-preview {
+div.form-item-displays-live-preview {
   text-align: right; /* LTR */
   margin: 0 12px;
   padding-bottom: 12px;
 }
 
-/**
- * Create a horizontal rule above the live preview area.
- */
-.page-admin-structure-views #content #views-live-preview {
-  border-top: 3px solid #CCC;
-  margin: 0 12px;
-}
-
-.page-admin-structure-views .views-query-info {
+.views-query-info {
   margin: 12px 0;
 }
 
@@ -360,39 +330,39 @@
  * attachment details section.
  */
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket {
+.views-ui-display-tab-bucket {
   border: 1px solid #f3f3f3;
   line-height: 20px;
   margin: 0;
   padding-top: 4px;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
+.views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
   border-top: medium none;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket h3 {
+.views-ui-display-tab-bucket h3 {
   font-size: 12px;
   text-transform: uppercase;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket > * {
+.views-ui-display-tab-bucket > * {
   padding: 2px 6px 4px;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-text {
+.views-ui-display-tab-bucket .icon-text {
   padding-left: 25px; /* LTR */
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-linked {
+.views-ui-display-tab-bucket .icon-linked {
   background-position: 6px -151px;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket .icon-unlinked {
+.views-ui-display-tab-bucket .icon-unlinked {
   background-position: 6px -193px;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket > .actions * + * {
+.views-ui-display-tab-bucket > .actions * + * {
   margin-left: 3px; /* LTR */
   padding-left: 3px; /* LTR */
 }
@@ -404,17 +374,17 @@
  * This is each row within one of the "boxes."
  */
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket .views-display-setting {
+.views-ui-display-tab-bucket .views-display-setting {
   color: #666666;
   font-size: 12px;
   padding-bottom: 2px;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket .even {
+.views-ui-display-tab-bucket .even {
   background-color: #f9f9f9;
 }
 
-.page-admin-structure-views #content .views-ui-display-tab-bucket .views-group-text {
+.views-ui-display-tab-bucket .views-group-text {
   margin-top: 6px;
   margin-bottom: 6px;
 }
@@ -430,36 +400,36 @@
  * The preview controls and the preview pane
  */
 
-.page-admin-structure-views #edit-displays-preview-controls .fieldset-wrapper > * {
+#edit-displays-preview-controls .fieldset-wrapper > * {
   float: left;
 }
 
-.page-admin-structure-views #edit-displays-preview-controls .fieldset-wrapper > .form-item {
+#edit-displays-preview-controls .fieldset-wrapper > .form-item {
   margin-top: 0.3333em;
 }
 
-.page-admin-structure-views #edit-displays-preview-controls .form-submit {
+#edit-displays-preview-controls .form-submit {
   display: inline-block;
   margin-right: 1em;
 }
 
-.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield {
+#edit-displays-preview-controls .form-type-textfield {
   margin-left: 1em;
   position: relative;
 }
 
-.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield label {
+#edit-displays-preview-controls .form-type-textfield label {
   border-left: 1px solid #999;
   padding-left: 1em;
   position: absolute;
 }
 
-.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield label:after {
+#edit-displays-preview-controls .form-type-textfield label:after {
   content: ":";
 }
 
-.page-admin-structure-views #edit-displays-preview-controls .form-type-textfield label ~ * {
-  margin-left: 10em;
+#edit-displays-preview-controls .form-type-textfield label ~ * {
+  margin-left: 105px;
 }
 
 /* @end */
@@ -469,95 +439,95 @@
  * The contents of the popup dialog on the views edit form.
  */
 
-.page-admin-structure-views .views-ui-dialog {
+.views-ui-dialog {
   padding: 0;
 }
 
-.page-admin-structure-views .views-filterable-options .form-type-checkbox {
+.views-filterable-options .form-type-checkbox {
   border: 1px solid #CCC;
   padding: 5px 8px;
   border-top: none;
 }
 
-.page-admin-structure-views .views-filterable-options {
+.views-filterable-options {
   border-top:  1px solid #CCC;
 }
 
-.page-admin-structure-views .views-filterable-options .even .form-type-checkbox {
+.views-filterable-options .even .form-type-checkbox {
   background-color: #F3F4EE;
 }
 
-.page-admin-structure-views .views-filterable-options .form-type-checkbox .description {
+.views-filterable-options .form-type-checkbox .description {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.page-admin-structure-views #views-filterable-options-controls {
+#views-filterable-options-controls {
   margin: 1em 0;
 }
 
-.page-admin-structure-views #views-filterable-options-controls .form-item {
+#views-filterable-options-controls .form-item {
   width: 45%;
   margin-right: 2%; /* LTR */
 }
 
-.page-admin-structure-views #views-filterable-options-controls input,
-.page-admin-structure-views #views-filterable-options-controls select {
+#views-filterable-options-controls input,
+#views-filterable-options-controls select {
   width: 200px;
 }
 
-.page-admin-structure-views .views-ui-dialog .views-filterable-options {
+.views-ui-dialog .views-filterable-options {
   margin-bottom: 10px;
 }
 
-.page-admin-structure-views .views-ui-dialog .views-add-form-selected {
+.views-ui-dialog .views-add-form-selected {
   margin: 5px 16px;
 }
 
-.page-admin-structure-views .views-ui-dialog #views-ajax-title,
-.page-admin-structure-views .views-ui-dialog .views-override {
+.views-ui-dialog #views-ajax-title,
+.views-ui-dialog .views-override {
   background-color: #F3F4EE;
 }
 
-.page-admin-structure-views .views-ui-dialog .views-override {
+.views-ui-dialog .views-override {
   padding: 8px 13px;
 }
 
-.page-admin-structure-views .views-ui-dialog .views-override > * {
+.views-ui-dialog .views-override > * {
   margin: 0;
 }
 
-.page-admin-structure-views .views-ui-dialog #views-ajax-title {
+.views-ui-dialog #views-ajax-title {
   font-size: 15px;
   padding: 8px 13px;
 }
 
-.page-admin-structure-views .views-ui-dialog #views-progress-indicator {
+.views-ui-dialog #views-progress-indicator {
   font-size: 11px;
   position: absolute;
   right: 10px; /* LTR */
   top: 8px;
 }
 
-.page-admin-structure-views .views-ui-dialog #views-progress-indicator:before {
+.views-ui-dialog #views-progress-indicator:before {
   content: "\003C\00A0";
 }
 
-.page-admin-structure-views .views-ui-dialog #views-progress-indicator:after {
+.views-ui-dialog #views-progress-indicator:after {
   content: "\00A0\003E";
 }
 
-.page-admin-structure-views .views-ui-dialog .scroll {
+.views-ui-dialog .scroll {
   border: 1px solid #CCC;
   border-width: 1px 0;
   padding: 8px 13px;
 }
 
-.page-admin-structure-views .views-ui-dialog .form-buttons {
+.views-ui-dialog .form-buttons {
   background-color: #F3F4EE;
   padding: 8px 13px;
 }
-.page-admin-structure-views .views-ui-dialog .form-buttons input {
+.views-ui-dialog .form-buttons input {
   margin-bottom: 0;
 }
 
@@ -610,31 +580,39 @@
 
 /* @group Live preview elements */
 
-.page-admin-structure-views #views-live-preview a,
-.page-admin-structure-views #views-live-preview a:link,
-.page-admin-structure-views #views-live-preview a:visited {
+/**
+ * Create a horizontal rule above the live preview area.
+ */
+#views-live-preview {
+  border-top: 3px solid #CCC;
+  margin: 0 12px;
+}
+
+#views-live-preview a,
+#views-live-preview a:link,
+#views-live-preview a:visited {
   color: #000000;
 }
 
-.page-admin-structure-views #views-live-preview .views-row {
+#views-live-preview .views-row {
   border: 1px dashed #DEDEDE;
   padding: 6px;
 }
 
-.page-admin-structure-views #views-live-preview .views_ui_view_preview_section_title + *,
-.page-admin-structure-views #views-live-preview li.views-row + li.views-row {
+#views-live-preview .views_ui_view_preview_section_title + *,
+#views-live-preview li.views-row + li.views-row {
   margin-top: 18px;
 }
 
 /* The div.views-row is intentional and excludes li.views-row, for example */
-.page-admin-structure-views #views-live-preview div.views-row + div.views-row {
+#views-live-preview div.views-row + div.views-row {
   margin-top: 36px;
 }
 
 /* @group Grid */
 
-.page-admin-structure-views #views-live-preview .views-view-grid th,
-.page-admin-structure-views #views-live-preview .views-view-grid td {
+#views-live-preview .views-view-grid th,
+#views-live-preview .views-view-grid td {
   vertical-align: top;
 }
 
@@ -642,7 +620,7 @@
 
 /* @group HTML list */
 
-.page-admin-structure-views #views-live-preview .view-content > .item-list > ul {
+#views-live-preview .view-content > .item-list > ul {
   list-style-position: outside;
   padding-left: 21px; /* LTR */
 }
@@ -651,7 +629,7 @@
 
 /* @group Jump list */
 
-.page-admin-structure-views #views-live-preview .ctools-jump-menu-select{
+#views-live-preview .ctools-jump-menu-select{
   max-width: 450px;
 }
 

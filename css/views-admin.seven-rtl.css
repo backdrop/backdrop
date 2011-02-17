@@ -5,8 +5,8 @@
 
 /* @group Forms */
 
-.page-admin-structure-views #content .form-submit,
-.page-admin-structure-views #content a.button {
+.views-admin .form-submit,
+.views-admin a.button {
   margin-left: 0;
 }
 
@@ -14,7 +14,7 @@
 
 /* @group Lists */
 
-.page-admin-structure-views #content .links li {
+.views-admin .links li {
   padding-left: 0;
 }
 
@@ -22,7 +22,7 @@
 
 /* @group Attachments */
 
-.page-admin-structure-views #content .views-displays .secondary {
+.views-displays .secondary {
   text-align: right;
 }
 

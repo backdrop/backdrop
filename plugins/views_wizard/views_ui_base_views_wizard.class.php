@@ -50,10 +50,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $this->base_table = $plugin['base_table'];
     $default = $this->filter_defaults;
 
-    foreach ($plugin['filters'] as $name => $info) {
-      $default['id'] = $name;
-      $plugin['filters'][$name] = $info + $default;
+    if (isset($plugin['filters'])) {
+      foreach ($plugin['filters'] as $name => $info) {
+        $default['id'] = $name;
+        $plugin['filters'][$name] = $info + $default;
+      }
     }
+
     $this->plugin = $plugin;
 
     $entities = entity_get_info();
@@ -247,9 +250,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       }
       $form['displays']['show']['type'] = array(
         '#type' => 'select',
-        '#title' => t('Type'),
+        '#title' => t('of type'),
         '#options' => $options,
         '#default_value' => 'all',
+        '#ajax' => array(
+          'callback' => 'views_ui_add_form_update',
+          'wrapper' => 'edit-view-displays-wrapper',
+        ),
       );
     }
 

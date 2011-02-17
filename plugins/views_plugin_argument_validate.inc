@@ -52,7 +52,7 @@ class views_plugin_argument_validate extends views_plugin {
   /**
    * Provide the default form form for submitting options
    */
-  function options_submit(&$form, &$form_state) { }
+  function options_submit(&$form, &$form_state, &$options = array()) { }
 
   /**
    * Convert options from the older style.

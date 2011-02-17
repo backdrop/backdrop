@@ -67,7 +67,7 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration'));
     $this->drupalLogin($admin_user);
 
-    $this->drupalGet("admin/structure/views/edit/$view->name");
+    $this->drupalGet("admin/structure/views/view/$view->name/edit");
     $this->assertNoText('-translated', 'Take sure that no strings get\'s translated in the ui.');
   }
 
