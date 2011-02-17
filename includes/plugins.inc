@@ -290,6 +290,7 @@ function views_views_plugins() {
       ),
       'full' => array(
         'title' => t('Paged output, full pager'),
+        'short title' => t('Full'),
         'help' => t('Paged output, full Drupal style'),
         'handler' => 'views_plugin_pager_full',
         'help topic' => 'pager-full',
@@ -297,6 +298,7 @@ function views_views_plugins() {
       ),
       'mini' => array(
         'title' => t('Paged output, mini pager'),
+        'short title' => t('Mini'),
         'help' => t('Use the mini pager output.'),
         'handler' => 'views_plugin_pager_mini',
         'help topic' => 'pager-mini',
@@ -498,6 +500,9 @@ class views_plugin extends views_object {
    * This appears on the ui beside each plugin and beside the settings link.
    */
   function plugin_title() {
+    if (isset($this->definition['short title'])) {
+      return check_plain($this->definition['short title']);
+    }
     return check_plain($this->definition['title']);
   }
 }
