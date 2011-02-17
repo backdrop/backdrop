@@ -34,7 +34,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $edit = array(
       'pager_options[items_per_page]' => 20,
     );
-    $this->drupalPost('admin/structure/views/nojs/display/frontpage/default/pager_options', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/frontpage/default/pager_options', $edit, t('Apply'));
     $this->assertText('20 items');
 
     // Change type and check whether the type is new type is stored.
@@ -42,7 +42,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $edit = array(
       'pager[type]' => 'mini',
     );
-    $this->drupalPost('admin/structure/views/nojs/display/frontpage/default/pager', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/frontpage/default/pager', $edit, t('Apply'));
     $this->drupalGet('admin/structure/views/edit/frontpage');
     $this->assertText('Mini pager', 'Changed pager plugin, should change some text');
 
@@ -57,14 +57,14 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $edit = array(
       'pager[type]' => 'full',
     );
-    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager', $edit, t('Apply'));
     $this->drupalGet('admin/structure/views/edit/test_store_pager_settings');
     $this->assertText('Paged');
 
     $edit = array(
       'pager_options[items_per_page]' => 20,
     );
-    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager_options', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager_options', $edit, t('Apply'));
     $this->assertText('20 items');
 
     // add new display and test the settings again, by override it.
@@ -78,14 +78,14 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $edit = array(
       'pager[type]' => 'mini',
     );
-    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/page_1/pager', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/page_1/pager', $edit, t('Apply'));
     $this->drupalGet('admin/structure/views/edit/test_store_pager_settings');
     $this->assertText('Mini pager', 'Changed pager plugin, should change some text');
 
     $edit = array(
       'pager_options[items_per_page]' => 10,
     );
-    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager_options', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager_options', $edit, t('Apply'));
     $this->assertText('20 items');
 
   }
