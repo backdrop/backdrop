@@ -1132,10 +1132,8 @@ class views_plugin_display extends views_plugin {
       // default to the no cache control plugin.
       $exposed_form_plugin = views_get_plugin('exposed_form', 'basic');
     }
-    dsm($exposed_form_plugin->plugin_title());
 
     $exposed_form_str = $exposed_form_plugin->summary_title();
-    dsm($exposed_form_str);
 
     $options['exposed_form'] = array(
       'category' => 'exposed',
