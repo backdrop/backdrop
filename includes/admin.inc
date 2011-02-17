@@ -520,16 +520,8 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
  */
 function theme_views_ui_view_info($variables) {
   $view = $variables['view'];
-  if (!empty($view->human_name)) {
-    $title = $view->human_name;
-  }
-  else {
-    $title = $view->get_title();
-    if (empty($title)) {
-      $title = $view->name;
-    }
-  }
-
+  $title = $view->get_human_name();
+  
   $displays = _views_ui_get_displays_list($view);
   $displays = empty($displays) ? t('None') : format_plural(count($displays), 'Display', 'Displays') . ': ' . '<em>' . implode(', ', $displays) . '</em>';
 
@@ -594,7 +586,7 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
  * Page title callback for the Edit View page.
  */
 function views_ui_edit_page_title($view) {
-  return $view->get_title();
+  return $view->get_human_name();
 }
 
 /**
@@ -706,7 +698,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => t('Cancel'),
+    '#value' => t('Undo changes'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
     '#access' => !empty($view->changed),
   );
@@ -780,6 +772,21 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       ),
     ),
   );
+  if ($view->type != t('Default')) {
+    if ($view->type == t('Overridden')) {
+      $form['displays']['top']['extra_actions']['#links']['revert'] = array(
+        'title' => t('revert'),
+        'href' => "admin/structure/views/view/$view->name/revert",
+        'query' => drupal_get_destination(),
+      );
+    }
+    else {
+      $form['displays']['top']['extra_actions']['#links']['delete'] = array(
+        'title' => t('delete'),
+        'href' => "admin/structure/views/view/$view->name/delete",
+      );
+    }
+  }
   // The rest requires a display to be selected.
   if ($display_id) {
     $form_state['display_id'] = $display_id;
@@ -1492,19 +1499,19 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
       $rearrange_text = t('And/Or');
       // TODO: Add another class to have another symbol for filter rearrange.
-      $class = 'views-button-rearrange';
+      $class = 'icon compact rearrange';
       break;
     default:
       $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
       $rearrange_text = t('Sort');
-      $class = 'views-button-rearrange';
+      $class = 'icon compact rearrange';
   }
 
   if (count($display->handler->get_handlers($type)) > 1) {
     $build['#rearrange'] = l('<span>' . $rearrange_text . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
   }
-  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
-  $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
+  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
+  $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
 
   if (!$display->handler->is_default_display()) {
     if (!$display->handler->is_defaulted($types[$type]['plural'])) {

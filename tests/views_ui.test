@@ -173,7 +173,7 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
 
     // It should not be possible to revert the view yet.
     $this->assertNoLink(t('Revert'));
-    $revert_href = 'admin/structure/views/view/frontpage/delete';
+    $revert_href = 'admin/structure/views/view/frontpage/revert';
     $this->assertNoLinkByHref($revert_href);
 
     // Edit the view and change the title. Make sure that the new title is
