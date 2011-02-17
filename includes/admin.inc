@@ -501,7 +501,7 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
 function theme_views_ui_view_info($variables) {
   $view = $variables['view'];
   $title = $view->get_human_name();
-  
+
   $displays = _views_ui_get_displays_list($view);
   $displays = empty($displays) ? t('None') : format_plural(count($displays), 'Display', 'Displays') . ': ' . '<em>' . implode(', ', $displays) . '</em>';
 
@@ -4161,20 +4161,13 @@ function views_ui_autocomplete_tag($string = '') {
   $matches = array();
   // get matches from default views:
   views_include('view');
-  $views = views_discover_default_views();
+  $views = views_get_all_views();
   foreach ($views as $view) {
     if (!empty($view->tag) && strpos($view->tag, $string) === 0) {
       $matches[$view->tag] = $view->tag;
-    }
-  }
-
-  $count = 10 - count($matches);
-  if ($string) {
-    $result = db_query_range("SELECT DISTINCT tag FROM {views_view} WHERE LOWER(tag) LIKE LOWER(:tag)",
-      0, $count,
-      array(':tag' => $string . '%'));
-    foreach ($result as $view) {
-      $matches[$view->tag] = check_plain($view->tag);
+      if (count($matches) >= 10) {
+        break;
+      }
     }
   }
 

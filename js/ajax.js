@@ -137,12 +137,6 @@
             return true;
           }
         }
-        else if ($(this).attr('action')) {
-          element_settings.url = $(this).attr('action');
-        }
-        else if (this.form && $(this.form).attr('action')) {
-          element_settings.url = $(this.form).attr('action');
-        }
 
         element_settings.wrapper = 'views-live-preview';
         element_settings.method = 'html';

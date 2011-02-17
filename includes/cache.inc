@@ -15,13 +15,6 @@ function _views_include_handlers() {
 }
 
 /**
- * Load default views files on behalf of modules.
- */
-function _views_include_default_views() {
-  views_module_include('views_default.inc');
-}
-
-/**
  * Fetch Views' data from the cache
  */
 function _views_fetch_data($table = NULL, $reset = FALSE) {
@@ -87,68 +80,6 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) 
 
   // Return an empty array if there is no match.
   return array();
-}
-
-/**
- * Scan all modules for default views and rebuild the default views cache.
- *
- * @return An associative array of all known default views.
- */
-function _views_discover_default_views($reset = FALSE) {
-  static $cache = NULL;
-
-  if (!isset($cache) || $reset) {
-    $index = views_cache_get('views_default_views_index', TRUE);
-
-    // Retrieve each cached default view
-    if (!$reset && isset($index->data) && is_array($index->data)) {
-      $cache = array();
-      foreach ($index->data as $view_name) {
-        $data = views_cache_get('views_default:' . $view_name, TRUE);
-        if (isset($data->data) && is_object($data->data)) {
-          $cache[$view_name] = $data->data;
-        }
-      }
-    }
-    // If missing index, rebuild the cache
-    else {
-      views_include_default_views();
-      $cache = array();
-
-      foreach (module_implements('views_default_views') as $module) {
-        $results = call_user_func($module . "_views_default_views");
-        if (!empty($results) && is_array($results)) {
-          foreach($results as $name => $view) {
-            // Only views with a sufficiently high api version are eligible.
-            if (!empty($view->api_version) && $view->api_version >= 2) {
-              // Do not cache dead handlers.
-              $view->destroy();
-              if (!isset($cache[$name])) {
-                $cache[$name] = $view;
-              }
-              else {
-                watchdog('view', "View name '@name' is already taken", array('@name' => $name), WATCHDOG_ERROR);
-              }
-            }
-          }
-        }
-      }
-
-      // Allow modules to modify default views before they are cached.
-      drupal_alter('views_default_views', $cache);
-
-      // Cache the index
-      $index = array_keys($cache);
-      views_cache_set('views_default_views_index', $index, TRUE);
-
-      // Cache each view
-      foreach ($cache as $name => $view) {
-        views_cache_set('views_default:' . $name, $view, TRUE);
-      }
-    }
-  }
-
-  return $cache;
 }
 
 /**
