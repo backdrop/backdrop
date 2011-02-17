@@ -636,11 +636,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    */
   function validate($form, &$form_state) {
     $view = $this->instantiate_view($form, $form_state);
-    $errors = $view->validate();
-    if (!is_array($errors) || empty($errors)) {
-      $this->set_validated_view($form, $form_state, $view);
-      return array();
-    }
+    // The default wizard can't provide any good validation.
+    // We can't call view::validate because it will fails in general.
+    $errors = array();
     return $errors;
   }
 
