@@ -2814,7 +2814,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
     ),
     '#default_value' => $groups['operator'],
     '#attributes' => array(
-      'class' => 'warning-on-change',
+      'class' => array('warning-on-change'),
     ),
     '#title' => t('Operator to use on all groups'),
     '#description' => t('Either "group 0 AND group 1 AND group 2" or "group 0 OR group 1 OR group 2", etc'),
@@ -2842,6 +2842,10 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
       $form['remove_groups'][$id] = array(
         '#type' => 'submit',
         '#value' => t('Remove group @group', array('@group' => $id)),
+        '#id' => "views-remove-group-$id",
+        '#attributes' => array(
+          'class' => array('views-remove-group'),
+        ),
         '#group' => $id,
       );
     }
@@ -2918,7 +2922,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_rearrange_filter_form');
   $form['buttons']['add_group'] = array(
     '#type' => 'submit',
-    '#value' => t('Add new group'),
+    '#value' => t('Create new filter group'),
     '#id' => 'views-add-group',
     '#group' => 'add',
   );
@@ -2950,10 +2954,16 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
       $row[] = array('class' => array('group', 'group-title'), 'data' => '<span>' . $form['#group_options'][$group_id] . '</span>', 'colspan' => 4);
       $rows[] = array('class' => array('views-group-title'), 'data' => $row, 'id' => 'views-group-title-' . $group_id);
 
-      // Row which will only appear if the group has nothing in it:
+      // Row which will only appear if the group has nothing in it.
       $row = array();
       $class = 'group-' . (count($contents) ? 'populated' : 'empty');
       $instructions = '<span>' . t('No filters have been added.') . '</span> <span class="js-only">' . t('Drag to add filters.') . '</span>';
+      // When JavaScript is enabled, the button for removing the group (if it's
+      // present) should be hidden, since it will be replaced by a link on the
+      // client side.
+      if (!empty($form['remove_groups'][$group_id]['#type']) && $form['remove_groups'][$group_id]['#type'] == 'submit') {
+        $form['remove_groups'][$group_id]['#attributes']['class'][] = 'js-hide';
+      }
       $row[] = array('colspan' => 5, 'data' => $instructions . drupal_render($form['remove_groups'][$group_id]));
       $rows[] = array('class' => array("group-message", "group-$group_id-message", $class), 'data' => $row, 'id' => 'views-group-' . $group_id);
     }
@@ -3003,9 +3013,14 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
   drupal_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
   $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange'))));
   $output .= '</div>';
+
+  // When JavaScript is enabled, the button for adding a new group should be
+  // hidden, since it will be replaced by a link on the client side.
+  $form['buttons']['add_group']['#attributes']['class'][] = 'js-hide';
+
+  // Render the rest of the form and return.
   $output .= drupal_render_children($form);
   return $output;
-
 }
 
 /**
