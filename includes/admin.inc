@@ -1182,6 +1182,7 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   $variables['title'] = $element['#title'];
   $variables['overridden'] = !empty($element['#overridden']);
   $variables['rearrange'] = !empty($element['#rearrange']) ? $element['#rearrange'] : '';
+  $variables['delete'] = !empty($element['#delete']) ? $element['#delete'] : '';
   $variables['add'] = !empty($element['#add']) ? $element['#add'] : '';
 }
 
@@ -1471,7 +1472,8 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   if (count($display->handler->get_handlers($type)) > 1) {
     $build['#rearrange'] = l('<span>' . t('Rearrange') . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
   }
-  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => true));
+  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
+  $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
 
   if (!$display->handler->is_default_display()) {
     if (!$display->handler->is_defaulted($types[$type]['plural'])) {
@@ -1926,7 +1928,7 @@ function views_ui_ajax_forms($key = NULL) {
       'form_id' => 'views_ui_rearrange_form',
       'args' => array('type'),
     ),
-    'item-delete' => array(
+    'delete-item' => array(
       'form_id' => 'views_ui_item_delete_form',
       'args' => array('type'),
     ),
@@ -3182,6 +3184,38 @@ function views_ui_item_delete_form($form, &$form_state) {
 
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_item_delete_form');
   return $form;
+}
+
+/**
+ * Submit handler for delete form
+ */
+function views_ui_item_delete_form_submit($form, &$form_state) {
+  $types = views_object_types();
+  $display = &$form_state['view']->display[$form_state['display_id']];
+
+  $old_fields = $display->handler->get_option($types[$form_state['type']]['plural']);
+  $new_fields = $order = array();
+
+  // Make an array with the weights
+  foreach ($form_state['values'] as $field => $info) {
+    // add each value that is a field, but only if
+    // it has had its 'removed' checkbox checked.
+    if (is_array($info) && empty($info['removed'])) {
+      $order[$field] = $field;
+    }
+  }
+
+  // Sort the array
+  asort($order);
+
+  // Create a new list of fields in the new order.
+  foreach (array_keys($order) as $field) {
+    $new_fields[$field] = $old_fields[$field];
+  }
+  $display->handler->set_option($types[$form_state['type']]['plural'], $new_fields);
+
+  // Store in cache
+  views_ui_cache_set($form_state['view']);
 }
 
 /**

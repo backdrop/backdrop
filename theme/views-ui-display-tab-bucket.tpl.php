@@ -17,6 +17,11 @@
       <?php print $add; ?>
     </li>
     <?php endif; ?>
+    <?php if ($delete) : ?>
+    <li>
+      <?php print $delete; ?>
+    </li>
+    <?php endif; ?>
   </ul>
   <h3><?php print $title; ?></h3>
   <?php print $content; ?>
