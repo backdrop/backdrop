@@ -85,7 +85,7 @@ function views_ui_menu() {
     'title' => 'Analyze',
     'page callback' => 'views_ui_analyze_view',
     'page arguments' => array(FALSE, 4),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
   ) + $base;
 
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
