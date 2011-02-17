@@ -81,12 +81,15 @@ class views_handler_sort extends views_handler {
     $form['expose_button'] = array(
       '#prefix' => '<div class="views-expose clearfix">',
       '#suffix' => '</div>',
+      // Should always come first
+      '#weight' => -1000,
     );
     if (empty($this->options['exposed'])) {
       $form['expose_button']['markup'] = array(
         '#markup' => '<div class="description exposed-description" style="float: left; margin-right:10px">' . t('This sort is not exposed. Expose it to allow the users to change it.') . '</div>',
       );
       $form['expose_button']['button'] = array(
+        '#limit_validation_errors' => array(),
         '#type' => 'submit',
         '#value' => t('Expose filter'),
         '#submit' => array('views_ui_config_item_form_expose'),
@@ -97,6 +100,7 @@ class views_handler_sort extends views_handler {
         '#markup' => '<div class="description exposed-description">' . t('This sort is exposed. If you hide it, users will not be able to change it.') . '</div>',
       );
       $form['expose_button']['button'] = array(
+        '#limit_validation_errors' => array(),
         '#type' => 'submit',
         '#value' => t('Hide filter'),
         '#submit' => array('views_ui_config_item_form_expose'),
@@ -156,17 +160,21 @@ class views_handler_sort extends views_handler {
   }
 
   function expose_form(&$form, &$form_state) {
+    // #flatten will move everything from $form['expose'][$key] to $form[$key]
+    // prior to rendering. That's why the pre_render for it needs to run first,
+    // so that when the next pre_render (the one for fieldsets) runs, it gets
+    // the flattened data.
+    array_unshift($form['#pre_render'], 'views_ui_pre_render_flatten_data');
+    $form['expose']['#flatten'] = TRUE;
+
     $form['expose']['label'] = array(
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['label'],
       '#title' => t('Label'),
       '#required' => TRUE,
       '#size' => 40,
+      '#weight' => -1,
    );
-    $form['expose']['order'] = array(
-      '#type' => 'value',
-      '#value' => 'ASC',
-     );
   }
 
   /**

@@ -21,29 +21,12 @@ function views_ui_menu() {
   );
 
   // Top-level Views module pages (not tied to a particular View).
-  $items['admin/structure/views'] = array(
-    'title' => 'Views',
-    'description' => 'Manage customized lists of content.',
-    'page callback' => 'views_ui_list_enabled_views',
-  ) + $base;
-  $items['admin/structure/views/list'] = array(
-    'title' => 'List',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => '-1'
-  ) + $base;
   $items['admin/structure/views/add'] = array(
     'title' => 'Add new view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
-  $items['admin/structure/views/templates'] = array(
-    'title' => 'Add view from template',
-    'page callback' => 'views_ui_list_disabled_views',
-    'type' => MENU_LOCAL_ACTION,
-  ) + $base;
-  // Copy the "Add view" item so that it will also appear as a local action on
-  // the view templates page.
-  $items['admin/structure/views/templates/add'] = $items['admin/structure/views/add'];
+
   $items['admin/structure/views/import'] = array(
     'title' => 'Import view from code',
     'page callback' => 'drupal_get_form',
@@ -51,6 +34,7 @@ function views_ui_menu() {
     'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
+
   $items['admin/structure/views/settings'] = array(
     'title' => 'Settings',
     'page callback' => 'drupal_get_form',
@@ -115,28 +99,11 @@ function views_ui_menu() {
     'page arguments' => array(4),
     'type' => MENU_CALLBACK,
   ) + $base;
+
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_break_lock_confirm', 4),
-    'type' => MENU_CALLBACK,
-  ) + $base;
-  $items['admin/structure/views/view/%views_ui_default/enable'] = array(
-    'title' => 'Enable',
-    'page callback' => 'views_ui_enable_page',
-    'page arguments' => array(4),
-    'type' => MENU_CALLBACK,
-  ) + $base;
-  $items['admin/structure/views/view/%views_ui_default/disable'] = array(
-    'title' => 'Disable',
-    'page callback' => 'views_ui_disable_page',
-    'page arguments' => array(4),
-    'type' => MENU_CALLBACK,
-  ) + $base;
-  $items['admin/structure/views/view/%views_ui_cache/delete'] = array(
-    'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_delete_confirm', 4),
     'type' => MENU_CALLBACK,
   ) + $base;
 
@@ -269,7 +236,7 @@ function views_ui_theme() {
 
     // list views
     'views_ui_view_info' => array(
-      'variables' => array('title' => '', 'paths' => array(), 'displays' => array()),
+      'variables' => array('view' => NULL, 'base' => NULL),
       'file' => "includes/admin.inc",
     ),
 
@@ -560,7 +527,7 @@ function views_ui_view_preview_section_rows_links($view) {
  * Views UI provides wizard plugins on behalf of core base tables.
  */
 function views_ui_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'views_ui') {
+  if ($module == 'views_ui' || ($module == 'ctools' && $plugin == 'export_ui')) {
     return 'plugins/' . $plugin;
   }
 }
@@ -761,3 +728,65 @@ function views_ui_ajax_get_form($form_id) {
     return $callback($form, $form_state);
   }
 }
+// @todo move these when we can
+
+
+/**
+ * Helper function to get a list of paths assigned to a view.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of links to this view's display paths.
+ */
+function _views_ui_get_paths($view) {
+  $all_paths = array();
+  if (empty($view->display)) {
+    $all_paths[] = t('Edit this view to add a display.');
+  }
+  else {
+    $view->init_display();   // Make sure all the handlers are set up
+    foreach ($view->display as $display) {
+      if (!empty($display->handler) && $display->handler->has_path()) {
+        $one_path = $display->handler->get_option('path');
+        if (empty($path_sort)) {
+          $path_sort = strtolower($one_path);
+        }
+        if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
+          $all_paths[] = l($one_path, $one_path);
+        }
+        else {
+          $all_paths[] = check_plain($one_path);
+        }
+      }
+    }
+  }
+
+  return array_unique($all_paths);
+}
+
+/**
+ * Helper function to get a list of displays included in a view.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of display types that this view includes.
+ */
+function _views_ui_get_displays_list($view) {
+  $displays = array();
+  foreach ($view->display as $display) {
+    if (!empty($display->handler->definition['admin'])) {
+      $displays[$display->handler->definition['admin']] = TRUE;
+    }
+  }
+
+  if ($displays) {
+    ksort($displays);
+    $displays = array_keys($displays);
+  }
+  return $displays;
+}
+

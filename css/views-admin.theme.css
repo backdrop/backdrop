@@ -2,7 +2,7 @@
  * The .theme.css file is intended to contain presentation declarations including
  * images, borders, colors, and fonts.
  */
-  
+
 /* @group Reset */
 
 .page-admin-structure-views #content .links {
@@ -79,7 +79,7 @@
 .page-admin-structure-views #content ul.actions .views-button-rearrange:active {
   background-position: left -134px; /* LTR */
 }
- 
+
 .page-admin-structure-views #content .views-displays .icon-add {
   background-position: left -3px; /* LTR */
 }
@@ -200,7 +200,7 @@
 /* @end */
 
 /* @group Attachment details tabs
- * 
+ *
  * The tabs that switch between sections
  */
 
@@ -299,18 +299,23 @@
  *
  * The columns that contain the option buckets e.g. Format and Basic Settings
  */
- 
+
  .page-admin-structure-views #content .views-display-columns > * + * {
    margin-top: 0;
  }
- 
+
  /* @end */
 
 /* @group Auto preview
  *
  * The auto-preview checkbox line. This may have more stuff added to it.
  */
- 
+
+.page-admin-structure-views #content input.arguments-preview {
+  margin-left: 10px;
+  margin-right: -5px;
+}
+
 .page-admin-structure-views #content div.form-item-displays-live-preview {
   text-align: right; /* LTR */
   margin: 0 12px;
@@ -336,7 +341,7 @@
  * These are the individual "buckets," or boxes, inside the three columns in the
  * attachment details section.
  */
- 
+
 .page-admin-structure-views #content .views-ui-display-tab-bucket {
   border: 1px solid #f3f3f3;
   line-height: 20px;
@@ -380,7 +385,7 @@
  *
  * This is each row within one of the "boxes."
  */
- 
+
 .page-admin-structure-views #content .views-ui-display-tab-bucket .views-display-setting {
   color: #666666;
   font-size: 12px;
@@ -406,7 +411,7 @@
  *
  * The preview controls and the preview pane
  */
- 
+
 .page-admin-structure-views #edit-displays-preview-controls .fieldset-wrapper > * {
   float: left;
 }
@@ -438,14 +443,14 @@
 .page-admin-structure-views #edit-displays-preview-controls .form-type-textfield label ~ * {
   margin-left: 10em;
 }
- 
+
 /* @end */
 
 /* @group Modal dialog box
  *
  * The contents of the popup dialog on the views edit form.
  */
- 
+
 .page-admin-structure-views .views-ui-dialog {
   padding: 0;
 }
@@ -542,7 +547,7 @@
 
 /* @group Configure filter criteria */
 
-/* @todo the width and border info could be moved into a more generic class */ 
+/* @todo the width and border info could be moved into a more generic class */
 #edit-options-value {
   border-color: #CCCCCC;
   border-style: solid;

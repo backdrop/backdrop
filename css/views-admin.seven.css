@@ -47,6 +47,11 @@
   margin-right: 1em;
 }
 
+/* Override for filter button on the vies list screen */
+.page-admin-structure-views #ctools-export-ui-list-form .form-submit {
+  margin-top: 1.3em;
+}
+
 .page-admin-structure-views #content .form-item {
   margin-bottom: 0;
   padding-bottom: 0;

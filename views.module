@@ -133,7 +133,7 @@ function views_theme($existing, $type, $theme, $path) {
  *   The existing cache of theme hooks to test against.
  * @param $path
  *   The path to search.
- * 
+ *
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {
@@ -1128,6 +1128,68 @@ function views_get_view($name, $reset = FALSE) {
   return $view->clone_view();
 }
 
+/**
+ * Export callback to load the view subrecords, which are the displays.
+ */
+function views_load_display_records(&$views) {
+  // Get vids from the views.
+  $names = array();
+  foreach ($views as $view) {
+    if (empty($view->display)) {
+      $names[$view->vid] = $view->name;
+    }
+  }
+
+  if (empty($names)) {
+    return;
+  }
+
+  foreach (view::db_objects() as $key) {
+    $object_name = "views_$key";
+    $result = db_query("SELECT * FROM {{$object_name}} WHERE vid IN (:vids) ORDER BY vid, position",
+      array(':vids' => array_keys($names)));
+
+    foreach ($result as $data) {
+      $object = new $object_name(FALSE);
+      $object->load_row($data);
+
+      // Because it can get complicated with this much indirection,
+      // make a shortcut reference.
+      $location = &$views[$names[$object->vid]]->$key;
+
+      // If we have a basic id field, load the item onto the view based on
+      // this ID, otherwise push it on.
+      if (!empty($object->id)) {
+        $location[$object->id] = $object;
+      }
+      else {
+        $location[] = $object;
+      }
+    }
+  }
+}
+
+/**
+ * Export CRUD callback to save a view.
+ */
+function views_save_view(&$view) {
+  return $view->save();
+}
+
+/**
+ * Export CRUD callback to export a view.
+ */
+function views_delete_view(&$view) {
+  return $view->delete(TRUE);
+}
+
+/**
+ * Export CRUD callback to export a view.
+ */
+function views_export_view(&$view, $indent = '') {
+  return $view->export($indent);
+}
+
 // ------------------------------------------------------------------
 // Views debug helper functions
 
@@ -1296,7 +1358,7 @@ function views_exposed_form_submit(&$form, &$form_state) {
   $exclude = array('q', 'submit', 'form_build_id', 'form_id', 'form_token', 'exposed_form_plugin', '');
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
   $exposed_form_plugin->exposed_form_submit($form, $form_state, $exclude);
-  
+
   foreach ($form_state['values'] as $key => $value) {
     if (!in_array($key, $exclude)) {
       $form_state['view']->exposed_raw_input[$key] = $value;
@@ -1622,3 +1684,56 @@ function views_trim_text($alter, $value) {
 
   return $value;
 }
+
+function views_views_default_hook_name() {
+  return 'views_api';
+}
+
+// Declare API compatibility on behalf of core modules:
+
+/**
+ * Implements hook_views_api().
+ *
+ * This one is used as the base to reduce errors when updating.
+ */
+function views_views_api() {
+  return array(
+    // in your modules do *not* use views_api_version()!!!
+    'api' => views_api_version(),
+    'path' => drupal_get_path('module', 'views') . '/modules',
+  );
+}
+
+function aggregator_views_api() { return views_views_api(); }
+
+function book_views_api() { return views_views_api(); }
+
+function comment_views_api() { return views_views_api(); }
+
+function locale_views_api() { return views_views_api(); }
+
+function field_views_api() { return views_views_api(); }
+
+function filter_views_api() { return views_views_api(); }
+
+function node_views_api() { return views_views_api(); }
+
+function poll_views_api() { return views_views_api(); }
+
+function profile_views_api() { return views_views_api(); }
+
+function search_views_api() { return views_views_api(); }
+
+function statistics_views_api() { return views_views_api(); }
+
+function system_views_api() { return views_views_api(); }
+
+function taxonomy_views_api() { return views_views_api(); }
+
+function translation_views_api() { return views_views_api(); }
+
+function upload_views_api() { return views_views_api(); }
+
+function user_views_api() { return views_views_api(); }
+
+function contact_views_api() { return views_views_api(); }

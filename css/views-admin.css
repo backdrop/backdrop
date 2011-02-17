@@ -333,3 +333,16 @@ html.js span.js-only {
 }
 
 /* @end */
+
+/* @group Inline lists */
+
+.views-ui-operations {
+  min-width: 22em;
+}
+
+.views-ui-name {
+  min-width: 15em;
+}
+
+/* @end */
+
