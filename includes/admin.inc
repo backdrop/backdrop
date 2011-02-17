@@ -500,16 +500,8 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
  */
 function theme_views_ui_view_info($variables) {
   $view = $variables['view'];
-  if (!empty($view->human_name)) {
-    $title = $view->human_name;
-  }
-  else {
-    $title = $view->get_title();
-    if (empty($title)) {
-      $title = $view->name;
-    }
-  }
-
+  $title = $view->get_human_name();
+  
   $displays = _views_ui_get_displays_list($view);
   $displays = empty($displays) ? t('None') : format_plural(count($displays), 'Display', 'Displays') . ': ' . '<em>' . implode(', ', $displays) . '</em>';
 
@@ -574,7 +566,7 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
  * Page title callback for the Edit View page.
  */
 function views_ui_edit_page_title($view) {
-  return $view->get_title();
+  return $view->get_human_name();
 }
 
 /**
@@ -1472,7 +1464,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
       $rearrange_text = t('And/Or');
       // TODO: Add another class to have another symbol for filter rearrange.
-      $class = 'views-button-rearrange icon';
+      $class = 'icon compact rearrange';
       break;
     default:
       $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
