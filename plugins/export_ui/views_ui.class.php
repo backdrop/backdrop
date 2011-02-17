@@ -45,31 +45,53 @@ class views_ui extends ctools_export_ui {
 
     parent::list_form($form, $form_state);
 
-    $form['top row']['#prefix'] = '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-top-row clearfix">';
-    $form['bottom row']['#prefix'] = '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-bottom-row clearfix">';
+    // ctools only has two rows. We want four.
+    // That's why we create our own structure.
+    $form['first row'] = array(
+      '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-first-row clearfix">',
+      '#suffix' => '</div>',
+      'search' => $form['top row']['search'],
+    );
+    $form['second row'] = array(
+      '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-second-row clearfix">',
+      '#suffix' => '</div>',
+      'storage' => $form['top row']['storage'],
+      'disabled' => $form['top row']['disabled'],
+    );
+    $form['third row'] = array(
+      '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-third-row clearfix">',
+      '#suffix' => '</div>',
+      'order' => $form['bottom row']['order'],
+      'sort' => $form['bottom row']['sort'],
+    );
+    $form['fourth row'] = array(
+      '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-fourth-row clearfix">',
+      '#suffix' => '</div>',
+      'submit' => $form['bottom row']['submit'],
+      'reset' => $form['bottom row']['reset'],
+    );
+    unset($form['top row']);
+    unset($form['bottom row']);
 
-    $form['bottom row']['sort']['#title'] = '';
-
-    $form['top row']['disabled']['#title'] = '';
-    $form['top row']['disabled']['#options']['all'] = t('All status');
-
-    $form['top row']['storage']['#title'] = '';
-    $form['top row']['storage']['#options'] = array(
+    // Modify the look and contents of existing form elements.
+    $form['second row']['storage']['#title'] = '';
+    $form['second row']['storage']['#options'] = array(
       'all' => t('All storage'),
       t('Normal') => t('In database'),
       t('Default') => t('In code'),
       t('Overridden') => t('Database overriding code'),
     );
+    $form['second row']['disabled']['#title'] = '';
+    $form['second row']['disabled']['#options']['all'] = t('All status');
+    $form['third row']['sort']['#title'] = '';
 
-    $form['top row']['search']['#weight'] = -10;
-    $form['top row']['search']['#size'] = 15;
-
+    // And finally, add our own.
     $this->bases = array();
     foreach (views_fetch_base_tables() as $table => $info) {
       $this->bases[$table] = $info['title'];
     }
 
-    $form['top row']['base'] = array(
+    $form['second row']['base'] = array(
       '#type' => 'select',
       '#options' => array_merge(array('all' => t('All types')), $this->bases),
       '#default_value' => 'all',
@@ -84,10 +106,9 @@ class views_ui extends ctools_export_ui {
         }
       }
     }
-
     asort($tags);
 
-    $form['top row']['tag'] = array(
+    $form['second row']['tag'] = array(
       '#type' => 'select',
       '#title' => t('Filter'),
       '#options' => array_merge(array('all' => t('All tags')), array('none' => t('No tags')), $tags),
@@ -101,16 +122,14 @@ class views_ui extends ctools_export_ui {
         $displays[$id] = $info['admin'];
       }
     }
-
     asort($displays);
 
-    $form['top row']['display'] = array(
+    $form['second row']['display'] = array(
       '#type' => 'select',
       '#options' => array_merge(array('all' => t('All displays')), $displays),
       '#default_value' => 'all',
       '#weight' => -1,
     );
-
   }
 
   function list_filter($form_state, $view) {
@@ -237,4 +256,3 @@ class views_ui extends ctools_export_ui {
   }
 
 }
-

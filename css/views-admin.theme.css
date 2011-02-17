@@ -143,6 +143,24 @@
   padding-left: 9px; /* LTR */
 }
 
+.views-ui-view-title {
+  font-weight: bold;
+}
+
+.ctools-export-ui-row {
+  margin-bottom: 5px;
+}
+
+.ctools-export-ui-row label {
+  display: block;
+  float: left;
+  width: 55px;
+}
+
+.ctools-export-ui-fourth-row input {
+  margin-top: 5px !important;
+}
+
 /* @end */
 
 /* @group Messages */
