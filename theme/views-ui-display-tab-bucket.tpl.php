@@ -10,15 +10,20 @@
     <div class="icon-linked"></div>
   <?php endif; ?>
   <?php if(!empty($add) || !empty($rearrange) || !empty($delete)) : ?>
-    <ul class="horizontal right actions links">
+    <ul class="horizontal right actions links drop-list">
+      <?php if ($add) : ?>
+      <li>
+        <?php print $add; ?>
+      </li>
+      <?php endif; ?>
       <?php if ($rearrange) : ?>
       <li>
         <?php print $rearrange; ?>
       </li>
       <?php endif; ?>
-      <?php if ($add) : ?>
+      <?php if ($delete) : ?>
       <li>
-        <?php print $add; ?>
+        <?php print $delete; ?>
       </li>
       <?php endif; ?>
     </ul>
