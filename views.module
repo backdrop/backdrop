@@ -1606,11 +1606,6 @@ function views_ctools_plugin_api_hook_name() {
   return 'views_api';
 }
 
-// @todo -- temporary -- remove in a few days.
-function views_views_default_hook_name() {
-  return 'views_api';
-}
-
 // Declare API compatibility on behalf of core modules:
 
 /**
