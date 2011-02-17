@@ -8,21 +8,21 @@
 /* @group Icons */
 
 .actions a,
-.icon,
-.icon-text {
+.views-admin .icon,
+.views-admin .icon-text {
   background-position: right top;
 }
 
 /* Targets any element with an icon -> text combo */
-.icon-text {
+.views-admin .icon-text {
   padding-right: 19px;
 }
 
-.icon-linked {
+.views-admin .icon-linked {
   background-position: right -153px;
 }
 
-.icon-unlinked {
+.views-admin .icon-unlinked {
   background-position: right -195px;
 }
 
@@ -67,7 +67,7 @@
 /* @group Forms */
 
 .form-submit + .form-submit,
-a.button + a.button {
+.views-admin a.button + a.button {
   margin-right: 1em;
 }
 

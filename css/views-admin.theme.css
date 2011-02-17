@@ -5,12 +5,12 @@
 
 /* @group Reset */
 
-.links {
+.views-admin .links {
   list-style: none outside none;
   margin: 0;
 }
 
-a:hover {
+.views-admin a:hover {
   text-decoration: none;
 }
 
@@ -18,8 +18,8 @@ a:hover {
 
 /* @group Icons */
 
-.icon,
-.icon-text {
+.views-admin .icon,
+.views-admin .icon-text {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
   background-position: left top; /* LTR */
@@ -27,7 +27,7 @@ a:hover {
 }
 
 /* Targets a <span> element. This assumes no visible text from the span. */
-.icon {
+.views-admin .icon {
   display: inline-block;
   height: 12px;
   position: relative;
@@ -35,15 +35,15 @@ a:hover {
 } 
 
 /* Targets any element with an icon -> text combo */
-.icon-text {
+.views-admin .icon-text {
   padding-left: 19px; /* LTR */
 }
 
-.icon-linked {
+.views-admin .icon-linked {
   background-position: left -153px; /* LTR */
 }
 
-.icon-unlinked {
+.views-admin .icon-unlinked {
   background-position: left -195px; /* LTR */
 }
 
@@ -67,12 +67,13 @@ fieldset.box-padding {
   border: none;
 }
 
-input.form-checkbox, input.form-radio {
+input.form-checkbox, 
+input.form-radio {
   vertical-align: baseline;
 }
 
 .form-submit + .form-submit,
-a.button + a.button {
+.views-admin a.button + a.button {
   margin-left: 1em; /* LTR */
 }
 
