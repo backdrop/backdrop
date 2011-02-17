@@ -2184,6 +2184,9 @@ function views_ui_analyze_view_button($form, &$form_state, $view) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Analyze'),
+    '#ajax' => array(
+      'path' => "admin/structure/views/ajax/analyze/$view->name",
+    ),
   );
 
   return $form;
