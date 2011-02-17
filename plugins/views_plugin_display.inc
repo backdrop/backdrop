@@ -947,8 +947,9 @@ class views_plugin_display extends views_plugin {
     );
 
     $style_plugin = views_fetch_plugin_data('style', $this->get_option('style_plugin'));
-    $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin['title'];
     $style_plugin_instance = $this->get_plugin('style');
+    $style_summary = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin_instance->summary_title();
+    $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin_instance->plugin_title();
 
     $style = '';
 
@@ -956,7 +957,7 @@ class views_plugin_display extends views_plugin {
       'category' => 'format',
       'title' => t('Format'),
       'value' => $style_title,
-      'setting' => $style_plugin_instance->plugin_title(),
+      'setting' => $style_summary,
       'desc' => t('Change the way content is formatted.'),
     );
 
@@ -967,14 +968,15 @@ class views_plugin_display extends views_plugin {
 
     if (!empty($style_plugin['uses row plugin'])) {
       $row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
-      $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin['title'];
       $row_plugin_instance = $this->get_plugin('row');
+      $row_summary = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin_instance->summary_title();
+      $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin_instance->plugin_title();
 
       $options['row_plugin'] = array(
         'category' => 'format',
         'title' => t('Show'),
         'value' => $row_title,
-        'setting' => $row_plugin_instance->plugin_title(),
+        'setting' => $row_summary,
         'desc' => t('Change the row plugin.'),
       );
       // This adds a 'Settings' link to the row_options setting if the row style has options.
@@ -1061,8 +1063,8 @@ class views_plugin_display extends views_plugin {
     $options['access'] = array(
       'category' => 'access',
       'title' => t('Access'),
-      'value' => $access_str,
-      'setting' => $access_plugin->plugin_title(),
+      'value' => $access_plugin->plugin_title(),
+      'setting' => $access_str,
       'desc' => t('Specify access control type for this display.'),
     );
 
@@ -1081,8 +1083,8 @@ class views_plugin_display extends views_plugin {
     $options['cache'] = array(
       'category' => 'other',
       'title' => t('Caching'),
-      'value' => $cache_str,
-      'setting' => $cache_plugin->plugin_title(),
+      'value' => $cache_plugin->plugin_title(),
+      'setting' => $cache_str,
       'desc' => t('Specify caching type for this display.'),
     );
 
@@ -1130,14 +1132,16 @@ class views_plugin_display extends views_plugin {
       // default to the no cache control plugin.
       $exposed_form_plugin = views_get_plugin('exposed_form', 'basic');
     }
+    dsm($exposed_form_plugin->plugin_title());
 
     $exposed_form_str = $exposed_form_plugin->summary_title();
+    dsm($exposed_form_str);
 
     $options['exposed_form'] = array(
       'category' => 'exposed',
       'title' => t('Exposed form style'),
-      'value' => $exposed_form_str,
-      'setting' => $exposed_form_plugin->plugin_title(),
+      'value' => $exposed_form_plugin->plugin_title(),
+      'setting' => $exposed_form_str,
       'desc' => t('Select the kind of exposed filter to use.'),
     );
 

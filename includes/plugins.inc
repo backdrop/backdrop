@@ -487,6 +487,12 @@ class views_plugin extends views_object {
   function validate() { return array(); }
 
   /**
+   * Returns the summary of the settings in the display.
+   */
+  function summary_title() {
+    return t('Settings');
+  }
+  /**
    * Return the human readable name of the display.
    *
    * This appears on the ui beside each plugin and beside the settings link.
