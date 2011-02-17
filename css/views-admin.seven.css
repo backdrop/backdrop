@@ -94,6 +94,11 @@ legend + .fieldset-wrapper {
 
 /* @group Rearrange filter criteria */
 
+#views-ui-rearrange-filter-form .action-links {
+  margin: 0;
+  padding: 0;
+}
+
 #views-ui-rearrange-filter-form table {
   border: medium none;
 }

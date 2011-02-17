@@ -403,6 +403,14 @@ Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
   // Keep a reference to all draggable rows within the table.
   this.draggableRows = $('.draggable', table);
 
+  // Keep a reference to the buttons for adding and removing filter groups.
+  this.addGroupButton = $('input#views-add-group');
+  this.removeGroupButtons = $('input.views-remove-group', table);
+
+  // Add links that duplicate the functionality of the (hidden) add and remove
+  // buttons.
+  this.insertAddRemoveFilterGroupLinks();
+
   // When there is a filter groups operator dropdown on the page, create
   // duplicates of the dropdown between each pair of filter groups.
   if (this.hasGroupOperator) {
@@ -422,7 +430,7 @@ Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
   this.redrawOperatorLabels();
   $('.views-group-title select', table)
     .once('views-rearrange-filter-handler')
-    .bind('click.views-rearrange-filter-handler', $.proxy(this, 'redrawOperatorLabels'));
+    .bind('change.views-rearrange-filter-handler', $.proxy(this, 'redrawOperatorLabels'));
 
   // Bind handlers so that when a "Remove" link is clicked, we:
   // - Update the rowspans of cells containing an operator dropdown (since they
@@ -434,6 +442,65 @@ Drupal.viewsUi.rearrangeFilterHandler = function (table, operator) {
     .once('views-rearrange-filter-handler')
     .bind('click.views-rearrange-filter-handler', $.proxy(this, 'updateRowspans'))
     .bind('click.views-rearrange-filter-handler', $.proxy(this, 'redrawOperatorLabels'));
+};
+
+/**
+ * Insert links that allow filter groups to be added and removed.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.insertAddRemoveFilterGroupLinks = function () {
+  var $ = jQuery;
+
+  // Insert a link for adding a new group at the top of the page, and make it
+  // match the action links styling used in a typical page.tpl.php. Note that
+  // Drupal does not provide a theme function for this markup, so this is the
+  // best we can do.
+  $('<ul class="action-links"><li><a id="views-add-group-link" href="#">' + this.addGroupButton.val() + '</a></li></ul>')
+    .prependTo(this.table.parent())
+    // When the link is clicked, dynamically click the hidden form button for
+    // adding a new filter group.
+    .once('views-rearrange-filter-handler')
+    .bind('click.views-rearrange-filter-handler', $.proxy(this, 'clickAddGroupButton'));
+
+  // Find each (visually hidden) button for removing a filter group and insert
+  // a link next to it.
+  var length = this.removeGroupButtons.length;
+  for (i = 0; i < length; i++) {
+    var $removeGroupButton = $(this.removeGroupButtons[i]);
+    var buttonId = $removeGroupButton.attr('id');
+    $('<a href="#" class="views-remove-group-link">' + Drupal.t('Remove group') + '</a>')
+      .insertBefore($removeGroupButton)
+      // When the link is clicked, dynamically click the corresponding form
+      // button.
+      .once('views-rearrange-filter-handler')
+      .bind('click.views-rearrange-filter-handler', {buttonId: buttonId}, $.proxy(this, 'clickRemoveGroupButton'));
+  }
+};
+
+/**
+ * Dynamically click the button that adds a new filter group.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.clickAddGroupButton = function () {
+  // Due to conflicts between Drupal core's AJAX system and the Views AJAX
+  // system, the only way to get this to work seems to be to trigger both the
+  // .mousedown() and .submit() events.
+  this.addGroupButton.mousedown();
+  this.addGroupButton.submit();
+  return false;
+};
+
+/**
+ * Dynamically click a button for removing a filter group.
+ *
+ * @param event
+ *   Event being triggered, with event.data.buttonId set to the ID of the
+ *   form button that should be clicked.
+ */
+Drupal.viewsUi.rearrangeFilterHandler.prototype.clickRemoveGroupButton = function (event) {
+  // For some reason, here we only need to trigger .submit(), unlike for
+  // Drupal.viewsUi.rearrangeFilterHandler.prototype.clickAddGroupButton()
+  // where we had to trigger .mousedown() also.
+  jQuery('input#' + event.data.buttonId, this.table).submit();
+  return false;
 };
 
 /**
