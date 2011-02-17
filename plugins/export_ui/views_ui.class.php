@@ -18,6 +18,18 @@ class views_ui extends ctools_export_ui {
     $plugin['menu']['items']['delete']['path'] = 'view/%ctools_export_ui/delete';
     $plugin['menu']['items']['revert']['path'] = 'view/%ctools_export_ui/revert';
 
+    $prefix_count = count(explode('/', $plugin['menu']['menu prefix']));
+    $plugin['menu']['items']['add-template'] = array(
+      'path' => 'template/%/add',
+      'title' => 'Add from template',
+      'page callback' => 'ctools_export_ui_switcher_page',
+      'page arguments' => array($plugin['name'], 'add_template', $prefix_count + 2),
+      'load arguments' => array($plugin['name']),
+      'access callback' => 'ctools_export_ui_task_access',
+      'access arguments' => array($plugin['name'], 'add_template', $prefix_count + 2),
+      'type' => MENU_CALLBACK,
+    );
+
     return parent::init($plugin);
   }
 
@@ -287,6 +299,29 @@ class views_ui extends ctools_export_ui {
     return $output;
   }
 
+  function add_template_page($js, $input, $name, $step = NULL) {
+    $templates = views_get_all_templates();
+
+    if (empty($templates[$name])) {
+      return MENU_NOT_FOUND;
+    }
+
+    $template = $templates[$name];
+
+    // The template description probably describes the template, not the
+    // view that will be created from it, but users aren't that likely to
+    // touch it.
+    if (!empty($template->description)) {
+      unset($template->description);
+    }
+
+    $template->is_template = TRUE;
+    $template->type = t('Default');
+
+    $output = $this->clone_page($js, $input, $template, $step);
+    drupal_set_title(t('Create view from template @template', array('@template' => $template->get_human_name())));
+    return $output;
+  }
 }
 
 /**
@@ -297,7 +332,16 @@ class views_ui extends ctools_export_ui {
 function views_ui_clone_form($form, &$form_state) {
   $counter = 1;
   do {
-    $name = format_plural($counter++, 'Clone of', 'Clone @count of') . ' ' . $form_state['original name'];
+    if (empty($form_state['item']->is_template)) {
+      $name = format_plural($counter, 'Clone of', 'Clone @count of') . ' ' . $form_state['original name'];
+    }
+    else {
+      $name = $form_state['original name'];
+      if ($counter > 1) {
+        $name .= ' ' . $counter;
+      }
+    }
+    $counter++;
     $machine_name = preg_replace('/[^a-z0-9_]+/', '_', drupal_strtolower($name));
   } while (ctools_export_crud_load($form_state['plugin']['schema'], $machine_name));
 
@@ -325,3 +369,5 @@ function views_ui_clone_form($form, &$form_state) {
 
   return $form;
 }
+
+

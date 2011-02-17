@@ -4453,3 +4453,25 @@ function views_ui_get_display_label($view, $display_id) {
   $title = $display_id == 'default' ? t('Master') : check_plain($view->display[$display_id]->display_title);
   return $title . $changed;
 }
+
+function views_ui_add_template_page() {
+  $templates = views_get_all_templates();
+
+  $header = array(
+    t('Name'),
+    t('Description'),
+    t('Operation'),
+  );
+
+  $rows = array();
+  foreach ($templates as $name => $template) {
+    $rows[] = array(
+      array('data' => check_plain($template->get_human_name())),
+      array('data' => check_plain($template->description)),
+      array('data' => l('add', 'admin/structure/views/template/' . $template->name . '/add')),
+    );
+  }
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows));
+  return $output;
+}

@@ -17,7 +17,7 @@ class ViewsExposedFormTest extends ViewsSqlTest {
     parent::setUp('views_ui');
     module_enable(array('views_ui'));
     // @TODO Figure out why it's required to clear the cache here.
-    views_module_include('views_default.inc', TRUE);
+    views_module_include('views_default', TRUE);
     views_get_all_views(TRUE);
     menu_rebuild();
   }
@@ -75,7 +75,7 @@ class ViewsExposedFormTest extends ViewsSqlTest {
     $edit['options[expose][identifier]'] = '';
     $this->drupalPost(NULL, $edit, t('Apply'));
     $this->assertText(t('The identifier is required if the filter is exposed.'));
-    
+
     $edit = array();
     $edit['options[expose][identifier]'] = 'value';
     $this->drupalPost(NULL, $edit, t('Apply'));

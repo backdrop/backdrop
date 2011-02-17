@@ -18,7 +18,7 @@ class ViewsAnalyzeTest extends viewsSqlTest {
     parent::setUp('views_ui');
     module_enable(array('views_ui'));
     // @TODO Figure out why it's required to clear the cache here.
-    views_module_include('views_default.inc', TRUE);
+    views_module_include('views_default', TRUE);
     views_get_all_views(TRUE);
     menu_rebuild();
 

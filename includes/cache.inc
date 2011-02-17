@@ -8,13 +8,6 @@
  */
 
 /**
- * Load views files on behalf of modules.
- */
-function _views_include_handlers() {
-  views_module_include('views.inc');
-}
-
-/**
  * Fetch Views' data from the cache
  */
 function _views_fetch_data($table = NULL, $reset = FALSE) {
