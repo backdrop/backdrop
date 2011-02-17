@@ -28,7 +28,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $this->drupalLogin($admin_user);
     // Test behaviour described in http://drupal.org/node/652712#comment-2354918.
 
-    $this->drupalGet('admin/structure/views/edit/frontpage');
+    $this->drupalGet('admin/structure/views/views/frontpage/edit');
 
 
     $edit = array(
@@ -43,7 +43,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
       'pager[type]' => 'mini',
     );
     $this->drupalPost('admin/structure/views/nojs/display/frontpage/default/pager', $edit, t('Apply'));
-    $this->drupalGet('admin/structure/views/edit/frontpage');
+    $this->drupalGet('admin/structure/views/view/frontpage/edit');
     $this->assertText('Mini pager', 'Changed pager plugin, should change some text');
 
     // Test behaviour described in http://drupal.org/node/652712#comment-2354400
@@ -51,14 +51,14 @@ class ViewsPagerTest extends DrupalWebTestCase {
     // Make it editable in the admin interface.
     $view->save();
 
-    $this->drupalGet('admin/structure/views/test_store_pager_settings');
+    $this->drupalGet('admin/structure/views/view/test_store_pager_settings/edit');
 
     $edit = array();
     $edit = array(
       'pager[type]' => 'full',
     );
     $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/default/pager', $edit, t('Apply'));
-    $this->drupalGet('admin/structure/views/edit/test_store_pager_settings');
+    $this->drupalGet('admin/structure/views/view/test_store_pager_settings/edit');
     $this->assertText('Paged');
 
     $edit = array(
@@ -72,14 +72,14 @@ class ViewsPagerTest extends DrupalWebTestCase {
       'display' => 'page',
     );
     // Add a display and override the pager settings.
-    $this->drupalPost('admin/structure/views/edit/test_store_pager_settings', $edit, t('Add display'));
+    $this->drupalPost('admin/structure/views/view/test_store_pager_settings/edit', $edit, t('Add display'));
     $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/page_1/pager', array(), t('Override'));
 
     $edit = array(
       'pager[type]' => 'mini',
     );
     $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/page_1/pager', $edit, t('Apply'));
-    $this->drupalGet('admin/structure/views/edit/test_store_pager_settings');
+    $this->drupalGet('admin/structure/views/view/test_store_pager_settings/edit');
     $this->assertText('Mini pager', 'Changed pager plugin, should change some text');
 
     $edit = array(

@@ -91,7 +91,7 @@ class views_handler_sort extends views_handler {
       $form['expose_button']['button'] = array(
         '#limit_validation_errors' => array(),
         '#type' => 'submit',
-        '#value' => t('Expose filter'),
+        '#value' => t('Expose sort'),
         '#submit' => array('views_ui_config_item_form_expose'),
       );
     }
@@ -102,7 +102,7 @@ class views_handler_sort extends views_handler {
       $form['expose_button']['button'] = array(
         '#limit_validation_errors' => array(),
         '#type' => 'submit',
-        '#value' => t('Hide filter'),
+        '#value' => t('Hide sort'),
         '#submit' => array('views_ui_config_item_form_expose'),
       );
     }
