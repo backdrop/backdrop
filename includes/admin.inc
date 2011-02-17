@@ -256,6 +256,7 @@ function views_ui_add_page() {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
+  ctools_include('dependent');
   $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';;
 
   $form['human_name'] = array(
@@ -275,11 +276,19 @@ function views_ui_add_form($form, &$form_state) {
     ),
     '#description' => t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
   );
+
+  $form['description_enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Description'),
+  );
   $form['description'] = array(
     '#type' => 'textfield',
-    '#title' => t('Description'),
     '#size' => 64,
     '#default_value' => !empty($form_state['view']) ? $form_state['view']->description : '',
+    '#process' => array('ctools_dependent_process'),
+    '#dependency' => array(
+      'edit-description-enable' => array(1)
+    ),
   );
 
   // Everything that can be updated by AJAX goes in here. It is triggered by
