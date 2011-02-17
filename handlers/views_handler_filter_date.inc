@@ -141,7 +141,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     // have a string if using offset.
     $placeholder1 = $this->placeholder();
     $placeholder2 = $this->placeholder();
-    $operator = strtoupper($operator);
+    $operator = strtoupper($this->operator);
     $this->query->add_where_expression($this->options['group'], "$field $operator $placeholder1 AND $placeholder2", array($placeholder1 => $a, $placeholder2 => $b));
   }
 
