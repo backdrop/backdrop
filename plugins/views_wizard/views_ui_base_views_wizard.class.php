@@ -241,7 +241,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // If the current base table support bundles and has more then one (like user).
     if (isset($entity_info['bundle keys']) && isset($entity_info['bundles'])) {
       // Get all bundles in a human readable name
-      $option = array();
+      $options = array('all' => t('All'));
       foreach ($entity_info['bundles'] as $type => $bundle) {
         $options[$type] = $bundle['label'];
       }
@@ -249,6 +249,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#type' => 'select',
         '#title' => t('Type'),
         '#options' => $options,
+        '#default_value' => 'all',
       );
     }
 
@@ -430,7 +431,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function default_display_filters_user($form, $form_state) {
     $filters = array();
 
-    if (!empty($form_state['values']['show']['type'])) {
+    if (!empty($form_state['values']['show']['type']) && $form_state['values']['show']['type'] != 'all') {
       $bundle_key = $this->entity_info['bundle keys']['bundle'];
       $filters[$bundle_key] = array(
         'id' => $bundle_key,
