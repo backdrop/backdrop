@@ -115,6 +115,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'select',
       '#options' => $style_options,
       '#default_value' => 'default',
+      '#ajax' => array(
+        'callback' => 'views_ui_add_form_update_style',
+        'wrapper' => 'edit-block-style-plugin',,
+      ),
     );
     $form['displays']['page']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
@@ -220,7 +224,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'select',
       '#options' => $style_options,
       '#default_value' => 'default',
+      '#ajax' => array(
+        'callback' => 'views_ui_add_form_update_style',
+        'wrapper' => 'edit-page-style-plugin',
+      ),
     );
+    $this->build_form_style($form, $form_state, 'block');
     $form['displays']['block']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
@@ -229,6 +238,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
 
     return $form;
+  }
+
+  /**
+   * Build the part of the form that builds the display format options.
+   */
+  protected function build_form_style(&$form, &$form_state, $type) {
+    if ($style = $form_state['values']['display'][$type]['options']['style_plugin']) {
+      $style_plugin = views_get_plugin('style', $style);
+      dsm($style_plugin);
+    }
   }
 
   /**

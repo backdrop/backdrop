@@ -370,13 +370,33 @@ function views_ui_show_nojs_submit($form, &$form_state) {
 }
 
 /**
- * Update the add view for via AJAX.
+ * Update the add view form via AJAX.
  *
  * @return
  *   The part of the form that has changed.
  */
 function views_ui_add_form_update($form, $form_state) {
   return $form['displays'];
+}
+
+/**
+ * Update the add view style form via AJAX.
+ *
+ * @return
+ *   The part of the form that has changed.
+ */
+function views_ui_add_form_update_style_page($form, $form_state) {
+  return $form['displays']['page']['options'];
+}
+
+/**
+ * Update the add view style form via AJAX.
+ *
+ * @return
+ *   The part of the form that has changed.
+ */
+function views_ui_add_form_update_style_block($form, $form_state) {
+  return $form['displays']['page']['options'];
 }
 
 /**
