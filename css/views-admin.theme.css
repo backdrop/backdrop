@@ -247,14 +247,25 @@ input.form-radio {
   border-bottom: 1px solid #CCCCCC;
   margin-bottom: 14px;
   padding: 8px 8px 6px; /* LTR */
+  position: relative;
 }
 
 .views-displays .views-extra-actions {
-  
+  position: absolute;
+  right: 10px; /* LTR */
+  top: 5px;
 }
 
-.views-displays .secondary > li + li {
+.views-displays .views-display-top li {
+  display: inline;
+}
+
+.views-displays .views-display-top ul > li + li {
   margin-left: 3px; /* LTR */
+}
+
+.views-displays .views-extra-actions li {
+  padding: 0 5px;
 }
 
 /* @end */
