@@ -66,6 +66,7 @@ Fix fieldsets in field handler.
 #957284: by dereine: Followup for filter_search fix.
 #1024586 by merlinofchaos, dereine: Provide a way to move old fields in views data. Additional move field-api data to it.
 #990554 by bojanz: Allow to show default values of fields.
+#1039460 by robertgarrigos: Rename drupal_set_content to drupal_add_region_content
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
