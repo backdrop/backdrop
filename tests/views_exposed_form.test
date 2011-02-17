@@ -63,12 +63,12 @@ class ViewsExposedFormTest extends ViewsSqlTest {
 
     $this->drupalGet('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/filter/type');
     // Be sure that the button is called exposed
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose filter'));
 
-    // Click the Expose button.
-    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/filter/type', $edit, t('Expose'));
+    // Click the Expose filter button.
+    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/filter/type', $edit, t('Expose filter'));
     // Check the label of the expose button
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide filter'));
 
     // Check the validations of the filter handler.
     $edit = array();
@@ -83,14 +83,14 @@ class ViewsExposedFormTest extends ViewsSqlTest {
 
     // Now check the sort criteria.
     $this->drupalGet('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created');
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose sort'));
     $this->assertNoFieldById('edit-options-expose-label', '', t('Take sure no label field is shown'));
 
-    // Click the Expose button.
+    // Click the Expose sort button.
     $edit = array();
-    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created', $edit, t('Expose'));
+    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created', $edit, t('Expose filter'));
     // Check the label of the expose button
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide sort'));
     $this->assertFieldById('edit-options-expose-label', '', t('Take sure a label field is shown'));
   }
 }
