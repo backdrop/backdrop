@@ -180,9 +180,17 @@
 
 .page-admin-structure-views #content .views-displays .secondary {
   background-color: #F9F9F9;
+}
+
+.page-admin-structure-views #content .views-displays .views-display-top {
+  background-color: #F9F9F9;
   border-bottom: 1px solid #CCCCCC;
   margin-bottom: 14px;
   padding: 8px 8px 6px; /* LTR */
+}
+
+.page-admin-structure-views #content .views-displays .views-extra-actions {
+  
 }
 
 .page-admin-structure-views #content .views-displays .secondary > li + li {
@@ -256,7 +264,8 @@
   border-width: 0 1px 1px;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list input.form-submit {
+.page-admin-structure-views #content .views-displays .secondary .action-list input.form-submit,
+.page-admin-structure-views #content input.form-submit {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
   -moz-border-radius: 0;

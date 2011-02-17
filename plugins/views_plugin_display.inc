@@ -919,13 +919,6 @@ class views_plugin_display extends views_plugin {
       );
     }
 
-    $options['display_title'] = array(
-      'category' => 'other',
-      'title' => t('Name'),
-      'value' => check_plain($this->display->display_title),
-      'desc' => t('Change the name of this display.'),
-    );
-
     $display_comment = drupal_substr($this->get_option('display_comment'), 0, 10);
     $options['display_comment'] = array(
       'category' => 'other',

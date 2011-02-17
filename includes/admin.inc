@@ -926,6 +926,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#suffix' => '</div>',
   );
 
+  $form['displays']['top']['#theme_wrappers'] = array('views_container');
+  $form['displays']['top']['#attributes']['class'] = array('views-display-top');
+
   // Determine the displays available for editing.
   if ($tabs = views_ui_edit_page_display_tabs($view)) {
     // If a display isn't specified, use the first one.
@@ -949,7 +952,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     }
     $tabs['#prefix'] = '<h2 class="element-invisible">' . t('Secondary tabs') . '</h2><ul class="tabs secondary">';
     $tabs['#suffix'] = '</ul>';
-    $form['displays']['tabs'] = $tabs;
+    $form['displays']['top']['tabs'] = $tabs;
   }
   elseif ($display_id) {
     return MENU_ACCESS_DENIED;
@@ -960,7 +963,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
   // Buttons for adding a new display.
   foreach (views_fetch_plugin_names('display') as $type => $label) {
-    $form['displays']['add_display'][$type] = array(
+    $form['displays']['top']['add_display'][$type] = array(
       '#type' => 'submit',
       '#value' => t('Add !display', array('!display' => $label)),
       '#limit_validation_errors' => array(),
@@ -969,6 +972,24 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
   }
 
+  $form['displays']['top']['extra_actions'] = array(
+    '#theme' => 'links',
+    '#attributes' => array('class' => 'views-extra-actions'),
+    '#links' => array(
+      'analyze' => array(
+        'title' => t('analyze'),
+        'href' => "admin/structure/views/view/$view->name/analyze",
+      ),
+      'clone' => array(
+        'title' => t('clone'),
+        'href' => "admin/structure/views/view/$view->name/clone",
+      ),
+      'export' => array(
+        'title' => t('export'),
+        'href' => "admin/structure/views/view/$view->name/export",
+      ),
+    ),
+  );
   // The rest requires a display to be selected.
   if ($display_id) {
     $form_state['display_id'] = $display_id;
@@ -1222,46 +1243,51 @@ function views_ui_get_display_tab_details($view, $display) {
     '#attributes' => array('class' => array('box-padding')),
   );
 
+  $build['top']['#theme_wrappers'] = array('views_container');
+  $build['top']['#attributes']['class'] = array('views-ui-display-tab-bucket');
   // The Delete and Duplicate buttons.
-  $build['actions'] = array(
+
+  // The area above the three columns.
+  $build['top']['display_title'] = array(
+    '#theme' => 'views_ui_display_tab_setting',
+    '#description' => t('Display name'),
+    '#link' => $display->handler->option_link(check_plain($display->display_title), 'display_title'),
+  );
+
+  $build['top']['actions'] = array(
     '#prefix' => '<div class="actions">',
     '#suffix' => '</div>',
   );
+
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   if (empty($display->deleted)) {
     if (empty($plugin['no remove'])) {
-      $build['actions']['delete'] = array(
+      $build['top']['actions']['delete'] = array(
         '#type' => 'submit',
-        '#value' => t('Delete'),
+        '#value' => t('delete'),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_delete_display'),
       );
     }
     // The master display cannot be cloned.
     if ($display->id != 'default') {
-      $build['actions']['duplicate'] = array(
+      $build['top']['actions']['duplicate'] = array(
         '#type' => 'submit',
-        '#value' => t('Duplicate'),
+        '#value' => t('duplicate'),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
       );
     }
   }
   else {
-    $build['actions']['undo_delete'] = array(
+    $build['top']['actions']['undo_delete'] = array(
       '#type' => 'submit',
-      '#value' => t('Undo delete'),
+      '#value' => t('undo delete'),
       '#limit_validation_errors' => array(),
       '#submit' => array('views_ui_edit_form_submit_undo_delete_display'),
     );
   }
 
-  // The area above the three columns.
-  $build['top']['display_name'] = array(
-    '#theme' => 'views_ui_display_tab_setting',
-    '#description' => t('Display name'),
-    '#link' => check_plain($display->display_title),
-  );
 
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
