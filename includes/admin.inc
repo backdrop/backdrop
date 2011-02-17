@@ -1472,7 +1472,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
       $rearrange_text = t('And/Or');
       // TODO: Add another class to have another symbol for filter rearrange.
-      $class = 'views-button-rearrange icon';
+      $class = 'icon compact rearrange';
       break;
     default:
       $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
