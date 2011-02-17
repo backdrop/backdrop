@@ -53,9 +53,7 @@
       -90deg,
       #ffffff 0px,
       #e8e8e8 100%);
-  
   background-repeat: no-repeat, repeat-y;
-  
   border: 1px solid #dddddd;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
@@ -436,6 +434,112 @@ div.form-item-displays-live-preview {
   margin-left: 3px; /* LTR */
   padding-left: 3px; /* LTR */
 }
+
+/* @group Drop list */
+
+html.js .views-ui-display-tab-bucket {
+  position: relative;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list {
+  background-color: #ffffff;
+  background-image:
+    -moz-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #efefef 100%);
+  background-image:
+    -webkit-gradient(
+      linear,
+      left top,
+      left bottom,
+      color-stop(0.0, rgba(255, 255, 255, 1.0)),
+      color-stop(1.0, rgba(242, 242, 242, 1.0))
+    );
+  background-image:
+    -webkit-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #efefef 100%);
+  border: 1px solid #D0D0D0;
+  -moz-border-radius: 7px 7px 7px 7px;
+  -webkit-border-radius: 7px 7px 7px 7px;
+  border-radius: 7px 7px 7px 7px;
+  font-size: 12px;
+  line-height: 1;
+  right: 5px;
+  padding: 2px 20px 2px 2px;
+  position: absolute;
+  top: 5px;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list .links {
+  margin-right: 0;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list .links li,
+html.js .views-ui-display-tab-bucket .drop-list .links a {
+  display: block;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list .links li {
+  line-height: 1.3333;
+  padding: 0 10px;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list .trigger {
+  -moz-border-radius-bottomright: 7px;
+  -moz-border-radius-topright: 7px;
+  -webkit-border-bottom-right-radius: 7px;
+  -webkit-border-top-right-radius: 7px;
+  border-bottom-right-radius: 7px;
+  border-top-right-radius: 7px;
+  border-left: 1px solid #dfdfdf;
+  bottom: 0;
+  height: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 17px;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list.open {
+  -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+  -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+  z-index: 100;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list.open li + li {
+  border-top: 1px solid #efefef;
+  margin-top: 4px;
+  padding-bottom: 0;
+  padding-top: 4px;
+}
+
+/**
+ * This createds the drop-list arrow and inherits the link color
+ */
+html.js .views-ui-display-tab-bucket .drop-list .trigger span {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 4px 4px 0;
+  left: 4pt;
+  position: absolute;
+  top: 0.75em;
+}
+
+html.js .views-ui-display-tab-bucket .drop-list.open .trigger span {
+  border-bottom: 4px solid;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  top: 0.5em;
+}
+
+/* @end */
 
 /* @end */
 

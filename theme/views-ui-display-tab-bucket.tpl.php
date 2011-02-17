@@ -10,7 +10,7 @@
     <div class="icon-linked"></div>
   <?php endif; ?>
   <?php if(!empty($add) || !empty($rearrange) || !empty($delete)) : ?>
-    <ul class="horizontal right actions links drop-list">
+    <ul class="horizontal right actions links">
       <?php if ($add) : ?>
       <li>
         <?php print $add; ?>
