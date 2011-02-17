@@ -678,7 +678,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => t('Cancel'),
+    '#value' => t('Undo changes'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
     '#access' => !empty($view->changed),
   );
