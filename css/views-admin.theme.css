@@ -265,7 +265,7 @@
 }
 
 .page-admin-structure-views #content .views-displays .secondary .action-list input.form-submit,
-.page-admin-structure-views #content input.form-submit {
+.page-admin-structure-views #content .views-display-tab input.form-submit {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
   -moz-border-radius: 0;
