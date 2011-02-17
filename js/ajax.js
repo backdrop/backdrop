@@ -62,7 +62,7 @@
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function(ajax, response, status) {
     if ($('input#edit-displays-live-preview').is(':checked')) {
-      $('#preview-submit').trigger('click');
+      $('#preview-submit').trigger('mousedown');
     }
   }
 
@@ -119,7 +119,7 @@
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });
 
-      $('div#views-live-preview form input[type=submit], div#views-live-preview a')
+      $('div#views-live-preview a')
         .once('views-ajax-processed').each(function () {
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
