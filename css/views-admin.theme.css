@@ -242,6 +242,10 @@ input.form-radio {
   margin-top: 0;
 }
 
+.form-item-description-enable label {
+  font-weight: bold;
+}
+
 #edit-view-displays-wrapper {
   margin-top: 27px;
 }
