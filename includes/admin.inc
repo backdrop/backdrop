@@ -4178,7 +4178,7 @@ function views_fetch_base_tables() {
       if (!empty($info['table']['base'])) {
         $tables[$table] = array(
           'title' => $info['table']['base']['title'],
-          'description' => $info['table']['base']['help'],
+          'description' => !empty($info['table']['base']['help']) ? $info['table']['base']['help'] : '',
           'weight' => !empty($info['table']['base']['weight']) ? $info['table']['base']['weight'] : 0,
         );
       }
