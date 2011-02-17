@@ -670,20 +670,30 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#markup' => t('Modify the display(s) of your view below or add new displays.'),
   );
 
-  $form['actions'] = array('#type' => 'actions', '#weight' => 0);
+  $form['actions'] = array(
+    '#type' => 'actions',
+    '#weight' => 0,
+  );
+
+  if (empty($view->changed)) {
+    $form['actions']['#attributes'] = array(
+      'class' => array(
+        'js-hide',
+      ),
+    );
+  }
+
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
     // Taken from the "old" UI. @TODO: Review and rename.
     '#validate' => array('views_ui_edit_view_form_validate'),
     '#submit' => array('views_ui_edit_view_form_submit'),
-    '#access' => !empty($view->changed),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Undo changes'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
-    '#access' => !empty($view->changed),
   );
 
   $form['displays'] = array(
@@ -2159,14 +2169,11 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
     }
     else {
       $output = array();
-      $output[] = views_ajax_command_enable_buttons();
       $output[] = views_ajax_command_dismiss_form();
+      $output[] = views_ajax_command_show_buttons();
       $output[] = views_ajax_command_trigger_preview();
     }
     views_ui_regenerate_tab($view, $output, $display_id);
-  }
-  elseif ($js) {
-    $output[] = views_ajax_command_disable_buttons();
   }
 
   return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
