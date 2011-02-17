@@ -18,7 +18,6 @@
 
 /* @group Icons */
 
-.page-admin-structure-views #content ul.actions a,
 .page-admin-structure-views #content .icon,
 .page-admin-structure-views #content .icon-text {
   background-attachment: scroll;
@@ -27,21 +26,13 @@
   background-repeat: no-repeat;
 }
 
-.page-admin-structure-views #content ul.actions a {
-  display: block;
-  height: 17px;
-  overflow: hidden;
-  text-indent: -9999px;
-  width: 17px;
-}
-
 /* Targets a <span> element. This assumes no visible text from the span. */
 .page-admin-structure-views #content .icon {
   display: inline-block;
   height: 12px;
   position: relative;
   width: 16px;
-}
+} 
 
 /* Targets any element with an icon -> text combo */
 .page-admin-structure-views #content .icon-text {
@@ -54,30 +45,6 @@
 
 .page-admin-structure-views #content .icon-unlinked {
   background-position: left -195px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add {
-  background-position: left -39px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange {
-  background-position: left -96px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add:hover {
-  background-position: left -58px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange:hover {
-  background-position: left -115px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-add:active {
-  background-position: left -77px; /* LTR */
-}
-
-.page-admin-structure-views #content ul.actions .views-button-rearrange:active {
-  background-position: left -134px; /* LTR */
 }
 
 .page-admin-structure-views #content .views-displays .icon-add {

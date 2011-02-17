@@ -7,14 +7,14 @@
 ?>
 <div class="<?php print $classes; ?>">
   <ul class="horizontal right actions links">
-    <?php if ($rearrange) : ?>
-    <li>
-      <?php print $rearrange; ?>
-    </li>
-    <?php endif; ?>
     <?php if ($add) : ?>
     <li>
       <?php print $add; ?>
+    </li>
+    <?php endif; ?>
+    <?php if ($rearrange) : ?>
+    <li>
+      <?php print $rearrange; ?>
     </li>
     <?php endif; ?>
     <?php if ($delete) : ?>
