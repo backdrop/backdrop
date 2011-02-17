@@ -670,12 +670,16 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['actions'] = array(
     '#type' => 'actions',
     '#weight' => 0,
-    '#attributes' => array(
-      'class' => array(
-        'js-hide'
-      )
-    )
   );
+
+  if (empty($view->changed)) {
+    $form['actions']['#attributes'] = array(
+      'class' => array(
+        'js-hide',
+      ),
+    );
+  }
+
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
