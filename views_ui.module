@@ -437,7 +437,9 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
  * Returns the HTML for a section of a View being previewed within the Views UI.
  */
 function theme_views_ui_view_preview_section($vars) {
-  return '<h1 class="views_ui_view_preview_section_title">' . $vars['links'] . $vars['title'] . '</h1>' . $vars['content'];
+  return '<h1>' . $vars['title'] . '</h1>'
+  . $vars['links']
+  . '<div>'. $vars['content'] . '</div>';
 }
 
 /**

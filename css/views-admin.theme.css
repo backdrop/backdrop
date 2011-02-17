@@ -807,6 +807,10 @@ html.js .views-ui-display-tab-bucket .drop-list.open .trigger span {
   margin: 0 12px;
 }
 
+#views-live-preview .view > * {
+  margin-top: 18px;
+}
+
 #views-live-preview a,
 #views-live-preview a:link,
 #views-live-preview a:visited {
