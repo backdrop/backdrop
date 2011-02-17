@@ -50,10 +50,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $this->base_table = $plugin['base_table'];
     $default = $this->filter_defaults;
 
-    foreach ($plugin['filters'] as $name => $info) {
-      $default['id'] = $name;
-      $plugin['filters'][$name] = $info + $default;
+    if (isset($plugin['filters'])) {
+      foreach ($plugin['filters'] as $name => $info) {
+        $default['id'] = $name;
+        $plugin['filters'][$name] = $info + $default;
+      }
     }
+
     $this->plugin = $plugin;
 
     $entities = entity_get_info();
