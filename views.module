@@ -1113,7 +1113,7 @@ function views_debug($message) {
       $output = var_export($message, TRUE);
     }
     if (variable_get('views_devel_region', 'footer') != 'watchdog') {
-      drupal_set_content(variable_get('views_devel_region', 'footer'), '<pre>' . $output . '</pre>');
+      drupal_add_region_content(variable_get('views_devel_region', 'footer'), '<pre>' . $output . '</pre>');
     }
     else {
       watchdog('views_logging', '<pre>' . $output . '</pre>');
