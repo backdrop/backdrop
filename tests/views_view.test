@@ -29,7 +29,7 @@ class viewsViewTest extends ViewsSqlTest {
 
     unset($view->display);
     $view->destroy();
-    $this->assertViewDestroy();
+    $this->assertViewDestroy($view);
   }
 
   function assertViewDestroy($view) {
@@ -45,7 +45,7 @@ class viewsViewTest extends ViewsSqlTest {
 
     $keys = array('current_display', 'display_handler', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
     foreach ($keys as $key) {
-      $this->assertFalse($view->{$key}, $key);
+      $this->assertFalse(isset($view->{$key}), $key);
     }
     $this->assertEqual($view->build, FALSE);
     $this->assertEqual($view->executed, FALSE);
