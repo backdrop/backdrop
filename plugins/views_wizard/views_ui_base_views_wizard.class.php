@@ -250,6 +250,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#title' => t('of type'),
         '#options' => $options,
         '#default_value' => 'all',
+        '#ajax' => array(
+          'callback' => 'views_ui_add_form_update',
+          'wrapper' => 'edit-view-displays-wrapper',
+        ),
       );
     }
 
