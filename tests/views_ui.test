@@ -376,6 +376,38 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $this->assertText($node_tag1_tag2_title);
     $this->assertNoText($node_no_tags_title);
   }
+
+  /**
+   * Test that the "tagged with" form element only shows for node types that support it.
+   */
+  function testTaggedWithByNodeType() {
+    // The tagging field is associated with one of our node types only. So the
+    // "tagged with" form element on the view wizard should appear on the form
+    // by default (when the wizard is configured to display all content) and
+    // also when the node type that has the tagging field is selected, but not
+    // when the node type that doesn't have the tagging field is selected.
+    $tags_xpath = '//input[@name="show[tagged_with]"]';
+    $this->drupalGet('admin/structure/views/add');
+    $this->assertFieldByXpath($tags_xpath);
+    $view['show[type]'] = $this->node_type_with_tags->type;
+    $this->drupalPost('admin/structure/views/add', $view, t('Update options'));
+    $this->assertFieldByXpath($tags_xpath);
+    $view['show[type]'] = $this->node_type_without_tags->type;
+    $this->drupalPost(NULL, $view, t('Update options'));
+    $this->assertNoFieldByXpath($tags_xpath);
+
+    // If we add an instance of the tagging field to the second node type, the
+    // "tagged with" form element should not appear for it too.
+    $instance = $this->tag_instance;
+    $instance['bundle'] = $this->node_type_without_tags->type;
+    field_create_instance($instance);
+    $view['show[type]'] = $this->node_type_with_tags->type;
+    $this->drupalPost('admin/structure/views/add', $view, t('Update options'));
+    $this->assertFieldByXpath($tags_xpath);
+    $view['show[type]'] = $this->node_type_without_tags->type;
+    $this->drupalPost(NULL, $view, t('Update options'));
+    $this->assertFieldByXpath($tags_xpath);
+  }
 }
 
 class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
