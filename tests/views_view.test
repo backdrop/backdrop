@@ -27,7 +27,6 @@ class viewsViewTest extends ViewsSqlTest {
     $view = $this->view_test_destroy();
     $view->preview();
 
-    unset($view->display);
     $view->destroy();
     $this->assertViewDestroy($view);
   }
@@ -47,7 +46,7 @@ class viewsViewTest extends ViewsSqlTest {
     foreach ($keys as $key) {
       $this->assertFalse(isset($view->{$key}), $key);
     }
-    $this->assertEqual($view->build, FALSE);
+    $this->assertEqual($view->built, FALSE);
     $this->assertEqual($view->executed, FALSE);
     $this->assertEqual($view->build_info, array());
     $this->assertEqual($view->attachment_before, '');
