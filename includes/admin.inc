@@ -1472,19 +1472,19 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
       $rearrange_text = t('And/Or');
       // TODO: Add another class to have another symbol for filter rearrange.
-      $class = 'views-button-rearrange';
+      $class = 'views-button-rearrange icon';
       break;
     default:
       $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
       $rearrange_text = t('Sort');
-      $class = 'views-button-rearrange';
+      $class = 'icon compact rearrange';
   }
 
   if (count($display->handler->get_handlers($type)) > 1) {
     $build['#rearrange'] = l('<span>' . $rearrange_text . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
   }
-  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
-  $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-button-delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
+  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
+  $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
 
   if (!$display->handler->is_default_display()) {
     if (!$display->handler->is_defaulted($types[$type]['plural'])) {
