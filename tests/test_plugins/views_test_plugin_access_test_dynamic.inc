@@ -10,7 +10,7 @@ class views_test_plugin_access_test_dynamic extends views_plugin_access {
   }
 
   function access($account) {
-    return !empty($this->options['access']) && $this->view->args[0] == variable_get('test_dynamic_access_argument1', NULL) && $this->view->args[1]== variable_get('test_dynamic_access_argument2', NULL);
+    return !empty($this->options['access']) && isset($this->view->args[0]) && $this->view->args[0] == variable_get('test_dynamic_access_argument1', NULL) && isset($this->view->args[1]) && $this->view->args[1] == variable_get('test_dynamic_access_argument2', NULL);
   }
 
   function get_access_callback() {

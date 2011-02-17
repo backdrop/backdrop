@@ -29,7 +29,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $view->execute_display();
     $view->destroy();
 
-    $this->assertEqual($view->args[0], $this->random, t('Fixed argument should be used by default.'));
+    $this->assertEqual($view->args[0], $this->random, 'Fixed argument should be used by default.');
 
     // Take sure that a normal argument provided is used
     $view = $this->view_argument_default_fixed();
@@ -38,7 +38,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $random_string = $this->randomString();
     $view->execute_display('default', array($random_string));
 
-    $this->assertEqual($view->args[0], $random_string, t('Provided argumetn should be used.'));
+    $this->assertEqual($view->args[0], $random_string, 'Provided argument should be used.');
   }
 
   /**

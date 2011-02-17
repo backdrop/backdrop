@@ -601,7 +601,7 @@ class views_many_to_one_helper {
     $this->handler = &$handler;
   }
 
-  function option_definition(&$options) {
+  static function option_definition(&$options) {
     $options['reduce_duplicates'] = array('default' => FALSE);
   }
 

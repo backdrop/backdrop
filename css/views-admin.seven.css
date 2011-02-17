@@ -56,6 +56,7 @@ legend + .fieldset-wrapper {
 
 .form-item {
   margin-bottom: 0;
+  margin-top: 15px;
   padding-bottom: 0;
   padding-top: 0;
 }
@@ -63,11 +64,6 @@ legend + .fieldset-wrapper {
 .form-actions {
   margin-bottom: 0;
   margin-top: 0;
-}
-
-input.form-checkbox,
-input.form-radio {
-  vertical-align: baseline;
 }
  
 .form-item .form-item {
@@ -85,6 +81,10 @@ input.form-radio {
   padding: 0;
 }
 
+.views-displays ul.secondary li a {
+  padding: 2px 7px 3px;
+}
+
 .views-admin .links li {
   padding-right: 0; /* LTR */
 }
@@ -97,6 +97,11 @@ input.form-radio {
 /* @end */
 
 /* @group Rearrange filter criteria */
+
+#views-ui-rearrange-filter-form .action-links {
+  margin: 0;
+  padding: 0;
+}
 
 #views-ui-rearrange-filter-form table {
   border: medium none;

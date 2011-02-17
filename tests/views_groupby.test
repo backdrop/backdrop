@@ -221,15 +221,15 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     menu_rebuild();
 
     $this->drupalGet('admin/structure/views');
-    $this->drupalGet('admin/structure/views/edit/test_views_groupby_save');
+    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
 
     $edit = array(
       'group_by' => TRUE,
     );
-    $this->drupalPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Apply'));
 
-    $this->drupalGet('admin/structure/views/edit/test_views_groupby_save');
-    $this->drupalPost('admin/structure/views/edit/test_views_groupby_save', array(), t('Save'));
+    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
+    $this->drupalPost('admin/structure/views/view/test_views_groupby_save/edit', array(), t('Save'));
 
     $this->drupalGet('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by');
   }

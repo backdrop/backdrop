@@ -18,6 +18,11 @@
 
 /* @group Icons */
 
+.views-admin .icon {
+  height: 16px;
+  width: 16px;
+}
+
 .views-admin .icon,
 .views-admin .icon-text {
   background-attachment: scroll;
@@ -26,37 +31,98 @@
   background-repeat: no-repeat;
 }
 
-/* Targets a <span> element. This assumes no visible text from the span. */
-.views-admin .icon {
+.views-admin a.icon {
+  background-image:
+    url("../images/sprites.png"),
+    -moz-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #e8e8e8 100%);
+  background-image:
+    url("../images/sprites.png"),
+    -webkit-gradient(
+      linear,
+      left top,
+      left bottom,
+      color-stop(0.0, rgba(255, 255, 255, 1.0)),
+      color-stop(1.0, rgba(232, 232, 232, 1.0))
+    );
+  background-image:
+    url("../images/sprites.png"),
+    -webkit-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #e8e8e8 100%);
+  
+  background-repeat: no-repeat, repeat-y;
+  
+  border: 1px solid #dddddd;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  -moz-box-shadow: 0 0 0 rgba(0,0,0,0.3333) inset;
+  -webkit-box-shadow: 0 0 0 rgba(0,0,0,0.3333) inset;
+  box-shadow: 0 0 0 rgba(0,0,0,0.3333) inset;
+}
+
+.views-admin a.icon:hover {
+  border-color: #d0d0d0;
+  -moz-box-shadow: 0 0 1px rgba(0,0,0,0.3333) inset;
+  -webkit-box-shadow: 0 0 1px rgba(0,0,0,0.3333) inset;
+  box-shadow: 0 0 1px rgba(0,0,0,0.3333) inset;
+}
+
+.views-admin a.icon:active {
+  border-color: #c0c0c0;
+}
+
+/** 
+ * Targets a <span> element inside an <a> element. 
+ * This assumes no visible text from the span. 
+ */
+.views-admin span.icon {
   display: inline-block;
-  height: 12px;
+  float: left;
   position: relative;
-  width: 16px;
-} 
+}
+
+.views-admin .icon.compact {
+  display: block;
+  overflow: hidden;
+  text-indent: -9999px;
+}
 
 /* Targets any element with an icon -> text combo */
 .views-admin .icon-text {
   padding-left: 19px; /* LTR */
 }
 
-.views-admin .icon-linked {
-  background-position: left -153px; /* LTR */
+.views-admin .icon.linked {
+  background-position: center -153px, left top;
 }
 
-.views-admin .icon-unlinked {
-  background-position: left -195px; /* LTR */
+.views-admin .icon.unlinked {
+  background-position: center -195px, left top;
 }
 
-.views-displays .icon-add {
-  background-position: left -3px; /* LTR */
+.views-admin .icon.add {
+  background-position: center 3px, left top;
 }
 
-.views-displays .secondary a:hover > .icon-add {
-  background-position: left -21px; /* LTR */
+.views-admin .icon.delete {
+  background-position: center -52px, left top;
 }
 
-.views-displays .secondary .open a:hover > .icon-add {
-  background-position: left -3px; /* LTR */
+.views-admin .icon.rearrange {
+  background-position: center -111px, left top;
+}
+
+.views-displays .secondary a:hover > .icon.add {
+  background-position: center -25px;
+}
+
+.views-displays .secondary .open a:hover > .icon.add {
+  background-position: center 3px;
 }
 
 /* @end */
@@ -65,6 +131,12 @@
 
 fieldset.box-padding {
   border: none;
+}
+
+.form-item {
+  margin-top: 15px;
+  padding-bottom: 0;
+  padding-top: 0;
 }
 
 input.form-checkbox, 
@@ -79,7 +151,11 @@ input.form-radio {
 
 .fieldset-wrapper > * + *,
 .form-wrapper > * + * {
-  margin-top: 18px;
+  margin-top: 15px;
+}
+
+.container-inline {
+  padding-top: 15px;
 }
 
 .container-inline > * + *,
@@ -336,6 +412,10 @@ div.form-item-displays-live-preview {
   text-transform: uppercase;
 }
 
+.views-ui-display-tab-bucket .actions.links {
+  margin-right: 6px;
+}
+
 .views-ui-display-tab-bucket > * {
   padding: 2px 6px 4px;
 }
@@ -419,7 +499,7 @@ div.form-item-displays-live-preview {
 }
 
 #edit-displays-preview-controls .form-type-textfield label ~ * {
-  margin-left: 10em;
+  margin-left: 105px;
 }
 
 /* @end */

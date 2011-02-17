@@ -71,7 +71,7 @@ class views_handler_argument extends views_handler {
 
   function is_wildcard($arg = NULL) {
     if (!isset($arg)) {
-      $arg = $this->argument;
+      $arg = isset($this->argument) ? $this->argument : NULL;
     }
 
     return !empty($this->options['wildcard']) && $this->options['wildcard'] === $arg;

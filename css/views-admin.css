@@ -256,6 +256,7 @@ td.group-title {
 }
 
 .group-message .form-submit,
+.views-remove-group-link,
 #views-add-group {
   float: right;
   clear: both;

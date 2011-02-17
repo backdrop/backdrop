@@ -94,6 +94,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
       $item_text .= drupal_render($node->content) . $links;
     }
 
+    $item = new stdClass;
     $item->description = $item_text;
     $item->title = $node->title;
     $item->link = url("node/$node->nid", array('absolute' => TRUE));
