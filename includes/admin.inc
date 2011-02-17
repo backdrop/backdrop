@@ -3753,12 +3753,6 @@ function views_ui_admin_settings_display() {
     '#type' => 'fieldset',
     '#title' => t('Edit view form'),
   );
-  $form['edit_view_form']['views_ui_trim_display_names'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Trim long display names'),
-    '#description' => t('Avoid wrapping of display names by trimming long names.'),
-    '#default_value' => variable_get('views_ui_trim_display_names', FALSE),
-  );
   $form['edit_view_form']['views_ui_show_sql_query'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show the SQL query'),
