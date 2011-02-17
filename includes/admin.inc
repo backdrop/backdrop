@@ -286,9 +286,10 @@ function views_ui_add_form($form, &$form_state) {
     '#type' => 'textfield',
     '#size' => 64,
     '#default_value' => !empty($form_state['view']) ? $form_state['view']->description : '',
-    '#process' => array('ctools_dependent_process'),
-    '#dependency' => array(
-      'edit-description-enable' => array(1)
+    '#states' => array(
+      'visible' => array(   // action to take.
+        ':input[name="description_enable"]' => array('checked' => TRUE),
+      ),
     ),
   );
 
@@ -796,7 +797,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#type' => 'submit',
       '#value' => t('Preview'),
       '#attributes' => array('class' => array('arguments-preview')),
-      '#process' => array('ctools_dependent_process'),
       '#states' => array(
         'visible' => array(   // action to take.
           ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
@@ -816,7 +816,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#title' => t('Arguments'),
       '#description' => t('Separate arguments with a / as though they were a URL path.'),
       '#attributes' => array('class' => array('arguments-preview')),
-      '#process' => array('ctools_dependent_process'),
       '#states' => array(
         'visible' => array(   // action to take.
           ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
