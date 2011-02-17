@@ -7,7 +7,7 @@
 
 /* @group Layout */
 
-.page-admin-structure-views #content .box-padding {
+.box-padding {
   padding-left: 12px;
   padding-right: 12px;
 }
@@ -16,24 +16,24 @@
 
 /* @group Inline lists */
 
-.page-admin-structure-views #content .horizontal > * {
+.horizontal > * {
   clear: none;
   float: left; /* LTR */
 }
 
-.page-admin-structure-views #content .horizontal.right {
+.horizontal.right {
   float: right;
 }
 
-.page-admin-structure-views #content .horizontal label {
+.horizontal label {
   position: absolute;
 }
 
-.page-admin-structure-views #content .horizontal .form-item > [class] {
+.horizontal .form-item > [class] {
   margin-top: 25px;
 }
 
-.page-admin-structure-views #content .horizontal .form-item > [class] + [class] {
+.horizontal .form-item > [class] + [class] {
   margin-top: 0;
 }
 
@@ -45,16 +45,16 @@
  * to add a new section
  */
 
-.page-admin-structure-views #content .form-actions {
+.form-actions {
   float: right; /* LTR */
 }
 
-.page-admin-structure-views #content .views-displays {
+.views-displays {
   clear: both;
   float:left; /* LTR */
 }
 
-.page-admin-structure-views #content .views-displays .secondary {
+.views-displays .secondary {
   overflow: visible;
 }
 
@@ -65,12 +65,12 @@
  * The tabs that switch between sections
  */
 
-.page-admin-structure-views #content .views-displays .secondary > li {
+.views-displays .secondary > li {
   display: inline-block;
   float: left; /* LTR */
 }
 
-.page-admin-structure-views #content .views-displays .secondary .open > a {
+.views-displays .secondary .open > a {
   position: relative;
   z-index: 51;
 }
@@ -79,11 +79,11 @@
 
 /* @group Attachment details new section button */
 
-.page-admin-structure-views #content .views-displays .secondary li.add {
+.views-displays .secondary li.add {
   position: relative;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list {
+.views-displays .secondary .action-list {
   left: 0; /* LTR */
   margin: 0;
   position: absolute;
@@ -91,7 +91,7 @@
   z-index: 50;
 }
 
-.page-admin-structure-views #content .views-displays .secondary .action-list  li {
+.views-displays .secondary .action-list  li {
   display: block;
 }
 
@@ -99,12 +99,12 @@
 
 /* @group Attachment details collapsible fieldset */
 
-.page-admin-structure-views #content .views-display-tab .fieldset-legend {
+.views-display-tab .fieldset-legend {
   left: -5px; /* LTR */
   position: relative;
 }
 
-.page-admin-structure-views #content .views-display-tab .fieldset-wrapper {
+.views-display-tab .fieldset-wrapper {
   position: relative;
 }
 
@@ -114,7 +114,7 @@
  *
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
-.page-admin-structure-views #content .views-display-tab .fieldset-wrapper > .actions {
+.views-display-tab .fieldset-wrapper > .actions {
   position: absolute;
   right: 0; /* LTR */
   top: -14px;
@@ -124,14 +124,14 @@
 
 /* @group Attachment configuration columns */
 
-.page-admin-structure-views #content .views-display-columns > * {
+.views-display-columns > * {
   float: left; /* LTR */
   margin-left: 1%; /* LTR */
   padding-left: 1%; /* LTR */
   width: 32%;
 }
 
-.page-admin-structure-views #content .views-display-columns > *:first-child {
+.views-display-columns > *:first-child {
   margin-left: 0; /* LTR */
   padding-left: 0; /* LTR */
 }
@@ -163,11 +163,11 @@
   max-height: 400px;
 }
 
-.page-admin-structure-views #views-filterable-options-controls {
+#views-filterable-options-controls {
   display: none;
 }
 
-.page-admin-structure-views .views-ui-dialog #views-filterable-options-controls {
+.views-ui-dialog #views-filterable-options-controls {
   display: block;
 }
 
@@ -188,7 +188,7 @@
 /* @end */
 
 /* @group Filter Settings form */
-.page-admin-structure-views div.form-item-options-value-all {
+div.form-item-options-value-all {
   display: none;
 }
 /* @end */
@@ -211,8 +211,8 @@
  */
 
  /* Reset the formatting context for all modern browsers */
-.page-admin-structure-views #content .views-display-tab .fieldset-wrapper:after,
-.page-admin-structure-views #content ul.secondary:after {
+.views-display-tab .fieldset-wrapper:after,
+ul.secondary:after {
   clear: both;
   content: " x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
   display: block;
@@ -224,8 +224,8 @@
 }
 
 /* Reset the formatting context for IE */
-.page-admin-structure-views #content .views-display-tab .fieldset-wrapper,
-.page-admin-structure-views #content ul.secondary {
+.views-display-tab .fieldset-wrapper,
+ul.secondary {
   zoom: 1;
 }
 
