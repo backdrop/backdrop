@@ -292,6 +292,12 @@ input.form-radio {
   padding: 0 5px;
 }
 
+.views-displays .views-extra-actions .analyze {
+  border: 1px solid #aaa;
+  border-width: 0 1px;
+  padding: 3px 11px;
+}
+
 /* @end */
 
 /* @group Attachment details tabs
