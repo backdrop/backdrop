@@ -100,7 +100,8 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view3['human_name'] = $this->randomName(16);
     $view3['name'] = strtolower($this->randomName(16));
     $view3['description'] = $this->randomName(16);
-    $view3['show[wizard_key]'] = 'node:page';
+    $view3['show[wizard_key]'] = 'node';
+    $view3['show[type]'] = 'page';
     $view3['page[create]'] = 1;
     $view3['page[title]'] = $this->randomName(16);
     $view3['page[path]'] = $this->randomName(16);
@@ -404,7 +405,8 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     $view['human_name'] = $this->randomName(16);
     $view['name'] = strtolower($this->randomName(16));
     $view['description'] = $this->randomName(16);
-    $view['show[wizard_key]'] = 'node:article';
+    $view['show[wizard_key]'] = 'node';
+    $view['show[type]'] = 'article';
     $view['show[sort_created_order]'] = 'DESC';
     $view['page[create]'] = 1;
     $view['page[title]'] = $this->randomName(16);
