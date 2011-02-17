@@ -642,6 +642,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // The default wizard can't provide any good validation.
     // We can't call view::validate because it will fails in general.
     $errors = array();
+    $this->set_validated_view($form, $form_state, $view);
     return $errors;
   }
 
