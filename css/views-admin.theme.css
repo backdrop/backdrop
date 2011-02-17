@@ -67,6 +67,12 @@ fieldset.box-padding {
   border: none;
 }
 
+.form-item {
+  margin-top: 15px;
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
 input.form-checkbox, 
 input.form-radio {
   vertical-align: baseline;
@@ -79,7 +85,11 @@ input.form-radio {
 
 .fieldset-wrapper > * + *,
 .form-wrapper > * + * {
-  margin-top: 18px;
+  margin-top: 15px;
+}
+
+.container-inline {
+  padding-top: 15px;
 }
 
 .container-inline > * + *,
@@ -419,7 +429,7 @@ div.form-item-displays-live-preview {
 }
 
 #edit-displays-preview-controls .form-type-textfield label ~ * {
-  margin-left: 10em;
+  margin-left: 105px;
 }
 
 /* @end */

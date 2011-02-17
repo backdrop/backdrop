@@ -257,7 +257,8 @@ function views_ui_add_page() {
  */
 function views_ui_add_form($form, &$form_state) {
   ctools_include('dependent');
-  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';;
+  $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
+  $form['#attributes']['class'] = array('views-admin');
 
   $form['human_name'] = array(
     '#type' => 'textfield',
