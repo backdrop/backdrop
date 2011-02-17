@@ -119,7 +119,7 @@
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });
 
-      $('div#views-live-preview form input[type=submit], div#views-live-preview a')
+      $('div#views-live-preview a')
         .once('views-ajax-processed').each(function () {
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
@@ -128,12 +128,6 @@
           if (element_settings.url.substring(0, 22) != '/admin/structure/views') {
             return true;
           }
-        }
-        else if ($(this).attr('action')) {
-          element_settings.url = $(this).attr('action');
-        }
-        else if (this.form && $(this.form).attr('action')) {
-          element_settings.url = $(this.form).attr('action');
         }
 
         element_settings.wrapper = 'views-live-preview';
