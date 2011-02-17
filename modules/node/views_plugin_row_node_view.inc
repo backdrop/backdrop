@@ -71,6 +71,10 @@ class views_plugin_row_node_view extends views_plugin_row {
     );
   }
 
+  function summary_title() {
+    return check_plain($this->options['build_mode']);
+  }
+
   function pre_render($values) {
     $nids = array();
     foreach ($values as $row) {
