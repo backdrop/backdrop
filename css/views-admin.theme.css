@@ -16,6 +16,15 @@
 
 /* @end */
 
+/* @group Layout */
+
+.box-padding {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* @end */
+
 /* @group Icons */
 
 .views-admin .icon {
@@ -220,6 +229,21 @@ input.form-radio {
   line-height: 1.6154;
   margin-bottom: 0;
   margin-top: 18px;
+}
+
+/* @end */
+
+/* @group Add view */
+
+/**
+ * I wish this didn't have to be so specific
+ */
+.form-item-description-enable + .form-item-description {
+  margin-top: 0;
+}
+
+#edit-view-displays-wrapper {
+  margin-top: 27px;
 }
 
 /* @end */
