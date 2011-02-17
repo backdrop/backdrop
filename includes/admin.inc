@@ -678,7 +678,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => t('Cancel'),
+    '#value' => t('Undo changes'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
     '#access' => !empty($view->changed),
   );
@@ -752,6 +752,21 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       ),
     ),
   );
+  if ($view->type != t('Default')) {
+    if ($view->type == t('Overridden')) {
+      $form['displays']['top']['extra_actions']['#links']['revert'] = array(
+        'title' => t('revert'),
+        'href' => "admin/structure/views/view/$view->name/revert",
+        'query' => drupal_get_destination(),
+      );
+    }
+    else {
+      $form['displays']['top']['extra_actions']['#links']['delete'] = array(
+        'title' => t('delete'),
+        'href' => "admin/structure/views/view/$view->name/delete",
+      );
+    }
+  }
   // The rest requires a display to be selected.
   if ($display_id) {
     $form_state['display_id'] = $display_id;
