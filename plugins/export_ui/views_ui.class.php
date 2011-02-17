@@ -170,8 +170,8 @@ class views_ui extends ctools_export_ui {
     $this->rows[$view->name] = array(
       'data' => array(
         array('data' => $info, 'class' => array('views-ui-name')),
-        array('data' => check_plain($view->tag), 'class' => array('views-ui-tag')),
         array('data' => check_plain($view->description), 'class' => array('views-ui-description')),
+        array('data' => check_plain($view->tag), 'class' => array('views-ui-tag')),
         array('data' => $paths, 'class' => array('views-ui-path')),
         array('data' => theme('links', array('links' => $operations, 'attributes' => array('class' => array('links', 'inline')))), 'class' => array('views-ui-operations')),
       ),
@@ -195,8 +195,8 @@ class views_ui extends ctools_export_ui {
 
     $header = array(
       $this->tablesort_link(t('View name'), 'name', 'views-ui-name'),
-      $this->tablesort_link(t('Tag'), 'tag', 'views-ui-tag'),
       array('data' => t('Description'), 'class' => array('views-ui-description')),
+      $this->tablesort_link(t('Tag'), 'tag', 'views-ui-tag'),
       $this->tablesort_link(t('Path'), 'path', 'views-ui-path'),
       array('data' => t('Operations'), 'class' => array('views-ui-operations')),
     );
