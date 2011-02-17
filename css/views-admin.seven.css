@@ -81,6 +81,10 @@ legend + .fieldset-wrapper {
   padding: 0;
 }
 
+.views-displays ul.secondary li a {
+  padding: 2px 7px 3px;
+}
+
 .views-admin .links li {
   padding-right: 0; /* LTR */
 }
