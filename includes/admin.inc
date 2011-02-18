@@ -44,7 +44,7 @@ function views_ui_get_admin_css() {
       $list[$module_path . '/css/views-admin.' . $module . '.css'] = array();
     }
   }
-  
+
 
   return $list;
 }
@@ -4569,6 +4569,10 @@ function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
 
 function views_ui_add_template_page() {
   $templates = views_get_all_templates();
+
+  if (empty($templates)) {
+    return t('There are no templates available.');
+  }
 
   $header = array(
     t('Name'),
