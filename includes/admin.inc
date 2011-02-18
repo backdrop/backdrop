@@ -654,19 +654,20 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#markup' => t('This view is being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_interval(REQUEST_TIME - $view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
     );
   }
-  if (!empty($view->changed)) {
-    if (isset($view->vid) && $view->vid == 'new') {
-      $message = t('* This view will not exist until the <em>Save</em> button is clicked.');
-    }
-    else {
-      $message = t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.');
-    }
+  if (isset($view->vid) && $view->vid == 'new') {
+    $message = t('* This view will not exist until the <em>Save</em> button is clicked.');
+  }
+  else {
+    $message = t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.');
+  }
 
-    $form['changed'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('view-changed', 'messages', 'warning')),
-      '#markup' => $message,
-    );
+  $form['changed'] = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('class' => array('view-changed', 'messages', 'warning')),
+    '#markup' => $message,
+  );
+  if (empty($view->changed)) {
+    $form['changed']['#attributes']['class'][] = 'js-hide';
   }
 
   $form['help_text'] = array(
