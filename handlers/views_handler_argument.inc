@@ -164,7 +164,7 @@ class views_handler_argument extends views_handler {
       'contains' => array(
         'sort_order' => array('default' => 'asc'),
         'number_of_records' => array('default' => 0),
-        'format' => array('default' => ''),
+        'format' => array('default' => 'list', 'export' => 'export_plugin'),
       ),
     );
     $options['specify_validation'] = array('default' => 0);
@@ -587,7 +587,7 @@ class views_handler_argument extends views_handler {
       if (empty($info['uses options'])) {
         continue;
       }
-      $plugin = $this->get_plugin('summary', $id);
+      $plugin = $this->get_plugin('style', $id);
       if ($plugin) {
         $form['summary']['options'][$id] = array(
           '#prefix' => '<div id="edit-options-summary-options-' . $id . '-wrapper">',
@@ -1062,7 +1062,8 @@ class views_handler_argument extends views_handler {
       case 'argument validator':
         $plugin_name = $this->options['validate']['type'];
         $options_name = 'validate_options';
-      case 'summary':
+        break;
+      case 'style':
         $plugin_name = $this->options['summary']['format'];
         $options_name = 'summary_options';
     }
