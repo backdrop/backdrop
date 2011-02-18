@@ -1348,6 +1348,7 @@ function views_ui_process_radios($element) {
       );
       $element[$key . '_options'] = array(
         '#type' => 'container',
+        '#attributes' => array('class' => array('views-admin-dependent')),
       );
     }
   }

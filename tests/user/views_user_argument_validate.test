@@ -104,7 +104,7 @@ class viewsUserArgumentValidate extends viewsSqlTest {
     $handler->display->display_options['arguments']['null']['field'] = 'null';
     $handler->display->display_options['arguments']['null']['style_plugin'] = 'default_summary';
     $handler->display->display_options['arguments']['null']['default_argument_type'] = 'fixed';
-    $handler->display->display_options['arguments']['null']['validate_type'] = 'user';
+    $handler->display->display_options['arguments']['null']['validate']['type'] = 'user';
     $handler->display->display_options['arguments']['null']['validate_options']['type'] = $argtype;
     $handler->display->display_options['arguments']['null']['must_not_be'] = 0;
 

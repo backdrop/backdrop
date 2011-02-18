@@ -86,6 +86,13 @@ class views_handler_argument extends views_handler {
     if (!empty($options['breadcrumb']) && !isset($options['breadcrumb_enable'])) {
       $this->options['breadcrumb_enable'] = 1;
     }
+
+    if (!empty($options['validate_type']) && !isset($options['validate']['type'])) {
+      $options['validate']['type'] = $options['validate_type'];
+    }
+    if (!empty($options['validate_fail']) && !isset($options['validate']['fail'])) {
+      $options['validate']['fail'] = $options['validate_fail'];
+    }
   }
 
   /**
@@ -129,7 +136,7 @@ class views_handler_argument extends views_handler {
    */
   function needs_style_plugin() {
     $info = $this->default_actions($this->options['default_action']);
-    $validate_info = $this->default_actions($this->options['validate_fail']);
+    $validate_info = $this->default_actions($this->options['validate']['fail']);
     return !empty($info['style plugin']) || !empty($validate_info['style plugin']);
   }
 
@@ -160,9 +167,14 @@ class views_handler_argument extends views_handler {
         'format' => array('default' => ''),
       ),
     );
-    $options['validate_type'] = array('default' => 'none', 'export' => 'export_plugin');
+    $options['specify_validation'] = array('default' => 0);
+    $options['validate'] = array(
+      'contains' => array(
+        'type' => array('default' => 'none', 'export' => 'export_plugin'),
+        'fail' => array('default' => 'not found'),
+      ),
+    );
     $options['validate_options'] = array('default' => array(), 'export' => FALSE);
-    $options['validate_fail'] = array('default' => 'not found');
 
     return $options;
   }
@@ -284,17 +296,20 @@ class views_handler_argument extends views_handler {
       '#fieldset' => 'argument_present',
     );
 
+    $form['validate'] = array(
+      '#type' => 'container',
+      '#fieldset' => 'argument_present',
+    );
     // @todo The mockup wanted to use "Validate using" here, but it doesn't
     // work well with many options (they'd need to be changed as well)
-    $form['validate_type'] = array(
+    $form['validate']['type'] = array(
       '#type' => 'select',
       '#title' => t('Validator'),
-      '#default_value' => $this->options['validate_type'],
+      '#default_value' => $this->options['validate']['type'],
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-specify-validation' => array('1'),
       ),
-      '#fieldset' => 'argument_present',
     );
 
     $validate_types = array('none' => t('- Basic validation -'));
@@ -322,9 +337,8 @@ class views_handler_argument extends views_handler {
       if ($valid) {
         $plugin = $this->get_plugin('argument validator', $id);
         if ($plugin) {
-          if ($plugin->access() || $this->options['validate_type'] == $id) {
-            $form['argument_validate']['#fieldset'] = 'argument_present';
-            $form['argument_validate'][$id] = array(
+          if ($plugin->access() || $this->options['validate']['type'] == $id) {
+            $form['validate']['options'][$id] = array(
               '#prefix' => '<div id="edit-options-validate-options-' . $id . '-wrapper">',
               '#suffix' => '</div>',
               '#type' => 'item',
@@ -337,7 +351,7 @@ class views_handler_argument extends views_handler {
               '#dependency_count' => 2,
               '#id' => 'edit-options-validate-options-' . $id,
             );
-            $plugin->options_form($form['argument_validate'][$id], $form_state);
+            $plugin->options_form($form['validate']['options'][$id], $form_state);
             $validate_types[$id] = $info['title'];
           }
         }
@@ -345,12 +359,12 @@ class views_handler_argument extends views_handler {
     }
 
     asort($validate_types);
-    $form['validate_type']['#options'] = $validate_types;
+    $form['validate']['type']['#options'] = $validate_types;
 
-    $form['validate_fail'] = array(
+    $form['validate']['fail'] = array(
       '#type' => 'select',
       '#title' => t('Action to take if argument does not validate'),
-      '#default_value' => $this->options['validate_fail'],
+      '#default_value' => $this->options['validate']['fail'],
       '#options' => $validate_options,
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
@@ -379,10 +393,10 @@ class views_handler_argument extends views_handler {
       $plugin->options_validate($form['summary']['options'][$default_id], $form_state, $form_state['values']['options']['summary']['options'][$default_id]);
     }
 
-    $validate_id = $form_state['values']['options']['validate_type'];
+    $validate_id = $form_state['values']['options']['validate']['type'];
     $plugin = $this->get_plugin('argument validator', $validate_id);
     if ($plugin) {
-      $plugin->options_validate($form['argument_validate'][$default_id], $form_state, $form_state['values']['options']['argument_validate'][$validate_id]);
+      $plugin->options_validate($form['validate']['options'][$default_id], $form_state, $form_state['values']['options']['validate']['options'][$validate_id]);
     }
 
   }
@@ -412,11 +426,11 @@ class views_handler_argument extends views_handler {
       $form_state['values']['options']['summary_options'] = $options;
     }
 
-    $validate_id = $form_state['values']['options']['validate_type'];
+    $validate_id = $form_state['values']['options']['validate']['type'];
     $plugin = $this->get_plugin('argument validator', $validate_id);
     if ($plugin) {
-      $options = &$form_state['values']['options']['argument_validate'][$validate_id];
-      $plugin->options_submit($form['argument_validate'][$validate_id], $form_state, $options);
+      $options = &$form_state['values']['options']['validate']['options'][$validate_id];
+      $plugin->options_submit($form['validate']['options'][$validate_id], $form_state, $options);
       // Copy the now submitted options to their final resting place so they get saved.
       $form_state['values']['options']['validate_options'] = $options;
     }
@@ -573,7 +587,7 @@ class views_handler_argument extends views_handler {
       if (empty($info['uses options'])) {
         continue;
       }
-      $plugin = $this->get_plugin('style', $id);
+      $plugin = $this->get_plugin('summary', $id);
       if ($plugin) {
         $form['summary']['options'][$id] = array(
           '#prefix' => '<div id="edit-options-summary-options-' . $id . '-wrapper">',
@@ -624,7 +638,7 @@ class views_handler_argument extends views_handler {
    * How to act if validation failes
    */
   function validate_fail() {
-    $info = $this->default_actions($this->options['validate_fail']);
+    $info = $this->default_actions($this->options['validate']['fail']);
     return $this->default_action($info);
   }
   /**
@@ -877,7 +891,7 @@ class views_handler_argument extends views_handler {
       return $this->argument_validated = TRUE;
     }
 
-    if ($this->options['validate_type'] == 'none') {
+    if ($this->options['validate']['type'] == 'none') {
       return $this->argument_validated = $this->validate_argument_basic($arg);
     }
 
@@ -898,7 +912,7 @@ class views_handler_argument extends views_handler {
    * then validation cannot actually fail.
    */
   function validate_argument($arg) {
-    $validate_info = $this->default_actions($this->options['validate_fail']);
+    $validate_info = $this->default_actions($this->options['validate']['fail']);
     if (empty($validate_info['hard fail'])) {
       return TRUE;
     }
@@ -907,7 +921,7 @@ class views_handler_argument extends views_handler {
 
     // If the validator has changed the validate fail condition to a
     // soft fail, deal with that:
-    $validate_info = $this->default_actions($this->options['validate_fail']);
+    $validate_info = $this->default_actions($this->options['validate']['fail']);
     if (empty($validate_info['hard fail'])) {
       return TRUE;
     }
@@ -1042,21 +1056,24 @@ class views_handler_argument extends views_handler {
     $options = array();
     switch ($type) {
       case 'argument default':
-        $plugin_name = 'default_argument_type';
+        $plugin_name = $this->options['default_argument_type'];
         $options_name = 'default_argument_options';
         break;
       case 'argument validator':
-        $plugin_name = 'validate_type';
+        $plugin_name = $this->options['validate']['type'];
         $options_name = 'validate_options';
+      case 'summary':
+        $plugin_name = $this->options['summary']['format'];
+        $options_name = 'summary_options';
     }
 
     if (!$name) {
-      $name = $this->options[$plugin_name];
+      $name = $plugin_name;
     }
 
     // we only fetch the options if we're fetching the plugin actually
     // in use.
-    if ($name == $this->options[$plugin_name]) {
+    if ($name == $plugin_name) {
       $options = $this->options[$options_name];
     }
 
