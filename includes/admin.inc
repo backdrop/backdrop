@@ -590,7 +590,13 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
  * Page title callback for the Edit View page.
  */
 function views_ui_edit_page_title($view) {
-  return $view->get_human_name();
+  $bases = views_fetch_base_tables();
+  $name = $view->get_human_name();
+  if (isset($bases[$view->base_table])) {
+    $name .= ' (' . $bases[$view->base_table]['title'] . ')';
+  }
+
+  return $name;
 }
 
 /**
