@@ -68,6 +68,7 @@ Fix fieldsets in field handler.
 #990554 by bojanz: Allow to show default values of fields.
 #1039460 by robertgarrigos: Rename drupal_set_content to drupal_add_region_content
 #1045908 by bfroehle: Fix type in api-upgrading.html
+#646456 by xslim: Add a workaround to run update.php
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

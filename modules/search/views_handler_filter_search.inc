@@ -138,7 +138,7 @@ class views_handler_filter_search extends views_handler_filter {
           // Take sure we just look at real conditions.
           if (is_numeric($key)) {
             // Replace the conditions with the table alias of views.
-            $this->condition_replace_string('d.', "$search_dataset.", $condition);
+            $this->search_query->condition_replace_string('d.', "$search_dataset.", $condition);
           }
         }
         $this->query->add_where($this->options['group'], $conditions);
@@ -148,20 +148,6 @@ class views_handler_filter_search extends views_handler_filter {
       $matches = $this->search_query->matches();
       $placeholder = $this->placeholder();
       $this->query->add_having_expression($this->options['group'], "COUNT(*) >= $placeholder", array($placeholder => $matches));
-    }
-  }
-
-  function condition_replace_string($search, $replace, &$condition) {
-    if ($condition['field'] instanceof DatabaseCondition) {
-      $conditions =& $condition['field']->conditions();
-      foreach ($conditions as $key => &$subcondition) {
-        if (is_numeric($key)) {
-          $this->condition_replace_string($search, $replace, $subcondition);
-        }
-      }
-    }
-    else {
-      $condition['field'] = str_replace($search, $replace, $condition['field']);
     }
   }
 }
@@ -184,5 +170,19 @@ class viewsSearchQuery extends searchQuery {
 
   public function publicParseSearchExpression() {
     return $this->parseSearchExpression();
+  }
+
+  function condition_replace_string($search, $replace, &$condition) {
+    if ($condition['field'] instanceof DatabaseCondition) {
+      $conditions =& $condition['field']->conditions();
+      foreach ($conditions as $key => &$subcondition) {
+        if (is_numeric($key)) {
+          $this->condition_replace_string($search, $replace, $subcondition);
+        }
+      }
+    }
+    else {
+      $condition['field'] = str_replace($search, $replace, $condition['field']);
+    }
   }
 }
