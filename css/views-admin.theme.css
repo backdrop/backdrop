@@ -635,26 +635,6 @@ div.form-item-displays-live-preview {
   padding: 2px 6px 4px;
 }
 
-/* adjust the advanced help icons */
-.views-ui-display-tab-bucket .advanced-help-link {
-  padding: 0;
-  margin: 6px 3px 0px 6px;
-}
-
-.views-ui-display-tab-bucket .icon-text {
-  padding-left: 25px; /* LTR */
-}
-
-.views-ui-display-tab-bucket .icon-linked {
-  background-position: 6px -151px;
-}
-
-.views-ui-display-tab-bucket .icon-unlinked {
-  background-position: 6px -193px;
-}
-
-/* @end */
-
 /* @group Attachment bucket drop button */
 
 .views-ui-display-tab-bucket {
