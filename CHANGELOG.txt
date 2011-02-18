@@ -71,7 +71,7 @@ Fix fieldsets in field handler.
 #1045908 by bfroehle: Fix type in api-upgrading.html
 #646456 by xslim: Add a workaround to run update.php
 #1055602 by dereine: Convert argument search to dbtng.
-
+#1039584 by dereine: Fix path of taxonomy path, function from d6
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
