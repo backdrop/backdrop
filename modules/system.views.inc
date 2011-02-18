@@ -30,6 +30,9 @@ function system_views_data() {
     'field' => 'fid',
     'title' => t('File'),
     'help' => t("Files maintained by Drupal and various modules."),
+    'defaults' => array(
+      'field' => 'filename'
+    ),
   );
 
   // The file table does not inherently join to the node table,
