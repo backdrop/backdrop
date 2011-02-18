@@ -146,6 +146,7 @@ function user_views_data() {
   );
 
   // picture
+  $data['users']['picture_fid']['moved to'] = array('users', 'picture');
   $data['users']['picture'] = array(
     'title' => t('Picture'),
     'help' => t("The user's picture, if allowed."), // The help that appears on the UI,
