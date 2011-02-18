@@ -168,7 +168,7 @@ class views_handler_argument_string extends views_handler_argument {
   /**
    * Build the query based upon the formula
    */
-  function query() {
+  function query($group_by = FALSE) {
     $argument = $this->argument;
     if (!empty($this->options['transform_dash'])) {
       $argument = strtr($argument, '-', ' ');

@@ -45,7 +45,7 @@ class views_handler_argument_formula extends views_handler_argument {
   /**
    * Build the query based upon the formula
    */
-  function query() {
+  function query($group_by = FALSE) {
     $this->ensure_my_table();
     // Now that our table is secure, get our formula.
     $placeholder = $this->placeholder();
