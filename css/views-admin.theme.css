@@ -668,21 +668,21 @@ html.js .views-ui-display-tab-bucket .drop-list.open .trigger span {
   padding: 0;
 }
 
-.views-filterable-options .form-type-checkbox {
+div.views-filterable-options .form-type-checkbox {
   border: 1px solid #CCC;
   padding: 5px 8px;
   border-top: none;
 }
 
-.views-filterable-options {
+div.views-filterable-options {
   border-top:  1px solid #CCC;
 }
 
-.views-filterable-options .even .form-type-checkbox {
+div.views-filterable-options .even .form-type-checkbox {
   background-color: #F3F4EE;
 }
 
-.views-filterable-options .form-type-checkbox .description {
+div.views-filterable-options .form-type-checkbox .description {
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -761,7 +761,8 @@ html.js .views-ui-display-tab-bucket .drop-list.open .trigger span {
 /* @group Configure filter criteria */
 
 /* @todo the width and border info could be moved into a more generic class */
-#edit-options-value {
+/* @todo Make this a class to be used anywhere there's node types? */
+#edit-options-value, #edit-options-argument-validate-node-types {
   border-color: #CCCCCC;
   border-style: solid;
   border-width: 1px;
@@ -863,5 +864,28 @@ html.js .views-ui-display-tab-bucket .drop-list.open .trigger span {
 }
 
 /* @end */
+
+/* @end */
+
+/* @group Add/edit argument form */
+
+#edit-options-default-action {
+  width: 300px;
+  float: left;
+}
+
+#edit-options-exception {
+  float: right;
+  width: 250px;
+  margin-top: 0pt;
+}
+
+#edit-options-argument-present .form-item {
+  margin-top: 10px;
+}
+
+#edit-options-exception .form-type-textfield, #edit-options-argument-present .form-type-textfield {
+  margin-top: 0;
+}
 
 /* @end */
