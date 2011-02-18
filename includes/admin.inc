@@ -1314,6 +1314,8 @@ function views_ui_pre_render_move_argument_options($form) {
  * using the options array as index.
  * While doing that, create a container element underneath each option, which
  * contains the settings related to that option.
+ *
+ * @see form_process_radios
  */
 function views_ui_process_radios($element) {
   if (count($element['#options']) > 0) {
