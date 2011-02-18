@@ -117,7 +117,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#default_value' => 'default',
       '#ajax' => array(
         'callback' => 'views_ui_add_form_update_style_page',
-        'wrapper' => 'edit-block-style-plugin',
+        'wrapper' => 'edit-page-style-plugin',
       ),
     );
     if (isset($form_state['values'])) {
@@ -229,7 +229,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#default_value' => 'default',
       '#ajax' => array(
         'callback' => 'views_ui_add_form_update_style_block',
-        'wrapper' => 'edit-page-style-plugin',
+        'wrapper' => 'edit-block-style-plugin',
       ),
     );
     if (isset($form_state['values'])) {
@@ -252,14 +252,17 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 //     dsm($form_state);
 //     dsm($form);
 //     dsm($form_state);
-    if ($style = $form_state['values']['displays'][$type]['options']['style_plugin']) {
+//     dd($form_state['values']);
+//     dd($form_state['input']);
+    if ($style = $form_state['values'][$type]['style_plugin']) {
       $style_plugin = views_get_plugin('style', $style);
       $options = $this->row_style_options($type);
-      $form_state['values']['displays'][$type]['options']['row_style'] = array(
+      $form['displays'][$type]['options']['row_style'] = array(
         '#type' => 'select',
         '#title' => t('of'),
         '#options' => $options,
       );
+      dd($form['displays']);
     }
   }
 
