@@ -514,7 +514,12 @@ class view extends views_db_object {
         if ($this->display_handler->uses_breadcrumb() && $argument->uses_breadcrumb()) {
           $path = $this->get_url($breadcrumb_args);
           if (strpos($path, '%') === FALSE) {
-            $breadcrumb = !empty($argument->options['breadcrumb'])? $argument->options['breadcrumb'] : $title;
+            if (!empty($argument->options['breadcrumb_enable']) && !empty($argument->options['breadcrumb'])) {
+              $breadcrumb = $argument->options['breadcrumb'];
+            }
+            else {
+              $breadcrumb = $title;
+            }
             $this->build_info['breadcrumb'][$path] = str_replace(array_keys($substitutions), $substitutions, $breadcrumb);
           }
         }
@@ -523,7 +528,7 @@ class view extends views_db_object {
         $argument->set_breadcrumb($this->build_info['breadcrumb']);
 
         // Test to see if we should use this argument's title
-        if (!empty($argument->options['title'])) {
+        if (!empty($argument->options['title_enable']) && !empty($argument->options['title'])) {
           $title = $argument->options['title'];
         }
 

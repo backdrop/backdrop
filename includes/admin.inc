@@ -5,33 +5,52 @@
  * Provides the Views' administrative interface.
  */
 
+/**
+ * Create an array of Views admin CSS for adding or attaching.
+ *
+ * This returns an array of arrays. Each array represents a single
+ * file. The array format is:
+ * - file: The fully qualified name of the file to send to drupal_add_css
+ * - options: An array of options to pass to drupal_add_css.
+ */
+function views_ui_get_admin_css() {
+  $module_path = drupal_get_path('module', 'views_ui');
+  $list = array();
+  $list[$module_path . '/css/views-admin.css'] = array();
+
+  $list[$module_path . '/css/ie/views-admin.ie7.css'] = array(
+    'browsers' => array(
+      'IE' => 'lte IE 7',
+      '!IE' => FALSE
+    ),
+    'preprocess' => FALSE,
+  );
+
+  $list[$module_path . '/css/views-admin.theme.css'] = array();
+
+  // Add in any theme specific CSS files we have
+  $themes = list_themes();
+  $theme_key = $GLOBALS['theme'];
+  while ($theme_key) {
+    $list[$module_path . "/css/views-admin.$theme_key.css"] = array(
+      'group' => CSS_THEME,
+    );
+    $theme_key = isset($themes[$theme_key]->base_theme) ? $themes[$theme_key]->base_theme : '';
+  }
+
+  if (module_exists('contextual')) {
+    $list[$module_path . '/css/views-admin.contextual.css'] = array();
+  }
+
+  return $list;
+}
 
 /**
  * Adds standard Views administration CSS to the current page.
  */
 function views_ui_add_admin_css() {
-  $module_path = drupal_get_path('module', 'views_ui');
-  drupal_add_css($module_path . '/css/views-admin.css');
-  drupal_add_css($module_path . '/css/ie/views-admin.ie7.css',
-    array(
-      'browsers' => array(
-        'IE' => 'lte IE 7',
-        '!IE' => FALSE
-      ),
-      'preprocess' => FALSE,
-    )
-  );
-  drupal_add_css($module_path . '/css/views-admin.theme.css');
-
-  if ($GLOBALS['theme'] === 'seven' || (isset($GLOBALS['theme_info']->base_theme) && $GLOBALS['theme_info']->base_theme === 'seven')) {
-    drupal_add_css($module_path . '/css/views-admin.seven.css',
-      array(
-        'group' => CSS_THEME,
-      )
-    );
-  }
-  if (module_exists('contextual')) {
-    drupal_add_css($module_path . '/css/views-admin.contextual.css');
+  foreach (views_ui_get_admin_css() as $file => $options) {
+    drupal_add_css($file, $options);
   }
 }
 
@@ -648,31 +667,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // for it, instead of having to add it manually here.
   $form['#attached']['js'][] = 'misc/tabledrag.js';
 
+  $form['#attached']['css'] = views_ui_get_admin_css();
   $module_path = drupal_get_path('module', 'views_ui');
-  $form['#attached']['css'][] = $module_path . '/css/views-admin.css';
-  $form['#attached']['css'][] = $module_path . '/css/views-admin.theme.css';
-  $form['#attached']['css'][] = array(
-    'data' => $module_path . '/css/ie/views-admin.ie7.css',
-    'group' => CSS_DEFAULT,
-    'browsers' => array(
-      'IE' => 'lte IE 7',
-      '!IE' => FALSE
-    ),
-    'preprocess' => FALSE,
-  );
-
-  // Add CSS specific to the Seven theme.
-  if ($GLOBALS['theme'] === 'seven' || (isset($GLOBALS['theme_info']->base_theme) && $GLOBALS['theme_info']->base_theme === 'seven')) {
-    $form['#attached']['css'][$module_path . '/css/views-admin.seven.css'] = array(
-      'group' => CSS_THEME,
-      'preprocess' => TRUE,
-    );
-  }
-
-  // Add CSS specific to the contextual module.
-  if (module_exists('contextual')) {
-    $form['#attached']['css'][$module_path . '/css/views-admin.contextual.css'] = array();
-  }
 
   $form['#attached']['js'][] = $module_path . '/js/views-admin.js';
   $form['#attached']['js'][] = array(

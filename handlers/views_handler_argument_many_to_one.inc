@@ -77,7 +77,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
     $this->helper->ensure_my_table();
   }
 
-  function query() {
+  function query($group_by = FALSE) {
     $empty = FALSE;
     if (isset($this->definition['zero is null']) && $this->definition['zero is null']) {
       if (empty($this->argument)) {
