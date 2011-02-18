@@ -1913,9 +1913,16 @@ class views_db_object {
 
     if (empty($id)) {
       $id = $this->generate_display_id($type);
-      $count = str_replace($type . '_', '', $id);
+      preg_match("/[0-9]/", $id, $count);
+      $count = $count[0];
+
       if (empty($title)) {
-        $title = $plugin['title'] . ' ' . $count;
+        if ($count > 1) {
+          $title = $plugin['title'] . ' ' . $count;
+        }
+        else {
+          $title = $plugin['title'];
+        }
       }
     }
 
