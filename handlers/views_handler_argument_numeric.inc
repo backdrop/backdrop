@@ -73,7 +73,7 @@ class views_handler_argument_numeric extends views_handler_argument {
     return $this->value;
   }
 
-  function query() {
+  function query($group_by = FALSE) {
     $this->ensure_my_table();
 
     if (!empty($this->options['break_phrase'])) {

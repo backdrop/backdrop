@@ -56,5 +56,5 @@ class views_handler_argument_null extends views_handler_argument {
    * Override the behavior of query() to prevent the query
    * from being changed in any way.
    */
-  function query() {}
+  function query($group_by = FALSE) {}
 }
