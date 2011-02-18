@@ -15,7 +15,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   protected function build_form_style(&$form, &$form_state, $type) {
     parent::build_form_style($form, $form_state, $type);
     $style_form =& $form['displays'][$type]['options']['style'];
-    $row_style = isset($form_state['values'][$type]['style']['row_style']) ? $form_state['values'][$type]['style']['row_style'] : 'full_posts';
+    $row_style = isset($form_state['values'][$type]['style']['row_plugin']) ? $form_state['values'][$type]['style']['row_plugin'] : 'full_posts';
     switch ($row_style) {
       case 'full_posts':
       case 'teasers':
@@ -76,23 +76,23 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   protected function page_display_options($form, $form_state) {
     $display_options = parent::default_display_options($form, $form_state);
     $row_plugin = $form_state['values']['page']['style']['row_plugin'];
-    $row_options = $form_state['values']['page']['style']['row_options'];
+    $row_options = isset($form_state['values']['page']['style']['row_options']) ? $form_state['values']['page']['style']['row_options'] : array();
     $this->display_options_row($display_options, $row_plugin, $row_options);
-    dsm($display_options);
+    return $display_options;
   }
 
   protected function block_display_options($form, $form_state) {
     $display_options = parent::default_display_options($form, $form_state);
     $row_plugin = $form_state['values']['block']['style']['row_plugin'];
-    $row_options = $form_state['values']['block']['style']['row_options'];
+    $row_options = isset($form_state['values']['block']['style']['row_options']) ? $form_state['values']['block']['style']['row_options'] : array();
     $this->display_options_row($display_options, $row_plugin, $row_options);
+    return $display_options;
   }
 
   /**
    * Set the row style and row style plugins to the display_options.
    */
   protected  function display_options_row(&$display_options, $row_plugin, $row_options) {
-    dsm($row_options);
     switch ($row_plugin) {
       case 'full_posts':
         $display_options['row_plugin'] = 'node';
@@ -107,11 +107,11 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
         $display_options['row_options']['comments'] = !empty($row_options['comments']);
         break;
       case 'titles_linked':
-        $display_options['row_plugin'] = 'field';
+        $display_options['row_plugin'] = 'fields';
         $display_options['fields']['title']['link_to_node'] = 1;
         break;
       case 'titles':
-        $display_options['row_plugin'] = 'field';
+        $display_options['row_plugin'] = 'fields';
         $display_options['fields']['title']['link_to_node'] = 0;
         break;
     }
