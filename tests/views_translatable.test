@@ -38,7 +38,7 @@ class viewsTranslatableTest extends ViewsSqlTest {
     variable_set('views_localization_plugin', 'test');
     // Reset the plugin data.
     views_fetch_plugin_data(NULL, NULL, TRUE);
-    $this->strings = array('Defaults1', 'Apply1', 'Sort By1', 'Asc1', 'Desc1', 'more1', 'Reset1', 'Offset1', 'Defaults1', 'title1', 'Items per page1', 'fieldlabel1', 'filterlabel1');
+    $this->strings = array('Master1', 'Apply1', 'Sort By1', 'Asc1', 'Desc1', 'more1', 'Reset1', 'Offset1', 'Master1', 'title1', 'Items per page1', 'fieldlabel1', 'filterlabel1');
     $this->enableViewsUi();
   }
 
@@ -96,8 +96,8 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $view->api_version = '3.0-alpha1';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults1', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master1', 'default');
     $handler->display->display_options['title'] = 'title1';
     $handler->display->display_options['use_more_text'] = 'more1';
     $handler->display->display_options['access']['type'] = 'none';

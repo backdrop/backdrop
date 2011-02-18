@@ -1025,10 +1025,10 @@ function views_ui_get_display_tab($view, $display_id) {
  *   A renderable page build array.
  */
 function views_ui_get_display_tab_details($view, $display) {
-  $type = $display->display_title;
+  $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
     '#type' => 'fieldset',
-    '#title' => t('@display_type details', array('@display_type' => ucwords($type))),
+    '#title' => t('@display_title details', array('@display_title' => ucwords($display_title))),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE, // @TODO: Close by default after contextual links are added.
     '#attributes' => array('class' => array('box-padding')),
@@ -4466,13 +4466,15 @@ function theme_views_ui_style_plugin_table($variables) {
  *
  * @todo Remove this function once editing the display title is possible.
  */
-function views_ui_get_display_label($view, $display_id) {
-  $changed = '';
-  if (!empty($view->changed_display[$display_id])) {
-    $changed = '*';
-  }
+function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   $title = $display_id == 'default' ? t('Master') : check_plain($view->display[$display_id]->display_title);
-  return $title . $changed;
+
+  if ($check_changed && !empty($view->changed_display[$display_id])) {
+    $changed = '*';
+    $title = $title . $changed;
+  }
+
+  return $title;
 }
 
 function views_ui_add_template_page() {

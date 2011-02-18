@@ -310,7 +310,7 @@ function hook_views_default_views() {
   $view->display = array();
     $display = new views_display;
     $display->id = 'default';
-    $display->display_title = t('Defaults');
+    $display->display_title = t('Master');
     $display->display_plugin = 'default';
     $display->position = '1';
     $display->display_options = array (

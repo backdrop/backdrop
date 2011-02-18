@@ -18,7 +18,7 @@ function taxonomy_views_default_views() {
   $view->api_version = 2;
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
-  $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->override_option('sorts', array(
     'sticky' => array(
       'id' => 'sticky',

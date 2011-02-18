@@ -373,7 +373,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->core = VERSION;
     $view->base_table = $this->base_table;
 
-    // Display: Defaults
+    // Display: Master
     $default_display = $view->new_display('default', 'Master', 'default');
     $options = $this->default_display_options($form, $form_state);
     if (!isset($options['filters'])) {

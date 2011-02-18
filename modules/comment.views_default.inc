@@ -19,8 +19,8 @@ function comment_views_default_views() {
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
 
-  /* Display: Defaults */
-  $handler = $view->new_display('default', 'Defaults', 'default');
+  /* Display: Master */
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Recent comments';
   $handler->display->display_options['use_more'] = TRUE;
   $handler->display->display_options['access']['type'] = 'none';
@@ -113,7 +113,7 @@ function comment_views_default_views() {
   $view->api_version = 2;
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
-  $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->override_option('fields', array(
     'type' => array(
       'id' => 'type',
