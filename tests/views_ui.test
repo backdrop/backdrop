@@ -27,7 +27,6 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->drupalGet('admin/structure/views');
-    $this->assertText(t('No views have been added.'));
     $this->assertText(t('Add new view'));
 
     // Create a simple and not at all useful view.
@@ -36,7 +35,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view1['name'] = strtolower($this->randomName(16));
     $view1['description'] = $this->randomName(16);
     $view1['page[create]'] = FALSE;
-    $this->drupalPost('admin/structure/views/add', $view1, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view1, t('Save & exit'));
 //     $this->assertText(t('Your view was saved. You may edit it from the list below.'));
     $this->assertText($view1['human_name']);
     $this->assertText($view1['description']);
@@ -62,7 +61,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view2['page[path]'] = $this->randomName(16);
     $view2['page[feed]'] = 1;
     $view2['page[feed_properties][path]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view2, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view2, t('Save & exit'));
 
     // Since the view has a page, we expect to be automatically redirected to
     // it.
@@ -104,7 +103,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view3['page[path]'] = $this->randomName(16);
     $view3['block[create]'] = 1;
     $view3['block[title]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view3, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view3, t('Save & exit'));
 
     // Make sure the view only displays the node we expect.
     $this->assertUrl($view3['page[path]']);
@@ -159,7 +158,9 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     // the listing page).
     $edit_href = 'admin/structure/views/view/frontpage/edit';
     $this->drupalGet('admin/structure/views');
-    $this->assertNoLinkByHref($edit_href);
+    // TODO: Disabled default views do now appear on the front page. Test this
+    // behavior with templates instead.
+    // $this->assertNoLinkByHref($edit_href);
 
     // Enable the front page view, and make sure it is now visible on the main
     // listing page.
@@ -194,10 +195,11 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     // Now disable the view, and make sure it stops appearing on the main view
     // listing page but instead goes back to displaying on the disabled views
     // listing page.
+    // TODO: Test this behavior with templates instead.
     $this->drupalGet('admin/structure/views');
-    $this->clickViewsOperationLink(t('disable'), '/frontpage/');
-    $this->assertUrl('admin/structure/views');
-    $this->assertNoLinkByHref($edit_href);
+    $this->clickViewsOperationLink(t('Disable'), '/frontpage/');
+    // $this->assertUrl('admin/structure/views');
+    // $this->assertNoLinkByHref($edit_href);
     // The easiest way to verify it appears on the disabled views listing page
     // is to try to click the "enable" link from there again.
     $this->drupalGet('admin/structure/views/templates');
@@ -349,7 +351,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $view1['page[create]'] = 1;
     $view1['page[title]'] = $this->randomName(16);
     $view1['page[path]'] = $this->randomName(16);
-    $this->drupalPost(NULL, $view1, t('Save'));
+    $this->drupalPost(NULL, $view1, t('Save & exit'));
     // Visit the page and check that the nodes we expect are present and the
     // ones we don't expect are absent.
     $this->drupalGet($view1['page[path]']);
@@ -369,7 +371,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $view2['page[create]'] = 1;
     $view2['page[title]'] = $this->randomName(16);
     $view2['page[path]'] = $this->randomName(16);
-    $this->drupalPost(NULL, $view2, t('Save'));
+    $this->drupalPost(NULL, $view2, t('Save & exit'));
     $this->drupalGet($view2['page[path]']);
     $this->assertNoText($node_tag1_title);
     $this->assertText($node_tag1_tag2_title);
@@ -437,7 +439,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
     $view1['page[create]'] = 1;
     $view1['page[title]'] = $this->randomName(16);
     $view1['page[path]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view1, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view1, t('Save & exit'));
 
     // Make sure the view shows the nodes in the expected order.
     $this->assertUrl($view1['page[path]']);
@@ -460,7 +462,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
     $view2['page[create]'] = 1;
     $view2['page[title]'] = $this->randomName(16);
     $view2['page[path]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view2, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view2, t('Save & exit'));
 
     // Make sure the view shows the nodes in the expected order.
     $this->assertUrl($view2['page[path]']);
@@ -516,7 +518,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     $view['block[create]'] = 1;
     $view['block[title]'] = $this->randomName(16);
     $view['block[items_per_page]'] = 3;
-    $this->drupalPost('admin/structure/views/add', $view, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view, t('Save & exit'));
 
     // Make sure the page display shows the nodes we expect, and that they
     // appear in the expected order.
@@ -582,7 +584,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
     $view['page[link]'] = 1;
     $view['page[link_properties][menu_name]'] = 'main-menu';
     $view['page[link_properties][title]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view, t('Save & exit'));
 
     // Make sure there is a link to the view from the front page (where we
     // expect the main menu to display).
@@ -624,7 +626,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[path]'] = $this->randomName(16);
     $view['block[create]'] = 1;
     $view_path = $view['page[path]'];
-    $this->drupalPost('admin/structure/views/add', $view, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view, t('Save & exit'));
 
     // Configure its title. Since the page and block both started off with the
     // same (empty) title in the views wizard, we expect the wizard to have set
@@ -690,7 +692,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[feed_properties][path]'] = $this->randomName(16);
     $view['block[create]'] = 1;
     $view['block[title]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view, t('Save & exit'));
 
     // Put the block into the first sidebar region, and make sure it will not
     // display on the view's page display (since we will be searching for the

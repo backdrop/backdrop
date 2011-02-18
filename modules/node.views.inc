@@ -389,6 +389,7 @@ function node_views_data() {
 
   // Define the base group of this table. Fields that don't
   // have a group defined will go into this field by default.
+  $data['node_revisions']['moved to'] = 'node_revision';
   $data['node_revision']['table']['group']  = t('Content revision');
 
   // Advertise this table as a possible base table
@@ -548,6 +549,7 @@ function node_views_data() {
   // We're actually defining a specific instance of the table, so let's
   // alias it so that we can later add the real table for other purposes if we
   // need it.
+  $data['history_user']['moved to'] = 'history';
   $data['history']['table']['group']  = t('Content');
 
   // Explain how this table joins to others.

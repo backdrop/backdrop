@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_search.inc,v 1.5.6.4 2011/02/08 22:50:11 dereine Exp $
+// $Id: views_handler_filter_search.inc,v 1.5.6.5 2011/02/18 01:02:48 dereine Exp $
 
 /**
  * Field handler to provide simple renderer that allows linking to a node.

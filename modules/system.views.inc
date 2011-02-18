@@ -1,5 +1,5 @@
 <?php
-// $Id: system.views.inc,v 1.7.6.8 2011/01/22 22:49:09 dereine Exp $
+// $Id: system.views.inc,v 1.7.6.9 2011/02/16 14:37:42 dereine Exp $
 /**
  * @file
  *
@@ -22,6 +22,7 @@ function system_views_data() {
   // ----------------------------------------------------------------------
   // file_managed table
 
+  $data['files']['moved to'] = 'file_managed';
   $data['file_managed']['table']['group']  = t('File');
 
   // Advertise this table as a possible base table

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_module.test,v 1.1.2.3 2010/12/17 21:51:42 dereine Exp $
+// $Id: views_module.test,v 1.1.2.4 2011/02/16 18:48:28 dereine Exp $
 module_load_include('test', 'views', 'tests/views_query');
 class viewsModuleTest extends ViewsSqlTest {
   public static function getInfo() {

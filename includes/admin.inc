@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.161.4.90 2011/02/04 14:13:16 dereine Exp $
+// $Id: admin.inc,v 1.161.4.91 2011/02/16 18:48:28 dereine Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -37,10 +37,14 @@ function views_ui_get_admin_css() {
     );
     $theme_key = isset($themes[$theme_key]->base_theme) ? $themes[$theme_key]->base_theme : '';
   }
-
-  if (module_exists('contextual')) {
-    $list[$module_path . '/css/views-admin.contextual.css'] = array();
+  // Views contains style overrides for the following modules
+  $module_list = array('contextual', 'advanced_help');
+  foreach ($module_list as $module) {
+    if (module_exists($module)) {
+      $list[$module_path . '/css/views-admin.' . $module . '.css'] = array();
+    }
   }
+  
 
   return $list;
 }
@@ -362,15 +366,16 @@ function views_ui_add_form($form, &$form_state) {
 
   $form['save'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save & exit'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
   );
   $form['continue'] = array(
     '#type' => 'submit',
-    '#value' => t('Continue'),
+    '#value' => t('Continue & edit'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
+    '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
   );
   $form['cancel'] = array(
     '#type' => 'submit',
@@ -695,12 +700,20 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#markup' => t('This view is being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_interval(REQUEST_TIME - $view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
     );
   }
-  if (!empty($view->changed)) {
-    $form['changed'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('view-changed', 'messages', 'warning')),
-      '#markup' => t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.'),
-    );
+  if (isset($view->vid) && $view->vid == 'new') {
+    $message = t('* This view will not exist until the <em>Save</em> button is clicked.');
+  }
+  else {
+    $message = t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.');
+  }
+
+  $form['changed'] = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('class' => array('view-changed', 'messages', 'warning')),
+    '#markup' => $message,
+  );
+  if (empty($view->changed)) {
+    $form['changed']['#attributes']['class'][] = 'js-hide';
   }
 
   $form['help_text'] = array(
@@ -731,7 +744,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => t('Undo changes'),
+    '#value' => (isset($view->vid) && $view->vid == 'new') ? t('Discard view') : t('Undo changes'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
   );
 
@@ -804,7 +817,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       ),
     ),
   );
-  if ($view->type != t('Default')) {
+  if (isset($view->type) && $view->type != t('Default')) {
     if ($view->type == t('Overridden')) {
       $form['displays']['top']['extra_actions']['#links']['revert'] = array(
         'title' => t('revert'),
@@ -4636,5 +4649,16 @@ function views_ui_form_button_was_clicked($element, &$form_state) {
   if ($process_input && !isset($form_state['triggering_element']) && isset($element['#button_type']) && isset($form_state['input'][$element['#name']]) && isset($element['#values']) && in_array($form_state['input'][$element['#name']], $element['#values'], TRUE)) {
     $form_state['triggering_element'] = $element;
   }
+  return $element;
+}
+
+/**
+ * #process callback for a button; makes implicit form submissions trigger as this button.
+ *
+ * @see Drupal.behaviors.viewsImplicitFormSubmission
+ */
+function views_ui_default_button($element, &$form_state, $form) {
+  $setting['viewsImplicitFormSubmission'][$form['#id']]['defaultButton'] = $element['#id'];
+  $element['#attached']['js'][] = array('type' => 'setting', 'data' => $setting);
   return $element;
 }

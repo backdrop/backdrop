@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.341.4.54 2011/02/06 14:29:01 dereine Exp $
+// $Id: views.module,v 1.341.4.56 2011/02/17 05:06:00 dereine Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -800,8 +800,14 @@ function views_get_handler($table, $field, $key, $override = NULL) {
 
   if (isset($data[$field][$key])) {
     // Support old views_data entries conversion.
+    if (isset($data[$field]['moved to'])) {
+      $moved = $data[$field]['moved to'];
+    }
     if (isset($data[$field][$key]['moved to'])) {
-      list($moved_table, $moved_field) = $data[$field][$key]['moved to'];
+      $moved = $data[$field][$key]['moved to'];
+    }
+    if (!empty($moved)) {
+      list($moved_table, $moved_field) = $moved;
       if (!empty($recursion_protection[$moved_table][$moved_field])) {
         // recursion detected!
         return NULL;

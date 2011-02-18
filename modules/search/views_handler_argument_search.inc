@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_argument_search.inc,v 1.1.2.2 2010/01/24 22:37:52 dereine Exp $
+// $Id: views_handler_argument_search.inc,v 1.1.2.3 2011/02/18 01:02:48 dereine Exp $
 
 /**
  * Argument that accepts query keys for search.
