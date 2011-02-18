@@ -111,8 +111,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
     $form['displays']['page']['options']['style'] = array(
       '#type' => 'fieldset',
-      '#collapsible' => FALSE,
-      '#collapsed' => FALSE,
+      '#attributes' => array('class' => array('container-inline')),
     );
     $form['displays']['page']['options']['style']['style_plugin'] = array(
       '#title' => t('Display format'),
@@ -250,7 +249,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Build the part of the form that builds the display format options.
    */
   protected function build_form_style(&$form, &$form_state, $type) {
-    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style_plugin'] : $form['displays'][$type]['options']['style_plugin']['#default_value'];
+    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : $form['displays'][$type]['options']['style_plugin']['#default_value'];
     $style_plugin = views_get_plugin('style', $style);
     $options = $this->row_style_options($type);
     $form['displays'][$type]['options']['style']['row_style'] = array(
@@ -575,7 +574,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $page = $form_state['values']['page'];
     $display_options['title'] = $page['title'];
     $display_options['path'] = $page['path'];
-    $display_options['style_plugin'] = $page['style_plugin'];
+    $display_options['style_plugin'] = $page['style']['style_plugin'];
     $display_options['pager']['type'] = 'full';
     $display_options['pager']['options']['items_per_page'] = $page['items_per_page'];
     if (!empty($page['link'])) {
@@ -590,7 +589,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options = array();
     $block = $form_state['values']['block'];
     $display_options['title'] = $block['title'];
-    $display_options['style_plugin'] = $block['style_plugin'];
+    $display_options['style_plugin'] = $block['style']['style_plugin'];
     $display_options['pager']['type'] = 'full';
     $display_options['pager']['options']['items_per_page'] = $block['items_per_page'];
     return $display_options;
