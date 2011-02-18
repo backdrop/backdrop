@@ -17,6 +17,7 @@
  */
 
 function comment_views_data() {
+  $data['comments']['moved to'] = 'comment';
   // Define the base group of this table. Fields that don't
   // have a group defined will go into this field by default.
   $data['comment']['table']['group']  = t('Comment');
