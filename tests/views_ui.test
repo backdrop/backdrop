@@ -350,6 +350,8 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $view1['page[title]'] = $this->randomName(16);
     $view1['page[path]'] = $this->randomName(16);
     $this->drupalPost(NULL, $view1, t('Save'));
+    // Visit the page and check that the nodes we expect are present and the
+    // ones we don't expect are absent.
     $this->drupalGet($view1['page[path]']);
     $this->assertText($node_tag1_title);
     $this->assertText($node_tag1_tag2_title);
@@ -358,11 +360,8 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     // Create a view that filters by taxonomy term "tag2". It should show only
     // the one node from above that is tagged with "tag2".
     $view2 = array();
-    // First select the node type and update the form so the correct tag field
-    // is used.
     $view2['show[type]'] = $this->node_type_with_tags->type;
     $this->drupalPost('admin/structure/views/add', $view2, t('Update options'));
-    // Now resubmit the entire form to the same URL.
     $view2['human_name'] = $this->randomName(16);
     $view2['name'] = strtolower($this->randomName(16));
     $view2['description'] = $this->randomName(16);
