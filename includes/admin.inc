@@ -793,7 +793,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
     $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
     // Mark deleted displays as such.
-    if ($view->display[$display_id]->deleted) {
+    if (!empty($view->display[$display_id]->deleted)) {
       $form['displays']['tab_content']['#attributes']['class'][] = 'views-display-deleted';
     }
 
