@@ -15,7 +15,7 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
     $row_style = isset($form_state['values'][$type]['style']['row_style']) ? $form_state['values'][$type]['style']['row_style'] : 'comment';
     switch ($row_style) {
       case 'comment':
-        $style_form['row_style_options']['with_links'] = array(
+        $style_form['row_options']['with_links'] = array(
           '#type' => 'select',
           '#title_display' => 'invisible',
           '#title' => t('Should links be displayed below each node'),

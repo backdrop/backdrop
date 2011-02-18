@@ -262,7 +262,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         'callback' => 'views_ui_add_form_update_row_' . $type,
       ),
     );
-    $style_form['row_style_options'] = array(
+    $style_form['row_options'] = array(
       '#type' => 'container',
       '#id' => "edit-style-$type-options-style-row-plugin-options",
     );
@@ -601,6 +601,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $block = $form_state['values']['block'];
     $display_options['title'] = $block['title'];
     $display_options['style_plugin'] = $block['style']['style_plugin'];
+    $display_options['row_plugin'] = isset($block['style']['row_plugin']) ? $block['style']['row_plugin'] : 'fields';
     $display_options['pager']['type'] = 'full';
     $display_options['pager']['options']['items_per_page'] = $block['items_per_page'];
     return $display_options;
