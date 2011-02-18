@@ -253,18 +253,18 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : $style_form['style_plugin']['#default_value'];
     $style_plugin = views_get_plugin('style', $style);
     $options = $this->row_style_options($type);
-    $style_form['row_style'] = array(
+    $style_form['row_plugin'] = array(
       '#type' => 'select',
       '#title' => t('of'),
       '#options' => $options,
       '#ajax' => array(
-        'wrapper' => "edit-style-$type-options-style-row-style-options",
+        'wrapper' => "edit-style-$type-options-style-row-plugin-options",
         'callback' => 'views_ui_add_form_update_row_' . $type,
       ),
     );
     $style_form['row_style_options'] = array(
       '#type' => 'container',
-      '#id' => "edit-style-$type-options-style-row-style-options",
+      '#id' => "edit-style-$type-options-style-row-plugin-options",
     );
   }
 
@@ -584,6 +584,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['title'] = $page['title'];
     $display_options['path'] = $page['path'];
     $display_options['style_plugin'] = $page['style']['style_plugin'];
+    // Not every style plugin supports row style plugins.
+    $display_options['row_plugin'] = isset($page['style']['row_plugin']) ? $page['style']['row_plugin'] : 'fields';
     $display_options['pager']['type'] = 'full';
     $display_options['pager']['options']['items_per_page'] = $page['items_per_page'];
     if (!empty($page['link'])) {
