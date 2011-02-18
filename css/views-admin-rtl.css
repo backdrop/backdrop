@@ -64,7 +64,7 @@
  *
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
-.views-display-tab .fieldset-wrapper > .actions {
+.views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
   left: 0;
   right: auto;
 }

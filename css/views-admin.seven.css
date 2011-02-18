@@ -49,7 +49,7 @@ legend + .fieldset-wrapper {
   margin-right: 1em;
 }
 
-/* Override for filter button on the vies list screen */
+/* Override for filter button on the views list screen */
 #ctools-export-ui-list-form .form-submit {
   margin-top: 1.3em;
 }
