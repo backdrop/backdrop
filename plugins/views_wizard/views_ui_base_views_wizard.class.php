@@ -249,10 +249,11 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Build the part of the form that builds the display format options.
    */
   protected function build_form_style(&$form, &$form_state, $type) {
-    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : $form['displays'][$type]['options']['style_plugin']['#default_value'];
+    $style_form =& $form['displays'][$type]['options']['style'];
+    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : $style_form['style_plugin']['#default_value'];
     $style_plugin = views_get_plugin('style', $style);
     $options = $this->row_style_options($type);
-    $form['displays'][$type]['options']['style']['row_style'] = array(
+    $style_form['row_style'] = array(
       '#type' => 'select',
       '#title' => t('of'),
       '#options' => $options,
@@ -267,6 +268,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function row_style_options($type) {
     $data = views_fetch_data($this->base_table);
     return array(
+      // @TODO allow to use 'defaults' in the base table.
       'fields:' . $data['table']['base']['field'] => $data[$data['table']['base']['field']]['title'],
     );
   }
