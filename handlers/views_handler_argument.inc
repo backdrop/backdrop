@@ -60,31 +60,31 @@ class views_handler_argument extends views_handler {
     }
 
     if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc') {
-      $options['default_action'] = 'summary';
-      $options['summary']['sort_order'] = 'asc';
-      $options['summary']['number_of_records'] = 0;
+      $this->options['default_action'] = 'summary';
+      $this->options['summary']['sort_order'] = 'asc';
+      $this->options['summary']['number_of_records'] = 0;
     }
     elseif (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary desc') {
-      $options['default_action'] = 'summary';
-      $options['summary']['sort_order'] = 'desc';
-      $options['summary']['number_of_records'] = 0;
+      $this->options['default_action'] = 'summary';
+      $this->options['summary']['sort_order'] = 'desc';
+      $this->options['summary']['number_of_records'] = 0;
     }
     elseif (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc by count') {
-      $options['default_action'] = 'summary';
-      $options['summary']['sort_order'] = 'asc';
-      $options['summary']['number_of_records'] = 1;
+      $this->options['default_action'] = 'summary';
+      $this->options['summary']['sort_order'] = 'asc';
+      $this->options['summary']['number_of_records'] = 1;
     }
     elseif (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary desc by count') {
-      $options['default_action'] = 'summary';
-      $options['summary']['sort_order'] = 'desc';
-      $options['summary']['number_of_records'] = 1;
+      $this->options['default_action'] = 'summary';
+      $this->options['summary']['sort_order'] = 'desc';
+      $this->options['summary']['number_of_records'] = 1;
     }
 
     if (!empty($options['title']) && !isset($options['title_enable'])) {
-      $options['title_enable'] = 1;
+      $this->options['title_enable'] = 1;
     }
     if (!empty($options['breadcrumb']) && !isset($options['breadcrumb_enable'])) {
-      $options['breadcrumb_enable'] = 1;
+      $this->options['breadcrumb_enable'] = 1;
     }
   }
 
@@ -116,7 +116,7 @@ class views_handler_argument extends views_handler {
 
   function exception_title() {
     // If title overriding is off for the exception, return the normal title.
-    if (!empty($this->options['exception']['title_enable'])) {
+    if (empty($this->options['exception']['title_enable'])) {
       return $this->get_title();
     }
     return $this->options['exception']['title'];
