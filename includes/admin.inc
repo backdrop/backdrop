@@ -362,13 +362,13 @@ function views_ui_add_form($form, &$form_state) {
 
   $form['save'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save & exit'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
   );
   $form['continue'] = array(
     '#type' => 'submit',
-    '#value' => t('Continue'),
+    '#value' => t('Continue & edit'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
   );
