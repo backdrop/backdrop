@@ -668,21 +668,21 @@ html.js .views-ui-display-tab-bucket .drop-list.open .trigger span {
   padding: 0;
 }
 
-.views-filterable-options .form-type-checkbox {
+div.views-filterable-options .form-type-checkbox {
   border: 1px solid #CCC;
   padding: 5px 8px;
   border-top: none;
 }
 
-.views-filterable-options {
+div.views-filterable-options {
   border-top:  1px solid #CCC;
 }
 
-.views-filterable-options .even .form-type-checkbox {
+div.views-filterable-options .even .form-type-checkbox {
   background-color: #F3F4EE;
 }
 
-.views-filterable-options .form-type-checkbox .description {
+div.views-filterable-options .form-type-checkbox .description {
   margin-top: 0;
   margin-bottom: 0;
 }
