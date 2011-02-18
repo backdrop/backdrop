@@ -1,5 +1,5 @@
 <?php
-// $Id: plugins.inc,v 1.156.4.16 2011/02/05 16:50:37 dereine Exp $
+// $Id: plugins.inc,v 1.156.4.17 2011/02/18 00:22:53 dereine Exp $
 /**
  * @file plugins.inc
  * Built in plugins for Views output handling.
