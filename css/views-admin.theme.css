@@ -866,3 +866,26 @@ div.views-filterable-options .form-type-checkbox .description {
 /* @end */
 
 /* @end */
+
+/* @group Add/edit argument form */
+
+#edit-options-default-action {
+  width: 300px;
+  float: left;
+}
+
+#edit-options-exception {
+  float: right;
+  width: 250px;
+  margin-top: 0pt;
+}
+
+#edit-options-argument-present .form-item {
+  margin-top: 10px;
+}
+
+#edit-options-exception .form-type-textfield, #edit-options-argument-present .form-type-textfield {
+  margin-top: 0;
+}
+
+/* @end */

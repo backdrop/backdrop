@@ -193,6 +193,7 @@ class views_handler_argument extends views_handler {
     $form['exception']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Override title'),
+      '#title_display' => 'invisible',
       '#size' => 20,
       '#default_value' => $this->options['exception']['title'],
       '#description' => t('Override the view and other argument titles. Use "%1" for the first argument, "%2" for the second, etc.'),
