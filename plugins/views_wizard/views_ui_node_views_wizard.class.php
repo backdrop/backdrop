@@ -2,6 +2,47 @@
 
 class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
 
+  protected function row_style_options($type) {
+    $options = array();
+    $options['full_posts'] = t('full posts');
+    $options['teasers'] = t('teasers');
+    $options['titles_linked'] = t('titles linked');
+    $options['titles'] = t('titles');
+    $options['fields'] = t('Fields');
+    return $options;
+  }
+
+  protected function build_form_style(&$form, &$form_state, $type) {
+    parent::build_form_style($form, $form_state, $type);
+    $style_form =& $form['displays'][$type]['options']['style'];
+    $row_style = isset($form_state['values'][$type]['style']['row_style']) ? $form_state['values'][$type]['style']['row_style'] : 'full_posts';
+    switch ($row_style) {
+      case 'full_posts':
+      case 'teasers':
+        $style_form['row_style_options']['with_links'] = array(
+          '#type' => 'select',
+          '#title_display' => 'invisible',
+          '#title' => t('Should links be displayed below each node'),
+          '#options' => array(
+            1 => t('with links (allow users to add comments, etc.)'),
+            0 => t('without links'),
+          ),
+          '#default_value' => 1,
+        );
+        $style_form['row_style_options']['with_comments'] = array(
+          '#type' => 'select',
+          '#title_display' => 'invisible',
+          '#title' => t('Should comments be displayed below each node'),
+          '#options' => array(
+            1 => t('with comments'),
+            0 => t('without comments'),
+          ),
+          '#default_value' => 1,
+        );
+        break;
+    }
+  }
+
   /**
    * @override
    */

@@ -257,6 +257,14 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'select',
       '#title' => t('of'),
       '#options' => $options,
+      '#ajax' => array(
+        'wrapper' => "edit-style-$type-options-style-row-style-options",
+        'callback' => 'views_ui_add_form_update_row_' . $type,
+      ),
+    );
+    $style_form['row_style_options'] = array(
+      '#type' => 'container',
+      '#id' => "edit-style-$type-options-style-row-style-options",
     );
   }
 
@@ -268,8 +276,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function row_style_options($type) {
     $data = views_fetch_data($this->base_table);
     return array(
-      // @TODO allow to use 'defaults' in the base table.
-      'fields:' . $data['table']['base']['field'] => $data[$data['table']['base']['field']]['title'],
+      'fields' => t('Custom fields'),
     );
   }
 

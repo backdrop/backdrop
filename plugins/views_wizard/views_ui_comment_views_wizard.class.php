@@ -2,6 +2,33 @@
 
 class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
 
+  protected function row_style_options($type) {
+    $options = array();
+    $options['comment'] = t('Comments');
+    $options['fields'] = t('Fields');
+    return $options;
+  }
+
+  protected function build_form_style(&$form, &$form_state, $type) {
+    parent::build_form_style($form, $form_state, $type);
+    $style_form =& $form['displays'][$type]['options']['style'];
+    $row_style = isset($form_state['values'][$type]['style']['row_style']) ? $form_state['values'][$type]['style']['row_style'] : 'comment';
+    switch ($row_style) {
+      case 'comment':
+        $style_form['row_style_options']['with_links'] = array(
+          '#type' => 'select',
+          '#title_display' => 'invisible',
+          '#title' => t('Should links be displayed below each node'),
+          '#options' => array(
+            1 => t('with links (allow users to add comments, etc.)'),
+            0 => t('without links'),
+          ),
+          '#default_value' => 1,
+        );
+        break;
+    }
+  }
+
   protected function default_display_options($form, $form_state) {
     $display_options = parent::default_display_options($form, $form_state);
 

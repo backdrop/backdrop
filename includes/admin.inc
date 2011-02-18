@@ -399,6 +399,27 @@ function views_ui_add_form_update_style_block($form, $form_state) {
   return $form['displays']['page']['options'];
 }
 
+
+/**
+ * Update the add view style row_options via AJAX.
+ *
+ * @return
+ *   The part of the form that has changed.
+ */
+function views_ui_add_form_update_row_page($form, $form_state) {
+  return $form['displays']['page']['options']['style']['row_style_options'];
+}
+
+/**
+ * Update the add view row_options form via AJAX.
+ *
+ * @return
+ *   The part of the form that has changed.
+ */
+function views_ui_add_form_update_row_block($form, $form_state) {
+  return $form['displays']['block']['options']['style']['row_style_options'];
+}
+
 /**
  * Validate the add view form.
  */
