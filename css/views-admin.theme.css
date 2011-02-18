@@ -134,6 +134,173 @@
 
 /* @end */
 
+/* @group Buttons */
+
+.views-admin .button {
+  background-color: #ffffff;
+  background-image:
+    -moz-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #efefef 100%);
+  background-image:
+    -webkit-gradient(
+      linear,
+      left top,
+      left bottom,
+      color-stop(0.0, rgba(255, 255, 255, 1.0)),
+      color-stop(1.0, rgba(242, 242, 242, 1.0))
+    );
+  background-image:
+    -webkit-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #efefef 100%);
+  border: 1px solid #D0D0D0;
+  -moz-border-radius: 7px 7px 7px 7px;
+  -webkit-border-radius: 7px 7px 7px 7px;
+  border-radius: 7px 7px 7px 7px;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+}
+
+.views-admin .button:hover {
+  background-image:
+    -moz-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #e6e6e6 100%);
+  background-image:
+    -webkit-gradient(
+      linear,
+      left top,
+      left bottom,
+      color-stop(0.0, rgba(255, 255, 255, 1.0)),
+      color-stop(1.0, rgba(230, 230, 230, 1.0))
+    );
+  background-image:
+    -webkit-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #e6e6e6 100%);
+  border-color: #b8b8b8;
+  cursor: pointer;
+}
+
+.views-admin .button.open:hover {
+  background-image:
+    -moz-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #efefef 100%);
+  background-image:
+    -webkit-gradient(
+      linear,
+      left top,
+      left bottom,
+      color-stop(0.0, rgba(255, 255, 255, 1.0)),
+      color-stop(1.0, rgba(242, 242, 242, 1.0))
+    );
+  background-image:
+    -webkit-linear-gradient(
+      -90deg,
+      #ffffff 0px,
+      #efefef 100%);
+  border: 1px solid #D0D0D0;
+}
+
+.views-admin .button:active {
+  border-color: #a0a0a0;
+}
+
+.views-admin .button > ul {
+  margin: 0;
+  padding-bottom: 2px;
+  padding-top: 2px;
+}
+
+.views-admin .button li {
+  line-height: 1.3333;
+  padding: 0 12px;
+}
+
+/* @group Drop buttons */
+
+.views-admin .drop.button {
+  padding-right: 18px;
+  position: relative;
+}
+
+.views-admin .drop.button > ul {
+  border-right: 1px solid #e8e8e8;
+}
+
+.views-admin .drop.button li,
+.views-admin .drop.button a {
+  display: block;
+}
+
+.views-admin .drop.button .trigger {
+  -moz-border-radius-bottomright: 7px;
+  -moz-border-radius-topright: 7px;
+  -webkit-border-bottom-right-radius: 7px;
+  -webkit-border-top-right-radius: 7px;
+  border-bottom-right-radius: 7px;
+  border-top-right-radius: 7px;
+  border-left: 1px solid #ffffff;
+  bottom: 0;
+  height: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 17px;
+}
+
+.views-admin .drop.button.open {
+  -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+  -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+  z-index: 100;
+}
+
+.views-admin .drop.button.open li + li {
+  border-top: 1px solid #efefef;
+  margin-top: 4px;
+  padding-bottom: 0;
+  padding-top: 4px;
+}
+
+.views-admin .drop.button.open li:last-child {
+  padding-bottom: 2px;
+}
+
+/**
+ * This creates the dropbutton arrow and inherits the link color
+ */
+.views-admin .drop.button .trigger span {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 4px 4px 0;
+  right: 3pt;
+  position: absolute;
+  top: 0.75em;
+}
+
+.views-admin .drop.button.open .trigger span {
+  border-bottom: 4px solid;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  top: 0.5em;
+}
+
+/* @end */
+
+/* @end */
+
 /* @group Forms */
 
 fieldset.box-padding {
@@ -486,111 +653,27 @@ div.form-item-displays-live-preview {
   background-position: 6px -193px;
 }
 
-/* @group Drop list */
+/* @end */
 
-html.js .views-ui-display-tab-bucket {
+/* @group Attachment bucket drop button */
+
+.views-ui-display-tab-bucket {
   position: relative;
 }
 
-html.js .views-ui-display-tab-bucket .drop-list {
-  background-color: #ffffff;
-  background-image:
-    -moz-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #efefef 100%);
-  background-image:
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(242, 242, 242, 1.0))
-    );
-  background-image:
-    -webkit-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #efefef 100%);
-  border: 1px solid #D0D0D0;
-  -moz-border-radius: 7px 7px 7px 7px;
-  -webkit-border-radius: 7px 7px 7px 7px;
-  border-radius: 7px 7px 7px 7px;
-  font-size: 12px;
-  line-height: 1;
+.views-ui-display-tab-bucket .button,
+.views-ui-display-tab-bucket .button.drop {
+  position: absolute;
+}
+
+.views-ui-display-tab-bucket .button {
   right: 5px;
-  padding: 2px 20px 2px 2px;
-  position: absolute;
-  top: 5px;
+  top: 4px;
 }
 
-html.js .views-ui-display-tab-bucket .drop-list .links {
-  margin-right: 0;
+.views-ui-display-tab-bucket .button .links {
+  margin: 0;
 }
-
-html.js .views-ui-display-tab-bucket .drop-list .links li,
-html.js .views-ui-display-tab-bucket .drop-list .links a {
-  display: block;
-}
-
-html.js .views-ui-display-tab-bucket .drop-list .links li {
-  line-height: 1.3333;
-  padding: 0 10px;
-}
-
-html.js .views-ui-display-tab-bucket .drop-list .trigger {
-  -moz-border-radius-bottomright: 7px;
-  -moz-border-radius-topright: 7px;
-  -webkit-border-bottom-right-radius: 7px;
-  -webkit-border-top-right-radius: 7px;
-  border-bottom-right-radius: 7px;
-  border-top-right-radius: 7px;
-  border-left: 1px solid #dfdfdf;
-  bottom: 0;
-  height: auto;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 17px;
-}
-
-html.js .views-ui-display-tab-bucket .drop-list.open {
-  -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  z-index: 100;
-}
-
-html.js .views-ui-display-tab-bucket .drop-list.open li + li {
-  border-top: 1px solid #efefef;
-  margin-top: 4px;
-  padding-bottom: 0;
-  padding-top: 4px;
-}
-
-/**
- * This createds the drop-list arrow and inherits the link color
- */
-html.js .views-ui-display-tab-bucket .drop-list .trigger span {
-  border-bottom-color: transparent;
-  border-left-color: transparent;
-  border-right-color: transparent;
-  border-style: solid;
-  border-width: 4px 4px 0;
-  left: 4pt;
-  position: absolute;
-  top: 0.75em;
-}
-
-html.js .views-ui-display-tab-bucket .drop-list.open .trigger span {
-  border-bottom: 4px solid;
-  border-left-color: transparent;
-  border-right-color: transparent;
-  border-top-color: transparent;
-  top: 0.5em;
-}
-
-/* @end */
 
 /* @end */
 
@@ -886,6 +969,20 @@ div.views-filterable-options .form-type-checkbox .description {
 
 #edit-options-exception .form-type-textfield, #edit-options-argument-present .form-type-textfield {
   margin-top: 0;
+}
+
+/* @end */
+
+/* @group Output specific */
+
+/**
+ * Keeps the admin screen from looking stretched out larger monitors
+ */ 
+@media screen and (min-width: 1400px) {
+  .views-admin {
+    margin: 0 auto;
+    max-width: 1379px;
+  }
 }
 
 /* @end */
