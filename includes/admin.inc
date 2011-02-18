@@ -1210,14 +1210,15 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   if (!empty($element['#item_help_icon'])) {
     $variables['item_help_icon'] = render($element['#item_help_icon']);
   }
-
   if (!empty($element['#name'])) {
     $variables['classes_array'][] = drupal_clean_css_identifier(strtolower($element['#name']));
+  }
+  if (!empty($element['#overridden'])) {
+    $variables['classes_array'][] = 'overridden';
   }
 
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
-  $variables['overridden'] = !empty($element['#overridden']);
   $variables['rearrange'] = !empty($element['#rearrange']) ? $element['#rearrange'] : '';
   $variables['delete'] = !empty($element['#delete']) ? $element['#delete'] : '';
   $variables['add'] = !empty($element['#add']) ? $element['#add'] : '';
@@ -1695,6 +1696,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     if (!empty($view->stack) && count($view->stack) > 1) {
       $name = t('Apply and continue');
     }
+    $names = array(t('Apply'), t('Apply and continue'));
   }
 
   // Forms that are purely informational set an ok_button flag, so we know not
@@ -1710,6 +1712,18 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
       // take care of running the regular submit handler as appropriate.
       '#submit' => array('views_ui_standard_submit'),
     );
+    // Form API button click detection requires the button's #value to be the
+    // same between the form build of the initial page request, and the initial
+    // form build of the request processing the form submission. Ideally, the
+    // button's #value shouldn't change until the form rebuild step. However,
+    // views_ui_ajax_form() implements a different multistep form workflow than
+    // the Form API does, and adjusts $view->stack prior to form processing, so
+    // we compensate by extending button click detection code to support any of
+    // the possible button labels.
+    if (isset($names)) {
+      $form['buttons']['submit']['#values'] = $names;
+      $form['buttons']['submit']['#process'] = array_merge(array('views_ui_form_button_was_clicked'), element_info_property($form['buttons']['submit']['#type'], '#process', array()));
+    }
     // If a validation handler exists for the form, assign it to this button.
     if (function_exists($form_id . '_validate')) {
       $form['buttons']['submit']['#validate'][] = $form_id . '_validate';
@@ -4497,4 +4511,27 @@ function views_ui_add_template_page() {
 
   $output = theme('table', array('header' => $header, 'rows' => $rows));
   return $output;
+}
+
+/**
+ * #process callback for a button; determines if a button is the form's triggering element.
+ *
+ * The Form API has logic to determine the form's triggering element based on
+ * the data in $_POST. However, it only checks buttons based on a single #value
+ * per button. This function may be added to a button's #process callbacks to
+ * extend button click detection to support multiple #values per button. If the
+ * data in $_POST matches any value in the button's #values array, then the
+ * button is detected as having been clicked. This can be used when the value
+ * (label) of the same logical button may be different based on context (e.g.,
+ * "Apply" vs. "Apply and continue").
+ *
+ * @see _form_builder_handle_input_element()
+ * @see _form_button_was_clicked()
+ */
+function views_ui_form_button_was_clicked($element, &$form_state) {
+  $process_input = empty($element['#disabled']) && ($form_state['programmed'] || ($form_state['process_input'] && (!isset($element['#access']) || $element['#access'])));
+  if ($process_input && !isset($form_state['triggering_element']) && isset($element['#button_type']) && isset($form_state['input'][$element['#name']]) && isset($element['#values']) && in_array($form_state['input'][$element['#name']], $element['#values'], TRUE)) {
+    $form_state['triggering_element'] = $element;
+  }
+  return $element;
 }
