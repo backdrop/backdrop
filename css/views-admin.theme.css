@@ -369,8 +369,7 @@ input.form-radio {
   border-width: 0 1px 1px;
 }
 
-.views-displays .secondary .action-list input.form-submit,
-.views-display-tab input.form-submit {
+.views-displays .secondary .action-list input.form-submit {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
   -moz-border-radius: 0;
@@ -446,6 +445,12 @@ div.form-item-displays-live-preview {
   padding-top: 4px;
 }
 
+/* The full-width bucket at the top. */
+.fieldset-wrapper > .views-ui-display-tab-bucket:first-child {
+  border: none;
+  padding: 0;
+}
+
 .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
   border-top: medium none;
 }
@@ -479,11 +484,6 @@ div.form-item-displays-live-preview {
 
 .views-ui-display-tab-bucket .icon-unlinked {
   background-position: 6px -193px;
-}
-
-.views-ui-display-tab-bucket > .actions * + * {
-  margin-left: 3px; /* LTR */
-  padding-left: 3px; /* LTR */
 }
 
 /* @group Drop list */
