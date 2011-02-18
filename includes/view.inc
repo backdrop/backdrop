@@ -1913,8 +1913,13 @@ class views_db_object {
 
     if (empty($id)) {
       $id = $this->generate_display_id($type);
-      preg_match("/[0-9]/", $id, $count);
-      $count = $count[0];
+      if ($id !== 'default') {
+        preg_match("/[0-9]/", $id, $count);
+        $count = $count[0];
+      }
+      else {
+        $count = '';
+      }
 
       if (empty($title)) {
         if ($count > 1) {
