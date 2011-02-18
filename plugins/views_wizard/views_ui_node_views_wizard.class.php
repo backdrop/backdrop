@@ -19,7 +19,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
     switch ($row_style) {
       case 'full_posts':
       case 'teasers':
-        $style_form['row_options']['with_links'] = array(
+        $style_form['row_options']['links'] = array(
           '#type' => 'select',
           '#title_display' => 'invisible',
           '#title' => t('Should links be displayed below each node'),
@@ -29,7 +29,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
           ),
           '#default_value' => 1,
         );
-        $style_form['row_options']['with_comments'] = array(
+        $style_form['row_options']['comments'] = array(
           '#type' => 'select',
           '#title_display' => 'invisible',
           '#title' => t('Should comments be displayed below each node'),
@@ -78,6 +78,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
     $row_plugin = $form_state['values']['page']['style']['row_plugin'];
     $row_options = $form_state['values']['page']['style']['row_options'];
     $this->display_options_row($display_options, $row_plugin, $row_options);
+    dsm($display_options);
   }
 
   protected function block_display_options($form, $form_state) {
@@ -91,16 +92,19 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
    * Set the row style and row style plugins to the display_options.
    */
   protected  function display_options_row(&$display_options, $row_plugin, $row_options) {
+    dsm($row_options);
     switch ($row_plugin) {
       case 'full_posts':
         $display_options['row_plugin'] = 'node';
         $display_options['row_options']['build_mode'] = 'full';
         $display_options['row_options']['links'] = !empty($row_options['links']);
+        $display_options['row_options']['comments'] = !empty($row_options['comments']);
         break;
       case 'teasers':
         $display_options['row_plugin'] = 'node';
         $display_options['row_options']['build_mode'] = 'teaser';
-        $display_options['row_options']['links'] = !empty($row_options['links']);
+          $display_options['row_options']['links'] = !empty($row_options['links']);
+        $display_options['row_options']['comments'] = !empty($row_options['comments']);
         break;
       case 'titles_linked':
         $display_options['row_plugin'] = 'field';
