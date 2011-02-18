@@ -776,3 +776,27 @@ Drupal.behaviors.viewsDisplayBucketDropList.attach = function(context) {
     }
   });
 };
+
+/**
+ * Ensure the desired default button is used when a form is implcitly submitted via an ENTER press on textfields, radios, and checkboxes.
+ *
+ * @see http://www.w3.org/TR/html5/association-of-controls-and-forms.html#implicit-submission
+ */
+Drupal.behaviors.viewsImplicitFormSubmission = {};
+Drupal.behaviors.viewsImplicitFormSubmission.attach = function (context, settings) {
+  var $ = jQuery;
+  $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission', function() {
+    $(this).keypress(function(event) {
+      if (event.which == 13) {
+        var formId = this.form.id;
+        if (formId && settings.viewsImplicitFormSubmission && settings.viewsImplicitFormSubmission[formId] && settings.viewsImplicitFormSubmission[formId].defaultButton) {
+          var $button = $('#' + settings.viewsImplicitFormSubmission[formId].defaultButton, this.form);
+          if ($button.length == 1 && $button.is(':enabled')) {
+            $button.click();
+            event.preventDefault();
+          }
+        }
+      }
+    });
+  });
+};

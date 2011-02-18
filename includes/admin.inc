@@ -371,6 +371,7 @@ function views_ui_add_form($form, &$form_state) {
     '#value' => t('Continue'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
+    '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
   );
   $form['cancel'] = array(
     '#type' => 'submit',
@@ -4603,5 +4604,16 @@ function views_ui_form_button_was_clicked($element, &$form_state) {
   if ($process_input && !isset($form_state['triggering_element']) && isset($element['#button_type']) && isset($form_state['input'][$element['#name']]) && isset($element['#values']) && in_array($form_state['input'][$element['#name']], $element['#values'], TRUE)) {
     $form_state['triggering_element'] = $element;
   }
+  return $element;
+}
+
+/**
+ * #process callback for a button; makes implicit form submissions trigger as this button.
+ *
+ * @see Drupal.behaviors.viewsImplicitFormSubmission
+ */
+function views_ui_default_button($element, &$form_state, $form) {
+  $setting['viewsImplicitFormSubmission'][$form['#id']]['defaultButton'] = $element['#id'];
+  $element['#attached']['js'][] = array('type' => 'setting', 'data' => $setting);
   return $element;
 }
