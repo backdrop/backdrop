@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.161.4.90 2011/02/04 14:13:16 dereine Exp $
+// $Id: admin.inc,v 1.161.4.91 2011/02/16 18:48:28 dereine Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -37,10 +37,14 @@ function views_ui_get_admin_css() {
     );
     $theme_key = isset($themes[$theme_key]->base_theme) ? $themes[$theme_key]->base_theme : '';
   }
-
-  if (module_exists('contextual')) {
-    $list[$module_path . '/css/views-admin.contextual.css'] = array();
+  // Views contains style overrides for the following modules
+  $module_list = array('contextual', 'advanced_help');
+  foreach ($module_list as $module) {
+    if (module_exists($module)) {
+      $list[$module_path . '/css/views-admin.' . $module . '.css'] = array();
+    }
   }
+  
 
   return $list;
 }
@@ -362,13 +366,13 @@ function views_ui_add_form($form, &$form_state) {
 
   $form['save'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save & exit'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
   );
   $form['continue'] = array(
     '#type' => 'submit',
-    '#value' => t('Continue'),
+    '#value' => t('Continue & edit'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
     '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
