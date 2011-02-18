@@ -427,7 +427,7 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
       break;
   }
 
-  if ($links) {
+  if (isset($links)) {
     $build = array(
       '#prefix' => '<div class="contextual-links-wrapper">',
       '#suffix' => '</div>',
