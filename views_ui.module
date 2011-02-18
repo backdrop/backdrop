@@ -27,6 +27,13 @@ function views_ui_menu() {
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
 
+  // Top-level Views module pages (not tied to a particular View).
+  $items['admin/structure/views/add-template'] = array(
+    'title' => 'Add view from template',
+    'page callback' => 'views_ui_add_template_page',
+    'type' => MENU_LOCAL_ACTION,
+  ) + $base;
+
   $items['admin/structure/views/import'] = array(
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
@@ -311,12 +318,15 @@ function views_ui_cache_set(&$view) {
   }
   ctools_include('object-cache');
   $view->changed = TRUE; // let any future object know that this view has changed.
-  // Add the knowledge of the changed display, too.
-  $view->changed_display[$view->current_display] = TRUE;
+
+  if (isset($view->current_display)) {
+    // Add the knowledge of the changed display, too.
+    $view->changed_display[$view->current_display] = TRUE;
+    unset($view->current_display);
+  }
 
   // Unset handlers; we don't want to write these into the cache
   unset($view->display_handler);
-  unset($view->current_display);
   unset($view->default_display);
   $view->query = NULL;
   foreach (array_keys($view->display) as $id) {
@@ -437,7 +447,9 @@ function template_preprocess_views_ui_view_preview_section(&$vars) {
  * Returns the HTML for a section of a View being previewed within the Views UI.
  */
 function theme_views_ui_view_preview_section($vars) {
-  return '<h1 class="views_ui_view_preview_section_title">' . $vars['links'] . $vars['title'] . '</h1>' . $vars['content'];
+  return '<h1>' . $vars['title'] . '</h1>'
+  . $vars['links']
+  . '<div>'. $vars['content'] . '</div>';
 }
 
 /**

@@ -147,14 +147,14 @@ abstract class ViewsSqlTest extends ViewsTestCase {
 
   /**
    * This function allows to enable views ui from a higher class which can't change the setup function anymore.
-   * 
+   *
    * @TODO
    *   Convert existing setUp functions.
    */
   function enableViewsUi() {
     module_enable(array('views_ui'));
     // @TODO Figure out why it's required to clear the cache here.
-    views_module_include('views_default.inc', TRUE);
+    views_module_include('views_default', TRUE);
     views_get_all_views(TRUE);
     menu_rebuild();
   }
@@ -368,7 +368,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     $view->base_table = 'views_test';
 
     // Set up the fields we need.
-    $display = $view->new_display('default', 'Defaults', 'default');
+    $display = $view->new_display('default', 'Master', 'default');
     $display->override_option('fields', array(
       'id' => array(
         'id' => 'id',

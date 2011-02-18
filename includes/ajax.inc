@@ -150,27 +150,14 @@ function views_ajax_command_add_tab($id, $title, $body) {
 }
 
 /**
- * Disables Save, Cancel, and Delete buttons.
+ * Shows Save, Undo changes buttons.
  *
  * @return
  *   An array suitable for use with the ajax_render() function.
  */
-function views_ajax_command_disable_buttons() {
+function views_ajax_command_show_buttons() {
   $command = array(
-    'command' => 'viewsDisableButtons',
-  );
-  return $command;
-}
-
-/**
- * Enables Save, Cancel, and Delete buttons.
- *
- * @return
- *   An array suitable for use with the ajax_render() function.
- */
-function views_ajax_command_enable_buttons() {
-  $command = array(
-    'command' => 'viewsEnableButtons',
+    'command' => 'viewsShowButtons',
   );
   return $command;
 }

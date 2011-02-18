@@ -6,6 +6,9 @@
  *
  */
 
+// @todo: Remove this once update.php can use the registry
+views_include('base');
+
 /**
  * Implements hook_views_plugins
  */
@@ -16,7 +19,7 @@ function views_views_plugins() {
     'display' => array(
       // Default settings for all display plugins.
       'default' => array(
-        'title' => t('Defaults'),
+        'title' => t('Master'),
         'help' => t('Default settings for this view.'),
         'handler' => 'views_plugin_display_default',
         'theme' => 'views_view',

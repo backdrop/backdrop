@@ -697,34 +697,29 @@ function views_include($file) {
 /**
  * Load views files on behalf of modules.
  */
-function views_module_include($file, $reset = FALSE) {
-  foreach (views_get_module_apis($reset) as $module => $info) {
-    if (file_exists(DRUPAL_ROOT . "/$info[path]/$module.$file")) {
-      require_once DRUPAL_ROOT . "/$info[path]/$module.$file";
+function views_module_include($api, $reset = FALSE) {
+  if ($reset) {
+    $cache = &drupal_static('ctools_plugin_api_info');
+    if (isset($cache['views']['views'])) {
+      unset($cache['views']['views']);
     }
   }
+  ctools_include('plugins');
+  return ctools_plugin_api_include('views', $api, views_api_minimum_version(), views_api_version());
 }
 
 /**
  * Get a list of modules that support the current views API.
  */
-function views_get_module_apis($reset = FALSE) {
-  static $cache = NULL;
-  if (!isset($cache) || $reset) {
-    $cache = array();
-    foreach (module_implements('views_api') as $module) {
-      $info = module_invoke($module, 'views_api');
-      if (version_compare($info['api'], views_api_minimum_version(), '>=') &&
-          version_compare($info['api'], views_api_version(), '<=')) {
-        if (!isset($info['path'])) {
-          $info['path'] = drupal_get_path('module', $module);
-        }
-        $cache[$module] = $info;
-      }
+function views_get_module_apis($api = 'views', $reset = FALSE) {
+  if ($reset) {
+    $cache = &drupal_static('ctools_plugin_api_info');
+    if (isset($cache['views']['views'])) {
+      unset($cache['views']['views']);
     }
   }
-
-  return $cache;
+  ctools_include('plugins');
+  return ctools_plugin_api_info('views', $api, views_api_minimum_version(), views_api_version());
 }
 
 /**
@@ -773,26 +768,7 @@ function views_include_handlers($reset = FALSE) {
   views_include('handlers');
   views_include('cache');
   views_include('plugins');
-  _views_include_handlers();
-  $finished = TRUE;
-}
-
-/**
- * Load default views files on behalf of modules.
- */
-function views_include_default_views($reset = FALSE) {
-  static $finished = FALSE;
-  // Ensure this only gets run once.
-  if ($finished && !$reset) {
-    return;
-  }
-
-  // Default views hooks may be in the normal handler file,
-  // or in a separate views_default file at the discretion of
-  // the module author.
-  views_include_handlers($reset);
-
-  _views_include_default_views($reset);
+  views_module_include('views', $reset);
   $finished = TRUE;
 }
 
@@ -906,34 +882,26 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
 // Views database functions
 
 /**
- * Get a view from the default views defined by modules.
+ * Get all view templates.
  *
- * Default views are cached per-language.  This function will rescan the
- * default_views hook if necessary.
- *
- * @param $view_name
- *   The name of the view to load.
- * @return
- *   A view object or NULL if it is not available.
+ * Templates are special in-code views that are never active, but exist only
+ * to be cloned into real views as though they were templates.
  */
-function &views_get_default_view($view_name, $reset = FALSE) {
-  $null = NULL;
+function views_get_all_templates() {
+  $templates = array();
+  $modules = views_module_include('views_template');
 
-  // Attempt to load individually cached view from cache.
-  views_include('cache');
-  if (!$reset) {
-    $data = views_cache_get("views_default:{$view_name}", TRUE);
-    if (isset($data->data) && is_object($data->data)) {
-      return $data->data;
+  foreach ($modules as $module => $info) {
+    $function = $module . '_views_templates';
+    if (function_exists($function)) {
+      $new = $function();
+      if ($new && is_array($new)) {
+        $templates = array_merge($new, $templates);
+      }
     }
   }
 
-  // Otherwise, allow entire cache to be rebuilt.
-  $cache = views_discover_default_views($reset);
-  if (isset($cache[$view_name])) {
-    return $cache[$view_name];
-  }
-  return $null;
+  return $templates;
 }
 
 /**
@@ -950,21 +918,6 @@ function views_new_view() {
   $view->add_display('default');
 
   return $view;
-}
-
-/**
- * Scan all modules for default views and rebuild the default views cache.
- *
- * @return An associative array of all known default views.
- */
-function views_discover_default_views($reset = FALSE) {
-  static $cache = array();
-
-  if (empty($cache) || $reset) {
-    views_include('cache');
-    $cache = _views_discover_default_views($reset);
-  }
-  return $cache;
 }
 
 /**
@@ -1025,36 +978,8 @@ function views_get_applicable_views($type) {
  *   If TRUE, reset the static cache forcing views to be reloaded.
  */
 function views_get_all_views($reset = FALSE) {
-  static $views = array();
-
-  if (empty($views) || $reset) {
-    $views = array();
-
-    // First, get all applicable views.
-    views_include('view');
-    $views = view::load_views();
-
-    // Get all default views.
-    $status = variable_get('views_defaults', array());
-
-    foreach (views_discover_default_views($reset) as $view) {
-      // Determine if default view is enabled or disabled.
-      if (isset($status[$view->name])) {
-        $view->disabled = $status[$view->name];
-      }
-
-      // If overridden, also say so.
-      if (!empty($views[$view->name])) {
-        $views[$view->name]->type = t('Overridden');
-      }
-      else {
-        $view->type = t('Default');
-        $views[$view->name] = $view;
-      }
-    }
-
-  }
-  return $views;
+  ctools_include('export');
+  return ctools_export_crud_load_all('views_view', 'views', $reset);
 }
 
 /**
@@ -1103,29 +1028,18 @@ function views_view_is_disabled($view) {
  *   a fresh one.
  */
 function views_get_view($name, $reset = FALSE) {
-  views_include('view');
-  $view = view::load($name, $reset);
-  $default_view = views_get_default_view($name, $reset);
-
-   // The view does not exist.
-  if (empty($view) && empty($default_view)) {
-    return;
-  }
-  // The view is defined in code.
-  elseif (empty($view) && !empty($default_view)) {
-    $status = variable_get('views_defaults', array());
-    if (isset($status[$default_view->name])) {
-      $default_view->disabled = $status[$default_view->name];
+  if ($reset) {
+    $cache = &drupal_static('ctools_export_load_object');
+    if (isset($cache['views_view'][$name])) {
+      unset($cache['views_view'][$name]);
     }
-    $default_view->type = t('Default');
-    return $default_view->clone_view();
-  }
-  // The view is overriden/defined in the database.
-  elseif (!empty($view) && !empty($default_view)) {
-    $view->type = t('Overridden');
   }
 
-  return $view->clone_view();
+  ctools_include('export');
+  $view = ctools_export_crud_load('views_view', $name);
+  if ($view) {
+    return $view->clone_view();
+  }
 }
 
 /**
@@ -1508,7 +1422,7 @@ function views_embed_view($name, $display_id = 'default') {
 *      The name of the view to retrieve the data from.
 * @param string $display_id
 *      The display id. On the edit page for the view in question, you'll find
-*      a list of displays at the left side of the control area. "Defaults"
+*      a list of displays at the left side of the control area. "Master"
 *      will be at the top of that list. Hover your cursor over the name of the
 *      display you want to use. An URL will appear in the status bar of your
 *      browser. This is usually at the bottom of the window, in the chrome.
@@ -1685,7 +1599,10 @@ function views_trim_text($alter, $value) {
   return $value;
 }
 
-function views_views_default_hook_name() {
+/**
+ * Report to CTools that we use hook_views_api instead of hook_ctools_plugin_api()
+ */
+function views_ctools_plugin_api_hook_name() {
   return 'views_api';
 }
 

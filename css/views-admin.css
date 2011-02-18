@@ -5,15 +5,6 @@
  * For example: display, position, float, clear, and overflow.
  */
 
-/* @group Layout */
-
-.box-padding {
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-/* @end */
-
 /* @group Inline lists */
 
 .horizontal > * {
@@ -75,6 +66,19 @@
   z-index: 51;
 }
 
+.views-displays .views-display-deleted-link {
+  text-decoration: line-through;
+}
+
+.views-display-deleted > fieldset > legend,
+.views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket > *,
+.views-display-deleted .views-display-columns {
+  opacity: 0.25;
+}
+
+.views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
+  opacity: 1.0;
+}
 /* @end */
 
 /* @group Attachment details new section button */
@@ -114,7 +118,7 @@
  *
  * Display the "Delete" and "Duplicate" buttons to the right.
  */
-.views-display-tab .fieldset-wrapper > .actions {
+.views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
   position: absolute;
   right: 0; /* LTR */
   top: -14px;

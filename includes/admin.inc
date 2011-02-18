@@ -10,10 +10,10 @@
  * Adds standard Views administration CSS to the current page.
  */
 function views_ui_add_admin_css() {
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.css');
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/ie/views-admin.ie7.css',
+  $module_path = drupal_get_path('module', 'views_ui');
+  drupal_add_css($module_path . '/css/views-admin.css');
+  drupal_add_css($module_path . '/css/ie/views-admin.ie7.css',
     array(
-      'group' => CSS_DEFAULT,
       'browsers' => array(
         'IE' => 'lte IE 7',
         '!IE' => FALSE
@@ -21,19 +21,17 @@ function views_ui_add_admin_css() {
       'preprocess' => FALSE,
     )
   );
-  drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.theme.css',
-    array(
-      'group' => CSS_DEFAULT,
-      'preprocess' => TRUE,
-    )
-  );
+  drupal_add_css($module_path . '/css/views-admin.theme.css');
+
   if ($GLOBALS['theme'] === 'seven' || (isset($GLOBALS['theme_info']->base_theme) && $GLOBALS['theme_info']->base_theme === 'seven')) {
-    drupal_add_css(drupal_get_path('module', 'views_ui') . '/css/views-admin.seven.css',
+    drupal_add_css($module_path . '/css/views-admin.seven.css',
       array(
         'group' => CSS_THEME,
-        'preprocess' => TRUE,
       )
     );
+  }
+  if (module_exists('contextual')) {
+    drupal_add_css($module_path . '/css/views-admin.contextual.css');
   }
 }
 
@@ -45,7 +43,7 @@ function views_ui_add_admin_css() {
  * be useful.
  */
 function views_ui_check_advanced_help() {
-  if (variable_get('views_hide_help_message', FALSE)) {
+  if (!variable_get('views_ui_show_advanced_help_warning', TRUE)) {
     return;
   }
 
@@ -53,10 +51,10 @@ function views_ui_check_advanced_help() {
     $filename = db_query_range("SELECT filename FROM {system} WHERE type = 'module' AND name = 'advanced_help'", 0, 1)
       ->fetchField();
     if ($filename && file_exists($filename)) {
-      drupal_set_message(t('If you <a href="@modules">enable the advanced help module</a>, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('@modules' => url('admin/modules'),'@hide' => url('admin/structure/views/tools'))));
+      drupal_set_message(t('If you <a href="@modules">enable the advanced help module</a>, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('@modules' => url('admin/modules'),'@hide' => url('admin/structure/views/settings'))));
     }
     else {
-      drupal_set_message(t('If you install the advanced help module from !href, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('!href' => l('http://drupal.org/project/advanced_help', 'http://drupal.org/project/advanced_help'), '@hide' => url('admin/structure/views/tools'))));
+      drupal_set_message(t('If you install the advanced help module from !href, Views will provide more and better help. <a href="@hide">Hide this message.</a>', array('!href' => l('http://drupal.org/project/advanced_help', 'http://drupal.org/project/advanced_help'), '@hide' => url('admin/structure/views/settings'))));
     }
   }
 }
@@ -521,7 +519,7 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
 function theme_views_ui_view_info($variables) {
   $view = $variables['view'];
   $title = $view->get_human_name();
-  
+
   $displays = _views_ui_get_displays_list($view);
   $displays = empty($displays) ? t('None') : format_plural(count($displays), 'Display', 'Displays') . ': ' . '<em>' . implode(', ', $displays) . '</em>';
 
@@ -648,6 +646,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
   }
 
+  // Add CSS specific to the contextual module.
+  if (module_exists('contextual')) {
+    $form['#attached']['css'][$module_path . '/css/views-admin.contextual.css'] = array();
+  }
+
   $form['#attached']['js'][] = $module_path . '/js/views-admin.js';
   $form['#attached']['js'][] = array(
     'data' => array('views' => array('ajax' => array(
@@ -687,20 +690,30 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#markup' => t('Modify the display(s) of your view below or add new displays.'),
   );
 
-  $form['actions'] = array('#type' => 'actions', '#weight' => 0);
+  $form['actions'] = array(
+    '#type' => 'actions',
+    '#weight' => 0,
+  );
+
+  if (empty($view->changed)) {
+    $form['actions']['#attributes'] = array(
+      'class' => array(
+        'js-hide',
+      ),
+    );
+  }
+
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
     // Taken from the "old" UI. @TODO: Review and rename.
     '#validate' => array('views_ui_edit_view_form_validate'),
     '#submit' => array('views_ui_edit_view_form_submit'),
-    '#access' => !empty($view->changed),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Undo changes'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
-    '#access' => !empty($view->changed),
   );
 
   $form['displays'] = array(
@@ -797,7 +810,10 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['tab_content']['#theme_wrappers'] = array('container');
     $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
     $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
-
+    // Mark deleted displays as such.
+    if ($view->display[$display_id]->deleted) {
+      $form['displays']['tab_content']['#attributes']['class'][] = 'views-display-deleted';
+    }
 
     // Add preview controls
     $form['displays']['preview_controls'] = array(
@@ -1029,10 +1045,10 @@ function views_ui_get_display_tab($view, $display_id) {
  *   A renderable page build array.
  */
 function views_ui_get_display_tab_details($view, $display) {
-  $type = $display->display_title;
+  $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
     '#type' => 'fieldset',
-    '#title' => t('@display_type details', array('@display_type' => ucwords($type))),
+    '#title' => t('@display_title details', array('@display_title' => ucwords($display_title))),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE, // @TODO: Close by default after contextual links are added.
     '#attributes' => array('class' => array('box-padding')),
@@ -1210,13 +1226,19 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
 function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   $element = $variables['element'];
 
+  $variables['item_help_icon'] = '';
+  if (!empty($element['#item_help_icon'])) {
+    $variables['item_help_icon'] = render($element['#item_help_icon']);
+  }
   if (!empty($element['#name'])) {
     $variables['classes_array'][] = drupal_clean_css_identifier(strtolower($element['#name']));
+  }
+  if (!empty($element['#overridden'])) {
+    $variables['classes_array'][] = 'overridden';
   }
 
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
-  $variables['overridden'] = !empty($element['#overridden']);
   $variables['rearrange'] = !empty($element['#rearrange']) ? $element['#rearrange'] : '';
   $variables['delete'] = !empty($element['#delete']) ? $element['#delete'] : '';
   $variables['add'] = !empty($element['#add']) ? $element['#add'] : '';
@@ -1485,7 +1507,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   $build['#overridden'] = FALSE;
   $build['#defaulted'] = FALSE;
   if (module_exists('advanced_help')) {
-    $build['item_help_icon'] = array(
+    $build['#item_help_icon'] = array(
       '#theme' => 'advanced_help_topic',
       '#module' => 'views',
       '#topic' => $type,
@@ -1507,11 +1529,14 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $class = 'icon compact rearrange';
   }
 
-  if (count($display->handler->get_handlers($type)) > 1) {
+  $count_handlers = count($display->handler->get_handlers($type));
+  if ($count_handlers > 1) {
     $build['#rearrange'] = l('<span>' . $rearrange_text . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
   }
   $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
-  $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
+  if ($count_handlers > 0) {
+    $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
+  }
 
   if (!$display->handler->is_default_display()) {
     if (!$display->handler->is_defaulted($types[$type]['plural'])) {
@@ -1691,6 +1716,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     if (!empty($view->stack) && count($view->stack) > 1) {
       $name = t('Apply and continue');
     }
+    $names = array(t('Apply'), t('Apply and continue'));
   }
 
   // Forms that are purely informational set an ok_button flag, so we know not
@@ -1706,6 +1732,18 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
       // take care of running the regular submit handler as appropriate.
       '#submit' => array('views_ui_standard_submit'),
     );
+    // Form API button click detection requires the button's #value to be the
+    // same between the form build of the initial page request, and the initial
+    // form build of the request processing the form submission. Ideally, the
+    // button's #value shouldn't change until the form rebuild step. However,
+    // views_ui_ajax_form() implements a different multistep form workflow than
+    // the Form API does, and adjusts $view->stack prior to form processing, so
+    // we compensate by extending button click detection code to support any of
+    // the possible button labels.
+    if (isset($names)) {
+      $form['buttons']['submit']['#values'] = $names;
+      $form['buttons']['submit']['#process'] = array_merge(array('views_ui_form_button_was_clicked'), element_info_property($form['buttons']['submit']['#type'], '#process', array()));
+    }
     // If a validation handler exists for the form, assign it to this button.
     if (function_exists($form_id . '_validate')) {
       $form['buttons']['submit']['#validate'][] = $form_id . '_validate';
@@ -2171,14 +2209,11 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
     }
     else {
       $output = array();
-      $output[] = views_ajax_command_enable_buttons();
       $output[] = views_ajax_command_dismiss_form();
+      $output[] = views_ajax_command_show_buttons();
       $output[] = views_ajax_command_trigger_preview();
     }
     views_ui_regenerate_tab($view, $output, $display_id);
-  }
-  elseif ($js) {
-    $output[] = views_ajax_command_disable_buttons();
   }
 
   return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
@@ -4181,20 +4216,13 @@ function views_ui_autocomplete_tag($string = '') {
   $matches = array();
   // get matches from default views:
   views_include('view');
-  $views = views_discover_default_views();
+  $views = views_get_all_views();
   foreach ($views as $view) {
     if (!empty($view->tag) && strpos($view->tag, $string) === 0) {
       $matches[$view->tag] = $view->tag;
-    }
-  }
-
-  $count = 10 - count($matches);
-  if ($string) {
-    $result = db_query_range("SELECT DISTINCT tag FROM {views_view} WHERE LOWER(tag) LIKE LOWER(:tag)",
-      0, $count,
-      array(':tag' => $string . '%'));
-    foreach ($result as $view) {
-      $matches[$view->tag] = check_plain($view->tag);
+      if (count($matches) >= 10) {
+        break;
+      }
     }
   }
 
@@ -4472,11 +4500,58 @@ function theme_views_ui_style_plugin_table($variables) {
  *
  * @todo Remove this function once editing the display title is possible.
  */
-function views_ui_get_display_label($view, $display_id) {
-  $changed = '';
-  if (!empty($view->changed_display[$display_id])) {
-    $changed = '*';
-  }
+function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   $title = $display_id == 'default' ? t('Master') : check_plain($view->display[$display_id]->display_title);
-  return $title . $changed;
+
+  if ($check_changed && !empty($view->changed_display[$display_id])) {
+    $changed = '*';
+    $title = $title . $changed;
+  }
+
+  return $title;
+}
+
+function views_ui_add_template_page() {
+  $templates = views_get_all_templates();
+
+  $header = array(
+    t('Name'),
+    t('Description'),
+    t('Operation'),
+  );
+
+  $rows = array();
+  foreach ($templates as $name => $template) {
+    $rows[] = array(
+      array('data' => check_plain($template->get_human_name())),
+      array('data' => check_plain($template->description)),
+      array('data' => l('add', 'admin/structure/views/template/' . $template->name . '/add')),
+    );
+  }
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows));
+  return $output;
+}
+
+/**
+ * #process callback for a button; determines if a button is the form's triggering element.
+ *
+ * The Form API has logic to determine the form's triggering element based on
+ * the data in $_POST. However, it only checks buttons based on a single #value
+ * per button. This function may be added to a button's #process callbacks to
+ * extend button click detection to support multiple #values per button. If the
+ * data in $_POST matches any value in the button's #values array, then the
+ * button is detected as having been clicked. This can be used when the value
+ * (label) of the same logical button may be different based on context (e.g.,
+ * "Apply" vs. "Apply and continue").
+ *
+ * @see _form_builder_handle_input_element()
+ * @see _form_button_was_clicked()
+ */
+function views_ui_form_button_was_clicked($element, &$form_state) {
+  $process_input = empty($element['#disabled']) && ($form_state['programmed'] || ($form_state['process_input'] && (!isset($element['#access']) || $element['#access'])));
+  if ($process_input && !isset($form_state['triggering_element']) && isset($element['#button_type']) && isset($form_state['input'][$element['#name']]) && isset($element['#values']) && in_array($form_state['input'][$element['#name']], $element['#values'], TRUE)) {
+    $form_state['triggering_element'] = $element;
+  }
+  return $element;
 }

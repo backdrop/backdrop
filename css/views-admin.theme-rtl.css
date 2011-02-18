@@ -94,8 +94,12 @@
   padding: 6px 8px 8px;
 }
 
-.views-displays .secondary > li + li {
+.views-displays .views-display-top ul > li + li {
   margin-right: 3px;
+}
+
+.views-displays .views-extra-actions {
+  left: 10px;
 }
 
 /* @end */
