@@ -1203,6 +1203,11 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
 function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   $element = $variables['element'];
 
+  $variables['item_help_icon'] = '';
+  if (!empty($element['#item_help_icon'])) {
+    $variables['item_help_icon'] = render($element['#item_help_icon']);
+  }
+
   if (!empty($element['#name'])) {
     $variables['classes_array'][] = drupal_clean_css_identifier(strtolower($element['#name']));
   }
@@ -1478,7 +1483,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   $build['#overridden'] = FALSE;
   $build['#defaulted'] = FALSE;
   if (module_exists('advanced_help')) {
-    $build['item_help_icon'] = array(
+    $build['#item_help_icon'] = array(
       '#theme' => 'advanced_help_topic',
       '#module' => 'views',
       '#topic' => $type,
