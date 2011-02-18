@@ -89,6 +89,10 @@
   padding-right: 0; /* LTR */
 }
 
+.views-admin .button .links li {
+  padding-right: 10px; /* LTR */
+}
+
 .page-admin-structure-views #content ul.action-links {
   padding-left: 0;
   padding-right: 0;
