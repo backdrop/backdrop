@@ -263,8 +263,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       ),
     );
     $style_form['row_options'] = array(
-      '#type' => 'container',
-      '#id' => "edit-style-$type-options-style-row-plugin-options",
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('id' => "edit-style-$type-options-style-row-plugin-options"),
     );
   }
 

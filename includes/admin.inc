@@ -431,7 +431,7 @@ function views_ui_add_form_update_style_block($form, $form_state) {
  *   The part of the form that has changed.
  */
 function views_ui_add_form_update_row_page($form, $form_state) {
-  return $form['displays']['page']['options']['style']['row_style_options'];
+  return $form['displays']['page']['options']['style']['row_options'];
 }
 
 /**
@@ -441,7 +441,7 @@ function views_ui_add_form_update_row_page($form, $form_state) {
  *   The part of the form that has changed.
  */
 function views_ui_add_form_update_row_block($form, $form_state) {
-  return $form['displays']['block']['options']['style']['row_style_options'];
+  return $form['displays']['block']['options']['style']['row_options'];
 }
 
 /**
