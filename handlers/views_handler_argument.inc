@@ -543,9 +543,8 @@ class views_handler_argument extends views_handler {
     $form['summary']['number_of_records'] = array(
       '#type' => 'checkbox',
       '#title' => t('Number of records'),
-      '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
       '#default_value' => $this->options['summary']['number_of_records'],
-      '#process' => array('ctools_dependent_process'),
+      '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[default_action]' => array('summary')),
     );
 
