@@ -276,7 +276,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function row_style_options($type) {
     $data = views_fetch_data($this->base_table);
     return array(
-      'fields' => t('Custom fields'),
+      'fields' => t('Fields'),
     );
   }
 
