@@ -12,6 +12,7 @@
  */
 function _views_fetch_data($table = NULL, $reset = FALSE) {
   static $cache = NULL;
+  static $recursion_protection = array();
   if (!isset($cache) || $reset) {
     $start = microtime(TRUE);
     // NOTE: This happens whether we retrieve them from cache or otherwise.
@@ -37,7 +38,21 @@ function _views_fetch_data($table = NULL, $reset = FALSE) {
     return $cache;
   }
   if (isset($cache[$table])) {
-    return $cache[$table];
+    // Support old views_data entries conversion.
+    if (isset($cache[$table]['moved to'])) {
+      $moved_table = $cache[$table]['moved to'];
+      if (!empty($recursion_protection[$table])) {
+        // recursion detected!
+        return NULL;
+      }
+      $recursion_protection[$table] = TRUE;
+      $data = _views_fetch_data($moved_table);
+      $recursion_protection = array();
+      return $data;
+    }
+    else {
+      return $cache[$table];
+    }
   }
 
   // Return an empty array if there is no match.
