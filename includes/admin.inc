@@ -1210,14 +1210,15 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   if (!empty($element['#item_help_icon'])) {
     $variables['item_help_icon'] = render($element['#item_help_icon']);
   }
-
   if (!empty($element['#name'])) {
     $variables['classes_array'][] = drupal_clean_css_identifier(strtolower($element['#name']));
+  }
+  if (!empty($element['#overridden'])) {
+    $variables['classes_array'][] = 'overridden';
   }
 
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
-  $variables['overridden'] = !empty($element['#overridden']);
   $variables['rearrange'] = !empty($element['#rearrange']) ? $element['#rearrange'] : '';
   $variables['delete'] = !empty($element['#delete']) ? $element['#delete'] : '';
   $variables['add'] = !empty($element['#add']) ? $element['#add'] : '';
