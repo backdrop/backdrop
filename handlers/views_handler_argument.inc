@@ -58,22 +58,22 @@ class views_handler_argument extends views_handler {
       $this->options['exception']['title_enable'] = 1;
       $this->options['exception']['title'] = $options['wildcard_substitution'];
     }
-    if (!isset($options['summary']['sort_order']) && $options['default_action'] == 'summary asc') {
+    if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc') {
       $options['default_action'] = 'summary';
       $options['summary']['sort_order'] = 'asc';
       $options['summary']['number_of_records'] = 0;
     }
-    if (!isset($options['summary']['sort_order']) && $options['default_action'] == 'summary desc') {
+    if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary desc') {
       $options['default_action'] = 'summary';
       $options['summary']['sort_order'] = 'desc';
       $options['summary']['number_of_records'] = 0;
     }
-    if (!isset($options['summary']['sort_order']) && $options['default_action'] == 'summary asc by count') {
+    if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc by count') {
       $options['default_action'] = 'summary';
       $options['summary']['sort_order'] = 'asc';
       $options['summary']['number_of_records'] = 1;
     }
-    if (!isset($options['summary']['sort_order']) && $options['default_action'] == 'summary desc by count') {
+    if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary desc by count') {
       $options['default_action'] = 'summary';
       $options['summary']['sort_order'] = 'desc';
       $options['summary']['number_of_records'] = 1;
@@ -163,6 +163,12 @@ class views_handler_argument extends views_handler {
     $form['no_argument'] = array(
       '#type' => 'fieldset',
       '#title' => t('When the argument value is <em>NOT</em> in the URL'),
+    );
+    // Everything in the fieldset is floated, so the last element needs to
+    // clear those floats.
+    $form['no_argument']['clearfix'] = array(
+      '#weight' => 1000,
+      '#markup' => '<div class="clearfix"></div>',
     );
     $form['default_action'] = array(
       '#type' => 'radios',
