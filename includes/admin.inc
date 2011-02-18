@@ -790,7 +790,10 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['tab_content']['#theme_wrappers'] = array('container');
     $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
     $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
-
+    // Mark deleted displays as such.
+    if ($view->display[$display_id]->deleted) {
+      $form['displays']['tab_content']['#attributes']['class'][] = 'views-display-deleted';
+    }
 
     // Add preview controls
     $form['displays']['preview_controls'] = array(
@@ -1505,11 +1508,14 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $class = 'icon compact rearrange';
   }
 
-  if (count($display->handler->get_handlers($type)) > 1) {
+  $count_handlers = count($display->handler->get_handlers($type));
+  if ($count_handlers > 1) {
     $build['#rearrange'] = l('<span>' . $rearrange_text . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
   }
   $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
-  $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
+  if ($count_handlers > 0) {
+    $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
+  }
 
   if (!$display->handler->is_default_display()) {
     if (!$display->handler->is_defaulted($types[$type]['plural'])) {
