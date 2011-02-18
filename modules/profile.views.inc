@@ -15,6 +15,7 @@
  * Implements hook_views_data()
  */
 function profile_views_data() {
+  $data['profile_values']['moved to'] = 'profile_value';
   // Define the base group of this table. Fields that don't
   // have a group defined will go into this field by default.
   $data['profile_value']['table']['group']  = t('Profile');
