@@ -444,6 +444,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       // The page display is usually the main one (from the user's point of
       // view). Its options should therefore become the overall view defaults,
       // so that new displays which are added later automatically inherit them.
+
       $this->set_default_options($options, $display, $default_display);
       // Display: Feed (attached to the page)
       if (!empty($form_state['values']['page']['feed'])) {
@@ -582,6 +583,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options = array();
     $page = $form_state['values']['page'];
     $display_options['title'] = $page['title'];
+    dsm($page);
     $display_options['path'] = $page['path'];
     $display_options['style_plugin'] = $page['style']['style_plugin'];
     // Not every style plugin supports row style plugins.

@@ -74,7 +74,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   }
 
   protected function page_display_options($form, $form_state) {
-    $display_options = parent::default_display_options($form, $form_state);
+    $display_options = parent::page_display_options($form, $form_state);
     $row_plugin = $form_state['values']['page']['style']['row_plugin'];
     $row_options = isset($form_state['values']['page']['style']['row_options']) ? $form_state['values']['page']['style']['row_options'] : array();
     $this->display_options_row($display_options, $row_plugin, $row_options);
@@ -82,7 +82,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   }
 
   protected function block_display_options($form, $form_state) {
-    $display_options = parent::default_display_options($form, $form_state);
+    $display_options = parent::block_display_options($form, $form_state);
     $row_plugin = $form_state['values']['block']['style']['row_plugin'];
     $row_options = isset($form_state['values']['block']['style']['row_options']) ? $form_state['values']['block']['style']['row_options'] : array();
     $this->display_options_row($display_options, $row_plugin, $row_options);
@@ -108,11 +108,11 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
         break;
       case 'titles_linked':
         $display_options['row_plugin'] = 'fields';
-        $display_options['fields']['title']['link_to_node'] = 1;
+        $display_options['field']['title']['link_to_node'] = 1;
         break;
       case 'titles':
         $display_options['row_plugin'] = 'fields';
-        $display_options['fields']['title']['link_to_node'] = 0;
+        $display_options['field']['title']['link_to_node'] = 0;
         break;
     }
   }
