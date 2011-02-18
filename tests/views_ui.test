@@ -584,7 +584,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
     $view['page[link]'] = 1;
     $view['page[link_properties][menu_name]'] = 'main-menu';
     $view['page[link_properties][title]'] = $this->randomName(16);
-    $this->drupalPost('admin/structure/views/add', $view, t('Save'));
+    $this->drupalPost('admin/structure/views/add', $view, t('Save & exit'));
 
     // Make sure there is a link to the view from the front page (where we
     // expect the main menu to display).
