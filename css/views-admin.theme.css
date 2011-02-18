@@ -761,7 +761,8 @@ div.views-filterable-options .form-type-checkbox .description {
 /* @group Configure filter criteria */
 
 /* @todo the width and border info could be moved into a more generic class */
-#edit-options-value {
+/* @todo Make this a class to be used anywhere there's node types? */
+#edit-options-value, #edit-options-argument-validate-node-types {
   border-color: #CCCCCC;
   border-style: solid;
   border-width: 1px;
