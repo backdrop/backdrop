@@ -897,6 +897,14 @@ div.views-filterable-options .form-type-checkbox .description {
   margin: 0 12px;
 }
 
+#views-live-preview h1 {
+  color: #818181;
+  display: inline-block;
+  font-size: 13px;
+  font-weight: normal;
+  margin-top: 0;
+}
+
 #views-live-preview .view > * {
   margin-top: 18px;
 }
@@ -907,9 +915,10 @@ div.views-filterable-options .form-type-checkbox .description {
   color: #000000;
 }
 
-#views-live-preview .views-row {
+#views-live-preview .preview-section {
   border: 1px dashed #DEDEDE;
-  padding: 6px;
+  margin: 0 -5px;
+  padding: 3px 5px;
 }
 
 #views-live-preview .views_ui_view_preview_section_title + *,
