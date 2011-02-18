@@ -303,6 +303,10 @@
 
 /* @group Forms */
 
+.views-admin-dependent {
+  padding-left: 17px;
+}
+
 fieldset.box-padding {
   border: none;
 }
@@ -825,7 +829,7 @@ div.views-filterable-options .form-type-checkbox .description {
 
 /* @todo the width and border info could be moved into a more generic class */
 /* @todo Make this a class to be used anywhere there's node types? */
-#edit-options-value, #edit-options-argument-validate-node-types {
+#edit-options-value, #edit-options-validate-options-node-types {
   border-color: #CCCCCC;
   border-style: solid;
   border-width: 1px;
@@ -966,7 +970,7 @@ div.views-filterable-options .form-type-checkbox .description {
 
 /**
  * Keeps the admin screen from looking stretched out larger monitors
- */ 
+ */
 @media screen and (min-width: 1400px) {
   .views-admin {
     margin: 0 auto;

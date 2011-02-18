@@ -44,7 +44,7 @@ function views_ui_get_admin_css() {
       $list[$module_path . '/css/views-admin.' . $module . '.css'] = array();
     }
   }
-  
+
 
   return $list;
 }
@@ -631,7 +631,13 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
  * Page title callback for the Edit View page.
  */
 function views_ui_edit_page_title($view) {
-  return $view->get_human_name();
+  $bases = views_fetch_base_tables();
+  $name = $view->get_human_name();
+  if (isset($bases[$view->base_table])) {
+    $name .= ' (' . $bases[$view->base_table]['title'] . ')';
+  }
+
+  return $name;
 }
 
 /**
@@ -1389,6 +1395,7 @@ function views_ui_process_radios($element) {
       );
       $element[$key . '_options'] = array(
         '#type' => 'container',
+        '#attributes' => array('class' => array('views-admin-dependent')),
       );
     }
   }
@@ -1717,28 +1724,6 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
     if ($handler->has_extra_options()) {
       // @TODO: #links is no longer being used?
       $build['fields'][$id]['#links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
-    }
-
-    if ($handler->needs_style_plugin()) {
-      // Add a second option link for the style plugin.
-      $style_plugin = views_fetch_plugin_data('style', $handler->options['style_plugin']);
-      $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin['title'];
-      $pid = $id . '-style-plugin';
-
-      $build['fields'][$pid] = array();
-      $build['fields'][$pid]['#theme'] = 'views_ui_display_tab_setting';
-
-      if (!empty($style_plugin['uses options'])) {
-        // @TODO: #links is no longer being used?
-        $build['fields'][$pid]['#links'][] = l('<span>' . t('Change settings for this style') . '</span>', "admin/structure/views/nojs/config-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
-      }
-
-      $build['fields'][$pid]['#link'] = ' ' . t('&nbsp; Style: !style', array('!style' => l($style_title, "admin/structure/views/nojs/change-style/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link'))))));
-      $build['fields'][$pid]['#class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $pid);
-      if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $pid])) {
-        // @TODO: #changed is no longer being used?
-        $build['fields'][$pid]['#changed'] = TRUE;
-      }
     }
 
     if ($grouping) {
@@ -2122,10 +2107,6 @@ function views_ui_ajax_forms($key = NULL) {
     ),
     'config-item-group' => array(
       'form_id' => 'views_ui_config_item_group_form',
-      'args' => array('type', 'id'),
-    ),
-    'change-style' => array(
-      'form_id' => 'views_ui_change_style_form',
       'args' => array('type', 'id'),
     ),
     'config-style' => array(
@@ -3744,9 +3725,6 @@ function views_ui_config_item_form_submit($form, &$form_state) {
 
   // Store the item back on the view
   $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $handler->options);
-  if ($form_state['handler'] && $form_state['handler']->needs_style_plugin()) {
-    views_ui_add_form_to_stack('change-style', $form_state['view'], $form_state['display_id'], array($form_state['type'], $form_state['id']), TRUE);
-  }
 
   // Write to cache
   views_ui_cache_set($form_state['view']);
@@ -3910,97 +3888,6 @@ function views_ui_config_item_extra_form_submit($form, &$form_state) {
 
   // Store the item back on the view
   $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
-
-  // Write to cache
-  views_ui_cache_set($form_state['view']);
-}
-
-/**
- * Form to change_style items in the views UI.
- */
-function views_ui_change_style_form($form, &$form_state) {
-  $view = &$form_state['view'];
-  $display_id = $form_state['display_id'];
-  $type = $form_state['type'];
-  $id = $form_state['id'];
-
-  $form = array(
-    'options' => array(
-      '#tree' => TRUE,
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('scroll')),
-    ),
-  );
-  if (!$view->set_display($display_id)) {
-    views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
-  }
-  $item = $view->get_item($display_id, $type, $id);
-
-  if ($item) {
-    $handler = views_get_handler($item['table'], $item['field'], $type);
-    if (empty($handler)) {
-      $form['markup'] = array('#markup' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
-    }
-    else {
-      $handler->init($view, $item);
-      $types = views_object_types();
-      $form['#title'] = t('Change summary style for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
-
-      $form['#section'] = $display_id . '-' . $type . '-' . $id . '-style-plugin';
-
-      $form['style_plugin'] =  array(
-        '#type' => 'radios',
-        '#options' => views_fetch_plugin_names('style', 'summary'),
-        '#default_value' => $item['style_plugin'],
-      );
-
-      $form_state['handler'] = &$handler;
-    }
-    views_ui_standard_form_buttons($form, $form_state, 'views_ui_change_style_form');
-  }
-  return $form;
-}
-
-function views_ui_change_style_form_validate($form, &$form_state) {
-  // Run it through the handler's submit function.
-  $form_state['handler']->options_validate($form['options'], $form_state);
-
-  $plugin = views_get_plugin('style', $form_state['values']['style_plugin']);
-  if (!$plugin) {
-    form_error($form['style_plugin'], t('Internal error: broken plugin.'));
-  }
-}
-
-/**
- * Submit handler for configing new item(s) to a view.
- */
-function views_ui_change_style_form_submit($form, &$form_state) {
-  // Run it through the handler's submit function.
-  $form_state['handler']->options_submit($form['options'], $form_state);
-  $item = $form_state['handler']->options;
-
-  $plugin = views_get_plugin('style', $form_state['values']['style_plugin']);
-  if (!$plugin) {
-    drupal_set_message(t('Internal error: broken plugin.'), 'error');
-    return;
-  }
-
-  $plugin->init($form_state['view'], $form_state['view']->display[$form_state['display_id']]);
-
-  // If changing style plugin, reset options to defaults.
-  if (empty($item['style_plugin']) || $item['style_plugin'] != $form_state['values']['style_plugin']) {
-    $item['style_options'] = $plugin->options;
-  }
-
-  // Store the data we're given.
-  $item['style_plugin'] = $form_state['values']['style_plugin'];
-
-  // Store the item back on the view
-  $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
-
-  if (!empty($plugin->definition['uses options'])) {
-    views_ui_add_form_to_stack('config-style', $form_state['view'], $form_state['display_id'], array($form_state['type'], $form_state['id']), TRUE);
-  }
 
   // Write to cache
   views_ui_cache_set($form_state['view']);
@@ -4609,6 +4496,10 @@ function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
 
 function views_ui_add_template_page() {
   $templates = views_get_all_templates();
+
+  if (empty($templates)) {
+    return t('There are no templates available.');
+  }
 
   $header = array(
     t('Name'),
