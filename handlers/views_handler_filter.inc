@@ -37,7 +37,7 @@ class views_handler_filter extends views_handler {
     $this->operator = $this->options['operator'];
     $this->value = $this->options['value'];
 
-    // Compatibility: The new UI changes several settings.
+    // Compatibility: The new UI changed several settings.
     if (!empty($options['exposed']) && !empty($options['expose']['optional']) && !isset($options['expose']['required'])) {
       $this->options['expose']['required'] = !$options['expose']['optional'];
     }

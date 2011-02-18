@@ -176,7 +176,7 @@ function views_views_plugins() {
         'parent' => '',
       ),
       'fixed' => array(
-        'title' => t('Fixed entry'),
+        'title' => t('Fixed value'),
         'handler' => 'views_plugin_argument_default_fixed',
       ),
       'php' => array(
@@ -425,11 +425,11 @@ function views_discover_plugins() {
 class views_plugin extends views_object {
   /**
    * The top object of a view.
-   * 
+   *
    * @var view
    */
   var $view = NULL;
-  
+
   /**
    * The current used display plugin.
    *
@@ -509,4 +509,3 @@ class views_plugin extends views_object {
     return check_plain($this->definition['title']);
   }
 }
-

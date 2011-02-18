@@ -282,6 +282,8 @@ function views_ui_add_form($form, &$form_state) {
   );
   $form['description'] = array(
     '#type' => 'textfield',
+    '#title' => t('Provide description'),
+    '#title_display' => 'invisible',
     '#size' => 64,
     '#default_value' => !empty($form_state['view']) ? $form_state['view']->description : '',
     '#states' => array(
@@ -811,7 +813,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
     $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
     // Mark deleted displays as such.
-    if ($view->display[$display_id]->deleted) {
+    if (!empty($view->display[$display_id]->deleted)) {
       $form['displays']['tab_content']['#attributes']['class'][] = 'views-display-deleted';
     }
 
@@ -1266,7 +1268,7 @@ function views_ui_pre_render_add_fieldset_markup($form) {
     // In our form builder functions, we added an arbitrary #fieldset property
     // to any element that belongs in a fieldset. If this form element has that
     // property, move it into its fieldset.
-    if (isset($element['#type']) && isset($element['#fieldset']) && isset($form[$element['#fieldset']])) {
+    if (isset($element['#fieldset']) && isset($form[$element['#fieldset']])) {
       $form[$element['#fieldset']][$key] = $element;
       // Remove the original element this duplicates.
       unset($form[$key]);
@@ -1297,6 +1299,70 @@ function views_ui_pre_render_flatten_data($form) {
   }
 
   return $form;
+}
+
+/**
+ * Moves argument options into their place.
+ *
+ * When configuring the default argument behavior, almost each of the radio
+ * buttons has its own fieldset shown bellow it when the radio button is
+ * clicked. That fieldset is created through a custom form process callback.
+ * Each element that has #argument_option defined and pointing to a default
+ * behavior gets moved to the appropriate fieldset.
+ * So if #argument_option is specified as 'default', the element is moved
+ * to the 'default_options' fieldset.
+ */
+function views_ui_pre_render_move_argument_options($form) {
+  foreach (element_children($form) as $key) {
+    $element = $form[$key];
+    if (!empty($element['#argument_option'])) {
+      $container_name = $element['#argument_option'] . '_options';
+      if (isset($form['no_argument']['default_action'][$container_name])) {
+        $form['no_argument']['default_action'][$container_name][$key] = $element;
+      }
+      // Remove the original element this duplicates.
+      unset($form[$key]);
+    }
+  }
+  return $form;
+}
+
+/**
+ * Custom form radios process function.
+ *
+ * Roll out a single radios element to a list of radios,
+ * using the options array as index.
+ * While doing that, create a container element underneath each option, which
+ * contains the settings related to that option.
+ *
+ * @see form_process_radios
+ */
+function views_ui_process_radios($element) {
+  if (count($element['#options']) > 0) {
+    foreach ($element['#options'] as $key => $choice) {
+      $element += array($key => array());
+      // Generate the parents as the autogenerator does, so we will have a
+      // unique id for each radio button.
+      $parents_for_id = array_merge($element['#parents'], array($key));
+
+      $element[$key] += array(
+        '#type' => 'radio',
+        '#title' => $choice,
+        // The key is sanitized in drupal_attributes() during output from the
+        // theme function.
+        '#return_value' => $key,
+        '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : NULL,
+        '#attributes' => $element['#attributes'],
+        '#parents' => $element['#parents'],
+        '#id' => drupal_html_id('edit-' . implode('-', $parents_for_id)),
+        '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
+      );
+      $element[$key . '_options'] = array(
+        '#type' => 'container',
+      );
+    }
+  }
+  return $element;
 }
 
 /*

@@ -18,19 +18,19 @@
 
 /* @group Forms */
 
-fieldset {
-  padding: 0;
+.views-display-tab fieldset {
+  padding: 0 12px;
 }
 
-.fieldset-wrapper {
+.views-display-tab .fieldset-wrapper {
   padding: 10px 12px 12px;
 }
 
-fieldset.box-padding .fieldset-wrapper {
+.views-display-tab fieldset.box-padding .fieldset-wrapper {
   padding: 0;
 }
 
-legend + .fieldset-wrapper {
+.views-display-tab legend + .fieldset-wrapper {
   padding-top: 2.5em;
 }
 
@@ -87,6 +87,10 @@ legend + .fieldset-wrapper {
 
 .views-admin .links li {
   padding-right: 0; /* LTR */
+}
+
+.views-admin .button .links li {
+  padding-right: 12px; /* LTR */
 }
 
 .page-admin-structure-views #content ul.action-links {

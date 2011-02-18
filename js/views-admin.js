@@ -746,23 +746,33 @@ Drupal.behaviors.viewsDisplayBucketDropList.attach = function(context) {
   var $ = jQuery;
   // Show the select all checkbox.
   $('.views-display-columns .views-ui-display-tab-bucket', context).once(function () {
-    $this = $(this);
-    $this.find('.actions a').removeClass('icon');
-    $this.find('.actions').children().eq(0).nextAll().hide();
-    $list = $this.find('.actions')
-      .removeClass('horizontal right');
-    $list.wrap($('<div>').addClass('drop-list horizontal right'))
-      .parent().prepend($('<a>', {
+    var $this = $(this),
+        $linkWrapper = $this.find('.actions'),
+        $links = $linkWrapper.children(),
+        hasMultipleLinks = ($links.length > 1);
+    // Remove the icon class, which is a fallback for non-js browsers.
+    $links.find('a').removeClass('icon');
+    // Apply the droplist classes to the list of links
+    $linkWrapper.removeClass('horizontal right');
+    var classes = (hasMultipleLinks) ? 'button drop horizontal right' : 'button horizontal right';
+    $linkWrapper.wrap($('<div>').addClass(classes));
+    // If the droplist has more than one action, add a trigger to open it
+    if (hasMultipleLinks) {
+      // Hide the extra links
+      $links.eq(0).nextAll().hide();
+      $droplist = $linkWrapper.parent();
+      $droplist.prepend($('<a>', {
         html: $('<span>'),
         href: "#"
-      })
-      .addClass('trigger'));
-    $this.find('.drop-list .trigger')
+      }).addClass('trigger'));
+      // Add a click event to the droplist toggle
+      $droplist.find('.trigger')
       .bind('click', function (event) {
         event.preventDefault();
         $target = $(event.currentTarget);
         $target.parent().toggleClass('open');
         $target.next().children().not(':eq(0)').slideToggle('fast');
       });
+    }
   });
 };

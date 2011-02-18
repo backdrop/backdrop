@@ -152,11 +152,6 @@ div.form-item-displays-live-preview {
   padding-right: 25px;
 }
 
-.views-ui-display-tab-bucket > .actions * + * {
-  margin-right: 3px;
-  padding-right: 3px;
-}
-
 /* @end */
 
 /* @group Attachment bucket rows
