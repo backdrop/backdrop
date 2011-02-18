@@ -498,8 +498,8 @@ class view extends views_db_object {
           break;
         }
 
-        if ($argument->is_wildcard()) {
-          $arg_title = $argument->wildcard_title();
+        if ($argument->is_exception()) {
+          $arg_title = $argument->exception_title();
         }
         else {
           $arg_title = $argument->get_title();
