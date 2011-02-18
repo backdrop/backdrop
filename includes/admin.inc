@@ -655,10 +655,17 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
   }
   if (!empty($view->changed)) {
+    if (isset($view->vid) && $view->vid == 'new') {
+      $message = t('* This view will not exist until the <em>Save</em> button is clicked.');
+    }
+    else {
+      $message = t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.');
+    }
+
     $form['changed'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array('class' => array('view-changed', 'messages', 'warning')),
-      '#markup' => t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.'),
+      '#markup' => $message,
     );
   }
 
@@ -690,7 +697,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => t('Undo changes'),
+    '#value' => (isset($view->vid) && $view->vid == 'new') ? t('Discard view') : t('Undo changes'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
   );
 
@@ -763,7 +770,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       ),
     ),
   );
-  if ($view->type != t('Default')) {
+  if (isset($view->type) && $view->type != t('Default')) {
     if ($view->type == t('Overridden')) {
       $form['displays']['top']['extra_actions']['#links']['revert'] = array(
         'title' => t('revert'),
