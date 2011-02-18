@@ -109,7 +109,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'textfield',
       '#field_prefix' => $path_prefix,
     );
-    $form['displays']['page']['options']['style_plugin'] = array(
+    $form['displays']['page']['options']['style'] = array(
+      '#type' => 'fieldset',
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $form['displays']['page']['options']['style']['style_plugin'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
@@ -120,9 +125,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         'wrapper' => 'edit-page-style-plugin',
       ),
     );
-    if (isset($form_state['values'])) {
-      $this->build_form_style($form, $form_state, 'page');
-    }
+    $this->build_form_style($form, $form_state, 'page');
     $form['displays']['page']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
@@ -232,9 +235,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         'wrapper' => 'edit-block-style-plugin',
       ),
     );
-    if (isset($form_state['values'])) {
-      $this->build_form_style($form, $form_state, 'block');
-    }
+    $this->build_form_style($form, $form_state, 'block');
     $form['displays']['block']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
@@ -249,21 +250,14 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Build the part of the form that builds the display format options.
    */
   protected function build_form_style(&$form, &$form_state, $type) {
-//     dsm($form_state);
-//     dsm($form);
-//     dsm($form_state);
-//     dd($form_state['values']);
-//     dd($form_state['input']);
-    if ($style = $form_state['values'][$type]['style_plugin']) {
-      $style_plugin = views_get_plugin('style', $style);
-      $options = $this->row_style_options($type);
-      $form['displays'][$type]['options']['row_style'] = array(
-        '#type' => 'select',
-        '#title' => t('of'),
-        '#options' => $options,
-      );
-      dd($form['displays']);
-    }
+    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style_plugin'] : $form['displays'][$type]['options']['style_plugin']['#default_value'];
+    $style_plugin = views_get_plugin('style', $style);
+    $options = $this->row_style_options($type);
+    $form['displays'][$type]['options']['style']['row_style'] = array(
+      '#type' => 'select',
+      '#title' => t('of'),
+      '#options' => $options,
+    );
   }
 
   /**
