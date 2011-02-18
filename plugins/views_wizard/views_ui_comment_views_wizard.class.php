@@ -29,6 +29,32 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
     }
   }
 
+  protected function page_display_options($form, $form_state) {
+    $display_options = parent::default_display_options($form, $form_state);
+    $row_plugin = $form_state['values']['page']['style']['row_plugin'];
+    $row_options = $form_state['values']['page']['style']['row_options'];
+    $this->display_options_row($display_options, $row_plugin, $row_options);
+  }
+
+  protected function block_display_options($form, $form_state) {
+    $display_options = parent::default_display_options($form, $form_state);
+    $row_plugin = $form_state['values']['block']['style']['row_plugin'];
+    $row_options = $form_state['values']['block']['style']['row_options'];
+    $this->display_options_row($display_options, $row_plugin, $row_options);
+  }
+
+  /**
+   * Set the row style and row style plugins to the display_options.
+   */
+  protected  function display_options_row(&$display_options, $row_plugin, $row_options) {
+    switch ($row_plugin) {
+      case 'comment':
+        $display_options['row_plugin'] = 'comment';
+        $display_options['row_options']['links'] = !empty($row_options['links']);
+        break;
+    }
+  }
+
   protected function default_display_options($form, $form_state) {
     $display_options = parent::default_display_options($form, $form_state);
 
