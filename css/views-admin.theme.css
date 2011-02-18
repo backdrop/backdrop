@@ -162,7 +162,7 @@
   border-radius: 7px 7px 7px 7px;
   font-size: 12px;
   line-height: 1;
-  padding: 2px 6px;
+  padding: 0;
 }
 
 .views-admin .button:hover {
@@ -214,25 +214,26 @@
   border-color: #a0a0a0;
 }
 
-.views-admin .button ul {
+.views-admin .button > ul {
   margin: 0;
-  padding: 0;
+  padding-bottom: 2px;
+  padding-top: 2px;
 }
 
 .views-admin .button li {
   line-height: 1.3333;
-  padding: 0 10px;
+  padding: 0 12px;
 }
 
 /* @group Drop buttons */
 
 .views-admin .drop.button {
-  padding-right: 20px;
+  padding-right: 18px;
   position: relative;
 }
 
 .views-admin .drop.button > ul {
-  margin-right: 0;
+  border-right: 1px solid #e8e8e8;
 }
 
 .views-admin .drop.button li,
@@ -247,7 +248,7 @@
   -webkit-border-top-right-radius: 7px;
   border-bottom-right-radius: 7px;
   border-top-right-radius: 7px;
-  border-left: 1px solid #dfdfdf;
+  border-left: 1px solid #ffffff;
   bottom: 0;
   height: auto;
   position: absolute;
@@ -278,23 +279,12 @@
  * This creates the dropbutton arrow and inherits the link color
  */
 .views-admin .drop.button .trigger span {
-   border-bottom-color: transparent;
-   border-left-color: transparent;
-   border-right-color: transparent;
-   border-style: solid;
-   border-width: 4px 4px 0;
-   left: 4pt;
-   position: absolute;
-   top: 0.75em;
- }
- 
-.views-admin .drop.button .trigger span {
   border-bottom-color: transparent;
   border-left-color: transparent;
   border-right-color: transparent;
   border-style: solid;
   border-width: 4px 4px 0;
-  left: 3pt;
+  right: 3pt;
   position: absolute;
   top: 0.75em;
 }
