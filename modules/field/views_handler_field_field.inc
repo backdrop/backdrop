@@ -86,7 +86,7 @@ class views_handler_field_field extends views_handler_field {
           $base_table_alias = $relationship->alias;
 
           $table_data = views_fetch_data($base_table);
-          $base_field = empty($relationship->definition['base field']) ? $table_data['table']['base']['field'] : $relationship->definition['base field'];
+          $base_field = $table_data['table']['base']['field'];
         }
       }
     }
@@ -495,10 +495,12 @@ class views_handler_field_field extends views_handler_field {
         $entities = entity_load($entity_type, $entity_ids);
 
         foreach ($entity_ids as $key => $entity_id) {
-          $values[$key]->_field_data[$this->field_alias] = array(
-            'entity_type' => $entity_type,
-            'entity' => $entities[$entity_id],
-          );
+          if (isset($entities[$entity_id])) {
+            $values[$key]->_field_data[$this->field_alias] = array(
+              'entity_type' => $entity_type,
+              'entity' => $entities[$entity_id],
+            );
+          }
         }
       }
     }
@@ -541,7 +543,7 @@ class views_handler_field_field extends views_handler_field {
    * should also be in this array.
    */
   function get_items($values) {
-    if (empty($values->_field_data[$this->field_alias])) {
+    if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity'])) {
       return array();
     }
 
