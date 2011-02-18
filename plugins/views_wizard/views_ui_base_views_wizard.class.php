@@ -484,6 +484,27 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['pager']['type'] = 'full';
     $display_options['style_plugin'] = 'default';
     $display_options['row_plugin'] = 'fields';
+
+    // Add a least one field so the view validates and the user has already a preview.
+    // Therefore the basefield could provide 'defaults][field]' in it's base settings.
+    // If there is nothing like this choose the first field with a field handler.
+    $data = views_fetch_data($this->base_table);
+    if (isset($data['table']['base']['defaults']['field'])) {
+      $field = $data['table']['base']['defaults']['field'];
+    }
+    else {
+      foreach ($data as $field => $field_data) {
+        if (isset($field_data['field']['handler'])) {
+          break;
+        }
+      }
+    }
+    $display_options['fields'][$field] = array(
+      'table' => $this->base_table,
+      'field' => $field,
+      'id' => $field,
+    );
+
     return $display_options;
   }
 
@@ -583,7 +604,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options = array();
     $page = $form_state['values']['page'];
     $display_options['title'] = $page['title'];
-    dsm($page);
     $display_options['path'] = $page['path'];
     $display_options['style_plugin'] = $page['style']['style_plugin'];
     // Not every style plugin supports row style plugins.

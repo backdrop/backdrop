@@ -29,6 +29,9 @@ function node_views_data() {
     'title' => t('Content'),
     'weight' => -10,
     'access query tag' => 'node_access',
+    'defaults' => array(
+      'field' => 'title',
+    ),
   );
 
   // For other base tables, explain how we join
