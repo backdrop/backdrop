@@ -275,9 +275,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    */
   protected function row_style_options($type) {
     $data = views_fetch_data($this->base_table);
-    return array(
-      'fields' => t('Fields'),
-    );
+    // Get all availible availible row plugins by default.
+    $options = views_fetch_plugin_names('row', 'normal', array($this->base_table));
+    return $options;
   }
 
   /**
