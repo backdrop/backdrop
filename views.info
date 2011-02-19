@@ -4,7 +4,10 @@ description = Create customized lists and queries from your database.
 package = Views
 core = 7.x
 php = 5.2
-files[] = views.module
+
+; Always available CSS
+stylesheets[all][] = css/views.css
+
 dependencies[] = ctools
 ; Handlers
 files[] = handlers/views_handler_area.inc

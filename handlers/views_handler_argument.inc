@@ -162,7 +162,7 @@ class views_handler_argument extends views_handler {
       'contains' => array(
         'sort_order' => array('default' => 'asc'),
         'number_of_records' => array('default' => 0),
-        'format' => array('default' => 'list', 'export' => 'export_summary'),
+        'format' => array('default' => 'default_summary', 'export' => 'export_summary'),
       ),
     );
     $options['specify_validation'] = array('default' => 0);

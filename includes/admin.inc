@@ -662,7 +662,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form_state['no_cache'] = TRUE;
 
   ctools_include('dependent');
-  ctools_add_js('dependent');
+  $form['#attached']['js'][] = ctools_attach_js('dependent');
 
   $form['#tree'] = TRUE;
   // @todo When more functionality is added to this form, cloning here may be

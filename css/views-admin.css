@@ -351,3 +351,13 @@ html.js span.js-only {
 
 /* @end */
 
+/* Position the AJAX throbber in the middle of the window.
+ * @todo This might not be the best way to do it, but it works without changing
+ *   where the throbber DIV is in the markup. To get control over where the DIV
+ *   is in the markup will require more investigation.
+ */
+.views-admin .ajax-progress-throbber {
+  position: fixed;
+  top: 45%;
+  left: 45%;
+}
