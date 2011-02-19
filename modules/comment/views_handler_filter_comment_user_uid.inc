@@ -11,12 +11,13 @@ class views_handler_filter_comment_user_uid extends views_handler_filter_user_na
 
     $subselect = db_select('comments', 'c');
     $subselect->addField('c', 'cid');
-    $subselect->condition('uid', $this->value, $this->operator);
-    $subselect->condition('nid', "$this->table_alias.nid");
+    $subselect->where("uid $this->operator $this->value");
+    $subselect->where("nid = $this->table_alias.nid");
     $subselect = $subselect->countQuery();
 
     $condition = db_or()
       ->condition("$this->table_alias.uid", $this->value, $this->operator)
+      ->where("0 < (" . (string) $subselect . ")")
       ->condition(0, $subselect, '<');
 
     $this->query->add_where(0, $condition);
