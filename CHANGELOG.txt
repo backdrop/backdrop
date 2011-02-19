@@ -74,6 +74,7 @@ Fix fieldsets in field handler.
 #1039584 by dereine: Fix path of taxonomy path, function from d6
 #1019746 by Ralf: Check_plain role names.
 #1006482 by dereine: Fix filter: user posted or commented handler.
+#1056824 by greggles: Rename the displayed permission from "access all views" to "bypass views access control".
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

@@ -232,7 +232,7 @@ function views_permission() {
       'description' => t('Access the views administration pages.'),
     ),
     'access all views' => array(
-      'title' => t('Access all views'),
+      'title' => t('Bypass views accces control'),
       'description' => t('Bypass access control when accessing views.'),
     ),
   );
