@@ -254,8 +254,8 @@ function views_ui_preview_callback($form, $form_state) {
   // Reload the view from cache, so we get the most recent version instead of
   // the version from the form cache.
   $view = views_ui_cache_load($form_state['view']->name);
-  if (isset($form_state['values']['displays']['preview']['form']['view_args']) && $form_state['values']['displays']['preview']['form']['view_args'] !== '') {
-    $args = explode('/', $form_state['values']['displays']['preview']['form']['view_args']);
+  if (isset($form_state['values']['displays']['preview_controls']['preview_fieldset']['view_args']) && $form_state['values']['displays']['preview_controls']['preview_fieldset']['view_args'] !== '') {
+    $args = explode('/', $form_state['values']['displays']['preview_controls']['preview_fieldset']['view_args']);
   }
   else {
     $args = array();
