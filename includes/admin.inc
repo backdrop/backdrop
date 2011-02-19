@@ -1373,7 +1373,7 @@ function views_ui_pre_render_move_argument_options($form) {
  *
  * @see form_process_radios
  */
-function views_ui_process_radios($element) {
+function views_ui_process_container_radios($element) {
   if (count($element['#options']) > 0) {
     foreach ($element['#options'] as $key => $choice) {
       $element += array($key => array());

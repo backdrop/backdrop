@@ -194,7 +194,7 @@ class views_handler_argument extends views_handler {
     );
     $form['default_action'] = array(
       '#type' => 'radios',
-      '#process' => array('views_ui_process_radios'),
+      '#process' => array('views_ui_process_container_radios'),
       '#default_value' => $this->options['default_action'],
       '#fieldset' => 'no_argument',
     );
