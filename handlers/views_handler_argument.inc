@@ -1116,7 +1116,7 @@ class views_handler_argument_broken extends views_handler_argument {
   }
 
   function ensure_my_table() { /* No table to ensure! */ }
-  function query() { /* No query to run */ }
+  function query($group_by = FALSE) { /* No query to run */ }
   function options_form(&$form, &$form_state) {
     $form['markup'] = array(
       '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',
