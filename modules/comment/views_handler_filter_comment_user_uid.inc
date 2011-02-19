@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_comment_user_uid.inc,v 1.2.4.2 2009/11/13 12:36:06 dereine Exp $
+// $Id: views_handler_filter_comment_user_uid.inc,v 1.2.4.3 2011/02/19 06:51:45 dereine Exp $
 
 /**
  * Filter handler to accept a user id to check for nodes that user posted or
