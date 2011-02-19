@@ -72,6 +72,7 @@ Fix fieldsets in field handler.
 #646456 by xslim: Add a workaround to run update.php
 #1055602 by dereine: Convert argument search to dbtng.
 #1039584 by dereine: Fix path of taxonomy path, function from d6
+#870960 by bojanz, dereine: Field label should derive from field Label, not field name.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
