@@ -788,10 +788,9 @@ function views_include_handlers($reset = FALSE) {
 function views_get_handler($table, $field, $key, $override = NULL) {
   static $recursion_protection = array();
 
-  $data = views_fetch_data($table);
+  $data = views_fetch_data($table, FALSE);
   $handler = NULL;
 
-  if (isset($data[$field][$key])) {
     // Support old views_data entries conversion.
     if (isset($data[$field]['moved to'])) {
       $moved = $data[$field]['moved to'];
@@ -799,6 +798,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
     if (isset($data[$field][$key]['moved to'])) {
       $moved = $data[$field][$key]['moved to'];
     }
+  if (isset($data[$field][$key]) || !empty($moved)) {
     if (!empty($moved)) {
       list($moved_table, $moved_field) = $moved;
       if (!empty($recursion_protection[$moved_table][$moved_field])) {
@@ -850,9 +850,9 @@ function views_get_handler($table, $field, $key, $override = NULL) {
 /**
  * Fetch Views' data from the cache
  */
-function views_fetch_data($table = NULL, $reset = FALSE) {
+function views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
   views_include('cache');
-  return _views_fetch_data($table, $reset);
+  return _views_fetch_data($table, $move, $reset);
 }
 
 // -----------------------------------------------------------------------

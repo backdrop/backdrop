@@ -10,7 +10,7 @@
 /**
  * Fetch Views' data from the cache
  */
-function _views_fetch_data($table = NULL, $reset = FALSE) {
+function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
   static $cache = NULL;
   static $recursion_protection = array();
   if (!isset($cache) || $reset) {
@@ -39,7 +39,7 @@ function _views_fetch_data($table = NULL, $reset = FALSE) {
   }
   if (isset($cache[$table])) {
     // Support old views_data entries conversion.
-    if (isset($cache[$table]['moved to'])) {
+    if (isset($cache[$table]['moved to']) && $move) {
       $moved_table = $cache[$table]['moved to'];
       if (!empty($recursion_protection[$table])) {
         // recursion detected!
