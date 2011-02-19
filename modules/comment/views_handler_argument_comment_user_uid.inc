@@ -34,7 +34,7 @@ class views_handler_argument_comment_user_uid extends views_handler_argument {
     }
   }
 
-  function query() {
+  function query($group_by = FALSE) {
     $this->ensure_my_table();
 
     $nid_alias = $this->query->add_field('node', 'nid');

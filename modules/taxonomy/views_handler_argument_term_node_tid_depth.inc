@@ -75,7 +75,7 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
     return $actions;
   }
 
-  function query() {
+  function query($group_by = FALSE) {
     $this->ensure_my_table();
 
     if (!empty($this->options['break_phrase'])) {

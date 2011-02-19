@@ -9,7 +9,7 @@
  */
 class views_handler_argument_term_node_tid_depth_modifier extends views_handler_argument {
   function options_form(&$form, &$form_state) { }
-  function query() { }
+  function query($group_by = FALSE) { }
   function pre_query() {
     // We don't know our argument yet, but it's based upon our position:
     $argument = isset($this->view->args[$this->position]) ? $this->view->args[$this->position] : NULL;
