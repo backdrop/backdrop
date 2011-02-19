@@ -29,6 +29,9 @@ function node_views_data() {
     'title' => t('Content'),
     'weight' => -10,
     'access query tag' => 'node_access',
+    'defaults' => array(
+      'field' => 'title',
+    ),
   );
 
   // For other base tables, explain how we join
@@ -397,6 +400,9 @@ function node_views_data() {
     'field' => 'vid',
     'title' => t('Content revision'),
     'help' => t('Content revision is a history of changes to content.'),
+    'defaults' => array(
+      'field' => 'title',
+    ),
   );
 
   // For other base tables, explain how we join

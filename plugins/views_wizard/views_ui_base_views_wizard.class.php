@@ -109,13 +109,22 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'textfield',
       '#field_prefix' => $path_prefix,
     );
-    $form['displays']['page']['options']['style_plugin'] = array(
+    $form['displays']['page']['options']['style'] = array(
+      '#type' => 'fieldset',
+      '#attributes' => array('class' => array('container-inline')),
+    );
+    $form['displays']['page']['options']['style']['style_plugin'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
       '#options' => $style_options,
       '#default_value' => 'default',
+      '#ajax' => array(
+        'callback' => 'views_ui_add_form_update_style_page',
+        'wrapper' => 'edit-page-style-plugin',
+      ),
     );
+    $this->build_form_style($form, $form_state, 'page');
     $form['displays']['page']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
@@ -220,7 +229,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'select',
       '#options' => $style_options,
       '#default_value' => 'default',
+      '#ajax' => array(
+        'callback' => 'views_ui_add_form_update_style_block',
+        'wrapper' => 'edit-block-style-plugin',
+      ),
     );
+    $this->build_form_style($form, $form_state, 'block');
     $form['displays']['block']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
@@ -229,6 +243,43 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
 
     return $form;
+  }
+
+  /**
+   * Build the part of the form that builds the display format options.
+   */
+  protected function build_form_style(&$form, &$form_state, $type) {
+    $style_form =& $form['displays'][$type]['options']['style'];
+    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : 'default';
+    $style_plugin = views_get_plugin('style', $style);
+    if (isset($style_plugin) && $style_plugin->uses_row_plugin()) {
+      $options = $this->row_style_options($type);
+      $style_form['row_plugin'] = array(
+        '#type' => 'select',
+        '#title' => t('of'),
+        '#options' => $options,
+        '#ajax' => array(
+          'wrapper' => "edit-style-$type-options-style-row-plugin-options",
+          'callback' => 'views_ui_add_form_update_row_' . $type,
+        ),
+      );
+      $style_form['row_options'] = array(
+        '#theme_wrappers' => array('container'),
+        '#attributes' => array('id' => "edit-style-$type-options-style-row-plugin-options"),
+      );
+    }
+  }
+
+  /**
+   * Add possible row style options.
+   *
+   * Per default use fields with base field.
+   */
+  protected function row_style_options($type) {
+    $data = views_fetch_data($this->base_table);
+    // Get all availible availible row plugins by default.
+    $options = views_fetch_plugin_names('row', 'normal', array($this->base_table));
+    return $options;
   }
 
   /**
@@ -395,6 +446,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       // The page display is usually the main one (from the user's point of
       // view). Its options should therefore become the overall view defaults,
       // so that new displays which are added later automatically inherit them.
+
       $this->set_default_options($options, $display, $default_display);
       // Display: Feed (attached to the page)
       if (!empty($form_state['values']['page']['feed'])) {
@@ -434,6 +486,27 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['pager']['type'] = 'full';
     $display_options['style_plugin'] = 'default';
     $display_options['row_plugin'] = 'fields';
+
+    // Add a least one field so the view validates and the user has already a preview.
+    // Therefore the basefield could provide 'defaults][field]' in it's base settings.
+    // If there is nothing like this choose the first field with a field handler.
+    $data = views_fetch_data($this->base_table);
+    if (isset($data['table']['base']['defaults']['field'])) {
+      $field = $data['table']['base']['defaults']['field'];
+    }
+    else {
+      foreach ($data as $field => $field_data) {
+        if (isset($field_data['field']['handler'])) {
+          break;
+        }
+      }
+    }
+    $display_options['fields'][$field] = array(
+      'table' => $this->base_table,
+      'field' => $field,
+      'id' => $field,
+    );
+
     return $display_options;
   }
 
@@ -534,7 +607,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $page = $form_state['values']['page'];
     $display_options['title'] = $page['title'];
     $display_options['path'] = $page['path'];
-    $display_options['style_plugin'] = $page['style_plugin'];
+    $display_options['style_plugin'] = $page['style']['style_plugin'];
+    // Not every style plugin supports row style plugins.
+    $display_options['row_plugin'] = isset($page['style']['row_plugin']) ? $page['style']['row_plugin'] : 'fields';
     $display_options['pager']['type'] = 'full';
     $display_options['pager']['options']['items_per_page'] = $page['items_per_page'];
     if (!empty($page['link'])) {
@@ -549,7 +624,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options = array();
     $block = $form_state['values']['block'];
     $display_options['title'] = $block['title'];
-    $display_options['style_plugin'] = $block['style_plugin'];
+    $display_options['style_plugin'] = $block['style']['style_plugin'];
+    $display_options['row_plugin'] = isset($block['style']['row_plugin']) ? $block['style']['row_plugin'] : 'fields';
     $display_options['pager']['type'] = 'full';
     $display_options['pager']['options']['items_per_page'] = $block['items_per_page'];
     return $display_options;

@@ -2,6 +2,59 @@
 
 class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
 
+  protected function row_style_options($type) {
+    $options = array();
+    $options['comment'] = t('Comments');
+    $options['fields'] = t('Fields');
+    return $options;
+  }
+
+  protected function build_form_style(&$form, &$form_state, $type) {
+    parent::build_form_style($form, $form_state, $type);
+    $style_form =& $form['displays'][$type]['options']['style'];
+    $row_style = isset($form_state['values'][$type]['style']['row_style']) ? $form_state['values'][$type]['style']['row_style'] : 'comment';
+    switch ($row_style) {
+      case 'comment':
+        $style_form['row_options']['links'] = array(
+          '#type' => 'select',
+          '#title_display' => 'invisible',
+          '#title' => t('Should links be displayed below each node'),
+          '#options' => array(
+            1 => t('with links (allow users to add comments, etc.)'),
+            0 => t('without links'),
+          ),
+          '#default_value' => 1,
+        );
+        break;
+    }
+  }
+
+  protected function page_display_options($form, $form_state) {
+    $display_options = parent::default_display_options($form, $form_state);
+    $row_plugin = $form_state['values']['page']['style']['row_plugin'];
+    $row_options = $form_state['values']['page']['style']['row_options'];
+    $this->display_options_row($display_options, $row_plugin, $row_options);
+  }
+
+  protected function block_display_options($form, $form_state) {
+    $display_options = parent::default_display_options($form, $form_state);
+    $row_plugin = $form_state['values']['block']['style']['row_plugin'];
+    $row_options = $form_state['values']['block']['style']['row_options'];
+    $this->display_options_row($display_options, $row_plugin, $row_options);
+  }
+
+  /**
+   * Set the row style and row style plugins to the display_options.
+   */
+  protected  function display_options_row(&$display_options, $row_plugin, $row_options) {
+    switch ($row_plugin) {
+      case 'comment':
+        $display_options['row_plugin'] = 'comment';
+        $display_options['row_options']['links'] = !empty($row_options['links']);
+        break;
+    }
+  }
+
   protected function default_display_options($form, $form_state) {
     $display_options = parent::default_display_options($form, $form_state);
 

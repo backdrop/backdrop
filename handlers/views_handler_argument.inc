@@ -144,8 +144,6 @@ class views_handler_argument extends views_handler {
     $options = parent::option_definition();
 
     $options['default_action'] = array('default' => 'ignore');
-    $options['style_plugin'] = array('default' => 'default_summary', 'export' => 'export_style');
-    $options['style_options'] = array('default' => array(), 'export' => FALSE);
     $options['exception'] = array(
       'contains' => array(
         'value' => array('default' => 'all'),
@@ -164,13 +162,13 @@ class views_handler_argument extends views_handler {
       'contains' => array(
         'sort_order' => array('default' => 'asc'),
         'number_of_records' => array('default' => 0),
-        'format' => array('default' => ''),
+        'format' => array('default' => 'list', 'export' => 'export_summary'),
       ),
     );
     $options['specify_validation'] = array('default' => 0);
     $options['validate'] = array(
       'contains' => array(
-        'type' => array('default' => 'none', 'export' => 'export_plugin'),
+        'type' => array('default' => 'none', 'export' => 'export_validation'),
         'fail' => array('default' => 'not found'),
       ),
     );
@@ -388,9 +386,9 @@ class views_handler_argument extends views_handler {
 
     // summary plugin
     $summary_id = $form_state['values']['options']['summary']['format'];
-    $plugin = $this->get_plugin('style', $default_id);
+    $plugin = $this->get_plugin('style', $summary_id);
     if ($plugin) {
-      $plugin->options_validate($form['summary']['options'][$default_id], $form_state, $form_state['values']['options']['summary']['options'][$default_id]);
+      $plugin->options_validate($form['summary']['options'][$summary_id], $form_state, $form_state['values']['options']['summary']['options'][$summary_id]);
     }
 
     $validate_id = $form_state['values']['options']['validate']['type'];
@@ -418,10 +416,10 @@ class views_handler_argument extends views_handler {
 
     // summary plugin
     $summary_id = $form_state['values']['options']['summary']['format'];
-    $plugin = $this->get_plugin('style', $default_id);
+    $plugin = $this->get_plugin('style', $summary_id);
     if ($plugin) {
-      $options = &$form_state['values']['options']['summary']['options'][$default_id];
-      $plugin->options_submit($form['summary']['options'][$default_id], $form_state, $options);
+      $options = &$form_state['values']['options']['summary']['options'][$summary_id];
+      $plugin->options_submit($form['summary']['options'][$summary_id], $form_state, $options);
       // Copy the now submitted options to their final resting place so they get saved.
       $form_state['values']['options']['summary_options'] = $options;
     }
@@ -587,7 +585,7 @@ class views_handler_argument extends views_handler {
       if (empty($info['uses options'])) {
         continue;
       }
-      $plugin = $this->get_plugin('summary', $id);
+      $plugin = $this->get_plugin('style', $id);
       if ($plugin) {
         $form['summary']['options'][$id] = array(
           '#prefix' => '<div id="edit-options-summary-options-' . $id . '-wrapper">',
@@ -715,8 +713,8 @@ class views_handler_argument extends views_handler {
 
     // Change the display style to the summary style for this
     // argument.
-    $this->view->plugin_name = $this->options['style_plugin'];
-    $this->view->style_options = $this->options['style_options'];
+    $this->view->plugin_name = $this->options['summary']['format'];
+    $this->view->style_options = $this->options['summary_options'];
 
     // Clear out the normal primary field and whatever else may have
     // been added and let the summary do the work.
@@ -996,34 +994,58 @@ class views_handler_argument extends views_handler {
   }
 
   /**
-   * Special handling for the style export.
+   * Export handler for summary export.
    *
    * Arguments can have styles for the summary view. This special export
    * handler makes sure this works properly.
    */
-  function export_style($indent, $prefix, $storage, $option, $definition, $parents) {
+  function export_summary($indent, $prefix, $storage, $option, $definition, $parents) {
     $output = '';
-    $name = $storage[$option];
-    $options = $storage['style_options'];
+    $name = $this->options['summary'][$option];
+    $options = $this->options['summary_options'];
 
     $plugin = views_get_plugin('style', $name);
     if ($plugin) {
       $plugin->init($this->view, $this->display, $options);
       // Write which plugin to use.
-      $output .= $indent . $prefix . "['$option'] = '$name';\n";
+      $output .= $indent . $prefix . "['summary']['$option'] = '$name';\n";
 
       // Pass off to the plugin to export itself.
-      $output .= $plugin->export_options($indent, $prefix . "['style_options']");
+      $output .= $plugin->export_options($indent, $prefix . "['summary_options']");
     }
 
     return $output;
   }
 
   /**
-   * Special handling for the style export.
+   * Export handler for validation export.
    *
-   * Arguments can have styles for the summary view. This special export
-   * handler makes sure this works properly.
+   * Arguments use validation plugins. This special export handler makes sure
+   * this works properly.
+   */
+  function export_validation($indent, $prefix, $storage, $option, $definition, $parents) {
+    $output = '';
+    $name = $this->options['validate'][$option];
+    $options = $this->options['validate_options'];
+
+    $plugin = views_get_plugin('argument validator', $name);
+    if ($plugin) {
+      $plugin->init($this->view, $this->display, $options);
+      // Write which plugin to use.
+      $output .= $indent . $prefix . "['validate']['$option'] = '$name';\n";
+
+      // Pass off to the plugin to export itself.
+      $output .= $plugin->export_options($indent, $prefix . "['validate_options']");
+    }
+
+    return $output;
+  }
+
+  /**
+   * Generic plugin export handler.
+   *
+   * Since style and validation plugins have their own export handlers, this
+   * one is currently only used for default argument plugins.
    */
   function export_plugin($indent, $prefix, $storage, $option, $definition, $parents) {
     $output = '';
@@ -1031,10 +1053,7 @@ class views_handler_argument extends views_handler {
       $type = 'argument default';
       $option_name = 'default_argument_options';
     }
-    else {
-      $type = 'argument validator';
-      $option_name = 'validate_options';
-    }
+
     $plugin = $this->get_plugin($type);
     $name = $this->options[$option];
 
@@ -1062,7 +1081,8 @@ class views_handler_argument extends views_handler {
       case 'argument validator':
         $plugin_name = $this->options['validate']['type'];
         $options_name = 'validate_options';
-      case 'summary':
+        break;
+      case 'style':
         $plugin_name = $this->options['summary']['format'];
         $options_name = 'summary_options';
     }
