@@ -37,10 +37,15 @@ class views_handler_field_field extends views_handler_field {
    */
   public $items = array();
 
+  /**
+    * Store the field informations.
+  */
+  public $field_info = array();
+
   function init(&$view, &$options) {
     parent::init($view, $options);
 
-    $field = $this->definition['field_info'];
+    $this->field_info = $field = field_info_field($this->definition['field_name']);
     $this->multiple = FALSE;
     $this->limit_values = FALSE;
 
@@ -135,7 +140,7 @@ class views_handler_field_field extends views_handler_field {
       $this->add_additional_fields($fields);
 
       // Filter by language, if field translation is enabled.
-      $field = $this->definition['field_info'];
+      $field = $this->field_info;
       if (field_is_translatable($entity_type, $field)) {
         $column = $this->table_alias . ".language";
         $this->query->add_where(0, $column, $this->query->options['field_language']);
@@ -200,7 +205,8 @@ class views_handler_field_field extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $field = $this->definition['field_info'];
+    // option_definition runs before init/construct, so no $this->field_info
+    $field = field_info_field($this->definition['field_name']);
     $field_type = field_info_field_types($field['type']);
     $column_names = array_keys($field['columns']);
 
@@ -252,7 +258,7 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    $field = $this->definition['field_info'];
+    $field = $this->field_info;
     $formatters = _field_view_formatter_options($field['type']);
     $column_names = array_keys($field['columns']);
 
@@ -336,7 +342,7 @@ class views_handler_field_field extends views_handler_field {
    * Provide options for multiple value fields.
    */
   function multiple_options_form(&$form, &$form_state) {
-    $field = $this->definition['field_info'];
+    $field = $this->field_info;
 
     $form['multiple_field_settings'] = array(
       '#type' => 'fieldset',
@@ -441,7 +447,7 @@ class views_handler_field_field extends views_handler_field {
     parent::groupby_form($form, $form_state);
     // With "field API" fields, the column target of the grouping function
     // and any additional grouping columns must be specified.
-    $group_columns = drupal_map_assoc(array_keys($this->definition['field_info']['columns']), 'ucfirst');
+    $group_columns = drupal_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
     $form['group_column'] = array(
       '#type' => 'select',
       '#title' => t('Group column'),
@@ -615,14 +621,14 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function document_self_tokens(&$tokens) {
-    $field = $this->definition['field_info'];
+    $field = $this->field_info;
     foreach ($field['columns'] as $id => $column) {
       $tokens['[' . $this->options['id'] . '-' . $id . ']'] = t('Raw @column', array('@column' => $id));
     }
   }
 
   function add_self_tokens(&$tokens, $item) {
-    $field = $this->definition['field_info'];
+    $field = $this->field_info;
     foreach ($field['columns'] as $id => $column) {
       // Use filter_xss_admin because it's user data and we can't be sure it is safe.
       // We know nothing about the data, though, so we can't really do much else.
@@ -637,7 +643,7 @@ class views_handler_field_field extends views_handler_field {
   function field_language() {
     global $language_content;
 
-    if (field_is_translatable($this->entity_type, $this->definition['field_info'])) {
+    if (field_is_translatable($this->entity_type, $this->field_info)) {
       $default_language = language_default('language');
       $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
                               array($language_content->language, $default_language),
