@@ -222,8 +222,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Block title'),
       '#type' => 'textfield',
     );
+    $form['displays']['block']['options']['style'] = array(
+      '#type' => 'fieldset',
+      '#attributes' => array('class' => array('container-inline')),
+    );
     // This may change by AJAX as we change the base table of the selected wizard.
-    $form['displays']['block']['options']['style_plugin'] = array(
+    $form['displays']['block']['options']['style']['style_plugin'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
