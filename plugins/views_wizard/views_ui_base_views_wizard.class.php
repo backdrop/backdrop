@@ -250,22 +250,24 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    */
   protected function build_form_style(&$form, &$form_state, $type) {
     $style_form =& $form['displays'][$type]['options']['style'];
-    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : $style_form['style_plugin']['#default_value'];
+    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : 'default';
     $style_plugin = views_get_plugin('style', $style);
-    $options = $this->row_style_options($type);
-    $style_form['row_plugin'] = array(
-      '#type' => 'select',
-      '#title' => t('of'),
-      '#options' => $options,
-      '#ajax' => array(
-        'wrapper' => "edit-style-$type-options-style-row-plugin-options",
-        'callback' => 'views_ui_add_form_update_row_' . $type,
-      ),
-    );
-    $style_form['row_options'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('id' => "edit-style-$type-options-style-row-plugin-options"),
-    );
+    if (isset($style_plugin) && $style_plugin->uses_row_plugin()) {
+      $options = $this->row_style_options($type);
+      $style_form['row_plugin'] = array(
+        '#type' => 'select',
+        '#title' => t('of'),
+        '#options' => $options,
+        '#ajax' => array(
+          'wrapper' => "edit-style-$type-options-style-row-plugin-options",
+          'callback' => 'views_ui_add_form_update_row_' . $type,
+        ),
+      );
+      $style_form['row_options'] = array(
+        '#theme_wrappers' => array('container'),
+        '#attributes' => array('id' => "edit-style-$type-options-style-row-plugin-options"),
+      );
+    }
   }
 
   /**

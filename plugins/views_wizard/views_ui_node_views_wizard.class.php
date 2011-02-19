@@ -15,8 +15,12 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   protected function build_form_style(&$form, &$form_state, $type) {
     parent::build_form_style($form, $form_state, $type);
     $style_form =& $form['displays'][$type]['options']['style'];
-    $row_style = isset($form_state['values'][$type]['style']['row_plugin']) ? $form_state['values'][$type]['style']['row_plugin'] : 'full_posts';
-    switch ($row_style) {
+    $row_plugin = isset($form_state['values'][$type]['style']['row_plugin']) ? $form_state['values'][$type]['style']['row_plugin'] : 'full_posts';
+    // Some style plugins doesn't support row plugins so stop here and don't add some row plugins.
+    if (!isset($style_form['row_plugin'])) {
+      return;
+    }
+    switch ($row_plugin) {
       case 'full_posts':
       case 'teasers':
         $style_form['row_options']['links'] = array(
