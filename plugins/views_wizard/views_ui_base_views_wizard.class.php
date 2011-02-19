@@ -256,8 +256,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $style_form =& $form['displays'][$type]['options']['style'];
     $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : 'default';
     $style_plugin = views_get_plugin('style', $style);
-    dd($style);
-    dd(debug_backtrace());
     if (isset($style_plugin) && $style_plugin->uses_row_plugin()) {
       $options = $this->row_style_options($type);
       $style_form['row_plugin'] = array(
