@@ -664,7 +664,8 @@ function template_preprocess_views_view_row_node(&$vars) {
   }
 
   if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
-    $vars['comments'] = drupal_render(comment_node_page_additions($node));
+    $build = comment_node_page_additions($node);
+    $vars['comments'] = drupal_render($build);
   }
 
   $vars['node'] = drupal_render($content);
