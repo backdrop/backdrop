@@ -459,7 +459,7 @@ input.form-radio {
   display: inline;
 }
 
-.views-displays .views-display-top ul > li + li {
+.views-displays .views-display-top > ul > li + li {
   margin-left: 3px; /* LTR */
 }
 

@@ -94,7 +94,7 @@
   padding: 6px 8px 8px;
 }
 
-.views-displays .views-display-top ul > li + li {
+.views-displays .views-display-top > ul > li + li {
   margin-right: 3px;
 }
 
