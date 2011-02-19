@@ -26,10 +26,21 @@ class views_handler_field_custom extends views_handler_field {
     unset($form['alter']['alter_text']);
     unset($form['alter']['text']['#dependency']);
     unset($form['alter']['text']['#process']);
+    $form['#pre_render'][] = 'views_handler_field_custom_pre_render_move_text';
   }
 
   function render($values) {
     // Nothing to render.
     return '';
   }
+}
+
+/**
+ * Prerender function to move the textarea to the top.
+ */
+function views_handler_field_custom_pre_render_move_text($form) {
+  $form['text'] = $form['alter']['text'];
+  unset($form['alter']['text']);
+
+  return $form;
 }
