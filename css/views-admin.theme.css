@@ -105,23 +105,23 @@
 }
 
 .views-admin .icon.linked {
-  background-position: center -153px, left top;
+  background-position: center -153px;
 }
 
 .views-admin .icon.unlinked {
-  background-position: center -195px, left top;
+  background-position: center -195px;
 }
 
 .views-admin .icon.add {
-  background-position: center 3px, left top;
+  background-position: center 3px;
 }
 
 .views-admin .icon.delete {
-  background-position: center -52px, left top;
+  background-position: center -52px;
 }
 
 .views-admin .icon.rearrange {
-  background-position: center -111px, left top;
+  background-position: center -111px;
 }
 
 .views-displays .secondary a:hover > .icon.add {
