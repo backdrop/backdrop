@@ -41,7 +41,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
       '#prefix' => '<div id="edit-options-argument-validate-user-roles-wrapper">',
       '#suffix' => '</div>',
       '#title' => t('Restrict to the selected roles'),
-      '#options' => user_roles(TRUE),
+      '#options' => array_map('check_plain', user_roles(TRUE)),
       '#default_value' => $this->options['roles'],
       '#description' => t('If no roles are selected, users from any role will be allowed.'),
       '#process' => array('form_process_checkboxes', 'ctools_dependent_process'),
