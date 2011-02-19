@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_date.inc,v 1.3.4.6 2010/12/23 22:34:37 dereine Exp $
+// $Id: views_handler_field_date.inc,v 1.3.4.7 2011/02/19 07:11:01 dereine Exp $
 /**
  * A handler to provide proper displays for dates.
  *
