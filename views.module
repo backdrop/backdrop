@@ -24,13 +24,6 @@ function views_api_minimum_version() {
 }
 
 /**
- * Implement hook_init().
- */
-function views_init() {
-  drupal_add_css(drupal_get_path('module', 'views') .'/css/views.css');
-}
-
-/**
  * Implement hook_theme(). Register views theming functions.
  */
 function views_theme($existing, $type, $theme, $path) {
