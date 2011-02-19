@@ -41,7 +41,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
             1 => t('with comments'),
             0 => t('without comments'),
           ),
-          '#default_value' => 1,
+          '#default_value' => 0,
         );
         break;
     }
