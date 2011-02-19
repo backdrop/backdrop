@@ -791,13 +791,13 @@ function views_get_handler($table, $field, $key, $override = NULL) {
   $data = views_fetch_data($table, FALSE);
   $handler = NULL;
 
-    // Support old views_data entries conversion.
-    if (isset($data[$field]['moved to'])) {
-      $moved = $data[$field]['moved to'];
-    }
-    if (isset($data[$field][$key]['moved to'])) {
-      $moved = $data[$field][$key]['moved to'];
-    }
+  // Support old views_data entries conversion.
+  if (isset($data[$field]['moved to'])) {
+    $moved = $data[$field]['moved to'];
+  }
+  if (isset($data[$field][$key]['moved to'])) {
+    $moved = $data[$field][$key]['moved to'];
+  }
   if (isset($data[$field][$key]) || !empty($moved)) {
     if (!empty($moved)) {
       list($moved_table, $moved_field) = $moved;

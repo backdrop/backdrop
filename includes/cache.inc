@@ -9,6 +9,10 @@
 
 /**
  * Fetch Views' data from the cache
+ *
+ * @param $move
+ *   Under certain circumstances it makes sense to not get the moved table, but the old one.
+ *   One example is views_get_handler.
  */
 function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
   static $cache = NULL;
