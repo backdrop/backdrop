@@ -76,6 +76,7 @@ Fix fieldsets in field handler.
 #1006482 by dereine: Fix filter: user posted or commented handler.
 #870960 by bojanz, dereine: Field label should derive from field Label, not field name.
 #1056824 by greggles: Rename the displayed permission from "access all views" to "bypass views access control".
+#1022052 bojanz, dereine: Don't add the field_info into the views data array
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
