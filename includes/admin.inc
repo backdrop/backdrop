@@ -845,29 +845,52 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
     // The part of the page where editing will take place.
     $view->set_display($display_id);
-    $form['displays']['tab_content'] = views_ui_get_display_tab($view, $display_id);
-    $form['displays']['tab_content']['#theme_wrappers'] = array('container');
-    $form['displays']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
-    $form['displays']['tab_content']['#id'] = 'views-tab-' . $display_id;
+    // This element is the ctools collapsible-div container for the display edit elements.
+    $form['displays']['settings'] = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array(
+        'class' => array(
+          'views-display-settings',
+          'box-padding',
+          'ctools-collapsible-container',
+        ),
+      ),
+    );
+    $display_title = views_ui_get_display_label($view, $display_id, FALSE);
+    // Add a handle for the ctools collapsible-div. The handle is the title of the display
+    $form['displays']['settings']['tab_title']['#markup'] = '<h2 class="ctools-collapsible-handle">'.t('@display_title details', array('@display_title' => ucwords($display_title))).'</h2>';
+    // The ctools collapsible-div content
+    $form['displays']['settings']['settings_content']= array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array(
+        'class' => array(
+          'ctools-collapsible-content',
+        ),
+      ),
+    );
+    // Add the edit display content
+    $form['displays']['settings']['settings_content']['tab_content'] = views_ui_get_display_tab($view, $display_id);
+    $form['displays']['settings']['settings_content']['tab_content']['#theme_wrappers'] = array('container');
+    $form['displays']['settings']['settings_content']['tab_content']['#attributes'] = array('class' => array('views-display-tab'));
+    $form['displays']['settings']['settings_content']['tab_content']['#id'] = 'views-tab-' . $display_id;
     // Mark deleted displays as such.
     if (!empty($view->display[$display_id]->deleted)) {
-      $form['displays']['tab_content']['#attributes']['class'][] = 'views-display-deleted';
+      $form['displays']['settings']['settings_content']['tab_content']['#attributes']['class'][] = 'views-display-deleted';
     }
 
     // Add preview controls
-    $form['displays']['preview_controls'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls'] = array(
       '#theme_wrappers' => array('container'),
     );
 
     // Wrap the controls in a fieldset used for standard left/right padding
-    $form['displays']['preview_controls']['preview_fieldset'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset'] = array(
       '#type' => 'fieldset',
       '#id' => 'edit-displays-preview-fieldset',
-      '#attributes' => array('class' => array('box-padding')),
     );
 
     // Add a checkbox controlling whether or not this display auto-previews.
-    $form['displays']['preview_controls']['preview_fieldset']['live_preview'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset']['live_preview'] = array(
       '#type' => 'checkbox',
       '#id' => 'edit-displays-live-preview',
       '#title' => t('Auto preview'),
@@ -875,7 +898,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
 
     // Add the preview button
-    $form['displays']['preview_controls']['preview_fieldset']['button'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset']['button'] = array(
       '#type' => 'submit',
       '#value' => t('Preview'),
       '#attributes' => array('class' => array('arguments-preview')),
@@ -893,7 +916,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
 
     // Add the arguments textfield
-    $form['displays']['preview_controls']['preview_fieldset']['view_args'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset']['view_args'] = array(
       '#type' => 'textfield',
       '#title' => t('Arguments'),
       '#description' => t('Separate arguments with a / as though they were a URL path.'),
@@ -1086,11 +1109,7 @@ function views_ui_get_display_tab($view, $display_id) {
 function views_ui_get_display_tab_details($view, $display) {
   $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
-    '#type' => 'fieldset',
-    '#title' => t('@display_title details', array('@display_title' => ucwords($display_title))),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE, // @TODO: Close by default after contextual links are added.
-    '#attributes' => array('class' => array('box-padding')),
+    '#theme_wrappers' => 'container'
   );
 
   $build['top']['#theme_wrappers'] = array('views_container');
