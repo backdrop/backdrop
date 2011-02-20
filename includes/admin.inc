@@ -883,14 +883,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#theme_wrappers' => array('container'),
     );
 
-    // Wrap the controls in a fieldset used for standard left/right padding
-    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset'] = array(
-      '#type' => 'fieldset',
-      '#id' => 'edit-displays-preview-fieldset',
-    );
-
     // Add a checkbox controlling whether or not this display auto-previews.
-    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset']['live_preview'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls']['live_preview'] = array(
       '#type' => 'checkbox',
       '#id' => 'edit-displays-live-preview',
       '#title' => t('Auto preview'),
@@ -898,13 +892,13 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
 
     // Add the preview button
-    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset']['button'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls']['button'] = array(
       '#type' => 'submit',
       '#value' => t('Preview'),
       '#attributes' => array('class' => array('arguments-preview')),
       '#states' => array(
         'visible' => array(   // action to take.
-          ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
+          ':input[name="displays[settings][settings_content][preview_controls][live_preview]"]' => array('checked' => FALSE),
         ),
       ),
       '#id' => 'preview-submit',
@@ -916,14 +910,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
 
     // Add the arguments textfield
-    $form['displays']['settings']['settings_content']['preview_controls']['preview_fieldset']['view_args'] = array(
+    $form['displays']['settings']['settings_content']['preview_controls']['view_args'] = array(
       '#type' => 'textfield',
       '#title' => t('Arguments'),
       '#description' => t('Separate arguments with a / as though they were a URL path.'),
       '#attributes' => array('class' => array('arguments-preview')),
       '#states' => array(
         'visible' => array(   // action to take.
-          ':input[name="displays[preview_controls][preview_fieldset][live_preview]"]' => array('checked' => FALSE),
+          ':input[name="displays[settings][settings_content][preview_controls][live_preview]"]' => array('checked' => FALSE),
         ),
       ),
       '#id' => 'preview-args',
