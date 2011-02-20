@@ -23,6 +23,11 @@
   padding-right: 12px;
 }
 
+.box-margin {
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
 /* @end */
 
 /* @group Icons */
@@ -327,10 +332,10 @@ input.form-radio {
   margin-left: 1em; /* LTR */
 }
 
-.fieldset-wrapper > * + *,
+/*.fieldset-wrapper > * + *,
 .form-wrapper > * + * {
   margin-top: 15px;
-}
+}*/
 
 .container-inline {
   padding-top: 15px;
@@ -556,15 +561,29 @@ input.form-radio {
 
 /* @end */
 
-/* @group Attachment details collapsible fieldset
+/* @group Attachment details collapsible
  *
- * The attachment details section is a collapsible fieldset, but should not
- * have a border around it.
+ * The attachment details section is a collapsible ctools area
  */
  
-#edit-displays-settings-content {
+#edit-display-settings {
   border-bottom: 3px solid #CCC;
-  padding-bottom: 18px;
+  padding-bottom: 12px;
+}
+
+#edit-display-settings-title {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+#edit-display-settings-title,
+.views-display-settings .ctools-toggle {
+  color: #008BCB;
+}
+
+#edit-display-settings-content {
+  margin-top: 12px;
 }
 
 /* @end */
@@ -978,7 +997,7 @@ div.views-filterable-options .form-type-checkbox .description {
   float: left;
   height: 0;
   margin-right: 2px;
-  margin-top: 7pt;
+  margin-top: 0.6667em;
   width: 0;
 }
 
@@ -990,7 +1009,12 @@ div.views-filterable-options .form-type-checkbox .description {
   border-width: 5px 0 5px 5px;
   margin-left: 2px;
   margin-right: 5px;
-  margin-top: 4pt;
+  margin-top: 0.5em;
+}
+
+.ctools-toggle:hover,
+.ctools-collapsible-handle:hover {
+  cursor: pointer;
 }
 
 /* @end */
