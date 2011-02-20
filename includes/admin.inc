@@ -1109,7 +1109,7 @@ function views_ui_get_display_tab($view, $display_id) {
 function views_ui_get_display_tab_details($view, $display) {
   $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
-    '#theme_wrappers' => 'container'
+    '#theme_wrappers' => array('container'),
   );
 
   $build['top']['#theme_wrappers'] = array('views_container');
