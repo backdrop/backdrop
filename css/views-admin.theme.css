@@ -561,11 +561,10 @@ input.form-radio {
  * The attachment details section is a collapsible fieldset, but should not
  * have a border around it.
  */
-
-.views-display-tab .fieldset-legend {
-  text-transform: none;
-  font-size: 14px;
-  left: -5px; /* LTR */
+ 
+#edit-displays-settings-content {
+  border-bottom: 3px solid #CCC;
+  padding-bottom: 18px;
 }
 
 /* @end */
@@ -638,6 +637,8 @@ div.form-item-displays-live-preview {
 .views-ui-display-tab-bucket > * {
   padding: 2px 6px 4px;
 }
+
+/* @end */
 
 /* @group Attachment bucket drop button */
 
@@ -877,7 +878,6 @@ div.views-filterable-options .form-type-checkbox .description {
  * Create a horizontal rule above the live preview area.
  */
 #views-live-preview {
-  border-top: 3px solid #CCC;
   margin: 0 12px;
 }
 
@@ -962,6 +962,35 @@ div.views-filterable-options .form-type-checkbox .description {
 
 #edit-options-exception .form-type-textfield, #edit-options-argument-present .form-type-textfield {
   margin-top: 0;
+}
+
+/* @end */
+
+/* @group CTools */
+
+.ctools-toggle {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 5px 5px 0;
+  display: inline-block;
+  float: left;
+  height: 0;
+  margin-right: 2px;
+  margin-top: 7pt;
+  width: 0;
+}
+
+.ctools-toggle.ctools-toggle-collapsed {
+  border-bottom-color: transparent;
+  border-left:  4px solid;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  border-width: 5px 0 5px 5px;
+  margin-left: 2px;
+  margin-right: 5px;
+  margin-top: 4pt;
 }
 
 /* @end */
