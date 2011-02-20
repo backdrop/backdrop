@@ -663,6 +663,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
   ctools_include('dependent');
   $form['#attached']['js'][] = ctools_attach_js('dependent');
+  $form['#attached']['js'][] = ctools_attach_js('collapsible-div');
 
   $form['#tree'] = TRUE;
   // @todo When more functionality is added to this form, cloning here may be
