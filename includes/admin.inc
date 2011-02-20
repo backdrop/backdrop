@@ -862,6 +862,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     // The ctools collapsible-div content
     $form['displays']['settings']['settings_content']= array(
       '#theme_wrappers' => array('container'),
+      '#id' => 'edit-displays-settings-content',
       '#attributes' => array(
         'class' => array(
           'ctools-collapsible-content',
