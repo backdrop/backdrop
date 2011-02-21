@@ -1112,12 +1112,13 @@ function views_ui_get_display_tab_details($view, $display) {
   $build = array(
     '#theme_wrappers' => array('container'),
     '#id' => 'edit-display-settings-details',
+    '#attributes' => array(),
   );
 
   $build['top']['#theme_wrappers'] = array('container');
   $build['top']['#id'] = 'edit-display-settings-top';
   $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
-  
+
   // The Delete and Duplicate buttons.
   $build['top']['actions'] = array(
     '#prefix' => '<div class="horizontal right"><div class="actions">',
