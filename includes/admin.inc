@@ -763,6 +763,46 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['displays']['top']['#theme_wrappers'] = array('views_container');
   $form['displays']['top']['#attributes']['class'] = array('views-display-top');
 
+  // Extra actions for the display
+  $form['displays']['top']['extra_actions'] = array(
+    '#theme' => 'links',
+    '#attributes' => array(
+        'id' => 'views-display-extra-actions',
+        'class' => array(
+          'horizontal', 'right', 'links', 'actions',
+        ),
+      ),
+    '#links' => array(
+      'analyze' => array(
+        'title' => t('analyze'),
+        'href' => "admin/structure/views/view/$view->name/analyze",
+      ),
+      'clone' => array(
+        'title' => t('clone'),
+        'href' => "admin/structure/views/view/$view->name/clone",
+      ),
+      'export' => array(
+        'title' => t('export'),
+        'href' => "admin/structure/views/view/$view->name/export",
+      ),
+    ),
+  );
+  if (isset($view->type) && $view->type != t('Default')) {
+    if ($view->type == t('Overridden')) {
+      $form['displays']['top']['extra_actions']['#links']['revert'] = array(
+        'title' => t('revert'),
+        'href' => "admin/structure/views/view/$view->name/revert",
+        'query' => drupal_get_destination(),
+      );
+    }
+    else {
+      $form['displays']['top']['extra_actions']['#links']['delete'] = array(
+        'title' => t('delete'),
+        'href' => "admin/structure/views/view/$view->name/delete",
+      );
+    }
+  }
+
   // Determine the displays available for editing.
   if ($tabs = views_ui_edit_page_display_tabs($view)) {
     // If a display isn't specified, use the first one.
@@ -806,39 +846,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
   }
 
-  $form['displays']['top']['extra_actions'] = array(
-    '#theme' => 'links',
-    '#attributes' => array('class' => 'views-extra-actions'),
-    '#links' => array(
-      'analyze' => array(
-        'title' => t('analyze'),
-        'href' => "admin/structure/views/view/$view->name/analyze",
-      ),
-      'clone' => array(
-        'title' => t('clone'),
-        'href' => "admin/structure/views/view/$view->name/clone",
-      ),
-      'export' => array(
-        'title' => t('export'),
-        'href' => "admin/structure/views/view/$view->name/export",
-      ),
-    ),
-  );
-  if (isset($view->type) && $view->type != t('Default')) {
-    if ($view->type == t('Overridden')) {
-      $form['displays']['top']['extra_actions']['#links']['revert'] = array(
-        'title' => t('revert'),
-        'href' => "admin/structure/views/view/$view->name/revert",
-        'query' => drupal_get_destination(),
-      );
-    }
-    else {
-      $form['displays']['top']['extra_actions']['#links']['delete'] = array(
-        'title' => t('delete'),
-        'href' => "admin/structure/views/view/$view->name/delete",
-      );
-    }
-  }
   // The rest requires a display to be selected.
   if ($display_id) {
     $form_state['display_id'] = $display_id;

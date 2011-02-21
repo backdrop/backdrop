@@ -81,6 +81,10 @@
   padding: 0;
 }
 
+.views-admin ul.secondary {
+  clear: none;
+}
+
 .views-displays ul.secondary li a {
   padding: 2px 7px 3px;
 }
@@ -96,6 +100,10 @@
 .page-admin-structure-views #content ul.action-links {
   padding-left: 0;
   padding-right: 0;
+}
+
+.views-display-top ul.secondary {
+  background-color: transparent;
 }
 
 /* @end */
@@ -140,7 +148,7 @@
   text-align: left; /* LTR */
 }
 
-.views-displays .secondary > li {
+.views-displays .secondary > li:first-child {
   padding-left: 0;
 }
 

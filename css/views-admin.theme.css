@@ -422,11 +422,7 @@ input.form-radio {
   padding-bottom: 18px;
 }
 
-.views-displays .secondary {
-  background-color: #F9F9F9;
-}
-
-.views-displays .views-display-top {
+.views-display-top {
   background-color: #F9F9F9;
   border-bottom: 1px solid #CCCCCC;
   margin-bottom: 14px;
@@ -434,28 +430,22 @@ input.form-radio {
   position: relative;
 }
 
-.views-displays .views-extra-actions {
-  position: absolute;
-  right: 10px; /* LTR */
-  top: 5px;
+.views-display-top .secondary > li + li {
+  margin-left: 6px;
+  padding-left: 0;
 }
 
-.views-displays .views-display-top li {
-  display: inline;
+#views-display-extra-actions li {
+  padding: 3px 9px;
 }
 
-.views-displays .views-display-top > ul > li + li {
-  margin-left: 3px; /* LTR */
-}
-
-.views-displays .views-extra-actions li {
-  padding: 0 5px;
-}
-
-.views-displays .views-extra-actions .analyze {
-  border: 1px solid #aaa;
+#views-display-extra-actions .analyze {
+  border-color: #aaa;
+  border-style: solid;
   border-width: 0 1px;
-  padding: 3px 11px;
+  margin-right: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 /* @end */
