@@ -346,7 +346,7 @@ input.form-radio {
   padding-left: 4pt; /* LTR */
 }
 
-.form-type-checkbox + .form-wrapper {
+.views-admin .form-type-checkbox + .form-wrapper {
   margin-left: 16px;
 }
 
@@ -786,6 +786,14 @@ th.views-ui-operations {
 
 .views-ui-dialog {
   padding: 0;
+}
+
+.views-ui-dialog fieldset.collapsible {
+  padding-top: 1.5em;
+}
+
+.views-ui-dialog fieldset.collapsed {
+  padding-top: 2.5em;
 }
 
 div.views-filterable-options .form-type-checkbox {
