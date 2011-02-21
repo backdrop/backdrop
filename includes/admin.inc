@@ -883,6 +883,12 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     // Add preview controls
     $form['displays']['settings']['settings_content']['preview_controls'] = array(
       '#theme_wrappers' => array('container'),
+      '#attributes' => array(
+        'class' => array(
+          'clearfix',
+        ),
+      ),
+      '#id' => 'edit-display-preview-controls',
     );
 
     // Add a checkbox controlling whether or not this display auto-previews.
@@ -916,7 +922,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#type' => 'textfield',
       '#title' => t('Arguments'),
       '#description' => t('Separate arguments with a / as though they were a URL path.'),
-      '#attributes' => array('class' => array('arguments-preview')),
       '#states' => array(
         'visible' => array(   // action to take.
           ':input[name="displays[settings][settings_content][preview_controls][live_preview]"]' => array('checked' => FALSE),
@@ -1106,22 +1111,24 @@ function views_ui_get_display_tab_details($view, $display) {
   $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
     '#theme_wrappers' => array('container'),
+    '#id' => 'edit-display-settings-details',
   );
 
-  $build['top']['#theme_wrappers'] = array('views_container');
-  $build['top']['#attributes']['class'] = array('views-ui-display-tab-bucket');
+  $build['top']['#theme_wrappers'] = array('container');
+  $build['top']['#id'] = 'edit-display-settings-top';
+  $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
+  
   // The Delete and Duplicate buttons.
+  $build['top']['actions'] = array(
+    '#prefix' => '<div class="horizontal right"><div class="actions">',
+    '#suffix' => '</div></div>',
+  );
 
   // The area above the three columns.
   $build['top']['display_title'] = array(
     '#theme' => 'views_ui_display_tab_setting',
     '#description' => t('Display name'),
     '#link' => $display->handler->option_link(check_plain($display->display_title), 'display_title'),
-  );
-
-  $build['top']['actions'] = array(
-    '#prefix' => '<div class="actions">',
-    '#suffix' => '</div>',
   );
 
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
@@ -1157,6 +1164,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
   $build['columns']['#attributes'] = array('class' => array('clearfix', 'views-display-columns'));
+  $build['columns']['#id'] = 'edit-display-settings-main';
 
   $build['columns']['first']['#theme_wrappers'] = array('container');
   $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first'));

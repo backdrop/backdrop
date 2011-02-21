@@ -374,20 +374,6 @@ input.form-radio {
   font-weight: bold;
 }
 
-.ctools-export-ui-row {
-  margin-bottom: 5px;
-}
-
-.ctools-export-ui-row label {
-  display: block;
-  float: left;
-  width: 55px;
-}
-
-.ctools-export-ui-fourth-row input {
-  margin-top: 5px !important;
-}
-
 /* @end */
 
 /* @group Messages */
@@ -433,13 +419,6 @@ input.form-radio {
 .views-displays {
   border: 1px solid #CCC;
   padding-bottom: 18px;
-}
-
-.views-alt-ui-view-displays,
-.views-alt-ui-view-paths,
-.views-alt-ui-view-description {
-  font-size: 0.9167em; /* 11px/12px */
-  line-height: 1.5em;
 }
 
 .views-displays .secondary {
@@ -561,7 +540,7 @@ input.form-radio {
 
 /* @end */
 
-/* @group Attachment details collapsible
+/* @group Attachment details
  *
  * The attachment details section is a collapsible ctools area
  */
@@ -586,6 +565,10 @@ input.form-radio {
   margin-top: 12px;
 }
 
+#edit-display-settings-main {
+  margin-top: 15px;
+}
+
 /* @end */
 
 /* @group Attachment columns
@@ -593,7 +576,7 @@ input.form-radio {
  * The columns that contain the option buckets e.g. Format and Basic Settings
  */
 
-.views-display-columns > * + * {
+.views-display-column + .views-display-column {
    margin-top: 0;
  }
 
@@ -601,30 +584,37 @@ input.form-radio {
 
 /* @group Auto preview
  *
- * The auto-preview checkbox line. This may have more stuff added to it.
+ * The auto-preview checkbox line.
  */
 
-input.arguments-preview {
-  margin-left: 10px;
-  margin-right: -5px;
+#edit-display-preview-controls > div,
+#edit-display-preview-controls > input {
+  float: left;
 }
 
-div.form-item-displays-live-preview {
-  text-align: right; /* LTR */
-  margin: 0 12px;
-  padding-bottom: 12px;
+#edit-display-preview-controls > div {
+  margin-top: 4px;
 }
 
-.views-query-info {
-  margin: 12px 0;
+#edit-display-preview-controls .arguments-preview,
+#edit-display-preview-controls .arguments-preview + .form-item {
+  margin-left: 14px;
+}
+
+#edit-display-preview-controls .form-type-textfield label {
+  position: absolute;
+}
+
+#edit-display-preview-controls .form-type-textfield input, 
+#edit-display-preview-controls .form-type-textfield .description {
+  margin-left: 82px;  
 }
 
 /* @end */
 
 /* @group Attachment buckets
  *
- * These are the individual "buckets," or boxes, inside the three columns in the
- * attachment details section.
+ * These are the individual "buckets," or boxes, inside the display settings area
  */
 
 .views-ui-display-tab-bucket {
@@ -634,27 +624,17 @@ div.form-item-displays-live-preview {
   padding-top: 4px;
 }
 
-/* The full-width bucket at the top. */
-.fieldset-wrapper > .views-ui-display-tab-bucket:first-child {
-  border: none;
-  padding: 0;
-}
-
 .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
   border-top: medium none;
+}
+
+.views-ui-display-tab-bucket > * {
+  padding: 2px 6px 4px;
 }
 
 .views-ui-display-tab-bucket h3 {
   font-size: 12px;
   text-transform: uppercase;
-}
-
-.views-ui-display-tab-bucket .actions.links {
-  margin-right: 6px;
-}
-
-.views-ui-display-tab-bucket > * {
-  padding: 2px 6px 4px;
 }
 
 /* @end */
@@ -1015,6 +995,20 @@ div.views-filterable-options .form-type-checkbox .description {
 .ctools-toggle:hover,
 .ctools-collapsible-handle:hover {
   cursor: pointer;
+}
+
+.ctools-export-ui-row {
+  margin-bottom: 5px;
+}
+
+.ctools-export-ui-row label {
+  display: block;
+  float: left;
+  width: 55px;
+}
+
+.ctools-export-ui-fourth-row input {
+  margin-top: 5px !important;
 }
 
 /* @end */
