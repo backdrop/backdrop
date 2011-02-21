@@ -8,7 +8,7 @@
  */
 .views-ui-display-tab-bucket .advanced-help-link {
   padding: 0;
-  margin: 6px 3px 0px 6px;
+  margin: 5px 3px 0px 6px; /* LTR */
 }
 
 .views-ui-display-tab-bucket .icon-text {
@@ -16,9 +16,9 @@
 }
 
 .views-ui-display-tab-bucket .icon-linked {
-  background-position: 6px -151px;
+  background-position: 6px -151px; /* LTR */
 }
 
 .views-ui-display-tab-bucket .icon-unlinked {
-  background-position: 6px -193px;
+  background-position: 6px -193px; /* LTR */
 }

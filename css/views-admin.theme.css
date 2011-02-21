@@ -640,6 +640,27 @@ input.form-radio {
 
 /* @end */
 
+/* @group Attachment bucket overridden
+ * 
+ * Applies a broken link icon to overridden buckets.
+ * The better way to implement this would be to add the overridden class
+ * to the bucket header when the bucket is overridden and style it as a 
+ * generic icon classed element. For the moment, we'll style the bucket
+ * header specifically with the broken link icon.
+ */
+ 
+.views-ui-display-tab-bucket.overridden > h3 {
+  background-attachment: scroll;
+  background-image: url("../images/sprites.png");
+  background-position: left -172px; /* LTR */
+  background-repeat: no-repeat;
+  overflow: hidden;
+  padding-left: 21px;
+  zoom: 1;
+}
+
+/* @end */
+
 /* @group Attachment bucket drop button */
 
 .views-ui-display-tab-bucket {
