@@ -456,6 +456,64 @@ th.views-ui-operations {
 
 /* @end */
 
+/* @group Rearrange filters
+ *
+ * Styling for the form that allows views filters to be rearranged.
+ */
+
+.group-populated {
+  display: none;
+}
+
+td.group-title {
+  font-weight: bold;
+}
+
+.views-ui-dialog td.group-title {
+  margin: 0;
+  padding: 0;
+}
+
+.views-ui-dialog td.group-title span {
+  display: block;
+  height: 1px;
+  overflow: hidden;
+}
+
+.group-message .form-submit,
+.views-remove-group-link,
+#views-add-group {
+  float: right;
+  clear: both;
+}
+
+.views-operator-label {
+  font-style: italic;
+  font-weight: bold;
+  padding-left: 0.5em; /* LTR */
+  text-transform: uppercase;
+}
+
+.form-item-show-wizard-key label {
+  float: left;
+}
+
+.form-item-show-wizard-key select {
+  margin-left: 5px;
+}
+
+.exposed-description {
+  float: left;
+  padding-top: 3px;
+  padding-right: 10px;
+}
+
+#edit-options-more {
+  clear: both;
+}
+
+/* @end */
+
 /* @group Attachments */
 
 .views-displays {

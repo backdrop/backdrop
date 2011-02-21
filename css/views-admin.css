@@ -28,7 +28,51 @@
   margin-top: 0;
 }
 
- /* @end */
+/* @end */
+ 
+/* @group Columns */
+
+.views-left-25 {
+  float: left;
+  width: 25%;
+}
+
+.views-left-30 {
+  float: left;
+  width: 30%;
+}
+
+.views-left-40 {
+  float: left;
+  width: 40%;
+}
+
+.views-left-50 {
+  float: left;
+  width: 50%;
+}
+
+.views-left-75 {
+  float: left;
+  width: 75%;
+}
+
+.views-right-50 {
+  float: right;
+  width: 50%;
+}
+
+.views-right-60 {
+  float: right;
+  width: 60%;
+}
+
+.views-right-70 {
+  float: right;
+  width: 70%;
+}
+
+/* @end */
 
 /* @group Attachment details
  *
@@ -154,8 +198,8 @@
 
 .views-ui-dialog #views-ajax-title,
 .views-ui-dialog #views-ajax-body {
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 .views-ui-dialog #views-ajax-popup {
@@ -163,8 +207,8 @@
 }
 
 .views-ui-dialog .scroll {
-  overflow: auto;
   max-height: 400px;
+  overflow: auto;
 }
 
 #views-filterable-options-controls {
@@ -192,6 +236,7 @@
 /* @end */
 
 /* @group Filter Settings form */
+
 div.form-item-options-value-all {
   display: none;
 }
@@ -235,43 +280,7 @@ ul.secondary {
 
 /* @end */
 
-/* @group Rearrange filters
- *
- * Styling for the form that allows views filters to be rearranged.
- */
-
-.group-populated {
-  display: none;
-}
-
-td.group-title {
-  font-weight: bold;
-}
-
-.views-ui-dialog td.group-title {
-  margin: 0;
-  padding: 0;
-}
-
-.views-ui-dialog td.group-title span {
-  display: block;
-  height: 1px;
-  overflow: hidden;
-}
-
-.group-message .form-submit,
-.views-remove-group-link,
-#views-add-group {
-  float: right;
-  clear: both;
-}
-
-.views-operator-label {
-  font-style: italic;
-  font-weight: bold;
-  padding-left: 0.5em; /* LTR */
-  text-transform: uppercase;
-}
+/* @group Javascript dependent styling */
 
 .js-only {
   display: none;
@@ -285,67 +294,19 @@ html.js span.js-only {
   display: inline;
 }
 
-.form-item-show-wizard-key label {
-  float: left;
-}
-
-.form-item-show-wizard-key select {
-  margin-left: 5px;
-}
-
-.exposed-description {
-  float: left;
-  padding-top: 3px;
-  padding-right: 10px;
-}
-
-.views-left-25 {
-  width: 25%;
-  float: left;
-}
-.views-left-30 {
-  width: 30%;
-  float: left;
-}
-.views-left-40 {
-  width: 40%;
-  float: left;
-}
-.views-left-50 {
-  width: 50%;
-  float: left;
-}
-.views-left-75 {
-  width: 75%;
-  float: left;
-}
-
-.views-right-50 {
-  width: 50%;
-  float: right;
-}
-.views-right-60 {
-  width: 60%;
-  float: right;
-}
-.views-right-70 {
-  width: 70%;
-  float: right;
-}
-
-#edit-options-more {
-  clear: both;
-}
-
 /* @end */
 
-/* Position the AJAX throbber in the middle of the window.
+/* @group AJAX throbber
+ *
+ * Position the AJAX throbber in the middle of the window.
  * @todo This might not be the best way to do it, but it works without changing
  *   where the throbber DIV is in the markup. To get control over where the DIV
  *   is in the markup will require more investigation.
  */
 .views-admin .ajax-progress-throbber {
+  left: 45%;
   position: fixed;
   top: 45%;
-  left: 45%;
 }
+
+/* @end */
