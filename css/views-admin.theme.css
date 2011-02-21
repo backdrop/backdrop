@@ -118,15 +118,15 @@
 }
 
 .views-admin .icon.add {
-  background-position: center 3px;
+  background-position: center 3px, left top;
 }
 
 .views-admin .icon.delete {
-  background-position: center -52px;
+  background-position: center -52px, left top;
 }
 
 .views-admin .icon.rearrange {
-  background-position: center -111px;
+  background-position: center -111px, left top;
 }
 
 .views-displays .secondary a:hover > .icon.add {

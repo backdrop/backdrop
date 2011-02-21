@@ -125,6 +125,21 @@ table th {
 
 /* @end */
 
+/* @group Attachment buckets
+ *
+ * These are the individual "buckets," or boxes, inside the display settings area
+ */
+
+.views-ui-display-tab-bucket .links {
+  padding: 2px 6px 4px;
+}
+
+.views-ui-display-tab-bucket .links li + li {
+  margin-left: 3px;
+}
+
+/* @end */
+
 /* @group Rearrange filter criteria */
 
 #views-ui-rearrange-filter-form .action-links {
