@@ -386,7 +386,8 @@ input.form-radio {
 
 /* @group Headings */
 
-.views-admin h1 {
+/* Intentionally targeting h1 */
+.views-admin h1.unit-title {
   font-size: 15px;
   line-height: 1.6154;
   margin-bottom: 0;
@@ -880,11 +881,14 @@ div.views-filterable-options .form-type-checkbox .description {
   margin: 0 12px;
 }
 
-#views-live-preview h1 {
+/* Intentionally targeting h1 */
+#views-live-preview h1.section-title {
   color: #818181;
   display: inline-block;
   font-size: 13px;
   font-weight: normal;
+  line-height: 1.6154;
+  margin-bottom: 0;
   margin-top: 0;
 }
 
@@ -904,7 +908,6 @@ div.views-filterable-options .form-type-checkbox .description {
   padding: 3px 5px;
 }
 
-#views-live-preview .views_ui_view_preview_section_title + *,
 #views-live-preview li.views-row + li.views-row {
   margin-top: 18px;
 }
