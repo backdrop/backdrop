@@ -396,6 +396,41 @@ input.form-radio {
 
 /* @end */
 
+/* @group Tables */
+
+table td, 
+table th {
+  vertical-align: top;
+}
+
+/* @end */
+
+/* @group List views */
+
+/* These header classes are ambiguous and should be scoped to th elements */
+
+th.views-ui-name {
+  width: 18%;
+}
+
+th.views-ui-description {
+  width: 26%;
+}
+
+th.views-ui-tag {
+  width: 8%;
+}
+
+th.views-ui-path {
+  width: auto;
+}
+
+th.views-ui-operations {
+  width: 22%;
+}
+
+/* @end */
+
 /* @group Add view */
 
 /**

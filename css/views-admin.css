@@ -339,18 +339,6 @@ html.js span.js-only {
 
 /* @end */
 
-/* @group Inline lists */
-
-.views-ui-operations {
-  min-width: 22em;
-}
-
-.views-ui-name {
-  min-width: 15em;
-}
-
-/* @end */
-
 /* Position the AJAX throbber in the middle of the window.
  * @todo This might not be the best way to do it, but it works without changing
  *   where the throbber DIV is in the markup. To get control over where the DIV

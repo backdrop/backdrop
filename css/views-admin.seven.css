@@ -108,6 +108,15 @@
 
 /* @end */
 
+/* @group Tables */
+
+table td, 
+table th {
+  vertical-align: top;
+}
+
+/* @end */
+
 /* @group Rearrange filter criteria */
 
 #views-ui-rearrange-filter-form .action-links {
