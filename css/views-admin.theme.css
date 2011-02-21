@@ -448,6 +448,12 @@ th.views-ui-operations {
   margin-top: 27px;
 }
 
+/* This could be made more general if more than one instance occurs */
+#edit-page-style .fieldset-wrapper {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 /* @end */
 
 /* @group Attachments */
