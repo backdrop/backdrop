@@ -662,7 +662,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form_state['no_cache'] = TRUE;
 
   ctools_include('dependent');
-  // ctools_include('dropbutton.theme');
   $form['#attached']['js'][] = ctools_attach_js('dependent');
   $form['#attached']['js'][] = ctools_attach_js('collapsible-div');
 

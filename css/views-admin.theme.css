@@ -194,6 +194,10 @@
   border-color: #a0a0a0;
 }
 
+.ctools-dropbutton .ctools-content {
+  border-right: 1px solid #e8e8e8;
+}
+
 .ctools-button .horizontal.left,
 .ctools-button .horizontal.right,
 .ctools-button .horizontal > li {
@@ -239,15 +243,15 @@
   border-left: 1px solid #ffffff;
 }
 
+.ctools-dropbutton.open .ctools-content {
+    padding-bottom: 4px;
+}
+
 .ctools-dropbutton.open li + li {
   border-top: 1px solid #efefef;
   margin-top: 4px;
   padding-bottom: 0;
   padding-top: 4px;
-}
-
-.ctools-dropbutton .ctools-content {
-  border-right: 1px solid #e8e8e8;
 }
 
 /* @end */
