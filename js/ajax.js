@@ -27,7 +27,7 @@
       });
 
       $('form', ajax_body).once('views-ajax-submit-processed').each(function() {
-        var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'none' } };
+        var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'throbber' } };
         var $form = $(this);
         var id = $form.attr('id');
         Drupal.ajax[id] = new Drupal.ajax(id, this, element_settings);

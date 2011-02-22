@@ -297,10 +297,25 @@ html.js span.js-only {
 /* @end */
 
 /* @group AJAX throbber */
+
+/* Base Page */
 .views-admin .ajax-progress-throbber {
   left: 45%;
   position: fixed;
   top: 45%;
+}
+.views-admin .ajax-progress-throbber .message {
+  display: none;
+}
+
+/* Modal */
+#views-ajax-popup .ajax-progress-throbber {
+  left: 45%;
+  position: fixed;
+  top: 45%;
+}
+.views-ajax-popup .ajax-progress-throbber .message {
+  display: none;
 }
 
 /* @end */
