@@ -41,34 +41,6 @@ Drupal.behaviors.viewsTabs = {
 };
 
 /**
- * For IE, attach some javascript so that our hovers do what they're supposed
- * to do.
- */
-Drupal.behaviors.viewsHoverlinks = function() {
-  if ($.browser.msie) {
-    // If IE, attach a hover event so we can see our admin links.
-    $("div.view:not(.views-hover-processed)").addClass('views-hover-processed').hover(
-      function() {
-        $('div.views-hide', this).addClass("views-hide-hover"); return true;
-      },
-      function(){
-        $('div.views-hide', this).removeClass("views-hide-hover"); return true;
-      }
-    );
-    $("div.views-admin-links:not(.views-hover-processed)")
-      .addClass('views-hover-processed')
-      .hover(
-        function() {
-          $(this).addClass("views-admin-links-hover"); return true;
-        },
-        function(){
-          $(this).removeClass("views-admin-links-hover"); return true;
-        }
-      );
-  }
-}
-
-/**
  * Helper function to parse a querystring.
  */
 Drupal.Views.parseQueryString = function (query) {

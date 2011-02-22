@@ -88,36 +88,13 @@ function template_preprocess_views_view(&$vars) {
   $vars['attachment_before'] = !empty($view->attachment_before) ? $view->attachment_before : '';
   $vars['attachment_after'] = !empty($view->attachment_after) ? $view->attachment_after : '';
 
-  // if administrator, add some links. These used to be tabs, but this is better.
-  if (user_access('administer views') && module_exists('views_ui') && module_exists('contextual') && empty($view->hide_admin_links)) {
-    $links = array(
-      'views-edit' => array(
-        'title' => t('Edit view'),
-        'attributes' => array('title' => t("Edit this view")),
-        'href' => "admin/structure/views/view/$view->name",
-        'fragment' => 'views-tab-' . $view->current_display,
-        'query' => drupal_get_destination(),
-      ),
-    );
-    drupal_alter('views_admin_links', $links, $view);
-
-    $build = array(
-      '#prefix' => '<div class="contextual-links-wrapper">',
-      '#suffix' => '</div>',
-      '#theme' => 'links__contextual',
-      '#links' => $links,
-      '#attributes' => array('class' => array('contextual-links')),
-      '#attached' => array(
-        'library' => array(array('contextual', 'contextual-links')),
-      ),
-    );
-    $vars['classes_array'][] = 'contextual-links-region';
-    $vars['admin_links'] = drupal_render($build);
-  }
-  else {
-    $vars['admin_links'] = '';
-    $vars['admin_links_raw'] = array();
-  }
+  // Add contextual links to the view. We need to attach them to the dummy
+  // $view_array variable, since contextual_preprocess() requires that they be
+  // attached to an array (not an object) in order to process them. For our
+  // purposes, it doesn't matter what we attach them to, since once they are
+  // processed by contextual_preprocess() they will appear in the $title_suffix
+  // variable (which we will then render in views-view.tpl.php).
+  views_add_contextual_links($vars['view_array'], 'view', $view, $view->current_display);
 
   // Attachments are always updated with the outer view, never by themselves,
   // so they do not have dom ids.

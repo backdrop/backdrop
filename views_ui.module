@@ -75,8 +75,9 @@ function views_ui_menu() {
     'page arguments' => array('views_ui_edit_form', 4),
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/edit'] = array(
-    'title' => 'Edit',
+    'title' => 'Edit view',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'weight' => -10,
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/edit/ajax'] = array(
@@ -357,8 +358,6 @@ function views_ui_preprocess_views_view(&$vars) {
   $view = $vars['view'];
   if (!empty($view->views_ui_context)) {
     $view->hide_admin_links = TRUE;
-    $vars['admin_links'] = '';
-    $vars['admin_links_raw'] = array();
     foreach (array('title', 'header', 'exposed', 'rows', 'pager', 'more', 'footer', 'empty', 'attachment_after', 'attachment_before') as $section) {
       if (!empty($vars[$section])) {
         $vars[$section] = array(
@@ -639,14 +638,35 @@ function views_ui_get_form_wizard_instance($wizard) {
 }
 
 /**
+ * Implements hook_views_plugins_alter().
+ */
+function views_ui_views_plugins_alter(&$plugins) {
+  // Attach contextual links to each display plugin. The links will point to
+  // paths underneath "admin/structure/views/view/{$view->name}" (i.e., paths
+  // for editing and performing other contextual actions on the view).
+  foreach ($plugins['display'] as &$display) {
+    $display['contextual links']['views_ui'] = array(
+      'parent path' => 'admin/structure/views/view',
+      'argument properties' => array('name'),
+    );
+  }
+}
+
+/**
  * Implements hook_contextual_links_view_alter().
- *
- * Removes contextual links from being rendered, when so desired, such as within
- * a View preview.
  */
 function views_ui_contextual_links_view_alter(&$element, $items) {
+  // Remove contextual links from being rendered, when so desired, such as
+  // within a View preview.
   if (views_ui_contextual_links_suppress()) {
     $element['#links'] = array();
+  }
+  // Append the display ID to the Views UI edit links, so that clicking on the
+  // contextual link takes you directly to the correct display tab on the edit
+  // screen.
+  elseif (!empty($element['#links']['views-ui-edit']) && !empty($element['#element']['#views_contextual_links_info']['views_ui']['view_display_id'])) {
+    $display_id = $element['#element']['#views_contextual_links_info']['views_ui']['view_display_id'];
+    $element['#links']['views-ui-edit']['href'] .= '/' . $display_id;
   }
 }
 
