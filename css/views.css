@@ -33,23 +33,6 @@
   text-align: center;
 }
 
-div.view div.views-hide {
-  display: none;
-}
-
-/** For IE we add the class via js; for other browsers we rely on :hover **/
-div.view div.views-hide-hover,
-div.view:hover div.views-hide {
-  display: block;
-  position: absolute;
-  z-index: 200;
-}
-
-/* don't do this one in IE */
-div.view:hover div.views-hide {
-  margin-top: -1.5em;
-}
-
 /* Remove the border on tbody that system puts in */
 .views-view-grid tbody {
   border-top: none;

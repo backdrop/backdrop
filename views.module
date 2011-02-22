@@ -43,7 +43,10 @@ function views_theme($existing, $type, $theme, $path) {
   );
 
   $arguments = array(
-    'display' => array('view' => NULL),
+    // For displays, we pass in a dummy array as the first parameter, since
+    // $view is an object but the core contextual_preprocess() function only
+    // attaches contextual links when the primary theme argument is an array.
+    'display' => array('view_array' => array(), 'view' => NULL),
     'style' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
     'row' => array('view' => NULL, 'options' => NULL, 'row' => NULL, 'field_alias' => NULL),
   );
@@ -395,17 +398,79 @@ function views_arg_load($value, $name, $display_id, $index) {
  * passes control to the display handler.
  */
 function views_page() {
+  // Determine the name and display ID of the view that will be rendered here,
+  // and save them in a static variable so we can use them in hook_page_alter()
+  // to affect the rest of the page.
+  $name = &drupal_static('views_page:name');
+  $display_id = &drupal_static('views_page:display_id');
   $args = func_get_args();
   $name = array_shift($args);
   $display_id = array_shift($args);
 
-  // Load the view
+  // Load the view and render it. Destory it before returning, to save memory.
   if ($view = views_get_view($name)) {
-    return $view->execute_display($display_id, $args);
+    $output = $view->execute_display($display_id, $args);
+    $view->destroy();
+    return $output;
   }
 
   // Fallback; if we get here no view was found or handler was not valid.
   return drupal_not_found();
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+function views_page_alter(&$page) {
+  // Check the static variables that were set in views_page() to see if the
+  // main content of this page contains a view. If so, attach its contextual
+  // links to the overall page array. This allows them to be rendered directly
+  // next to the page title.
+  $name = drupal_static('views_page:name');
+  $display_id = drupal_static('views_page:display_id');
+  if (!empty($name) && !empty($display_id) && ($view = views_get_view($name))) {
+    views_add_contextual_links($page, 'page', $view, $display_id);
+    $view->destroy();
+  }
+}
+
+/**
+ * Implements MODULE_preprocess_HOOK().
+ */
+function views_preprocess_html(&$variables) {
+  // If the page contains a view as its main content, contextual links may have
+  // been attached to the page as a whole; for example, by views_page_alter().
+  // This allows them to be associated with the page and rendered by default
+  // next to the page title (which we want). However, it also causes the
+  // Contextual Links module to treat the wrapper for the entire page (i.e.,
+  // the <body> tag) as the HTML element that these contextual links are
+  // associated with. This we don't want; for better visual highlighting, we
+  // prefer a smaller region to be chosen. The region we prefer differs from
+  // theme to theme and depends on the details of the theme's markup in
+  // page.tpl.php, so we can only find it using JavaScript. We therefore remove
+  // the "contextual-links-region" class from the <body> tag here and add
+  // JavaScript that will insert it back in the correct place.
+  if (!empty($variables['page']['#views_contextual_links_info'])) {
+    $key = array_search('contextual-links-region', $variables['classes_array']);
+    if ($key !== FALSE) {
+      unset($variables['classes_array'][$key]);
+      // Add the JavaScript, with a group and weight such that it will run
+      // before modules/contextual/contextual.js.
+      drupal_add_js(drupal_get_path('module', 'views') . '/js/views-contextual.js', array('group' => JS_LIBRARY, 'weight' => -1));
+    }
+  }
+}
+
+/**
+ * Implements hook_contextual_links_view_alter().
+ */
+function views_contextual_links_view_alter(&$element, $items) {
+  // If we are rendering views-related contextual links attached to the overall
+  // page array, add a class to the list of contextual links. This will be used
+  // by the JavaScript added in views_preprocess_html().
+  if (!empty($element['#element']['#views_contextual_links_info']) && !empty($element['#element']['#type']) && $element['#element']['#type'] == 'page') {
+    $element['#attributes']['class'][] = 'views-contextual-links-page';
+  }
 }
 
 /**
@@ -501,6 +566,9 @@ function views_block_view($delta) {
         $view->set_display($display_id);
         if (isset($view->display_handler)) {
           $output = $view->display_handler->view_special_blocks($type);
+          // Before returning the block output, convert it to a renderable
+          // array with contextual links.
+          views_add_block_contextual_links($output, $view, $display_id);
           $view->destroy();
           return $output;
         }
@@ -514,10 +582,148 @@ function views_block_view($delta) {
   if ($view = views_get_view($name)) {
     if ($view->access($display_id)) {
       $output = $view->execute_display($display_id);
+      // Before returning the block output, convert it to a renderable array
+      // with contextual links.
+      views_add_block_contextual_links($output, $view, $display_id);
       $view->destroy();
       return $output;
     }
     $view->destroy();
+  }
+}
+
+/**
+ * Converts Views block content to a renderable array with contextual links.
+ *
+ * @param $block
+ *   An array representing the block, with the same structure as the return
+ *   value of hook_block_view(). This will be modified so as to force
+ *   $block['content'] to be a renderable array, containing the optional
+ *   '#contextual_links' property (if there are any contextual links associated
+ *   with the block).
+ * @param $view
+ *   The view that was used to generate the block content.
+ * @param $display_id
+ *   The ID of the display within the view that was used to generate the block
+ *   content.
+ */
+function views_add_block_contextual_links(&$block, $view, $display_id) {
+  // Do not add contextual links to an empty block.
+  if (!empty($block['content'])) {
+    // Contextual links only work on blocks whose content is a renderable
+    // array, so if the block contains a string of already-rendered markup,
+    // convert it to an array.
+    if (is_string($block['content'])) {
+      $block['content'] = array('#markup' => $block['content']);
+    }
+    // Add the contextual links.
+    views_add_contextual_links($block['content'], 'block', $view, $display_id);
+  }
+}
+
+/**
+ * Adds contextual links associated with a view display to a renderable array.
+ *
+ * This function should be called when a view is being rendered in a particular
+ * location and you want to attach the appropriate contextual links (e.g.,
+ * links for editing the view) to it.
+ *
+ * The function operates by checking the view's display plugin to see if it has
+ * defined any contextual links that are intended to be displayed in the
+ * requested location; if so, it attaches them. The contextual links intended
+ * for a particular location are defined by the 'contextual links' and
+ * 'contextual links locations' properties in hook_views_plugins() and
+ * hook_views_plugins_alter(); as a result, these hook implementations have
+ * full control over where and how contextual links are rendered for each
+ * display.
+ *
+ * In addition to attaching the contextual links to the passed-in array (via
+ * the standard #contextual_links property), this function also attaches
+ * additional information via the #views_contextual_links_info property. This
+ * stores an array whose keys are the names of each module that provided
+ * views-related contextual links (same as the keys of the #contextual_links
+ * array itself) and whose values are themselves arrays whose keys ('location',
+ * 'view_name', and 'view_display_id') store the location, name of the view,
+ * and display ID that were passed in to this function. This allows you to
+ * access information about the contextual links and how they were generated in
+ * a variety of contexts where you might be manipulating the renderable array
+ * later on (for example, alter hooks which run later during the same page
+ * request).
+ *
+ * @param $render_element
+ *   The renderable array to which contextual links will be added. This array
+ *   should be suitable for passing in to drupal_render() and will normally
+ *   contain a representation of the view display whose contextual links are
+ *   being requested.
+ * @param $location
+ *   The location in which the calling function intends to render the view and
+ *   its contextual links. The core system supports three options for this
+ *   parameter:
+ *   - 'block': Used when rendering a block which contains a view. This
+ *     retrieves any contextual links intended to be attached to the block
+ *     itself.
+ *   - 'page': Used when rendering the main content of a page which contains a
+ *     view. This retrieves any contextual links intended to be attached to the
+ *     page itself (for example, links which are displayed directly next to the
+ *     page title).
+ *   - 'view': Used when rendering the view itself, in any context. This
+ *     retrieves any contextual links intended to be attached directly to the
+ *     view.
+ *   If you are rendering a view and its contextual links in another location,
+ *   you can pass in a different value for this parameter. However, you will
+ *   also need to use hook_views_plugins() or hook_views_plugins_alter() to
+ *   declare, via the 'contextual links locations' array key, which view
+ *   displays support having their contextual links rendered in the location
+ *   you have defined.
+ * @param $view
+ *   The view whose contextual links will be added.
+ * @param $display_id
+ *   The ID of the display within $view whose contextual links will be added.
+ *
+ * @see hook_views_plugins()
+ * @see views_block_view()
+ * @see views_page_alter()
+ * @see template_preprocess_views_view()
+ */
+function views_add_contextual_links(&$render_element, $location, $view, $display_id) {
+  // Do not do anything if the view is configured to hide its administrative
+  // links.
+  if (empty($view->hide_admin_links)) {
+    // Also do not do anything if the display plugin has not defined any
+    // contextual links that are intended to be displayed in the requested
+    // location.
+    $plugin = views_fetch_plugin_data('display', $view->display[$display_id]->display_plugin);
+    $has_links = !empty($plugin['contextual links']) && !empty($plugin['contextual links locations']);
+    if ($has_links && in_array($location, $plugin['contextual links locations'])) {
+      foreach ($plugin['contextual links'] as $module => $link) {
+        $args = array();
+        $valid = TRUE;
+        if (!empty($link['argument properties'])) {
+          foreach ($link['argument properties'] as $property) {
+            // If the plugin is trying to create an invalid contextual link
+            // (for example, "path/to/{$view->property}", where $view->property
+            // does not exist), we cannot construct the link, so we skip it.
+            if (!property_exists($view, $property)) {
+              $valid = FALSE;
+              break;
+            }
+            else {
+              $args[] = $view->{$property};
+            }
+          }
+        }
+        // If the link was valid, attach information about it to the renderable
+        // array.
+        if ($valid) {
+          $render_element['#contextual_links'][$module] = array($link['parent path'], $args);
+          $render_element['#views_contextual_links_info'][$module] = array(
+            'location' => $location,
+            'view_name' => $view->name,
+            'view_display_id' => $display_id,
+          );
+        }
+      }
+    }
   }
 }
 
