@@ -746,15 +746,30 @@ function field_group_field_group_build_pre_render_alter(& $element) {
  * @return Boolean Is field group empty
  */
 function field_group_field_group_is_empty($element, $groups) {
+
+  $empty = TRUE;
+
+  // Loop throug the children from current element.
   foreach (element_children($element) as $name) {
-    if (in_array($name, $groups)) {
-      return field_group_field_group_is_empty($element[$name], $groups);
+
+    // Fields are found in the element.
+    if (!$empty) {
+      return FALSE;
     }
+
+    // Descend into groups if the child is a group.
+    if (in_array($name, $groups)) {
+      $empty = field_group_field_group_is_empty($element[$name], $groups);
+    }
+    // Child is a field, the asked element is not empty.
     else {
       return FALSE;
     }
+
   }
-  return TRUE;
+
+  return $empty;
+
 }
 
 /**
