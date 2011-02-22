@@ -662,6 +662,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form_state['no_cache'] = TRUE;
 
   ctools_include('dependent');
+  ctools_include('dropbutton.theme');
   $form['#attached']['js'][] = ctools_attach_js('dependent');
   $form['#attached']['js'][] = ctools_attach_js('collapsible-div');
 
@@ -1309,9 +1310,7 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
 
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
-  $variables['rearrange'] = !empty($element['#rearrange']) ? $element['#rearrange'] : '';
-  $variables['delete'] = !empty($element['#delete']) ? $element['#delete'] : '';
-  $variables['add'] = !empty($element['#add']) ? $element['#add'] : '';
+  $variables['actions'] = !empty($element['#actions']) ? $element['#actions'] : '';
 }
 
 function template_preprocess_views_ui_display_tab_column(&$variables) {
@@ -1663,15 +1662,43 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $rearrange_text = t('Sort');
       $class = 'icon compact rearrange';
   }
-
+  
+  // Create an array of actions to pass to theme_links
+  $actions = array();
   $count_handlers = count($display->handler->get_handlers($type));
   if ($count_handlers > 1) {
-    $build['#rearrange'] = l('<span>' . $rearrange_text . '</span>', $rearrange_url, array('attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type), 'html' => TRUE));
+    $actions['rearrange'] = array(
+      'title' => $rearrange_text,
+      'href' => $rearrange_url,
+      'attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type),
+      'html' => TRUE,
+    );
   }
-  $build['#add'] = l('<span>' . t('Add') . '</span>', "admin/structure/views/nojs/add-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type), 'html' => TRUE));
+  $actions['add'] = array(
+    'title' => t('Add'),
+    'href' => "admin/structure/views/nojs/add-item/$view->name/$display->id/$type",
+    'attributes'=> array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type),
+    'html' => TRUE,
+  );
   if ($count_handlers > 0) {
-    $build['#delete'] = l('<span>' . t('Delete') . '</span>', "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type", array('attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type), 'html' => TRUE));
+    $actions['delete'] = array(
+      'title' => t('Delete'),
+      'href' => "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type",
+      'attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type),
+      'html' => TRUE,
+    );
   }
+  
+  // Render the array of links
+  $build['#actions'] = theme('links__ctools_dropbutton',
+    array(
+      'links' => $actions,
+      'attributes' => array(
+        'class' => array('inline', 'links', 'actions', 'horizontal', 'right')
+      ),
+      'class' => array('views-ui-settings-bucket-operations'),
+    )
+  );
 
   if (!$display->handler->is_default_display()) {
     if (!$display->handler->is_defaulted($types[$type]['plural'])) {

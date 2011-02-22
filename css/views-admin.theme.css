@@ -141,7 +141,7 @@
 
 /* @group Buttons */
 
-.views-admin .button {
+.ctools-button {
   background-color: #ffffff;
   background-image:
     -moz-linear-gradient(
@@ -161,16 +161,14 @@
       -90deg,
       #ffffff 0px,
       #efefef 100%);
-  border: 1px solid #D0D0D0;
+  border-color: #D0D0D0;
   -moz-border-radius: 7px 7px 7px 7px;
   -webkit-border-radius: 7px 7px 7px 7px;
   border-radius: 7px 7px 7px 7px;
   font-size: 12px;
-  line-height: 1;
-  padding: 0;
 }
 
-.views-admin .button:hover {
+.ctools-button:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -190,10 +188,25 @@
       #ffffff 0px,
       #e6e6e6 100%);
   border-color: #b8b8b8;
-  cursor: pointer;
 }
 
-.views-admin .button.open:hover {
+.ctools-button:active {
+  border-color: #a0a0a0;
+}
+
+.ctools-button .horizontal.left,
+.ctools-button .horizontal.right,
+.ctools-button .horizontal > li {
+  clear: none;
+  float: none;
+}
+
+.ctools-button .ctools-content a {
+  background-image: none;
+  border: medium none;
+}
+
+.ctools-dropbutton.open:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -212,97 +225,30 @@
       -90deg,
       #ffffff 0px,
       #efefef 100%);
-  border: 1px solid #D0D0D0;
+  border-color: #D0D0D0;
 }
 
-.views-admin .button:active {
-  border-color: #a0a0a0;
-}
-
-.views-admin .button > ul {
-  margin: 0;
-  padding-bottom: 2px;
-  padding-top: 2px;
-}
-
-.views-admin .button li {
-  line-height: 1.3333;
-  padding: 0 12px;
-}
-
-/* @group Drop buttons */
-
-.views-admin .drop.button {
-  padding-right: 18px;
-  position: relative;
-}
-
-.views-admin .drop.button > ul {
-  border-right: 1px solid #e8e8e8;
-}
-
-.views-admin .drop.button li,
-.views-admin .drop.button a {
-  display: block;
-}
-
-.views-admin .drop.button .trigger {
-  -moz-border-radius-bottomright: 7px;
-  -moz-border-radius-topright: 7px;
-  -webkit-border-bottom-right-radius: 7px;
-  -webkit-border-top-right-radius: 7px;
-  border-bottom-right-radius: 7px;
-  border-top-right-radius: 7px;
-  border-left: 1px solid #ffffff;
-  bottom: 0;
-  height: auto;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 17px;
-}
-
-.views-admin .drop.button.open {
+.ctools-dropbutton.open {
   -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   z-index: 100;
 }
 
-.views-admin .drop.button.open li + li {
+.ctools-dropbutton .ctools-link {
+  border-left: 1px solid #ffffff;
+}
+
+.ctools-dropbutton.open li + li {
   border-top: 1px solid #efefef;
   margin-top: 4px;
   padding-bottom: 0;
   padding-top: 4px;
 }
 
-.views-admin .drop.button.open li:last-child {
-  padding-bottom: 2px;
+.ctools-dropbutton .ctools-content {
+  border-right: 1px solid #e8e8e8;
 }
-
-/**
- * This creates the dropbutton arrow and inherits the link color
- */
-.views-admin .drop.button .trigger span {
-  border-bottom-color: transparent;
-  border-left-color: transparent;
-  border-right-color: transparent;
-  border-style: solid;
-  border-width: 4px 4px 0;
-  right: 3pt;
-  position: absolute;
-  top: 0.75em;
-}
-
-.views-admin .drop.button.open .trigger span {
-  border-bottom: 4px solid;
-  border-left-color: transparent;
-  border-right-color: transparent;
-  border-top-color: transparent;
-  top: 0.5em;
-}
-
-/* @end */
 
 /* @end */
 
@@ -718,7 +664,8 @@ td.group-title {
   border-top: medium none;
 }
 
-.views-ui-display-tab-bucket > * {
+.views-ui-display-tab-bucket > h3,
+.views-ui-display-tab-bucket > .views-display-setting {
   padding: 2px 6px 4px;
 }
 
@@ -756,18 +703,13 @@ td.group-title {
   position: relative;
 }
 
-.views-ui-display-tab-bucket .button,
-.views-ui-display-tab-bucket .button.drop {
+.views-ui-display-tab-bucket .ctools-button {
   position: absolute;
 }
 
-.views-ui-display-tab-bucket .button {
+.views-ui-display-tab-bucket .ctools-button {
   right: 5px;
   top: 4px;
-}
-
-.views-ui-display-tab-bucket .button .links {
-  margin: 0;
 }
 
 /* @end */
