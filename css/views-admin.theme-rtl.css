@@ -181,6 +181,16 @@ div.form-item-displays-live-preview {
 
 /* @end */
 
+/* @group Rearrange filters
+ *
+ * Styling for the form that allows views filters to be rearranged.
+ */
+.views-operator-label {
+  padding-right: 0.5em;
+}
+
+/* @end */
+
 /* @group Live preview elements */
 
 /* @group HTML list */
