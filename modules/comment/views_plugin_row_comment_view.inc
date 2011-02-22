@@ -36,8 +36,6 @@ class views_plugin_row_comment_view extends views_plugin_row {
 
     $cresult = comment_load_multiple($cids);
     foreach ($cresult as $comment) {
-      $comment = drupal_unpack($comment);
-      $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
       $comment->depth = count(explode('.', $comment->thread)) - 1;
       $this->comments[$comment->cid] = $comment;
     }
