@@ -674,6 +674,11 @@ td.group-title {
   text-transform: uppercase;
 }
 
+.views-ui-display-tab-bucket .links.actions {
+  margin-right: 6px;
+  margin-top: 2px;
+}
+
 /* @end */
 
 /* @group Attachment bucket overridden
