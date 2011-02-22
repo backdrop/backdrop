@@ -314,7 +314,7 @@ html.js span.js-only {
   position: fixed;
   top: 45%;
 }
-.views-ajax-popup .ajax-progress-throbber .message {
+#views-ajax-popup .ajax-progress-throbber .message {
   display: none;
 }
 
