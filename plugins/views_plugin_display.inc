@@ -2399,7 +2399,7 @@ class views_plugin_display extends views_plugin {
   function view_special_blocks($type) {
     if ($type == '-exp') {
       // avoid interfering with the admin forms.
-      if (arg(0) == 'admin' && arg(1) == 'build' && arg(2) == 'views') {
+      if (arg(0) == 'admin' && arg(1) == 'structure' && arg(2) == 'views') {
         return;
       }
       $this->view->init_handlers();

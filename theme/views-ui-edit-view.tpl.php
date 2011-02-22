@@ -11,7 +11,7 @@
        <?php print t('This view is being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => $locked, '!age' => $lock_age, '!break' => $break)); ?>
     </div>
   <?php endif; ?>
-  <div class="views-basic-info contextual-links-region clearfix<?php if (!empty($view->changed)) { print " changed"; }?>">
+  <div class="views-basic-info clearfix<?php if (!empty($view->changed)) { print " changed"; }?>">
     <?php if (!is_numeric($view->vid)): ?>
       <div class="view-changed view-new"><?php print t('New view'); ?></div>
     <?php else: ?>
