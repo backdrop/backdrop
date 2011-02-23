@@ -943,11 +943,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#type' => 'textfield',
       '#title' => t('Arguments'),
       '#description' => t('Separate arguments with a / as though they were a URL path.'),
-      '#states' => array(
-        'visible' => array(   // action to take.
-          ':input[name="displays[settings][settings_content][preview_controls][live_preview]"]' => array('checked' => FALSE),
-        ),
-      ),
       '#id' => 'preview-args',
     );
 

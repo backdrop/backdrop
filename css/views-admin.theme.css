@@ -506,14 +506,22 @@ td.group-title {
  *
  * The auto-preview checkbox line.
  */
+ 
+#edit-display-preview-controls {
+  margin-top: 36px;
+}
 
 #edit-display-preview-controls > div,
 #edit-display-preview-controls > input {
   float: left;
 }
 
-#edit-display-preview-controls > div {
+#edit-display-preview-controls > .form-type-checkbox {
   margin-top: 4px;
+}
+
+#edit-display-preview-controls > .form-type-textfield {
+  margin-top: 5px;
 }
 
 #edit-display-preview-controls .arguments-preview,
