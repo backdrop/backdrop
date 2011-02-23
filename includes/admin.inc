@@ -773,7 +773,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
   // Extra actions for the display
   $form['displays']['top']['extra_actions'] = array(
-    '#theme' => 'links',
+    '#theme' => 'links__ctools_dropbutton',
     '#attributes' => array(
         'id' => 'views-display-extra-actions',
         'class' => array(
