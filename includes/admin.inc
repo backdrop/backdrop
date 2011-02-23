@@ -933,6 +933,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       ),
       // Make ENTER in arguments textfield (and other controls) submit the form
       // as this button, not the Save button.
+      // @todo This only works for JS users. To make this work for nojs users,
+      //   we may need to split Preview into a separate form.
       '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
     );
 
