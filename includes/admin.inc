@@ -849,7 +849,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#type' => 'submit',
       '#value' => t('Add !display', array('!display' => $label)),
       '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_add_display'),
+      '#submit' => array('views_ui_edit_form_submit_add_display', 'views_ui_edit_form_submit_delay_destination'),
       '#attributes' => array('class' => array('add-display'))
     );
   }
@@ -1066,6 +1066,33 @@ function views_ui_edit_form_submit_preview($form, &$form_state) {
 }
 
 /**
+ * Submit handler for form buttons that do not complete a form workflow.
+ *
+ * The Edit View form is a multistep form workflow, but with state managed by
+ * the CTools object cache rather than $form_state['rebuild']. Without this
+ * submit handler, buttons that add or remove displays would redirect to the
+ * destination parameter (e.g., when the Edit View form is linked to from a
+ * contextual link). This handler can be added to buttons whose form submission
+ * should not yet redirect to the destination.
+ */
+function views_ui_edit_form_submit_delay_destination($form, &$form_state) {
+  if (isset($_GET['destination']) && $form_state['redirect'] !== FALSE) {
+    if (!isset($form_state['redirect'])) {
+      $form_state['redirect'] = $_GET['q'];
+    }
+    if (is_string($form_state['redirect'])) {
+      $form_state['redirect'] = array($form_state['redirect']);
+    }
+    $options = isset($form_state['redirect'][1]) ? $form_state['redirect'][1] : array();
+    if (!isset($options['query']['destination'])) {
+      $options['query']['destination'] = $_GET['destination'];
+    }
+    $form_state['redirect'][1] = $options;
+    unset($_GET['destination']);
+  }
+}
+
+/**
  * Adds tabs for navigating across Displays when editing a View.
  *
  * This function can be called from hook_menu_local_tasks_alter() to implement
@@ -1174,7 +1201,7 @@ function views_ui_get_display_tab_details($view, $display) {
         '#type' => 'submit',
         '#value' => t('delete'),
         '#limit_validation_errors' => array(),
-        '#submit' => array('views_ui_edit_form_submit_delete_display'),
+        '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
       );
     }
     // The master display cannot be cloned.
@@ -1183,7 +1210,7 @@ function views_ui_get_display_tab_details($view, $display) {
         '#type' => 'submit',
         '#value' => t('duplicate'),
         '#limit_validation_errors' => array(),
-        '#submit' => array('views_ui_edit_form_submit_duplicate_display'),
+        '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
       );
     }
   }
@@ -1192,10 +1219,9 @@ function views_ui_get_display_tab_details($view, $display) {
       '#type' => 'submit',
       '#value' => t('undo delete'),
       '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_undo_delete_display'),
+      '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
     );
   }
-
 
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
