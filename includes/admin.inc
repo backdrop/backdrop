@@ -1186,15 +1186,6 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['top']['#id'] = 'edit-display-settings-top';
   $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
 
-  
-
-  // The area above the three columns.
-  $build['top']['display_title'] = array(
-    '#theme' => 'views_ui_display_tab_setting',
-    '#description' => t('Display name'),
-    '#link' => $display->handler->option_link(check_plain($display->display_title), 'display_title'),
-  );
-
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   // The following is for display purposes only. We need to determine if there is more than one button and wrap
   // the buttons in a .ctools-dropbutton class if more than one is present.  Otherwise, we'll just wrap the
@@ -1203,18 +1194,29 @@ function views_ui_get_display_tab_details($view, $display) {
   $isDeletable = empty($plugin['no remove']);
   // The master display cannot be cloned.
   $isDefault = $display->id == 'default';
+  // This check can be removed when http://drupal.org/node/1070058 is committed
+  $hasCtoolsDropbuttons = FALSE;
 
-  if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
+  if (!$hasCtoolsDropbuttons) {
+    $prefix = '<div class="horizontal right actions links">';
+    $suffix = '</div>';
+    $itemElement = 'div';
+  }
+  else if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
     $prefix = '<div class="ctools-button ctools-dropbutton"><div class="ctools-link"><a href="#" class="ctools-twisty ctools-text">open</a></div><div class="ctools-content"><ul class="horizontal right actions">';
+    $suffix = '</ul></div></div>';
+    $itemElement = 'li';
   }
   else {
     $prefix = '<div class="ctools-button"><div class="ctools-content"><ul class="horizontal right actions">';
+    $suffix = '</ul></div></div>';
+    $itemElement = 'li';
   }
 
   // The Delete, Duplicate and Undo Delete buttons.
   $build['top']['actions'] = array(
     '#prefix' => $prefix,
-    '#suffix' => '</ul></div></div>',
+    '#suffix' => $suffix,
   );
 
   if (!$isDisplayDeleted) {
@@ -1224,8 +1226,8 @@ function views_ui_get_display_tab_details($view, $display) {
         '#value' => t('delete'),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
-        '#prefix' => '<li class="delete">',
-        "#suffix" => '</li>',
+        '#prefix' => '<' . $itemElement . ' class="delete">',
+        "#suffix" => '</' . $itemElement . '>',
       );
     }
     if (!$isDefault) {
@@ -1234,8 +1236,8 @@ function views_ui_get_display_tab_details($view, $display) {
         '#value' => t('duplicate'),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
-        '#prefix' => '<li class="duplicate">',
-        "#suffix" => '</li>',
+        '#prefix' => '<' . $itemElement . ' class="duplicate">',
+        "#suffix" => '</' . $itemElement . '>',
       );
     }
   }
@@ -1245,10 +1247,17 @@ function views_ui_get_display_tab_details($view, $display) {
       '#value' => t('undo delete'),
       '#limit_validation_errors' => array(),
       '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
-      '#prefix' => '<li class="undo-delete">',
-      "#suffix" => '</li>',
+      '#prefix' => '<' . $itemElement . ' class="undo-delete">',
+      "#suffix" => '</' . $itemElement . '>',
     );
   }
+
+  // The area above the three columns.
+  $build['top']['display_title'] = array(
+    '#theme' => 'views_ui_display_tab_setting',
+    '#description' => t('Display name'),
+    '#link' => $display->handler->option_link(check_plain($display->display_title), 'display_title'),
+  );
 
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
