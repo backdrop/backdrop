@@ -931,6 +931,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
         'callback' => 'views_ui_preview_callback',
         'wrapper' => 'views-live-preview',
       ),
+      // Make ENTER in arguments textfield (and other controls) submit the form
+      // as this button, not the Save button.
+      '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
     );
 
     // Add the arguments textfield

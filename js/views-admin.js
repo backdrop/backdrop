@@ -750,17 +750,22 @@ Drupal.behaviors.viewsImplicitFormSubmission.attach = function (context, setting
       if (event.which == 13) {
         var formId = this.form.id;
         if (formId && settings.viewsImplicitFormSubmission && settings.viewsImplicitFormSubmission[formId] && settings.viewsImplicitFormSubmission[formId].defaultButton) {
-          var $button = $('#' + settings.viewsImplicitFormSubmission[formId].defaultButton, this.form);
+          event.preventDefault();
+          var buttonId = settings.viewsImplicitFormSubmission[formId].defaultButton;
+          var $button = $('#' + buttonId, this.form);
           if ($button.length == 1 && $button.is(':enabled')) {
-            $button.click();
-            event.preventDefault();
+            if (Drupal.ajax && Drupal.ajax[buttonId]) {
+              $button.trigger(Drupal.ajax[buttonId].element_settings.event);
+            }
+            else {
+              $button.click();
+            }
           }
         }
       }
     });
   });
 };
-
 
 /**
  * Remove icon class from elements that are themed as buttons or dropbuttons
