@@ -768,7 +768,9 @@ Drupal.behaviors.viewsImplicitFormSubmission.attach = function (context, setting
 Drupal.behaviors.viewsRemoveIconClass = {};
 Drupal.behaviors.viewsRemoveIconClass.attach = function (context, settings) {
   var $ = jQuery;
-  $('.ctools-button .icon', context).once('RemoveIconClass', function () {
-    $(this).removeClass('icon');
+  $('.ctools-button', context).once('RemoveIconClass', function () {
+    $this = $(this);
+    $('.icon', $this).removeClass('icon');
+    $('.horizontal', $this).removeClass('horizontal');
   });
 }

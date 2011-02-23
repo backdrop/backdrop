@@ -38,7 +38,7 @@ function views_ui_get_admin_css() {
     $theme_key = isset($themes[$theme_key]->base_theme) ? $themes[$theme_key]->base_theme : '';
   }
   // Views contains style overrides for the following modules
-  $module_list = array('contextual', 'advanced_help');
+  $module_list = array('contextual', 'advanced_help', 'ctools');
   foreach ($module_list as $module) {
     if (module_exists($module)) {
       $list[$module_path . '/css/views-admin.' . $module . '.css'] = array();
