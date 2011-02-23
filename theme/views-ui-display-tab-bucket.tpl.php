@@ -7,24 +7,8 @@
 ?>
 <div class="<?php print $classes; ?>">
   <?php print $item_help_icon; ?>
-  <?php if(!empty($add) || !empty($rearrange) || !empty($delete)) : ?>
-    <ul class="horizontal right actions links">
-      <?php if ($add) : ?>
-      <li>
-        <?php print $add; ?>
-      </li>
-      <?php endif; ?>
-      <?php if ($rearrange) : ?>
-      <li>
-        <?php print $rearrange; ?>
-      </li>
-      <?php endif; ?>
-      <?php if ($delete) : ?>
-      <li>
-        <?php print $delete; ?>
-      </li>
-      <?php endif; ?>
-    </ul>
+  <?php if(!empty($actions)) : ?>
+    <?php print $actions; ?>
   <?php endif; ?>
   <h3><?php print $title; ?></h3>
   <?php print $content; ?>

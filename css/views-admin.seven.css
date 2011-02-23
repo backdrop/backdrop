@@ -116,11 +116,34 @@ fieldset fieldset {
 
 /* @end */
 
+/* @group Buttons */
+
+.ctools-button ul {
+  margin: 0;
+}
+
+/* @end */
+
 /* @group Tables */
 
 table td, 
 table th {
   vertical-align: top;
+}
+
+/* @end */
+
+/* @group Attachment buckets
+ *
+ * These are the individual "buckets," or boxes, inside the display settings area
+ */
+
+.views-ui-display-tab-bucket .links {
+  padding: 2px 6px 4px;
+}
+
+.views-ui-display-tab-bucket .links li + li {
+  margin-left: 3px;
 }
 
 /* @end */

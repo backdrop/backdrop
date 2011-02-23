@@ -118,15 +118,15 @@
 }
 
 .views-admin .icon.add {
-  background-position: center 3px;
+  background-position: center 3px, left top;
 }
 
 .views-admin .icon.delete {
-  background-position: center -52px;
+  background-position: center -52px, left top;
 }
 
 .views-admin .icon.rearrange {
-  background-position: center -111px;
+  background-position: center -111px, left top;
 }
 
 .views-displays .secondary a:hover > .icon.add {
@@ -136,173 +136,6 @@
 .views-displays .secondary .open a:hover > .icon.add {
   background-position: center 3px;
 }
-
-/* @end */
-
-/* @group Buttons */
-
-.views-admin .button {
-  background-color: #ffffff;
-  background-image:
-    -moz-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #efefef 100%);
-  background-image:
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(242, 242, 242, 1.0))
-    );
-  background-image:
-    -webkit-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #efefef 100%);
-  border: 1px solid #D0D0D0;
-  -moz-border-radius: 7px 7px 7px 7px;
-  -webkit-border-radius: 7px 7px 7px 7px;
-  border-radius: 7px 7px 7px 7px;
-  font-size: 12px;
-  line-height: 1;
-  padding: 0;
-}
-
-.views-admin .button:hover {
-  background-image:
-    -moz-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #e6e6e6 100%);
-  background-image:
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(230, 230, 230, 1.0))
-    );
-  background-image:
-    -webkit-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #e6e6e6 100%);
-  border-color: #b8b8b8;
-  cursor: pointer;
-}
-
-.views-admin .button.open:hover {
-  background-image:
-    -moz-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #efefef 100%);
-  background-image:
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(242, 242, 242, 1.0))
-    );
-  background-image:
-    -webkit-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #efefef 100%);
-  border: 1px solid #D0D0D0;
-}
-
-.views-admin .button:active {
-  border-color: #a0a0a0;
-}
-
-.views-admin .button > ul {
-  margin: 0;
-  padding-bottom: 2px;
-  padding-top: 2px;
-}
-
-.views-admin .button li {
-  line-height: 1.3333;
-  padding: 0 12px;
-}
-
-/* @group Drop buttons */
-
-.views-admin .drop.button {
-  padding-right: 18px;
-  position: relative;
-}
-
-.views-admin .drop.button > ul {
-  border-right: 1px solid #e8e8e8;
-}
-
-.views-admin .drop.button li,
-.views-admin .drop.button a {
-  display: block;
-}
-
-.views-admin .drop.button .trigger {
-  -moz-border-radius-bottomright: 7px;
-  -moz-border-radius-topright: 7px;
-  -webkit-border-bottom-right-radius: 7px;
-  -webkit-border-top-right-radius: 7px;
-  border-bottom-right-radius: 7px;
-  border-top-right-radius: 7px;
-  border-left: 1px solid #ffffff;
-  bottom: 0;
-  height: auto;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 17px;
-}
-
-.views-admin .drop.button.open {
-  -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  z-index: 100;
-}
-
-.views-admin .drop.button.open li + li {
-  border-top: 1px solid #efefef;
-  margin-top: 4px;
-  padding-bottom: 0;
-  padding-top: 4px;
-}
-
-.views-admin .drop.button.open li:last-child {
-  padding-bottom: 2px;
-}
-
-/**
- * This creates the dropbutton arrow and inherits the link color
- */
-.views-admin .drop.button .trigger span {
-  border-bottom-color: transparent;
-  border-left-color: transparent;
-  border-right-color: transparent;
-  border-style: solid;
-  border-width: 4px 4px 0;
-  right: 3pt;
-  position: absolute;
-  top: 0.75em;
-}
-
-.views-admin .drop.button.open .trigger span {
-  border-bottom: 4px solid;
-  border-left-color: transparent;
-  border-right-color: transparent;
-  border-top-color: transparent;
-  top: 0.5em;
-}
-
-/* @end */
 
 /* @end */
 
@@ -630,10 +463,7 @@ td.group-title {
 
 /* @end */
 
-/* @group Attachment details
- *
- * The attachment details section is a collapsible ctools area
- */
+/* @group Attachment details */
  
 #edit-display-settings {
   border-bottom: 3px solid #CCC;
@@ -646,8 +476,7 @@ td.group-title {
   margin: 0;
 }
 
-#edit-display-settings-title,
-.views-display-settings .ctools-toggle {
+#edit-display-settings-title {
   color: #008BCB;
 }
 
@@ -718,13 +547,19 @@ td.group-title {
   border-top: medium none;
 }
 
-.views-ui-display-tab-bucket > * {
+.views-ui-display-tab-bucket > h3,
+.views-ui-display-tab-bucket > .views-display-setting {
   padding: 2px 6px 4px;
 }
 
 .views-ui-display-tab-bucket h3 {
   font-size: 12px;
   text-transform: uppercase;
+}
+
+.views-ui-display-tab-bucket .links.actions {
+  margin-right: 6px;
+  margin-top: 2px;
 }
 
 /* @end */
@@ -754,20 +589,6 @@ td.group-title {
 
 .views-ui-display-tab-bucket {
   position: relative;
-}
-
-.views-ui-display-tab-bucket .button,
-.views-ui-display-tab-bucket .button.drop {
-  position: absolute;
-}
-
-.views-ui-display-tab-bucket .button {
-  right: 5px;
-  top: 4px;
-}
-
-.views-ui-display-tab-bucket .button .links {
-  margin: 0;
 }
 
 /* @end */
@@ -1053,14 +874,6 @@ div.views-filterable-options .form-type-checkbox .description {
 
 /* @end */
 
-/* @group Jump list */
-
-#views-live-preview .ctools-jump-menu-select{
-  max-width: 450px;
-}
-
-/* @end */
-
 /* @end */
 
 /* @group Add/edit argument form */
@@ -1082,54 +895,6 @@ div.views-filterable-options .form-type-checkbox .description {
 
 #edit-options-exception .form-type-textfield, #edit-options-argument-present .form-type-textfield {
   margin-top: 0;
-}
-
-/* @end */
-
-/* @group CTools */
-
-.ctools-toggle {
-  border-bottom-color: transparent;
-  border-left-color: transparent;
-  border-right-color: transparent;
-  border-style: solid;
-  border-width: 5px 5px 0;
-  display: inline-block;
-  float: left;
-  height: 0;
-  margin-right: 2px;
-  margin-top: 0.6667em;
-  width: 0;
-}
-
-.ctools-toggle.ctools-toggle-collapsed {
-  border-bottom-color: transparent;
-  border-left:  4px solid;
-  border-right-color: transparent;
-  border-top-color: transparent;
-  border-width: 5px 0 5px 5px;
-  margin-left: 2px;
-  margin-right: 5px;
-  margin-top: 0.5em;
-}
-
-.ctools-toggle:hover,
-.ctools-collapsible-handle:hover {
-  cursor: pointer;
-}
-
-.ctools-export-ui-row {
-  margin-bottom: 5px;
-}
-
-.ctools-export-ui-row label {
-  display: block;
-  float: left;
-  width: 55px;
-}
-
-.ctools-export-ui-fourth-row input {
-  margin-top: 5px !important;
 }
 
 /* @end */

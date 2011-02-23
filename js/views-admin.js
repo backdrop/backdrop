@@ -737,46 +737,6 @@ Drupal.behaviors.viewsFilterConfigSelectAll.attach = function(context) {
   });
 };
 
-Drupal.behaviors.viewsDisplayBucketDropList = {};
-
-/**
- * Reformat the action links in the display buckets to look like a droplist.
- */
-Drupal.behaviors.viewsDisplayBucketDropList.attach = function(context) {
-  var $ = jQuery;
-  // Show the select all checkbox.
-  $('.views-display-columns .views-ui-display-tab-bucket', context).once(function () {
-    var $this = $(this),
-        $linkWrapper = $this.find('.actions'),
-        $links = $linkWrapper.children(),
-        hasMultipleLinks = ($links.length > 1);
-    // Remove the icon class, which is a fallback for non-js browsers.
-    $links.find('a').removeClass('icon');
-    // Apply the droplist classes to the list of links
-    $linkWrapper.removeClass('horizontal right');
-    var classes = (hasMultipleLinks) ? 'button drop horizontal right' : 'button horizontal right';
-    $linkWrapper.wrap($('<div>').addClass(classes));
-    // If the droplist has more than one action, add a trigger to open it
-    if (hasMultipleLinks) {
-      // Hide the extra links
-      $links.eq(0).nextAll().hide();
-      $droplist = $linkWrapper.parent();
-      $droplist.prepend($('<a>', {
-        html: $('<span>'),
-        href: "#"
-      }).addClass('trigger'));
-      // Add a click event to the droplist toggle
-      $droplist.find('.trigger')
-      .bind('click', function (event) {
-        event.preventDefault();
-        $target = $(event.currentTarget);
-        $target.parent().toggleClass('open');
-        $target.next().children().not(':eq(0)').slideToggle('fast');
-      });
-    }
-  });
-};
-
 /**
  * Ensure the desired default button is used when a form is implcitly submitted via an ENTER press on textfields, radios, and checkboxes.
  *
@@ -800,3 +760,17 @@ Drupal.behaviors.viewsImplicitFormSubmission.attach = function (context, setting
     });
   });
 };
+
+
+/**
+ * Remove icon class from elements that are themed as buttons or dropbuttons
+ */
+Drupal.behaviors.viewsRemoveIconClass = {};
+Drupal.behaviors.viewsRemoveIconClass.attach = function (context, settings) {
+  var $ = jQuery;
+  $('.ctools-button', context).once('RemoveIconClass', function () {
+    $this = $(this);
+    $('.icon', $this).removeClass('icon');
+    $('.horizontal', $this).removeClass('horizontal');
+  });
+}

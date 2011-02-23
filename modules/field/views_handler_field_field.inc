@@ -258,13 +258,7 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-<<<<<<< views_handler_field_field.inc
     $field = $this->field_info;
-=======
-    parent::options_form($form, $form_state);
-
-    $field = $this->field_info;
->>>>>>> 1.1.2.34
     $formatters = _field_view_formatter_options($field['type']);
     $column_names = array_keys($field['columns']);
 
