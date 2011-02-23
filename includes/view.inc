@@ -2170,7 +2170,6 @@ function views_object_types() {
         'stitle' => t('Filter criterion'),
         'lstitle' => t('filter criterion'),
         'plural' => 'filters',
-        'options' => 'views_ui_config_filters_form',
       ),
       'relationship' => array(
         'title' => t('Relationships'),

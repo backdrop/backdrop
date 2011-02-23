@@ -1767,14 +1767,12 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
     }
   }
 
-  if ($display->display_plugin != 'default') {
-    $build['#title'] = l($types[$type]['title'], "admin/structure/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-title-' . $type)));
-  }
-  else {
-    $build['#title'] = $types[$type]['title'];
-  }
+  $build['#name'] = $build['#title'] = $types[$type]['title'];
 
-  $build['#name'] = $types[$type]['title'];
+  // If there's an options form for the bucket, link to it.
+  if (!empty($types[$type]['options'])) {
+    $build['#title'] = l($build['#title'], "admin/structure/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => array('views-ajax-link'), 'id' => 'views-title-' . $type)));
+  }
 
   static $relationships = NULL;
   if (!isset($relationships)) {
@@ -2804,13 +2802,6 @@ function views_ui_config_type_form_submit($form, &$form_state) {
 
   // Store in cache
   views_ui_cache_set($form_state['view']);
-}
-
-/**
- * Configure settings particular to filters.
- */
-function views_ui_config_filters_form(&$form, &$form_state) {
-
 }
 
 /**
