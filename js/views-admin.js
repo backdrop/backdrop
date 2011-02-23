@@ -88,8 +88,8 @@ Drupal.viewsUi.FormFieldFiller = function ($target, exclude, replace, suffix) {
   // one bound version of an object method, whereas we need one version per
   // object instance.
   var self = this;
-  this.populate = function () { return self._populate.call(self); };
-  this.unbind = function () { return self._unbind.call(self); };
+  this.populate = function () {return self._populate.call(self);};
+  this.unbind = function () {return self._unbind.call(self);};
 
   this.bind();
   // Object constructor; no return value.
@@ -280,6 +280,12 @@ Drupal.viewsUi.OptionsSearch = function ($form) {
   this.options = this.getOptions(this.$form.find('.filterable-option'));
   // Restripe on initial loading.
   this.handleKeyup();
+  // Trap the ENTER key in the search box so that it doesn't submit the form.
+  this.$searchBox.keypress(function(event) {
+    if (event.which == 13) {
+      event.preventDefault();
+    }
+  });
 };
 
 /**
