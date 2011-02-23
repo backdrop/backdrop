@@ -122,6 +122,14 @@ fieldset fieldset {
   margin: 0;
 }
 
+/* Override for input elements that are themed like ctools-buttons */
+.ctools-button input.form-submit:active {
+  background: none;
+  border: medium none;
+  color: #0074BD;
+  text-shadow: none;
+}
+
 /* @end */
 
 /* @group Tables */

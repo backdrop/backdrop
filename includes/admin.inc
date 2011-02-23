@@ -1186,11 +1186,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['top']['#id'] = 'edit-display-settings-top';
   $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
 
-  // The Delete and Duplicate buttons.
-  $build['top']['actions'] = array(
-    '#prefix' => '<div class="horizontal right"><div class="actions">',
-    '#suffix' => '</div></div>',
-  );
+  
 
   // The area above the three columns.
   $build['top']['display_title'] = array(
@@ -1200,22 +1196,46 @@ function views_ui_get_display_tab_details($view, $display) {
   );
 
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
-  if (empty($display->deleted)) {
-    if (empty($plugin['no remove'])) {
+  // The following is for display purposes only. We need to determine if there is more than one button and wrap
+  // the buttons in a .ctools-dropbutton class if more than one is present.  Otherwise, we'll just wrap the
+  // actions in the .ctools-button class.
+  $isDisplayDeleted = !empty($display->deleted);
+  $isDeletable = empty($plugin['no remove']);
+  // The master display cannot be cloned.
+  $isDefault = $display->id == 'default';
+
+  if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
+    $prefix = '<div class="ctools-button ctools-dropbutton"><div class="ctools-link"><a href="#" class="ctools-twisty ctools-text">open</a></div><div class="ctools-content"><ul class="horizontal right actions">';
+  }
+  else {
+    $prefix = '<div class="ctools-button"><div class="ctools-content"><ul class="horizontal right actions">';
+  }
+
+  // The Delete, Duplicate and Undo Delete buttons.
+  $build['top']['actions'] = array(
+    '#prefix' => $prefix,
+    '#suffix' => '</ul></div></div>',
+  );
+
+  if (!$isDisplayDeleted) {
+    if ($isDeletable) {
       $build['top']['actions']['delete'] = array(
         '#type' => 'submit',
         '#value' => t('delete'),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
+        '#prefix' => '<li class="delete">',
+        "#suffix" => '</li>',
       );
     }
-    // The master display cannot be cloned.
-    if ($display->id != 'default') {
+    if (!$isDefault) {
       $build['top']['actions']['duplicate'] = array(
         '#type' => 'submit',
         '#value' => t('duplicate'),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
+        '#prefix' => '<li class="duplicate">',
+        "#suffix" => '</li>',
       );
     }
   }
@@ -1225,6 +1245,8 @@ function views_ui_get_display_tab_details($view, $display) {
       '#value' => t('undo delete'),
       '#limit_validation_errors' => array(),
       '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
+      '#prefix' => '<li class="undo-delete">',
+      "#suffix" => '</li>',
     );
   }
 

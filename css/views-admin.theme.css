@@ -471,13 +471,14 @@ td.group-title {
 }
 
 #edit-display-settings-title {
+  color: #008BCB;
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
 }
 
-#edit-display-settings-title {
-  color: #008BCB;
+#edit-display-settings-top {
+  padding-bottom: 4px;
 }
 
 #edit-display-settings-content {
