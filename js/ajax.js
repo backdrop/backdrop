@@ -79,6 +79,22 @@
   }
 
   /**
+   * Trigger preview when the "live preview" checkbox is checked.
+   */
+  Drupal.behaviors.livePreview = {
+    attach: function (context) {
+      $('input#edit-displays-live-preview', context).once('views-ajax-processed').click(function() {
+        if ($(this).is(':checked')) {
+          $('#preview-submit').trigger('mousedown');
+        }
+        else {
+          $('#views-live-preview').empty();
+        }
+      });
+    }
+  }
+
+  /**
    * Sync preview display.
    */
   Drupal.behaviors.syncPreviewDisplay = {

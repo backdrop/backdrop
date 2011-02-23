@@ -83,9 +83,27 @@ function views_ui_check_advanced_help() {
 }
 
 /**
+ * #pre_render callback for the live preview element.
+ *
+ * Delaying the preview generation until the rendering phase ensures that time
+ * isn't wasted generating a preview if it won't be displayed (for example, if
+ * after processing the Edit form, a redirect is issued).
+ */
+function views_ui_pre_render_preview($element) {
+  $element['#markup'] = views_ui_preview($element['#view'], $element['#display_id'], $element['#preview_args']);
+  return $element;
+}
+
+/**
  * Returns the results of the live preview.
  */
-function views_ui_preview($view, $display_id, $args) {
+function views_ui_preview($view, $display_id, $args = array()) {
+  // When this function is invoked as a page callback, each Views argument is
+  // passed separately.
+  if (!is_array($args)) {
+    $args = array_slice(func_get_args(), 2);
+  }
+
   // Save $_GET['q'] so it can be restored before returning from this function.
   $q = $_GET['q'];
 
@@ -251,16 +269,6 @@ function views_ui_preview($view, $display_id, $args) {
  * AJAX callback that returns the preview section of the edit form.
  */
 function views_ui_preview_callback($form, $form_state) {
-  // Reload the view from cache, so we get the most recent version instead of
-  // the version from the form cache.
-  $view = views_ui_cache_load($form_state['view']->name);
-  if (isset($form_state['values']['displays']['preview_controls']['preview_fieldset']['view_args']) && $form_state['values']['displays']['preview_controls']['preview_fieldset']['view_args'] !== '') {
-    $args = explode('/', $form_state['values']['displays']['preview_controls']['preview_fieldset']['view_args']);
-  }
-  else {
-    $args = array();
-  }
-  $form['displays']['preview']['preview']['#markup'] = views_ui_preview($view, $form_state['display_id'], $args);
   return $form['displays']['preview'];
 }
 
@@ -917,6 +925,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
         ),
       ),
       '#id' => 'preview-submit',
+      '#submit' => array('views_ui_edit_form_submit_preview'),
       '#ajax' => array(
         'path' => 'admin/structure/views/view/' . $view->name . '/edit/ajax',
         'callback' => 'views_ui_preview_callback',
@@ -946,9 +955,18 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#id' => 'views-live-preview',
     );
 
-    $form['displays']['preview']['preview'] = array(
-      '#markup' => views_ui_preview($view, $display_id, array()),
-    );
+    $form['displays']['preview']['preview'] = array();
+    if (!variable_get('views_ui_disable_live_preview', 0) || !empty($form_state['show_preview']) || !empty($form_state['values']['displays']['settings']['settings_content']['preview_controls']['live_preview'])) {
+      $preview_args = isset($form_state['values']['displays']['settings']['settings_content']['preview_controls']['view_args']) ? $form_state['values']['displays']['settings']['settings_content']['preview_controls']['view_args'] : '';
+      $preview_args = ($preview_args !== '') ? explode('/', $preview_args) : array();
+      $form['displays']['preview']['preview'] += array(
+        '#type' => 'markup',
+        '#pre_render' => array_merge(array('views_ui_pre_render_preview'), element_info_property('markup', '#pre_render', array())),
+        '#view' => $view,
+        '#display_id' => $display_id,
+        '#preview_args' => $preview_args,
+      );
+    }
 
     // The content of the popup dialog.
     $form['ajax-area'] = array(
@@ -1035,6 +1053,16 @@ function views_ui_edit_form_submit_undo_delete_display($form, &$form_state) {
 
   // Redirect to the top-level edit page.
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+}
+
+/**
+ * Submit handler when Preview button is clicked.
+ */
+function views_ui_edit_form_submit_preview($form, &$form_state) {
+  // Rebuild the form with a pristine $view object.
+  $form_state['build_info']['args'][0] = views_ui_cache_load($form_state['view']->name);
+  $form_state['show_preview'] = TRUE;
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
