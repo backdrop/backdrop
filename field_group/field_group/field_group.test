@@ -59,7 +59,7 @@ class GroupUITestCase extends DrupalWebTestCase {
 
     // Add new group on the 'Manage fields' page.
     $this->drupalPost('admin/structure/types/manage/article/fields',  $group, t('Save'));
-    $this->assertRaw(t('New group %label succesfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
+    $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
 
     // Test if group is in the $groups array.
     $groups = field_group_info_groups('node', 'article', 'form', TRUE);
@@ -67,7 +67,7 @@ class GroupUITestCase extends DrupalWebTestCase {
 
     // Add new group on the 'Manage display' page.
     $this->drupalPost('admin/structure/types/manage/article/display',  $group, t('Save'));
-    $this->assertRaw(t('New group %label succesfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
+    $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
 
     // Test if group is in the $groups array.
     $groups = field_group_info_groups('node', 'article', 'default', TRUE);

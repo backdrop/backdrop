@@ -584,7 +584,7 @@ function field_group_field_overview_submit($form, &$form_state) {
 
     // Store new group information for any additional submit handlers.
     $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
-    drupal_set_message(t('New group %label succesfully created.', array('%label' => $new_group->label)));
+    drupal_set_message(t('New group %label successfully created.', array('%label' => $new_group->label)));
 
     // Replace the newly created group in the $children array, in case it was
     // dragged directly in an existing field.
