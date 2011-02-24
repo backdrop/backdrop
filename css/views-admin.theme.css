@@ -118,14 +118,26 @@
 }
 
 .views-admin .icon.add {
+  background-position: center 3px;
+}
+
+.views-admin a.icon.add {
   background-position: center 3px, left top;
 }
 
 .views-admin .icon.delete {
+  background-position: center -52px;
+}
+
+.views-admin a.icon.delete {
   background-position: center -52px, left top;
 }
 
 .views-admin .icon.rearrange {
+  background-position: center -111px;
+}
+
+.views-admin a.icon.rearrange {
   background-position: center -111px, left top;
 }
 
