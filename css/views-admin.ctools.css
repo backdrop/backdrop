@@ -29,7 +29,7 @@
   -moz-border-radius: 11px 11px 11px 11px;
   -webkit-border-radius: 11px 11px 11px 11px;
   border-radius: 11px 11px 11px 11px;
-  font-size: 12px;
+  font-size: 11px;
   padding-bottom: 2px;
   padding-top: 2px;
 }
@@ -133,7 +133,7 @@
 }
 
 .views-display-top .ctools-button {
-  font-size: 13px;
+  font-size: 12px;
   position: absolute;
   right: 12px;
   top: 7px;
@@ -153,7 +153,7 @@
   border: medium;
   color: #0074BD;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   padding: 0;
 }
 
