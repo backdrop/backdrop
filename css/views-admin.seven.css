@@ -123,6 +123,12 @@ fieldset fieldset {
 }
 
 /* Override for input elements that are themed like ctools-buttons */
+.ctools-button input.form-submit:hover {
+  background-image: none;
+  color: #0074BD;
+  text-shadow: none;
+}
+
 .ctools-button input.form-submit:active {
   background: none;
   border: medium none;
