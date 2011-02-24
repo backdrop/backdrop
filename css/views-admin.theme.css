@@ -603,6 +603,10 @@ td.group-title {
   zoom: 1;
 }
 
+.views-ui-display-tab-bucket.overridden .views-display-setting {
+  margin-left: 15px; /* LTR */
+}
+
 /* @end */
 
 /* @group Attachment bucket drop button */
