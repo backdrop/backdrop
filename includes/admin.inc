@@ -2409,11 +2409,19 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
     unset($view->form_cache);
   }
 
+  // With the below logic, we may end up rendering a form twice (or two forms
+  // each sharing the same element ids), potentially resulting in
+  // drupal_add_js() being called twice to add the same setting. drupal_get_js()
+  // is ok with that, but until ajax_render() is (http://drupal.org/node/208611),
+  // reset the drupal_add_js() static before rendering the second time.
+  $drupal_add_js_original = drupal_add_js();
+  $drupal_add_js = &drupal_static('drupal_add_js');
   $output = views_ajax_form_wrapper($form_state['form_id'], $form_state);
   if ($form_state['submitted'] && empty($form_state['rerender'])) {
     // Sometimes we need to re-generate the form for multi-step type operations.
     $object = NULL;
     if (!empty($view->stack)) {
+      $drupal_add_js = $drupal_add_js_original;
       $stack = $view->stack;
       $top = array_shift($stack);
       $top[0] = $js;
