@@ -216,6 +216,16 @@ Drupal.behaviors.viewsUiRenderAddViewButton.attach = function (context, settings
   var $displayButtons = $menu.nextAll('input.add-display').detach();
   $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>')
     .parent().first().addClass('first').end().last().addClass('last');
+  // Remove the 'Add ' prefix from the button labels since they're being palced
+  // in an 'Add' dropdown.
+  // @todo This assumes English, but so does $addDisplayDropdown above. Add
+  //   support for translation.
+  $displayButtons.each(function () {
+    var label = $(this).val();
+    if (label.substr(0, 4) == 'Add ') {
+      $(this).val(label.substr(4));
+    }
+  });
   $addDisplayDropdown.appendTo($menu);
 
   // Add the click handler for the add display button

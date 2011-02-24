@@ -850,7 +850,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#value' => t('Add !display', array('!display' => $label)),
       '#limit_validation_errors' => array(),
       '#submit' => array('views_ui_edit_form_submit_add_display', 'views_ui_edit_form_submit_delay_destination'),
-      '#attributes' => array('class' => array('add-display'))
+      '#attributes' => array('class' => array('add-display')),
+      // Allow JavaScript to remove the 'Add ' prefix from the button label when
+      // placing the button in a "Add" dropdown menu.
+      '#process' => array_merge(array('views_ui_form_button_was_clicked'), element_info_property('submit', '#process', array())),
+      '#values' => array(t('Add !display', array('!display' => $label)), $label),
     );
   }
 
