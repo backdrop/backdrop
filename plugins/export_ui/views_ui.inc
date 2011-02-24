@@ -17,5 +17,18 @@ $plugin = array(
   'title plural proper' => t('Views'),
 
   'handler' => 'views_ui',
+
+  'strings' => array(
+    'confirmation' => array(
+      'revert' => array(
+        'information' => t('This action will permanently remove any customizations made to this view.'),
+        'success' => t('The view has been reverted.'),
+      ),
+      'delete' => array(
+        'information' => t('This action will permanently remove the view from your database.'),
+        'success' => t('The view has been deleted.'),
+      ),
+    ),
+  ),
 );
 

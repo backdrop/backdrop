@@ -716,10 +716,10 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
   }
   if (isset($view->vid) && $view->vid == 'new') {
-    $message = t('* This view will not exist until the <em>Save</em> button is clicked.');
+    $message = t('* All changes are stored temporarily. Click Save to make your changes permanent. Click Cancel to discard the view.');
   }
   else {
-    $message = t('* The changes to this view will not be saved until the <em>Save</em> button is clicked.');
+    $message = t('* All changes are stored temporarily. Click Save to make your changes permanent. Click Cancel to discard your changes.');
   }
 
   $form['changed'] = array(
@@ -759,7 +759,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => (isset($view->vid) && $view->vid == 'new') ? t('Discard view') : t('Undo changes'),
+    '#value' => t('Cancel'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
   );
 

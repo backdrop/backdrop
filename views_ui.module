@@ -31,7 +31,8 @@ function views_ui_menu() {
   $items['admin/structure/views/add-template'] = array(
     'title' => 'Add view from template',
     'page callback' => 'views_ui_add_template_page',
-    'type' => MENU_LOCAL_ACTION,
+    // Don't show a local action link if there aren't any templates.
+    'type' => views_get_all_templates() ? MENU_LOCAL_ACTION : MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
 
   $items['admin/structure/views/import'] = array(
