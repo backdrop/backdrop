@@ -269,6 +269,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#type' => 'select',
         '#title' => t('of'),
         '#options' => $options,
+        '#access' => count($options) > 1,
       );
       $style_form['row_plugin']['#default_value'] = views_ui_get_selected($form_state, array($type, 'style', 'row_plugin'), key($options), $style_form['row_plugin']);
       // Changing this dropdown updates the individual row options via AJAX.
