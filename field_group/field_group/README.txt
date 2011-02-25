@@ -1,4 +1,3 @@
-/* $Id$ */
 
 History:
   Field_group was written for Drupal 7. For drupal 6, the module is 

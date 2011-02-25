@@ -1,4 +1,3 @@
-; $Id: field_group.info,v 1.1 2010/09/27 15:00:19 karens Exp $
 name = Fieldgroup
 description = Fieldgroup
 package = Fields
