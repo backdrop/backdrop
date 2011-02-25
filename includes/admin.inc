@@ -324,19 +324,23 @@ function views_ui_add_form($form, &$form_state) {
     ),
   );
 
-  // Everything that can be updated by AJAX goes in here. It is triggered by
-  // the "Show" dropdown below.
-  $form['displays'] = array(
-    '#prefix' => '<div id="edit-view-displays-wrapper">',
-    '#suffix' => '</div>',
-  );
+  // Create a wrapper for the entire dynamic portion of the form. Everything
+  // that can be updated by AJAX goes somewhere inside here. For example, this
+  // is needed by "Show" dropdown (below); it changes the base table of the
+  // view and therefore potentially requires all options on the form to be
+  // dynamically updated.
+  $form['displays'] = array();
 
+  // Create the part of the form that allows the user to select the basic
+  // properties of what the view will display.
   $form['displays']['show'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#attributes' => array('class' => array('container-inline')),
   );
 
+  // Create the "Show" dropdown, which allows the base table of the view to be
+  // selected.
   $wizard_plugins = views_ui_get_wizards();
   $options = array();
   foreach ($wizard_plugins as $key => $w) {
@@ -346,28 +350,15 @@ function views_ui_add_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Show'),
     '#options' => $options,
-    '#default_value' => 'node',
-    '#ajax' => array(
-      'callback' => 'views_ui_add_form_update',
-      'wrapper' => 'edit-view-displays-wrapper',
-    ),
   );
+  $show_form = &$form['displays']['show'];
+  $show_form['wizard_key']['#default_value'] = views_ui_get_selected($form_state, array('show', 'wizard_key'), 'node', $show_form['wizard_key']);
+  // Changing this dropdown updates the entire content of $form['displays'] via
+  // AJAX.
+  views_ui_add_ajax_trigger($show_form, 'wizard_key', array('displays'));
 
-  // Since the "Show" dropdown can't trigger a form submission when
-  // JavaScript is disabled, add a submit button to do that.
-  $form['displays']['show']['update_wizard_key'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update options'),
-    // Do not trigger form validation errors elsewhere on the page.
-    '#limit_validation_errors' => array(
-      array('show', 'wizard_key'),
-    ),
-    // Hide this button when JavaScript is enabled.
-    '#attributes' => array('class' => array('js-hide')),
-    '#submit' => array('views_ui_show_nojs_submit'),
-  );
-
-  $wizard_key = isset($form_state['values']['show']['wizard_key']) ? $form_state['values']['show']['wizard_key'] : $form['displays']['show']['wizard_key']['#default_value'];
+  // Build the rest of the form based on the currently selected wizard plugin.
+  $wizard_key = $show_form['wizard_key']['#default_value'];
   $get_instance = $wizard_plugins[$wizard_key]['get_instance'];
   $wizard_instance = $get_instance($wizard_plugins[$wizard_key]);
   $form = $wizard_instance->build_form($form, $form_state);
@@ -395,61 +386,278 @@ function views_ui_add_form($form, &$form_state) {
 }
 
 /**
- * Update the add view form.
+ * Gets the current value of a #select element, from within a form constructor function.
+ *
+ * This function is intended for use in highly dynamic forms (in particular the
+ * add view wizard) which are rebuilt in different ways depending on which
+ * triggering element (AJAX or otherwise) was most recently fired. For example,
+ * sometimes it is necessary to decide how to build one dynamic form element
+ * based on the value of a different dynamic form element that may not have
+ * even been present on the form the last time it was submitted. This function
+ * takes care of resolving those conflicts and gives you the proper current
+ * value of the requested #select element.
+ *
+ * By necessity, this function sometimes uses non-validated user input from
+ * $form_state['input'] in making its determination. Although it performs some
+ * minor validation of its own, it is not complete. The intention is that the
+ * return value of this function should only be used to help decide how to
+ * build the current form the next time it is reloaded, not to be saved as if
+ * it had gone through the normal, final form validation process. Do NOT use
+ * the results of this function for any other purpose besides deciding how to
+ * build the next version of the form.
+ *
+ * @param $form_state
+ *   The  standard associative array containing the current state of the form.
+ * @param $parents
+ *   An array of parent keys that point to the part of the submitted form
+ *   values that are expected to contain the element's value (in the case where
+ *   this form element was actually submitted). In a simple case (assuming
+ *   #tree is TRUE throughout the form), if the select element is located in
+ *   $form['wrapper']['select'], so that the submitted form values would
+ *   normally be found in $form_state['values']['wrapper']['select'], you would
+ *   pass array('wrapper', 'select') for this parameter.
+ * @param $default_value
+ *   The default value to return if the #select element does not currently have
+ *   a proper value set based on the submitted input.
+ * @param $element
+ *   An array representing the current version of the #select element within
+ *   the form.
+ *
+ * @return
+ *   The current value of the #select element. A common use for this is to feed
+ *   it back into $element['#default_value'] so that the form will be rendered
+ *   with the correct value selected.
  */
-function views_ui_show_nojs_submit($form, &$form_state) {
+function views_ui_get_selected($form_state, $parents, $default_value, $element) {
+  // For now, don't trust this to work on anything but a #select element.
+  if (!isset($element['#type']) || $element['#type'] != 'select' || !isset($element['#options'])) {
+    return $default_value;
+  }
+
+  // If there is a user-submitted value for this element that matches one of
+  // the currently available options attached to it, use that. We need to check
+  // $form_state['input'] rather than $form_state['values'] here because the
+  // triggering element often has the #limit_validation_errors property set to
+  // prevent unwanted errors elsewhere on the form. This means that the
+  // $form_state['values'] array won't be complete. We could make it complete
+  // by adding each required part of the form to the #limit_validation_errors
+  // property individually as the form is being built, but this is difficult to
+  // do for a highly dynamic and extensible form. This method is much simpler.
+  if (!empty($form_state['input'])) {
+    $key_exists = NULL;
+    $submitted = drupal_array_get_nested_value($form_state['input'], $parents, $key_exists);
+    // Check that the user-submitted value is one of the allowed options before
+    // returning it. This is not a substitute for actual form validation;
+    // rather it is necessary because, for example, the same select element
+    // might have #options A, B, and C under one set of conditions but #options
+    // D, E, F under a different set of conditions. So the form submission
+    // might have occurred with option A selected, but when the form is rebuilt
+    // option A is no longer one of the choices. In that case, we don't want to
+    // use the value that was submitted anymore but rather fall back to the
+    // default value.
+    if ($key_exists && in_array($submitted, array_keys($element['#options']))) {
+      return $submitted;
+    }
+  }
+
+  // Fall back on returning the default value if nothing was returned above.
+  return $default_value;
+}
+
+/**
+ * Converts a form element in the add view wizard to be AJAX-enabled.
+ *
+ * This function takes a form element and adds AJAX behaviors to it such that
+ * changing it triggers another part of the form to update automatically. It
+ * also adds a submit button to the form that appears next to the triggering
+ * element and that duplicates its functionality for users who do not have
+ * JavaScript enabled (the button is automatically hidden for users who do have
+ * JavaScript).
+ *
+ * To use this function, call it directly from your form builder function
+ * immediately after you have defined the form element that will serve as the
+ * JavaScript trigger. Calling it elsewhere (such as in hook_form_alter()) may
+ * mean that the non-JavaScript fallback button does not appear in the correct
+ * place in the form.
+ *
+ * @param $wrapping_element
+ *   The element whose child will server as the AJAX trigger. For example, if
+ *   $form['some_wrapper']['triggering_element'] represents the element which
+ *   will trigger the AJAX behavior, you would pass $form['some_wrapper'] for
+ *   this parameter.
+ * @param $trigger_key
+ *   The key within the wrapping element that identifies which of its children
+ *   serves as the AJAX trigger. In the above example, you would pass
+ *   'triggering_element' for this parameter.
+ * @param $refresh_parents
+ *   An array of parent keys that point to the part of the form that will be
+ *   refreshed by AJAX. For example, if triggering the AJAX behavior should
+ *   cause $form['dynamic_content']['section'] to be refreshed, you would pass
+ *   array('dynamic_content', 'section') for this parameter.
+ */
+function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_parents) {
+  $seen_ids = &drupal_static(__FUNCTION__, array());
+  $seen_buttons = &drupal_static(__FUNCTION__, array());
+
+  // Add the AJAX behavior to the triggering element.
+  $triggering_element = &$wrapping_element[$trigger_key];
+  $triggering_element['#ajax']['callback'] = 'views_ui_ajax_update_form';
+  // We do not use drupal_html_id() to get an ID for the AJAX wrapper, because
+  // it remembers IDs across AJAX requests (and won't reuse them), but in our
+  // case we need to use the same ID from request to request so that the
+  // wrapper can be recognized by the AJAX system and its content can be
+  // dynamically updated. So instead, we will keep track of duplicate IDs
+  // (within a single request) on our own, later in this function.
+  $triggering_element['#ajax']['wrapper'] = 'edit-view-' . implode('-', $refresh_parents) . '-wrapper';
+
+  // Add a submit button for users who do not have JavaScript enabled. It
+  // should be displayed next to the triggering element on the form.
+  $button_key = $trigger_key . '_trigger_update';
+  $wrapping_element[$button_key] = array(
+    '#type' => 'submit',
+    // Hide this button when JavaScript is enabled.
+    '#attributes' => array('class' => array('js-hide')),
+    '#submit' => array('views_ui_nojs_submit'),
+    // Add a process function to limit this button's validation errors to the
+    // triggering element only. We have to do this in #process since until the
+    // form API has added the #parents property to the triggering element for
+    // us, we don't have any (easy) way to find out where its submitted values
+    // will eventually appear in $form_state['values'].
+    '#process' => array_merge(array('views_ui_add_limited_validation'), element_info_property('submit', '#process', array())),
+    // Add an after-build function that inserts a wrapper around the region of
+    // the form that needs to be refreshed by AJAX (so that the AJAX system can
+    // detect and dynamically update it). This is done in #after_build because
+    // it's a convenient place where we have automatic access to the complete
+    // form array, but also to minimize the chance that the HTML we add will
+    // get clobbered by code that runs after we have added it.
+    '#after_build' => array_merge(element_info_property('submit', '#after_build', array()), array('views_ui_add_ajax_wrapper')),
+  );
+  // Copy #weight and #access from the triggering element to the button, so
+  // that the two elements will be displayed together.
+  foreach (array('#weight', '#access') as $property) {
+    if (isset($triggering_element[$property])) {
+      $wrapping_element[$button_key][$property] = $triggering_element[$property];
+    }
+  }
+  // For easiest integration with the form API and the testing framework, we
+  // always give the button a unique #value, rather than playing around with
+  // #name.
+  $button_title = !empty($triggering_element['#title']) ? $triggering_element['#title'] : $trigger_key;
+  if (empty($seen_buttons[$button_title])) {
+    $wrapping_element[$button_key]['#value'] = t('Update "@title" choice', array(
+      '@title' => $button_title,
+    ));
+    $seen_buttons[$button_title] = 1;
+  }
+  else {
+    $wrapping_element[$button_key]['#value'] = t('Update "@title" choice (@number)', array(
+      '@title' => $button_title,
+      '@number' => ++$seen_buttons[$button_title],
+   ));
+  }
+
+  // Attach custom data to the triggering element and submit button, so we can
+  // use it in both the process function and AJAX callback.
+  $ajax_data = array(
+    'wrapper' => $triggering_element['#ajax']['wrapper'],
+    'trigger_key' => $trigger_key,
+    'refresh_parents' => $refresh_parents,
+    // Keep track of duplicate wrappers so we don't add the same wrapper to the
+    // page more than once.
+    'duplicate_wrapper' => !empty($seen_ids[$triggering_element['#ajax']['wrapper']]),
+  );
+  $seen_ids[$triggering_element['#ajax']['wrapper']] = TRUE;
+  $triggering_element['#views_ui_ajax_data'] = $ajax_data;
+  $wrapping_element[$button_key]['#views_ui_ajax_data'] = $ajax_data;
+}
+
+/**
+ * Processes a non-JavaScript fallback submit button to limit its validation errors.
+ */
+function views_ui_add_limited_validation($element, &$form_state) {
+  // Retrieve the AJAX triggering element so we can determine its parents. (We
+  // know it's at the same level of the complete form array as the submit
+  // button, so all we have to do to find it is swap out the submit button's
+  // last array parent.)
+  $array_parents = $element['#array_parents'];
+  array_pop($array_parents);
+  $array_parents[] = $element['#views_ui_ajax_data']['trigger_key'];
+  $ajax_triggering_element = drupal_array_get_nested_value($form_state['complete form'], $array_parents);
+
+  // Limit this button's validation to the AJAX triggering element, so it can
+  // update the form for that change without requiring that the rest of the
+  // form be filled out properly yet.
+  $element['#limit_validation_errors'] = array($ajax_triggering_element['#parents']);
+
+  // If we are in the process of a form submission and this is the button that
+  // was clicked, the form API workflow in form_builder() will have already
+  // copied it to $form_state['triggering_element'] before our #process
+  // function is run. So we need to make the same modifications in $form_state
+  // as we did to the element itself, to ensure that #limit_validation_errors
+  // will actually be set in the correct place.
+  if (!empty($form_state['triggering_element'])) {
+    $clicked_button = &$form_state['triggering_element'];
+    if ($clicked_button['#name'] == $element['#name'] && $clicked_button['#value'] == $element['#value']) {
+      $clicked_button['#limit_validation_errors'] = $element['#limit_validation_errors'];
+    }
+  }
+
+  return $element;
+}
+
+/**
+ * After-build function that adds a wrapper to a form region (for AJAX refreshes).
+ *
+ * This function inserts a wrapper around the region of the form that needs to
+ * be refreshed by AJAX, based on information stored in the corresponding
+ * submit button form element.
+ */
+function views_ui_add_ajax_wrapper($element, &$form_state) {
+  // Don't add the wrapper <div> if the same one was already inserted on this
+  // form.
+  if (empty($element['#views_ui_ajax_data']['duplicate_wrapper'])) {
+    // Find the region of the complete form that needs to be refreshed by AJAX.
+    // This was earlier stored in a property on the element.
+    $complete_form = &$form_state['complete form'];
+    $refresh_parents = $element['#views_ui_ajax_data']['refresh_parents'];
+    $refresh_element = drupal_array_get_nested_value($complete_form, $refresh_parents);
+
+    // The HTML ID that AJAX expects was also stored in a property on the
+    // element, so use that information to insert the wrapper <div> here.
+    $id = $element['#views_ui_ajax_data']['wrapper'];
+    $refresh_element += array(
+      '#prefix' => '',
+      '#suffix' => '',
+    );
+    $refresh_element['#prefix'] = '<div id="' . $id . '">' . $refresh_element['#prefix'];
+    $refresh_element['#suffix'] .= '</div>';
+
+    // Copy the element that needs to be refreshed back into the form, with our
+    // modifications to it.
+    drupal_array_set_nested_value($complete_form, $refresh_parents, $refresh_element);
+  }
+
+  return $element;
+}
+
+/**
+ * Updates a part of the add view form via AJAX.
+ *
+ * @return
+ *   The part of the form that has changed.
+ */
+function views_ui_ajax_update_form($form, $form_state) {
+  // The region that needs to be updated was stored in a property of the
+  // triggering element by views_ui_add_ajax_trigger(), so all we have to do is
+  // retrieve that here.
+  return drupal_array_get_nested_value($form, $form_state['triggering_element']['#views_ui_ajax_data']['refresh_parents']);
+}
+
+/**
+ * Non-Javascript fallback for updating the add view form.
+ */
+function views_ui_nojs_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
-}
-
-/**
- * Update the add view form via AJAX.
- *
- * @return
- *   The part of the form that has changed.
- */
-function views_ui_add_form_update($form, $form_state) {
-  return $form['displays'];
-}
-
-/**
- * Update the add view style form via AJAX.
- *
- * @return
- *   The part of the form that has changed.
- */
-function views_ui_add_form_update_style_page($form, $form_state) {
-  return $form['displays']['page']['options'];
-}
-
-/**
- * Update the add view style form via AJAX.
- *
- * @return
- *   The part of the form that has changed.
- */
-function views_ui_add_form_update_style_block($form, $form_state) {
-  return $form['displays']['page']['options'];
-}
-
-
-/**
- * Update the add view style row_options via AJAX.
- *
- * @return
- *   The part of the form that has changed.
- */
-function views_ui_add_form_update_row_page($form, $form_state) {
-  return $form['displays']['page']['options']['style']['row_options'];
-}
-
-/**
- * Update the add view row_options form via AJAX.
- *
- * @return
- *   The part of the form that has changed.
- */
-function views_ui_add_form_update_row_block($form, $form_state) {
-  return $form['displays']['block']['options']['style']['row_options'];
 }
 
 /**

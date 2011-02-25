@@ -342,7 +342,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     // First select the node type and update the form so the correct tag field
     // is used.
     $view1['show[type]'] = $this->node_type_with_tags->type;
-    $this->drupalPost('admin/structure/views/add', $view1, t('Update options'));
+    $this->drupalPost('admin/structure/views/add', $view1, t('Update "of type" choice'));
     // Now resubmit the entire form to the same URL.
     $view1['human_name'] = $this->randomName(16);
     $view1['name'] = strtolower($this->randomName(16));
@@ -363,7 +363,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     // the one node from above that is tagged with "tag2".
     $view2 = array();
     $view2['show[type]'] = $this->node_type_with_tags->type;
-    $this->drupalPost('admin/structure/views/add', $view2, t('Update options'));
+    $this->drupalPost('admin/structure/views/add', $view2, t('Update "of type" choice'));
     $view2['human_name'] = $this->randomName(16);
     $view2['name'] = strtolower($this->randomName(16));
     $view2['description'] = $this->randomName(16);
@@ -391,10 +391,10 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $this->drupalGet('admin/structure/views/add');
     $this->assertFieldByXpath($tags_xpath);
     $view['show[type]'] = $this->node_type_with_tags->type;
-    $this->drupalPost('admin/structure/views/add', $view, t('Update options'));
+    $this->drupalPost('admin/structure/views/add', $view, t('Update "of type" choice'));
     $this->assertFieldByXpath($tags_xpath);
     $view['show[type]'] = $this->node_type_without_tags->type;
-    $this->drupalPost(NULL, $view, t('Update options'));
+    $this->drupalPost(NULL, $view, t('Update "of type" choice'));
     $this->assertNoFieldByXpath($tags_xpath);
 
     // If we add an instance of the tagging field to the second node type, the
@@ -403,10 +403,10 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $instance['bundle'] = $this->node_type_without_tags->type;
     field_create_instance($instance);
     $view['show[type]'] = $this->node_type_with_tags->type;
-    $this->drupalPost('admin/structure/views/add', $view, t('Update options'));
+    $this->drupalPost('admin/structure/views/add', $view, t('Update "of type" choice'));
     $this->assertFieldByXpath($tags_xpath);
     $view['show[type]'] = $this->node_type_without_tags->type;
-    $this->drupalPost(NULL, $view, t('Update options'));
+    $this->drupalPost(NULL, $view, t('Update "of type" choice'));
     $this->assertFieldByXpath($tags_xpath);
   }
 }

@@ -12,8 +12,13 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
   protected function build_form_style(&$form, &$form_state, $type) {
     parent::build_form_style($form, $form_state, $type);
     $style_form =& $form['displays'][$type]['options']['style'];
-    $row_style = isset($form_state['values'][$type]['style']['row_style']) ? $form_state['values'][$type]['style']['row_style'] : 'comment';
-    switch ($row_style) {
+    // Some style plugins don't support row plugins so stop here if that's the
+    // case.
+    if (!isset($style_form['row_plugin'])) {
+      return;
+    }
+    $row_plugin = $style_form['row_plugin']['#default_value'];
+    switch ($row_plugin) {
       case 'comment':
         $style_form['row_options']['links'] = array(
           '#type' => 'select',

@@ -15,11 +15,12 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   protected function build_form_style(&$form, &$form_state, $type) {
     parent::build_form_style($form, $form_state, $type);
     $style_form =& $form['displays'][$type]['options']['style'];
-    $row_plugin = isset($form_state['values'][$type]['style']['row_plugin']) ? $form_state['values'][$type]['style']['row_plugin'] : 'full_posts';
-    // Some style plugins doesn't support row plugins so stop here and don't add some row plugins.
+    // Some style plugins don't support row plugins so stop here if that's the
+    // case.
     if (!isset($style_form['row_plugin'])) {
       return;
     }
+    $row_plugin = $style_form['row_plugin']['#default_value'];
     switch ($row_plugin) {
       case 'full_posts':
       case 'teasers':
@@ -107,7 +108,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
       case 'teasers':
         $display_options['row_plugin'] = 'node';
         $display_options['row_options']['build_mode'] = 'teaser';
-          $display_options['row_options']['links'] = !empty($row_options['links']);
+        $display_options['row_options']['links'] = !empty($row_options['links']);
         $display_options['row_options']['comments'] = !empty($row_options['comments']);
         break;
       case 'titles_linked':
