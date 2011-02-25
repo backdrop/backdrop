@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Field handler to output the name of an input format.
  */

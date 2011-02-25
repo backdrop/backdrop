@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Abstract argument handler for dates.
  *

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * A handler to run a field through check_markup, using a companion

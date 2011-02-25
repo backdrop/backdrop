@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class ViewsHandlerAreaTextTest extends ViewsSqlTest {
   public static function getInfo() {

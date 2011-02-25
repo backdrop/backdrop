@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Access plugin that provides role-based access control.

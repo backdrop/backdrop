@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Filter by whether or not a node has attached files from the upload module

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Access plugin that provides no access control at all.

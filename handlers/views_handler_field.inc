@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{

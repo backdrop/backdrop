@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Validate whether an argument is a valid user.

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @defgroup views_argument_handlers Handlers for arguments

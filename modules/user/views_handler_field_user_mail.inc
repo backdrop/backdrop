@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Field handler to provide acess control for the email field
  */

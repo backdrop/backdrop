@@ -1,4 +1,3 @@
-; $Id$
 
 name = Views exporter
 description = Allows exporting multiple views at once.

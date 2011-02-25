@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Sort handler to sort by last comment name which might be in 2 different
  * fields

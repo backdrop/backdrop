@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Simple filter to handle greater than/less than filters

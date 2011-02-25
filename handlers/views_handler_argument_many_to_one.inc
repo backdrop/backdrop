@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * An argument handler for use in fields that have a many to one relationship
  * with the table(s) to the left. This adds a bunch of options that are

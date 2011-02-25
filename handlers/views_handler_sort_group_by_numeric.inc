@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Handler for GROUP BY on simple numeric fields.
  */

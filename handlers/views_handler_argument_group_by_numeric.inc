@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Simple handler for arguments using group by.

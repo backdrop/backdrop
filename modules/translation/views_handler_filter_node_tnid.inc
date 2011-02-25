@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Filter by whether the node is the original translation.
  */

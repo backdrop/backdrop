@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Plugin for views without pagers.

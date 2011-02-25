@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the fixed argument default plugin.

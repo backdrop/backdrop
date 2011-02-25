@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-view-table.tpl.php
  * Template to display a view as a table.

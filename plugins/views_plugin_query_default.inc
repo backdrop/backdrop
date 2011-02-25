@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Filter handler for the current user

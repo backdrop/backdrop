@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Render a field as a numeric value
  *

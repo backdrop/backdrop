@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Basic textfield filter to handle string filtering commands

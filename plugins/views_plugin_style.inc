@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @defgroup views_style_plugins Views' style plugins

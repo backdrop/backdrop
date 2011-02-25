@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  *   Taxonomy tid default argument.

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Handles relationships for content translation sets and provides multiple

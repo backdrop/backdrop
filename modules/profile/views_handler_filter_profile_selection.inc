@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Filter by a selection widget in the profile.

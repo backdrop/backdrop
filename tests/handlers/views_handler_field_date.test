@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class ViewsHandlerFieldDateTest extends ViewsSqlTest {
   public static function getInfo() {

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file view.inc
  * Provides the view object type and associated methods.

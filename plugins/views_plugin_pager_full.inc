@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * The plugin to handle full pager.

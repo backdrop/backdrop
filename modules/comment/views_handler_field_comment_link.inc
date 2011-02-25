@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Base field handler to present a link.
  */

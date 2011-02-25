@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Provide node nid argument handler.

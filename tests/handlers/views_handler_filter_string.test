@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class viewsHandlerFilterStringTest extends ViewsSqlTest {
   var $column_map = array();

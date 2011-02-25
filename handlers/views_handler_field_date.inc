@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * A handler to provide proper displays for dates.
  *

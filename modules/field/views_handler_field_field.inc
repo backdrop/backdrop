@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Helper function: Return an array of formatter options for a field type.

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Field handler to add rendering file paths as file URLs instead of as internal file URIs.

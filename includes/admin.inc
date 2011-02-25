@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.

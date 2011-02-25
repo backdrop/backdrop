@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @defgroup views_sort_handlers Views' sort handlers
  * @{

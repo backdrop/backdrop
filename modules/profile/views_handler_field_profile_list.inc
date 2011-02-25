@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Field handler display a profile list item.
  */

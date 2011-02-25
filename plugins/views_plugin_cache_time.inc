@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Simple caching of query results for Views displays.

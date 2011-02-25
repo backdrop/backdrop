@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the page display plugin.

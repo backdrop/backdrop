@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class views_handler_field_last_comment_timestamp extends views_handler_field_date {
   function construct() {

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the table style plugin.

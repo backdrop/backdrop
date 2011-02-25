@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-view-fields.tpl.php
  * Default simple view template to all the fields as a row.

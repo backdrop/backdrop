@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.

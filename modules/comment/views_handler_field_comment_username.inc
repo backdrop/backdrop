@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Field handler to allow linking to a user account or homepage
  */

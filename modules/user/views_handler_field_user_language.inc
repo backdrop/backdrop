@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  *   Views field handler for userlanguage.

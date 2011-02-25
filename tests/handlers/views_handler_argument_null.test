@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class ViewsHandlerArgumentNullTest extends ViewsSqlTest {
   public static function getInfo() {

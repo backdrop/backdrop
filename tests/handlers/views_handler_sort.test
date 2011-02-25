@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Test for core views_handler_sort handler.

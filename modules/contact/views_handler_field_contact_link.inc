@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * A field that links to the user contact page, if access is permitted.
  */

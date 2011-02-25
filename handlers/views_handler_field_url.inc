@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Field handler to provide simple renderer that turns a URL into a clickable link.

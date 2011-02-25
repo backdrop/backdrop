@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Argument handler for a full date (CCYYMMDD)
  */

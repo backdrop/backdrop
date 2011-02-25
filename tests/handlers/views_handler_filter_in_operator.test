@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class ViewsHandlerFilterInOperator extends ViewsSqlTest {
   public static function getInfo() {

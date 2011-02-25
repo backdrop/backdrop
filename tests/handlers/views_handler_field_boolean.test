@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class ViewsHandlerFieldBooleanTest extends ViewsSqlTest {
   public static function getInfo() {

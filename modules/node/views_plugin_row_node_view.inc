@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the node view row style plugin.

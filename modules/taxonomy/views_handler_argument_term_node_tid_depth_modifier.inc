@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Argument handler for to modify depth for a previous term.

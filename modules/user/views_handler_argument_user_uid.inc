@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Provide user uid argument handler.

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * A stump localisation plugin which has static variables to cache the input.

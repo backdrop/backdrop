@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Field handler to translate a language into its readable form.

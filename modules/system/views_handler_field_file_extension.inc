@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Returns a pure file extension of the file, for example 'module'.

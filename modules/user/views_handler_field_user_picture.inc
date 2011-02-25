@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Field handler to provide simple renderer that allows using a themed user link

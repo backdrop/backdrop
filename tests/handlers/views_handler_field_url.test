@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class ViewsHandlerFieldUrlTest extends ViewsSqlTest {
   public static function getInfo() {

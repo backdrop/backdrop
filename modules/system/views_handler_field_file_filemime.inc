@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Field handler to add rendering MIME type images as an option on the filemime field.

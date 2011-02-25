@@ -1,4 +1,3 @@
-// $Id$
 
 Welcome to Views 2. Please see the advanced help for more information.
 

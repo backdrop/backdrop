@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class viewsArgumentValidatorTest extends ViewsSqlTest {
   public static function getInfo() {

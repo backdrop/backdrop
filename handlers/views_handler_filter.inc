@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @defgroup views_filter_handlers Views' filter handlers
  * @{

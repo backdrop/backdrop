@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * The base plugin to handle exposed filter forms.

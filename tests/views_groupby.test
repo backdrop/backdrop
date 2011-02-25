@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class ViewsQueryGroupByTest extends ViewsSqlTest {
   public static function getInfo() {

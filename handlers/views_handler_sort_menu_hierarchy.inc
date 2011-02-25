@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Sort in menu hierarchy order.

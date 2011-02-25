@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Argument handler for taxonomy terms with depth.
  *

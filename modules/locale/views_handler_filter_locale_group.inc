@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Filter by locale group.

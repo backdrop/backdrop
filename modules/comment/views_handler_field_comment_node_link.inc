@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
 * Handler for showing comment module's node link.
  */

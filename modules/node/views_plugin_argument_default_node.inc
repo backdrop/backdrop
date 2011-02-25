@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the node from URL argument default plugin.

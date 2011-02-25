@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Field handler to present a link to the node.
  */

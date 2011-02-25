@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Exposed form plugin that provides basic exposed form

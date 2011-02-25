@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the user from URL argument default plugin.

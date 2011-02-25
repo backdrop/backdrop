@@ -1,4 +1,3 @@
-// $Id$
 /**
  * @file base.js
  *

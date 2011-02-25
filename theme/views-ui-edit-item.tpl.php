@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-ui-edit-item.tpl.php
  *

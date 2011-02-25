@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-view-row-comment.tpl.php
  * Default simple view template to display a single comment.

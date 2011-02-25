@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Argument that accepts query keys for search.

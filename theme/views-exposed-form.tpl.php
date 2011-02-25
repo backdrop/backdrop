@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-exposed-form.tpl.php
  *

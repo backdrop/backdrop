@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Filter to handle dates stored as a timestamp.

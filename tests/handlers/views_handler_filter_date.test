@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Tests the handler filter_date.

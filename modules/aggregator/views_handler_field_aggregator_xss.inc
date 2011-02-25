@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  *   Filters htmls tags from item.

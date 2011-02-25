@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Render a mathematical expression as a numeric value
  *

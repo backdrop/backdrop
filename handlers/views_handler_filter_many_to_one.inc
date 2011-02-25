@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Complex filter to handle filtering for many to one relationships,

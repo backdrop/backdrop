@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Basic sort handler for dates.

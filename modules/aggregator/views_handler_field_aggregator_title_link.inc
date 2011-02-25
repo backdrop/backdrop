@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
  /**
  * Field handler that turns an item's title into a clickable link to the original

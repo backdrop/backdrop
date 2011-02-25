@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Caching plugin that provides no caching at all.

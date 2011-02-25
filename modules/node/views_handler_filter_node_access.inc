@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * Filter by node_access records.
  */

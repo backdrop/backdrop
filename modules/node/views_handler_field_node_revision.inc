@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the basic 'node_revision' field handler.

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the list style plugin.

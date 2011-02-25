@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Argument handler to accept a vocabulary id.

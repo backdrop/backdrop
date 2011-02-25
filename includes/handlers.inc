@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.

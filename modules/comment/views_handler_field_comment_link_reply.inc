@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Field handler to present a link to delete a node.
