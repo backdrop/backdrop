@@ -1408,15 +1408,8 @@ function views_ui_get_display_tab_details($view, $display) {
   $isDeletable = empty($plugin['no remove']);
   // The master display cannot be cloned.
   $isDefault = $display->id == 'default';
-  // This check can be removed when http://drupal.org/node/1070058 is committed
-  $hasCtoolsDropbuttons = FALSE;
 
-  if (!$hasCtoolsDropbuttons) {
-    $prefix = '<div class="horizontal right actions links">';
-    $suffix = '</div>';
-    $itemElement = 'div';
-  }
-  else if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
+  if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
     $prefix = '<div class="ctools-button ctools-dropbutton"><div class="ctools-link"><a href="#" class="ctools-twisty ctools-text">open</a></div><div class="ctools-content"><ul class="horizontal right actions">';
     $suffix = '</ul></div></div>';
     $itemElement = 'li';
