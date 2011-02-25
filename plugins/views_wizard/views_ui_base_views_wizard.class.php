@@ -113,23 +113,27 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'fieldset',
       '#attributes' => array('class' => array('container-inline')),
     );
+
+    // Create the dropdown for choosing the display format.
     $form['displays']['page']['options']['style']['style_plugin'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
       '#options' => $style_options,
-      '#default_value' => 'default',
-      '#ajax' => array(
-        'callback' => 'views_ui_add_form_update_style_page',
-        'wrapper' => 'edit-page-style-plugin',
-      ),
     );
+    $style_form = &$form['displays']['page']['options']['style'];
+    $style_form['style_plugin']['#default_value'] = views_ui_get_selected($form_state, array('page', 'style', 'style_plugin'), 'default', $style_form['style_plugin']);
+    // Changing this dropdown updates $form['displays']['page']['options'] via
+    // AJAX.
+    views_ui_add_ajax_trigger($style_form, 'style_plugin', array('displays', 'page', 'options'));
+
     $this->build_form_style($form, $form_state, 'page');
     $form['displays']['page']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
       '#default_value' => '10',
       '#size' => 5,
+      '#element_validate' => array('_element_validate_integer_positive'),
     );
     $form['displays']['page']['options']['link'] = array(
       '#title' => t('Create a menu link'),
@@ -226,24 +230,27 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'fieldset',
       '#attributes' => array('class' => array('container-inline')),
     );
-    // This may change by AJAX as we change the base table of the selected wizard.
+
+    // Create the dropdown for choosing the display format.
     $form['displays']['block']['options']['style']['style_plugin'] = array(
       '#title' => t('Display format'),
       '#help_topic' => 'style',
       '#type' => 'select',
       '#options' => $style_options,
-      '#default_value' => 'default',
-      '#ajax' => array(
-        'callback' => 'views_ui_add_form_update_style_block',
-        'wrapper' => 'edit-block-style-plugin',
-      ),
     );
+    $style_form = &$form['displays']['block']['options']['style'];
+    $style_form['style_plugin']['#default_value'] = views_ui_get_selected($form_state, array('block', 'style', 'style_plugin'), 'default', $style_form['style_plugin']);
+    // Changing this dropdown updates $form['displays']['block']['options'] via
+    // AJAX.
+    views_ui_add_ajax_trigger($style_form, 'style_plugin', array('displays', 'block', 'options'));
+
     $this->build_form_style($form, $form_state, 'block');
     $form['displays']['block']['options']['items_per_page'] = array(
       '#title' => t('Items per page'),
       '#type' => 'textfield',
       '#default_value' => '5',
       '#size' => 5,
+      '#element_validate' => array('_element_validate_integer_positive'),
     );
 
     return $form;
@@ -254,7 +261,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    */
   protected function build_form_style(&$form, &$form_state, $type) {
     $style_form =& $form['displays'][$type]['options']['style'];
-    $style = isset($form_state['values'][$type]) ? $form_state['values'][$type]['style']['style_plugin'] : 'default';
+    $style = $style_form['style_plugin']['#default_value'];
     $style_plugin = views_get_plugin('style', $style);
     if (isset($style_plugin) && $style_plugin->uses_row_plugin()) {
       $options = $this->row_style_options($type);
@@ -262,14 +269,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#type' => 'select',
         '#title' => t('of'),
         '#options' => $options,
-        '#ajax' => array(
-          'wrapper' => "edit-style-$type-options-style-row-plugin-options",
-          'callback' => 'views_ui_add_form_update_row_' . $type,
-        ),
+        '#access' => count($options) > 1,
       );
+      $style_form['row_plugin']['#default_value'] = views_ui_get_selected($form_state, array($type, 'style', 'row_plugin'), key($options), $style_form['row_plugin']);
+      // Changing this dropdown updates the individual row options via AJAX.
+      views_ui_add_ajax_trigger($style_form, 'row_plugin', array('displays', $type, 'options', 'style', 'row_options'));
+
+      // This is the region that can be updated by AJAX. The base class doesn't
+      // add anything here, but child classes can.
       $style_form['row_options'] = array(
         '#theme_wrappers' => array('container'),
-        '#attributes' => array('id' => "edit-style-$type-options-style-row-plugin-options"),
       );
     }
   }
@@ -281,7 +290,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    */
   protected function row_style_options($type) {
     $data = views_fetch_data($this->base_table);
-    // Get all availible availible row plugins by default.
+    // Get all available row plugins by default.
     $options = views_fetch_plugin_names('row', 'normal', array($this->base_table));
     return $options;
   }
@@ -308,17 +317,13 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#type' => 'select',
         '#title' => t('of type'),
         '#options' => $options,
-        '#default_value' => 'all',
-        '#ajax' => array(
-          'callback' => 'views_ui_add_form_update',
-          'wrapper' => 'edit-view-displays-wrapper',
-        ),
       );
-      // Add this to the "Update options" button's form validation so the
-      // submitted type will always be available in $form_state['values'].
-      // This allows us to use $form_state['values']['show']['type'] to
-      // dynamically build the rest of the form.
-      $form['displays']['show']['update_wizard_key']['#limit_validation_errors'][] = array('show', 'type');
+      $selected_bundle = views_ui_get_selected($form_state, array('show', 'type'), 'all', $form['displays']['show']['type']);
+      $form['displays']['show']['type']['#default_value'] = $selected_bundle;
+      // Changing this dropdown updates the entire content of $form['displays']
+      // via AJAX, since each bundle might have entirely different fields
+      // attached to it, etc.
+      views_ui_add_ajax_trigger($form['displays']['show'], 'type', array('displays'));
     }
 
     // Check if we are allowed to filter by taxonomy, and if so, add the
@@ -343,13 +348,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         // selected above, then we only search for taxonomy fields associated
         // with that bundle. Otherwise, we use all bundles.
         $bundles = array_keys($entity_info['bundles']);
-        $selected_bundle = NULL;
-        if (isset($form_state['values']['show']['type'])) {
-          $selected_bundle = $form_state['values']['show']['type'];
-        }
-        elseif (isset($form['displays']['show']['type']['#default_value'])) {
-          $selected_bundle = $form['displays']['show']['type']['#default_value'];
-        }
+        // Double check that this is a real bundle before using it (since above
+        // we added a dummy option 'all' to the bundle list on the form).
         if (isset($selected_bundle) && in_array($selected_bundle, $bundles)) {
           $bundles = array($selected_bundle);
         }

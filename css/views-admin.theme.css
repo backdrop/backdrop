@@ -289,10 +289,6 @@ th.views-ui-operations {
   font-weight: bold;
 }
 
-#edit-view-displays-wrapper {
-  margin-top: 27px;
-}
-
 /* This could be made more general if more than one instance occurs */
 #edit-page-style .fieldset-wrapper {
   padding-left: 0;
@@ -601,6 +597,10 @@ td.group-title {
   overflow: hidden;
   padding-left: 21px;
   zoom: 1;
+}
+
+.views-ui-display-tab-bucket.overridden .views-display-setting {
+  margin-left: 15px; /* LTR */
 }
 
 /* @end */
