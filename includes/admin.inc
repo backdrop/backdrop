@@ -985,6 +985,13 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#id' => 'views-ajax-body',
       '#markup' => views_ui_get_default_ajax_message(),
     );
+
+    // WYSIWYG does not yet work on AJAX returned content unless the editor
+    // libraries are loaded on the base page (http://drupal.org/node/356480).
+    // @todo Remove this when that issue is resolved.
+    if (module_exists('wysiwyg')) {
+      $form['dummy_text_format'] = array('#type' => 'text_format', '#prefix' => '<div style="display:none">', '#suffix' => '</div>');
+    }
   }
 
   return $form;
