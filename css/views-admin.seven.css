@@ -26,6 +26,16 @@ fieldset fieldset {
   border: medium none;
 }
 
+/**
+ * Being extra safe here and scoping this to the add view wizard form (where
+ * a layout problem occurs for the Display format fieldset if we don't fix its
+ * padding), but it's probably safe to just let it apply everywhere.
+ */
+#views-ui-add-form fieldset fieldset .fieldset-wrapper {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .views-display-tab fieldset {
   padding: 0 12px;
 }
