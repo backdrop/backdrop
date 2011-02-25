@@ -67,8 +67,8 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
     $handler->display->display_options['group_by'] = TRUE;
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
@@ -76,7 +76,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['type'] = 'some';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'title';
@@ -90,7 +90,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
     $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
     $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
-    /* Argument: Node: Type */
+    /* Argument: Content: Type */
     $handler->display->display_options['arguments']['type']['id'] = 'type';
     $handler->display->display_options['arguments']['type']['table'] = 'node';
     $handler->display->display_options['arguments']['type']['field'] = 'type';
@@ -150,8 +150,8 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
     $handler->display->display_options['group_by'] = TRUE;
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
@@ -159,7 +159,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['type'] = 'some';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
@@ -174,7 +174,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
     $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
     $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
-    /* Field: Node: Type */
+    /* Field: Content: Type */
     $handler->display->display_options['fields']['type']['id'] = 'type';
     $handler->display->display_options['fields']['type']['table'] = 'node';
     $handler->display->display_options['fields']['type']['field'] = 'type';
@@ -220,15 +220,15 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     menu_rebuild();
 
     $this->drupalGet('admin/structure/views');
-    $this->drupalGet('admin/structure/views/edit/test_views_groupby_save');
+    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
 
     $edit = array(
       'group_by' => TRUE,
     );
-    $this->drupalPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Update'));
+    $this->drupalPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Apply'));
 
-    $this->drupalGet('admin/structure/views/edit/test_views_groupby_save');
-    $this->drupalPost('admin/structure/views/edit/test_views_groupby_save', array(), t('Save'));
+    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
+    $this->drupalPost('admin/structure/views/view/test_views_groupby_save/edit', array(), t('Save'));
 
     $this->drupalGet('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by');
   }
@@ -265,8 +265,8 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
     $handler->display->display_options['group_by'] = TRUE;
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
@@ -299,5 +299,3 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     return $view;
   }
 }
-
-

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field conversion for fields handled by this module.

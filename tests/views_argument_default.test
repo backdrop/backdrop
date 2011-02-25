@@ -28,7 +28,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $view->execute_display();
     $view->destroy();
 
-    $this->assertEqual($view->args[0], $this->random, t('Fixed argument should be used by default.'));
+    $this->assertEqual($view->args[0], $this->random, 'Fixed argument should be used by default.');
 
     // Take sure that a normal argument provided is used
     $view = $this->view_argument_default_fixed();
@@ -37,7 +37,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $random_string = $this->randomString();
     $view->execute_display('default', array($random_string));
 
-    $this->assertEqual($view->args[0], $random_string, t('Provided argumetn should be used.'));
+    $this->assertEqual($view->args[0], $random_string, 'Provided argument should be used.');
   }
 
   /**
@@ -65,8 +65,8 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -76,7 +76,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['options']['id'] = '0';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Title */
+    /* Field: Content: Title */
     $handler->display->display_options['fields']['title']['id'] = 'title';
     $handler->display->display_options['fields']['title']['table'] = 'node';
     $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -103,4 +103,3 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     return $view;
   }
 }
-

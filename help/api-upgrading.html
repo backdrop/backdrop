@@ -29,7 +29,7 @@ Everyone who used it can extend from views_handler_sort, too.
 
 <h3>Ctools dependency</h3>
 Views requires ctools now, so it can use the dependency system of ctools.
-The only thing you have to do is to replace 
+The only thing you have to do is to replace
 <pre>
 '#process' => array('views_process_dependency')
 </pre>
@@ -61,3 +61,20 @@ placeholder() generates a automatic unique placeholder for you.
 add_where with operator 'formula' can be converted to add_where_expression.
 add_having with operator 'formula' can be converted to add_having_expression.
 
+<h3>Changed place for display specific settings</h3>
+In the new ui the new place for display settings is at the top of the second column.
+Therefore use something like this code in your display plugin:
+<code>
+$categories['block'] = array(
+  'title' => t('Block settings'),
+  'column' => 'second',
+  'build' => array(
+    '#weight' => -10,
+  ),
+);
+</code>
+
+<h3>Changed filter settings and associated class variables</h3>
+'optional' and 'single' are now 'required' and 'multiple', the logic is now opposite.
+Also, the 'no_single' and 'no_optional' class variables (known as "object flags" in the API docs)
+are now 'always_multiple' and 'always_required'.

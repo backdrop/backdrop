@@ -13,10 +13,11 @@ function taxonomy_views_default_views() {
   $view->description = 'A view to emulate Drupal core\'s handling of taxonomy/term; it also emulates Views 1\'s handling by having two possible feeds.';
   $view->tag = 'default';
   $view->base_table = 'node';
+  $view->human_name = 'Taxonomy term';
   $view->api_version = 2;
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
-  $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->override_option('sorts', array(
     'sticky' => array(
       'id' => 'sticky',

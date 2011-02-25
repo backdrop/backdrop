@@ -86,6 +86,10 @@ class views_plugin_display_feed extends views_plugin_display_page {
     // category 'page' but let's override it so it says feed settings.
     $categories['page'] = array(
       'title' => t('Feed settings'),
+      'column' => 'second',
+      'build' => array(
+        '#weight' => -10,
+      ),
     );
 
     if ($this->get_option('sitename_title')) {

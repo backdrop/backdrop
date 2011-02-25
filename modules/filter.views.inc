@@ -16,11 +16,12 @@
  */
 function filter_views_data() {
   // ----------------------------------------------------------------------
-  // filter_formats table
+  // filter_format table
 
   // Have not defined $data['filter_formats']['table']['group'] since
   // no fields are defined here yet.
-  $data['filter_formats']['table']['join'] = array(
+  $data['filter_formats']['moved to'] = 'filter_format';
+  $data['filter_format']['table']['join'] = array(
     'node_revisions' => array(
       'left_field' => 'format',
       'field' => 'format',

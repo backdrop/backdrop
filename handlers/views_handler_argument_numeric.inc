@@ -29,6 +29,7 @@ class views_handler_argument_numeric extends views_handler_argument {
       '#title' => t('Allow multiple terms per argument.'),
       '#description' => t('If selected, users can enter multiple arguments in the form of 1+2+3 or 1,2,3.'),
       '#default_value' => !empty($this->options['break_phrase']),
+      '#fieldset' => 'more',
     );
 
     $form['not'] = array(
@@ -36,6 +37,7 @@ class views_handler_argument_numeric extends views_handler_argument {
       '#title' => t('Exclude the argument'),
       '#description' => t('If selected, the numbers entered in the argument will be excluded rather than limiting the view.'),
       '#default_value' => !empty($this->options['not']),
+      '#fieldset' => 'more',
     );
   }
 
@@ -70,7 +72,7 @@ class views_handler_argument_numeric extends views_handler_argument {
     return $this->value;
   }
 
-  function query() {
+  function query($group_by = FALSE) {
     $this->ensure_my_table();
 
     if (!empty($this->options['break_phrase'])) {

@@ -38,7 +38,6 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
    * Provide "link to term" option.
    */
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_to_taxonomy'] = array(
       '#title' => t('Link this field to its term page'),
       '#type' => 'checkbox',
@@ -49,6 +48,7 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
       '#type' => 'checkbox',
       '#title' => t('Limit terms by vocabulary'),
       '#default_value'=> $this->options['limit'],
+      '#fieldset' => 'more',
     );
 
     $options = array();
@@ -66,7 +66,10 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
       '#default_value' => $this->options['vocabularies'],
       '#process' => array('form_process_checkboxes', 'ctools_dependent_process'),
       '#dependency' => array('edit-options-limit' => array(TRUE)),
+      '#fieldset' => 'more',
     );
+
+    parent::options_form($form, $form_state);
   }
 
   /**

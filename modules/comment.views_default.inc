@@ -13,12 +13,13 @@ function comment_views_default_views() {
   $view->description = 'Contains a block and a page to list recent comments; the block will automatically link to the page, which displays the comment body as well as a link to the node.';
   $view->tag = 'default';
   $view->base_table = 'comment';
+  $view->human_name = 'Recent comments';
   $view->api_version = 2;
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
 
-  /* Display: Defaults */
-  $handler = $view->new_display('default', 'Defaults', 'default');
+  /* Display: Master */
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Recent comments';
   $handler->display->display_options['use_more'] = TRUE;
   $handler->display->display_options['access']['type'] = 'none';
@@ -49,7 +50,7 @@ function comment_views_default_views() {
   $handler->display->display_options['sorts']['timestamp']['table'] = 'comment';
   $handler->display->display_options['sorts']['timestamp']['field'] = 'changed';
   $handler->display->display_options['sorts']['timestamp']['order'] = 'DESC';
-  /* Filter: Node: Published or admin */
+  /* Filter: Content: Published or admin */
   $handler->display->display_options['filters']['status_extra']['id'] = 'status_extra';
   $handler->display->display_options['filters']['status_extra']['table'] = 'node';
   $handler->display->display_options['filters']['status_extra']['field'] = 'status_extra';
@@ -71,7 +72,7 @@ function comment_views_default_views() {
   $handler->display->display_options['row_options']['separator'] = '&nbsp;';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Node: Title */
+  /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -107,10 +108,11 @@ function comment_views_default_views() {
   $view->description = 'Shows all new activity on system.';
   $view->tag = 'default';
   $view->base_table = 'node';
+  $view->human_name = 'Tracker';
   $view->api_version = 2;
   $view->version = 7;
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
-  $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->override_option('fields', array(
     'type' => array(
       'id' => 'type',

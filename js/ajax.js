@@ -5,28 +5,39 @@
  */
 (function ($) {
 
-  Drupal.ajax.prototype.commands.viewsSetForm = function(ajax, response, status) {
+  Drupal.ajax.prototype.commands.viewsSetForm = function (ajax, response, status) {
     var ajax_title = Drupal.settings.views.ajax.title;
-    var ajax_area = Drupal.settings.views.ajax.id;
+    var ajax_body = Drupal.settings.views.ajax.id;
+    var ajax_popup = Drupal.settings.views.ajax.popup;
     $(ajax_title).html(response.title);
-    $(ajax_area).html(response.output);
-    Drupal.attachBehaviors($(ajax_area).add($(ajax_title)), ajax.settings);
+    $(ajax_body).html(response.output);
+    $(ajax_popup).dialog('open');
+    Drupal.attachBehaviors($(ajax_popup), ajax.settings);
     if (response.url) {
-      var submit = $('input[type=submit]', ajax_area).unbind('click').click(function() {
-        $('form', ajax_area).append('<input type="hidden" name="' + $(this).attr('name') + '" value="' + $(this).val() + '">');
-        $(this).after('<span class="views-throbbing">&nbsp</span>');
-      })
-      $('form', ajax_area).once('views-ajax-submit-processed').each(function() {
+      // Identify the button that was clicked so that .ajaxSubmit() can use it.
+      // We need to do this for both .click() and .mousedown() since JavaScript
+      // code might trigger either behavior.
+      var $submit_buttons = $('input[type=submit], button', ajax_body);
+      $submit_buttons.click(function(event) {
+        this.form.clk = this;
+      });
+      $submit_buttons.mousedown(function(event) {
+        this.form.clk = this;
+      });
+
+      $('form', ajax_body).once('views-ajax-submit-processed').each(function() {
         var element_settings = { 'url': response.url, 'event': 'submit', 'progress': { 'type': 'throbber' } };
-        var form = $(this)[0];
-        form.form = form;
-        Drupal.ajax[$(this).attr('id')] = new Drupal.ajax($(this).attr('id'), form, element_settings);
+        var $form = $(this);
+        var id = $form.attr('id');
+        Drupal.ajax[id] = new Drupal.ajax(id, this, element_settings);
+        Drupal.ajax[id].form = $form;
       });
     }
   };
 
   Drupal.ajax.prototype.commands.viewsDismissForm = function(ajax, response, status) {
     Drupal.ajax.prototype.commands.viewsSetForm({}, {'title': '', 'output': Drupal.settings.views.ajax.defaultForm});
+    $(Drupal.settings.views.ajax.popup).dialog('close');
   }
 
   Drupal.ajax.prototype.commands.viewsHilite = function(ajax, response, status) {
@@ -48,17 +59,14 @@
     $('#views-tabset').viewsClickTab(instance.$tabs.length);
   };
 
-  Drupal.ajax.prototype.commands.viewsDisableButtons = function(ajax, response, status) {
-    $('#views-ui-edit-view-form input').attr('disabled', 'disabled');
-  }
-
-  Drupal.ajax.prototype.commands.viewsEnableButtons = function(ajax, response, status) {
-    $('#views-ui-edit-view-form input').removeAttr('disabled');
+  Drupal.ajax.prototype.commands.viewsShowButtons = function(ajax, response, status) {
+    $('div.views-edit-view div.form-actions').removeClass('js-hide');
+    $('div.views-edit-view div.view-changed.messages').removeClass('js-hide');
   }
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function(ajax, response, status) {
-    if ($('#views-live-preview div.form-item-live-preview input').is(':checked')) {
-      $('#views-live-preview input[type=submit]').trigger('click');
+    if ($('input#edit-displays-live-preview').is(':checked')) {
+      $('#preview-submit').trigger('mousedown');
     }
   }
 
@@ -70,10 +78,26 @@
   }
 
   /**
+   * Trigger preview when the "live preview" checkbox is checked.
+   */
+  Drupal.behaviors.livePreview = {
+    attach: function (context) {
+      $('input#edit-displays-live-preview', context).once('views-ajax-processed').click(function() {
+        if ($(this).is(':checked')) {
+          $('#preview-submit').trigger('mousedown');
+        }
+        else {
+          $('#views-live-preview').empty();
+        }
+      });
+    }
+  }
+
+  /**
    * Sync preview display.
    */
   Drupal.behaviors.syncPreviewDisplay = {
-    attach: function(context) {
+    attach: function (context) {
       $("#views-tabset a").once('views-ajax-processed').click(function() {
         var href = $(this).attr('href');
         // Cut of #views-tabset.
@@ -85,7 +109,21 @@
   }
 
   Drupal.behaviors.viewsAjax = {
-    attach: function(context) {
+    attach: function (context, settings) {
+      if (!settings.views) {
+        return;
+      }
+      // Create a jQuery UI dialog, but leave it closed.
+      var dialog_area = $(settings.views.ajax.popup, context);
+      dialog_area.dialog({
+        'autoOpen': false,
+        'dialogClass': 'views-ui-dialog',
+        'modal': true,
+        'position': 'center',
+        'resizable': false,
+        'width': 750
+      });
+
       var base_element_settings = {
         'event': 'click',
         'progress': { 'type': 'throbber' }
@@ -101,7 +139,7 @@
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });
 
-      $('div#views-live-preview form input[type=submit], div#views-live-preview a')
+      $('div#views-live-preview a')
         .once('views-ajax-processed').each(function () {
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
@@ -111,13 +149,9 @@
             return true;
           }
         }
-        else if ($(this).attr('action')) {
-          element_settings.url = $(this).attr('action');
-        }
-        else if (this.form && $(this.form).attr('action')) {
-          element_settings.url = $(this.form).attr('action');
-        }
 
+        element_settings.wrapper = 'views-live-preview';
+        element_settings.method = 'html';
         var base = $(this).attr('id');
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });

@@ -232,3 +232,21 @@ The following items are allowed in the field definition:
 </dl>
 
 For more information about what handlers need/use what data, visit <a href="http://views.doc.logrus.com">the Views API site</a> and check out the available handlers.
+
+<h3>Support old tabledata</h3>
+If you need to rename some tables/fields you can create some references in the views data to be able to continue to work.
+Therefore you create the whole table structure of the current views data.
+
+If you have to rename a single table you need to specify 
+<pre>
+$data['oldtable']['moved to'] = 'newtable';
+</pre>
+
+If you have to rename/move a single a field to another table you specify
+<pre>
+$data['oldtable']['oldfield']['field']['moved to'] = array('newtable', 'newfield');
+</pre>
+or
+<pre>
+$data['oldtable']['oldfield']['moved to'] = array('newtable', 'newfield');
+</pre>

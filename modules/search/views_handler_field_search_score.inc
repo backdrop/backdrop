@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Field handler to provide simple renderer that allows linking to a node.
  */

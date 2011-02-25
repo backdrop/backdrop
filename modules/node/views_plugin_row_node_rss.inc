@@ -30,15 +30,28 @@ class views_plugin_row_node_rss extends views_plugin_row {
     $form['item_length'] = array(
       '#type' => 'select',
       '#title' => t('Display type'),
-      '#options' => array(
-        'fulltext' => t('Full text'),
-        'teaser' => t('Title plus teaser'),
-        'title' => t('Title only'),
-        'default' => t('Use default RSS settings'),
-      ),
+      '#options' => $this->options_form_summary_options(),
       '#default_value' => $this->options['item_length'],
     );
   }
+
+  /**
+   * Return the main options, which are shown in the summary title.
+   */
+  function options_form_summary_options() {
+    return array(
+      'fulltext' => t('Full text'),
+      'teaser' => t('Title plus teaser'),
+      'title' => t('Title only'),
+      'default' => t('Use default RSS settings'),
+    );
+  }
+
+  function summary_title() {
+    $options = $this->options_form_summary_options();
+    return check_plain($options[$this->options['item_length']]);
+  }
+
 
   function pre_render($values) {
     foreach ($values as $row) {
@@ -88,6 +101,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
       $item_text .= drupal_render($node->content) . $links;
     }
 
+    $item = new stdClass;
     $item->description = $item_text;
     $item->title = $node->title;
     $item->link = url("node/$node->nid", array('absolute' => TRUE));

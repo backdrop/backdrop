@@ -16,7 +16,7 @@ class ViewsExposedFormTest extends ViewsSqlTest {
     parent::setUp('views_ui');
     module_enable(array('views_ui'));
     // @TODO Figure out why it's required to clear the cache here.
-    views_module_include('views_default.inc', TRUE);
+    views_module_include('views_default', TRUE);
     views_get_all_views(TRUE);
     menu_rebuild();
   }
@@ -62,34 +62,34 @@ class ViewsExposedFormTest extends ViewsSqlTest {
 
     $this->drupalGet('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/filter/type');
     // Be sure that the button is called exposed
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose filter'));
 
-    // Click the Expose button.
-    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/filter/type', $edit, t('Expose'));
+    // Click the Expose filter button.
+    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/filter/type', $edit, t('Expose filter'));
     // Check the label of the expose button
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide filter'));
 
     // Check the validations of the filter handler.
     $edit = array();
     $edit['options[expose][identifier]'] = '';
-    $this->drupalPost(NULL, $edit, t('Update'));
+    $this->drupalPost(NULL, $edit, t('Apply'));
     $this->assertText(t('The identifier is required if the filter is exposed.'));
-    
+
     $edit = array();
     $edit['options[expose][identifier]'] = 'value';
-    $this->drupalPost(NULL, $edit, t('Update'));
+    $this->drupalPost(NULL, $edit, t('Apply'));
     $this->assertText(t('This identifier is not allowed.'));
 
     // Now check the sort criteria.
     $this->drupalGet('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created');
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose sort'));
     $this->assertNoFieldById('edit-options-expose-label', '', t('Take sure no label field is shown'));
 
-    // Click the Expose button.
+    // Click the Expose sort button.
     $edit = array();
-    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created', $edit, t('Expose'));
+    $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created', $edit, t('Expose sort'));
     // Check the label of the expose button
-    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide'));
+    $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide sort'));
     $this->assertFieldById('edit-options-expose-label', '', t('Take sure a label field is shown'));
   }
 }

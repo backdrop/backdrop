@@ -26,7 +26,7 @@
 class views_plugin_display extends views_plugin {
   /**
    * The top object of a view.
-   * 
+   *
    * @var view
    */
   var $view = NULL;
@@ -866,39 +866,61 @@ class views_plugin_display extends views_plugin {
    */
   function options_summary(&$categories, &$options) {
     $categories = array(
-      'basic' => array(
-        'title' => t('Basic settings'),
+      'title' => array(
+        'title' => t('Title'),
+        'column' => 'first',
       ),
-      'advanced' => array(
-        'title' => t('Advanced settings'),
+      'format' => array(
+        'title' => t('Format'),
+        'column' => 'first',
       ),
-      'style' => array(
-        'title' => t('Style settings'),
+      'filters' => array(
+        'title' => t('Filters'),
+        'column' => 'first',
+      ),
+      'fields' => array(
+        'title' => t('Fields'),
+        'column' => 'first',
+      ),
+      'pager' => array(
+        'title' => t('Pager'),
+        'column' => 'second',
       ),
       'exposed' => array(
         'title' => t('Exposed form'),
+        'column' => 'third',
+        'build' => array(
+          '#weight' => 1,
+        ),
+      ),
+      'access' => array(
+        'title' => '',
+        'column' => 'second',
+        'build' => array(
+          '#weight' => -5,
+        ),
+      ),
+      'other' => array(
+        'title' => t('Other'),
+        'column' => 'third',
+        'build' => array(
+          '#weight' => 2,
+        ),
       ),
     );
 
     if ($this->display->id != 'default') {
       $options['display_id'] = array(
-        'category' => 'basic',
+        'category' => 'other',
         'title' => t('Machine Name'),
         'value' => !empty($this->display->new_id) ? check_plain($this->display->new_id) : check_plain($this->display->id),
         'desc' => t('Change the machine name of this display.'),
       );
     }
 
-    $options['display_title'] = array(
-      'category' => 'basic',
-      'title' => t('Name'),
-      'value' => check_plain($this->display->display_title),
-      'desc' => t('Change the name of this display.'),
-    );
-
     $display_comment = drupal_substr($this->get_option('display_comment'), 0, 10);
     $options['display_comment'] = array(
-      'category' => 'basic',
+      'category' => 'other',
       'title' => t('Comment'),
       'value' => !empty($display_comment) ? $display_comment : t('No comment'),
       'desc' => t('Comment or document this display.'),
@@ -910,45 +932,51 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['title'] = array(
-      'category' => 'basic',
+      'category' => 'title',
       'title' => t('Title'),
       'value' => $title,
       'desc' => t('Change the title that this display will use.'),
     );
 
     $options['enabled'] = array(
-      'category' => 'basic',
+      'category' => 'other',
       'title' => t('Display status'),
       'value' => $this->get_option('enabled') ? t('Enabled') : t('Disabled'),
       'desc' => t('Define if this display is or is not enabled.'),
     );
 
     $style_plugin = views_fetch_plugin_data('style', $this->get_option('style_plugin'));
-    $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin['title'];
+    $style_plugin_instance = $this->get_plugin('style');
+    $style_summary = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin_instance->summary_title();
+    $style_title = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin_instance->plugin_title();
 
     $style = '';
 
     $options['style_plugin'] = array(
-      'category' => 'style',
-      'title' => t('Style'),
+      'category' => 'format',
+      'title' => t('Format'),
       'value' => $style_title,
-      'desc' => t('Change the style plugin.'),
+      'setting' => $style_summary,
+      'desc' => t('Change the way content is formatted.'),
     );
 
     // This adds a 'Settings' link to the style_options setting if the style has options.
     if (!empty($style_plugin['uses options'])) {
-      $options['style_plugin']['links']['style_options'] = t('Change settings for this style');
+      $options['style_plugin']['links']['style_options'] = t('Change settings for this format');
     }
 
     if (!empty($style_plugin['uses row plugin'])) {
       $row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
-      $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin['title'];
+      $row_plugin_instance = $this->get_plugin('row');
+      $row_summary = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin_instance->summary_title();
+      $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin_instance->plugin_title();
 
       $options['row_plugin'] = array(
-        'category' => 'style',
-        'title' => t('Row style'),
+        'category' => 'format',
+        'title' => t('Show'),
         'value' => $row_title,
-        'desc' => t('Change the row plugin.'),
+        'setting' => $row_summary,
+        'desc' => t('Change the way each row in the view is styled.'),
       );
       // This adds a 'Settings' link to the row_options setting if the row style has options.
       if (!empty($row_plugin['uses options'])) {
@@ -957,7 +985,7 @@ class views_plugin_display extends views_plugin {
     }
     if (!empty($this->definition['use ajax'])) {
       $options['use_ajax'] = array(
-        'category' => 'advanced',
+        'category' => 'other',
         'title' => t('Use AJAX'),
         'value' => $this->get_option('use_ajax') ? t('Yes') : t('No'),
         'desc' => t('Change whether or not this display will use AJAX.'),
@@ -965,7 +993,7 @@ class views_plugin_display extends views_plugin {
     }
     if (!empty($this->definition['accept attachments'])) {
       $options['hide_attachment_summary'] = array(
-        'category' => 'advanced',
+        'category' => 'other',
         'title' => t('Hide attachments in summary'),
         'value' => $this->get_option('hide_attachment_summary') ? t('Yes') : t('No'),
         'desc' => t('Change whether or not to display attachments when displaying an argument summary.'),
@@ -981,9 +1009,10 @@ class views_plugin_display extends views_plugin {
     $pager_str = $pager_plugin->summary_title();
 
     $options['pager'] = array(
-      'category' => 'basic',
+      'category' => 'pager',
       'title' => t('Use pager'),
-      'value' => $pager_str,
+      'value' => $pager_plugin->plugin_title(),
+      'setting' => $pager_str,
       'desc' => t("Change this display's pager setting."),
     );
 
@@ -998,7 +1027,7 @@ class views_plugin_display extends views_plugin {
 
     if (!empty($this->definition['use more'])) {
       $options['use_more'] = array(
-        'category' => 'basic',
+        'category' => 'pager',
         'title' => t('More link'),
         'value' => $this->get_option('use_more') ? t('Yes') : t('No'),
         'desc' => t('Specify whether this display will provide a "more" link.'),
@@ -1008,7 +1037,7 @@ class views_plugin_display extends views_plugin {
     $this->view->init_query();
     if ($this->view->query->get_aggregation_info()) {
       $options['group_by'] = array(
-        'category' => 'advanced',
+        'category' => 'other',
         'title' => t('Use grouping'),
         'value' => $this->get_option('group_by') ? t('Yes') : t('No'),
         'desc' => t('Allow grouping and aggregation (calculation) of fields.'),
@@ -1016,7 +1045,7 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['query'] = array(
-      'category' => 'advanced',
+      'category' => 'other',
       'title' => t('Query settings'),
       'value' => t('Settings'),
       'desc' => t('Allow to set some advanced settings for the query plugin'),
@@ -1031,9 +1060,10 @@ class views_plugin_display extends views_plugin {
     $access_str = $access_plugin->summary_title();
 
     $options['access'] = array(
-      'category' => 'basic',
+      'category' => 'access',
       'title' => t('Access'),
-      'value' => $access_str,
+      'value' => $access_plugin->plugin_title(),
+      'setting' => $access_str,
       'desc' => t('Specify access control type for this display.'),
     );
 
@@ -1050,9 +1080,10 @@ class views_plugin_display extends views_plugin {
     $cache_str = $cache_plugin->summary_title();
 
     $options['cache'] = array(
-      'category' => 'advanced',
+      'category' => 'other',
       'title' => t('Caching'),
-      'value' => $cache_str,
+      'value' => $cache_plugin->plugin_title(),
+      'setting' => $cache_str,
       'desc' => t('Specify caching type for this display.'),
     );
 
@@ -1080,7 +1111,7 @@ class views_plugin_display extends views_plugin {
         $display_id = $this->get_link_display();
         $link_display = empty($this->view->display[$display_id]) ? t('None') : check_plain($this->view->display[$display_id]->display_title);
         $options['link_display'] = array(
-          'category' => 'basic',
+          'category' => 'other',
           'title' => t('Link display'),
           'value' => $link_display,
           'desc' => t('Specify which display this display will link to.'),
@@ -1106,7 +1137,8 @@ class views_plugin_display extends views_plugin {
     $options['exposed_form'] = array(
       'category' => 'exposed',
       'title' => t('Exposed form style'),
-      'value' => $exposed_form_str,
+      'value' => $exposed_form_plugin->plugin_title(),
+      'setting' => $exposed_form_str,
       'desc' => t('Select the kind of exposed filter to use.'),
     );
 
@@ -1120,14 +1152,14 @@ class views_plugin_display extends views_plugin {
     }
 
     $options['css_class'] = array(
-      'category' => 'style',
+      'category' => 'other',
       'title' => t('CSS class'),
       'value' => $css_class,
       'desc' => t('Change the CSS class name(s) that will be added to this display.'),
     );
 
     $options['analyze-theme'] = array(
-      'category' => 'style',
+      'category' => 'other',
       'title' => t('Theme'),
       'value' => t('Information'),
       'desc' => t('Get information on how to theme this display'),
@@ -1139,7 +1171,7 @@ class views_plugin_display extends views_plugin {
    */
   function options_form(&$form, &$form_state) {
     if ($this->defaultable_sections($form_state['section'])) {
-      $this->add_override_button($form, $form_state, $form_state['section']);
+      views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
     }
     $form['#title'] = check_plain($this->display->display_title) . ': ';
 
@@ -1282,7 +1314,7 @@ class views_plugin_display extends views_plugin {
         if (!empty($access_plugin['uses options'])) {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
-            '#markup' => t('You may also adjust the !settings for the currently selected access restriction by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'access_options'))),
+            '#markup' => t('You may also adjust the !settings for the currently selected access restriction.', array('!settings' => $this->option_link(t('settings'), 'access_options'))),
             '#suffix' => '</div>',
           );
         }
@@ -1326,7 +1358,7 @@ class views_plugin_display extends views_plugin {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
             '#suffix' => '</div>',
-            '#markup' => t('You may also adjust the !settings for the currently selected cache mechanism by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'cache_options'))),
+            '#markup' => t('You may also adjust the !settings for the currently selected cache mechanism.', array('!settings' => $this->option_link(t('settings'), 'cache_options'))),
           );
         }
         break;
@@ -1390,7 +1422,7 @@ class views_plugin_display extends views_plugin {
         $style_plugin = views_fetch_plugin_data('style', $this->get_option('style_plugin'));
         if (!empty($style_plugin['uses options'])) {
           $form['markup'] = array(
-            '#markup' => '<div class="form-item description">' . t('You may also adjust the !settings for the currently selected style by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'style_options'))) . '</div>',
+            '#markup' => '<div class="form-item description">' . t('You may also adjust the !settings for the currently selected style.', array('!settings' => $this->option_link(t('settings'), 'style_options'))) . '</div>',
           );
         }
 
@@ -1434,7 +1466,7 @@ class views_plugin_display extends views_plugin {
         $row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
         if (!empty($row_plugin['uses options'])) {
           $form['markup'] = array(
-            '#markup' => '<div class="form-item description">' . t('You may also adjust the !settings for the currently selected row style by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'row_options'))) . '</div>',
+            '#markup' => '<div class="form-item description">' . t('You may also adjust the !settings for the currently selected row style.', array('!settings' => $this->option_link(t('settings'), 'row_options'))) . '</div>',
           );
         }
 
@@ -1746,7 +1778,7 @@ class views_plugin_display extends views_plugin {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
             '#suffix' => '</div>',
-            '#markup' => t('You may also adjust the !settings for the currently selected style by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'exposed_form_options'))),
+            '#markup' => t('You may also adjust the !settings for the currently selected style.', array('!settings' => $this->option_link(t('settings'), 'exposed_form_options'))),
           );
         }
         break;
@@ -1782,7 +1814,7 @@ class views_plugin_display extends views_plugin {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
             '#suffix' => '</div>',
-            '#markup' => t('You may also adjust the !settings for the currently selected pager by clicking on the icon.', array('!settings' => $this->option_link(t('settings'), 'pager_options'))),
+            '#markup' => t('You may also adjust the !settings for the currently selected pager.', array('!settings' => $this->option_link(t('settings'), 'pager_options'))),
           );
         }
 
@@ -2087,54 +2119,6 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
-   * Add an override button for a given section, allowing the user to
-   * change whether this info is stored on the default display or on
-   * the current display.
-   */
-  function add_override_button(&$form, &$form_state, $section) {
-    if ($this->is_default_display()) {
-      return;
-    }
-
-    $form['override'] = array(
-      '#prefix' => '<div class="views-override clearfix">',
-      '#suffix' => '</div>',
-    );
-    if ($this->is_defaulted($section)) {
-      $form['override']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Override'),
-        '#submit' => array('views_ui_edit_display_form_override'),
-      );
-      $help = '';
-      if (module_exists('advanced_help')) {
-        $help = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'overrides'));
-      }
-      $form['override']['markup'] = array(
-        '#markup' => '<div class="description">' . $help . t('Status: using default values.') . '</div>',
-      );
-
-      $form_state['update_name'] = t('Update default display');
-    }
-    else {
-      $form['override']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Use default'),
-        '#submit' => array('views_ui_edit_display_form_override'),
-      );
-      $help = '';
-      if (module_exists('advanced_help')) {
-        $help = theme('advanced_help_topic', array('module' => 'views', 'topic' => 'overrides'));
-      }
-      $form['override']['markup'] = array(
-        '#markup' => '<div class="description">' . $help . t('Status: using overridden values.') . '</div>',
-      );
-
-      $form_state['update_name'] = NULL;
-    }
-  }
-
-  /**
    * If override/revert was clicked, perform the proper toggle.
    */
   function options_override($form, &$form_state) {
@@ -2414,7 +2398,7 @@ class views_plugin_display extends views_plugin {
   function view_special_blocks($type) {
     if ($type == '-exp') {
       // avoid interfering with the admin forms.
-      if (arg(0) == 'admin' && arg(1) == 'build' && arg(2) == 'views') {
+      if (arg(0) == 'admin' && arg(1) == 'structure' && arg(2) == 'views') {
         return;
       }
       $this->view->init_handlers();
@@ -2644,4 +2628,3 @@ class views_plugin_display extends views_plugin {
 /**
  * @}
  */
-

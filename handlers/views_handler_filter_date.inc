@@ -34,8 +34,8 @@ class views_handler_filter_date extends views_handler_filter_numeric {
   function options_validate(&$form, &$form_state) {
     parent::options_validate($form, $form_state);
 
-    if (!empty($form_state['values']['options']['expose']['optional'])) {
-      // Who cares what the value is if it's exposed and optional.
+    if (!empty($form_state['values']['options']['expose']['required'])) {
+      // Who cares what the value is if it's exposed and non-required.
       return;
     }
 
@@ -47,14 +47,14 @@ class views_handler_filter_date extends views_handler_filter_numeric {
       return;
     }
 
-    if (!empty($this->options['expose']['optional'])) {
-      // Who cares what the value is if it's exposed and optional.
+    if (empty($this->options['expose']['required'])) {
+      // Who cares what the value is if it's exposed and non-required.
       return;
     }
 
     $value = &$form_state['values'][$this->options['expose']['identifier']];
-    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator'])) {
-      $operator = $form_state['values'][$this->options['expose']['operator']];
+    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id'])) {
+      $operator = $form_state['values'][$this->options['expose']['operator_id']];
     }
     else {
       $operator = $this->operator;
@@ -99,8 +99,8 @@ class views_handler_filter_date extends views_handler_filter_numeric {
 
     // Don't filter if value(s) are empty.
     $operators = $this->operators();
-    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator'])) {
-      $operator = $input[$this->options['expose']['operator']];
+    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id'])) {
+      $operator = $input[$this->options['expose']['operator_id']];
     }
     else {
       $operator = $this->operator;
@@ -140,7 +140,8 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     // have a string if using offset.
     $placeholder1 = $this->placeholder();
     $placeholder2 = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field BETWEEN $placeholder1 AND $placeholder2", array($placeholder1 => $a, $placeholder2 => $b));
+    $operator = strtoupper($this->operator);
+    $this->query->add_where_expression($this->options['group'], "$field $operator $placeholder1 AND $placeholder2", array($placeholder1 => $a, $placeholder2 => $b));
   }
 
   function op_simple($field) {

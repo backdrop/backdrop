@@ -37,7 +37,7 @@ class viewsTranslatableTest extends ViewsSqlTest {
     variable_set('views_localization_plugin', 'test');
     // Reset the plugin data.
     views_fetch_plugin_data(NULL, NULL, TRUE);
-    $this->strings = array('Defaults1', 'Apply1', 'Sort By1', 'Asc1', 'Desc1', 'more1', 'Reset1', 'Offset1', 'Defaults1', 'title1', 'Items per page1', 'fieldlabel1', 'filterlabel1');
+    $this->strings = array('Master1', 'Apply1', 'Sort By1', 'Asc1', 'Desc1', 'more1', 'Reset1', 'Offset1', 'Master1', 'title1', 'Items per page1', 'fieldlabel1', 'filterlabel1');
     $this->enableViewsUi();
   }
 
@@ -66,7 +66,7 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration'));
     $this->drupalLogin($admin_user);
 
-    $this->drupalGet("admin/structure/views/edit/$view->name");
+    $this->drupalGet("admin/structure/views/view/$view->name/edit");
     $this->assertNoText('-translated', 'Take sure that no strings get\'s translated in the ui.');
   }
 
@@ -95,8 +95,8 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $view->api_version = '3.0-alpha1';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults1', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master1', 'default');
     $handler->display->display_options['title'] = 'title1';
     $handler->display->display_options['use_more_text'] = 'more1';
     $handler->display->display_options['access']['type'] = 'none';
@@ -119,7 +119,7 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['options']['expose']['offset_label'] = 'Offset1';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
@@ -134,15 +134,15 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
     $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
     $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
-    /* Filter: Node: Nid */
+    /* Filter: Content: Nid */
     $handler->display->display_options['filters']['nid']['id'] = 'nid';
     $handler->display->display_options['filters']['nid']['table'] = 'node';
     $handler->display->display_options['filters']['nid']['field'] = 'nid';
     $handler->display->display_options['filters']['nid']['exposed'] = TRUE;
-    $handler->display->display_options['filters']['nid']['expose']['operator'] = 'nid_op';
+    $handler->display->display_options['filters']['nid']['expose']['operator_id'] = 'nid_op';
     $handler->display->display_options['filters']['nid']['expose']['label'] = 'filterlabel1';
     $handler->display->display_options['filters']['nid']['expose']['identifier'] = 'nid';
-    $handler->display->display_options['filters']['nid']['expose']['single'] = 0;
+    $handler->display->display_options['filters']['nid']['expose']['multiple'] = 1;
     $handler->display->display_options['filters']['nid']['expose']['reduce'] = 0;
 
     return $view;

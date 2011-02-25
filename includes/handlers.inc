@@ -132,7 +132,7 @@ function views_get_table_join($table, $base_table) {
 class views_handler extends views_object {
   /**
    * The top object of a view.
-   * 
+   *
    * @var view
    */
   var $view = NULL;
@@ -257,12 +257,32 @@ class views_handler extends views_object {
    */
   function options_validate(&$form, &$form_state) { }
 
+  /**
+   * Build the options form.
+   */
   function options_form(&$form, &$form_state) {
+    // Some form elements belong in a fieldset for presentation, but can't
+    // be moved into one because of the form_state['values'] hierarchy. Those
+    // elements can add a #fieldset => 'fieldset_name' property, and they'll
+    // be moved to their fieldset during pre_render.
+    $form['#pre_render'][] = 'views_ui_pre_render_add_fieldset_markup';
+
     $form['ui_name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Administrative Title'),
+      '#title' => t('Administrative title'),
       '#description' => t('This title will be displayed on the views edit page instead of the default one. This might be useful if you have the same item twice.'),
       '#default_value' => $this->options['ui_name'],
+      '#fieldset' => 'more',
+    );
+
+    // This form is long and messy enough that the "Administrative title" option
+    // belongs in a "more options" fieldset at the bottom of the form.
+    $form['more'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('More'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 50,
     );
   }
 
@@ -370,39 +390,9 @@ class views_handler extends views_object {
   function exposed_submit(&$form, &$form_state) { }
 
   /**
-   * Overridable form for exposed handler options.
-   *
-   * If overridden, it is best to call the parent or re-implement
-   * the stuff here.
-   *
-   * Many handlers will need to override this in order to provide options
-   * that are nicely tailored to the given filter.
+   * Form for exposed handler options.
    */
-  function expose_form(&$form, &$form_state) {
-    $form['expose']['start_left'] = array(
-      '#markup' => '<div class="views-left-50">',
-    );
-
-    $this->expose_form_left($form, $form_state);
-
-    $form['expose']['end_left'] = array(
-      '#markup' => '</div>',
-    );
-
-    $form['expose']['start_checkboxes'] = array(
-      '#markup' => '<div class="form-checkboxes views-left-40 clearfix">',
-    );
-
-    $this->expose_form_right($form, $form_state);
-
-    $form['expose']['end_checkboxes'] = array(
-      '#markup' => '</div>',
-    );
-  }
-
-  function expose_form_left(&$form, &$form_state) { }
-
-  function expose_form_right(&$form, &$form_state){ }
+  function expose_form(&$form, &$form_state) { }
 
   /**
    * Validate the options form.
@@ -415,34 +405,10 @@ class views_handler extends views_object {
    */
   function expose_submit($form, &$form_state) { }
 
-    /**
+  /**
    * Shortcut to display the expose/hide button.
    */
-  function show_expose_button(&$form, &$form_state) {
-    $form['expose_button'] = array(
-      '#prefix' => '<div class="views-expose clearfix">',
-      '#suffix' => '</div>',
-    );
-    if (empty($this->options['exposed'])) {
-      $form['expose_button']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Expose'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-      );
-      $form['expose_button']['markup'] = array(
-        '#markup' => '<div class="description">' . t('This item is currently not exposed. If you <strong>expose</strong> it, users will be able to change the filter as they view it.') . '</div>',
-      );
-    }
-    else {
-      $form['expose_button']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Hide'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-      );
-      $form['expose_button']['markup'] = array(
-        '#markup' => '<div class="description">' . t('This item is currently exposed. If you <strong>hide</strong> it, users will not be able to change the filter as they view it.') . '</div>',      );
-    }
-  }
+  function show_expose_button(&$form, &$form_state) { }
 
   /**
    * Shortcut to display the exposed options form.
@@ -452,10 +418,6 @@ class views_handler extends views_object {
       return;
     }
 
-    $form['expose'] = array(
-      '#prefix' => '<div class="views-expose-options clearfix">',
-      '#suffix' => '</div>',
-    );
     $this->expose_form($form, $form_state);
 
     // When we click the expose button, we add new gadgets to the form but they
@@ -638,7 +600,7 @@ class views_many_to_one_helper {
     $this->handler = &$handler;
   }
 
-  function option_definition(&$options) {
+  static function option_definition(&$options) {
     $options['reduce_duplicates'] = array('default' => FALSE);
   }
 
@@ -1426,52 +1388,3 @@ class views_join {
 /**
  * @}
  */
-
-// Declare API compatibility on behalf of core modules:
-
-/**
- * Implements hook_views_api().
- *
- * This one is used as the base to reduce errors when updating.
- */
-function views_views_api() {
-  return array(
-    // in your modules do *not* use views_api_version()!!!
-    'api' => views_api_version(),
-    'path' => drupal_get_path('module', 'views') . '/modules',
-  );
-}
-
-function aggregator_views_api() { return views_views_api(); }
-
-function book_views_api() { return views_views_api(); }
-
-function comment_views_api() { return views_views_api(); }
-
-function locale_views_api() { return views_views_api(); }
-
-function field_views_api() { return views_views_api(); }
-
-function filter_views_api() { return views_views_api(); }
-
-function node_views_api() { return views_views_api(); }
-
-function poll_views_api() { return views_views_api(); }
-
-function profile_views_api() { return views_views_api(); }
-
-function search_views_api() { return views_views_api(); }
-
-function statistics_views_api() { return views_views_api(); }
-
-function system_views_api() { return views_views_api(); }
-
-function taxonomy_views_api() { return views_views_api(); }
-
-function translation_views_api() { return views_views_api(); }
-
-function upload_views_api() { return views_views_api(); }
-
-function user_views_api() { return views_views_api(); }
-
-function contact_views_api() { return views_views_api(); }

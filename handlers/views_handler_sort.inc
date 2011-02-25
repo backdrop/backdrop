@@ -74,6 +74,40 @@ class views_handler_sort extends views_handler {
   }
 
   /**
+   * Shortcut to display the expose/hide button.
+   */
+  function show_expose_button(&$form, &$form_state) {
+    $form['expose_button'] = array(
+      '#prefix' => '<div class="views-expose clearfix">',
+      '#suffix' => '</div>',
+      // Should always come first
+      '#weight' => -1000,
+    );
+    if (empty($this->options['exposed'])) {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description" style="float: left; margin-right:10px">' . t('This sort is not exposed. Expose it to allow the users to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#limit_validation_errors' => array(),
+        '#type' => 'submit',
+        '#value' => t('Expose sort'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+    else {
+      $form['expose_button']['markup'] = array(
+        '#markup' => '<div class="description exposed-description">' . t('This sort is exposed. If you hide it, users will not be able to change it.') . '</div>',
+      );
+      $form['expose_button']['button'] = array(
+        '#limit_validation_errors' => array(),
+        '#type' => 'submit',
+        '#value' => t('Hide sort'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+    }
+  }
+
+  /**
    * Simple validate handler
    */
   function options_validate(&$form, &$form_state) {
@@ -117,40 +151,29 @@ class views_handler_sort extends views_handler {
    * Provide a list of options for the default sort form.
    * Should be overridden by classes that don't override sort_form
    */
-  function sort_options() { 
+  function sort_options() {
     return array(
-      'ASC' => t('Sort ascending'), 
+      'ASC' => t('Sort ascending'),
       'DESC' => t('Sort descending'),
-    ); 
+    );
   }
 
-  /**
-   * Since all exposed sorts are grouped into one select box.
-   * We don't return nothing when views call to exposed_form()
-   */ 
-  function exposed_form(&$form, &$form_state) { }
+  function expose_form(&$form, &$form_state) {
+    // #flatten will move everything from $form['expose'][$key] to $form[$key]
+    // prior to rendering. That's why the pre_render for it needs to run first,
+    // so that when the next pre_render (the one for fieldsets) runs, it gets
+    // the flattened data.
+    array_unshift($form['#pre_render'], 'views_ui_pre_render_flatten_data');
+    $form['expose']['#flatten'] = TRUE;
 
-  /**
-   * Handle the 'left' side fo the exposed options form.
-   */
- function expose_form_left(&$form, &$form_state) {
     $form['expose']['label'] = array(
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['label'],
       '#title' => t('Label'),
       '#required' => TRUE,
       '#size' => 40,
+      '#weight' => -1,
    );
-  }
-  
-  /**
-   * Handle the 'right' side fo the exposed options form.
-   */
-  function expose_form_right(&$form, &$form_state) {
-    $form['expose']['order'] = array(
-      '#type' => 'value',
-      '#value' => 'ASC',
-     );
   }
 
   /**
@@ -173,7 +196,7 @@ class views_handler_sort_broken extends views_handler_sort {
   }
 
   function ensure_my_table() { /* No table to ensure! */ }
-  function query() { /* No query to run */ }
+  function query($group_by = FALSE) { /* No query to run */ }
   function options_form(&$form, &$form_state) {
     $form['markup'] = array(
       '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',

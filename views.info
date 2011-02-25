@@ -3,11 +3,15 @@ description = Create customized lists and queries from your database.
 package = Views
 core = 7.x
 php = 5.2
-files[] = views.module
+
+; Always available CSS
+stylesheets[all][] = css/views.css
+
 dependencies[] = ctools
 ; Handlers
 files[] = handlers/views_handler_area.inc
 files[] = handlers/views_handler_area_text.inc
+files[] = handlers/views_handler_area_view.inc
 files[] = handlers/views_handler_argument.inc
 files[] = handlers/views_handler_argument_date.inc
 files[] = handlers/views_handler_argument_formula.inc
@@ -265,3 +269,4 @@ files[] = tests/user/views_user_argument_default.test
 files[] = tests/user/views_user_argument_validate.test
 files[] = tests/views_cache.test
 files[] = tests/views_view.test
+files[] = tests/views_ui.test

@@ -48,8 +48,8 @@ class views_handler_filter_in_operator extends views_handler_filter {
     $this->options['expose']['reduce'] = FALSE;
   }
 
-  function expose_form_right(&$form, &$form_state) {
-    parent::expose_form_right($form, $form_state);
+  function expose_form(&$form, &$form_state) {
+    parent::expose_form($form, $form_state);
     $form['expose']['reduce'] = array(
       '#type' => 'checkbox',
       '#title' => t('Limit list to selected items'),
@@ -136,9 +136,15 @@ class views_handler_filter_in_operator extends views_handler_filter {
 
   function value_form(&$form, &$form_state) {
     $form['value'] = array();
+    $options = array();
+
+    if (empty($form_state['exposed'])) {
+      // Add a select all option to the value form.
+      $options = array('all' => t('Select all'));
+    }
 
     $this->get_value_options();
-    $options = $this->value_options;
+    $options += $this->value_options;
     $default_value = (array) $this->value;
 
     $which = 'all';
@@ -148,24 +154,24 @@ class views_handler_filter_in_operator extends views_handler_filter {
     if (!empty($form_state['exposed'])) {
       $identifier = $this->options['expose']['identifier'];
 
-      if (empty($this->options['expose']['use_operator']) || empty($this->options['expose']['operator'])) {
+      if (empty($this->options['expose']['use_operator']) || empty($this->options['expose']['operator_id'])) {
         // exposed and locked.
         $which = in_array($this->operator, $this->operator_values(1)) ? 'value' : 'none';
       }
       else {
-        $source = 'edit-' . drupal_html_id($this->options['expose']['operator']);
+        $source = 'edit-' . drupal_html_id($this->options['expose']['operator_id']);
       }
 
       if (!empty($this->options['expose']['reduce'])) {
         $options = $this->reduce_value_options();
 
-        if (empty($this->options['expose']['single']) && !empty($this->options['expose']['optional'])) {
+        if (!empty($this->options['expose']['multiple']) && empty($this->options['expose']['required'])) {
           $default_value = array();
         }
       }
 
-      if (!empty($this->options['expose']['single'])) {
-        if (!empty($this->options['expose']['optional']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
+      if (empty($this->options['expose']['multiple'])) {
+        if (empty($this->options['expose']['required']) && (empty($default_value) || !empty($this->options['expose']['reduce']))) {
           $default_value = 'All';
         }
         elseif (empty($default_value)) {
@@ -256,9 +262,9 @@ class views_handler_filter_in_operator extends views_handler_filter {
       return TRUE;
     }
 
-    // If this is single and optional, this says that yes this filter will
+    // If this is non-multiple and non-required, then this filter will
     // participate, but using the default settings, *if* 'limit is true.
-    if (!empty($this->options['expose']['single']) && !empty($this->options['expose']['optional']) && !empty($this->options['expose']['limit'])) {
+    if (empty($this->options['expose']['multiple']) && empty($this->options['expose']['required']) && !empty($this->options['expose']['limit'])) {
       $identifier = $this->options['expose']['identifier'];
       if ($input[$identifier] == 'All') {
         return TRUE;

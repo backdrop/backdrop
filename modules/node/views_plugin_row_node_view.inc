@@ -38,20 +38,7 @@ class views_plugin_row_node_view extends views_plugin_row {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $entity_info = entity_get_info('node');
-    $options = array();
-    if (!empty($entity_info['view modes'])) {
-      foreach ($entity_info['view modes'] as $mode => $settings) {
-        $options[$mode] = $settings['label'];
-      }
-    }
-    if (empty($options)) {
-      $options = array(
-        'teaser' => t('Teaser'),
-        'full' => t('Full node')
-      );
-    }
-
+    $options = $this->options_form_summary_options();
     $form['build_mode'] = array(
       '#type' => 'select',
       '#options' => $options,
@@ -65,9 +52,35 @@ class views_plugin_row_node_view extends views_plugin_row {
     );
     $form['comments'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display node comments'),
+      '#title' => t('Display comments'),
       '#default_value' => $this->options['comments'],
     );
+  }
+
+  /**
+   * Return the main options, which are shown in the summary title.
+   */
+  function options_form_summary_options() {
+    $entity_info = entity_get_info('node');
+    $options = array();
+    if (!empty($entity_info['view modes'])) {
+      foreach ($entity_info['view modes'] as $mode => $settings) {
+        $options[$mode] = $settings['label'];
+      }
+    }
+    if (empty($options)) {
+      $options = array(
+        'teaser' => t('Teaser'),
+        'full' => t('Full content')
+      );
+    }
+
+    return $options;
+  }
+
+  function summary_title() {
+    $options = $this->options_form_summary_options();
+    return check_plain($options[$this->options['build_mode']]);
   }
 
   function pre_render($values) {

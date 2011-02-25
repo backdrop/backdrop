@@ -19,12 +19,12 @@ class views_handler_field_comment_username extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_to_user'] = array(
       '#title' => t("Link this field to its user or an author's homepage"),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_user'],
     );
+    parent::options_form($form, $form_state);
   }
 
   function render_link($data, $values) {

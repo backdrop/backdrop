@@ -31,13 +31,13 @@ class views_handler_field_taxonomy extends views_handler_field {
    * Provide link to taxonomy option
    */
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_to_taxonomy'] = array(
       '#title' => t('Link this field to its taxonomy term page'),
-      '#description' => t('This will override any other link you have set.'),
+      '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_taxonomy']),
     );
+    parent::options_form($form, $form_state);
   }
 
   /**

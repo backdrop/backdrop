@@ -5,10 +5,6 @@
  */
 class views_plugin_exposed_form_input_required extends views_plugin_exposed_form {
 
-  function summary_title() {
-    return t('Input required');
-  }
-
   function option_definition() {
     $options = parent::option_definition();
 

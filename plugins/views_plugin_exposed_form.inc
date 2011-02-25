@@ -20,14 +20,6 @@ class views_plugin_exposed_form extends views_plugin {
     $this->unpack_options($this->options, $options);
   }
 
-  /**
-   * Return a string to display as the clickable title for the
-   * control.
-   */
-  function summary_title() {
-    return t('Unknown');
-  }
-
   function option_definition() {
     $options = parent::option_definition();
     $options['submit_button'] = array('default' => t('Apply'), 'translatable' => TRUE);

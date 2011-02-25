@@ -63,6 +63,10 @@ class views_plugin_display_block extends views_plugin_display {
 
     $categories['block'] = array(
       'title' => t('Block settings'),
+      'column' => 'second',
+      'build' => array(
+        '#weight' => -10,
+      ),
     );
 
     $block_description = strip_tags($this->get_option('block_description'));
@@ -76,7 +80,7 @@ class views_plugin_display_block extends views_plugin_display {
 
     $options['block_description'] = array(
       'category' => 'block',
-      'title' => t('Admin'),
+      'title' => t('Block name'),
       'value' => $block_description,
     );
 
@@ -87,8 +91,8 @@ class views_plugin_display_block extends views_plugin_display {
 
     $types = $this->block_caching_modes();
     $options['block_caching'] = array(
-      'category' => 'block',
-      'title' => t('Caching'),
+      'category' => 'other',
+      'title' => t('Block caching'),
       'value' => $types[$this->get_cache_type()],
     );
   }

@@ -17,7 +17,7 @@ class viewsUserArgumentDefault extends ViewsSqlTest {
     // Create a user to test.
     $account = $this->drupalCreateUser();
 
-    // Switch the user, we have to check the global user too, because drupalLogin is only for the simpletest browser. 
+    // Switch the user, we have to check the global user too, because drupalLogin is only for the simpletest browser.
     $this->drupalLogin($account);
     global $user;
     $admin = $user;
@@ -47,8 +47,8 @@ class viewsUserArgumentDefault extends ViewsSqlTest {
     $view->api_version = '3.0-alpha1';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -58,7 +58,7 @@ class viewsUserArgumentDefault extends ViewsSqlTest {
     $handler->display->display_options['pager']['options']['id'] = '0';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Node: Title */
+    /* Field: Content: Title */
     $handler->display->display_options['fields']['title']['id'] = 'title';
     $handler->display->display_options['fields']['title']['table'] = 'node';
     $handler->display->display_options['fields']['title']['field'] = 'title';

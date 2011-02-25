@@ -21,7 +21,6 @@ class views_handler_field_prerender_list extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['type'] = array(
       '#type' => 'radios',
       '#title' => t('Display type'),
@@ -40,6 +39,7 @@ class views_handler_field_prerender_list extends views_handler_field {
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array('radio:options[type]' => array('separator')),
     );
+    parent::options_form($form, $form_state);
   }
 
   /**

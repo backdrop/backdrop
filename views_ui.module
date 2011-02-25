@@ -4,207 +4,197 @@
  * Provide structure for the administrative interface to Views.
  */
 
-/*
+/**
  * Implements hook_menu().
  */
 function views_ui_menu() {
   $items = array();
 
-  // Minor code reduction technique
+  //module_load_include('inc', 'views_ui', 'includes/admin');
+
+  // Minor code reduction technique.
   $base = array(
     'access callback' => 'user_access',
     'access arguments' => array('administer views'),
     'file' => 'includes/admin.inc',
   );
 
-  $callback = $base + array('type' => MENU_CALLBACK);
-
-  $convert = array('file' => 'includes/convert.inc') + $base;
-
-  $items['admin/structure/views'] = $base + array(
-    'title' => 'Views',
-    'page callback' => 'views_ui_list_views',
-    'description' => 'Views are customized lists of content on your system; they are highly configurable and give you control over how lists of content are presented.',
-    'type' => MENU_NORMAL_ITEM
-  );
-  $items['admin/structure/views/list'] = $base + array(
-    'title' => 'List',
-    'page callback' => 'views_ui_list_views',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => '-1'
-  );
-  $items['admin/structure/views/add'] = $base + array(
+  // Top-level Views module pages (not tied to a particular View).
+  $items['admin/structure/views/add'] = array(
     'title' => 'Add new view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
-  );
+  ) + $base;
+
+  // Top-level Views module pages (not tied to a particular View).
+  $items['admin/structure/views/add-template'] = array(
+    'title' => 'Add view from template',
+    'page callback' => 'views_ui_add_template_page',
+    // Don't show a local action link if there aren't any templates.
+    'type' => views_get_all_templates() ? MENU_LOCAL_ACTION : MENU_VISIBLE_IN_BREADCRUMB,
+  ) + $base;
+
   $items['admin/structure/views/import'] = array(
-    'title' => 'Import view from code',
+    'title' => 'Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_import_page'),
     'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
-  $items['admin/structure/views/tools'] = $base + array(
-    'title' => 'Tools',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_admin_tools'),
-    'type' => MENU_LOCAL_TASK
-  );
-  $items['admin/structure/views/tools/basic'] = $base + array(
-    'title' => 'Basic',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_admin_tools'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
 
-  $items['admin/structure/views/tools/convert'] = $convert + array(
-    'title' => 'Convert',
-    'description' => 'Convert stored Views 1 views.',
-    'page callback' => 'views_ui_admin_convert',
+  $items['admin/structure/views/settings'] = array(
+    'title' => 'Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_ui_admin_settings_display'),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/structure/views/settings/display'] = array(
+    'title' => 'Display',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'page arguments' => array('views_ui_admin_settings_display'),
+    'weight' => -10,
+  ) + $base;
+  $items['admin/structure/views/settings/defaults'] = array(
+    'title' => 'Defaults',
+    'page arguments' => array('views_ui_admin_settings_defaults'),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/structure/views/settings/advanced'] = array(
+    'title' => 'Advanced',
+    'page arguments' => array('views_ui_admin_settings_advanced'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 1,
-  );
-  $items['admin/structure/views1/delete'] = $convert + array(
-    'title' => 'Delete view',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_delete1_confirm', 4),
-    'type' => MENU_CALLBACK,
-  );
-  $items['admin/structure/views1/convert'] = $convert + array(
-    'title' => 'Convert view',
-    'page callback' => 'views_ui_convert1',
-    'page arguments' => array(4),
-    'type' => MENU_CALLBACK,
-  );
+  ) + $base;
 
-  $items['admin/structure/views/delete/%views_ui_cache'] = $callback + array(
-    'title' => 'Delete view',
+  // The primary Edit View page. Secondary tabs for each Display are added in
+  // view_ui_menu_local_tasks_alter().
+  $items['admin/structure/views/view/%views_ui_cache'] = array(
+    'title callback' => 'views_ui_edit_page_title',
+    'title arguments' => array(4),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_delete_confirm', 4),
-  );
-  $items['admin/structure/views/break-lock/%views_ui_cache'] = $callback + array(
-    'title' => 'Delete view',
+    'page arguments' => array('views_ui_edit_form', 4),
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/edit'] = array(
+    'title' => 'Edit view',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'weight' => -10,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/edit/ajax'] = array(
+    'page callback' => 'views_ui_ajax_get_form',
+    'page arguments' => array('views_ui_edit_form', 4),
+    'delivery callback' => 'ajax_deliver',
+    'theme callback' => 'ajax_base_page_theme',
+    'type' => MENU_CALLBACK,
+  ) + $base;
+
+  // Additional pages for acting on a View.
+  $items['admin/structure/views/view/%views_ui_cache/analyze'] = array(
+    'title' => 'Analyze',
+    'page callback' => 'views_ui_analyze_view',
+    'page arguments' => array(FALSE, 4),
+    'type' => MENU_CALLBACK,
+  ) + $base;
+
+  $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
+    'title' => 'Break lock',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_break_lock_confirm', 4),
-  );
-  $items['admin/structure/views/export/%views_ui_cache'] = $callback + array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_export_page', 4),
-    'type' => MENU_LOCAL_TASK
-  );
-  $items['admin/structure/views/clone/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_clone_page',
-    'page arguments' => array(4),
-    'type' => MENU_LOCAL_TASK
-  );
-  $items['admin/structure/views/enable/%views_ui_default'] = $callback + array(
-    'page callback' => 'views_ui_enable_page',
-    'page arguments' => array(4),
-  );
-  $items['admin/structure/views/disable/%views_ui_default'] = $callback + array(
-    'page callback' => 'views_ui_disable_page',
-    'page arguments' => array(4),
-  );
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
-  // Many line items for editing a view.
-  $items['admin/structure/views/edit/%views_ui_cache'] = $base + array(
-    'title' => 'Edit',
-    'page callback' => 'views_ui_edit_page',
-    'page arguments' => array(4),
-    'type' => MENU_LOCAL_TASK
-  );
-  $ajax_callbacks = array(
-    'analyze' => 'views_ui_analyze_view',
-    'add-display' => 'views_ui_add_display',
-    'preview' => 'views_ui_preview',
-    'reorder-displays' => 'views_ui_reorder_view',
-  );
-
-  foreach ($ajax_callbacks as $menu => $menu_callback) {
-    $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache'] = $callback + array(
-      'page callback' => $menu_callback,
-      'page arguments' => array(FALSE, 5),
-    );
-    $items['admin/structure/views/ajax/' . $menu . '/%views_ui_cache'] = $callback + array(
-      'page callback' => $menu_callback,
-      'page arguments' => array(TRUE, 5),
-      'delivery callback' => 'views_ui_ajax_deliver',
-    );
-  }
-
-  $items['admin/structure/views/nojs/human_name/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_edit_details',
-    'page arguments' => array('human_name', FALSE, 5),
-  );
-  $items['admin/structure/views/ajax/human_name/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_edit_details',
-    'page arguments' => array('human_name', TRUE, 5),
-    'delivery callback' => 'views_ui_ajax_deliver',
-  );
-  $items['admin/structure/views/nojs/tag/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_edit_details',
-    'page arguments' => array('tag', FALSE, 5),
-  );
-  $items['admin/structure/views/ajax/tag/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_edit_details',
-    'page arguments' => array('tag', TRUE, 5),
-    'delivery callback' => 'views_ui_ajax_deliver',
-  );
-  $items['admin/structure/views/nojs/description/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_edit_details',
-    'page arguments' => array('description', FALSE, 5),
-  );
-  $items['admin/structure/views/ajax/description/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_edit_details',
-    'page arguments' => array('description', TRUE, 5),
-    'delivery callback' => 'views_ui_ajax_deliver',
-  );
-
-  $items['admin/build/views/nojs/clone-display/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_clone_display',
-    'page arguments' => array(FALSE, 5, 6),
-  );
-
-  $items['admin/build/views/ajax/clone-display/%views_ui_cache'] = $callback + array(
-    'page callback' => 'views_ui_clone_display',
-    'page arguments' => array(TRUE, 5, 6),
-    'delivery callback' => 'views_ui_ajax_deliver',
-  );
-
-  $items['admin/structure/views/nojs/%/%views_ui_cache'] = $callback + array(
+  // NoJS/AJAX callbacks that can use the default Views AJAX form system.
+  $items['admin/structure/views/nojs/%/%views_ui_cache'] = array(
     'page callback' => 'views_ui_ajax_form',
     'page arguments' => array(FALSE, 4, 5),
-  );
-  $items['admin/structure/views/ajax/%/%views_ui_cache'] = $callback + array(
+    'type' => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/structure/views/ajax/%/%views_ui_cache'] = array(
     'page callback' => 'views_ui_ajax_form',
     'page arguments' => array(TRUE, 4, 5),
-    'delivery callback' => 'views_ui_ajax_deliver',
-  );
-
-  // autocompletes for handlers and such
-  $items['admin/views/ajax/autocomplete/tag'] = $callback + array(
-    'page callback' => 'views_ui_autocomplete_tag',
-    'access arguments' => array('administer views'),
+    'delivery callback' => 'ajax_deliver',
     'type' => MENU_CALLBACK,
-    'file' => 'includes/admin.inc',
+  ) + $base;
+
+  // NoJS/AJAX callbacks that require custom page callbacks.
+  $ajax_callbacks = array(
+    //'analyze' => 'views_ui_analyze_view',
+    'preview' => 'views_ui_preview',
   );
+  foreach ($ajax_callbacks as $menu => $menu_callback) {
+    $items['admin/structure/views/nojs/' . $menu . '/%views_ui_cache/%'] = array(
+      'page callback' => $menu_callback,
+      'page arguments' => array(5, 6),
+    ) + $base;
+    $items['admin/structure/views/ajax/' . $menu . '/%views_ui_cache/%'] = array(
+      'page callback' => $menu_callback,
+      'page arguments' => array(5, 6),
+      'delivery callback' => 'ajax_deliver',
+    ) + $base;
+  }
+
+  // Autocomplete callback for tagging a View.
+  // Views module uses admin/views/... instead of admin/structure/views/... for
+  // autocomplete paths, so be consistent with that.
+  // @todo Change to admin/structure/views/... when the change can be made to
+  //   Views module as well.
+  $items['admin/views/ajax/autocomplete/tag'] = array(
+    'page callback' => 'views_ui_autocomplete_tag',
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
   return $items;
 }
 
-/*
+/**
+ * Implements hook_menu_local_tasks_alter().
+ *
+ * Adds secondary tabs for navigating across Displays when editing a View. Since
+ * each view contains its own set of displays, doing this here instead of in
+ * hook_menu() reduces bloat in the {menu_links} table, and avoids requiring a
+ * menu rebuild every time a display is added or removed.
+ */
+function views_ui_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // @todo This is commented out until theming of secondary local tasks is
+  //   fixed (see http://drupal.org/node/599706#comment-3620912). In the
+  //   meantime, we add the tabs within views_ui_edit_form().
+  /*
+  if ($root_path == 'admin/structure/views/view/%') {
+    module_load_include('inc', 'views_ui', 'includes/admin');
+    $view = $router_item['page_arguments'][0];
+    $tabs = views_ui_edit_page_display_tabs($view);
+    if ($active_display = arg(6) && isset($tabs[$active_display])) {
+      $tabs[$active_display]['#active'] = TRUE;
+    }
+    else {
+      // Set the first one to active.
+      foreach ($tabs as $id => $tab) {
+        if (!isset($tab['#access']) || $tab['#access']) {
+          $tabs[$id]['#active'] = TRUE;
+          break;
+        }
+      }
+    }
+    if (!isset($data['tabs'][1]['output'])) {
+      $data['tabs'][1]['output'] = array();
+    }
+    $data['tabs'][1]['output'] = array_merge($data['tabs'][1]['output'], $tabs);
+    $data['tabs'][1]['count'] = count($data['tabs'][1]['output']);
+  }
+  */
+}
+
+/**
  * Implements hook_help().
  */
 function views_ui_help($path, $arg = '') {
   switch ($path) {
-    case 'admin/structure/views/tools/convert':
-      return '<p>' . t('The converter will make a best-effort attempt to convert a Views 1 view to Views 2. This conversion is not reliable; you will very likely have to make adjustments to your view to get it to match. You can import Views 1 views through the normal Import tab.') . '</p>';
+
   }
+ // return '<pre>'.print_r(views_ui_get_wizards(),1);
 }
 
-/*
+/**
  * Implements hook_theme().
  */
 function views_ui_theme() {
@@ -213,14 +203,14 @@ function views_ui_theme() {
 
   return array(
     // edit a view
-    'views_ui_edit_view' => array(
-      'variables' => array('view' => NULL),
-      'template' => 'views-ui-edit-view',
+    'views_ui_display_tab_setting' => array(
+      'variables' => array('description' => '', 'link' => '', 'settings_links' => array(), 'overridden' => FALSE, 'defaulted' => FALSE, 'description_separator' => TRUE, 'class' => array()),
+      'template' => 'views-ui-display-tab-setting',
       'path' => "$path/theme",
     ),
-    'views_ui_edit_tab' => array(
-      'variables' => array('view' => NULL, 'display' => NULL),
-      'template' => 'views-ui-edit-tab',
+    'views_ui_display_tab_bucket' => array(
+      'render element' => 'element',
+      'template' => 'views-ui-display-tab-bucket',
       'path' => "$path/theme",
     ),
     'views_ui_edit_item' => array(
@@ -235,17 +225,18 @@ function views_ui_theme() {
       'render element' => 'form',
       'file' => 'includes/admin.inc',
     ),
+    'views_ui_item_delete_form' => array(
+      'render element' => 'form',
+    ),
+    'views_ui_expose_filter_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/admin.inc',
+    ),
 
     // list views
-    'views_ui_list_views' => array(
-      'variables' => array(
-        'views' => array(),
-        'help' => '',
-        'widgets' => '',
-        'help_type_icon' => '',
-      ),
-      'template' => 'views-ui-list-views',
-      'path' => "$path/theme",
+    'views_ui_view_info' => array(
+      'variables' => array('view' => NULL, 'base' => NULL),
+      'file' => "includes/admin.inc",
     ),
 
     // tab themes
@@ -265,12 +256,30 @@ function views_ui_theme() {
     'views_ui_style_plugin_table' => array(
       'render element' => 'form',
     ),
+
+    // When previewing a view.
+    'views_ui_view_preview_section' => array(
+      'variables' => array('view' => NULL, 'section' => NULL, 'content' => NULL, 'links' => ''),
+    ),
+
+    // Generic container wrapper, to use instead of theme_container when an id
+    // is not desired.
+    'views_container' => array(
+      'render element' => 'element',
+      'file' => 'theme/theme.inc',
+    ),
   );
 }
 
 /**
- * Specialized menu callback to load a view either out of the cache or just
- * load it.
+ * Specialized menu callback to load a view and check its locked status.
+ *
+ * @param $name
+ *   The machine name of the view.
+ *
+ * @return
+ *   The view object, with a "locked" property indicating whether or not
+ *   someone else is already editing the view.
  */
 function views_ui_cache_load($name) {
   ctools_include('object-cache');
@@ -311,9 +320,14 @@ function views_ui_cache_set(&$view) {
   ctools_include('object-cache');
   $view->changed = TRUE; // let any future object know that this view has changed.
 
+  if (isset($view->current_display)) {
+    // Add the knowledge of the changed display, too.
+    $view->changed_display[$view->current_display] = TRUE;
+    unset($view->current_display);
+  }
+
   // Unset handlers; we don't want to write these into the cache
   unset($view->display_handler);
-  unset($view->current_display);
   unset($view->default_display);
   $view->query = NULL;
   foreach (array_keys($view->display) as $id) {
@@ -338,84 +352,464 @@ function views_ui_default_load($name) {
 }
 
 /**
- * Package and send the result of a page callback to the browser as an AJAX
- * response, and add the HTML.
- *
- * @param $page_callback_result
- *   The result of a page callback. Can be one of:
- *   - NULL: to indicate no content.
- *   - An integer menu status constant: to indicate an error condition.
- *   - A string of HTML content.
- *   - A renderable array of content.
+ * Theme preprocess for views-view.tpl.php.
  */
-function views_ui_ajax_deliver($page_callback_result) {
-  $commands = array();
-  $header = TRUE;
-
-  if (!isset($page_callback_result)) {
-    // Simply delivering an empty commands array is sufficient. This results
-    // in the AJAX request being completed, but nothing being done to the page.
-  }
-  elseif (is_int($page_callback_result)) {
-    switch ($page_callback_result) {
-      case MENU_NOT_FOUND:
-        $commands[] = ajax_command_alert(t('The requested page could not be found.'));
-        break;
-
-      case MENU_ACCESS_DENIED:
-        $commands[] = ajax_command_alert(t('You are not authorized to access this page.'));
-        break;
-
-      case MENU_SITE_OFFLINE:
-        $commands[] = ajax_command_alert(filter_xss_admin(variable_get('maintenance_mode_message',
-          t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal'))))));
-        break;
-    }
-  }
-  elseif (is_array($page_callback_result) && isset($page_callback_result['#type']) && ($page_callback_result['#type'] == 'ajax')) {
-    // Complex AJAX callbacks can return a result that contains an error message
-    // or a specific set of commands to send to the browser.
-    $page_callback_result += element_info('ajax');
-    $header = $page_callback_result['#header'];
-    $error = $page_callback_result['#error'];
-    if (isset($error) && $error !== FALSE) {
-      if ((empty($error) || $error === TRUE)) {
-        $error = t('An error occurred while handling the request: The server received invalid input.');
+function views_ui_preprocess_views_view(&$vars) {
+  $view = $vars['view'];
+  if (!empty($view->views_ui_context)) {
+    $view->hide_admin_links = TRUE;
+    foreach (array('title', 'header', 'exposed', 'rows', 'pager', 'more', 'footer', 'empty', 'attachment_after', 'attachment_before') as $section) {
+      if (!empty($vars[$section])) {
+        $vars[$section] = array(
+          '#theme' => 'views_ui_view_preview_section',
+          '#view' => $view,
+          '#section' => $section,
+          '#content' => $vars[$section],
+          '#theme_wrappers' => array('views_container'),
+          '#attributes' => array('class' => 'contextual-links-region'),
+        );
+        $vars[$section] = drupal_render($vars[$section]);
       }
-      $commands[] = ajax_command_alert($error);
     }
-    else {
-      $commands = $page_callback_result['#commands'];
+  }
+}
+
+/**
+ * Theme preprocess for theme_views_ui_view_preview_section().
+ *
+ * @TODO
+ *    Perhaps move this to includes/admin.inc or theme/theme.inc
+ */
+function template_preprocess_views_ui_view_preview_section(&$vars) {
+  switch ($vars['section']) {
+    case 'title':
+      $vars['title'] = t('Title');
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'title', $vars['title']);
+      break;
+    case 'header':
+      $vars['title'] = t('Header');
+      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      break;
+    case 'empty':
+      $vars['title'] = t('No results behavior');
+      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      break;
+    case 'exposed':
+      // @todo Sorts can be exposed too, so we may need a better title.
+      $vars['title'] = t('Exposed Filters');
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'exposed_form_options', $vars['title']);
+      break;
+    case 'rows':
+      // @todo The title needs to depend on what is being viewed.
+      $vars['title'] = t('Content');
+      $links = views_ui_view_preview_section_rows_links($vars['view']);
+      break;
+    case 'pager':
+      $vars['title'] = t('Pager');
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'pager_options', $vars['title']);
+      break;
+    case 'more':
+      $vars['title'] = t('More');
+      $links = views_ui_view_preview_section_display_category_links($vars['view'], 'use_more', $vars['title']);
+      break;
+    case 'footer':
+      $vars['title'] = t('Footer');
+      $links = views_ui_view_preview_section_handler_links($vars['view'], $vars['section']);
+      break;
+    case 'attachment_before':
+      // @todo: Add links to the attachment configuration page.
+      $vars['title'] = t('Attachment before');
+      break;
+    case 'attachment_after':
+      // @todo: Add links to the attachment configuration page.
+      $vars['title'] = t('Attachment after');
+      break;
+  }
+
+  if (isset($links)) {
+    $build = array(
+      '#prefix' => '<div class="contextual-links-wrapper">',
+      '#suffix' => '</div>',
+      '#theme' => 'links__contextual',
+      '#links' => $links,
+      '#attributes' => array('class' => array('contextual-links')),
+      '#attached' => array(
+        'library' => array(array('contextual', 'contextual-links')),
+      ),
+    );
+    $vars['links'] = drupal_render($build);
+  }
+  $vars['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $vars['section'];
+}
+
+/**
+ * Returns the HTML for a section of a View being previewed within the Views UI.
+ */
+function theme_views_ui_view_preview_section($vars) {
+  return '<h1 class="section-title">' . $vars['title'] . '</h1>'
+  . $vars['links']
+  . '<div class="preview-section">'. $vars['content'] . '</div>';
+}
+
+/**
+ * Returns contextual links for each handler of a certain section.
+ *
+ * @TODO
+ *   Bring in relationships
+ *   Refactor this function to use much stuff of views_ui_edit_form_get_bucket.
+ *
+ * @param $title
+ *   Add a bolded title of this section.
+ */
+function views_ui_view_preview_section_handler_links($view, $type, $title = FALSE) {
+  $display = $view->display_handler->display;
+  $handlers = $view->display_handler->get_handlers($type);
+  $links = array();
+
+  $types = views_object_types();
+  if ($title) {
+    $links[$type . '-title'] = array(
+      'title' => $types[$type]['title'],
+      'attributes' => array('class' => array('views-ajax-link')),
+    );
+  }
+
+  foreach ($handlers as $id => $handler) {
+    $field_name = $handler->ui_name(TRUE);
+    $links[$type . '-edit-' . $id] = array(
+      'title' => t('Edit @section', array('@section' => $field_name)),
+      'href' => "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id",
+      'attributes' => array('class' => array('views-ajax-link')),
+    );
+  }
+  $links[$type . '-add'] = array(
+    'title' => t('Add new'),
+    'href' => "admin/structure/views/nojs/add-item/$view->name/$display->id/$type",
+    'attributes' => array('class' => array('views-ajax-link')),
+  );
+
+  return $links;
+}
+
+/**
+ * Returns a link to editing a certain display setting.
+ */
+function views_ui_view_preview_section_display_category_links($view, $type, $title) {
+  $display = $view->display_handler->display;
+  $links = array(
+    $type . '-edit' => array(
+      'title' => t('Edit @section', array('@section' => $title)),
+      'href' => "admin/structure/views/nojs/display/$view->name/$display->id/$type",
+      'attributes' => array('class' => array('views-ajax-link')),
+    ),
+  );
+
+  return $links;
+}
+
+/**
+ * Returns all contextual links for the main content part of the view.
+ */
+function views_ui_view_preview_section_rows_links($view) {
+  $display = $view->display_handler->display;
+  $links = array();
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'filter', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'field', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'sort', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'argument', TRUE));
+  $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'relationship', TRUE));
+
+  return $links;
+}
+
+
+/**
+ * Implments hook_ctools_plugin_directory().
+ *
+ * Views UI provides wizard plugins on behalf of core base tables.
+ */
+function views_ui_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'views_ui' || ($module == 'ctools' && $plugin == 'export_ui')) {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Fetch metadata on a specific views ui wizard plugin.
+ *
+ * @param $wizard_type
+ *   Name of a wizard, or name of a base table.
+ *
+ * @return
+ *   An array with information about the requested wizard type.
+ */
+function views_ui_get_wizard($wizard_type) {
+  ctools_include('plugins');
+  $w = ctools_get_plugins('views_ui', 'views_wizard', $wizard_type);
+  // @todo - handle this via an alter hook instead.
+  if (!$w) {
+    // Must be a base table using the default wizard plugin.
+    $base_tables = views_fetch_base_tables();
+    if (!empty($base_tables[$wizard_type])) {
+      $w = views_ui_views_wizard_defaults();
+      $w['base_table'] = $wizard_type;
+      $w['title'] = $base_tables[$wizard_type]['title'];
     }
+  }
+  return $w;
+}
+
+/**
+ * Fetch metadata for all content_type plugins.
+ *
+ * @return
+ *   An array of arrays with information about all available views wizards.
+ */
+function views_ui_get_wizards() {
+  ctools_include('plugins');
+  $wizard_plugins = ctools_get_plugins('views_ui', 'views_wizard');
+  $wizard_tables = array();
+  foreach ($wizard_plugins as $name => $info) {
+    $wizard_tables[$info['base_table']] = TRUE;
+  }
+  $base_tables = views_fetch_base_tables();
+  $default_wizard = views_ui_views_wizard_defaults();
+  // Find base tables with no wizard.
+  // @todo - handle this via an alter hook for plugins?
+  foreach ($base_tables as $table => $info) {
+    if (!isset($wizard_tables[$table])) {
+      $w = $default_wizard;
+      $w['title'] = $info['title'];
+      $w['base_table'] = $table;
+      $wizard_plugins[$table] = $w;
+    }
+  }
+  return $wizard_plugins;
+}
+
+/**
+ * Helper function to define the default values for a Views wizard plugin.
+ *
+ * @return
+ *   An array of defaults for a views wizard.
+ */
+function views_ui_views_wizard_defaults() {
+  return array(
+    // The children may, for example, be a different variant for each node type.
+    'get children' => NULL,
+    'get child' => NULL,
+    // title and base table must be populated.  They are empty here just
+    // so they are documented.
+    'title' => '',
+    'base_table' => NULL,
+    // This is a callback that takes the wizard as argument and returns
+    // an instantiazed Views UI form wizard object.
+    'get_instance' => 'views_ui_get_form_wizard_instance',
+    'form_wizard_class' => array(
+      'file' => 'views_ui_base_views_wizard',
+      'class' => 'ViewsUiBaseViewsWizard',
+    ),
+  );
+}
+
+/**
+ * Inform CTools that the Views wizard plugin can have child plugins.
+ */
+function views_ui_ctools_plugin_type() {
+  return array(
+    'views_wizard' => array(
+      'child plugins' => TRUE,
+      'classes' => array(
+        'form_wizard_class',
+      ),
+      'defaults' => views_ui_views_wizard_defaults(),
+    ),
+  );
+}
+
+function views_ui_get_form_wizard_instance($wizard) {
+  if (isset($wizard['form_wizard_class']['class'])) {
+    $class = $wizard['form_wizard_class']['class'];
+    return new $class($wizard);
   }
   else {
-    // Like normal page callbacks, simple AJAX callbacks can return html
-    // content, as a string or renderable array, to replace what was previously
-    // there in the wrapper. In this case, in addition to the content, we want
-    // to add the status messages, but inside the new wrapper, so that they get
-    // replaced on subsequent AJAX calls for the same wrapper.
-    $html = is_string($page_callback_result) ? $page_callback_result : drupal_render($page_callback_result);
-    $commands[] = ajax_command_replace(NULL, $html);
-    $commands[] = ajax_command_prepend(NULL, theme('status_messages'));
+    return new ViewsUiBaseViewsWizard($wizard);
+  }
+}
+
+/**
+ * Implements hook_views_plugins_alter().
+ */
+function views_ui_views_plugins_alter(&$plugins) {
+  // Attach contextual links to each display plugin. The links will point to
+  // paths underneath "admin/structure/views/view/{$view->name}" (i.e., paths
+  // for editing and performing other contextual actions on the view).
+  foreach ($plugins['display'] as &$display) {
+    $display['contextual links']['views_ui'] = array(
+      'parent path' => 'admin/structure/views/view',
+      'argument properties' => array('name'),
+    );
+  }
+}
+
+/**
+ * Implements hook_contextual_links_view_alter().
+ */
+function views_ui_contextual_links_view_alter(&$element, $items) {
+  // Remove contextual links from being rendered, when so desired, such as
+  // within a View preview.
+  if (views_ui_contextual_links_suppress()) {
+    $element['#links'] = array();
+  }
+  // Append the display ID to the Views UI edit links, so that clicking on the
+  // contextual link takes you directly to the correct display tab on the edit
+  // screen.
+  elseif (!empty($element['#links']['views-ui-edit']) && !empty($element['#element']['#views_contextual_links_info']['views_ui']['view_display_id'])) {
+    $display_id = $element['#element']['#views_contextual_links_info']['views_ui']['view_display_id'];
+    $element['#links']['views-ui-edit']['href'] .= '/' . $display_id;
+  }
+}
+
+/**
+ * Sets a static variable for controlling whether contextual links are rendered.
+ *
+ * @see views_ui_contextual_links_view_alter()
+ */
+function views_ui_contextual_links_suppress($set = NULL) {
+  $suppress = &drupal_static(__FUNCTION__);
+  if (isset($set)) {
+    $suppress = $set;
+  }
+  return $suppress;
+}
+
+/**
+ * Increments the views_ui_contextual_links_suppress() static variable.
+ *
+ * When this function is added to the #pre_render of an element, and
+ * 'views_ui_contextual_links_suppress_pop' is added to the #post_render of the
+ * same element, then all contextual links within the element and its
+ * descendants are suppressed from being rendered. This is used, for example,
+ * during a View preview, when it is not desired for nodes in the Views result
+ * to have contextual links.
+ *
+ * @see views_ui_contextual_links_suppress_pop()
+ */
+function views_ui_contextual_links_suppress_push() {
+  views_ui_contextual_links_suppress(((int) views_ui_contextual_links_suppress())+1);
+}
+
+/**
+ * Decrements the views_ui_contextual_links_suppress() static variable.
+ *
+ * @see views_ui_contextual_links_suppress_push()
+ */
+function views_ui_contextual_links_suppress_pop() {
+  views_ui_contextual_links_suppress(((int) views_ui_contextual_links_suppress())-1);
+}
+
+/**
+ * Menu callback; handles AJAX form submissions similar to ajax_form_callback(), but can be used for uncached forms.
+ *
+ * ajax_form_callback(), the menu callback for the system/ajax path, requires
+ * the form to be retrievable from the form cache, because it lacks a trusted
+ * $form_id argument with which to call drupal_retrieve_form(). When AJAX is
+ * wanted on a non-cacheable form, #ajax['path'] can be set to a path whose
+ * menu router item's 'page callback' is this function, and whose
+ * 'page arguments' is the form id, optionally followed by additional build
+ * arguments, as expected by drupal_get_form().
+ *
+ * The same caution must be used when defining a hook_menu() entry with this
+ * page callback as is used when defining a hook_menu() entry with the
+ * 'drupal_get_form' page callback: a 'page arguments' must be specified with a
+ * literal value as the first argument, because $form_id determines which form
+ * builder function gets called, so must be safe from user tampering.
+ *
+ * @see drupal_get_form()
+ * @see ajax_form_callback()
+ * @see http://drupal.org/node/774876
+ */
+function views_ui_ajax_get_form($form_id) {
+  // @see ajax_get_form()
+  $form_state = array(
+    'no_redirect' => TRUE,
+  );
+  $form_state['rebuild_info']['copy']['#build_id'] = TRUE;
+  $form_state['rebuild_info']['copy']['#action'] = TRUE;
+
+  // @see drupal_get_form()
+  $args = func_get_args();
+  array_shift($args);
+  $form_state['build_info']['args'] = $args;
+  $form = drupal_build_form($form_id, $form_state);
+
+  // @see ajax_form_callback()
+  if (!empty($form_state['triggering_element'])) {
+    $callback = $form_state['triggering_element']['#ajax']['callback'];
+  }
+  if (!empty($callback) && function_exists($callback)) {
+    return $callback($form, $form_state);
+  }
+}
+// @todo move these when we can
+
+
+/**
+ * Helper function to get a list of paths assigned to a view.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of links to this view's display paths.
+ */
+function _views_ui_get_paths($view) {
+  $all_paths = array();
+  if (empty($view->display)) {
+    $all_paths[] = t('Edit this view to add a display.');
+  }
+  else {
+    $view->init_display();   // Make sure all the handlers are set up
+    foreach ($view->display as $display) {
+      if (!empty($display->handler) && $display->handler->has_path()) {
+        $one_path = $display->handler->get_option('path');
+        if (empty($path_sort)) {
+          $path_sort = strtolower($one_path);
+        }
+        if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
+          $all_paths[] = l($one_path, $one_path);
+        }
+        else {
+          $all_paths[] = check_plain($one_path);
+        }
+      }
+    }
   }
 
-  // This function needs to do the same thing that drupal_deliver_html_page()
-  // does: add any needed http headers, print rendered output, and perform
-  // end-of-request tasks. By default, $header=TRUE, and we add a
-  // 'text/javascript' header. The page callback can override $header by
-  // returning an 'ajax' element with a #header property. This can be set to
-  // FALSE to prevent the 'text/javascript' header from being output, necessary
-  // when outputting to an IFRAME. This can also be set to 'multipart', in which
-  // case, we don't output JSON, but JSON content wrapped in a textarea, making
-  // a 'text/javascript' header incorrect.
-  if ($header && $header !== 'multipart') {
-    drupal_add_http_header('Content-Type', 'text/javascript; charset=utf-8');
-  }
-  $output = ajax_render($commands);
-  if ($header === 'multipart') {
-    // jQuery file uploads: http://malsup.com/jquery/form/#code-samples
-    $output = '<textarea>' . $output . '</textarea>';
-  }
-  print $output;
-  ajax_footer();
+  return array_unique($all_paths);
 }
+
+/**
+ * Helper function to get a list of displays included in a view.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of display types that this view includes.
+ */
+function _views_ui_get_displays_list($view) {
+  $displays = array();
+  foreach ($view->display as $display) {
+    if (!empty($display->handler->definition['admin'])) {
+      $displays[$display->handler->definition['admin']] = TRUE;
+    }
+  }
+
+  if ($displays) {
+    ksort($displays);
+    $displays = array_keys($displays);
+  }
+  return $displays;
+}
+

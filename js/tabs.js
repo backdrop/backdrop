@@ -1,4 +1,3 @@
-
 /**
  * @file tabs.js
  * jQuery UI Tabs (Tabs 3)

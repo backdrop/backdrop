@@ -257,8 +257,6 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
     $field = $this->field_info;
     $formatters = _field_view_formatter_options($field['type']);
     $column_names = array_keys($field['columns']);
@@ -282,6 +280,7 @@ class views_handler_field_field extends views_handler_field {
         '#options' => drupal_map_assoc($column_names),
         '#default_value' => $this->options['click_sort_column'],
         '#description' => t('Used by Style: Table to determine the actual column to click sort the field on. The default is usually fine.'),
+        '#fieldset' => 'more',
       );
     }
 
@@ -300,6 +299,7 @@ class views_handler_field_field extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['field_api_classes'],
       '#description' => t('If checked, field api classes will be added using field.tpl.php (or equivalent). This is not recommended unless your CSS depends upon these classes. If not checked, template will not be used.'),
+      '#fieldset' => 'more',
     );
 
     if ($this->multiple) {
@@ -333,6 +333,8 @@ class views_handler_field_field extends views_handler_field {
       $settings_form = $function($field, $instance, '_dummy', $form, $form_state);
     }
     $form['settings'] = $settings_form;
+
+    parent::options_form($form, $form_state);
   }
 
   /**
@@ -341,8 +343,12 @@ class views_handler_field_field extends views_handler_field {
   function multiple_options_form(&$form, &$form_state) {
     $field = $this->field_info;
 
-    $form['multiple_prefix'] = array(
-      '#markup' => '<fieldset class="form-wrapper" id="views-multiple-options"><legend><span class="fieldset-legend">' . t('Multiple field settings') . '</span></legend>',
+    $form['multiple_field_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Multiple field settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 5,
     );
 
     $form['group_rows'] = array(
@@ -350,6 +356,7 @@ class views_handler_field_field extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['group_rows'],
       '#description' => t('If checked, multiple values for this field will be shown in the same row. If not checked, each value in this field will create a new row.'),
+      '#fieldset' => 'multiple_field_settings',
     );
 
     // Make the string translatable by keeping it as a whole rather than
@@ -379,6 +386,7 @@ class views_handler_field_field extends views_handler_field {
       '#process' => array('form_process_radios', 'ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#default_value' => $this->options['multi_type'],
+      '#fieldset' => 'multiple_field_settings',
     );
 
     $form['separator'] = array(
@@ -391,6 +399,7 @@ class views_handler_field_field extends views_handler_field {
         'edit-options-group-rows' => array(TRUE),
       ),
       '#dependency_count' => 2,
+      '#fieldset' => 'multiple_field_settings',
     );
 
     $form['delta_limit'] = array(
@@ -403,6 +412,7 @@ class views_handler_field_field extends views_handler_field {
       '#prefix' => '<div class="container-inline">',
       '#process' => $process + array('ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
+      '#fieldset' => 'multiple_field_settings',
     );
 
     list($prefix, $suffix) = explode('@count', t('starting from @count'));
@@ -415,6 +425,7 @@ class views_handler_field_field extends views_handler_field {
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#description' => t('(first item is 0)'),
+      '#fieldset' => 'multiple_field_settings',
     );
     $form['delta_reversed'] = array(
       '#title' => t('Reversed'),
@@ -424,12 +435,8 @@ class views_handler_field_field extends views_handler_field {
       '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#description' => t('(start from last values)'),
+      '#fieldset' => 'multiple_field_settings',
     );
-
-    $form['multiple_suffix'] = array(
-      '#markup' => '</fieldset>',
-    );
-
   }
 
   /**

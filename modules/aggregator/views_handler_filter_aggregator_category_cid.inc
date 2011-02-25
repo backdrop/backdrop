@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Filter by aggregator category cid
  */

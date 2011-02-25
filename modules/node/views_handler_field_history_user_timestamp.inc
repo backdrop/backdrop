@@ -32,6 +32,7 @@ class views_handler_field_history_user_timestamp extends views_handler_field_nod
         '#type' => 'checkbox',
         '#title' => t('Check for new comments as well'),
         '#default_value' => !empty($this->options['comments']),
+        '#fieldset' => 'more',
       );
     }
   }

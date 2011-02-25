@@ -90,8 +90,8 @@ class viewsUserArgumentValidate extends viewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -104,7 +104,7 @@ class viewsUserArgumentValidate extends viewsSqlTest {
     $handler->display->display_options['arguments']['null']['field'] = 'null';
     $handler->display->display_options['arguments']['null']['style_plugin'] = 'default_summary';
     $handler->display->display_options['arguments']['null']['default_argument_type'] = 'fixed';
-    $handler->display->display_options['arguments']['null']['validate_type'] = 'user';
+    $handler->display->display_options['arguments']['null']['validate']['type'] = 'user';
     $handler->display->display_options['arguments']['null']['validate_options']['type'] = $argtype;
     $handler->display->display_options['arguments']['null']['must_not_be'] = 0;
 

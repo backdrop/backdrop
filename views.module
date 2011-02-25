@@ -23,13 +23,6 @@ function views_api_minimum_version() {
 }
 
 /**
- * Implement hook_init().
- */
-function views_init() {
-  drupal_add_css(drupal_get_path('module', 'views') .'/css/views.css');
-}
-
-/**
  * Implement hook_theme(). Register views theming functions.
  */
 function views_theme($existing, $type, $theme, $path) {
@@ -49,7 +42,10 @@ function views_theme($existing, $type, $theme, $path) {
   );
 
   $arguments = array(
-    'display' => array('view' => NULL),
+    // For displays, we pass in a dummy array as the first parameter, since
+    // $view is an object but the core contextual_preprocess() function only
+    // attaches contextual links when the primary theme argument is an array.
+    'display' => array('view_array' => array(), 'view' => NULL),
     'style' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
     'row' => array('view' => NULL, 'options' => NULL, 'row' => NULL, 'field_alias' => NULL),
   );
@@ -132,7 +128,7 @@ function views_theme($existing, $type, $theme, $path) {
  *   The existing cache of theme hooks to test against.
  * @param $path
  *   The path to search.
- * 
+ *
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {
@@ -401,17 +397,79 @@ function views_arg_load($value, $name, $display_id, $index) {
  * passes control to the display handler.
  */
 function views_page() {
+  // Determine the name and display ID of the view that will be rendered here,
+  // and save them in a static variable so we can use them in hook_page_alter()
+  // to affect the rest of the page.
+  $name = &drupal_static('views_page:name');
+  $display_id = &drupal_static('views_page:display_id');
   $args = func_get_args();
   $name = array_shift($args);
   $display_id = array_shift($args);
 
-  // Load the view
+  // Load the view and render it. Destory it before returning, to save memory.
   if ($view = views_get_view($name)) {
-    return $view->execute_display($display_id, $args);
+    $output = $view->execute_display($display_id, $args);
+    $view->destroy();
+    return $output;
   }
 
   // Fallback; if we get here no view was found or handler was not valid.
   return drupal_not_found();
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+function views_page_alter(&$page) {
+  // Check the static variables that were set in views_page() to see if the
+  // main content of this page contains a view. If so, attach its contextual
+  // links to the overall page array. This allows them to be rendered directly
+  // next to the page title.
+  $name = drupal_static('views_page:name');
+  $display_id = drupal_static('views_page:display_id');
+  if (!empty($name) && !empty($display_id) && ($view = views_get_view($name))) {
+    views_add_contextual_links($page, 'page', $view, $display_id);
+    $view->destroy();
+  }
+}
+
+/**
+ * Implements MODULE_preprocess_HOOK().
+ */
+function views_preprocess_html(&$variables) {
+  // If the page contains a view as its main content, contextual links may have
+  // been attached to the page as a whole; for example, by views_page_alter().
+  // This allows them to be associated with the page and rendered by default
+  // next to the page title (which we want). However, it also causes the
+  // Contextual Links module to treat the wrapper for the entire page (i.e.,
+  // the <body> tag) as the HTML element that these contextual links are
+  // associated with. This we don't want; for better visual highlighting, we
+  // prefer a smaller region to be chosen. The region we prefer differs from
+  // theme to theme and depends on the details of the theme's markup in
+  // page.tpl.php, so we can only find it using JavaScript. We therefore remove
+  // the "contextual-links-region" class from the <body> tag here and add
+  // JavaScript that will insert it back in the correct place.
+  if (!empty($variables['page']['#views_contextual_links_info'])) {
+    $key = array_search('contextual-links-region', $variables['classes_array']);
+    if ($key !== FALSE) {
+      unset($variables['classes_array'][$key]);
+      // Add the JavaScript, with a group and weight such that it will run
+      // before modules/contextual/contextual.js.
+      drupal_add_js(drupal_get_path('module', 'views') . '/js/views-contextual.js', array('group' => JS_LIBRARY, 'weight' => -1));
+    }
+  }
+}
+
+/**
+ * Implements hook_contextual_links_view_alter().
+ */
+function views_contextual_links_view_alter(&$element, $items) {
+  // If we are rendering views-related contextual links attached to the overall
+  // page array, add a class to the list of contextual links. This will be used
+  // by the JavaScript added in views_preprocess_html().
+  if (!empty($element['#element']['#views_contextual_links_info']) && !empty($element['#element']['#type']) && $element['#element']['#type'] == 'page') {
+    $element['#attributes']['class'][] = 'views-contextual-links-page';
+  }
 }
 
 /**
@@ -507,6 +565,9 @@ function views_block_view($delta) {
         $view->set_display($display_id);
         if (isset($view->display_handler)) {
           $output = $view->display_handler->view_special_blocks($type);
+          // Before returning the block output, convert it to a renderable
+          // array with contextual links.
+          views_add_block_contextual_links($output, $view, $display_id);
           $view->destroy();
           return $output;
         }
@@ -520,10 +581,148 @@ function views_block_view($delta) {
   if ($view = views_get_view($name)) {
     if ($view->access($display_id)) {
       $output = $view->execute_display($display_id);
+      // Before returning the block output, convert it to a renderable array
+      // with contextual links.
+      views_add_block_contextual_links($output, $view, $display_id);
       $view->destroy();
       return $output;
     }
     $view->destroy();
+  }
+}
+
+/**
+ * Converts Views block content to a renderable array with contextual links.
+ *
+ * @param $block
+ *   An array representing the block, with the same structure as the return
+ *   value of hook_block_view(). This will be modified so as to force
+ *   $block['content'] to be a renderable array, containing the optional
+ *   '#contextual_links' property (if there are any contextual links associated
+ *   with the block).
+ * @param $view
+ *   The view that was used to generate the block content.
+ * @param $display_id
+ *   The ID of the display within the view that was used to generate the block
+ *   content.
+ */
+function views_add_block_contextual_links(&$block, $view, $display_id) {
+  // Do not add contextual links to an empty block.
+  if (!empty($block['content'])) {
+    // Contextual links only work on blocks whose content is a renderable
+    // array, so if the block contains a string of already-rendered markup,
+    // convert it to an array.
+    if (is_string($block['content'])) {
+      $block['content'] = array('#markup' => $block['content']);
+    }
+    // Add the contextual links.
+    views_add_contextual_links($block['content'], 'block', $view, $display_id);
+  }
+}
+
+/**
+ * Adds contextual links associated with a view display to a renderable array.
+ *
+ * This function should be called when a view is being rendered in a particular
+ * location and you want to attach the appropriate contextual links (e.g.,
+ * links for editing the view) to it.
+ *
+ * The function operates by checking the view's display plugin to see if it has
+ * defined any contextual links that are intended to be displayed in the
+ * requested location; if so, it attaches them. The contextual links intended
+ * for a particular location are defined by the 'contextual links' and
+ * 'contextual links locations' properties in hook_views_plugins() and
+ * hook_views_plugins_alter(); as a result, these hook implementations have
+ * full control over where and how contextual links are rendered for each
+ * display.
+ *
+ * In addition to attaching the contextual links to the passed-in array (via
+ * the standard #contextual_links property), this function also attaches
+ * additional information via the #views_contextual_links_info property. This
+ * stores an array whose keys are the names of each module that provided
+ * views-related contextual links (same as the keys of the #contextual_links
+ * array itself) and whose values are themselves arrays whose keys ('location',
+ * 'view_name', and 'view_display_id') store the location, name of the view,
+ * and display ID that were passed in to this function. This allows you to
+ * access information about the contextual links and how they were generated in
+ * a variety of contexts where you might be manipulating the renderable array
+ * later on (for example, alter hooks which run later during the same page
+ * request).
+ *
+ * @param $render_element
+ *   The renderable array to which contextual links will be added. This array
+ *   should be suitable for passing in to drupal_render() and will normally
+ *   contain a representation of the view display whose contextual links are
+ *   being requested.
+ * @param $location
+ *   The location in which the calling function intends to render the view and
+ *   its contextual links. The core system supports three options for this
+ *   parameter:
+ *   - 'block': Used when rendering a block which contains a view. This
+ *     retrieves any contextual links intended to be attached to the block
+ *     itself.
+ *   - 'page': Used when rendering the main content of a page which contains a
+ *     view. This retrieves any contextual links intended to be attached to the
+ *     page itself (for example, links which are displayed directly next to the
+ *     page title).
+ *   - 'view': Used when rendering the view itself, in any context. This
+ *     retrieves any contextual links intended to be attached directly to the
+ *     view.
+ *   If you are rendering a view and its contextual links in another location,
+ *   you can pass in a different value for this parameter. However, you will
+ *   also need to use hook_views_plugins() or hook_views_plugins_alter() to
+ *   declare, via the 'contextual links locations' array key, which view
+ *   displays support having their contextual links rendered in the location
+ *   you have defined.
+ * @param $view
+ *   The view whose contextual links will be added.
+ * @param $display_id
+ *   The ID of the display within $view whose contextual links will be added.
+ *
+ * @see hook_views_plugins()
+ * @see views_block_view()
+ * @see views_page_alter()
+ * @see template_preprocess_views_view()
+ */
+function views_add_contextual_links(&$render_element, $location, $view, $display_id) {
+  // Do not do anything if the view is configured to hide its administrative
+  // links.
+  if (empty($view->hide_admin_links)) {
+    // Also do not do anything if the display plugin has not defined any
+    // contextual links that are intended to be displayed in the requested
+    // location.
+    $plugin = views_fetch_plugin_data('display', $view->display[$display_id]->display_plugin);
+    $has_links = !empty($plugin['contextual links']) && !empty($plugin['contextual links locations']);
+    if ($has_links && in_array($location, $plugin['contextual links locations'])) {
+      foreach ($plugin['contextual links'] as $module => $link) {
+        $args = array();
+        $valid = TRUE;
+        if (!empty($link['argument properties'])) {
+          foreach ($link['argument properties'] as $property) {
+            // If the plugin is trying to create an invalid contextual link
+            // (for example, "path/to/{$view->property}", where $view->property
+            // does not exist), we cannot construct the link, so we skip it.
+            if (!property_exists($view, $property)) {
+              $valid = FALSE;
+              break;
+            }
+            else {
+              $args[] = $view->{$property};
+            }
+          }
+        }
+        // If the link was valid, attach information about it to the renderable
+        // array.
+        if ($valid) {
+          $render_element['#contextual_links'][$module] = array($link['parent path'], $args);
+          $render_element['#views_contextual_links_info'][$module] = array(
+            'location' => $location,
+            'view_name' => $view->name,
+            'view_display_id' => $display_id,
+          );
+        }
+      }
+    }
   }
 }
 
@@ -696,34 +895,29 @@ function views_include($file) {
 /**
  * Load views files on behalf of modules.
  */
-function views_module_include($file, $reset = FALSE) {
-  foreach (views_get_module_apis($reset) as $module => $info) {
-    if (file_exists(DRUPAL_ROOT . "/$info[path]/$module.$file")) {
-      require_once DRUPAL_ROOT . "/$info[path]/$module.$file";
+function views_module_include($api, $reset = FALSE) {
+  if ($reset) {
+    $cache = &drupal_static('ctools_plugin_api_info');
+    if (isset($cache['views']['views'])) {
+      unset($cache['views']['views']);
     }
   }
+  ctools_include('plugins');
+  return ctools_plugin_api_include('views', $api, views_api_minimum_version(), views_api_version());
 }
 
 /**
  * Get a list of modules that support the current views API.
  */
-function views_get_module_apis($reset = FALSE) {
-  static $cache = NULL;
-  if (!isset($cache) || $reset) {
-    $cache = array();
-    foreach (module_implements('views_api') as $module) {
-      $info = module_invoke($module, 'views_api');
-      if (version_compare($info['api'], views_api_minimum_version(), '>=') &&
-          version_compare($info['api'], views_api_version(), '<=')) {
-        if (!isset($info['path'])) {
-          $info['path'] = drupal_get_path('module', $module);
-        }
-        $cache[$module] = $info;
-      }
+function views_get_module_apis($api = 'views', $reset = FALSE) {
+  if ($reset) {
+    $cache = &drupal_static('ctools_plugin_api_info');
+    if (isset($cache['views']['views'])) {
+      unset($cache['views']['views']);
     }
   }
-
-  return $cache;
+  ctools_include('plugins');
+  return ctools_plugin_api_info('views', $api, views_api_minimum_version(), views_api_version());
 }
 
 /**
@@ -772,26 +966,7 @@ function views_include_handlers($reset = FALSE) {
   views_include('handlers');
   views_include('cache');
   views_include('plugins');
-  _views_include_handlers();
-  $finished = TRUE;
-}
-
-/**
- * Load default views files on behalf of modules.
- */
-function views_include_default_views($reset = FALSE) {
-  static $finished = FALSE;
-  // Ensure this only gets run once.
-  if ($finished && !$reset) {
-    return;
-  }
-
-  // Default views hooks may be in the normal handler file,
-  // or in a separate views_default file at the discretion of
-  // the module author.
-  views_include_handlers($reset);
-
-  _views_include_default_views($reset);
+  views_module_include('views', $reset);
   $finished = TRUE;
 }
 
@@ -818,13 +993,19 @@ function views_include_default_views($reset = FALSE) {
 function views_get_handler($table, $field, $key, $override = NULL) {
   static $recursion_protection = array();
 
-  $data = views_fetch_data($table);
+  $data = views_fetch_data($table, FALSE);
   $handler = NULL;
 
-  if (isset($data[$field][$key])) {
-    // Support old views_data entries conversion.
-    if (isset($data[$field][$key]['moved to'])) {
-      list($moved_table, $moved_field) = $data[$field][$key]['moved to'];
+  // Support old views_data entries conversion.
+  if (isset($data[$field]['moved to'])) {
+    $moved = $data[$field]['moved to'];
+  }
+  if (isset($data[$field][$key]['moved to'])) {
+    $moved = $data[$field][$key]['moved to'];
+  }
+  if (isset($data[$field][$key]) || !empty($moved)) {
+    if (!empty($moved)) {
+      list($moved_table, $moved_field) = $moved;
       if (!empty($recursion_protection[$moved_table][$moved_field])) {
         // recursion detected!
         return NULL;
@@ -868,15 +1049,15 @@ function views_get_handler($table, $field, $key, $override = NULL) {
     'table' => $table,
     'field' => $field,
   );
-  return _views_create_handler($broken, 'handler', $type);
+  return _views_create_handler($broken, 'handler', $key);
 }
 
 /**
  * Fetch Views' data from the cache
  */
-function views_fetch_data($table = NULL, $reset = FALSE) {
+function views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
   views_include('cache');
-  return _views_fetch_data($table, $reset);
+  return _views_fetch_data($table, $move, $reset);
 }
 
 // -----------------------------------------------------------------------
@@ -905,34 +1086,26 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
 // Views database functions
 
 /**
- * Get a view from the default views defined by modules.
+ * Get all view templates.
  *
- * Default views are cached per-language.  This function will rescan the
- * default_views hook if necessary.
- *
- * @param $view_name
- *   The name of the view to load.
- * @return
- *   A view object or NULL if it is not available.
+ * Templates are special in-code views that are never active, but exist only
+ * to be cloned into real views as though they were templates.
  */
-function &views_get_default_view($view_name, $reset = FALSE) {
-  $null = NULL;
+function views_get_all_templates() {
+  $templates = array();
+  $modules = views_module_include('views_template');
 
-  // Attempt to load individually cached view from cache.
-  views_include('cache');
-  if (!$reset) {
-    $data = views_cache_get("views_default:{$view_name}", TRUE);
-    if (isset($data->data) && is_object($data->data)) {
-      return $data->data;
+  foreach ($modules as $module => $info) {
+    $function = $module . '_views_templates';
+    if (function_exists($function)) {
+      $new = $function();
+      if ($new && is_array($new)) {
+        $templates = array_merge($new, $templates);
+      }
     }
   }
 
-  // Otherwise, allow entire cache to be rebuilt.
-  $cache = views_discover_default_views($reset);
-  if (isset($cache[$view_name])) {
-    return $cache[$view_name];
-  }
-  return $null;
+  return $templates;
 }
 
 /**
@@ -949,21 +1122,6 @@ function views_new_view() {
   $view->add_display('default');
 
   return $view;
-}
-
-/**
- * Scan all modules for default views and rebuild the default views cache.
- *
- * @return An associative array of all known default views.
- */
-function views_discover_default_views($reset = FALSE) {
-  static $cache = array();
-
-  if (empty($cache) || $reset) {
-    views_include('cache');
-    $cache = _views_discover_default_views($reset);
-  }
-  return $cache;
 }
 
 /**
@@ -1024,36 +1182,38 @@ function views_get_applicable_views($type) {
  *   If TRUE, reset the static cache forcing views to be reloaded.
  */
 function views_get_all_views($reset = FALSE) {
-  static $views = array();
+  ctools_include('export');
+  return ctools_export_crud_load_all('views_view', 'views', $reset);
+}
 
-  if (empty($views) || $reset) {
-    $views = array();
+/**
+ * Returns an array of all enabled views, as fully loaded $view objects.
+ */
+function views_get_enabled_views() {
+  $views = views_get_all_views();
+  return array_filter($views, 'views_view_is_enabled');
+}
 
-    // First, get all applicable views.
-    views_include('view');
-    $views = view::load_views();
+/**
+ * Returns an array of all disabled views, as fully loaded $view objects.
+ */
+function views_get_disabled_views() {
+  $views = views_get_all_views();
+  return array_filter($views, 'views_view_is_disabled');
+}
 
-    // Get all default views.
-    $status = variable_get('views_defaults', array());
+/**
+ * Returns TRUE if a view is enabled, FALSE otherwise.
+ */
+function views_view_is_enabled($view) {
+  return empty($view->disabled);
+}
 
-    foreach (views_discover_default_views($reset) as $view) {
-      // Determine if default view is enabled or disabled.
-      if (isset($status[$view->name])) {
-        $view->disabled = $status[$view->name];
-      }
-
-      // If overridden, also say so.
-      if (!empty($views[$view->name])) {
-        $views[$view->name]->type = t('Overridden');
-      }
-      else {
-        $view->type = t('Default');
-        $views[$view->name] = $view;
-      }
-    }
-
-  }
-  return $views;
+/**
+ * Returns TRUE if a view is disabled, FALSE otherwise.
+ */
+function views_view_is_disabled($view) {
+  return !empty($view->disabled);
 }
 
 /**
@@ -1072,29 +1232,80 @@ function views_get_all_views($reset = FALSE) {
  *   a fresh one.
  */
 function views_get_view($name, $reset = FALSE) {
-  views_include('view');
-  $view = view::load($name, $reset);
-  $default_view = views_get_default_view($name, $reset);
+  if ($reset) {
+    $cache = &drupal_static('ctools_export_load_object');
+    if (isset($cache['views_view'][$name])) {
+      unset($cache['views_view'][$name]);
+    }
+  }
 
-   // The view does not exist.
-  if (empty($view) && empty($default_view)) {
+  ctools_include('export');
+  $view = ctools_export_crud_load('views_view', $name);
+  if ($view) {
+    return $view->clone_view();
+  }
+}
+
+/**
+ * Export callback to load the view subrecords, which are the displays.
+ */
+function views_load_display_records(&$views) {
+  // Get vids from the views.
+  $names = array();
+  foreach ($views as $view) {
+    if (empty($view->display)) {
+      $names[$view->vid] = $view->name;
+    }
+  }
+
+  if (empty($names)) {
     return;
   }
-  // The view is defined in code.
-  elseif (empty($view) && !empty($default_view)) {
-    $status = variable_get('views_defaults', array());
-    if (isset($status[$default_view->name])) {
-      $default_view->disabled = $status[$default_view->name];
-    }
-    $default_view->type = t('Default');
-    return $default_view->clone_view();
-  }
-  // The view is overriden/defined in the database.
-  elseif (!empty($view) && !empty($default_view)) {
-    $view->type = t('Overridden');
-  }
 
-  return $view->clone_view();
+  foreach (view::db_objects() as $key) {
+    $object_name = "views_$key";
+    $result = db_query("SELECT * FROM {{$object_name}} WHERE vid IN (:vids) ORDER BY vid, position",
+      array(':vids' => array_keys($names)));
+
+    foreach ($result as $data) {
+      $object = new $object_name(FALSE);
+      $object->load_row($data);
+
+      // Because it can get complicated with this much indirection,
+      // make a shortcut reference.
+      $location = &$views[$names[$object->vid]]->$key;
+
+      // If we have a basic id field, load the item onto the view based on
+      // this ID, otherwise push it on.
+      if (!empty($object->id)) {
+        $location[$object->id] = $object;
+      }
+      else {
+        $location[] = $object;
+      }
+    }
+  }
+}
+
+/**
+ * Export CRUD callback to save a view.
+ */
+function views_save_view(&$view) {
+  return $view->save();
+}
+
+/**
+ * Export CRUD callback to export a view.
+ */
+function views_delete_view(&$view) {
+  return $view->delete(TRUE);
+}
+
+/**
+ * Export CRUD callback to export a view.
+ */
+function views_export_view(&$view, $indent = '') {
+  return $view->export($indent);
 }
 
 // ------------------------------------------------------------------
@@ -1265,7 +1476,7 @@ function views_exposed_form_submit(&$form, &$form_state) {
   $exclude = array('q', 'submit', 'form_build_id', 'form_id', 'form_token', 'exposed_form_plugin', '');
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
   $exposed_form_plugin->exposed_form_submit($form, $form_state, $exclude);
-  
+
   foreach ($form_state['values'] as $key => $value) {
     if (!in_array($key, $exclude)) {
       $form_state['view']->exposed_raw_input[$key] = $value;
@@ -1415,7 +1626,7 @@ function views_embed_view($name, $display_id = 'default') {
 *      The name of the view to retrieve the data from.
 * @param string $display_id
 *      The display id. On the edit page for the view in question, you'll find
-*      a list of displays at the left side of the control area. "Defaults"
+*      a list of displays at the left side of the control area. "Master"
 *      will be at the top of that list. Hover your cursor over the name of the
 *      display you want to use. An URL will appear in the status bar of your
 *      browser. This is usually at the bottom of the window, in the chrome.
@@ -1591,3 +1802,59 @@ function views_trim_text($alter, $value) {
 
   return $value;
 }
+
+/**
+ * Report to CTools that we use hook_views_api instead of hook_ctools_plugin_api()
+ */
+function views_ctools_plugin_api_hook_name() {
+  return 'views_api';
+}
+
+// Declare API compatibility on behalf of core modules:
+
+/**
+ * Implements hook_views_api().
+ *
+ * This one is used as the base to reduce errors when updating.
+ */
+function views_views_api() {
+  return array(
+    // in your modules do *not* use views_api_version()!!!
+    'api' => views_api_version(),
+    'path' => drupal_get_path('module', 'views') . '/modules',
+  );
+}
+
+function aggregator_views_api() { return views_views_api(); }
+
+function book_views_api() { return views_views_api(); }
+
+function comment_views_api() { return views_views_api(); }
+
+function locale_views_api() { return views_views_api(); }
+
+function field_views_api() { return views_views_api(); }
+
+function filter_views_api() { return views_views_api(); }
+
+function node_views_api() { return views_views_api(); }
+
+function poll_views_api() { return views_views_api(); }
+
+function profile_views_api() { return views_views_api(); }
+
+function search_views_api() { return views_views_api(); }
+
+function statistics_views_api() { return views_views_api(); }
+
+function system_views_api() { return views_views_api(); }
+
+function taxonomy_views_api() { return views_views_api(); }
+
+function translation_views_api() { return views_views_api(); }
+
+function upload_views_api() { return views_views_api(); }
+
+function user_views_api() { return views_views_api(); }
+
+function contact_views_api() { return views_views_api(); }

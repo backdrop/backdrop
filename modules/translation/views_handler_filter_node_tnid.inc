@@ -18,7 +18,7 @@ class views_handler_filter_node_tnid extends views_handler_filter {
   function operator_form(&$form, &$form_state) {
     $form['operator'] = array(
       '#type' => 'radios',
-      '#title' => t('Include untranslated nodes'),
+      '#title' => t('Include untranslated content'),
       '#default_value' => $this->operator,
       '#options' => array(
         1 => t('Yes'),
@@ -35,4 +35,3 @@ class views_handler_filter_node_tnid extends views_handler_filter {
     $this->query->add_where($this->options['group'], "$table.tnid = $table.nid" . ($this->operator ? " OR $table.tnid = 0" : ''));
   }
 }
-

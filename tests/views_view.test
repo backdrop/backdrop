@@ -26,27 +26,26 @@ class viewsViewTest extends ViewsSqlTest {
     $view = $this->view_test_destroy();
     $view->preview();
 
-    unset($view->display);
     $view->destroy();
-    $this->assertViewDestroy();
+    $this->assertViewDestroy($view);
   }
 
   function assertViewDestroy($view) {
-    $this->assertNull($view->display['default']->handler, 'Take sure all displays are destroyed.');
-    $this->assertNull($view->display['attachment_1']->handler, 'Take sure all displays are destroyed.');
+    $this->assertFalse(isset($view->display['default']->handler), 'Take sure all displays are destroyed.');
+    $this->assertFalse(isset($view->display['attachment_1']->handler), 'Take sure all displays are destroyed.');
 
-    $this->assertNull($view->filter, 'Take sure all handlers are destroyed');
-    $this->assertNull($view->field, 'Take sure all handlers are destroyed');
-    $this->assertNull($view->argument, 'Take sure all handlers are destroyed');
-    $this->assertNull($view->relationship, 'Take sure all handlers are destroyed');
-    $this->assertNull($view->sort, 'Take sure all handlers are destroyed');
-    $this->assertNull($view->area, 'Take sure all handlers are destroyed');
+    $this->assertFalse(isset($view->filter), 'Take sure all handlers are destroyed');
+    $this->assertFalse(isset($view->field), 'Take sure all handlers are destroyed');
+    $this->assertFalse(isset($view->argument), 'Take sure all handlers are destroyed');
+    $this->assertFalse(isset($view->relationship), 'Take sure all handlers are destroyed');
+    $this->assertFalse(isset($view->sort), 'Take sure all handlers are destroyed');
+    $this->assertFalse(isset($view->area), 'Take sure all handlers are destroyed');
 
     $keys = array('current_display', 'display_handler', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
     foreach ($keys as $key) {
-      $this->assertNull($view->{$key}, $key);
+      $this->assertFalse(isset($view->{$key}), $key);
     }
-    $this->assertEqual($view->build, FALSE);
+    $this->assertEqual($view->built, FALSE);
     $this->assertEqual($view->executed, FALSE);
     $this->assertEqual($view->build_info, array());
     $this->assertEqual($view->attachment_before, '');
@@ -66,8 +65,8 @@ class viewsViewTest extends ViewsSqlTest {
     $view->api_version = '3.0-alpha1';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Defaults */
-    $handler = $view->new_display('default', 'Defaults', 'default');
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['query']['type'] = 'views_query';
@@ -117,57 +116,57 @@ class viewsViewTest extends ViewsSqlTest {
     $handler->display->display_options['relationships']['uid']['id'] = 'uid';
     $handler->display->display_options['relationships']['uid']['table'] = 'comments';
     $handler->display->display_options['relationships']['uid']['field'] = 'uid';
-    /* Field: Node: Nid */
+    /* Field: Content: Nid */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
-    /* Field: Node: Path */
+    /* Field: Content: Path */
     $handler->display->display_options['fields']['path']['id'] = 'path';
     $handler->display->display_options['fields']['path']['table'] = 'node';
     $handler->display->display_options['fields']['path']['field'] = 'path';
-    /* Field: Node: Post date */
+    /* Field: Content: Post date */
     $handler->display->display_options['fields']['created']['id'] = 'created';
     $handler->display->display_options['fields']['created']['table'] = 'node';
     $handler->display->display_options['fields']['created']['field'] = 'created';
-    /* Sort criterion: Node: In moderation */
+    /* Sort criterion: Content: In moderation */
     $handler->display->display_options['sorts']['moderate']['id'] = 'moderate';
     $handler->display->display_options['sorts']['moderate']['table'] = 'node';
     $handler->display->display_options['sorts']['moderate']['field'] = 'moderate';
-    /* Sort criterion: Node: Last comment author */
+    /* Sort criterion: Content: Last comment author */
     $handler->display->display_options['sorts']['last_comment_name']['id'] = 'last_comment_name';
     $handler->display->display_options['sorts']['last_comment_name']['table'] = 'node_comment_statistics';
     $handler->display->display_options['sorts']['last_comment_name']['field'] = 'last_comment_name';
-    /* Sort criterion: Node: Last comment time */
+    /* Sort criterion: Content: Last comment time */
     $handler->display->display_options['sorts']['last_comment_timestamp']['id'] = 'last_comment_timestamp';
     $handler->display->display_options['sorts']['last_comment_timestamp']['table'] = 'node_comment_statistics';
     $handler->display->display_options['sorts']['last_comment_timestamp']['field'] = 'last_comment_timestamp';
-    /* Argument: Node: Created date */
+    /* Argument: Content: Created date */
     $handler->display->display_options['arguments']['created_fulldate']['id'] = 'created_fulldate';
     $handler->display->display_options['arguments']['created_fulldate']['table'] = 'node';
     $handler->display->display_options['arguments']['created_fulldate']['field'] = 'created_fulldate';
     $handler->display->display_options['arguments']['created_fulldate']['style_plugin'] = 'default_summary';
     $handler->display->display_options['arguments']['created_fulldate']['default_argument_type'] = 'fixed';
-    /* Argument: Node: Created day */
+    /* Argument: Content: Created day */
     $handler->display->display_options['arguments']['created_day']['id'] = 'created_day';
     $handler->display->display_options['arguments']['created_day']['table'] = 'node';
     $handler->display->display_options['arguments']['created_day']['field'] = 'created_day';
     $handler->display->display_options['arguments']['created_day']['style_plugin'] = 'default_summary';
     $handler->display->display_options['arguments']['created_day']['default_argument_type'] = 'fixed';
-    /* Argument: Node: Created month */
+    /* Argument: Content: Created month */
     $handler->display->display_options['arguments']['created_month']['id'] = 'created_month';
     $handler->display->display_options['arguments']['created_month']['table'] = 'node';
     $handler->display->display_options['arguments']['created_month']['field'] = 'created_month';
     $handler->display->display_options['arguments']['created_month']['style_plugin'] = 'default_summary';
     $handler->display->display_options['arguments']['created_month']['default_argument_type'] = 'fixed';
-    /* Filter: Node: Nid */
+    /* Filter: Content: Nid */
     $handler->display->display_options['filters']['nid']['id'] = 'nid';
     $handler->display->display_options['filters']['nid']['table'] = 'node';
     $handler->display->display_options['filters']['nid']['field'] = 'nid';
-    /* Filter: Node: Published */
+    /* Filter: Content: Published */
     $handler->display->display_options['filters']['status']['id'] = 'status';
     $handler->display->display_options['filters']['status']['table'] = 'node';
     $handler->display->display_options['filters']['status']['field'] = 'status';
-    /* Filter: Node: Title */
+    /* Filter: Content: Title */
     $handler->display->display_options['filters']['title']['id'] = 'title';
     $handler->display->display_options['filters']['title']['table'] = 'node';
     $handler->display->display_options['filters']['title']['field'] = 'title';
@@ -192,7 +191,7 @@ class viewsViewTest extends ViewsSqlTest {
       'page_1' => 'page_1',
     );
     $translatables['test_destroy'] = array(
-      t('Defaults'),
+      t('Master'),
       t('more'),
       t('Apply'),
       t('Reset'),
@@ -203,7 +202,7 @@ class viewsViewTest extends ViewsSqlTest {
       t('- All -'),
       t('Offset'),
       t('Text area'),
-      t('Node'),
+      t('Content'),
       t('Parent comment'),
       t('User'),
       t('Nid'),

@@ -25,15 +25,15 @@ class views_handler_field_comment_node_link extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
     $form['teaser'] = array(
       '#type' => 'checkbox',
       '#title' => t('Show teaser-style link'),
       '#default_value' => $this->options['teaser'],
       '#description' => t('Show the comment link in the form used on standard node teasers, rather than the full node form.'),
+      '#fieldset' => 'more',
     );
 
+    parent::options_form($form, $form_state);
   }
 
   function query() {

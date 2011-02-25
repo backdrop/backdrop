@@ -4,7 +4,7 @@
  * Simple filter to handle greater than/less than filters
  */
 class views_handler_filter_numeric extends views_handler_filter {
-  var $no_single = TRUE;
+  var $always_multiple = TRUE;
   function option_definition() {
     $options = parent::option_definition();
 
@@ -132,12 +132,12 @@ class views_handler_filter_numeric extends views_handler_filter {
     if (!empty($form_state['exposed'])) {
       $identifier = $this->options['expose']['identifier'];
 
-      if (empty($this->options['expose']['use_operator']) || empty($this->options['expose']['operator'])) {
+      if (empty($this->options['expose']['use_operator']) || empty($this->options['expose']['operator_id'])) {
         // exposed and locked.
         $which = in_array($this->operator, $this->operator_values(2)) ? 'minmax' : 'value';
       }
       else {
-        $source = 'edit-' . drupal_html_id($this->options['expose']['operator']);
+        $source = 'edit-' . drupal_html_id($this->options['expose']['operator_id']);
       }
     }
 
@@ -277,8 +277,8 @@ class views_handler_filter_numeric extends views_handler_filter {
 
     $rc = parent::accept_exposed_input($input);
 
-    if (!empty($this->options['expose']['optional'])) {
-      // We have to do some of our own optional checking.
+    if (empty($this->options['expose']['required'])) {
+      // We have to do some of our own checking for non-required filters.
       $info = $this->operators();
       if (!empty($info[$this->operator]['values'])) {
         switch ($info[$this->operator]['values']) {

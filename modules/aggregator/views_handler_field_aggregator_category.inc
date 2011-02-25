@@ -23,13 +23,13 @@ class views_handler_field_aggregator_category extends views_handler_field {
    * Provide link to category option
    */
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['link_to_category'] = array(
       '#title' => t('Link this field to its aggregator category page'),
       '#description' => t('This will override any other link you have set.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_category']),
     );
+    parent::options_form($form, $form_state);
   }
 
   /**

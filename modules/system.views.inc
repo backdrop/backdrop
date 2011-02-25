@@ -21,6 +21,7 @@ function system_views_data() {
   // ----------------------------------------------------------------------
   // file_managed table
 
+  $data['files']['moved to'] = 'file_managed';
   $data['file_managed']['table']['group']  = t('File');
 
   // Advertise this table as a possible base table
@@ -28,6 +29,9 @@ function system_views_data() {
     'field' => 'fid',
     'title' => t('File'),
     'help' => t("Files maintained by Drupal and various modules."),
+    'defaults' => array(
+      'field' => 'filename'
+    ),
   );
 
   // The file table does not inherently join to the node table,
@@ -232,14 +236,14 @@ function system_views_data() {
 
   // Relationships between files and nodes.
   $data['file_usage']['file_to_node'] = array(
-    'title' => t('Node'),
-    'help' => t('A node that is associated with this file, usually because this file is in a field on the node.'),
+    'title' => t('Content'),
+    'help' => t('Content that is associated with this file, usually because this file is in a field on the content.'),
     // Only provide this field/relationship/etc. when the 'file_managed' base table is present.
     'skip base' => array('node', 'node_revision', 'users', 'comment', 'taxonomy_term_data', 'taxonomy_vocabulary'),
     'real field' => 'id',
     'relationship' => array(
-      'title' => t('Node'),
-      'label' => t('Node'),
+      'title' => t('Content'),
+      'label' => t('Content'),
       'base' => 'node',
       'base field' => 'nid',
       'relationship field' => 'id',
