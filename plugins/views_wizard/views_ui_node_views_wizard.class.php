@@ -80,7 +80,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function page_display_options($form, $form_state) {
     $display_options = parent::page_display_options($form, $form_state);
-    $row_plugin = $form_state['values']['page']['style']['row_plugin'];
+    $row_plugin = isset($form_state['values']['page']['style']['row_plugin']) ? $form_state['values']['page']['style']['row_plugin'] : NULL;
     $row_options = isset($form_state['values']['page']['style']['row_options']) ? $form_state['values']['page']['style']['row_options'] : array();
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
@@ -88,7 +88,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function block_display_options($form, $form_state) {
     $display_options = parent::block_display_options($form, $form_state);
-    $row_plugin = $form_state['values']['block']['style']['row_plugin'];
+    $row_plugin = isset($form_state['values']['block']['style']['row_plugin']) ? $form_state['values']['block']['style']['row_plugin'] : NULL;
     $row_options = isset($form_state['values']['block']['style']['row_options']) ? $form_state['values']['block']['style']['row_options'] : array();
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
