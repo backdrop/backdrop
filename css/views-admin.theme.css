@@ -919,17 +919,3 @@ div.views-filterable-options .form-type-checkbox .description {
 }
 
 /* @end */
-
-/* @group Output specific */
-
-/**
- * Keeps the admin screen from looking stretched out larger monitors
- */
-@media screen and (min-width: 1400px) {
-  .views-admin {
-    margin: 0 auto;
-    max-width: 1379px;
-  }
-}
-
-/* @end */
