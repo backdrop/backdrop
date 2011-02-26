@@ -81,6 +81,7 @@ Fix fieldsets in field handler.
 #1069100 by paranojik: remove legacy code from views_plugin_row_comment_view:pre_render().
 #741234 by voxpelli: Arguments should check for NULL along with empty string to find empty values.
 #1046170 by agentrickard, blackice2999, dereine: Execute preExecute before generate the countQuery to fix pagers with node_access.
+#1046170 (follow up) by agentrickard: Provide a better documentation for the problem.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
