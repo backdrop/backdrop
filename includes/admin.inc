@@ -1152,8 +1152,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     // Add the arguments textfield
     $form['displays']['settings']['settings_content']['preview_controls']['view_args'] = array(
       '#type' => 'textfield',
-      '#title' => t('Arguments'),
-      '#description' => t('Separate arguments with a / as though they were a URL path.'),
+      '#title' => t('Preview with contextual filters:'),
+      '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
       '#id' => 'preview-args',
     );
 

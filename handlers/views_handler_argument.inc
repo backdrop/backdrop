@@ -183,7 +183,7 @@ class views_handler_argument extends views_handler {
 
     $form['no_argument'] = array(
       '#type' => 'fieldset',
-      '#title' => t('When the argument value is <em>NOT</em> in the URL'),
+      '#title' => t('When the filter value is <em>NOT</em> in the URL'),
     );
     // Everything in the fieldset is floated, so the last element needs to
     // clear those floats.
@@ -210,7 +210,7 @@ class views_handler_argument extends views_handler {
       '#title' => t('Exception value'),
       '#size' => 20,
       '#default_value' => $this->options['exception']['value'],
-      '#description' => t('If this value is received, the argument will be ignored; i.e, "all values"'),
+      '#description' => t('If this value is received, the filter will be ignored; i.e, "all values"'),
     );
     $form['exception']['title_enable'] = array(
       '#type' => 'checkbox',
@@ -246,7 +246,7 @@ class views_handler_argument extends views_handler {
 
     $form['argument_present'] = array(
       '#type' => 'fieldset',
-      '#title' => t('When the argument <em>IS</em> in the URL or a default is provided'),
+      '#title' => t('When the filter value <em>IS</em> in the URL or a default is provided'),
     );
     $form['title_enable'] = array(
       '#type' => 'checkbox',
@@ -360,7 +360,7 @@ class views_handler_argument extends views_handler {
 
     $form['validate']['fail'] = array(
       '#type' => 'select',
-      '#title' => t('Action to take if argument does not validate'),
+      '#title' => t('Action to take if filter value does not validate'),
       '#default_value' => $this->options['validate']['fail'],
       '#options' => $validate_options,
       '#process' => array('ctools_dependent_process'),

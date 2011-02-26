@@ -279,6 +279,19 @@ th.views-ui-operations {
 /* @group Add view */
 
 /**
+ * Drupal core forces AJAX triggering elements to float left when they are
+ * disabled due to AJAX processing. On the add view page, we have inline
+ * containers where we don't want that behavior; it causes the select dropdown
+ * which is triggered to jump to the left while the AJAX throbber is active.
+ *
+ * See also http://drupal.org/node/769936 (Drupal core issue); when that is
+ * fixed it may no longer be necessary to do this.
+ */
+.views-admin .container-inline .progress-disabled {
+  float: none;
+}
+
+/**
  * I wish this didn't have to be so specific
  */
 .form-item-description-enable + .form-item-description {
@@ -287,12 +300,6 @@ th.views-ui-operations {
 
 .form-item-description-enable label {
   font-weight: bold;
-}
-
-/* This could be made more general if more than one instance occurs */
-#edit-page-style .fieldset-wrapper {
-  padding-left: 0;
-  padding-right: 0;
 }
 
 /* @end */
@@ -333,14 +340,6 @@ td.group-title {
   font-weight: bold;
   padding-left: 0.5em; /* LTR */
   text-transform: uppercase;
-}
-
-.form-item-show-wizard-key label {
-  float: left;
-}
-
-.form-item-show-wizard-key select {
-  margin-left: 5px;
 }
 
 .exposed-description {

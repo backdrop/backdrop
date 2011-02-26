@@ -2150,10 +2150,10 @@ function views_object_types() {
         'plural' => 'fields',
       ),
       'argument' => array(
-        'title' => t('Arguments'),
-        'ltitle' => t('arguments'),
-        'stitle' => t('Argument'),
-        'lstitle' => t('Argument'),
+        'title' => t('Contextual filters'),
+        'ltitle' => t('contextual filters'),
+        'stitle' => t('Contextual filter'),
+        'lstitle' => t('contextual filter'),
         'plural' => 'arguments',
       ),
       'sort' => array(

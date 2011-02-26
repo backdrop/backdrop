@@ -996,7 +996,7 @@ class views_plugin_display extends views_plugin {
         'category' => 'other',
         'title' => t('Hide attachments in summary'),
         'value' => $this->get_option('hide_attachment_summary') ? t('Yes') : t('No'),
-        'desc' => t('Change whether or not to display attachments when displaying an argument summary.'),
+        'desc' => t('Change whether or not to display attachments when displaying a contextual filter summary.'),
       );
     }
 
@@ -1257,7 +1257,7 @@ class views_plugin_display extends views_plugin {
         );
         break;
       case 'hide_attachment_summary':
-        $form['#title'] .= t('Hide attachments when displaying argument summary');
+        $form['#title'] .= t('Hide attachments when displaying a contextual filter summary');
         $form['hide_attachment_summary'] = array(
           '#type' => 'radios',
           '#options' => array(1 => t('Yes'), 0 => t('No')),

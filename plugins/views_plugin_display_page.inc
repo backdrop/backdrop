@@ -297,7 +297,7 @@ class views_plugin_display_page extends views_plugin_display {
         $form['#help_topic'] = 'path';
         $form['path'] = array(
           '#type' => 'textfield',
-          '#description' => t('This view will be displayed by visiting this path on your site. You may use "%" in your URL to represent values that will be used for arguments: For example, "node/%/feed".'),
+          '#description' => t('This view will be displayed by visiting this path on your site. You may use "%" in your URL to represent values that will be used for contextual filters: For example, "node/%/feed".'),
           '#default_value' => $this->get_option('path'),
 	  '#field_prefix' => '<span dir="ltr">' . url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
 	  '#field_suffix' => '</span>&lrm;',
