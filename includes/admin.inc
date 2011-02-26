@@ -4730,43 +4730,6 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
   return array();
 }
 
-/**
- * Fetch a list of all base tables available
- *
- * @param $type
- *   Either 'display', 'style' or 'row'
- * @param $key
- *   For style plugins, this is an optional type to restrict to. May be 'normal',
- *   'summary', 'feed' or others based on the neds of the display.
- * @param $base
- *   An array of possible base tables.
- *
- * @return
- *   A keyed array of in the form of 'base_table' => 'Description'.
- */
-function views_fetch_plugin_names($type, $key = NULL, $base = array()) {
-  $data = views_fetch_plugin_data();
-
-  $plugins[$type] = array();
-
-  foreach ($data[$type] as $id => $plugin) {
-    // Skip plugins that don't conform to our key.
-    if ($key && (empty($plugin['type']) || $plugin['type'] != $key)) {
-      continue;
-    }
-    if (empty($plugin['no ui']) && (empty($base) || empty($plugin['base']) || array_intersect($base, $plugin['base']))) {
-      $plugins[$type][$id] = $plugin['title'];
-    }
-  }
-
-  if (!empty($plugins[$type])) {
-    asort($plugins[$type]);
-    return $plugins[$type];
-  }
-  // fall-through
-  return array();
-}
-
 
 /**
  * Theme the form for the table style plugin

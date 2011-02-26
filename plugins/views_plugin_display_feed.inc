@@ -12,6 +12,19 @@
  * @ingroup views_display_plugins
  */
 class views_plugin_display_feed extends views_plugin_display_page {
+  function init(&$view, &$display, $options = NULL) {
+    parent::init($view, $display, $options);
+
+    // Set the default row style. Ideally this would be part of the option
+    // definition, but in this case it's dependent on the view's base table,
+    // which we don't know until init().
+    $row_plugins = views_fetch_plugin_names('row', $this->get_style_type(), array($view->base_table));
+    $default_row_plugin = key($row_plugins);
+    if ($this->options['row_plugin'] == '') {
+      $this->options['row_plugin'] = $default_row_plugin;
+    }
+  }
+
   function uses_breadcrumb() { return FALSE; }
   function get_style_type() { return 'feed'; }
 
