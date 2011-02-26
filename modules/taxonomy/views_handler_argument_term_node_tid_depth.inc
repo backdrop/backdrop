@@ -28,8 +28,8 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
 
     $form['break_phrase'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow multiple terms per argument'),
-      '#description' => t('If selected, users can enter multiple arguments in the form of 1+2+3. Due to the number of JOINs it would require, AND will be treated as OR with this argument.'),
+      '#title' => t('Allow multiple values'),
+      '#description' => t('If selected, users can enter multiple values in the form of 1+2+3. Due to the number of JOINs it would require, AND will be treated as OR with this filter.'),
       '#default_value' => !empty($this->options['break_phrase']),
     );
 

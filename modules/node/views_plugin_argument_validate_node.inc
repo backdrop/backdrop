@@ -47,7 +47,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
 
     $form['nid_type'] = array(
       '#type' => 'select',
-      '#title' => t('Argument format'),
+      '#title' => t('Filter value format'),
       '#options' => array(
         'nid' => t('Node ID'),
         'nids' => t('Node IDs separated by , or +'),

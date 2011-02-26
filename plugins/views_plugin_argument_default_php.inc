@@ -19,10 +19,10 @@ class views_plugin_argument_default_php extends views_plugin_argument_default {
   function options_form(&$form, &$form_state) {
     $form['code'] = array(
       '#type' => 'textarea',
-      '#title' => t('PHP argument code'),
+      '#title' => t('PHP contextual filter code'),
       '#default_value' => $this->options['code'],
       '#process' => array('ctools_dependent_process'),
-      '#description' => t('Enter PHP code that returns a value to use for this argument. Do not use &lt;?php ?&gt;. You must return only a single value for just this argument.'),
+      '#description' => t('Enter PHP code that returns a value to use for this filter. Do not use &lt;?php ?&gt;. You must return only a single value for just this filter.'),
     );
 
     // Only do this if using one simple standard form gadget

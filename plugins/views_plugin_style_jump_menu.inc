@@ -77,7 +77,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
     $form['default_value'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Select the current argument.'),
+      '#title' => t('Select the current contextual filter value.'),
       '#default_value' => !empty($this->options['default_value']),
       '#description' => t('If checked, the current path will be displayed as the default option in the jump menu, if applicable.'),
     );

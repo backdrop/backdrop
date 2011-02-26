@@ -43,7 +43,7 @@ class views_handler_argument_string extends views_handler_argument {
     $form['glossary'] = array(
       '#type' => 'checkbox',
       '#title' => t('Glossary mode'),
-      '#description' => t('Glossary mode applies a limit to the number of characters used in the argument, which allows the summary view to act as a glossary.'),
+      '#description' => t('Glossary mode applies a limit to the number of characters used in the filter value, which allows the summary view to act as a glossary.'),
       '#default_value' => $this->options['glossary'],
       '#fieldset' => 'more',
     );
@@ -51,7 +51,7 @@ class views_handler_argument_string extends views_handler_argument {
     $form['limit'] = array(
       '#type' => 'textfield',
       '#title' => t('Character limit'),
-      '#description' => t('How many characters of the argument to filter against. If set to 1, all fields starting with the letter in the argument would be matched.'),
+      '#description' => t('How many characters of the filter value to filter against. If set to 1, all fields starting with the first letter in the filter value would be matched.'),
       '#default_value' => $this->options['limit'],
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-options-glossary' => array(TRUE)),
@@ -61,7 +61,7 @@ class views_handler_argument_string extends views_handler_argument {
     $form['case'] = array(
       '#type' => 'select',
       '#title' => t('Case'),
-      '#description' => t('When printing the argument result, how to transform the case.'),
+      '#description' => t('When printing the title and summary, how to transform the case of the filter value.'),
       '#options' => array(
         'none' => t('No transform'),
         'upper' => t('Upper case'),
@@ -76,7 +76,7 @@ class views_handler_argument_string extends views_handler_argument {
     $form['path_case'] = array(
       '#type' => 'select',
       '#title' => t('Case in path'),
-      '#description' => t('When printing url paths, how to transform the case of the argument. Do not use this unless with Postgres as it uses case sensitive comparisons.'),
+      '#description' => t('When printing url paths, how to transform the case of the filter value. Do not use this unless with Postgres as it uses case sensitive comparisons.'),
       '#options' => array(
         'none' => t('No transform'),
         'upper' => t('Upper case'),
@@ -98,8 +98,8 @@ class views_handler_argument_string extends views_handler_argument {
     if (!empty($this->definition['many to one'])) {
       $form['add_table'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Allow multiple arguments to work together.'),
-        '#description' => t('If selected, multiple instances of this argument can work together, as though multiple terms were supplied to the same argument. This setting is not compatible with the "Reduce duplicates" setting.'),
+        '#title' => t('Allow multiple filter values to work together.'),
+        '#description' => t('If selected, multiple instances of this filter can work together, as though multiple values were supplied to the same filter. This setting is not compatible with the "Reduce duplicates" setting.'),
         '#default_value' => !empty($this->options['add_table']),
         '#fieldset' => 'more',
       );
@@ -115,8 +115,8 @@ class views_handler_argument_string extends views_handler_argument {
     // allow + for or, , for and
     $form['break_phrase'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow multiple terms per argument.'),
-      '#description' => t('If selected, users can enter multiple arguments in the form of 1+2+3 or 1,2,3.'),
+      '#title' => t('Allow multiple values.'),
+      '#description' => t('If selected, users can enter multiple values in the form of 1+2+3 (for OR) or 1,2,3 (for AND).'),
       '#default_value' => !empty($this->options['break_phrase']),
       '#fieldset' => 'more',
     );

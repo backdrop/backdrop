@@ -92,7 +92,7 @@ class views_plugin_display_attachment extends views_plugin_display {
 
     $options['inherit_arguments'] = array(
       'category' => 'attachment',
-      'title' => t('Inherit arguments'),
+      'title' => t('Inherit contextual filters'),
       'value' => $this->get_option('inherit_arguments') ? t('Yes') : t('No'),
     );
 
@@ -125,11 +125,11 @@ class views_plugin_display_attachment extends views_plugin_display {
 
     switch ($form_state['section']) {
       case 'inherit_arguments':
-        $form['#title'] .= t('Inherit arguments');
+        $form['#title'] .= t('Inherit contextual filters');
         $form['inherit_arguments'] = array(
           '#type' => 'checkbox',
           '#title' => t('Inherit'),
-          '#description' => t('Should this display inherit its arguments from the parent display to which it is attached?'),
+          '#description' => t('Should this display inherit its contextual filter values from the parent display to which it is attached?'),
           '#default_value' => $this->get_option('inherit_arguments'),
         );
         break;
