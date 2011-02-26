@@ -79,6 +79,7 @@ Fix fieldsets in field handler.
 #1022052 bojanz, dereine: Don't add the field_info into the views data array
 #970162 by longwave: Add "time hence" options to date field format
 #1069100 by paranojik: remove legacy code from views_plugin_row_comment_view:pre_render().
+#741234 by voxpelli: Arguments should check for NULL along with empty string to find empty values.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
