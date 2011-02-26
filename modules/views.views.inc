@@ -30,7 +30,7 @@ function views_views_data() {
 
   $data['views']['null'] = array(
     'title' => t('Null'),
-    'help' => t('Allow an argument to be ignored. The query will not be altered by this argument.'),
+    'help' => t('Allow a contextual filter value to be ignored. The query will not be altered by this contextual filter value. Can be used when contextual filter values come from the URL, and a part of the URL needs to be ignored.'),
     'argument' => array(
       'handler' => 'views_handler_argument_null',
     ),

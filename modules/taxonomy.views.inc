@@ -365,7 +365,7 @@ function taxonomy_views_data_alter(&$data) {
   $data['node']['term_node_tid_depth_modifier'] = array(
     'group' => t('Taxonomy'),
     'title' => t('Term ID depth modifier'),
-    'help' => t('Allows the "depth" for Taxonomy: Term ID (with depth) to be modified via an additional argument.'),
+    'help' => t('Allows the "depth" for Taxonomy: Term ID (with depth) to be modified via an additional contextual filter value.'),
     'argument' => array(
       'handler' => 'views_handler_argument_term_node_tid_depth_modifier',
     ),
