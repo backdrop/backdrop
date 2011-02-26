@@ -82,6 +82,7 @@ Fix fieldsets in field handler.
 #741234 by voxpelli: Arguments should check for NULL along with empty string to find empty values.
 #1046170 by agentrickard, blackice2999, dereine: Execute preExecute before generate the countQuery to fix pagers with node_access.
 #1046170 (follow up) by agentrickard: Provide a better documentation for the problem.
+#1070112 by drunken_monkey: Fix notice in field_views_field_label.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

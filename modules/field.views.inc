@@ -53,6 +53,9 @@ function field_views_field_label($field_name) {
       }
     }
   }
+  if (empty($label_counter)) {
+    return $field_name;
+  }
   // Sort the field lables by it most used label and return the most used one.
   arsort($label_counter);
   $label_counter = array_keys($label_counter);
