@@ -46,7 +46,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
       array('nid' => $this->nodes[3]->nid),
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
-    $view->delete();
+    $view->destroy();
 
     // Test offset for between operator.
     $view->set_display('default');
@@ -60,7 +60,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
       array('nid' => $this->nodes[3]->nid),
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
-    $view->delete();
+    $view->destroy();
   }
 
 
@@ -80,7 +80,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
       array('nid' => $this->nodes[1]->nid),
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
-    $view->delete();
+    $view->destroy();
 
     // Test between with just min.
     $view = $this->views_test_between();
@@ -94,7 +94,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
       array('nid' => $this->nodes[1]->nid),
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
-    $view->delete();
+    $view->destroy();
 
     // Test not between with min and max.
     $view = $this->views_test_between();
@@ -110,7 +110,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
       array('nid' => $this->nodes[3]->nid),
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
-    $view->delete();
+    $view->destroy();
 
     // Test not between with min.
     $view = $this->views_test_between();
@@ -125,7 +125,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
       array('nid' => $this->nodes[3]->nid),
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
-    $view->delete();
+    $view->destroy();
   }
 
   /**
