@@ -983,13 +983,20 @@ function views_include_handlers($reset = FALSE) {
 function views_get_handler($table, $field, $key, $override = NULL) {
   static $recursion_protection = array();
 
-  $data = views_fetch_data($table, FALSE);
+  $data = views_fetch_data($table);
   $handler = NULL;
 
   // Support old views_data entries conversion.
+  
+  // Support conversion on table level.
+  if (isset($data['moved to'])) {
+    $moved = array($data['moved to'], $field);
+  }
+  // Support conversion on datafield level.
   if (isset($data[$field]['moved to'])) {
     $moved = $data[$field]['moved to'];
   }
+  // Support conversion on handler level.
   if (isset($data[$field][$key]['moved to'])) {
     $moved = $data[$field][$key]['moved to'];
   }
