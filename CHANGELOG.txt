@@ -86,6 +86,7 @@ Fix fieldsets in field handler.
 #978824 by dereine: Don't execute validation on config_item remove button.
 by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1046650 by dereine, damz: Don't delete views in the simpletest.
+#1022052 follow up by bojanz: Fix filter_list handler, by loading the field_info again.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
