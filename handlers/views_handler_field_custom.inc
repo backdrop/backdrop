@@ -25,6 +25,8 @@ class views_handler_field_custom extends views_handler_field {
     unset($form['alter']['alter_text']);
     unset($form['alter']['text']['#dependency']);
     unset($form['alter']['text']['#process']);
+    unset($form['alter']['help']['#dependency']);
+    unset($form['alter']['help']['#process']);
     $form['#pre_render'][] = 'views_handler_field_custom_pre_render_move_text';
   }
 
@@ -39,7 +41,9 @@ class views_handler_field_custom extends views_handler_field {
  */
 function views_handler_field_custom_pre_render_move_text($form) {
   $form['text'] = $form['alter']['text'];
+  $form['help'] = $form['alter']['help'];
   unset($form['alter']['text']);
+  unset($form['alter']['help']);
 
   return $form;
 }
