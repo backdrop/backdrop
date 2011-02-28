@@ -1581,8 +1581,6 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   // Put the main link to the left side
   array_unshift($variables['settings_links'], $variables['link']);
   $variables['settings_links'] = implode('<span class="views-ajax-link">&nbsp;|&nbsp;</span>', $variables['settings_links']);
-  // Put the addition links to the right side
-  $variables['settings_links'] = implode('<span class="views-ajax-link">&nbsp;|&nbsp;</span>', $variables['settings_links']);
 
   // Add classes associated with this display tab to the overall list.
   $variables['classes_array'] = array_merge($variables['classes_array'], $variables['class']);
