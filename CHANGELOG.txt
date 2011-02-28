@@ -82,6 +82,15 @@ Fix fieldsets in field handler.
 #741234 by voxpelli: Arguments should check for NULL along with empty string to find empty values.
 #1046170 by agentrickard, blackice2999, dereine: Execute preExecute before generate the countQuery to fix pagers with node_access.
 #1046170 (follow up) by agentrickard: Provide a better documentation for the problem.
+#1070112 by drunken_monkey: Fix notice in field_views_field_label.
+#978824 by dereine: Don't execute validation on config_item remove button.
+by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
+#1046650 by dereine, damz: Don't delete views in the simpletest.
+#1022052 follow up by bojanz: Fix filter_list handler, by loading the field_info again.
+#1023794 by turek: Fix notice in many_to_one_helper.
+#1057810 by mariusz.slonina: Remove views_handler_field_user_link_delete and the views_data entry.
+#1075598 by paranojik: small fix for the single argument case.
+#1053164 by dereine: Support random sort for sqlite by using dbtng functionality.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
