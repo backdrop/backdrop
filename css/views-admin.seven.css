@@ -22,6 +22,10 @@ fieldset {
   padding-top: 0;
 }
 
+.views-ui-dialog fieldset {
+  padding-top: 2.5em;
+}
+
 fieldset fieldset {
   border: medium none;
 }
