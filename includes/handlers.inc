@@ -837,6 +837,10 @@ class views_many_to_one_helper {
     if (empty($options['group'])) {
       $options['group'] = 0;
     }
+    else {
+      $value = $this->handler->value;
+      $operator = 'IN';
+    }
 
     $add_condition = TRUE;
     if ($operator == 'not') {

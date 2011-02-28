@@ -261,14 +261,6 @@ function user_views_data() {
     ),
   );
 
-  $data['users']['delete_node'] = array(
-    'field' => array(
-      'title' => t('Delete link'),
-      'help' => t('Provide a simple link to delete the user.'),
-      'handler' => 'views_handler_field_user_link_delete',
-    ),
-  );
-
   // ----------------------------------------------------------------------
   // users_roles table
 

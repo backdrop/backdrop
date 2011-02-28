@@ -4048,6 +4048,8 @@ function views_ui_config_item_form($form, &$form_state) {
     }
 
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name, t('Remove'), 'remove');
+    // Don't execute validations for the remove button.
+    $form['buttons']['remove']['#limit_validation_errors'] = array();
   }
   return $form;
 }
