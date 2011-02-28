@@ -133,6 +133,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'textfield',
       '#default_value' => '10',
       '#size' => 5,
+      '#element_validate' => array('_element_validate_integer_positive'),
     );
     $form['displays']['page']['options']['link'] = array(
       '#title' => t('Create a menu link'),
