@@ -1391,12 +1391,11 @@ function views_ui_get_display_tab_details($view, $display) {
   $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
     '#theme_wrappers' => array('container'),
-    '#id' => 'edit-display-settings-details',
-    '#attributes' => array(),
+    '#attributes' => array('id' => 'edit-display-settings-details',),
   );
 
   $build['top']['#theme_wrappers'] = array('container');
-  $build['top']['#id'] = 'edit-display-settings-top';
+  $build['top']['#attributes']['id'] = 'edit-display-settings-top';
   $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
 
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
@@ -1467,8 +1466,7 @@ function views_ui_get_display_tab_details($view, $display) {
 
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
-  $build['columns']['#attributes'] = array('class' => array('clearfix', 'views-display-columns'));
-  $build['columns']['#id'] = 'edit-display-settings-main';
+  $build['columns']['#attributes'] = array('id' => 'edit-display-settings-main', 'class' => array('clearfix', 'views-display-columns'),);
 
   $build['columns']['first']['#theme_wrappers'] = array('container');
   $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first'));
