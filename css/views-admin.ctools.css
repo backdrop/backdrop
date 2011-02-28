@@ -34,6 +34,11 @@
   padding-top: 2px;
 }
 
+.ctools-button,
+.ctools-button input {
+  text-transform: lowercase;
+}
+
 .ctools-button:hover {
   background-image:
     -moz-linear-gradient(
