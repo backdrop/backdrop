@@ -1520,11 +1520,13 @@ function views_ui_get_display_tab_details($view, $display) {
         $build['columns'][$column]['collapse'][$id] = $bucket['build'];
         $build['columns'][$column]['collapse'][$id]['#theme_wrappers'][] = 'views_ui_display_tab_bucket';
         $build['columns'][$column]['collapse'][$id]['#title'] = !empty($bucket['title']) ? $bucket['title'] : '';
+        $build['columns'][$column]['collapse'][$id]['#name'] = !empty($bucket['title']) ? $bucket['title'] : $id;
       }
       else {
         $build['columns'][$column][$id] = $bucket['build'];
         $build['columns'][$column][$id]['#theme_wrappers'][] = 'views_ui_display_tab_bucket';
         $build['columns'][$column][$id]['#title'] = !empty($bucket['title']) ? $bucket['title'] : '';
+        $build['columns'][$column][$id]['#name'] = !empty($bucket['title']) ? $bucket['title'] : $id;
       }
     }
   }

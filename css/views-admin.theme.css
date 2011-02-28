@@ -577,6 +577,14 @@ td.group-title {
   margin-top: 2px;
 }
 
+.views-ui-display-tab-bucket.access {
+  padding-top: 0;
+}
+
+.views-ui-display-tab-bucket.page-settings {
+  border-bottom: medium none;
+}
+
 /* @end */
 
 /* @group Attachment bucket overridden
