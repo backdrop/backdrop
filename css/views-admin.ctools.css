@@ -34,6 +34,11 @@
   padding-top: 2px;
 }
 
+.ctools-button,
+.ctools-button input {
+  text-transform: lowercase;
+}
+
 .ctools-button:hover {
   background-image:
     -moz-linear-gradient(
@@ -203,6 +208,36 @@
 
 .views-display-settings .ctools-toggle {
   color: #008BCB;
+}
+
+.views-display-column > .ctools-toggle {
+  margin-left: 6px;
+  margin-right: 3px;
+  margin-top: 14px;
+}
+.views-display-column > .ctools-toggle.ctools-toggle-collapsed {
+  margin-left: 9px;
+  margin-right: 5px;
+  margin-top: 12px;
+}
+
+.views-display-column > .ctools-collapsible-handle {
+  border-color: #F3F3F3;
+  border-style: solid;
+  border-width: 1px 1px 0;
+  color: #008BCB;
+  font-size: 13px;
+  font-weight: normal;
+  margin: 0;
+  padding: 6px 3px;
+}
+
+.views-display-column > .ctools-toggle.ctools-toggle-collapsed + .ctools-collapsible-handle {
+  border-width: 1px;
+}
+
+.views-display-column > .ctools-collapsible-content > .views-ui-display-tab-bucket:first-child {
+  border-top: medium none;
 }
 
 /* @end */
