@@ -96,7 +96,7 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
     }
     else {
       $operator = "=";
-      $tids = array($this->argument);
+      $tids = $this->argument;
     }
     // Now build the subqueries.
     $subquery = db_select('taxonomy_index', 'tn');

@@ -1426,23 +1426,23 @@ function views_ui_get_display_tab_details($view, $display) {
   );
 
   if (!$isDisplayDeleted) {
-    if ($isDeletable) {
-      $build['top']['actions']['delete'] = array(
-        '#type' => 'submit',
-        '#value' => t('delete'),
-        '#limit_validation_errors' => array(),
-        '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
-        '#prefix' => '<' . $itemElement . ' class="delete">',
-        "#suffix" => '</' . $itemElement . '>',
-      );
-    }
     if (!$isDefault) {
       $build['top']['actions']['duplicate'] = array(
         '#type' => 'submit',
-        '#value' => t('duplicate'),
+        '#value' => t('clone') . " " . $display_title,
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
         '#prefix' => '<' . $itemElement . ' class="duplicate">',
+        "#suffix" => '</' . $itemElement . '>',
+      );
+    }
+    if ($isDeletable) {
+      $build['top']['actions']['delete'] = array(
+        '#type' => 'submit',
+        '#value' => t('delete') . " " . $display_title,
+        '#limit_validation_errors' => array(),
+        '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
+        '#prefix' => '<' . $itemElement . ' class="delete">',
         "#suffix" => '</' . $itemElement . '>',
       );
     }
@@ -1450,7 +1450,7 @@ function views_ui_get_display_tab_details($view, $display) {
   else {
     $build['top']['actions']['undo_delete'] = array(
       '#type' => 'submit',
-      '#value' => t('undo delete'),
+      '#value' => t('undo delete of') . " " . $display_title,
       '#limit_validation_errors' => array(),
       '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
       '#prefix' => '<' . $itemElement . ' class="undo-delete">',
@@ -1481,8 +1481,12 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['columns']['second']['footer'] = array();
   $build['columns']['second']['pager'] = array();
 
+  // The third column buckets are wrapped in a CTools collapsible div
   $build['columns']['third']['#theme_wrappers'] = array('container');
-  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third'));
+  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third', 'ctools-collapsible-container', 'ctools-collapsed',));
+  $build['columns']['third']['advanced'] = array('#markup' => '<h3 class="ctools-collapsible-handle">' . t('Advanced') . '</h3>',);
+  $build['columns']['third']['collapse']['#theme_wrappers'] = array('container');
+  $build['columns']['third']['collapse']['#attributes'] = array('class' => array('ctools-collapsible-content',),);
 
   // Each option (e.g. title, access, display as grid/table/list) fits into one
   // of several "buckets," or boxes (Format, Fields, Sort, and so on).
@@ -1510,9 +1514,20 @@ function views_ui_get_display_tab_details($view, $display) {
       $column = 'third';
     }
     if (isset($bucket['build']) && is_array($bucket['build'])) {
-      $build['columns'][$column][$id] = $bucket['build'];
-      $build['columns'][$column][$id]['#theme_wrappers'][] = 'views_ui_display_tab_bucket';
-      $build['columns'][$column][$id]['#title'] = !empty($bucket['title']) ? $bucket['title'] : '';
+      // The third column is a CTools collapsible div, so
+      // the structure of the form is a little different for this column
+      if ($column === 'third') {
+        $build['columns'][$column]['collapse'][$id] = $bucket['build'];
+        $build['columns'][$column]['collapse'][$id]['#theme_wrappers'][] = 'views_ui_display_tab_bucket';
+        $build['columns'][$column]['collapse'][$id]['#title'] = !empty($bucket['title']) ? $bucket['title'] : '';
+        $build['columns'][$column]['collapse'][$id]['#name'] = !empty($bucket['title']) ? $bucket['title'] : $id;
+      }
+      else {
+        $build['columns'][$column][$id] = $bucket['build'];
+        $build['columns'][$column][$id]['#theme_wrappers'][] = 'views_ui_display_tab_bucket';
+        $build['columns'][$column][$id]['#title'] = !empty($bucket['title']) ? $bucket['title'] : '';
+        $build['columns'][$column][$id]['#name'] = !empty($bucket['title']) ? $bucket['title'] : $id;
+      }
     }
   }
 
@@ -1526,9 +1541,9 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['columns']['first']['sorts'] = views_ui_edit_form_get_bucket('sort', $view, $display);
   $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
   $build['columns']['second']['footer'] = views_ui_edit_form_get_bucket('footer', $view, $display);
-  $build['columns']['third']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
-  $build['columns']['third']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
-  $build['columns']['third']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
+  $build['columns']['third']['collapse']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
+  $build['columns']['third']['collapse']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
+  $build['columns']['third']['collapse']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
 
   return $build;
 }
@@ -4033,6 +4048,8 @@ function views_ui_config_item_form($form, &$form_state) {
     }
 
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name, t('Remove'), 'remove');
+    // Don't execute validations for the remove button.
+    $form['buttons']['remove']['#limit_validation_errors'] = array();
   }
   return $form;
 }

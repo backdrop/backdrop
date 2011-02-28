@@ -10,6 +10,8 @@
   <?php if(!empty($actions)) : ?>
     <?php print $actions; ?>
   <?php endif; ?>
-  <h3><?php print $title; ?></h3>
+  <?php if (!empty($title)) : ?>
+    <h3><?php print $title; ?></h3>
+  <?php endif; ?>
   <?php print $content; ?>
 </div>

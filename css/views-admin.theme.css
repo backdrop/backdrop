@@ -542,7 +542,7 @@ td.group-title {
 
 #edit-display-preview-controls .form-type-textfield input, 
 #edit-display-preview-controls .form-type-textfield .description {
-  margin-left: 82px;  
+  margin-left: 194px;  
 }
 
 /* @end */
@@ -575,6 +575,14 @@ td.group-title {
 
 .views-ui-display-tab-bucket .links.actions {
   margin-top: 2px;
+}
+
+.views-ui-display-tab-bucket.access {
+  padding-top: 0;
+}
+
+.views-ui-display-tab-bucket.page-settings {
+  border-bottom: medium none;
 }
 
 /* @end */

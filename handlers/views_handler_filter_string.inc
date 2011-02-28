@@ -291,12 +291,12 @@ class views_handler_filter_string extends views_handler_filter {
 
   function op_shorter($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where($this->options['group'], "LENGTH($field) < $placeholder", array($placeholder => $this->value), 'formula');
+    $this->query->add_where_expression($this->options['group'], "LENGTH($field) < $placeholder", array($placeholder => $this->value));
   }
 
   function op_longer($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where($this->options['group'], "LENGTH($field) > $placeholder", array($placeholder => $this->value), 'formula');
+    $this->query->add_where_expression($this->options['group'], "LENGTH($field) > $placeholder", array($placeholder => $this->value));
   }
 
   function op_empty($field) {

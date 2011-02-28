@@ -939,6 +939,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * @param $table
    *   The table this field is part of. If a formula, enter NULL.
+   *   If you want to orderby random use "rand" as table and 
    * @param $field
    *   The field or formula to sort on. If already a field, enter NULL
    *   and put in the alias.
@@ -952,7 +953,7 @@ class views_plugin_query_default extends views_plugin_query {
    * @param $params
    *   Any params that should be passed through to the add_field.
    */
-  function add_orderby($table, $field, $order, $alias = '', $params = array()) {
+  function add_orderby($table, $field = NULL, $order = 'ASC', $alias = '', $params = array()) {
     if ($table) {
       $this->ensure_table($table);
     }
@@ -1189,7 +1190,12 @@ class views_plugin_query_default extends views_plugin_query {
       // we only add the orderby if we're not counting.
       if ($this->orderby) {
         foreach ($this->orderby as $order) {
-          $query->orderBy($order['field'], $order['direction']);
+          if ($order['field'] == 'rand_') {
+            $query->orderRandom();
+          }
+          else {
+            $query->orderBy($order['field'], $order['direction']);
+          }
         }
       }
     }
@@ -1273,9 +1279,18 @@ class views_plugin_query_default extends views_plugin_query {
     $items = array();
     if ($query) {
       $additional_arguments = module_invoke_all('views_query_substitutions', $view);
+
+      // Count queries must be run through the preExecute() method.
+      // If not, then hook_query_node_access_alter() may munge the count by
+      // adding a distinct against an empty query string
+      // (e.g. COUNT DISTINCT(1) ...) and no pager will return.
+      // See pager.inc > PagerDefault::execute()
+      // http://api.drupal.org/api/drupal/includes--pager.inc/function/PagerDefault::execute/7
+      // See http://drupal.org/node/1046170.
+      $count_query->preExecute();
+
       // Build the count query.
       $count_query = $count_query->countQuery();
-      //  $count_query->distinct = FALSE;
 
       // Add additional arguments as a fake condition.
       // XXX: this doesn't work... because PDO mandates that all bound arguments
