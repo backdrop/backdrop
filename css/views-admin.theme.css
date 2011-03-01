@@ -161,8 +161,12 @@ fieldset.box-padding {
   border: none;
 }
 
+.views-admin fieldset fieldset {
+  margin-bottom: 0;
+}
+
 .form-item {
-  margin-top: 15px;
+  margin-top: 6px;
   padding-bottom: 0;
   padding-top: 0;
 }
@@ -177,11 +181,6 @@ input.form-radio {
   margin-left: 1em; /* LTR */
 }
 
-/*.fieldset-wrapper > * + *,
-.form-wrapper > * + * {
-  margin-top: 15px;
-}*/
-
 .container-inline {
   padding-top: 15px;
 }
@@ -189,6 +188,11 @@ input.form-radio {
 .container-inline > * + *,
 .container-inline .fieldset-wrapper > * + * {
   padding-left: 4pt; /* LTR */
+}
+
+.views-admin fieldset fieldset.container-inline {
+  margin-top: 6px;
+  padding-top: 0;
 }
 
 .views-admin .form-type-checkbox + .form-wrapper {
@@ -300,6 +304,11 @@ th.views-ui-operations {
 
 .form-item-description-enable label {
   font-weight: bold;
+}
+
+/* This makes the form elements after the "Display Format" label flow underneath the label */
+#edit-page-style [for="edit-page-style-style-plugin"] {
+  display: block;
 }
 
 /* @end */
