@@ -1974,6 +1974,12 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   // Create an array of actions to pass to theme_links
   $actions = array();
   $count_handlers = count($display->handler->get_handlers($type));
+  $actions['add'] = array(
+    'title' => t('Add'),
+    'href' => "admin/structure/views/nojs/add-item/$view->name/$display->id/$type",
+    'attributes'=> array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type),
+    'html' => TRUE,
+  );
   if ($count_handlers > 1) {
     $actions['rearrange'] = array(
       'title' => $rearrange_text,
@@ -1982,12 +1988,6 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       'html' => TRUE,
     );
   }
-  $actions['add'] = array(
-    'title' => t('Add'),
-    'href' => "admin/structure/views/nojs/add-item/$view->name/$display->id/$type",
-    'attributes'=> array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type),
-    'html' => TRUE,
-  );
   if ($count_handlers > 0) {
     $actions['delete'] = array(
       'title' => t('Delete'),
