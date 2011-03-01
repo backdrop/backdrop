@@ -42,7 +42,7 @@ class views_handler_area_view extends views_handler_area {
       '#type' => 'checkbox',
       '#title' => t('Inherit contextual filters'),
       '#default_value' => $this->options['inherit_arguments'],
-      '#description' => t('If checked, this view will recive the same contextual filters as its parent.'),
+      '#description' => t('If checked, this view will receive the same contextual filters as its parent.'),
     );
   }
 
