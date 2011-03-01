@@ -1481,7 +1481,7 @@ function views_ui_get_display_tab_details($view, $display) {
 
   // The third column buckets are wrapped in a CTools collapsible div
   $build['columns']['third']['#theme_wrappers'] = array('container');
-  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third', 'ctools-collapsible-container', 'ctools-collapsed',));
+  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third', 'ctools-collapsible-container', 'ctools-collapsed', 'ctools-collapsible-remember',));
   $build['columns']['third']['advanced'] = array('#markup' => '<h3 class="ctools-collapsible-handle">' . t('Advanced') . '</h3>',);
   $build['columns']['third']['collapse']['#theme_wrappers'] = array('container');
   $build['columns']['third']['collapse']['#attributes'] = array('class' => array('ctools-collapsible-content',),);
