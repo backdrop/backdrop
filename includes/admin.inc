@@ -3731,7 +3731,7 @@ function views_ui_item_delete_form_submit($form, &$form_state) {
   foreach ($form_state['values'] as $field => $info) {
     // add each value that is a field, but only if
     // it has had its 'removed' checkbox checked.
-    if (is_array($info) && empty($info['removed'])) {
+    if (isset($form['fields'][$field]) && empty($info['removed'])) {
       $order[$field] = $field;
     }
   }
