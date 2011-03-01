@@ -756,7 +756,7 @@ div.views-filterable-options .form-type-checkbox .description {
 }
 
 .views-ui-dialog .views-override {
-  padding: 8px 13px;
+  padding: 0 13px 8px;
 }
 
 .views-ui-dialog .views-override > * {
