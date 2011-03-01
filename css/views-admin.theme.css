@@ -524,25 +524,32 @@ td.group-title {
 }
 
 #edit-display-preview-controls > .form-type-checkbox {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 #edit-display-preview-controls > .form-type-textfield {
   margin-top: 5px;
 }
 
+#edit-display-preview-controls .arguments-preview {
+  font-size: 1em;
+}
+
 #edit-display-preview-controls .arguments-preview,
-#edit-display-preview-controls .arguments-preview + .form-item {
+#edit-display-preview-controls .form-type-textfield {
   margin-left: 14px;
 }
 
 #edit-display-preview-controls .form-type-textfield label {
-  position: absolute;
+  display: inline-block;
+  float: left;
+  font-weight: normal;
+  height: 6ex;
+  margin-right: 0.75em;
 }
 
-#edit-display-preview-controls .form-type-textfield input, 
 #edit-display-preview-controls .form-type-textfield .description {
-  margin-left: 194px;  
+  white-space: nowrap;
 }
 
 /* @end */

@@ -56,6 +56,10 @@ fieldset fieldset {
   padding-top: 2.5em;
 }
 
+.form-item label.option {
+  font-size: 1em;
+}
+
 .views-admin input.form-submit,
 .views-ui-dialog input.form-submit,
 .views-admin a.button,
