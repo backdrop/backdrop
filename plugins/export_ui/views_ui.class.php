@@ -181,6 +181,13 @@ class views_ui extends ctools_export_ui {
 
     $info = theme('views_ui_view_info', array('view' => $view, 'base' => $base));
 
+    // Reorder the operations so that enable is the default action for a templatic views
+    if (!empty($operations['enable'])) {
+      $enable = $operations['enable'];
+      unset($operations['enable']);
+      array_unshift($operations, $enable);
+    }
+
     // Set up sorting
     switch ($form_state['values']['order']) {
       case 'disabled':
