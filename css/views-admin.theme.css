@@ -311,10 +311,19 @@ th.views-ui-operations {
   margin-top: 13px;
 }
 
+.form-item-page-create label,
+.form-item-block-create label {
+  font-weight: bold;
+}
+
 /* This makes the form elements after the "Display Format" label flow underneath the label */
 .form-item-page-style-style-plugin > label,
 .form-item-block-style-style-plugin > label {
   display: block;
+}
+
+.views-attachment .options-set label {
+  font-weight: normal;
 }
 
 /* @end */

@@ -79,6 +79,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $form['displays']['page'] = array(
       '#type' => 'fieldset',
+      '#attributes' => array('class' => array('views-attachment'),),
       '#tree' => TRUE,
     );
     $form['displays']['page']['create'] = array(
@@ -92,6 +93,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // can be hidden en masse when the "Create a page" checkbox is unchecked.
     $form['displays']['page']['options'] = array(
       '#type' => 'container',
+      '#attributes' => array('class' => array('options-set'),),
       '#states' => array(
         'visible' => array(
           ':input[name="page[create]"]' => array('checked' => TRUE),
@@ -202,6 +204,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $form['displays']['block'] = array(
       '#type' => 'fieldset',
+      '#attributes' => array('class' => array('views-attachment'),),
       '#tree' => TRUE,
     );
     $form['displays']['block']['create'] = array(
@@ -214,6 +217,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // can be hidden en masse when the "Create a block" checkbox is unchecked.
     $form['displays']['block']['options'] = array(
       '#type' => 'container',
+      '#attributes' => array('class' => array('options-set'),),
       '#states' => array(
         'visible' => array(
           ':input[name="block[create]"]' => array('checked' => TRUE),
