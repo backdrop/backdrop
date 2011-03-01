@@ -84,7 +84,7 @@ function views_views_plugins() {
     'style' => array(
       // Default settings for all style plugins.
       'default' => array(
-        'title' => t('Unformatted'),
+        'title' => t('Unformatted list'),
         'help' => t('Displays rows one after another.'),
         'handler' => 'views_plugin_style_default',
         'theme' => 'views_view_unformatted',
@@ -96,7 +96,7 @@ function views_views_plugins() {
         'help topic' => 'style-unformatted',
       ),
       'list' => array(
-        'title' => t('HTML List'),
+        'title' => t('HTML list'),
         'help' => t('Displays rows as an HTML list.'),
         'handler' => 'views_plugin_style_list',
         'theme' => 'views_view_list',

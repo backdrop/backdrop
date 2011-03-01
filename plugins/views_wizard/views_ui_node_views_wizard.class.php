@@ -4,11 +4,11 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function row_style_options($type) {
     $options = array();
-    $options['full_posts'] = t('full posts');
     $options['teasers'] = t('teasers');
-    $options['titles_linked'] = t('titles linked');
+    $options['full_posts'] = t('full posts');
     $options['titles'] = t('titles');
-    $options['fields'] = t('Fields');
+    $options['titles_linked'] = t('titles (linked)');
+    $options['fields'] = t('fields');
     return $options;
   }
 
