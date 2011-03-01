@@ -92,6 +92,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1075598 by paranojik: small fix for the single argument case.
 #1053164 by dereine: Support random sort for sqlite by using dbtng functionality.
 #1073862 by solotandem: Title of columns from field revision tables shouldn't have the name delta.
+#1042072 by das-peter: Fix notice in views_handler_field_field.
 
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
