@@ -357,6 +357,16 @@ td.group-title {
   padding-right: 10px;
 }
 
+/* This keeps the collapsible fieldsets of options from crashing into the bottom
+ * of the edit option columns. Because the edit option columns are floated, the collapsible
+ * fieldsets need to be floated as well so that the margin above the fieldset interacts with
+ * the float edit option columns.
+ */
+#edit-options .collapsible {
+  float: left;
+  width: 100%;
+}
+
 #edit-options-more {
   clear: both;
 }
