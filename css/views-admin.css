@@ -301,6 +301,7 @@ html.js span.js-only {
   left: 45%;
   position: fixed;
   top: 45%;
+  z-index: 1000;
 }
 .views-admin .ajax-progress-throbber .message {
   display: none;
@@ -311,6 +312,7 @@ html.js span.js-only {
   left: 45%;
   position: fixed;
   top: 45%;
+  z-index: 1000;
 }
 #views-ajax-popup .ajax-progress-throbber .message {
   display: none;
