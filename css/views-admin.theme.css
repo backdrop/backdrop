@@ -611,6 +611,11 @@ td.group-title {
   border-bottom: medium none;
 }
 
+.views-display-setting .views-ajax-link {
+  margin-left: 0.2083em;
+  margin-right: 0.2083em;
+}
+
 /* @end */
 
 /* @group Attachment bucket overridden
