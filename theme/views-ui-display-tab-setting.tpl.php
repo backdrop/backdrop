@@ -9,8 +9,7 @@
   <?php if ($description): ?>
     <span class="label"><?php print $description; ?></span>
   <?php endif; ?>
-  <?php print $link; ?>
-  <?php if ($settings): ?>
-    <span class="views-ajax-link">&nbsp;|&nbsp;</span> <?php print $settings; ?>
+  <?php if ($settings_links): ?>
+    <?php print $settings_links; ?>
   <?php endif; ?>
 </div>

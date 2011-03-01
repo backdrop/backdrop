@@ -1591,7 +1591,9 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   $variables['zebra'] = ($zebra % 2 === 0 ? 'odd' : 'even');
   $zebra++;
 
-  $variables['settings'] = implode($variables['settings_links']);
+  // Put the main link to the left side
+  array_unshift($variables['settings_links'], $variables['link']);
+  $variables['settings_links'] = implode('<span class="views-ajax-link">&nbsp;|&nbsp;</span>', $variables['settings_links']);
 
   // Add classes associated with this display tab to the overall list.
   $variables['classes_array'] = array_merge($variables['classes_array'], $variables['class']);
@@ -2082,13 +2084,11 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
     }
 
     if ($display->handler->use_group_by()) {
-      // @TODO: #links is no longer being used?
-      $build['fields'][$id]['#links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
+      $build['fields'][$id]['#settings_links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
     }
 
     if ($handler->has_extra_options()) {
-      // @TODO: #links is no longer being used?
-      $build['fields'][$id]['#links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+      $build['fields'][$id]['#settings_links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
     }
 
     if ($grouping) {
