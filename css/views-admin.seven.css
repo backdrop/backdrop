@@ -214,6 +214,15 @@ table th {
 
 /* @end */
 
+/* @group Add view */
+
+.form-item-page-create,
+.form-item-block-create {
+  margin-top: 13px;
+}
+
+/* @end */
+
 /* @group Attachments */
 
 .views-displays .secondary {

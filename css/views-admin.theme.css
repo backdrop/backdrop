@@ -306,8 +306,14 @@ th.views-ui-operations {
   font-weight: bold;
 }
 
+.form-item-page-create,
+.form-item-block-create {
+  margin-top: 13px;
+}
+
 /* This makes the form elements after the "Display Format" label flow underneath the label */
-#edit-page-style [for="edit-page-style-style-plugin"] {
+.form-item-page-style-style-plugin > label,
+.form-item-block-style-style-plugin > label {
   display: block;
 }
 
