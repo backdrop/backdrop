@@ -1125,6 +1125,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#default_value' => !variable_get('views_ui_disable_live_preview', 0),
     );
 
+    // Add the arguments textfield
+    $form['displays']['settings']['settings_content']['preview_controls']['view_args'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Preview with contextual filters:'),
+      '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
+      '#id' => 'preview-args',
+    );
+
     // Add the preview button
     $form['displays']['settings']['settings_content']['preview_controls']['button'] = array(
       '#type' => 'submit',
@@ -1147,14 +1155,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       // @todo This only works for JS users. To make this work for nojs users,
       //   we may need to split Preview into a separate form.
       '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
-    );
-
-    // Add the arguments textfield
-    $form['displays']['settings']['settings_content']['preview_controls']['view_args'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Preview with contextual filters:'),
-      '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
-      '#id' => 'preview-args',
     );
 
     // The live preview.
