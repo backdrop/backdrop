@@ -4,8 +4,8 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function row_style_options($type) {
     $options = array();
-    $options['comment'] = t('Comments');
-    $options['fields'] = t('Fields');
+    $options['comment'] = t('comments');
+    $options['fields'] = t('fields');
     return $options;
   }
 
