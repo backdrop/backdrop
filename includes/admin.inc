@@ -2153,7 +2153,25 @@ function views_ui_regenerate_tab(&$view, &$output, $display_id) {
   }
 
   $build = views_ui_get_display_tab($view, $display_id);
+  views_ui_add_microweights($build);
   $output[] = ajax_command_html('#views-tab-' . $display_id, drupal_render($build));
+}
+
+/**
+ * Recursively adds microweights to a render array, similar to what form_builder() does for forms.
+ *
+ * @todo Submit a core patch to fix drupal_render() to do this, so that all
+ *   render arrays automatically preserve array insertion order, as forms do.
+ */
+function views_ui_add_microweights(&$build) {
+  $count = 0;
+  foreach (element_children($build) as $key) {
+    if (!isset($build[$key]['#weight'])) {
+      $build[$key]['#weight'] = $count/1000;
+    }
+    views_ui_add_microweights($build[$key]);
+    $count++;
+  }
 }
 
 /**
