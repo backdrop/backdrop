@@ -67,7 +67,7 @@ function views_ui_menu() {
   ) + $base;
 
   // The primary Edit View page. Secondary tabs for each Display are added in
-  // view_ui_menu_local_tasks_alter().
+  // views_ui_menu_local_tasks_alter().
   $items['admin/structure/views/view/%views_ui_cache'] = array(
     'title callback' => 'views_ui_edit_page_title',
     'title arguments' => array(4),
@@ -80,9 +80,9 @@ function views_ui_menu() {
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'weight' => -10,
   ) + $base;
-  $items['admin/structure/views/view/%views_ui_cache/edit/ajax'] = array(
+  $items['admin/structure/views/view/%views_ui_cache/edit/%/ajax'] = array(
     'page callback' => 'views_ui_ajax_get_form',
-    'page arguments' => array('views_ui_edit_form', 4),
+    'page arguments' => array('views_ui_edit_form', 4, 6),
     'delivery callback' => 'ajax_deliver',
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,

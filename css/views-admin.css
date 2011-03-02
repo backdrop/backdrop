@@ -298,9 +298,10 @@ html.js span.js-only {
 
 /* Base Page */
 .views-admin .ajax-progress-throbber {
-  left: 45%;
+  /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
+  left: 49%;
   position: fixed;
-  top: 45%;
+  top: 48.5%;
   z-index: 1000;
 }
 .views-admin .ajax-progress-throbber .message {
@@ -309,9 +310,10 @@ html.js span.js-only {
 
 /* Modal */
 #views-ajax-popup .ajax-progress-throbber {
-  left: 45%;
+  /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
+  left: 49%;
   position: fixed;
-  top: 45%;
+  top: 48.5%;
   z-index: 1000;
 }
 #views-ajax-popup .ajax-progress-throbber .message {
