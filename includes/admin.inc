@@ -1486,7 +1486,16 @@ function views_ui_get_display_tab_details($view, $display) {
 
   // The third column buckets are wrapped in a CTools collapsible div
   $build['columns']['third']['#theme_wrappers'] = array('container');
-  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third', 'ctools-collapsible-container', 'ctools-collapsed', 'ctools-collapsible-remember',));
+  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third', 'ctools-collapsible-container', 'ctools-collapsible-remember'));
+  // Specify an id that won't change after AJAX requests, so ctools can keep
+  // track of the user's preferred collapsible state. Use the same id across
+  // different displays of the same view, so changing displays doesn't
+  // recollapse the column.
+  $build['columns']['third']['#attributes']['id'] = 'views-ui-advanced-column-' . $view->name;
+  // Collapse the div by default.
+  if (!variable_get('views_ui_show_advanced_column', FALSE)) {
+    $build['columns']['third']['#attributes']['class'][] = 'ctools-collapsed';
+  }
   $build['columns']['third']['advanced'] = array('#markup' => '<h3 class="ctools-collapsible-handle">' . t('Advanced') . '</h3>',);
   $build['columns']['third']['collapse']['#theme_wrappers'] = array('container');
   $build['columns']['third']['collapse']['#attributes'] = array('class' => array('ctools-collapsible-content',),);
@@ -4503,6 +4512,13 @@ function views_ui_admin_settings_defaults() {
     '#description' => t('Legacy users of views may choose to see the master (i.e. default) display.'),
     '#default_value' => variable_get('views_ui_show_master_display', FALSE),
   );
+  $form['edit_view_form']['views_ui_show_advanced_column'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Always show advanced display settings'),
+    '#description' => t('Default to showing advanced display settings, such as relationships and contextual filters.'),
+    '#default_value' => variable_get('views_ui_show_advanced_column', FALSE),
+  );
+
   $form['edit_view_form']['views_exposed_filter_any_label'] = array(
     '#type' => 'select',
     '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
