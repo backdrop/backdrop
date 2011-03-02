@@ -564,10 +564,14 @@ class views_handler_argument extends views_handler {
       '#dependency' => array('radio:options[default_action]' => array('summary')),
     );
     $form['summary']['number_of_records'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Number of records'),
+      '#type' => 'radios',
+      '#title' => t('Sort by'),
       '#default_value' => $this->options['summary']['number_of_records'],
-      '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
+      '#options' => array(
+        0 => $this->get_sort_name(),
+        1 => t('Number of records')
+      ),
+      '#process' => array('form_process_radios', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[default_action]' => array('summary')),
     );
 
@@ -1101,6 +1105,16 @@ class views_handler_argument extends views_handler {
       $plugin->init($this->view, $this, $options);
       return $plugin;
     }
+  }
+
+  /**
+   * Return a description of how the argument would normally be sorted.
+   *
+   * Subclasses should override this to specify what the default sort order of
+   * their argument is (e.g. alphabetical, numeric, date).
+   */
+  function get_sort_name() {
+    return t('Default sort', array(), array('context' => 'Sort order'));
   }
 }
 

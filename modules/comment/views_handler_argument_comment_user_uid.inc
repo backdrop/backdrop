@@ -52,4 +52,8 @@ class views_handler_argument_comment_user_uid extends views_handler_argument {
 
     $this->query->add_where(0, $condition);
   }
+
+  function get_sort_name() {
+    return t('Numerical', array(), array('context' => 'Sort order'));
+  }
 }

@@ -94,4 +94,8 @@ class views_handler_argument_numeric extends views_handler_argument {
       $this->query->add_where_expression(0, "$this->table_alias.$this->real_field $operator $placeholder $null_check", array($placeholder => $this->argument));
     }
   }
+
+  function get_sort_name() {
+    return t('Numerical', array(), array('context' => 'Sort order'));
+  }
 }

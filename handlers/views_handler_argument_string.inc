@@ -260,6 +260,10 @@ class views_handler_argument_string extends views_handler_argument {
     }
   }
 
+  function get_sort_name() {
+    return t('Alphabetical', array(), array('context' => 'Sort order'));
+  }
+
   function title() {
     $this->argument = $this->case_transform($this->argument, 'case');
     if (!empty($this->options['transform_dash'])) {

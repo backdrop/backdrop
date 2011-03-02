@@ -62,4 +62,8 @@ class views_handler_argument_date extends views_handler_argument_formula {
 
     return parent::get_default_argument($raw);
   }
+
+  function get_sort_name() {
+    return t('Date', array(), array('context' => 'Sort order'));
+  }
 }
