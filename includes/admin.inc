@@ -1380,6 +1380,9 @@ function views_ui_get_display_tab($view, $display_id) {
   else {
     $build['details'] = views_ui_get_display_tab_details($view, $display);
   }
+  // In AJAX context, views_ui_regenerate_tab() returns this outside of form
+  // context, so hook_form_views_ui_edit_form_alter() is insufficient.
+  drupal_alter('views_ui_display_tab', $build, $view, $display_id);
   return $build;
 }
 
