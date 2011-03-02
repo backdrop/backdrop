@@ -14,7 +14,7 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
     $style_form =& $form['displays'][$type]['options']['style'];
     // Some style plugins don't support row plugins so stop here if that's the
     // case.
-    if (!isset($style_form['row_plugin'])) {
+    if (!isset($style_form['row_plugin']['#default_value'])) {
       return;
     }
     $row_plugin = $style_form['row_plugin']['#default_value'];
