@@ -784,13 +784,13 @@ Drupal.behaviors.viewsImplicitFormSubmission.attach = function (context, setting
 };
 
 /**
- * Remove icon class from elements that are themed as buttons or dropbuttons
+ * Remove icon class from elements that are themed as buttons or dropbuttons.
  */
 Drupal.behaviors.viewsRemoveIconClass = {};
 Drupal.behaviors.viewsRemoveIconClass.attach = function (context, settings) {
-  var $ = jQuery;
-  $('.ctools-button', context).once('RemoveIconClass', function () {
-    $this = $(this);
+  jQuery('.ctools-button', context).once('RemoveIconClass', function () {
+    var $ = jQuery;
+    var $this = $(this);
     $('.icon', $this).removeClass('icon');
     $('.horizontal', $this).removeClass('horizontal');
   });
