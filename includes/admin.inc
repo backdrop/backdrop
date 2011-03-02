@@ -1612,6 +1612,13 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   // Add classes associated with this display tab to the overall list.
   $variables['classes_array'] = array_merge($variables['classes_array'], $variables['class']);
 
+  if (!empty($variables['defaulted'])) {
+    $variables['classes_array'][] = 'defaulted';
+  }
+  if (!empty($variables['overridden'])) {
+    $variables['classes_array'][] = 'overridden';
+  }
+
   // Append a colon to the description, if requested.
   if ($variables['description'] && $variables['description_separator']) {
     $variables['description'] .= t(':');

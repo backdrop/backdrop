@@ -635,6 +635,7 @@ td.group-title {
  * header specifically with the broken link icon.
  */
  
+.views-ui-display-tab-setting.overridden,
 .views-ui-display-tab-bucket.overridden > h3 {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
@@ -643,6 +644,7 @@ td.group-title {
   overflow: hidden;
   padding-left: 21px;
   zoom: 1;
+  margin-left: 4px;
 }
 
 .views-ui-display-tab-bucket.overridden .views-display-setting {
