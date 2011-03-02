@@ -285,6 +285,9 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#theme_wrappers' => array('container'),
       );
     }
+    elseif ($style_plugin->uses_fields()) {
+      $style_form['row_plugin'] = array('#markup' => '<span>' . t('of fields') . '</span>');
+    }
   }
 
   /**
