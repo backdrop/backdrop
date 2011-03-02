@@ -23,7 +23,7 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
         $style_form['row_options']['links'] = array(
           '#type' => 'select',
           '#title_display' => 'invisible',
-          '#title' => t('Should links be displayed below each node'),
+          '#title' => t('Should links be displayed below each comment'),
           '#options' => array(
             1 => t('with links (allow users to add comments, etc.)'),
             0 => t('without links'),
@@ -74,10 +74,14 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
     $display_options['relationships']['nid']['field'] = 'nid';
     $display_options['relationships']['nid']['required'] = 1;
 
+    // Remove the default fields, since we are customizing them here.
+    unset($display_options['fields']);
+
     /* Field: Comment: Title */
     $display_options['fields']['subject']['id'] = 'subject';
     $display_options['fields']['subject']['table'] = 'comment';
     $display_options['fields']['subject']['field'] = 'subject';
+    $display_options['fields']['subject']['label'] = '';
     $display_options['fields']['subject']['alter']['alter_text'] = 0;
     $display_options['fields']['subject']['alter']['make_link'] = 0;
     $display_options['fields']['subject']['alter']['absolute'] = 0;

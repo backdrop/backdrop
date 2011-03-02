@@ -8,10 +8,14 @@ class ViewsUiUsersViewsWizard extends ViewsUiBaseViewsWizard {
     $display_options['access']['type'] = 'perm';
     $display_options['access']['perm'] = 'access user profiles';
 
+    // Remove the default fields, since we are customizing them here.
+    unset($display_options['fields']);
+
     /* Field: User: Name */
     $display_options['fields']['name']['id'] = 'name';
     $display_options['fields']['name']['table'] = 'users';
     $display_options['fields']['name']['field'] = 'name';
+    $display_options['fields']['name']['label'] = '';
     $display_options['fields']['name']['alter']['alter_text'] = 0;
     $display_options['fields']['name']['alter']['make_link'] = 0;
     $display_options['fields']['name']['alter']['absolute'] = 0;

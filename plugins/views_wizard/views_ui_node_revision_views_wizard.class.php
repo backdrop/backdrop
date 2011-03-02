@@ -9,6 +9,9 @@ class ViewsUiNodeRevisionViewsWizard extends ViewsUiNodeViewsWizard {
     $display_options['access']['type'] = 'perm';
     $display_options['access']['perm'] = 'view revisions';
 
+    // Remove the default fields, since we are customizing them here.
+    unset($display_options['fields']);
+
     /* Field: Content revision: Created date */
     $display_options['fields']['timestamp']['id'] = 'timestamp';
     $display_options['fields']['timestamp']['table'] = 'node_revision';
@@ -28,6 +31,7 @@ class ViewsUiNodeRevisionViewsWizard extends ViewsUiNodeViewsWizard {
     $display_options['fields']['title']['id'] = 'title';
     $display_options['fields']['title']['table'] = 'node_revision';
     $display_options['fields']['title']['field'] = 'title';
+    $display_options['fields']['title']['label'] = '';
     $display_options['fields']['title']['alter']['alter_text'] = 0;
     $display_options['fields']['title']['alter']['make_link'] = 0;
     $display_options['fields']['title']['alter']['absolute'] = 0;

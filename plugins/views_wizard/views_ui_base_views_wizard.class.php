@@ -275,7 +275,11 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#options' => $options,
         '#access' => count($options) > 1,
       );
-      $style_form['row_plugin']['#default_value'] = views_ui_get_selected($form_state, array($type, 'style', 'row_plugin'), key($options), $style_form['row_plugin']);
+      // For the block display, the default value should be "titles (linked)",
+      // if it's available (since that's the most common use case).
+      $block_with_linked_titles_available = ($type == 'block' && isset($options['titles_linked']));
+      $default_value = $block_with_linked_titles_available ? 'titles_linked' : key($options);
+      $style_form['row_plugin']['#default_value'] = views_ui_get_selected($form_state, array($type, 'style', 'row_plugin'), $default_value, $style_form['row_plugin']);
       // Changing this dropdown updates the individual row options via AJAX.
       views_ui_add_ajax_trigger($style_form, 'row_plugin', array('displays', $type, 'options', 'style', 'row_options'));
 

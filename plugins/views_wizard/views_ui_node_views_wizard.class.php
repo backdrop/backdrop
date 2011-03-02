@@ -57,12 +57,16 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
     // Add permission-based access control.
     $display_options['access']['type'] = 'perm';
 
+    // Remove the default fields, since we are customizing them here.
+    unset($display_options['fields']);
+
     // Add the title field, so that the display has content if the user switches
     // to a row style that uses fields.
     /* Field: Content: Title */
     $display_options['fields']['title']['id'] = 'title';
     $display_options['fields']['title']['table'] = 'node';
     $display_options['fields']['title']['field'] = 'title';
+    $display_options['fields']['title']['label'] = '';
     $display_options['fields']['title']['alter']['alter_text'] = 0;
     $display_options['fields']['title']['alter']['make_link'] = 0;
     $display_options['fields']['title']['alter']['absolute'] = 0;
