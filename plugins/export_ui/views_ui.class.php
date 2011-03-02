@@ -183,9 +183,7 @@ class views_ui extends ctools_export_ui {
 
     // Reorder the operations so that enable is the default action for a templatic views
     if (!empty($operations['enable'])) {
-      $enable = $operations['enable'];
-      unset($operations['enable']);
-      array_unshift($operations, $enable);
+      $operations = array('enable' => $operations['enable']) + $operations;
     }
 
     // Set up sorting
