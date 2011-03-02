@@ -368,24 +368,26 @@ Drupal.viewsUi.OptionsSearch.prototype.handleKeyup = function (event) {
   }
 };
 
+
 Drupal.behaviors.viewsUiPreview = {};
 Drupal.behaviors.viewsUiPreview.attach = function (context, settings) {
   var $ = jQuery;
-  var argumentsBucket = $('.views-display-column .arguments', context);
 
   // Only act on the edit view form.
-  if (argumentsBucket.length == 0) {
+  var contextualFiltersBucket = $('.views-display-column .views-ui-display-tab-bucket.contextual-filters', context);
+  if (contextualFiltersBucket.length == 0) {
     return;
   }
 
-  // If the display has no arguments, hide the form where you enter arguments
-  // for the live preview.
-  var arguments = $('.views-display-column .arguments .views-display-setting a', context);
-  if (arguments.length) {
-    $('.form-item-displays-preview-form-view-args').show();
+  // If the display has no contextual filters, hide the form where you enter
+  // the contextual filters for the live preview. If it has contextual filters,
+  // show the form.
+  var contextualFilters = $('.views-display-setting a', contextualFiltersBucket);
+  if (contextualFilters.length) {
+    $('.form-item-displays-settings-settings-content-preview-controls-view-args').show();
   }
   else {
-    $('.form-item-displays-preview-form-view-args').hide();
+    $('.form-item-displays-settings-settings-content-preview-controls-view-args').hide();
   }
 };
 
