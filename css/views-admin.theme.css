@@ -195,8 +195,10 @@ input.form-radio {
   padding-top: 0;
 }
 
-.views-admin .form-type-checkbox + .form-wrapper {
-  margin-left: 16px;
+/* Indent form elements so they're directly underneath the label of the checkbox that reveals them */
+.views-admin .form-type-checkbox + .form-wrapper,
+.views-admin .form-type-checkbox + .views-ui-ajax-wrapper {
+  margin-left: 16px; /* LTR */
 }
 
 /* Hide 'remove' checkboxes. This might be scoped too widely. */

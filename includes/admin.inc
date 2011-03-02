@@ -628,7 +628,7 @@ function views_ui_add_ajax_wrapper($element, &$form_state) {
       '#prefix' => '',
       '#suffix' => '',
     );
-    $refresh_element['#prefix'] = '<div id="' . $id . '">' . $refresh_element['#prefix'];
+    $refresh_element['#prefix'] = '<div id="' . $id . '" class="views-ui-ajax-wrapper">' . $refresh_element['#prefix'];
     $refresh_element['#suffix'] .= '</div>';
 
     // Copy the element that needs to be refreshed back into the form, with our
