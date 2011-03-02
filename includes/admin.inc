@@ -495,8 +495,8 @@ function views_ui_get_selected($form_state, $parents, $default_value, $element) 
  *   array('dynamic_content', 'section') for this parameter.
  */
 function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_parents) {
-  $seen_ids = &drupal_static(__FUNCTION__, array());
-  $seen_buttons = &drupal_static(__FUNCTION__, array());
+  $seen_ids = &drupal_static(__FUNCTION__ . ':seen_ids', array());
+  $seen_buttons = &drupal_static(__FUNCTION__ . ':seen_buttons', array());
 
   // Add the AJAX behavior to the triggering element.
   $triggering_element = &$wrapping_element[$trigger_key];
