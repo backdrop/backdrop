@@ -35,17 +35,17 @@
     }
   };
 
-  Drupal.ajax.prototype.commands.viewsDismissForm = function(ajax, response, status) {
+  Drupal.ajax.prototype.commands.viewsDismissForm = function (ajax, response, status) {
     Drupal.ajax.prototype.commands.viewsSetForm({}, {'title': '', 'output': Drupal.settings.views.ajax.defaultForm});
     $(Drupal.settings.views.ajax.popup).dialog('close');
   }
 
-  Drupal.ajax.prototype.commands.viewsHilite = function(ajax, response, status) {
+  Drupal.ajax.prototype.commands.viewsHilite = function (ajax, response, status) {
     $('.hilited').removeClass('hilited');
     $(response.selector).addClass('hilited');
   };
 
-  Drupal.ajax.prototype.commands.viewsAddTab = function(ajax, response, status) {
+  Drupal.ajax.prototype.commands.viewsAddTab = function (ajax, response, status) {
     var id = '#views-tab-' + response.id;
     $('#views-tabset').viewsAddTab(id, response.title, 0);
     $(id).html(response.body).addClass('views-tab');
@@ -59,16 +59,33 @@
     $('#views-tabset').viewsClickTab(instance.$tabs.length);
   };
 
-  Drupal.ajax.prototype.commands.viewsShowButtons = function(ajax, response, status) {
+  Drupal.ajax.prototype.commands.viewsShowButtons = function (ajax, response, status) {
     $('div.views-edit-view div.form-actions').removeClass('js-hide');
     $('div.views-edit-view div.view-changed.messages').removeClass('js-hide');
-  }
+  };
 
-  Drupal.ajax.prototype.commands.viewsTriggerPreview = function(ajax, response, status) {
+  Drupal.ajax.prototype.commands.viewsTriggerPreview = function (ajax, response, status) {
     if ($('input#edit-displays-live-preview').is(':checked')) {
       $('#preview-submit').trigger('mousedown');
     }
-  }
+  };
+
+  Drupal.ajax.prototype.commands.viewsReplaceTitle = function (ajax, response, status) {
+    // In case we're in the overlay, get a reference to the underlying window.
+    var doc = parent.document;
+    // For the <title> element, make a best-effort attempt to replace the page
+    // title and leave the site name alone. If the theme doesn't use the site
+    // name in the <title> element, this will fail.
+    var oldTitle = doc.title;
+    // Escape the site name, in case it has special characters in it, so we can
+    // use it in our regex.
+    var escapedSiteName = response.siteName.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    var re = new RegExp('.+ (.) ' + escapedSiteName);
+    doc.title = oldTitle.replace(re, response.title + ' $1 ' + response.siteName);
+
+    $('h1.page-title').text(response.title);
+    $('h1#overlay-title').text(response.title);
+  };
 
   /**
    * Get rid of irritating tabledrag messages

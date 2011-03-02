@@ -988,6 +988,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
         ),
       ),
     '#links' => array(
+      'edit-details' => array(
+        'title' => t('edit name and description'),
+        'href' => "admin/structure/views/nojs/edit-details/$view->name",
+        'attributes' => array('class' => array('views-ajax-link')),
+      ),
       'analyze' => array(
         'title' => t('analyze'),
         'href' => "admin/structure/views/view/$view->name/analyze",
@@ -2478,6 +2483,10 @@ function views_ui_ajax_forms($key = NULL) {
       'form_id' => 'views_ui_config_style_form',
       'args' => array('type', 'id'),
     ),
+    'edit-details' => array(
+      'form_id' => 'views_ui_edit_details_form',
+      'args' => array(),
+    ),
   );
 
   if ($key) {
@@ -2584,11 +2593,9 @@ function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FAL
  * Generic entry point to handle forms.
  *
  * We do this for consistency and to make it easy to chain forms
- * together. This only works for forms that use both $view
- * and $display_id, so we have a couple of ajax forms that we don't
- * use with this system.
+ * together.
  */
-function views_ui_ajax_form($js, $key, $view, $display_id) {
+function views_ui_ajax_form($js, $key, $view, $display_id = '') {
   // Reset the cache of IDs. Drupal rather aggressively prevents id duplication
   // but this causes it to remember IDs that are no longer even being used.
   if (isset($_POST['ajax_html_ids'])) {
@@ -2662,8 +2669,15 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
       $output[] = views_ajax_command_dismiss_form();
       $output[] = views_ajax_command_show_buttons();
       $output[] = views_ajax_command_trigger_preview();
+      if (!empty($form_state['#page_title'])) {
+        $output[] = views_ajax_command_replace_title($form_state['#page_title']);
+      }
     }
-    views_ui_regenerate_tab($view, $output, $display_id);
+    // If this form was for view-wide changes, there's no need to regenerate
+    // the display section of the form.
+    if ($display_id !== '') {
+      views_ui_regenerate_tab($view, $output, $display_id);
+    }
   }
 
   return $js ? array('#type' => 'ajax', '#commands' => $output) : $output;
@@ -2937,6 +2951,59 @@ function views_ui_reorder_displays_button($form, &$form_state, $view) {
   );
 
   return $form;
+}
+
+/**
+ * Form builder to edit details of a view.
+ */
+function views_ui_edit_details_form($form, &$form_state) {
+  $view = &$form_state['view'];
+
+  $form['#title'] = t('View name and description');
+  $form['#section'] = 'details';
+
+  $form['details'] = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('class' => array('scroll')),
+  );
+  $form['details']['human_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Human-readable name'),
+    '#description' => t('A descriptive human-readable name for this view. Spaces are allowed'),
+    '#default_value' => $view->get_human_name(),
+  );
+  $form['details']['tag'] = array(
+    '#type' => 'textfield',
+    '#title' => t('View tag'),
+    '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
+    '#default_value' => $view->tag,
+    '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
+  );
+  $form['details']['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('View description'),
+    '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
+    '#default_value' => $view->description,
+  );
+
+  views_ui_standard_form_buttons($form, $form_state, 'views_ui_edit_details_form');
+  return $form;
+}
+
+/**
+ * Submit handler for views_ui_edit_details_form.
+ */
+function views_ui_edit_details_form_submit($form, &$form_state) {
+  $view = $form_state['view'];
+  foreach ($form_state['values'] as $key => $value) {
+    // Only save values onto the view if they're actual view properties
+    // (as opposed to 'op' or 'form_build_id').
+    if (isset($form['details'][$key])) {
+      $view->$key = $value;
+    }
+  }
+  $form_state['#page_title'] = views_ui_edit_page_title($view);
+  views_ui_cache_set($view);
 }
 
 /**

@@ -175,6 +175,21 @@ function views_ajax_command_trigger_preview() {
 }
 
 /**
+ * Replace the page title.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_replace_title($title) {
+  $command = array(
+    'command' => 'viewsReplaceTitle',
+    'title' => $title,
+    'siteName' => variable_get('site_name', 'Drupal'),
+  );
+  return $command;
+}
+
+/**
  * Return an AJAX error.
  */
 function views_ajax_error($message) {

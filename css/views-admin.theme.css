@@ -412,15 +412,6 @@ td.group-title {
   padding: 3px 9px;
 }
 
-#views-display-extra-actions .analyze {
-  border-color: #aaa;
-  border-style: solid;
-  border-width: 0 1px;
-  margin-right: 1px;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
 /* @end */
 
 /* @group Attachment details tabs
