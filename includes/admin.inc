@@ -1151,7 +1151,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#id' => 'preview-submit',
       '#submit' => array('views_ui_edit_form_submit_preview'),
       '#ajax' => array(
-        'path' => 'admin/structure/views/view/' . $view->name . '/edit/ajax',
+        'path' => 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id . '/ajax',
         'callback' => 'views_ui_preview_callback',
         'wrapper' => 'views-live-preview',
       ),
