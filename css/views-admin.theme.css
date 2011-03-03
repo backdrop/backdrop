@@ -985,3 +985,12 @@ div.views-filterable-options .form-type-checkbox .description {
 }
 
 /* @end */
+
+/* @group Drupal
+ *
+ * Overrides to Drupal system CSS
+ */
+div.messages {
+  margin-bottom: 18px;
+} 
+
