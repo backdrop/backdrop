@@ -26,6 +26,7 @@ files[] = handlers/views_handler_field_markup.inc
 files[] = handlers/views_handler_field_math.inc
 files[] = handlers/views_handler_field_numeric.inc
 files[] = handlers/views_handler_field_prerender_list.inc
+files[] = handlers/views_handler_field_serialized.inc
 files[] = handlers/views_handler_field_url.inc
 files[] = handlers/views_handler_filter.inc
 files[] = handlers/views_handler_filter_group_by_numeric.inc

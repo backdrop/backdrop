@@ -95,6 +95,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1042072 by das-peter: Fix notice in views_handler_field_field.
 #1078570 by duellj: Search filter doesn't work for attachments.
 #1068108 by boombatower: Allow row_class to contain multiple classes.
+#1078738 by dereine: Add a serialized data field handler and set users.data to it.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
