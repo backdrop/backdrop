@@ -246,6 +246,14 @@
 
 /* @end */
 
+/* @group Dependent */
+
+.dependent-options {
+  margin-left: 18px; /* LTR */
+}
+
+/* @end */
+
 /* @group Export */
 
 .ctools-export-ui-fourth-row input {
