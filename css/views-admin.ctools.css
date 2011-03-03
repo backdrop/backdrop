@@ -137,6 +137,10 @@
   padding-top: 4px;
 }
 
+.ctools-twisty:focus {
+  outline: medium none;
+}
+
 .views-display-top .ctools-button {
   font-size: 12px;
   position: absolute;
