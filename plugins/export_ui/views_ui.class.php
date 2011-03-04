@@ -296,6 +296,7 @@ class views_ui extends ctools_export_ui {
     if (!empty($form_state['executed'])) {
       $item->name = $form_state['values']['name'];
       $item->human_name = $form_state['values']['human_name'];
+      $item->vid = NULL;
       views_ui_cache_set($item);
 
       drupal_goto(ctools_export_ui_plugin_menu_path($this->plugin, 'edit', $item->name));
