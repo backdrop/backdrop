@@ -289,7 +289,7 @@ function list_field_views_data($field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
     foreach ($table_data as $field_name => $field_data) {
-      if (!in_array($field_name, array('table', 'entity_id', 'revision_id'))) {
+      if (!in_array($field_name, array('table', $field_name, $field_name . '-revision_id'))) {
         $data[$table_name][$field_name]['filter']['handler'] = 'views_handler_filter_field_list';
       }
     }
