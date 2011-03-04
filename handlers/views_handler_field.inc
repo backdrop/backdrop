@@ -380,17 +380,18 @@ class views_handler_field extends views_handler {
       ),
     );
 
+    $label = $this->label();
     $form['custom_label'] = array(
       '#type' => 'checkbox',
       '#title' => t('Create a label'),
       '#description' => t('Enable to create a custom label for this field.'),
-      '#default_value' => (bool) ($this->definition['title'] !== $this->label()),
+      '#default_value' => $label !== '',
     );
 
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
-      '#default_value' => isset($this->options['label']) ? $this->options['label'] : '',
+      '#default_value' => $label,
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-custom-label' => array(1)
@@ -401,7 +402,7 @@ class views_handler_field extends views_handler {
       '#type' => 'checkbox',
       '#title' => t('Place a colon after the label'),
       '#default_value' => $this->options['element_label_colon'],
-      '#process' => array('ctools_dependent_process'),
+      '#process' => array_merge(element_info_property('checkbox', '#process', array()), array('ctools_dependent_process')),
       '#dependency' => array(
         'edit-options-custom-label' => array(1)
       ),
