@@ -89,7 +89,12 @@ function views_ui_check_advanced_help() {
  * after processing the Edit form, a redirect is issued).
  */
 function views_ui_pre_render_preview($element) {
-  $element['#markup'] = views_ui_preview($element['#view'], $element['#display_id'], $element['#preview_args']);
+  $preview = views_ui_preview($element['#view'], $element['#display_id'], $element['#preview_args']);
+  // @todo HTML does not support a FORM inside a FORM. Remove this hack after
+  //   fixing Views UI to display the preview outside of the edit form, so that
+  //   we don't have to mess with the exposed widget form in this way.
+  $preview = preg_replace('@</?form.*?>@', '', $preview);
+  $element['#markup'] = $preview;
   return $element;
 }
 
@@ -133,6 +138,11 @@ function views_ui_preview($view, $display_id, $args = array()) {
         unset($exposed_input[$key]);
       }
     }
+    // @todo Remove this hack after fixing Views UI to display the preview
+    //   outside of the edit form, so that the edit form doesn't conflict with
+    //   the exposed widget form.
+    $exposed_input['form_id'] = 'views_exposed_form';
+    unset($exposed_input['form_build_id'], $exposed_input['form_token']);
 
     $view->set_exposed_input($exposed_input);
 
