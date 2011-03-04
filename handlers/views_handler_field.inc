@@ -384,7 +384,7 @@ class views_handler_field extends views_handler {
     $form['custom_label'] = array(
       '#type' => 'checkbox',
       '#title' => t('Create a label'),
-      '#description' => t('Enable to create a custom label for this field.'),
+      '#description' => t('Enable to create a label for this field.'),
       '#default_value' => $label !== '',
     );
 
