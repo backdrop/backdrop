@@ -1145,18 +1145,21 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     $options = array();
-    // Detect an external database.
+    $target = 'default';
+    $key = 'default';
+    // Detect an external database and set the 
     if (isset($this->view->base_database)) {
-      $options['target'] = $this->view->base_database;
+      $key = $this->view->base_database;
     }
 
     // Set the slave target if the slave option is set
     if (!empty($this->options['slave'])) {
-      $options['target'] = 'slave';
+      $target = 'slave';
     }
 
     // Go ahead and build the query.
-    $query = db_select($this->base_table, $this->base_table, $options)->addTag('views');
+    // db_select doesn't support to specify the key, so use getConnection directly.
+    $query = Database::getConnection($target, $key)->select($this->base_table, $this->base_table, $options)->addTag('views');
 
     $joins = $where = $having = $orderby = $groupby = '';
     $fields = $distinct = array();

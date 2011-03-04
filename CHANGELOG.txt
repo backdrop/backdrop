@@ -99,6 +99,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1051308 by dereine: Backport a test fix for views_handler_filter_date from d7v3ui.
 #1079496 by dereine: Fix renamed field names for list fields. This caused an additional filter, which didn't worked.
 #1080690 by dereine: Store the view object in the query object, so it can be used.
+#1080690 by dereine: Fix target/key for querying against sql databases. Therefore don't use db_select anymore.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
