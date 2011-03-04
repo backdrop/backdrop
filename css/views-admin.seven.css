@@ -97,6 +97,17 @@ fieldset fieldset {
   padding-top: 0;
 }
 
+/* @group Dependent options 
+ *
+ * Dependent options are identified in CTools dependent.js
+ */
+
+.dependent-options {
+  margin-left: 18px;
+}
+
+/* @end */
+
 /* @end */
 
 /* @group Lists */

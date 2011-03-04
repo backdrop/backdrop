@@ -517,13 +517,13 @@ class views_plugin_display_page extends views_plugin_display {
 
     $menu = $this->get_option('menu');
     if (!empty($menu['type']) && $menu['type'] != 'none' && empty($menu['title'])) {
-      $errors[] = t('Display @display is set to use a menu but the menu title is not set.', array('@display' => $this->display->display_title));
+      $errors[] = t('Display @display is set to use a menu but the menu link text is not set.', array('@display' => $this->display->display_title));
     }
 
     if ($menu['type'] == 'default tab') {
       $tab_options = $this->get_option('tab_options');
       if (!empty($tab_options['type']) && $tab_options['type'] != 'none' && empty($tab_options['title'])) {
-        $errors[] = t('Display @display is set to use a parent menu but the parent menu title is not set.', array('@display' => $this->display->display_title));
+        $errors[] = t('Display @display is set to use a parent menu but the parent menu link text is not set.', array('@display' => $this->display->display_title));
       }
     }
 

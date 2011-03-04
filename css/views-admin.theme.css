@@ -905,12 +905,6 @@ div.views-filterable-options .form-type-checkbox .description {
   margin-top: 18px;
 }
 
-#views-live-preview a,
-#views-live-preview a:link,
-#views-live-preview a:visited {
-  color: #000000;
-}
-
 #views-live-preview .preview-section {
   border: 1px dashed #DEDEDE;
   margin: 0 -5px;
@@ -991,3 +985,12 @@ div.views-filterable-options .form-type-checkbox .description {
 }
 
 /* @end */
+
+/* @group Drupal
+ *
+ * Overrides to Drupal system CSS
+ */
+div.messages {
+  margin-bottom: 18px;
+} 
+
