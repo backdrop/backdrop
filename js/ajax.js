@@ -173,6 +173,18 @@
         Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });
 
+      // Within a live preview, make exposed widget form buttons re-trigger the
+      // Preview button.
+      // @todo Revisit this after fixing Views UI to display a Preview outside
+      //   of the main Edit form.
+      $('div#views-live-preview input[type=submit]')
+        .once('views-ajax-processed').each(function () {
+        $(this).click(function(event) {
+          event.preventDefault();
+          $('#preview-submit').mousedown();
+        });
+      });
+
     }
   };
 
