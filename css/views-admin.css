@@ -221,10 +221,6 @@
 
 /* @group Settings forms */
 
-.views-dependent {
-  margin-left: 1.5em; /* LTR */
-}
-
 .views-display-setting .label,
 .views-display-setting .views-ajax-link {
   display: inline-block;

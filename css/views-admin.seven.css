@@ -56,7 +56,7 @@ fieldset fieldset {
   padding-top: 2.5em;
 }
 
-.form-item label.option {
+.views-admin .form-item label.option {
   font-size: 1em;
 }
 
@@ -80,9 +80,10 @@ fieldset fieldset {
   margin-top: 1.3em;
 }
 
-.form-item {
+.form-item,
+.form-item .form-item {
   margin-bottom: 0;
-  margin-top: 6px;
+  margin-top: 9px;
   padding-bottom: 0;
   padding-top: 0;
 }
@@ -97,13 +98,42 @@ fieldset fieldset {
   padding-top: 0;
 }
 
+.form-radios > .form-item {
+  margin-top: 3px;
+}
+
 /* @group Dependent options 
  *
  * Dependent options are identified in CTools dependent.js
  */
 
-.dependent-options {
-  margin-left: 18px;
+/* The .dependent-options.form-item is necessary to supercede the Seven .form-item
+ * reset declaration that sets the margin to zero.
+ */
+.dependent-options,
+.dependent-options.form-item,
+.form-item-options-expose-required,
+.form-item-options-expose-label {
+  margin-left: 1.2308em;
+}
+
+.views-admin-dependent .form-item .form-item,
+.views-admin-dependent .form-type-checkboxes,
+.views-admin-dependent .form-type-radios,
+.views-admin-dependent .dependent-options,
+.views-admin-dependent .form-item .form-item,
+.views-admin-dependent .dependent-options .form-type-select,
+.views-admin-dependent .dependent-options .form-type-textfield,
+.form-item-options-expose-required,
+.form-item-options-expose-label {
+  margin-bottom: 6px;
+  margin-top: 6px;
+}
+
+.views-admin-dependent .form-type-radio,
+.views-admin-dependent .form-radios .form-item {
+  margin-bottom: 2px;
+  margin-top: 2px;
 }
 
 /* @end */
