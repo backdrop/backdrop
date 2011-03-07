@@ -2,9 +2,6 @@
 
 /**
  * Tests the handler filter_date.
- *
- * @TODO
- *   Convert to "beatles".
  */
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -82,7 +79,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
     $view->destroy();
 
-    // Test between with just min.
+    // Test between with just max.
     $view = $this->views_test_between();
     $view->set_display('default');
     $view->init_handlers();
@@ -112,7 +109,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
     $view->destroy();
 
-    // Test not between with min.
+    // Test not between with just max.
     $view = $this->views_test_between();
     $view->set_display('default');
     $view->init_handlers();
@@ -177,7 +174,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
 
     return $view;
   }
-  
+
   function views_test_offset() {
     $view = $this->views_test_between();
     return $view;
