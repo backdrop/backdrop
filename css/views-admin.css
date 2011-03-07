@@ -317,9 +317,3 @@ html.js span.js-only {
 }
 
 /* @end */
-
-/* @todo Abstract the indentation of dependent form items */
-#views-ui-config-item-form .form-item-options-label,
-#views-ui-config-item-form .form-item-options-element-label-colon {
-  margin-left: 1.5em;
-}
