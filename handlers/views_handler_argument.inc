@@ -62,21 +62,25 @@ class views_handler_argument extends views_handler {
       $this->options['default_action'] = 'summary';
       $this->options['summary']['sort_order'] = 'asc';
       $this->options['summary']['number_of_records'] = 0;
+      $this->options['summary_options'] = $options['style_options'];
     }
     elseif (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary desc') {
       $this->options['default_action'] = 'summary';
       $this->options['summary']['sort_order'] = 'desc';
       $this->options['summary']['number_of_records'] = 0;
+      $this->options['summary_options'] = $options['style_options'];
     }
     elseif (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc by count') {
       $this->options['default_action'] = 'summary';
       $this->options['summary']['sort_order'] = 'asc';
       $this->options['summary']['number_of_records'] = 1;
+      $this->options['summary_options'] = $options['style_options'];
     }
     elseif (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary desc by count') {
       $this->options['default_action'] = 'summary';
       $this->options['summary']['sort_order'] = 'desc';
       $this->options['summary']['number_of_records'] = 1;
+      $this->options['summary_options'] = $options['style_options'];
     }
 
     if (!empty($options['title']) && !isset($options['title_enable'])) {
