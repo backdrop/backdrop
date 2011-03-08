@@ -968,10 +968,10 @@ div.views-filterable-options .form-type-checkbox .description {
   float: left;
 }
 
-#edit-options-exception {
+#edit-options-exception.collapsible {
   float: right;
   width: 250px;
-  margin-top: 4px;
+  margin-top: -2px;
 }
 
 /* @end */
