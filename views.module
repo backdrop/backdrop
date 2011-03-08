@@ -868,7 +868,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
     'table' => $table,
     'field' => $field,
   );
-  return _views_create_handler($broken, 'handler', $type);
+  return _views_create_handler($broken, 'handler', $key);
 }
 
 /**

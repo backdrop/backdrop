@@ -102,6 +102,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1080690 by dereine: Fix target/key for querying against sql databases. Therefore don't use db_select anymore.
 #1029534 by bojanz: Fix like for pgsql by using db_like correct.
 #1051308 by bojanz: Fix date filter handler behaviour with offsets.
+#1062506 by dereine: Misnamed parameter for creation of broken handlers.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
