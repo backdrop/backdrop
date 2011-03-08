@@ -1220,7 +1220,7 @@ function views_get_applicable_views($type) {
  */
 function views_get_all_views($reset = FALSE) {
   ctools_include('export');
-  return ctools_export_crud_load_all('views_view', 'views', $reset);
+  return ctools_export_crud_load_all('views_view', $reset);
 }
 
 /**
