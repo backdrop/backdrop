@@ -8,6 +8,7 @@ class views_handler_field_locale_group extends views_handler_field {
     $groups = module_invoke_all('locale', 'groups');
     // Sort the list.
     asort($groups);
-    return isset($groups[$values->{$this->field_alias}]) ? $groups[$values->{$this->field_alias}] : '';
+    $value = $this->get_value($values);
+    return isset($groups[$value]) ? $groups[$value] : '';
   }
 }

@@ -24,7 +24,7 @@ class views_handler_field_user_mail extends views_handler_field_user {
   }
 
   function render_link($data, $values) {
-    parent::render_link(check_plain($values->{$this->field_alias}), $values);
+    parent::render_link($data, $values);
 
     if ($this->options['link_to_user'] == 'mailto') {
       $this->options['alter']['make_link'] = TRUE;

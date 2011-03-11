@@ -46,10 +46,11 @@ class views_handler_field_taxonomy extends views_handler_field {
    * Data should be made XSS safe prior to calling this function.
    */
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_taxonomy']) && !empty($values->{$this->aliases['tid']}) && $data !== NULL && $data !== '') {
+    $tid = $this->get_value($values, 'tid');
+    if (!empty($this->options['link_to_taxonomy']) && !empty($tid) && $data !== NULL && $data !== '') {
       $term = new stdClass();
-      $term->tid = $values->{$this->aliases['tid']};
-      $term->vid = $values->{$this->aliases['vid']};
+      $term->tid = $tid;
+      $term->vid = $this->get_value($values, 'vid');
       $term->vocabulary_machine_name = $values->{$this->aliases['vocabulary_machine_name']};
       $this->options['alter']['make_link'] = TRUE;
       $uri = entity_uri('taxonomy_term', $term);
@@ -59,6 +60,7 @@ class views_handler_field_taxonomy extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    $value = $this->get_value($values);
+    return $this->render_link($this->sanitize_value($value), $values);
   }
 }

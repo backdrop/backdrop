@@ -36,14 +36,15 @@ class views_handler_field_comment extends views_handler_field {
   function render_link($data, $values) {
     if (!empty($this->options['link_to_comment']) && $data !== NULL && $data !== '') {
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = "node/". $values->{$this->aliases['nid']};
-      $this->options['alter']['fragment'] = "comment-" . $values->{$this->aliases['cid']};
+      $this->options['alter']['path'] = "node/". $this->get_value($values, 'nid');
+      $this->options['alter']['fragment'] = "comment-" . $this->get_value($values, 'cid');
     }
 
     return $data;
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    $value = $this->get_value($values);
+    return $this->render_link($this->sanitize_value($value), $values);
   }
 }

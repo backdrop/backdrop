@@ -15,11 +15,12 @@ class views_handler_field_profile_date extends views_handler_field_date {
   /**
    * Display a profile field of type 'date'
    */
-  function render($value) {
-    if (!$value->{$this->field_alias}) {
+  function render($values) {
+    $value = $this->get_value($values);
+    if (!$value) {
       return;
     }
-    $value = unserialize($value->{$this->field_alias});
+    $value = unserialize($value);
     $format = $this->options['date_format'];
     switch ($format) {
       case 'custom':
@@ -78,4 +79,3 @@ class views_handler_field_profile_date extends views_handler_field_date {
     return strtr($format, $replace);
   }
 }
-
