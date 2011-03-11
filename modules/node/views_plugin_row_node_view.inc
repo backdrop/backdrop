@@ -23,12 +23,16 @@ class views_plugin_row_node_view extends views_plugin_row {
     if (isset($this->options['teaser'])) {
       $this->options['build_mode'] = $this->options['teaser'] ? 'teaser' : 'full';
     }
+    // Handle existing views which has used build_mode instead of view_mode.
+    if (isset($this->options['build_mode'])) {
+      $this->options['view_mode'] = $this->options['build_mode'];
+    }
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['build_mode'] = array('default' => 'teaser');
+    $options['view_mode'] = array('default' => 'teaser');
     $options['links'] = array('default' => TRUE);
     $options['comments'] = array('default' => FALSE);
 
@@ -52,10 +56,10 @@ class views_plugin_row_node_view extends views_plugin_row {
       );
     }
 
-    $form['build_mode'] = array(
+    $form['view_mode'] = array(
       '#type' => 'select',
       '#options' => $options,
-      '#title' => t('Build mode'),
+      '#title' => t('View mode'),
       '#default_value' => $this->options['build_mode'],
      );
     $form['links'] = array(
