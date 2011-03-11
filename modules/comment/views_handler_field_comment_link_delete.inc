@@ -10,9 +10,10 @@ class views_handler_field_comment_link_delete extends views_handler_field_commen
 
   function render_link($data, $values) {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('delete');
+    $cid =  $this->get_value($values, 'cid');
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = "comment/delete/" . $values->{$this->aliases['cid']};
+    $this->options['alter']['path'] = "comment/delete/" . $cid;
     $this->options['alter']['query'] = drupal_get_destination();
 
     return $text;

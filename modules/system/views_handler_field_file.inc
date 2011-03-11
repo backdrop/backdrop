@@ -40,13 +40,14 @@ class views_handler_field_file extends views_handler_field {
   function render_link($data, $values) {
     if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = file_create_url($values->{$this->aliases['uri']});
+      $this->options['alter']['path'] = file_create_url($this->get_value($values, 'uri'));
     }
 
     return $data;
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    $value = $this->get_value($values);
+    return $this->render_link($this->sanitize_value($value), $values);
   }
 }

@@ -104,6 +104,8 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1051308 by bojanz: Fix date filter handler behaviour with offsets.
 #1062506 by dereine: Misnamed parameter for creation of broken handlers.
 #1049998 by dereine: Fix jump_menu summary and some possible notices.
+#975400 by bojanz, dereine: Refactor field render() functions to accept $value.
+#975400 follow up by bojanz: Give field::sanitize_value more power and fix some issues with get_value.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

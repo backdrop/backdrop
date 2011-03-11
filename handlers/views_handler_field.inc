@@ -727,14 +727,52 @@ If you would like to have the characters %5B and %5D please use the html entity 
   function pre_render(&$values) { }
 
   /**
+   * Get the value that's supposed to be rendered.
+   *
+   * @param $values
+   *   An object containing all retrieved values.
+   * @param $field
+   *   Optional name of the field where the value is stored.
+   */
+  function get_value($values, $field = NULL) {
+    $alias = isset($field) ? $this->aliases[$field] : $this->field_alias;
+    if (isset($values->{$alias})) {
+      return $values->{$alias};
+    }
+  }
+
+  /**
+   * Sanitize the value for output.
+   *
+   * @param $value
+   *   The value being rendered.
+   * @param $type
+   *   The type of sanitization needed. If not provided, check_plain() is used.
+   */
+  function sanitize_value($value, $type = NULL) {
+    switch ($type) {
+      case 'xss':
+        $value = filter_xss($value);
+        break;
+      case 'url':
+        $value = check_url($value);
+        break;
+      default:
+        $value = check_plain($value);
+        break;
+    }
+    return $value;
+  }
+
+  /**
    * Render the field.
    *
    * @param $values
    *   The values retrieved from the database.
    */
   function render($values) {
-    $value = $values->{$this->field_alias};
-    return check_plain($value);
+    $value = $this->get_value($values);
+    return $this->sanitize_value($value);
   }
 
   /**
@@ -1138,13 +1176,14 @@ class views_handler_field_file_size extends views_handler_field {
   }
 
   function render($values) {
-    if ($values->{$this->field_alias}) {
+    $value = $this->get_value($values);
+    if ($value) {
       switch ($this->options['file_size_display']) {
         case 'bytes':
-          return $values->{$this->field_alias};
+          return $value;
         case 'formatted':
         default:
-          return format_size($values->{$this->field_alias});
+          return format_size($value);
       }
     }
     else {
@@ -1158,8 +1197,8 @@ class views_handler_field_file_size extends views_handler_field {
  */
 class views_handler_field_xss extends views_handler_field {
   function render($values) {
-    $value = $values->{$this->field_alias};
-    return filter_xss($value);
+    $value = $this->get_value($values);
+    return $this->sanitize_value($value, 'xss');
   }
 }
 

@@ -33,7 +33,7 @@ class views_handler_field_node_path extends views_handler_field {
   }
 
   function render($values) {
-    $nid = $values->{$this->aliases['nid']};
+    $nid = $this->get_value($values, 'nid');
     return url("node/$nid", array('absolute' => $this->options['absolute']));
   }
 }

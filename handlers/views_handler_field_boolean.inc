@@ -58,7 +58,7 @@ class views_handler_field_boolean extends views_handler_field {
   }
 
   function render($values) {
-    $value = $values->{$this->field_alias};
+    $value = $this->get_value($values);
     if (!empty($this->options['not'])) {
       $value = !$value;
     }

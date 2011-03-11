@@ -52,11 +52,11 @@ class views_handler_field_history_user_timestamp extends views_handler_field_nod
     $mark = MARK_READ;
     global $user;
     if ($user->uid) {
-      $last_read = $values->{$this->field_alias};
-      $created = $values->{$this->aliases['created']};
-      $changed = $values->{$this->aliases['changed']};
+      $last_read = $this->get_value($values);
+      $created = $this->get_value($values, 'created');
+      $changed = $this->get_value($values, 'changed');
 
-      $last_comment = module_exists('comment') && !empty($this->options['comments']) ? $values->{$this->aliases['last_comment']} : 0;
+      $last_comment = module_exists('comment') && !empty($this->options['comments']) ?  $this->get_value($values, 'last_comment') : 0;
 
       if (!$last_read && $created > NODE_NEW_LIMIT) {
         $mark = MARK_NEW;
