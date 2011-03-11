@@ -17,16 +17,17 @@ class views_handler_field_node_revision_link_revert extends views_handler_field_
   function render_link($data, $values) {
     // ensure user has access to edit this node.
     $node = new stdClass();
-    $node->nid = $values->{$this->aliases['nid']};
-    $node->vid = $values->{$this->aliases['vid']};
-    $node->uid = $values->{$this->aliases['uid']};
+    $node->nid = $this->get_value($values, 'nid');
+    $node->vid = $this->get_value($values, 'vid');
+    $node->uid = $this->get_value($values, 'uid');
+    $node->format = $this->get_value($values, 'format');
     $node->status = 1; // unpublished nodes ignore access control
     if (!node_access('update', $node)) {
       return;
     }
 
     // Current revision cannot be reverted.
-    if ($node->vid == $values->{$this->aliases['node_vid']}) {
+    if ($node->vid ==  $this->get_value($values, 'node_vid')) {
       return;
     }
 

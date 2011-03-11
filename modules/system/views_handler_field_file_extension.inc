@@ -6,9 +6,9 @@
 
 class views_handler_field_file_extension extends views_handler_field {
   function render($values) {
-    $value = $values->{$this->field_alias};
+    $value = $this->get_value($values);
     if (preg_match('/\.([^\.]+)$/', $value, $match)) {
-      return check_plain($match[1]);
+      return $this->sanitize_value($match[1]);
     }
   }
 }

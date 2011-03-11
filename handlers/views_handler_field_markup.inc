@@ -27,8 +27,9 @@ class views_handler_field_markup extends views_handler_field {
   }
 
   function render($values) {
-    $value = $values->{$this->field_alias};
-    $format = is_array($this->format) ? $values->{$this->aliases['format']} : $this->format;
+    $value = $this->get_value($values);
+    $format = $this->get_value($values, $this->aliases['format']);
+    $format = is_numeric($this->format) ? $this->format : $format;
     if ($value) {
       $value = str_replace('<!--break-->', '', $value);
       return check_markup($value, $format, '');
