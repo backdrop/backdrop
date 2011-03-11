@@ -115,7 +115,8 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       'default_value' => $default_value,
     );
 
-    return drupal_get_form('ctools_jump_menu', $options, $settings);
+    $form = drupal_get_form('ctools_jump_menu', $options, $settings);
+    return drupal_render($form);
   }
 }
 

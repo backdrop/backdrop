@@ -145,7 +145,8 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       'default_value' => $default_value,
     );
 
-    return drupal_render(drupal_get_form('ctools_jump_menu', $options, $settings));
+    $form = drupal_get_form('ctools_jump_menu', $options, $settings);
+    return drupal_render($form);
   }
 
   function render_set($title, $records) {
