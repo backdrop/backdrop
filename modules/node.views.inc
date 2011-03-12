@@ -655,8 +655,8 @@ function template_preprocess_views_view_row_node(&$vars) {
 
   $node->view = $vars['view'];
   // Detect which build module should be used.
-  $node->build_mode = (!empty($options['build_mode'])) ? $options['build_mode'] : 'full';
-  $content = node_view_multiple(array($node->nid => $node), $node->build_mode);
+  $node->view_mode = (!empty($options['view_mode'])) ? $options['view_mode'] : 'full';
+  $content = node_view_multiple(array($node->nid => $node), $node->view_mode);
   $content = $content['nodes'][$node->nid];
   if (!$options['links']) {
     unset($content['links']);

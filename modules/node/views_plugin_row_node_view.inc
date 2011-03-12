@@ -23,12 +23,16 @@ class views_plugin_row_node_view extends views_plugin_row {
     if (isset($this->options['teaser'])) {
       $this->options['build_mode'] = $this->options['teaser'] ? 'teaser' : 'full';
     }
+    // Handle existing views which has used build_mode instead of view_mode.
+    if (isset($this->options['build_mode'])) {
+      $this->options['view_mode'] = $this->options['build_mode'];
+    }
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['build_mode'] = array('default' => 'teaser');
+    $options['view_mode'] = array('default' => 'teaser');
     $options['links'] = array('default' => TRUE);
     $options['comments'] = array('default' => FALSE);
 
@@ -38,12 +42,25 @@ class views_plugin_row_node_view extends views_plugin_row {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $options = $this->options_form_summary_options();
-    $form['build_mode'] = array(
+    $entity_info = entity_get_info('node');
+    $options = array();
+    if (!empty($entity_info['view modes'])) {
+      foreach ($entity_info['view modes'] as $mode => $settings) {
+        $options[$mode] = $settings['label'];
+      }
+    }
+    if (empty($options)) {
+      $options = array(
+        'teaser' => t('Teaser'),
+        'full' => t('Full node')
+      );
+    }
+
+    $form['view_mode'] = array(
       '#type' => 'select',
       '#options' => $options,
-      '#title' => t('Build mode'),
-      '#default_value' => $this->options['build_mode'],
+      '#title' => t('View mode'),
+      '#default_value' => $this->options['view_mode'],
      );
     $form['links'] = array(
       '#type' => 'checkbox',

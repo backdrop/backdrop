@@ -106,6 +106,8 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1049998 by dereine: Fix jump_menu summary and some possible notices.
 #975400 by bojanz, dereine: Refactor field render() functions to accept $value.
 #975400 follow up by bojanz: Give field::sanitize_value more power and fix some issues with get_value.
+#1052896 by dereine: Fix summary css classes output.
+#1046674 by dereine: Rename build_mode to view_mode in row_node_view. This fixes some bugs with code using $node->view_mode.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
