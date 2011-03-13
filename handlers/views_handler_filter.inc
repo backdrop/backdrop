@@ -432,7 +432,7 @@ class views_handler_filter extends views_handler {
       $value = $input[$this->options['expose']['identifier']];
 
       // Various ways to check for the absence of optional input.
-      if (empty($this->no_optional) && !empty($this->options['expose']['optional'])) {
+      if (!empty($this->options['expose']['optional'])) {
 
         if (($this->operator == 'empty' || $this->operator == 'not empty') && $value === '') {
           $value = ' ';
