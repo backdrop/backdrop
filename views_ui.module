@@ -578,10 +578,10 @@ function views_ui_get_wizards() {
   // @todo - handle this via an alter hook for plugins?
   foreach ($base_tables as $table => $info) {
     if (!isset($wizard_tables[$table])) {
-      $w = $default_wizard;
-      $w['title'] = $info['title'];
-      $w['base_table'] = $table;
-      $wizard_plugins[$table] = $w;
+      $wizard = $default_wizard;
+      $wizard['title'] = $info['title'];
+      $wizard['base_table'] = $table;
+      $wizard_plugins[$table] = $wizard;
     }
   }
   return $wizard_plugins;
