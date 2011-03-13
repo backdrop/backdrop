@@ -53,6 +53,20 @@ class viewsViewTest extends ViewsSqlTest {
     $this->assertEqual($view->attachment_after, '');
   }
 
+  function testDelete() {
+    // Delete a database view
+    $view = $this->view_test_delete();
+    $view->save();
+    $view = views_get_view($view->name);
+    $view->delete();
+
+    $view = views_get_view($view->name);
+    $this->assertNotNull($view, 'Take sure that the old view is still in the static cache.');
+
+    $view = views_get_view($view->name, TRUE);
+    $this->assertNull($view, "Take sure that the old view get's cleared by the reset parameter.");
+  }
+
   /**
    * This view provides some filters, fields, arguments, relationships, sorts, areas and attachments.
    */
@@ -212,6 +226,41 @@ class viewsViewTest extends ViewsSqlTest {
       t('All'),
       t('Page'),
       t('Attachment'),
+    );
+
+    return $view;
+  }
+  function view_test_delete() {
+    $view = new view;
+    $view->name = 'test_view_delete';
+    $view->description = '';
+    $view->tag = '';
+    $view->base_table = 'node';
+    $view->human_name = 'test_view_delete';
+    $view->core = 7;
+    $view->api_version = '3.0-alpha1';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Defaults */
+    $handler = $view->new_display('default', 'Defaults', 'default');
+    $handler->display->display_options['access']['type'] = 'none';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    $translatables['test_view_delete'] = array(
+      t('Defaults'),
+      t('more'),
+      t('Apply'),
+      t('Reset'),
+      t('Sort By'),
+      t('Asc'),
+      t('Desc'),
+      t('Items per page'),
+      t('- All -'),
+      t('Offset'),
     );
 
     return $view;

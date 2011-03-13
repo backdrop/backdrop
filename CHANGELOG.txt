@@ -109,6 +109,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1052896 by dereine: Fix summary css classes output.
 #1046674 by dereine: Rename build_mode to view_mode in row_node_view. This fixes some bugs with code using $node->view_mode.
 #1090682 by febbraro: view:load does not clear the cache correctly when reset.
+#1090682 by dereine: Write a simpletest for the reset parameter of view::load.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
