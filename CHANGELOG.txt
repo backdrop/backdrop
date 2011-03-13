@@ -111,6 +111,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1090682 by febbraro: view:load does not clear the cache correctly when reset.
 #1090682 by dereine: Write a simpletest for the reset parameter of view::load.
 #1054272 by dagmar: String filters are non optional anymore.
+#1086158 by dereine: Fix filter handler of list fields.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
