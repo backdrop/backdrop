@@ -70,7 +70,7 @@ function field_group_schema() {
 /**
  * Utility function: fetch all the field_group definitions from the database.
  */
-function _update_7000_field_group_read_groups() {
+function _field_group_install_read_groups() {
   $groups = array();
   if (db_table_exists('content_group')) {
     $query = db_select('content_group', 'cg', array('fetch' => PDO::FETCH_ASSOC))
@@ -92,11 +92,15 @@ function _update_7000_field_group_read_groups() {
 }
 
 /**
- * Implementation of hook_update_N().
+ * Implementation of hook_install().
+ *
+ * Because this is a new module in D7, hook_update_N() doesn't help D6
+ * users who upgrade to run the migration path. So, we try that here as
+ * the module is being installed.
  */
-function field_group_update_7000() {
+function field_group_install() {
 
-  $groups = _update_7000_field_group_read_groups();
+  $groups = _field_group_install_read_groups();
 
   if (!empty($groups)) {
 
