@@ -710,9 +710,6 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   $display = isset($element['#view_mode']);
   $groups = array_keys($element['#groups']);
 
-  // Always perform access checks.
-  field_group_field_group_check_access($element, $groups, $display);
-
   // Dish the fieldgroups with no fields for non-forms.
   if ($display) {
     foreach (element_children($element) as $name) {
@@ -769,33 +766,6 @@ function field_group_field_group_is_empty($element, $groups) {
 
   return $empty;
 
-}
-
-/**
- * Helper function to recursively check groups with restricted fields only.
- *
- * @param array $element
- *   array structure of the element.
- * @param array $groups
- *   Array of group names.
- * @param boolean $display
- *   Display is true when we are not on a form.
- * @return Boolean Is field group empty
- *
- * @TODO Create this function.
- */
-function field_group_field_group_check_access(& $element, $groups, $display) {
-//  foreach (element_children($element) as $name) {
-//    if (isset($element[$name]['#access']) && $element[$name]['#access'] == FALSE) {
-//      continue;
-//    }
-//    elseif (isset($element[$name]['und'][0]['#access']) && $element[$name]['und'][0]['#access'] == FALSE) {
-//      continue;
-//    }
-//    else {
-//      field_group_field_group_check_access($element[$name], $groups, $display);
-//    }
-//  }
 }
 
 /**
@@ -1200,7 +1170,11 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
 
         // Stash the field in the group.
         if ($groupname == $name && isset($root_element[$groupfield])) {
-          $element[$name][$groupfield] = $root_element[$groupfield];
+          // Block the denied fields (#access) before they are put in groups.
+          $access = !isset($root_element[$groupfield]['#access']) || $root_element[$groupfield]['#access'];
+          if ($access) {
+            $element[$name][$groupfield] = $root_element[$groupfield];
+          }
           // We can not meet this field again!
           unset($root_element[$groupfield]);
           unset($root_element['#group_children'][$groupfield]);
