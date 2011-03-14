@@ -1,5 +1,11 @@
 Fields are the individual pieces of data being displayed. Adding the fields <em>Node: Title</em>, <em>Node: Type</em>, and <em>Node: Post date</em> to a node view, for example, includes the title, content type and creation date in the displayed results).
 
-Fields may not appear on every display, because not all style plugins actually use fields. For example, the 'node' row plugin simply displays the node through Drupal's normal mechanisms, and fields are not involved.
+Fields may not appear on every display, because not all style plugins actually use <a href="topic:views/style-fields">fields</a>. For example, the '<a href="topic:views/style-node">node</a>' <a href="topic:views/style-row">row plugin</a> simply displays the node through Drupal's normal mechanisms, and fields are not involved.
+For the most  part, the field settings should be self explanatory. Fields will appear in the order that they are arranged in, and they will usually appear with the label they are given. 
 
-For the most part, the field settings should be self explanatory. Fields will appear in the order that they are arranged in, and they will usually appear with the label they are given.
+If you add new cck fields you will find them under the Group "Content". Search for the field name. With new modules the list of groups will grow. Modules can add new items with the <em>hook_views_data()</em> hook.
+
+If you do not find a field, consider whether or not you need a <a href="topic:views/relationship">Relationship</a>.
+
++You can override the entire field section - see <a href="topic:views/overrides">here</a> for more information.
+
