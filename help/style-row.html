@@ -1,3 +1,8 @@
-A row style is an individual style to display only an individual record within a view. For example, a <strong>node</strong> type view would display one node per row; a <strong>user</strong> type view would display one user per row.
+A row style is an individual style to display only an individual record within a view. You can choose between <a href="topic:views/style-node">node</a> or <a href="topic:views/style-fields">fields</a>. For example, a node type view would display one node per row; a user type view would display one user per row. 
 
-Some row styles use <em>fields</em> which means you select from the available fields to display; others do not; they are able to use the base type and create a display. Usually, row styles that do not use fields <em>produce less efficient (slower) views</em>, so bear this in mind when contemplating the performance of your site.
+When you choose <strong>fields</strong>, you must have entries in the <a href="topic:views/field">Fields</a> section to produce an output. To set some options for fields, read <a href="topic:views/style-fields">here</a>. 
+
+Some row styles use <em>fields</em> which means you may select from the available fields to display. Others row styles do not - they are able to use the base type and create a display. Usually, row styles that do not use fields produce less efficient (slower) views, so bear this in mind when contemplating the performance of your site.
+
++When you choose <strong>node</strong> the complete node will display through Drupal's standard <em>node_view()</em> function. You can choose some <a href="topic:views/style-node">options</a>. 
+
