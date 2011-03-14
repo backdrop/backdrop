@@ -16,7 +16,7 @@ Drupal.FieldGroup.Effects.processFieldset = {
       // Add required fields mark to any fieldsets containing required fields
       $('fieldset.fieldset').each(function(i){
         if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
-          $('legend span').eq(i).append('&nbsp;').append($('.form-required').eq(0).clone());
+          $('legend span.fieldset-legend', $(this)).eq(0).append('&nbsp;').append($('.form-required').eq(0).clone());
         }
       });
     }
