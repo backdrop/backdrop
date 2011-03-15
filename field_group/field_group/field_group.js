@@ -52,7 +52,7 @@ Drupal.FieldGroup.Effects.processHtabs = {
       // Add required fields mark to any element containing required fields
       $('fieldset.horizontal-tabs-pane').each(function(i){
         if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
-          $('li.horizontal-tab-button').eq(i).children('a').find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
+          $(this).data('horizontalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
         }
       });
     }
@@ -68,7 +68,7 @@ Drupal.FieldGroup.Effects.processTabs = {
       // Add required fields mark to any fieldsets containing required fields
       $('fieldset.vertical-tabs-pane').each(function(i){
         if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
-          $('li.vertical-tab-button').eq(i).children('a').find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
+          $(this).data('verticalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
         }
       });
     }
