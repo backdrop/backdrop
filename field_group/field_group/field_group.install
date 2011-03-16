@@ -10,6 +10,24 @@
  */
 function field_group_schema() {
   $schema['field_group'] = array(
+    'description' => t('Table that contains field group entries and settings.'),
+
+    // CTools export definitions.
+    'export' => array(
+      'key' => 'id',
+      'identifier' => 'field_group',
+      'default hook' => 'field_group_info',
+      'save callback' => 'field_group_save',
+      'delete callback' => 'field_group_delete',
+      'can disable' => FALSE,
+      'api' => array(
+        'owner' => 'field_group',
+        'api' => 'field_group',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+
     'fields' => array(
       'id' => array(
         'type' => 'serial',
@@ -105,6 +123,8 @@ function field_group_install() {
   if (!empty($groups)) {
 
     module_load_include('module', 'field_group');
+    module_load_include('module', 'ctools');
+    ctools_include('export');
 
     foreach ($groups as $group) {
 
@@ -130,7 +150,7 @@ function field_group_install() {
         'formatter' => preg_match("/fieldset/", $group->settings['form']['style']) ? 'collapsible' : 'collapsed',
         'instance_settings' => array(),
       );
-      field_group_create_field_group($new);
+      ctools_export_crud_save('field_group', $new);
 
       // The full node.
       $new->id = NULL;
@@ -141,7 +161,7 @@ function field_group_install() {
         'formatter' => 'collapsible',
         'instance_settings' => array(),
       );
-      field_group_create_field_group($new);
+      ctools_export_crud_save('field_group', $new);
 
       // The teaser node.
       $new->id = NULL;
@@ -152,7 +172,7 @@ function field_group_install() {
         'formatter' => 'collapsible',
         'instance_settings' => array(),
       );
-      field_group_create_field_group($new);
+      ctools_export_crud_save('field_group', $new);
 
     }
 

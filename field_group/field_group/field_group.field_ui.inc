@@ -423,8 +423,9 @@ function field_group_formatter_settings_update(& $group, $settings) {
     $group->label = $settings['format_settings']['settings']['label'];
     $group->format_settings = $settings['format_settings']['settings'];
     // This is avoided now, cause of the form_state['field_group']
-    //field_group_update_field_group($group);
-    //cache_clear_all('field_groups', 'cache_field');
+    // ctools_include('export');
+    // ctools_export_crud_save('field_group', $group);
+    // cache_clear_all('field_groups', 'cache_field');
   }
 }
 
@@ -536,6 +537,7 @@ function field_group_field_overview_validate($form, &$form_state) {
  * @param Array $form_state The state of the form.
  */
 function field_group_field_overview_submit($form, &$form_state) {
+
   $form_values = $form_state['values']['fields'];
   $entity_type = $form['#entity_type'];
   $bundle = $form['#bundle'];
@@ -556,6 +558,9 @@ function field_group_field_overview_submit($form, &$form_state) {
       $children[$value['parent']][$name] = $name;
     }
   }
+
+  // Prepare storage with ctools.
+  ctools_include('export');
 
   // Create new group.
   if (!empty($form_values['_add_new_group']['group_name'])) {
@@ -579,7 +584,7 @@ function field_group_field_overview_submit($form, &$form_state) {
     if (isset($formatter['instance_settings'])) {
       $new_group->format_settings['instance_settings'] = $formatter['instance_settings'];
     }
-    field_group_create_field_group($new_group);
+    ctools_export_crud_save('field_group', $new_group);
 
     // Store new group information for any additional submit handlers.
     $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
@@ -607,7 +612,7 @@ function field_group_field_overview_submit($form, &$form_state) {
     if (isset($form_state['field_group'][$group_name]->format_settings)) {
       $group->format_settings = $form_state['field_group'][$group_name]->format_settings;
     }
-    field_group_update_field_group($group);
+    ctools_export_crud_save('field_group', $group);
   }
 
   cache_clear_all('field_groups', 'cache_field');
@@ -665,15 +670,18 @@ function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form
  * @todo we'll have to reset all view mode settings - that will be fun :)
  */
 function field_group_delete_form_submit($form, &$form_state) {
+
   $group = $form['#group'];
   $bundle = $group->bundle;
   $entity_type = $group->entity_type;
-  $mode = $form_state['build_info']['args'][1];
+  $group->mode = $form_state['build_info']['args'][1];
 
   $bundles = field_info_bundles();
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
-  field_group_delete_field_group($group, $mode);
+  ctools_include('export');
+  ctools_export_crud_delete('field_group', $group);
+
   drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
 
   // Redirect.

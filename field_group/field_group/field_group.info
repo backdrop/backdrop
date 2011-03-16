@@ -2,6 +2,7 @@ name = Fieldgroup
 description = Fieldgroup
 package = Fields
 dependencies[] = field
+dependencies[] = ctools
 core = 7.x
 files[] = field_group.install
 files[] = field_group.module

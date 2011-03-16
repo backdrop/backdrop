@@ -2,6 +2,7 @@
 CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
+    o Made the summary descriptions more human readable.
     o Issue #1086450: Cannot see red star on some field groups even required fields are set to 1.
     o #1072292 by shadow_jh, stalski: Using on user settings page but need to hid on registration page.
     o #1092360 by dww: Move field_group_update_7000 functionality to hook_install().

@@ -117,32 +117,27 @@ function field_group_permission() {
  */
 function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
 
-  // Extract the actual bundle name from the translated argument map.
-  // The menu router path to manage fields of an entity can be shared among
-  // multiple bundles. For example:
-  // - admin/structure/types/manage/%node_type/fields/%field_ui_menu
-  // - admin/structure/types/manage/%comment_node_type/fields/%field_ui_menu
-  // The menu system will automatically load the correct bundle depending on the
-  // actual path arguments, but this menu loader function only receives the node
-  // type string as $bundle_name, which is not the bundle name for comments.
-  // We therefore leverage the dynamically translated $map provided by the menu
-  // system to retrieve the actual bundle and bundle name for the current path.
   if ($bundle_pos > 0) {
     $bundle = $map[$bundle_pos];
     $bundle_name = field_extract_bundle($entity_type, $bundle);
   }
 
-  // A unique group is identified by a [entity_type, bundle, group_name, view_mode] tuple.
-  $query = db_select('field_group', 'fg');
-  $query->fields('fg');
-  $query->condition('group_name', $group_name);
-  $query->condition('entity_type', $entity_type);
-  $query->condition('bundle', $bundle_name);
-  $group = $query->execute()->fetchObject();
-  if ($group && $group->id) {
-    return field_group_unpack($group);
+  $args = func_get_args();
+  $mode = array_pop(array_pop($args));
+
+  ctools_include('export');
+  $objects = ctools_export_load_object('field_group', 'conditions', array(
+    'group_name' => $group_name,
+    'entity_type' => $entity_type,
+    'bundle' => $bundle_name,
+    'mode' => $mode
+  ));
+  $object = array_shift($objects);
+  if ($object && isset($object->data)) {
+    return field_group_unpack($object);
   }
-  return FALSE;
+  return $object;
+
 }
 
 /**
@@ -157,18 +152,28 @@ function field_group_theme() {
 }
 
 /**
- * Implements hook_features_api().
+ * Implements hook_features_export_options().
+ *
+ * Override of ctools default options list to make sure users
+ * can choose from well formatted labels.
+ * hook_features_api is implemented by Ctools. We could have used the
+ * export name list callback too.
+ * @see ctools_features_api().
  */
-function field_group_features_api() {
-  module_load_include('inc', 'field_group', 'field_group.features');
-  return array(
-    'field_group' => array(
-      'name' => t('Field groups'),
-      'default_hook' => 'field_group_default_field_groups',
-      'default_file' => FEATURES_DEFAULTS_INCLUDED,
-      'feature_source' => TRUE,
-    )
-  );
+function field_group_features_export_options() {
+  $options = array();
+  $field_group_instances = field_group_info_groups();
+  foreach ($field_group_instances as $entity_type => $bundles) {
+    foreach ($bundles as $bundle => $view_modes) {
+      foreach ($view_modes as $view_mode => $field_groups) {
+        foreach ($field_groups as $field_group) {
+          $identifier = "{$entity_type}-{$bundle}-{$view_mode}-{$field_group->group_name}";
+          $options[$identifier] = $identifier;
+        }
+      }
+    }
+  }
+  return $options;
 }
 
 /**
@@ -178,11 +183,20 @@ function field_group_features_api() {
  * @param String $bundle
  */
 function field_group_field_attach_delete_bundle($entity_type, $bundle) {
+
+  ctools_include('export');
+  $list = field_group_read_groups(array('bundle' => $bundle, 'entity_type' => $entity_type));
+
   // Delete the entity's entry from field_group of all entities.
-  db_delete('field_group')
-    ->condition('bundle', $bundle)
-    ->condition('entity_type', $entity_type)
-    ->execute();
+  // We fetch the field groups first to assign the removal task to ctools.
+  if (isset($list[$entity_type], $list[$entity_type][$bundle])) {
+    foreach ($list[$entity_type][$bundle] as $group_mode => $groups) {
+      foreach ($groups as $group) {
+        ctools_export_crud_delete('field_group', $group);
+      }
+    }
+  }
+
 }
 
 /**
@@ -780,7 +794,17 @@ function field_group_field_group_format_summary($group) {
     $last = end($group->format_settings['instance_settings']);
     $output .= '<br />';
     foreach ($group->format_settings['instance_settings'] as $key => $value) {
-      $output .= '<strong>' . $key . '</strong> ' . check_plain($value);
+      if (empty($value)) {
+        continue;
+      }
+      $output .= '<strong>' . $key . '</strong> ';
+      if (strlen($value) > 38) {
+        $value = truncate_utf8($value, 50, TRUE, TRUE);
+      }
+      elseif (is_numeric($value)) {
+        $value = $value == '1' ? t('yes') : t('no');
+      }
+      $output .= check_plain($value);
       $output .= $last == $value ? ' ' : '<br />';
     }
   }
@@ -921,23 +945,15 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
  * Read all groups.
  */
 function field_group_read_groups($params = array()) {
+
   $groups = array();
-  $query = db_select('field_group', 'fg');
-  $query->fields('fg');
-  // This makes sure the parents are always set first.
-  $query->orderBy('parent_name', 'ASC');
-
-  // Turn the conditions into a query.
-  foreach ($params as $key => $value) {
-    $query->condition($key, $value);
-  }
-
-  $results = $query->execute();
-  foreach ($results as $group) {
+  ctools_include('export');
+  $records = ctools_export_load_object('field_group', 'conditions', $params);
+  foreach ($records as $group) {
     $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = field_group_unpack($group);
   }
-
   return $groups;
+
 }
 
 /**
@@ -966,7 +982,7 @@ function field_group_exists($group_name, $entity_type, $bundle, $mode) {
  */
 function field_group_unpack($group) {
   // Extract unserialized data.
-  $data = unserialize($group->data);
+  $data = $group->data;
   unset($group->data);
   $group->label = $data['label'];
   $group->weight = $data['weight'];
@@ -986,6 +1002,7 @@ function field_group_unpack($group) {
  *   Database row object, ready to be inserted/update
  */
 function field_group_pack($group) {
+
   $record = clone $group;
   $record->data = array(
     'label' => $record->label,
@@ -1000,62 +1017,64 @@ function field_group_pack($group) {
 }
 
 /**
- * Creates a field_group.
- * @param
- *   Object $group The FieldGroup object.
- * @return $group
- *   Field group object.
+ * Delete a field group.
+ * This function is called by ctools export when calls are
+ * made through ctools_export_crud_delete().
+ *
+ * @param $group
+ *   A group definition.
  */
-function field_group_create_field_group(& $group) {
-  field_group_save($group);
-}
+function field_group_delete($group) {
 
-/**
- * Updates a field_group.
- * @param
- *   Object $group The FieldGroup object.
- * @return $group
- *   Field group object.
- */
-function field_group_update_field_group(& $group) {
-  field_group_save($group);
-}
+  $query = db_delete('field_group');
 
-/**
- * Deletes a field_group.
- * @param
- *   $group FieldGroup object.
- * @param
- *   $mode String for the mode (form or view_mode).
- */
-function field_group_delete_field_group($group, $mode) {
-  db_delete('field_group')->condition('id', $group->id)->condition('mode', $mode)->execute();
+  // If we were sent an object, get the export key from it. Otherwise
+  // assume we were sent the export key.
+  if (is_object($group)) {
+    $query->condition('id', $group->id);
+    if (!empty($group->mode)) {
+      $query->condition('mode', $group->mode);
+    }
+  }
+  else {
+    $query->condition('id', $group);
+  }
+
+  $query->execute();
+
   cache_clear_all('field_groups', 'cache_field');
   module_invoke_all('field_group_delete_field_group', $group);
+
 }
 
 /**
+ * field_group_save().
+ *
  * Saves a group definition.
+ * This function is called by ctools export when calls are made
+ * through ctools_export_crud_save().
  *
  * @param $group
  *   A group definition.
  */
 function field_group_save(& $group) {
-  // Prepare the record.
-  $record = field_group_pack($group);
 
-  if (isset($record->id) && $record->id > 0) {
-    drupal_write_record('field_group', $record, array('id'));
-    $group->id = $record->id;
-    module_invoke_all('field_group_update_field_group', $group);
+  // Prepare the record.
+  $object = field_group_pack($group);
+
+  if (isset($object->export_type) && $object->export_type & EXPORT_IN_DATABASE) {
+    // Existing record.
+    $update = array('id');
+    module_invoke_all('field_group_update_field_group', $object);
   }
   else {
-    drupal_write_record('field_group', $record);
-    $group->id = $record->id;
-    module_invoke_all('field_group_create_field_group', $group);
+    // New record.
+    $update = array();
+    $object->export_type = EXPORT_IN_DATABASE;
+    module_invoke_all('field_group_create_field_group', $object);
   }
+  return drupal_write_record('field_group', $object, $update);
 
-  return $group->id;
 }
 
 /**
