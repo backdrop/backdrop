@@ -11,14 +11,93 @@
  */
 
 /**
+ * Javascript hooks
+ *
+ * Drupal.FieldGroup.Effects.processHook.execute()
+ * See field_group.js for the examples for all implemented formatters.
+ */
+
+
+/**
+ * Implements hook_field_group_formatter_info().
+ *
+ * Define the information on formatters. The formatters are
+ * separated by view mode type. We have "form" for all form elements
+ * and "display" will be the real view modes (full, teaser, sticky, ...)
+ *
+ * structure:
+ * @code
+ * array(
+ *   'form' => array(
+ *     'fieldset' => array(
+ *       // required, String with the name of the formatter type.
+ *       'label' => t('Fieldset'),
+ *       // optional, String description of the formatter type.
+ *       'description' => t('This is field group that ...'),
+ *       // required, Array of available formatter options.
+ *       'format_types' => array('open', 'collapsible', 'collapsed'),
+ *       // required, String with default value of the style.
+        'default_formatter' => 'collapsible',
+ *       // optional, Array with key => default_value pairs.
+ *       'instance_settings' => array('key' => 'value'),
+ *     ),
+ *   ),
+ *   'display' => array(
+ *     'fieldset' => array(
+ *       // required, String with the name of the formatter type.
+ *       'label' => t('Fieldset'),
+ *       // optional, String description of the formatter type.
+ *       'description' => t('This is field group that ...'),
+ *       // required, Array of available formatter options.
+ *       'format_types' => array('open', 'collapsible', 'collapsed'),
+ *       // required, String with default value of the style.
+        'default_formatter' => 'collapsible',
+ *       // optional, Array with key => default_value pairs.
+ *       'instance_settings' => array('key' => 'value'),
+ *     ),
+ *   ),
+ * ),
+ * @endcode
+ *
+ * @return $formatters
+ *   A collection of available formatting html controls for form
+ *   and display overview type.
+ *
+ * @see field_group_field_group_formatter_info()
+ */
+function hook_field_group_formatter_info() {
+  return array(
+    'form' => array(
+      'fieldset' => array(
+        'label' => t('Fieldset'),
+        'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
+        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array('classes' => ''),
+        'default_formatter' => 'collapsible',
+      ),
+    ),
+    'display' => array(
+      'div' => array(
+        'label' => t('Div'),
+        'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
+        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array('effect' => 'none', 'speed' => 'fast', 'classes' => ''),
+        'default_formatter' => 'collapsible',
+      ),
+    ),
+  );
+}
+
+/**
  * Implements hook_field_group_format_settings().
  *
- *
+ * Defines configuration widget for the settings on a field group
+ * formatter. Eache formatter can have different elements and storage.
  *
  * @params Object $group The group object.
  * @return Array $form The form element for the format settings.
  */
-function hook_group_field_group_format_settings($group) {
+function hook_field_group_format_settings($group) {
   // Add a wrapper for extra settings to use by others.
   $form = array(
     'instance_settings' => array(
@@ -108,73 +187,193 @@ function hook_group_field_group_format_settings($group) {
 }
 
 /**
- * Implements hook_field_group_formatter_info().
+ * Implements hook_field_group_pre_render().
  *
- * You can use all keys you want although there are some required ones.
+ * This function gives you the oppertunity to create the given
+ * wrapper element that can contain the fields.
+ * In the example beneath, some variables are prepared and used when building the
+ * actual wrapper element. All elements in drupal fapi can be used.
  *
- * structure:
- * @code
- * array(
- *   'form' => array(
- *     'fieldset' => array(
- *       // required, String with the name of the formatter type.
- *       'label' => t('Fieldset'),
- *       // optional, String description of the formatter type.
- *       'description' => t('This is field group that ...'),
- *       // required, Array of available formatter options.
- *       'format_types' => array('open', 'collapsible', 'collapsed'),
- *       // required, String with default value of the style.
-        'default_formatter' => 'collapsible',
- *       // optional, Array with key => default_value pairs.
- *       'instance_settings' => array('key' => 'value'),
- *     ),
- *   ),
- *   'display' => array(
- *     'fieldset' => array(
- *       // required, String with the name of the formatter type.
- *       'label' => t('Fieldset'),
- *       // optional, String description of the formatter type.
- *       'description' => t('This is field group that ...'),
- *       // required, Array of available formatter options.
- *       'format_types' => array('open', 'collapsible', 'collapsed'),
- *       // required, String with default value of the style.
-        'default_formatter' => 'collapsible',
- *       // optional, Array with key => default_value pairs.
- *       'instance_settings' => array('key' => 'value'),
- *     ),
- *   ),
- * ),
- * @endcode
+ * Note that at this point, the field group has no notion of the fields in it.
  *
- * @return $formatters
- *   A collection of available formatting html controls for form
- *   and display overview type.
- *
- * @see field_group_field_group_formatter_info()
+ * @param Array $elements by address.
+ * @param Object $group The Field group info.
  */
-function hook_field_group_formatter_info() {
-  return array(
-    'form' => array(
-      'fieldset' => array(
-        'label' => t('Fieldset'),
-        'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('classes' => ''),
-        'default_formatter' => 'collapsible',
-      ),
-    ),
-    'display' => array(
-      'div' => array(
-        'label' => t('Div'),
-        'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('effect' => 'none', 'speed' => 'fast', 'classes' => ''),
-        'default_formatter' => 'collapsible',
-      ),
-    ),
-  );
+function hook_field_group_pre_render(& $element, $group, & $form) {
+
+  // You can prepare some variables to use in the logic.
+  $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
+  $id = $form['#entity_type'] . '_' . $form['#bundle'] . '_' . $view_mode . '_' . $group->group_name;
+
+  // Each formatter type can have whole different set of element properties.
+  switch ($group->format_type) {
+
+    // Normal or collapsible div.
+    case 'div':
+      $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+      $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
+      $add = array(
+        '#type' => 'markup',
+        '#weight' => $group->weight,
+        '#id' => $id,
+      );
+      $classes .= " speed-$speed effect-$effect";
+      if ($group->format_settings['formatter'] != 'open') {
+        $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
+          <span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span>
+          <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
+        $add['#suffix'] = '</div></div>';
+      }
+      else {
+        $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
+        $add['#suffix'] = '</div>';
+      }
+      if (!empty($description)) {
+        $add['#prefix'] .= '<div class="description">' . $description . '</div>';
+      }
+      $element += $add;
+
+      if ($effect == 'blind') {
+        drupal_add_library('system', 'effects.blind');
+      }
+
+      break;
+    break;
+  }
 }
+
+/**
+ * Implements hook_field_group_build_pre_render_alter().
+ *
+ * Function that fungates as last resort where you can alter things. It is
+ * expected that when you need this function, you have most likely a very custom
+ * case or it is a fix that can be put in field_group core.
+ *
+ * @param Array $elements by address.
+ */
+function hook_field_group_build_pre_render_alter(& $element) {
+
+  // Prepare variables.
+  $display = isset($element['#view_mode']);
+  $groups = array_keys($element['#groups']);
+
+  // Example from field_group itself to unset empty elements.
+  if ($display) {
+    foreach (element_children($element) as $name) {
+      if (in_array($name, $groups)) {
+        if (field_group_field_group_is_empty($element[$name], $groups)) {
+          unset($element[$name]);
+        }
+      }
+    }
+  }
+
+  // You might include additional javascript files and stylesheets.
+  $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
+  $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
+
+}
+
+/**
+ * Implements hook_field_group_format_summary().
+ *
+ * Place to override or change default summary behavior. In most
+ * cases the implementation of field group itself will be enough.
+ *
+ * TODO It might be better to change this hook with already created summaries,
+ * giving the ability to alter or add it later on.
+ */
+function hook_field_group_format_summary($group) {
+  $output = '';
+  // Create additional summary or change the default setting.
+  return $output;
+}
+
+/**
+ * Implements hook_field_group_delete_field_group().
+ *
+ * This hook is invoked by ctools export API.
+ * Note that this is used by ctools and the group could occasional be
+ * the group ID.
+ *
+ * @param $object $group
+ *   The FieldGroup object.
+ */
+function hook_field_group_update_field_group($group) {
+  // Delete extra data depending on the group.
+}
+
+/**
+ * Implements hook_field_group_delete_field_group().
+ *
+ * This hook is invoked by ctools export API.
+ *
+ * @param $object $group
+ *   The FieldGroup object.
+ */
+function hook_field_group_update_field_group($group) {
+  // Update extra data depending on the group.
+}
+
+/**
+ * Implements hook_field_group_create_field_group().
+ *
+ * This hook is invoked by ctools export API.
+ *
+ * @param $object $group
+ *   The FieldGroup object.
+ */
+function hook_field_group_create_field_group($group) {
+  // Create extra data depending on the group.
+}
+
+
 
 /**
  * @} End of "addtogroup hooks".
  */
+
+
+
+/**
+ * @addtogroup utility functions
+ * @{
+ */
+
+/**
+ * Get the groups for a given entity type, bundle and view mode.
+ *
+ * @param String $entity_type
+ *   The Entity type where field groups are requested.
+ * @param String $bundle
+ *   The entity bundle for the field groups.
+ * @param String $view_mode
+ *   The view mode scope for the field groups.
+ *
+ * @see field_group_read_groups().
+ * @see ctools_export_crud_load().
+ * @see ctools_export_crud_load_all().
+ * @see ctools_export_crud_delete().
+ * @see ctools_export_crud_save().
+ */
+function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode = NULL, $reset = FALSE) {
+  // This function caches the result and delegates to field_group_read_groups.
+}
+
+/**
+ * Get the groups for the given parameters, uncached.
+ *
+ * @param Array $params
+ *   The Entity type where field groups are requested.
+ *
+ * @see field_group_info_groups().
+ * @see ctools_export_load_object().
+ */
+function field_group_read_groups($params = array()) {
+  // This function loads the requested groups through ctools export api.
+}
+
+/**
+ * @} End of "addtogroup utility functions".
+ */
+

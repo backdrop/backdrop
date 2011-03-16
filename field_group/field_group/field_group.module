@@ -4,25 +4,7 @@
  * @file
  * Fieldgroup module.
  *
- *   PHP HOOKS
- *
- *   hook_field_group_format_settings
- *     Creates a form for the fieldgroup settings of the current group.
- *
- *   hook_field_group_format_summary
- *     Creates a summary for the current group.
- *
- *   hook_field_group_pre_render()
- *     Create an element for the field group
- *
- *   hook_field_group_build_pre_render_alter()
- *     Gives the opportunity to do extra things for
- *     some format cases.
- *
- *   JAVASCRIPT HOOKS
- *
- *   Drupal.FieldGroup.Effects.processHook.execute()
- *
+ * For an overview of all php and javascript hooks, see field_group.api.php.
  *
  */
 
@@ -158,7 +140,7 @@ function field_group_theme() {
  * can choose from well formatted labels.
  * hook_features_api is implemented by Ctools. We could have used the
  * export name list callback too.
- * @see ctools_features_api().
+ * @see ctools_features_api()
  */
 function field_group_features_export_options() {
   $options = array();
@@ -442,8 +424,7 @@ function field_group_field_group_format_settings($group) {
 
 /**
  * Implements hook_field_group_pre_render().
- * This function (only) gives you the oppertunity to create the given
- * wrapper field.
+ *
  * @param Array $elements by address.
  * @param Object $group The Field group info.
  */
@@ -1132,8 +1113,8 @@ function field_group_attach_groups(&$element, $view_mode) {
  * Depending on whether it is a form build or content build.
  * Form api go through more than a regular build. #process is
  * needed here, where #pre_render is ideal for the regular array.
- * @see called by field_group_attach_groups().
- * @see calls field_group_fields_nest().
+ * @see called by field_group_attach_groups()
+ * @see calls field_group_fields_nest()
  * @param $element Form element
  * @return $element Array with re-arranged fields in forms.
  */
@@ -1216,7 +1197,7 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
 
 /**
  * Function to pre render the field group element.
- * @see called by field_group_fields_nest().
+ * @see called by field_group_fields_nest()
  * @param $element Array of group element that needs to be created!
  * @param $group Object with the group information.
  * @param $form The form object itself.

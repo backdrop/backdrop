@@ -2,6 +2,7 @@
 CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
+    o Issue #1033036 by Stalski, swentel: Create a field_group.api.php.
     o Made the summary descriptions more human readable.
     o Issue #1086450: Cannot see red star on some field groups even required fields are set to 1.
     o #1072292 by shadow_jh, stalski: Using on user settings page but need to hid on registration page.
@@ -30,5 +31,3 @@ Field_group 7.x-1.0-rc1
       postpone saving until the save button is hit.
     o Changed some important variable name, so it makes more sense and easier to read.
     o Add basic crud functions.
-    
-Field_group 7.x-1.0-rc1
