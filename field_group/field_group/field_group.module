@@ -381,14 +381,14 @@ function field_group_field_group_format_settings($group) {
   // Add optional instance_settings.
   switch ($group->format_type) {
     case 'div':
-     $form['instance_settings']['effect'] = array(
+      $form['instance_settings']['effect'] = array(
         '#title' => t('Effect'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'blind' => t('Blind')),
         '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
         '#weight' => 2,
       );
-       $form['instance_settings']['speed'] = array(
+      $form['instance_settings']['speed'] = array(
         '#title' => t('Speed'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
@@ -779,7 +779,7 @@ function field_group_field_group_format_summary($group) {
         continue;
       }
       $output .= '<strong>' . $key . '</strong> ';
-      if (strlen($value) > 38) {
+      if (drupal_strlen($value) > 38) {
         $value = truncate_utf8($value, 50, TRUE, TRUE);
       }
       elseif (is_numeric($value)) {
@@ -1113,8 +1113,8 @@ function field_group_attach_groups(&$element, $view_mode) {
  * Depending on whether it is a form build or content build.
  * Form api go through more than a regular build. #process is
  * needed here, where #pre_render is ideal for the regular array.
- * @see called by field_group_attach_groups()
- * @see calls field_group_fields_nest()
+ * @see field_group_attach_groups()
+ * @see field_group_fields_nest()
  * @param $element Form element
  * @return $element Array with re-arranged fields in forms.
  */
@@ -1197,7 +1197,9 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
 
 /**
  * Function to pre render the field group element.
- * @see called by field_group_fields_nest()
+ *
+ * @see field_group_fields_nest()
+ *
  * @param $element Array of group element that needs to be created!
  * @param $group Object with the group information.
  * @param $form The form object itself.

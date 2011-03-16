@@ -110,7 +110,7 @@ function _field_group_install_read_groups() {
 }
 
 /**
- * Implementation of hook_install().
+ * Implements of hook_install().
  *
  * Because this is a new module in D7, hook_update_N() doesn't help D6
  * users who upgrade to run the migration path. So, we try that here as

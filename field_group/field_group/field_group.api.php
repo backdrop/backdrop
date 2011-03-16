@@ -145,14 +145,14 @@ function hook_field_group_format_settings($group) {
   // Add optional instance_settings.
   switch ($group->format_type) {
     case 'div':
-     $form['instance_settings']['effect'] = array(
+      $form['instance_settings']['effect'] = array(
         '#title' => t('Effect'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'blind' => t('Blind')),
         '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
         '#weight' => 2,
       );
-       $form['instance_settings']['speed'] = array(
+      $form['instance_settings']['speed'] = array(
         '#title' => t('Speed'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
@@ -350,11 +350,11 @@ function hook_field_group_create_field_group($group) {
  * @param String $view_mode
  *   The view mode scope for the field groups.
  *
- * @see field_group_read_groups().
- * @see ctools_export_crud_load().
- * @see ctools_export_crud_load_all().
- * @see ctools_export_crud_delete().
- * @see ctools_export_crud_save().
+ * @see field_group_read_groups()
+ * @see ctools_export_crud_load()
+ * @see ctools_export_crud_load_all()
+ * @see ctools_export_crud_delete()
+ * @see ctools_export_crud_save()
  */
 function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode = NULL, $reset = FALSE) {
   // This function caches the result and delegates to field_group_read_groups.
@@ -366,8 +366,8 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
  * @param Array $params
  *   The Entity type where field groups are requested.
  *
- * @see field_group_info_groups().
- * @see ctools_export_load_object().
+ * @see field_group_info_groups()
+ * @see ctools_export_load_object()
  */
 function field_group_read_groups($params = array()) {
   // This function loads the requested groups through ctools export api.
