@@ -1630,6 +1630,7 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
   }
   if (!empty($variables['overridden'])) {
     $variables['classes_array'][] = 'overridden';
+    $variables['attributes_array']['title'][] = t('Overridden');
   }
 
   // Append a colon to the description, if requested.
@@ -1650,6 +1651,7 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
   }
   if (!empty($element['#overridden'])) {
     $variables['classes_array'][] = 'overridden';
+    $variables['attributes_array']['title'][] = t('Overridden');
   }
 
   $variables['content'] = $element['#children'];
