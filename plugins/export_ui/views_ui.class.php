@@ -59,6 +59,7 @@ class views_ui extends ctools_export_ui {
 
     // ctools only has two rows. We want four.
     // That's why we create our own structure.
+    $form['bottom row']['submit']['#attributes']['class'][] = 'js-hide';
     $form['first row'] = array(
       '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-first-row clearfix">',
       '#suffix' => '</div>',

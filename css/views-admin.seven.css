@@ -78,6 +78,12 @@ fieldset fieldset {
 /* Override for filter button on the views list screen */
 #ctools-export-ui-list-form .form-submit {
   margin-top: 0em;
+  margin-right: 0em;
+}
+
+#ctools-export-ui-list-form .ctools-export-ui-first-row .form-item {
+  margin-top: 3px;
+  margin-right: 5px; /* LTR */
 }
 
 .form-item,
@@ -92,7 +98,7 @@ fieldset fieldset {
   margin-bottom: 0;
   margin-top: 0;
 }
- 
+
 .form-item .form-item {
   padding-bottom: 0;
   padding-top: 0;
@@ -102,7 +108,7 @@ fieldset fieldset {
   margin-top: 3px;
 }
 
-/* @group Dependent options 
+/* @group Dependent options
  *
  * Dependent options are identified in CTools dependent.js
  */
@@ -199,7 +205,7 @@ fieldset fieldset {
 
 /* @group Tables */
 
-table td, 
+table td,
 table th {
   vertical-align: top;
 }

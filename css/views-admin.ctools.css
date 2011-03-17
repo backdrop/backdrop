@@ -201,7 +201,8 @@
 }
 
 .ctools-export-ui-row {
-  margin-bottom: 5px;
+  margin-bottom: 0;
+  padding-top: 0;
 }
 
 .ctools-export-ui-row label {
