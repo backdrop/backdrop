@@ -63,6 +63,8 @@ class views_ui extends ctools_export_ui {
       '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-first-row clearfix">',
       '#suffix' => '</div>',
       'search' => $form['top row']['search'],
+      'submit' => $form['bottom row']['submit'],
+      'reset' => $form['bottom row']['reset'],
     );
     $form['second row'] = array(
       '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-second-row clearfix">',
@@ -71,16 +73,10 @@ class views_ui extends ctools_export_ui {
       'disabled' => $form['top row']['disabled'],
     );
     $form['third row'] = array(
-      '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-third-row clearfix">',
+      '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-third-row clearfix element-hidden">',
       '#suffix' => '</div>',
       'order' => $form['bottom row']['order'],
       'sort' => $form['bottom row']['sort'],
-    );
-    $form['fourth row'] = array(
-      '#prefix' => '<div class="' . $row_class . ' ctools-export-ui-row ctools-export-ui-fourth-row clearfix">',
-      '#suffix' => '</div>',
-      'submit' => $form['bottom row']['submit'],
-      'reset' => $form['bottom row']['reset'],
     );
     unset($form['top row']);
     unset($form['bottom row']);

@@ -77,7 +77,7 @@ fieldset fieldset {
 
 /* Override for filter button on the views list screen */
 #ctools-export-ui-list-form .form-submit {
-  margin-top: 1.3em;
+  margin-top: 0em;
 }
 
 .form-item,
