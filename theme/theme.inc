@@ -324,7 +324,7 @@ function template_preprocess_views_view_summary(&$vars) {
 function template_preprocess_views_view_summary_unformatted(&$vars) {
   $view     = $vars['view'];
   $argument = $view->argument[$view->build_info['summary_level']];
-  $vars['classes_array'] = array();
+  $vars['row_classes'] = array();
 
   $url_options = array();
 
@@ -349,7 +349,7 @@ function template_preprocess_views_view_summary_unformatted(&$vars) {
     $vars['rows'][$id]->url = url($view->get_url($args, $base_path), $url_options);
     $vars['rows'][$id]->count = intval($row->{$argument->count_alias});
     if ($vars['rows'][$id]->url == base_path() . $_GET['q'] || $vars['rows'][$id]->url == base_path() . drupal_get_path_alias($_GET['q'])) {
-      $vars['classes_array'][$id] = 'active';
+      $vars['row_classes'][$id] = 'active';
     }
   }
 }

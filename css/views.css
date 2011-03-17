@@ -37,3 +37,6 @@
   border-top: none;
 }
 
+.view .progress-disabled {
+  float: none;
+}
