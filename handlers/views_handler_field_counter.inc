@@ -13,7 +13,6 @@ class views_handler_field_counter extends views_handler_field {
       '#title' => t('Starting value'),
       '#default_value' => $this->options['counter_start'],
       '#description' => t('Specify the number the counter should start at.'),
-      //'#process' => array('ctools_dependent_process'),
       '#size' => 2,
     );
 

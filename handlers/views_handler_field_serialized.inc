@@ -1,7 +1,7 @@
 <?php
 
 class views_handler_field_serialized extends views_handler_field {
-  
+
   function option_definition() {
     $options = parent::option_definition();
     $options['format'] = array('default' => 'unserialized');
@@ -28,7 +28,6 @@ class views_handler_field_serialized extends views_handler_field {
       '#type' => 'textfield',
       '#title' => t('Which key should be displayed'),
       '#default_value' => $this->options['key'],
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-options-format' => array('key')),
     );
   }

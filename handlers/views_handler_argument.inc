@@ -229,7 +229,6 @@ class views_handler_argument extends views_handler {
       '#size' => 20,
       '#default_value' => $this->options['exception']['title'],
       '#description' => t('Override the view and other argument titles. Use "%1" for the first argument, "%2" for the second, etc.'),
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-exception-title-enable' => array('1'),
       ),
@@ -265,7 +264,6 @@ class views_handler_argument extends views_handler {
       '#title_display' => 'invisible',
       '#default_value' => $this->options['title'],
       '#description' => t('Override the view and other argument titles. Use "%1" for the first argument, "%2" for the second, etc.'),
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-title-enable' => array('1'),
       ),
@@ -284,7 +282,6 @@ class views_handler_argument extends views_handler {
       '#title_display' => 'invisible',
       '#default_value' => $this->options['breadcrumb'],
       '#description' => t('Enter a breadcrumb name you would like to use. See "Title" for percent substitutions.'),
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-breadcrumb-enable' => array('1'),
       ),
@@ -308,7 +305,6 @@ class views_handler_argument extends views_handler {
       '#type' => 'select',
       '#title' => t('Validator'),
       '#default_value' => $this->options['validate']['type'],
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-specify-validation' => array('1'),
       ),
@@ -345,7 +341,6 @@ class views_handler_argument extends views_handler {
               '#suffix' => '</div>',
               '#type' => 'item',
               '#input' => TRUE, // trick it into checking input to make #process run
-              '#process' => array('ctools_dependent_process'),
               '#dependency' => array(
                 'edit-options-specify-validation' => array('1'),
                 'edit-options-validate-type' => array($id),
@@ -368,7 +363,6 @@ class views_handler_argument extends views_handler {
       '#title' => t('Action to take if filter value does not validate'),
       '#default_value' => $this->options['validate']['fail'],
       '#options' => $validate_options,
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-specify-validation' => array('1'),
       ),
@@ -502,7 +496,7 @@ class views_handler_argument extends views_handler {
       '#id' => 'edit-options-default-argument-type',
       '#title' => t('Type'),
       '#default_value' => $this->options['default_argument_type'],
-      '#process' => array('ctools_dependent_process'),
+
       '#dependency' => array('radio:options[default_action]' => array('default')),
       // Views custom key, moves this element to the appropriate container
       // under the radio button.
@@ -522,8 +516,6 @@ class views_handler_argument extends views_handler {
             '#suffix' => '</div>',
             '#id' => 'edit-options-argument-default-options-' . $id,
             '#type' => 'item',
-            '#input' => TRUE, // trick it into checking input to make #process run
-            '#process' => array('ctools_dependent_process'),
             '#dependency' => array(
               'radio:options[default_action]' => array('default'),
               'edit-options-default-argument-type' => array($id)
@@ -565,7 +557,6 @@ class views_handler_argument extends views_handler {
       '#title' => t('Sort order'),
       '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
       '#default_value' => $this->options['summary']['sort_order'],
-      '#process' => array('form_process_radios', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[default_action]' => array('summary')),
     );
     $form['summary']['number_of_records'] = array(
@@ -576,7 +567,6 @@ class views_handler_argument extends views_handler {
         0 => $this->get_sort_name(),
         1 => t('Number of records')
       ),
-      '#process' => array('form_process_radios', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[default_action]' => array('summary')),
     );
 
@@ -585,7 +575,6 @@ class views_handler_argument extends views_handler {
       '#title' => t('Format'),
       '#options' => $format_options,
       '#default_value' => $this->options['summary']['format'],
-      '#process' => array('form_process_radios', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[default_action]' => array('summary')),
     );
 
@@ -601,7 +590,6 @@ class views_handler_argument extends views_handler {
           '#id' => 'edit-options-summary-options-' . $id,
           '#type' => 'item',
           '#input' => TRUE, // trick it into checking input to make #process run
-          '#process' => array('ctools_dependent_process'),
           '#dependency' => array(
             'radio:options[default_action]' => array('summary'),
             'radio:options[summary][format]' => array($id),

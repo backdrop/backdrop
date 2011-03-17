@@ -29,14 +29,7 @@ Everyone who used it can extend from views_handler_sort, too.
 
 <h3>Ctools dependency</h3>
 Views requires ctools now, so it can use the dependency system of ctools.
-The only thing you have to do is to replace
-<pre>
-'#process' => array('views_process_dependency')
-</pre>
-with
-<pre>
-'#process' => array('ctools_dependent_process'),
-</pre>
+The only thing you have to do is to remove views_process_dependency.
 
 <h3>Changed add_where api</h3>
 If your field is a plain sql field:

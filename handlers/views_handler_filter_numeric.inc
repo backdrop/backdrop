@@ -147,7 +147,6 @@ class views_handler_filter_numeric extends views_handler_filter {
         '#title' => empty($form_state['exposed']) ? t('Value') : '',
         '#size' => 30,
         '#default_value' => $this->value['value'],
-        '#process' => array('ctools_dependent_process'),
         '#dependency' => array($source => $this->operator_values(1)),
       );
       if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['value'])) {
@@ -183,7 +182,6 @@ class views_handler_filter_numeric extends views_handler_filter {
       );
       if ($which == 'all') {
         $dependency = array(
-          '#process' => array('ctools_dependent_process'),
           '#dependency' => array($source => $this->operator_values(2)),
         );
         $form['value']['min'] += $dependency;

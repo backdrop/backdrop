@@ -56,7 +56,6 @@ class views_plugin_exposed_form extends views_plugin {
       '#dependency' => array(
         'edit-exposed-form-options-reset-button' => array(1)
       ),
-      '#process' => array('ctools_dependent_process'),
     );
 
     $form['exposed_sorts_label'] = array(

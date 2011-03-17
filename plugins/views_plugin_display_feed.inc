@@ -152,7 +152,6 @@ class views_plugin_display_feed extends views_plugin_display_page {
           '#default_value' => $this->get_option('sitename_title'),
         );
         $form['title'] = $title;
-        $form['title']['#process'] = array('ctools_dependent_process');
         $form['title']['#dependency'] = array('edit-sitename-title' => array(FALSE));
         break;
       case 'displays':

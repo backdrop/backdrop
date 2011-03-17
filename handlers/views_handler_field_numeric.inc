@@ -38,7 +38,6 @@ class views_handler_field_numeric extends views_handler_field {
         '#title' => t('Precision'),
         '#default_value' => $this->options['precision'],
         '#description' => t('Specify how many digits to print after the decimal point.'),
-        '#process' => array('ctools_dependent_process'),
         '#dependency' => array('edit-options-set-precision' => array(TRUE)),
         '#size' => 2,
       );
@@ -68,7 +67,6 @@ class views_handler_field_numeric extends views_handler_field {
       '#title' => t('Singular form'),
       '#default_value' => $this->options['format_plural_singular'],
       '#description' => t('Text to use for the singular form.'),
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-options-format-plural' => array(TRUE)),
     );
     $form['format_plural_plural'] = array(
@@ -76,7 +74,6 @@ class views_handler_field_numeric extends views_handler_field {
       '#title' => t('Plural form'),
       '#default_value' => $this->options['format_plural_plural'],
       '#description' => t('Text to use for the plural form, @count will be replaced with the value.'),
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-options-format-plural' => array(TRUE)),
     );
     $form['prefix'] = array(

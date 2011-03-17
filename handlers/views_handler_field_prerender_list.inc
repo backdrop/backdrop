@@ -36,7 +36,6 @@ class views_handler_field_prerender_list extends views_handler_field {
       '#type' => 'textfield',
       '#title' => t('Separator'),
       '#default_value' => $this->options['separator'],
-      '#process' => array('ctools_dependent_process'),
       '#dependency' => array('radio:options[type]' => array('separator')),
     );
     parent::options_form($form, $form_state);
