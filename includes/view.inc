@@ -1331,42 +1331,39 @@ class view extends views_db_object {
         ->fields('v')
         ->condition(is_numeric($arg) ? 'vid' : 'name', $arg)
         ->execute();
-      foreach ($result as $data) {
-        if (empty($data)) {
-          $cache[$arg] = NULL;
-        }
-        else {
-          $view = new view();
-          $view->load_row($data);
-          $view->type = t('Normal');
-          // Load all of our subtables.
-          foreach ($view->db_objects() as $key) {
-            $object_name = "views_$key";
-            $result = db_select($object_name, 'v')
-              ->fields('v')
-              ->condition('vid', $view->vid)
-              ->orderBy('position')
-              ->execute();
-            foreach ($result as $data) {
-              $object = new $object_name(FALSE);
-              $object->load_row($data);
+      if ($result->rowCount() == 0) {
+        $cache[$arg] = NULL;
+      }
+      else {
+        $view = new view();
+        $view->load_row($result->fetchObject());
+        $view->type = t('Normal');
+        // Load all of our subtables.
+        foreach ($view->db_objects() as $key) {
+          $object_name = "views_$key";
+          $result = db_select($object_name, 'v')
+            ->fields('v')
+            ->condition('vid', $view->vid)
+            ->orderBy('position')
+            ->execute();
+          foreach ($result as $data) {
+            $object = new $object_name(FALSE);
+            $object->load_row($data);
 
-              // Because it can get complicated with this much indirection,
-              // make a shortcut reference.
-              $location = &$view->$key;
+            // Because it can get complicated with this much indirection,
+            // make a shortcut reference.
+            $location = &$view->$key;
 
-              // If we have a basic id field, load the item onto the view based on
-              // this ID, otherwise push it on.
-              if (!empty($object->id)) {
-                $location[$object->id] = $object;
-              }
-              else {
-                $location[] = $object;
-              }
+            // If we have a basic id field, load the item onto the view based on
+            // this ID, otherwise push it on.
+            if (!empty($object->id)) {
+              $location[$object->id] = $object;
+            }
+            else {
+              $location[] = $object;
             }
           }
         }
-
         $view->loaded = TRUE;
         $cache[$arg] = $view;
       }
