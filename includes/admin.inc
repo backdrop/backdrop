@@ -2006,7 +2006,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $rearrange_text = t('Sort');
       $class = 'icon compact rearrange';
   }
-  
+
   // Create an array of actions to pass to theme_links
   $actions = array();
   $count_handlers = count($display->handler->get_handlers($type));
@@ -2032,7 +2032,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       'html' => TRUE,
     );
   }
-  
+
   // Render the array of links
   $build['#actions'] = theme('links__ctools_dropbutton',
     array(
@@ -4544,18 +4544,28 @@ function views_ui_admin_settings_defaults() {
     '#type' => 'fieldset',
     '#title' => t('Edit view form'),
   );
+
   $form['edit_view_form']['views_ui_show_master_display'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show the master query'),
     '#description' => t('Legacy users of views may choose to see the master (i.e. default) display.'),
     '#default_value' => variable_get('views_ui_show_master_display', FALSE),
   );
+
   $form['edit_view_form']['views_ui_show_advanced_column'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show advanced display settings'),
     '#description' => t('Default to showing advanced display settings, such as relationships and contextual filters.'),
     '#default_value' => variable_get('views_ui_show_advanced_column', FALSE),
   );
+
+  $form['edit_view_form']['views_ui_disable_live_preview'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disable automatic live preview'),
+    '#description' => t("Don't automatically update the preview. This can speed up the editing of views a bit."),
+    '#default_value' => variable_get('views_ui_disable_live_preview', 0),
+  );
+
 
   $form['edit_view_form']['views_exposed_filter_any_label'] = array(
     '#type' => 'select',
@@ -4572,55 +4582,63 @@ function views_ui_admin_settings_defaults() {
  */
 function views_ui_admin_settings_advanced() {
   $form = array();
-  $form['clear_cache'] = array(
-    '#type' => 'submit',
-    '#value' => t("Clear Views' cache"),
-    '#submit' => array('views_ui_tools_clear_cache'),
+  $form['cache'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Caching'),
   );
 
-  $form['views_sql_signature'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Add Views signature to all SQL queries'),
-    '#description' => t("All Views-generated queries will include a special 'VIEWS' = 'VIEWS' string in the WHERE clause. This makes identifying Views queries in database server logs simpler, but should only be used when troubleshooting."),
-    '#default_value' => variable_get('views_sql_signature', FALSE),
-  );
-
-  $form['views_skip_cache'] = array(
+  $form['cache']['views_skip_cache'] = array(
     '#type' => 'checkbox',
     '#title' => t('Disable views data caching'),
     '#description' => t("Views caches data about tables, modules and views available, to increase performance. By checking this box, Views will skip this cache and always rebuild this data when needed. This can have a serious performance impact on your site."),
     '#default_value' => variable_get('views_skip_cache', FALSE),
   );
 
-  $form['views_ui_disable_live_preview'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Disable automatic live preview'),
-    '#description' => t("Don't automatically update the preview. This can speed up the editing of views a bit."),
-    '#default_value' => variable_get('views_ui_disable_live_preview', 0),
+  $form['cache']['clear_cache'] = array(
+    '#type' => 'submit',
+    '#value' => t("Clear Views' cache"),
+    '#submit' => array('views_ui_tools_clear_cache'),
   );
 
-  $form['views_show_additional_queries'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show other queries run during render during live preview'),
-    '#description' => t("Drupal has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."),
-    '#default_value' => variable_get('views_show_additional_queries', FALSE),
+  $form['debug'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Debugging'),
   );
 
-  $form['views_devel_output'] = array(
+  $form['debug']['views_sql_signature'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable views performance statistics via the Devel module'),
-    '#description' => t("Check this to enable some Views query and performance statistics <em>if Devel is installed</em>."),
-    '#default_value' => variable_get('views_devel_output', FALSE),
+    '#title' => t('Add Views signature to all SQL queries'),
+    '#description' => t("All Views-generated queries will include a special 'VIEWS' = 'VIEWS' string in the WHERE clause. This makes identifying Views queries in database server logs simpler, but should only be used when troubleshooting."),
+    '#default_value' => variable_get('views_sql_signature', FALSE),
   );
 
-  $form['views_no_javascript'] = array(
+  $form['debug']['views_no_javascript'] = array(
     '#type' => 'checkbox',
     '#title' => t('Disable JavaScript with Views'),
     '#description' => t("If you are having problems with the JavaScript, you can disable it here. The Views UI should degrade and still be usable without javascript; it's just not as good."),
     '#default_value' => variable_get('views_no_javascript', FALSE),
   );
 
-  $form['views_localization_plugin'] =  array(
+  $form['debug']['views_show_additional_queries'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show other queries run during render during live preview'),
+    '#description' => t("Drupal has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."),
+    '#default_value' => variable_get('views_show_additional_queries', FALSE),
+  );
+
+  $form['debug']['views_devel_output'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable views performance statistics via the Devel module'),
+    '#description' => t("Check this to enable some Views query and performance statistics <em>if Devel is installed</em>."),
+    '#default_value' => variable_get('views_devel_output', FALSE),
+  );
+
+  $form['locale'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Localization'),
+  );
+
+  $form['locale']['views_localization_plugin'] =  array(
     '#type' => 'radios',
     '#title' => t('Translation method'),
     '#options' => views_fetch_plugin_names('localization', NULL, array(), TRUE),
@@ -4631,7 +4649,7 @@ function views_ui_admin_settings_advanced() {
   $regions = system_region_list(variable_get('theme_default', 'garland'));
   $regions['watchdog'] = t('Watchdog');
 
-  $form['views_devel_region'] = array(
+  $form['debug']['views_devel_region'] = array(
     '#type' => 'select',
     '#title' => t('Page region to output performance statistics'),
     '#default_value' => variable_get('views_devel_region', 'footer'),
