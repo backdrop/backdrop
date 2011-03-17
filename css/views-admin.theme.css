@@ -258,7 +258,7 @@ input.form-radio {
 
 /* @group Tables */
 
-table td, 
+table td,
 table th {
   vertical-align: top;
 }
@@ -508,7 +508,7 @@ td.group-title {
 /* @end */
 
 /* @group Attachment details */
- 
+
 #edit-display-settings {
   border-bottom: 3px solid #CCC;
   padding-bottom: 12px;
@@ -550,7 +550,7 @@ td.group-title {
  *
  * The auto-preview checkbox line.
  */
- 
+
 #edit-display-preview-controls {
   margin-top: 36px;
 }
@@ -637,14 +637,14 @@ td.group-title {
 /* @end */
 
 /* @group Attachment bucket overridden
- * 
+ *
  * Applies a broken link icon to overridden buckets.
  * The better way to implement this would be to add the overridden class
- * to the bucket header when the bucket is overridden and style it as a 
+ * to the bucket header when the bucket is overridden and style it as a
  * generic icon classed element. For the moment, we'll style the bucket
  * header specifically with the broken link icon.
  */
- 
+
 .views-ui-display-tab-setting.overridden,
 .views-ui-display-tab-bucket.overridden > h3 {
   background-attachment: scroll;
@@ -1005,6 +1005,6 @@ div.views-filterable-options .form-type-checkbox .description {
  */
 div.messages {
   margin-bottom: 18px;
-} 
+}
 
 /* @end */
