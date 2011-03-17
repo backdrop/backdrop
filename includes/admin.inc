@@ -1629,7 +1629,6 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
     $variables['classes_array'][] = 'defaulted';
   }
   if (!empty($variables['overridden'])) {
-    dsm(123);
     $variables['classes_array'][] = 'overridden';
     $variables['attributes_array']['title'][] = t('Overridden');
   }
