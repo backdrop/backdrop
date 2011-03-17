@@ -812,7 +812,7 @@ function theme_views_ui_view_info($variables) {
   $output = '';
   $output .= '<div class="views-ui-view-title">' . $title . "</div>\n";
   $output .= '<div class="views-ui-view-displays">' . $displays . "</div>\n";
-  $output .= '<div class="views-ui-view-storage">'. $type . "</div>\n";
+  $output .= '<div class="views-ui-view-storage">' . $type . "</div>\n";
   $output .= '<div class="views-ui-view-base">' . t('Type') . ': ' . $variables['base']. "</div>\n";
   return $output;
 }
@@ -1100,7 +1100,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
     $display_title = views_ui_get_display_label($view, $display_id, FALSE);
     // Add a handle for the ctools collapsible-div. The handle is the title of the display
-    $form['displays']['settings']['tab_title']['#markup'] = '<h2 id="edit-display-settings-title" class="ctools-collapsible-handle">'.t('@display_title details', array('@display_title' => ucwords($display_title))).'</h2>';
+    $form['displays']['settings']['tab_title']['#markup'] = '<h2 id="edit-display-settings-title" class="ctools-collapsible-handle">' . t('@display_title details', array('@display_title' => ucwords($display_title))) . '</h2>';
     // The ctools collapsible-div content
     $form['displays']['settings']['settings_content']= array(
       '#theme_wrappers' => array('container'),
@@ -2860,7 +2860,7 @@ function views_ui_reorder_displays_form($form, &$form_state) {
     'limit' => 0,
   );
 
-  $form['#action'] = url('admin/structure/views/nojs/reorder-displays/'. $view->name);
+  $form['#action'] = url('admin/structure/views/nojs/reorder-displays/' . $view->name);
 
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_reorder_displays_form');
 
