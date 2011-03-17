@@ -4478,6 +4478,11 @@ function views_ui_admin_settings_display() {
     '#title' => t('Show filters on the list of views'),
     '#default_value' => variable_get('views_ui_show_listing_filters', FALSE),
   );
+  $form['view_list']['views_ui_show_advanced_help_warning'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show advanced help warning'),
+    '#default_value' => variable_get('views_ui_show_advanced_help_warning', TRUE),
+  );
   $form['edit_view_form'] = array(
     '#type' => 'fieldset',
     '#title' => t('Edit view form'),
@@ -4493,11 +4498,11 @@ function views_ui_admin_settings_display() {
       'above' => t('Show the query above the automatic preview'),
       'below' => t('Show the query below the automatic preview'),
     ),
+    '#id' => 'edit-show-sql',
     '#default_value' => variable_get('views_ui_show_sql_query_where', 'above'),
-    '#process' => array('form_process_radios', 'ctools_dependent_process'),
     '#dependency' => array('edit-views-ui-show-sql-query' => array(TRUE)),
-    '#prefix' => '<div id="edit-show-sql-wrapper" class="views-dependent"><div id="edit-show-sql">',
-    '#suffix' => '</div></div>',
+    '#prefix' => '<div id="edit-show-sql-wrapper" class="views-dependent">',
+    '#suffix' => '</div>',
   );
   $form['edit_view_form']['views_ui_show_performance_statistics'] = array(
     '#type' => 'checkbox',
@@ -4511,15 +4516,9 @@ function views_ui_admin_settings_display() {
       'below' => t('Show the statistics below the automatic preview'),
     ),
     '#default_value' => variable_get('views_ui_show_performance_statistics_where', 'above'),
-    '#process' => array('form_process_radios', 'ctools_dependent_process'),
     '#dependency' => array('edit-views-ui-show-performance-statistics' => array(TRUE)),
-    '#prefix' => '<div id="edit-show-performance-wrapper" class="views-dependent"><div id="edit-show-performance">',
-    '#suffix' => '</div></div>',
-  );
-  $form['edit_view_form']['views_ui_show_advanced_help_warning'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show advanced help warning'),
-    '#default_value' => variable_get('views_ui_show_advanced_help_warning', TRUE),
+    '#prefix' => '<div id="edit-show-performance-wrapper" class="views-dependent">',
+    '#suffix' => '</div>',
   );
 
   return system_settings_form($form);
