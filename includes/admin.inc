@@ -4530,15 +4530,6 @@ function views_ui_admin_settings_display() {
  */
 function views_ui_admin_settings_defaults() {
   $form = array();
-  $form['view_list'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('View list'),
-  );
-  $form['view_list']['views_ui_combine_templates'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Combine view templates and user-generated views'),
-    '#default_value' => variable_get('views_ui_combine_templates', FALSE),
-  );
 
   $form['edit_view_form'] = array(
     '#type' => 'fieldset',
