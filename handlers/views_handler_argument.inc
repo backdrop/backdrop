@@ -58,6 +58,7 @@ class views_handler_argument extends views_handler {
       $this->options['exception']['title'] = $options['wildcard_substitution'];
     }
 
+    $this->options['summary']['format'] = $options['style_plugin'];
     if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc') {
       $this->options['default_action'] = 'summary';
       $this->options['summary']['sort_order'] = 'asc';
