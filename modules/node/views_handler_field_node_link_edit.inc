@@ -15,7 +15,6 @@ class views_handler_field_node_link_edit extends views_handler_field_node_link {
     $node->nid = $this->get_value($values, 'nid');
     $node->uid = $this->get_value($values, 'uid');
     $node->type = $this->get_value($values, 'type');
-    $node->format = $this->get_value($values, 'format');
     $node->status = 1; // unpublished nodes ignore access control
     if (!node_access('update', $node)) {
       return;
@@ -29,4 +28,3 @@ class views_handler_field_node_link_edit extends views_handler_field_node_link {
     return $text;
   }
 }
-

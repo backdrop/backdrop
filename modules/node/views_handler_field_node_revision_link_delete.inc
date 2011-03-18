@@ -20,7 +20,6 @@ class views_handler_field_node_revision_link_delete extends views_handler_field_
     $node->nid = $this->get_value($values, 'nid');
     $node->uid = $this->get_value($values, 'uid');
     $node->type = $this->get_value($values, 'type');
-    $node->format = $this->get_value($values, 'format');
     $node->status = 1; // unpublished nodes ignore access control
     if (!node_access('delete', $node)) {
       return;
