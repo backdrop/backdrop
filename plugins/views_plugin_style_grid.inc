@@ -45,7 +45,7 @@ class views_plugin_style_grid extends views_plugin_style {
     $form['fill_single_line'] = array(
       '#type' => 'checkbox',
       '#title' => t('Fill up single line'),
-      '#description' => t('If you disable this option a grid with only one row will have the amount of items as tds. If you disable it this can cause problems with your css.'),
+      '#description' => t('If you disable this option, a grid with only one row will have the same number of table cells (<TD>) as items. Disabling it can cause problems with your CSS.'),
       '#default_value' => !empty($this->options['fill_single_line']),
     );
 
