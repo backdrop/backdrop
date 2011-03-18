@@ -570,6 +570,7 @@ function field_group_field_overview_submit($form, &$form_state) {
     $formatter = $field_group_types[($mode == 'form' ? 'form' : 'display')][$values['format']['type']];
 
     $new_group = (object) array(
+      'identifier' => $values['group_name'] . '|' . $entity_type . '|' . $bundle . '|' . $mode,
       'group_name' => $values['group_name'],
       'entity_type' => $entity_type,
       'bundle' => $bundle,

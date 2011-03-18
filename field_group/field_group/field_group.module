@@ -123,6 +123,15 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
 }
 
 /**
+ * Implements hook_ctools_plugin_api().
+ */
+function field_group_ctools_plugin_api($owner, $api) {
+  if ($owner == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function field_group_theme() {
@@ -131,31 +140,6 @@ function field_group_theme() {
       'render element' => 'element',
     ),
   );
-}
-
-/**
- * Implements hook_features_export_options().
- *
- * Override of ctools default options list to make sure users
- * can choose from well formatted labels.
- * hook_features_api is implemented by Ctools. We could have used the
- * export name list callback too.
- * @see ctools_features_api()
- */
-function field_group_features_export_options() {
-  $options = array();
-  $field_group_instances = field_group_info_groups();
-  foreach ($field_group_instances as $entity_type => $bundles) {
-    foreach ($bundles as $bundle => $view_modes) {
-      foreach ($view_modes as $view_mode => $field_groups) {
-        foreach ($field_groups as $field_group) {
-          $identifier = "{$entity_type}-{$bundle}-{$view_mode}-{$field_group->group_name}";
-          $options[$identifier] = $identifier;
-        }
-      }
-    }
-  }
-  return $options;
 }
 
 /**
@@ -767,6 +751,7 @@ function field_group_field_group_is_empty($element, $groups) {
  * Implements hook_field_group_format_summary().
  */
 function field_group_field_group_format_summary($group) {
+
   $output = '';
   if (isset($group->format_settings['formatter'])) {
     $output .= '<strong>' . $group->format_type . '</strong> ' . $group->format_settings['formatter'] . '';

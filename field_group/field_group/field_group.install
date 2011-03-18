@@ -14,7 +14,7 @@ function field_group_schema() {
 
     // CTools export definitions.
     'export' => array(
-      'key' => 'id',
+      'key' => 'identifier',
       'identifier' => 'field_group',
       'default hook' => 'field_group_info',
       'save callback' => 'field_group_save',
@@ -33,6 +33,14 @@ function field_group_schema() {
         'type' => 'serial',
         'not null' => TRUE,
         'description' => 'The primary identifier for a group',
+        'no export' => TRUE,
+      ),
+      'identifier' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The unique string identifier for a group.',
       ),
       'group_name' => array(
         'type' => 'varchar',
@@ -174,6 +182,39 @@ function field_group_install() {
       );
       ctools_export_crud_save('field_group', $new);
 
+    }
+
+  }
+
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function field_group_update_7001() {
+
+  if (!db_field_exists('field_group', 'identifier')) {
+    // Add the new string identifier field for ctools.
+    db_add_field('field_group', 'identifier', array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'The unique string identifier for a group.',
+    ));
+
+    // Migrate the field groups so they have a unique identifier.
+    $result = db_select('field_group', 'fg')
+      ->fields('fg')
+      ->execute();
+    $rows = array();
+    foreach($result as $row) {
+      $row->identifier = $row->group_name . '|' . $row->entity_type . '|' . $row->bundle . '|' . $row->mode;
+      $row->data = unserialize($row->data);
+      $rows[] = $row;
+    }
+    foreach ($rows as $row) {
+      drupal_write_record('field_group', $row, array('id'));
     }
 
   }
