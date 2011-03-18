@@ -186,6 +186,11 @@ function field_group_install() {
 
   }
 
+  // Set weight to 1.
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'field_group')
+    ->execute();
 }
 
 /**
@@ -218,5 +223,10 @@ function field_group_update_7001() {
     }
 
   }
+
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'field_group')
+    ->execute();
 
 }
