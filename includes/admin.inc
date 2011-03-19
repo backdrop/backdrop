@@ -389,6 +389,7 @@ function views_ui_add_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Cancel'),
     '#submit' => array('views_ui_add_form_cancel_submit'),
+    '#limit_validation_errors' => array(),
   );
 
   return $form;
