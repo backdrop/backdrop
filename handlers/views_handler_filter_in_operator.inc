@@ -199,26 +199,12 @@ class views_handler_filter_in_operator extends views_handler_filter {
         $form_state['input'][$identifier] = $default_value;
       }
 
-      $process = array();
-      if ($this->value_form_type == 'checkboxes') {
-        // If this form element will use checkboxes in the UI, we need to
-        // check_plain() all the options ourselves since FAPI is inconsistent
-        // about this. However, instead of directly doing that to the #options
-        // right now, we define a #process callback since we might change our
-        // mind later and convert this into a 'select' form element, which
-        // would lead to double-escaping the options.
-        $process[] = 'views_process_check_options';
-      }
       if ($which == 'all') {
         if (empty($form_state['exposed']) && (in_array($this->value_form_type, array('checkbox', 'checkboxes', 'radios', 'select')))) {
-          $process[] = "form_process_$this->value_form_type";
           $form['value']['#prefix'] = '<div id="edit-options-value-wrapper">';
           $form['value']['#suffix'] = '</div>';
         }
         $form['value']['#dependency'] = array($source => $this->operator_values(1));
-      }
-      if (!empty($process)) {
-        $form['value']['#process'] = $process;
       }
     }
   }

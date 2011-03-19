@@ -118,6 +118,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1097964 by dereine: Don't show contextual links when the contextual module is disabled.
 #1098006 by bojanz: Fix notice in summary style conversion code.
 by dereine: Move get_value and sanitize_value into views_handler to support it for area handlers.
+#1058464 by chsoney, dereine: Remove #process functions changes. They aren't needed anymore. This fixed multi-select list exposed filters.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
