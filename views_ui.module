@@ -356,7 +356,7 @@ function views_ui_default_load($name) {
  */
 function views_ui_preprocess_views_view(&$vars) {
   $view = $vars['view'];
-  if (!empty($view->views_ui_context)) {
+  if (!empty($view->views_ui_context) && module_exists('contextual')) {
     $view->hide_admin_links = TRUE;
     foreach (array('title', 'header', 'exposed', 'rows', 'pager', 'more', 'footer', 'empty', 'attachment_after', 'attachment_before') as $section) {
       if (!empty($vars[$section])) {
