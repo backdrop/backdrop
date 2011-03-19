@@ -802,44 +802,6 @@ If you would like to have the characters %5B and %5D please use the html entity 
   function pre_render(&$values) { }
 
   /**
-   * Get the value that's supposed to be rendered.
-   *
-   * @param $values
-   *   An object containing all retrieved values.
-   * @param $field
-   *   Optional name of the field where the value is stored.
-   */
-  function get_value($values, $field = NULL) {
-    $alias = isset($field) ? $this->aliases[$field] : $this->field_alias;
-    if (isset($values->{$alias})) {
-      return $values->{$alias};
-    }
-  }
-
-  /**
-   * Sanitize the value for output.
-   *
-   * @param $value
-   *   The value being rendered.
-   * @param $type
-   *   The type of sanitization needed. If not provided, check_plain() is used.
-   */
-  function sanitize_value($value, $type = NULL) {
-    switch ($type) {
-      case 'xss':
-        $value = filter_xss($value);
-        break;
-      case 'url':
-        $value = check_url($value);
-        break;
-      default:
-        $value = check_plain($value);
-        break;
-    }
-    return $value;
-  }
-
-  /**
    * Render the field.
    *
    * @param $values
