@@ -119,6 +119,7 @@ by dereine: Convert op_shorter/longer in filter_string to add_where_expression.
 #1098006 by bojanz: Fix notice in summary style conversion code.
 by dereine: Move get_value and sanitize_value into views_handler to support it for area handlers.
 #1098334 by kannary, dereine: Remove merge leftover in views.help.ini.
+by dereine: Allow to expose sorts again.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

@@ -83,6 +83,19 @@ class views_handler_sort extends views_handler {
       // Should always come first
       '#weight' => -1000,
     );
+
+    // Add a checkbox for JS users, which will have behavior attached to it
+    // so it can replace the button.
+    $form['expose_button']['checkbox'] = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('js-only')),
+    );
+    $form['expose_button']['checkbox']['checkbox'] = array(
+      '#title' => t('Expose this filter to visitors, to allow them to change it.'),
+      '#type' => 'checkbox',
+    );
+
+    // Then add the button itself.
     if (empty($this->options['exposed'])) {
       $form['expose_button']['markup'] = array(
         '#markup' => '<div class="description exposed-description" style="float: left; margin-right:10px">' . t('This sort is not exposed. Expose it to allow the users to change it.') . '</div>',
@@ -93,6 +106,7 @@ class views_handler_sort extends views_handler {
         '#value' => t('Expose sort'),
         '#submit' => array('views_ui_config_item_form_expose'),
       );
+      $form['expose_button']['checkbox']['checkbox']['#default_value'] = 0;
     }
     else {
       $form['expose_button']['markup'] = array(
