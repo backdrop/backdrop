@@ -122,6 +122,7 @@ by dereine: Move get_value and sanitize_value into views_handler to support it f
 by dereine: Allow to expose sorts again.
 #1098168 by fubhy: HTML Wrapper checkboxes in style settings in default field handler showing weird behavior
 #1096366 by jamsilver: Role access plugin: Replacing array_unshift() with reset()
+#1096834 by dww: Allow importing views code that starts with '<?php'.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================
