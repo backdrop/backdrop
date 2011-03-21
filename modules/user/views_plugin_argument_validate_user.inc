@@ -37,7 +37,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
 
     $form['roles'] = array(
       '#type' => 'checkboxes',
-      '#prefix' => '<div id="edit-options-argument-validate-user-roles-wrapper">',
+      '#prefix' => '<div id="edit-options-validate-options-user-roles-wrapper">',
       '#suffix' => '</div>',
       '#title' => t('Restrict to the selected roles'),
       '#options' => array_map('check_plain', user_roles(TRUE)),
@@ -45,7 +45,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
       '#description' => t('If no roles are selected, users from any role will be allowed.'),
       '#process' => array('form_process_checkboxes', 'ctools_dependent_process'),
       '#dependency' => array(
-        'edit-options-argument-validate-user-restrict-roles' => array(1),
+        'edit-options-validate-options-user-restrict-roles' => array(1),
       ),
     );
   }
@@ -121,4 +121,3 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     return TRUE;
   }
 }
-
