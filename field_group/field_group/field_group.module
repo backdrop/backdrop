@@ -1143,21 +1143,24 @@ function field_group_build_pre_render($element) {
  */
 function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL) {
 
-  $groups = $root_element['#groups'];
-  $group_fields = $root_element['#group_children'];
+  static $groups = array();
+  static $group_fields = array();
+  if (!isset($parent_name)) {
+    $groups = $root_element['#groups'];
+    $group_fields = $root_element['#group_children'];
+  }
 
   foreach ($groups as $name => $group) {
 
     // Add fieldgroups to the current element. But only if the parent is the current
     // group parent or if we are starting from the root.
-    if (!isset($parent_name) || (!empty($group->parent_name) && $parent_name == $group->parent_name)) {
+    if ((!isset($parent_name) && empty($group->parent_name)) || (!empty($group->parent_name) && $parent_name == $group->parent_name)) {
 
       // We first create a new element wrapper, and loop over the fields
       // to detect children. After this point, the fields are stashed
       // in the group element and removed from the root.
       $element[$name] = array();
       foreach ($group_fields as $groupfield => $groupname) {
-
         // Stash the field in the group.
         if ($groupname == $name && isset($root_element[$groupfield])) {
           // Block the denied fields (#access) before they are put in groups.
@@ -1167,20 +1170,24 @@ function field_group_fields_nest(&$element, &$root_element, $parent_name = NULL)
           }
           // We can not meet this field again!
           unset($root_element[$groupfield]);
+          unset($group_fields[$groupfield]);
           unset($root_element['#group_children'][$groupfield]);
         }
         // Or hey, is the field maybe a group, then prepare the array.
         if ($groupname == $name && isset($root_element['#groups'][$groupfield])) {
           $element[$name][$groupfield] = array();
         }
+
       }
       // Go deeper with the current group element and the parent $name.
       // @TODO check if the order of these two functions are correct.
       // Recently changed to fix unnested fieldgroups. Needs revision & testing.
       field_group_fields_nest($element[$name], $root_element, $name);
+
       // Bring extra element wrappers to achieve a grouping of fields.
       // This will mainly be prefix and suffix altering.
       field_group_pre_render($element[$name], $group, $root_element);
+
     }
   }
 }
