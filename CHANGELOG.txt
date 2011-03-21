@@ -125,6 +125,7 @@ by dereine: Allow to expose sorts again.
 #1096834 by dww: Allow importing views code that starts with '<?php'.
 #557160 by joachim: Move docs/docs.php to views.api.php to match the drupal standard of hook documentation.
 #1100052 by michielnugter: Fix strict warning of views_handler_argument::get_value.
+#1023456 by dereine: Fix many_to_one_helper condition buidling.
 
 Views 3.x-7.x-alpha1 (05-Jan-2011)
 ==================================

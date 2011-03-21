@@ -921,7 +921,7 @@ class views_many_to_one_helper {
       $field = $this->handler->real_field;
       $clause = $operator == 'or' ? db_or() : db_and();
       foreach ($this->handler->table_aliases as $value => $alias) {
-        $clause->condition("$alias.$field", $this->handler->value);
+        $clause->condition("$alias.$field", $value);
       }
 
       // implode on either AND or OR.
