@@ -353,11 +353,11 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Add a table to the query, without ensuring the path.
+   * Add a table to the query without ensuring the path.
    *
-   * This function will test to ensure that the path back to the primary
-   * table is valid and exists; if you do not wish for this testing to
-   * occur, use $query->queue_table() instead.
+   * This is a pretty internal function to Views and add_table() or
+   * ensure_table() should be used instead of this one, unless you are
+   * absolutely sure this is what you want.
    *
    * @param $table
    *   The name of the table to add. It needs to exist in the global table
@@ -939,7 +939,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * @param $table
    *   The table this field is part of. If a formula, enter NULL.
-   *   If you want to orderby random use "rand" as table and 
+   *   If you want to orderby random use "rand" as table and
    * @param $field
    *   The field or formula to sort on. If already a field, enter NULL
    *   and put in the alias.
@@ -1147,7 +1147,7 @@ class views_plugin_query_default extends views_plugin_query {
     $options = array();
     $target = 'default';
     $key = 'default';
-    // Detect an external database and set the 
+    // Detect an external database and set the
     if (isset($this->view->base_database)) {
       $key = $this->view->base_database;
     }
