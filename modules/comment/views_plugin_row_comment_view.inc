@@ -11,6 +11,13 @@ class views_plugin_row_comment_view extends views_plugin_row {
   var $base_table = 'comment';
   var $base_field = 'cid';
 
+  function summary_title() {
+    if (empty($this->options['links'])) {
+      return t('Hide links');
+    }
+    return t('Display links');
+  }
+
   function option_definition() {
     $options = parent::option_definition();
     $options['links'] = array('default' => TRUE);
