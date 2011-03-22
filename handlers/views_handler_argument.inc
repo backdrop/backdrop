@@ -164,6 +164,7 @@ class views_handler_argument extends views_handler {
     $options['breadcrumb'] = array('default' => '', 'translatable' => TRUE);
     $options['default_argument_type'] = array('default' => 'fixed', 'export' => 'export_plugin');
     $options['default_argument_options'] = array('default' => array(), 'export' => FALSE);
+    $options['default_argument_skip_url'] = array('default' => FALSE);
     $options['summary_options'] = array('default' => array(), 'export' => FALSE);
     $options['summary'] = array(
       'contains' => array(
@@ -491,6 +492,13 @@ class views_handler_argument extends views_handler {
   function default_argument_form(&$form, &$form_state) {
     $plugins = views_fetch_plugin_data('argument default');
     $options = array();
+
+    $form['default_argument_skip_url'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Skip default argument for view URL'),
+      '#default_value' => $this->options['default_argument_skip_url'],
+      '#description' => t('Select whether to include this default argument when constructing the URL for this view. Skipping default arguments is useful e.g. in the case of feeds.')
+    );
 
     $form['default_argument_type'] = array(
       '#prefix' => '<div id="edit-options-default-argument-type-wrapper">',
@@ -983,6 +991,9 @@ class views_handler_argument extends views_handler {
     $argument = clone $this;
     if (!isset($arg) && $argument->has_default_argument()) {
       $arg = $argument->get_default_argument();
+
+      // remember that this argument was computed, not passed on the URL.
+      $this->is_default = TRUE;
     }
     // Set the argument, which will also validate that the argument can be set.
     if ($argument->set_argument($arg)) {
