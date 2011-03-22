@@ -1332,7 +1332,7 @@ function views_save_view(&$view) {
 }
 
 /**
- * Export CRUD callback to export a view.
+ * Export CRUD callback to delete a view.
  */
 function views_delete_view(&$view) {
   return $view->delete(TRUE);
