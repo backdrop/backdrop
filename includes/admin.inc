@@ -4544,7 +4544,7 @@ function views_ui_admin_settings_defaults() {
 
   $form['edit_view_form']['views_ui_show_master_display'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Always show the master query'),
+    '#title' => t('Always show the master display'),
     '#description' => t('Advanced users of views may choose to see the master (i.e. default) display.'),
     '#default_value' => variable_get('views_ui_show_master_display', FALSE),
   );
