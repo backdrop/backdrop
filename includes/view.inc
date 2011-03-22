@@ -785,6 +785,11 @@ class view extends views_db_object {
       $cache = $this->display_handler->get_plugin('cache');
     }
     if ($cache && $cache->cache_get('results')) {
+      if($this->query->pager->use_pager()) {
+        $this->query->pager->total_items = $this->total_rows;
+        $this->query->pager->update_page_info();
+      }
+      vpr('Used cached results');
     }
     else {
       $this->query->execute($this);

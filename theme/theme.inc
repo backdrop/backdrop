@@ -190,12 +190,13 @@ function template_preprocess_views_view_fields(&$vars) {
         $object->raw = NULL; // make sure it exists to reduce NOTICE
       }
 
+      $object->inline = !empty($vars['options']['inline'][$id]);
+
       if (!empty($vars['options']['separator']) && $inline && $object->inline && $object->content) {
         $object->separator = filter_xss_admin($vars['options']['separator']);
       }
 
       $object->class = drupal_clean_css_identifier($id);
-      $object->inline = !empty($vars['options']['inline'][$id]);
       $inline = $object->inline;
       $object->inline_html = $object->handler->element_wrapper_type(TRUE, TRUE);
 

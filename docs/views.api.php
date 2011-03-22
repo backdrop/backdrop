@@ -540,8 +540,7 @@ function hook_views_default_views() {
  */
 function hook_views_default_views_alter(&$views) {
   if (isset($views['taxonomy_term'])) {
-    $views['taxonomy_term']->set_display('default');
-    $views['taxonomy_term']->display_handler->set_option('title', 'Categories');
+    $views['taxonomy_term']->display['default']->display_options['title'] = 'Categories';
   }
 }
 

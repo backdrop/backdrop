@@ -298,6 +298,7 @@ class views_handler_field extends views_handler {
         'path' => array('default' => '', 'translatable' => TRUE),
         'absolute' => array('default' => '', 'translatable' => FALSE),
         'external' => array('default' => '', 'translatable' => FALSE),
+        'replace_spaces' => array('default' => '', 'translatable' => FALSE),
         'alt' => array('default' => '', 'translatable' => TRUE),
         'rel' => array('default' => ''),
         'link_class' => array('default' => ''),
@@ -574,6 +575,15 @@ class views_handler_field extends views_handler {
         '#type' => 'checkbox',
         '#title' => t('Use absolute path'),
         '#default_value' => $this->options['alter']['absolute'],
+        '#dependency' => array(
+          'edit-options-alter-make-link' => array(1)
+        ),
+      );
+      $form['alter']['replace_spaces'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Replace spaces with dashes'),
+        '#default_value' => $this->options['alter']['replace_spaces'],
+        '#process' => array('views_process_dependency'),
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1)
         ),
@@ -967,6 +977,10 @@ If you would like to have the characters %5B and %5D please use the html entity 
       // However, we need to preserve special characters like " that
       // were removed by check_plain().
       $path = strip_tags(html_entity_decode(strtr($path, $tokens)));
+
+      if (!empty($alter['replace_spaces'])) {
+        $path = str_replace(' ', '-', $path);
+      }
     }
 
     // Parse the URL and move any query and fragment parameters out of the path.

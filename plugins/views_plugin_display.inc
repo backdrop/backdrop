@@ -1278,7 +1278,6 @@ class views_plugin_display extends views_plugin {
           '#description' => t("This will display the more link even if there are no more items to display."),
           '#default_value' => $this->get_option('use_more_always'),
         );
-        $form['#title'] .= t('Text to use for the more link.');
         $form['use_more_text'] = array(
           '#type' => 'textfield',
           '#title' => t('More link text'),
