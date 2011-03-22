@@ -1023,7 +1023,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       $form['displays']['top']['extra_actions']['#links']['revert'] = array(
         'title' => t('revert'),
         'href' => "admin/structure/views/view/$view->name/revert",
-        'query' => drupal_get_destination(),
+        'query' => array('destination' => "admin/structure/views/view/$view->name"),
       );
     }
     else {
