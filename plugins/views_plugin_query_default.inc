@@ -1179,7 +1179,7 @@ class views_plugin_query_default extends views_plugin_query {
     if (count($this->having)) {
       $this->has_aggregate = TRUE;
     }
-    if ($this->has_aggregate || $this->groupby) {
+    if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
       $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
       foreach ($groupby as $field) {
         $query->groupBy($field);
