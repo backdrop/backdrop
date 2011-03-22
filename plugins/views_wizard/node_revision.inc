@@ -1,7 +1,10 @@
 <?php
-// $Id$
 
-// Parent plugin.
+/**
+ * @file
+ * Views wizard for node revision views.
+ */
+
 $plugin = array(
   'name' => 'node_revision',
   'base_table' => 'node_revision',

@@ -1,5 +1,9 @@
 <?php
-// $Id: ctools_custom_content.inc,v 1.2 2010/10/11 22:18:23 sdboyer Exp $
+
+/**
+ * @file
+ * Plugin definition for CTools Export UI integration.
+ */
 
 $plugin = array(
   'schema' => 'views_view',

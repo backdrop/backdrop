@@ -5,7 +5,6 @@ First, create a directory in <em>sites/all/modules</em> for your new module. Cal
 
 In this directory, create a <em>mymodule.module</em> file. It can be empty for now, but it should at least contain an opening PHP tag:
 <pre>&lt;?php
-// $Id $
 </pre>
 
 It should not contain a closing ?&gt; tag, as the closing ?&gt; tag is not required and anything AFTER the closing tag, such as a space or a linefeed, will be displayed directly to the browser and can potentially cause problems.
@@ -21,8 +20,7 @@ For other uses you may well add additional functions.
 
 Second, you need to create a <em>mymodule.info</em> file:
 
-<pre>; $Id $
-name = My module
+<pre>name = My module
 description = My site specific module.
 core = 6.x
 </pre>

@@ -1,6 +1,15 @@
 <?php
-// $Id: $
 
+/**
+ * @file
+ * Contains the CTools Export UI integration code.
+ *
+ * Note that this is only a partial integration.
+ */
+
+/**
+ * CTools Export UI class handler for Views UI.
+ */
 class views_ui extends ctools_export_ui {
 
   function init($plugin) {
