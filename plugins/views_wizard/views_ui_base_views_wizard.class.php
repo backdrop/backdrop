@@ -87,6 +87,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
       '#default_value' => TRUE,
+      '#id' => 'edit-page-create',
     );
 
     // All options for the page display are included in this container so they
@@ -94,11 +95,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['page']['options'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('options-set'),),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[create]"]' => array('checked' => TRUE),
-        ),
+      '#dependency' => array(
+        'edit-page-create' => array(1),
       ),
+      '#pre_render' => array('ctools_dependent_pre_render'),
+      '#prefix' => '<div><div id="edit-page-wrapper">',
+      '#suffix' => '</div></div>',
       '#parents' => array('page'),
     );
 
@@ -140,14 +142,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['page']['options']['link'] = array(
       '#title' => t('Create a menu link'),
       '#type' => 'checkbox',
+      '#id' => 'edit-page-link',
     );
     $form['displays']['page']['options']['link_properties'] = array(
       '#type' => 'container',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="page[link]"]' => array('checked' => TRUE),
-        ),
+      '#dependency' => array(
+        'edit-page-link' => array(1),
       ),
+      '#pre_render' => array('ctools_dependent_pre_render'),
+      '#prefix' => '<div id="edit-page-link-properties-wrapper">',
+      '#suffix' => '</div>',
     );
     if (module_exists('menu')) {
       $menu_options = menu_get_menus();
@@ -173,14 +177,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $form['displays']['page']['options']['feed'] = array(
         '#title' => t('Include an RSS feed'),
         '#type' => 'checkbox',
+        '#id' => 'edit-page-feed',
       );
       $form['displays']['page']['options']['feed_properties'] = array(
         '#type' => 'container',
-        '#states' => array(
-          'visible' => array(
-            ':input[name="page[feed]"]' => array('checked' => TRUE),
-          ),
+        '#dependency' => array(
+          'edit-page-feed' => array(1),
         ),
+        '#pre_render' => array('ctools_dependent_pre_render'),
+        '#prefix' => '<div id="edit-page-feed-properties-wrapper">',
+        '#suffix' => '</div>',
       );
       $form['displays']['page']['options']['feed_properties']['path'] = array(
         '#title' => t('Feed path'),
@@ -194,11 +200,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#options' => $feed_row_options,
         '#default_value' => key($feed_row_options),
         '#access' => (count($feed_row_options) > 1),
-        '#states' => array(
-          'visible' => array(
-            ':input[name="page[feed]"]' => array('checked' => TRUE),
-          ),
+        '#dependency' => array(
+          'edit-page-feed' => array(1),
         ),
+        '#pre_render' => array('ctools_dependent_pre_render'),
+        '#prefix' => '<div id="edit-page-feed-properties-row-plugin-wrapper">',
+        '#suffix' => '</div>',
       );
     }
 
@@ -211,6 +218,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a block'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
+      '#id' => 'edit-block-create',
     );
 
     // All options for the block display are included in this container so they
@@ -218,11 +226,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $form['displays']['block']['options'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('options-set'),),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="block[create]"]' => array('checked' => TRUE),
-        ),
+      '#dependency' => array(
+        'edit-block-create' => array(1),
       ),
+      '#pre_render' => array('ctools_dependent_pre_render'),
+      '#prefix' => '<div id="edit-block-wrapper">',
+      '#suffix' => '</div>',
       '#parents' => array('block'),
     );
 

@@ -196,8 +196,7 @@ input.form-radio {
 }
 
 /* Indent form elements so they're directly underneath the label of the checkbox that reveals them */
-.views-admin .form-type-checkbox + .form-wrapper,
-.views-admin .form-type-checkbox + .views-ui-ajax-wrapper {
+.views-admin .form-type-checkbox + .form-wrapper {
   margin-left: 16px; /* LTR */
 }
 
