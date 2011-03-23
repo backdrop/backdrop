@@ -12,6 +12,13 @@ function views_ui_menu() {
 
   //module_load_include('inc', 'views_ui', 'includes/admin');
 
+  // Drupal core loads the module file when uninstall a module. So views.module is not loaded.
+  // There is a core bug filled, remove it once the bug is fixed.
+  // @see http://drupal.org/node/1029606
+  if (!module_exists('views')) {
+    return;
+  }
+
   // Minor code reduction technique.
   $base = array(
     'access callback' => 'user_access',
