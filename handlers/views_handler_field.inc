@@ -583,7 +583,6 @@ class views_handler_field extends views_handler {
         '#type' => 'checkbox',
         '#title' => t('Replace spaces with dashes'),
         '#default_value' => $this->options['alter']['replace_spaces'],
-        '#process' => array('views_process_dependency'),
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1)
         ),
