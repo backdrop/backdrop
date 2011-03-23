@@ -1,5 +1,9 @@
 <?php
-// $Id$
+
+/**
+ * @file
+ * Views wizard for managed file views.
+ */
 
 $plugin = array(
   'name' => 'file_managed',

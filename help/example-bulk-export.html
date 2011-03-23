@@ -1,0 +1,44 @@
+This documentation focuses on the bulk export and version control functionality of the Views module.  The following steps document how to export multiple views at once and create a module from the exported code that will allow you to revert any subsequent changes to your views.
+
+Assumptions:
+- You have views you want to bulk export; we'll call them <em>myView1</em> and <em>myView2</em>
+- You know how to install and enable a module
+
+
+<ol>
+<li><h3>Modules you will need</h3>
+<p>Install <a href="http://drupal.org/project/views" target="_blank">Views</a> and <a href="base_url:admin/build/modules" target="_blank">enable</a> the following modules: Views, Views exporter, Views UI</p>
+</li>
+<li><h3>Evaluate the Current State of Things</h3>
+<p>Navigate to the <a href="base_url:admin/build/views" target="_blank">Views Administration page</a>. You should have <em>Edit | Export | Clone | Delete</em> options next to <em>myView1</em> and <em>myView2</em>.  Once we're done, "Delete" will become "Revert"!</p>
+</li>
+<li><h3>Bulk Export Your Views</h3>
+  <ol>
+    <li>Click <strong>Tools</strong> > <strong>Bulk Export</strong> to navigate to the <a href="base_url:admin/build/views/tools/exports" target="_blank">Bulk Export page</a> to export <em>myView1</em> and <em>myView2</em>.</li>  
+    <li>Check the boxes to the left of <em>myView1</em> and <em>myView2</em></li>
+    <li>Choose a module name: my_views</li>
+    <li>Click Export</li>
+  </ol>
+</li>
+<li><h3>Create a Module from the Exported Views</h3>
+<p>The results of the export should now be in front of you.  Specifically, the results page should be composed of three code-containing regions. This code and the following steps are all you need to create a module that will allow you to revert your views to the state they were in when you exported them.
+  <ol>
+    <li>Create a directory called <em>my_views</em> within your sites/all/modules directory.</li>
+    <li>Create the following files, paste in the appropriate code, and place them into the <em>my_views</em> directory:</li>
+      <ul>
+        <li>my_views.info</li>
+        <li>my_views.module (add a &lt;?php tag at the beginning of this file!)</li>
+        <li>my_views.views_default.inc (add a &lt;?php tag at the beginning of this file!)</li>
+      </ul>
+  </ol>
+</li>
+<li><h3>Clear the cache</h3>
+<p>Just to be safe.  Navigate to the <a href="base_url:admin/settings/performance" target="_blank">Performance Administration page</a> and <strong>Clear cached data</strong>.</p>
+</li>
+<li><h3>Enable the Module Containing Exported Views</h3>
+<p>Navigate to the <a href="base_url:admin/build/modules" target="_blank">Modules Administration page</a> and enable <em>my_views Export Module</em>.  <strong>Save</strong>.</p>
+</li>
+<li><h3>Verify Presence of Reversion Option for Exported Views</h3>
+<p>Navigate to the <a href="base_url:admin/build/views" target="_blank">Views Administration page</a>.  The right of <em>myView1</em> and <em>myView2</em> should now read <em>Edit | Export | Clone | Revert</em>.  Congratulations, you now have version control in place for your exported views!</p>
+</li>
+</ol>

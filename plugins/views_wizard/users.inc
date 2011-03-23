@@ -1,7 +1,10 @@
 <?php
-// $Id$
 
-// Parent plugin.
+/**
+ * @file
+ * Views wizard for user views.
+ */
+
 $plugin = array(
   'name' => 'users',
   'base_table' => 'users',

@@ -1,5 +1,3 @@
-// $Id$
-
 /**
  * @file
  * Javascript related to contextual links.
