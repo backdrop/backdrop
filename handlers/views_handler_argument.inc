@@ -771,7 +771,7 @@ class views_handler_argument extends views_handler {
     if (isset($this->name_table)) {
       // if the alias is different then we're probably added, not ensured,
       // so look up the join and add it instead.
-      if ($this->table_alias != $this->table) {
+      if ($this->table_alias != $this->name_table) {
         $j = views_get_table_join($this->name_table, $this->table);
         if ($j) {
           $join = clone $j;
