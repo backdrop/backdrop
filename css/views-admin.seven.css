@@ -18,16 +18,20 @@
 
 /* @group Forms */
 
-fieldset {
-  padding-top: 0;
-}
-
 .views-ui-dialog fieldset {
   padding-top: 2.5em;
 }
 
 fieldset fieldset {
   border: medium none;
+}
+
+/**
+ * Seven positions the legend absolutely, but does not have a way to ignore
+ * fieldsets without a legend so we make one up.
+ */
+fieldset.fieldset-no-legend {
+  padding-top: 0;
 }
 
 /**

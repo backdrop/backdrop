@@ -79,7 +79,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $form['displays']['page'] = array(
       '#type' => 'fieldset',
-      '#attributes' => array('class' => array('views-attachment'),),
+      '#attributes' => array('class' => array('views-attachment', 'fieldset-no-legend'),),
       '#tree' => TRUE,
     );
     $form['displays']['page']['create'] = array(
@@ -113,7 +113,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
     $form['displays']['page']['options']['style'] = array(
       '#type' => 'fieldset',
-      '#attributes' => array('class' => array('container-inline')),
+      '#attributes' => array('class' => array('container-inline', 'fieldset-no-legend')),
     );
 
     // Create the dropdown for choosing the display format.
@@ -204,7 +204,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $form['displays']['block'] = array(
       '#type' => 'fieldset',
-      '#attributes' => array('class' => array('views-attachment'),),
+      '#attributes' => array('class' => array('views-attachment', 'fieldset-no-legend'),),
       '#tree' => TRUE,
     );
     $form['displays']['block']['create'] = array(
@@ -232,7 +232,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     );
     $form['displays']['block']['options']['style'] = array(
       '#type' => 'fieldset',
-      '#attributes' => array('class' => array('container-inline')),
+      '#attributes' => array('class' => array('container-inline', 'fieldset-no-legend')),
     );
 
     // Create the dropdown for choosing the display format.

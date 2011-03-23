@@ -45,18 +45,12 @@ function views_ui_menu() {
   $items['admin/structure/views/settings'] = array(
     'title' => 'Settings',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_admin_settings_display'),
+    'page arguments' => array('views_ui_admin_settings_basic'),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
-  $items['admin/structure/views/settings/display'] = array(
-    'title' => 'Display',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'page arguments' => array('views_ui_admin_settings_display'),
-    'weight' => -10,
-  ) + $base;
-  $items['admin/structure/views/settings/defaults'] = array(
-    'title' => 'Defaults',
-    'page arguments' => array('views_ui_admin_settings_defaults'),
+  $items['admin/structure/views/settings/basic'] = array(
+    'title' => 'Basic',
+    'page arguments' => array('views_ui_admin_settings_basic'),
     'type' => MENU_LOCAL_TASK,
   ) + $base;
   $items['admin/structure/views/settings/advanced'] = array(
