@@ -597,13 +597,7 @@ function node_views_data() {
 }
 
 /**
- * Implements hook_views_plugins
-      'views_handler_argument_node_uid_revision' => array(
-        'parent' => 'views_handler_argument_comment_user_uid',
-      ),
-      ),
-      'views_handler_filter_node_uid_revision' => array(
-        'parent' => 'views_handler_filter_user_name',
+ * Implements hook_views_plugins().
  */
 function node_views_plugins() {
   return array(
