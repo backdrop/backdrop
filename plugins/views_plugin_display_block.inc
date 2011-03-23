@@ -75,7 +75,7 @@ class views_plugin_display_block extends views_plugin_display {
     }
 
     if (strlen($block_description) > 16) {
-      $block_description = substr($block_description, 0, 16) . '...';
+      $block_description = drupal_substr($block_description, 0, 16) . '...';
     }
 
     $options['block_description'] = array(
