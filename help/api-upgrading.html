@@ -182,3 +182,7 @@ return filter_xss($value);
 // Can become:
 return $this->sanitize_value($value, 'xss');
 </pre>
+
+
+<h3>Changed views_get_page_view</h3>
+In contrast to 6.x views_get_page_view now does stores the current view, not the current page display.
