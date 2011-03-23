@@ -1,5 +1,10 @@
 <?php
-// $Id:
+
+/**
+ * @file
+ * Handler for node path field.
+ */
+
 /**
  * Field handler to present the path to the node.
  */

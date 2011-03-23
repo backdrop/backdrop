@@ -200,7 +200,7 @@ class views_plugin_display_page extends views_plugin_display {
    */
   function execute() {
     // Let the world know that this is the page view we're using.
-    views_set_page_view($this);
+    views_set_page_view($this->view);
 
     // Prior to this being called, the $view should already be set to this
     // display, and arguments should be set on the view.

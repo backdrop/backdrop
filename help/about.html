@@ -14,6 +14,14 @@ The "building block" design of the views system provides power and flexibility, 
   <li><a href="topic:views/filter">Filters</a>, which limit items displayed in the results. Adding the filter <em>Node: Published</em> (and setting it equal to "Published") to a node view, for example, prevents unpublished items from being displayed</li>
 
   <li><a href="topic:views/display">Displays</a>, which control where the output will be seen. Every view has a default display, which doesn't actually display the view anywhere, but is used to hold the default settings for the view, and is used when the view is called programmatically if another display is not specified. Much more useful to users are the <a href="topic:views/display-page">page</a> display, which gives a view a path and allows it to be the primary content of a page, or the <a href="topic:views/display-block">block</a> display which allows it to appear as secondary content on other pages.</li>
+
+<li><a href="topic:views/header">Header</a>, which allow you to add by default one or more text area above the views output. </li>
+
+	<li><a href="topic:views/footer">Footer</a>, which allow you to add by default one or more text area beneath the views output. </li>
+	
+	<li>The <a href="topic:views/footer">Emtpy Text</a> content will be displayed, when you choose in the Arguments Section "Action to take if argument is not present" the option "Display empty text".</li>
+
+
 </ul>
 
 Parallels between the components in the Views interface and an sql query:

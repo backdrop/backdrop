@@ -1366,6 +1366,9 @@ function views_debug($message) {
       watchdog('views_logging', '<pre>' . $output . '</pre>');
     }
   }
+  elseif (isset($GLOBALS['drupal_test_info'])) {
+    debug($message);
+  }
 }
 
 /**

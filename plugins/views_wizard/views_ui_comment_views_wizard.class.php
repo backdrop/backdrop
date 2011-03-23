@@ -25,7 +25,7 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
           '#title_display' => 'invisible',
           '#title' => t('Should links be displayed below each comment'),
           '#options' => array(
-            1 => t('with links (allow users to add comments, etc.)'),
+            1 => t('with links (allow users to reply to the comment, etc.)'),
             0 => t('without links'),
           ),
           '#default_value' => 1,

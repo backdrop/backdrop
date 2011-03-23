@@ -489,6 +489,8 @@ class view extends views_db_object {
           if (isset($arg)) {
             $this->args[$position] = $arg;
           }
+          // remember that this argument was computed, not passed on the URL.
+          $argument->is_default = TRUE;
         }
 
         // Set the argument, which will also validate that the argument can be set.
@@ -1161,6 +1163,17 @@ class view extends views_db_object {
     }
     if (!isset($args)) {
       $args = $this->args;
+
+      // Exclude arguments that were computed, not passed on the URL.
+      $position = 0;
+      if (!empty($this->argument)) {
+        foreach ($this->argument as $argument_id => $argument) {
+          if (!empty($argument->is_default) && !empty($argument->options['default_argument_skip_url'])) {
+            unset($args[$position]);
+          }
+          $position++;
+        }
+      }
     }
     // Don't bother working if there's nothing to do:
     if (empty($path) || (empty($args) && strpos($path, '%') === FALSE)) {
@@ -1455,6 +1468,8 @@ class view extends views_db_object {
     foreach ($this->db_objects() as $key) {
       $this->_save_rows($key);
     }
+
+    $this->save_locale_strings();
 
     cache_clear_all('views_urls', 'cache_views');
     cache_clear_all(); // clear the page cache as well.

@@ -1,5 +1,9 @@
 <?php
-// $Id$
+
+/**
+ * @file
+ * Views wizard for taxonomy term views.
+ */
 
 if (module_exists('taxonomy')) {
   $plugin = array(

@@ -320,7 +320,7 @@ class views_handler extends views_object {
       '#title' => t('More'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#weight' => 50,
+      '#weight' => 150,
     );
   }
 

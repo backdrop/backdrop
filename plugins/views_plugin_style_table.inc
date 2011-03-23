@@ -20,6 +20,7 @@ class views_plugin_style_table extends views_plugin_style {
     $options['sticky'] = array('default' => FALSE);
     $options['order'] = array('default' => 'asc');
     $options['summary'] = array('default' => '');
+    $options['empty_table'] = array('default' => FALSE);
 
     return $options;
   }
@@ -258,8 +259,19 @@ class views_plugin_style_table extends views_plugin_style {
       '#default_value' => $default,
     );
 
+    $form['empty_table'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show the empty text in the table.'),
+      '#default_value' => $this->options['empty_table'],
+      '#description' => t('Per default the table is hidden for an empty view. With this option it is posible to show an empty table with the text in it.'),
+    );
+
     $form['description_markup'] = array(
       '#markup' => '<div class="description form-item">' . t('Place fields into columns; you may combine multiple fields into the same column. If you do, the separator in the column specified will be used to separate the fields. Check the sortable box to make that column click sortable, and check the default sort radio to determine which column will be sorted by default, if any. You may control column order and field labels in the fields section.') . '</div>',
     );
+  }
+  
+  function even_empty() {
+    return parent::even_empty() || !empty($this->options['empty_table']);
   }
 }

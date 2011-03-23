@@ -1,5 +1,9 @@
 <?php
-// $Id$
+
+/**
+ * @file
+ * Views wizard for comment views.
+ */
 
 // Parent plugin.
 if (module_exists('comment')) {

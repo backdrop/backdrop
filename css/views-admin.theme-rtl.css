@@ -77,8 +77,7 @@
   padding-right: 4pt;
 }
 
-.views-admin .form-type-checkbox + .form-wrapper,
-.views-admin .form-type-checkbox + .views-ui-ajax-wrapper {
+.views-admin .form-type-checkbox + .form-wrapper {
   margin-right: 16px;
 }
 

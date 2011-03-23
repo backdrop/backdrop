@@ -505,6 +505,8 @@ class views_handler_field_field extends views_handler_field {
               'entity_type' => $entity_type,
               'entity' => $entities[$entity_id],
             );
+            // Push the field values directly into the results array to make themers the life a bit easier.
+            $values[$key]->{$this->definition['table'] . '_' . $entity_type . '_values'} = field_get_items($entity_type, $entities[$entity_id], $this->definition['field_name']);
           }
         }
       }
