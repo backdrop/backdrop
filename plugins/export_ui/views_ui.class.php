@@ -246,9 +246,20 @@ class views_ui extends ctools_export_ui {
       array('data' => t('Operations'), 'class' => array('views-ui-operations')),
     );
 
+    $rows = $this->rows;
+    if (empty($rows)) {
+      $rows = array();
+      $rows[] = array(
+        array(
+          'data' => t('No views match the search criteria.'),
+          'colspan' => count($header),
+        )
+      );
+    }
+
     $table = array(
       'header' => $header,
-      'rows' => $this->rows,
+      'rows' => $rows,
       'attributes' => array('id' => 'ctools-export-ui-list-items'),
     );
     return theme('table', $table);
