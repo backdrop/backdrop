@@ -368,7 +368,7 @@ class views_handler_field extends views_handler {
       '#title' => t('Create a label'),
       '#description' => t('Enable to create a label for this field.'),
       '#default_value' => $label !== '',
-      '#weight' => -100,
+      '#weight' => -103,
     );
     $form['label'] = array(
       '#type' => 'textfield',
@@ -377,7 +377,7 @@ class views_handler_field extends views_handler {
       '#dependency' => array(
         'edit-options-custom-label' => array(1),
       ),
-      '#weight' => -100,
+      '#weight' => -102,
     );
     $form['element_label_colon'] = array(
       '#type' => 'checkbox',
@@ -386,7 +386,7 @@ class views_handler_field extends views_handler {
       '#dependency' => array(
         'edit-options-custom-label' => array(1),
       ),
-      '#weight' => -100,
+      '#weight' => -101,
     );
 
     $form['exclude'] = array(
@@ -402,7 +402,7 @@ class views_handler_field extends views_handler {
       '#title' => t('Style settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#weight' => 100,
+      '#weight' => 99,
     );
 
     $form['element_type_enable'] = array(
