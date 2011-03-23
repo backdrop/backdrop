@@ -105,9 +105,9 @@ class views_plugin_style_jump_menu extends views_plugin_style {
           $path = substr($path, 1);
         }
 
-        // use parse_url() to preserve query and fragment in case the user
+        // use drupal_parse_url() to preserve query and fragment in case the user
         // wants to do fun tricks.
-        $url = parse_url($path);
+        $url = drupal_parse_url($path);
         $url_options = array();
         if (isset($url['query'])) {
           $path = strtr($path, array('?' . $url['query'] => ''));
