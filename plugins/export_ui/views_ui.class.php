@@ -211,13 +211,15 @@ class views_ui extends ctools_export_ui {
         break;
     }
 
+    $ops = theme('links__ctools_dropbutton', array('links' => $operations, 'attributes' => array('class' => array('links', 'inline'))));
+
     $this->rows[$view->name] = array(
       'data' => array(
         array('data' => $info, 'class' => array('views-ui-name')),
         array('data' => check_plain($view->description), 'class' => array('views-ui-description')),
         array('data' => check_plain($view->tag), 'class' => array('views-ui-tag')),
         array('data' => $paths, 'class' => array('views-ui-path')),
-        array('data' => theme('links__ctools_dropbutton', array('links' => $operations, 'attributes' => array('class' => array('links', 'inline')), 'class' => array('views-ui-operations'))),),
+        array('data' => $ops, 'class' => array('views-ui-operations')),
       ),
       'title' => t('Machine name: ') . check_plain($view->name),
       'class' => array(!empty($view->disabled) ? 'ctools-export-ui-disabled' : 'ctools-export-ui-enabled'),
