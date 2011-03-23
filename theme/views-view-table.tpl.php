@@ -34,7 +34,7 @@
     <?php foreach ($rows as $count => $row): ?>
       <tr class="<?php print implode(' ', $row_classes[$count]); ?>">
         <?php foreach ($row as $field => $content): ?>
-          <td class="<?php print $field_classes[$field][$count]; ?>">
+          <td class="<?php print $field_classes[$field][$count]; ?>" <?php print drupal_attributes($field_attributes[$field][$count]); ?>>
             <?php print $content; ?>
           </td>
         <?php endforeach; ?>

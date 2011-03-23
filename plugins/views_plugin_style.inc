@@ -133,6 +133,13 @@ class views_plugin_style extends views_plugin {
     return $value;
   }
 
+  /**
+   * Should the output of the style plugin be rendered even if it's a empty view.
+   */
+  function even_empty() {
+    return !empty($this->definition['even empty']);
+  }
+
   function option_definition() {
     $options = parent::option_definition();
     $options['grouping'] = array('default' => '');
