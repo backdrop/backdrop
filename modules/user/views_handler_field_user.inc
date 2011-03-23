@@ -34,8 +34,7 @@ class views_handler_field_user extends views_handler_field {
   }
 
   function render_link($data, $values) {
-    $uid = $this->get_value($values, 'uid');
-    if (!empty($this->options['link_to_user']) && user_access('access user profiles') && $uid && $data !== NULL && $data !== '') {
+    if (!empty($this->options['link_to_user']) && user_access('access user profiles') && ($uid = $this->get_value($values, 'uid')) && $data !== NULL && $data !== '') {
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = "user/" . $uid;
     }
