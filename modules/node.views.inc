@@ -386,6 +386,18 @@ function node_views_data() {
     ),
   );
 
+  $data['node']['uid_revision'] = array(
+    'title' => t('User has a revision'),
+    'help' => t('All nodes where a certain user has a revision'),
+    'real field' => 'nid',
+    'filter' => array(
+      'handler' => 'views_handler_filter_node_uid_revision',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_node_uid_revision',
+    ),
+  );
+
   // ----------------------------------------------------------------------
   // Content revision table
 
@@ -586,6 +598,12 @@ function node_views_data() {
 
 /**
  * Implements hook_views_plugins
+      'views_handler_argument_node_uid_revision' => array(
+        'parent' => 'views_handler_argument_comment_user_uid',
+      ),
+      ),
+      'views_handler_filter_node_uid_revision' => array(
+        'parent' => 'views_handler_filter_user_name',
  */
 function node_views_plugins() {
   return array(
