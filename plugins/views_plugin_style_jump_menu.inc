@@ -107,16 +107,8 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
         // use drupal_parse_url() to preserve query and fragment in case the user
         // wants to do fun tricks.
-        $url = drupal_parse_url($path);
-        $url_options = array();
-        if (isset($url['query'])) {
-          $path = strtr($path, array('?' . $url['query'] => ''));
-          $url_options['query'] = $url['query'];
-        }
-        if (isset($url['fragment'])) {
-          $path = strtr($path, array('#' . $url['fragment'] => ''));
-          $url_options['fragment'] = $url['fragment'];
-        }
+        $url_options = drupal_parse_url($path);
+        $path = $url_options['path'];
 
         $path = url($path, $url_options);
         $field = strip_tags($this->row_plugin->render($row));
