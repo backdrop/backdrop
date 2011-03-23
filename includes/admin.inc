@@ -1817,6 +1817,10 @@ function views_ui_import_page($form, &$form_state) {
 function views_ui_import_validate($form, &$form_state) {
   $view = '';
   views_include('view');
+  // Be forgiving if someone pastes views code that starts with '<?php'.
+  if (substr($form_state['values']['view'], 0, 5) == '<?php') {
+    $form_state['values']['view'] = substr($form_state['values']['view'], 5);
+  }
   ob_start();
   eval($form_state['values']['view']);
   ob_end_clean();
