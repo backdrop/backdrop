@@ -214,21 +214,26 @@ class views_handler_field extends views_handler {
    * rare occurence.
    */
   function get_elements() {
-    return array(
-      '' => t('- Use default -'),
-      '0' => t('- None -'),
-      'div' => t('DIV'),
-      'span' => t('SPAN'),
-      'h1' => t('H1'),
-      'h2' => t('H2'),
-      'h3' => t('H3'),
-      'h4' => t('H4'),
-      'h5' => t('H5'),
-      'h6' => t('H6'),
-      'p' => t('P'),
-      'strong' => t('STRONG'),
-      'em' => t('EM'),
-    );
+    static $elements = NULL;
+    if (!isset($elements)) {
+      $elements = variable_get('views_field_rewrite_elements', array(
+        '' => t('- Use default -'),
+        '0' => t('- None -'),
+        'div' => t('DIV'),
+        'span' => t('SPAN'),
+        'h1' => t('H1'),
+        'h2' => t('H2'),
+        'h3' => t('H3'),
+        'h4' => t('H4'),
+        'h5' => t('H5'),
+        'h6' => t('H6'),
+        'p' => t('P'),
+        'strong' => t('STRONG'),
+        'em' => t('EM'),
+      ));
+    }
+
+    return $elements;
   }
 
   /**
