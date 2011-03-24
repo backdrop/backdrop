@@ -868,15 +868,15 @@ Drupal.viewsUi.resizeModal = function (e) {
   var winHeight = $(window).height();
   var winWidth = $(window).width();
 
-  var offsetTop = $(window).scrollTop();
-  var offsetLeft = $(window).scrollLeft();
+//  var offsetTop = $(window).scrollTop();
+//  var offsetLeft = $(window).scrollLeft();
 
   var width = $(window).width() * .8; // 80% of window
   var height = $(window).height() * .8;
 
   // Get where we should move content to
-  var top = (winHeight / 2) - (height / 2) + offsetTop;
-  var left = (winWidth / 2) - (width / 2) + offsetLeft;
+  var top = (winHeight / 2) - (height / 2) /* + offsetTop */;
+  var left = (winWidth / 2) - (width / 2) /* + offsetLeft */;
 
   $modal.css({
     'top': top + 'px',

@@ -214,6 +214,7 @@
 .views-ui-dialog {
   /* We need this so the button is visible. */
   overflow: visible;
+  position: fixed;
 }
 
 .views-ui-dialog .ui-dialog-titlebar-close {
