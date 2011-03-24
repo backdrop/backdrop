@@ -21,5 +21,16 @@ $plugin = array(
       'field' => 'status',
     ),
   ),
+  'path_field' => array(
+    'id' => 'uid',
+    'table' => 'users',
+    'field' => 'uid',
+    'exclude' => TRUE,
+    'link_to_user' => FALSE,
+    'alter' => array(
+      'alter_text' => 1,
+      'text' => 'user/[uid]',
+    ),
+  ),
 );
 

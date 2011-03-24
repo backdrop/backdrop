@@ -13,7 +13,7 @@ class ViewsUIWizardHelper extends DrupalWebTestCase {
     parent::setUp('views_ui');
 
     // Create and log in a user with administer views permission.
-    $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks', 'bypass node access'));
+    $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));
     $this->drupalLogin($views_admin);
   }
 }
@@ -605,6 +605,150 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
       }
     }
     $this->assertTrue($found, t('Found a link to %path in the main menu', array('%path' => $view['page[path]'])));
+  }
+}
+
+class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'Views UI wizard jump menu functionality',
+      'description' => 'Test the ability of the views wizard to create views with a jump menu style plugin.',
+      'group' => 'Views UI',
+    );
+  }
+
+  /**
+   * Test the jump menu style plugin.
+   */
+  function testJumpMenus() {
+    // We'll run this test for several different base tables that appear in the
+    // wizard.
+    $base_table_methods = array(
+      'node' => 'createNodeAndGetPath',
+      'users' => 'createUserAndGetPath',
+      'comment' => 'createCommentAndGetPath',
+      'taxonomy_term' => 'createTaxonomyTermAndGetPath',
+      'file_managed' => 'createFileAndGetPath',
+      'node_revision' => 'createNodeRevisionAndGetPath',
+    );
+
+    foreach ($base_table_methods as $base_table => $method) {
+      // For each base table, find the path that we expect the jump menu to
+      // redirect us to.
+      $path_info = $this->{$method}();
+      if (is_array($path_info)) {
+        $path = $path_info['path'];
+        $options = isset($path_info['options']) ? $path_info['options'] : array();
+      }
+      else {
+        $path = $path_info;
+        $options = array();
+      }
+
+      // Create a page view for the specified base table that uses the jump
+      // menu style plugin.
+      $view = array();
+      $view['human_name'] = $this->randomName(16);
+      $view['name'] = strtolower($this->randomName(16));
+      $view['description'] = $this->randomName(16);
+      $view['show[wizard_key]'] = $base_table;
+      $view['page[create]'] = 1;
+      $view['page[title]'] = $this->randomName(16);
+      $view['page[path]'] = $this->randomName(16);
+      $view['page[style][style_plugin]'] = 'jump_menu';
+      $view['page[style][row_plugin]'] = 'fields';
+      $this->drupalPost('admin/structure/views/add', $view, t('Save & exit'));
+
+      // Submit the jump menu form, and check that we are redirected to the
+      // expected URL.
+      $edit = array();
+      $edit['jump'] = url($path, $options);
+      $this->drupalPost($view['page[path]'], $edit, t('Go'));
+      $this->assertResponse(200);
+      $this->assertUrl($path, $options);
+    }
+  }
+
+  /**
+   * Helper function to create a node and return its expected path.
+   */
+  function createNodeAndGetPath() {
+    $node = $this->drupalCreateNode();
+    return entity_uri('node', $node);
+  }
+
+  /**
+   * Helper function to create a user and return its expected path.
+   */
+  function createUserAndGetPath() {
+    $account = $this->drupalCreateUser();
+    return entity_uri('user', $account);
+  }
+
+  /**
+   * Helper function to create a comment and return its expected path.
+   */
+  function createCommentAndGetPath() {
+    $node = $this->drupalCreateNode();
+    $comment = (object) array(
+      'cid' => NULL,
+      'nid' => $node->nid,
+      'pid' => 0,
+      'uid' => 0,
+      'status' => COMMENT_PUBLISHED,
+      'subject' => $this->randomName(),
+      'language' => LANGUAGE_NONE,
+      'comment_body' => array(LANGUAGE_NONE => array($this->randomName())),
+    );
+    comment_save($comment);
+    return entity_uri('comment', $comment);
+  }
+
+  /**
+   * Helper function to create a taxonomy term and return its expected path.
+   */
+  function createTaxonomyTermAndGetPath() {
+    $vocabulary = new stdClass();
+    $vocabulary->name = $this->randomName();
+    $vocabulary->machine_name = drupal_strtolower($this->randomName());
+    taxonomy_vocabulary_save($vocabulary);
+
+    $term = new stdClass();
+    $term->name = $this->randomName();
+    $term->vid = $vocabulary->vid;
+    taxonomy_term_save($term);
+
+    return entity_uri('taxonomy_term', $term);
+  }
+
+  /**
+   * Helper function to create a file and return its expected path.
+   */
+  function createFileAndGetPath() {
+    $file = (object) array(
+      'uid' => 1,
+      'filename' => 'views-ui-jump-menu-test.txt',
+      'uri' => 'public://views-ui-jump-menu-test.txt',
+      'filemime' => 'text/plain',
+      'timestamp' => 1,
+      'status' => FILE_STATUS_PERMANENT,
+    );
+    file_put_contents($file->uri, 'test content');
+    $file = file_save($file);
+    return file_create_url($file->uri);
+  }
+
+  /**
+   * Helper function to create a node revision and return its expected path.
+   */
+  function createNodeRevisionAndGetPath() {
+    // The node needs at least two revisions in order for Drupal to allow
+    // access to the revision path.
+    $settings = array('revision' => TRUE);
+    $node = $this->drupalCreateNode($settings);
+    $node->vid = NULL;
+    node_save($node);
+    return 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
   }
 }
 
