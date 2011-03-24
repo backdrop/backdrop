@@ -280,6 +280,7 @@ class views_plugin_display_page extends views_plugin_display {
 
     // This adds a 'Settings' link to the style_options setting if the style has options.
     if ($menu['type'] == 'default tab') {
+      $options['menu']['setting'] = t('Parent menu item');
       $options['menu']['links']['tab_options'] = t('Change settings for the parent menu');
     }
   }
