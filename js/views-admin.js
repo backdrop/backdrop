@@ -883,20 +883,29 @@ Drupal.viewsUi.resizeModal = function (e) {
     'height': height + 'px'
   });
 
+  // Ensure the inner popup height also matches:
+  $(Drupal.settings.views.ajax.popup).css('height', height + 'px');
+
   // Calculate the new maximum height of the scroll area by adding
   // up the other elements and subtracting them from the height we set.
-  var scrollHeight = $modal.height();
-  console.log(scrollHeight);
+  var scrollHeight = $(Drupal.settings.views.ajax.popup).innerHeight();
 
-  scrollHeight -= $('#views-ajax-title').outerHeight();
-  scrollHeight -= $('.views-add-form-selected').outerHeight();
-  scrollHeight -= $('.form-buttons', $modal).outerHeight();
+  scrollHeight -= $('#views-ajax-title').outerHeight(true);
+  scrollHeight -= $('.views-add-form-selected').outerHeight(true);
+  scrollHeight -= $('.form-buttons', $modal).outerHeight(true);
 
-  // A fudge because for some reason something hangs out the bottom.
-  scrollHeight -= 40;
+  var $scroll = $('.scroll', $modal);
+  // Subtract out the padding.
+  scrollHeight -= parseInt($scroll.css('padding-top'));
+  scrollHeight -= parseInt($scroll.css('padding-bottom'));
 
-  $('.scroll', $modal).css('max-height', parseInt(scrollHeight));
-  $('.scroll', $modal).css('height', parseInt(scrollHeight));
+  var padding = $scroll.outerHeight() - $scroll.innerHeight();
+  scrollHeight -= padding;
+
+  $scroll.css({
+    'height': scrollHeight + 'px',
+    'max-height': scrollHeight + 'px'
+  });
 };
 
 jQuery(function() {
