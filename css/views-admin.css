@@ -2,11 +2,11 @@
  * The .css file is intended to only contain positioning and size declarations
  * For example: display, position, float, clear, and overflow.
  */
- 
+
 /* @group Resets */
 
-.views-admin ul, 
-.views-admin menu, 
+.views-admin ul,
+.views-admin menu,
 .views-admin dir {
   padding-left: 0; /* LTR for IE */
   /* padding-start is used so that RTL works out of the box */
@@ -47,7 +47,7 @@
 }
 
 /* @end */
- 
+
 /* @group Columns */
 
 .views-left-25 {
@@ -113,7 +113,7 @@
  *
  * The tabs that switch between sections
  */
- 
+
  .views-displays .secondary {
    border-bottom: 0 none;
    margin: 0;
@@ -211,12 +211,43 @@
 
 /* @group Modal dialog box */
 
+.views-ui-dialog {
+  /* We need this so the button is visible. */
+  overflow: visible;
+}
+
+.views-ui-dialog .ui-dialog-titlebar-close {
+  background: transparent url('../images/close.png') no-repeat;
+  -moz-border-radius-topleft: 0;
+  -webkit-border-top-left-radius: 0;
+  border-top-left-radius: 0;
+  display: block;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 26px;
+  /* Make sure this is in front of the modal backdrop. */
+  z-index: 1002;
+  right: -26px;
+}
+
+.views-ui-dialog .ui-dialog-titlebar-close span {
+  display: none;
+}
+
 .views-ui-dialog .ui-dialog-titlebar {
+  padding: 0;
+  margin: 0;
+}
+
+.views-ui-dialog .ui-dialog-title {
   display: none;
 }
 
 .views-ui-dialog #views-ajax-popup {
   padding: 0;
+  overflow: hidden;
 }
 
 .views-ui-dialog #views-ajax-title,
