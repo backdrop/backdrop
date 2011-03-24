@@ -176,6 +176,7 @@ Drupal.viewsUi.addItemForm.prototype.handleCheck = function (event) {
       if (i == position) {
         this.checkedItems.splice(i, 1);
         i--;
+        break;
       }
     }
     // Hide it again if none item is selected.
