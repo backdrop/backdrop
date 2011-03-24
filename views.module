@@ -1865,36 +1865,70 @@ function views_views_api() {
   );
 }
 
-function aggregator_views_api() { return views_views_api(); }
+if (!function_exists('aggregator_views_api')) {
+  function aggregator_views_api() { return views_views_api(); }
+}
 
-function book_views_api() { return views_views_api(); }
+if (!function_exists('book_views_api')) {
+  function book_views_api() { return views_views_api(); }
+}
 
-function comment_views_api() { return views_views_api(); }
+if (!function_exists('comment_views_api')) {
+  function comment_views_api() { return views_views_api(); }
+}
 
-function locale_views_api() { return views_views_api(); }
+if (!function_exists('locale_views_api')) {
+  function locale_views_api() { return views_views_api(); }
+}
 
-function field_views_api() { return views_views_api(); }
+if (!function_exists('field_views_api')) {
+  function field_views_api() { return views_views_api(); }
+}
 
-function filter_views_api() { return views_views_api(); }
+if (!function_exists('filter_views_api')) {
+  function filter_views_api() { return views_views_api(); }
+}
 
-function node_views_api() { return views_views_api(); }
+if (!function_exists('node_views_api')) {
+  function node_views_api() { return views_views_api(); }
+}
 
-function poll_views_api() { return views_views_api(); }
+if (!function_exists('poll_views_api')) {
+  function poll_views_api() { return views_views_api(); }
+}
 
-function profile_views_api() { return views_views_api(); }
+if (!function_exists('profile_views_api')) {
+  function profile_views_api() { return views_views_api(); }
+}
 
-function search_views_api() { return views_views_api(); }
+if (!function_exists('search_views_api')) {
+  function search_views_api() { return views_views_api(); }
+}
 
-function statistics_views_api() { return views_views_api(); }
+if (!function_exists('statistics_views_api')) {
+  function statistics_views_api() { return views_views_api(); }
+}
 
-function system_views_api() { return views_views_api(); }
+if (!function_exists('system_views_api')) {
+  function system_views_api() { return views_views_api(); }
+}
 
-function taxonomy_views_api() { return views_views_api(); }
+if (!function_exists('taxonomy_views_api')) {
+  function taxonomy_views_api() { return views_views_api(); }
+}
 
-function translation_views_api() { return views_views_api(); }
+if (!function_exists('translation_views_api')) {
+  function translation_views_api() { return views_views_api(); }
+}
 
-function upload_views_api() { return views_views_api(); }
+if (!function_exists('upload_views_api')) {
+  function upload_views_api() { return views_views_api(); }
+}
 
-function user_views_api() { return views_views_api(); }
+if (!function_exists('user_views_api')) {
+  function user_views_api() { return views_views_api(); }
+}
 
-function contact_views_api() { return views_views_api(); }
+if (!function_exists('contact_views_api')) {
+  function contact_views_api() { return views_views_api(); }
+}
