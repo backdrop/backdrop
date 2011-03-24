@@ -895,7 +895,6 @@ Drupal.viewsUi.resizeModal = function (e) {
   // A fudge because for some reason something hangs out the bottom.
   scrollHeight -= 40;
 
-  console.log(scrollHeight);
   $('.scroll', $modal).css('max-height', parseInt(scrollHeight));
   $('.scroll', $modal).css('height', parseInt(scrollHeight));
 };
