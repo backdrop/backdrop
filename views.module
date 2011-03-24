@@ -397,20 +397,13 @@ function views_arg_load($value, $name, $display_id, $index) {
  * passes control to the display handler.
  */
 function views_page() {
-  // Determine the name and display ID of the view that will be rendered here,
-  // and save them in a static variable so we can use them in hook_page_alter()
-  // to affect the rest of the page.
-  $name = &drupal_static('views_page:name');
-  $display_id = &drupal_static('views_page:display_id');
   $args = func_get_args();
   $name = array_shift($args);
   $display_id = array_shift($args);
 
-  // Load the view and render it. Destory it before returning, to save memory.
+  // Load the view and render it.
   if ($view = views_get_view($name)) {
-    $output = $view->execute_display($display_id, $args);
-    $view->destroy();
-    return $output;
+    return $view->execute_display($display_id, $args);
   }
 
   // Fallback; if we get here no view was found or handler was not valid.
@@ -421,15 +414,12 @@ function views_page() {
  * Implements hook_page_alter().
  */
 function views_page_alter(&$page) {
-  // Check the static variables that were set in views_page() to see if the
-  // main content of this page contains a view. If so, attach its contextual
+  // If the main content of this page contains a view, attach its contextual
   // links to the overall page array. This allows them to be rendered directly
   // next to the page title.
-  $name = drupal_static('views_page:name');
-  $display_id = drupal_static('views_page:display_id');
-  if (!empty($name) && !empty($display_id) && ($view = views_get_view($name))) {
-    views_add_contextual_links($page, 'page', $view, $display_id);
-    $view->destroy();
+  $view = views_get_page_view();
+  if (!empty($view)) {
+    views_add_contextual_links($page, 'page', $view, $view->current_display);
   }
 }
 

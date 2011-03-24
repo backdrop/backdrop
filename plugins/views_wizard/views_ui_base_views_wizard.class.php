@@ -440,6 +440,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   }
 
   protected function instantiate_view($form, &$form_state) {
+    // Build the basic view properties.
     $view = views_new_view();
     $view->name = $form_state['values']['name'];
     $view->human_name = $form_state['values']['human_name'];
@@ -448,53 +449,131 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->core = VERSION;
     $view->base_table = $this->base_table;
 
+    // Build all display options for this view.
+    $display_options = $this->build_display_options($form, $form_state);
+
+    // Allow the fully built options to be altered. This happens before adding
+    // the options to the view, so that once they are eventually added we will
+    // be able to get all the overrides correct.
+    $this->alter_display_options($display_options, $form, $form_state);
+
+    $this->add_displays($view, $display_options, $form, $form_state);
+
+    return $view;
+  }
+
+  /**
+   * Build an array of display options for the view.
+   *
+   * @return
+   *   An array whose keys are the names of each display and whose values are
+   *   arrays of options for that display.
+   */
+  protected function build_display_options($form, $form_state) {
     // Display: Master
-    $default_display = $view->new_display('default', 'Master', 'default');
-    $options = $this->default_display_options($form, $form_state);
-    if (!isset($options['filters'])) {
-      $options['filters'] = array();
-    }
-    $options['filters'] += $this->default_display_filters($form, $form_state);
-    if (!isset($options['sorts'])) {
-      $options['sorts'] = array();
-    }
-    $options['sorts'] += $this->default_display_sorts($form, $form_state);
-    foreach ($options as $option => $value) {
-      $default_display->set_option($option, $value);
-    }
+    $display_options['default'] = $this->default_display_options($form, $form_state);
+    $display_options['default'] += array(
+      'filters' => array(),
+      'sorts' => array(),
+    );
+    $display_options['default']['filters'] += $this->default_display_filters($form, $form_state);
+    $display_options['default']['sorts'] += $this->default_display_sorts($form, $form_state);
 
     // Display: Page
     if (!empty($form_state['values']['page']['create'])) {
-      $display = $view->new_display('page', 'Page', 'page');
-      $options = $this->page_display_options($form, $form_state);
-      // The page display is usually the main one (from the user's point of
-      // view). Its options should therefore become the overall view defaults,
-      // so that new displays which are added later automatically inherit them.
+      $display_options['page'] = $this->page_display_options($form, $form_state);
 
-      $this->set_default_options($options, $display, $default_display);
       // Display: Feed (attached to the page)
       if (!empty($form_state['values']['page']['feed'])) {
-        $display = $view->new_display('feed', 'Feed', 'feed');
-        $options = $this->page_feed_display_options($form, $form_state);
-        $this->set_override_options($options, $display, $default_display);
+        $display_options['feed'] = $this->page_feed_display_options($form, $form_state);
       }
     }
 
     // Display: Block
     if (!empty($form_state['values']['block']['create'])) {
-      $display = $view->new_display('block', 'Block', 'block');
-      $options = $this->block_display_options($form, $form_state);
-      // When there is no page, the block display options should become the
-      // overall view defaults.
-      if (empty($form_state['values']['page']['create'])) {
-        $this->set_default_options($options, $display, $default_display);
+      $display_options['block'] = $this->block_display_options($form, $form_state);
+    }
+
+    return $display_options;
+  }
+
+  /**
+   * Alter the full array of display options before they are added to the view.
+   */
+  protected function alter_display_options(&$display_options, $form, $form_state) {
+    // If any of the displays use jump menus, we want to add fields to the view
+    // that store the path that will be used in the jump menu. The fields to
+    // use for this are defined by the plugin.
+    if (isset($this->plugin['path_field'])) {
+      $path_field = $this->plugin['path_field'];
+      $path_fields_added = FALSE;
+      foreach ($display_options as $display_type => $options) {
+        if (!empty($options['style_plugin']) && $options['style_plugin'] == 'jump_menu') {
+          // Regardless of how many displays have jump menus, we only need to
+          // add a single set of path fields to the view.
+          if (!$path_fields_added) {
+            // The plugin might provide supplemental fields that it needs to
+            // generate the path (for example, node revisions need the node ID
+            // as well as the revision ID). We need to add these first so they
+            // are available as replacement patterns in the main path field.
+            $path_fields = !empty($this->plugin['path_fields_supplemental']) ? $this->plugin['path_fields_supplemental'] : array();
+            $path_fields[] = &$path_field;
+
+            // Generate a unique ID for each field so we don't overwrite
+            // existing ones.
+            foreach ($path_fields as &$field) {
+              $field['id'] = view::generate_item_id($field['id'], $display_options['default']['fields']);
+              $display_options['default']['fields'][$field['id']] = $field;
+            }
+
+            $path_fields_added = TRUE;
+          }
+
+          // Configure the style plugin to use the path field to generate the
+          // jump menu path.
+          $display_options[$display_type]['style_options']['path'] = $path_field['id'];
+        }
       }
-      else {
-        $this->set_override_options($options, $display, $default_display);
+    }
+  }
+
+  /**
+   * Add the array of display options to the view, with appropriate overrides.
+   */
+  protected function add_displays($view, $display_options, $form, $form_state) {
+    // Display: Master
+    $default_display = $view->new_display('default', 'Master', 'default');
+    foreach ($display_options['default'] as $option => $value) {
+      $default_display->set_option($option, $value);
+    }
+
+    // Display: Page
+    if (isset($display_options['page'])) {
+      $display = $view->new_display('page', 'Page', 'page');
+      // The page display is usually the main one (from the user's point of
+      // view). Its options should therefore become the overall view defaults,
+      // so that new displays which are added later automatically inherit them.
+      $this->set_default_options($display_options['page'], $display, $default_display);
+
+      // Display: Feed (attached to the page)
+      if (isset($display_options['feed'])) {
+        $display = $view->new_display('feed', 'Feed', 'feed');
+        $this->set_override_options($display_options['feed'], $display, $default_display);
       }
     }
 
-    return $view;
+    // Display: Block
+    if (isset($display_options['block'])) {
+      $display = $view->new_display('block', 'Block', 'block');
+      // When there is no page, the block display options should become the
+      // overall view defaults.
+      if (!isset($display_options['page'])) {
+        $this->set_default_options($display_options['block'], $display, $default_display);
+      }
+      else {
+        $this->set_override_options($display_options['block'], $display, $default_display);
+      }
+    }
   }
 
   /**

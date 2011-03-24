@@ -21,4 +21,23 @@ $plugin = array(
       'field' => 'status',
     ),
   ),
+  'path_field' => array(
+    'id' => 'vid',
+    'table' => 'node_revision',
+    'field' => 'vid',
+    'exclude' => TRUE,
+    'alter' => array(
+      'alter_text' => 1,
+      'text' => 'node/[nid]/revisions/[vid]/view',
+    ),
+  ),
+  'path_fields_supplemental' => array(
+    array(
+      'id' => 'nid',
+      'table' => 'node',
+      'field' => 'nid',
+      'exclude' => TRUE,
+      'link_to_node' => FALSE,
+    ),
+  ),
 );

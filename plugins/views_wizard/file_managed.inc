@@ -16,4 +16,11 @@ $plugin = array(
   'title' => t('Files'),
   'filters' => array(
   ),
+  'path_field' => array(
+    'id' => 'uri',
+    'table' => 'file_managed',
+    'field' => 'uri',
+    'exclude' => TRUE,
+    'file_download_path' => TRUE,
+  ),
 );

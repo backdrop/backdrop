@@ -24,6 +24,17 @@ $plugin = array(
       'field' => 'status',
     ),
   ),
+  'path_field' => array(
+    'id' => 'nid',
+    'table' => 'node',
+    'field' => 'nid',
+    'exclude' => TRUE,
+    'link_to_node' => FALSE,
+    'alter' => array(
+      'alter_text' => 1,
+      'text' => 'node/[nid]',
+    ),
+  ),
 );
 
 if (module_exists('statistics')) {

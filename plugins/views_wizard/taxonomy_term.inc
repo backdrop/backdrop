@@ -16,5 +16,15 @@ if (module_exists('taxonomy')) {
     'title' => t('Taxonomy terms'),
     'filters' => array(
     ),
+    'path_field' => array(
+      'id' => 'tid',
+      'table' => 'taxonomy_term_data',
+      'field' => 'tid',
+      'exclude' => TRUE,
+      'alter' => array(
+        'alter_text' => 1,
+        'text' => 'taxonomy/term/[tid]',
+      ),
+    ),
   );
 }

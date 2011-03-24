@@ -1987,6 +1987,30 @@ class views_db_object {
   }
 
   /**
+   * Generates a unique ID for an item.
+   *
+   * These items are typically fields, filters, sort criteria, or arguments.
+   *
+   * @param $requested_id
+   *   The requested ID for the item.
+   * @param $existing_items
+   *   An array of existing items, keyed by their IDs.
+   *
+   * @return
+   *   A unique ID. This will be equal to $requested_id if no item with that ID
+   *   already exists. Otherwise, it will be appended with an integer to make
+   *   it unique, e.g. "{$requested_id}_1", "{$requested_id}_2", etc.
+   */
+  public static function generate_item_id($requested_id, $existing_items) {
+    $count = 0;
+    $id = $requested_id;
+    while (!empty($existing_items[$id])) {
+      $id = $requested_id . '_' . ++$count;
+    }
+    return $id;
+  }
+
+  /**
    * Create a new display and a display handler for it.
    * @param $type
    *   The plugin type from the views plugin data. Defaults to 'page'.
@@ -2032,11 +2056,7 @@ class views_db_object {
     $fields = $this->display[$display_id]->handler->get_option($types[$type]['plural']);
 
     if (empty($id)) {
-      $count = 0;
-      $id = $field;
-      while (!empty($fields[$id])) {
-        $id = $field . '_' . ++$count;
-      }
+      $id = $this->generate_item_id($field, $fields);
     }
 
     $new_item = array(
