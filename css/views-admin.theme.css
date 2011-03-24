@@ -176,8 +176,8 @@ input.form-radio {
   vertical-align: baseline;
 }
 
-.form-submit + .form-submit,
-.views-admin a.button + a.button {
+.form-submit:not(.js-hide) + .form-submit,
+.views-admin a.button:not(.js-hide) + a.button {
   margin-left: 1em; /* LTR */
 }
 
@@ -191,8 +191,13 @@ input.form-radio {
 }
 
 .views-admin fieldset fieldset.container-inline {
-  margin-top: 6px;
+  margin-bottom: 1em;
+  margin-top: 1em;
   padding-top: 0;
+}
+
+.views-admin fieldset fieldset.container-inline > .fieldset-wrapper {
+  padding-bottom: 0;
 }
 
 /* Indent form elements so they're directly underneath the label of the checkbox that reveals them */
@@ -431,14 +436,10 @@ td.group-title {
  */
 
 .views-displays .secondary a {
-  background-color: #f1f1f1;
   border: 1px solid #cbcbcb;
-  -moz-border-radius: 7px;
-  -webkit-border-radius: 7px;
-  border-radius: 7px;
-  color: #008BCB;
   display: inline-block;
-  padding: 2px 7px 3px;
+  line-height: 1.3333;
+  padding: 3px 7px;
 }
 
 .views-displays .secondary a:focus {
@@ -449,19 +450,17 @@ td.group-title {
 .views-displays .secondary .active a {
   background-color: #666666;
   color: #ffffff;
+  border-bottom-width: 1px;
 }
 
 .views-displays .secondary .open > a {
-  -moz-border-radius: 7px 7px 0 0;
-  -webkit-border-radius: 7px 7px 0 0;
-  border-radius: 7px 7px 0 0;
+  background-color: #f1f1f1;
   border-bottom: 1px solid transparent;
   position: relative;
 }
 
 .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
-  color: #008BCB;
 }
 
 .views-displays .secondary .action-list  li {
@@ -473,9 +472,6 @@ td.group-title {
 }
 
 .views-displays .secondary .action-list  li:first-child {
-  -moz-border-radius: 0 7px 0 0;
-  -webkit-border-radius: 0 7px 0 0;
-  border-radius: 0 7px 0 0;
   border-width: 1px 1px 0;
 }
 
@@ -484,19 +480,12 @@ td.group-title {
 }
 
 .views-displays .secondary .action-list  li:last-child {
-  -moz-border-radius: 0 0 7px 7px;
-  -webkit-border-radius: 0 0 7px 7px;
-  border-radius: 0 0 7px 7px;
   border-width: 0 1px 1px;
 }
 
 .views-displays .secondary .action-list input.form-submit {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
-  -moz-border-radius: 0;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  color: #008BCB;
   padding: 0;
 }
 
@@ -514,7 +503,6 @@ td.group-title {
 }
 
 #edit-display-settings-title {
-  color: #008BCB;
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
@@ -612,8 +600,8 @@ td.group-title {
 }
 
 .views-ui-display-tab-bucket h3 {
-  font-size: 12px;
-  text-transform: uppercase;
+  font-size: small;
+  margin: 0;
 }
 
 .views-ui-display-tab-bucket .links.actions {
@@ -741,6 +729,7 @@ td.group-title {
  */
 
 .views-ui-dialog {
+  font-size: small;
   padding: 0;
 }
 
@@ -752,21 +741,26 @@ td.group-title {
   padding-top: 2.5em;
 }
 
-div.views-filterable-options .form-type-checkbox {
+.views-filterable-options .form-type-checkbox {
   border: 1px solid #CCC;
   padding: 5px 8px;
   border-top: none;
 }
 
-div.views-filterable-options {
+.views-filterable-options {
   border-top:  1px solid #CCC;
 }
 
-div.views-filterable-options .even .form-type-checkbox {
+.views-filterable-options .even .form-type-checkbox {
   background-color: #F3F4EE;
 }
 
-div.views-filterable-options .form-type-checkbox .description {
+.filterable-option .form-item {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.views-filterable-options .form-type-checkbox .description {
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -832,12 +826,17 @@ div.views-filterable-options .form-type-checkbox .description {
   padding: 8px 13px;
 }
 
+.views-ui-dialog fieldset .item-list {
+  padding-left: 2em;
+}
+
 .views-ui-dialog .form-buttons {
   background-color: #F3F4EE;
   padding: 8px 13px;
 }
 .views-ui-dialog .form-buttons input {
   margin-bottom: 0;
+  margin-right: 0;
 }
 
 /* @end */

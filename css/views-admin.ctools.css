@@ -2,33 +2,7 @@
 
 .ctools-button {
   background-color: #ffffff;
-  background-image:
-    -moz-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f9f9f9 100%);
-  background-image:
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(249, 249, 249, 1.0))
-    );
-  background-image:
-    -webkit-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f9f9f9 100%);
-  background-image:
-    linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f9f9f9 100%);
   border-color: #cccccc;
-  -moz-border-radius: 11px 11px 11px 11px;
-  -webkit-border-radius: 11px 11px 11px 11px;
-  border-radius: 11px 11px 11px 11px;
   font-size: 11px;
   padding-bottom: 2px;
   padding-top: 2px;
@@ -40,29 +14,6 @@
 }
 
 .ctools-button:hover {
-  background-image:
-    -moz-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f1f1f1 100%);
-  background-image:
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(241, 241, 241, 1.0))
-    );
-  background-image:
-    -webkit-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f1f1f1 100%);
-  background-image:
-    linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f1f1f1 100%);
   border-color: #b8b8b8;
 }
 
@@ -79,42 +30,27 @@
   border-right: 1px solid #e8e8e8;
 }
 
+.ctools-dropbutton .ctools-content ul {
+  margin: 0;
+  padding: 0;
+}
+
+.ctools-content ul.actions {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
 .ctools-button .ctools-content a {
   background-image: none;
   border: medium none;
 }
 
 .ctools-dropbutton.open:hover {
-  background-image:
-    -moz-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f9f9f9 100%);
-  background-image:
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(249, 249, 249, 1.0))
-    );
-  background-image:
-    -webkit-linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f9f9f9 100%);
-  background-image:
-    linear-gradient(
-      -90deg,
-      #ffffff 0px,
-      #f9f9f9 100%);
   border-color: #D0D0D0;
 }
 
 .ctools-dropbutton.open {
-  -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-  box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   z-index: 100;
 }
 
@@ -160,10 +96,10 @@
 .views-ui-display-tab-actions .ctools-button input {
   background: none;
   border: medium;
-  color: #0074BD;
   font-family: inherit;
   font-size: 12px;
   padding: 0;
+  margin-bottom: 0;
 }
 
 /* @end */
@@ -180,7 +116,7 @@
   float: left;
   height: 0;
   margin-right: 2px;
-  margin-top: 0.6667em;
+  margin-top: 0.4545em;
   width: 0;
 }
 
@@ -192,7 +128,7 @@
   border-width: 5px 0 5px 5px;
   margin-left: 2px;
   margin-right: 5px;
-  margin-top: 0.5em;
+  margin-top: 0.3333em;
 }
 
 .ctools-toggle:hover,
@@ -212,25 +148,24 @@
 }
 
 .views-display-settings .ctools-toggle {
-  color: #008BCB;
+  color: #000000;
 }
 
 .views-display-column > .ctools-toggle {
   margin-left: 6px;
   margin-right: 3px;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 .views-display-column > .ctools-toggle.ctools-toggle-collapsed {
   margin-left: 9px;
   margin-right: 5px;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .views-display-column > .ctools-collapsible-handle {
   border-color: #F3F3F3;
   border-style: solid;
   border-width: 1px 1px 0;
-  color: #008BCB;
   font-size: 13px;
   font-weight: normal;
   margin: 0;
@@ -257,6 +192,16 @@
 
 /* @group Export */
 
+/* Override for filter button on the views list screen */
+#ctools-export-ui-list-form .form-submit {
+  margin-top: 0em !important;
+  margin-right: 0em;
+}
+
+.ctools-export-ui-row + .ctools-export-ui-row {
+  margin-top: 1em;
+}
+
 .ctools-export-ui-fourth-row input {
   margin-top: 5px !important;
 }
@@ -270,3 +215,4 @@
 }
 
 /* @end */
+
