@@ -33,6 +33,7 @@
         Drupal.ajax[id].form = $form;
       });
     }
+    Drupal.viewsUi.resizeModal();
   };
 
   Drupal.ajax.prototype.commands.viewsDismissForm = function (ajax, response, status) {
