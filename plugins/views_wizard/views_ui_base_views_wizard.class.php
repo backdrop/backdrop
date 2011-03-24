@@ -555,9 +555,24 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     if (!empty($form_state['values']['show']['type']) && $form_state['values']['show']['type'] != 'all') {
       $bundle_key = $this->entity_info['bundle keys']['bundle'];
+      // Figure out the table where $bundle_key lives. It may not be the same as
+      // the base table for the view; the taxonomy vocabulary machine_name, for
+      // example, is stored in taxonomy_vocabulary, not taxonomy_term_data.
+      $fields = views_fetch_fields($this->base_table, 'filter');
+      if (isset($fields[$this->base_table . '.' . $bundle_key])) {
+        $table = $this->base_table;
+      }
+      else {
+        foreach ($fields as $field_name => $value) {
+          if ($pos = strpos($field_name, '.' . $bundle_key)) {
+            $table = substr($field_name, 0, $pos);
+            break;
+          }
+        }
+      }
       $filters[$bundle_key] = array(
         'id' => $bundle_key,
-        'table' => $this->base_table,
+        'table' => $table,
         'field' => $bundle_key,
         'value' => drupal_map_assoc(array($form_state['values']['show']['type'])),
       );
