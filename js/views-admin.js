@@ -176,6 +176,7 @@ Drupal.viewsUi.addItemForm.prototype.handleCheck = function (event) {
       if (i == position) {
         this.checkedItems.splice(i, 1);
         i--;
+        break;
       }
     }
     // Hide it again if none item is selected.
@@ -193,6 +194,7 @@ Drupal.viewsUi.addItemForm.prototype.handleCheck = function (event) {
 Drupal.viewsUi.addItemForm.prototype.refreshCheckedItems = function() {
   // Perhaps we should precache the text div, too.
   this.$selected_div.find('.views-selected-options').html(this.checkedItems.join(', '));
+  Drupal.viewsUi.resizeModal();
 }
 
 
@@ -866,15 +868,15 @@ Drupal.viewsUi.resizeModal = function (e) {
   var winHeight = $(window).height();
   var winWidth = $(window).width();
 
-  var offsetTop = $(window).scrollTop();
-  var offsetLeft = $(window).scrollLeft();
+//  var offsetTop = $(window).scrollTop();
+//  var offsetLeft = $(window).scrollLeft();
 
   var width = $(window).width() * .8; // 80% of window
   var height = $(window).height() * .8;
 
   // Get where we should move content to
-  var top = (winHeight / 2) - (height / 2) + offsetTop;
-  var left = (winWidth / 2) - (width / 2) + offsetLeft;
+  var top = (winHeight / 2) - (height / 2) /* + offsetTop */;
+  var left = (winWidth / 2) - (width / 2) /* + offsetLeft */;
 
   $modal.css({
     'top': top + 'px',
@@ -883,20 +885,29 @@ Drupal.viewsUi.resizeModal = function (e) {
     'height': height + 'px'
   });
 
+  // Ensure the inner popup height also matches:
+  $(Drupal.settings.views.ajax.popup).css('height', height + 'px');
+
   // Calculate the new maximum height of the scroll area by adding
   // up the other elements and subtracting them from the height we set.
-  var scrollHeight = $modal.height();
-  console.log(scrollHeight);
+  var scrollHeight = $(Drupal.settings.views.ajax.popup).innerHeight();
 
-  scrollHeight -= $('#views-ajax-title').outerHeight();
-  scrollHeight -= $('.views-add-form-selected').outerHeight();
-  scrollHeight -= $('.form-buttons', $modal).outerHeight();
+  scrollHeight -= $('#views-ajax-title').outerHeight(true);
+  scrollHeight -= $('.views-add-form-selected').outerHeight(true);
+  scrollHeight -= $('.form-buttons', $modal).outerHeight(true);
 
-  // A fudge because for some reason something hangs out the bottom.
-  scrollHeight -= 40;
+  var $scroll = $('.scroll', $modal);
+  // Subtract out the padding.
+  scrollHeight -= parseInt($scroll.css('padding-top'));
+  scrollHeight -= parseInt($scroll.css('padding-bottom'));
 
-  $('.scroll', $modal).css('max-height', parseInt(scrollHeight));
-  $('.scroll', $modal).css('height', parseInt(scrollHeight));
+  var padding = $scroll.outerHeight() - $scroll.innerHeight();
+  scrollHeight -= padding;
+
+  $scroll.css({
+    'height': scrollHeight + 'px',
+    'max-height': scrollHeight + 'px'
+  });
 };
 
 jQuery(function() {
