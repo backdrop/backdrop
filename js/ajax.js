@@ -192,6 +192,9 @@
         Drupal.collapseScrollIntoView = function (node) {
           for (var $parent = $(node); $parent.get(0) != document && $parent.size() != 0; $parent = $parent.parent()) {
             if ($parent.css('overflow') == 'scroll' || $parent.css('overflow') == 'auto') {
+              if (Drupal.viewsUi.resizeModal) {
+                Drupal.viewsUi.resizeModal();
+              }
               return;
             }
           }
