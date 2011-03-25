@@ -895,6 +895,8 @@ Drupal.viewsUi.resizeModal = function (e) {
   // will be.
 
   var difference = 0;
+  difference += parseInt($scroll.css('padding-top'));
+  difference += parseInt($scroll.css('padding-bottom'));
   difference += $('.views-override').outerHeight(true);
   difference += $('#views-ajax-title').outerHeight(true);
   difference += $('.views-add-form-selected').outerHeight(true);
@@ -921,6 +923,9 @@ Drupal.viewsUi.resizeModal = function (e) {
     'width': width + 'px',
     'height': height + 'px'
   });
+
+  // Ensure inner popup height matches.
+  $(Drupal.settings.views.ajax.popup).css('height', height + 'px');
 
   $scroll.css({
     'height': scrollHeight + 'px',
