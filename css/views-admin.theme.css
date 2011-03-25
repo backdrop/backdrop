@@ -798,8 +798,17 @@ td.group-title {
   margin-bottom: 10px;
 }
 
-.views-ui-dialog .views-add-form-selected {
-  margin: 5px 16px;
+.views-ui-dialog .views-add-form-selected.container-inline {
+  padding-top: 0;
+}
+
+.views-ui-dialog .views-add-form-selected.container-inline > div {
+  display: block;
+}
+
+.views-ui-dialog #edit-selected {
+  margin: 0;
+  padding: 6px 16px;
 }
 
 .views-ui-dialog #views-ajax-title,
