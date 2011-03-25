@@ -266,6 +266,12 @@
   display: block;
 }
 
+/* Don't let the messages overwhelm the modal */
+.views-ui-dialog .views-messages {
+  max-height: 200px;
+  overflow: auto;
+}
+
 /* @end */
 
 /* @group Settings forms */

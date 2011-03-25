@@ -898,6 +898,7 @@ Drupal.viewsUi.resizeModal = function (e) {
   difference += parseInt($scroll.css('padding-top'));
   difference += parseInt($scroll.css('padding-bottom'));
   difference += $('.views-override').outerHeight(true);
+  difference += $('.views-messages').outerHeight(true);
   difference += $('#views-ajax-title').outerHeight(true);
   difference += $('.views-add-form-selected').outerHeight(true);
   difference += $('.form-buttons', $modal).outerHeight(true);
