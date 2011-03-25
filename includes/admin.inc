@@ -4256,7 +4256,11 @@ function views_ui_config_item_group_form($type, &$form_state) {
     }
     else {
       $handler->init($view, $item);
-      $handler->groupby_form($form, $form_state);
+      $types = views_object_types();
+
+      $form['#title'] = t('Configure group settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
+
+      $handler->groupby_form($form['options'], $form_state);
       $form_state['handler'] = &$handler;
     }
 
