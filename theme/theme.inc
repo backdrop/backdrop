@@ -294,13 +294,13 @@ function template_preprocess_views_view_field(&$vars) {
 function template_preprocess_views_view_summary(&$vars) {
   $view     = $vars['view'];
   $argument = $view->argument[$view->build_info['summary_level']];
+  $vars['row_classes'] = array();
 
   $url_options = array();
 
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
-  $vars['classes_array'] = array();
   foreach ($vars['rows'] as $id => $row) {
     $vars['rows'][$id]->link = $argument->summary_name($row);
     $args = $view->args;
@@ -313,7 +313,7 @@ function template_preprocess_views_view_summary(&$vars) {
     $vars['rows'][$id]->url = url($view->get_url($args, $base_path), $url_options);
     $vars['rows'][$id]->count = intval($row->{$argument->count_alias});
     if ($vars['rows'][$id]->url == base_path() . $_GET['q'] || $vars['rows'][$id]->url == base_path() . drupal_get_path_alias($_GET['q'])) {
-      $vars['classes_array'][$id] = 'active';
+      $vars['row_classes'][$id] = 'active';
     }
   }
 }
@@ -504,7 +504,7 @@ function template_preprocess_views_view_table(&$vars) {
 
   $vars['row_classes'][0][] = 'views-row-first';
   $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
-  
+
   $vars['classes_array'] = array('views-table');
   if (empty($vars['rows']) && !empty($options['empty_table'])) {
     $vars['rows'][0][0] = $view->display_handler->render_area('empty');
@@ -512,7 +512,7 @@ function template_preprocess_views_view_table(&$vars) {
     $vars['field_attributes'][0][0]['colspan'] = count($vars['header']);
   }
 
-  
+
   if (!empty($options['sticky'])) {
     drupal_add_js('misc/tableheader.js');
     $vars['classes_array'][] = "sticky-enabled";
