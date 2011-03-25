@@ -1948,6 +1948,8 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
   foreach ($form_state['view']->display as $id => $display) {
     if (!empty($display->new_id)) {
       $form_state['view']->display[$id]->id = $display->new_id;
+      // Redirect the user to the renamed display to be sure that the page itself exists and doesn't throw errors.
+      $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $display->new_id;
     }
   }
 
