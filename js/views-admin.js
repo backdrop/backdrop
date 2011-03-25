@@ -892,6 +892,7 @@ Drupal.viewsUi.resizeModal = function (e) {
   // up the other elements and subtracting them from the height we set.
   var scrollHeight = $(Drupal.settings.views.ajax.popup).innerHeight();
 
+  scrollHeight -= $('.views-override').outerHeight(true);
   scrollHeight -= $('#views-ajax-title').outerHeight(true);
   scrollHeight -= $('.views-add-form-selected').outerHeight(true);
   scrollHeight -= $('.form-buttons', $modal).outerHeight(true);
