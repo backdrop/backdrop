@@ -196,7 +196,7 @@
                 // If the modal is already at the max height, don't bother with
                 // this since the only reason to do it is to grow the modal.
                 if ($('.views-ui-dialog').height() < parseInt($(window).height() * .8)) {
-                  Drupal.viewsUi.resizeModal();
+                  Drupal.viewsUi.resizeModal('', true);
                 }
               }
               return;

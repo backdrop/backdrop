@@ -194,7 +194,7 @@ Drupal.viewsUi.addItemForm.prototype.handleCheck = function (event) {
 Drupal.viewsUi.addItemForm.prototype.refreshCheckedItems = function() {
   // Perhaps we should precache the text div, too.
   this.$selected_div.find('.views-selected-options').html(this.checkedItems.join(', '));
-  Drupal.viewsUi.resizeModal();
+  Drupal.viewsUi.resizeModal('', true);
 }
 
 
@@ -857,7 +857,7 @@ Drupal.behaviors.viewsUiDependent.attach = function (context, settings) {
   });
 };
 
-Drupal.viewsUi.resizeModal = function (e) {
+Drupal.viewsUi.resizeModal = function (e, no_shrink) {
   var $ = jQuery;
   var $modal = $('.views-ui-dialog');
   var $scroll = $('.scroll', $modal);
@@ -875,6 +875,15 @@ Drupal.viewsUi.resizeModal = function (e) {
 
   // Don't let the window get more than 80% of the display high.
   var maxHeight = parseInt($(window).height() * .8);
+  var minHeight = 200;
+  if (no_shrink) {
+    minHeight = $modal.height();
+  }
+
+  if (minHeight > maxHeight) {
+    minHeight = maxHeight;
+  }
+
   var height = 0;
 
   // Calculate the height of the 'scroll' region.
@@ -908,6 +917,10 @@ Drupal.viewsUi.resizeModal = function (e) {
   if (height > maxHeight) {
     height = maxHeight;
     scrollHeight = maxHeight - difference;
+  }
+  else if (height < minHeight) {
+    height = minHeight;
+    scrollHeight = minHeight - difference;
   }
 
   if (width > maxWidth) {
