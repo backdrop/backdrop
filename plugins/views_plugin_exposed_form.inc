@@ -183,12 +183,17 @@ class views_plugin_exposed_form extends views_plugin {
         'ASC' => $this->options['sort_asc_label'],
         'DESC' => $this->options['sort_desc_label'],
       );
-      $first_sort = reset($this->view->sort);
+      if (isset($form_state['input']['sort_by']) && isset($this->view->sort[$form_state['input']['sort_by']])) {
+        $default_sort_order = $this->view->sort[$form_state['input']['sort_by']]->options['order'];
+      } else {
+        $first_sort = reset($this->view->sort);
+        $default_sort_order = $first_sort->options['order'];
+      }
       $form['sort_order'] = array(
         '#type' => 'select',
         '#options' => $sort_order,
         '#title' => t('Order'),
-        '#default_value' => $first_sort->options['order'],
+        '#default_value' => $default_sort_order,
       );
       $form['submit']['#weight'] = 10;
       if (isset($form['reset'])) {

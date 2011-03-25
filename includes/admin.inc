@@ -1001,20 +1001,20 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       ),
     '#links' => array(
       'edit-details' => array(
-        'title' => t('edit name and description'),
+        'title' => t('edit view name/description'),
         'href' => "admin/structure/views/nojs/edit-details/$view->name",
         'attributes' => array('class' => array('views-ajax-link')),
       ),
       'analyze' => array(
-        'title' => t('analyze'),
+        'title' => t('analyze view'),
         'href' => "admin/structure/views/view/$view->name/analyze",
       ),
       'clone' => array(
-        'title' => t('clone'),
+        'title' => t('clone view'),
         'href' => "admin/structure/views/view/$view->name/clone",
       ),
       'export' => array(
-        'title' => t('export'),
+        'title' => t('export view'),
         'href' => "admin/structure/views/view/$view->name/export",
       ),
     ),
@@ -1022,14 +1022,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   if (isset($view->type) && $view->type != t('Default')) {
     if ($view->type == t('Overridden')) {
       $form['displays']['top']['extra_actions']['#links']['revert'] = array(
-        'title' => t('revert'),
+        'title' => t('revert view'),
         'href' => "admin/structure/views/view/$view->name/revert",
         'query' => array('destination' => "admin/structure/views/view/$view->name"),
       );
     }
     else {
       $form['displays']['top']['extra_actions']['#links']['delete'] = array(
-        'title' => t('delete'),
+        'title' => t('delete view'),
         'href' => "admin/structure/views/view/$view->name/delete",
       );
     }
