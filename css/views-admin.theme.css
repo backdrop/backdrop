@@ -438,6 +438,7 @@ td.group-title {
 .views-displays .secondary a {
   border: 1px solid #cbcbcb;
   display: inline-block;
+  font-size: small;
   line-height: 1.3333;
   padding: 3px 7px;
 }
@@ -486,6 +487,7 @@ td.group-title {
 .views-displays .secondary .action-list input.form-submit {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
+  margin: 0;
   padding: 0;
 }
 
@@ -752,14 +754,6 @@ td.group-title {
 
 .views-ui-dialog .ui-dialog-titlebar-close span {
   display: none;
-}
-
-.views-ui-dialog fieldset.collapsible {
-  padding-top: 1.5em;
-}
-
-.views-ui-dialog fieldset.collapsed {
-  padding-top: 2.5em;
 }
 
 .views-filterable-options .form-type-checkbox {

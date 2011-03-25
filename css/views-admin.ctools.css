@@ -102,6 +102,10 @@
   margin-bottom: 0;
 }
 
+.views-ui-display-tab-actions .ctools-button input:hover {
+  background: none;
+}
+
 /* @end */
 
 /* @group Collapsible */
