@@ -741,7 +741,15 @@ class views_plugin_display extends views_plugin {
       $this->handlers[$type] = array();
       $types = views_object_types();
       $plural = $types[$type]['plural'];
+
       foreach ($this->get_option($plural) as $id => $info) {
+        // If this is during form submission and there are temporary options
+        // which can only appear if the view is in the edit cache, use those
+        // options instead. This is used for AJAX multi-step stuff.
+        if (isset($_POST['form_id']) && isset($this->view->temporary_options[$type][$id])) {
+          $info = $this->view->temporary_options[$type][$id];
+        }
+
         if ($info['id'] != $id) {
           $info['id'] = $id;
         }

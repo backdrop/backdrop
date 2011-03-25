@@ -4193,6 +4193,44 @@ function views_ui_config_item_form_validate($form, &$form_state) {
 }
 
 /**
+ * A submit handler that is used for storing temporary items when using
+ * multi-step changes, such as ajax requests.
+ */
+function views_ui_config_item_form_submit_temporary($form, &$form_state) {
+  // Run it through the handler's submit function.
+  $form_state['handler']->options_submit($form['options'], $form_state);
+  $item = $form_state['handler']->options;
+  $types = views_object_types();
+
+  $type = $form_state['type'];
+  if (!empty($types[$type]['type'])) {
+    $type = $types[$type]['type'];
+  }
+
+  // Create a new handler and unpack the options from the form onto it. We
+  // can use that for storage.
+  $handler = views_get_handler($item['table'], $item['field'], $type);
+  $handler->init($form_state['view'], $item);
+
+
+  // Add the incoming options to existing options because items using
+  // the extra form may not have everything in the form here.
+  $options = $form_state['values']['options'] + $form_state['handler']->options;
+
+  // This unpacks only options that are in the definition, ensuring random
+  // extra stuff on the form is not sent through.
+  $handler->unpack_options($handler->options, $options, NULL, FALSE);
+
+  // Store the item back on the view
+  $form_state['view']->temporary_options[$type][$form_state['id']] = $handler->options;
+
+  $form_state['rerender'] = TRUE;
+  $form_state['rebuild'] = TRUE;
+  // Write to cache
+  views_ui_cache_set($form_state['view']);
+}
+
+/**
  * Submit handler for configing new item(s) to a view.
  */
 function views_ui_config_item_form_submit($form, &$form_state) {
@@ -4222,6 +4260,11 @@ function views_ui_config_item_form_submit($form, &$form_state) {
 
   // Store the item back on the view
   $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $handler->options);
+
+  // Ensure any temporary options are removed.
+  if (isset($form_state['view']->temporary_options[$type][$form_state['id']])) {
+    unset($form_state['view']->temporary_options[$type][$form_state['id']]);
+  }
 
   // Write to cache
   views_ui_cache_set($form_state['view']);

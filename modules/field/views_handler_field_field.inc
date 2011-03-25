@@ -298,6 +298,8 @@ class views_handler_field_field extends views_handler_field {
       '#ajax' => array(
         'path' => views_ui_build_form_url($form_state),
       ),
+      '#submit' => array('views_ui_config_item_form_submit_temporary'),
+      '#executes_submit_callback' => TRUE,
     );
 
     $form['field_api_classes'] = array(
@@ -313,12 +315,8 @@ class views_handler_field_field extends views_handler_field {
     }
 
     // Get the currently selected formatter.
-    if (isset($form_state['values']['options']['type'])) {
-      $format = $form_state['values']['options']['type'];
-    }
-    else {
-      $format = $this->options['type'];
-    }
+    $format = $this->options['type'];
+
     $formatter = field_info_formatter_types($format);
     $settings = $this->options['settings'] + field_info_formatter_settings($format);
 
