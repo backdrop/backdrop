@@ -179,6 +179,9 @@ class views_plugin_query_default extends views_plugin_query {
     $options['field_language'] = array(
       'default' => '***CURRENT_LANGUAGE***',
     );
+    $options['field_language_add_to_query'] = array(
+      'default' => 1,
+    );
 
     return $options;
   }
@@ -225,7 +228,7 @@ class views_plugin_query_default extends views_plugin_query {
       $languages = array(
         '***CURRENT_LANGUAGE***' => t("Current user's language"),
         '***DEFAULT_LANGUAGE***' => t("Default site language"),
-        LANGUAGE_NONE => t('No language')
+        LANGUAGE_NONE => t('Language neutral'),
       );
       $languages = array_merge($languages, locale_language_list());
 
@@ -235,6 +238,11 @@ class views_plugin_query_default extends views_plugin_query {
         '#description' => t('All fields which support translations will be displayed in the selected language.'),
         '#options' => $languages,
         '#default_value' => $this->options['field_language'],
+      );
+      $form['field_language_add_to_query'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('When needed, add the field language condition to the query.'),
+        '#default_value' => $this->options['field_language_add_to_query'],
       );
     }
   }

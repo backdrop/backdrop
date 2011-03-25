@@ -111,7 +111,7 @@ class views_handler_field_field extends views_handler_field {
     // Get the entity type according to the base table of the field.
     // Then add it to the query as a formula. That way we can avoid joining
     // the field table if all we need is entity_id and entity_type.
-    $this->entity_type = $entity_type = $this->definition['entity_tables'][$base_table];
+    $entity_type = $this->definition['entity_tables'][$base_table];
     // The alias needs to be unique, so we use both the field table and the entity type.
     $entity_type_alias = $this->definition['table'] . '_' . $entity_type . '_entity_type';
     $this->aliases['entity_type'] = $this->query->add_field(NULL, "'$entity_type'", $entity_type_alias);
@@ -140,8 +140,8 @@ class views_handler_field_field extends views_handler_field {
 
       // Filter by language, if field translation is enabled.
       $field = $this->field_info;
-      if (field_is_translatable($entity_type, $field)) {
-        $column = $this->table_alias . ".language";
+      if (field_is_translatable($entity_type, $field) && !empty($this->query->options['field_language_add_to_query'])) {
+        $column = $this->table_alias . '.language';
         $this->query->add_where(0, $column, $this->query->options['field_language']);
       }
     }
@@ -554,11 +554,10 @@ class views_handler_field_field extends views_handler_field {
       return array();
     }
 
-    $langcode = $this->field_language();
-
     // Go ahead and render and store in $this->items.
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
     $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
+    $langcode = $this->field_language($entity_type);
 
     // The field we are trying to display doesn't exist on this entity.
     if (!isset($entity->{$this->definition['field_name']})) {
@@ -643,10 +642,10 @@ class views_handler_field_field extends views_handler_field {
    * Return the language code of the language the field should be displayed in,
    * according to the settings.
    */
-  function field_language() {
+  function field_language($entity_type) {
     global $language_content;
 
-    if (field_is_translatable($this->entity_type, $this->field_info)) {
+    if (field_is_translatable($entity_type, $this->field_info)) {
       $default_language = language_default('language');
       $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
                               array($language_content->language, $default_language),
