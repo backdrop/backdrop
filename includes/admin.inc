@@ -190,8 +190,13 @@ function views_ui_preview($view, $display_id, $args = array()) {
           if (get_class($view->query) == 'views_plugin_query_default') {
             $arguments = $query->getArguments();
             $connection = Database::getConnection();
-            foreach ((array)$query->arguments() as $key => $val) {
-              $quoted[$key] = $connection->quote($val);
+            foreach ($query->arguments() as $key => $val) {
+              if (is_array($val)) {
+                $quoted[$key] = implode(', ', array_map(array($connection, 'quote'), $val));
+              }
+              else {
+                $quoted[$key] = $connection->quote($val);
+              }
             }
           }
           $rows['query'][] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain(strtr($query, $quoted)) . '</pre>');

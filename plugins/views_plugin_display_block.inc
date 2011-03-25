@@ -160,10 +160,10 @@ class views_plugin_display_block extends views_plugin_display {
   function options_submit(&$form, &$form_state) {
     // It is very important to call the parent function here:
     parent::options_submit($form, $form_state);
-    $section = $form_state['section'];
     switch ($form_state['section']) {
       case 'display_id':
-        $this->save_block_bid($this->display->id, $this->display->new_id);
+        $this->update_block_bid($form_state['view']->name, $this->display->id, $this->display->new_id);
+        break;
       case 'block_description':
         $this->set_option('block_description', $form_state['values']['block_description']);
         break;
@@ -186,11 +186,11 @@ class views_plugin_display_block extends views_plugin_display {
   }
 
   /**
-   * Update the block bid when you change the machine readable name of the display.
+   * Update the block delta when you change the machine readable name of the display.
    */
-  function save_block_bid($old_delta, $delta) {
-    $old_delta = $form_state['view']->name . '-' . $old_delta;
-    $delta = $form_state['view']->name . '-' . $delta;
+  function update_block_bid($name, $old_delta, $delta) {
+    $old_delta = $name . '-' . $old_delta;
+    $delta = $name . '-' . $delta;
     if (strlen($old_delta) >= 32) {
       $old_delta = md5($old_delta);
     }
@@ -198,8 +198,8 @@ class views_plugin_display_block extends views_plugin_display {
       $delta = md5($delta);
     }
     db_update('block')
-      ->fields(array('bid' => $delta))
-      ->condition('bid', $old_delta)
+      ->fields(array('delta' => $delta))
+      ->condition('delta', $old_delta)
       ->execute();
   }
   /**
