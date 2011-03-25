@@ -860,23 +860,62 @@ Drupal.behaviors.viewsUiDependent.attach = function (context, settings) {
 Drupal.viewsUi.resizeModal = function (e) {
   var $ = jQuery;
   var $modal = $('.views-ui-dialog');
-  if ($modal.size() == 0) {
+  var $scroll = $('.scroll', $modal);
+  if ($modal.size() == 0 || $modal.css('display') == 'none') {
     return;
   }
 
-  // Get our heights
-  var winHeight = $(window).height();
-  var winWidth = $(window).width();
+  var maxWidth = parseInt($(window).width() * .85); // 70% of window
+  var minWidth = parseInt($(window).width() * .6); // 70% of window
 
-//  var offsetTop = $(window).scrollTop();
-//  var offsetLeft = $(window).scrollLeft();
+  // Set the modal to the minwidth so that our width calculation of
+  // children works.
+  $modal.css('width', minWidth);
+  var width = minWidth;
 
-  var width = $(window).width() * .8; // 80% of window
-  var height = $(window).height() * .8;
+  // Don't let the window get more than 80% of the display high.
+  var maxHeight = parseInt($(window).height() * .8);
+  var height = 0;
+
+  // Calculate the height of the 'scroll' region.
+  var scrollHeight = 0;
+
+  scrollHeight += parseInt($scroll.css('padding-top'));
+  scrollHeight += parseInt($scroll.css('padding-bottom'));
+
+  $scroll.children().each(function() {
+    var w = $(this).innerWidth();
+    if (w > width) {
+      width = w;
+    }
+    scrollHeight += $(this).outerHeight(true);
+  });
+
+  // Now, calculate what the difference between the scroll and the modal
+  // will be.
+
+  var difference = 0;
+  difference += parseInt($scroll.css('padding-top'));
+  difference += parseInt($scroll.css('padding-bottom'));
+  difference += $('.views-override').outerHeight(true);
+  difference += $('#views-ajax-title').outerHeight(true);
+  difference += $('.views-add-form-selected').outerHeight(true);
+  difference += $('.form-buttons', $modal).outerHeight(true);
+
+  height = scrollHeight + difference;
+
+  if (height > maxHeight) {
+    height = maxHeight;
+    scrollHeight = maxHeight - difference;
+  }
+
+  if (width > maxWidth) {
+    width = maxWidth;
+  }
 
   // Get where we should move content to
-  var top = (winHeight / 2) - (height / 2) /* + offsetTop */;
-  var left = (winWidth / 2) - (width / 2) /* + offsetLeft */;
+  var top = ($(window).height() / 2) - (height / 2);
+  var left = ($(window).width() / 2) - (width / 2);
 
   $modal.css({
     'top': top + 'px',
@@ -885,29 +924,14 @@ Drupal.viewsUi.resizeModal = function (e) {
     'height': height + 'px'
   });
 
-  // Ensure the inner popup height also matches:
+  // Ensure inner popup height matches.
   $(Drupal.settings.views.ajax.popup).css('height', height + 'px');
-
-  // Calculate the new maximum height of the scroll area by adding
-  // up the other elements and subtracting them from the height we set.
-  var scrollHeight = $(Drupal.settings.views.ajax.popup).innerHeight();
-
-  scrollHeight -= $('#views-ajax-title').outerHeight(true);
-  scrollHeight -= $('.views-add-form-selected').outerHeight(true);
-  scrollHeight -= $('.form-buttons', $modal).outerHeight(true);
-
-  var $scroll = $('.scroll', $modal);
-  // Subtract out the padding.
-  scrollHeight -= parseInt($scroll.css('padding-top'));
-  scrollHeight -= parseInt($scroll.css('padding-bottom'));
-
-  var padding = $scroll.outerHeight() - $scroll.innerHeight();
-  scrollHeight -= padding;
 
   $scroll.css({
     'height': scrollHeight + 'px',
     'max-height': scrollHeight + 'px'
   });
+
 };
 
 jQuery(function() {

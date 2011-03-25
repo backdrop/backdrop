@@ -366,7 +366,7 @@ class views_handler extends views_object {
   function groupby_form_submit(&$form, &$form_state) {
     $item =& $form_state['handler']->options;
 
-    $item['group_type'] = $form_state['values']['group_type'];
+    $item['group_type'] = $form_state['values']['options']['group_type'];
   }
 
   /**

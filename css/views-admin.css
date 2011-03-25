@@ -218,23 +218,15 @@
 }
 
 .views-ui-dialog .ui-dialog-titlebar-close {
-  background: transparent url('../images/close.png') no-repeat;
-  -moz-border-radius-topleft: 0;
-  -webkit-border-top-left-radius: 0;
-  border-top-left-radius: 0;
+  border: 1px solid transparent;
   display: block;
-  height: 26px;
   margin: 0;
   padding: 0;
   position: absolute;
-  width: 26px;
+  right: 0;
+  top: 2px;
   /* Make sure this is in front of the modal backdrop. */
   z-index: 1002;
-  right: -26px;
-}
-
-.views-ui-dialog .ui-dialog-titlebar-close span {
-  display: none;
 }
 
 .views-ui-dialog .ui-dialog-titlebar {

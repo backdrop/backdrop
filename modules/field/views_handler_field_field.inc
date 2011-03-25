@@ -475,8 +475,8 @@ class views_handler_field_field extends views_handler_field {
     }
     else {
       // Add settings for "field API" fields.
-      $item['group_column'] = $form_state['values']['group_column'];
-      $item['group_columns'] = array_filter($form_state['values']['group_columns']);
+      $item['group_column'] = $form_state['values']['options']['group_column'];
+      $item['group_columns'] = array_filter($form_state['values']['options']['group_columns']);
     }
   }
 

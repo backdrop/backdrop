@@ -733,6 +733,27 @@ td.group-title {
   padding: 0;
 }
 
+.views-ui-dialog .ui-dialog-titlebar-close {
+  background: url("../images/close.png") no-repeat scroll 6px 3px #F3F4EE;
+  border-color: #aaaaaa;
+  -moz-border-radius: 0 10px 12px 0;
+  -webkit-border-radius: 0 10px 12px 0;
+  border-radius: 0 10px 12px 0;
+  border-style: solid;
+  border-width: 1px 1px 1px 0;
+  -moz-box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.1);
+  height: 22px;
+  right: -28px;
+  top: 0;
+  width: 26px;
+}
+
+.views-ui-dialog .ui-dialog-titlebar-close span {
+  display: none;
+}
+
 .views-ui-dialog fieldset.collapsible {
   padding-top: 1.5em;
 }
