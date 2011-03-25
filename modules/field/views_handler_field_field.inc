@@ -77,8 +77,7 @@ class views_handler_field_field extends views_handler_field {
    * present in the query itself (such as "sphinx").
    */
   function query($use_groupby = FALSE) {
-    $base_table_alias = $base_table = $this->view->base_table;
-    $base_field = $this->view->base_field;
+    $base_table_alias = $base_table = $this->definition['base table'];
 
     // If the current field is under a relationship you can't be sure that the
     // base table of the view is the base table of the current field.
@@ -106,12 +105,19 @@ class views_handler_field_field extends views_handler_field {
     }
 
     // We always need the base field (entity_id / revision_id).
-    $this->field_alias = $this->query->add_field($base_table_alias, $base_field, '', $params);
+    if (empty($this->definition['revision id'])) {
+      $this->field_alias = $this->query->add_field($base_table_alias, $this->definition['entity id'], '', $params);
+    }
+    else {
+      $this->field_alias = $this->query->add_field($base_table_alias, $this->definition['revision id'], '', $params);
+      $this->aliases['entity id'] = $this->query->add_field($base_table_alias, $this->definition['entity id'], '', $params);
+    }
 
     // Get the entity type according to the base table of the field.
     // Then add it to the query as a formula. That way we can avoid joining
     // the field table if all we need is entity_id and entity_type.
     $entity_type = $this->definition['entity_tables'][$base_table];
+
     // The alias needs to be unique, so we use both the field table and the entity type.
     $entity_type_alias = $this->definition['table'] . '_' . $entity_type . '_entity_type';
     $this->aliases['entity_type'] = $this->query->add_field(NULL, "'$entity_type'", $entity_type_alias);
@@ -487,19 +493,45 @@ class views_handler_field_field extends views_handler_field {
     if (!empty($values)) {
       // Divide the entity ids by entity type, so they can be loaded in bulk.
       $entities_by_type = array();
+      $revisions_by_type = array();
       foreach ($values as $key => $object) {
         if (isset($object->{$this->field_alias}) && !isset($values[$key]->_field_data[$this->field_alias])) {
           $entity_type = $object->{$this->aliases['entity_type']};
-          $entity_id = $object->{$this->field_alias};
-          $entities_by_type[$entity_type][$key] = $entity_id;
+          if (empty($this->definition['revision id'])) {
+            $entity_id = $object->{$this->field_alias};
+            $entities_by_type[$entity_type][$key] = $entity_id;
+          }
+          else {
+            $revision_id = $object->{$this->field_alias};
+            $entity_id = $object->{$this->aliases['entity id']};
+            $entities_by_type[$entity_type][$key] = array($entity_id, $revision_id);
+          }
         }
       }
 
       // Load the entities.
       foreach ($entities_by_type as $entity_type => $entity_ids) {
-        $entities = entity_load($entity_type, $entity_ids);
+        if (empty($this->definition['revision id'])) {
+          $entities = entity_load($entity_type, $entity_ids);
+          $keys = $entity_ids;
+        }
+        else {
+          // Revisions can't be loaded multiple, so we have to load them
+          // one by one.
+          $entities = array();
+          $keys = array();
+          foreach ($entity_ids as $key => $combined) {
+            list($entity_id, $revision_id) = $combined;
+            $entity = entity_load($entity_type, array($entity_id), array($this->definition['revision id'] => $revision_id));
+            if ($entity) {
+              $entities[$revision_id] = array_shift($entity);
+              $keys[$key] = $revision_id;
+            }
+          }
+        }
 
-        foreach ($entity_ids as $key => $entity_id) {
+        foreach ($keys as $key => $entity_id) {
+          // If this is a revision, load the revision instead.
           if (isset($entities[$entity_id])) {
             $values[$key]->_field_data[$this->field_alias] = array(
               'entity_type' => $entity_type,

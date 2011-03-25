@@ -87,6 +87,9 @@ function field_views_field_default_views_data($field) {
   foreach ($field['bundles'] as $entity => $bundles) {
     $entity_info = entity_get_info($entity);
     $entity_tables[$entity_info['base table']] = $entity;
+    if (isset($entity_info['revision table'])) {
+      $entity_tables[$entity_info['revision table']] = $entity;
+    }
 
     $data[$current_table]['table']['join'][$entity_info['base table']] = array(
       'left_field' => $entity_info['entity keys']['id'],
@@ -160,7 +163,14 @@ function field_views_field_default_views_data($field) {
       'entity_tables' => $entity_tables,
       // Default the element type to div, let the UI change it if necessary.
       'element type' => 'div',
+      'is revision' => $type == FIELD_LOAD_REVISION,
+      'entity id' => $entity_info['entity keys']['id'],
+      'base table' => $entity_info['base table'],
     );
+    if ($type == FIELD_LOAD_REVISION) {
+      $data[$table][$column]['field']['revision id'] = $entity_info['entity keys']['revision'];
+      $data[$table][$column]['field']['base table'] = $entity_info['revision table'];
+    }
   }
 
   foreach ($field['columns'] as $column => $attributes) {
