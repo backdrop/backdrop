@@ -954,6 +954,27 @@ td.group-title {
   margin-top: 36px;
 }
 
+/* @group Query info table */
+
+.views-query-info table {
+  border-collapse: separate;
+  border-color: #dddddd;
+  border-spacing: 0;
+  margin: 10px 0;
+}
+
+.views-query-info table tr {
+  background-color: #f9f9f9;
+}
+
+.views-query-info table th,
+.views-query-info table td {
+  color: #666666;
+  padding: 4px 10px;
+}
+
+/* @end */
+
 /* @group Grid */
 
 #views-live-preview .views-view-grid th,

@@ -345,6 +345,23 @@ table th {
   margin-top: 0;
 }
 
+/* @group Query info table */
+
+.views-query-info table {
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  -webkit-border-horizontal-spacing: 1px;
+  -webkit-border-vertical-spacing: 1px;
+}
+
+.views-query-info table tr td:last-child {
+  /* Fixes a Seven style that bleeds down into this table unnecessarily */
+  border-right: 0 none;
+}
+
+/* @end */
+
 /* @end */
 
 /* @group Add view */
