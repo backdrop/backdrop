@@ -63,6 +63,17 @@
 
 /* @end */
 
+/* @group Attachment buckets
+ *
+ * These are the individual "buckets," or boxes, inside the display settings area
+ */
+
+.views-ui-display-tab-bucket h3 {
+  font-weight: bold;
+}
+
+/* @end */
+
 /* @group Modal dialog box
  *
  * The contents of the popup dialog on the views edit form.
