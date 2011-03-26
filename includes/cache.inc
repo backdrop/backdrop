@@ -22,7 +22,6 @@ function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
 
     $data = views_cache_get('views_data', TRUE);
     if (!empty($data->data)) {
-      debug(123);
       $cache = $data->data;
     }
 

@@ -983,11 +983,11 @@ function views_include_handlers($reset = FALSE) {
 function views_get_handler($table, $field, $key, $override = NULL) {
   static $recursion_protection = array();
 
-  $data = views_fetch_data($table);
+  $data = views_fetch_data($table, FALSE);
   $handler = NULL;
 
   // Support old views_data entries conversion.
-  
+
   // Support conversion on table level.
   if (isset($data['moved to'])) {
     $moved = array($data['moved to'], $field);
@@ -1000,6 +1000,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
   if (isset($data[$field][$key]['moved to'])) {
     $moved = $data[$field][$key]['moved to'];
   }
+
   if (isset($data[$field][$key]) || !empty($moved)) {
     if (!empty($moved)) {
       list($moved_table, $moved_field) = $moved;
@@ -1007,6 +1008,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
         // recursion detected!
         return NULL;
       }
+
       $recursion_protection[$moved_table][$moved_field] = TRUE;
       $handler = views_get_handler($moved_table, $moved_field, $key, $override);
       $recursion_protection = array();
@@ -1276,6 +1278,12 @@ function views_get_view($name, $reset = FALSE) {
   ctools_include('export');
   $view = ctools_export_crud_load('views_view', $name);
   if ($view) {
+    // When views are converted automatically the base_table should be renamed
+    // to have a working query.
+    $data = views_fetch_data($view->base_table, FALSE);
+    if (isset($data['moved to'])) {
+      $view->base_table = $data['moved to'];
+    }
     return $view->clone_view();
   }
 }

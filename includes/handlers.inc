@@ -99,6 +99,8 @@ function views_get_table_join($table, $base_table) {
 
     return $handler;
   }
+
+  vsm_trace();
   // DEBUG -- identify missing handlers
   vpr("Missing join: $table $base_table");
 }
@@ -158,6 +160,16 @@ class views_handler extends views_object {
     // Check to see if this handler type is defaulted. Note that
     // we have to do a lookup because the type is singular but the
     // option is stored as the plural.
+
+    // If the 'moved to' keyword moved our handler, let's fix that now.
+    if (isset($this->actual_table)) {
+      $options['table'] = $this->actual_table;
+    }
+
+    if (isset($this->actual_field)) {
+      $options['field'] = $this->actual_field;
+    }
+
     $types = views_object_types();
     $plural = $this->handler_type;
     if (isset($types[$this->handler_type]['plural'])) {

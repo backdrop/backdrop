@@ -597,14 +597,6 @@ class view extends views_db_object {
     if (!empty($this->built)) {
       return;
     }
-    
-    // When views are converted automatically the base_table should be renamed
-    // to have a working query.
-    $data = views_fetch_data($this->base_table, FALSE);
-    if (isset($data['moved to'])) {
-      $this->base_table = $data['moved to'];
-    }
-
 
     if (empty($this->current_display) || $display_id) {
       if (!$this->set_display($display_id)) {
