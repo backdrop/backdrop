@@ -311,6 +311,8 @@ function template_preprocess_views_view_summary(&$vars) {
     $url_options['query'] = $view->exposed_raw_input;
   }
   foreach ($vars['rows'] as $id => $row) {
+    $vars['row_classes'][$id] = '';
+
     $vars['rows'][$id]->link = $argument->summary_name($row);
     $args = $view->args;
     $args[$argument->position] = $argument->summary_argument($row);
