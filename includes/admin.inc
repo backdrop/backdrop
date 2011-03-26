@@ -4146,7 +4146,7 @@ function views_ui_config_item_form($form, &$form_state) {
           '#title' => t('Relationship'),
           '#options' => $relationship_options,
           '#default_value' => $rel,
-          '#fieldset' => 'more',
+          '#weight' => -500,
         );
       }
       else {

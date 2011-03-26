@@ -218,8 +218,8 @@ class views_handler_filter extends views_handler {
     $form['expose_button'] = array(
       '#prefix' => '<div class="views-expose clearfix">',
       '#suffix' => '</div>',
-      // Should always come first
-      '#weight' => -1000,
+      // Should always come after the description and the relationship.
+      '#weight' => -200,
     );
 
     // Add a checkbox for JS users, which will have behavior attached to it
