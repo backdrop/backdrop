@@ -94,8 +94,8 @@ function template_preprocess_views_view(&$vars) {
   // processed by contextual_preprocess() they will appear in the $title_suffix
   // variable (which we will then render in views-view.tpl.php).
   views_add_contextual_links($vars['view_array'], 'view', $view, $view->current_display);
-  // If a display handle's where to put the contextual links for themselves let it
-  // does them but by default render the links as before.
+  // If a display handles where to put the contextual links for themselves let it
+  // does it but by default render the links in the view ouput.
   $vars['admin_links'] = '';
   if (!empty($vars['view_array']['#views_contextual_links_info'])) {
     $location = $vars['view_array']['#views_contextual_links_info']['views_ui'];

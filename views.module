@@ -682,7 +682,7 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
     // contextual links that are intended to be displayed in the requested
     // location.
     $plugin = views_fetch_plugin_data('display', $view->display[$display_id]->display_plugin);
-    // If contextual links locationos is empty provide a sane default.
+    // If contextual links locations are empty provide a sane default.
     if (empty($plugin['contextual links locations'])) {
       $plugin['contextual links locations'] = array('view');
     }
