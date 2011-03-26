@@ -72,8 +72,8 @@ function views_ui_menu() {
   $items['admin/structure/views/view/%views_ui_cache'] = array(
     'title callback' => 'views_ui_edit_page_title',
     'title arguments' => array(4),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('views_ui_edit_form', 4),
+    'page callback' => 'views_ui_edit_page',
+    'page arguments' => array(4),
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/edit'] = array(
     'title' => 'Edit view',
