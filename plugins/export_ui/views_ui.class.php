@@ -19,13 +19,15 @@ class views_ui extends ctools_export_ui {
     // Reset the edit path to match what we're really using.
     $plugin['menu']['items']['edit']['path'] = 'view/%ctools_export_ui/edit';
     $plugin['menu']['items']['clone']['path'] = 'view/%ctools_export_ui/clone';
-    $plugin['menu']['items']['clone']['type'] = MENU_CALLBACK;
+    $plugin['menu']['items']['clone']['type'] = MENU_VISIBLE_IN_BREADCRUMB;
     $plugin['menu']['items']['export']['path'] = 'view/%ctools_export_ui/export';
-    $plugin['menu']['items']['export']['type'] = MENU_CALLBACK;
+    $plugin['menu']['items']['export']['type'] = MENU_VISIBLE_IN_BREADCRUMB;
     $plugin['menu']['items']['enable']['path'] = 'view/%ctools_export_ui/enable';
     $plugin['menu']['items']['disable']['path'] = 'view/%ctools_export_ui/disable';
     $plugin['menu']['items']['delete']['path'] = 'view/%ctools_export_ui/delete';
+    $plugin['menu']['items']['delete']['type'] = MENU_VISIBLE_IN_BREADCRUMB;
     $plugin['menu']['items']['revert']['path'] = 'view/%ctools_export_ui/revert';
+    $plugin['menu']['items']['revert']['type'] = MENU_VISIBLE_IN_BREADCRUMB;
 
     $prefix_count = count(explode('/', $plugin['menu']['menu prefix']));
     $plugin['menu']['items']['add-template'] = array(

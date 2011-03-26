@@ -94,14 +94,14 @@ function views_ui_menu() {
     'title' => 'Analyze',
     'page callback' => 'views_ui_analyze_view',
     'page arguments' => array(FALSE, 4),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
 
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_break_lock_confirm', 4),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
 
   // NoJS/AJAX callbacks that can use the default Views AJAX form system.
@@ -270,6 +270,20 @@ function views_ui_theme() {
       'file' => 'theme/theme.inc',
     ),
   );
+}
+
+/**
+ * Page title callback for the Edit View page.
+ */
+function views_ui_edit_page_title($view) {
+  module_load_include('inc', 'views_ui', 'includes/admin');
+  $bases = views_fetch_base_tables();
+  $name = $view->get_human_name();
+  if (isset($bases[$view->base_table])) {
+    $name .= ' (' . $bases[$view->base_table]['title'] . ')';
+  }
+
+  return $name;
 }
 
 /**
