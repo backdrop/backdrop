@@ -100,7 +100,6 @@ function views_get_table_join($table, $base_table) {
     return $handler;
   }
 
-  vsm_trace();
   // DEBUG -- identify missing handlers
   vpr("Missing join: $table $base_table");
 }
