@@ -6,6 +6,8 @@
 
 /**
  * Field handler to provide simple renderer that allows linking to a node.
+ * Definition terms:
+ * - link_to_node default: Should this field have the checkbox "link to node" enabled by default.
  */
 class views_handler_field_node extends views_handler_field {
 
@@ -21,7 +23,7 @@ class views_handler_field_node extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_node'] = array('default' => TRUE);
+    $options['link_to_node'] = array('default' => isset($this->definition['link_to_node default']) ? $this->definition['link_to_node default'] : FALSE);
     return $options;
   }
 
