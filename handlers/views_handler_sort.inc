@@ -91,7 +91,7 @@ class views_handler_sort extends views_handler {
       '#attributes' => array('class' => array('js-only')),
     );
     $form['expose_button']['checkbox']['checkbox'] = array(
-      '#title' => t('Expose this filter to visitors, to allow them to change it.'),
+      '#title' => t('Expose this sort to visitors, to allow them to change it.'),
       '#type' => 'checkbox',
     );
 
@@ -118,6 +118,7 @@ class views_handler_sort extends views_handler {
         '#value' => t('Hide sort'),
         '#submit' => array('views_ui_config_item_form_expose'),
       );
+      $form['expose_button']['checkbox']['checkbox']['#default_value'] = 1;
     }
   }
 
