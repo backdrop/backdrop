@@ -91,6 +91,7 @@ function node_views_data() {
       'group' => t('Content'), // The group it appears in on the UI. Could be left out.
       'handler' => 'views_handler_field_node',
       'click sortable' => TRUE,
+      'link_to_node default' => TRUE,
      ),
     'sort' => array(
       'handler' => 'views_handler_sort',
