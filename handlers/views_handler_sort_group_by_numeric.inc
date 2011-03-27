@@ -24,7 +24,7 @@ class views_handler_sort_group_by_numeric extends views_handler_sort {
     $this->query->add_orderby($this->table_alias, $this->real_field, $this->options['order'], NULL, $params);
   }
 
-  function ui_name() {
-    return $this->get_field(parent::ui_name());
+  function ui_name($short = FALSE) {
+    return $this->get_field(parent::ui_name($short));
   }
 }
