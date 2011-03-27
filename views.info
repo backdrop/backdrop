@@ -54,7 +54,6 @@ files[] = handlers/views_handler_sort_random.inc
 files[] = includes/base.inc
 files[] = includes/handlers.inc
 files[] = includes/plugins.inc
-files[] = includes/tabs.inc
 files[] = includes/view.inc
 ; Modules
 files[] = modules/aggregator/views_handler_argument_aggregator_fid.inc
@@ -173,7 +172,6 @@ files[] = modules/user/views_handler_field_user.inc
 files[] = modules/user/views_handler_field_user_language.inc
 files[] = modules/user/views_handler_field_user_link.inc
 files[] = modules/user/views_handler_field_user_link_cancel.inc
-files[] = modules/user/views_handler_field_user_link_delete.inc
 files[] = modules/user/views_handler_field_user_link_edit.inc
 files[] = modules/user/views_handler_field_user_mail.inc
 files[] = modules/user/views_handler_field_user_name.inc
