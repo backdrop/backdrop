@@ -104,19 +104,21 @@ class views_handler_field_field extends views_handler_field {
       );
     }
 
-    // We always need the base field (entity_id / revision_id).
-    if (empty($this->definition['revision id'])) {
-      $this->field_alias = $this->query->add_field($base_table_alias, $this->definition['entity id'], '', $params);
-    }
-    else {
-      $this->field_alias = $this->query->add_field($base_table_alias, $this->definition['revision id'], '', $params);
-      $this->aliases['entity id'] = $this->query->add_field($base_table_alias, $this->definition['entity id'], '', $params);
-    }
-
     // Get the entity type according to the base table of the field.
     // Then add it to the query as a formula. That way we can avoid joining
     // the field table if all we need is entity_id and entity_type.
     $entity_type = $this->definition['entity_tables'][$base_table];
+    $entity_info = entity_get_info($entity_type);
+
+    // We always need the base field (entity_id / revision_id).
+    if (empty($this->definition['is revision'])) {
+      $this->field_alias = $this->query->add_field($base_table_alias, $entity_info['entity keys']['id'], '', $params);
+    }
+    else {
+      $this->field_alias = $this->query->add_field($base_table_alias, $entity_info['entity keys']['revision'], '', $params);
+      $this->aliases['entity id'] = $this->query->add_field($base_table_alias, $entity_info['entity keys']['id'], '', $params);
+    }
+
 
     // The alias needs to be unique, so we use both the field table and the entity type.
     $entity_type_alias = $this->definition['table'] . '_' . $entity_type . '_entity_type';
@@ -509,7 +511,8 @@ class views_handler_field_field extends views_handler_field {
 
       // Load the entities.
       foreach ($entities_by_type as $entity_type => $entity_ids) {
-        if (empty($this->definition['revision id'])) {
+        $entity_info = entity_get_info($entity_type);
+        if (empty($this->definition['is revision'])) {
           $entities = entity_load($entity_type, $entity_ids);
           $keys = $entity_ids;
         }
@@ -520,7 +523,7 @@ class views_handler_field_field extends views_handler_field {
           $keys = array();
           foreach ($entity_ids as $key => $combined) {
             list($entity_id, $revision_id) = $combined;
-            $entity = entity_load($entity_type, array($entity_id), array($this->definition['revision id'] => $revision_id));
+            $entity = entity_load($entity_type, array($entity_id), array($entity_info['entity keys']['revision'] => $revision_id));
             if ($entity) {
               $entities[$revision_id] = array_shift($entity);
               $keys[$key] = $revision_id;
@@ -629,6 +632,7 @@ class views_handler_field_field extends views_handler_field {
       'settings' => $this->options['settings'],
       'label' => 'hidden',
     );
+
 
     $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
 
