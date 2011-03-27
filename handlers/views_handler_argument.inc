@@ -95,12 +95,12 @@ class views_handler_argument extends views_handler {
     }
 
     if (!empty($options['validate_type']) && !isset($options['validate']['type'])) {
-      $options['validate']['type'] = $options['validate_type'];
-      $options['specify_validation'] = 1;
+      $this->options['validate']['type'] = $options['validate_type'];
+      $this->options['specify_validation'] = 1;
     }
     if (!empty($options['validate_fail']) && !isset($options['validate']['fail'])) {
-      $options['validate']['fail'] = $options['validate_fail'];
-      $options['specify_validation'] = 1;
+      $this->options['validate']['fail'] = $options['validate_fail'];
+      $this->options['specify_validation'] = 1;
     }
   }
 
