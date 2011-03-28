@@ -1130,6 +1130,7 @@ class views_plugin_query_default extends views_plugin_query {
     if (empty($this->no_distinct) && $this->distinct && !empty($this->fields)) {
       $base_field_alias = $this->add_field($this->base_table, $this->base_field);
       $this->add_groupby($base_field_alias);
+      $distinct = TRUE;
     }
 
     /**
@@ -1168,6 +1169,10 @@ class views_plugin_query_default extends views_plugin_query {
     // Go ahead and build the query.
     // db_select doesn't support to specify the key, so use getConnection directly.
     $query = Database::getConnection($target, $key)->select($this->base_table, $this->base_table, $options)->addTag('views');
+
+    if (!empty($distinct)) {
+      $query->distinct();
+    }
 
     $joins = $where = $having = $orderby = $groupby = '';
     $fields = $distinct = array();
