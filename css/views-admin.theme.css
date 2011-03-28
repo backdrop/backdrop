@@ -419,9 +419,18 @@ td.group-title {
   position: relative;
 }
 
-.views-display-top .secondary > li + li {
-  margin-left: 6px;
+.views-display-top .secondary {
+  margin-right: 18em;
+}
+
+.views-display-top .secondary > li {
+  margin-bottom: 4px;
+  margin-right: 6px;
   padding-left: 0;
+}
+
+.views-display-top .secondary > li:last-child {
+  margin-right: 0;
 }
 
 #views-display-extra-actions li {

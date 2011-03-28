@@ -161,8 +161,15 @@ fieldset.fieldset-no-legend {
   clear: none;
 }
 
-.views-displays ul.secondary li a {
+.views-displays ul.secondary li a,
+.views-displays ul.secondary li.active a,
+.views-displays ul.secondary li.active a.active {
   padding: 2px 7px 3px;
+}
+
+.views-displays ul.secondary li.active a,
+.views-displays ul.secondary li.active a.active {
+  border: 1px solid transparent;
 }
 
 .views-admin .links li {
@@ -180,6 +187,7 @@ fieldset.fieldset-no-legend {
 
 .views-display-top ul.secondary {
   background-color: transparent;
+  margin-right: 18em;
 }
 
 /* @end */
