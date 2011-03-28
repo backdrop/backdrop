@@ -174,13 +174,7 @@ function field_views_field_default_views_data($field) {
       // Default the element type to div, let the UI change it if necessary.
       'element type' => 'div',
       'is revision' => $type == FIELD_LOAD_REVISION,
-      'entity id' => $entity_info['entity keys']['id'],
-      'base table' => $entity_info['base table'],
     );
-    if ($type == FIELD_LOAD_REVISION) {
-      $data[$table][$column]['field']['revision id'] = $entity_info['entity keys']['revision'];
-      $data[$table][$column]['field']['base table'] = $entity_info['revision table'];
-    }
   }
 
   foreach ($field['columns'] as $column => $attributes) {
