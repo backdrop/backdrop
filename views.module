@@ -1495,6 +1495,18 @@ function views_exposed_form($form, &$form_state) {
 }
 
 /**
+ * Implement hook_form_alter for the exposed form.
+ *
+ * Since the exposed form is a GET form, we don't want it to send a wide
+ * variety of information.
+ */
+function views_form_views_exposed_form_alter(&$form, &$form_state) {
+  $form['form_build_id']['#access'] = FALSE;
+  $form['form_token']['#access'] = FALSE;
+  $form['form_id']['#access'] = FALSE;
+}
+
+/**
  * Validate handler for exposed filters
  */
 function views_exposed_form_validate(&$form, &$form_state) {
