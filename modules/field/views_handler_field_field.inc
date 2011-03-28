@@ -77,7 +77,7 @@ class views_handler_field_field extends views_handler_field {
    * present in the query itself (such as "sphinx").
    */
   function query($use_groupby = FALSE) {
-    // This base_table is coming from the entity not the fieod.
+    // This base_table is coming from the entity not the field.
     $base_table_alias = $base_table = $this->view->base_table;
 
     // If the current field is under a relationship you can't be sure that the
