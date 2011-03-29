@@ -175,7 +175,7 @@ function template_preprocess_views_view_fields(&$vars) {
           $class = 'field-content';
         }
 
-        if ($classes = $object->handler->element_classes()) {
+        if ($classes = $object->handler->element_classes($view->row_index)) {
           if ($class) {
             $class .= ' ';
           }
@@ -469,7 +469,7 @@ function template_preprocess_views_view_table(&$vars) {
       if ($fields[$field]->options['element_default_classes']) {
         $vars['field_classes'][$field][$num] = "views-field views-field-" . $vars['fields'][$field];
       }
-      if ($classes = $fields[$field]->element_classes()) {
+      if ($classes = $fields[$field]->element_classes($num)) {
         if ($vars['field_classes'][$field][$num]) {
           $vars['field_classes'][$field][$num] .= ' ';
         }

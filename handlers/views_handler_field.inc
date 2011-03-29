@@ -239,8 +239,8 @@ class views_handler_field extends views_handler {
   /**
    * Return the class of the field.
    */
-  function element_classes() {
-    $classes = $this->tokenize_value($this->options['element_class']);
+  function element_classes($row_index = NULL) {
+    $classes = $this->tokenize_value($this->options['element_class'], $row_index);
     return drupal_clean_css_identifier($classes);
   }
 
@@ -250,20 +250,27 @@ class views_handler_field extends views_handler {
    * This function actually figures out which field was last and uses its
    * tokens so they will all be available.
    */
-  function tokenize_value($value) {
+  function tokenize_value($value, $row_index = NULL) {
     if (strpos($value, '[') !== FALSE || strpos($value, '!') !== FALSE || strpos($value, '%') !== FALSE) {
       $fake_item = array(
         'alter_text' => TRUE,
         'text' => $value,
       );
 
-      // Get tokens from the last field.
-      $last_field = end($this->view->field);
-      if (isset($last_field->last_tokens)) {
-        $tokens = $last_field->last_tokens;
+      // Use isset() because empty() will trigger on 0 and 0 is
+      // the first row.
+      if (isset($row_index) && isset($this->view->style_plugin->render_tokens[$row_index])) {
+        $tokens = $this->view->style_plugin->render_tokens[$row_index];
       }
       else {
-        $tokens = $last_field->get_render_tokens($fake_item);
+        // Get tokens from the last field.
+        $last_field = end($this->view->field);
+        if (isset($last_field->last_tokens)) {
+          $tokens = $last_field->last_tokens;
+        }
+        else {
+          $tokens = $last_field->get_render_tokens($fake_item);
+        }
       }
 
       $value = strip_tags($this->render_altered($fake_item, $tokens));
@@ -1134,6 +1141,8 @@ If you would like to have the characters %5B and %5D please use the html entity 
       }
     }
 
+    // Store the tokens for the row so we can reference them later if necessary.
+    $this->view->style_plugin->render_tokens[$this->view->row_index] = $tokens;
     $this->last_tokens = $tokens;
     return $tokens;
   }
