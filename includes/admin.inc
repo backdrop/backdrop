@@ -1439,10 +1439,6 @@ function views_ui_get_display_tab_details($view, $display) {
     '#attributes' => array('id' => 'edit-display-settings-details',),
   );
 
-  $build['top']['#theme_wrappers'] = array('container');
-  $build['top']['#attributes']['id'] = 'edit-display-settings-top';
-  $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
-
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   // The following is for display purposes only. We need to determine if there is more than one button and wrap
   // the buttons in a .ctools-dropbutton class if more than one is present.  Otherwise, we'll just wrap the
@@ -1463,51 +1459,57 @@ function views_ui_get_display_tab_details($view, $display) {
     $itemElement = 'li';
   }
 
-  // The Delete, Duplicate and Undo Delete buttons.
-  $build['top']['actions'] = array(
-    '#prefix' => $prefix,
-    '#suffix' => $suffix,
-  );
+  if ($display->id != 'default') {
+    $build['top']['#theme_wrappers'] = array('container');
+    $build['top']['#attributes']['id'] = 'edit-display-settings-top';
+    $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
 
-  if (!$isDisplayDeleted) {
-    if (!$isDefault) {
-      $build['top']['actions']['duplicate'] = array(
+    // The Delete, Duplicate and Undo Delete buttons.
+    $build['top']['actions'] = array(
+      '#prefix' => $prefix,
+      '#suffix' => $suffix,
+    );
+
+    if (!$isDisplayDeleted) {
+      if (!$isDefault) {
+        $build['top']['actions']['duplicate'] = array(
+          '#type' => 'submit',
+          '#value' => t('clone') . " " . $display_title,
+          '#limit_validation_errors' => array(),
+          '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
+          '#prefix' => '<' . $itemElement . ' class="duplicate">',
+          "#suffix" => '</' . $itemElement . '>',
+        );
+      }
+      if ($isDeletable) {
+        $build['top']['actions']['delete'] = array(
+          '#type' => 'submit',
+          '#value' => t('delete') . " " . $display_title,
+          '#limit_validation_errors' => array(),
+          '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
+          '#prefix' => '<' . $itemElement . ' class="delete">',
+          "#suffix" => '</' . $itemElement . '>',
+        );
+      }
+    }
+    else {
+      $build['top']['actions']['undo_delete'] = array(
         '#type' => 'submit',
-        '#value' => t('clone') . " " . $display_title,
+        '#value' => t('undo delete of') . " " . $display_title,
         '#limit_validation_errors' => array(),
-        '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
-        '#prefix' => '<' . $itemElement . ' class="duplicate">',
+        '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
+        '#prefix' => '<' . $itemElement . ' class="undo-delete">',
         "#suffix" => '</' . $itemElement . '>',
       );
     }
-    if ($isDeletable) {
-      $build['top']['actions']['delete'] = array(
-        '#type' => 'submit',
-        '#value' => t('delete') . " " . $display_title,
-        '#limit_validation_errors' => array(),
-        '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
-        '#prefix' => '<' . $itemElement . ' class="delete">',
-        "#suffix" => '</' . $itemElement . '>',
-      );
-    }
-  }
-  else {
-    $build['top']['actions']['undo_delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('undo delete of') . " " . $display_title,
-      '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
-      '#prefix' => '<' . $itemElement . ' class="undo-delete">',
-      "#suffix" => '</' . $itemElement . '>',
+
+    // The area above the three columns.
+    $build['top']['display_title'] = array(
+      '#theme' => 'views_ui_display_tab_setting',
+      '#description' => t('Display name'),
+      '#link' => $display->handler->option_link(check_plain($display_title), 'display_title'),
     );
   }
-
-  // The area above the three columns.
-  $build['top']['display_title'] = array(
-    '#theme' => 'views_ui_display_tab_setting',
-    '#description' => t('Display name'),
-    '#link' => $display->handler->option_link(check_plain($display->display_title), 'display_title'),
-  );
 
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
@@ -5021,7 +5023,12 @@ function theme_views_ui_style_plugin_table($variables) {
  * @todo Remove this function once editing the display title is possible.
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
-  $title = $display_id == 'default' ? t('Master') : check_plain($view->display[$display_id]->display_title);
+  $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
+
+  if (drupal_strlen($title) > 25) {
+    $title = drupal_substr($title, 0, 25);
+    $title .= '...';
+  }
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {
     $changed = '*';
