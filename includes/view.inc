@@ -1935,7 +1935,7 @@ class views_db_object {
     if (empty($id)) {
       $id = $this->generate_display_id($type);
       if ($id !== 'default') {
-        preg_match("/[0-9]/", $id, $count);
+        preg_match("/[0-9]+/", $id, $count);
         $count = $count[0];
       }
       else {
