@@ -37,7 +37,6 @@ class views_handler_field_math extends views_handler_field_numeric {
   function render($values) {
     ctools_include('math-expr');
     $tokens = array_map('floatval', $this->get_render_tokens(array()));
-    dsm($tokens);
     $value = strtr($this->options['expression'], $tokens);
     $expressions = explode(';', $value);
     $math = new ctools_math_expr;
