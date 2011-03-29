@@ -266,6 +266,8 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
     $field = $this->field_info;
     $formatters = _field_view_formatter_options($field['type']);
     $column_names = array_keys($field['columns']);
@@ -310,7 +312,8 @@ class views_handler_field_field extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['field_api_classes'],
       '#description' => t('If checked, field api classes will be added using field.tpl.php (or equivalent). This is not recommended unless your CSS depends upon these classes. If not checked, template will not be used.'),
-      '#fieldset' => 'more',
+      '#fieldset' => 'style_settings',
+      '#weight' => 20,
     );
 
     if ($this->multiple) {
@@ -340,8 +343,6 @@ class views_handler_field_field extends views_handler_field {
       $settings_form = $function($field, $instance, '_dummy', $form, $form_state);
     }
     $form['settings'] = $settings_form;
-
-    parent::options_form($form, $form_state);
   }
 
   /**
