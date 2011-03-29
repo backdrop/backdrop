@@ -216,7 +216,12 @@ function field_views_field_default_views_data($field) {
     }
 
     foreach ($tables as $type => $table) {
-      $group = $type == FIELD_LOAD_CURRENT ? t('Fields') : t('Fields (historical data)');
+      if ($type == FIELD_LOAD_CURRENT) {
+        $group = $group_name;
+      }
+      else {
+        $group = t('@group (historical data)', array('@group' => $group_name));
+      }
       $column_real_name = $field['storage']['details']['sql'][$type][$table][$column];
 
       // Load all the fields from the table by default.
