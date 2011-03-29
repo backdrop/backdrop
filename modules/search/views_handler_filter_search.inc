@@ -162,7 +162,7 @@ class views_handler_filter_search extends views_handler_filter {
   }
 }
 
-class viewsSearchQuery extends searchQuery {
+class viewsSearchQuery extends SearchQuery {
   public function &conditions() {
     return $this->conditions;
   }
