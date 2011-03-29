@@ -1181,8 +1181,7 @@ class view extends views_db_object {
     }
 
     $pieces = array();
-    $arguments = isset($arguments) ? $arguments : $this->display_handler->get_option('arguments');
-    $argument_keys = isset($arguments) ? array_keys($arguments) : array();
+    $argument_keys = isset($this->argument) ? array_keys($this->argument) : array();
     $id = current($argument_keys);
     foreach (explode('/', $path) as $piece) {
       if ($piece != '%') {
@@ -1191,8 +1190,8 @@ class view extends views_db_object {
       else {
         if (empty($args)) {
           // Try to never put % in a url; use the wildcard instead.
-          if ($id && !empty($arguments[$id]['wildcard'])) {
-            $pieces[] = $arguments[$id]['wildcard'];
+          if ($id && !empty($this->argument[$id]->options['exception']['value'])) {
+            $pieces[] = $this->argument[$id]->options['exception']['value'];
           }
           else {
             $pieces[] = '*'; // gotta put something if there just isn't one.
