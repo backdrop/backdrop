@@ -4198,6 +4198,7 @@ function views_ui_config_item_form($form, &$form_state) {
     // Don't execute validations for the remove button.
     $form['buttons']['remove']['#limit_validation_errors'] = array();
   }
+
   return $form;
 }
 

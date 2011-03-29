@@ -705,9 +705,12 @@ If you would like to have the characters %5B and %5D please use the html entity 
       // the parent in situations like this, so we need a second div to
       // make this work.
       $form['alter']['help'] = array(
-        '#type' => 'hidden',
+        '#type' => 'fieldset',
+        '#title' => t('Replacement patterns'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#value' => $output,
         '#id' => 'views-tokens-help',
-        '#prefix' => '<div><fieldset id="views-tokens-help"><legend>' . t('Replacement patterns') . '</legend>' . $output . '</fieldset></div>',
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1),
           'edit-options-alter-alter-text' => array(1),
