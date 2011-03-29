@@ -291,7 +291,6 @@ class views_plugin_display extends views_plugin {
       'pager' => array('pager'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
-      'exposed_block' => array('exposed_block'),
       'exposed_form' => array('exposed_form'),
 
       // Force these to cascade properly.
@@ -349,7 +348,6 @@ class views_plugin_display extends views_plugin {
           'use_more' => TRUE,
           'use_more_always' => TRUE,
           'use_more_text' => TRUE,
-          'exposed_block' => TRUE,
           'exposed_form' => TRUE,
 
           'link_display' => TRUE,
@@ -1128,12 +1126,14 @@ class views_plugin_display extends views_plugin {
       }
     }
 
-    $options['exposed_block'] = array(
-      'category' => 'exposed',
-      'title' => t('Exposed form in block'),
-      'value' => $this->get_option('exposed_block') ? t('Yes') : t('No'),
-      'desc' => t('Allow the exposed form to appear in a block instead of the view.'),
-    );
+    if ($this->has_path()) {
+      $options['exposed_block'] = array(
+        'category' => 'exposed',
+        'title' => t('Exposed form in block'),
+        'value' => $this->get_option('exposed_block') ? t('Yes') : t('No'),
+        'desc' => t('Allow the exposed form to appear in a block instead of the view.'),
+      );
+    }
 
     $exposed_form_plugin = $this->get_plugin('exposed_form');
     if (!$exposed_form_plugin) {
@@ -2389,6 +2389,10 @@ class views_plugin_display extends views_plugin {
    * Provide the block system with any exposed widget blocks for this display.
    */
   function get_special_blocks() {
+    if (!$this->has_path()) {
+      return;
+    }
+
     $delta = '-exp-' . $this->view->name . '-' . $this->display->id;
     $desc = t('Exposed form: @view-@display_id', array('@view' => $this->view->name, '@display_id' => $this->display->id));
 
@@ -2410,7 +2414,8 @@ class views_plugin_display extends views_plugin {
         return;
       }
       $this->view->init_handlers();
-      if ($this->uses_exposed()) {
+
+      if ($this->uses_exposed() && $this->get_option('exposed_block')) {
         $exposed_form = $this->get_plugin('exposed_form');
         return array(
           'content' => $exposed_form->render_exposed_form(TRUE),
