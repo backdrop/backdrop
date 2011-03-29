@@ -174,7 +174,7 @@ function comment_views_data() {
   $data['comments']['timestamp']['moved to'] = array('comment', 'changed');
   // changed (when comment was last updated)
   $data['comment']['changed'] = array(
-    'title' => t('Post date'),
+    'title' => t('Updated date'),
     'help' => t('Date and time of when the comment was last updated.'),
     'field' => array(
       'handler' => 'views_handler_field_date',
