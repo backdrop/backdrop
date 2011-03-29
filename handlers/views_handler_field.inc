@@ -446,7 +446,7 @@ class views_handler_field extends views_handler {
     );
     $form['element_class'] = array(
       '#title' => t('CSS class'),
-      '#description' => t('Provide a CSS class to...'),
+      '#description' => t('You may use token substitutions from the rewriting section in this class.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_class'],
       '#dependency' => array(
@@ -483,7 +483,7 @@ class views_handler_field extends views_handler {
     );
     $form['element_label_class'] = array(
       '#title' => t('CSS class'),
-      '#description' => t('Provide a CSS class to...'),
+      '#description' => t('You may use token substitutions from the rewriting section in this class.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_label_class'],
       '#dependency' => array(
@@ -521,7 +521,7 @@ class views_handler_field extends views_handler {
     );
     $form['element_wrapper_class'] = array(
       '#title' => t('CSS class'),
-      '#description' => t('Provide a CSS class to...'),
+      '#description' => t('You may use token substitutions from the rewriting section in this class.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['element_wrapper_class'],
       '#dependency' => array(
