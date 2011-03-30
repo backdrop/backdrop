@@ -4623,7 +4623,7 @@ function views_ui_admin_settings_basic() {
   );
   $form['live_preview']['views_ui_always_live_preview_button'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Always show the preview button, even the automatically update is checked.'),
+    '#title' => t('Always show the preview button, even when the automatically update option is checked.'),
     '#default_value' => variable_get('views_ui_always_live_preview_button', FALSE),
   );
 
