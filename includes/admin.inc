@@ -1489,7 +1489,7 @@ function views_ui_get_display_tab_details($view, $display) {
       if (!$isDefault) {
         $build['top']['actions']['duplicate'] = array(
           '#type' => 'submit',
-          '#value' => t('clone') . " " . $display_title,
+          '#value' => t('clone @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<' . $itemElement . ' class="duplicate">',
@@ -1499,7 +1499,7 @@ function views_ui_get_display_tab_details($view, $display) {
       if ($isDeletable) {
         $build['top']['actions']['delete'] = array(
           '#type' => 'submit',
-          '#value' => t('delete') . " " . $display_title,
+          '#value' => t('delete @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<' . $itemElement . ' class="delete">',
@@ -1510,7 +1510,7 @@ function views_ui_get_display_tab_details($view, $display) {
     else {
       $build['top']['actions']['undo_delete'] = array(
         '#type' => 'submit',
-        '#value' => t('undo delete of') . " " . $display_title,
+        '#value' => t('undo delete of @display_title', array('@display_title' => $display_title)),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
         '#prefix' => '<' . $itemElement . ' class="undo-delete">',
@@ -4650,7 +4650,7 @@ function views_ui_admin_settings_basic() {
   );
   $form['live_preview']['views_ui_always_live_preview_button'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Always show the preview button, even the automatically update is checked.'),
+    '#title' => t('Always show the preview button, even when the automatically update option is checked.'),
     '#default_value' => variable_get('views_ui_always_live_preview_button', FALSE),
   );
 
