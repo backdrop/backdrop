@@ -37,8 +37,8 @@ class views_handler_field_field extends views_handler_field {
   public $items = array();
 
   /**
-    * Store the field informations.
-  */
+   * Store the field informations.
+   */
   public $field_info = array();
 
   function init(&$view, &$options) {
@@ -103,6 +103,10 @@ class views_handler_field_field extends views_handler_field {
       $params = array(
         'function' => 'min',
       );
+
+      // Add the field that we're actually grouping on.
+      $this->ensure_my_table();
+      $this->field_aliases['real_field'] = $this->query->add_field($this->table_alias, $this->real_field);
     }
 
     // Get the entity type according to the base table of the field.

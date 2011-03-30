@@ -84,6 +84,7 @@ class views_handler_field extends views_handler {
       }
       $fields = $this->additional_fields;
     }
+
     if (!empty($fields) && is_array($fields)) {
       foreach ($fields as $identifier => $info) {
         if (is_array($info)) {

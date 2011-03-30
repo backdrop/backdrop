@@ -134,7 +134,7 @@ function field_views_field_default_views_data($field) {
     $tables[FIELD_LOAD_REVISION] = $revision_table;
   }
 
-  $add_fields = array('entity_type', 'delta', 'language', 'bundle');
+  $add_fields = array('delta', 'language', 'bundle');
   foreach ($field['columns'] as $column_name => $attributes) {
     $add_fields[] = _field_sql_storage_columnname($field['field_name'], $column_name);
   }
@@ -163,12 +163,15 @@ function field_views_field_default_views_data($field) {
       'title short' => $label,
       'help' =>  t('Appears in: @bundles', array('@bundles' => implode(', ', $bundles_names))),
     );
+
     $data[$table][$column]['field'] = array(
-      'field' => $column,
+//      'field' => $column,
       'table' => $table,
       'handler' => 'views_handler_field_field',
       'click sortable' => TRUE,
       'field_name' => $field['field_name'],
+      // Provide a real field for group by.
+      'real field' => $column . '_' . reset(array_keys($field['columns'])),
       'additional fields' => $add_fields,
       'entity_tables' => $entity_tables,
       // Default the element type to div, let the UI change it if necessary.
