@@ -122,7 +122,8 @@
       #f1f1f1 100%);
 }
 
-.ctools-button li {
+.ctools-button li a,
+.views-ui-display-tab-actions .ctools-button input {
   padding-left: 9px;
   padding-right: 9px;
 }
@@ -171,7 +172,8 @@
   top: 0.3333em;
 }
 
-.ctools-dropbutton li {
+.ctools-dropbutton li a,
+.views-ui-display-tab-actions .ctools-dropbutton input {
   padding-right: 7px;
 }
 

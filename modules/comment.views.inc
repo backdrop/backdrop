@@ -7,7 +7,7 @@
 /**
  * @defgroup views_comment_module comment.module handlers
  *
- * Includes the tables 'comments' and 'node_comment_statistics'
+ * Includes the tables 'comment' and 'node_comment_statistics'
  * @{
  */
 
