@@ -42,7 +42,7 @@ class views_handler_field_upload_description extends views_handler_field {
     }
 
     if ($fids) {
-      $result = db_query("SELECT f.fid, f.uri FROM {files} f WHERE f.fid IN (:fids)", array(':fids' => $fids));
+      $result = db_query("SELECT f.fid, f.uri FROM {file_managed} f WHERE f.fid IN (:fids)", array(':fids' => $fids));
       foreach ($result as $file) {
         $this->items[$file->fid] = $file;
       }

@@ -125,7 +125,7 @@ function system_views_data() {
   );
 
   // extension
-  $data['files']['extension'] = array(
+  $data['file_managed']['extension'] = array(
     'title' => t('Extension'),
     'help' => t('The extension of the file.'),
     'real field' => 'filename',

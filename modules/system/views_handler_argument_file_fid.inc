@@ -7,7 +7,7 @@ class views_handler_argument_file_fid extends views_handler_argument {
    * Override the behavior of title(). Get the title of the file.
    */
   function title() {
-    $title = db_select('files', 'f')
+    $title = db_select('file_managed', 'f')
       ->addField('f', 'filename')
       ->condition('fid', $this->argument)
       ->execute()
