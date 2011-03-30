@@ -281,7 +281,6 @@ class views_plugin_display extends views_plugin {
       'access' => array('access'),
       'cache' => array('cache'),
       'title' => array('title'),
-      'enabled' => array('enabled'),
       'css_class' => array('css_class'),
       'use_ajax' => array('use_ajax'),
       'hide_attachment_summary' => array('hide_attachment_summary'),
