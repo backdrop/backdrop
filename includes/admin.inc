@@ -4230,9 +4230,20 @@ function views_ui_config_item_form_submit_temporary($form, &$form_state) {
     $type = $types[$type]['type'];
   }
 
+  $override = NULL;
+  if ($form_state['view']->display_handler->use_group_by() && !empty($item['group_type'])) {
+    if (empty($form_state['view']->query)) {
+      $form_state['view']->init_query();
+    }
+    $aggregate = $form_state['view']->query->get_aggregation_info();
+    if (!empty($aggregate[$item['group_type']]['handler'][$type])) {
+      $override = $aggregate[$item['group_type']]['handler'][$type];
+    }
+  }
+
   // Create a new handler and unpack the options from the form onto it. We
   // can use that for storage.
-  $handler = views_get_handler($item['table'], $item['field'], $type);
+  $handler = views_get_handler($item['table'], $item['field'], $type, $override);
   $handler->init($form_state['view'], $item);
 
 
@@ -4267,9 +4278,20 @@ function views_ui_config_item_form_submit($form, &$form_state) {
     $type = $types[$type]['type'];
   }
 
+  $override = NULL;
+  if ($form_state['view']->display_handler->use_group_by() && !empty($item['group_type'])) {
+    if (empty($form_state['view']->query)) {
+      $form_state['view']->init_query();
+    }
+    $aggregate = $form_state['view']->query->get_aggregation_info();
+    if (!empty($aggregate[$item['group_type']]['handler'][$type])) {
+      $override = $aggregate[$item['group_type']]['handler'][$type];
+    }
+  }
+
   // Create a new handler and unpack the options from the form onto it. We
   // can use that for storage.
-  $handler = views_get_handler($item['table'], $item['field'], $type);
+  $handler = views_get_handler($item['table'], $item['field'], $type, $override);
   $handler->init($form_state['view'], $item);
 
 

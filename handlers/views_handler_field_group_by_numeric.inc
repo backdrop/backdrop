@@ -29,6 +29,8 @@ class views_handler_field_group_by_numeric extends views_handler_field_numeric {
   }
 
   function init(&$view, &$options) {
+    // group by fields are always floats.
+    $this->definition['float'] = TRUE;
     parent::init($view, $options);
 
     // Initialize the original handler.
