@@ -242,7 +242,8 @@ class views_handler_field extends views_handler {
    */
   function element_classes($row_index = NULL) {
     $classes = $this->tokenize_value($this->options['element_class'], $row_index);
-    return drupal_clean_css_identifier($classes);
+    $classes = array_map('drupal_clean_css_identifier', $classes);
+    return implode(' ', $classes);
   }
 
   /**
@@ -284,7 +285,9 @@ class views_handler_field extends views_handler {
    * Return the class of the field's label.
    */
   function element_label_classes() {
-    return drupal_clean_css_identifier($this->options['element_label_class']);
+    $classes = explode(' ', $this->options['element_label_class']);
+    $classes = array_map('drupal_clean_css_identifier', $classes);
+    return implode(' ', $classes);
   }
 
   /**
