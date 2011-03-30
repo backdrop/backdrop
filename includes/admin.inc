@@ -1029,78 +1029,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#suffix' => '</div>',
   );
 
-  $form['displays']['top']['#theme_wrappers'] = array('views_container');
-  $form['displays']['top']['#attributes']['class'] = array('views-display-top');
-
-  // Extra actions for the display
-  $form['displays']['top']['extra_actions'] = array(
-    '#theme' => 'links__ctools_dropbutton',
-    '#attributes' => array(
-        'id' => 'views-display-extra-actions',
-        'class' => array(
-          'horizontal', 'right', 'links', 'actions',
-        ),
-      ),
-    '#links' => array(
-      'edit-details' => array(
-        'title' => t('edit view name/description'),
-        'href' => "admin/structure/views/nojs/edit-details/$view->name",
-        'attributes' => array('class' => array('views-ajax-link')),
-      ),
-      'analyze' => array(
-        'title' => t('analyze view'),
-        'href' => "admin/structure/views/view/$view->name/analyze",
-      ),
-      'clone' => array(
-        'title' => t('clone view'),
-        'href' => "admin/structure/views/view/$view->name/clone",
-      ),
-      'export' => array(
-        'title' => t('export view'),
-        'href' => "admin/structure/views/view/$view->name/export",
-      ),
-    ),
-  );
-  if (isset($view->type) && $view->type != t('Default')) {
-    if ($view->type == t('Overridden')) {
-      $form['displays']['top']['extra_actions']['#links']['revert'] = array(
-        'title' => t('revert view'),
-        'href' => "admin/structure/views/view/$view->name/revert",
-        'query' => array('destination' => "admin/structure/views/view/$view->name"),
-      );
-    }
-    else {
-      $form['displays']['top']['extra_actions']['#links']['delete'] = array(
-        'title' => t('delete view'),
-        'href' => "admin/structure/views/view/$view->name/delete",
-      );
-    }
-  }
-
-  // Determine the displays available for editing.
-  if ($tabs = views_ui_edit_page_display_tabs($view)) {
-    if ($display_id) {
-      $tabs[$display_id]['#active'] = TRUE;
-    }
-    $tabs['#prefix'] = '<h2 class="element-invisible">' . t('Secondary tabs') . '</h2><ul class="tabs secondary">';
-    $tabs['#suffix'] = '</ul>';
-    $form['displays']['top']['tabs'] = $tabs;
-  }
-
-  // Buttons for adding a new display.
-  foreach (views_fetch_plugin_names('display') as $type => $label) {
-    $form['displays']['top']['add_display'][$type] = array(
-      '#type' => 'submit',
-      '#value' => t('Add !display', array('!display' => $label)),
-      '#limit_validation_errors' => array(),
-      '#submit' => array('views_ui_edit_form_submit_add_display', 'views_ui_edit_form_submit_delay_destination'),
-      '#attributes' => array('class' => array('add-display')),
-      // Allow JavaScript to remove the 'Add ' prefix from the button label when
-      // placing the button in a "Add" dropdown menu.
-      '#process' => array_merge(array('views_ui_form_button_was_clicked'), element_info_property('submit', '#process', array())),
-      '#values' => array(t('Add !display', array('!display' => $label)), $label),
-    );
-  }
+  $form['displays']['top'] = views_ui_render_display_top($view, $display_id);
 
   // The rest requires a display to be selected.
   if ($display_id) {
@@ -1244,6 +1173,92 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   }
 
   return $form;
+}
+
+/**
+ * Render the top of the display so it can be updated during ajax operations.
+ */
+function views_ui_render_display_top($view, $display_id) {
+  $element['#theme_wrappers'] = array('views_container');
+  $element['#attributes']['class'] = array('views-display-top');
+  $element['#attributes']['id'] = array('views-display-top');
+
+  // Extra actions for the display
+  $element['extra_actions'] = array(
+    '#theme' => 'links__ctools_dropbutton',
+    '#attributes' => array(
+        'id' => 'views-display-extra-actions',
+        'class' => array(
+          'horizontal', 'right', 'links', 'actions',
+        ),
+      ),
+    '#links' => array(
+      'edit-details' => array(
+        'title' => t('edit view name/description'),
+        'href' => "admin/structure/views/nojs/edit-details/$view->name",
+        'attributes' => array('class' => array('views-ajax-link')),
+      ),
+      'analyze' => array(
+        'title' => t('analyze view'),
+        'href' => "admin/structure/views/view/$view->name/analyze",
+      ),
+      'clone' => array(
+        'title' => t('clone view'),
+        'href' => "admin/structure/views/view/$view->name/clone",
+      ),
+      'export' => array(
+        'title' => t('export view'),
+        'href' => "admin/structure/views/view/$view->name/export",
+      ),
+      'reorder' => array(
+        'title' => t('reorder displays'),
+        'href' => "admin/structure/views/nojs/reorder-displays/$view->name/$display_id",
+        'attributes' => array('class' => array('views-ajax-link')),
+      ),
+    ),
+  );
+  if (isset($view->type) && $view->type != t('Default')) {
+    if ($view->type == t('Overridden')) {
+      $element['extra_actions']['#links']['revert'] = array(
+        'title' => t('revert view'),
+        'href' => "admin/structure/views/view/$view->name/revert",
+        'query' => array('destination' => "admin/structure/views/view/$view->name"),
+      );
+    }
+    else {
+      $element['extra_actions']['#links']['delete'] = array(
+        'title' => t('delete view'),
+        'href' => "admin/structure/views/view/$view->name/delete",
+      );
+    }
+  }
+
+  // Determine the displays available for editing.
+  if ($tabs = views_ui_edit_page_display_tabs($view)) {
+    if ($display_id) {
+      $tabs[$display_id]['#active'] = TRUE;
+    }
+    $tabs['#prefix'] = '<h2 class="element-invisible">' . t('Secondary tabs') . '</h2><ul id = "views-display-menu-tabs" class="tabs secondary">';
+    $tabs['#suffix'] = '</ul>';
+    $element['tabs'] = $tabs;
+  }
+
+  // Buttons for adding a new display.
+  foreach (views_fetch_plugin_names('display') as $type => $label) {
+    $element['add_display'][$type] = array(
+      '#type' => 'submit',
+      '#value' => t('Add !display', array('!display' => $label)),
+      '#limit_validation_errors' => array(),
+      '#submit' => array('views_ui_edit_form_submit_add_display', 'views_ui_edit_form_submit_delay_destination'),
+      '#attributes' => array('class' => array('add-display')),
+      // Allow JavaScript to remove the 'Add ' prefix from the button label when
+      // placing the button in a "Add" dropdown menu.
+      '#process' => array_merge(array('views_ui_form_button_was_clicked'), element_info_property('submit', '#process', array())),
+      '#values' => array(t('Add !display', array('!display' => $label)), $label),
+    );
+  }
+
+  return $element;
 }
 
 function views_ui_get_default_ajax_message() {
@@ -2209,9 +2224,15 @@ function views_ui_regenerate_tab(&$view, &$output, $display_id) {
     return;
   }
 
+  // Regenerate the main display area.
   $build = views_ui_get_display_tab($view, $display_id);
   views_ui_add_microweights($build);
   $output[] = ajax_command_html('#views-tab-' . $display_id, drupal_render($build));
+
+  // Regenerate the top area so changes to display names and order will appear.
+  $build = views_ui_render_display_top($view, $display_id);
+  views_ui_add_microweights($build);
+  $output[] = ajax_command_replace('#views-display-top', drupal_render($build));
 }
 
 /**
@@ -2547,6 +2568,10 @@ function views_ui_ajax_forms($key = NULL) {
       'form_id' => 'views_ui_rearrange_filter_form',
       'args' => array('type'),
     ),
+    'reorder-displays' => array(
+      'form_id' => 'views_ui_reorder_displays_form',
+      'args' => array(),
+    ),
     'add-item' => array(
       'form_id' => 'views_ui_add_item_form',
       'args' => array('type'),
@@ -2847,6 +2872,7 @@ function views_ui_analyze_view_form_submit($form, &$form_state) {
  */
 function views_ui_reorder_displays_form($form, &$form_state) {
   $view = &$form_state['view'];
+  $display_id = $form_state['display_id'];
 
   $form['view'] = array('#type' => 'value', '#value' => $view);
 
@@ -2897,7 +2923,7 @@ function views_ui_reorder_displays_form($form, &$form_state) {
     'limit' => 0,
   );
 
-  $form['#action'] = url('admin/structure/views/nojs/reorder-displays/' . $view->name);
+  $form['#action'] = url('admin/structure/views/nojs/reorder-displays/' . $view->name . '/' . $display_id);
 
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_reorder_displays_form');
 
@@ -3024,13 +3050,14 @@ function theme_views_ui_reorder_displays_form($vars) {
  * where the form is placed.
  */
 function views_ui_reorder_displays_button($form, &$form_state, $view) {
-  $form['#action'] = url("admin/structure/views/nojs/reorder-displays/$view->name");
+  $display_id = $form_state['display_id'];
+  $form['#action'] = url("admin/structure/views/nojs/reorder-displays/$view->name/$display_id");
   $form['#attributes'] = array('class' => array('views-ajax-form'));
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Reorder'),
     '#ajax' => array(
-      'path' => "admin/structure/views/ajax/reorder-displays/$view->name",
+      'path' => "admin/structure/views/ajax/reorder-displays/$view->name/$display_id",
     ),
   );
 
