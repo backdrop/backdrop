@@ -163,6 +163,10 @@
   padding-bottom: 0;
 }
 
+.views-ui-display-tab-actions .ctools-button input {
+  margin-right: 0;
+}
+
 .ctools-content ul.actions {
   padding-bottom: 0;
 }

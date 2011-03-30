@@ -62,7 +62,8 @@
     padding-bottom: 4px;
 }
 
-.ctools-dropbutton li {
+.ctools-dropbutton li a,
+.ctools-dropbutton li input {
   padding-right: 9px;
 }
 
@@ -95,7 +96,9 @@
   border: medium;
   font-family: inherit;
   font-size: 12px;
-  padding: 0;
+  padding-bottom: 0;
+  padding-left: 12px;
+  padding-top: 0;
   margin-bottom: 0;
 }
 
