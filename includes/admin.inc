@@ -4880,12 +4880,16 @@ function views_fetch_base_tables() {
 }
 
 function _views_sort_types($a, $b) {
-  if ($a['group'] != $b['group']) {
-    return $a['group'] < $b['group'] ? -1 : 1;
+  $a_group = drupal_strtolower($a['group']);
+  $b_group = drupal_strtolower($b['group']);
+  if ($a_group != $b_group) {
+    return $a_group < $b_group ? -1 : 1;
   }
 
-  if ($a['title'] != $b['title']) {
-    return $a['title'] < $b['title'] ? -1 : 1;
+  $a_title = drupal_strtolower($a['title']);
+  $b_title = drupal_strtolower($b['title']);
+  if ($a_title != $b_title) {
+    return $a_title < $b_title ? -1 : 1;
   }
 
   return 0;
