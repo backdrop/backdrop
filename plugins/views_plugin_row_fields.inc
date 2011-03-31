@@ -38,7 +38,7 @@ class views_plugin_row_fields extends views_plugin_row {
       '#title' => t('Inline fields'),
       '#options' => $options,
       '#default_value' => $this->options['inline'],
-      '#description' => t('Inline fields will be displayed next to each other rather than one after another.'),
+      '#description' => t('Inline fields will be displayed next to each other rather than one after another. Note that some fields will ignore this if they are block elements. For some fields you may have to go into their Style settings and ensure that the field HTML element is SPAN or NONE.'),
     );
 
     $form['separator'] = array(

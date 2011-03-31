@@ -183,6 +183,18 @@ function system_views_data() {
     ),
   );
 
+  // uid
+  $data['file_managed']['uid'] = array(
+    'title' => t('User who uploaded'),
+    'help' => t('The user that uploaded the file.'),
+    'relationship' => array(
+      'title' => t('User who uploaded'),
+      'label' => t('User who uploaded'),
+      'base' => 'users',
+      'base field' => 'uid',
+    ),
+  );
+
   // ----------------------------------------------------------------------
   // file_usage table
 
@@ -563,19 +575,6 @@ function _views_file_status($choice = NULL) {
 
   return $status;
 }
-
-  // uid field
-  $data['files']['uid'] = array(
-    'title' => t('User'),
-    'help' => t('The user, who uploaded the file.'),
-    'relationship' => array(
-      'base' => 'users',
-      'base field' => 'uid',
-      'handler' => 'views_handler_relationship',
-      'label' => t('User'),
-    ),
-  );
-
 
 /**
  * @}

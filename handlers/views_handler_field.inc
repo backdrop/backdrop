@@ -241,7 +241,7 @@ class views_handler_field extends views_handler {
    * Return the class of the field.
    */
   function element_classes($row_index = NULL) {
-    $classes = $this->tokenize_value($this->options['element_class'], $row_index);
+    $classes = explode(' ', $this->tokenize_value($this->options['element_class'], $row_index));
     $classes = array_map('drupal_clean_css_identifier', $classes);
     return implode(' ', $classes);
   }
@@ -295,10 +295,23 @@ class views_handler_field extends views_handler {
    */
   function element_wrapper_classes() {
     $classes = explode(' ', $this->options['element_wrapper_class']);
-    foreach ($classes as $key => $class) {
-      $classes[$key] = drupal_clean_css_identifier($class);
-    }
+    $classes = array_map('drupal_clean_css_identifier', $classes);
     return implode(' ', $classes);
+  }
+
+  /**
+   * Get the value that's supposed to be rendered.
+   *
+   * @param $values
+   *   An object containing all retrieved values.
+   * @param $field
+   *   Optional name of the field where the value is stored.
+   */
+  function get_value($values, $field = NULL) {
+    $alias = isset($field) ? $this->aliases[$field] : $this->field_alias;
+    if (isset($values->{$alias})) {
+      return $values->{$alias};
+    }
   }
 
   function option_definition() {
