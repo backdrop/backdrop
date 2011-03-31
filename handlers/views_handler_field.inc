@@ -241,7 +241,7 @@ class views_handler_field extends views_handler {
    * Return the class of the field.
    */
   function element_classes($row_index = NULL) {
-    $classes = $this->tokenize_value($this->options['element_class'], $row_index);
+    $classes = explode(' ', $this->tokenize_value($this->options['element_class'], $row_index));
     $classes = array_map('drupal_clean_css_identifier', $classes);
     return implode(' ', $classes);
   }
