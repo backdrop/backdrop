@@ -10,172 +10,94 @@
 function taxonomy_views_default_views() {
   $view = new view;
   $view->name = 'taxonomy_term';
-  $view->description = 'A view to emulate Drupal core\'s handling of taxonomy/term; it also emulates Views 1\'s handling by having two possible feeds.';
+  $view->description = 'A view to emulate Drupal core\'s handling of taxonomy/term.';
   $view->tag = 'default';
   $view->base_table = 'node';
   $view->human_name = 'Taxonomy term';
-  $view->api_version = 2;
-  $view->version = 7;
+  $view->core = 7;
+  $view->api_version = '3.0-alpha1';
   $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
+
+  /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
-  $handler->override_option('sorts', array(
-    'sticky' => array(
-      'id' => 'sticky',
-      'table' => 'node',
-      'field' => 'sticky',
-      'order' => 'DESC',
-      'relationship' => 'none',
-    ),
-    'created' => array(
-      'id' => 'created',
-      'table' => 'node',
-      'field' => 'created',
-      'order' => 'DESC',
-      'granularity' => 'second',
-      'relationship' => 'none',
-    ),
-  ));
-  $handler->override_option('arguments', array(
-    'term_node_tid_depth' => array(
-      'id' => 'term_node_tid_depth',
-      'table' => 'node',
-      'field' => 'term_node_tid_depth',
-      'default_action' => 'not found',
-      'style_plugin' => 'default_summary',
-      'style_options' => array(
-        'count' => TRUE,
-        'override' => FALSE,
-        'items_per_page' => 25,
-      ),
-      'wildcard' => 'all',
-      'wildcard_substitution' => 'All',
-      'title' => '%1',
-      'default_argument_type' => 'fixed',
-      'default_argument' => '',
-      'validate_type' => 'taxonomy_term',
-      'validate_fail' => 'not found',
-      'depth' => '0',
-      'break_phrase' => 1,
-      'relationship' => 'none',
-      'default_argument_fixed' => '',
-      'default_argument_php' => '',
-      'validate_argument_node_type' => array(
-        'album' => 0,
-        'artist' => 0,
-        'book' => 0,
-        'page' => 0,
-        'story' => 0,
-        'track' => 0,
-      ),
-      'validate_argument_vocabulary' => array(
-        '3' => 0,
-        '4' => 0,
-        '1' => 0,
-        '5' => 0,
-        '2' => 0,
-      ),
-      'validate_argument_type' => 'tids',
-      'validate_argument_php' => '',
-    ),
-    'term_node_tid_depth_modifier' => array(
-      'id' => 'term_node_tid_depth_modifier',
-      'table' => 'node',
-      'field' => 'term_node_tid_depth_modifier',
-      'default_action' => 'ignore',
-      'style_plugin' => 'default_summary',
-      'style_options' => array(
-        'count' => TRUE,
-        'override' => FALSE,
-        'items_per_page' => 25,
-      ),
-      'wildcard' => 'all',
-      'wildcard_substitution' => 'All',
-      'title' => '',
-      'default_argument_type' => 'fixed',
-      'default_argument' => '',
-      'validate_type' => 'none',
-      'validate_fail' => 'not found',
-    ),
-  ));
-  $handler->override_option('filters', array(
-    'status_extra' => array(
-      'id' => 'status_extra',
-      'table' => 'node',
-      'field' => 'status_extra',
-      'operator' => '=',
-      'value' => '',
-      'group' => 0,
-      'exposed' => FALSE,
-      'expose' => array(
-        'operator' => FALSE,
-        'label' => '',
-      ),
-      'relationship' => 'none',
-    ),
-  ));
-  $handler->override_option('access', array(
-    'type' => 'none',
-    'role' => array(),
-    'perm' => '',
-  ));
-  $handler->override_option('use_pager', '1');
-  $handler->override_option('row_plugin', 'node');
-  $handler->override_option('row_options', array(
-    'teaser' => TRUE,
-    'links' => TRUE,
-  ));
+  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['style_plugin'] = 'default';
+  $handler->display->display_options['row_plugin'] = 'node';
+  /* Sort criterion: Content: Sticky */
+  $handler->display->display_options['sorts']['sticky']['id'] = 'sticky';
+  $handler->display->display_options['sorts']['sticky']['table'] = 'node';
+  $handler->display->display_options['sorts']['sticky']['field'] = 'sticky';
+  $handler->display->display_options['sorts']['sticky']['order'] = 'DESC';
+  /* Sort criterion: Content: Post date */
+  $handler->display->display_options['sorts']['created']['id'] = 'created';
+  $handler->display->display_options['sorts']['created']['table'] = 'node';
+  $handler->display->display_options['sorts']['created']['field'] = 'created';
+  $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+  /* Contextual filter: Taxonomy: Term ID (with depth) */
+  $handler->display->display_options['arguments']['term_node_tid_depth']['id'] = 'term_node_tid_depth';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['table'] = 'node';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['field'] = 'term_node_tid_depth';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['default_action'] = 'not found';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['exception']['title_enable'] = 1;
+  $handler->display->display_options['arguments']['term_node_tid_depth']['title_enable'] = 1;
+  $handler->display->display_options['arguments']['term_node_tid_depth']['title'] = '%1';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['specify_validation'] = 1;
+  $handler->display->display_options['arguments']['term_node_tid_depth']['validate']['type'] = 'taxonomy_term';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['depth'] = '0';
+  $handler->display->display_options['arguments']['term_node_tid_depth']['break_phrase'] = 1;
+  /* Contextual filter: Taxonomy: Term ID depth modifier */
+  $handler->display->display_options['arguments']['term_node_tid_depth_modifier']['id'] = 'term_node_tid_depth_modifier';
+  $handler->display->display_options['arguments']['term_node_tid_depth_modifier']['table'] = 'node';
+  $handler->display->display_options['arguments']['term_node_tid_depth_modifier']['field'] = 'term_node_tid_depth_modifier';
+  $handler->display->display_options['arguments']['term_node_tid_depth_modifier']['exception']['title_enable'] = 1;
+  $handler->display->display_options['arguments']['term_node_tid_depth_modifier']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['term_node_tid_depth_modifier']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['term_node_tid_depth_modifier']['specify_validation'] = 1;
+  /* Filter criterion: Content: Published or admin */
+  $handler->display->display_options['filters']['status_extra']['id'] = 'status_extra';
+  $handler->display->display_options['filters']['status_extra']['table'] = 'node';
+  $handler->display->display_options['filters']['status_extra']['field'] = 'status_extra';
+  $handler->display->display_options['filters']['status_extra']['group'] = 0;
+  $handler->display->display_options['filters']['status_extra']['expose']['operator'] = FALSE;
+
+  /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
-  $handler->override_option('path', 'taxonomy/term/%');
-  $handler->override_option('menu', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
-  $handler->override_option('tab_options', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
+  $handler->display->display_options['path'] = 'taxonomy/term/%';
+
+  /* Display: Core feed */
   $handler = $view->new_display('feed', 'Core feed', 'feed');
-  $handler->override_option('items_per_page', 15);
-  $handler->override_option('use_pager', '1');
-  $handler->override_option('row_plugin', 'node_rss');
-  $handler->override_option('row_options', array(
-    'item_length' => 'default',
-  ));
-  $handler->override_option('path', 'taxonomy/term/%/%/feed');
-  $handler->override_option('menu', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
-  $handler->override_option('tab_options', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
-  $handler->override_option('displays', array(
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = 15;
+  $handler->display->display_options['style_plugin'] = 'rss';
+  $handler->display->display_options['row_plugin'] = 'node_rss';
+  $handler->display->display_options['path'] = 'taxonomy/term/%/%/feed';
+  $handler->display->display_options['displays'] = array(
     'page' => 'page',
     'default' => 0,
-  ));
-  $handler = $view->new_display('feed', 'Views 1 feed', 'feed_1');
-  $handler->override_option('items_per_page', 15);
-  $handler->override_option('use_pager', '1');
-  $handler->override_option('row_plugin', 'node_rss');
-  $handler->override_option('row_options', array(
-    'item_length' => 'default',
-  ));
-  $handler->override_option('path', 'taxonomy/term/%/feed');
-  $handler->override_option('menu', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
-  $handler->override_option('tab_options', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
+  );
+  $translatables['taxonomy_term'] = array(
+    t('Master'),
+    t('more'),
+    t('Apply'),
+    t('Reset'),
+    t('Sort by'),
+    t('Asc'),
+    t('Desc'),
+    t('Items per page'),
+    t('- All -'),
+    t('Offset'),
+    t('All'),
+    t('%1'),
+    t('Page'),
+    t('Core feed'),
+  );
+
   $views[$view->name] = $view;
 
   return $views;

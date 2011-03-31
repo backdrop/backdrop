@@ -32,7 +32,14 @@ class views_handler_argument_many_to_one extends views_handler_argument {
     $options['add_table'] = array('default' => FALSE);
     $options['require_value'] = array('default' => FALSE);
 
-    views_many_to_one_helper::option_definition($options);
+    if (isset($this->helper)) {
+      $this->helper->option_definition($options);
+    }
+    else {
+      $helper = new views_many_to_one_helper($this);
+      $helper->option_definition($options);
+    }
+
     return $options;
   }
 
