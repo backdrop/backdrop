@@ -6,6 +6,9 @@
 class views_handler_filter_term_node_tid extends views_handler_filter_many_to_one {
   function init(&$view, &$options) {
     parent::init($view, $options);
+    if (!empty($this->definition['vocabulary'])) {
+      $this->options['vocabulary'] = $this->definition['vocabulary'];
+    }
 
     // Convert legacy vid option to machine name vocabulary.
     if (!empty($this->options['vid']) & empty($this->options['vocabulary'])) {
@@ -46,13 +49,15 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         $this->options['vid'] = $first_vocabulary->vid;
       }
 
-      $form['vocabulary'] = array(
-        '#type' => 'radios',
-        '#title' => t('Vocabulary'),
-        '#options' => $options,
-        '#description' => t('Select which vocabulary to show terms for in the regular options.'),
-        '#default_value' => $this->options['vocabulary'],
-      );
+      if (empty($this->definition['vocabulary'])) {
+        $form['vocabulary'] = array(
+          '#type' => 'radios',
+          '#title' => t('Vocabulary'),
+          '#options' => $options,
+          '#description' => t('Select which vocabulary to show terms for in the regular options.'),
+          '#default_value' => $this->options['vocabulary'],
+        );
+      }
     }
 
     $form['type'] = array(

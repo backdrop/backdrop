@@ -374,6 +374,10 @@ function taxonomy_field_views_data($field) {
           'label' => t('term from !field_name', array('!field_name' => $field['field_name'])),
         );
       }
+      if (isset($field_data['filter'])) {
+        $data[$table_name][$field_name]['filter']['handler'] = 'views_handler_filter_term_node_tid';
+        $data[$table_name][$field_name]['filter']['vocabulary'] = $field['settings']['allowed_values'][0]['vocabulary'];
+      }
     }
   }
   return $data;
