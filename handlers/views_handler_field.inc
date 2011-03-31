@@ -295,9 +295,7 @@ class views_handler_field extends views_handler {
    */
   function element_wrapper_classes() {
     $classes = explode(' ', $this->options['element_wrapper_class']);
-    foreach ($classes as $key => $class) {
-      $classes[$key] = drupal_clean_css_identifier($class);
-    }
+    $classes = array_map('drupal_clean_css_identifier', $classes);
     return implode(' ', $classes);
   }
 
