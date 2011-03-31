@@ -340,7 +340,7 @@ function taxonomy_views_data_alter(&$data) {
       'accept depth modifier' => TRUE,
     ),
     'filter' => array(
-      'title' => t('Ha taxonomy terms (with depth)'),
+      'title' => t('Has taxonomy terms (with depth)'),
       'handler' => 'views_handler_filter_term_node_tid_depth',
     ),
   );
