@@ -279,7 +279,9 @@ class views_plugin_display extends views_plugin {
   function defaultable_sections($section = NULL) {
     $sections = array(
       'access' => array('access'),
+      'access_options' => array('access_options'),
       'cache' => array('cache'),
+      'cache_options' => array('cache_options'),
       'title' => array('title'),
       'css_class' => array('css_class'),
       'use_ajax' => array('use_ajax'),
@@ -288,9 +290,11 @@ class views_plugin_display extends views_plugin {
       'query' => array('query'),
       'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
       'pager' => array('pager'),
+      'pager_options' => array('pager_options'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
       'exposed_form' => array('exposed_form'),
+      'exposed_form_options' => array('exposed_form_options'),
 
       // Force these to cascade properly.
       'style_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),

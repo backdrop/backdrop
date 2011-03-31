@@ -104,9 +104,7 @@ class views_handler_field_field extends views_handler_field {
         'function' => 'min',
       );
 
-      // Add the field that we're actually grouping on.
       $this->ensure_my_table();
-      $this->field_aliases['real_field'] = $this->query->add_field($this->table_alias, $this->real_field);
     }
 
     // Get the entity type according to the base table of the field.
@@ -137,9 +135,7 @@ class views_handler_field_field extends views_handler_field {
     }
 
     if ($use_groupby) {
-      // Remove additional fields that are not the group_column or are not in
-      // the additional group_columns as their presence in the query inhibits
-      // grouping.
+      // Add the fields that we're actually grouping on.
       $group_field_name = $this->definition['field_name'] . '_' . $this->options['group_column'];
       if (in_array($group_field_name, $fields)) {
         $fields = array($group_field_name => $group_field_name) + $this->options['group_columns'];
