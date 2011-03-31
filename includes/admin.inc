@@ -1600,12 +1600,7 @@ function views_ui_get_display_tab_details($view, $display) {
     }
   }
 
-  // Fetch the style plugin info so we know whether to list fields or not.
-  $style_plugin = $display->handler->get_plugin();
-  $uses_fields = $style_plugin && $style_plugin->uses_fields();
-  if ($uses_fields) {
-    $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display);
-  }
+  $build['columns']['first']['fields'] = views_ui_edit_form_get_bucket('field', $view, $display);
   $build['columns']['first']['filters'] = views_ui_edit_form_get_bucket('filter', $view, $display);
   $build['columns']['first']['sorts'] = views_ui_edit_form_get_bucket('sort', $view, $display);
   $build['columns']['second']['header'] = views_ui_edit_form_get_bucket('header', $view, $display);
@@ -2044,9 +2039,23 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
     );
   }
 
+  $build['#name'] = $build['#title'] = $types[$type]['title'];
+
   // Different types now have different rearrange forms, so we use this switch
   // to get the right one.
   switch ($type) {
+    case 'field':
+      // Fetch the style plugin info so we know whether to list fields or not.
+      $style_plugin = $display->handler->get_plugin();
+      $uses_fields = $style_plugin && $style_plugin->uses_fields();
+      if (!$uses_fields) {
+        $build['fields'][] = array(
+          '#markup' => t('The selected style or row format does not utilize fields.'),
+          '#theme_wrappers' => array('views_container'),
+          '#attributes' => array('class' => array('views-display-setting')),
+        );
+        return $build;
+      }
     case 'filter':
       $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
       $rearrange_text = t('And/Or');
@@ -2104,8 +2113,6 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
       $build['#defaulted'] = TRUE;
     }
   }
-
-  $build['#name'] = $build['#title'] = $types[$type]['title'];
 
   // If there's an options form for the bucket, link to it.
   if (!empty($types[$type]['options'])) {
