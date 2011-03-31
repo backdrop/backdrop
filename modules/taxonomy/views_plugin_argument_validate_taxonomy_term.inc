@@ -8,7 +8,7 @@
  * Validate whether an argument is an acceptable node.
  */
 class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument_validate {
-  function init(&$view, &$argument, &$options) {
+  function init(&$view, &$argument, $options) {
     parent::init($view, $argument, $options);
 
     // Convert legacy vids option to machine name vocabularies.
@@ -68,9 +68,9 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
     );
   }
 
-  function options_submit(&$form, &$form_state, &$options) {
+  function options_submit(&$form, &$form_state) {
     // filter trash out of the options so we don't store giant unnecessary arrays
-    $options['vocabularies'] = array_filter($options['vocabularies']);
+    $form_state['values']['vocabularies'] = array_filter($form_state['values']['vocabularies']);
   }
 
   function convert_options(&$options) {
