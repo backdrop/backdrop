@@ -107,8 +107,14 @@ class views_handler_filter extends views_handler {
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }
+    $form['clear_markup_start'] = array(
+      '#markup' => '<div class="clearfix">',
+    );
     $this->show_operator_form($form, $form_state);
     $this->show_value_form($form, $form_state);
+    $form['clear_markup_end'] = array(
+      '#markup' => '</div>',
+    );
     if ($this->can_expose()) {
       $this->show_expose_form($form, $form_state);
     }
@@ -142,7 +148,7 @@ class views_handler_filter extends views_handler {
    */
   function show_operator_form(&$form, &$form_state) {
     $this->operator_form($form, $form_state);
-    $form['operator']['#prefix'] = '<div class="views-left-30">';
+    $form['operator']['#prefix'] = '<div class="views-group-box views-left-30">';
     $form['operator']['#suffix'] = '</div>';
   }
 
@@ -187,7 +193,7 @@ class views_handler_filter extends views_handler {
   function show_value_form(&$form, &$form_state) {
     $this->value_form($form, $form_state);
     if (empty($this->no_operator)) {
-      $form['value']['#prefix'] = '<div class="views-right-70">' . (isset($form['value']['#prefix']) ? $form['value']['#prefix'] : '');
+      $form['value']['#prefix'] = '<div class="views-group-box views-right-70">' . (isset($form['value']['#prefix']) ? $form['value']['#prefix'] : '');
       $form['value']['#suffix'] = (isset($form['value']['#suffix']) ? $form['value']['#suffix'] : '') . '</div>';
     }
   }
@@ -285,9 +291,9 @@ class views_handler_filter extends views_handler {
 
     if (!empty($form['operator']['#type'])) {
        // Increase the width of the left (operator) column.
-      $form['operator']['#prefix'] = '<div class="views-left-40">';
+      $form['operator']['#prefix'] = '<div class="views-group-box views-left-40">';
       $form['operator']['#suffix'] = '</div>';
-      $form['value']['#prefix'] = '<div class="views-right-60">';
+      $form['value']['#prefix'] = '<div class="views-group-box views-right-60">';
       $form['value']['#suffix'] = '</div>';
 
       $form['expose']['use_operator'] = array(

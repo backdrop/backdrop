@@ -47,8 +47,6 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       }
 
       $form['vocabulary'] = array(
-        '#prefix' => '<div class="views-left-40">',
-        '#suffix' => '</div>',
         '#type' => 'radios',
         '#title' => t('Vocabulary'),
         '#options' => $options,
@@ -56,10 +54,6 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         '#default_value' => $this->options['vocabulary'],
       );
     }
-
-    $form['markup_start'] = array(
-      '#markup' => '<div class="views-left-40">',
-    );
 
     $form['type'] = array(
       '#type' => 'radios',
@@ -74,10 +68,6 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       '#default_value' => !empty($this->options['hierarchy']),
       '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[type]' => array('select')),
-    );
-
-    $form['markup_end'] = array(
-      '#markup' => '</div>',
     );
   }
 
