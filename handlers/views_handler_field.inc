@@ -301,6 +301,21 @@ class views_handler_field extends views_handler {
     return implode(' ', $classes);
   }
 
+  /**
+   * Get the value that's supposed to be rendered.
+   *
+   * @param $values
+   *   An object containing all retrieved values.
+   * @param $field
+   *   Optional name of the field where the value is stored.
+   */
+  function get_value($values, $field = NULL) {
+    $alias = isset($field) ? $this->aliases[$field] : $this->field_alias;
+    if (isset($values->{$alias})) {
+      return $values->{$alias};
+    }
+  }
+
   function option_definition() {
     $options = parent::option_definition();
 
