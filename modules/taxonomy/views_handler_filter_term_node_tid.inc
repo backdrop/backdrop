@@ -209,6 +209,12 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       return TRUE;
     }
 
+    // If view is an attachment and is inheriting exposed filters, then assume
+    // exposed input has already been validated
+    if (!empty($this->view->is_attachment) && $this->view->display_handler->uses_exposed()) {
+      $this->validated_exposed_input = (array) $this->view->exposed_raw_input[$this->options['expose']['identifier']];
+    }
+
     // If it's non-required and there's no value don't bother filtering.
     if (!$this->options['expose']['required'] && empty($this->validated_exposed_input)) {
       return FALSE;
