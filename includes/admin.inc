@@ -968,6 +968,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['#prefix'] = $form['#prefix'] . '<div class="views-edit-view views-admin clearfix">';
   $form['#suffix'] = '</div>' . $form['#suffix'];
+  
+  $form['#attributes']['class'] = array('form-edit');
 
   if (isset($view->locked) && is_object($view->locked)) {
     $form['locked'] = array(
