@@ -968,7 +968,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
   $form['#prefix'] = $form['#prefix'] . '<div class="views-edit-view views-admin clearfix">';
   $form['#suffix'] = '</div>' . $form['#suffix'];
-  
+
   $form['#attributes']['class'] = array('form-edit');
 
   if (isset($view->locked) && is_object($view->locked)) {
@@ -2723,7 +2723,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
 
   $form = views_ui_ajax_forms($key);
   if (empty($form)) {
-    return drupal_not_found();
+    return MENU_NOT_FOUND;
   }
 
   views_include('ajax');
