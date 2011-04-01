@@ -972,7 +972,7 @@ class views_handler_argument extends views_handler {
   /**
    * Get the value of this argument.
    */
-  function get_value($values, $field = NULL) {
+  function get_value() {
     // If we already processed this argument, we're done.
     if (isset($this->argument)) {
       return $this->argument;

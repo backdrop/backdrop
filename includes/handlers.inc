@@ -264,21 +264,6 @@ class views_handler extends views_object {
   }
 
   /**
-   * Get the value that's supposed to be rendered.
-   *
-   * @param $values
-   *   An object containing all retrieved values.
-   * @param $field
-   *   Optional name of the field where the value is stored.
-   */
-  function get_value($values, $field = NULL) {
-    $alias = isset($field) ? $this->aliases[$field] : $this->field_alias;
-    if (isset($values->{$alias})) {
-      return $values->{$alias};
-    }
-  }
-
-  /**
    * Sanitize the value for output.
    *
    * @param $value
@@ -662,6 +647,7 @@ class views_many_to_one_helper {
       '#title' => t('Reduce duplicates'),
       '#description' => t('This filter can cause items that have more than one of the selected options to appear as duplicate results. If this filter causes duplicate results to occur, this checkbox can reduce those duplicates; however, the more terms it has to search for, the less performant the query will be, so use this with caution. Shouldn\'t be set on single-value fields, as it may cause values to disappear from display, if used on an incompatible field.'),
       '#default_value' => !empty($this->handler->options['reduce_duplicates']),
+      '#weight' => 4,
     );
   }
 

@@ -6,6 +6,9 @@
 class views_handler_filter_term_node_tid extends views_handler_filter_many_to_one {
   function init(&$view, &$options) {
     parent::init($view, $options);
+    if (!empty($this->definition['vocabulary'])) {
+      $this->options['vocabulary'] = $this->definition['vocabulary'];
+    }
 
     // Convert legacy vid option to machine name vocabulary.
     if (!empty($this->options['vid']) & empty($this->options['vocabulary'])) {
@@ -46,20 +49,16 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         $this->options['vid'] = $first_vocabulary->vid;
       }
 
-      $form['vocabulary'] = array(
-        '#prefix' => '<div class="views-left-40">',
-        '#suffix' => '</div>',
-        '#type' => 'radios',
-        '#title' => t('Vocabulary'),
-        '#options' => $options,
-        '#description' => t('Select which vocabulary to show terms for in the regular options.'),
-        '#default_value' => $this->options['vocabulary'],
-      );
+      if (empty($this->definition['vocabulary'])) {
+        $form['vocabulary'] = array(
+          '#type' => 'radios',
+          '#title' => t('Vocabulary'),
+          '#options' => $options,
+          '#description' => t('Select which vocabulary to show terms for in the regular options.'),
+          '#default_value' => $this->options['vocabulary'],
+        );
+      }
     }
-
-    $form['markup_start'] = array(
-      '#markup' => '<div class="views-left-40">',
-    );
 
     $form['type'] = array(
       '#type' => 'radios',
@@ -74,10 +73,6 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       '#default_value' => !empty($this->options['hierarchy']),
       '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
       '#dependency' => array('radio:options[type]' => array('select')),
-    );
-
-    $form['markup_end'] = array(
-      '#markup' => '</div>',
     );
   }
 
@@ -212,6 +207,12 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
   function accept_exposed_input($input) {
     if (empty($this->options['exposed'])) {
       return TRUE;
+    }
+
+    // If view is an attachment and is inheriting exposed filters, then assume
+    // exposed input has already been validated
+    if (!empty($this->view->is_attachment) && $this->view->display_handler->uses_exposed()) {
+      $this->validated_exposed_input = (array) $this->view->exposed_raw_input[$this->options['expose']['identifier']];
     }
 
     // If it's non-required and there's no value don't bother filtering.

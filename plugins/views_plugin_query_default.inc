@@ -1032,18 +1032,20 @@ class views_plugin_query_default extends views_plugin_query {
     $has_condition = FALSE;
     $main_group = $this->group_operator == 'OR' ? db_or() : db_and();
     foreach ($this->$where as $group => $info) {
-      $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
-      foreach ($info['conditions'] as $key => $clause) {
-        if ($clause['operator'] == 'formula') {
-          $has_condition = TRUE;
-          $sub_group->where($clause['field'], $clause['value']);
+      if (!empty($info['conditions'])) {
+        $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
+        foreach ($info['conditions'] as $key => $clause) {
+          if ($clause['operator'] == 'formula') {
+            $has_condition = TRUE;
+            $sub_group->where($clause['field'], $clause['value']);
+          }
+          else {
+            $has_condition = TRUE;
+            $sub_group->condition($clause['field'], $clause['value'], $clause['operator']);
+          }
         }
-        else {
-          $has_condition = TRUE;
-          $sub_group->condition($clause['field'], $clause['value'], $clause['operator']);
-        }
+        $main_group->condition($sub_group);
       }
-      $main_group->condition($sub_group);
     }
     if ($has_condition) {
       return $main_group;

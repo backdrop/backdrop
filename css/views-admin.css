@@ -90,6 +90,11 @@
   width: 70%;
 }
 
+.views-group-box .form-item {
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
 /* @end */
 
 /* @group Attachment details
