@@ -1089,11 +1089,9 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
   $db_type = db_driver();
   $offset = $set_offset !== NULL ? $set_offset : views_get_timezone();
   if (isset($offset) && !is_numeric($offset)) {
-    $tz = date_default_timezone_get();
-    $current = time('Z');
-    date_default_timezone_set($offset);
-    $offset_seconds = $current - time('Z');
-    date_default_timezone_set($tz);
+    $dtz = new DateTimeZone($offset);
+    $dt = new DateTime("now", $dtz);
+    $offset_seconds = $dtz->getOffset($dt);	
   }
 
   switch ($db_type) {
