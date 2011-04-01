@@ -276,6 +276,9 @@ class views_handler_field extends views_handler {
       }
 
       $value = strip_tags($this->render_altered($fake_item, $tokens));
+      if (!empty($this->options['alter']['trim_whitespace'])) {
+        $value = trim($value);
+      }
     }
 
     return $value;
@@ -340,6 +343,7 @@ class views_handler_field extends views_handler {
         'word_boundary' => array('default' => TRUE),
         'ellipsis' => array('default' => TRUE),
         'strip_tags' => array('default' => FALSE),
+        'trim' => array('default' => FALSE),
         'preserve_tags' => array('default' => ''),
         'html' => array('default' => FALSE),
       ),
@@ -787,6 +791,12 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#description' => t('If checked, all HTML tags will be stripped.'),
         '#default_value' => $this->options['alter']['strip_tags'],
       );
+      $form['alter']['trim_whitespace'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Remove whitespace'),
+        '#description' => t('If checked, all whitespaces at the beginning and the end of the output will be removed.'),
+        '#default_value' => $this->options['alter']['trim_whitespace'],
+      );
       $form['alter']['preserve_tags'] = array(
         '#type' => 'textfield',
         '#title' => t('Preserve certain tags'),
@@ -924,7 +934,10 @@ If you would like to have the characters %5B and %5D please use the html entity 
    * each item to be handled individually.
    */
   function render_text($alter) {
-    $value = trim($this->last_render);
+    $value = $this->last_render;
+    if (!empty($this->options['alter']['trim_whitespace'])) {
+      $value = trim($value);
+    }
 
     if (!empty($alter['alter_text']) && $alter['text'] !== '') {
       $tokens = $this->get_render_tokens($alter);
