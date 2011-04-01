@@ -242,7 +242,7 @@ class views_handler_field extends views_handler {
    */
   function element_classes($row_index = NULL) {
     $classes = explode(' ', $this->tokenize_value($this->options['element_class'], $row_index));
-    $classes = array_map('drupal_clean_css_identifier', $classes, array('/' => '-', '[' => '-', ']' => ''));
+    $classes = array_map('drupal_clean_css_identifier', $classes);
     return implode(' ', $classes);
   }
 
@@ -286,7 +286,7 @@ class views_handler_field extends views_handler {
    */
   function element_label_classes() {
     $classes = explode(' ', $this->options['element_label_class']);
-    $classes = array_map('drupal_clean_css_identifier', $classes, array('/' => '-', '[' => '-', ']' => ''));
+    $classes = array_map('drupal_clean_css_identifier', $classes);
     return implode(' ', $classes);
   }
 
@@ -295,7 +295,7 @@ class views_handler_field extends views_handler {
    */
   function element_wrapper_classes() {
     $classes = explode(' ', $this->options['element_wrapper_class']);
-    $classes = array_map('drupal_clean_css_identifier', $classes, array('/' => '-', '[' => '-', ']' => ''));
+    $classes = array_map('drupal_clean_css_identifier', $classes);
     return implode(' ', $classes);
   }
 

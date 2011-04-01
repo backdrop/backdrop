@@ -1881,8 +1881,8 @@ class views_plugin_display extends views_plugin {
     switch ($form_state['section']) {
       case 'css_class':
         $css_class = $form_state['values']['css_class'];
-        if (preg_match('/[^a-zA-Z0-9- _]/', $css_class)) {
-          form_error($form['css_class'], t('CSS classes must be alphanumeric, dashes or underscores only.'));
+        if (preg_match('/[^a-zA-Z0-9- ]/', $css_class)) {
+          form_error($form['css_class'], t('CSS classes must be alphanumeric or dashes only.'));
         }
       break;
       case 'display_id':

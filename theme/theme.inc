@@ -678,10 +678,10 @@ function template_preprocess_views_view_list(&$vars) {
   $handler  = $vars['view']->style_plugin;
 
   $class = explode(' ', $handler->options['class']);
-  $class = array_map('drupal_clean_css_identifier', $class, array('/' => '-', '[' => '-', ']' => ''));
+  $class = array_map('drupal_clean_css_identifier', $class);
 
   $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('drupal_clean_css_identifier', $wrapper_class, array('/' => '-', '[' => '-', ']' => ''));
+  $wrapper_class = array_map('drupal_clean_css_identifier', $wrapper_class);
 
   $vars['class'] = implode(' ', $class);
   $vars['wrapper_class'] = implode(' ', $wrapper_class);
