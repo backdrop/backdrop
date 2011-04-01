@@ -149,44 +149,6 @@ function views_ui_menu() {
 }
 
 /**
- * Implements hook_menu_local_tasks_alter().
- *
- * Adds secondary tabs for navigating across Displays when editing a View. Since
- * each view contains its own set of displays, doing this here instead of in
- * hook_menu() reduces bloat in the {menu_links} table, and avoids requiring a
- * menu rebuild every time a display is added or removed.
- */
-function views_ui_menu_local_tasks_alter(&$data, $router_item, $root_path) {
-  // @todo This is commented out until theming of secondary local tasks is
-  //   fixed (see http://drupal.org/node/599706#comment-3620912). In the
-  //   meantime, we add the tabs within views_ui_edit_form().
-  /*
-  if ($root_path == 'admin/structure/views/view/%') {
-    module_load_include('inc', 'views_ui', 'includes/admin');
-    $view = $router_item['page_arguments'][0];
-    $tabs = views_ui_edit_page_display_tabs($view);
-    if ($active_display = arg(6) && isset($tabs[$active_display])) {
-      $tabs[$active_display]['#active'] = TRUE;
-    }
-    else {
-      // Set the first one to active.
-      foreach ($tabs as $id => $tab) {
-        if (!isset($tab['#access']) || $tab['#access']) {
-          $tabs[$id]['#active'] = TRUE;
-          break;
-        }
-      }
-    }
-    if (!isset($data['tabs'][1]['output'])) {
-      $data['tabs'][1]['output'] = array();
-    }
-    $data['tabs'][1]['output'] = array_merge($data['tabs'][1]['output'], $tabs);
-    $data['tabs'][1]['count'] = count($data['tabs'][1]['output']);
-  }
-  */
-}
-
-/**
  * Implements hook_help().
  */
 function views_ui_help($path, $arg = '') {
