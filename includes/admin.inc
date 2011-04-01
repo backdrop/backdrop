@@ -969,6 +969,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#prefix'] = $form['#prefix'] . '<div class="views-edit-view views-admin clearfix">';
   $form['#suffix'] = '</div>' . $form['#suffix'];
 
+  $form['#attributes']['class'] = array('form-edit');
+
   if (isset($view->locked) && is_object($view->locked)) {
     $form['locked'] = array(
       '#theme_wrappers' => array('container'),
@@ -2044,6 +2046,12 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   // Different types now have different rearrange forms, so we use this switch
   // to get the right one.
   switch ($type) {
+    case 'filter':
+      $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
+      $rearrange_text = t('And/Or');
+      // TODO: Add another class to have another symbol for filter rearrange.
+      $class = 'icon compact rearrange';
+      break;
     case 'field':
       // Fetch the style plugin info so we know whether to list fields or not.
       $style_plugin = $display->handler->get_plugin();
@@ -2056,12 +2064,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
         );
         return $build;
       }
-    case 'filter':
-      $rearrange_url = "admin/structure/views/nojs/rearrange-$type/$view->name/$display->id/$type";
-      $rearrange_text = t('And/Or');
-      // TODO: Add another class to have another symbol for filter rearrange.
-      $class = 'icon compact rearrange';
-      break;
+
     default:
       $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
       $rearrange_text = t('Sort');
@@ -2720,7 +2723,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
 
   $form = views_ui_ajax_forms($key);
   if (empty($form)) {
-    return drupal_not_found();
+    return MENU_NOT_FOUND;
   }
 
   views_include('ajax');

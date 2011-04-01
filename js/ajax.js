@@ -104,9 +104,6 @@
         if ($(this).is(':checked')) {
           $('#preview-submit').trigger('mousedown');
         }
-        else {
-          $('#views-live-preview').empty();
-        }
       });
     }
   }

@@ -103,7 +103,7 @@
  * to add a new section
  */
 
-.form-actions {
+.form-edit .form-actions {
   float: right; /* LTR */
 }
 

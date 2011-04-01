@@ -224,6 +224,7 @@ function taxonomy_views_data() {
       'base' => 'node',
       'base field' => 'nid',
       'label' => t('node'),
+      'skip base' => 'node',
     ),
   );
 

@@ -2187,7 +2187,7 @@ class views_plugin_display extends views_plugin {
    * Render the 'more' link
    */
   function render_more_link() {
-    if ($this->use_more() && ($this->use_more_always() || $this->view->query->pager->has_more_records())) {
+    if ($this->use_more() && ($this->use_more_always() || (!empty($this->view->query->pager) && $this->view->query->pager->has_more_records()))) {
       $path = $this->get_path();
       if ($path) {
         $path = $this->view->get_url(NULL, $path);
