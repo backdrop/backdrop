@@ -27,6 +27,13 @@ function views_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     'aliases' => array('vr'),
   );
+  $items['views-dev'] = array(
+    'callback' => 'views_development_settings',
+    'drupal dependencies' => array('views'),
+    'description' => dt('Setup the views settings to a more developer oriented value..'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'aliases' => array('vd'),
+  );
 
   return $items;
 }
@@ -152,4 +159,20 @@ function views_revert_view($view) {
   else {
     drush_set_error(dt("The view '@viewname' is not overridden.", array('@viewname' => $view->name)));
   }
+}
+
+/**
+ * Change the settings to a more developer oriented value.
+ */
+function views_development_settings() {
+  variable_set('views_ui_show_listing_filters', TRUE);
+  variable_set('views_ui_show_master_display', TRUE);
+  variable_set('views_ui_show_advanced_column', TRUE);
+  variable_set('views_ui_always_live_preview_button', TRUE);
+  variable_set('views_ui_show_preview_information', TRUE);
+  variable_set('views_ui_show_sql_query', TRUE);
+  variable_set('views_ui_show_performance_statistics', TRUE);
+  variable_set('views_show_additional_queries', TRUE);
+  $message = dt("Setup the new views settings.");
+  drush_log($message, 'success');
 }
