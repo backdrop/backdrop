@@ -1520,6 +1520,21 @@ function views_ui_get_display_tab_details($view, $display) {
       );
     }
 
+    // Add a link to view the page.
+    if ($display->handler->has_path()) {
+      $path = $display->handler->get_path();
+      if (strpos($path, '%') === FALSE) {
+        $build['top']['actions']['path'] = array(
+          '#type' => 'link',
+          '#title' => t('View "@display"', array('@display' => $display->display_title)),
+          '#options' => array('alt' => array(t("Go to the real page for this display"))),
+          '#href' => $path,
+          '#prefix' => '<' . $itemElement . ' class="undo-delete">',
+          "#suffix" => '</' . $itemElement . '>',
+        );
+      }
+    }
+
     // The area above the three columns.
     $build['top']['display_title'] = array(
       '#theme' => 'views_ui_display_tab_setting',
