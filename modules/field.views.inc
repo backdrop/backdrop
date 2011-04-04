@@ -170,8 +170,6 @@ function field_views_field_default_views_data($field) {
       'handler' => 'views_handler_field_field',
       'click sortable' => TRUE,
       'field_name' => $field['field_name'],
-      // Provide a real field for group by.
-      'real field' => $column . '_' . reset(array_keys($field['columns'])),
       'additional fields' => $add_fields,
       'entity_tables' => $entity_tables,
       // Default the element type to div, let the UI change it if necessary.
