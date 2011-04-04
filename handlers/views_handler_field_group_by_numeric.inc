@@ -4,8 +4,14 @@
  * Handler for GROUP BY on simple numeric fields.
  */
 class views_handler_field_group_by_numeric extends views_handler_field_numeric {
-  function add_additional_fields() {
-    $fields = $this->additional_fields;
+  function add_additional_fields($fields = NULL) {
+    if (!isset($fields)) {
+      // notice check
+      if (empty($this->additional_fields)) {
+        return;
+      }
+      $fields = $this->additional_fields;
+    }
     $new_fields = array();
 
     foreach ($fields as $identifier => $info) {
