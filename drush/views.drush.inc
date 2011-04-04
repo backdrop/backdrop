@@ -7,7 +7,7 @@
 /**
  * Implement hook_drush_help().
  */
-function views_revert_drush_help($section) {
+function views_drush_help($section) {
   switch ($section) {
     case 'drush:revert-views':
       return dt('Reverts all views in the drupal installation that have been overriden. Careful, use with care.');
@@ -17,7 +17,7 @@ function views_revert_drush_help($section) {
 /**
  * Implement hook_drush_command().
  */
-function views_revert_drush_command() {
+function views_drush_command() {
   $items = array();
 
   $items['views-revert'] = array(
@@ -142,7 +142,8 @@ function views_revert_view($view) {
     // Revert the view.
     $view->delete();
     // Clear its cache.
-    views_object_cache_clear('view', $view->name);
+    ctools_include('object-cache');
+    ctools_object_cache_clear('view', $view->name);
     // Give feedback.
     $message = dt("Reverted the view '@viewname'", array('@viewname' => $view->name));
     drush_log($message, 'success');
