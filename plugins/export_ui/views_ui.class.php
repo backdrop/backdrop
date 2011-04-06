@@ -58,6 +58,10 @@ class views_ui extends ctools_export_ui {
     parent::hook_menu($items);
   }
 
+  function load_item($item_name) {
+    return views_ui_cache_load($item_name);
+  }
+
   function list_form(&$form, &$form_state) {
     $row_class = 'container-inline';
     if (!variable_get('views_ui_show_listing_filters', FALSE)) {
