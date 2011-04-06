@@ -1395,8 +1395,8 @@ function views_ui_edit_page_display_tabs($view) {
     }
   }
 
-  // If the default display isn't supposed to be shown, don't display its tab.
-  if (!views_ui_show_default_display($view)) {
+  // If the default display isn't supposed to be shown, don't display its tab, unless it's the only display.
+  if (!views_ui_show_default_display($view) && count($tabs) > 1) {
     $tabs['default']['#access'] = FALSE;
   }
 
