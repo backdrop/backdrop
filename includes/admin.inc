@@ -1075,6 +1075,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     }
 
     // Add preview controls
+    $form['#attached']['js'][] = ctools_attach_js('auto-submit');
     $form['displays']['settings']['settings_content']['preview_controls'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array(
@@ -1099,13 +1100,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#title' => t('Preview with contextual filters:'),
       '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
       '#id' => 'preview-args',
+//      '#attributes' => array('class' => array('ctools-auto-submit')),
     );
 
     // Add the preview button
     $form['displays']['settings']['settings_content']['preview_controls']['button'] = array(
       '#type' => 'submit',
-      '#value' => t('Preview'),
-      '#attributes' => array('class' => array('arguments-preview')),
+      '#value' => t('Update preview'),
+      '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
       '#pre_render' => array('ctools_dependent_pre_render'),
       '#prefix' => '<div id="preview-submit-wrapper">',
       '#suffix' => '</div>',
@@ -1115,6 +1117,8 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
         'path' => 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id . '/ajax',
         'callback' => 'views_ui_preview_callback',
         'wrapper' => 'views-live-preview',
+        'event' => 'click',
+        'progress' => array('type' => 'throbber'),
       ),
       // Make ENTER in arguments textfield (and other controls) submit the form
       // as this button, not the Save button.
@@ -1124,11 +1128,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     );
 
     // Hide the button on the autopreview checkbox, but only based on a setting.
-    if (!variable_get('views_ui_always_live_preview_button', FALSE)) {
-      $form['displays']['settings']['settings_content']['preview_controls']['button']['#dependency'] = array(
-        'edit-displays-live-preview' => array(0),
-      );
-    }
+//    if (!variable_get('views_ui_always_live_preview_button', FALSE)) {
+//      $form['displays']['settings']['settings_content']['preview_controls']['button']['#dependency'] = array(
+//        'edit-displays-live-preview' => array(0),
+//      );
+//    }
 
     // The live preview.
     // @todo: Figure out whether $view->preview and $view->editing might be enough already.
@@ -4673,11 +4677,12 @@ function views_ui_admin_settings_basic() {
     '#title' => t('Automatically update preview on changes'),
     '#default_value' => variable_get('views_ui_always_live_preview', TRUE),
   );
-  $form['live_preview']['views_ui_always_live_preview_button'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Always show the preview button, even when the automatically update option is checked.'),
-    '#default_value' => variable_get('views_ui_always_live_preview_button', FALSE),
-  );
+
+//  $form['live_preview']['views_ui_always_live_preview_button'] = array(
+//    '#type' => 'checkbox',
+//    '#title' => t('Always show the preview button, even when the automatically update option is checked.'),
+//    '#default_value' => variable_get('views_ui_always_live_preview_button', FALSE),
+//  );
 
   $form['live_preview']['views_ui_show_preview_information'] = array(
     '#type' => 'checkbox',
