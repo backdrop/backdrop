@@ -1,6 +1,0 @@
-
-name = Views exporter
-description = Allows exporting multiple views at once.
-package = "Views"
-dependencies[] = views
-core = 7.x

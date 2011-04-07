@@ -58,7 +58,7 @@ function views_ui_menu() {
   $items['admin/structure/views/settings/basic'] = array(
     'title' => 'Basic',
     'page arguments' => array('views_ui_admin_settings_basic'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base;
   $items['admin/structure/views/settings/advanced'] = array(
     'title' => 'Advanced',
