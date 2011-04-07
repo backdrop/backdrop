@@ -201,6 +201,11 @@ class views_handler_field_field extends views_handler_field {
    * Called to determine what to tell the clicksorter.
    */
   function click_sort($order) {
+    // No column selected, can't continue.
+    if (empty($this->options['click_sort_column'])) {
+      return;
+    }
+
     $this->ensure_my_table();
     $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_sort_column']);
     if (!isset($this->aliases[$column])) {
@@ -217,10 +222,18 @@ class views_handler_field_field extends views_handler_field {
     $field = field_info_field($this->definition['field_name']);
     $field_type = field_info_field_types($field['type']);
     $column_names = array_keys($field['columns']);
+    $default_column = '';
+    // Try to determine a sensible default.
+    if (count($column_names) == 1) {
+      $default_column = $column_names[0];
+    }
+    elseif (in_array('value', $column_names)) {
+      $default_column = 'value';
+    }
 
     // If the field has a "value" column, we probably need that one.
     $options['click_sort_column'] = array(
-      'default' => in_array('value', $column_names) ? 'value' : '',
+      'default' => $default_column,
     );
     $options['type'] = array(
       'default' => $field_type['default_formatter'],
