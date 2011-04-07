@@ -379,10 +379,25 @@ function field_group_format_settings_form(&$group) {
     '#type' => 'textfield',
     '#title' => t('Field group label'),
     '#default_value' => $group->label,
-    '#weight' => -5
+    '#weight' => -5,
+    '#element_validate' => array('field_group_format_settings_label_validate'),
   );
   $form += module_invoke_all('field_group_format_settings', $group);
+  $form['#validate'] = array('field_group_format_settings_form_validate');
   return $form;
+}
+
+/**
+ * Validate the label. Label is required for fieldsets that are collapsible.
+ */
+function field_group_format_settings_label_validate($element, &$form_state) {
+
+  $group = $form_state['values']['fields'][$element['#parents'][1]];
+  $settings = $group['format_settings']['settings'];
+  if ($group['format']['type'] == 'fieldset' && ($settings['formatter'] == 'collapsed' || $settings['formatter'] == 'collapsible') && empty($settings['label'])) {
+    form_error($element, t('The label is required when formatter is collapsible or collapsed'));
+  }
+
 }
 
 /**
