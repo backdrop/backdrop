@@ -286,6 +286,7 @@ function views_ajax_autocomplete_user($string = '') {
     $result = db_select('users', 'u')
       ->fields('u', array('uid', 'name'))
       ->condition('u.name', db_like($last_string) . '%', 'LIKE')
+      ->range(0, 10)
       ->execute()
       ->fetchAllKeyed();
 
