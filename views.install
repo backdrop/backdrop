@@ -572,13 +572,15 @@ function views_schema_6014() {
  */
 function views_update_6014() {
   $ret = array();
-  $new_field = array(
-    'type' => 'int',
-    'default' => 0,
-    'description' => 'Stores the drupal core version of the view.',
-  );
-
-  db_add_field('views_view', 'core', $new_field);
+  // Check because D6 installs may already have added this.
+  if (!db_field_exists('views_view', 'core')) {
+    $new_field = array(
+      'type' => 'int',
+      'default' => 0,
+      'description' => 'Stores the drupal core version of the view.',
+    );
+    db_add_field('views_view', 'core', $new_field);
+  }
 
   return $ret;
 }

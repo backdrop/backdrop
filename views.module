@@ -898,7 +898,7 @@ function &views_get_current_view() {
  * Include views .inc files as necessary.
  */
 function views_include($file) {
-  module_load_include('inc', 'views', "includes/$file");
+  ctools_include($file, 'views');
 }
 
 /**
