@@ -241,8 +241,11 @@ class views_handler_field extends views_handler {
    * Return the class of the field.
    */
   function element_classes($row_index = NULL) {
-    $classes = explode(' ', $this->tokenize_value($this->options['element_class'], $row_index));
-    $classes = array_map('drupal_clean_css_identifier', $classes);
+    $classes = explode(' ', $this->options['element_class']);
+    foreach ($classes as &$class) {
+      $class = $this->tokenize_value($class, $row_index);
+      $class = views_clean_css_identifier($class);
+    }
     return implode(' ', $classes);
   }
 
@@ -287,18 +290,24 @@ class views_handler_field extends views_handler {
   /**
    * Return the class of the field's label.
    */
-  function element_label_classes() {
+  function element_label_classes($row_index = NULL) {
     $classes = explode(' ', $this->options['element_label_class']);
-    $classes = array_map('drupal_clean_css_identifier', $classes);
+    foreach ($classes as &$class) {
+      $class = $this->tokenize_value($class, $row_index);
+      $class = views_clean_css_identifier($class);
+    }
     return implode(' ', $classes);
   }
 
   /**
    * Return the class of the field's wrapper.
    */
-  function element_wrapper_classes() {
+  function element_wrapper_classes($row_index = NULL) {
     $classes = explode(' ', $this->options['element_wrapper_class']);
-    $classes = array_map('drupal_clean_css_identifier', $classes);
+    foreach ($classes as &$class) {
+      $class = $this->tokenize_value($class, $row_index);
+      $class = views_clean_css_identifier($class);
+    }
     return implode(' ', $classes);
   }
 

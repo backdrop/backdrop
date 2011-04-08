@@ -521,6 +521,7 @@ function template_preprocess_views_view_table(&$vars) {
     $vars['rows'][0][0] = $view->display_handler->render_area('empty');
     // Calculate the amounts of rows with output.
     $vars['field_attributes'][0][0]['colspan'] = count($vars['header']);
+    $vars['field_classes'][0][0] = 'views-empty';
   }
 
 
@@ -678,10 +679,10 @@ function template_preprocess_views_view_list(&$vars) {
   $handler  = $vars['view']->style_plugin;
 
   $class = explode(' ', $handler->options['class']);
-  $class = array_map('drupal_clean_css_identifier', $class);
+  $class = array_map('views_clean_css_identifier', $class);
 
   $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('drupal_clean_css_identifier', $wrapper_class);
+  $wrapper_class = array_map('views_clean_css_identifier', $wrapper_class);
 
   $vars['class'] = implode(' ', $class);
   $vars['wrapper_class'] = implode(' ', $wrapper_class);

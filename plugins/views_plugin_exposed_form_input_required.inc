@@ -22,11 +22,13 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
       '#description' => t('Text to display instead of results until the user selects and applies an exposed filter.'),
       '#default_value' => $this->options['text_input_required'],
       '#format' => $this->options['text_input_required_format'],
+      '#wysiwyg' => FALSE,
     );
   }
 
   function options_submit(&$form, &$form_state) {
-    $form_state['values']['exposed_form_options']['text_input_required_format'] = $form_state['values']['options']['text_input_required']['format'];
+    $form_state['values']['exposed_form_options']['text_input_required_format'] = $form_state['values']['exposed_form_options']['text_input_required']['format'];
+    $form_state['values']['exposed_form_options']['text_input_required'] = $form_state['values']['exposed_form_options']['text_input_required']['value'];
     parent::options_submit($form, $form_state);
   }
 
