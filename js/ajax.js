@@ -102,7 +102,7 @@
     attach: function (context) {
       $('input#edit-displays-live-preview', context).once('views-ajax-processed').click(function() {
         if ($(this).is(':checked')) {
-          $('#preview-submit').trigger('mousedown');
+          $('#preview-submit').click();
         }
       });
     }
