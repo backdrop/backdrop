@@ -180,7 +180,7 @@
         .once('views-ajax-processed').each(function () {
         $(this).click(function(event) {
           event.preventDefault();
-          $('#preview-submit').mousedown();
+          $('#preview-submit').click();
         });
       });
 
