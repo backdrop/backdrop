@@ -1680,7 +1680,7 @@ function template_preprocess_views_ui_display_tab_setting(&$variables) {
 
   // Put the main link to the left side
   array_unshift($variables['settings_links'], $variables['link']);
-  $variables['settings_links'] = implode('<span>&nbsp;|&nbsp;</span>', $variables['settings_links']);
+  $variables['settings_links'] = implode('<span class="label">&nbsp;|&nbsp;</span>', $variables['settings_links']);
 
   // Add classes associated with this display tab to the overall list.
   $variables['classes_array'] = array_merge($variables['classes_array'], $variables['class']);
@@ -2199,11 +2199,11 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
     }
 
     if ($display->handler->use_group_by()) {
-      $build['fields'][$id]['#settings_links'][] = l('<span>' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
+      $build['fields'][$id]['#settings_links'][] = l('<span class="label">' . t('Group settings') . '</span>', "admin/structure/views/nojs/config-item-group/$view->name/$display->id/$type/$id", array('attributes' => array('class' => 'views-button-configure views-ajax-link', 'title' => t('Group settings')), 'html' => true));
     }
 
     if ($handler->has_extra_options()) {
-      $build['fields'][$id]['#settings_links'][] = l('<span>' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
+      $build['fields'][$id]['#settings_links'][] = l('<span class="label">' . t('Settings') . '</span>', "admin/structure/views/nojs/config-item-extra/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-button-configure', 'views-ajax-link'), 'title' => t('Settings')), 'html' => true));
     }
 
     if ($grouping) {
