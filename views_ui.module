@@ -448,7 +448,6 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
   if ($title) {
     $links[$type . '-title'] = array(
       'title' => $types[$type]['title'],
-      'attributes' => array('class' => array('views-ajax-link')),
     );
   }
 
