@@ -897,7 +897,11 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $raw_items = $this->get_items($values);
     }
     else {
-      $this->last_render = $value = $this->render($values);
+      $value = $this->render($values);
+      if (is_array($value)) {
+        $value = drupal_render($value);
+      }
+      $this->last_render = $value;
       $this->original_value = $value;
     }
 
@@ -906,7 +910,11 @@ If you would like to have the characters %5B and %5D please use the html entity 
       if (method_exists($this, 'render_item')) {
         $items = array();
         foreach ($raw_items as $count => $item) {
-          $this->last_render = $this->render_item($count, $item);
+          $value = $this->render_item($count, $item);
+          if (is_array($value)) {
+            $value = drupal_render($value);
+          }
+          $this->last_render = $value;
           $this->original_value = $this->last_render;
 
           $alter = $item + $this->options['alter'];
@@ -919,6 +927,9 @@ If you would like to have the characters %5B and %5D please use the html entity 
         $value = $this->render_text($this->options['alter']);
       }
 
+      if (is_array($value)) {
+        $value = drupal_render($value);
+      }
       // This happens here so that render_as_link can get the unaltered value of
       // this field as a token rather than the altered value.
       $this->last_render = $value;
