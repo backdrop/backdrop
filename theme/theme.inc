@@ -182,7 +182,11 @@ function template_preprocess_views_view_fields(&$vars) {
           $class .=  $classes;
         }
 
-        $field_output = '<' . $object->element_type . ' class="' . $class . '">' . $field_output . '</' . $object->element_type . '>';
+        $pre = '<' . $object->element_type;
+        if ($class) {
+          $pre .= ' class="' . $class . '"';
+        }
+        $field_output = $pre . '>' . $field_output . '</' . $object->element_type . '>';
       }
 
       // Protect ourself somewhat for backward compatibility. This will prevent

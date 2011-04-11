@@ -481,7 +481,9 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_class'],
       '#dependency' => array(
         'edit-options-element-class-enable' => array(1),
+        'edit-options-element-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
@@ -518,7 +520,9 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_label_class'],
       '#dependency' => array(
         'edit-options-element-label-class-enable' => array(1),
+        'edit-options-element-label-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
@@ -556,7 +560,9 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_wrapper_class'],
       '#dependency' => array(
         'edit-options-element-wrapper-class-enable' => array(1),
+        'edit-options-element-wrapper-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
