@@ -636,27 +636,16 @@ td.group-title {
 
 /* @group Attachment bucket overridden
  *
- * Applies a broken link icon to overridden buckets.
+ * Applies a overriden(italics) font style to overridden buckets.
  * The better way to implement this would be to add the overridden class
  * to the bucket header when the bucket is overridden and style it as a
  * generic icon classed element. For the moment, we'll style the bucket
- * header specifically with the broken link icon.
+ * header specifically with the overriden font style.
  */
 
 .views-ui-display-tab-setting.overridden,
 .views-ui-display-tab-bucket.overridden > h3 {
-  background-attachment: scroll;
-  background-image: url("../images/sprites.png");
-  background-position: left -172px; /* LTR */
-  background-repeat: no-repeat;
-  overflow: hidden;
-  padding-left: 21px;
-  zoom: 1;
-  margin-left: 4px;
-}
-
-.views-ui-display-tab-bucket.overridden .views-display-setting {
-  margin-left: 15px; /* LTR */
+  font-style: italic;
 }
 
 /* @end */
