@@ -242,28 +242,36 @@ function template_preprocess_views_view_fields(&$vars) {
       // on the template.
       $object->label = check_plain($view->field[$id]->label());
       $object->label_html = '';
-      $object->element_label_type = $object->handler->element_label_type(TRUE);
-      if ($object->element_label_type && $object->label) {
-        $class = '';
-        if ($object->handler->options['element_default_classes']) {
-          $class = 'views-label-' . $object->class;
-        }
-
-        $element_label_class = $object->handler->element_label_classes();
-        if ($element_label_class) {
-          if ($class) {
-            $class .= ' ';
-          }
-
-          $class .= $element_label_class;
-        }
-
-        $object->label_html = '<' . $object->element_label_type . ' class="' . $class . '">';
+      if ($object->label) {
         $object->label_html .= $object->label;
         if ($object->handler->options['element_label_colon']) {
           $object->label_html .= ': ';
         }
-        $object->label_html .= '</' . $object->element_label_type . '>';
+
+        $object->element_label_type = $object->handler->element_label_type(TRUE);
+        if ($object->element_label_type) {
+          $class = '';
+          if ($object->handler->options['element_default_classes']) {
+            $class = 'views-label-' . $object->class;
+          }
+
+          $element_label_class = $object->handler->element_label_classes();
+          if ($element_label_class) {
+            if ($class) {
+              $class .= ' ';
+            }
+
+            $class .= $element_label_class;
+          }
+
+          $pre = '<' . $object->element_label_type;
+          if ($class) {
+            $pre .= ' class="' . $class . '"';
+          }
+          $pre .= '>';
+
+          $object->label_html = $pre . $object->label_html . '</' . $object->element_label_type . '>';
+        }
       }
 
       $vars['fields'][$id] = $object;
