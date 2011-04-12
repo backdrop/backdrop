@@ -146,7 +146,7 @@ class views_handler_field extends views_handler {
   /**
    * Return an HTML element based upon the field's element type.
    */
-  function element_type($none_supported = FALSE, $default_empty = FALSE) {
+  function element_type($none_supported = FALSE, $default_empty = FALSE, $inline = FALSE) {
     if ($none_supported) {
       if ($this->options['element_type'] === '0') {
         return '';
@@ -158,6 +158,10 @@ class views_handler_field extends views_handler {
 
     if ($default_empty) {
       return '';
+    }
+
+    if ($inline) {
+      return 'span';
     }
 
     if (isset($this->definition['element type'])) {
@@ -449,7 +453,7 @@ class views_handler_field extends views_handler {
 
     $form['element_type_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Wrap field in HTML'),
+      '#title' => t('Customize field HTML'),
       '#default_value' => !empty($this->options['element_type']) || (string) $this->options['element_type'] == '0' || !empty($this->options['element_class']) || (string) $this->options['element_class'] == '0',
       '#fieldset' => 'style_settings',
     );
@@ -481,13 +485,15 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_class'],
       '#dependency' => array(
         'edit-options-element-class-enable' => array(1),
+        'edit-options-element-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
     $form['element_label_type_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Wrap label in HTML'),
+      '#title' => t('Customize label HTML'),
       '#default_value' => !empty($this->options['element_label_type']) || (string) $this->options['element_label_type'] == '0' || !empty($this->options['element_label_class']) || (string) $this->options['element_label_class'] == '0',
       '#fieldset' => 'style_settings',
     );
@@ -518,13 +524,15 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_label_class'],
       '#dependency' => array(
         'edit-options-element-label-class-enable' => array(1),
+        'edit-options-element-label-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
     $form['element_wrapper_type_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Wrap field and label in HTML'),
+      '#title' => t('Customize field and label HTML'),
       '#default_value' => !empty($this->options['element_wrapper_type']) || (string) $this->options['element_wrapper_type'] == '0' || !empty($this->options['element_wrapper_class']) || (string) $this->options['element_wrapper_class'] == '0',
       '#fieldset' => 'style_settings',
     );
@@ -556,7 +564,9 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_wrapper_class'],
       '#dependency' => array(
         'edit-options-element-wrapper-class-enable' => array(1),
+        'edit-options-element-wrapper-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
