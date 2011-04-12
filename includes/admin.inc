@@ -169,12 +169,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
     // @todo We'll want to add contextual links specific to editing the View, so
     //   the suppression may need to be moved deeper into the Preview pipeline.
     views_ui_contextual_links_suppress_push();
-    try {
-      $preview = $view->preview($display_id, $args);
-    }
-    catch (Exception $e) {
-      drupal_set_message($e->getMessage(), 'error');
-    }
+    $preview = $view->preview($display_id, $args);
     views_ui_contextual_links_suppress_pop();
 
     // Prepare the query information and statistics to show either above or
