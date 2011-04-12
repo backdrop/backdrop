@@ -146,7 +146,7 @@ class views_handler_field extends views_handler {
   /**
    * Return an HTML element based upon the field's element type.
    */
-  function element_type($none_supported = FALSE, $default_empty = FALSE) {
+  function element_type($none_supported = FALSE, $default_empty = FALSE, $inline = FALSE) {
     if ($none_supported) {
       if ($this->options['element_type'] === '0') {
         return '';
@@ -158,6 +158,10 @@ class views_handler_field extends views_handler {
 
     if ($default_empty) {
       return '';
+    }
+
+    if ($inline) {
+      return 'span';
     }
 
     if (isset($this->definition['element type'])) {
