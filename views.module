@@ -205,7 +205,14 @@ function views_preprocess_node(&$vars) {
     $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
     if (!empty($vars['node']->view->current_display)) {
       $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
+
+      // If a node is being rendered in a view, and the view does not have a path,
+      // prevent drupal from accidentally setting the $page variable:
+      if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
+        $vars['page'] = FALSE;
+      }
     }
+
   }
 }
 

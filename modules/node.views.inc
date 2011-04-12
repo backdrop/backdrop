@@ -671,6 +671,12 @@ function template_preprocess_views_view_row_node(&$vars) {
   $node->view = $vars['view'];
   // Detect which build module should be used.
   $node->view_mode = (!empty($options['view_mode'])) ? $options['view_mode'] : 'full';
+
+  // Prevent the comment form from showing up if this is not a page display.
+  if ($node->view_mode == 'full' && !$vars['view']->display_handler->has_path()) {
+    $node->comment = FALSE;
+  }
+
   $content = node_view_multiple(array($node->nid => $node), $node->view_mode);
   $content = $content['nodes'][$node->nid];
   if (!$options['links']) {
