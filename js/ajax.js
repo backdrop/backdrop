@@ -67,7 +67,7 @@
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function (ajax, response, status) {
     if ($('input#edit-displays-live-preview').is(':checked')) {
-      $('#preview-submit').trigger('mousedown');
+      $('#preview-submit').trigger('click');
     }
   };
 
