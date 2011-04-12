@@ -29,7 +29,7 @@ class views_plugin_display_block extends views_plugin_display {
     $desc = $this->get_option('block_description');
 
     if (empty($desc)) {
-      $desc = t('@view: @display', array('@view' => $this->view->name, '@display' => $this->display->display_title));
+      $desc = t('@view: @display', array('@view' => $this->view->get_human_name(), '@display' => $this->display->display_title));
     }
     return array(
       $delta => array(
