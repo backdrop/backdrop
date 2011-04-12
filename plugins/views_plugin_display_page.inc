@@ -54,14 +54,15 @@ class views_plugin_display_page extends views_plugin_display {
 
     $bits = explode('/', $this->get_option('path'));
     $page_arguments = array($this->view->name, $this->display->id);
-    $view_arguments = $this->get_option('arguments');
+    $this->view->init_handlers();
+    $view_arguments = $this->view->argument;
 
     // Replace % with %views_arg for menu autoloading and add to the
     // page arguments so the argument actually comes through.
-    foreach($bits as $pos => $bit) {
+    foreach ($bits as $pos => $bit) {
       if ($bit == '%') {
         $argument = array_shift($view_arguments);
-        if (isset($argument['validate_type']) && $argument['validate_type'] != 'none') {
+        if (!empty($argument->options['specify_validation']) && $argument->options['validate']['type'] != 'none') {
           $bits[$pos] = '%views_arg';
         }
         $page_arguments[] = $pos;

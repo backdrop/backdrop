@@ -67,7 +67,7 @@
 
   Drupal.ajax.prototype.commands.viewsTriggerPreview = function (ajax, response, status) {
     if ($('input#edit-displays-live-preview').is(':checked')) {
-      $('#preview-submit').trigger('mousedown');
+      $('#preview-submit').trigger('click');
     }
   };
 
@@ -102,7 +102,7 @@
     attach: function (context) {
       $('input#edit-displays-live-preview', context).once('views-ajax-processed').click(function() {
         if ($(this).is(':checked')) {
-          $('#preview-submit').trigger('mousedown');
+          $('#preview-submit').click();
         }
       });
     }
@@ -180,7 +180,7 @@
         .once('views-ajax-processed').each(function () {
         $(this).click(function(event) {
           event.preventDefault();
-          $('#preview-submit').mousedown();
+          $('#preview-submit').click();
         });
       });
 

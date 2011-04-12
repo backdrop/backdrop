@@ -146,7 +146,7 @@ class views_handler_field extends views_handler {
   /**
    * Return an HTML element based upon the field's element type.
    */
-  function element_type($none_supported = FALSE, $default_empty = FALSE) {
+  function element_type($none_supported = FALSE, $default_empty = FALSE, $inline = FALSE) {
     if ($none_supported) {
       if ($this->options['element_type'] === '0') {
         return '';
@@ -158,6 +158,10 @@ class views_handler_field extends views_handler {
 
     if ($default_empty) {
       return '';
+    }
+
+    if ($inline) {
+      return 'span';
     }
 
     if (isset($this->definition['element type'])) {
@@ -241,8 +245,11 @@ class views_handler_field extends views_handler {
    * Return the class of the field.
    */
   function element_classes($row_index = NULL) {
-    $classes = explode(' ', $this->tokenize_value($this->options['element_class'], $row_index));
-    $classes = array_map('drupal_clean_css_identifier', $classes);
+    $classes = explode(' ', $this->options['element_class']);
+    foreach ($classes as &$class) {
+      $class = $this->tokenize_value($class, $row_index);
+      $class = views_clean_css_identifier($class);
+    }
     return implode(' ', $classes);
   }
 
@@ -287,18 +294,24 @@ class views_handler_field extends views_handler {
   /**
    * Return the class of the field's label.
    */
-  function element_label_classes() {
+  function element_label_classes($row_index = NULL) {
     $classes = explode(' ', $this->options['element_label_class']);
-    $classes = array_map('drupal_clean_css_identifier', $classes);
+    foreach ($classes as &$class) {
+      $class = $this->tokenize_value($class, $row_index);
+      $class = views_clean_css_identifier($class);
+    }
     return implode(' ', $classes);
   }
 
   /**
    * Return the class of the field's wrapper.
    */
-  function element_wrapper_classes() {
+  function element_wrapper_classes($row_index = NULL) {
     $classes = explode(' ', $this->options['element_wrapper_class']);
-    $classes = array_map('drupal_clean_css_identifier', $classes);
+    foreach ($classes as &$class) {
+      $class = $this->tokenize_value($class, $row_index);
+      $class = views_clean_css_identifier($class);
+    }
     return implode(' ', $classes);
   }
 
@@ -440,7 +453,7 @@ class views_handler_field extends views_handler {
 
     $form['element_type_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Wrap field in HTML'),
+      '#title' => t('Customize field HTML'),
       '#default_value' => !empty($this->options['element_type']) || (string) $this->options['element_type'] == '0' || !empty($this->options['element_class']) || (string) $this->options['element_class'] == '0',
       '#fieldset' => 'style_settings',
     );
@@ -472,13 +485,15 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_class'],
       '#dependency' => array(
         'edit-options-element-class-enable' => array(1),
+        'edit-options-element-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
     $form['element_label_type_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Wrap label in HTML'),
+      '#title' => t('Customize label HTML'),
       '#default_value' => !empty($this->options['element_label_type']) || (string) $this->options['element_label_type'] == '0' || !empty($this->options['element_label_class']) || (string) $this->options['element_label_class'] == '0',
       '#fieldset' => 'style_settings',
     );
@@ -509,13 +524,15 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_label_class'],
       '#dependency' => array(
         'edit-options-element-label-class-enable' => array(1),
+        'edit-options-element-label-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
     $form['element_wrapper_type_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Wrap field and label in HTML'),
+      '#title' => t('Customize field and label HTML'),
       '#default_value' => !empty($this->options['element_wrapper_type']) || (string) $this->options['element_wrapper_type'] == '0' || !empty($this->options['element_wrapper_class']) || (string) $this->options['element_wrapper_class'] == '0',
       '#fieldset' => 'style_settings',
     );
@@ -547,7 +564,9 @@ class views_handler_field extends views_handler {
       '#default_value' => $this->options['element_wrapper_class'],
       '#dependency' => array(
         'edit-options-element-wrapper-class-enable' => array(1),
+        'edit-options-element-wrapper-type-enable' => array(1),
       ),
+      '#dependency_count' => 2,
       '#fieldset' => 'style_settings',
     );
 
@@ -888,7 +907,11 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $raw_items = $this->get_items($values);
     }
     else {
-      $this->last_render = $value = $this->render($values);
+      $value = $this->render($values);
+      if (is_array($value)) {
+        $value = drupal_render($value);
+      }
+      $this->last_render = $value;
       $this->original_value = $value;
     }
 
@@ -897,7 +920,11 @@ If you would like to have the characters %5B and %5D please use the html entity 
       if (method_exists($this, 'render_item')) {
         $items = array();
         foreach ($raw_items as $count => $item) {
-          $this->last_render = $this->render_item($count, $item);
+          $value = $this->render_item($count, $item);
+          if (is_array($value)) {
+            $value = drupal_render($value);
+          }
+          $this->last_render = $value;
           $this->original_value = $this->last_render;
 
           $alter = $item + $this->options['alter'];
@@ -910,6 +937,9 @@ If you would like to have the characters %5B and %5D please use the html entity 
         $value = $this->render_text($this->options['alter']);
       }
 
+      if (is_array($value)) {
+        $value = drupal_render($value);
+      }
       // This happens here so that render_as_link can get the unaltered value of
       // this field as a token rather than the altered value.
       $this->last_render = $value;

@@ -875,11 +875,9 @@ class views_many_to_one_helper {
     if (empty($options['group'])) {
       $options['group'] = 0;
     }
-    else {
-      $value = $this->handler->value;
-      $operator = 'IN';
-    }
 
+    // add_condition determines whether a single expression is enough(FALSE) or the
+    // conditions should be added via an db_or()/db_and() (TRUE).
     $add_condition = TRUE;
     if ($operator == 'not') {
       $value = NULL;
@@ -887,12 +885,11 @@ class views_many_to_one_helper {
       $add_condition = FALSE;
     }
     elseif ($operator == 'or' && empty($options['reduce_duplicates'])) {
-      if (count($this->handler->value) > 1) {
-        $value = $this->handler->value;
+      if (count($value) > 1) {
         $operator = 'IN';
       }
       else {
-        $value = is_array($this->handler->value) ? array_pop($this->handler->value) : $this->handler->value;
+        $value = is_array($value) ? array_pop($value) : $value;
         $operator = '=';
       }
       $add_condition = FALSE;

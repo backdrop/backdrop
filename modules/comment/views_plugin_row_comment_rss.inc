@@ -21,7 +21,6 @@ class views_plugin_row_comment_rss extends views_plugin_row {
 
     $cresult = comment_load_multiple($cids);
     foreach ($cresult as $comment) {
-      $comment = drupal_unpack($comment);
       $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
       $comment->depth = count(explode('.', $comment->thread)) - 1;
       $this->comments[$comment->cid] = $comment;
@@ -37,9 +36,10 @@ class views_plugin_row_comment_rss extends views_plugin_row {
     $item = new stdClass();
     $item->title = $comment->subject;
     $item->link = url('node/' . $comment->nid, array('absolute' => TRUE, 'fragment' => 'comment-' . $comment->cid));
-    $item->description = check_markup($comment->comment, $comment->format);
+    $items = field_get_items('comment', $comment, 'comment_body');
+    $item->description = check_markup($items[0]['value'], $items[0]['format']);
     $item->elements = array(
-      array('key' => 'pubDate', 'value' => gmdate('r', $comment->timestamp)),
+      array('key' => 'pubDate', 'value' => gmdate('r', $comment->created)),
       array('key' => 'dc:creator', 'value' => $comment->name),
       array(
         'key' => 'guid',

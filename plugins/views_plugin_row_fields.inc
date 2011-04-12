@@ -19,6 +19,7 @@ class views_plugin_row_fields extends views_plugin_row {
     $options['inline'] = array('default' => array());
     $options['separator'] = array('default' => '');
     $options['hide_empty'] = array('default' => FALSE);
+    $options['default_field_elements'] = array('default' => TRUE);
     return $options;
   }
 
@@ -33,12 +34,25 @@ class views_plugin_row_fields extends views_plugin_row {
       $this->options['inline'] = array();
     }
 
+    $form['default_field_elements'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Provide default field wrapper elements'),
+      '#default_value' => $this->options['default_field_elements'],
+      '#description' => t('If checked, fields that are not configured to customize their HTML elements will get no wrappers at all for their field, label and field + label wrappers. You can use this to quickly reduce the amount of markup the view provides by default, at the cost of making it more difficult to apply CSS.'),
+    );
+
     $form['inline'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Inline fields'),
       '#options' => $options,
       '#default_value' => $this->options['inline'],
-      '#description' => t('Inline fields will be displayed next to each other rather than one after another. Note that some fields will ignore this if they are block elements. For some fields you may have to go into their Style settings and ensure that the field HTML element is SPAN or NONE.'),
+      '#description' => t('Inline fields will be displayed next to each other rather than one after another. Note that some fields will ignore this if they are block elements, particularly body fields and other formatted HTML.'),
+      '#dependency' => array(
+        'edit-row-options-default-field-elements' => array(1),
+      ),
+      '#prefix' => '<div id="edit-row-options-inline-wrapper"><div>',
+      '#suffix' => '</div></div>',
+
     );
 
     $form['separator'] = array(
