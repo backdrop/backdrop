@@ -337,8 +337,6 @@ class views_plugin_display extends views_plugin {
           'cache' => TRUE,
           'query' => TRUE,
           'title' => TRUE,
-          'display_comment' => FALSE,
-          'enabled' => TRUE,
           'css_class' => TRUE,
 
           'display_description' => FALSE,
@@ -948,13 +946,6 @@ class views_plugin_display extends views_plugin {
       'desc' => t('Change the title that this display will use.'),
     );
 
-    $options['enabled'] = array(
-      'category' => 'other',
-      'title' => t('Display status'),
-      'value' => $this->get_option('enabled') ? t('Enabled') : t('Disabled'),
-      'desc' => t('Define if this display is or is not enabled.'),
-    );
-
     $style_plugin = views_fetch_plugin_data('style', $this->get_option('style_plugin'));
     $style_plugin_instance = $this->get_plugin('style');
     $style_summary = empty($style_plugin['title']) ? t('Missing style plugin') : $style_plugin_instance->summary_title();
@@ -1238,15 +1229,6 @@ class views_plugin_display extends views_plugin {
           '#type' => 'textfield',
           '#description' => t('This title will be displayed with the view, wherever titles are normally displayed; i.e, as the page title, block title, etc.'),
           '#default_value' => $this->get_option('title'),
-        );
-        break;
-      case 'enabled':
-        $form['#title'] .= t('Status of this display');
-        $form['enabled'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Enable display'),
-          '#description' => t('If unchecked, this display will not be available in the site.'),
-          '#default_value' => $this->get_option('enabled'),
         );
         break;
       case 'css_class':
@@ -2017,7 +1999,6 @@ class views_plugin_display extends views_plugin {
       case 'display_comment':
         $this->set_option($section, $form_state['values'][$section]);
         break;
-      case 'enabled':
       case 'use_ajax':
       case 'hide_attachment_summary':
         $this->set_option($section, (bool)$form_state['values'][$section]);

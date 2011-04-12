@@ -767,8 +767,8 @@ class view extends views_db_object {
       return TRUE;
     }
 
-    // Don't allow to use deactivated displays.
-    if (!$this->display[$this->current_display]->handler->get_option('enabled')) {
+    // Don't allow to use deactivated displays, but display them on the live preview.
+    if (!$this->display[$this->current_display]->handler->get_option('enabled') && empty($this->live_preview)) {
       $this->build_info['fail'] = TRUE;
       return FALSE;
     }

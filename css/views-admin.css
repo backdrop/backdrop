@@ -148,6 +148,12 @@
   opacity: 0.25;
 }
 
+.views-display-disabled > fieldset > legend,
+.views-display-disabled .fieldset-wrapper > .views-ui-display-tab-bucket > *,
+.views-display-disabled .views-display-columns {
+  opacity: 0.5;
+}
+
 .views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
   opacity: 1.0;
 }

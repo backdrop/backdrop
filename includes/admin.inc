@@ -1054,6 +1054,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $display_title = views_ui_get_display_label($view, $display_id, FALSE);
     // Add a handle for the ctools collapsible-div. The handle is the title of the display
     $form['displays']['settings']['tab_title']['#markup'] = '<h2 id="edit-display-settings-title" class="ctools-collapsible-handle">' . t('@display_title details', array('@display_title' => ucwords($display_title))) . '</h2>';
+    // Add a text that the display is disabled.
+    $enabled = $view->display[$display_id]->handler->get_option('enabled');
+    if (empty($enabled)) {
+      $form['displays']['settings']['disabled']['#markup'] = t('This display is disabled.');
+    }
     // The ctools collapsible-div content
     $form['displays']['settings']['settings_content']= array(
       '#theme_wrappers' => array('container'),
@@ -1072,6 +1077,10 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     // Mark deleted displays as such.
     if (!empty($view->display[$display_id]->deleted)) {
       $form['displays']['settings']['settings_content']['tab_content']['#attributes']['class'][] = 'views-display-deleted';
+    }
+    // Mark disabled displays as such.
+    if (empty($enabled)) {
+      $form['displays']['settings']['settings_content']['tab_content']['#attributes']['class'][] = 'views-display-disabled';
     }
 
     // Add preview controls
@@ -1337,6 +1346,35 @@ function views_ui_edit_form_submit_undo_delete_display($form, &$form_state) {
 }
 
 /**
+ * Submit handler to enable a disabled display.
+ */
+function views_ui_edit_form_submit_enable_display($form, &$form_state) {
+  $id = $form_state['display_id'];
+  // set_option doesn't work because this would might affect upper displays
+  $form_state['view']->display[$id]->handler->set_option('enabled', TRUE);
+
+  // Store in cache
+  views_ui_cache_set($form_state['view']);
+
+  // Redirect to the top-level edit page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+}
+
+/**
+ * Submit handler to disable display.
+ */
+function views_ui_edit_form_submit_disable_display($form, &$form_state) {
+  $id = $form_state['display_id'];
+  $form_state['view']->display[$id]->handler->set_option('enabled', FALSE);
+
+  // Store in cache
+  views_ui_cache_set($form_state['view']);
+
+  // Redirect to the top-level edit page.
+  $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit/' . $id;
+}
+
+/**
  * Submit handler when Preview button is clicked.
  */
 function views_ui_edit_form_submit_preview($form, &$form_state) {
@@ -1396,6 +1434,9 @@ function views_ui_edit_page_display_tabs($view) {
     );
     if (!empty($display->deleted)) {
       $tabs[$id]['#link']['localized_options']['attributes']['class'][] = 'views-display-deleted-link';
+    }
+    if (empty($display->options['enabled'])) {
+      $tabs[$id]['#link']['localized_options']['attributes']['class'][] = 'views-display-disabled-link';
     }
   }
 
@@ -1468,6 +1509,8 @@ function views_ui_get_display_tab_details($view, $display) {
   $isDeletable = empty($plugin['no remove']);
   // The master display cannot be cloned.
   $isDefault = $display->id == 'default';
+  // @todo: Figure out why get_option doesn't work here.
+  $isEnabled = $display->handler->get_option('enabled');
 
   if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
     $prefix = '<div class="ctools-button ctools-dropbutton"><div class="ctools-link"><a href="#" class="ctools-twisty ctools-text">open</a></div><div class="ctools-content"><ul class="horizontal right actions">';
@@ -1492,6 +1535,16 @@ function views_ui_get_display_tab_details($view, $display) {
     );
 
     if (!$isDisplayDeleted) {
+      if (!$isEnabled) {
+        $build['top']['actions']['enable'] = array(
+          '#type' => 'submit',
+          '#value' => t('enable @display_title', array('@display_title' => $display_title)),
+          '#limit_validation_errors' => array(),
+          '#submit' => array('views_ui_edit_form_submit_enable_display', 'views_ui_edit_form_submit_delay_destination'),
+          '#prefix' => '<' . $itemElement . ' class="enable">',
+          "#suffix" => '</' . $itemElement . '>',
+        );
+      }
       if (!$isDefault) {
         $build['top']['actions']['duplicate'] = array(
           '#type' => 'submit',
@@ -1509,6 +1562,16 @@ function views_ui_get_display_tab_details($view, $display) {
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<' . $itemElement . ' class="delete">',
+          "#suffix" => '</' . $itemElement . '>',
+        );
+      }
+      if ($isEnabled) {
+        $build['top']['actions']['disable'] = array(
+          '#type' => 'submit',
+          '#value' => t('disable @display_title', array('@display_title' => $display_title)),
+          '#limit_validation_errors' => array(),
+          '#submit' => array('views_ui_edit_form_submit_disable_display', 'views_ui_edit_form_submit_delay_destination'),
+          '#prefix' => '<' . $itemElement . ' class="disable">',
           "#suffix" => '</' . $itemElement . '>',
         );
       }
