@@ -16,6 +16,6 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
   function render($input) {
     $pager_theme = views_theme_functions('views_mini_pager', $this->view, $this->display);
     return theme($pager_theme, array(
-      'tags' => $input, 'element' => $this->options['id']));
+      'parameters' => $input, 'element' => $this->options['id']));
   }
 }

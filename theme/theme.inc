@@ -80,7 +80,7 @@ function template_preprocess_views_view(&$vars) {
   $vars['title'] = !empty($view->views_ui_context) ? filter_xss_admin($view->get_title()) : '';
 
   if ($view->display_handler->render_pager()) {
-    $exposed_input = isset($view->exposed_data_raw) ? $view->exposed_data_raw : NULL;
+    $exposed_input = isset($view->exposed_raw_input) ? $view->exposed_raw_input : NULL;
     $vars['pager']      = $view->query->render_pager($exposed_input);
   }
 
@@ -402,6 +402,9 @@ function template_preprocess_views_view_table(&$vars) {
   $order    = !empty($handler->order) ? $handler->order : 'asc';
 
   $query    = tablesort_get_query_parameters();
+  if (isset($view->exposed_raw_input)) {
+    $query += $view->exposed_raw_input;
+  }
 
   $header = array();
 
