@@ -226,7 +226,7 @@ function template_preprocess_views_view_fields(&$vars) {
           $class = "views-field views-field-" . $object->class;
         }
 
-        if ($classes = $object->handler->element_wrapper_classes()) {
+        if ($classes = $object->handler->element_wrapper_classes($view->row_index)) {
           if ($class) {
             $class .= ' ';
           }
@@ -258,7 +258,7 @@ function template_preprocess_views_view_fields(&$vars) {
             $class = 'views-label-' . $object->class;
           }
 
-          $element_label_class = $object->handler->element_label_classes();
+          $element_label_class = $object->handler->element_label_classes($view->row_index);
           if ($element_label_class) {
             if ($class) {
               $class .= ' ';
@@ -450,7 +450,7 @@ function template_preprocess_views_view_table(&$vars) {
       if ($fields[$field]->options['element_default_classes']) {
         $vars['header_classes'][$field] .= "views-field views-field-" . $vars['fields'][$field];
       }
-      $class = $fields[$field]->element_label_classes();
+      $class = $fields[$field]->element_label_classes(0);
       if ($class) {
         if ($vars['header_classes'][$field]) {
           $vars['header_classes'][$field] .= ' ';
