@@ -547,7 +547,7 @@ class view extends views_db_object {
 
     // set the title in the build info.
     if (!empty($title)) {
-      $this->build_info['title'] = str_replace(array_keys($substitutions), $substitutions, $title);
+      $this->build_info['title'] = $title;
     }
 
     // Store the arguments for later use.
@@ -1116,6 +1116,10 @@ class view extends views_db_object {
       $title = $this->display_handler->get_option('title');
     }
 
+    // Allow substitutions from the first row.
+    if ($this->style_plugin) {
+      $title = $this->style_plugin->tokenize_value($title, 0);
+    }
     return $title;
   }
 

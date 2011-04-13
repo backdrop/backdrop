@@ -103,7 +103,7 @@ class views_plugin_style extends views_plugin {
     if ($this->uses_row_class()) {
       $class = $this->options['row_class'];
       if ($this->uses_fields() && $this->view->field) {
-        $class = $this->tokenize_value($class, $row_index);
+        $class = strip_tags($this->tokenize_value($class, $row_index));
       }
 
       $classes = explode(' ', $class);
@@ -125,9 +125,10 @@ class views_plugin_style extends views_plugin {
       );
 
       $tokens = $this->row_tokens[$row_index];
-      // Grab a random field handler to perform the render.
-      $field = end($this->view->field);
-      $value = strip_tags($field->render_altered($fake_item, $tokens));
+
+      if ($tokens) {
+        $value = strtr($value, $tokens);
+      }
     }
 
     return $value;
@@ -309,9 +310,7 @@ class views_plugin_style extends views_plugin {
         $this->rendered_fields[$count][$id] = $this->view->field[$id]->theme($row);
       }
 
-      if ($this->uses_tokens()) {
-        $this->row_tokens[$count] = $this->view->field[$id]->get_render_tokens(array());
-      }
+      $this->row_tokens[$count] = $this->view->field[$id]->get_render_tokens(array());
     }
     unset($this->view->row_index);
   }
