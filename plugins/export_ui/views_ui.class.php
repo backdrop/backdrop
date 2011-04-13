@@ -48,6 +48,9 @@ class views_ui extends ctools_export_ui {
     // We are using our own 'edit' still, rather than having edit on this
     // object (maybe in the future) so unset the edit callbacks:
 
+    // Store this so we can put them back as sometimes they're needed
+    // again laster:
+    $items = $this->plugin['menu']['items'];
     // We leave these to make sure the operations still exist in the plugin so
     // that the path finder.
     unset($this->plugin['menu']['items']['edit']);
@@ -56,6 +59,8 @@ class views_ui extends ctools_export_ui {
     unset($this->plugin['menu']['items']['edit callback']);
 
     parent::hook_menu($items);
+
+    $this->plugin['menu']['items'] = $items;
   }
 
   function load_item($item_name) {

@@ -813,3 +813,16 @@ function views_ui_library_alter(&$libraries, $module) {
     }
   }
 }
+
+/**
+ * Handle bad updates from alpha versions to beta versions.
+ *
+ * This function will ONLY be called if there is an old menu entry for
+ * this hanging around. This will force a menu rebuild and a cache clear
+ * which should resolve the problem.
+ */
+function views_ui_list_views() {
+  drupal_flush_all_caches();
+  menu_rebuild();
+  drupal_goto($_GET['q']);
+}
