@@ -103,7 +103,7 @@ class views_handler_area_text extends views_handler_area {
 
     if ($value) {
       $value = $this->view->style_plugin->tokenize_value($value, 0);
-      return check_markup($this->view->style_plugin->tokenize_value($value, 0), $format, '', FALSE);
+      return check_markup($value, $format, '', FALSE);
     }
   }
 
