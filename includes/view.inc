@@ -355,10 +355,93 @@ class view extends views_db_object {
   }
 
   /**
+   * Attempt to discover if the view has handlers missing relationships.
+   *
+   * This will try to add relationships automatically if it can, and will
+   * remove the handlers if it cannot.
+   */
+  function fix_missing_relationships() {
+    if (isset($this->relationships_fixed)) {
+      return;
+    }
+
+    $this->relationships_fixed = TRUE;
+
+    // Go through all of our handler types and test them to see if they
+    // are missing relationships. Missing relationships can cause fatally
+    // broken Views.
+    $base_tables = array(
+      $this->base_table => TRUE,
+      '#global' => TRUE,
+    );
+
+    // For each relationship we have, make sure we mark the base it provides as
+    // available.
+    foreach ($this->display_handler->get_option('relationships') as $id => $options) {
+      $data = views_fetch_data($options['table']);
+      $base_tables[$data[$options['field']]['relationship']['base']] = TRUE;
+    }
+
+    $base_tables = array_keys($base_tables);
+    $missing_base_tables = array();
+
+    $types = views_object_types();
+    foreach ($types as $key => $info) {
+      foreach ($this->display_handler->get_option($info['plural']) as $id => $options) {
+        $data = views_fetch_data($options['table']);
+        $valid_bases = array($options['table']);
+        if (isset($data['table']['join'])) {
+          $valid_bases += array_keys($data['table']['join']);
+        }
+
+        // If the base table is missing, record it so we can try to fix it.
+        if (!array_intersect($valid_bases, $base_tables)) {
+          $missing_base_tables[$options['table']][] = array('type' => $key, 'id' => $id);
+        }
+      }
+    }
+
+    if (!empty($missing_base_tables)) {
+      // This will change handlers, so make sure any existing handlers get
+      // tossed.
+      $this->display_handler->handlers = array();
+      $this->relationships_changed = TRUE;
+      $this->changed = TRUE;
+
+      // Try to fix it.
+      foreach ($missing_base_tables as $table => $handlers) {
+        $data = views_fetch_data($table);
+        $relationship = NULL;
+
+        // Does the missing base table have a default relationship we can
+        // throw in?
+        if (isset($data['table']['default_relationship'][$this->base_table])) {
+          // Create the relationship.
+          $info = $data['table']['default_relationship'][$this->base_table];
+
+          $relationship_options = isset($info['options']) ? $info['options'] : array();
+          $relationship = $this->add_item($this->current_display, 'relationship', $info['table'], $info['field'], $relationship_options);
+        }
+        foreach ($handlers as $handler) {
+          $options = $this->display_handler->get_option($types[$handler['type']]['plural']);
+          if ($relationship) {
+            $options[$handler['id']]['relationship'] = $relationship;
+          }
+          else {
+            unset($options[$handler['id']]);
+          }
+          $this->display_handler->set_option($types[$handler['type']]['plural'], $options);
+        }
+      }
+    }
+  }
+
+  /**
    * Acquire and attach all of the handlers.
    */
   function init_handlers() {
     if (empty($this->inited)) {
+      $this->fix_missing_relationships();
       foreach (views_object_types() as $key => $info) {
         $this->_init_handler($key, $info);
       }

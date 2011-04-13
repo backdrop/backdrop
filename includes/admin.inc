@@ -925,6 +925,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   //     form_load_include().
   $form_state['no_cache'] = TRUE;
 
+  if ($display_id) {
+    $view->set_display($display_id);
+    $view->fix_missing_relationships();
+  }
+
   ctools_include('dependent');
   $form['#attached']['js'][] = ctools_attach_js('dependent');
   $form['#attached']['js'][] = ctools_attach_js('collapsible-div');
@@ -1033,7 +1038,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form_state['display_id'] = $display_id;
 
     // The part of the page where editing will take place.
-    $view->set_display($display_id);
     // This element is the ctools collapsible-div container for the display edit elements.
     $form['displays']['settings'] = array(
       '#theme_wrappers' => array('container'),
@@ -1182,6 +1186,13 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     }
   }
 
+  // If relationships had to be fixed, we want to get that into the cache
+  // so that edits work properly, and to try to get the user to save it
+  // so that it's not using weird fixed up relationships.
+  if (!empty($view->relationships_changed) && empty($_POST)) {
+    drupal_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
+    views_ui_cache_set($view);
+  }
   return $form;
 }
 
