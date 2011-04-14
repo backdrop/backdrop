@@ -77,7 +77,6 @@ function node_views_default_views() {
   $handler->display->display_options['arguments']['created_year_month']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['created_year_month']['summary_options']['items_per_page'] = '30';
   $handler->display->display_options['arguments']['created_year_month']['specify_validation'] = 1;
-  $handler->display->display_options['block_description'] = 'Archive list';
   $translatables['archive'] = array(
     t('Master'),
     t('Monthly archive'),

@@ -182,7 +182,6 @@ function statistics_views_default_views() {
   $handler->display->display_options['fields']['totalcount']['label'] = '';
   $handler->display->display_options['fields']['totalcount']['prefix'] = ' (';
   $handler->display->display_options['fields']['totalcount']['suffix'] = ')';
-  $handler->display->display_options['block_description'] = 'Popular content';
 
   /* Display: Today (block) */
   $handler = $view->new_display('block', 'Today (block)', 'block_1');
@@ -221,7 +220,6 @@ function statistics_views_default_views() {
   $handler->display->display_options['sorts']['daycount']['table'] = 'node_counter';
   $handler->display->display_options['sorts']['daycount']['field'] = 'daycount';
   $handler->display->display_options['sorts']['daycount']['order'] = 'DESC';
-  $handler->display->display_options['block_description'] = 'Today\'s popular content';
   $translatables['popular'] = array(
     t('Master'),
     t('Popular content'),

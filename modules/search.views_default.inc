@@ -72,7 +72,7 @@ function search_views_default_views() {
   $handler->display->display_options['menu']['weight'] = '0';
 
   /* Display: Block */
-  $handler = $view->new_display('block', 'Block', 'block');
+  $handler = $view->new_display('block', 'What links here', 'block');
   $handler->display->display_options['defaults']['items_per_page'] = FALSE;
   $handler->display->display_options['defaults']['use_more'] = FALSE;
   $handler->display->display_options['use_more'] = TRUE;
@@ -94,7 +94,6 @@ function search_views_default_views() {
   $handler->display->display_options['arguments']['nid']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['nid']['specify_validation'] = 1;
   $handler->display->display_options['arguments']['nid']['validate']['type'] = 'node';
-  $handler->display->display_options['block_description'] = 'What links here';
   $translatables['backlinks'] = array(
     t('Master'),
     t('more'),

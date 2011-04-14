@@ -104,7 +104,6 @@ function comment_views_default_views() {
 
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block');
-  $handler->display->display_options['block_description'] = 'Recent comments view';
   $translatables['comments_recent'] = array(
     t('Master'),
     t('Recent comments'),
