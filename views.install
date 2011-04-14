@@ -612,3 +612,23 @@ function views_update_7000() {
   // Rename the unused views_no_hover_links variable.
   variable_del('views_no_hover_links');
 }
+
+/**
+ * Fix missing items from Views administrative breadcrumb
+ */
+function views_update_7001() {
+  $depth = db_select('menu_links')
+    ->fields('menu_links', array('depth'))
+    ->condition('link_path', 'admin/structure/views/view/%')
+    ->execute()
+    ->fetchField();
+
+  if ($depth == 3) {
+    db_delete('menu_links')
+      ->condition('link_path', 'admin/structure/views/%', 'LIKE')
+      ->execute();
+    cache_clear_all(NULL, 'cache_menu');
+    menu_rebuild();
+  }
+
+}
