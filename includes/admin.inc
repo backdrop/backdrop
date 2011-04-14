@@ -3114,28 +3114,6 @@ function theme_views_ui_reorder_displays_form($vars) {
 }
 
 /**
- * This form doesn't particularly do much; it's really just providing a link
- * but a button seems like it would be nicer here.
- *
- * It has no submit or anything, as we will never actually submit this form
- * where the form is placed.
- */
-function views_ui_reorder_displays_button($form, &$form_state, $view) {
-  $display_id = $form_state['display_id'];
-  $form['#action'] = url("admin/structure/views/nojs/reorder-displays/$view->name/$display_id");
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Reorder'),
-    '#ajax' => array(
-      'path' => "admin/structure/views/ajax/reorder-displays/$view->name/$display_id",
-    ),
-  );
-
-  return $form;
-}
-
-/**
  * Form builder to edit details of a view.
  */
 function views_ui_edit_details_form($form, &$form_state) {
