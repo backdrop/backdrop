@@ -391,7 +391,7 @@ class view extends views_db_object {
         $data = views_fetch_data($options['table']);
         $valid_bases = array($options['table']);
         if (isset($data['table']['join'])) {
-          $valid_bases += array_keys($data['table']['join']);
+          $valid_bases = array_merge($valid_bases, array_keys($data['table']['join']));
         }
 
         // If the base table is missing, record it so we can try to fix it.
