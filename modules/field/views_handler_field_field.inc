@@ -519,7 +519,7 @@ class views_handler_field_field extends views_handler_field {
   /**
    * Load the entities for all fields that are about to be displayed.
    */
-  function pre_render(&$values) {
+  function post_execute(&$values) {
     if (!empty($values)) {
       // Divide the entity ids by entity type, so they can be loaded in bulk.
       $entities_by_type = array();
@@ -568,10 +568,13 @@ class views_handler_field_field extends views_handler_field {
               'entity_type' => $entity_type,
               'entity' => $entities[$entity_id],
             );
-            // Push the field values directly into the results array to make themers the life a bit easier.
-            $values[$key]->{$this->definition['table'] . '_' . $entity_type . '_values'} = field_get_items($entity_type, $entities[$entity_id], $this->definition['field_name']);
           }
         }
+      }
+
+      // Now, transfer the data back into the resultset so it can be easily used.
+      foreach ($values as $key => &$value) {
+        $value->{'field_' . $this->options['id']} = $this->set_items($value);
       }
     }
   }
@@ -602,17 +605,14 @@ class views_handler_field_field extends views_handler_field {
     }
   }
 
+  function get_items($values) {
+    return $values->{'field_' . $this->options['id']};
+  }
+
   /**
    * Return an array of items for the field.
-   *
-   * Items should be stored in the result array, if possible, as an array
-   * with 'value' as the actual displayable value of the item, plus
-   * any items that might be found in the 'alter' options array for
-   * creating links, such as 'path', 'fragment', 'query' etc, such a thing
-   * is to be made. Additionally, items that might be turned into tokens
-   * should also be in this array.
    */
-  function get_items($values) {
+  function set_items($values) {
     if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity'])) {
       return array();
     }

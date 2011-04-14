@@ -492,6 +492,15 @@ class views_handler extends views_object {
   function pre_query() { }
 
   /**
+   * Run after the view is executed, before the result is cached.
+   *
+   * This gives all the handlers some time to modify values. This is primarily
+   * used so that handlers that pull up secondary data can put it in the
+   * $values so that the raw data can be utilized externally.
+   */
+  function post_execute(&$values) { }
+
+  /**
    * Provides a unique placeholders for handlers.
    */
   function placeholder() {
@@ -1088,7 +1097,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
   if (isset($offset) && !is_numeric($offset)) {
     $dtz = new DateTimeZone($offset);
     $dt = new DateTime("now", $dtz);
-    $offset_seconds = $dtz->getOffset($dt);	
+    $offset_seconds = $dtz->getOffset($dt);
   }
 
   switch ($db_type) {

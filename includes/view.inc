@@ -507,6 +507,18 @@ class view extends views_db_object {
   }
 
   /**
+   * Run the post_execute() on all active handlers.
+   */
+  function _post_execute() {
+    foreach (views_object_types() as $key => $info) {
+      $handlers = &$this->$key;
+      foreach ($handlers as $id => $handler) {
+        $handlers[$id]->post_execute($this->result);
+      }
+    }
+  }
+
+  /**
    * Attach all of the handlers for each type.
    *
    * @param $key
@@ -878,6 +890,7 @@ class view extends views_db_object {
     }
     else {
       $this->query->execute($this);
+      $this->_post_execute();
       if ($cache) {
         $cache->cache_set('results');
       }
