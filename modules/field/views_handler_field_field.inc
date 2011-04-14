@@ -70,6 +70,9 @@ class views_handler_field_field extends views_handler_field {
    */
   function access() {
     $this->get_base_table();
+    if (!isset($this->definition['entity_tables'][$this->base_table])) {
+      dsm($this);
+    }
     return field_access('view', $this->definition['field_name'], $this->definition['entity_tables'][$this->base_table]);
   }
 
@@ -79,18 +82,17 @@ class views_handler_field_field extends views_handler_field {
   function get_base_table() {
     if (!isset($this->base_table)) {
       // This base_table is coming from the entity not the field.
-      $this->base_table_alias = $this->base_table = $this->view->base_table;
+      $this->base_table = $this->view->base_table;
 
       // If the current field is under a relationship you can't be sure that the
       // base table of the view is the base table of the current field.
       // For example a field from a node author on a node view does have users as base table.
-      if (!empty($this->relationship)) {
-        foreach ($this->view->relationship as $relationship) {
-          if ($relationship->alias == $this->relationship) {
-            $this->base_table = $relationship->definition['base'];
-            $this->base_table_alias = $relationship->alias;
-          }
-        }
+      if (!empty($this->options['relationship']) && $this->options['relationship'] != 'none') {
+        $relationships = $this->view->display_handler->get_option('relationships');
+        $options = $relationships[$this->options['relationship']];
+        $data = views_fetch_data($options['table']);
+        $this->base_table = $data[$options['field']]['relationship']['base'];
+//            $this->base_table_alias = $relationship->alias;
       }
     }
     return $this->base_table;
@@ -127,6 +129,13 @@ class views_handler_field_field extends views_handler_field {
     // the field table if all we need is entity_id and entity_type.
     $entity_type = $this->definition['entity_tables'][$this->base_table];
     $entity_info = entity_get_info($entity_type);
+
+    if (isset($this->relationship)) {
+      $this->base_table_alias = $this->relationship;
+    }
+    else {
+      $this->base_table_alias = $this->base_table;
+    }
 
     // We always need the base field (entity_id / revision_id).
     if (empty($this->definition['is revision'])) {
