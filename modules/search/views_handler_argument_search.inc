@@ -40,8 +40,10 @@ class views_handler_argument_search extends views_handler_argument {
       }
     }
     else {
-      $search_index = $this->ensure_my_table();
+      $search_index = $this->ensure_my_table();// Stores each condition, so and/or on the filter level will still work.
 
+      // Stores each condition, so and/or on the filter level will still work.
+      $search_condition = db_and();
       $or = db_or();
       foreach ($words as $word) {
         $or->condition("$search_index.word", $word);
@@ -54,7 +56,7 @@ class views_handler_argument_search extends views_handler_argument {
 
       $this->search_score = $this->query->add_field('', "SUM($search_index.score * $search_total.count)", 'score', array('aggregate' => TRUE));
 
-      $this->query->add_where($this->options['group'], $or);
+      $search_condition->condition($or);
 
       if (empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;
@@ -62,7 +64,7 @@ class views_handler_argument_search extends views_handler_argument {
       else {
         $base_table = $this->query->relationships[$this->relationship]['base'];
       }
-      $this->query->add_where($this->options['group'], "$search_index.type", $base_table);
+      $search_condition->condition("$search_index.type", $base_table);
       if (!$this->search_query->simple()) {
         $search_dataset = $this->query->add_table('search_dataset');
         $conditions = $this->search_query->conditions();
@@ -74,9 +76,10 @@ class views_handler_argument_search extends views_handler_argument {
             $this->search_query->condition_replace_string('d.', "$search_dataset.", $condition);
           }
         }
-        $this->query->add_where($this->options['group'], $conditions);
+        $search_conditions =& $search_condition->conditions() + $conditions;
       }
 
+      $this->query->add_where($this->options['group'], $search_condition);
       $this->query->add_groupby("$search_index.sid");
       $matches = $this->search_query->matches();
       $placeholder = $this->placeholder();
