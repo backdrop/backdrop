@@ -864,16 +864,28 @@ Drupal.behaviors.viewsUiDependent.attach = function (context, settings) {
 Drupal.behaviors.viewsUiOverrideSelect = {};
 Drupal.behaviors.viewsUiOverrideSelect.attach = function (context, settings) {
   var $ = jQuery;
-  $('#edit-override-dropdown', context).once('views-ui-override-button-text')
-    .change(function() {
+  $('#edit-override-dropdown', context).once('views-ui-override-button-text', function() {
+    // Closures! :(
+    var $submit = $('#edit-submit', context);
+    var old_value = $submit.val();
+
+    $submit.once('views-ui-override-button-text')
+      .bind('mouseup', function() {
+        $(this).val(old_value);
+        return true;
+      });
+
+    $(this).bind('change', function() {
       if ($(this).val() == 'default') {
-        $('#edit-submit', context).val(Drupal.t('Apply (all displays)'));
+        $submit.val(Drupal.t('Apply (all displays)'));
       }
       else {
-        $('#edit-submit', context).val(Drupal.t('Apply (this display)'));
+        $submit.val(Drupal.t('Apply (this display)'));
       }
     })
     .trigger('change');
+  });
+
 };
 
 Drupal.viewsUi.resizeModal = function (e, no_shrink) {
