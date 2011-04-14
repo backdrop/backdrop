@@ -1213,7 +1213,7 @@ class view extends views_db_object {
     }
 
     // Allow substitutions from the first row.
-    if ($this->style_plugin) {
+    if ($this->init_style()) {
       $title = $this->style_plugin->tokenize_value($title, 0);
     }
     return $title;

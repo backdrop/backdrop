@@ -19,6 +19,10 @@
  */
 class views_plugin_style extends views_plugin {
   /**
+   * Store all availible tokens row rows.
+   */
+  var $row_tokens = array();
+  /**
    * Initialize a style plugin.
    *
    * @param $view
@@ -124,7 +128,11 @@ class views_plugin_style extends views_plugin {
         'text' => $value,
       );
 
-      $tokens = $this->row_tokens[$row_index];
+      // Row tokens might be empty, for example for node row style.
+      $tokens = isset($this->row_tokens[$row_index]) ? $this->row_tokens[$row_index] : array();
+      if (!empty($this->view->build_info['substitutions'])) {
+        $tokens += $this->view->build_info['substitutions'];
+      }
 
       if ($tokens) {
         $value = strtr($value, $tokens);
