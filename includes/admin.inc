@@ -1221,7 +1221,8 @@ function views_ui_render_display_top($view, $display_id) {
       ),
       'analyze' => array(
         'title' => t('analyze view'),
-        'href' => "admin/structure/views/view/$view->name/analyze",
+        'href' => "admin/structure/views/nojs/analyze/$view->name/$display_id",
+        'attributes' => array('class' => array('views-ajax-link')),
       ),
       'clone' => array(
         'title' => t('clone view'),
@@ -2694,6 +2695,10 @@ function views_ui_ajax_forms($key = NULL) {
       'form_id' => 'views_ui_edit_details_form',
       'args' => array(),
     ),
+    'analyze' => array(
+      'form_id' => 'views_ui_analyze_view_form',
+      'args' => array(),
+    ),
   );
 
   if ($key) {
@@ -2900,38 +2905,6 @@ function views_ui_remove_display_form_restore($form, &$form_state) {
 
   // Store in cache
   views_ui_cache_set($form_state['view']);
-}
-
-/**
- * Page callback to display analysis information on a view.
- */
-function views_ui_analyze_view($js, $view) {
-  $form_state = array(
-    'view' => &$view,
-  );
-
-  return drupal_build_form('views_ui_analyze_view_form', $form_state);
-}
-
-/**
- * This form doesn't particularly do much; it's really just providing a link
- * but a button seems like it would be nicer here.
- *
- * It has no submit or anything, as we will never actually submit this form
- * where the form is placed.
- */
-function views_ui_analyze_view_button($form, &$form_state, $view) {
-  $form['#action'] = url("admin/structure/views/nojs/analyze/$view->name");
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Analyze'),
-    '#ajax' => array(
-      'path' => "admin/structure/views/ajax/analyze/$view->name",
-    ),
-  );
-
-  return $form;
 }
 
 /**
