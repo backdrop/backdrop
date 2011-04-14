@@ -66,6 +66,37 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
+   * Return TRUE if the user has access to view this field.
+   */
+  function access() {
+    $this->get_base_table();
+    return field_access('view', $this->definition['field_name'], $this->definition['entity_tables'][$this->base_table]);
+  }
+
+  /**
+   * Set the base_table and base_table_alias.
+   */
+  function get_base_table() {
+    if (!isset($this->base_table)) {
+      // This base_table is coming from the entity not the field.
+      $this->base_table_alias = $this->base_table = $this->view->base_table;
+
+      // If the current field is under a relationship you can't be sure that the
+      // base table of the view is the base table of the current field.
+      // For example a field from a node author on a node view does have users as base table.
+      if (!empty($this->relationship)) {
+        foreach ($this->view->relationship as $relationship) {
+          if ($relationship->alias == $this->relationship) {
+            $this->base_table = $relationship->definition['base'];
+            $this->base_table_alias = $relationship->alias;
+          }
+        }
+      }
+    }
+    return $this->base_table;
+  }
+
+  /**
    * Called to add the field to a query.
    *
    * By default, the only columns added to the query are entity_id and
@@ -77,23 +108,7 @@ class views_handler_field_field extends views_handler_field {
    * present in the query itself (such as "sphinx").
    */
   function query($use_groupby = FALSE) {
-    // This base_table is coming from the entity not the field.
-    $base_table_alias = $base_table = $this->view->base_table;
-
-    // If the current field is under a relationship you can't be sure that the
-    // base table of the view is the base table of the current field.
-    // For example a field from a node author on a node view does have users as base table.
-    if (!empty($this->relationship)) {
-      foreach ($this->view->relationship as $relationship) {
-        if ($relationship->alias == $this->relationship) {
-          $base_table = $relationship->definition['base'];
-          $base_table_alias = $relationship->alias;
-
-          $table_data = views_fetch_data($base_table);
-          $base_field = $table_data['table']['base']['field'];
-        }
-      }
-    }
+    $this->get_base_table();
 
     $params = array();
     if ($use_groupby) {
@@ -110,16 +125,16 @@ class views_handler_field_field extends views_handler_field {
     // Get the entity type according to the base table of the field.
     // Then add it to the query as a formula. That way we can avoid joining
     // the field table if all we need is entity_id and entity_type.
-    $entity_type = $this->definition['entity_tables'][$base_table];
+    $entity_type = $this->definition['entity_tables'][$this->base_table];
     $entity_info = entity_get_info($entity_type);
 
     // We always need the base field (entity_id / revision_id).
     if (empty($this->definition['is revision'])) {
-      $this->field_alias = $this->query->add_field($base_table_alias, $entity_info['entity keys']['id'], '', $params);
+      $this->field_alias = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['id'], '', $params);
     }
     else {
-      $this->field_alias = $this->query->add_field($base_table_alias, $entity_info['entity keys']['revision'], '', $params);
-      $this->aliases['entity id'] = $this->query->add_field($base_table_alias, $entity_info['entity keys']['id'], '', $params);
+      $this->field_alias = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['revision'], '', $params);
+      $this->aliases['entity id'] = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['id'], '', $params);
     }
 
 
