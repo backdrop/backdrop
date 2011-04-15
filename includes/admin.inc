@@ -113,6 +113,8 @@ function views_ui_preview($view, $display_id, $args = array()) {
   if ($errors === TRUE) {
     $view->ajax = TRUE;
     $view->live_preview = TRUE;
+    $view->views_ui_context = TRUE;
+
 
     // AJAX happens via $_POST but everything expects exposed data to
     // be in GET. Copy stuff but remove ajax-framework specific keys.
@@ -1124,7 +1126,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
  */
 function views_ui_preview_form($form, &$form_state, $view, $display_id = 'default') {
   $form_state['no_cache'] = TRUE;
-  $form_state['view'] = $view->clone_view();
+  $form_state['view'] = $view;
 
   $form['#attributes'] = array('class' => array('clearfix',));
 
@@ -1168,10 +1170,6 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
     //   we may need to split Preview into a separate form.
     '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
   );
-
-  // The live preview.
-  // @todo: Figure out whether $view->preview and $view->editing might be enough already.
-  $view->views_ui_context = TRUE;
 
   return $form;
 }
