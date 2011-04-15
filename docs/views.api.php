@@ -546,17 +546,6 @@ function hook_views_default_views_alter(&$views) {
 
 /**
  * Stub hook documentation
- *
- * This hook should be placed in MODULENAME.views_convert.inc and it will be auto-loaded.
- * This must either be in the same directory as the .module file or in a subdirectory
- * named 'includes'.
- */
-function hook_views_convert() {
-  // example code here
-}
-
-/**
- * Stub hook documentation
  */
 function hook_views_query_substitutions() {
   // example code here
