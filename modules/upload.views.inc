@@ -28,7 +28,7 @@ function upload_views_data() {
       'left_field' => 'vid',
       'field' => 'vid',
     ),
-    'node_revisions' => array(
+    'node_revision' => array(
       'left_field' => 'vid',
       'field' => 'vid',
     ),
@@ -47,7 +47,7 @@ function upload_views_data() {
       'base field' => 'vid',
       // This allows us to not show this relationship if the base is already
       // node so users won't create circular relationships.
-      'skip base' => array('node', 'node_revisions'),
+      'skip base' => array('node', 'node_revision'),
     ),
   );
 
