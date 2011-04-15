@@ -840,25 +840,6 @@ Drupal.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
 };
 
 /**
- * Add extra dependency behavior, in addition to CTools visibility management.
- *
- * @todo Abstract this and perhaps add to CTools.
- */
-Drupal.behaviors.viewsUiDependent = {};
-Drupal.behaviors.viewsUiDependent.attach = function (context, settings) {
-  var $ = jQuery;
-  $('#views-ui-config-item-form #edit-options-custom-label').once('views-ui-dependent', function () {
-    var $checkbox = $(this);
-    $checkbox.click(function (event) {
-      if (!$checkbox.is(':checked')) {
-        $('#views-ui-config-item-form #edit-options-label').val('');
-        $('#views-ui-config-item-form #edit-options-element-label-colon').attr('checked', false);
-      }
-    });
-  });
-};
-
-/**
  * Change the Apply button text based upon the override select state.
  */
 Drupal.behaviors.viewsUiOverrideSelect = {};

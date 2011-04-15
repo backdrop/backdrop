@@ -409,6 +409,11 @@ class views_handler_field extends views_handler {
         $options[$class] = '';
       }
     }
+
+    if (empty($options['custom_label'])) {
+      $options['label'] = '';
+      $options['element_label_colon'] = FALSE;
+    }
   }
 
   /**
