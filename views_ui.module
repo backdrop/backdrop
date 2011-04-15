@@ -91,12 +91,6 @@ function views_ui_menu() {
   ) + $base;
 
   // Additional pages for acting on a View.
-  $items['admin/structure/views/view/%views_ui_cache/analyze'] = array(
-    'title' => 'Analyze',
-    'page callback' => 'views_ui_analyze_view',
-    'page arguments' => array(FALSE, 4),
-    'type' => MENU_VISIBLE_IN_BREADCRUMB,
-  ) + $base;
 
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
@@ -120,7 +114,6 @@ function views_ui_menu() {
 
   // NoJS/AJAX callbacks that require custom page callbacks.
   $ajax_callbacks = array(
-    //'analyze' => 'views_ui_analyze_view',
     'preview' => 'views_ui_preview',
   );
   foreach ($ajax_callbacks as $menu => $menu_callback) {
@@ -812,4 +805,17 @@ function views_ui_library_alter(&$libraries, $module) {
       drupal_add_js(drupal_get_path('module', 'views') . '/js/jquery.ui.dialog.patch.js', array('group' => JS_THEME));
     }
   }
+}
+
+/**
+ * Handle bad updates from alpha versions to beta versions.
+ *
+ * This function will ONLY be called if there is an old menu entry for
+ * this hanging around. This will force a menu rebuild and a cache clear
+ * which should resolve the problem.
+ */
+function views_ui_list_views() {
+  drupal_flush_all_caches();
+  menu_rebuild();
+  drupal_goto($_GET['q']);
 }

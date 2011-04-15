@@ -925,6 +925,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   //     form_load_include().
   $form_state['no_cache'] = TRUE;
 
+  if ($display_id) {
+    $view->set_display($display_id);
+    $view->fix_missing_relationships();
+  }
+
   ctools_include('dependent');
   $form['#attached']['js'][] = ctools_attach_js('dependent');
   $form['#attached']['js'][] = ctools_attach_js('collapsible-div');
@@ -1033,7 +1038,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form_state['display_id'] = $display_id;
 
     // The part of the page where editing will take place.
-    $view->set_display($display_id);
     // This element is the ctools collapsible-div container for the display edit elements.
     $form['displays']['settings'] = array(
       '#theme_wrappers' => array('container'),
@@ -1182,6 +1186,13 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     }
   }
 
+  // If relationships had to be fixed, we want to get that into the cache
+  // so that edits work properly, and to try to get the user to save it
+  // so that it's not using weird fixed up relationships.
+  if (!empty($view->relationships_changed) && empty($_POST)) {
+    drupal_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
+    views_ui_cache_set($view);
+  }
   return $form;
 }
 
@@ -1210,7 +1221,8 @@ function views_ui_render_display_top($view, $display_id) {
       ),
       'analyze' => array(
         'title' => t('analyze view'),
-        'href' => "admin/structure/views/view/$view->name/analyze",
+        'href' => "admin/structure/views/nojs/analyze/$view->name/$display_id",
+        'attributes' => array('class' => array('views-ajax-link')),
       ),
       'clone' => array(
         'title' => t('clone view'),
@@ -2683,6 +2695,10 @@ function views_ui_ajax_forms($key = NULL) {
       'form_id' => 'views_ui_edit_details_form',
       'args' => array(),
     ),
+    'analyze' => array(
+      'form_id' => 'views_ui_analyze_view_form',
+      'args' => array(),
+    ),
   );
 
   if ($key) {
@@ -2892,38 +2908,6 @@ function views_ui_remove_display_form_restore($form, &$form_state) {
 }
 
 /**
- * Page callback to display analysis information on a view.
- */
-function views_ui_analyze_view($js, $view) {
-  $form_state = array(
-    'view' => &$view,
-  );
-
-  return drupal_build_form('views_ui_analyze_view_form', $form_state);
-}
-
-/**
- * This form doesn't particularly do much; it's really just providing a link
- * but a button seems like it would be nicer here.
- *
- * It has no submit or anything, as we will never actually submit this form
- * where the form is placed.
- */
-function views_ui_analyze_view_button($form, &$form_state, $view) {
-  $form['#action'] = url("admin/structure/views/nojs/analyze/$view->name");
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Analyze'),
-    '#ajax' => array(
-      'path' => "admin/structure/views/ajax/analyze/$view->name",
-    ),
-  );
-
-  return $form;
-}
-
-/**
  * Form constructor callback to display analysis information on a view
  */
 function views_ui_analyze_view_form($form, &$form_state) {
@@ -3127,28 +3111,6 @@ function theme_views_ui_reorder_displays_form($vars) {
   $output .= drupal_render_children($form);
 
   return $output;
-}
-
-/**
- * This form doesn't particularly do much; it's really just providing a link
- * but a button seems like it would be nicer here.
- *
- * It has no submit or anything, as we will never actually submit this form
- * where the form is placed.
- */
-function views_ui_reorder_displays_button($form, &$form_state, $view) {
-  $display_id = $form_state['display_id'];
-  $form['#action'] = url("admin/structure/views/nojs/reorder-displays/$view->name/$display_id");
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Reorder'),
-    '#ajax' => array(
-      'path' => "admin/structure/views/ajax/reorder-displays/$view->name/$display_id",
-    ),
-  );
-
-  return $form;
 }
 
 /**

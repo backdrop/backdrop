@@ -62,9 +62,9 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
 
   function convert_options(&$options) {
     if (!isset($options['types']) && !empty($this->argument->options['validate_argument_node_type'])) {
-      $options['types'] = $this->argument->options['validate_argument_node_type'];
+      $options['types'] = isset($this->argument->options['validate_argument_node_type']) ? $this->argument->options['validate_argument_node_type'] : array();
       $options['access'] = !empty($this->argument->options['validate_argument_node_access']);
-      $options['access_op'] = $this->argument->options['validate_argument_node_access_op'];
+      $options['access_op'] = isset($this->argument->options['validate_argument_node_access_op']) ? $this->argument->options['validate_argument_node_access_op'] : 'view';
       $options['nid_type'] = isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : array();
     }
   }

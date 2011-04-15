@@ -371,7 +371,7 @@ class views_handler_filter extends views_handler {
       'use_operator' => FALSE,
       'operator' => $this->options['id'] . '_op',
       'identifier' => $this->options['id'],
-      'label' => $this->ui_name(),
+      'label' => $this->definition['title'],
       'remember' => FALSE,
       'multiple' => FALSE,
       'required' => FALSE,

@@ -392,9 +392,11 @@ function comment_views_data() {
     'field' => array(
       'handler' => 'views_handler_field_ncs_last_comment_name',
       'click sortable' => TRUE,
+      'no group by' => TRUE,
     ),
     'sort' => array(
       'handler' => 'views_handler_sort_ncs_last_comment_name',
+      'no group by' => TRUE,
     ),
   );
 
@@ -424,9 +426,11 @@ function comment_views_data() {
     'field' => array(
       'handler' => 'views_handler_field_ncs_last_updated',
       'click sortable' => TRUE,
+      'no group by' => TRUE,
     ),
     'sort' => array(
       'handler' => 'views_handler_sort_ncs_last_updated',
+      'no group by' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_ncs_last_updated',
@@ -497,6 +501,7 @@ function comment_views_data_alter(&$data) {
       'name table' => 'users',
       'name field' => 'name',
       'handler' => 'views_handler_argument_comment_user_uid',
+      'no group by' => TRUE,
     ),
     'filter' => array(
       'field' => 'uid',
