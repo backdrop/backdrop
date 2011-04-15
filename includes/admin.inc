@@ -115,7 +115,6 @@ function views_ui_preview($view, $display_id, $args = array()) {
     $view->live_preview = TRUE;
     $view->views_ui_context = TRUE;
 
-
     // AJAX happens via $_POST but everything expects exposed data to
     // be in GET. Copy stuff but remove ajax-framework specific keys.
     $exposed_input = $_POST;

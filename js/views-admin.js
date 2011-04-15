@@ -385,10 +385,10 @@ Drupal.behaviors.viewsUiPreview.attach = function (context, settings) {
   // show the form.
   var contextualFilters = $('.views-display-setting a', contextualFiltersBucket);
   if (contextualFilters.length) {
-    $('.form-item-displays-settings-settings-content-preview-controls-view-args').show();
+    $('#preview-args').parent().show();
   }
   else {
-    $('.form-item-displays-settings-settings-content-preview-controls-view-args').hide();
+    $('#preview-args').parent().hide();
   }
 };
 
