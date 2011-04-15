@@ -185,6 +185,11 @@
   border-top: medium none;
 }
 
+h2.ctools-collapsible-handle {
+  display: inline;
+  clear: both;
+}
+
 /* @end */
 
 /* @group Dependent */
