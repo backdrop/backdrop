@@ -70,9 +70,6 @@ class views_handler_field_field extends views_handler_field {
    */
   function access() {
     $this->get_base_table();
-    if (!isset($this->definition['entity_tables'][$this->base_table])) {
-      dsm($this);
-    }
     return field_access('view', $this->definition['field_name'], $this->definition['entity_tables'][$this->base_table]);
   }
 
@@ -160,10 +157,21 @@ class views_handler_field_field extends views_handler_field {
 
     if ($use_groupby) {
       // Add the fields that we're actually grouping on.
-      $group_field_name = $this->definition['field_name'] . '_' . $this->options['group_column'];
-      if (in_array($group_field_name, $fields)) {
-        $fields = array($group_field_name => $group_field_name) + $this->options['group_columns'];
+      $options = array($this->options['group_column'] => $this->options['group_column']) + $this->options['group_columns'];
+
+      $fields = array();
+      $rkey = $this->definition['is revision'] ? 'FIELD_LOAD_REVISION' : 'FIELD_LOAD_CURRENT';
+      // Go through the list and determine the actual column name from field api.
+      foreach ($options as $column) {
+        $name = $column;
+        if (isset($this->field_info['storage']['details']['sql'][$rkey][$this->table][$column])) {
+          $name = $this->field_info['storage']['details']['sql'][$rkey][$this->table][$column];
+        }
+
+        $fields[$column] = $name;
       }
+
+      $this->group_fields = $fields;
     }
 
     // Add additional fields (and the table join itself) if needed.
@@ -501,12 +509,14 @@ class views_handler_field_field extends views_handler_field {
     );
 
     $options = drupal_map_assoc(array('bundle', 'language', 'entity_type'), 'ucfirst');
+
+    // Add on defined fields, noting that they're prefixed with the field name.
     $form['group_columns'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Group columns (additional)'),
       '#default_value' => $this->options['group_columns'],
       '#description' => t('Select any additional columns of this field to include in the query and to group on.'),
-      '#options' => $options,
+      '#options' => $options + $group_columns,
     );
   }
 
@@ -514,15 +524,9 @@ class views_handler_field_field extends views_handler_field {
     parent::groupby_form_submit($form, $form_state);
     $item =& $form_state['handler']->options;
 
-    if ($item['group_type'] != 'group') {
-      unset($item['group_column']);
-      unset($item['group_columns']);
-    }
-    else {
-      // Add settings for "field API" fields.
-      $item['group_column'] = $form_state['values']['options']['group_column'];
-      $item['group_columns'] = array_filter($form_state['values']['options']['group_columns']);
-    }
+    // Add settings for "field API" fields.
+    $item['group_column'] = $form_state['values']['options']['group_column'];
+    $item['group_columns'] = array_filter($form_state['values']['options']['group_columns']);
   }
 
   /**
@@ -628,8 +632,39 @@ class views_handler_field_field extends views_handler_field {
 
     // Go ahead and render and store in $this->items.
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
+
     $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
     $langcode = $this->field_language($entity_type);
+    // If we are grouping, copy our group fields into the cloned entity.
+    // It's possible this will cause some weirdness, but there's only
+    // so much we can hope to do.
+    if (isset($this->group_fields)) {
+      // first, test to see if we have a base value.
+      $base_value = array();
+      // Note: We would copy original values here, but it can cause problems.
+      // For example, text fields store cached filtered values as
+      // 'safe_value' which doesn't appear anywhere in the field definition
+      // so we can't affect it. Other side effects could happen similarly.
+      $data = FALSE;
+      foreach ($this->group_fields as $field => $column) {
+        if (property_exists($values, $this->aliases[$column])) {
+          $base_value[$field] = $values->{$this->aliases[$column]};
+          if (isset($base_value[$field])) {
+            $data = TRUE;
+          }
+        }
+      }
+
+      // If any of our aggregated fields have data, fake it:
+      if ($data) {
+        // Now, overwrite the original value with our aggregated value.
+        // This overwrites it so there is always just one entry.
+        $entity->{$this->definition['field_name']}[$langcode] = array($base_value);
+      }
+      else {
+        $entity->{$this->definition['field_name']}[$langcode] = array();
+      }
+    }
 
     // The field we are trying to display doesn't exist on this entity.
     if (!isset($entity->{$this->definition['field_name']})) {

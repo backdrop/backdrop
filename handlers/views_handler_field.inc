@@ -61,7 +61,8 @@ class views_handler_field extends views_handler {
   function query() {
     $this->ensure_my_table();
     // Add the field.
-    $this->field_alias = $this->query->add_field($this->table_alias, $this->real_field);
+    $params = $this->options['group_type'] != 'group' ? array('function' => $this->options['group_type']) : array();
+    $this->field_alias = $this->query->add_field($this->table_alias, $this->real_field, NULL, $params);
 
     $this->add_additional_fields();
   }
@@ -85,6 +86,13 @@ class views_handler_field extends views_handler {
       $fields = $this->additional_fields;
     }
 
+    $group_params = array();
+    if ($this->options['group_type'] != 'group') {
+      $group_params = array(
+        'function' => $this->options['group_type'],
+      );
+    }
+
     if (!empty($fields) && is_array($fields)) {
       foreach ($fields as $identifier => $info) {
         if (is_array($info)) {
@@ -106,10 +114,11 @@ class views_handler_field extends views_handler {
             $params = $info['params'];
           }
 
+          $params += $group_params;
           $this->aliases[$identifier] = $this->query->add_field($table_alias, $info['field'], NULL, $params);
         }
         else {
-          $this->aliases[$info] = $this->query->add_field($this->table_alias, $info);
+          $this->aliases[$info] = $this->query->add_field($this->table_alias, $info, NULL, $group_params);
         }
       }
     }
@@ -122,7 +131,8 @@ class views_handler_field extends views_handler {
     if (isset($this->field_alias)) {
       // Since fields should always have themselves already added, just
       // add a sort on the field.
-      $this->query->add_orderby(NULL, NULL, $order, $this->field_alias);
+      $params = $this->options['group_type'] != 'group' ? array('function' => $this->options['group_type']) : array();
+      $this->query->add_orderby(NULL, NULL, $order, $this->field_alias, $params);
     }
   }
 
@@ -1267,6 +1277,10 @@ If you would like to have the characters %5B and %5D please use the html entity 
     $themes[] = $hook;
 
     return $themes;
+  }
+
+  function ui_name($short = FALSE) {
+    return $this->get_field(parent::ui_name($short));
   }
 }
 
