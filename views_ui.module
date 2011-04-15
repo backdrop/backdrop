@@ -263,10 +263,10 @@ function views_ui_cache_load($name) {
   ctools_include('object-cache');
   views_include('view');
   $view = ctools_object_cache_get('view', $name);
+  $original_view = views_get_view($name);
 
   if (empty($view)) {
-    $view = views_get_view($name);
-
+    $view = $original_view;
     if (!empty($view)) {
       // Check to see if someone else is already editing this view.
       $view->locked = ctools_object_cache_test('view', $view->name);
@@ -274,6 +274,12 @@ function views_ui_cache_load($name) {
       // This flag will be used e.g. to determine whether strings
       // should be localized.
       $view->editing = TRUE;
+    }
+  }
+  else {
+    // Keep disabled/enabled status real.
+    if ($original_view) {
+      $view->disabled = $original_view->disabled;
     }
   }
 
