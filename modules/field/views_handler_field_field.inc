@@ -705,8 +705,15 @@ class views_handler_field_field extends views_handler_field {
     foreach ($field['columns'] as $id => $column) {
       // Use filter_xss_admin because it's user data and we can't be sure it is safe.
       // We know nothing about the data, though, so we can't really do much else.
-      if (isset($item['raw']) && is_scalar($item['raw'][$id])) {
-        $tokens['[' . $this->options['id'] . '-' . $id . ']'] = filter_xss_admin($item['raw'][$id]);
+
+      if (isset($item['raw'])) {
+        // If $item['raw'] is an array then we can use as is, if it's an object
+        // we cast it to an array, if it's neither, we can't use it.
+        $raw = is_array($item['raw']) ? $item['raw'] :
+               (is_object($item['raw']) ? (array)$item['raw'] : NULL);
+      }
+      if (isset($raw) && isset($raw[$id]) && is_scalar($raw[$id])) {
+        $tokens['[' . $this->options['id'] . '-' . $id . ']'] = filter_xss_admin($raw[$id]);
       }
     }
   }
