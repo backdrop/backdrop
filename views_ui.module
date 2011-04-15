@@ -89,6 +89,13 @@ function views_ui_menu() {
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
   ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/preview/%/ajax'] = array(
+    'page callback' => 'views_ui_build_preview',
+    'page arguments' => array(4, 6),
+    'delivery callback' => 'ajax_deliver',
+    'theme callback' => 'ajax_base_page_theme',
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
   // Additional pages for acting on a View.
 

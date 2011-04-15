@@ -145,7 +145,7 @@
         'progress': { 'type': 'throbber' }
       };
       // Bind AJAX behaviors to all items showing the class.
-      $('.views-ajax-link', context).once('views-ajax-processed').each(function () {
+      $('a.views-ajax-link', context).once('views-ajax-processed').each(function () {
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
         if ($(this).attr('href')) {

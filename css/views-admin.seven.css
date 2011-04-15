@@ -60,8 +60,13 @@ fieldset.fieldset-no-legend {
   padding-top: 2.5em;
 }
 
-.views-admin .form-item label.option {
+.views-admin .form-item label.option,
+#views-ui-preview-form .form-item label.option {
   font-size: 1em;
+}
+
+#views-ui-preview-form .form-submit {
+  margin-top: 3px;
 }
 
 .views-admin input.form-submit,
@@ -243,7 +248,7 @@ table th {
 .views-displays .secondary > li:first-child {
  padding-left: 0;
 }
- 
+
 .views-admin .icon.add {
   background-position: center 3px;
 }

@@ -82,23 +82,6 @@ function views_ui_check_advanced_help() {
 }
 
 /**
- * #pre_render callback for the live preview element.
- *
- * Delaying the preview generation until the rendering phase ensures that time
- * isn't wasted generating a preview if it won't be displayed (for example, if
- * after processing the Edit form, a redirect is issued).
- */
-function views_ui_pre_render_preview($element) {
-  $preview = views_ui_preview($element['#view'], $element['#display_id'], $element['#preview_args']);
-  // @todo HTML does not support a FORM inside a FORM. Remove this hack after
-  //   fixing Views UI to display the preview outside of the edit form, so that
-  //   we don't have to mess with the exposed widget form in this way.
-  $preview = preg_replace('@</?form.*?>@', '', $preview);
-  $element['#markup'] = $preview;
-  return $element;
-}
-
-/**
  * Returns the results of the live preview.
  */
 function views_ui_preview($view, $display_id, $args = array()) {
@@ -275,13 +258,6 @@ function views_ui_preview($view, $display_id, $args = array()) {
 
   $_GET['q'] = $q;
   return $output;
-}
-
-/**
- * AJAX callback that returns the preview section of the edit form.
- */
-function views_ui_preview_callback($form, $form_state) {
-  return $form['displays']['preview'];
 }
 
 /**
@@ -855,21 +831,6 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
 }
 
 /**
- * Page callback for the Edit View page.
- */
-function views_ui_edit_page($view, $display_id = NULL) {
-  $display_id = views_ui_edit_page_display($view, $display_id);
-  if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
-    $build = drupal_get_form('views_ui_edit_form', $view, $display_id);
-  }
-  else {
-    $build = $display_id;
-  }
-
-  return $build;
-}
-
-/**
  * Helper function to return the used display_id for the edit page
  *
  * This function handles access to the display.
@@ -902,6 +863,50 @@ function views_ui_edit_page_display($view, $display_id) {
   }
 
   return $display_id;
+}
+
+/**
+ * Page callback for the Edit View page.
+ */
+function views_ui_edit_page($view, $display_id = NULL) {
+  $display_id = views_ui_edit_page_display($view, $display_id);
+  if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
+    $build = array();
+    $build['edit_form'] = drupal_get_form('views_ui_edit_form', $view, $display_id);
+    $build['preview'] = views_ui_build_preview($view, $display_id);
+  }
+  else {
+    $build = $display_id;
+  }
+
+  return $build;
+}
+
+function views_ui_build_preview($view, $display_id) {
+  if (isset($_POST['ajax_html_ids'])) {
+    unset($_POST['ajax_html_ids']);
+  }
+
+  $build = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('id' => 'views-preview-wrapper', 'class' => 'views-admin clearfix'),
+  );
+
+  $form_state = array('build_info' => array('args' => array($view, $display_id)));
+  $build['controls'] = drupal_build_form('views_ui_preview_form', $form_state);
+
+  $args = array();
+  if (!empty($form_state['values']['view_args'])) {
+    $args = explode('/', $form_state['values']['view_args']);
+  }
+
+  $build['preview'] = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('id' => 'views-live-preview'),
+    '#markup' => views_ui_preview($view->clone_view(), $display_id, $args),
+  );
+
+  return $build;
 }
 
 /**
@@ -1082,88 +1087,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       $form['displays']['settings']['settings_content']['tab_content']['#attributes']['class'][] = 'views-display-disabled';
     }
 
-    // Add preview controls
-    $form['#attached']['js'][] = ctools_attach_js('auto-submit');
-    $form['displays']['settings']['settings_content']['preview_controls'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array(
-        'class' => array(
-          'clearfix',
-        ),
-      ),
-      '#id' => 'edit-display-preview-controls',
-    );
-
-    // Add a checkbox controlling whether or not this display auto-previews.
-    $form['displays']['settings']['settings_content']['preview_controls']['live_preview'] = array(
-      '#type' => 'checkbox',
-      '#id' => 'edit-displays-live-preview',
-      '#title' => t('Auto preview'),
-      '#default_value' => variable_get('views_ui_always_live_preview', TRUE),
-    );
-
-    // Add the arguments textfield
-    $form['displays']['settings']['settings_content']['preview_controls']['view_args'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Preview with contextual filters:'),
-      '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
-      '#id' => 'preview-args',
-//      '#attributes' => array('class' => array('ctools-auto-submit')),
-    );
-
-    // Add the preview button
-    $form['displays']['settings']['settings_content']['preview_controls']['button'] = array(
-      '#type' => 'submit',
-      '#value' => t('Update preview'),
-      '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
-      '#pre_render' => array('ctools_dependent_pre_render'),
-      '#prefix' => '<div id="preview-submit-wrapper">',
-      '#suffix' => '</div>',
-      '#id' => 'preview-submit',
-      '#submit' => array('views_ui_edit_form_submit_preview'),
-      '#ajax' => array(
-        'path' => 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id . '/ajax',
-        'callback' => 'views_ui_preview_callback',
-        'wrapper' => 'views-live-preview',
-        'event' => 'click',
-        'progress' => array('type' => 'throbber'),
-      ),
-      // Make ENTER in arguments textfield (and other controls) submit the form
-      // as this button, not the Save button.
-      // @todo This only works for JS users. To make this work for nojs users,
-      //   we may need to split Preview into a separate form.
-      '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
-    );
-
-    // Hide the button on the autopreview checkbox, but only based on a setting.
-//    if (!variable_get('views_ui_always_live_preview_button', FALSE)) {
-//      $form['displays']['settings']['settings_content']['preview_controls']['button']['#dependency'] = array(
-//        'edit-displays-live-preview' => array(0),
-//      );
-//    }
-
-    // The live preview.
-    // @todo: Figure out whether $view->preview and $view->editing might be enough already.
-    $view->views_ui_context = TRUE;
-
-    $form['displays']['preview'] = array(
-      '#theme_wrappers' => array('container'),
-      '#id' => 'views-live-preview',
-    );
-
-    $form['displays']['preview']['preview'] = array();
-    if (variable_get('views_ui_always_live_preview', TRUE) || !empty($form_state['show_preview']) || !empty($form_state['values']['displays']['settings']['settings_content']['preview_controls']['live_preview'])) {
-      $preview_args = isset($form_state['values']['displays']['settings']['settings_content']['preview_controls']['view_args']) ? $form_state['values']['displays']['settings']['settings_content']['preview_controls']['view_args'] : '';
-      $preview_args = ($preview_args !== '') ? explode('/', $preview_args) : array();
-      $form['displays']['preview']['preview'] += array(
-        '#type' => 'markup',
-        '#pre_render' => array_merge(array('views_ui_pre_render_preview'), element_info_property('markup', '#pre_render', array())),
-        '#view' => $view,
-        '#display_id' => $display_id,
-        '#preview_args' => $preview_args,
-      );
-    }
-
     // The content of the popup dialog.
     $form['ajax-area'] = array(
       '#theme_wrappers' => array('container'),
@@ -1193,6 +1116,63 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     drupal_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
     views_ui_cache_set($view);
   }
+  return $form;
+}
+
+/**
+ * Provide the preview formulas and the preview output, too.
+ */
+function views_ui_preview_form($form, &$form_state, $view, $display_id = 'default') {
+  $form_state['no_cache'] = TRUE;
+  $form_state['view'] = $view->clone_view();
+
+  $form['#attributes'] = array('class' => array('clearfix',));
+
+  // Add a checkbox controlling whether or not this display auto-previews.
+  $form['live_preview'] = array(
+    '#type' => 'checkbox',
+    '#id' => 'edit-displays-live-preview',
+    '#title' => t('Auto preview'),
+    '#default_value' => variable_get('views_ui_always_live_preview', TRUE),
+  );
+
+  // Add the arguments textfield
+  $form['view_args'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Preview with contextual filters:'),
+    '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
+    '#id' => 'preview-args',
+//      '#attributes' => array('class' => array('ctools-auto-submit')),
+  );
+
+  // Add the preview button
+  $form['button'] = array(
+    '#type' => 'submit',
+      '#value' => t('Update preview'),
+      '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
+    '#pre_render' => array('ctools_dependent_pre_render'),
+    '#prefix' => '<div id="preview-submit-wrapper">',
+    '#suffix' => '</div>',
+    '#id' => 'preview-submit',
+    '#submit' => array('views_ui_edit_form_submit_preview'),
+    '#ajax' => array(
+      'path' => 'admin/structure/views/view/' . $view->name . '/preview/' . $display_id . '/ajax',
+      'wrapper' => 'views-preview-wrapper',
+      'event' => 'click',
+      'progress' => array('type' => 'throbber'),
+      'method' => 'replace',
+    ),
+    // Make ENTER in arguments textfield (and other controls) submit the form
+    // as this button, not the Save button.
+    // @todo This only works for JS users. To make this work for nojs users,
+    //   we may need to split Preview into a separate form.
+    '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
+  );
+
+  // The live preview.
+  // @todo: Figure out whether $view->preview and $view->editing might be enough already.
+  $view->views_ui_context = TRUE;
+
   return $form;
 }
 
