@@ -161,7 +161,7 @@
         // Set the URL to go to the anchor.
         if ($(this).attr('href')) {
           element_settings.url = $(this).attr('href');
-          if (element_settings.url.substring(0, 22) != '/admin/structure/views') {
+          if (Drupal.Views.getPath(element_settings.url.substring(0, 22)) != '/admin/structure/views') {
             return true;
           }
         }
