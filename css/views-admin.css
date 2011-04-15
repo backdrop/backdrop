@@ -359,6 +359,7 @@ html.js span.js-only {
 /* @group AJAX throbber */
 
 /* Base Page */
+#views-ui-list-page .ajax-progress-throbber,
 .views-admin .ajax-progress-throbber {
   /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
   left: 49%;
@@ -366,6 +367,7 @@ html.js span.js-only {
   top: 48.5%;
   z-index: 1000;
 }
+#views-ui-list-page .ajax-progress-throbber .message,
 .views-admin .ajax-progress-throbber .message {
   display: none;
 }

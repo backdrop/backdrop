@@ -361,6 +361,14 @@ class views_ui extends ctools_export_ui {
     }
   }
 
+  function list_page($js, $input) {
+    // wrap output in a div for CSS
+    $output = parent::list_page($js, $input);
+    if (is_string($output)) {
+      $output = '<div id="views-ui-list-page">' . $output . '</div>';
+      return $output;
+    }
+  }
 }
 
 /**
