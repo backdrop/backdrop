@@ -30,7 +30,7 @@ class views_plugin_access_perm extends views_plugin_access {
     foreach (module_implements('permission') as $module) {
       $permissions = module_invoke($module, 'permission');
       foreach ($permissions as $name => $perm) {
-        $perms[$module][$name] = $perm['title'];
+        $perms[$module][$name] = strip_tags($perm['title']);
       }
     }
     $form['perm'] = array(
