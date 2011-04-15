@@ -348,6 +348,19 @@ class views_ui extends ctools_export_ui {
     drupal_set_title(t('Create view from template @template', array('@template' => $template->get_human_name())));
     return $output;
   }
+
+  function set_item_state($state, $js, $input, $item) {
+    ctools_export_set_object_status($item, $state);
+    menu_rebuild();
+
+    if (!$js) {
+      drupal_goto(ctools_export_ui_plugin_base_path($this->plugin));
+    }
+    else {
+      return $this->list_page($js, $input);
+    }
+  }
+
 }
 
 /**
