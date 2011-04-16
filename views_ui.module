@@ -760,10 +760,10 @@ function _views_ui_get_paths($view) {
           $path_sort = strtolower($one_path);
         }
         if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
-          $all_paths[] = l($one_path, $one_path);
+          $all_paths[] = l('/' . $one_path, $one_path);
         }
         else {
-          $all_paths[] = check_plain($one_path);
+          $all_paths[] = check_plain('/' . $one_path);
         }
       }
     }

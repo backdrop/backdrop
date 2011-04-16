@@ -236,13 +236,13 @@ class views_plugin_display_page extends views_plugin_display {
       ),
     );
 
-    $path = strip_tags($this->get_option('path'));
+    $path = strip_tags('/' . $this->get_option('path'));
     if (empty($path)) {
       $path = t('None');
     }
 
-    if (strlen($path) > 16) {
-      $path = substr($path, 0, 16) . '...';
+    if (strlen($path) > 24) {
+      $path = substr($path, 0, 24) . '...';
     }
 
     $options['path'] = array(
@@ -269,8 +269,8 @@ class views_plugin_display_page extends views_plugin_display {
         break;
     }
 
-    if (strlen($menu_str) > 16) {
-      $menu_str = substr($menu_str, 0, 16) . '...';
+    if (strlen($menu_str) > 24) {
+      $menu_str = substr($menu_str, 0, 24) . '...';
     }
 
     $options['menu'] = array(
