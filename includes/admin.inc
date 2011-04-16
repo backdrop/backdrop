@@ -5097,11 +5097,7 @@ function theme_views_ui_style_plugin_table($variables) {
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
-
-  if (drupal_strlen($title) > 25) {
-    $title = drupal_substr($title, 0, 25);
-    $title .= '...';
-  }
+  $title = views_ui_truncate($title, 25);
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {
     $changed = '*';

@@ -832,3 +832,17 @@ function views_ui_list_views() {
   menu_rebuild();
   drupal_goto($_GET['q']);
 }
+
+/**
+ * Truncate strings to a set length and provide a ... if they truncated.
+ *
+ * This is often used in the UI to ensure long strings fit.
+ */
+function views_ui_truncate($string, $length) {
+  if (drupal_strlen($string) > $length) {
+    $string = drupal_substr($string, 0, $length);
+    $string .= '...';
+  }
+
+  return $string;
+}

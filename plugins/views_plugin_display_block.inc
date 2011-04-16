@@ -79,14 +79,10 @@ class views_plugin_display_block extends views_plugin_display {
       $block_description = t('None');
     }
 
-    if (strlen($block_description) > 16) {
-      $block_description = drupal_substr($block_description, 0, 16) . '...';
-    }
-
     $options['block_description'] = array(
       'category' => 'block',
       'title' => t('Block name'),
-      'value' => $block_description,
+      'value' => views_ui_truncate($block_description, 24),
     );
 
     $cache_type = $this->get_option('block_caching');

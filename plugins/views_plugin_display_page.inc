@@ -241,14 +241,10 @@ class views_plugin_display_page extends views_plugin_display {
       $path = t('None');
     }
 
-    if (strlen($path) > 24) {
-      $path = substr($path, 0, 24) . '...';
-    }
-
     $options['path'] = array(
       'category' => 'page',
       'title' => t('Path'),
-      'value' => $path,
+      'value' => views_ui_truncate($path, 24),
     );
 
     $menu = $this->get_option('menu');
@@ -269,14 +265,10 @@ class views_plugin_display_page extends views_plugin_display {
         break;
     }
 
-    if (strlen($menu_str) > 24) {
-      $menu_str = substr($menu_str, 0, 24) . '...';
-    }
-
     $options['menu'] = array(
       'category' => 'page',
       'title' => t('Menu'),
-      'value' => $menu_str,
+      'value' => views_ui_truncate($menu_str, 24),
     );
 
     // This adds a 'Settings' link to the style_options setting if the style has options.
