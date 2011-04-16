@@ -210,7 +210,7 @@ function field_views_field_default_views_data($field) {
     }
 
 
-    if (count($field['columns']) == 1 && $column == 'value') {
+    if (count($field['columns']) == 1 || $column == 'value') {
       $title = t('@label (!name)', array('@label' => $label, '!name' => $field['field_name']));
       // CCK used the first 10 characters of $label. Probably doesn't matter.
       $title_short = $label;
