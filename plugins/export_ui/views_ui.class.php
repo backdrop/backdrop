@@ -50,7 +50,7 @@ class views_ui extends ctools_export_ui {
 
     // Store this so we can put them back as sometimes they're needed
     // again laster:
-    $items = $this->plugin['menu']['items'];
+    $stored_items = $this->plugin['menu']['items'];
     // We leave these to make sure the operations still exist in the plugin so
     // that the path finder.
     unset($this->plugin['menu']['items']['edit']);
@@ -60,7 +60,7 @@ class views_ui extends ctools_export_ui {
 
     parent::hook_menu($items);
 
-    $this->plugin['menu']['items'] = $items;
+    $this->plugin['menu']['items'] = $stored_items;
   }
 
   function load_item($item_name) {
