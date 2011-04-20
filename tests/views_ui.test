@@ -48,7 +48,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
 
     // This view should not have a block.
     $this->drupalGet('admin/structure/block');
-    $this->assertNoText($view1['name'] . ': Block');
+    $this->assertNoText('View: ' . $view1['human_name']);
 
     // Create two nodes.
     $node1 = $this->drupalCreateNode(array('type' => 'page'));
@@ -92,7 +92,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
 
     // This view should not have a block.
     $this->drupalGet('admin/structure/block');
-    $this->assertNoText($view2['name'] . ': Block');
+    $this->assertNoText('View: ' . $view2['human_name']);
 
     // Create a view with a page and a block, and filter the listing.
     $view3 = array();
@@ -122,7 +122,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
 
     // Put the block into the first sidebar region.
     $this->drupalGet('admin/structure/block');
-    $this->assertText($view3['name'] . ': Block');
+    $this->assertText('View: ' . $view3['human_name']);
     $edit = array();
     $edit["blocks[views_{$view3['name']}-block][region]"] = 'sidebar_first';
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
@@ -544,7 +544,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     // the block, and check that the nodes we expect appear in the correct
     // order.
     $this->drupalGet('admin/structure/block');
-    $this->assertText($view['name'] . ': Block');
+    $this->assertText('View: ' . $view['human_name']);
     $edit = array();
     $edit["blocks[views_{$view['name']}-block][region]"] = 'sidebar_first';
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
