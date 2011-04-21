@@ -765,7 +765,6 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#value' => $output,
-        '#id' => 'views-tokens-help',
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1),
           'edit-options-alter-alter-text' => array(1),
