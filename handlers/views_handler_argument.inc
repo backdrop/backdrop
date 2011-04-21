@@ -1022,7 +1022,7 @@ class views_handler_argument extends views_handler {
 
     $plugin = views_get_plugin('style', $name);
     if ($plugin) {
-      $plugin->init($this->view, $this->display, $options);
+      $plugin->init($this->view, $this->view->display_handler->display, $options);
       // Write which plugin to use.
       $output .= $indent . $prefix . "['summary']['$option'] = '$name';\n";
 
@@ -1115,7 +1115,13 @@ class views_handler_argument extends views_handler {
 
     $plugin = views_get_plugin($type, $name);
     if ($plugin) {
-      $plugin->init($this->view, $this, $options);
+      // Style plugins expects different parameters as argument related plugins.
+      if ($type == 'style') {
+        $plugin->init($this->view, $this->view->display_handler->display, $options);
+      }
+      else {
+        $plugin->init($this->view, $this, $options);
+      }
       return $plugin;
     }
   }
