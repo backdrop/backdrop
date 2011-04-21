@@ -812,6 +812,17 @@ function field_group_library() {
 }
 
 /**
+ * Implements hook_field_attach_rename_bundle().
+ */
+function field_group_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new) {
+  db_query('UPDATE {field_group} SET bundle = :bundle WHERE bundle = :old_bundle AND entity_type = :entity_type', array(
+    ':bundle' => $bundle_new,
+    ':old_bundle' => $bundle_old,
+    ':entity_type' => $entity_type,
+  ));
+}
+
+/**
  * Creates a group formatted as horizontal tabs.
  *
  * @param $element
