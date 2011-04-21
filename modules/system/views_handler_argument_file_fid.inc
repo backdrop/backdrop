@@ -8,7 +8,7 @@ class views_handler_argument_file_fid extends views_handler_argument {
    */
   function title() {
     $title = db_select('file_managed', 'f')
-      ->addField('f', 'filename')
+      ->fields('f', array('filename'))
       ->condition('fid', $this->argument)
       ->execute()
       ->fetchField();
