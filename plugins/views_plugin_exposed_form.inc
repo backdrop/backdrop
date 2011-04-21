@@ -243,7 +243,10 @@ class views_plugin_exposed_form extends views_plugin {
   }
 
   function reset_form(&$form, &$form_state) {
-    unset($_SESSION['views'][$this->view->name][$this->view->current_display]);
+    // _SESSION is not defined for users who are not logged in.
+    if (isset($_SESSION['views'][$this->view->name][$this->view->current_display])){
+      unset($_SESSION['views'][$this->view->name][$this->view->current_display]);
+    }
     $form_state = array();
     $form_state['values'] = array();
   }
