@@ -1210,7 +1210,9 @@ If you would like to have the characters %5B and %5D please use the html entity 
       else {
         $tokens["[$field]"] = '';
       }
-      $this->add_self_tokens($tokens, $item);
+      if (!empty($item)) {
+        $this->add_self_tokens($tokens, $item);
+      }
 
       // We only use fields up to (and including) this one.
       if ($field == $this->options['id']) {
