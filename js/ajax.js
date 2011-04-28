@@ -157,13 +157,16 @@
 
       $('div#views-live-preview a')
         .once('views-ajax-processed').each(function () {
+        // We don't bind to links without a URL.
+        if (!$(this).attr('href')) {
+          return true;
+        }
+
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
-        if ($(this).attr('href')) {
-          element_settings.url = $(this).attr('href');
-          if (Drupal.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
-            return true;
-          }
+        element_settings.url = $(this).attr('href');
+        if (Drupal.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
+          return true;
         }
 
         element_settings.wrapper = 'views-live-preview';
