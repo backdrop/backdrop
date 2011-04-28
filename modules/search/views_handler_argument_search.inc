@@ -36,7 +36,7 @@ class views_handler_argument_search extends views_handler_argument {
     }
     if ($required) {
       if ($this->operator == 'required') {
-        $this->query->add_where($this->options['group'], 'FALSE');
+        $this->query->add_where(0, 'FALSE');
       }
     }
     else {
@@ -79,11 +79,11 @@ class views_handler_argument_search extends views_handler_argument {
         $search_conditions =& $search_condition->conditions() + $conditions;
       }
 
-      $this->query->add_where($this->options['group'], $search_condition);
+      $this->query->add_where(0, $search_condition);
       $this->query->add_groupby("$search_index.sid");
       $matches = $this->search_query->matches();
       $placeholder = $this->placeholder();
-      $this->query->add_having_expression($this->options['group'], "COUNT(*) >= $placeholder", array($placeholder => $matches));
+      $this->query->add_having_expression(0, "COUNT(*) >= $placeholder", array($placeholder => $matches));
     }
   }
 }
