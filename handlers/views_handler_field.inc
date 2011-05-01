@@ -354,6 +354,7 @@ class views_handler_field extends views_handler {
         'absolute' => array('default' => '', 'translatable' => FALSE),
         'external' => array('default' => '', 'translatable' => FALSE),
         'replace_spaces' => array('default' => '', 'translatable' => FALSE),
+        'trim_whitespace' => array('default' => FALSE),
         'alt' => array('default' => '', 'translatable' => TRUE),
         'rel' => array('default' => ''),
         'link_class' => array('default' => ''),
