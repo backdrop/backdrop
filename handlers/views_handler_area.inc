@@ -5,7 +5,7 @@
  */
 
 /**
- * @defgroup views_area_handlers Views' relationship handlers
+ * @defgroup views_area_handlers Views' area handlers
  * @{
  * Handlers to tell Views what can display in header, footer
  * and empty text in a view.

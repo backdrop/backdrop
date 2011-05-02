@@ -1,5 +1,14 @@
 <?php
 
+/**
+* @file
+* Views area text handler.
+*/
+
+/**
+ * @ingroup views_area_handlers Views' area handlers
+*/
+
 class views_handler_area_text extends views_handler_area {
 
   function option_definition() {
