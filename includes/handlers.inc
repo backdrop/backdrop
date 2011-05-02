@@ -1305,7 +1305,8 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  *   - left_table: The table we join to
  *   - left_field: The field we join to
  *   - type: either LEFT (default) or INNER
- *   - extra: Either a string that's directly added, or an array of items:
+ *   - extra: An array of extra conditions on the join. Each condition is
+ *     either a string that's directly added, or an array of items:
  *   - - table: if not set, current table; if NULL, no table. This field can't
  *       be set in the cached definition because it can't know aliases; this field
  *       can only be used by realtime joins.
