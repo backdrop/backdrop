@@ -606,8 +606,13 @@ td.group-title {
   margin: 0;
 }
 
-.views-ui-display-tab-bucket .links.actions {
-  margin-top: 2px;
+.views-ui-display-tab-bucket .horizontal.actions {
+  margin-right: 6px;
+}
+
+.views-ui-display-tab-bucket .actions.horizontal li + li {
+  margin-left: 3px;
+  padding-left: 3px;
 }
 
 .views-ui-display-tab-bucket.access {
