@@ -1529,6 +1529,20 @@ function views_ui_get_display_tab_details($view, $display) {
           "#suffix" => '</' . $itemElement . '>',
         );
       }
+      // Add a link to view the page.
+      elseif ($display->handler->has_path()) {
+        $path = $display->handler->get_path();
+        if (strpos($path, '%') === FALSE) {
+          $build['top']['actions']['path'] = array(
+            '#type' => 'link',
+            '#title' => t('view @display', array('@display' => $display->display_title)),
+            '#options' => array('alt' => array(t("Go to the real page for this display"))),
+            '#href' => $path,
+            '#prefix' => '<' . $itemElement . ' class="view">',
+            "#suffix" => '</' . $itemElement . '>',
+          );
+        }
+      }
       if (!$isDefault) {
         $build['top']['actions']['duplicate'] = array(
           '#type' => 'submit',
@@ -1569,21 +1583,6 @@ function views_ui_get_display_tab_details($view, $display) {
         '#prefix' => '<' . $itemElement . ' class="undo-delete">',
         "#suffix" => '</' . $itemElement . '>',
       );
-    }
-
-    // Add a link to view the page.
-    if ($display->handler->has_path()) {
-      $path = $display->handler->get_path();
-      if (strpos($path, '%') === FALSE) {
-        $build['top']['actions']['path'] = array(
-          '#type' => 'link',
-          '#title' => t('View "@display"', array('@display' => $display->display_title)),
-          '#options' => array('alt' => array(t("Go to the real page for this display"))),
-          '#href' => $path,
-          '#prefix' => '<' . $itemElement . ' class="undo-delete">',
-          "#suffix" => '</' . $itemElement . '>',
-        );
-      }
     }
 
     // The area above the three columns.
