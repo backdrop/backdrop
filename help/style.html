@@ -11,3 +11,5 @@ Some styles use a separate <a href="topic:views/style-row">row style</a> to dete
 Many styles can be <strong>grouped</strong>. For styles that can, there will be a 'grouping field' option; pick one of the fields to group by. Please see <a href="topic:views/style-grouping">Grouping in styles</a> for more information.
 
 Each style is its own entity.
+
+If you want your fields to be templatable, you need to use values that are acceptable in function names. That's actually more strict, since that basically limits you to alphanumeric and _. Even though Views may be able to query datastores that use special characters, naming is still important for use in templates.
