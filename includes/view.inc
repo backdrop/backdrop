@@ -1618,6 +1618,7 @@ class view extends views_db_object {
    */
   function export($indent = '') {
     $this->init_display();
+    $this->init_query();
     $output = '';
     $output .= $this->export_row('view', $indent);
     // Set the API version
