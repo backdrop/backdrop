@@ -81,6 +81,15 @@ function views_views_plugins() {
         'help topic' => 'display-feed',
       ),
     ),
+    'display_extender' => array(
+      // Default settings for all display_extender plugins.
+      'default' => array(
+        'title' => t('Empty display extender'),
+        'help' => t('Default settings for this view.'),
+        'handler' => 'views_plugin_display_extender',
+        'no ui' => TRUE,
+      ),
+    ),
     'style' => array(
       // Default settings for all style plugins.
       'default' => array(

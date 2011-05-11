@@ -4794,6 +4794,21 @@ function views_ui_admin_settings_advanced() {
     '#dependency' => array('edit-views-devel-output' => array(1)),
   );
 
+  $options = views_fetch_plugin_names('display_extender');
+  if (!empty($options)) {
+    $form['extenders'] = array(
+      '#type' => 'fieldset',
+    );
+    ;
+    $form['extenders']['views_display_extenders'] = array(
+      '#title' => t('Display extenders'),
+      '#default_value' => variable_get('views_display_extenders', array()),
+      '#options' => $options,
+      '#type' => 'checkboxes',
+      '#description' => t('Select extensions of the views interface.')
+    );
+  }
+
   return system_settings_form($form);
 }
 
