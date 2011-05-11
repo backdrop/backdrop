@@ -18,7 +18,7 @@ function field_group_schema() {
       'identifier' => 'field_group',
       'default hook' => 'field_group_info',
       'save callback' => 'field_group_save',
-      'delete callback' => 'field_group_delete',
+      'delete callback' => 'field_group_export_delete',
       'can disable' => FALSE,
       'api' => array(
         'owner' => 'field_group',
