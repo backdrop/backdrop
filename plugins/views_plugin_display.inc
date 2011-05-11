@@ -224,7 +224,7 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
-   * Does the display have a more link enabled?
+   * Does the display have groupby enabled?
    */
   function use_group_by() {
     return $this->get_option('group_by');
