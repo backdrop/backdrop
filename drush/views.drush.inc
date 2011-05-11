@@ -9,8 +9,11 @@
  */
 function views_drush_help($section) {
   switch ($section) {
-    case 'drush:revert-views':
-      return dt('Reverts all views in the drupal installation that have been overriden. Careful, use with care.');
+    case 'drush:views-revert':
+      $help = dt('Reverts views in the drupal installation that have been overriden. ');
+      $help .= dt('If no view names are specified, you will be presented with a list of overridden views to choose from. ');
+      $help .= dt('To revert all views, do not specify any view names, and choose the option "All" from the options presented.');
+      return $help;
   }
 }
 
@@ -24,8 +27,16 @@ function views_drush_command() {
     'callback' => 'views_revert_views',
     'drupal dependencies' => array('views'),
     'description' => dt('Revert overridden views to their default state. Make sure to backup first.'),
+    'arguments' => array(
+      'views' => 'A space delimited list of view names.',
+    ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     'aliases' => array('vr'),
+    'examples' => array(
+      'drush vr archive' => 'Reverts the "archive" view.',
+      'drush rln archive frontpage' => 'Reverts the "archive" and "frontpage" view.',
+      'drush vr' => 'Will present you with a list of overridden views to choose from, and an option to revert all overridden views.',
+    ),
   );
   $items['views-dev'] = array(
     'callback' => 'views_development_settings',
