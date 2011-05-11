@@ -2,6 +2,7 @@
 CHANGELOG for field_group for Drupal 7
 
 Field_group 7.x-1.x-dev
+    o Issue #1095316: Field Groups disappear when Content Type is renamed.
     o Issue #1095316 by swentel: Support for Entity API.
     o Issue #1095002 by animelion: Upgrading removes all existing field groups.
     o Issue #1095130 by willvincent: Features export not working with rc2.
