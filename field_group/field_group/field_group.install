@@ -230,3 +230,10 @@ function field_group_update_7001() {
     ->execute();
 
 }
+
+/**
+ * Implements hook_update_N().
+ */
+function field_group_update_7002() {
+
+}
