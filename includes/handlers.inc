@@ -941,14 +941,16 @@ class views_many_to_one_helper {
  *
  * @param $str
  *   The string to parse.
- * @param $handler
- *   The handler object to use as a base.  If not specified one will
+ * @param $object
+ *   The object to use as a base. If not specified one will
  *   be created.
  *
- * @return $handler
- *   The new handler object.
+ * @return $object
+ *   An object containing
+ *   - operator: Either 'and' or 'or'
+ *   - value: An array of numeric values.
  */
-function views_break_phrase_string($str, &$handler) {
+function views_break_phrase_string($str, &$handler = NULL) {
   if (!$handler) {
     $handler = new stdClass();
   }
