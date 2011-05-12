@@ -937,12 +937,13 @@ class views_many_to_one_helper {
 }
 
 /*
- * Break x,y,z and x+y+z into an array. Numeric only.
+ * Break x,y,z and x+y+z into an array. Works for strings.
  *
  * @param $str
  *   The string to parse.
  * @param $handler
- *   The handler object to use as a base.
+ *   The handler object to use as a base.  If not specified one will
+ *   be created.
  *
  * @return $handler
  *   The new handler object.
@@ -993,14 +994,14 @@ function views_break_phrase_string($str, &$handler) {
  *
  * @param $str
  *   The string to parse.
- * @param $filter
- *   The filter object to use as a base. If not specified one will
+ * @param $handler
+ *   The handler object to use as a base. If not specified one will
  *   be created.
  *
- * @return $filter
- *   The new filter object.
+ * @return $handler
+ *   The new handler object.
  */
-function views_break_phrase($str, $handler = NULL) {
+function views_break_phrase($str, &$handler = NULL) {
   if (!$handler) {
     $handler = new stdClass();
   }
