@@ -197,7 +197,7 @@ class views_plugin_exposed_form extends views_plugin {
       $form['sort_by'] = array(
         '#type' => 'select',
         '#options' => $exposed_sorts,
-        '#title' => t($this->options['exposed_sorts_label']),
+        '#title' => $this->options['exposed_sorts_label'],
       );
       $sort_order = array(
         'ASC' => $this->options['sort_asc_label'],
