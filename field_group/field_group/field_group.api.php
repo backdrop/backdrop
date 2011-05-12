@@ -290,7 +290,7 @@ function hook_field_group_format_summary($group) {
 }
 
 /**
- * Implements hook_field_group_delete_field_group().
+ * Implements hook_field_group_update_field_group().
  *
  * This hook is invoked by ctools export API.
  * Note that this is used by ctools and the group could occasional be
@@ -311,8 +311,8 @@ function hook_field_group_update_field_group($group) {
  * @param $object $group
  *   The FieldGroup object.
  */
-function hook_field_group_update_field_group($group) {
-  // Update extra data depending on the group.
+function hook_field_group_delete_field_group($group) {
+  // Delete extra data depending on the group.
 }
 
 /**
