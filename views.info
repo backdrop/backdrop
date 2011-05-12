@@ -145,6 +145,7 @@ files[] = modules/taxonomy/views_handler_argument_term_node_tid.inc
 files[] = modules/taxonomy/views_handler_argument_term_node_tid_depth.inc
 files[] = modules/taxonomy/views_handler_argument_term_node_tid_depth_modifier.inc
 files[] = modules/taxonomy/views_handler_argument_vocabulary_vid.inc
+files[] = modules/taxonomy/views_handler_argument_vocabulary_machine_name.inc
 files[] = modules/taxonomy/views_handler_field_taxonomy.inc
 files[] = modules/taxonomy/views_handler_field_term_node_tid.inc
 files[] = modules/taxonomy/views_handler_field_term_link_edit.inc

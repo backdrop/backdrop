@@ -63,6 +63,10 @@ function taxonomy_views_data() {
       'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
       'handler' => 'views_handler_filter_vocabulary_machine_name',
     ),
+    'argument' => array(
+      'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
+      'handler' => 'views_handler_argument_vocabulary_machine_name',
+    ),
   );
   $data['taxonomy_vocabulary']['vid'] = array(
     'title' => t('Vocabulary ID'), // The item it appears as on the UI,
