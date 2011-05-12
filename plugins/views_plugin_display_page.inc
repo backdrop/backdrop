@@ -515,4 +515,12 @@ class views_plugin_display_page extends views_plugin_display {
 
     return $errors;
   }
+
+  function get_argument_text() {
+    return array(
+      'filter value not present' => t('When the filter value is <em>NOT</em> in the URL'),
+      'filter value present' => t('When the filter value <em>IS</em> in the URL or a default is provided'),
+      'description' => t('The contextual filter values is provided by the URL.'),
+    );
+  }
 }

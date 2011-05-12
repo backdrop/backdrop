@@ -190,11 +190,19 @@ class views_handler_argument extends views_handler {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
+    $argument_text = $this->view->display_handler->get_argument_text();
+
     $form['#pre_render'][] = 'views_ui_pre_render_move_argument_options';
+
+    $form['description'] = array(
+      '#markup' => $argument_text['description'],
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('description')),
+    );
 
     $form['no_argument'] = array(
       '#type' => 'fieldset',
-      '#title' => t('When the filter value is <em>NOT</em> in the URL'),
+      '#title' => $argument_text['filter value not present'],
     );
     // Everything in the fieldset is floated, so the last element needs to
     // clear those floats.
@@ -256,7 +264,7 @@ class views_handler_argument extends views_handler {
 
     $form['argument_present'] = array(
       '#type' => 'fieldset',
-      '#title' => t('When the filter value <em>IS</em> in the URL or a default is provided'),
+      '#title' => $argument_text['filter value present'],
     );
     $form['title_enable'] = array(
       '#type' => 'checkbox',
