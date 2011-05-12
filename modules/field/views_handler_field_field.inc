@@ -69,8 +69,8 @@ class views_handler_field_field extends views_handler_field {
    * Return TRUE if the user has access to view this field.
    */
   function access() {
-    $this->get_base_table();
-    return field_access('view', $this->definition['field_name'], $this->definition['entity_tables'][$this->base_table]);
+    $base_table = $this->get_base_table();
+    return field_access('view', $this->field_info, $this->definition['entity_tables'][$base_table]);
   }
 
   /**
