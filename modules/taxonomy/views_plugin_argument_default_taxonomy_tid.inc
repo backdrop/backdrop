@@ -5,7 +5,7 @@
  */
 
 class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_default {
-  function init(&$view, &$argument, &$options) {
+  function init(&$view, &$argument, $options) {
     parent::init($view, $argument, $options);
 
     // Convert legacy vids option to machine name vocabularies.
@@ -73,9 +73,9 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
     );
   }
 
-  function options_submit(&$form, &$form_state, &$options) {
+  function options_submit(&$form, &$form_state) {
     // Clear checkbox values.
-    $options['vocabularies'] = array_filter($options['vocabularies']);
+    $form_state['values']['vocabularies'] = array_filter($form_state['values']['vocabularies']);
   }
 
   function get_argument() {
