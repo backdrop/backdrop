@@ -449,7 +449,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
     $classes .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
   }
 
-  $description = isset($group->format_settings['instance_settings']['description']) ? check_plain($group->format_settings['instance_settings']['description']) : '';
+  $description = isset($group->format_settings['instance_settings']['description']) ? filter_xss_admin($group->format_settings['instance_settings']['description']) : '';
 
   // Add all field_group format types to the js settings.
   $form['#attached']['js'][] = array(
