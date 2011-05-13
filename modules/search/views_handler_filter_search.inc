@@ -151,7 +151,7 @@ class views_handler_filter_search extends views_handler_filter {
             $this->search_query->condition_replace_string('d.', "$search_dataset.", $condition);
           }
         }
-        $search_conditions =& $search_condition->conditions() + $conditions;
+        $search_conditions =& $search_condition->conditions() + $condition_conditions;
       }
 
       $this->query->add_where($this->options['group'], $search_condition);

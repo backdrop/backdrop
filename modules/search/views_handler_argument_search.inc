@@ -76,7 +76,7 @@ class views_handler_argument_search extends views_handler_argument {
             $this->search_query->condition_replace_string('d.', "$search_dataset.", $condition);
           }
         }
-        $search_conditions =& $search_condition->conditions() + $conditions;
+        $search_conditions =& $search_condition->conditions() + $condition_conditions;
       }
 
       $this->query->add_where(0, $search_condition);
