@@ -140,7 +140,7 @@ class views_object {
           // sent in, and the name of the property being processed.
           $translation_data = array(
             'value' => $value,
-            'format' => isset($options[$key . '_format']) ? $options[$key . '_format'] : NULL,
+            'format' => isset($definition[$key]['format_key']) ? $options[$definition[$key]['format_key']] : NULL,
             'keys' => array_merge(array($this->view->name), $localization_keys, array($key)),
           );
           $storage[$key] = $this->view->localization_plugin->translate($translation_data);
@@ -302,7 +302,7 @@ class views_object {
           $translatable[] = array(
             'value' => $value,
             'keys' => $translation_keys,
-            'format' => isset($options[$key . '_format']) ? $options[$key . '_format'] : NULL,
+            'format' => isset($definition['format_key']) ? $options[$definition['format_key']] : NULL,
           );
         }
       }
@@ -313,6 +313,7 @@ class views_object {
       $translatable[] = array(
         'value' => $value,
         'keys' => isset($translation_keys) ? $translation_keys : $parents,
+        'format' => isset($definition['format_key']) ? $storage[$definition['format_key']] : NULL,
       );
     }
   }
