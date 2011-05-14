@@ -86,6 +86,43 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $this->assertEqual(sort($expected_strings), sort($view->localization_plugin->translated_strings), 'Take sure that every string got loaded translated');
   }
 
+  /**
+   * Take sure that the different things have the right translation keys.
+   */
+  public function testTranslationKey() {
+    $view = $this->view_unpack_translatable();
+    $view->editing = TRUE;
+    $view->init_display();
+
+    // Don't run translation. We just want to get the right keys.
+
+    foreach ($view->display as $display_id => $display) {
+      $translatables = array();
+      $display->handler->unpack_translatables($translatables);
+
+      $this->string_keys = array(
+        'Master1' => array('title'),
+        'Apply1' => array('exposed_form', 'submit_button'),
+        'Sort By1' => array('exposed_form', 'exposed_sorts_label'),
+        'Asc1' => array('exposed_form', 'sort_asc_label'),
+        'Desc1' => array('exposed_form', 'sort_desc_label'),
+        'more1' => array('use_more_text'),
+        'Reset1' => array('exposed_form', 'reset_button_label'),
+        'Offset1' => array('pager', 'expose', 'offset_label'),
+        'Master1' => array('title'),
+        'title1' => array('title'),
+        'Items per page1' => array('pager', 'expose', 'items_per_page_label'),
+        'fieldlabel1' => array('field', 'node', 'nid', 'label'),
+        'filterlabel1' => array('filter', 'node', 'nid', 'expose', 'label'),
+        '- All -' => array('pager', 'expose', 'items_per_page_options_all_label'),
+      );
+
+      foreach ($translatables as $translatable) {
+        $this->assertEqual($translatable['keys'], $this->string_keys[$translatable['value']]);
+      }
+    }
+  }
+
   public function view_unpack_translatable() {
     $view = new view;
     $view->name = 'view_unpack_translatable';
