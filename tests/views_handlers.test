@@ -36,6 +36,9 @@ class ViewsHandlersTest extends ViewsSqlTest {
     $this->assertFieldByName('options[expose][reduce]', TRUE);
   }
 
+  /**
+   * Test views_break_phrase_string function.
+   */
   function test_views_break_phrase_string() {
     $empty_stdclass = new stdClass();
     $empty_stdclass->operator = 'or';
@@ -64,7 +67,43 @@ class ViewsHandlersTest extends ViewsSqlTest {
     $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1,,word2,word', $handler));
     $this->assertEqual('and', $handler->operator);
   }
-  
+
+  /**
+   * Test views_break_phrase function.
+   */
+  function test_views_break_phrase() {
+    $empty_stdclass = new stdClass();
+    $empty_stdclass->operator = 'or';
+    $empty_stdclass->value = array();
+
+    $null = NULL;
+    // check defaults
+    $this->assertEqual($empty_stdclass, views_break_phrase('', $null));
+
+    $handler = views_get_handler('node', 'title', 'argument');
+    $this->assertEqual($handler, views_break_phrase('', $handler));
+
+    // Generate three random numbers which can be used below;
+    $n1 = rand(0, 100);
+    $n2 = rand(0, 100);
+    $n3 = rand(0, 100);
+    // test ors
+    $this->assertEqualValue(array($n1, $n2, $n3), views_break_phrase("$n1 $n2+$n3", $handler));
+    $this->assertEqual('or', $handler->operator);
+    $this->assertEqualValue(array($n1, $n2, $n3), views_break_phrase("$n1+$n2+$n3", $handler));
+    $this->assertEqual('or', $handler->operator);
+    $this->assertEqualValue(array($n1, $n2, $n3), views_break_phrase("$n1 $n2 $n3", $handler));
+    $this->assertEqual('or', $handler->operator);
+    $this->assertEqualValue(array($n1, $n2, $n3), views_break_phrase("$n1 $n2++$n3", $handler));
+    $this->assertEqual('or', $handler->operator);
+
+    // test ands.
+    $this->assertEqualValue(array($n1, $n2, $n3), views_break_phrase("$n1,$n2,$n3", $handler));
+    $this->assertEqual('and', $handler->operator);
+    $this->assertEqualValue(array($n1, $n2, $n3), views_break_phrase("$n1,,$n2,$n3", $handler));
+    $this->assertEqual('and', $handler->operator);
+  }
+
   /**
    * Check to see if two values are equal.
    *
