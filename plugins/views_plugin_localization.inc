@@ -70,7 +70,7 @@ class views_plugin_localization extends views_plugin {
   function save($source) {
     // Allow other modules to make changes to the string before saving
     $source['pre_process'] = $this->invoke_translation_process($source, 'pre');
-    $this->save_string($source['value'], $source['keys'], $source['format']);
+    $this->save_string($source['value'], $source['keys'], isset($source['format']) ? $source['format'] : '');
   }
 
   /**
