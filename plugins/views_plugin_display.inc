@@ -1642,6 +1642,9 @@ class views_plugin_display extends views_plugin {
         }
 
         foreach (list_themes() as $key => $theme) {
+          if (!empty($theme->info['hidden'])) {
+            continue;
+          }
           $options[$key] = $theme->info['name'];
         }
 
