@@ -290,6 +290,28 @@ function hook_field_group_format_summary($group) {
 }
 
 /**
+ * Implement hook_ctools_plugin_api().
+ * This hook is needed to let ctools know about exportables.
+ * If you create field groups by using hook_field_group_info, you
+ * will need to include the ctools api hook as well.
+ */
+function hook_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_field_group_info().
+ * Don't forget to include the ctools hook to notify that
+ * your modules has field group exports.
+ * @see hook_ctools_plugin_api.
+ */
+function hook_field_group_info() {
+
+}
+
+/**
  * Implements hook_field_group_update_field_group().
  *
  * This hook is invoked by ctools export API.
