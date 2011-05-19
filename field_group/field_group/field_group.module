@@ -814,6 +814,30 @@ function field_group_library() {
 }
 
 /**
+ * Implements hook_field_extra_fields().
+ */
+function field_group_field_extra_fields() {
+  $extra = array();
+
+  $extra['user']['user'] = array(
+    'form' => array(
+      'contact' => array(
+        'label' => t('Contact'),
+        'description' => t('Contact user element'),
+        'weight' => -5,
+      ),
+      'picture' => array(
+        'label' => t('Picture'),
+        'description' => t('User picture'),
+        'weight' => -5,
+      ),
+    ),
+  );
+
+  return $extra;
+}
+
+/**
  * Implements hook_field_attach_rename_bundle().
  */
 function field_group_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new) {
