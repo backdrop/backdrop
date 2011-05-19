@@ -105,7 +105,9 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   }
 
   $args = func_get_args();
-  $mode = array_pop(array_pop($args));
+  $args = func_get_args();
+  $args_pop = array_pop($args);
+  $mode = array_pop($args_pop);
 
   ctools_include('export');
   $objects = ctools_export_load_object('field_group', 'conditions', array(
