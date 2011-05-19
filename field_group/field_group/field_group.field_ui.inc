@@ -394,6 +394,8 @@ function field_group_format_settings_label_validate($element, &$form_state) {
 
   $group = $form_state['values']['fields'][$element['#parents'][1]];
   $settings = $group['format_settings']['settings'];
+  $name = $form_state['formatter_settings_edit'];
+  $form_state['values']['fields'][$name]['settings_edit_form']['settings'] = $settings;
   if ($group['format']['type'] == 'fieldset' && ($settings['formatter'] == 'collapsed' || $settings['formatter'] == 'collapsible') && empty($settings['label'])) {
     form_error($element, t('The label is required when formatter is collapsible or collapsed'));
   }
@@ -429,7 +431,7 @@ function field_group_formatter_settings_update(& $group, $settings) {
   // for format changes we load the defaults.
   if (empty($settings['format_settings']['settings'])) {
     $group->format_settings = array(
-      'formatter' => $formatter['default_formatter'],
+      'formatter' => isset($formatter['default_formatter']) ? $formatter['default_formatter'] : '',
       'instance_settings' => $formatter['instance_settings']
     );
   }
