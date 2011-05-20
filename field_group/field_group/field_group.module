@@ -105,7 +105,6 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   }
 
   $args = func_get_args();
-  $args = func_get_args();
   $args_pop = array_pop($args);
   $mode = array_pop($args_pop);
 
