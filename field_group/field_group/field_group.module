@@ -1146,12 +1146,9 @@ function field_group_attach_groups(&$element, $view_mode) {
   }
   $element['#group_children'] = $group_children;
 
-  // Add a pre render or process callback.
+  // Add a pre render callback.
   // This is needed since process seems too early for the front view modes.
-  // TODO Really check what's the difference on forms to use pre_render or process.
-  //$element[$view_mode == 'form' ? '#process': '#pre_render'][] = 'field_group_build_pre_render';
   $element['#pre_render'][] = 'field_group_build_pre_render';
-  //$element['#process'][] = 'field_group_build_pre_render';
 }
 
 /**
@@ -1207,8 +1204,9 @@ function field_group_fields_nest(&$element) {
   // direct access as we don't know where in the root_element hierarchy the
   // parent currently is situated.
   foreach ($element['#group_children'] as $child_name => $parent_name) {
-    // Block denied fields (#access) before they are put in groups.
-    if (!isset($element[$child_name]['#access']) || $element[$child_name]['#access']) {
+    // Block denied fields (#access) before they are put in groups,
+    // or fields that were not processed (like field_permissions).
+    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access']) && (!isset($element[$child_name]['#processed']) || $element[$child_name]['#processed'] == TRUE)) {
       // If this is a group, we have to use a reference to keep the reference
       // list intact (but if it is a field we don't mind).
       $group_references[$parent_name][$child_name] = &$element[$child_name];
