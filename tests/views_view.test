@@ -66,6 +66,23 @@ class viewsViewTest extends ViewsSqlTest {
     $this->assertNull($view, "Take sure that the old view get's cleared by the reset parameter.");
   }
 
+  function testValidate() {
+    // Test a view with multiple displays. 
+    // Validating a view shouldn't change the active display.
+    // @todo: Create an extra validation view.
+    $view = $this->view_test_destroy();
+    $view->set_display('page_1');
+
+    $view->validate();
+
+    $this->assertEqual('page_1', $view->current_display, "The display should be constant while validating");
+
+    // @todo: Write real tests for the validation.
+    // In general the following things could be tested:
+    // - Deleted displays shouldn't be validated
+    // - Multiple displays are validating and the errors are merged together.
+  }
+
   /**
    * This view provides some filters, fields, arguments, relationships, sorts, areas and attachments.
    */
