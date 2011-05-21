@@ -921,7 +921,7 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
   static $groups = FALSE;
 
   if (!$groups || $reset) {
-    if ($cached = cache_get('field_groups', 'cache_field')) {
+    if (!$reset && $cached = cache_get('field_groups', 'cache_field')) {
       $groups = $cached->data;
     }
     else {
@@ -955,6 +955,27 @@ function field_group_read_groups($params = array()) {
     $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = field_group_unpack($group);
   }
   return $groups;
+
+}
+
+/**
+ * Utility function to recreate identifiers.
+ */
+function _field_group_recreate_identifiers() {
+
+  // Migrate the field groups so they have a unique identifier.
+  $result = db_select('field_group', 'fg')
+    ->fields('fg')
+    ->execute();
+  $rows = array();
+  foreach($result as $row) {
+    $row->identifier = $row->group_name . '|' . $row->entity_type . '|' . $row->bundle . '|' . $row->mode;
+    $row->data = unserialize($row->data);
+    $rows[] = $row;
+  }
+  foreach ($rows as $row) {
+    drupal_write_record('field_group', $row, array('id'));
+  }
 
 }
 

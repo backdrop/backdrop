@@ -208,19 +208,8 @@ function field_group_update_7001() {
       'description' => 'The unique string identifier for a group.',
     ));
 
-    // Migrate the field groups so they have a unique identifier.
-    $result = db_select('field_group', 'fg')
-      ->fields('fg')
-      ->execute();
-    $rows = array();
-    foreach($result as $row) {
-      $row->identifier = $row->group_name . '|' . $row->entity_type . '|' . $row->bundle . '|' . $row->mode;
-      $row->data = unserialize($row->data);
-      $rows[] = $row;
-    }
-    foreach ($rows as $row) {
-      drupal_write_record('field_group', $row, array('id'));
-    }
+    module_load_include('module', 'field_group');
+    _field_group_recreate_identifiers();
 
   }
 
@@ -235,5 +224,8 @@ function field_group_update_7001() {
  * Update hook to clear cache for new changes to take effect.
  */
 function field_group_update_7002() {
+
+  module_load_include('module', 'field_group');
+  _field_group_recreate_identifiers();
 
 }
