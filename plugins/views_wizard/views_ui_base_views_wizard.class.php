@@ -61,7 +61,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $entities = entity_get_info();
     foreach ($entities as $entity_type => $entity_info) {
-      if ($this->base_table == $entity_info['base table']) {
+      if (isset($entity_info['base table']) && $this->base_table == $entity_info['base table']) {
         $this->entity_info = $entity_info;
         $this->entity_type = $entity_type;
       }

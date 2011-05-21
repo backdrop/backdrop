@@ -65,7 +65,7 @@
 
 /* @group Buttons */
 
-.ctools-button {
+.ctools-button-processed {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -96,7 +96,7 @@
   padding-top: 1px;
 }
 
-.ctools-button:hover {
+.ctools-button-processed:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -122,8 +122,8 @@
       #f1f1f1 100%);
 }
 
-.ctools-button li a,
-.views-ui-display-tab-actions .ctools-button input {
+.ctools-button-processed li a,
+.views-ui-display-tab-actions .ctools-button-processed input {
   padding-left: 9px;
   padding-right: 9px;
 }
@@ -132,7 +132,7 @@
   padding-bottom: 0;
 }
 
-.ctools-dropbutton.open:hover {
+.ctools-dropbutton-processed.open:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -158,7 +158,7 @@
       #f9f9f9 100%);
 }
 
-.ctools-dropbutton.open {
+.ctools-dropbutton-processed.open {
   -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
@@ -168,16 +168,16 @@
   top: 0.6667em;
 }
 
-.ctools-dropbutton.open .ctools-twisty {
+.ctools-dropbutton-processed.open .ctools-twisty {
   top: 0.3333em;
 }
 
-.ctools-dropbutton li a,
-.views-ui-display-tab-actions .ctools-dropbutton input {
+.ctools-dropbutton-processed li a,
+.views-ui-display-tab-actions .ctools-dropbutton-processed input {
   padding-right: 7px;
 }
 
-.views-ui-display-tab-actions .ctools-button input.form-submit {
+.views-ui-display-tab-actions .ctools-button-processed input.form-submit {
   margin-right: 0;
   margin-top: 0;
 }

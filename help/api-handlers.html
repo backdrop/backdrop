@@ -21,7 +21,7 @@ For the query flow:
 
 Fields, being the only handlers concerned with output, also have an extended piece of the flow:
 <dl>
-<dt>handler-&gt;pre_render()</dt>
+<dt>handler-&gt;pre_render(&$values)</dt>
 <dd>Called prior to the actual rendering, this allows handlers to query for extra data; the entire resultset is available here, and this is where items that have "multiple values" per record can do their extra query for all of the records available. There are several examples of this at work in the code.</dd>
 <dt>handler-&gt;render()</dt>
 <dd>This does the actual work of rendering the field.</dd>

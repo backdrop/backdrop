@@ -111,6 +111,8 @@ function views_schema_6000() {
       'save callback' => 'views_save_view',
       'delete callback' => 'views_delete_view',
       'export callback' => 'views_export_view',
+      'cache defaults' => TRUE,
+      'default cache bin' => 'cache_views',
     ),
     'fields' => array(
       'vid' => array(
@@ -311,7 +313,7 @@ function views_schema_6003() {
 }
 function views_update_6003() {
   $ret = array();
-  db_add_unique_key($ret, 'views_view', 'name', array('name'));
+  db_add_unique_key('views_view', 'name', array('name'));
   return $ret;
 }
 
@@ -337,8 +339,8 @@ function views_update_6004() {
 
   // Drop and re-add this field because there is a bug in
   // db_change_field that causes this to fail when trying to cast the data.
-  db_drop_field($ret, 'views_object_cache', 'data');
-  db_add_field($ret, 'views_object_cache', 'data', $new_field);
+  db_drop_field('views_object_cache', 'data');
+  db_add_field('views_object_cache', 'data', $new_field);
 
   return $ret;
 }
@@ -361,7 +363,7 @@ function views_update_6005() {
     'not null' => TRUE,
     'description' => 'What table this view is based on, such as node, user, comment, or term.',
   );
-  db_change_field($ret, 'views_view', 'base_table', 'base_table', $new_field);
+  db_change_field('views_view', 'base_table', 'base_table', $new_field);
   return $ret;
 }
 
@@ -382,7 +384,7 @@ function views_update_6006() {
   $table['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
   $table['fields']['serialized']['default'] = 1;
 
-  db_create_table($ret, 'cache_views_data', $table);
+  db_create_table('cache_views_data', $table);
 
   return $ret;
 }
@@ -394,9 +396,9 @@ function views_update_6006() {
 function views_update_6007() {
   $ret = array();
   if (db_driver() == 'pgsql') {
-    $ret[] = update_sql('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
-    $ret[] = update_sql("DROP AGGREGATE IF EXISTS first(anyelement)");
-    $ret[] = update_sql("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
+    $ret[] = db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
+    $ret[] = db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
+    $ret[] = db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
   }
   return $ret;
 }
@@ -416,7 +418,7 @@ function views_schema_6008() {
 function views_update_6008() {
   $ret = array();
 
-  db_add_primary_key($ret, 'views_display', array('vid', 'id'));
+  db_add_primary_key('views_display', array('vid', 'id'));
 
   return $ret;
 }
@@ -442,22 +444,26 @@ function views_update_6009() {
 
   $schema = views_schema_6009();
 
-  if ($GLOBALS['db_type'] == 'pgsql') {
-    $ret[] = update_sql('ALTER TABLE {views_display} RENAME "display_options" TO "display_options_old"');
-    db_add_field($ret, 'views_display', 'display_options', $schema['views_display']['fields']['display_options']);
+  if (db_driver() == 'pgsql') {
+    $ret[] = db_query('ALTER TABLE {views_display} RENAME "display_options" TO "display_options_old"');
+    db_add_field('views_display', 'display_options', $schema['views_display']['fields']['display_options']);
 
     $sql = "SELECT vid, id, display_options_old FROM {views_display}";
     $result = db_query($sql);
-    while ($row = db_fetch_array($result)) {
+    foreach ($result as $row) {
       $row['display_options_old'] = db_decode_blob($row['display_options_old']);
-      $sql = "UPDATE {views_display} SET display_options = '%s' WHERE vid = %d AND id = '%s'";
-      db_query($sql, $row['display_options_old'], $row['vid'], $row['id']);
+      $sql = "UPDATE {views_display} SET display_options = :display_optons WHERE vid = :vid AND id = :id";
+      db_query($sql, array(
+        ':display_optons' => $row['display_options_old'],
+        ':vid' => $row['vid'],
+        ':id' => $row['id'],
+      ));
     }
 
-    db_drop_field($ret, 'views_display', 'display_options_old');
+    db_drop_field('views_display', 'display_options_old');
   }
   else {
-    db_change_field($ret, 'views_display', 'display_options', 'display_options', $schema['views_display']['fields']['display_options']);
+    db_change_field('views_display', 'display_options', 'display_options', $schema['views_display']['fields']['display_options']);
   }
 
   return $ret;
@@ -611,4 +617,24 @@ function views_update_7000() {
 
   // Rename the unused views_no_hover_links variable.
   variable_del('views_no_hover_links');
+}
+
+/**
+ * Fix missing items from Views administrative breadcrumb
+ */
+function views_update_7001() {
+  $depth = db_select('menu_links')
+    ->fields('menu_links', array('depth'))
+    ->condition('link_path', 'admin/structure/views/view/%')
+    ->execute()
+    ->fetchField();
+
+  if ($depth == 3) {
+    db_delete('menu_links')
+      ->condition('link_path', 'admin/structure/views/%', 'LIKE')
+      ->execute();
+    cache_clear_all(NULL, 'cache_menu');
+    menu_rebuild();
+  }
+
 }

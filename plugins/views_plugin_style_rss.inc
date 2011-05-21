@@ -56,7 +56,6 @@ class views_plugin_style_rss extends views_plugin_style {
       '#title' => t('RSS description'),
       '#default_value' => $this->options['description'],
       '#description' => t('This will appear in the RSS feed itself.'),
-      '#dependency' => array('edit-style-options-override' => array(FALSE)),
     );
   }
 

@@ -100,7 +100,7 @@
 
 /* @group Buttons */
 
-.ctools-button {
+.ctools-button-processed {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -131,7 +131,7 @@
   padding-top: 1px;
 }
 
-.ctools-button:hover {
+.ctools-button-processed:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -157,13 +157,13 @@
       #f1f1f1 100%);
 }
 
-.ctools-button ol li, 
-.ctools-button ul li {
+.ctools-button-processed ol li, 
+.ctools-button-processed ul li {
   margin: 0;
   padding-bottom: 0;
 }
 
-.views-ui-display-tab-actions .ctools-button input {
+.views-ui-display-tab-actions .ctools-button-processed input {
   margin-right: 0;
 }
 
@@ -171,7 +171,7 @@
   padding-bottom: 0;
 }
 
-.ctools-dropbutton.open:hover {
+.ctools-dropbutton-processed.open:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -197,7 +197,7 @@
       #f9f9f9 100%);
 }
 
-.ctools-dropbutton.open {
+.ctools-dropbutton-processed.open {
   -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
@@ -207,7 +207,7 @@
   top: 0.6667em;
 }
 
-.ctools-dropbutton.open .ctools-twisty {
+.ctools-dropbutton-processed.open .ctools-twisty {
   top: 0.3333em;
 }
 

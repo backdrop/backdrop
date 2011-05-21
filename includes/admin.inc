@@ -82,23 +82,6 @@ function views_ui_check_advanced_help() {
 }
 
 /**
- * #pre_render callback for the live preview element.
- *
- * Delaying the preview generation until the rendering phase ensures that time
- * isn't wasted generating a preview if it won't be displayed (for example, if
- * after processing the Edit form, a redirect is issued).
- */
-function views_ui_pre_render_preview($element) {
-  $preview = views_ui_preview($element['#view'], $element['#display_id'], $element['#preview_args']);
-  // @todo HTML does not support a FORM inside a FORM. Remove this hack after
-  //   fixing Views UI to display the preview outside of the edit form, so that
-  //   we don't have to mess with the exposed widget form in this way.
-  $preview = preg_replace('@</?form.*?>@', '', $preview);
-  $element['#markup'] = $preview;
-  return $element;
-}
-
-/**
  * Returns the results of the live preview.
  */
 function views_ui_preview($view, $display_id, $args = array()) {
@@ -130,6 +113,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
   if ($errors === TRUE) {
     $view->ajax = TRUE;
     $view->live_preview = TRUE;
+    $view->views_ui_context = TRUE;
 
     // AJAX happens via $_POST but everything expects exposed data to
     // be in GET. Copy stuff but remove ajax-framework specific keys.
@@ -275,13 +259,6 @@ function views_ui_preview($view, $display_id, $args = array()) {
 
   $_GET['q'] = $q;
   return $output;
-}
-
-/**
- * AJAX callback that returns the preview section of the edit form.
- */
-function views_ui_preview_callback($form, $form_state) {
-  return $form['displays']['preview'];
 }
 
 /**
@@ -855,21 +832,6 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
 }
 
 /**
- * Page callback for the Edit View page.
- */
-function views_ui_edit_page($view, $display_id = NULL) {
-  $display_id = views_ui_edit_page_display($view, $display_id);
-  if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
-    $build = drupal_get_form('views_ui_edit_form', $view, $display_id);
-  }
-  else {
-    $build = $display_id;
-  }
-
-  return $build;
-}
-
-/**
  * Helper function to return the used display_id for the edit page
  *
  * This function handles access to the display.
@@ -905,6 +867,50 @@ function views_ui_edit_page_display($view, $display_id) {
 }
 
 /**
+ * Page callback for the Edit View page.
+ */
+function views_ui_edit_page($view, $display_id = NULL) {
+  $display_id = views_ui_edit_page_display($view, $display_id);
+  if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
+    $build = array();
+    $build['edit_form'] = drupal_get_form('views_ui_edit_form', $view, $display_id);
+    $build['preview'] = views_ui_build_preview($view, $display_id);
+  }
+  else {
+    $build = $display_id;
+  }
+
+  return $build;
+}
+
+function views_ui_build_preview($view, $display_id) {
+  if (isset($_POST['ajax_html_ids'])) {
+    unset($_POST['ajax_html_ids']);
+  }
+
+  $build = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('id' => 'views-preview-wrapper', 'class' => 'views-admin clearfix'),
+  );
+
+  $form_state = array('build_info' => array('args' => array($view, $display_id)));
+  $build['controls'] = drupal_build_form('views_ui_preview_form', $form_state);
+
+  $args = array();
+  if (!empty($form_state['values']['view_args'])) {
+    $args = explode('/', $form_state['values']['view_args']);
+  }
+
+  $build['preview'] = array(
+    '#theme_wrappers' => array('container'),
+    '#attributes' => array('id' => 'views-live-preview'),
+    '#markup' => views_ui_preview($view->clone_view(), $display_id, $args),
+  );
+
+  return $build;
+}
+
+/**
  * Form builder callback for editing a View.
  *
  * @todo Remove as many #prefix/#suffix lines as possible. Use #theme_wrappers
@@ -924,6 +930,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   //   - Update ctools_include() to support cached forms, or else use
   //     form_load_include().
   $form_state['no_cache'] = TRUE;
+
+  if ($display_id) {
+    $view->set_display($display_id);
+    $view->fix_missing_relationships();
+  }
 
   ctools_include('dependent');
   $form['#attached']['js'][] = ctools_attach_js('dependent');
@@ -1033,7 +1044,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form_state['display_id'] = $display_id;
 
     // The part of the page where editing will take place.
-    $view->set_display($display_id);
     // This element is the ctools collapsible-div container for the display edit elements.
     $form['displays']['settings'] = array(
       '#theme_wrappers' => array('container'),
@@ -1078,88 +1088,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       $form['displays']['settings']['settings_content']['tab_content']['#attributes']['class'][] = 'views-display-disabled';
     }
 
-    // Add preview controls
-    $form['#attached']['js'][] = ctools_attach_js('auto-submit');
-    $form['displays']['settings']['settings_content']['preview_controls'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array(
-        'class' => array(
-          'clearfix',
-        ),
-      ),
-      '#id' => 'edit-display-preview-controls',
-    );
-
-    // Add a checkbox controlling whether or not this display auto-previews.
-    $form['displays']['settings']['settings_content']['preview_controls']['live_preview'] = array(
-      '#type' => 'checkbox',
-      '#id' => 'edit-displays-live-preview',
-      '#title' => t('Auto preview'),
-      '#default_value' => variable_get('views_ui_always_live_preview', TRUE),
-    );
-
-    // Add the arguments textfield
-    $form['displays']['settings']['settings_content']['preview_controls']['view_args'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Preview with contextual filters:'),
-      '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
-      '#id' => 'preview-args',
-//      '#attributes' => array('class' => array('ctools-auto-submit')),
-    );
-
-    // Add the preview button
-    $form['displays']['settings']['settings_content']['preview_controls']['button'] = array(
-      '#type' => 'submit',
-      '#value' => t('Update preview'),
-      '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
-      '#pre_render' => array('ctools_dependent_pre_render'),
-      '#prefix' => '<div id="preview-submit-wrapper">',
-      '#suffix' => '</div>',
-      '#id' => 'preview-submit',
-      '#submit' => array('views_ui_edit_form_submit_preview'),
-      '#ajax' => array(
-        'path' => 'admin/structure/views/view/' . $view->name . '/edit/' . $display_id . '/ajax',
-        'callback' => 'views_ui_preview_callback',
-        'wrapper' => 'views-live-preview',
-        'event' => 'click',
-        'progress' => array('type' => 'throbber'),
-      ),
-      // Make ENTER in arguments textfield (and other controls) submit the form
-      // as this button, not the Save button.
-      // @todo This only works for JS users. To make this work for nojs users,
-      //   we may need to split Preview into a separate form.
-      '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
-    );
-
-    // Hide the button on the autopreview checkbox, but only based on a setting.
-//    if (!variable_get('views_ui_always_live_preview_button', FALSE)) {
-//      $form['displays']['settings']['settings_content']['preview_controls']['button']['#dependency'] = array(
-//        'edit-displays-live-preview' => array(0),
-//      );
-//    }
-
-    // The live preview.
-    // @todo: Figure out whether $view->preview and $view->editing might be enough already.
-    $view->views_ui_context = TRUE;
-
-    $form['displays']['preview'] = array(
-      '#theme_wrappers' => array('container'),
-      '#id' => 'views-live-preview',
-    );
-
-    $form['displays']['preview']['preview'] = array();
-    if (variable_get('views_ui_always_live_preview', TRUE) || !empty($form_state['show_preview']) || !empty($form_state['values']['displays']['settings']['settings_content']['preview_controls']['live_preview'])) {
-      $preview_args = isset($form_state['values']['displays']['settings']['settings_content']['preview_controls']['view_args']) ? $form_state['values']['displays']['settings']['settings_content']['preview_controls']['view_args'] : '';
-      $preview_args = ($preview_args !== '') ? explode('/', $preview_args) : array();
-      $form['displays']['preview']['preview'] += array(
-        '#type' => 'markup',
-        '#pre_render' => array_merge(array('views_ui_pre_render_preview'), element_info_property('markup', '#pre_render', array())),
-        '#view' => $view,
-        '#display_id' => $display_id,
-        '#preview_args' => $preview_args,
-      );
-    }
-
     // The content of the popup dialog.
     $form['ajax-area'] = array(
       '#theme_wrappers' => array('container'),
@@ -1181,6 +1109,66 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       $form['dummy_text_format'] = array('#type' => 'text_format', '#prefix' => '<div style="display:none">', '#suffix' => '</div>');
     }
   }
+
+  // If relationships had to be fixed, we want to get that into the cache
+  // so that edits work properly, and to try to get the user to save it
+  // so that it's not using weird fixed up relationships.
+  if (!empty($view->relationships_changed) && empty($_POST)) {
+    drupal_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
+    views_ui_cache_set($view);
+  }
+  return $form;
+}
+
+/**
+ * Provide the preview formulas and the preview output, too.
+ */
+function views_ui_preview_form($form, &$form_state, $view, $display_id = 'default') {
+  $form_state['no_cache'] = TRUE;
+  $form_state['view'] = $view;
+
+  $form['#attributes'] = array('class' => array('clearfix',));
+
+  // Add a checkbox controlling whether or not this display auto-previews.
+  $form['live_preview'] = array(
+    '#type' => 'checkbox',
+    '#id' => 'edit-displays-live-preview',
+    '#title' => t('Auto preview'),
+    '#default_value' => variable_get('views_ui_always_live_preview', TRUE),
+  );
+
+  // Add the arguments textfield
+  $form['view_args'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Preview with contextual filters:'),
+    '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
+    '#id' => 'preview-args',
+//      '#attributes' => array('class' => array('ctools-auto-submit')),
+  );
+
+  // Add the preview button
+  $form['button'] = array(
+    '#type' => 'submit',
+      '#value' => t('Update preview'),
+      '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
+    '#pre_render' => array('ctools_dependent_pre_render'),
+    '#prefix' => '<div id="preview-submit-wrapper">',
+    '#suffix' => '</div>',
+    '#id' => 'preview-submit',
+    '#submit' => array('views_ui_edit_form_submit_preview'),
+    '#ajax' => array(
+      'path' => 'admin/structure/views/view/' . $view->name . '/preview/' . $display_id . '/ajax',
+      'wrapper' => 'views-preview-wrapper',
+      'event' => 'click',
+      'progress' => array('type' => 'throbber'),
+      'method' => 'replace',
+    ),
+    // Make ENTER in arguments textfield (and other controls) submit the form
+    // as this button, not the Save button.
+    // @todo This only works for JS users. To make this work for nojs users,
+    //   we may need to split Preview into a separate form.
+    '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
+  );
 
   return $form;
 }
@@ -1210,7 +1198,8 @@ function views_ui_render_display_top($view, $display_id) {
       ),
       'analyze' => array(
         'title' => t('analyze view'),
-        'href' => "admin/structure/views/view/$view->name/analyze",
+        'href' => "admin/structure/views/nojs/analyze/$view->name/$display_id",
+        'attributes' => array('class' => array('views-ajax-link')),
       ),
       'clone' => array(
         'title' => t('clone view'),
@@ -1508,7 +1497,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $isEnabled = $display->handler->get_option('enabled');
 
   if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
-    $prefix = '<div class="ctools-button ctools-dropbutton"><div class="ctools-link"><a href="#" class="ctools-twisty ctools-text">open</a></div><div class="ctools-content"><ul class="horizontal right actions">';
+    $prefix = '<div class="ctools-no-js ctools-button ctools-dropbutton"><div class="ctools-link"><a href="#" class="ctools-twisty ctools-text">open</a></div><div class="ctools-content"><ul class="horizontal right actions">';
     $suffix = '</ul></div></div>';
     $itemElement = 'li';
   }
@@ -1539,6 +1528,20 @@ function views_ui_get_display_tab_details($view, $display) {
           '#prefix' => '<' . $itemElement . ' class="enable">',
           "#suffix" => '</' . $itemElement . '>',
         );
+      }
+      // Add a link to view the page.
+      elseif ($display->handler->has_path()) {
+        $path = $display->handler->get_path();
+        if (strpos($path, '%') === FALSE) {
+          $build['top']['actions']['path'] = array(
+            '#type' => 'link',
+            '#title' => t('view @display', array('@display' => $display->display_title)),
+            '#options' => array('alt' => array(t("Go to the real page for this display"))),
+            '#href' => $path,
+            '#prefix' => '<' . $itemElement . ' class="view">',
+            "#suffix" => '</' . $itemElement . '>',
+          );
+        }
       }
       if (!$isDefault) {
         $build['top']['actions']['duplicate'] = array(
@@ -1580,21 +1583,6 @@ function views_ui_get_display_tab_details($view, $display) {
         '#prefix' => '<' . $itemElement . ' class="undo-delete">',
         "#suffix" => '</' . $itemElement . '>',
       );
-    }
-
-    // Add a link to view the page.
-    if ($display->handler->has_path()) {
-      $path = $display->handler->get_path();
-      if (strpos($path, '%') === FALSE) {
-        $build['top']['actions']['path'] = array(
-          '#type' => 'link',
-          '#title' => t('View "@display"', array('@display' => $display->display_title)),
-          '#options' => array('alt' => array(t("Go to the real page for this display"))),
-          '#href' => $path,
-          '#prefix' => '<' . $itemElement . ' class="undo-delete">',
-          "#suffix" => '</' . $itemElement . '>',
-        );
-      }
     }
 
     // The area above the three columns.
@@ -1941,15 +1929,8 @@ function views_ui_import_validate($form, &$form_state) {
   }
 
   if (empty($view->api_version) || $view->api_version < 2) {
-    // Check for some value that would only exist on a Views 1 view.
-    if (isset($view->url) || isset($view->page) || isset($view->block)) {
-      views_include('convert');
-      $view = views1_import($view);
-      drupal_set_message(t('You are importing a view created in Views version 1. You may need to adjust some parameters to work correctly in version 2.'), 'warning');
-    }
-    else {
-      form_error($form['view'], t('That view is not compatible with this version of Views.'));
-    }
+    form_error($form['view'], t('That view is not compatible with this version of Views.
+      If you have a view from views1 you have to go to a drupal6 installation and import it there.'));
   }
   elseif ($view->api_version > views_api_version()) {
     form_error($form['view'], t('That view is created for the version @import_version of views, but you only have @api_version', array(
@@ -2683,6 +2664,10 @@ function views_ui_ajax_forms($key = NULL) {
       'form_id' => 'views_ui_edit_details_form',
       'args' => array(),
     ),
+    'analyze' => array(
+      'form_id' => 'views_ui_analyze_view_form',
+      'args' => array(),
+    ),
   );
 
   if ($key) {
@@ -2892,38 +2877,6 @@ function views_ui_remove_display_form_restore($form, &$form_state) {
 }
 
 /**
- * Page callback to display analysis information on a view.
- */
-function views_ui_analyze_view($js, $view) {
-  $form_state = array(
-    'view' => &$view,
-  );
-
-  return drupal_build_form('views_ui_analyze_view_form', $form_state);
-}
-
-/**
- * This form doesn't particularly do much; it's really just providing a link
- * but a button seems like it would be nicer here.
- *
- * It has no submit or anything, as we will never actually submit this form
- * where the form is placed.
- */
-function views_ui_analyze_view_button($form, &$form_state, $view) {
-  $form['#action'] = url("admin/structure/views/nojs/analyze/$view->name");
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Analyze'),
-    '#ajax' => array(
-      'path' => "admin/structure/views/ajax/analyze/$view->name",
-    ),
-  );
-
-  return $form;
-}
-
-/**
  * Form constructor callback to display analysis information on a view
  */
 function views_ui_analyze_view_form($form, &$form_state) {
@@ -3127,28 +3080,6 @@ function theme_views_ui_reorder_displays_form($vars) {
   $output .= drupal_render_children($form);
 
   return $output;
-}
-
-/**
- * This form doesn't particularly do much; it's really just providing a link
- * but a button seems like it would be nicer here.
- *
- * It has no submit or anything, as we will never actually submit this form
- * where the form is placed.
- */
-function views_ui_reorder_displays_button($form, &$form_state, $view) {
-  $display_id = $form_state['display_id'];
-  $form['#action'] = url("admin/structure/views/nojs/reorder-displays/$view->name/$display_id");
-  $form['#attributes'] = array('class' => array('views-ajax-form'));
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Reorder'),
-    '#ajax' => array(
-      'path' => "admin/structure/views/ajax/reorder-displays/$view->name/$display_id",
-    ),
-  );
-
-  return $form;
 }
 
 /**
@@ -4862,6 +4793,21 @@ function views_ui_admin_settings_advanced() {
     '#dependency' => array('edit-views-devel-output' => array(1)),
   );
 
+  $options = views_fetch_plugin_names('display_extender');
+  if (!empty($options)) {
+    $form['extenders'] = array(
+      '#type' => 'fieldset',
+    );
+    ;
+    $form['extenders']['views_display_extenders'] = array(
+      '#title' => t('Display extenders'),
+      '#default_value' => variable_get('views_display_extenders', array()),
+      '#options' => $options,
+      '#type' => 'checkboxes',
+      '#description' => t('Select extensions of the views interface.')
+    );
+  }
+
   return system_settings_form($form);
 }
 
@@ -5165,11 +5111,7 @@ function theme_views_ui_style_plugin_table($variables) {
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
-
-  if (drupal_strlen($title) > 25) {
-    $title = drupal_substr($title, 0, 25);
-    $title .= '...';
-  }
+  $title = views_ui_truncate($title, 25);
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {
     $changed = '*';

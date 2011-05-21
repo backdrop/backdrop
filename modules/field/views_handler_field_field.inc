@@ -66,6 +66,36 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
+   * Return TRUE if the user has access to view this field.
+   */
+  function access() {
+    $base_table = $this->get_base_table();
+    return field_access('view', $this->field_info, $this->definition['entity_tables'][$base_table]);
+  }
+
+  /**
+   * Set the base_table and base_table_alias.
+   */
+  function get_base_table() {
+    if (!isset($this->base_table)) {
+      // This base_table is coming from the entity not the field.
+      $this->base_table = $this->view->base_table;
+
+      // If the current field is under a relationship you can't be sure that the
+      // base table of the view is the base table of the current field.
+      // For example a field from a node author on a node view does have users as base table.
+      if (!empty($this->options['relationship']) && $this->options['relationship'] != 'none') {
+        $relationships = $this->view->display_handler->get_option('relationships');
+        $options = $relationships[$this->options['relationship']];
+        $data = views_fetch_data($options['table']);
+        $this->base_table = $data[$options['field']]['relationship']['base'];
+//            $this->base_table_alias = $relationship->alias;
+      }
+    }
+    return $this->base_table;
+  }
+
+  /**
    * Called to add the field to a query.
    *
    * By default, the only columns added to the query are entity_id and
@@ -77,23 +107,7 @@ class views_handler_field_field extends views_handler_field {
    * present in the query itself (such as "sphinx").
    */
   function query($use_groupby = FALSE) {
-    // This base_table is coming from the entity not the field.
-    $base_table_alias = $base_table = $this->view->base_table;
-
-    // If the current field is under a relationship you can't be sure that the
-    // base table of the view is the base table of the current field.
-    // For example a field from a node author on a node view does have users as base table.
-    if (!empty($this->relationship)) {
-      foreach ($this->view->relationship as $relationship) {
-        if ($relationship->alias == $this->relationship) {
-          $base_table = $relationship->definition['base'];
-          $base_table_alias = $relationship->alias;
-
-          $table_data = views_fetch_data($base_table);
-          $base_field = $table_data['table']['base']['field'];
-        }
-      }
-    }
+    $this->get_base_table();
 
     $params = array();
     if ($use_groupby) {
@@ -110,16 +124,23 @@ class views_handler_field_field extends views_handler_field {
     // Get the entity type according to the base table of the field.
     // Then add it to the query as a formula. That way we can avoid joining
     // the field table if all we need is entity_id and entity_type.
-    $entity_type = $this->definition['entity_tables'][$base_table];
+    $entity_type = $this->definition['entity_tables'][$this->base_table];
     $entity_info = entity_get_info($entity_type);
+
+    if (isset($this->relationship)) {
+      $this->base_table_alias = $this->relationship;
+    }
+    else {
+      $this->base_table_alias = $this->base_table;
+    }
 
     // We always need the base field (entity_id / revision_id).
     if (empty($this->definition['is revision'])) {
-      $this->field_alias = $this->query->add_field($base_table_alias, $entity_info['entity keys']['id'], '', $params);
+      $this->field_alias = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['id'], '', $params);
     }
     else {
-      $this->field_alias = $this->query->add_field($base_table_alias, $entity_info['entity keys']['revision'], '', $params);
-      $this->aliases['entity id'] = $this->query->add_field($base_table_alias, $entity_info['entity keys']['id'], '', $params);
+      $this->field_alias = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['revision'], '', $params);
+      $this->aliases['entity id'] = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['id'], '', $params);
     }
 
 
@@ -136,10 +157,21 @@ class views_handler_field_field extends views_handler_field {
 
     if ($use_groupby) {
       // Add the fields that we're actually grouping on.
-      $group_field_name = $this->definition['field_name'] . '_' . $this->options['group_column'];
-      if (in_array($group_field_name, $fields)) {
-        $fields = array($group_field_name => $group_field_name) + $this->options['group_columns'];
+      $options = array($this->options['group_column'] => $this->options['group_column']) + $this->options['group_columns'];
+
+      $fields = array();
+      $rkey = $this->definition['is revision'] ? 'FIELD_LOAD_REVISION' : 'FIELD_LOAD_CURRENT';
+      // Go through the list and determine the actual column name from field api.
+      foreach ($options as $column) {
+        $name = $column;
+        if (isset($this->field_info['storage']['details']['sql'][$rkey][$this->table][$column])) {
+          $name = $this->field_info['storage']['details']['sql'][$rkey][$this->table][$column];
+        }
+
+        $fields[$column] = $name;
       }
+
+      $this->group_fields = $fields;
     }
 
     // Add additional fields (and the table join itself) if needed.
@@ -477,12 +509,14 @@ class views_handler_field_field extends views_handler_field {
     );
 
     $options = drupal_map_assoc(array('bundle', 'language', 'entity_type'), 'ucfirst');
+
+    // Add on defined fields, noting that they're prefixed with the field name.
     $form['group_columns'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Group columns (additional)'),
       '#default_value' => $this->options['group_columns'],
       '#description' => t('Select any additional columns of this field to include in the query and to group on.'),
-      '#options' => $options,
+      '#options' => $options + $group_columns,
     );
   }
 
@@ -490,21 +524,15 @@ class views_handler_field_field extends views_handler_field {
     parent::groupby_form_submit($form, $form_state);
     $item =& $form_state['handler']->options;
 
-    if ($item['group_type'] != 'group') {
-      unset($item['group_column']);
-      unset($item['group_columns']);
-    }
-    else {
-      // Add settings for "field API" fields.
-      $item['group_column'] = $form_state['values']['options']['group_column'];
-      $item['group_columns'] = array_filter($form_state['values']['options']['group_columns']);
-    }
+    // Add settings for "field API" fields.
+    $item['group_column'] = $form_state['values']['options']['group_column'];
+    $item['group_columns'] = array_filter($form_state['values']['options']['group_columns']);
   }
 
   /**
    * Load the entities for all fields that are about to be displayed.
    */
-  function pre_render(&$values) {
+  function post_execute(&$values) {
     if (!empty($values)) {
       // Divide the entity ids by entity type, so they can be loaded in bulk.
       $entities_by_type = array();
@@ -553,10 +581,13 @@ class views_handler_field_field extends views_handler_field {
               'entity_type' => $entity_type,
               'entity' => $entities[$entity_id],
             );
-            // Push the field values directly into the results array to make themers the life a bit easier.
-            $values[$key]->{$this->definition['table'] . '_' . $entity_type . '_values'} = field_get_items($entity_type, $entities[$entity_id], $this->definition['field_name']);
           }
         }
+      }
+
+      // Now, transfer the data back into the resultset so it can be easily used.
+      foreach ($values as $row_id => &$value) {
+        $value->{'field_' . $this->options['id']} = $this->set_items($value, $row_id);
       }
     }
   }
@@ -587,25 +618,53 @@ class views_handler_field_field extends views_handler_field {
     }
   }
 
+  function get_items($values) {
+    return $values->{'field_' . $this->options['id']};
+  }
+
   /**
    * Return an array of items for the field.
-   *
-   * Items should be stored in the result array, if possible, as an array
-   * with 'value' as the actual displayable value of the item, plus
-   * any items that might be found in the 'alter' options array for
-   * creating links, such as 'path', 'fragment', 'query' etc, such a thing
-   * is to be made. Additionally, items that might be turned into tokens
-   * should also be in this array.
    */
-  function get_items($values) {
+  function set_items($values, $row_id) {
     if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity'])) {
       return array();
     }
 
     // Go ahead and render and store in $this->items.
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
+
     $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
     $langcode = $this->field_language($entity_type);
+    // If we are grouping, copy our group fields into the cloned entity.
+    // It's possible this will cause some weirdness, but there's only
+    // so much we can hope to do.
+    if (isset($this->group_fields)) {
+      // first, test to see if we have a base value.
+      $base_value = array();
+      // Note: We would copy original values here, but it can cause problems.
+      // For example, text fields store cached filtered values as
+      // 'safe_value' which doesn't appear anywhere in the field definition
+      // so we can't affect it. Other side effects could happen similarly.
+      $data = FALSE;
+      foreach ($this->group_fields as $field => $column) {
+        if (property_exists($values, $this->aliases[$column])) {
+          $base_value[$field] = $values->{$this->aliases[$column]};
+          if (isset($base_value[$field])) {
+            $data = TRUE;
+          }
+        }
+      }
+
+      // If any of our aggregated fields have data, fake it:
+      if ($data) {
+        // Now, overwrite the original value with our aggregated value.
+        // This overwrites it so there is always just one entry.
+        $entity->{$this->definition['field_name']}[$langcode] = array($base_value);
+      }
+      else {
+        $entity->{$this->definition['field_name']}[$langcode] = array();
+      }
+    }
 
     // The field we are trying to display doesn't exist on this entity.
     if (!isset($entity->{$this->definition['field_name']})) {
@@ -646,8 +705,11 @@ class views_handler_field_field extends views_handler_field {
       'type' => $this->options['type'],
       'settings' => $this->options['settings'],
       'label' => 'hidden',
+      // Pass the View object in the display so that fields can act on it.
+      'views_view' => $this->view,
+      'views_field' => $this,
+      'views_row_id' => $row_id,
     );
-
 
     $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
 
@@ -681,8 +743,15 @@ class views_handler_field_field extends views_handler_field {
     foreach ($field['columns'] as $id => $column) {
       // Use filter_xss_admin because it's user data and we can't be sure it is safe.
       // We know nothing about the data, though, so we can't really do much else.
-      if (isset($item['raw']) && is_scalar($item['raw'][$id])) {
-        $tokens['[' . $this->options['id'] . '-' . $id . ']'] = filter_xss_admin($item['raw'][$id]);
+
+      if (isset($item['raw'])) {
+        // If $item['raw'] is an array then we can use as is, if it's an object
+        // we cast it to an array, if it's neither, we can't use it.
+        $raw = is_array($item['raw']) ? $item['raw'] :
+               (is_object($item['raw']) ? (array)$item['raw'] : NULL);
+      }
+      if (isset($raw) && isset($raw[$id]) && is_scalar($raw[$id])) {
+        $tokens['[' . $this->options['id'] . '-' . $id . ']'] = filter_xss_admin($raw[$id]);
       }
     }
   }

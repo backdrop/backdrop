@@ -29,7 +29,12 @@ class views_plugin_display_block extends views_plugin_display {
     $desc = $this->get_option('block_description');
 
     if (empty($desc)) {
-      $desc = t('@view: @display', array('@view' => $this->view->get_human_name(), '@display' => $this->display->display_title));
+      if ($this->display->display_title == $this->definition['title']) {
+        $desc = t('View: @view', array('@view' => $this->view->get_human_name()));
+      }
+      else {
+        $desc = t('View: @view: @display', array('@view' => $this->view->get_human_name(), '@display' => $this->display->display_title));
+      }
     }
     return array(
       $delta => array(
@@ -74,14 +79,10 @@ class views_plugin_display_block extends views_plugin_display {
       $block_description = t('None');
     }
 
-    if (strlen($block_description) > 16) {
-      $block_description = drupal_substr($block_description, 0, 16) . '...';
-    }
-
     $options['block_description'] = array(
       'category' => 'block',
       'title' => t('Block name'),
-      'value' => $block_description,
+      'value' => views_ui_truncate($block_description, 24),
     );
 
     $cache_type = $this->get_option('block_caching');

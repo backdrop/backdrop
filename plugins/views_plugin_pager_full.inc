@@ -252,7 +252,9 @@ class views_plugin_pager_full extends views_plugin_pager {
     $items_per_page = $this->get_items_per_page();
     if (!empty($items_per_page)) {
       // Dump information about what we already know into the globals.
-      global $pager_page_array, $pager_total, $pager_total_items;
+      global $pager_page_array, $pager_total, $pager_total_items, $pager_limits;
+      // Set the limit.
+      $pager_limits[$this->options['id']] = $this->options['items_per_page'];
       // Set the item count for the pager.
       $pager_total_items[$this->options['id']] = $this->total_items;
       // Calculate and set the count of available pages.

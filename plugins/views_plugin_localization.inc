@@ -43,7 +43,7 @@ class views_plugin_localization extends views_plugin {
   function translate($source) {
     // Allow other modules to make changes to the string before and after translation
     $source['pre_process'] = $this->invoke_translation_process($source, 'pre');
-    $source['translation'] = $this->translate_string($source['value'], $source['keys']);
+    $source['translation'] = $this->translate_string($source['value'], $source['keys'], $source['format']);
     $source['post_process'] = $this->invoke_translation_process($source, 'post');
     return $source['translation'];
   }
@@ -56,8 +56,10 @@ class views_plugin_localization extends views_plugin {
    * @param $keys
    *   An array of keys to identify the string. Generally constructed from
    *   view name, display_id, and a property, e.g., 'header'.
+   * @param $format
+   *   The input format of the string. This is optional.
    */
-  function translate_string($string, $keys = array()) {}
+  function translate_string($string, $keys = array(), $format = '') {}
 
   /**
    * Save string source for translation.
@@ -68,7 +70,7 @@ class views_plugin_localization extends views_plugin {
   function save($source) {
     // Allow other modules to make changes to the string before saving
     $source['pre_process'] = $this->invoke_translation_process($source, 'pre');
-    $this->save_string($source['value'], $source['keys']);
+    $this->save_string($source['value'], $source['keys'], isset($source['format']) ? $source['format'] : '');
   }
 
   /**
@@ -79,8 +81,10 @@ class views_plugin_localization extends views_plugin {
    * @param $keys
    *   An array of keys to identify the string. Generally constructed from
    *   view name, display_id, and a property, e.g., 'header'.
+   * @param $format
+   *   The input format of the string. This is optional.
    */
-  function save_string($string, $keys = array()) {}
+  function save_string($string, $keys = array(), $format = '') {}
 
   /**
    * Delete a string.

@@ -89,14 +89,15 @@ function views_ui_menu() {
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
   ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/preview/%/ajax'] = array(
+    'page callback' => 'views_ui_build_preview',
+    'page arguments' => array(4, 6),
+    'delivery callback' => 'ajax_deliver',
+    'theme callback' => 'ajax_base_page_theme',
+    'type' => MENU_CALLBACK,
+  ) + $base;
 
   // Additional pages for acting on a View.
-  $items['admin/structure/views/view/%views_ui_cache/analyze'] = array(
-    'title' => 'Analyze',
-    'page callback' => 'views_ui_analyze_view',
-    'page arguments' => array(FALSE, 4),
-    'type' => MENU_VISIBLE_IN_BREADCRUMB,
-  ) + $base;
 
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
@@ -120,7 +121,6 @@ function views_ui_menu() {
 
   // NoJS/AJAX callbacks that require custom page callbacks.
   $ajax_callbacks = array(
-    //'analyze' => 'views_ui_analyze_view',
     'preview' => 'views_ui_preview',
   );
   foreach ($ajax_callbacks as $menu => $menu_callback) {
@@ -263,10 +263,10 @@ function views_ui_cache_load($name) {
   ctools_include('object-cache');
   views_include('view');
   $view = ctools_object_cache_get('view', $name);
+  $original_view = views_get_view($name);
 
   if (empty($view)) {
-    $view = views_get_view($name);
-
+    $view = $original_view;
     if (!empty($view)) {
       // Check to see if someone else is already editing this view.
       $view->locked = ctools_object_cache_test('view', $view->name);
@@ -274,6 +274,12 @@ function views_ui_cache_load($name) {
       // This flag will be used e.g. to determine whether strings
       // should be localized.
       $view->editing = TRUE;
+    }
+  }
+  else {
+    // Keep disabled/enabled status real.
+    if ($original_view) {
+      $view->disabled = !empty($original_view->disabled);
     }
   }
 
@@ -754,10 +760,10 @@ function _views_ui_get_paths($view) {
           $path_sort = strtolower($one_path);
         }
         if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
-          $all_paths[] = l($one_path, $one_path);
+          $all_paths[] = l('/' . $one_path, $one_path);
         }
         else {
-          $all_paths[] = check_plain($one_path);
+          $all_paths[] = check_plain('/' . $one_path);
         }
       }
     }
@@ -812,4 +818,31 @@ function views_ui_library_alter(&$libraries, $module) {
       drupal_add_js(drupal_get_path('module', 'views') . '/js/jquery.ui.dialog.patch.js', array('group' => JS_THEME));
     }
   }
+}
+
+/**
+ * Handle bad updates from alpha versions to beta versions.
+ *
+ * This function will ONLY be called if there is an old menu entry for
+ * this hanging around. This will force a menu rebuild and a cache clear
+ * which should resolve the problem.
+ */
+function views_ui_list_views() {
+  drupal_flush_all_caches();
+  menu_rebuild();
+  drupal_goto($_GET['q']);
+}
+
+/**
+ * Truncate strings to a set length and provide a ... if they truncated.
+ *
+ * This is often used in the UI to ensure long strings fit.
+ */
+function views_ui_truncate($string, $length) {
+  if (drupal_strlen($string) > $length) {
+    $string = drupal_substr($string, 0, $length);
+    $string .= '...';
+  }
+
+  return $string;
 }

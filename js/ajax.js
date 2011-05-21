@@ -145,7 +145,7 @@
         'progress': { 'type': 'throbber' }
       };
       // Bind AJAX behaviors to all items showing the class.
-      $('.views-ajax-link', context).once('views-ajax-processed').each(function () {
+      $('a.views-ajax-link', context).once('views-ajax-processed').each(function () {
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
         if ($(this).attr('href')) {
@@ -157,13 +157,16 @@
 
       $('div#views-live-preview a')
         .once('views-ajax-processed').each(function () {
+        // We don't bind to links without a URL.
+        if (!$(this).attr('href')) {
+          return true;
+        }
+
         var element_settings = base_element_settings;
         // Set the URL to go to the anchor.
-        if ($(this).attr('href')) {
-          element_settings.url = $(this).attr('href');
-          if (element_settings.url.substring(0, 22) != '/admin/structure/views') {
-            return true;
-          }
+        element_settings.url = $(this).attr('href');
+        if (Drupal.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
+          return true;
         }
 
         element_settings.wrapper = 'views-live-preview';

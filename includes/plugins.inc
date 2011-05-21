@@ -63,6 +63,7 @@ function views_views_plugins() {
         'help' => t('Attachments added to other displays to achieve multiple views in the same view.'),
         'handler' => 'views_plugin_display_attachment',
         'theme' => 'views_view',
+        'contextual links locations' => array(),
         'use ajax' => TRUE,
         'use pager' => FALSE,
         'use more' => TRUE,
@@ -79,6 +80,15 @@ function views_views_plugins() {
         'accept attachments' => FALSE,
         'admin' => t('Feed'),
         'help topic' => 'display-feed',
+      ),
+    ),
+    'display_extender' => array(
+      // Default settings for all display_extender plugins.
+      'default' => array(
+        'title' => t('Empty display extender'),
+        'help' => t('Default settings for this view.'),
+        'handler' => 'views_plugin_display_extender',
+        'no ui' => TRUE,
       ),
     ),
     'style' => array(

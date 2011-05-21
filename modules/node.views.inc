@@ -508,8 +508,8 @@ function node_views_data() {
   // revision timestamp
   // changed field
   $data['node_revision']['timestamp'] = array(
-    'title' => t('Created date'), // The item it appears as on the UI,
-    'help' => t('The date the content revision was created.'), // The help that appears on the UI,
+    'title' => t('Updated date'), // The item it appears as on the UI,
+    'help' => t('The date the node was last updated.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,

@@ -60,8 +60,13 @@ fieldset.fieldset-no-legend {
   padding-top: 2.5em;
 }
 
-.views-admin .form-item label.option {
+.views-admin .form-item label.option,
+#views-ui-preview-form .form-item label.option {
   font-size: 1em;
+}
+
+#views-ui-preview-form .form-submit {
+  margin-top: 3px;
 }
 
 .views-admin input.form-submit,
@@ -194,18 +199,18 @@ fieldset.fieldset-no-legend {
 
 /* @group Buttons */
 
-.ctools-button ul {
+.ctools-button-processed ul {
   margin: 0;
 }
 
 /* Override for input elements that are themed like ctools-buttons */
-.ctools-button input.form-submit:hover {
+.ctools-button-processed input.form-submit:hover {
   background-image: none;
   color: #0074BD;
   text-shadow: none;
 }
 
-.ctools-button input.form-submit:active {
+.ctools-button-processed input.form-submit:active {
   background: none;
   border: medium none;
   color: #0074BD;
@@ -243,7 +248,7 @@ table th {
 .views-displays .secondary > li:first-child {
  padding-left: 0;
 }
- 
+
 .views-admin .icon.add {
   background-position: center 3px;
 }
@@ -416,7 +421,7 @@ table th {
 
 /* @group Buttons */
 
-.ctools-button {
+.ctools-button-processed {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -445,7 +450,7 @@ table th {
   border-radius: 11px 11px 11px 11px;
 }
 
-.ctools-button:hover {
+.ctools-button-processed:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -471,7 +476,7 @@ table th {
       #f1f1f1 100%);
 }
 
-.ctools-dropbutton.open:hover {
+.ctools-dropbutton-processed.open:hover {
   background-image:
     -moz-linear-gradient(
       -90deg,
@@ -497,7 +502,7 @@ table th {
       #f9f9f9 100%);
 }
 
-.ctools-dropbutton.open {
+.ctools-dropbutton-processed.open {
   -moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
@@ -531,7 +536,7 @@ table th {
   color: #008BCB;
 }
 
-.views-ui-display-tab-actions .ctools-button input {
+.views-ui-display-tab-actions .ctools-button-processed input {
   color: #0074BD;
 }
 

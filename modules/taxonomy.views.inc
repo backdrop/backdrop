@@ -31,6 +31,14 @@ function taxonomy_views_data() {
     ),
   );
 
+  // Provide a "default relationship" to keep older views from choking.
+  $data['taxonomy_vocabulary']['table']['default_relationship'] = array(
+    'node' => array(
+      'table' => 'node',
+      'field' => 'term_node_tid',
+    ),
+  );
+
   // vocabulary name
   $data['taxonomy_vocabulary']['name'] = array(
     'title' => t('Name'), // The item it appears as on the UI,
@@ -54,6 +62,10 @@ function taxonomy_views_data() {
     'filter' => array(
       'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
       'handler' => 'views_handler_filter_vocabulary_machine_name',
+    ),
+    'argument' => array(
+      'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
+      'handler' => 'views_handler_argument_vocabulary_machine_name',
     ),
   );
   $data['taxonomy_vocabulary']['vid'] = array(
@@ -98,6 +110,14 @@ function taxonomy_views_data() {
     'taxonomy_index' => array(
       'field' => 'tid',
       'left_field' => 'tid',
+    ),
+  );
+
+  // Provide a "default relationship" to keep older views from choking.
+  $data['taxonomy_term_data']['table']['default_relationship'] = array(
+    'node' => array(
+      'table' => 'node',
+      'field' => 'term_node_tid',
     ),
   );
 
@@ -269,6 +289,14 @@ function taxonomy_views_data() {
       // links directly to taxonomy_term_data via tid
       'left_field' => 'tid',
       'field' => 'tid',
+    ),
+  );
+
+  // Provide a "default relationship" to keep older views from choking.
+  $data['taxonomy_term_hierarchy']['table']['default_relationship'] = array(
+    'node' => array(
+      'table' => 'node',
+      'field' => 'term_node_tid',
     ),
   );
 

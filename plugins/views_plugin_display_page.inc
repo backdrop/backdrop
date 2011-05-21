@@ -236,19 +236,15 @@ class views_plugin_display_page extends views_plugin_display {
       ),
     );
 
-    $path = strip_tags($this->get_option('path'));
+    $path = strip_tags('/' . $this->get_option('path'));
     if (empty($path)) {
       $path = t('None');
-    }
-
-    if (strlen($path) > 16) {
-      $path = substr($path, 0, 16) . '...';
     }
 
     $options['path'] = array(
       'category' => 'page',
       'title' => t('Path'),
-      'value' => $path,
+      'value' => views_ui_truncate($path, 24),
     );
 
     $menu = $this->get_option('menu');
@@ -269,14 +265,10 @@ class views_plugin_display_page extends views_plugin_display {
         break;
     }
 
-    if (strlen($menu_str) > 16) {
-      $menu_str = substr($menu_str, 0, 16) . '...';
-    }
-
     $options['menu'] = array(
       'category' => 'page',
       'title' => t('Menu'),
-      'value' => $menu_str,
+      'value' => views_ui_truncate($menu_str, 24),
     );
 
     // This adds a 'Settings' link to the style_options setting if the style has options.
@@ -522,5 +514,13 @@ class views_plugin_display_page extends views_plugin_display {
     }
 
     return $errors;
+  }
+
+  function get_argument_text() {
+    return array(
+      'filter value not present' => t('When the filter value is <em>NOT</em> in the URL'),
+      'filter value present' => t('When the filter value <em>IS</em> in the URL or a default is provided'),
+      'description' => t('The contextual filter values is provided by the URL.'),
+    );
   }
 }

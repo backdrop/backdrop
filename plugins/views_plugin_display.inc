@@ -33,6 +33,11 @@ class views_plugin_display extends views_plugin {
 
   var $handlers = array();
 
+  /**
+   * Stores all availible display extenders.
+   */
+  var $extender = array();
+
   function init(&$view, &$display, $options = NULL) {
     $this->view = &$view;
     $this->display = &$display;
@@ -45,7 +50,6 @@ class views_plugin_display extends views_plugin {
     if ($this->is_default_display() && isset($options['defaults'])) {
       unset($options['defaults']);
     }
-
     $this->unpack_options($this->options, $options);
 
     // Translate changed settings:
@@ -132,6 +136,20 @@ class views_plugin_display extends views_plugin {
     }
   }
 
+  function construct() {
+    // Load extenders as soon as possible
+    $this->extender = array();
+    $extenders = array_filter(variable_get('views_display_extenders', array()));
+    // If you update to the dev version the registry might not be loaded yet.
+    if (!empty($extenders) && class_exists('views_plugin_display_extender')) {
+      foreach ($extenders as $extender) {
+        $data = views_fetch_plugin_data('display_extender', $extender);
+        $this->extender[$extender] = new $data['handler']($view, $this);
+      }
+    }
+    parent::construct();
+  }
+
   function destroy() {
     parent::destroy();
 
@@ -145,6 +163,10 @@ class views_plugin_display extends views_plugin {
 
     if (isset($this->default_display)) {
       unset($this->default_display);
+    }
+
+    foreach ($this->extender as $extender) {
+      $extender->destroy();
     }
   }
 
@@ -224,7 +246,7 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
-   * Does the display have a more link enabled?
+   * Does the display have groupby enabled?
    */
   function use_group_by() {
     return $this->get_option('group_by');
@@ -317,6 +339,10 @@ class views_plugin_display extends views_plugin {
     if (empty($this->definition['use pager'])) {
       unset($sections['pager']);
       unset($sections['items_per_page']);
+    }
+
+    foreach ($this->extender as $extender) {
+      $extender->defaultable_sections($sections, $section);
     }
 
     if ($section) {
@@ -557,6 +583,11 @@ class views_plugin_display extends views_plugin {
     if ($this->is_default_display()) {
       unset($options['defaults']);
     }
+
+    foreach ($this->extender as $extender) {
+      $extender->option_definition($options);
+    }
+
     return $options;
   }
 
@@ -1167,6 +1198,10 @@ class views_plugin_display extends views_plugin {
       'value' => t('Information'),
       'desc' => t('Get information on how to theme this display'),
     );
+
+    foreach ($this->extender as $extender) {
+      $extender->options_summary($categories, $options);
+    }
   }
 
   /**
@@ -1607,6 +1642,9 @@ class views_plugin_display extends views_plugin {
         }
 
         foreach (list_themes() as $key => $theme) {
+          if (!empty($theme->info['hidden'])) {
+            continue;
+          }
           $options[$key] = $theme->info['name'];
         }
 
@@ -1826,6 +1864,9 @@ class views_plugin_display extends views_plugin {
         break;
     }
 
+    foreach ($this->extender as $extender) {
+      $extender->options_form($form, $form_state);
+    }
   }
 
   /**
@@ -1861,6 +1902,11 @@ class views_plugin_display extends views_plugin {
    */
   function options_validate(&$form, &$form_state) {
     switch ($form_state['section']) {
+      case 'display_title':
+        if (empty($form_state['values']['display_title'])) {
+          form_error($form['options']['display_title'], t('Display title may not be empty.'));
+        }
+        break;
       case 'css_class':
         $css_class = $form_state['values']['css_class'];
         if (preg_match('/[^a-zA-Z0-9-_ ]/', $css_class)) {
@@ -1870,12 +1916,12 @@ class views_plugin_display extends views_plugin {
       case 'display_id':
         if ($form_state['values']['display_id']) {
           if (preg_match('/[^a-zA-Z0-9_]/', $form_state['values']['display_id'])) {
-            form_error($form['display_id'], t('Display name must be letters, numbers, or underscores only.'));
+            form_error($form['options']['display_id'], t('Display name must be letters, numbers, or underscores only.'));
           }
 
           foreach ($this->view->display as $id => $display) {
             if ($id != $this->view->current_display && ($form_state['values']['display_id'] == $id || (isset($display->new_id) && $form_state['values']['display_id'] == $display->new_id))) {
-              form_error($form['display_id'], t('Display id should be unique.'));
+              form_error($form['options']['display_id'], t('Display id should be unique.'));
             }
           }
         }
@@ -1918,6 +1964,10 @@ class views_plugin_display extends views_plugin {
           $plugin->options_validate($form['pager_options'], $form_state);
         }
         break;
+    }
+
+    foreach ($this->extender as $extender) {
+      $extender->options_validate($form, $form_state);
     }
   }
 
@@ -2108,6 +2158,10 @@ class views_plugin_display extends views_plugin {
         }
         break;
     }
+
+    foreach ($this->extender as $extender) {
+      $extender->options_submit($form, $form_state);
+    }
   }
 
   /**
@@ -2150,7 +2204,11 @@ class views_plugin_display extends views_plugin {
   /**
    * Inject anything into the query that the display handler needs.
    */
-  function query() {  }
+  function query() {
+    foreach ($this->extender as $extender) {
+      $extender->query();
+    }
+  }
 
   /**
    * Not all display plugins will support filtering
@@ -2272,6 +2330,10 @@ class views_plugin_display extends views_plugin {
     if ($this->uses_exposed()) {
       $exposed_form = $this->get_plugin('exposed_form');
       $exposed_form->pre_execute();
+    }
+
+    foreach ($this->extender as $extender) {
+      $extender->pre_execute();
     }
   }
 
@@ -2618,6 +2680,25 @@ class views_plugin_display extends views_plugin {
     }
 
     return $output;
+  }
+
+  /**
+   * Provide some helpful text for the arguments.
+   * The result should contain of an array with
+   *   - filter value present: The title of the fieldset in the argument
+   *     where you can configure what should be done with a given argument.
+   *   - filter value not present: The tiel of the fieldset in the argument
+   *     where you can configure what should be done if the argument does not
+   *     exist.
+   *   - description: A description about how arguments comes to the display.
+   *     For example blocks don't get it from url.
+   */
+  function get_argument_text() {
+    return array(
+      'filter value not present' => t('When the filter value is <em>NOT</em> available'),
+      'filter value present' => t('When the filter value <em>IS</em> available or a default is provided'),
+      'description' => t("This display does not have a source for contextual filters, so no contextual filter value will be available unless you select 'Provide default'."),
+    );
   }
 }
 

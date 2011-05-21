@@ -197,7 +197,7 @@ class views_handler_sort extends views_handler {
   function expose_options() {
     $this->options['expose'] = array(
       'order' => $this->options['order'],
-      'label' => $this->ui_name(),
+      'label' => $this->definition['title'],
     );
   }
 }

@@ -8,7 +8,8 @@ By default, the style is <em>unformatted</em>, which means that there is very li
 
 Some styles use a separate <a href="topic:views/style-row">row style</a> to determine how each row of the View looks. This is useful for mixing and matching styles to more readily produce exactly the kind of output you need.
 
-Many styles can be <strong>grouped</strong>. For styles that can, there will be a 'grouping field' option; pick one of the fields to group by. This grouping field will be displayed as a header, and all rows will be displayed beneath it.
-With the Theme Developer module enabled, the field grouping in Views does not work. Disable the Theme Developer module before grouping by fields.
+Many styles can be <strong>grouped</strong>. For styles that can, there will be a 'grouping field' option; pick one of the fields to group by. Please see <a href="topic:views/style-grouping">Grouping in styles</a> for more information.
 
 Each style is its own entity.
+
+If you want your fields to be templatable, you need to use values that are acceptable in function names. That's actually more strict, since that basically limits you to alphanumeric and _. Even though Views may be able to query datastores that use special characters, naming is still important for use in templates.

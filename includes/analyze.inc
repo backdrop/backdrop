@@ -102,6 +102,17 @@ function views_ui_views_analyze($view) {
   if (count($view->display) < 2) {
     $ret[] = views_ui_analysis(t('This view has only a default display and therefore will not be placed anywhere on your site; perhaps you want to add a page or a block display.'), 'warning');
   }
+  // You can give a page display the same path as an alias existing in the
+  // system, so the alias will not work anymore. Report this to the user,
+  // because he probably wanted something else.
+  foreach ($view->display as $id => $display) {
+    if ($display->handler->has_path() && $path = $display->handler->get_option('path')) {
+      $normal_path = drupal_get_normal_path($path);
+      if ($path != $normal_path) {
+        $ret[] = views_ui_analysis(t('You have configured display %display with a path which is an path alias as well. This might lead to unwanted effects so better use an internal path.', array('%display' => $display->display_title)), 'warning');
+      }
+    }
+  }
 
   return $ret;
 }
