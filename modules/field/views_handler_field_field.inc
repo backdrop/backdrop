@@ -540,7 +540,7 @@ class views_handler_field_field extends views_handler_field {
       foreach ($values as $key => $object) {
         if (isset($object->{$this->field_alias}) && !isset($values[$key]->_field_data[$this->field_alias])) {
           $entity_type = $object->{$this->aliases['entity_type']};
-          if (empty($this->definition['revision id'])) {
+          if (empty($this->definition['is revision'])) {
             $entity_id = $object->{$this->field_alias};
             $entities_by_type[$entity_type][$key] = $entity_id;
           }

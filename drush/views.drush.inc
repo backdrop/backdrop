@@ -26,7 +26,7 @@ function views_drush_command() {
   $items['views-revert'] = array(
     'callback' => 'views_revert_views',
     'drupal dependencies' => array('views'),
-    'description' => dt('Revert overridden views to their default state. Make sure to backup first.'),
+    'description' => 'Revert overridden views to their default state. Make sure to backup first.',
     'arguments' => array(
       'views' => 'A space delimited list of view names.',
     ),
@@ -41,7 +41,7 @@ function views_drush_command() {
   $items['views-dev'] = array(
     'callback' => 'views_development_settings',
     'drupal dependencies' => array('views'),
-    'description' => dt('Setup the views settings to a more developer oriented value..'),
+    'description' => 'Setup the views settings to a more developer oriented value..',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     'aliases' => array('vd'),
   );
