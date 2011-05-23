@@ -71,6 +71,8 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
     $actions = parent::default_actions();
     unset($actions['summary asc']);
     unset($actions['summary desc']);
+    unset($actions['summary asc by count']);
+    unset($actions['summary desc by count']);
     return $actions;
   }
 
