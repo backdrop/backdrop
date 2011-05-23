@@ -14,7 +14,7 @@ class views_handler_area_text extends views_handler_area {
   function option_definition() {
     $options = parent::option_definition();
     $options['content'] = array('default' => '', 'translatable' => TRUE, 'format_key' => 'format');
-    $options['format'] = array('default' => filter_default_format());
+    $options['format'] = array('default' => NULL);
     $options['tokenize'] = array('default' => FALSE);
     return $options;
   }
@@ -26,7 +26,7 @@ class views_handler_area_text extends views_handler_area {
       '#type' => 'text_format',
       '#default_value' => $this->options['content'],
       '#rows' => 6,
-      '#format' => $this->options['format'],
+      '#format' => isset($this->options['format']) ? $this->options['format'] : filter_default_format(),
       '#wysiwyg' => FALSE,
     );
 
@@ -98,18 +98,6 @@ class views_handler_area_text extends views_handler_area {
    * Render a text area, using the proper format.
    */
   function render_textarea($value, $format) {
-    static $formats = array();
-
-    if (!array_key_exists($format, $formats)) {
-      if ($filter = filter_format_load($format)) {
-        $formats[$format] = $filter->name;
-      }
-    }
-
-    if (!isset($formats[$format])) {
-      return;
-    }
-
     if ($value) {
       $value = $this->view->style_plugin->tokenize_value($value, 0);
       return check_markup($value, $format, '', FALSE);
