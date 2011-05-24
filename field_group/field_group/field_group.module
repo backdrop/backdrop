@@ -1186,10 +1186,6 @@ function field_group_build_pre_render($element) {
  * stash fields and groups in it while we go deeper in the array.
  * @param Array $element
  *   The current element to analyse for grouping.
- * @param Array $root_element
- *   The root element to control.
- * @param String $parent
- *   the parent name to look for in each level.
  */
 function field_group_fields_nest(&$element) {
 
