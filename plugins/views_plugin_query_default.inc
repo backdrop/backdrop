@@ -176,6 +176,10 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
+    $options['query_comment'] = array(
+      'default' => '',
+      'bool' => FALSE,
+    );
     $options['field_language'] = array(
       'default' => '***CURRENT_LANGUAGE***',
     );
@@ -208,6 +212,12 @@ class views_plugin_query_default extends views_plugin_query {
       '#title' => t('Use Slave Server'),
       '#description' => t('This will make the query attempt to connect to a slave server if available.  If no slave server is defined or available, it will fall back to the default server.'),
       '#default_value' => !empty($this->options['slave']),
+    );
+    $form['query_comment'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Query Comment'),
+      '#description' => t('If set, this comment will be embedded in the query and passed to the SQL server. This can be helpful for logging or debugging.'),
+      '#default_value' => $this->options['query_comment'],
     );
 
     $entities = entity_get_info();
@@ -1220,6 +1230,11 @@ class views_plugin_query_default extends views_plugin_query {
 
     if (!empty($this->where) && $condition = $this->build_condition('where')) {
       $query->condition($condition);
+    }
+
+    // Add a query comment.
+    if (!empty($this->options['query_comment'])) {
+      $query->comment($this->options['query_comment']);
     }
 
     // Add all query substitutions as metadata.
