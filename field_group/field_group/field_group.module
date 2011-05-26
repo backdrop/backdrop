@@ -818,19 +818,20 @@ function field_group_library() {
 function field_group_field_extra_fields() {
   $extra = array();
 
-  $extra['user']['user'] = array(
-    'form' => array(
-      'contact' => array(
-        'label' => t('Contact'),
-        'description' => t('Contact user element'),
-        'weight' => -5,
-      ),
-      'picture' => array(
-        'label' => t('Picture'),
-        'description' => t('User picture'),
-        'weight' => -5,
-      ),
-    ),
+  $extra['user']['user'] = array('form' => array());
+
+  if (module_exists('contact')) {
+    $extra['user']['user']['form']['contact'] = array(
+      'label' => t('Contact'),
+      'description' => t('Contact user element'),
+      'weight' => -5,
+    );
+  }
+
+  $extra['user']['user']['form']['picture'] = array(
+    'label' => t('Picture'),
+    'description' => t('User picture'),
+    'weight' => -5,
   );
 
   return $extra;
@@ -1201,8 +1202,9 @@ function field_group_fields_nest(&$element) {
   // parent currently is situated.
   foreach ($element['#group_children'] as $child_name => $parent_name) {
     // Block denied fields (#access) before they are put in groups,
-    // or fields that were not processed (like field_permissions).
-    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access']) && (!isset($element[$child_name]['#processed']) || $element[$child_name]['#processed'] == TRUE)) {
+    // or fields (not groups) that don't have children (like field_permissions).
+    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access'])
+    && (isset($element['#groups'][$child_name]) || count(element_get_visible_children($element[$child_name])) > 0)) {
       // If this is a group, we have to use a reference to keep the reference
       // list intact (but if it is a field we don't mind).
       $group_references[$parent_name][$child_name] = &$element[$child_name];
