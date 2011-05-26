@@ -133,7 +133,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     $this->build_form_style($form, $form_state, 'page');
     $form['displays']['page']['options']['items_per_page'] = array(
-      '#title' => t('Items per page'),
+      '#title' => t('Items to display'),
       '#type' => 'textfield',
       '#default_value' => '10',
       '#size' => 5,
