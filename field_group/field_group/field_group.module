@@ -721,7 +721,7 @@ function field_group_remove_empty_groups(& $element, $groups) {
       if (in_array($name, $groups)) {
         field_group_remove_empty_groups($element[$name], $groups);
       }
-      $hasChildren = $hasChildren ? TRUE : isset($element[$name]['#type']);
+      $hasChildren = $hasChildren ? TRUE : (isset($element[$name]['#type']) || $name == 'account');
     }
   }
 
@@ -1221,9 +1221,10 @@ function field_group_fields_nest(&$element) {
   // direct access as we don't know where in the root_element hierarchy the
   // parent currently is situated.
   foreach ($element['#group_children'] as $child_name => $parent_name) {
-    // Block denied fields (#access) before they are put in groups,
-    // or fields (not groups) that don't have children (like field_permissions).
-    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access']) && (isset($element['#groups'][$child_name]) || count(element_get_visible_children($element[$child_name])) > 0)) {
+    // Block denied fields (#access) before they are put in groups.
+    // Fields (not groups) that don't have children (like field_permissions) are removed
+    // in field_group_field_group_build_pre_render_alter.
+    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access'])) {
       // If this is a group, we have to use a reference to keep the reference
       // list intact (but if it is a field we don't mind).
       $group_references[$parent_name][$child_name] = &$element[$child_name];
