@@ -688,5 +688,20 @@ function hook_views_preview_info_alter(&$rows, $view) {
 }
 
 /**
+ * This hooks allows to alter the links at the top of the view edit form.
+ * Some modules might want to add links there.
+ *
+ * @param $links
+ *   The links which will be displayed at the top of the view edit form.
+ * @param view $view
+ *   The full view object which is currently changed.
+ * @param $display_id
+ *   The current display id which is edited. For example that's 'default' or 'page_1'.
+ */
+function hook_views_ui_display_top_links_alter(&$links, $view, $display_id) {
+  // example code here
+}
+
+/**
  * @}
  */

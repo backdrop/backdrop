@@ -1216,6 +1216,10 @@ function views_ui_render_display_top($view, $display_id) {
       ),
     ),
   );
+
+  // Let other modules add additional links here.
+  drupal_alter('views_ui_display_top_links', $element['extra_actions']['#links'], $view, $display_id);
+
   if (isset($view->type) && $view->type != t('Default')) {
     if ($view->type == t('Overridden')) {
       $element['extra_actions']['#links']['revert'] = array(
