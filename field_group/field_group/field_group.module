@@ -702,12 +702,32 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   }
   else {
     // Fix the problem on forms with additional settings.
-    // @TODO check latest status: No problems to be solved here?
+    field_group_remove_empty_groups($element, $groups);
   }
 
   // Add the default field_group javascript and stylesheet.
   $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
   $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
+
+}
+
+function field_group_remove_empty_groups(& $element, $groups) {
+
+  $children = element_children($element);
+
+  $hasChildren = FALSE;
+  if (count($children)) {
+    foreach ($children as $name) {
+      if (in_array($name, $groups)) {
+        field_group_remove_empty_groups($element[$name], $groups);
+      }
+      $hasChildren = $hasChildren ? TRUE : isset($element[$name]['#type']);
+    }
+  }
+
+  if (!$hasChildren) {
+    $element['#access'] = FALSE;
+  }
 
 }
 
@@ -1203,8 +1223,7 @@ function field_group_fields_nest(&$element) {
   foreach ($element['#group_children'] as $child_name => $parent_name) {
     // Block denied fields (#access) before they are put in groups,
     // or fields (not groups) that don't have children (like field_permissions).
-    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access'])
-    && (isset($element['#groups'][$child_name]) || count(element_get_visible_children($element[$child_name])) > 0)) {
+    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access']) && (isset($element['#groups'][$child_name]) || count(element_get_visible_children($element[$child_name])) > 0)) {
       // If this is a group, we have to use a reference to keep the reference
       // list intact (but if it is a field we don't mind).
       $group_references[$parent_name][$child_name] = &$element[$child_name];
