@@ -60,6 +60,13 @@ class view extends views_db_object {
   // var $stack;
 
   /**
+   * Identifier of the current display.
+   *
+   * @var string
+   */
+  var $current_display;
+  
+  /**
    * Where the $query object will reside:
    *
    * @var views_plugin_query
