@@ -555,6 +555,32 @@ function hook_views_query_substitutions() {
 }
 
 /**
+ * This hook is called to get a list of placeholders and their substitutions,
+ * used when preprocessing a View with form elements.
+ */
+function hook_views_form_substitutions() {
+  return array(
+    '<!--views-form-example-substitutions-->' => 'Example Substitution',
+  );
+}
+
+/**
+ * Views form (View with form elements) validate handler.
+ * Called for all steps ($form_state['step']) of the multistep form.
+ */
+function hook_views_form_validate($form, &$form_state) {
+  // example code here
+}
+
+/**
+ * Views form (View with form elements) submit handler.
+ * Called for all steps ($form_state['step']) of the multistep form.
+ */
+function hook_views_form_submit($form, &$form_state) {
+  // example code here
+}
+
+/**
  * This hook is called at the very beginning of views processing,
  * before anything is done.
  *

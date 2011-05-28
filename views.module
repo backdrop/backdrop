@@ -16,6 +16,37 @@ function views_api_version() {
 }
 
 /**
+ * Implements hook_forms().
+ *
+ * To provide distinct form IDs for Views forms, the View name and
+ * specific display name are appended to the base ID,
+ * views_form_views_form. When such a form is built or submitted, this
+ * function will return the proper callback function to use for the given form.
+ */
+function views_forms($form_id, $args) {
+  if (strpos($form_id, 'views_form_') === 0) {
+    return array(
+      $form_id => array(
+        'callback' => 'views_form',
+      ),
+    );
+  }
+}
+
+/**
+ * Returns a form ID for a Views form using the name and display of the View.
+ */
+function views_form_id($view) {
+  $parts = array(
+    'views_form',
+    $view->name,
+    $view->current_display,
+  );
+
+  return implode('_', $parts);
+}
+
+/**
  * Views will not load plugins advertising a version older than this.
  */
 function views_api_minimum_version() {
@@ -99,6 +130,10 @@ function views_theme($existing, $type, $theme, $path) {
       }
     }
   }
+
+  $hooks['views_form_views_form'] = $base + array(
+    'render element' => 'form',
+  );
 
   $hooks['views_exposed_form'] = $base + array(
     'template' => 'views-exposed-form',
@@ -1434,6 +1469,154 @@ function vsm_trace() {
 
 function vpr_trace() {
   dpr(views_trace());
+}
+
+// ------------------------------------------------------------------
+// Views form (View with form elements)
+
+/**
+ * This is the entry function. Just gets the form for the current step.
+ * The form is always assumed to be multistep, even if it has only one
+ * step (the default 'views_form_vews_form' step). That way it is actually
+ * possible for modules to have a multistep form if they need to.
+ */
+function views_form($form, &$form_state, $view, $output) {
+  $form_state['step'] = isset($form_state['step']) ? $form_state['step'] : 'views_form_views_form';
+
+  $form = array();
+  $form['#validate'] = array('views_form_validate');
+  $form['#submit'] = array('views_form_submit');
+  // Tell the preprocessor whether it should hide the header, footer, pager...
+  $form['show_view_elements'] = array(
+    '#type' => 'value',
+    '#value' => ($form_state['step'] == 'views_form_views_form') ? TRUE : FALSE,
+  );
+
+  $form = $form_state['step']($form, $form_state, $view, $output);
+  return $form;
+}
+
+/**
+ * The basic form validate handler.
+ * Fires the hook_views_form_validate() function.
+ */
+function views_form_validate($form, &$form_state) {
+  // Fire the hook. Doesn't use module_invoke_all() because $form_state needs
+  // to be passed by reference.
+  foreach (module_implements('views_form_validate') as $module) {
+    $function = $module . '_views_form_validate';
+    $function($form, $form_state);
+  }
+}
+
+/**
+ * The basic form submit handler.
+ * Fires the hook_views_form_submit() function.
+ */
+function views_form_submit($form, &$form_state) {
+  // Fire the hook. Doesn't use module_invoke_all() because $form_state needs
+  // to be passed by reference.
+  foreach (module_implements('views_form_submit') as $module) {
+    $function = $module . '_views_form_submit';
+    $function($form, $form_state);
+  }
+}
+
+/**
+ * Callback for the main step of a Views form.
+ * Invoked by views_form().
+ */
+function views_form_views_form($form, &$form_state, $view, $output) {
+  $form['#prefix'] = '<div class="views-form">';
+  $form['#suffix'] = '</div>';
+  $form['#theme'] = 'views_form_views_form';
+  $form['#validate'][] = 'views_form_views_form_validate';
+  $form['#submit'][] = 'views_form_views_form_submit';
+
+  // Add the output markup to the form array so that it's included when the form
+  // array is passed to the theme function.
+  $form['output'] = array(
+    '#type' => 'markup',
+    '#markup' => $output,
+    // This way any additional form elements will go before the view
+    // (below the exposed widgets).
+    '#weight' => 50,
+  );
+
+  $substitutions = array();
+  foreach ($view->field as $field_name => $field) {
+    // If the field provides a views form, allow it to modify the $form array.
+    $has_form = FALSE;
+    if (property_exists($field, 'views_form_callback')) {
+      $callback = $field->views_form_callback;
+      $callback($view, $field, $form, $form_state);
+      $has_form = TRUE;
+    }
+    elseif (method_exists($field, 'views_form')) {
+      $field->views_form($form, $form_state);
+      $has_form = TRUE;
+    }
+
+    // Build the substitutions array for use in the theme function.
+    if ($has_form) {
+      foreach ($view->result as $row_id => $row) {
+        $substitutions[] = array(
+          'placeholder' => '<!--form-item-' . $field_name . '--' . $row_id . '-->',
+          'field_name' => $field_name,
+          'row_id' => $row_id,
+        );
+      }
+    }
+  }
+
+  $form['#substitutions'] = array(
+    '#type' => 'value',
+    '#value' => $substitutions,
+  );
+  $form['actions'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('form-actions')),
+    '#weight' => 100,
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Validate handler for the first step of the views form.
+ * Calls any existing views_form_validate functions located
+ * on the views fields.
+ */
+function views_form_views_form_validate($form, &$form_state) {
+  $view = $form_state['build_info']['args'][0];
+
+  // Call the validation method on every field handler that has it.
+  foreach ($view->field as $field_name => $field) {
+    if (method_exists($field, 'views_form_validate')) {
+      $field->views_form_validate($form, $form_state);
+    }
+  }
+}
+
+/**
+ * Submit handler for the first step of the views form.
+ * Calls any existing views_form_submit functions located
+ * on the views fields.
+ */
+function views_form_views_form_submit($form, &$form_state) {
+  $view = $form_state['build_info']['args'][0];
+
+  // Call the submit method on every field handler that has it.
+  foreach ($view->field as $field_name => $field) {
+    if (method_exists($field, 'views_form_submit')) {
+      $field->views_form_submit($form, $form_state);
+    }
+  }
 }
 
 // ------------------------------------------------------------------

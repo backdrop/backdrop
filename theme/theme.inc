@@ -140,6 +140,30 @@ function template_preprocess_views_view(&$vars) {
   }
   // Flatten the classes to a string for the template file.
   $vars['classes'] = implode(' ', $vars['classes_array']);
+
+  // Check the fields on the View to see if any are adding form elements.
+  $has_form_fields = FALSE;
+  foreach ($view->field as $field_name => $field) {
+    if (property_exists($field, 'views_form_callback') || method_exists($field, 'views_form')) {
+      $has_form_fields = TRUE;
+      break;
+    }
+  }
+  // If form fields were found in the View, reformat the View output as a form.
+  if ($has_form_fields) {
+    $form = drupal_get_form(views_form_id($view), $view, $vars['rows']);
+    // The form is requesting that all non-essential views elements be hidden,
+    // usually because the rendered step is not a view result.
+    if ($form['show_view_elements']['#value'] == FALSE) {
+      $vars['header'] = '';
+      $vars['exposed'] = '';
+      $vars['pager'] = '';
+      $vars['footer'] = '';
+      $vars['more'] = '';
+      $vars['feed_icon'] = '';
+    }
+    $vars['rows'] = drupal_render($form);
+  }
 }
 
 /**
@@ -842,6 +866,38 @@ function template_preprocess_views_exposed_form(&$vars) {
   }
   // This includes the submit button.
   $vars['button'] = drupal_render_children($form);
+}
+
+/**
+ * Theme function for a View with form elements: replace the placeholders.
+ */
+function theme_views_form_views_form($variables) {
+  $form = $variables['form'];
+
+  // Placeholders and their substitutions (usually rendered form elements).
+  $search = array();
+  $replace = array();
+
+  // Add in substitutions provided by the form.
+  foreach ($form['#substitutions']['#value'] as $substitution) {
+    $field_name = $substitution['field_name'];
+    $row_id = $substitution['row_id'];
+
+    $search[] = $substitution['placeholder'];
+    $replace[] = isset($form[$field_name][$row_id]) ? drupal_render($form[$field_name][$row_id]) : '';
+  }
+  // Add in substitutions from hook_views_form_substitutions().
+  $substitutions = module_invoke_all('views_form_substitutions');
+  foreach ($substitutions as $placeholder => $substitution) {
+    $search[] = $placeholder;
+    $replace[] = $substitution;
+  }
+
+  // Apply substitutions to the rendered output.
+  $form['output']['#markup'] = str_replace($search, $replace, $form['output']['#markup']);
+
+  // Render and add remaining form fields.
+  return drupal_render_children($form);
 }
 
 function theme_views_mini_pager($vars) {
