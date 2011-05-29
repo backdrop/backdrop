@@ -140,6 +140,9 @@ function field_group_theme() {
     'horizontal_tabs' => array(
       'render element' => 'element',
     ),
+    'multipage' => array(
+      'render element' => 'element',
+    ),
   );
 }
 
@@ -242,6 +245,18 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'closed',
+        'instance_settings' => array('classes' => '', 'required_fields' => 1),
+      ),
+      'multipage-group' => array(
+        'label' => ('Multipage group'),
+        'description' => t('This fieldgroup renders groups on separate pages.'),
+        'instance_settings' => array('classes' => '', 'move_button' => 0),
+      ),
+      'multipage' => array(
+        'label' => t('Multipage'),
+        'format_types' => array('start', 'no-start'),
+        'description' => t('This fieldgroup renders the content in a page.'),
+        'default_formatter' => 'no-start',
         'instance_settings' => array('classes' => '', 'required_fields' => 1),
       ),
       'accordion' => array(
@@ -382,14 +397,15 @@ function field_group_field_group_format_settings($group) {
       );
       break;
     case 'fieldset':
-      $form['instance_settings']['classes'] = array(
-        '#title' => t('Extra CSS classes'),
-        '#type' => 'textfield',
-        '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : $formatter['instance_settings']['classes'],
-        '#weight' => 3,
-        '#element_validate' => array('field_group_validate_css_class'),
-      );
       break;
+    case 'multipage-group':
+      $form['instance_settings']['move_button'] = array(
+        '#title' => t('Move submit button to last multipage'),
+        '#type' => 'select',
+        '#options' => array(0 => t('No'), 1 => t('Yes')),
+        '#default_value' => isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : $formatter['instance_settings']['move_button'],
+        '#weight' => 3,
+      );
     case 'tabs':
     case 'htabs':
     case 'accordion':
@@ -397,6 +413,8 @@ function field_group_field_group_format_settings($group) {
       if (isset($form['instance_settings']['required_fields'])) {
         unset($form['instance_settings']['required_fields']);
       }
+      break;
+    case 'multipage':
       break;
     case 'tab':
     case 'htab':
@@ -561,6 +579,38 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#description' => $description,
       );
       break;
+    // Multipage group.
+    case 'multipage-group':
+      $move_button = isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : 0;
+      drupal_add_js(array('multipage_move_submit' => $move_button), 'setting');
+      $element += array(
+        '#id' => $id,
+        '#type' => 'multipage',
+        '#weight' => $group->weight,
+        '#theme_wrappers' => array('multipage'),
+        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
+        '#suffix' => '</div>',
+      );
+      $form['#attached']['js'][] = 'misc/form.js';
+      $form['#attached']['js'][] = 'misc/collapse.js';
+      break;
+    // Multipage.
+    case 'multipage':
+      $classes  .= $group->format_settings['formatter'] == 'start' ? ' multipage-open' : ' multipage-closed';
+      $element += array(
+        '#id' => $id,
+        '#type' => 'fieldset',
+        '#title' => check_plain(t($group->label)),
+        '#weight' => $group->weight,
+        '#collapsible' => $collapsible,
+        '#collapsed' => $collapsed,
+        '#attributes' => array('class' => explode(" ", $classes)),
+        '#group' => $group->parent_name,
+        // very important. Cannot be added on the form!
+        '#parents' => array($group->parent_name),
+        '#description' => $description,
+      );
+      break;
     // Vertical tabs group.
     // Vertical tabs for forms need a little tricky approach, to be
     // able to optionally merge field(groups) with the "additional_settings"
@@ -711,6 +761,13 @@ function field_group_field_group_build_pre_render_alter(& $element) {
 
 }
 
+/**
+ * Remove empty groups on forms.
+ * @param array $element
+ *   The element to check the empty state.
+ * @param array $groups
+ *   Array of group objects.
+ */
 function field_group_remove_empty_groups(& $element, $groups) {
 
   $children = element_children($element);
@@ -807,6 +864,11 @@ function field_group_element_info() {
     '#default_tab' => '',
     '#process' => array('form_process_horizontal_tabs'),
   );
+  $types['multipage'] = array(
+    '#theme_wrappers' => array('multipage'),
+    '#default_tab' => '',
+    '#process' => array('form_process_multipage'),
+  );
   return $types;
 }
 
@@ -826,6 +888,18 @@ function field_group_library() {
     ),
     'css' => array(
       $path . '/horizontal-tabs/horizontal-tabs.css' => array(),
+    ),
+  );
+  // Multipage Tabs.
+  $libraries['multipage'] = array(
+    'title' => 'Multipage',
+    'website' => 'http://drupal.org/node/323112',
+    'version' => '1.0',
+    'js' => array(
+      $path . '/multipage/multipage.js' => array(),
+    ),
+    'css' => array(
+      $path . '/multipage/multipage.css' => array(),
     ),
   );
 
@@ -922,6 +996,64 @@ function theme_horizontal_tabs($variables) {
 
   $output = '<h2 class="element-invisible">' . t('Horizontal Tabs') . '</h2>';
   $output .= '<div class="horizontal-tabs-panes">' . $element['#children'] . '</div>';
+
+  return $output;
+}
+
+/**
+ * Creates a group formatted as multipage.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   fieldset.
+ * @param $form_state
+ *   The $form_state array for the form this horizontal tab widget belongs to.
+ * @return
+ *   The processed element.
+ */
+function form_process_multipage($element, &$form_state) {
+  // Inject a new fieldset as child, so that form_process_fieldset() processes
+  // this fieldset like any other fieldset.
+  $element['group'] = array(
+    '#type' => 'fieldset',
+    '#theme_wrappers' => array(),
+    '#parents' => $element['#parents'],
+  );
+
+  // The JavaScript stores the currently selected tab in this hidden
+  // field so that the active control can be restored the next time the
+  // form is rendered, e.g. on preview pages or when form validation
+  // fails.
+  $name = implode('__', $element['#parents']);
+  if (isset($form_state['values'][$name . '__active_control'])) {
+    $element['#default_tab'] = $form_state['values'][$name . '__active_control'];
+  }
+  $element[$name . '__active_control'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $element['#default_control'],
+    '#attributes' => array('class' => array('multipage-active-control')),
+  );
+
+  return $element;
+}
+
+/**
+ * Returns HTML for an element's children fieldsets as multipage.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties and children of the
+ *     fieldset. Properties used: #children.
+ *
+ * @ingroup themeable
+ */
+function theme_multipage($variables) {
+  $element = $variables['element'];
+  // Add required JavaScript and Stylesheet.
+  drupal_add_library('field_group', 'multipage');
+
+  $output = '<h2 class="element-invisible">' . t('Multipage') . '</h2>';
+  $output .= '<div class="multipage-panes">' . $element['#children'] . '</div>';
 
   return $output;
 }
