@@ -212,7 +212,7 @@ function _views_find_module_templates($cache, $path) {
           // Put the underscores back in for the hook name and register this pattern.
           $templates[strtr($file, '-', '_')] = array(
             'template' => $file,
-            'path' => dirname($files[$match]->filename),
+            'path' => dirname($files[$match]->uri),
             'variables' => $info['variables'],
             'base hook' => $hook,
             'includes' => isset($info['includes']) ? $info['includes'] : NULL,
