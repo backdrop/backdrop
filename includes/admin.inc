@@ -2129,7 +2129,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
     default:
       $rearrange_url = "admin/structure/views/nojs/rearrange/$view->name/$display->id/$type";
-      $rearrange_text = t('Sort');
+      $rearrange_text = t('Rearrange');
       $class = 'icon compact rearrange';
   }
 
@@ -2142,19 +2142,11 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
     'attributes'=> array('class' => array('icon compact add', 'views-ajax-link'), 'title' => t('Add'), 'id' => 'views-add-' . $type),
     'html' => TRUE,
   );
-  if ($count_handlers > 1) {
+  if ($count_handlers > 0) {
     $actions['rearrange'] = array(
       'title' => $rearrange_text,
       'href' => $rearrange_url,
       'attributes' => array('class' => array($class, 'views-ajax-link'), 'title' => t('Rearrange'), 'id' => 'views-rearrange-' . $type),
-      'html' => TRUE,
-    );
-  }
-  if ($count_handlers > 0) {
-    $actions['delete'] = array(
-      'title' => t('Delete'),
-      'href' => "admin/structure/views/nojs/delete-item/$view->name/$display->id/$type",
-      'attributes' => array('class' => array('icon compact delete', 'views-ajax-link'), 'title' => t('delete'), 'id' => 'views-delete-' . $type),
       'html' => TRUE,
     );
   }
@@ -2630,10 +2622,6 @@ function views_ui_ajax_forms($key = NULL) {
     ),
     'rearrange' => array(
       'form_id' => 'views_ui_rearrange_form',
-      'args' => array('type'),
-    ),
-    'delete-item' => array(
-      'form_id' => 'views_ui_item_delete_form',
       'args' => array('type'),
     ),
     'rearrange-filter' => array(
@@ -3834,150 +3822,6 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
   // Store in cache.
   views_ui_cache_set($form_state['view']);
 }
-
-/**
- * Form to delete multiple items at once.
- *
- * @todo: All this relationship stuff is there three times. This should be abstracted out.
- */
-function views_ui_item_delete_form($form, &$form_state) {
-  $view = &$form_state['view'];
-  $display_id = $form_state['display_id'];
-  $type = $form_state['type'];
-
-  $types = views_object_types();
-  if (!$view->set_display($display_id)) {
-    views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
-  }
-  $display = &$view->display[$display_id];
-  $form['#title'] = t('Delete @type', array('@type' => $types[$type]['ltitle']));
-  $form['#section'] = $display_id . 'delete-item';
-
-  if ($display->handler->defaultable_sections($types[$type]['plural'])) {
-    $form_state['section'] = $types[$type]['plural'];
-    views_ui_standard_display_dropdown($form, $form_state, $form_state['section']);
-  }
-
-  $count = 0;
-
-  // Get relationship labels
-  $relationships = array();
-  foreach ($display->handler->get_handlers('relationship') as $id => $handler) {
-    $relationships[$id] = $handler->label();
-    $handlers = $display->handler->get_option('relationships');
-    if ($handlers) {
-      foreach ($handlers as $id => $info) {
-        $handler = $display->handler->get_handler('relationship', $id);
-        $relationships[$id] = $handler->label();
-      }
-    }
-  }
-
-  // Filters can now be grouped so we do a little bit extra:
-  $groups = array();
-  $grouping = FALSE;
-  if ($type == 'filter') {
-    $group_info = $view->display_handler->get_option('filter_groups');
-    if (!empty($group_info['groups']) && count($group_info['groups']) > 1) {
-      $grouping = TRUE;
-      $groups = array(0 => array());
-    }
-  }
-
-  foreach ($display->handler->get_option($types[$type]['plural']) as $id => $field) {
-    $form['fields'][$id] = array('#tree' => TRUE);
-    $handler = $display->handler->get_handler($type, $id);
-    if ($handler) {
-      $name = $handler->ui_name() . ' ' . $handler->admin_summary();
-      if (!empty($field['relationship']) && !empty($relationships[$field['relationship']])) {
-        $name = '(' . $relationships[$field['relationship']] . ') ' . $name;
-      }
-
-      $form['fields'][$id]['name'] = array(
-        '#markup' => $name,
-      );
-    }
-    else {
-      $form['fields'][$id]['name'] = array('#markup' => t('Broken field @id', array('@id' => $id)));
-    }
-    $form['fields'][$id]['removed'] = array(
-      '#type' => 'checkbox',
-      '#id' => 'views-removed-' . $id,
-      '#attributes' => array('class' => array('views-remove-checkbox')),
-      '#default_value' => 0,
-    );
-  }
-
-  $name = NULL;
-  if (isset($form_state['update_name'])) {
-    $name = $form_state['update_name'];
-  }
-
-  views_ui_standard_form_buttons($form, $form_state, 'views_ui_item_delete_form');
-  return $form;
-}
-
-/**
- * Submit handler for delete form
- */
-function views_ui_item_delete_form_submit($form, &$form_state) {
-  $types = views_object_types();
-  $display = &$form_state['view']->display[$form_state['display_id']];
-
-  $old_fields = $display->handler->get_option($types[$form_state['type']]['plural']);
-  $new_fields = $order = array();
-
-  // Make an array with the weights
-  foreach ($form_state['values'] as $field => $info) {
-    // add each value that is a field, but only if
-    // it has had its 'removed' checkbox checked.
-    if (isset($form['fields'][$field]) && empty($info['removed'])) {
-      $order[$field] = $field;
-    }
-  }
-
-  // Sort the array
-  asort($order);
-
-  // Create a new list of fields in the new order.
-  foreach (array_keys($order) as $field) {
-    $new_fields[$field] = $old_fields[$field];
-  }
-  $display->handler->set_option($types[$form_state['type']]['plural'], $new_fields);
-
-  // Store in cache
-  views_ui_cache_set($form_state['view']);
-}
-
-/**
- * Turn the rearrange form into a proper table
- */
-function theme_views_ui_item_delete_form($variables) {
-  $form = $variables['form'];
-
-  $rows = array();
-  foreach (element_children($form['fields']) as $id) {
-    if (isset($form['fields'][$id]['name'])) {
-      $row = array();
-      $row[] = drupal_render($form['fields'][$id]['name']);
-      $row[] = drupal_render($form['fields'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => TRUE));
-      $rows[] = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
-    }
-  }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
-  }
-
-  $header = array('', t('Remove'));
-  $output = drupal_render($form['override']);
-  $output .= '<div class="scroll">';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
-  $output .= '</div>';
-  $output .= drupal_render_children($form);
-
-  return $output;
-}
-
 
 /**
  * Form to add_item items in the views UI.
