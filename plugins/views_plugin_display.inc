@@ -2524,7 +2524,20 @@ class views_plugin_display extends views_plugin {
       else {
         $handler_type = $type;
       }
-      $handler = views_get_handler($info['table'], $info['field'], $handler_type);
+      // If aggregation is on, the group type might override the actual
+      // handler that is in use. This piece of code checks that and,
+      // if necessary, sets the override handler.
+      $override = NULL;
+      if ($this->use_group_by() && !empty($info['group_type'])) {
+        if (empty($this->view->query)) {
+          $this->view->init_query();
+        }
+        $aggregate = $this->view->query->get_aggregation_info();
+        if (!empty($aggregate[$info['group_type']]['handler'][$type])) {
+          $override = $aggregate[$info['group_type']]['handler'][$type];
+        }
+      }
+      $handler = views_get_handler($info['table'], $info['field'], $handler_type, $override);
       if ($handler) {
         $handler->init($this->view, $info);
         $output .= $indent . '/* ' . $types[$type]['stitle'] . ': ' . $handler->ui_name() . " */\n";
