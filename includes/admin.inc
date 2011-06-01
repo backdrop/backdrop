@@ -4151,6 +4151,11 @@ function views_ui_config_item_form_submit_temporary($form, &$form_state) {
   // Store the item back on the view
   $form_state['view']->temporary_options[$type][$form_state['id']] = $handler->options;
 
+  // @todo: Figure out whether views_ui_ajax_form is perhaps the better place to fix the issue.
+  // views_ui_ajax_form() drops the current form from the stack, even if it's an #ajax.
+  // So add the item back to the top of the stack.
+  views_ui_add_form_to_stack($form_state['form_key'], $form_state['view'], $form_state['display_id'], array($type, $item['id']), TRUE);
+
   $form_state['rerender'] = TRUE;
   $form_state['rebuild'] = TRUE;
   // Write to cache
