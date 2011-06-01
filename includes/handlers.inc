@@ -1402,22 +1402,37 @@ class views_join {
             $join_table = $info['table'] . '.';
           }
 
-          $placeholder = ':views_join_condition_' . $select_query->nextPlaceholder();
+          // Convert a single-valued array of values to the single-value case,
+          // and transform from IN() notation to = notation
+          if (is_array($info['value']) && count($info['value']) == 1) {
+            if (empty($info['operator'])) {
+              $operator = '=';
+            }
+            else {
+              $operator = $info['operator'] == 'NOT IN' ? '!=' : '=';
+            }
+            $info['value'] = array_shift($info['value']);
+          }
 
           if (is_array($info['value'])) {
-            $operator = !empty($info['operator']) ? $info['operator'] : 'IN';
-            // Transform from IN() notation to = notation if just one value.
-            if (count($info['value']) == 1) {
-              $info['value'] = array_shift($info['value']);
-              $operator = $operator == 'NOT IN' ? '!=' : '=';
+            // With an array of values, we need multiple placeholders and the
+            // 'IN' operator is implicit.
+            foreach ($info['value'] as $value) {
+              $placeholder_i = ':views_join_condition_' . $select_query->nextPlaceholder();
+              $arguments[$placeholder_i] = $value;
             }
+
+            $operator = !empty($info['operator']) ? $info['operator'] : 'IN';
+            $placeholder = '( ' . implode(', ', array_keys($arguments)) . ' )';
           }
           else {
+            // With a single value, the '=' operator is implicit.
             $operator = !empty($info['operator']) ? $info['operator'] : '=';
+            $placeholder = ':views_join_condition_' . $select_query->nextPlaceholder();
+            $arguments[$placeholder] = $info['value'];
           }
 
           $extras[] = "$join_table$info[field] $operator $placeholder";
-          $arguments[$placeholder] = $info['value'];
         }
 
         if ($extras) {
