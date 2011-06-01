@@ -507,7 +507,7 @@ function views_schema_6011() {
 function views_update_6011() {
   $ret = array();
 
-  $caches = db_query("SELECT * FROM {views_object_cache}")->fetch();
+  $caches = db_query("SELECT * FROM {views_object_cache}");
   foreach ($caches as $item) {
     drupal_write_record('ctools_object_cache', $item);
   }

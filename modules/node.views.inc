@@ -465,7 +465,7 @@ function node_views_data() {
     'relationship' => array(
       'handler' => 'views_handler_relationship',
       'base' => 'node',
-      'base field' => 'nid',
+      'base field' => 'vid',
       'title' => t('Content'),
       'label' => t('Get the actual content from a content revision.'),
     ),
