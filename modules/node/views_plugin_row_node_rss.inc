@@ -54,10 +54,13 @@ class views_plugin_row_node_rss extends views_plugin_row {
 
 
   function pre_render($values) {
+    $nids = array();
     foreach ($values as $row) {
       $nids[] = $row->{$this->field_alias};
     }
-    $this->nodes = node_load_multiple($nids);
+    if (!empty($nids)) {
+      $this->nodes = node_load_multiple($nids);
+    }
   }
 
   function render($row) {
