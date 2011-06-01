@@ -967,7 +967,7 @@ class view extends views_db_object {
       // Let the theme play too, because pre render is a very themey thing.
       $function = $GLOBALS['theme'] . '_views_pre_render';
       if (function_exists($function)) {
-        $function($this, $this->display_handler->output, $cache);
+        $function($this);
       }
 
       // Give field handlers the opportunity to perform additional queries
