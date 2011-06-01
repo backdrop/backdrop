@@ -254,6 +254,7 @@ class views_handler extends views_object {
 
     // If grouping, check to see if the aggregation method needs to modify the field.
     if ($this->view->display_handler->use_group_by()) {
+      $this->view->init_query();
       $info = $this->query->get_aggregation_info();
       if (!empty($info[$this->options['group_type']]['method']) && function_exists($info[$this->options['group_type']]['method'])) {
         return $info[$this->options['group_type']]['method']($this->options['group_type'], $field);
@@ -341,6 +342,7 @@ class views_handler extends views_object {
 
     $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
+    $view->init_query();
     $info = $view->query->get_aggregation_info();
     foreach ($info as $id => $aggregate) {
       $group_types[$id] = $aggregate['title'];
