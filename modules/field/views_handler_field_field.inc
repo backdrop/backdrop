@@ -157,7 +157,14 @@ class views_handler_field_field extends views_handler_field {
 
     if ($use_groupby) {
       // Add the fields that we're actually grouping on.
-      $options = array($this->options['group_column'] => $this->options['group_column']) + $this->options['group_columns'];
+      $options = array();
+
+      if ($this->options['group_column'] != 'entity id') {
+        $options = array($this->options['group_column'] => $this->options['group_column']);
+      }
+
+      $options += $this->options['group_columns'];
+
 
       $fields = array();
       $rkey = $this->definition['is revision'] ? 'FIELD_LOAD_REVISION' : 'FIELD_LOAD_CURRENT';
@@ -408,7 +415,7 @@ class views_handler_field_field extends views_handler_field {
       '#title' => t('Display all values in the same row'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['group_rows'],
-      '#description' => t('If checked, multiple values for this field will be shown in the same row. If not checked, each value in this field will create a new row.'),
+      '#description' => t('If checked, multiple values for this field will be shown in the same row. If not checked, each value in this field will create a new row. If using group by, please make sure to group by "Entity ID" for this setting to have any effect.'),
       '#fieldset' => 'multiple_field_settings',
     );
 
@@ -499,7 +506,10 @@ class views_handler_field_field extends views_handler_field {
     parent::groupby_form($form, $form_state);
     // With "field API" fields, the column target of the grouping function
     // and any additional grouping columns must be specified.
-    $group_columns = drupal_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
+    $group_columns = array(
+      'entity id' => t('Entity ID'),
+    ) + drupal_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
+
     $form['group_column'] = array(
       '#type' => 'select',
       '#title' => t('Group column'),
@@ -638,7 +648,7 @@ class views_handler_field_field extends views_handler_field {
     // If we are grouping, copy our group fields into the cloned entity.
     // It's possible this will cause some weirdness, but there's only
     // so much we can hope to do.
-    if (isset($this->group_fields)) {
+    if (!empty($this->group_fields)) {
       // first, test to see if we have a base value.
       $base_value = array();
       // Note: We would copy original values here, but it can cause problems.
