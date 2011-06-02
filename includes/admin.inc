@@ -2562,7 +2562,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
     '#options' => $display_dropdown,
   );
   if ($current_display->handler->is_defaulted($section)) {
-    $form['override']['dropdown']['#default_value'] = 'default';
+    $form['override']['dropdown']['#default_value'] = 'defaults';
   }
   else {
     $form['override']['dropdown']['#default_value'] = $display_id;
