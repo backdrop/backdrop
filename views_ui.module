@@ -149,16 +149,6 @@ function views_ui_menu() {
 }
 
 /**
- * Implements hook_help().
- */
-function views_ui_help($path, $arg = '') {
-  switch ($path) {
-
-  }
- // return '<pre>'.print_r(views_ui_get_wizards(),1);
-}
-
-/**
  * Implements hook_theme().
  */
 function views_ui_theme() {
