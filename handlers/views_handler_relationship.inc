@@ -115,6 +115,7 @@ class views_handler_relationship extends views_handler {
     }
 
     $join->definition = $def;
+    $join->options = $this->options;
     $join->construct();
     $join->adjusted = TRUE;
 
