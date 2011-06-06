@@ -1180,7 +1180,10 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Go ahead and build the query.
     // db_select doesn't support to specify the key, so use getConnection directly.
-    $query = Database::getConnection($target, $key)->select($this->base_table, $this->base_table, $options)->addTag('views');
+    $query = Database::getConnection($target, $key)
+      ->select($this->base_table, $this->base_table, $options)
+      ->addTag('views')
+      ->addTag('views_' . $this->view->name);
 
     if (!empty($distinct)) {
       $query->distinct();
