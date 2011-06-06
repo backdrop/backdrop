@@ -644,7 +644,7 @@ class views_handler_field_field extends views_handler_field {
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
 
     $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
-    $langcode = $this->field_language($entity_type);
+    $langcode = $this->field_language($entity_type, $entity);
     // If we are grouping, copy our group fields into the cloned entity.
     // It's possible this will cause some weirdness, but there's only
     // so much we can hope to do.
@@ -770,7 +770,7 @@ class views_handler_field_field extends views_handler_field {
    * Return the language code of the language the field should be displayed in,
    * according to the settings.
    */
-  function field_language($entity_type) {
+  function field_language($entity_type, $entity) {
     global $language_content;
 
     if (field_is_translatable($entity_type, $this->field_info)) {
@@ -778,6 +778,12 @@ class views_handler_field_field extends views_handler_field {
       $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
                               array($language_content->language, $default_language),
                               $this->query->options['field_language']);
+
+      // Give the Field Language API a chance to fallback to a different language
+      // (or LANGUAGE_NONE), in case the field has no data for the selected language.
+      // field_view_field() does this as well, but since the returned language code
+      // is used before calling it, the fallback needs to happen explicitly.
+      $language = field_language($entity_type, $entity, $this->field_info['field_name'], $language);
 
       return $language;
     }
