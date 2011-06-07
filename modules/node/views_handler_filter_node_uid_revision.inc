@@ -5,7 +5,7 @@
  * Filter handler to check for revisions a certain user has created.
  */
 class views_handler_filter_node_uid_revision extends views_handler_filter_user_name {
-  function query() {
+  function query($group_by = FALSE) {
     $this->ensure_my_table();
 
     $placeholder = $this->placeholder();
