@@ -300,29 +300,30 @@ class views_plugin_display extends views_plugin {
    */
   function defaultable_sections($section = NULL) {
     $sections = array(
-      'access' => array('access'),
-      'access_options' => array('access_options'),
-      'cache' => array('cache'),
-      'cache_options' => array('cache_options'),
+      'access' => array('access', 'access_options'),
+      'access_options' => array('access', 'access_options'),
+      'cache' => array('cache', 'cache_options'),
+      'cache_options' => array('cache', 'cache_options'),
       'title' => array('title'),
       'css_class' => array('css_class'),
       'use_ajax' => array('use_ajax'),
       'hide_attachment_summary' => array('hide_attachment_summary'),
       'group_by' => array('group_by'),
       'query' => array('query'),
-      'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
-      'pager' => array('pager'),
-      'pager_options' => array('pager_options'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
-      'exposed_form' => array('exposed_form'),
-      'exposed_form_options' => array('exposed_form_options'),
 
       // Force these to cascade properly.
       'style_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
       'style_options' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
       'row_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
       'row_options' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
+
+      'pager' => array('pager', 'pager_options'),
+      'pager_options' => array('pager', 'pager_options'),
+
+      'exposed_form' => array('exposed_form', 'exposed_form_options'),
+      'exposed_form_options' => array('exposed_form', 'exposed_form_options'),
 
       // These guys are special
       'header' => array('header'),
@@ -368,14 +369,13 @@ class views_plugin_display extends views_plugin {
           'display_description' => FALSE,
           'use_ajax' => TRUE,
           'hide_attachment_summary' => TRUE,
-          'items_per_page' => TRUE,
-          'use_pager' => TRUE,
-          'offset' => TRUE,
           'pager' => TRUE,
+          'pager_options' => TRUE,
           'use_more' => TRUE,
           'use_more_always' => TRUE,
           'use_more_text' => TRUE,
           'exposed_form' => TRUE,
+          'exposed_form_options' => TRUE,
 
           'link_display' => TRUE,
           'group_by' => TRUE,
@@ -427,6 +427,10 @@ class views_plugin_display extends views_plugin {
         'default' => FALSE,
         'bool' => TRUE,
       ),
+      // This is legacy code:
+      // Items_per/offset/use_pager is moved to the pager plugin
+      // but the automatic update path needs this items defined, so don't remove it.
+      // @see views_plugin_display::init()
       'items_per_page' => array(
         'default' => 10,
       ),
