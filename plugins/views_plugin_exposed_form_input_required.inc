@@ -36,7 +36,6 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
     static $cache = NULL;
     if (!isset($cache)) {
       $view = $this->view;
-      $exposed_data = $view->exposed_data;
       if (is_array($view->filter) && count($view->filter)) {
         foreach ($view->filter as $filter_id => $filter) {
           if ($filter->is_exposed()) {
