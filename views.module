@@ -1475,6 +1475,26 @@ function vpr_trace() {
 // Views form (View with form elements)
 
 /**
+ * Returns TRUE if the passed-in view contains handlers with views form
+ * implementations, FALSE otherwise.
+ */
+function views_view_has_form_elements($view) {
+  foreach ($view->field as $field) {
+    if (property_exists($field, 'views_form_callback') || method_exists($field, 'views_form')) {
+      return TRUE;
+    }
+  }
+  $area_handlers = array_merge(array_values($view->header), array_values($view->footer));
+  $empty = empty($view->result);
+  foreach ($area_handlers as $area) {
+    if (method_exists($area, 'views_form') && !$area->views_form_empty($empty)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
  * This is the entry function. Just gets the form for the current step.
  * The form is always assumed to be multistep, even if it has only one
  * step (the default 'views_form_vews_form' step). That way it is actually
@@ -1569,6 +1589,15 @@ function views_form_views_form($form, &$form_state, $view, $output) {
     }
   }
 
+  // Give the area handlers a chance to extend the form.
+  $area_handlers = array_merge(array_values($view->header), array_values($view->footer));
+  $empty = empty($view->result);
+  foreach ($area_handlers as $area) {
+    if (method_exists($area, 'views_form') && !$area->views_form_empty($empty)) {
+      $area->views_form($form, $form_state);
+    }
+  }
+
   $form['#substitutions'] = array(
     '#type' => 'value',
     '#value' => $substitutions,
@@ -1578,7 +1607,6 @@ function views_form_views_form($form, &$form_state, $view, $output) {
     '#attributes' => array('class' => array('form-actions')),
     '#weight' => 100,
   );
-
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),

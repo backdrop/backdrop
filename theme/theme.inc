@@ -141,16 +141,8 @@ function template_preprocess_views_view(&$vars) {
   // Flatten the classes to a string for the template file.
   $vars['classes'] = implode(' ', $vars['classes_array']);
 
-  // Check the fields on the View to see if any are adding form elements.
-  $has_form_fields = FALSE;
-  foreach ($view->field as $field_name => $field) {
-    if (property_exists($field, 'views_form_callback') || method_exists($field, 'views_form')) {
-      $has_form_fields = TRUE;
-      break;
-    }
-  }
   // If form fields were found in the View, reformat the View output as a form.
-  if ($has_form_fields) {
+  if (views_view_has_form_elements($view)) {
     $form = drupal_get_form(views_form_id($view), $view, $vars['rows']);
     // The form is requesting that all non-essential views elements be hidden,
     // usually because the rendered step is not a view result.
