@@ -167,7 +167,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
           $quoted = array();
 
           if (get_class($view->query) == 'views_plugin_query_default') {
-            $arguments = $query->getArguments();
+            $quoted = $query->getArguments();
             $connection = Database::getConnection();
             foreach ($query->arguments() as $key => $val) {
               if (is_array($val)) {
