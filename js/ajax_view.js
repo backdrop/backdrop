@@ -34,7 +34,7 @@ Drupal.behaviors.ViewsAjaxView.attach = function() {
       $('form#views-exposed-form-' + settings.view_name.replace(/_/g, '-') + '-' + settings.view_display_id.replace(/_/g, '-'))
       .filter(':not(.views-processed)')
       .each(function () {
-        var button = $('input[type=submit]', this);
+        var button = $('input[type=submit], input[type=image]', this);
         button = button[0];
 
         var ajax = new Drupal.ajax($(button).attr('id'), button, element_settings);
