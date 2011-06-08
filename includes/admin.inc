@@ -4649,7 +4649,7 @@ function views_ui_admin_settings_advanced() {
     '#type' => 'radios',
     '#title' => t('Translation method'),
     '#options' => views_fetch_plugin_names('localization', NULL, array(), TRUE),
-    '#default_value' => variable_get('views_localization_plugin', 'core'),
+    '#default_value' => views_get_localization_plugin(),
     '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
   );
 

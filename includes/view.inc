@@ -1804,7 +1804,7 @@ class view extends views_db_object {
       return TRUE;
     }
 
-    $this->localization_plugin = views_get_plugin('localization', variable_get('views_localization_plugin', 'core'));
+    $this->localization_plugin = views_get_plugin('localization', views_get_localization_plugin());
 
     if (empty($this->localization_plugin)) {
       return FALSE;
