@@ -28,8 +28,8 @@
 <?php endif; ?>
 <div class="views-exposed-form">
   <div class="views-exposed-widgets clearfix">
-    <?php foreach($widgets as $id => $widget): ?>
-      <div class="views-exposed-widget views-widget-<?php print $id ?>">
+    <?php foreach ($widgets as $id => $widget): ?>
+      <div class="views-exposed-widget views-widget-<?php print $id; ?>">
         <?php if (!empty($widget->label)): ?>
           <label for="<?php print $widget->id; ?>">
             <?php print $widget->label; ?>
@@ -46,25 +46,25 @@
       </div>
     <?php endforeach; ?>
     <?php if (!empty($sort_by)): ?>
-      <div class="views-exposed-widget">
+      <div class="views-exposed-widget views-widget-sort-by">
         <?php print $sort_by; ?>
       </div>
-      <div class="views-exposed-widget">
+      <div class="views-exposed-widget views-widget-sort-order">
         <?php print $sort_order; ?>
       </div>
     <?php endif; ?>
     <?php if (!empty($items_per_page)): ?>
-      <div class="views-exposed-widget">
+      <div class="views-exposed-widget views-widget-per-page">
         <?php print $items_per_page; ?>
       </div>
     <?php endif; ?>
     <?php if (!empty($offset)): ?>
-      <div class="views-exposed-widget">
+      <div class="views-exposed-widget views-widget-offset">
         <?php print $offset; ?>
       </div>
     <?php endif; ?>
     <div class="views-exposed-widget views-submit-button">
-      <?php print $button ?>
+      <?php print $button; ?>
     </div>
     <?php if (!empty($reset_button)): ?>
       <div class="views-exposed-widget views-reset-button">
