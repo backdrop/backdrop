@@ -1310,12 +1310,18 @@ class views_plugin_display extends views_plugin {
           '#title' => t('Do not display more link unless there is more content'),
           '#description' => t("This will display the more link even if there are no more items to display."),
           '#default_value' => !$this->get_option('use_more_always'),
+            '#dependency' => array(
+              'edit-use-more' => array(TRUE),
+            ),
         );
         $form['use_more_text'] = array(
           '#type' => 'textfield',
           '#title' => t('More link text'),
           '#description' => t("The text to display for the more link."),
           '#default_value' => $this->get_option('use_more_text'),
+          '#dependency' => array(
+            'edit-use-more' => array(TRUE),
+          ),
         );
         break;
       case 'group_by':
