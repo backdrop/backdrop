@@ -1344,7 +1344,7 @@ function views_view_is_disabled($view) {
  *   The name of the view.
  * @param $reset
  *   If TRUE, reset this entry in the load cache.
- * @return $view
+ * @return view
  *   A reference to the $view object. Use $reset if you're sure you want
  *   a fresh one.
  */
