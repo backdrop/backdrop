@@ -1242,10 +1242,7 @@ class view extends views_db_object {
       $human_name = $this->human_name;
     }
     else {
-      $human_name = $this->get_title();
-      if (empty($human_name)) {
-        $human_name = $this->name;
-      }
+      $human_name = $this->name;
     }
     return $human_name;
   }

@@ -2066,7 +2066,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
   }
 
   $form_state['view']->save();
-  drupal_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->name)));
+  drupal_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->get_human_name())));
 
   // Make sure menu items get rebuilt as neces
   menu_rebuild();
