@@ -59,7 +59,7 @@ class views_handler_field_field extends views_handler_field {
 
       // Otherwise, we only limit values if the user hasn't selected "all", 0, or
       // the value matching field cardinality.
-      if (intval($this->options['delta_limit']) && ($this->options['delta_limit'] != $field['cardinality'])) {
+      if ((intval($this->options['delta_limit']) && ($this->options['delta_limit'] != $field['cardinality'])) || intval($this->options['delta_offset'])) {
         $this->limit_values = TRUE;
       }
     }
@@ -698,6 +698,12 @@ class views_handler_field_field extends views_handler_field {
       else {
         $delta_limit = $this->options['delta_limit'];
         $offset = intval($this->options['delta_offset']);
+
+        // We should only get here in this case if there's an offset, and
+        // in that case we're limiting to all values after the offset.
+        if ($delta_limit == 'all') {
+          $delta_limit = count($all_values) - $offset;
+        }
       }
 
       $new_values = array();
