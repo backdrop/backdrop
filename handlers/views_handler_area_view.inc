@@ -21,7 +21,7 @@ class views_handler_area_view extends views_handler_area {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $views = views_get_all_views();
-    foreach ($views as $view->name => $view) {
+    foreach ($views as $view) {
       // Exclude the current view
       if ($view->name != $this->view->name) {
         foreach ($view->display as $display_id => $display) {
