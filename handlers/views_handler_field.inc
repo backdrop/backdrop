@@ -548,7 +548,7 @@ class views_handler_field extends views_handler {
 
     $form['element_wrapper_type_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Customize field and label HTML'),
+      '#title' => t('Customize field and label wrapper HTML'),
       '#default_value' => !empty($this->options['element_wrapper_type']) || (string) $this->options['element_wrapper_type'] == '0' || !empty($this->options['element_wrapper_class']) || (string) $this->options['element_wrapper_class'] == '0',
       '#fieldset' => 'style_settings',
     );
@@ -557,7 +557,7 @@ class views_handler_field extends views_handler {
       '#options' => $this->get_elements(FALSE),
       '#type' => 'select',
       '#default_value' => $this->options['element_wrapper_type'],
-      '#description' => t('Choose the HTML element to wrap around this field and label, e.g. H1, H2, etc.'),
+      '#description' => t('Choose the HTML element to wrap around this field and label, e.g. H1, H2, etc. This may not be used if the field and label are not rendered together, such as with a table.'),
       '#dependency' => array(
         'edit-options-element-wrapper-type-enable' => array(1),
       ),
