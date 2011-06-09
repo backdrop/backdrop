@@ -293,7 +293,7 @@ function views_menu() {
   $items['views/ajax'] = array(
     'title' => 'Views',
     'page callback' => 'views_ajax',
-    'theme callback' => 'views_ajax_theme_callback',
+    'theme callback' => 'ajax_base_page_theme',
     'delivery callback' => 'ajax_deliver',
     'access callback' => TRUE,
     'description' => 'Ajax callback for view loading.',
@@ -304,7 +304,7 @@ function views_menu() {
   // the generic ajax callback.
   $items['admin/views/ajax/autocomplete/user'] = array(
     'page callback' => 'views_ajax_autocomplete_user',
-    'theme callback' => 'views_ajax_theme_callback',
+    'theme callback' => 'ajax_base_page_theme',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -314,25 +314,13 @@ function views_menu() {
   // does not support a vid a argument anymore
   $items['admin/views/ajax/autocomplete/taxonomy'] = array(
     'page callback' => 'views_ajax_autocomplete_taxonomy',
-    'theme callback' => 'views_ajax_theme_callback',
+    'theme callback' => 'ajax_base_page_theme',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
   return $items;
-}
-
-/**
- * Menu theme callback.
- *
- * This simply ensures that Views' ajax calls are rendered in the same
- * theme as the original page to prevent .css file confusion.
- */
-function views_ajax_theme_callback() {
-  if (!empty($_POST['ajax_page_state']['theme'])) {
-    return $_POST['ajax_page_state']['theme'];
-  }
 }
 
 /**

@@ -80,7 +80,7 @@ function views_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'weight' => -10,
-    'theme callback' => 'views_ajax_theme_callback',
+    'theme callback' => 'ajax_base_page_theme',
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/edit/%/ajax'] = array(
     'page callback' => 'views_ui_ajax_get_form',
