@@ -396,13 +396,16 @@ function views_ui_clone_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('View name'),
     '#default_value' => $name,
+    '#size' => 32,
+    '#maxlength' => 255,
   );
 
   $form['name'] = array(
     '#title' => t('View name'),
     '#type' => 'machine_name',
     '#required' => TRUE,
-    '#maxlength' => 255,
+    '#maxlength' => 32,
+    '#size' => 32,
     '#machine_name' => array(
       'exists' => 'ctools_export_ui_edit_name_exists',
       'source' => array('human_name'),
