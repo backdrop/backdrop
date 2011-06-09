@@ -12,7 +12,7 @@ class views_handler_filter_locale_language extends views_handler_filter_in_opera
         '***DEFAULT_LANGUAGE***' => t("Default site language"),
         LANGUAGE_NONE => t('No language')
       );
-      $languages = array_merge($languages, locale_language_list());
+      $languages = array_merge($languages, views_language_list());
       $this->value_options = $languages;
     }
   }

@@ -766,6 +766,34 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
 }
 
 /**
+ * Returns array of language names.
+ *
+ * This is a one to one copy of locale_language_list because we can't rely on enabled locale module.
+ *
+ * @param $field
+ *   'name' => names in current language, localized
+ *   'native' => native names
+ * @param $all
+ *   Boolean to return all languages or only enabled ones
+ *
+ * @see locale_language_list
+ */
+function views_language_list($field = 'name', $all = FALSE) {
+  if ($all) {
+    $languages = language_list();
+  }
+  else {
+    $languages = language_list('enabled');
+    $languages = $languages[1];
+  }
+  $list = array();
+  foreach ($languages as $language) {
+    $list[$language->language] = ($field == 'name') ? t($language->name) : $language->$field;
+  }
+  return $list;
+}
+
+/**
  * Implements hook_flush_caches().
  */
 function views_flush_caches() {

@@ -240,7 +240,7 @@ class views_plugin_query_default extends views_plugin_query {
         '***DEFAULT_LANGUAGE***' => t("Default site language"),
         LANGUAGE_NONE => t('Language neutral'),
       );
-      $languages = array_merge($languages, locale_language_list());
+      $languages = array_merge($languages, views_language_list());
 
       $form['field_language'] = array(
         '#type' => 'select',
