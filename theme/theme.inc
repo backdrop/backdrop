@@ -262,7 +262,7 @@ function template_preprocess_views_view_fields(&$vars) {
         if ($object->element_label_type) {
           $class = '';
           if ($object->handler->options['element_default_classes']) {
-            $class = 'views-label-' . $object->class;
+            $class = 'views-label views-label-' . $object->class;
           }
 
           $element_label_class = $object->handler->element_label_classes($view->row_index);
