@@ -615,7 +615,7 @@ class views_handler_field_field extends views_handler_field {
       }
 
       if ($this->options['multi_type'] == 'separator') {
-        return implode(check_plain($this->options['separator']), $items);
+        return implode(filter_xss_admin($this->options['separator']), $items);
       }
       else {
         return theme('item_list',
