@@ -17,14 +17,14 @@
  * @ingroup views_templates
  */
 ?>
-<table class="<?php print $classes; ?>"<?php print $attributes; ?>>
+<table <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
   <?php if (!empty($title)) : ?>
     <caption><?php print $title; ?></caption>
   <?php endif; ?>
   <thead>
     <tr>
       <?php foreach ($header as $field => $label): ?>
-        <th class="<?php print $header_classes[$field]; ?>">
+        <th <?php if ($header_classes[$field]) { print 'class="'. $header_classes[$field] . '" '; } ?>>
           <?php print $label; ?>
         </th>
       <?php endforeach; ?>
@@ -34,7 +34,7 @@
     <?php foreach ($rows as $count => $row): ?>
       <tr class="<?php print implode(' ', $row_classes[$count]); ?>">
         <?php foreach ($row as $field => $content): ?>
-          <td class="<?php print $field_classes[$field][$count]; ?>" <?php print drupal_attributes($field_attributes[$field][$count]); ?>>
+          <td <?php if ($field_classes[$field][$count]) { print 'class="'. $field_classes[$field][$count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$count]); ?>>
             <?php print $content; ?>
           </td>
         <?php endforeach; ?>
