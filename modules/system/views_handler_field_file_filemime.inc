@@ -12,7 +12,7 @@ class views_handler_field_file_filemime extends views_handler_field_file {
 
   function options_form(&$form, &$form_state) {
     $form['filemime_image'] = array(
-      '#title' => t('Display an icon representing the file type, instead of the MIME text (such as "image/jpeg").'),
+      '#title' => t('Display an icon representing the file type, instead of the MIME text (such as "image/jpeg")'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['filemime_image']),
     );

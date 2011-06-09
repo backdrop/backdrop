@@ -229,7 +229,7 @@ class views_handler_filter extends views_handler {
       '#attributes' => array('class' => array('js-only')),
     );
     $form['expose_button']['checkbox']['checkbox'] = array(
-      '#title' => t('Expose this filter to visitors, to allow them to change it.'),
+      '#title' => t('Expose this filter to visitors, to allow them to change it'),
       '#type' => 'checkbox',
     );
 

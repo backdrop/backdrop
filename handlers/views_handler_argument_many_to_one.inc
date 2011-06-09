@@ -50,7 +50,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
     if (!empty($this->definition['numeric'])) {
       $form['break_phrase'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Allow multiple values.'),
+        '#title' => t('Allow multiple values'),
         '#description' => t('If selected, users can enter multiple values in the form of 1+2+3 (for OR) or 1,2,3 (for AND).'),
         '#default_value' => !empty($this->options['break_phrase']),
         '#fieldset' => 'more',
@@ -59,7 +59,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
 
     $form['add_table'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow multiple filter values to work together.'),
+      '#title' => t('Allow multiple filter values to work together'),
       '#description' => t('If selected, multiple instances of this filter can work together, as though multiple values were supplied to the same filter. This setting is not compatible with the "Reduce duplicates" setting.'),
       '#default_value' => !empty($this->options['add_table']),
       '#fieldset' => 'more',

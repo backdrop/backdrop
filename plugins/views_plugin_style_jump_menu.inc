@@ -56,7 +56,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
     $form['hide'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Hide the "Go" button.'),
+      '#title' => t('Hide the "Go" button'),
       '#default_value' => !empty($this->options['hide']),
       '#description' => t('If hidden, this button will only be hidden for users with javascript and the page will automatically jump when the select is changed.'),
     );
@@ -76,7 +76,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
     $form['default_value'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Select the current contextual filter value.'),
+      '#title' => t('Select the current contextual filter value'),
       '#default_value' => !empty($this->options['default_value']),
       '#description' => t('If checked, the current path will be displayed as the default option in the jump menu, if applicable.'),
     );

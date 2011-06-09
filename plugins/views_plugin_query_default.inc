@@ -251,7 +251,7 @@ class views_plugin_query_default extends views_plugin_query {
       );
       $form['field_language_add_to_query'] = array(
         '#type' => 'checkbox',
-        '#title' => t('When needed, add the field language condition to the query.'),
+        '#title' => t('When needed, add the field language condition to the query'),
         '#default_value' => $this->options['field_language_add_to_query'],
       );
     }

@@ -26,7 +26,7 @@ class views_handler_argument_numeric extends views_handler_argument {
     // allow + for or, , for and
     $form['break_phrase'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow multiple values.'),
+      '#title' => t('Allow multiple values'),
       '#description' => t('If selected, users can enter multiple values in the form of 1+2+3 (for OR) or 1,2,3 (for AND).'),
       '#default_value' => !empty($this->options['break_phrase']),
       '#fieldset' => 'more',
