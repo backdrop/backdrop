@@ -29,7 +29,7 @@
 <div class="views-exposed-form">
   <div class="views-exposed-widgets clearfix">
     <?php foreach ($widgets as $id => $widget): ?>
-      <div class="views-exposed-widget views-widget-<?php print $id; ?>">
+      <div id="<?php print $widget->id; ?>-wrapper" class="views-exposed-widget views-widget-<?php print $id; ?>">
         <?php if (!empty($widget->label)): ?>
           <label for="<?php print $widget->id; ?>">
             <?php print $widget->label; ?>
