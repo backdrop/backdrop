@@ -378,12 +378,13 @@ class views_ui extends ctools_export_ui {
  */
 function views_ui_clone_form($form, &$form_state) {
   $counter = 1;
+  $view = views_get_view($form_state['original name']);
   do {
     if (empty($form_state['item']->is_template)) {
-      $name = format_plural($counter, 'Clone of', 'Clone @count of') . ' ' . $form_state['original name'];
+      $name = format_plural($counter, 'Clone of', 'Clone @count of') . ' ' . $view->get_human_name();
     }
     else {
-      $name = $form_state['original name'];
+      $name = $view->get_human_name();
       if ($counter > 1) {
         $name .= ' ' . $counter;
       }
