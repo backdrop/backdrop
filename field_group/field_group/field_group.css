@@ -2,15 +2,14 @@
 @CHARSET "UTF-8";
 
 /**
- * Override for fieldsets in vertical tabs.
- * All legends where displayed none, breaking the 
- * nested field_group formatters.
+ * Fix for fieldsets in vertical tabs.
+ * Note that this can only be hardcoded to the Seven theme
+ * where people who override this, are in trouble.
  */
-.vertical-tabs legend {
-  display: block;
-}
-.vertical-tabs-pane>legend {
-  display: none;
+.vertical-tabs fieldset.default-fallback {
+  margin: 1em 0;
+  padding: 2.5em 0 0;
+  border: 1px solid #CCCCCC;
 }
 
 /**

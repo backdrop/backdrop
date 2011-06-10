@@ -804,7 +804,6 @@ function field_group_field_group_is_empty($element, $groups) {
 
   // Loop throug the children from current element.
   foreach (element_children($element) as $name) {
-
     // Fields are found in the element.
     if (!$empty) {
       return FALSE;

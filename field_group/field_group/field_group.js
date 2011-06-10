@@ -163,6 +163,11 @@ Drupal.behaviors.fieldGroup = {
         }
       });
     });
+
+    // Fixes css for fieldgroups under vertical tabs.
+    $('.fieldset-wrapper .fieldset > legend').css({display: 'block'});
+    $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
+    
   }
 };
 
