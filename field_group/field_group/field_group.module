@@ -555,6 +555,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element += array(
         '#id' => $id,
         '#type' => 'horizontal_tabs',
+        '#title' => check_plain(t($group->label)),
         '#weight' => $group->weight,
         '#theme_wrappers' => array('horizontal_tabs'),
         '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
@@ -586,6 +587,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element += array(
         '#id' => $id,
         '#type' => 'multipage',
+        '#title' => check_plain(t($group->label)),
         '#weight' => $group->weight,
         '#theme_wrappers' => array('multipage'),
         '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
@@ -993,7 +995,7 @@ function theme_horizontal_tabs($variables) {
   // Add required JavaScript and Stylesheet.
   drupal_add_library('field_group', 'horizontal-tabs');
 
-  $output = '<h2 class="element-invisible">' . t('Horizontal Tabs') . '</h2>';
+  $output = '<h2 class="element-invisible">' . (!empty($element['#title']) ? $element['#title'] : t('Horizontal Tabs')) . '</h2>';
   $output .= '<div class="horizontal-tabs-panes">' . $element['#children'] . '</div>';
 
   return $output;
@@ -1051,7 +1053,7 @@ function theme_multipage($variables) {
   // Add required JavaScript and Stylesheet.
   drupal_add_library('field_group', 'multipage');
 
-  $output = '<h2 class="element-invisible">' . t('Multipage') . '</h2>';
+  $output = '<h2 class="element-invisible">' . (!empty($element['#title']) ? $element['#title'] : t('Multipage')) . '</h2>';
   $output .= '<div class="multipage-panes">' . $element['#children'] . '</div>';
 
   return $output;
