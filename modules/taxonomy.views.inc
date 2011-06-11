@@ -226,7 +226,7 @@ function taxonomy_views_data() {
       'field' => 'tid',
     ),
     'node' => array(
-      // links directly to node via vid
+      // links directly to node via nid
       'left_field' => 'nid',
       'field' => 'nid',
     ),
