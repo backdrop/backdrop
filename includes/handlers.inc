@@ -978,7 +978,7 @@ function views_break_phrase_string($str, &$handler = NULL) {
     $handler->operator = 'or';
     $handler->value = preg_split('/[+ ]/', $str);
   }
-  else if (preg_match('/^(\w+,)*\w+$/', $str)) {
+  else if (preg_match('/^((\w|\s)+,)*(\w|\s)+$/', $str)) {
     $handler->operator = 'and';
     $handler->value = explode(',', $str);
   }

@@ -66,6 +66,10 @@ class ViewsHandlersTest extends ViewsSqlTest {
     $this->assertEqual('and', $handler->operator);
     $this->assertEqualValue(array('word1', 'word2', 'word'), views_break_phrase_string('word1,,word2,word', $handler));
     $this->assertEqual('and', $handler->operator);
+    $this->assertEqualValue(array('word1 word2', 'word'), views_break_phrase_string('word1 word2,word', $handler));
+    $this->assertEqual('and', $handler->operator);
+    $this->assertEqualValue(array('word1', 'word2 word'), views_break_phrase_string('word1,word2 word', $handler));
+    $this->assertEqual('and', $handler->operator);
   }
 
   /**
