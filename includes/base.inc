@@ -20,6 +20,13 @@ class views_object {
    * @var view
    */
   var $view = NULL;
+  
+  /**
+   * Handler's definition
+   *
+   * @var array
+   */
+  var $definition;
 
   /**
    * Information about options for all kinds of purposes will be held here.
