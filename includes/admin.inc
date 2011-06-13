@@ -2485,20 +2485,13 @@ function views_ui_standard_submit($form, &$form_state) {
   if ($was_defaulted === $is_defaulted) {
     // We're not changing which display these form values apply to.
     // Run the regular submit handler for this form.
-    $submit_handler = $form['#form_id'] . '_submit';
-    if (function_exists($submit_handler)) {
-      $submit_handler($form, $form_state);
-    }
   }
   elseif ($was_defaulted && !$is_defaulted) {
     // We were using the default display's values, but we're now overriding
     // the default display and saving values specific to this display.
-    // TODO: Document why the regular form submit handler isn't necessary in
-    // this case.
     $display = &$form_state['view']->display[$form_state['display_id']];
     $display->handler->options_override($form, $form_state);
     $display->handler->options_submit($form, $form_state);
-    views_ui_cache_set($form_state['view']);
   }
   elseif (!$was_defaulted && $is_defaulted) {
     // We used to have an override for this display, but the user now wants
@@ -2508,14 +2501,11 @@ function views_ui_standard_submit($form, &$form_state) {
     $display = &$form_state['view']->display[$form_state['display_id']];
     $display->handler->options_override($form, $form_state);
     $display->handler->options_submit($form, $form_state);
+  }
 
-    // TODO: This is copy/paste code. Refactor.
-    $submit_handler = $form['#form_id'] . '_submit';
-    if (function_exists($submit_handler)) {
-      $submit_handler($form, $form_state);
-    }
-
-    views_ui_cache_set($form_state['view']);
+  $submit_handler = $form['#form_id'] . '_submit';
+  if (function_exists($submit_handler)) {
+    $submit_handler($form, $form_state);
   }
 }
 
