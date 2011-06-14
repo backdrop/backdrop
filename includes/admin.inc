@@ -3895,6 +3895,22 @@ function views_ui_add_item_form($form, &$form_state) {
       $group = preg_replace('/[^a-z0-9]/', '-', strtolower($option['group']));
       $groups[$group] = $option['group'];
       $grouped_options[$group][$key] = $option;
+      if (!empty($option['aliases'])) {
+        foreach ($option['aliases'] as $id => $alias) {
+          if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
+            $copy = $option;
+            $copy['group'] = $alias['group'];
+            $copy['title'] = $alias['title'];
+            if (isset($alias['help'])) {
+              $copy['help'] = $alias['help'];
+            }
+
+            $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
+            $groups[$group] = $copy['group'];
+            $grouped_options[$group][$key . '$' . $id] = $copy;
+          }
+        }
+      }
     }
 
     foreach ($grouped_options as $group => $group_options) {
@@ -3947,6 +3963,10 @@ function views_ui_add_item_form_submit($form, &$form_state) {
     // Loop through each of the items that were checked and add them to the view.
     foreach (array_keys(array_filter($form_state['values']['name'])) as $field) {
       list($table, $field) = explode('.', $field, 2);
+
+      if ($cut = strpos($field, '$')) {
+        $field = substr($field, 0, $cut);
+      }
       $id = $form_state['view']->add_item($form_state['display_id'], $type, $table, $field);
 
       // check to see if we have group by settings
@@ -4840,7 +4860,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
             if (isset($info[$key]['moved to'])) {
               continue;
             }
-            foreach (array('title', 'group', 'help', 'base') as $string) {
+            foreach (array('title', 'group', 'help', 'base', 'aliases') as $string) {
               // First, try the lowest possible level
               if (!empty($info[$key][$string])) {
                 $strings[$field][$key][$string] = $info[$key][$string];
@@ -4854,7 +4874,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
                 $strings[$field][$key][$string] = $table_data['table'][$string];
               }
               else {
-                if ($string != 'base') {
+                if ($string != 'base' && $string != 'base') {
                   $strings[$field][$key][$string] = t("Error: missing @component", array('@component' => $string));
                 }
               }

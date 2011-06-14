@@ -44,12 +44,14 @@ function field_views_data() {
  */
 function field_views_field_label($field_name) {
   $label_counter = array();
+  $all_labels = array();
   // Count the amount of instances per label per field.
   $instances = field_info_instances();
-  foreach ($instances as $entity_type) {
+  foreach ($instances as $entity_name => $entity_type) {
     foreach ($entity_type as $bundle) {
       if (isset($bundle[$field_name])) {
         $label_counter[$bundle[$field_name]['label']] = isset($label_counter[$bundle[$field_name]['label']]) ? ++$label_counter[$bundle[$field_name]['label']] : 1;
+        $all_labels[$entity_name][$bundle[$field_name]['label']] = TRUE;
       }
     }
   }
@@ -59,7 +61,7 @@ function field_views_field_label($field_name) {
   // Sort the field lables by it most used label and return the most used one.
   arsort($label_counter);
   $label_counter = array_keys($label_counter);
-  return $label_counter[0];
+  return array($label_counter[0], $all_labels);
 }
 
 /**
@@ -82,23 +84,32 @@ function field_views_field_default_views_data($field) {
   $bundles_names = array();
   $supports_revisions = FALSE;
   $entity_tables = array();
-  $group_name = count($field['bundles']) > 1 ? t('Fields') : NULL;
+  $current_tables = array();
+  $revision_tables = array();
+  $groups = array();
+
+  $group_name = count($field['bundles']) > 1 ? t('Field') : NULL;
 
   // Build the relationships between the field table and the entity tables.
   foreach ($field['bundles'] as $entity => $bundles) {
     $entity_info = entity_get_info($entity);
-    if (empty($group_name)) {
-      $group_name = $entity_info['label'];
+    $groups[$entity] = $entity_info['label'];
 
-      // Override Node to Content.
-      if ($group_name == t('Node')) {
-        $group_name = t('Content');
-      }
+    // Override Node to Content.
+    if ($groups[$entity] == t('Node')) {
+      $groups[$entity] = t('Content');
+    }
+
+    // If only one bundle use this as the default name.
+    if (empty($group_name)) {
+      $group_name = $groups[$entity];
     }
 
     $entity_tables[$entity_info['base table']] = $entity;
+    $current_tables[$entity] = $entity_info['base table'];
     if (isset($entity_info['revision table'])) {
       $entity_tables[$entity_info['revision table']] = $entity;
+      $revision_tables[$entity] = $entity_info['revision table'];
     }
 
     $data[$current_table]['table']['join'][$entity_info['base table']] = array(
@@ -143,7 +154,7 @@ function field_views_field_default_views_data($field) {
   // level, not at the instance level. So we just go through all instances
   // and take the one which is used the most frequently.
   $field_name = $field['field_name'];
-  $label = field_views_field_label($field_name);
+  list($label, $all_labels) = field_views_field_label($field_name);
   foreach ($tables as $type => $table) {
     if ($type == FIELD_LOAD_CURRENT) {
       $group = $group_name;
@@ -161,13 +172,47 @@ function field_views_field_default_views_data($field) {
       'group' => $group,
       'title' => $label,
       'title short' => $label,
-      'help' =>  t('Appears in: @bundles', array('@bundles' => implode(', ', $bundles_names))),
+      'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
     );
+
+    // Go through and create a list of aliases for all possible combinations of
+    // entity type + name.
+    $aliases = array();
+    $also_known = array();
+    foreach ($all_labels as $entity_name => $labels) {
+      foreach ($labels as $label_name => $true) {
+        if ($type == FIELD_LOAD_CURRENT) {
+          if ($group_name != $groups[$entity_name] || $label != $label_name) {
+            $aliases[] = array(
+              'base' => $current_tables[$entity_name],
+              'group' => $groups[$entity_name],
+              'title' => $label_name,
+              'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $label)),
+            );
+          }
+          $also_known[] = t('@group: @field', array('@group' => $groups[$entity_name], '@field' => $label_name));
+        }
+        else {
+          if ($group_name != $groups[$entity_name] && $label != $label_name) {
+            $aliases[] = array(
+              'base' => $revision_tables[$entity_name],
+              'group' => t('@group (historical data)', array('@group' => $groups[$entity_name])),
+              'title' => $label_name,
+              'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $label)),
+            );
+          }
+          $also_known[] = t('@group (historical data): @field', array('@group' => $groups[$entity_name], '@field' => $label_name));
+        }
+      }
+    }
+    if ($aliases) {
+      $data[$table][$column]['aliases'] = $aliases;
+      $data[$table][$column]['help'] .= ' ' . t('Also known as: !also.', array('!also' => implode(', ', $also_known)));
+    }
 
     $keys = array_keys($field['columns']);
     $real_field = reset($keys);
     $data[$table][$column]['field'] = array(
-//      'field' => $column,
       'table' => $table,
       'handler' => 'views_handler_field_field',
       'click sortable' => TRUE,
@@ -236,8 +281,36 @@ function field_views_field_default_views_data($field) {
         'group' => $group,
         'title' => $title,
         'title short' => $title_short,
-        'help' =>  t('Appears in: @bundles', array('@bundles' => implode(', ', $bundles_names))),
+        'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
       );
+
+      // Go through and create a list of aliases for all possible combinations of
+      // entity type + name.
+      $aliases = array();
+      $also_known = array();
+      foreach ($all_labels as $entity_name => $labels) {
+        foreach ($labels as $label_name => $true) {
+          if ($group_name != $groups[$entity_name] || $label != $label_name) {
+            if (count($field['columns']) == 1 || $column == 'value') {
+              $alias_title = t('@label (!name)', array('@label' => $label_name, '!name' => $field['field_name']));
+              // CCK used the first 10 characters of $label. Probably doesn't matter.
+            }
+            else {
+              $alias_title = t('@label (!name:!column)', array('@label' => $label_name, '!name' => $field['field_name'], '!column' => $column));
+            }
+            $aliases[] = array(
+              'group' => $groups[$entity_name],
+              'title' => $alias_title,
+              'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $title)),
+            );
+          }
+          $also_known[] = t('@group: @field', array('@group' => $groups[$entity_name], '@field' => $title));
+        }
+      }
+      if ($aliases) {
+        $data[$table][$column_real_name]['aliases'] = $aliases;
+        $data[$table][$column_real_name]['help'] .= ' ' . t('Also known as: !also.', array('!also' => implode(', ', $also_known)));
+      }
 
       $data[$table][$column_real_name]['argument'] = array(
         'field' => $column_real_name,
@@ -274,7 +347,7 @@ function field_views_field_default_views_data($field) {
           'group' => $group,
           'title' => $title_delta,
           'title short' => $title_short_delta,
-          'help' => t('Delta - Appears in: @bundles', array('@bundles' => implode(', ', $bundles_names))),
+          'help' => t('Delta - Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
         );
         $data[$table]['delta']['argument'] = array(
           'field' => 'delta',
