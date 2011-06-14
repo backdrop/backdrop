@@ -1379,14 +1379,24 @@ function views_get_view($name, $reset = FALSE) {
   ctools_include('export');
   $view = ctools_export_crud_load('views_view', $name);
   if ($view) {
-    // When views are converted automatically the base_table should be renamed
-    // to have a working query.
-    $data = views_fetch_data($view->base_table, FALSE);
-    if (isset($data['moved to'])) {
-      $view->base_table = $data['moved to'];
-    }
+    $view->update();
     return $view->clone_view();
   }
+}
+
+/**
+ * Find the real location of at able.
+ *
+ * If a table has moved, find the new name of the table so that we can
+ * change its name directly in options where necessary.
+ */
+function views_move_table($table) {
+  $data = views_fetch_data($table, FALSE);
+  if (isset($data['moved to'])) {
+    $table = $data['moved to'];
+  }
+
+  return $table;
 }
 
 /**

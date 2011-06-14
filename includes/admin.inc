@@ -1962,6 +1962,9 @@ function views_ui_import_validate($form, &$form_state) {
     form_set_error('', t('A view by that name already exists; please choose a different name'));
   }
 
+  // Make sure base table gets set properly if it got moved.
+  $view->update();
+
   $view->init_display();
 
   $broken = FALSE;
