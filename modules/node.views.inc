@@ -383,7 +383,7 @@ function node_views_data() {
       'handler' => 'views_handler_relationship',
       'base' => 'users',
       'field' => 'uid',
-      'label' => t('user'),
+      'label' => t('author'),
     ),
   );
 
