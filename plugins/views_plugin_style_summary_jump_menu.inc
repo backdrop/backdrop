@@ -89,9 +89,15 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
 
     $options = array();
     $default_value = '';
+    $row_args = array();
+    foreach ($this->view->result as $id => $row) {
+      $row_args[$id] = $argument->summary_argument($row);
+    }
+    $argument->process_summary_arguments($row_args);
+
     foreach ($this->view->result as $id => $row) {
       $args = $this->view->args;
-      $args[$argument->position] = $argument->summary_argument($row);
+      $args[$argument->position] = $row_args[$id];
       $base_path = NULL;
       if (!empty($argument->options['style_options']['base_path'])) {
         $base_path = $argument->options['style_options']['base_path'];

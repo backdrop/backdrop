@@ -84,6 +84,16 @@ class views_plugin_argument_validate extends views_plugin {
   }
 
   function validate_argument($arg) { return TRUE; }
+
+  /**
+   * Process the summary arguments for displaying.
+   *
+   * Some plugins alter the argument so it uses something else interal.
+   * For example the user validation set's the argument to the uid,
+   * for a faster query. But there are use cases where you want to use
+   * the old value again, for example the summary.
+   */
+  function process_summary_arguments(&$args) { }
 }
 
 /**

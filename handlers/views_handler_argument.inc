@@ -31,6 +31,8 @@
  */
 class views_handler_argument extends views_handler {
   var $name_field = NULL;
+  var $validator = NULL;
+
   /**
    * Constructor
    */
@@ -719,6 +721,20 @@ class views_handler_argument extends views_handler {
     $plugin = $this->get_plugin('argument default');
     if ($plugin) {
       return $plugin->get_argument();
+    }
+  }
+
+  /**
+   * Process the summary arguments for display.
+   *
+   * For example, the validation plugin may want to alter an argument for use in
+   * the URL.
+   */
+  function process_summary_arguments(&$args) {
+    if ($this->options['validate']['type'] != 'none') {
+      if (isset($this->validator) || $this->validator = $this->get_plugin('argument validator')) {
+        $this->validator->process_summary_arguments($args);
+      }
     }
   }
 

@@ -328,12 +328,21 @@ function template_preprocess_views_view_summary(&$vars) {
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
+
+  // Collect all arguments foreach row, to be able to alter them for example by the validator.
+  // This is not done per single argument value, because this could cause performance problems.
+  $row_args = array();
+  foreach ($vars['rows'] as $id => $row) {
+    $row_args[$id] = $argument->summary_argument($row);
+  }
+  $argument->process_summary_arguments($row_args);
+
   foreach ($vars['rows'] as $id => $row) {
     $vars['row_classes'][$id] = '';
 
     $vars['rows'][$id]->link = $argument->summary_name($row);
     $args = $view->args;
-    $args[$argument->position] = $argument->summary_argument($row);
+    $args[$argument->position] = $row_args[$id];
 
     $base_path = NULL;
     if (!empty($argument->options['summary_options']['base_path'])) {
@@ -363,6 +372,15 @@ function template_preprocess_views_view_summary_unformatted(&$vars) {
   }
 
   $count = 0;
+
+  // Collect all arguments foreach row, to be able to alter them for example by the validator.
+  // This is not done per single argument value, because this could cause performance problems.
+  $row_args = array();
+  foreach ($vars['rows'] as $id => $row) {
+    $row_args[$id] = $argument->summary_argument($row);
+  }
+  $argument->process_summary_arguments($row_args);
+
   foreach ($vars['rows'] as $id => $row) {
     // only false on first time:
     if ($count++) {
@@ -370,7 +388,7 @@ function template_preprocess_views_view_summary_unformatted(&$vars) {
     }
     $vars['rows'][$id]->link = $argument->summary_name($row);
     $args = $view->args;
-    $args[$argument->position] = $argument->summary_argument($row);
+    $args[$argument->position] = $row_args[$id];
 
     $base_path = NULL;
     if (!empty($argument->options['summary_options']['base_path'])) {
