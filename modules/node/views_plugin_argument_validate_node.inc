@@ -42,6 +42,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
       '#title' => t('Access operation to check'),
       '#options' => array('view' => t('View'), 'update' => t('Edit'), 'delete' => t('Delete')),
       '#default_value' => $this->options['access_op'],
+      '#dependency' => array('edit-options-validate-options-node-access' => array(TRUE)),
     );
 
     $form['nid_type'] = array(
