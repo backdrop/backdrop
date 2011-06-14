@@ -1073,9 +1073,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     // Add a handle for the ctools collapsible-div. The handle is the title of the display
     $form['displays']['settings']['tab_title']['#markup'] = '<h2 id="edit-display-settings-title" class="ctools-collapsible-handle">' . t('@display_title details', array('@display_title' => ucwords($display_title))) . '</h2>';
     // Add a text that the display is disabled.
-    $enabled = $view->display[$display_id]->handler->get_option('enabled');
-    if (empty($enabled)) {
-      $form['displays']['settings']['disabled']['#markup'] = t('This display is disabled.');
+    if (!empty($view->display[$display_id]->handler)) {
+      $enabled = $view->display[$display_id]->handler->get_option('enabled');
+      if (empty($enabled)) {
+        $form['displays']['settings']['disabled']['#markup'] = t('This display is disabled.');
+      }
     }
     // The ctools collapsible-div content
     $form['displays']['settings']['settings_content']= array(
@@ -1464,10 +1466,10 @@ function views_ui_get_display_tab($view, $display_id) {
   $plugin = $display->handler->definition;
   // If the plugin doesn't exist, display an error message instead of an edit
   // page.
-  if (empty($plugin)) {
+  if (empty($display->handler)) {
     $title = isset($display->display_title) ? $display->display_title : t('Invalid');
     // @TODO: Improved UX for the case where a plugin is missing.
-    $build['#markup'] = t("Error: Display @display refers to a plugin named '@plugin', but that plugin is missing.", array('@display' => $display->id, '@plugin' => $display->display_plugin));
+    $build['#markup'] = t("Error: Display @display refers to a plugin named '@plugin', but that plugin is not available.", array('@display' => $display->id, '@plugin' => $display->display_plugin));
   }
   // Build the content of the edit page.
   else {
