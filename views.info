@@ -268,6 +268,7 @@ files[] = tests/views_upgrade.test
 files[] = tests/views_test.views_default.inc
 files[] = tests/user/views_user_argument_default.test
 files[] = tests/user/views_user_argument_validate.test
+files[] = tests/user/views_user.test
 files[] = tests/views_cache.test
 files[] = tests/views_view.test
 files[] = tests/views_ui.test
