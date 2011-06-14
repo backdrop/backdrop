@@ -340,11 +340,12 @@ function comment_views_data() {
     'title' => t('Uid'),
     'help' => t("The User ID of the comment's author."),
     'relationship' => array(
-      'title' => t('User'),
+      'title' => t('Author'),
+      'help' => t('Relate comment to the user who created it.'),
       'base' => 'users',
       'base field' => 'uid',
       'handler' => 'views_handler_relationship',
-      'label' => t('User'),
+      'label' => t('author'),
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_numeric',
