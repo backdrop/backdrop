@@ -29,12 +29,11 @@ function comment_views_data() {
     'help' => t("Comments are responses to node content."),
   );
 
-  //joins
-  $data['comment']['table']['join'] = array(
-    //...to the node table
+  // Provide a "default relationship" to keep older views from choking.
+  $data['comment']['table']['default_relationship'] = array(
     'node' => array(
-      'left_field' => 'nid',
-      'field' => 'nid',
+      'table' => 'node',
+      'field' => 'cid',
     ),
   );
 
@@ -529,6 +528,19 @@ function comment_views_data_alter(&$data) {
       'name table' => 'users',
       'name field' => 'name',
       'handler' => 'views_handler_filter_comment_user_uid'
+    ),
+  );
+
+  $data['node']['cid'] = array(
+    'title' => t('Comments of the node'),
+    'help' => t('Relate all comments on the node. This will create 1 duplicate record for every comment. Usually if you need this it is better to create a comment view.'),
+    'relationship' => array(
+      'group' => t('Comment'),
+      'label' => t('Comments'),
+      'base' => 'comment',
+      'base field' => 'nid',
+      'relationship field' => 'nid',
+      'handler' => 'views_handler_relationship',
     ),
   );
 
