@@ -328,7 +328,13 @@ class views_handler extends views_object {
   function options_submit(&$form, &$form_state) { }
 
   /**
-   * Provide a form for groupby settings.
+   * Provides the handler some groupby.
+   */
+  function use_group_by() {
+    return TRUE;
+  }
+  /**
+   * Provide a form for aggregation settings.
    */
   function groupby_form(&$form, &$form_state) {
     $view = &$form_state['view'];
@@ -338,7 +344,7 @@ class views_handler extends views_object {
     $id = $form_state['id'];
 
     $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-    $form['#title'] .= t('Configure group settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $this->ui_name()));
+    $form['#title'] .= t('Configure aggregation settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $this->ui_name()));
 
     $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
@@ -350,9 +356,9 @@ class views_handler extends views_object {
 
     $form['group_type'] = array(
       '#type' => 'select',
-      '#title' => t('Group type'),
+      '#title' => t('Aggregation type'),
       '#default_value' => $this->options['group_type'],
-      '#description' => t('Select the grouping function to use on this field.'),
+      '#description' => t('Select the aggregation function to use on this field.'),
       '#options' => $group_types,
     );
   }
