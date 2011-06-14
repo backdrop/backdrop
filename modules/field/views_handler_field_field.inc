@@ -632,14 +632,7 @@ class views_handler_field_field extends views_handler_field {
     return $values->{'field_' . $this->options['id']};
   }
 
-  /**
-   * Return an array of items for the field.
-   */
-  function set_items($values, $row_id) {
-    if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity'])) {
-      return array();
-    }
-
+  function get_value($values, $field = NULL) {
     // Go ahead and render and store in $this->items.
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
 
@@ -717,6 +710,22 @@ class views_handler_field_field extends views_handler_field {
       $entity->{$this->definition['field_name']}[$langcode] = $new_values;
     }
 
+    if ($field == 'entity') {
+      return $entity;
+    }
+    else {
+      return $entity->{$this->definition['field_name']}[$langcode];
+    }
+  }
+
+  /**
+   * Return an array of items for the field.
+   */
+  function set_items($values, $row_id) {
+    if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity'])) {
+      return array();
+    }
+
     $display = array(
       'type' => $this->options['type'],
       'settings' => $this->options['settings'],
@@ -727,6 +736,10 @@ class views_handler_field_field extends views_handler_field {
       'views_row_id' => $row_id,
     );
 
+
+    $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
+    $entity = $this->get_value($values, 'entity');
+    $langcode = $this->field_language($entity_type, $entity);
     $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
 
     $items = array();
