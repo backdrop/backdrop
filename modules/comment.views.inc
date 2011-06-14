@@ -316,24 +316,45 @@ function comment_views_data() {
   );
 
   $data['comment']['nid'] = array(
-    'title' => t('Content'),
-    'help' => t('The content to which the comment is a reply to.'),
+    'title' => t('Nid'),
+    'help' => t('The node ID to which the comment is a reply to.'),
     'relationship' => array(
+      'title' => t('Content'),
+      'help' => t('The content to which the comment is a reply to.'),
       'base' => 'node',
       'base field' => 'nid',
       'handler' => 'views_handler_relationship',
       'label' => t('Content'),
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
   );
 
   $data['comment']['uid'] = array(
-    'title' => t('User'),
+    'title' => t('Uid'),
     'help' => t("The User ID of the comment's author."),
     'relationship' => array(
+      'title' => t('User'),
       'base' => 'users',
       'base field' => 'uid',
       'handler' => 'views_handler_relationship',
       'label' => t('User'),
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+    'field' => array(
+      'handler' => 'views_handler_filter_user_name',
     ),
   );
 
