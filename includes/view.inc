@@ -181,6 +181,15 @@ class view extends views_db_object {
   }
 
   /**
+   * Determine if the pager actually uses a pager.
+   */
+  function use_pager() {
+    if (!empty($this->query->pager)) {
+      return $this->query->pager->use_pager();
+    }
+  }
+
+  /**
    * Whether or not AJAX should be used. If AJAX is used, paging,
    * tablesorting and exposed filters will be fetched via an AJAX call
    * rather than a page refresh.
