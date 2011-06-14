@@ -180,11 +180,24 @@
       // @todo Revisit this after fixing Views UI to display a Preview outside
       //   of the main Edit form.
       $('div#views-live-preview input[type=submit]')
-        .once('views-ajax-processed').each(function () {
-        $(this).click(function(event) {
-          event.preventDefault();
-          $('#preview-submit').click();
+        .once('views-ajax-processed').each(function(event) {
+        $(this).click(function () {
+          this.form.clk = this;
+          return true;
         });
+        var element_settings = base_element_settings;
+        // Set the URL to go to the anchor.
+        element_settings.url = $(this.form).attr('action');
+        if (Drupal.Views.getPath(element_settings.url).substring(0, 21) != 'admin/structure/views') {
+          return true;
+        }
+
+        element_settings.wrapper = 'views-live-preview';
+        element_settings.method = 'html';
+        element_settings.event = 'click';
+
+        var base = $(this).attr('id');
+        Drupal.ajax[base] = new Drupal.ajax(base, this, element_settings);
       });
 
       if (!this.collapseReplaced && Drupal.collapseScrollIntoView) {

@@ -279,7 +279,16 @@ class views_plugin_exposed_form extends views_plugin {
     if (isset($_SESSION['views'][$this->view->name][$this->view->current_display])){
       unset($_SESSION['views'][$this->view->name][$this->view->current_display]);
     }
-    $form_state = array();
+
+    // Set the form to allow redirect.
+    if (empty($this->view->live_preview)) {
+      $form_state['no_redirect'] = FALSE;
+    }
+    else {
+      $form_state['rebuild'] = TRUE;
+      $this->view->exposed_data = array();
+    }
+
     $form_state['values'] = array();
   }
 }

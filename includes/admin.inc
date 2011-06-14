@@ -117,17 +117,14 @@ function views_ui_preview($view, $display_id, $args = array()) {
 
     // AJAX happens via $_POST but everything expects exposed data to
     // be in GET. Copy stuff but remove ajax-framework specific keys.
-    $exposed_input = $_POST;
-    foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state') as $key) {
+    // If we're clicking on links in a preview, though, we could actually
+    // still have some in $_GET, so we use $_REQUEST to ensure we get it all.
+    $exposed_input = $_REQUEST;
+    foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state', 'form_id', 'form_build_id', 'form_token') as $key) {
       if (isset($exposed_input[$key])) {
         unset($exposed_input[$key]);
       }
     }
-    // @todo Remove this hack after fixing Views UI to display the preview
-    //   outside of the edit form, so that the edit form doesn't conflict with
-    //   the exposed widget form.
-    $exposed_input['form_id'] = 'views_exposed_form';
-    unset($exposed_input['form_build_id'], $exposed_input['form_token']);
 
     $view->set_exposed_input($exposed_input);
 
