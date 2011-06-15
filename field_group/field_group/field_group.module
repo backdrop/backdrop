@@ -22,7 +22,7 @@ function field_group_menu() {
 
   // Create tabs for all possible bundles.
   foreach (entity_get_info() as $entity_type => $entity_info) {
-    if ($entity_info['fieldable']) {
+    if (isset($entity_info['fieldable']) && $entity_info['fieldable']) {
       foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
         if (isset($bundle_info['admin'])) {
           // Extract path information from the bundle.
