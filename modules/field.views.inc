@@ -13,6 +13,9 @@
 
 /**
  * Implements hook_views_data()
+ *
+ * Field modules can implement hook_field_views_data() to override
+ * the default behavior for adding fields.
  */
 function field_views_data() {
   $data = array();
@@ -35,6 +38,27 @@ function field_views_data() {
   }
 
   return $data;
+}
+
+/**
+ * Implements hook_views_data_alter()
+ *
+ * Field modules can implement hook_field_views_data_views_data_alter() to
+ * alter the views data on a per field basis. This is weirdly named so as
+ * not to conflict with the drupal_alter('field_views_data') in
+ * field_views_data.
+ */
+function field_views_data_alter(&$data) {
+  foreach (field_info_fields() as $field) {
+    if ($field['storage']['type'] != 'field_sql_storage') {
+      continue;
+    }
+
+    $function = $field['module'] . '_field_views_data_views_data_alter';
+    if (function_exists($function)) {
+      $function($data, $field);
+    }
+  }
 }
 
 /**
