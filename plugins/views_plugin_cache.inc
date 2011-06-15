@@ -173,12 +173,7 @@ class views_plugin_cache extends views_plugin {
   function cache_start() {
     $this->storage['head'] = drupal_add_html_head();
     $this->storage['css'] = drupal_add_css();  
-    $js = drupal_add_js();
-    foreach ($js as $key => $data) {
-      if ($data['scope'] == 'header' || $data['scope'] == 'footer') {
-        $this->storage['js'][$data['scope']][$key] = $data;
-      }
-    }
+    $this->storage['js'] = drupal_add_js();
   }
 
   /**
@@ -204,20 +199,31 @@ class views_plugin_cache extends views_plugin {
       }
     }
 
-    $js = array();
-    // A little less simple for js
-    foreach (array('header', 'footer') as $scope) {
-      $js[$scope] = drupal_add_js(NULL, NULL, $scope);
-    }
+    // Get javascript after views renders
+    $js = drupal_add_js();
 
+    // Get javascript before views renders.
     $start = isset($this->storage['js']) ? $this->storage['js'] : array();
     $this->storage['js'] = array();
 
-return; // @TODO: fixme
+    // If there are any differences between the old and the new javascript then
+    // store them to be added later.
+    if ($diff = array_diff_assoc($js, $start)) {
+      $this->storage['js'] = $diff;
+    }
 
-    foreach ($js as $key => $data) {
-      if (!isset($start[$key][$data['scope']][$key]) && ($data['scope'] == 'header' || $data['scope'] == 'footer')) {
-        $this->storage['js'][$data['scope']][$key] = $data;
+    // Special case the settings key and get the difference of the data.
+    if ($settings_diff = array_diff_assoc($js['settings']['data'], $start['settings']['data'])) {
+      // Add back in all the settings options
+      $this->storage['js']['settings'] = $js['settings'];
+
+      // This is used because the data is in the wrong format when adding to
+      // drupal_add_js.  This will fix the data array so the code is nicer in
+      // restore_headers.
+      foreach ($settings_diff as $setting) {
+        foreach ($setting as $key => $value) {
+          $this->storage['js']['settings']['data'][$key] = $value;
+        }
       }
     }
   }
@@ -236,7 +242,7 @@ return; // @TODO: fixme
     }
     if (!empty($this->storage['js'])) {
       foreach ($this->storage['js'] as $args) {
-        drupal_add_js($data);
+        drupal_add_js($args['data'], $args);
       }
     }
   }
