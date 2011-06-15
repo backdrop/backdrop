@@ -418,10 +418,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * By default, this adds a "sorted by [date]" filter (when it is available).
    */
   protected function build_sorts(&$form, &$form_state) {
-    // Check if we are allowed to sort by creation date.
     $sorts = array(
       'none' => t('Unsorted'),
     );
+    // Check if we are allowed to sort by creation date.    
     if (!empty($this->plugin['created_column'])) {
       $sorts += array(
         $this->plugin['created_column'] . ':DESC' => t('Newest first'),
