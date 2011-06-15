@@ -137,6 +137,7 @@ Drupal.FieldGroup.Effects.processDiv = {
           }
           wrapper.animating = false;
         }
+        $wrapper.toggleClass('collapsed');
         return false;
       });
       
