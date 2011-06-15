@@ -523,4 +523,11 @@ class views_plugin_display_page extends views_plugin_display {
       'description' => t('The contextual filter values is provided by the URL.'),
     );
   }
+
+  function get_pager_text() {
+    return array(
+      'items per page title' => t('Items per page'),
+      'items per page description' => t('The number of items to display per page. Enter 0 for no limit.')
+    );
+  }
 }

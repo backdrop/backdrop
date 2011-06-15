@@ -25,10 +25,11 @@ class views_plugin_pager_some extends views_plugin_pager {
    * Provide the default form for setting options.
    */
   function options_form(&$form, &$form_state) {
+    $pager_text = $this->display->handler->get_pager_text();
     $form['items_per_page'] = array(
-      '#title' => t('Items to display'),
+      '#title' => $pager_text['items per page title'],
       '#type' => 'textfield',
-      '#description' => t('The number of items to display per page.'),
+      '#description' => $pager_text['items per page description'],
       '#default_value' => $this->options['items_per_page'],
     );
 

@@ -2723,6 +2723,19 @@ class views_plugin_display extends views_plugin {
       'description' => t("This display does not have a source for contextual filters, so no contextual filter value will be available unless you select 'Provide default'."),
     );
   }
+
+  /**
+   * Provide some helpful text for pagers.
+   *
+   * The result should contain of an array within
+   *   - items per page title
+   */
+  function get_pager_text() {
+    return array(
+      'items per page title' => t('Items to display'),
+      'items per page description' => t('The number of items to display. Enter 0 for no limit.')
+    );
+  }
 }
 
 
