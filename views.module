@@ -234,9 +234,9 @@ function _views_find_module_templates($cache, $path) {
  * node portion of the theme registry.
  */
 function views_preprocess_node(&$vars) {
-  // The 'view' attribute of the node is added in template_preprocess_views_view_row_node()
+  // The 'view' attribute of the node is added in views_preprocess_node()
   if (!empty($vars['node']->view) && !empty($vars['node']->view->name)) {
-    $vars['view'] = &$vars['node']->view;
+    $vars['view'] = $vars['node']->view;
     $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
     if (!empty($vars['node']->view->current_display)) {
       $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
@@ -247,7 +247,11 @@ function views_preprocess_node(&$vars) {
         $vars['page'] = FALSE;
       }
     }
+  }
 
+  // Allow to alter comments and links based on the settings in the row plugin.
+  if (!empty($vars['view']->style_plugin->row_plugin) && get_class($vars['view']->style_plugin->row_plugin) == 'views_plugin_row_node_view') {
+    node_row_node_view_preprocess_node($vars);
   }
 }
 

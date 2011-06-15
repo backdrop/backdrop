@@ -186,3 +186,6 @@ return $this->sanitize_value($value, 'xss');
 
 <h3>Changed views_get_page_view</h3>
 In contrast to 6.x views_get_page_view now does stores the current view, not the current page display.
+
+<h3>Removed views-view-row-node</h3>
+Due to changes in comment.module there is no extra views-view-row-node template needed to display the comments.If you do some custom stuff there you should can do now everything in your node.tpl.php

@@ -94,4 +94,12 @@ class views_plugin_row_node_view extends views_plugin_row {
     }
     $this->nodes = node_load_multiple($nids);
   }
+
+  function render($row) {
+    $node = $this->nodes[$row->{$this->field_alias}];
+    $node->view = $this->view;
+    $build = node_view($node, $this->options['view_mode']);
+
+    return drupal_render($build);
+  }
 }
