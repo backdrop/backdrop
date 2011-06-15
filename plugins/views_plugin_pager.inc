@@ -77,6 +77,9 @@ class views_plugin_pager extends views_plugin {
    *   the page number will be set from the global page array.
    */
   function set_current_page($number = NULL) {
+    if (!is_numeric($number) || $number < 0) {
+      $number = 0;
+    }
     $this->current_page = $number;
   }
 

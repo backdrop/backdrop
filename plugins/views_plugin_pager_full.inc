@@ -224,6 +224,9 @@ class views_plugin_pager_full extends views_plugin_pager {
     if (!empty($pager_page_array[$this->options['id']])) {
       $this->current_page = intval($pager_page_array[$this->options['id']]);
     }
+    if ($this->current_page < 0) {
+      $this->current_page = 0;
+    }
   }
 
   function get_pager_total() {
