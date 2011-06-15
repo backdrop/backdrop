@@ -88,6 +88,13 @@ class view extends views_db_object {
    var $style_plugin;
 
   /**
+   * Allow to override the path used for generated urls.
+   *
+   * @var string
+   */
+  var $override_path = NULL;
+
+  /**
    * Constructor
    */
   function __construct() {
