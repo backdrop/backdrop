@@ -3895,7 +3895,7 @@ function views_ui_add_item_form($form, &$form_state) {
       $group = preg_replace('/[^a-z0-9]/', '-', strtolower($option['group']));
       $groups[$group] = $option['group'];
       $grouped_options[$group][$key] = $option;
-      if (!empty($option['aliases'])) {
+      if (!empty($option['aliases']) && is_array(empty($option['aliases']))) {
         foreach ($option['aliases'] as $id => $alias) {
           if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
             $copy = $option;
