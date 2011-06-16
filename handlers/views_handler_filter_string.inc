@@ -7,12 +7,11 @@
 class views_handler_filter_string extends views_handler_filter {
   // exposed filter options
   var $always_multiple = TRUE;
-  var $always_required = TRUE;
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['expose']['contains']['required'] = array('default' => TRUE);
+    $options['expose']['contains']['required'] = array('default' => FALSE);
 
     return $options;
   }
