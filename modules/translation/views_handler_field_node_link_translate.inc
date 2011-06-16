@@ -8,7 +8,6 @@ class views_handler_field_node_link_translate extends views_handler_field_node_l
     $this->additional_fields['uid'] = 'uid';
     $this->additional_fields['type'] = 'type';
     $this->additional_fields['language'] = 'language';
-    $this->additional_fields['format'] = array('table' => 'node_revision', 'field' => 'format');
   }
 
   function render_link($data, $values) {
@@ -17,7 +16,6 @@ class views_handler_field_node_link_translate extends views_handler_field_node_l
     $node->nid = $this->get_value($values, 'nid');
     $node->uid = $this->get_value($values, 'uid');
     $node->type = $this->get_value($values, 'type');
-    $node->format = $this->get_value($values, 'format');
     $node->language = $this->get_value($values, 'language');
     $node->status = 1; // unpublished nodes ignore access control
     if (empty($node->language) || !translation_supported_type($node->type) || !node_access('view', $node) || !user_access('translate content')) {
