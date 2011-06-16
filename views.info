@@ -41,6 +41,7 @@ files[] = handlers/views_handler_filter_many_to_one.inc
 files[] = handlers/views_handler_filter_numeric.inc
 files[] = handlers/views_handler_filter_string.inc
 files[] = handlers/views_handler_relationship.inc
+files[] = handlers/views_handler_relationship_groupwise_max.inc
 files[] = handlers/views_handler_sort.inc
 files[] = handlers/views_handler_sort_date.inc
 files[] = handlers/views_handler_sort_formula.inc

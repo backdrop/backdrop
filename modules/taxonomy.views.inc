@@ -146,6 +146,21 @@ function taxonomy_views_data() {
     ),
   );
 
+  $data['taxonomy_term_data']['tid_representative'] = array(
+    'relationship' => array(
+      'title' => t('Representative node'),
+      'label'  => t('Representative node'),
+      'help' => t('Obtains a single representative node for each term, according to a chosen sort criterion.'),
+      'handler' => 'views_handler_relationship_groupwise_max',
+      'relationship field' => 'tid',
+      'outer field' => 'taxonomy_term_data.tid',
+      'argument table' => 'taxonomy_term_data',
+      'argument field' =>  'tid',
+      'base'   => 'node',
+      'field'  => 'nid',
+    ),
+  );
+
   // Term name field
   $data['taxonomy_term_data']['name'] = array(
     'title' => t('Name'),

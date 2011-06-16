@@ -70,6 +70,22 @@ function user_views_data() {
   );
 
   // uid
+  $data['users']['uid_representative'] = array(
+    'relationship' => array(
+      'title' => t('Representative node'),
+      'label'  => t('Representative node'),
+      'help' => t('Obtains a single representative node for each user, according to a chosen sort criterion.'),
+      'handler' => 'views_handler_relationship_groupwise_max',
+      'relationship field' => 'uid',
+      'outer field' => 'users.uid',
+      'argument table' => 'users',
+      'argument field' =>  'uid',
+      'base'   => 'node',
+      'field'  => 'nid',
+    ),
+  );
+
+  // uid
   $data['users']['uid_current'] = array(
     'real field' => 'uid',
     'title' => t('Current'),
