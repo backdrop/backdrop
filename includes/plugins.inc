@@ -194,6 +194,10 @@ function views_views_plugins() {
         'title' => t('PHP Code'),
         'handler' => 'views_plugin_argument_default_php',
       ),
+      'raw' => array(
+        'title' => t('Raw value from URL'),
+        'handler' => 'views_plugin_argument_default_raw',
+      ),
     ),
     'argument validator' => array(
       'php' => array(

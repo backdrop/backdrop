@@ -192,6 +192,7 @@ files[] = plugins/views_plugin_access_role.inc
 files[] = plugins/views_plugin_argument_default.inc
 files[] = plugins/views_plugin_argument_default_php.inc
 files[] = plugins/views_plugin_argument_default_fixed.inc
+files[] = plugins/views_plugin_argument_default_raw.inc
 files[] = plugins/views_plugin_argument_validate.inc
 files[] = plugins/views_plugin_argument_validate_numeric.inc
 files[] = plugins/views_plugin_argument_validate_php.inc
