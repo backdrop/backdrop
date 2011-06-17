@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Field handler for terms.
+ * @file
+ * Field handler to display all taxonomy terms of a node.
  */
 class views_handler_field_term_node_tid extends views_handler_field_prerender_list {
   function init(&$view, &$options) {
