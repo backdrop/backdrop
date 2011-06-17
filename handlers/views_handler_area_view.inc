@@ -23,8 +23,9 @@ class views_handler_area_view extends views_handler_area {
     $views = views_get_all_views();
     foreach ($views as $view) {
       // Exclude the current view
-      if ($view->name != $this->view->name) {
-        foreach ($view->display as $display_id => $display) {
+      foreach ($view->display as $display_id => $display) {
+        // Exclude the current display
+        if (!($view->name == $this->view->name && $display_id == $this->view->current_display)) {
           $options[$view->name . ':' . $display->id] = t('View: @view Display: @display', array('@view' => $view->name, '@display' => $display->id));
         }
       }
