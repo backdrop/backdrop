@@ -137,7 +137,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'textfield',
       '#default_value' => '10',
       '#size' => 5,
-      '#element_validate' => array('views_element_validate_integer_positive'),
+      '#element_validate' => array('views_element_validate_integer'),
+    );
+    $form['displays']['page']['options']['pager'] = array(
+      '#title' => t('Use a pager'),
+      '#type' => 'checkbox',
+      '#default_value' => TRUE,
     );
     $form['displays']['page']['options']['link'] = array(
       '#title' => t('Create a menu link'),
@@ -263,7 +268,12 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'textfield',
       '#default_value' => '5',
       '#size' => 5,
-      '#element_validate' => array('views_element_validate_integer_positive'),
+      '#element_validate' => array('views_element_validate_integer'),
+    );
+    $form['displays']['block']['options']['pager'] = array(
+      '#title' => t('Use a pager'),
+      '#type' => 'checkbox',
+      '#default_value' => TRUE,
     );
 
     return $form;
@@ -729,7 +739,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['style_plugin'] = $page['style']['style_plugin'];
     // Not every style plugin supports row style plugins.
     $display_options['row_plugin'] = isset($page['style']['row_plugin']) ? $page['style']['row_plugin'] : 'fields';
-    $display_options['pager']['type'] = 'full';
+    $display_options['pager']['type'] = $page['pager'] ? 'full' : (empty($page['items_per_page']) ? 'none' : 'some');
     $display_options['pager']['options']['items_per_page'] = $page['items_per_page'];
     if (!empty($page['link'])) {
       $display_options['menu']['type'] = 'normal';
@@ -745,7 +755,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['title'] = $block['title'];
     $display_options['style_plugin'] = $block['style']['style_plugin'];
     $display_options['row_plugin'] = isset($block['style']['row_plugin']) ? $block['style']['row_plugin'] : 'fields';
-    $display_options['pager']['type'] = 'full';
+    $display_options['pager']['type'] = $block['pager'] ? 'full' : (empty($block['items_per_page']) ? 'none' : 'some');
     $display_options['pager']['options']['items_per_page'] = $block['items_per_page'];
     return $display_options;
   }
