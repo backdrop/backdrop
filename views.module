@@ -468,6 +468,11 @@ function views_page_alter(&$page) {
   // next to the page title.
   $view = views_get_page_view();
   if (!empty($view)) {
+    // If a module is still putting in the display like we used to, catch that.
+    if (is_subclass_of($view, 'views_plugin_display')) {
+      $view = $view->view;
+    }
+
     views_add_contextual_links($page, 'page', $view, $view->current_display);
   }
 }
