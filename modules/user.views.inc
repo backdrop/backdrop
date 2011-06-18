@@ -416,12 +416,19 @@ function user_views_data() {
       'left_field' => 'uid',
       'field' => 'uid',
     ),
+  );
+
+  $data['authmap']['table']['default_relationship'] = array(
     'node' => array(
-      'left_table' => 'users',
-      'left_field' => 'uid',
+      'table' => 'node',
+      'field' => 'uid',
+    ),
+    'node_revision' => array(
+      'table' => 'node_revision',
       'field' => 'uid',
     ),
   );
+
   $data['authmap']['aid'] = array(
     'title' => t('Authmap ID'),
     'help' => t('The Authmap ID.'),
