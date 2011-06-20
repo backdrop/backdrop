@@ -167,6 +167,7 @@ function views_theme($existing, $type, $theme, $path) {
  * @see drupal_find_theme_templates
  */
 function _views_find_module_templates($cache, $path) {
+  $templates = array();
   $regex = '/' . '\.tpl\.php' . '$' . '/';
 
   // Because drupal_system_listing works the way it does, we check for real
