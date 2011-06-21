@@ -772,7 +772,7 @@ function field_group_remove_empty_form_groups(& $element, $groups) {
   if (count($children)) {
     foreach ($children as $name) {
       if (in_array($name, $groups)) {
-        field_group_remove_empty_groups($element[$name], $groups);
+        field_group_remove_empty_form_groups($element[$name], $groups);
       }
       $hasChildren = $hasChildren ? TRUE : (isset($element[$name]['#type']) || $name == 'account');
     }
