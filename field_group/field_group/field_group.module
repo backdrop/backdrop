@@ -712,7 +712,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           $form['additional_settings'][$group->group_name] = $child_element;
           // Nest the fields inside the appropriate structure.
           foreach (element_children($element) as $fieldname) {
-            $form['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+            $form['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
             unset($element[$fieldname]);
           }
         }
@@ -722,7 +722,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
           $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
           // Nest the fields inside the appropriate structure.
           foreach (element_children($element) as $fieldname) {
-            $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = $element[$fieldname];
+            $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
             unset($element[$fieldname]);
           }
         }
