@@ -744,17 +744,11 @@ function field_group_field_group_build_pre_render_alter(& $element) {
 
   // Dish the fieldgroups with no fields for non-forms.
   if ($display) {
-    foreach (element_children($element) as $name) {
-      if (in_array($name, $groups)) {
-        if (field_group_field_group_is_empty($element[$name], $groups)) {
-          unset($element[$name]);
-        }
-      }
-    }
+    field_group_remove_empty_display_groups($element, $groups);
   }
   else {
     // Fix the problem on forms with additional settings.
-    field_group_remove_empty_groups($element, $groups);
+    field_group_remove_empty_form_groups($element, $groups);
   }
 
   // Add the default field_group javascript and stylesheet.
@@ -770,7 +764,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
  * @param array $groups
  *   Array of group objects.
  */
-function field_group_remove_empty_groups(& $element, $groups) {
+function field_group_remove_empty_form_groups(& $element, $groups) {
 
   $children = element_children($element);
 
@@ -791,38 +785,40 @@ function field_group_remove_empty_groups(& $element, $groups) {
 }
 
 /**
- * Helper function to recursively tell if the group contains
- * an empty element or maybe one of its children.
- *
+ * Remove empty groups on entity display.
  * @param array $element
- *   array structure of the element.
+ *   The element to check the empty state.
  * @param array $groups
- *   Array of group names.
- * @return Boolean Is field group empty
+ *   Array of group objects.
  */
-function field_group_field_group_is_empty($element, $groups) {
+function field_group_remove_empty_display_groups(& $element, $groups) {
 
-  $empty = TRUE;
+  $empty_child = TRUE;
+  $empty_group = TRUE;
 
   // Loop throug the children from current element.
   foreach (element_children($element) as $name) {
-    // Fields are found in the element.
-    if (!$empty) {
-      return FALSE;
-    }
 
     // Descend into groups if the child is a group.
     if (in_array($name, $groups)) {
-      $empty = field_group_field_group_is_empty($element[$name], $groups);
+      $empty_child = field_group_field_group_is_empty($element[$name], $groups);
+      if (!$empty_child) {
+        $empty_group = FALSE;
+      }
     }
     // Child is a field, the asked element is not empty.
     elseif (!empty($element[$name])) {
-      return FALSE;
+      $empty_group = FALSE;
     }
 
   }
 
-  return $empty;
+  // Reset an empty group.
+  if ($empty_group) {
+    $element = NULL;
+  }
+
+  return $empty_group;
 
 }
 
