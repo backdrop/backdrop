@@ -89,6 +89,9 @@ function field_group_schema() {
     'indexes' => array(
       'group_name' => array('group_name'),
     ),
+    'unique keys' => array(
+      'identifier' => array('identifier'),
+    ),
   );
   return $schema;
 }
