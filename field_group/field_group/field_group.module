@@ -796,17 +796,17 @@ function field_group_remove_empty_display_groups(& $element, $groups) {
   $empty_child = TRUE;
   $empty_group = TRUE;
 
-  // Loop throug the children from current element.
+  // Loop through the children for current element.
   foreach (element_children($element) as $name) {
 
-    // Descend into groups if the child is a group.
+    // Descend if the child is a group.
     if (in_array($name, $groups)) {
       $empty_child = field_group_field_group_is_empty($element[$name], $groups);
       if (!$empty_child) {
         $empty_group = FALSE;
       }
     }
-    // Child is a field, the asked element is not empty.
+    // Child is a field, the element is not empty.
     elseif (!empty($element[$name])) {
       $empty_group = FALSE;
     }
