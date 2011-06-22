@@ -801,7 +801,7 @@ function field_group_remove_empty_display_groups(& $element, $groups) {
 
     // Descend if the child is a group.
     if (in_array($name, $groups)) {
-      $empty_child = field_group_field_group_is_empty($element[$name], $groups);
+      $empty_child = field_group_remove_empty_display_groups($element[$name], $groups);
       if (!$empty_child) {
         $empty_group = FALSE;
       }
