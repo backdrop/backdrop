@@ -114,8 +114,13 @@ class views_handler_field_prerender_list extends views_handler_field {
    *   An object containing all retrieved values.
    * @param $field
    *   Optional name of the field where the value is stored.
+   * @param $raw
+   *   Use the raw data and not the data defined in pre_render
    */
-  function get_value($values, $field = NULL) {
+  function get_value($values, $field = NULL, $raw = FALSE) {
+    if ($raw) {
+      return parent::get_value($values, $field);
+    }
     $item = $this->get_items($values);
     $item = (array) $item;
     if (isset($field) && isset($item[$field])) {
