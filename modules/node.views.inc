@@ -660,8 +660,7 @@ function node_row_node_view_preprocess_node(&$vars) {
   }
 
   if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
-    $build = comment_node_page_additions($node);
-    $vars['content']['comments'] = drupal_render($build);
+    $vars['content']['comments'] = comment_node_page_additions($node);
   }
 }
 
