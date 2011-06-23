@@ -197,7 +197,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     else {
       // Create a new view object on the fly, which we use to generate a query
       // object and then get the SQL we need for the subquery.
-      $temp_view = $this->view_aliased();
+      $temp_view = $this->get_temporary_view();
 
       // Add the sort from the options to the default display.
       // This is broken, in that the sort order field also gets added as a
