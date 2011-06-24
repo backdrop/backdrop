@@ -791,7 +791,9 @@ class views_many_to_one_helper {
           // query optimization, INNER joins are slightly faster, so use them
           // when we know we can.
           $join = $this->get_join();
-          $join->type = 'INNER';
+          if (isset($join)) {
+            $join->type = 'INNER';
+          }
           $this->handler->table_alias = $this->handler->query->ensure_table($this->handler->table, $this->handler->relationship, $join);
           $this->handler->view->many_to_one_tables[$field] = $this->handler->value;
         }
