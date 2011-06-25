@@ -149,7 +149,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
    * Generate the subquery string when the user submits the options, and store
    * it. This saves the expense of generating it when the view is run.
    */
-  function options_submit($form, &$form_state) {
+  function options_submit(&$form, &$form_state) {
     // Get the new user options from the form values.
     $new_options = $form_state['values']['options'];
     $subquery = $this->left_query($new_options);
