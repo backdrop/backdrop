@@ -216,7 +216,7 @@ function node_views_data() {
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
       'output formats' => array(
-        'sticky' => array('', t('Sticky')),
+        'sticky' => array(t('Sticky'), ''),
       ),
     ),
     'filter' => array(
