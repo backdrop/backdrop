@@ -788,6 +788,10 @@ class views_handler_field_field extends views_handler_field {
       if (isset($raw) && isset($raw[$id]) && is_scalar($raw[$id])) {
         $tokens['[' . $this->options['id'] . '-' . $id . ']'] = filter_xss_admin($raw[$id]);
       }
+      else {
+        // Take sure that empty values are replaced as well.
+        $tokens['[' . $this->options['id'] . '-' . $id . ']'] = '';
+      }
     }
   }
 
