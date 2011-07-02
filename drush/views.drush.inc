@@ -67,6 +67,12 @@ function views_drush_command() {
       'drush vl --type=overridden' => 'Show a list of overridden views.',
     ),
   );
+  $items['views-analyze'] = array(
+    'drupal dependencies' => array('views', 'views_ui'),
+    'description' => 'Get a list of all Views analyze warnings',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'aliases' => array('va'),
+  );
 
   return $items;
 }
@@ -373,4 +379,22 @@ function drush_views_list() {
   drush_print(dt("  @over views are overridden", array('@over' => $overridden)));
   drush_print(dt("  @incode views are in their default state", array('@incode' => $incode)));
   drush_print(dt("  @dis views are disabled\n", array('@dis' => $disabled)));
+}
+
+function drush_views_analyze() {
+  views_include('analyze');
+  $messages_count = 0;
+  $total = 0;
+
+  foreach (views_get_all_views() as $view_name => $view) {
+    $total++;
+    if ($messages = views_analyze_view($view)) {
+      drush_print($view_name);
+      foreach ($messages as $message) {
+        $messages_count++;
+        drush_print($message['type'] .': '. $message['message'], 2);
+      }
+    }
+  }
+  drush_log(dt('A total of @total views were analyzed and @messages problems were found.', array('@total' => $total, '@messages' => $messages_count)), 'ok');
 }
