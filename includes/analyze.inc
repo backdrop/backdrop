@@ -106,6 +106,9 @@ function views_ui_views_analyze($view) {
   // system, so the alias will not work anymore. Report this to the user,
   // because he probably wanted something else.
   foreach ($view->display as $id => $display) {
+    if (empty($display->handler)) {
+      continue;
+    }
     if ($display->handler->has_path() && $path = $display->handler->get_option('path')) {
       $normal_path = drupal_get_normal_path($path);
       if ($path != $normal_path) {

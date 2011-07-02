@@ -682,6 +682,9 @@ function node_views_analyze($view) {
   // Check for something other than the default display:
   if ($view->base_table == 'node') {
     foreach ($view->display as $id => $display) {
+      if (empty($display->handler)) {
+        continue;
+      }
       if (!$display->handler->is_defaulted('access') || !$display->handler->is_defaulted('filters')) {
         // check for no access control
         $access = $display->handler->get_option('access');
