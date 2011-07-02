@@ -192,7 +192,9 @@ class views_handler_field_field extends views_handler_field {
       $field = $this->field_info;
       if (field_is_translatable($entity_type, $field) && !empty($this->query->options['field_language_add_to_query'])) {
         $column = $this->table_alias . '.language';
-        $this->query->add_where(0, $column, $this->query->options['field_language']);
+        // By the same reason as field_language the field might be LANGUAGE_NONE in reality so allow it as well.
+        // @see this::field_language()
+        $this->query->add_where(0, $column, array($this->query->options['field_language'], LANGUAGE_NONE));
       }
     }
 
