@@ -217,7 +217,7 @@ function field_views_field_default_views_data($field) {
           $also_known[] = t('@group: @field', array('@group' => $groups[$entity_name], '@field' => $label_name));
         }
         else {
-          if ($group_name != $groups[$entity_name] && $label != $label_name) {
+          if ($group_name != $groups[$entity_name] && $label != $label_name && isset($revision_tables[$entity_name])) {
             $aliases[] = array(
               'base' => $revision_tables[$entity_name],
               'group' => t('@group (historical data)', array('@group' => $groups[$entity_name])),

@@ -651,10 +651,10 @@ class views_handler_field_field extends views_handler_field {
       // 'safe_value' which doesn't appear anywhere in the field definition
       // so we can't affect it. Other side effects could happen similarly.
       $data = FALSE;
-      foreach ($this->group_fields as $field => $column) {
+      foreach ($this->group_fields as $field_name => $column) {
         if (property_exists($values, $this->aliases[$column])) {
-          $base_value[$field] = $values->{$this->aliases[$column]};
-          if (isset($base_value[$field])) {
+          $base_value[$field_name] = $values->{$this->aliases[$column]};
+          if (isset($base_value[$field_name])) {
             $data = TRUE;
           }
         }
@@ -787,6 +787,10 @@ class views_handler_field_field extends views_handler_field {
       }
       if (isset($raw) && isset($raw[$id]) && is_scalar($raw[$id])) {
         $tokens['[' . $this->options['id'] . '-' . $id . ']'] = filter_xss_admin($raw[$id]);
+      }
+      else {
+        // Take sure that empty values are replaced as well.
+        $tokens['[' . $this->options['id'] . '-' . $id . ']'] = '';
       }
     }
   }

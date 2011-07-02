@@ -24,6 +24,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
 
     $options['term_page'] = array('default' => TRUE);
     $options['node'] = array('default' => FALSE);
+    $options['anyall'] = array('default' => ',');
     $options['limit'] = array('default' => FALSE);
     $options['vocabularies'] = array('default' => array());
 
@@ -68,6 +69,20 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
       '#process' => array('form_process_checkboxes', 'ctools_dependent_process'),
       '#dependency' => array(
         'edit-options-argument-default-taxonomy-tid-limit' => array(1),
+        'edit-options-argument-default-taxonomy-tid-node' => array(1),
+      ),
+    );
+
+    $form['anyall'] = array(
+      '#type' => 'radios',
+      '#title' => t('Multiple-value handling'),
+      '#default_value'=> $this->options['anyall'],
+      '#process' => array('form_process_radios', 'ctools_dependent_process'),
+      '#options' => array(
+        ',' => t('Filter to items that share all terms'),
+        '+' => t('Filter to items that share any term'),
+      ),
+      '#dependency' => array(
         'edit-options-argument-default-taxonomy-tid-node' => array(1),
       ),
     );
@@ -116,11 +131,11 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
               $tids[] = $tid;
             }
           }
-          return implode(",", $tids);
+          return implode($this->options['anyall'], $tids);
         }
         // Return all tids.
         else {
-          return implode(",", array_keys($taxonomy));
+          return implode($this->options['anyall'], array_keys($taxonomy));
         }
       }
     }

@@ -149,7 +149,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
    * Generate the subquery string when the user submits the options, and store
    * it. This saves the expense of generating it when the view is run.
    */
-  function options_submit($form, &$form_state) {
+  function options_submit(&$form, &$form_state) {
     // Get the new user options from the form values.
     $new_options = $form_state['values']['options'];
     $subquery = $this->left_query($new_options);
@@ -197,7 +197,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     else {
       // Create a new view object on the fly, which we use to generate a query
       // object and then get the SQL we need for the subquery.
-      $temp_view = $this->view_aliased();
+      $temp_view = $this->get_temporary_view();
 
       // Add the sort from the options to the default display.
       // This is broken, in that the sort order field also gets added as a
