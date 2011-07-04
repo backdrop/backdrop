@@ -146,6 +146,11 @@ class views_handler extends views_object {
   var $query = NULL;
 
   /**
+   * The type of the handler, for example filter/footer/field.
+   */
+  var $handler_type = NULL;
+
+  /**
    * init the handler with necessary data.
    * @param $view
    *   The $view object this handler is attached to.
