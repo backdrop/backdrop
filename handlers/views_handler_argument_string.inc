@@ -270,7 +270,7 @@ class views_handler_argument_string extends views_handler_argument {
     }
 
     if (!empty($this->options['break_phrase'])) {
-      views_break_phrase($this->argument, $this);
+      views_break_phrase_string($this->argument, $this);
     }
     else {
       $this->value = array($this->argument);
