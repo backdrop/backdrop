@@ -1564,6 +1564,8 @@ function views_form($form, &$form_state, $view, $output) {
   $form_state['step'] = isset($form_state['step']) ? $form_state['step'] : 'views_form_views_form';
 
   $form = array();
+  $query = drupal_get_query_parameters($_GET, array('q'));
+  $form['#action'] = url($view->get_url(), array('query' => $query));
   $form['#validate'] = array('views_form_validate');
   $form['#submit'] = array('views_form_submit');
   // Tell the preprocessor whether it should hide the header, footer, pager...
