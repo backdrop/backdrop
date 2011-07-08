@@ -2224,16 +2224,24 @@ if (!function_exists('comment_views_api')) {
   function comment_views_api() { return views_views_api(); }
 }
 
-if (!function_exists('locale_views_api')) {
-  function locale_views_api() { return views_views_api(); }
-}
-
 if (!function_exists('field_views_api')) {
   function field_views_api() { return views_views_api(); }
 }
 
+if (!function_exists('file_views_api')) {
+  function file_views_api() { return views_views_api(); }
+}
+
 if (!function_exists('filter_views_api')) {
   function filter_views_api() { return views_views_api(); }
+}
+
+if (!function_exists('image_views_api')) {
+  function image_views_api() { return views_views_api(); }
+}
+
+if (!function_exists('locale_views_api')) {
+  function locale_views_api() { return views_views_api(); }
 }
 
 if (!function_exists('node_views_api')) {
