@@ -37,6 +37,10 @@ function user_views_data() {
       'table' => 'node_revision',
       'field' => 'uid',
     ),
+    'file' => array(
+      'table' => 'file',
+      'field' => 'uid',
+    ),
   );
 
   // uid

@@ -38,15 +38,6 @@ function system_views_data() {
   // but may things (such as upload.module) can add relationships
   // that allow file fields to be used.
 
-  // For other base tables, explain how we join
-  $data['file_managed']['table']['join'] = array(
-    'users' => array(
-      // direct join to the users table via 'uid' field.
-      'left_field' => 'uid',
-      'field' => 'uid',
-     ),
-  );
-
   // fid
   $data['file_managed']['fid'] = array(
     'title' => t('File ID'),
