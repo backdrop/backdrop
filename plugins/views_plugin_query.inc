@@ -70,7 +70,9 @@ class views_plugin_query extends views_plugin {
   /**
    * Add settings for the ui.
    */
-  function options_form(&$form, &$form_state) { }
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+  }
 
   function options_validate(&$form, &$form_state) { }
 

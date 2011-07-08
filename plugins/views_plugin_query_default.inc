@@ -194,6 +194,8 @@ class views_plugin_query_default extends views_plugin_query {
    * Add settings for the ui.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
     $form['disable_sql_rewrite'] = array(
       '#title' => t('Disable SQL rewriting'),
       '#description' => t('Disabling SQL rewriting will disable node_access checks as well as other modules that implement hook_query_alter().'),
