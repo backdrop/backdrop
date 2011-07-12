@@ -190,11 +190,6 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
   }
 
-  function validate() {
-    // Override the validation handler defined by filter_in_operator and do nothing.
-    // @todo: Someone could refactor this handler to support get_value_options and do some custom validation for the autocompletion here.
-  }
-
   function value_validate($form, &$form_state) {
     // We only validate if they've chosen the text field style.
     if ($this->options['type'] != 'textfield') {

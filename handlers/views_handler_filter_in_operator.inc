@@ -361,6 +361,15 @@ class views_handler_filter_in_operator extends views_handler_filter {
       $errors[] = t('The operator is invalud');
     }
     if (is_array($this->value)) {
+      if (!isset($this->value_options)) {
+        // Don't validate if there are none value options provided, for example for special handlers.
+        return $errors;
+      }
+      if ($this->options['exposed'] && !$this->options['expose']['required'] && empty($this->value)) {
+        // Don't validate if the field is exposed and no default value is provided.
+        return $errors;
+      }
+
       // Remove every element which is not known.
       foreach ($this->value as $value) {
         if (!isset($this->value_options[$value])) {
