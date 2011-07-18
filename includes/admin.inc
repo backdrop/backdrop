@@ -1463,7 +1463,6 @@ function views_ui_show_default_display($view) {
 function views_ui_get_display_tab($view, $display_id) {
   $build = array();
   $display = $view->display[$display_id];
-  $plugin = $display->handler->definition;
   // If the plugin doesn't exist, display an error message instead of an edit
   // page.
   if (empty($display->handler)) {
