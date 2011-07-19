@@ -616,6 +616,16 @@ class views_plugin_display extends views_plugin {
   function uses_link_display() { return !$this->has_path(); }
 
   /**
+   * Check to see if the display can put the exposed formin a block.
+   *
+   * By default, displays that do not have a path cannot disconnect
+   * the exposed form and put it in a block, because the form has no
+   * place to go and Views really wants the forms to go to a specific
+   * page.
+   */
+  function uses_exposed_form_in_block() { return $this->has_path(); }
+
+  /**
    * Check to see which display to use when creating links within
    * a view using this display.
    */
@@ -1155,7 +1165,7 @@ class views_plugin_display extends views_plugin {
       }
     }
 
-    if ($this->has_path()) {
+    if ($this->uses_exposed_form_in_block()) {
       $options['exposed_block'] = array(
         'category' => 'exposed',
         'title' => t('Exposed form in block'),
@@ -2445,19 +2455,19 @@ class views_plugin_display extends views_plugin {
    * Provide the block system with any exposed widget blocks for this display.
    */
   function get_special_blocks() {
-    if (!$this->has_path()) {
-      return;
-    }
+    $blocks = array();
 
-    $delta = '-exp-' . $this->view->name . '-' . $this->display->id;
-    $desc = t('Exposed form: @view-@display_id', array('@view' => $this->view->name, '@display_id' => $this->display->id));
+    if ($this->uses_exposed_form_in_block()) {
+      $delta = '-exp-' . $this->view->name . '-' . $this->display->id;
+      $desc = t('Exposed form: @view-@display_id', array('@view' => $this->view->name, '@display_id' => $this->display->id));
 
-    return array(
-      $delta => array(
+      $blocks[$delta] = array(
         'info' => $desc,
         'cache' => DRUPAL_NO_CACHE,
-      )
-    );
+      );
+    }
+
+    return $blocks;
   }
 
   /**
