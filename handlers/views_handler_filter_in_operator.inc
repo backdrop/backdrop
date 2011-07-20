@@ -358,7 +358,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
     $this->get_value_options();
     $errors = array();
     if (!in_array($this->operator, $this->operator_values(1))) {
-      $errors[] = t('The operator is invalud');
+      $errors[] = t('The operator is invalid.');
     }
     if (is_array($this->value)) {
       if (!isset($this->value_options)) {
