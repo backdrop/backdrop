@@ -1689,6 +1689,15 @@ function views_form_views_form_validate($form, &$form_state) {
       $field->views_form_validate($form, $form_state);
     }
   }
+
+  // Call the validate method on every area handler that has it.
+  foreach (array('header', 'footer') as $area) {
+    foreach ($view->{$area} as $area_name => $area_handler) {
+      if (method_exists($area_handler, 'views_form_validate')) {
+        $area_handler->views_form_validate($form, $form_state);
+      }
+    }
+  }
 }
 
 /**
@@ -1703,6 +1712,15 @@ function views_form_views_form_submit($form, &$form_state) {
   foreach ($view->field as $field_name => $field) {
     if (method_exists($field, 'views_form_submit')) {
       $field->views_form_submit($form, $form_state);
+    }
+  }
+
+  // Call the submit method on every area handler that has it.
+  foreach (array('header', 'footer') as $area) {
+    foreach ($view->{$area} as $area_name => $area_handler) {
+      if (method_exists($area_handler, 'views_form_submit')) {
+        $area_handler->views_form_submit($form, $form_state);
+      }
     }
   }
 }
