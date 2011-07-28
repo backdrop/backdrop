@@ -739,6 +739,12 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
  */
 function field_group_field_group_build_pre_render_alter(& $element) {
 
+  // Someone is doing a node view, in a node view. Reset content.
+  // TODO Check if this breaks something else.
+  if (isset($element['#node']->content) && count($element['#node']->content) > 0) {
+    $element['#node']->content = array();
+  }
+
   $display = isset($element['#view_mode']);
   $groups = array_keys($element['#groups']);
 
