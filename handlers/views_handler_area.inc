@@ -58,7 +58,6 @@ class views_handler_area extends views_handler {
         '#type' => 'checkbox',
         '#title' => t('Display even if view has no result'),
         '#default_value' => isset($this->options['empty']) ? $this->options['empty'] : 0,
-        '#description' => t('If checked this area will be rended, even if the views has no results.'),
       );
     }
   }
