@@ -238,33 +238,12 @@ class views_handler_argument_string extends views_handler_argument {
     return $value;
   }
 
-  function case_transform($string, $option) {
-    global $multibyte;
-
-    switch ($this->options[$option]) {
-      default:
-        return $string;
-      case 'upper':
-        return drupal_strtoupper($string);
-      case 'lower':
-        return drupal_strtolower($string);
-      case 'ucfirst':
-        return drupal_strtoupper(drupal_substr($string, 0, 1)) . drupal_substr($string, 1);
-      case 'ucwords':
-        if ($multibyte == UNICODE_MULTIBYTE) {
-          return mb_convert_case($string, MB_CASE_TITLE);
-        } else {
-          return ucwords($string);
-        }
-    }
-  }
-
   function get_sort_name() {
     return t('Alphabetical', array(), array('context' => 'Sort order'));
   }
 
   function title() {
-    $this->argument = $this->case_transform($this->argument, 'case');
+    $this->argument = $this->case_transform($this->argument, $this->options['case']);
     if (!empty($this->options['transform_dash'])) {
       $this->argument = strtr($this->argument, '-', ' ');
     }
@@ -296,7 +275,7 @@ class views_handler_argument_string extends views_handler_argument {
   }
 
   function summary_name($data) {
-    return $this->case_transform(parent::summary_name($data), 'case');
+    return $this->case_transform(parent::summary_name($data), $this->options['case']);
   }
 
 }

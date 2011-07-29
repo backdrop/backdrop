@@ -293,6 +293,43 @@ class views_handler extends views_object {
   }
 
   /**
+   * Transform a string by a certain method.
+   *
+   * @param $string
+   *    The input you want to transform.
+   * @param $option
+   *    How do you want to transform it, possible values:
+   *      - upper: Uppercase the string.
+   *      - lower: lowercase the string.
+   *      - ucfirst: Make the first char uppercase.
+   *      - ucwords: Make each word in the string uppercase.
+   *
+   * @return string
+   *    The transformed string.
+   */
+  function case_transform($string, $option) {
+    global $multibyte;
+
+    switch ($option) {
+      default:
+        return $string;
+      case 'upper':
+        return drupal_strtoupper($string);
+      case 'lower':
+        return drupal_strtolower($string);
+      case 'ucfirst':
+        return drupal_strtoupper(drupal_substr($string, 0, 1)) . drupal_substr($string, 1);
+      case 'ucwords':
+        if ($multibyte == UNICODE_MULTIBYTE) {
+          return mb_convert_case($string, MB_CASE_TITLE);
+        }
+        else {
+          return ucwords($string);
+        }
+    }
+  }
+
+  /**
    * Validate the options form.
    */
   function options_validate(&$form, &$form_state) { }

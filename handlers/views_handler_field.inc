@@ -354,6 +354,7 @@ class views_handler_field extends views_handler {
         'absolute' => array('default' => '', 'translatable' => FALSE),
         'external' => array('default' => '', 'translatable' => FALSE),
         'replace_spaces' => array('default' => '', 'translatable' => FALSE),
+        'path_case' => array('default' => 'none', 'translatable' => FALSE),
         'trim_whitespace' => array('default' => FALSE),
         'alt' => array('default' => '', 'translatable' => TRUE),
         'rel' => array('default' => ''),
@@ -662,7 +663,22 @@ class views_handler_field extends views_handler {
           'edit-options-alter-make-link' => array(1),
         ),
       );
-
+      $form['alter']['path_case'] = array(
+        '#type' => 'select',
+        '#title' => t('Transform the case'),
+        '#description' => t('When printing url paths, how to transform the case of the filter value.'),
+        '#dependency' => array(
+          'edit-options-alter-make-link' => array(1),
+        ),
+       '#options' => array(
+          'none' => t('No transform'),
+          'upper' => t('Upper case'),
+          'lower' => t('Lower case'),
+          'ucfirst' => t('Capitalize first letter'),
+          'ucwords' => t('Capitalize each word'),
+        ),
+        '#default_value' => $this->options['alter']['path_case'],
+      );
       $form['alter']['link_class'] = array(
         '#title' => t('Link class'),
         '#type' => 'textfield',
@@ -1073,6 +1089,10 @@ If you would like to have the characters %5B and %5D please use the html entity 
       // However, we need to preserve special characters like " that
       // were removed by check_plain().
       $path = strip_tags(html_entity_decode(strtr($path, $tokens)));
+
+      if (!empty($alter['path_case']) && $alter['path_case'] != 'none') {
+        $path = $this->case_transform($path, $this->options['alter']['path_case']);
+      }
 
       if (!empty($alter['replace_spaces'])) {
         $path = str_replace(' ', '-', $path);
