@@ -808,7 +808,7 @@ class views_handler_field_field extends views_handler_field {
       $default_language = language_default('language');
       $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
                               array($language_content->language, $default_language),
-                              $this->query->options['field_language']);
+                              $this->display_handler->options['field_language']);
 
       // Give the Field Language API a chance to fallback to a different language
       // (or LANGUAGE_NONE), in case the field has no data for the selected language.

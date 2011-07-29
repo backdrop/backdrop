@@ -134,6 +134,18 @@ class views_plugin_display extends views_plugin {
       // Clear the values
       $this->set_option('distinct', NULL);
     }
+
+    // Convert field language settings.
+    $query_options = $this->get_option('query');
+    if (isset($query_options['options']['field_language'])) {
+      $this->set_option('field_language', $query_options['options']['field_language']);
+      unset($query_options['options']['field_language']);
+    }
+    if (isset($query_options['options']['field_language_add_to_query'])) {
+      $this->set_option('field_language_add_to_query', $query_options['options']['field_language_add_to_query']);
+      unset($query_options['options']['field_language_add_to_query']);
+    }
+    $this->set_option('query', $query_options);
   }
 
   function construct() {
@@ -459,6 +471,12 @@ class views_plugin_display extends views_plugin {
       'group_by' => array(
         'default' => FALSE,
         'bool' => TRUE,
+      ),
+      'field_language' => array(
+        'default' => '***CURRENT_LANGUAGE***',
+      ),
+      'field_language_add_to_query' => array(
+        'default' => 1,
       ),
 
       // These types are all plugins that can have individual settings
@@ -1097,6 +1115,22 @@ class views_plugin_display extends views_plugin {
       'desc' => t('Allow to set some advanced settings for the query plugin'),
     );
 
+    $languages = array(
+        '***CURRENT_LANGUAGE***' => t("Current user's language"),
+        '***DEFAULT_LANGUAGE***' => t("Default site language"),
+        LANGUAGE_NONE => t('Language neutral'),
+    );
+    if (module_exists('locale')) {
+      $languages = array_merge($languages, locale_language_list());
+    }
+    $field_language = array();
+    $options['field_language'] = array(
+      'category' => 'other',
+      'title' => t('Field Language'),
+      'value' => $languages[$this->get_option('field_language')],
+      'desc' => t('All fields which support translations will be displayed in the selected language.'),
+    );
+
     $access_plugin = $this->get_plugin('access');
     if (!$access_plugin) {
       // default to the no access control plugin.
@@ -1455,6 +1489,48 @@ class views_plugin_display extends views_plugin {
           );
 
           $this->view->query->options_form($form['query']['options'], $form_state);
+        }
+        break;
+      case 'field_language':
+        $form['#title'] .= t('Field Language');
+
+        $entities = entity_get_info();
+        $entity_tables = array();
+        $has_translation_handlers = FALSE;
+        foreach ($entities as $type => $entity_info) {
+          $entity_tables[] = $entity_info['base table'];
+
+          if (!empty($entity_info['translation'])) {
+            $has_translation_handlers = TRUE;
+          }
+        }
+
+        // Doesn't make sense to show a field setting here if we aren't querying
+        // an entity base table. Also, we make sure that there's at least one
+        // entity type with a translation handler attached.
+        if (in_array($this->view->base_table, $entity_tables) && $has_translation_handlers) {
+          $languages = array(
+            '***CURRENT_LANGUAGE***' => t("Current user's language"),
+            '***DEFAULT_LANGUAGE***' => t("Default site language"),
+            LANGUAGE_NONE => t('Language neutral'),
+          );
+          $languages = array_merge($languages, views_language_list());
+
+          $form['field_language'] = array(
+            '#type' => 'select',
+            '#title' => t('Field Language'),
+            '#description' => t('All fields which support translations will be displayed in the selected language.'),
+            '#options' => $languages,
+            '#default_value' => $this->get_option('field_language'),
+          );
+          $form['field_language_add_to_query'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('When needed, add the field language condition to the query'),
+            '#default_value' => $this->get_option('field_language_add_to_query'),
+          );
+        }
+        else {
+          $form['field_language']['#markup'] = t("You don't have translatable entity types.");
         }
         break;
       case 'style_plugin':
@@ -2068,6 +2144,10 @@ class views_plugin_display extends views_plugin {
       case 'link_display':
       case 'display_comment':
         $this->set_option($section, $form_state['values'][$section]);
+        break;
+      case 'field_language':
+        $this->set_option('field_language', $form_state['values']['field_language']);
+        $this->set_option('field_language_add_to_query', $form_state['values']['field_language_add_to_query']);
         break;
       case 'use_ajax':
       case 'hide_attachment_summary':
