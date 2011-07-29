@@ -14,14 +14,13 @@ class views_handler_filter_group_by_numeric extends views_handler_filter_numeric
     }
   }
   function op_between($field) {
-    $placeholder = $this->placeholder();
+    $placeholder_min = $this->placeholder();
+    $placeholder_max = $this->placeholder();
     if ($this->operator == 'between') {
-      $this->query->add_having_expression($this->options['group'], "$field >= $placeholder", array($placeholder => $this->value['min']));
-      $this->query->add_having_expression($this->options['group'], "$field <= $placeholder", array($placeholder => $this->value['max']));
+      $this->query->add_having_expression($this->options['group'], "$field >= $placeholder_min", array($placeholder_min => $this->value['min']));
+      $this->query->add_having_expression($this->options['group'], "$field <= $placeholder_max", array($placeholder_max => $this->value['max']));
     }
     else {
-      $placeholder_min = $placeholder;
-      $placeholder_max = $this->placeholder();
       $this->query->add_having_expression($this->options['group'], "$field <= $placeholder_min OR $field >= $placeholder_max", array($placeholder_min => $this->value['min'], $placeholder_max => $this->value['max']));
     }
   }
