@@ -357,6 +357,13 @@ class views_handler_filter_in_operator extends views_handler_filter {
   function validate() {
     $this->get_value_options();
     $errors = array();
+
+    // If the operator is an operator which doesn't require a value, there is
+    // no need for additional validation.
+    if (in_array($this->operator, $this->operator_values(0))) {
+      return array();
+    }
+
     if (!in_array($this->operator, $this->operator_values(1))) {
       $errors[] = t('The operator is invalid.');
     }
