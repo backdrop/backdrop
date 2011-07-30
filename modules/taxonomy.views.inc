@@ -498,7 +498,7 @@ function views_taxonomy_set_breadcrumb(&$breadcrumb, &$argument) {
     if ($parent->tid == $argument->argument) {
       continue;
     }
-    if ($argument->options['use_taxonomy_term_path']) {
+    if (!empty($argument->options['use_taxonomy_term_path'])) {
       $path = taxonomy_term_uri($parent);
     }
     else {
