@@ -69,7 +69,7 @@ class views_plugin_argument_default_user extends views_plugin_argument_default {
     // If the current page is a view that takes uid as an argument, return the uid.
     $views_page = views_get_page_view();
 
-    if ($views_page && isset($views_page->view->argument['uid'])) {
+    if ($views_page && isset($views_page->argument['uid'])) {
       return $views_page->view->argument['uid']->argument;
     }
   }

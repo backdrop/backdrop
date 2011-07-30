@@ -143,7 +143,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
     // If the current page is a view that takes tid as an argument,
     // find the tid argument and return it.
     $views_page = views_get_page_view();
-    if ($views_page && isset($views_page->view->argument['tid'])) {
+    if ($views_page && isset($views_page->argument['tid'])) {
       return $views_page->view->argument['tid']->argument;
     }
   }
