@@ -27,6 +27,7 @@ function comment_views_data() {
     'field' => 'cid',
     'title' => t('Comment'),
     'help' => t("Comments are responses to node content."),
+    'access query tag' => 'comment_access',
   );
 
   // Provide a "default relationship" to keep older views from choking.
