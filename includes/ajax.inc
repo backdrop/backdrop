@@ -67,6 +67,7 @@ function views_ajax() {
         }
       }
     }
+    drupal_alter('views_ajax_data', $commands, $view);
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 }
