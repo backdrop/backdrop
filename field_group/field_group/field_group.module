@@ -1215,7 +1215,12 @@ function field_group_export_delete($group) {
   // If we were sent an object, get the export key from it. Otherwise
   // assume we were sent the export key.
   if (is_object($group)) {
-    $query->condition('id', $group->id);
+    if (isset($group->id)) {
+      $query->condition('id', $group->id);
+    }
+    elseif (isset($group->identifier)) {
+      $query->condition('identifier', $group->identifier);
+    }
     if (!empty($group->mode)) {
       $query->condition('mode', $group->mode);
     }
