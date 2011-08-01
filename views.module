@@ -1395,7 +1395,7 @@ function views_get_view($name, $reset = FALSE) {
 }
 
 /**
- * Find the real location of at able.
+ * Find the real location of a table.
  *
  * If a table has moved, find the new name of the table so that we can
  * change its name directly in options where necessary.
