@@ -22,7 +22,7 @@ Drupal.FieldGroup.Effects.processFieldset = {
       // Add required fields mark to any fieldsets containing required fields
       $('fieldset.fieldset').each(function(i){
         if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
-          $('legend span.fieldset-legend', $(this)).eq(0).append('&nbsp;').append($('.form-required').eq(0).clone());
+          $('legend span.fieldset-legend', $(this)).eq(0).append(' ').append($('.form-required').eq(0).clone());
         }
         if ($('.error', $(this)).length) {
           $('legend span.fieldset-legend', $(this)).eq(0).addClass('error');
@@ -47,7 +47,7 @@ Drupal.FieldGroup.Effects.processAccordion = {
       // Add required fields mark to any element containing required fields
       $('div.accordion-item').each(function(i){
         if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
-          $('h3.ui-accordion-header').eq(i).append('&nbsp;').append($('.form-required').eq(0).clone());
+          $('h3.ui-accordion-header').eq(i).append(' ').append($('.form-required').eq(0).clone());
         }
         if ($('.error', $(this)).length) {
           $('h3.ui-accordion-header').eq(i).addClass('error');
@@ -68,7 +68,7 @@ Drupal.FieldGroup.Effects.processHtabs = {
       // Add required fields mark to any element containing required fields
       $('fieldset.horizontal-tabs-pane').each(function(i){
         if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
-          $(this).data('horizontalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
+          $(this).data('horizontalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after(' ');
         }
         if ($('.error', $(this)).length) {
           $(this).data('horizontalTab').link.parent().addClass('error');
@@ -89,7 +89,7 @@ Drupal.FieldGroup.Effects.processTabs = {
       // Add required fields mark to any fieldsets containing required fields
       $('fieldset.vertical-tabs-pane').each(function(i){
         if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
-          $(this).data('verticalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
+          $(this).data('verticalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after(' ');
         }
         if ($('.error', $(this)).length) {
           $(this).data('verticalTab').link.parent().addClass('error');
