@@ -132,10 +132,10 @@ function _field_group_install_read_groups() {
 function field_group_install() {
 
   $groups = _field_group_install_read_groups();
+  module_load_include('module', 'field_group');
 
   if (!empty($groups)) {
 
-    module_load_include('module', 'field_group');
     module_load_include('module', 'ctools');
     ctools_include('export');
 
