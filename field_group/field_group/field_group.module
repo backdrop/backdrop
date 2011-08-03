@@ -220,7 +220,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1),
         'default_formatter' => 'open',
       ),
       'fieldset' => array(
@@ -284,7 +284,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('effect' => 'none', 'speed' => 'fast', 'classes' => ''),
+        'instance_settings' => array('show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'fieldset' => array(
@@ -388,6 +388,20 @@ function field_group_field_group_format_settings($group) {
   // Add optional instance_settings.
   switch ($group->format_type) {
     case 'div':
+      $form['instance_settings']['show_label'] = array(
+        '#title' => t('Show label'),
+        '#type' => 'select',
+        '#options' => array(0 => t('No'), 1 => t('Yes')),
+        '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : $formatter['instance_settings']['show_label'],
+        '#weight' => 2,
+      );
+      $form['instance_settings']['label_element'] = array(
+        '#title' => t('Label element'),
+        '#type' => 'select',
+        '#options' => array('h2' => t('Header 2'), 'h3' => t('Header 3')),
+        '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
+        '#weight' => 2,
+      );
       $form['instance_settings']['effect'] = array(
         '#title' => t('Effect'),
         '#type' => 'select',
@@ -502,6 +516,8 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       break;
     // Normal or collapsible div.
     case 'div':
+      $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
+      $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
       $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
       $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
       $add = array(
@@ -512,12 +528,15 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $classes .= " speed-$speed effect-$effect";
       if ($group->format_settings['formatter'] != 'open') {
         $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
-          <span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span>
+          <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
           <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
         $add['#suffix'] = '</div></div>';
       }
       else {
         $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
+        if ($show_label) {
+          $add['#prefix'] += '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
+        }
         $add['#suffix'] = '</div>';
       }
       if (!empty($description)) {
