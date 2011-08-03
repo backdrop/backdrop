@@ -196,6 +196,10 @@ function field_group_install() {
     ->fields(array('weight' => 1))
     ->condition('name', 'field_group')
     ->execute();
+
+  // Create the identifiers if any groups are inserted at install.
+  _field_group_recreate_identifiers();
+
 }
 
 /**
@@ -231,6 +235,13 @@ function field_group_update_7001() {
 function field_group_update_7002() {
 
   module_load_include('module', 'field_group');
+
+  // This hook is called to satify people with older version of field_group.
+  // This will recreate all identifiers for the field_groups known in database.
+  // At the moment, we only trigger field_groups that are stored in the database, where
+  // we should maybe get all field_groups as ctools has registered them.
+  // See http://drupal.org/node/1169146.
+  // See http://drupal.org/node/1018550.
   _field_group_recreate_identifiers();
 
 }
