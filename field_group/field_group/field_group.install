@@ -245,3 +245,14 @@ function field_group_update_7002() {
   _field_group_recreate_identifiers();
 
 }
+
+/**
+ * Update hook to recreate identifiers.
+ * @see function field_group_update_7002.
+ */
+function field_group_update_7003() {
+
+  module_load_include('module', 'field_group');
+  _field_group_recreate_identifiers();
+
+}
