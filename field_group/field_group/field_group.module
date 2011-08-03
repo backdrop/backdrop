@@ -1285,6 +1285,15 @@ function field_group_formatter_info($display_overview = FALSE) {
     else {
       $formatters = array();
       $formatters += module_invoke_all('field_group_formatter_info');
+      $hidden_region = array(
+        'label' => t('<Hidden>'),
+        'description' => '',
+        'format_types' => array(),
+        'instance_settings' => array(),
+        'default_formatter' => '',
+      );
+      //$formatters['form']['hidden'] = $hidden_region;
+      $formatters['display']['hidden'] = $hidden_region;
       cache_set('field_group_formatter_info', $formatters, 'cache_field');
     }
     $cache = $formatters;
