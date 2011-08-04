@@ -257,7 +257,7 @@ function field_group_field_group_formatter_info() {
       'multipage-group' => array(
         'label' => ('Multipage group'),
         'description' => t('This fieldgroup renders groups on separate pages.'),
-        'instance_settings' => array('classes' => '', 'move_button' => 0),
+        'instance_settings' => array('classes' => '', 'page_header' => 3, 'move_additional' => 1, 'page_counter' => 1, 'move_button' => 0),
       ),
       'multipage' => array(
         'label' => t('Multipage'),
@@ -420,12 +420,33 @@ function field_group_field_group_format_settings($group) {
     case 'fieldset':
       break;
     case 'multipage-group':
+      $form['instance_settings']['page_header'] = array(
+        '#title' => t('Format page title'),
+        '#type' => 'select',
+        '#options' => array(0 => t('None'), 1 => t('Label only'), 2 => t('Step 1 of 10'), 3 => t('Step 1 of 10 [Label]'),),
+        '#default_value' => isset($group->format_settings['instance_settings']['page_header']) ? $group->format_settings['instance_settings']['page_header'] : $formatter['instance_settings']['page_header'],
+        '#weight' => 1,
+      );
+      $form['instance_settings']['page_counter'] = array(
+        '#title' => t('Add a page counter at the bottom'),
+        '#type' => 'select',
+        '#options' => array(0 => t('No'), 1 => t('Format 1 / 10'), 2 => t('The count number only')),
+        '#default_value' => isset($group->format_settings['instance_settings']['page_counter']) ? $group->format_settings['instance_settings']['page_counter'] : $formatter['instance_settings']['page_counter'],
+        '#weight' => 2,
+      );
       $form['instance_settings']['move_button'] = array(
         '#title' => t('Move submit button to last multipage'),
         '#type' => 'select',
         '#options' => array(0 => t('No'), 1 => t('Yes')),
         '#default_value' => isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : $formatter['instance_settings']['move_button'],
         '#weight' => 3,
+      );
+      $form['instance_settings']['move_additional'] = array(
+        '#title' => t('Move additional settings to last multipage (if available)'),
+        '#type' => 'select',
+        '#options' => array(0 => t('No'), 1 => t('Yes')),
+        '#default_value' => isset($group->format_settings['instance_settings']['move_additional']) ? $group->format_settings['instance_settings']['move_additional'] : $formatter['instance_settings']['move_additional'],
+        '#weight' => 4,
       );
     case 'tabs':
     case 'htabs':
@@ -498,8 +519,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
   );
 
   switch ($group->format_type) {
+
     // Fieldset.
     case 'fieldset':
+
       $element += array(
         '#id' => $id,
         '#type' => 'fieldset',
@@ -514,8 +537,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $element['#attached']['js'][] = 'misc/form.js';
       $element['#attached']['js'][] = 'misc/collapse.js';
       break;
+
     // Normal or collapsible div.
     case 'div':
+
       $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
       $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
       $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
@@ -549,8 +574,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       }
 
       break;
+
     // Accordion group.
     case 'accordion':
+
       $element += array(
         '#id' => $id,
         '#type' => 'markup',
@@ -576,8 +603,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       }
       drupal_add_library('system', 'ui.accordion');
       break;
+
     // Horizontal tabs group.
     case 'htabs':
+
       $element += array(
         '#id' => $id,
         '#type' => 'horizontal_tabs',
@@ -606,24 +635,67 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         '#description' => $description,
       );
       break;
+
     // Multipage group.
     case 'multipage-group':
+
+      $move_additional = isset($group->format_settings['instance_settings']['move_additional']) ? $group->format_settings['instance_settings']['move_additional'] : 1;
       $move_button = isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : 0;
-      drupal_add_js(array('multipage_move_submit' => $move_button), 'setting');
-      $element += array(
+
+      $multipage_element = array(
         '#id' => $id,
         '#type' => 'multipage',
-        '#title' => check_plain(t($group->label)),
         '#weight' => $group->weight,
         '#theme_wrappers' => array('multipage'),
         '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
         '#suffix' => '</div>',
       );
+
+      // Create a page title from the label.
+      $page_header = isset($group->format_settings['instance_settings']['page_header']) ? $group->format_settings['instance_settings']['page_header'] : 3;
+      switch ($page_header) {
+        case 1:
+          $multipage_element['#title'] = check_plain(t($group->label));
+          break;
+        case 2:
+          $multipage_element['#title'] = t('Step 1 of 10');
+          break;
+        case 3:
+          $multipage_element['#title'] = t('Step 1 of 10 @label', array('@label' => check_plain(t($group->label))));
+          break;
+        case 0:
+        default:
+          break;
+      }
+
+      // Add a page counter if needed.
+      // counter array(0 => t('No'), 1 => t('Format 1 / 10'), 2 => t('The count number only'));
+      $multipage_element['#page_counter_format'] = isset($group->format_settings['instance_settings']['page_counter']) ? $group->format_settings['instance_settings']['page_counter'] : 1;
+      $multipage_element['#page_counter_rendered'] = '';
+      if ($multipage_element['#page_counter_format'] == 1) {
+        $multipage_element['#page_counter_rendered'] = '1 / 10';
+      }
+      elseif ($multipage_element['#page_counter_format'] == 2) {
+        $multipage_element['#page_counter_rendered'] = '1';
+      }
+
+      $element += $multipage_element;
+
+      drupal_add_js(array('multipage_move_submit' => $move_button), 'setting');
       $form['#attached']['js'][] = 'misc/form.js';
       $form['#attached']['js'][] = 'misc/collapse.js';
+
       break;
+
     // Multipage.
     case 'multipage':
+
+      static $multipages;
+      if (!isset($multipages[$group->parent_name])) {
+        $multipages = array($group->parent_name => 0);
+      }
+      $multipages[$group->parent_name]++;
+
       $classes  .= $group->format_settings['formatter'] == 'start' ? ' multipage-open' : ' multipage-closed';
       $element += array(
         '#id' => $id,
@@ -637,12 +709,15 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
         // very important. Cannot be added on the form!
         '#parents' => array($group->parent_name),
         '#description' => $description,
+        '#page_count' => $multipages[$group->parent_name],
       );
       break;
+
     // Vertical tabs group.
     // Vertical tabs for forms need a little tricky approach, to be
     // able to optionally merge field(groups) with the "additional_settings"
     case 'tabs':
+
       $element += array(
         '#id' => $id,
         '#type' => 'vertical_tabs',
@@ -659,8 +734,10 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       $form['#attached']['library'][] = array('system', 'drupal.form');
       $form['#attached']['library'][] = array('system', 'drupal.collapse');
       break;
+
     // Vertical tab.
     case 'tab':
+
       // Could be it never runs through htab.
       $form['#attached']['js'][] = array(
         'data' => array('field_group' => array('tabs' => $view_mode)),
@@ -756,7 +833,9 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       }
 
     break;
+
   }
+
 }
 
 /**
@@ -859,6 +938,8 @@ function field_group_remove_empty_display_groups(& $element, $groups) {
  */
 function field_group_field_group_format_summary($group) {
 
+  $group_form = module_invoke_all('field_group_format_settings', $group);
+
   $output = '';
   if (isset($group->format_settings['formatter'])) {
     $output .= '<strong>' . $group->format_type . '</strong> ' . $group->format_settings['formatter'] . '';
@@ -870,10 +951,18 @@ function field_group_field_group_format_summary($group) {
       if (empty($value)) {
         continue;
       }
+
       $output .= '<strong>' . $key . '</strong> ';
+
+      if (isset($group_form['instance_settings'], $group_form['instance_settings'][$key]['#options'])) {
+        $value = $group_form['instance_settings'][$key]['#options'][$value];
+      }
+
+      // Shorten the string.
       if (drupal_strlen($value) > 38) {
         $value = truncate_utf8($value, 50, TRUE, TRUE);
       }
+      // If still numeric, handle it as yes or no.
       elseif (is_numeric($value)) {
         $value = $value == '1' ? t('yes') : t('no');
       }
@@ -1093,7 +1182,11 @@ function theme_multipage($variables) {
   drupal_add_library('field_group', 'multipage');
 
   $output = '<h2 class="element-invisible">' . (!empty($element['#title']) ? $element['#title'] : t('Multipage')) . '</h2>';
-  $output .= '<div class="multipage-panes">' . $element['#children'] . '</div>';
+
+  $output .= '<div class="multipage-panes">';
+  $output .= $element['#children'];
+  $output .= '<div>' . $element['#page_count'] . '</div>';
+  $output .= '</div>';
 
   return $output;
 }
