@@ -836,6 +836,11 @@ class view extends views_db_object {
       $this->style_plugin->build_sort_post();
     }
 
+    // Allow area handlers to affect the query.
+    $this->_build('header');
+    $this->_build('footer');
+    $this->_build('empty');
+
     // Allow display handler to affect the query:
     $this->display_handler->query($this->display_handler->use_group_by());
 
