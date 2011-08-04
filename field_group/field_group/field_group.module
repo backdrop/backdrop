@@ -535,7 +535,7 @@ function field_group_field_group_pre_render(& $element, $group, & $form) {
       else {
         $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
         if ($show_label) {
-          $add['#prefix'] += '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
+          $add['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
         }
         $add['#suffix'] = '</div>';
       }
