@@ -1,0 +1,87 @@
+diff --git a/field_group.field_ui.inc b/field_group.field_ui.inc
+index ae39e66..b622959 100644
+--- a/field_group.field_ui.inc
++++ b/field_group.field_ui.inc
+@@ -698,7 +698,7 @@ function field_group_delete_form_submit($form, &$form_state) {
+   $bundle_label = $bundles[$entity_type][$bundle]['label'];
+ 
+   ctools_include('export');
+-  ctools_export_crud_delete('field_group', $group);
++  field_group_export_delete($group, FALSE);
+ 
+   drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
+ 
+diff --git a/field_group.install b/field_group.install
+index 803b92a..f3e1047 100644
+--- a/field_group.install
++++ b/field_group.install
+@@ -19,7 +19,7 @@ function field_group_schema() {
+       'default hook' => 'field_group_info',
+       'save callback' => 'field_group_save',
+       'delete callback' => 'field_group_export_delete',
+-      'can disable' => FALSE,
++      'can disable' => TRUE,
+       'api' => array(
+         'owner' => 'field_group',
+         'api' => 'field_group',
+diff --git a/field_group.module b/field_group.module
+index 5a10da2..0ed6b86 100644
+--- a/field_group.module
++++ b/field_group.module
+@@ -1108,6 +1108,10 @@ function field_group_read_groups($params = array()) {
+   ctools_include('export');
+   $records = ctools_export_load_object('field_group', 'conditions', $params);
+   foreach ($records as $group) {
++    // Deleted groups
++    if (isset($group->disabled) && $group->disabled) {
++      continue;
++    }
+     $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = field_group_unpack($group);
+   }
+   return $groups;
+@@ -1202,31 +1206,30 @@ function field_group_pack($group) {
+ 
+ /**
+  * Delete a field group.
+- * This function is called by ctools export when calls are
++ * This function is also called by ctools export when calls are
+  * made through ctools_export_crud_delete().
+  *
+  * @param $group
+  *   A group definition.
++ * @param $ctools_crud
++ *  Is this function called by the ctools crud delete.
+  */
+-function field_group_export_delete($group) {
++function field_group_export_delete($group, $ctools_crud = TRUE) {
+ 
+   $query = db_delete('field_group');
+ 
+-  // If we were sent an object, get the export key from it. Otherwise
+-  // assume we were sent the export key.
+-  if (is_object($group)) {
+-    if (isset($group->id)) {
+-      $query->condition('id', $group->id);
+-    }
+-    elseif (isset($group->identifier)) {
+-      $query->condition('identifier', $group->identifier);
+-    }
+-    if (!empty($group->mode)) {
+-      $query->condition('mode', $group->mode);
++  if (isset($group->identifier)) {
++    $query->condition('identifier', $group->identifier);
++    if (!$ctools_crud) {
++      ctools_export_crud_disable('field_group', $group->identifier);
+     }
+   }
+-  else {
+-    $query->condition('id', $group);
++  elseif (isset($group->id)) {
++    $query->condition('id', $group->id);
++  }
++
++  if (!empty($group->mode)) {
++    $query->condition('mode', $group->mode);
+   }
+ 
+   $query->execute();

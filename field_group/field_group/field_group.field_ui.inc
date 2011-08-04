@@ -698,7 +698,7 @@ function field_group_delete_form_submit($form, &$form_state) {
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
   ctools_include('export');
-  ctools_export_crud_delete('field_group', $group);
+  field_group_export_delete($group, FALSE);
 
   drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
 
