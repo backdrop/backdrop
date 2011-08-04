@@ -23,6 +23,10 @@ class views_handler_field_node_link extends views_handler_field {
       '#default_value' => $this->options['text'],
     );
     parent::options_form($form, $form_state);
+
+    // The path is set by render_link function so don't allow to set it.
+    $form['alter']['path'] = array('#access' => FALSE);
+    $form['alter']['external'] = array('#access' => FALSE);
   }
 
   function query() {
