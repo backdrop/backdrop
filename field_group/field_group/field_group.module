@@ -943,6 +943,14 @@ function field_group_field_extra_fields() {
 
   $extra['user']['user'] = array('form' => array());
 
+  // User picture field to integrate with user module.
+  $extra['user']['user']['form']['picture'] = array(
+    'label' => t('Picture'),
+    'description' => t('User picture'),
+    'weight' => -5,
+  );
+
+  // Field to itegrate with contact module.
   if (module_exists('contact')) {
     $extra['user']['user']['form']['contact'] = array(
       'label' => t('Contact'),
@@ -951,11 +959,14 @@ function field_group_field_extra_fields() {
     );
   }
 
-  $extra['user']['user']['form']['picture'] = array(
-    'label' => t('Picture'),
-    'description' => t('User picture'),
-    'weight' => -5,
-  );
+  // Field to integrate with the locale module.
+  if (module_exists('locale')) {
+    $extra['user']['user']['form']['locale'] = array(
+      'label' => t('Language settings'),
+      'description' => t('Language settings for the user account.'),
+      'weight' => -5,
+    );
+  }
 
   return $extra;
 }
