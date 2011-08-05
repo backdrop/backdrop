@@ -1350,6 +1350,79 @@ function views_get_disabled_views() {
 }
 
 /**
+ * Return an array of view as options array, that can be used by select,
+ * checkboxes and radios as #options.
+ *
+ * @param bool $views_only
+ *  If TRUE, only return views, not displays.
+ * @param string $filter
+ *  Filters the views on status. Can either be 'all' (default), 'enabled' or
+ *  'disabled'
+ * @param  mixed $exclude_view
+ *  view or current display to exclude
+ *  either a
+ *  - views object (containing $exclude_view->name and $exclude_view->current_display)
+ *  - views name as string:  e.g. my_view
+ *  - views name and display id (separated by ':'): e.g. my_view:default
+ * @param bool $optgroup
+ *  If TRUE, returns an array with optgroups for each view (will be ignored for
+ *  $views_only = TRUE). Can be used by select
+ *
+ * @return array
+ *  an associative array for use in select.
+ *  - key: view name and display id separated by ':', or the view name only
+ */
+function views_get_views_as_options($views_only = FALSE, $filter = 'all', $exclude_view = NULL, $optgroup = FALSE) {
+
+  // Filter the big views array.
+  switch ($filter) {
+    case 'all':
+    case 'disabled':
+    case 'enabled':
+      $func = "views_get_{$filter}_views";
+      $views = $func();
+      break;
+    default:
+      return array();
+  }
+
+  // Prepare exclude view strings for comparison.
+  if (empty($exclude_view)) {
+    $exclude_view_name = '';
+    $exclude_view_display = '';
+  }
+  elseif (is_object($exclude_view)) {
+    $exclude_view_name = $exclude_view->name;
+    $exclude_view_display = $exclude_view->current_display;
+  }
+  else {
+    list($exclude_view_name, $exclude_view_display) = explode(':', $exclude_view);
+  }
+
+  $options = array();
+  foreach ($views as $view) {
+    // Return only views.
+    if ($views_only && $view->name != $exclude_view_name) {
+      $options[$view->name] = $view_name;
+    }
+    // Return views with display ids.
+    else {
+      foreach ($view->display as $display_id => $display) {
+        if (!($view->name == $exclude_view_name && $view->current_display != $exclude_view_display)) {
+          if ($optgroup) {
+            $options[$view->name][$view->name . ':' . $display->id] = t('@view : @display', array('@view' => $view->name, '@display' => $display->id));
+          }
+          else {
+            $options[$view->name . ':' . $display->id] = t('View: @view - Display: @display', array('@view' => $view->name, '@display' => $display->id));
+          }
+        }
+      }
+    }
+  }
+  return $options;
+}
+
+/**
  * Returns TRUE if a view is enabled, FALSE otherwise.
  */
 function views_view_is_enabled($view) {
