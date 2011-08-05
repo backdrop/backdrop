@@ -151,16 +151,19 @@ class views_plugin_exposed_form extends views_plugin {
     $exposed_data = isset($view->exposed_data) ? $view->exposed_data : array();
     $sort_by = isset($exposed_data['sort_by']) ? $exposed_data['sort_by'] : NULL;
     if (!empty($sort_by)) {
-      $handler = $view->sort[$sort_by];
-      if (isset($handler)) {
+      // Make sure the original order of sorts is preserved
+      // (e.g. a sticky sort is often first)
+      if (isset($view->sort[$sort_by])) {
         $view->query->orderby = array();
-        if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('ASC', 'DESC'))) {
-          $handler->options['order'] = $exposed_data['sort_order'];
-        }
-        $handler->set_relationship();
-        $handler->query();
-        foreach ($view->sort as $sort) {
+        foreach ($view->sort as $key => $sort) {
           if (!$sort->is_exposed()) {
+            $sort->query();
+          }
+          else if ($key == $sort_by) {
+            if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('ASC', 'DESC'))) {
+              $sort->options['order'] = $exposed_data['sort_order'];
+            }
+            $sort->set_relationship();
             $sort->query();
           }
         }
