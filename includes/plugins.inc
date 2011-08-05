@@ -423,6 +423,9 @@ function views_discover_plugins() {
         if (!isset($def['parent'])) {
           $def['parent'] = 'parent';
         }
+        // Set the internal name to be able to read it out later.
+        $def['name'] = $plugin;
+
         // merge the new data in
         $cache[$type][$plugin] = $def;
       }

@@ -48,11 +48,14 @@ class views_plugin_style_summary extends views_plugin_style {
       '#default_value' => !empty($this->options['override']),
       '#title' => t('Override number of items to display'),
     );
+
     $form['items_per_page'] = array(
       '#type' => 'textfield',
       '#title' => t('Items to display'),
       '#default_value' => $this->options['items_per_page'],
-      '#dependency' => array('edit-style-options-override' => array(TRUE)),
+      '#dependency' => array(
+        'edit-options-summary-options-' . str_replace('_', '-', $this->definition['name']) . '-override' => array(1)
+      ),
     );
   }
 
