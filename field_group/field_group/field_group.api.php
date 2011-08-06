@@ -196,6 +196,10 @@ function hook_field_group_format_settings($group) {
  *
  * Note that at this point, the field group has no notion of the fields in it.
  *
+ * There is also an alternative way of handling this. The default implementation
+ * within field_group calls "field_group_pre_render_<format_type>".
+ * @see field_group_pre_render_fieldset.
+ *
  * @param Array $elements by address.
  * @param Object $group The Field group info.
  */

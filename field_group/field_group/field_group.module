@@ -143,6 +143,9 @@ function field_group_theme() {
     'multipage' => array(
       'render element' => 'element',
     ),
+    'multipage_pane' => array(
+      'render element' => 'element',
+    ),
   );
 }
 
@@ -174,7 +177,7 @@ function field_group_field_attach_delete_bundle($entity_type, $bundle) {
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.css';
-  field_group_attach_groups($form, 'form');
+  field_group_attach_groups($form, 'form', $form_state);
 }
 
 /**
@@ -468,372 +471,388 @@ function field_group_field_group_format_settings($group) {
 }
 
 /**
+ * Helper function to prepare basic variables needed for most formatters.
+ *
+ * Called in field_group_field_group_pre_render(), but can also be called in
+ * other implementations of hook_field_group_pre_render().
+ */
+function field_group_pre_render_prepare(&$group) {
+
+  // Prepare extra classes.
+  $group->classes = array($group->format_type, str_replace('_', '-', $group->group_name));
+  if (isset($group->format_settings['formatter'])) {
+    $group->collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
+    // Open or closed horizontal or vertical tabs will be collapsible by default.
+    if ($group->format_type == 'tab' || $group->format_type == 'htab') {
+      $group->collapsible = TRUE;
+    }
+    $group->collapsed = in_array($group->format_settings['formatter'], array('collapsed', 'closed'));
+    if ($group->collapsible) {
+      $group->classes[] = 'collapsible';
+      if ($group->collapsed) {
+        $group->classes[] = 'collapsed';
+      }
+    }
+  }
+
+  // Add a required-fields class to trigger the js.
+  if (isset($group->format_settings['instance_settings']) && !empty($group->format_settings['instance_settings']['required_fields'])) {
+    $group->classes[] = 'required-fields';
+  }
+
+  $group->classes = implode(' ', $group->classes);
+  if (isset($group->format_settings['instance_settings'], $group->format_settings['instance_settings']['classes'])) {
+    $group->classes .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
+  }
+
+  $group->description = isset($group->format_settings['instance_settings']['description']) ? filter_xss_admin($group->format_settings['instance_settings']['description']) : '';
+
+}
+
+/**
  * Implements hook_field_group_pre_render().
  *
  * @param Array $elements by address.
  * @param Object $group The Field group info.
  */
-function field_group_field_group_pre_render(& $element, $group, & $form) {
+function field_group_field_group_pre_render(& $element, &$group, & $form) {
+
+  field_group_pre_render_prepare($group);
 
   $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
-  $id = $form['#entity_type'] . '_' . $form['#bundle'] . '_' . $view_mode . '_' . $group->group_name;
-
-  // Prepare extra classes.
-  $classes = array($group->format_type, str_replace('_', '-', $group->group_name));
-  if (isset($group->format_settings['formatter'])) {
-    $collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
-    // Open or closed horizontal or vertical tabs will be collapsible by default.
-    if ($group->format_type == 'tab' || $group->format_type == 'htab') {
-      $collapsible = TRUE;
-    }
-    $collapsed = in_array($group->format_settings['formatter'], array('collapsed', 'closed'));
-    if ($collapsible) {
-      $classes[] = 'collapsible';
-      if ($collapsed) {
-        $classes[] = 'collapsed';
-      }
-    }
-  }
-  else {
-    $collapsible = TRUE;
-    $collapsed = FALSE;
-    $classes[] = 'collapsible';
-  }
-
-  // Add a required-fields class to trigger the js.
-  if (isset($group->format_settings['instance_settings']) && !empty($group->format_settings['instance_settings']['required_fields'])) {
-    $classes[] = 'required-fields';
-  }
-
-  $classes = implode(' ', $classes);
-  if (isset($group->format_settings['instance_settings'], $group->format_settings['instance_settings']['classes'])) {
-    $classes .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
-  }
-
-  $description = isset($group->format_settings['instance_settings']['description']) ? filter_xss_admin($group->format_settings['instance_settings']['description']) : '';
 
   // Add all field_group format types to the js settings.
   $form['#attached']['js'][] = array(
     'data' => array('field_group' => array($group->format_type => $view_mode)),
     'type' => 'setting',
   );
+  $form['#attached']['js'][] = 'misc/form.js';
+  $form['#attached']['js'][] = 'misc/collapse.js';
 
-  switch ($group->format_type) {
+  $element['#id'] = $form['#entity_type'] . '_' . $form['#bundle'] . '_' . $view_mode . '_' . $group->group_name;
+  $element['#weight'] = $group->weight;
 
-    // Fieldset.
-    case 'fieldset':
+  // Call the pre render function for the format type.
+  $function = "field_group_pre_render_" . str_replace("-", "_", $group->format_type);
+  if (function_exists($function)) {
+    $function($element, $group, $form);
+  }
 
-      $element += array(
-        '#id' => $id,
-        '#type' => 'fieldset',
-        '#title' => check_plain(t($group->label)),
-        '#weight' => $group->weight,
-        '#collapsible' => $collapsible,
-        '#collapsed' => $collapsed,
-        '#pre_render' => array(),
-        '#attributes' => array('class' => explode(' ', $classes)),
-        '#description' => $description,
-      );
-      $element['#attached']['js'][] = 'misc/form.js';
-      $element['#attached']['js'][] = 'misc/collapse.js';
-      break;
+}
 
-    // Normal or collapsible div.
-    case 'div':
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Fieldset.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_fieldset(&$element, $group, &$form) {
 
-      $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
-      $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
-      $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
-      $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
-      $add = array(
-        '#type' => 'markup',
-        '#weight' => $group->weight,
-        '#id' => $id,
-      );
-      $classes .= " speed-$speed effect-$effect";
-      if ($group->format_settings['formatter'] != 'open') {
-        $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
-          <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
-          <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
-        $add['#suffix'] = '</div></div>';
-      }
-      else {
-        $add['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
-        if ($show_label) {
-          $add['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
-        }
-        $add['#suffix'] = '</div>';
-      }
-      if (!empty($description)) {
-        $add['#prefix'] .= '<div class="description">' . $description . '</div>';
-      }
-      $element += $add;
+  $element += array(
+    '#type' => 'fieldset',
+    '#title' => check_plain(t($group->label)),
+    '#collapsible' => $group->collapsible,
+    '#collapsed' => $group->collapsed,
+    '#pre_render' => array(),
+    '#attributes' => array('class' => explode(' ', $group->classes)),
+    '#description' => $group->description,
+  );
+  $element['#attached']['js'][] = 'misc/form.js';
+  $element['#attached']['js'][] = 'misc/collapse.js';
 
-      if ($effect == 'blind') {
-        drupal_add_library('system', 'effects.blind');
-      }
+}
 
-      break;
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Div.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_div(&$element, $group, &$form) {
 
-    // Accordion group.
-    case 'accordion':
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
+  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
+  $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+  $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
 
-      $element += array(
-        '#id' => $id,
-        '#type' => 'markup',
-        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
-        '#suffix' => '</div>',
-        '#weight' => $group->weight,
-      );
-      break;
-    // Accordion item.
-    case 'accordion-item':
-      $element += array(
-        '#id' => $id,
-        '#type' => 'markup',
-        '#prefix' => '
-        <h3 class="field-group-format-toggler ' . $group->format_type . ($collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . '</h3>
-        <div class="field-group-format-wrapper ' . $classes . '">',
-        '#suffix' => '</div>',
-        '#weight' => $group->weight,
-        //'#attributes' => array('class' => array($group->format_type)),
-      );
-      if (!empty($description)) {
-        $element['#prefix'] .= '<div class="description">' . $description . '</div>';
-      }
-      drupal_add_library('system', 'ui.accordion');
-      break;
+  $element['#type'] = 'markup';
 
-    // Horizontal tabs group.
-    case 'htabs':
+  $group->classes .= " speed-$speed effect-$effect";
+  if ($group->format_settings['formatter'] != 'open') {
+    $element['#prefix'] = '<div class="field-group-format ' . $group->classes . '">
+      <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
+      <div class="field-group-format-wrapper" style="display: ' . ($group->collapsed ? 'none' : 'block') . ';">';
+    $element['#suffix'] = '</div></div>';
+  }
+  else {
+    $element['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
+    if ($show_label) {
+      $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
+    }
+    $element['#suffix'] = '</div>';
+  }
+  if (!empty($group->description)) {
+    $element['#prefix'] .= '<div class="description">' . $group->description . '</div>';
+  }
 
-      $element += array(
-        '#id' => $id,
-        '#type' => 'horizontal_tabs',
-        '#title' => check_plain(t($group->label)),
-        '#weight' => $group->weight,
-        '#theme_wrappers' => array('horizontal_tabs'),
-        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
-        '#suffix' => '</div>',
-      );
-      $form['#attached']['js'][] = 'misc/form.js';
-      $form['#attached']['js'][] = 'misc/collapse.js';
-      break;
-    // Horizontal tab.
-    case 'htab':
-      $element += array(
-        '#id' => $id,
-        '#type' => 'fieldset',
-        '#title' => check_plain(t($group->label)),
-        '#weight' => $group->weight,
-        '#collapsible' => $collapsible,
-        '#collapsed' => $collapsed,
-        '#attributes' => array('class' => explode(" ", $classes)),
-        '#group' => $group->parent_name,
-        // very important. Cannot be added on the form!
-        '#parents' => array($group->parent_name),
-        '#description' => $description,
-      );
-      break;
+  if ($effect == 'blind') {
+    drupal_add_library('system', 'effects.blind');
+  }
 
-    // Multipage group.
-    case 'multipage-group':
+}
 
-      $move_additional = isset($group->format_settings['instance_settings']['move_additional']) ? $group->format_settings['instance_settings']['move_additional'] : 1;
-      $move_button = isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : 0;
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Accordion.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_accordion(&$element, $group, &$form) {
 
-      $multipage_element = array(
-        '#id' => $id,
-        '#type' => 'multipage',
-        '#weight' => $group->weight,
-        '#theme_wrappers' => array('multipage'),
-        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
-        '#suffix' => '</div>',
-      );
+  $element += array(
+    '#type' => 'markup',
+    '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
+    '#suffix' => '</div>',
+  );
 
-      // Create a page title from the label.
-      $page_header = isset($group->format_settings['instance_settings']['page_header']) ? $group->format_settings['instance_settings']['page_header'] : 3;
-      switch ($page_header) {
-        case 1:
-          $multipage_element['#title'] = check_plain(t($group->label));
-          break;
-        case 2:
-          $multipage_element['#title'] = t('Step 1 of 10');
-          break;
-        case 3:
-          $multipage_element['#title'] = t('Step 1 of 10 @label', array('@label' => check_plain(t($group->label))));
-          break;
-        case 0:
-        default:
-          break;
-      }
+}
 
-      // Add a page counter if needed.
-      // counter array(0 => t('No'), 1 => t('Format 1 / 10'), 2 => t('The count number only'));
-      $multipage_element['#page_counter_format'] = isset($group->format_settings['instance_settings']['page_counter']) ? $group->format_settings['instance_settings']['page_counter'] : 1;
-      $multipage_element['#page_counter_rendered'] = '';
-      if ($multipage_element['#page_counter_format'] == 1) {
-        $multipage_element['#page_counter_rendered'] = '1 / 10';
-      }
-      elseif ($multipage_element['#page_counter_format'] == 2) {
-        $multipage_element['#page_counter_rendered'] = '1';
-      }
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Accordion item.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_accordion_item(&$element, $group, &$form) {
 
-      $element += $multipage_element;
+  $element += array(
+    '#type' => 'markup',
+    '#prefix' => '<h3 class="field-group-format-toggler ' . $group->format_type . ($group->collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . '</h3>
+    <div class="field-group-format-wrapper ' . $group->classes . '">',
+    '#suffix' => '</div>',
+    //'#attributes' => array('class' => array($group->format_type)),
+  );
+  if (!empty($group->description)) {
+    $element['#prefix'] .= '<div class="description">' . $group->description . '</div>';
+  }
+  drupal_add_library('system', 'ui.accordion');
 
-      drupal_add_js(array('multipage_move_submit' => $move_button), 'setting');
-      $form['#attached']['js'][] = 'misc/form.js';
-      $form['#attached']['js'][] = 'misc/collapse.js';
+}
 
-      break;
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Horizontal tabs group.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_htabs(&$element, $group, &$form) {
 
-    // Multipage.
-    case 'multipage':
+  $element += array(
+    '#type' => 'horizontal_tabs',
+    '#title' => check_plain(t($group->label)),
+    '#theme_wrappers' => array('horizontal_tabs'),
+    '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
+    '#suffix' => '</div>',
+  );
 
-      static $multipages;
-      if (!isset($multipages[$group->parent_name])) {
-        $multipages = array($group->parent_name => 0);
-      }
-      $multipages[$group->parent_name]++;
+}
 
-      $classes  .= $group->format_settings['formatter'] == 'start' ? ' multipage-open' : ' multipage-closed';
-      $element += array(
-        '#id' => $id,
-        '#type' => 'fieldset',
-        '#title' => check_plain(t($group->label)),
-        '#weight' => $group->weight,
-        '#collapsible' => $collapsible,
-        '#collapsed' => $collapsed,
-        '#attributes' => array('class' => explode(" ", $classes)),
-        '#group' => $group->parent_name,
-        // very important. Cannot be added on the form!
-        '#parents' => array($group->parent_name),
-        '#description' => $description,
-        '#page_count' => $multipages[$group->parent_name],
-      );
-      break;
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Horizontal tab.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_htab(&$element, $group, &$form) {
 
-    // Vertical tabs group.
-    // Vertical tabs for forms need a little tricky approach, to be
-    // able to optionally merge field(groups) with the "additional_settings"
-    case 'tabs':
+  $element += array(
+    '#type' => 'fieldset',
+    '#title' => check_plain(t($group->label)),
+    '#collapsible' => $group->collapsible,
+    '#collapsed' => $group->collapsed,
+    '#attributes' => array('class' => explode(" ", $group->classes)),
+    '#group' => $group->parent_name,
+    // very important. Cannot be added on the form!
+    '#parents' => array($group->parent_name),
+    '#description' => $group->description,
+  );
 
-      $element += array(
-        '#id' => $id,
-        '#type' => 'vertical_tabs',
-        '#weight' => $group->weight,
-        '#theme_wrappers' => array('vertical_tabs'),
-        '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $classes . '">',
-        '#suffix' => '</div>',
-      );
-      $element[$group->group_name . '__active_tab'] = array(
-        '#type' => 'hidden',
-        '#default_value' => '',
-        '#attributes' => array('class' => array('vertical-tabs-active-tab')),
-      );
-      $form['#attached']['library'][] = array('system', 'drupal.form');
-      $form['#attached']['library'][] = array('system', 'drupal.collapse');
-      break;
+}
 
-    // Vertical tab.
-    case 'tab':
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Multipage group.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_multipage_group(&$element, &$group, &$form) {
 
-      // Could be it never runs through htab.
-      $form['#attached']['js'][] = array(
-        'data' => array('field_group' => array('tabs' => $view_mode)),
-        'type' => 'setting',
-      );
-      // Front-end and back-end on configuration will lead
-      // to vertical tabs nested in a separate vertical group.
-      if ($view_mode != 'form') {
-        $parent_name = empty($group->parent_name) ? 'additional_settings' : $group->parent_name;
-        $element += array(
-          '#id' => $id,
-          '#type' => 'fieldset',
-          '#id' => 'edit-' . $group->group_name,
-          '#title' => check_plain(t($group->label)),
+  $multipage_element = array(
+    '#type' => 'multipage',
+    '#theme_wrappers' => array('multipage'),
+    '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
+    '#suffix' => '</div>',
+  );
+
+  $element += $multipage_element;
+
+  $move_additional = isset($group->format_settings['instance_settings']['move_additional']) ? ($group->format_settings['instance_settings']['move_additional'] && isset($form['additional_settings'])) : isset($form['additional_settings']);
+  $move_button = isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : 0;
+
+  drupal_add_js(array('multipage_move_submit' => $move_button, 'multipage_move_additional' => $move_additional), 'setting');
+
+
+}
+
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Multipage.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_multipage(&$element, $group, &$form) {
+
+  $group->classes .= $group->format_settings['formatter'] == 'start' ? ' multipage-open' : ' multipage-closed';
+  $element += array(
+    '#type' => 'multipage_pane',
+    '#title' => check_plain(t($group->label)),
+    '#collapsible' => $group->collapsible,
+    '#collapsed' => $group->collapsed,
+    '#attributes' => array('class' => explode(" ", $group->classes)),
+    '#group' => $group->parent_name,
+    '#group_object' => $group,
+    '#parent_group_object' => $form['#groups'][$group->parent_name],
+    // very important. Cannot be added on the form!
+    '#parents' => array($group->parent_name),
+    '#description' => $group->description,
+  );
+
+}
+
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Vertical tabs wrapper.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_tabs(&$element, $group, &$form) {
+
+  $element += array(
+    '#type' => 'vertical_tabs',
+    '#theme_wrappers' => array('vertical_tabs'),
+    '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
+    '#suffix' => '</div>',
+  );
+  $element[$group->group_name . '__active_tab'] = array(
+    '#type' => 'hidden',
+    '#default_value' => '',
+    '#attributes' => array('class' => array('vertical-tabs-active-tab')),
+  );
+  $form['#attached']['library'][] = array('system', 'drupal.form');
+  $form['#attached']['library'][] = array('system', 'drupal.collapse');
+
+}
+
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Vertical tab.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_tab(&$element, $group, &$form) {
+
+  $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
+
+  // Could be it never runs through htab.
+  $form['#attached']['js'][] = array(
+    'data' => array('field_group' => array('tabs' => $view_mode)),
+    'type' => 'setting',
+  );
+
+  $add = array(
+    '#type' => 'fieldset',
+    '#id' => 'edit-' . $group->group_name,
+    '#title' => check_plain(t($group->label)),
+    '#collapsible' => $group->collapsible,
+    '#collapsed' => $group->collapsed,
+    '#attributes' => array('class' => explode(" ", $group->classes)),
+    '#description' => $group->description,
+    '#group' => $parent_name,
+  );
+
+  // Front-end and back-end on configuration will lead
+  // to vertical tabs nested in a separate vertical group.
+  if ($view_mode != 'form') {
+    $add['#group'] = empty($group->parent_name) ? 'additional_settings' : $group->parent_name;
+    $add['#parents'] = array($add['#group']);
+    $element += $add;
+  }
+  // Form fieldgroups which are nested into a vertical tab group
+  // are handled a little different.
+  elseif (!empty($group->parent_name)) {
+    $add['#group'] = $group->parent_name;
+    $element += $add;
+  }
+  // For the form, we will keep it in the core additional_settings,
+  // or in a custom created parallel one.
+  else {
+    // Create the fieldgroup element.
+    $add['#parents'] = array('additional_settings');
+    $add['#group'] = 'additional_settings';
+    $add['#weight'] = -30 + $group->weight; // hardcoded to bring our extra additional vtabs on top.
+    $element += $add;
+
+    // Check if the additional_settings exist for this type of form,
+    // if not, add the vertical_tabs wrapper.
+    if (!isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
+      if (!isset($form['additional_settings']['#type'])) {
+        $form['additional_settings'] = array(
+          '#type' => 'vertical_tabs',
           '#weight' => $group->weight,
-          '#collapsible' => $collapsible,
-          '#collapsed' => $collapsed,
-          '#attributes' => array('class' => explode(" ", $classes)),
-          '#group' => $parent_name,
-          '#parents' => array($parent_name),
-          '#description' => $description,
+          '#theme_wrappers' => array('vertical_tabs'),
+          '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
+          '#suffix' => '</div>',
         );
+        $form['#attached']['js'][] = 'misc/form.js';
+        $form['#attached']['js'][] = 'misc/collapse.js';
       }
-      // Form fieldgroups which are nested into a vertical tab group
-      // are handled a little different.
-      elseif (!empty($group->parent_name)) {
-        $parent_name = $group->parent_name;
-        $element += array(
-          '#id' => $id,
-          '#type' => 'fieldset',
-          '#id' => 'edit-' . $group->group_name,
-          '#title' => check_plain(t($group->label)),
-          '#weight' => $group->weight,
-          '#collapsible' => $collapsible,
-          '#collapsed' => $collapsed,
-          '#attributes' => array('class' => explode(" ", $classes)),
-          '#group' => $parent_name,
-          '#description' => $description,
-        );
+      $form['additional_settings'][$group->group_name] = $child_element;
+      // Nest the fields inside the appropriate structure.
+      foreach (element_children($element) as $fieldname) {
+        $form['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
+        unset($element[$fieldname]);
       }
-      // For the form, we will keep it in the core additional_settings,
-      // or in a custom created parallel one.
-      else {
-        $group->parent_name = 'additional_settings';
-        $parent_name = 'additional_settings';
-        // Create the fieldgroup element.
-        $child_element = array(
-          '#id' => $id,
-          '#type' => 'fieldset',
-          '#id' => 'edit-' . $group->group_name,
-          '#title' => check_plain(t($group->label)),
-          '#weight' => -30 + $group->weight, // hardcoded to bring our extra additional vtabs on top.
-          '#collapsible' => $collapsible,
-          '#collapsed' => $collapsed,
-          '#attributes' => array('class' => explode(" ", $classes)),
-          '#group' => 'additional_settings',
-          '#parents' => array($group->parent_name),
-          '#description' => $description,
-        );
-
-        // Check if the additional_settings exist for this type of form,
-        // if not, add the vertical_tabs wrapper.
-        if (!isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
-          if (!isset($form['additional_settings']['#type'])) {
-            $form['additional_settings'] = array(
-              '#type' => 'vertical_tabs',
-              '#weight' => $group->weight,
-              '#theme_wrappers' => array('vertical_tabs'),
-              '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper">',
-              '#suffix' => '</div>',
-            );
-            $form['#attached']['js'][] = 'misc/form.js';
-            $form['#attached']['js'][] = 'misc/collapse.js';
-          }
-          $form['additional_settings'][$group->group_name] = $child_element;
-          // Nest the fields inside the appropriate structure.
-          foreach (element_children($element) as $fieldname) {
-            $form['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
-            unset($element[$fieldname]);
-          }
-        }
-        // Merge fieldgroups with the core additional settings.
-        else {
-          $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $child_element;
-          $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
-          // Nest the fields inside the appropriate structure.
-          foreach (element_children($element) as $fieldname) {
-            $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
-            unset($element[$fieldname]);
-          }
-        }
-
+    }
+    // Merge fieldgroups with the core additional settings.
+    else {
+      $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $child_element;
+      $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
+      // Nest the fields inside the appropriate structure.
+      foreach (element_children($element) as $fieldname) {
+        $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
+        unset($element[$fieldname]);
       }
-
-    break;
-
+    }
   }
 
 }
@@ -865,6 +884,21 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   // Add the default field_group javascript and stylesheet.
   $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
   $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
+
+  // Move additional settings to the last multipage pane if configured that way.
+  // Note that multipages MUST be in the root of the form.
+  foreach (element_children($element) as $name) {
+    if (isset($element[$name]['#type']) && $element[$name]['#type'] == 'multipage' && isset($element['additional_settings'])) {
+      $parent_group = $element['#groups'][$name];
+      $move_additional = isset($parent_group->format_settings['instance_settings']['move_additional']) ? $parent_group->format_settings['instance_settings']['move_additional'] : 1;
+      $last_pane = NULL;
+      foreach (element_children($element[$name], TRUE) as $pane) {
+        $last_pane = $pane;
+      }
+      $element[$name][$last_pane]['additional_settings'] = $element['additional_settings'];
+      unset($element['additional_settings']);
+    }
+  }
 
 }
 
@@ -987,6 +1021,12 @@ function field_group_element_info() {
     '#default_tab' => '',
     '#process' => array('form_process_multipage'),
   );
+  $types['multipage_pane'] = array(
+    '#value' => NULL,
+    '#process' => array('form_process_fieldset', 'ajax_process_form'),
+    '#pre_render' => array('form_pre_render_fieldset'),
+    '#theme_wrappers' => array('multipage_pane'),
+  );
   return $types;
 }
 
@@ -1073,6 +1113,8 @@ function field_group_field_attach_rename_bundle($entity_type, $bundle_old, $bund
 
 /**
  * Creates a group formatted as horizontal tabs.
+ * This function will never be callable from within field_group rendering. Other
+ * modules using #type horizontal_tabs will have the benefit of this processor.
  *
  * @param $element
  *   An associative array containing the properties and children of the
@@ -1131,6 +1173,8 @@ function theme_horizontal_tabs($variables) {
 
 /**
  * Creates a group formatted as multipage.
+ * This function will never be callable from within field_group rendering. Other
+ * modules using #type multipage will have the benefit of this processor.
  *
  * @param $element
  *   An associative array containing the properties and children of the
@@ -1185,10 +1229,84 @@ function theme_multipage($variables) {
 
   $output .= '<div class="multipage-panes">';
   $output .= $element['#children'];
-  $output .= '<div>' . $element['#page_count'] . '</div>';
   $output .= '</div>';
 
   return $output;
+}
+
+/**
+ * Returns HTML for multipage pane.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties and children of the
+ *     fieldset. Properties used: #children.
+ *
+ * @ingroup themeable
+ */
+function theme_multipage_pane($variables) {
+
+  $element = $variables['element'];
+  $group = $variables['element']['#group_object'];
+  $parent_group = $variables['element']['#parent_group_object'];
+
+  static $multipages;
+  if (!isset($multipages[$group->parent_name])) {
+    $multipages = array($group->parent_name => 0);
+  }
+  $multipages[$parent_group->group_name]++;
+
+  // Create a page title from the label.
+  $page_header = isset($parent_group->format_settings['instance_settings']['page_header']) ? $parent_group->format_settings['instance_settings']['page_header'] : 3;
+  switch ($page_header) {
+    case 1:
+      $title = $element['#title'];
+      break;
+    case 2:
+      $title = t('Step %count of %total', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children)));
+      break;
+    case 3:
+      $title = t('Step %count of %total @label', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children), '@label' => $element['#title']));
+      break;
+    case 0:
+    default:
+      $title = '';
+      break;
+  }
+
+  element_set_attributes($element, array('id'));
+  _form_set_class($element, array('form-wrapper'));
+
+  $output = '<div' . drupal_attributes($element['#attributes']) . '>';
+  if (!empty($element['#title'])) {
+    // Always wrap fieldset legends in a SPAN for CSS positioning.
+    $output .= '<h2 class="multipage-pane-title"><span>' . $title . '</span></h2>';
+  }
+  $output .= '<div class="fieldset-wrapper multipage-pane-wrapper">';
+  if (!empty($element['#description'])) {
+    $output .= '<div class="fieldset-description">' . $element['#description'] . '</div>';
+  }
+  $output .= $element['#children'];
+  if (isset($element['#value'])) {
+    $output .= $element['#value'];
+  }
+
+  // Add a page counter if needed.
+  // counter array(0 => t('No'), 1 => t('Format 1 / 10'), 2 => t('The count number only'));
+  $page_counter_format = isset($parent_group->format_settings['instance_settings']['page_counter']) ? $parent_group->format_settings['instance_settings']['page_counter'] : 1;
+  $multipage_element['#page_counter_rendered'] = '';
+  if ($page_counter_format == 1) {
+    $output .= t('<span class="multipage-counter">%count / %total</span>', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children)));
+  }
+  elseif ($page_counter_format == 2) {
+    $output .=  t('<span class="multipage-counter">%count</span>', array('%count' => $multipages[$parent_group->group_name]));
+  }
+
+  $output .= '</div>';
+  $output .= "</div>\n";
+
+  return $output;
+
 }
 
 /**
@@ -1429,10 +1547,15 @@ function field_group_formatter_info($display_overview = FALSE) {
 
 /**
  * Attach groups to the (form) build.
- * @param Array $element The part of the form.
- * @param String $view_mode The mode for the build.
+ *
+ * @param Array $element
+ *   The part of the form.
+ * @param String $view_mode
+ *   The mode for the build.
+ * @param Array $form_state
+ *   The optional form state when in view_mode = form context.
  */
-function field_group_attach_groups(&$element, $view_mode) {
+function field_group_attach_groups(&$element, $view_mode, $form_state = array()) {
 
   $entity_type = $element['#entity_type'];
   $bundle = $element['#bundle'];
@@ -1451,7 +1574,11 @@ function field_group_attach_groups(&$element, $view_mode) {
 
   // Add a pre render callback.
   // This is needed since process seems too early for the front view modes.
+  // This is main bottleneck in field_group. By using this, we can't process
+  // our added groups in a normal way, resulting in early creation of vertical
+  // tabs, horizontal tabs and multipages.
   $element['#pre_render'][] = 'field_group_build_pre_render';
+
 }
 
 /**
