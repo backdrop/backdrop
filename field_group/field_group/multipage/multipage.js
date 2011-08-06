@@ -15,7 +15,6 @@ Drupal.behaviors.MultiPage = {
       // Check if there are some wrappers that can be converted to multipages.
       var $panes = $('> div.multipage', this);
       var $form = $panes.parents('form');
-      console.log($form);
       if ($panes.length == 0) {
         return;
       }
@@ -28,6 +27,11 @@ Drupal.behaviors.MultiPage = {
         
         $controls = $('<div class="multipage-controls-list"></div>');
         $(this).append('<div class="multipage-controls clearfix"></div>').append($controls);
+        
+        // Check if the submit button needs to move to the latest pane.
+        if (Drupal.settings.multipage_move_submit && $('.form-actions').length) {
+          $('.form-actions', $form).remove().appendTo($($controls, $panes.last()));
+        }
         
         var multipageControl = new Drupal.multipageControl({
           title: $('> .multipage-pane-title', this).text(),
@@ -47,16 +51,6 @@ Drupal.behaviors.MultiPage = {
         
       });
       
-      // Check if the submit button needs to move to the latest pane.
-      if (Drupal.settings.multipage_move_submit && $('.form-actions').length) {
-        $('.form-actions', $form).remove().appendTo($panes.last());
-      }
-      
-      // Check if there are some additional settings when configured that way.
-      if (Drupal.settings.multipage_move_additional) {
-        //$(".vertical-tabs:last").hide();
-      }
-
       if (!paneWithFocus) {
         // If the current URL has a fragment and one of the tabs contains an
         // element that matches the URL fragment, activate that tab.

@@ -116,7 +116,6 @@ Drupal.FieldGroup.Effects.processDiv = {
       // Turn the legend into a clickable link, but retain span.field-group-format-toggler
       // for CSS positioning.
       var $toggler = $('span.field-group-format-toggler:first', $wrapper);
-      console.log($toggler);
       var $link = $('<a class="field-group-format-title" href="#"></a>');
       $link.prepend($toggler.contents()).appendTo($toggler);
       
