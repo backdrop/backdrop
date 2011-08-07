@@ -431,7 +431,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $sorts = array(
       'none' => t('Unsorted'),
     );
-    // Check if we are allowed to sort by creation date.    
+    // Check if we are allowed to sort by creation date.
     if (!empty($this->plugin['created_column'])) {
       $sorts += array(
         $this->plugin['created_column'] . ':DESC' => t('Newest first'),
@@ -445,7 +445,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#type' => 'select',
       '#title' => t('sorted by'),
       '#options' => $sorts,
-      '#default_value' => isset($this->plugin['created_column']) ? $this->plugin['created_column'] . ':DESC' : NULL,
+      '#default_value' => isset($this->plugin['created_column']) ? $this->plugin['created_column'] . ':DESC' : 'none',
     );
   }
 
