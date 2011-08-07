@@ -768,7 +768,7 @@ class views_plugin_display extends views_plugin {
 
         if (!isset($this->base_field)) {
           $views_data = views_fetch_data($this->view->base_table);
-          $this->view->base_field = $views_data['table']['base']['field'];
+          $this->view->base_field = !empty($views_data['table']['base']['field']) ? $views_data['table']['base']['field'] : '';
         }
         $plugin->init($this->view->base_table, $this->view->base_field, $options);
       }

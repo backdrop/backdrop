@@ -713,7 +713,7 @@ class view extends views_db_object {
 
     // Create and initialize the query object.
     $views_data = views_fetch_data($this->base_table);
-    $this->base_field = $views_data['table']['base']['field'];
+    $this->base_field = !empty($views_data['table']['base']['field']) ? $views_data['table']['base']['field'] : '';
     if (!empty($views_data['table']['base']['database'])) {
       $this->base_database = $views_data['table']['base']['database'];
     }
