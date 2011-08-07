@@ -797,7 +797,6 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
     '#collapsed' => $group->collapsed,
     '#attributes' => array('class' => explode(" ", $group->classes)),
     '#description' => $group->description,
-    '#group' => $parent_name,
   );
 
   // Front-end and back-end on configuration will lead
@@ -813,18 +812,29 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
     $add['#group'] = $group->parent_name;
     $element += $add;
   }
-  // For the form, we will keep it in the core additional_settings,
-  // or in a custom created parallel one.
+  // Forms "can" have additional settins. We'll try to locate it first, if not
+  // exists, field_group will create a parallel additional settings entry.
   else {
     // Create the fieldgroup element.
     $add['#parents'] = array('additional_settings');
     $add['#group'] = 'additional_settings';
     $add['#weight'] = -30 + $group->weight; // hardcoded to bring our extra additional vtabs on top.
-    $element += $add;
 
-    // Check if the additional_settings exist for this type of form,
-    // if not, add the vertical_tabs wrapper.
-    if (!isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
+    // Check if the additional_settings exist for this type of form.
+    if (isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
+
+      // Merge fieldgroups with the core additional settings.
+      $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $add;
+      $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
+      // Nest the fields inside the appropriate structure.
+      foreach (element_children($element) as $fieldname) {
+        $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
+        unset($element[$fieldname]);
+      }
+    }
+    // Assumption the wrapper is in the root. This could be done by field_group itself
+    // in previous loop of tabs in same wrapper or even some other contrib / custom module.
+    else {
       if (!isset($form['additional_settings']['#type'])) {
         $form['additional_settings'] = array(
           '#type' => 'vertical_tabs',
@@ -836,20 +846,10 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
         $form['#attached']['js'][] = 'misc/form.js';
         $form['#attached']['js'][] = 'misc/collapse.js';
       }
-      $form['additional_settings'][$group->group_name] = $child_element;
+      $form['additional_settings'][$group->group_name] = $add;
       // Nest the fields inside the appropriate structure.
       foreach (element_children($element) as $fieldname) {
         $form['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
-        unset($element[$fieldname]);
-      }
-    }
-    // Merge fieldgroups with the core additional settings.
-    else {
-      $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $child_element;
-      $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
-      // Nest the fields inside the appropriate structure.
-      foreach (element_children($element) as $fieldname) {
-        $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name][$fieldname] = &$element[$fieldname];
         unset($element[$fieldname]);
       }
     }
@@ -1354,7 +1354,14 @@ function field_group_read_groups($params = array()) {
 
   $groups = array();
   ctools_include('export');
-  $records = ctools_export_load_object('field_group', 'conditions', $params);
+
+  if (empty($params)) {
+    $records = ctools_export_load_object('field_group');
+  }
+  else {
+    $records = ctools_export_load_object('field_group', 'conditions', $params);
+  }
+
   foreach ($records as $group) {
     // Deleted groups
     if (isset($group->disabled) && $group->disabled) {

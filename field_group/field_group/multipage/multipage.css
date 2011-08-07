@@ -1,1 +1,14 @@
-@CHARSET "UTF-8";
+.multipage-controls-list #edit-actions {
+  float: left;
+}
+
+.multipage-button {    
+  margin-bottom: 1em;
+  margin-top: 1em;
+  padding-top: 10px;
+  float: left;
+}
+
+.multipage-button a {    
+  padding-top: 10px;
+}

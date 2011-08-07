@@ -597,6 +597,7 @@ function field_group_field_overview_submit($form, &$form_state) {
       'weight' => $values['weight'],
       'label' => $values['label'],
       'format_type' => $values['format']['type'],
+      'disabled' => FALSE,
     );
     $new_group->format_settings = array('formatter' => isset($formatter['default_formatter']) ? $formatter['default_formatter'] : '');
     if (isset($formatter['instance_settings'])) {
