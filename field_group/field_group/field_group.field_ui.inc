@@ -88,7 +88,9 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   // Update existing rows accordingly to the parents.
   foreach (element_children($table) as $name) {
     $table[$name]['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
-    $table[$name]['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
+    if (empty($table[$name]['parent_wrapper']['parent']['#default_value'])) {
+      $table[$name]['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
+    }
   }
 
   $formatter_options = field_group_field_formatter_options($display_overview ? 'display' : 'form');
