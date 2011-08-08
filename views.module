@@ -1630,7 +1630,7 @@ function views_view_has_form_elements($view) {
 /**
  * This is the entry function. Just gets the form for the current step.
  * The form is always assumed to be multistep, even if it has only one
- * step (the default 'views_form_vews_form' step). That way it is actually
+ * step (the default 'views_form_views_form' step). That way it is actually
  * possible for modules to have a multistep form if they need to.
  */
 function views_form($form, &$form_state, $view, $output) {
