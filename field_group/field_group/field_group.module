@@ -589,7 +589,7 @@ function field_group_pre_render_div(&$element, $group, &$form) {
     $element['#suffix'] = '</div></div>';
   }
   else {
-    $element['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $classes . '">';
+    $element['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $group->classes . '">';
     if ($show_label) {
       $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
     }
