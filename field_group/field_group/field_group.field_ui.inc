@@ -88,6 +88,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   // Update existing rows accordingly to the parents.
   foreach (element_children($table) as $name) {
     $table[$name]['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
+    // Inherit the value of the parent when default value is empty.
     if (empty($table[$name]['parent_wrapper']['parent']['#default_value'])) {
       $table[$name]['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
     }

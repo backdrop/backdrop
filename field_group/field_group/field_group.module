@@ -878,7 +878,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   }
   else {
     // Fix the problem on forms with additional settings.
-    field_group_remove_empty_form_groups($element, $groups);
+    field_group_remove_empty_form_groups('form', $element, $groups, $element['#groups']);
   }
 
   // Add the default field_group javascript and stylesheet.
@@ -904,27 +904,44 @@ function field_group_field_group_build_pre_render_alter(& $element) {
 
 /**
  * Remove empty groups on forms.
+ *
+ * @param String $parent_name
+ *   The name of the element.
  * @param array $element
  *   The element to check the empty state.
  * @param array $groups
  *   Array of group objects.
  */
-function field_group_remove_empty_form_groups(& $element, $groups) {
+function field_group_remove_empty_form_groups($name, & $element, $groups, &$form_groups) {
 
+  $exceptions = array('account');
   $children = element_children($element);
 
   $hasChildren = FALSE;
   if (count($children)) {
-    foreach ($children as $name) {
-      if (in_array($name, $groups)) {
-        field_group_remove_empty_form_groups($element[$name], $groups);
+    foreach ($children as $childname) {
+      if (in_array($childname, $groups)) {
+        field_group_remove_empty_form_groups($childname, $element[$childname], $groups, $form_groups);
       }
-      $hasChildren = $hasChildren ? TRUE : (isset($element[$name]['#type']) || $name == 'account');
+      $hasChildren = $hasChildren ? TRUE : (isset($element[$childname]['#type']) || in_array($childname, $exceptions));
     }
   }
 
   if (!$hasChildren) {
+
+    // Remove empty elements from the #groups.
+    if (empty($element) && isset($form_groups[$name])) {
+      unset($form_groups[$name]);
+      foreach ($form_groups as $group_name => $group) {
+        $group_children = array_flip($group->children);
+        if (isset($group_children[$name])) {
+          unset($form_groups[$group_name]->children[$group_children[$name]]);
+        }
+      }
+    }
+
     $element['#access'] = FALSE;
+
   }
 
 }
