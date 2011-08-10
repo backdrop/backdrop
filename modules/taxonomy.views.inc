@@ -133,7 +133,7 @@ function taxonomy_views_data() {
       'handler' => 'views_handler_sort',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
+      'handler' => 'views_handler_argument_taxonomy',
       'name field' => 'name',
       'zero is null' => TRUE,
     ),
@@ -325,7 +325,7 @@ function taxonomy_views_data() {
     ),
     'argument' => array(
       'help' => t('The parent term of the term.'),
-      'handler' => 'views_handler_argument_numeric',
+      'handler' => 'views_handler_argument_taxonomy',
     ),
   );
 

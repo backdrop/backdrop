@@ -3,7 +3,7 @@
 /**
  * Argument handler for basic taxonomy tid.
  */
-class views_handler_argument_taxonomy extends views_handler_argument {
+class views_handler_argument_taxonomy extends views_handler_argument_numeric {
 
   /**
    * Override the behavior of title(). Get the title of the node.
