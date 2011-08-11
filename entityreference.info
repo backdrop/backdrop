@@ -1,0 +1,5 @@
+name = Entity Reference
+description = Provides a field that can reference other entities.
+core = 7.x
+dependencies[] = entity
+

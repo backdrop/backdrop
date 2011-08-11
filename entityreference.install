@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * Implements hook_field_schema().
+ */
+function entityreference_field_schema($field) {
+  if ($field['type'] == 'entityreference') {
+    return array(
+      'columns' => array(
+        'target_id' => array(
+          'description' => 'The id of the target entity',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ),
+        'target_type' => array(
+          'description' => 'The type of the target entity',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ),
+      ),
+      'indexes' => array(
+        'target_entity' => array('target_type', 'target_id'),
+      ),
+      'foreign keys' => array(),
+    );
+  }
+}
