@@ -40,7 +40,7 @@ Drupal.FieldGroup.Effects.processAccordion = {
   execute: function (context, settings, type) {
     var accordions = $('div.field-group-accordion-wrapper', context).accordion({
       autoHeight: false,
-      active: 0,
+      active: '.field-group-accordion-active',
       collapsible: true
     });
     if (type == 'form') {
