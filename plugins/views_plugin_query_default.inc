@@ -718,7 +718,7 @@ class views_plugin_query_default extends views_plugin_query {
 
     // We limit the length of the original alias up to 60 characters
     // to get a unique alias later if its have duplicates
-    $alias = substr($alias, 0, 60);
+    $alias = strtolower(substr($alias, 0, 60));
 
     // Create a field info array.
     $field_info = array(
