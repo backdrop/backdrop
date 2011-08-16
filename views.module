@@ -79,6 +79,11 @@ function views_theme($existing, $type, $theme, $path) {
     'display' => array('view_array' => array(), 'view' => NULL),
     'style' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
     'row' => array('view' => NULL, 'options' => NULL, 'row' => NULL, 'field_alias' => NULL),
+    'exposed_form' => array('view' => NULL, 'options' => NULL),
+    'pager' => array(
+      'view' => NULL, 'options' => NULL,
+      'tags' => array(), 'quantity' => 10, 'element' => 0, 'parameters' => array()
+    ),
   );
 
   // Default view themes
