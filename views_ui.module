@@ -145,6 +145,13 @@ function views_ui_menu() {
     'type' => MENU_CALLBACK,
   ) + $base;
 
+  // A page in the Reports section to show usage of fields in all views
+  $items['admin/reports/views-fields'] = array(
+    'title' => 'Fields used in views',
+    'description' => 'Overview of fields used in all views.',
+    'page callback' => 'views_ui_field_list',
+  ) + $base;
+
   return $items;
 }
 

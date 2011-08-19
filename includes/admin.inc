@@ -5055,3 +5055,58 @@ function views_ui_default_button($element, &$form_state, $form) {
   $element['#attached']['js'][] = array('type' => 'setting', 'data' => $setting);
   return $element;
 }
+
+/**
+ * List all instances of fields on any views.
+ *
+ * Therefore it builds up a table of each field which is used in any view.
+ *
+ * @see field_ui_fields_list
+ */
+function views_ui_field_list() {
+  $views = views_get_all_views();
+
+  // Fetch all fieldapi fields which are used in views
+  // Therefore search in all views, displays and handler-types.
+  $fields = array();
+  foreach ($views as $view) {
+    foreach ($view->display as $display_id => $display) {
+      if ($view->set_display($display_id)) {
+        foreach (views_object_types() as $type => $info) {
+          foreach ($view->get_items($type, $display_id) as $item) {
+            $data = views_fetch_data($item['table']);
+            if (isset($data[$item['field']]) && isset($data[$item['field']][$type])
+              && $data = $data[$item['field']][$type]) {
+              // The final check that we have a fieldapi field now.
+              if (isset($data['field_name'])) {
+                $fields[$data['field_name']][$view->name] = $view->name;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  $header = array(t('Field name'), t('Used in'));
+  $rows = array();
+  foreach ($fields as $field_name => $views) {
+
+    $rows[$field_name]['data'][0] = check_plain($field_name);
+    foreach ($views as $view) {
+      $rows[$field_name]['data'][1][] = l($view, "admin/structure/views/view/$view");
+    }
+    $rows[$field_name]['data'][1] = implode(', ', $rows[$field_name]['data'][1]);
+  }
+
+  // Sort rows by field name.
+  ksort($rows);
+  $output = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No fields have been used in views yet.'),
+  );
+
+  return $output;
+}
