@@ -214,16 +214,24 @@ class views_plugin_pager_full extends views_plugin_pager {
       return;
     }
 
-    // If the current page number was not prespecified, default to pulling it from 'page'
-    // based upon
+    // If the current page number was not specified, extract it from the global
+    // page array.
     global $pager_page_array;
-    // Extract the ['page'] info.
-    $pager_page_array = isset($_GET['page']) ? explode(',', $_GET['page']) : array(0);
 
-    $this->current_page = 0;
-    if (!empty($pager_page_array[$this->options['id']])) {
-      $this->current_page = intval($pager_page_array[$this->options['id']]);
+    if (empty($pager_page_array)) {
+      $pager_page_array = array();
     }
+
+    // Fill in missing values in the global page array, in case the global page
+    // array hasn't been initialized before.
+    $page = isset($_GET['page']) ? explode(',', $_GET['page']) : array();
+
+    for ($i = 0; $i <= $this->options['id'] || $i < count($pager_page_array); $i++) {
+      $pager_page_array[$i] = empty($page[$i]) ? 0 : $page[$i];
+    }
+
+    $this->current_page = intval($pager_page_array[$this->options['id']]);
+
     if ($this->current_page < 0) {
       $this->current_page = 0;
     }
