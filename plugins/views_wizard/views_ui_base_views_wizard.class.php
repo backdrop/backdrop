@@ -659,13 +659,26 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           }
         }
       }
+      $table_data = views_fetch_data($table);
+      // Check whether the bundle key filter handler is or an child of it views_handler_filter_in_operator
+      // If it's not just use a single value instead of an array.
+      $handler = $table_data[$bundle_key]['filter']['handler'];
+      if ($handler == 'views_handler_filter_in_operator' || is_subclass_of($handler, 'views_handler_filter_in_operator')) {
+        $value = drupal_map_assoc(array($form_state['values']['show']['type']));
+      }
+      else {
+        $value = $form_state['values']['show']['type'];
+      }
+
       $filters[$bundle_key] = array(
         'id' => $bundle_key,
         'table' => $table,
         'field' => $bundle_key,
-        'value' => drupal_map_assoc(array($form_state['values']['show']['type'])),
+        'value' => $value,
       );
     }
+
+    // @todo: Figure out why this isn't part of node_views_wizard.
     if (!empty($form_state['values']['show']['tagged_with']['tids'])) {
       $filters['tid'] = array(
         'id' => 'tid',
