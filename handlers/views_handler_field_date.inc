@@ -40,9 +40,9 @@ class views_handler_field_date extends views_handler_field {
     $form['custom_date_format'] = array(
       '#type' => 'textfield',
       '#title' => t('Custom date format'),
-      '#description' => t('If "Custom", see <a href="http://us.php.net/manual/en/function.date.php" target="_blank">the PHP docs</a> for date formats. If "Time ago", enter the number of different time units to display, which defaults to 2.'),
+      '#description' => t('If "Custom", see <a href="http://us.php.net/manual/en/function.date.php" target="_blank">the PHP docs</a> for date formats. Otherwise, enter the number of different time units to display, which defaults to 2.'),
       '#default_value' => isset($this->options['custom_date_format']) ? $this->options['custom_date_format'] : '',
-      '#dependency' => array('edit-options-date-format' => array('custom', 'raw time ago', 'time ago', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span')),
+      '#dependency' => array('edit-options-date-format' => array('custom', 'raw time ago', 'time ago', 'raw time hence', 'time hence', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span')),
     );
 
     parent::options_form($form, $form_state);
@@ -51,7 +51,7 @@ class views_handler_field_date extends views_handler_field {
   function render($values) {
     $value = $this->get_value($values);
     $format = $this->options['date_format'];
-    if (in_array($format, array('custom', 'raw time ago', 'time ago', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span'))) {
+    if (in_array($format, array('custom', 'raw time ago', 'time ago', 'raw time hence', 'time hence', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span'))) {
       $custom_format = $this->options['custom_date_format'];
     }
 
