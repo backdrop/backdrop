@@ -5,10 +5,17 @@
 .multipage-button {    
   margin-bottom: 1em;
   margin-top: 1em;
-  padding-top: 10px;
   float: left;
 }
 
 .multipage-button a {    
   padding-top: 10px;
+}
+
+.multipage-counter {
+  float: right;
+  margin-right: 5px;
+  height: 0;
+  position: relative;
+  top: 1em;
 }
