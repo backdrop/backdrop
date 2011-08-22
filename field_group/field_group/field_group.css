@@ -5,10 +5,18 @@
  * Note that this can only be hardcoded to the Seven theme
  * where people who override this, are in trouble.
  */
-.vertical-tabs fieldset.default-fallback {
-  margin: 1em 0;
-  padding: 2.5em 0 0;
-  border: 1px solid #CCCCCC;
+.vertical-tabs fieldset.default-fallback,
+div.field-group-tabs-wrapper div.field-type-image fieldset,
+div.field-group-tabs-wrapper div.field-type-file fieldset {
+   border: 1px solid #CCCCCC;
+   margin: 1em 0;
+   padding: 2.5em 0 0;
+   position: relative;
+}
+
+div.field-group-tabs-wrapper div.field-type-image legend,
+div.field-group-tabs-wrapper div.field-type-file legend {
+  display: block;
 }
 
 /**
