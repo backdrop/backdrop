@@ -878,7 +878,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   }
   else {
     // Fix the problem on forms with additional settings.
-    field_group_remove_empty_form_groups('form', $element, $groups, $element['#groups']);
+    field_group_remove_empty_form_groups('form', $element, $groups, $element['#groups'], $element['#entity_type']);
   }
 
   // Add the default field_group javascript and stylesheet.
@@ -912,18 +912,20 @@ function field_group_field_group_build_pre_render_alter(& $element) {
  * @param array $groups
  *   Array of group objects.
  */
-function field_group_remove_empty_form_groups($name, & $element, $groups, &$form_groups) {
+function field_group_remove_empty_form_groups($name, & $element, $groups, &$form_groups, $entity) {
 
-  $exceptions = array('account');
+  $exceptions = array('user__account', 'comment__author');
+
   $children = element_children($element);
 
   $hasChildren = FALSE;
   if (count($children)) {
     foreach ($children as $childname) {
       if (in_array($childname, $groups)) {
-        field_group_remove_empty_form_groups($childname, $element[$childname], $groups, $form_groups);
+        field_group_remove_empty_form_groups($childname, $element[$childname], $groups, $form_groups, $entity);
       }
-      $hasChildren = $hasChildren ? TRUE : (isset($element[$childname]['#type']) || in_array($childname, $exceptions));
+      $exception = $entity . '__' . $childname;
+      $hasChildren = $hasChildren ? TRUE : (isset($element[$childname]['#type']) || in_array($exception, $exceptions));
     }
   }
 
