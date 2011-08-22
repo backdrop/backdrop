@@ -883,6 +883,12 @@ function views_ui_edit_page_display($view, $display_id) {
  * Page callback for the Edit View page.
  */
 function views_ui_edit_page($view, $display_id = NULL) {
+  // If the user has enabled the master display, remove 'default' from the url.
+  // If the user hasn't enabled the master display redirect to the first other display.
+  if (arg(6) == 'default') {
+    drupal_goto("admin/structure/views/view/$view->name/edit");
+  }
+
   $display_id = views_ui_edit_page_display($view, $display_id);
   if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
     $build = array();
