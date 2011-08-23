@@ -441,12 +441,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $sorts += $this->plugin['available_sorts'];
       }
     }
-    $form['displays']['show']['sort'] = array(
-      '#type' => 'select',
-      '#title' => t('sorted by'),
-      '#options' => $sorts,
-      '#default_value' => isset($this->plugin['created_column']) ? $this->plugin['created_column'] . ':DESC' : 'none',
-    );
+
+    // If there is no sorts option availible continue.
+    if (!empty($sorts)) {
+      $form['displays']['show']['sort'] = array(
+        '#type' => 'select',
+        '#title' => t('sorted by'),
+        '#options' => $sorts,
+        '#default_value' => isset($this->plugin['created_column']) ? $this->plugin['created_column'] . ':DESC' : 'none',
+      );
+    }
   }
 
   protected function instantiate_view($form, &$form_state) {
