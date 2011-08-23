@@ -97,7 +97,7 @@ function views_theme($existing, $type, $theme, $path) {
   // Register theme functions for all style plugins
   foreach ($plugins as $type => $info) {
     foreach ($info as $plugin => $def) {
-      if (isset($def['theme'])) {
+      if (isset($def['theme']) && (!isset($def['register theme']) || !empty($def['register theme']))) {
         $hooks[$def['theme']] = array(
           'pattern' => $def['theme'] . '__',
           'file' => $def['theme file'],
