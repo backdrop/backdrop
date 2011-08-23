@@ -87,6 +87,13 @@ class view extends views_db_object {
    */
    var $style_plugin;
 
+   /**
+   * Allow to override the url of the current view.
+   *
+   * @var string
+   */
+  var $override_url = NULL;
+
   /**
    * Allow to override the path used for generated urls.
    *
@@ -1308,6 +1315,10 @@ class view extends views_db_object {
    * This URL will be adjusted for arguments.
    */
   function get_url($args = NULL, $path = NULL) {
+    if (!empty($this->override_url)) {
+      return $this->override_url;
+    }
+
     if (!isset($path)) {
       $path = $this->get_path();
     }
