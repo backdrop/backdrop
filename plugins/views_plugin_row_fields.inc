@@ -38,7 +38,7 @@ class views_plugin_row_fields extends views_plugin_row {
       '#type' => 'checkbox',
       '#title' => t('Provide default field wrapper elements'),
       '#default_value' => $this->options['default_field_elements'],
-      '#description' => t('If checked, fields that are not configured to customize their HTML elements will get no wrappers at all for their field, label and field + label wrappers. You can use this to quickly reduce the amount of markup the view provides by default, at the cost of making it more difficult to apply CSS.'),
+      '#description' => t('If not checked, fields that are not configured to customize their HTML elements will get no wrappers at all for their field, label and field + label wrappers. You can use this to quickly reduce the amount of markup the view provides by default, at the cost of making it more difficult to apply CSS.'),
     );
 
     $form['inline'] = array(
