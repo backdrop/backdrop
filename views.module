@@ -626,7 +626,12 @@ function views_block_view($delta) {
     }
   }
 
-  list($name, $display_id) = explode('-', $delta);
+  // If the delta doesn't contain valid data return nothing.
+  $explode = explode('-', $delta);
+  if (count($explode) != 2) {
+    return;
+  }
+  list($name, $display_id) = $explode;
   // Load the view
   if ($view = views_get_view($name)) {
     if ($view->access($display_id)) {
