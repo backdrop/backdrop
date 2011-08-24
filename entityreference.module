@@ -125,7 +125,7 @@ function _entityreference_target_type_validate($element, &$form_state, $form) {
 
   // When the "all bundles" option is selected, remove all the other bundles.
   if (in_array('', $target_bundles)) {
-    $target_bundles = array('');
+    $target_bundles = array();
   }
 
   $parents = $element['#parents'];
