@@ -8,6 +8,7 @@
  *    - true-false: True/false (this is the default)
  *    - yes-no: Yes/No
  *    - on-off: On/Off
+ *    - enabled-disabled: Enabled/Disabled
  * - accept null: Treat a NULL value as false.
  */
 class views_handler_filter_boolean_operator extends views_handler_filter {
@@ -52,6 +53,9 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
       }
       if ($this->definition['type'] == 'on-off') {
         $this->value_options = array(1 => t('On'), 0 => t('Off'));
+      }
+      if ($this->definition['type'] == 'enabled-disabled') {
+        $this->value_options = array(1 => t('Enabled'), 0 => t('Disabled'));
       }
     }
 
