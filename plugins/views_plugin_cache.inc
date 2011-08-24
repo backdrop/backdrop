@@ -237,7 +237,7 @@ class views_plugin_cache extends views_plugin {
     }
     if (!empty($this->storage['css'])) {
       foreach ($this->storage['css'] as $args) {
-        call_user_func_array('drupal_add_css', $args);
+        drupal_add_css($args['data'], $args);
       }
     }
     if (!empty($this->storage['js'])) {
