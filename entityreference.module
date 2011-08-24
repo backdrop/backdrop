@@ -297,20 +297,19 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
 }
 
 function _entityreference_autocomplete_validate($element, &$form_state, $form) {
+  $value = array();
   // If a value was entered into the autocomplete...
   if (!empty($element['#value'])) {
     $entities = drupal_explode_tags($element['#value']);
     $value = array();
     foreach ($entities as $entity) {
-      // Take "label (entity id)', match the id from paranthesis.
-      preg_match("/.+\((\d+)\)/", $entity, $matches);
-      $value[] = array(
-        'target_id' => $matches[1],
-      );
+      // Take "label (entity id)', match the id from parenthesis.
+      if (preg_match("/.+\((\d+)\)/", $entity, $matches)) {
+        $value[] = array(
+          'target_id' => $matches[1],
+        );
+      }
     }
-  }
-  else {
-    $value = array();
   }
 
   // Update the value of this element so the field can validate the product IDs.
