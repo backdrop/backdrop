@@ -24,6 +24,7 @@ function user_views_data() {
   $data['users']['table']['base'] = array(
     'field' => 'uid',
     'title' => t('User'),
+    'entity type' => 'user',
     'help' => t('Users who have created accounts on your site.'),
     'access query tag' => 'user_access',
   );

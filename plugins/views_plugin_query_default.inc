@@ -79,6 +79,11 @@ class views_plugin_query_default extends views_plugin_query {
    */
    var $pager = NULL;
 
+   /**
+    * An array mapping table aliases and field names to field aliases.
+    */
+   var $field_aliases = array();
+
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
@@ -740,6 +745,9 @@ class views_plugin_query_default extends views_plugin_query {
       $this->fields[$alias] = $field_info;
     }
 
+    // Keep track of all aliases used.
+    $this->field_aliases[$table][$field] = $alias;
+
     return $alias;
   }
 
@@ -976,6 +984,15 @@ class views_plugin_query_default extends views_plugin_query {
     if (!in_array($clause, $this->groupby)) {
       $this->groupby[] = $clause;
     }
+  }
+
+  /**
+   * Returns the alias for the given field added to $table.
+   *
+   * @see views_plugin_query_default::add_field()
+   */
+  function get_field_alias($table_alias, $field) {
+    return isset($this->field_aliases[$table_alias][$field]) ? $this->field_aliases[$table_alias][$field] : FALSE;
   }
 
   /**
@@ -1420,6 +1437,50 @@ class views_plugin_query_default extends views_plugin_query {
         ),
       ),
     );
+  }
+
+  /**
+   * Returns the according entity objects for the given query results.
+   *
+   */
+  function get_result_entities($results, $relationship = NULL) {
+    $base_table = $this->base_table;
+    $base_table_alias = $base_table;
+
+    if (!empty($relationship)) {
+      foreach ($this->view->relationship as $current) {
+        if ($current->alias == $relationship) {
+          $base_table = $current->definition['base'];
+          $base_table_alias = $relationship;
+          break;
+        }
+      }
+    }
+    $table_data = views_fetch_data($base_table);
+
+    // Bail out if the base-table has not specified the according entity-type.
+    if (!isset($table_data['table']['base']['entity type'])) {
+      return FALSE;
+    }
+    $entity_type = $table_data['table']['base']['entity type'];
+    $info = entity_get_info($entity_type);
+    $id_alias = $this->get_field_alias($base_table_alias, $info['entity keys']['id']);
+
+    // Assemble the ids of the entities to load.
+    $ids = array();
+    foreach ($results as $key => $result) {
+      if (isset($result->$id_alias)) {
+        $ids[$key] = $result->$id_alias;
+      }
+    }
+
+    $entities = entity_load($entity_type, $ids);
+    // Re-key the array by row-index.
+    $result = array();
+    foreach ($ids as $key => $id) {
+      $result[$key] = isset($entities[$id]) ? $entities[$id] : FALSE;
+    }
+    return array($entity_type, $result);
   }
 }
 

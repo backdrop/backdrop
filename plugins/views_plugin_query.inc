@@ -148,4 +148,10 @@ class views_plugin_query extends views_plugin {
     $this->group_operator = strtoupper($type);
   }
 
+  /**
+   * Returns the according entity objects for the given query results.
+   */
+  function get_result_entities($results, $relationship = NULL) {
+    return FALSE;
+  }
 }

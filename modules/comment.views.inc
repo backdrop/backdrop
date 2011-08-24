@@ -26,6 +26,7 @@ function comment_views_data() {
   $data['comment']['table']['base'] = array(
     'field' => 'cid',
     'title' => t('Comment'),
+    'entity type' => 'comment',
     'help' => t("Comments are responses to node content."),
     'access query tag' => 'comment_access',
   );

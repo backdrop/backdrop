@@ -25,6 +25,7 @@ files[] = handlers/views_handler_field_counter.inc
 files[] = handlers/views_handler_field_boolean.inc
 files[] = handlers/views_handler_field_custom.inc
 files[] = handlers/views_handler_field_date.inc
+files[] = handlers/views_handler_field_entity.inc
 files[] = handlers/views_handler_field_markup.inc
 files[] = handlers/views_handler_field_math.inc
 files[] = handlers/views_handler_field_numeric.inc

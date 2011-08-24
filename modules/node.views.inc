@@ -26,6 +26,7 @@ function node_views_data() {
   $data['node']['table']['base'] = array(
     'field' => 'nid',
     'title' => t('Content'),
+    'entity type' => 'node',
     'weight' => -10,
     'access query tag' => 'node_access',
     'defaults' => array(

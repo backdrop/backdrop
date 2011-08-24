@@ -151,6 +151,11 @@ class views_handler extends views_object {
   var $handler_type = NULL;
 
   /**
+   * The alias of the table of this handler which is used in the query.
+   */
+  public $table_alias;
+
+  /**
    * init the handler with necessary data.
    * @param $view
    *   The $view object this handler is attached to.
