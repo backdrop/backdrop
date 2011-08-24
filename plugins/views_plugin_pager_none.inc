@@ -6,6 +6,14 @@
  * @ingroup views_pager_plugins
  */
 class views_plugin_pager_none extends views_plugin_pager {
+
+  function init(&$view, &$display, $options = array()) {
+    parent::init($view, $display, $options);
+
+    // If the pager is set to none, then it should show all items.
+    $this->set_items_per_page(0);
+  }
+
   function summary_title() {
     if (!empty($this->options['offset'])) {
       return t('All items, skip @skip', array('@skip' => $this->options['offset']));
