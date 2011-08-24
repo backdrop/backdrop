@@ -18,8 +18,8 @@ function comment_views_default_views() {
   $view->base_table = 'comment';
   $view->human_name = 'Recent comments';
   $view->core = 0;
-  $view->api_version = '3.0-alpha1';
-  $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
@@ -28,6 +28,7 @@ function comment_views_default_views() {
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'some';
   $handler->display->display_options['pager']['options']['items_per_page'] = 5;
@@ -63,7 +64,6 @@ function comment_views_default_views() {
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
-  $handler->display->display_options['defaults']['items_per_page'] = FALSE;
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'list';
   $handler->display->display_options['defaults']['style_options'] = FALSE;
@@ -117,8 +117,8 @@ function comment_views_default_views() {
     t('Page'),
     t('Reply to'),
     t('Block'),
-    t('Recent comments view'),
   );
+
   $views['comments_recent'] = $view;
 
   $view = new view;
@@ -128,8 +128,8 @@ function comment_views_default_views() {
   $view->base_table = 'node';
   $view->human_name = 'Tracker';
   $view->core = 0;
-  $view->api_version = '3.0-alpha1';
-  $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
@@ -137,6 +137,7 @@ function comment_views_default_views() {
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '25';
@@ -270,6 +271,7 @@ function comment_views_default_views() {
     t('Recent posts for %1'),
     t('Page'),
   );
+
   $views['tracker'] = $view;
 
   return $views;

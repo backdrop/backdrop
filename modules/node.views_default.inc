@@ -18,8 +18,8 @@ function node_views_default_views() {
   $view->base_table = 'node';
   $view->human_name = 'Archive';
   $view->core = 0;
-  $view->api_version = '3.0-alpha1';
-  $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
@@ -27,6 +27,7 @@ function node_views_default_views() {
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['style_plugin'] = 'default';
@@ -93,8 +94,8 @@ function node_views_default_views() {
     t('%1'),
     t('Page'),
     t('Block'),
-    t('Archive list'),
   );
+
   $views['archive'] = $view;
 
   $view = new view;
@@ -104,14 +105,15 @@ function node_views_default_views() {
   $view->base_table = 'node';
   $view->human_name = 'Front page';
   $view->core = 0;
-  $view->api_version = '3.0-alpha1';
-  $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['style_plugin'] = 'default';
@@ -174,6 +176,7 @@ function node_views_default_views() {
     t('Feed'),
     t('Front page feed'),
   );
+
   $views['frontpage'] = $view;
 
   $view = new view;
@@ -183,8 +186,8 @@ function node_views_default_views() {
   $view->base_table = 'node';
   $view->human_name = 'Glossary';
   $view->core = 0;
-  $view->api_version = '3.0-alpha1';
-  $view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
@@ -192,6 +195,7 @@ function node_views_default_views() {
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = 36;
@@ -303,6 +307,7 @@ function node_views_default_views() {
     t('Page'),
     t('Attachment'),
   );
+
   $views['glossary'] = $view;
 
   return $views;
