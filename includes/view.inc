@@ -659,6 +659,7 @@ class view extends views_db_object {
 
         // Add this argument's substitution
         $substitutions['%' . ($position + 1)] = $arg_title;
+        $substitutions['!' . ($position + 1)] = strip_tags(html_entity_decode($arg));
 
         // Since we're really generating the breadcrumb for the item above us,
         // check the default action of this argument.
