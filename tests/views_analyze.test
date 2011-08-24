@@ -35,10 +35,10 @@ class ViewsAnalyzeTest extends viewsSqlTest {
     $view->save();
 
     $this->drupalGet('admin/structure/views/view/frontpage/edit');
-    $this->assertLink(t('analyze'));
+    $this->assertLink(t('analyze view'));
 
     // This redirects the user to the form.
-    $this->clickLink(t('analyze'));
+    $this->clickLink(t('analyze view'));
     $this->assertText(t('View analysis'));
 
     // This redirects the user back to the main views edit page.
