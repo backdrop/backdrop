@@ -149,7 +149,7 @@ function views_theme($existing, $type, $theme, $path) {
   $hooks['views_more'] = $base + array(
     'template' => 'views-more',
     'pattern' => 'views_more__',
-    'variables' => array('more_url' => NULL, 'link_text' => 'more'),
+    'variables' => array('more_url' => NULL, 'link_text' => 'more', 'view' => NULL),
   );
 
   // Add theme suggestions which are part of modules.
