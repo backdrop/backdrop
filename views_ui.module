@@ -342,7 +342,7 @@ function views_ui_preprocess_views_view(&$vars) {
           '#theme' => 'views_ui_view_preview_section',
           '#view' => $view,
           '#section' => $section,
-          '#content' => $vars[$section],
+          '#content' => is_array($vars[$section]) ? drupal_render($vars[$section]) : $vars[$section],
           '#theme_wrappers' => array('views_container'),
           '#attributes' => array('class' => 'contextual-links-region'),
         );
