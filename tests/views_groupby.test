@@ -61,10 +61,10 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $view->name = 'aggregate_count';
     $view->description = '';
     $view->tag = '';
-    $view->view_php = '';
     $view->base_table = 'node';
-    $view->is_cacheable = FALSE;
-    $view->api_version = 2;
+    $view->human_name = '';
+    $view->core = 7;
+    $view->api_version = '3.0';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
     /* Display: Master */
@@ -72,31 +72,34 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['group_by'] = TRUE;
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['query']['options']['query_comment'] = FALSE;
     $handler->display->display_options['exposed_form']['type'] = 'basic';
     $handler->display->display_options['pager']['type'] = 'some';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Content: Nid */
+    /* Field: Content: Title */
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'title';
     $handler->display->display_options['fields']['nid']['alter']['alter_text'] = 0;
     $handler->display->display_options['fields']['nid']['alter']['make_link'] = 0;
-    $handler->display->display_options['fields']['nid']['alter']['trim'] = 0;
     $handler->display->display_options['fields']['nid']['alter']['word_boundary'] = 1;
     $handler->display->display_options['fields']['nid']['alter']['ellipsis'] = 1;
     $handler->display->display_options['fields']['nid']['alter']['strip_tags'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['trim'] = 0;
     $handler->display->display_options['fields']['nid']['alter']['html'] = 0;
     $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
     $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
     $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
-    /* Argument: Content: Type */
+    /* Contextual filter: Content: Type */
     $handler->display->display_options['arguments']['type']['id'] = 'type';
     $handler->display->display_options['arguments']['type']['table'] = 'node';
     $handler->display->display_options['arguments']['type']['field'] = 'type';
-    $handler->display->display_options['arguments']['type']['default_action'] = 'summary asc';
-    $handler->display->display_options['arguments']['type']['style_plugin'] = 'default_summary';
+    $handler->display->display_options['arguments']['type']['default_action'] = 'summary';
     $handler->display->display_options['arguments']['type']['default_argument_type'] = 'fixed';
+    $handler->display->display_options['arguments']['type']['summary']['format'] = 'default_summary';
+
 
     return $view;
   }
