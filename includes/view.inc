@@ -2276,7 +2276,7 @@ class views_db_object {
   }
 
   /**
-   * Get the configuration of an item (field/sort/filter/etc) on a given
+   * Set the configuration of an item (field/sort/filter/etc) on a given
    * display.
    *
    * Pass in NULL for the $item to remove an item.
