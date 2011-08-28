@@ -84,6 +84,11 @@ class views_plugin_query_default extends views_plugin_query {
     */
    var $field_aliases = array();
 
+   /**
+    * Query tags which will be passed over to the dbtng query object.
+    */
+   var $tags = array();
+
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
@@ -996,6 +1001,15 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
+   * Adds a query tag to the sql object.
+   *
+   * @see SelectQuery::addTag
+   */
+  function add_tag($tag) {
+    $this->tags[] = $tag;
+  }
+
+  /**
    * Generates a unique placeholder used in the db query.
    */
   function placeholder($base = 'views') {
@@ -1167,6 +1181,11 @@ class views_plugin_query_default extends views_plugin_query {
       ->select($this->base_table, $this->base_table, $options)
       ->addTag('views')
       ->addTag('views_' . $this->view->name);
+
+    // Add the tags added to the view itself.
+    foreach ($this->tags as $tag) {
+      $query->addTag($tag);
+    }
 
     if (!empty($distinct)) {
       $query->distinct();
