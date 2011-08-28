@@ -168,6 +168,7 @@ function template_preprocess_views_view_row_search(&$vars) {
     return;
   }
 
+  // @todo: Once the search row is fixed this node_load should be replace by a node_load_multiple
   $node = node_load($nid);
 
   if (empty($node)) {
