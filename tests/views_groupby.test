@@ -3,15 +3,10 @@
 class ViewsQueryGroupByTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => 'Tests groupby feature of views3',
-      'description' => 'tests aggregate functionality of views3, for example count',
-      'group' => 'Views',
+      'name' => 'Groupby UI',
+      'description' => 'Tests UI of aggregate functionality.',
+      'group' => 'Views UI',
     );
-  }
-
-  public function setUp() {
-    parent::setUp('views', 'views_ui');
-    module_enable(array('views_ui'));
   }
 
   /**
@@ -38,7 +33,6 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->drupalCreateNode($node_2);
 
     $view = $this->viewsAggregateCountView();
-    $view->set_display('default');
     $output = $view->execute_display();
 
     $this->assertEqual(count($view->result), 2, 'Make sure the count of items is right.');
@@ -130,7 +124,6 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->drupalCreateNode($node_2);
 
     $view = $this->viewsGroupByViewHelper($group_by);
-    $view->set_display('default');
     $output = $view->execute_display();
 
     $this->assertEqual(count($view->result), 2, 'Make sure the count of items is right.');
@@ -216,26 +209,6 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->GroupByTestHelper('max', array(4, 7));
   }
 
-  function testGroupBySave() {
-    $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration'));
-    $this->drupalLogin($admin_user);
-    views_invalidate_cache();
-    menu_rebuild();
-
-    $this->drupalGet('admin/structure/views');
-    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
-
-    $edit = array(
-      'group_by' => TRUE,
-    );
-    $this->drupalPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Apply'));
-
-    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
-    $this->drupalPost('admin/structure/views/view/test_views_groupby_save/edit', array(), t('Save'));
-
-    $this->drupalGet('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by');
-  }
-
   public function testGroupByCountOnlyFilters() {
     // Check if GROUP BY and HAVING are included when a view
     // Doesn't display SUM, COUNT, MAX... functions in SELECT statment
@@ -250,7 +223,6 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     }
 
     $view = $this->viewsGroupByCountViewOnlyFilters();
-    $view->set_display('default');
     $output = $view->execute_display();
 
     $this->assertTrue(strpos($view->build_info['query'], 'GROUP BY'), t('Make sure that GROUP BY is in the query'));
@@ -300,5 +272,44 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['filters']['nid']['value']['value'] = '3';
 
     return $view;
+  }
+}
+
+class viewsUiGroupbyTestCase extends DrupalWebTestCase {
+  public function setUp() {
+    parent::setUp('views', 'views_ui');
+    module_enable(array('views_ui'));
+  }
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Groupby',
+      'description' => 'Tests aggregate functionality of views, for example count.',
+      'group' => 'Views',
+    );
+  }
+
+  /**
+   * Tests whether basic saving works.
+   *
+   * @todo: this should check the change of the settings as well.
+   */
+  function testGroupBySave() {
+    $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration'));
+    $this->drupalLogin($admin_user);
+    views_invalidate_cache();
+    menu_rebuild();
+
+    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
+
+    $edit = array(
+      'group_by' => TRUE,
+    );
+    $this->drupalPost('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by', $edit, t('Apply'));
+
+    $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
+    $this->drupalPost('admin/structure/views/view/test_views_groupby_save/edit', array(), t('Save'));
+
+    $this->drupalGet('admin/structure/views/nojs/display/test_views_groupby_save/default/group_by');
   }
 }
