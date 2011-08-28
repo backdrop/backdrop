@@ -239,8 +239,6 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     // Now take the SelectQuery object the View has built and massage it
     // somewhat so we can get the SQL query from it.
     $subquery = $temp_view->build_info['query'];
-    //dsm($temp_view, 'temp view');
-    //dsm($subquery, 'subq');
 
     // Workaround until http://drupal.org/node/844910 is fixed:
     // Remove all fields from the SELECT except the base id.
