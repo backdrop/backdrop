@@ -1,0 +1,414 @@
+<?php
+
+/**
+ * Test for Entity Reference handlers.
+ */
+class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Entity Reference Handlers',
+      'description' => 'Tests for the base handlers provided by Entity Reference.',
+      'group' => 'Entity Reference',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp(array('entity', 'entityreference'));
+  }
+
+  protected function assertReferencable($field, $tests, $handler_name) {
+    $handler = entityreference_get_handler($field);
+
+    foreach ($tests as $test) {
+      foreach ($test['arguments'] as $arguments) {
+        $result = call_user_func_array(array($handler, 'getReferencableEntities'), $arguments);
+        $this->assertEqual($result, $test['result'], t('Valid result set returned by @handler.', array('@handler' => $handler_name)));
+
+        $result = call_user_func_array(array($handler, 'countReferencableEntities'), $arguments);
+        $this->assertEqual($result, count($test['result']), t('Valid count returned by @handler.', array('@handler' => $handler_name)));
+      }
+    }
+  }
+
+  /**
+   * Test the node-specific overrides of the entity handler.
+   */
+  public function testNodeHandler() {
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'node',
+        'target_bundles' => array(),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    $nodes = array(
+      'published1' => (object) array(
+        'type' => 'article',
+        'status' => 1,
+        'title' => 'Node published1',
+        'uid' => 1,
+      ),
+      'published2' => (object) array(
+        'type' => 'article',
+        'status' => 1,
+        'title' => 'Node published2',
+        'uid' => 1,
+      ),
+      'unpublished' => (object) array(
+        'type' => 'article',
+        'status' => 0,
+        'title' => 'Node unpublished',
+        'uid' => 1,
+      ),
+    );
+
+    $node_labels = array();
+    foreach ($nodes as $node) {
+      node_save($node);
+      $node_labels[$node->nid] = $node->title;
+    }
+
+    // Test as a non-admin.
+    $normal_user = $this->drupalCreateUser(array('access content'));
+    $GLOBALS['user'] = $normal_user;
+    $referencable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          $nodes['published1']->nid => $nodes['published1']->title,
+          $nodes['published2']->nid => $nodes['published2']->title,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('published1', 'CONTAINS'),
+          array('Published1', 'CONTAINS'),
+        ),
+        'result' => array(
+          $nodes['published1']->nid => $nodes['published1']->title,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('published2', 'CONTAINS'),
+          array('Published2', 'CONTAINS'),
+        ),
+        'result' => array(
+          $nodes['published2']->nid => $nodes['published2']->title,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('invalid node', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+      array(
+        'arguments' => array(
+          array('Node unpublished', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+    );
+    $this->assertReferencable($field, $referencable_tests, 'Node handler');
+
+    // Test as an admin.
+    $admin_user = $this->drupalCreateUser(array('access content', 'bypass node access'));
+    $GLOBALS['user'] = $admin_user;
+    $referencable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          $nodes['published1']->nid => $nodes['published1']->title,
+          $nodes['published2']->nid => $nodes['published2']->title,
+          $nodes['unpublished']->nid => $nodes['unpublished']->title,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('Node unpublished', 'CONTAINS'),
+        ),
+        'result' => array(
+          $nodes['unpublished']->nid => $nodes['unpublished']->title,
+        ),
+      ),
+    );
+    $this->assertReferencable($field, $referencable_tests, 'Node handler (admin)');
+  }
+
+  /**
+   * Test the user-specific overrides of the entity handler.
+   */
+  public function testUserHandler() {
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'user',
+        'target_bundles' => array(),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    $users = array(
+      'anonymous' => user_load(0),
+      'admin' => user_load(1),
+      'non_admin' => (object) array(
+        'name' => 'non_admin',
+        'mail' => 'non_admin@example.com',
+        'roles' => array(),
+        'pass' => user_password(),
+        'status' => 1,
+      ),
+      'blocked' => (object) array(
+        'name' => 'blocked',
+        'mail' => 'blocked@example.com',
+        'roles' => array(),
+        'pass' => user_password(),
+        'status' => 0,
+      ),
+    );
+
+    // The label of the anonymous user is variable_get('anonymous').
+    $users['anonymous']->name = variable_get('anonymous', t('Anonymous'));
+
+    $user_labels = array();
+    foreach ($users as $key => $user) {
+      if (!isset($user->uid)) {
+        $users[$key] = $user = user_save(drupal_anonymous_user(), (array) $user);
+      }
+      $user_labels[$user->uid] = $user->name;
+    }
+
+    // Test as a non-admin.
+    $GLOBALS['user'] = $users['non_admin'];
+    $referencable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          $users['admin']->uid => $users['admin']->name,
+          $users['non_admin']->uid => $users['non_admin']->name,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('non_admin', 'CONTAINS'),
+          array('NON_ADMIN', 'CONTAINS'),
+        ),
+        'result' => array(
+          $users['non_admin']->uid => $users['non_admin']->name,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('invalid user', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+      array(
+        'arguments' => array(
+          array('blocked', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+    );
+    $this->assertReferencable($field, $referencable_tests, 'User handler');
+
+    $GLOBALS['user'] = $users['admin'];
+    $referencable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          $users['anonymous']->uid => $users['anonymous']->name,
+          $users['admin']->uid => $users['admin']->name,
+          $users['non_admin']->uid => $users['non_admin']->name,
+          $users['blocked']->uid => $users['blocked']->name,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('blocked', 'CONTAINS'),
+        ),
+        'result' => array(
+          $users['blocked']->uid => $users['blocked']->name,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('Anonymous', 'CONTAINS'),
+          array('anonymous', 'CONTAINS'),
+        ),
+        'result' => array(
+          $users['anonymous']->uid => $users['anonymous']->name,
+        ),
+      ),
+    );
+    $this->assertReferencable($field, $referencable_tests, 'User handler (admin)');
+  }
+
+  /**
+   * Test the comment-specific overrides of the entity handler.
+   */
+  public function testCommentHandler() {
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'comment',
+        'target_bundles' => array(),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    $nodes = array(
+      'published' => (object) array(
+        'type' => 'article',
+        'status' => 1,
+        'title' => 'Node published',
+        'uid' => 1,
+      ),
+      'unpublished' => (object) array(
+        'type' => 'article',
+        'status' => 0,
+        'title' => 'Node unpublished',
+        'uid' => 1,
+      ),
+    );
+    foreach ($nodes as $node) {
+      node_save($node);
+    }
+
+    $comments = array(
+      'published_published' => (object) array(
+        'nid' => $nodes['published']->nid,
+        'uid' => 1,
+        'cid' => NULL,
+        'pid' => 0,
+        'status' => COMMENT_PUBLISHED,
+        'subject' => 'Comment Published',
+        'hostname' => ip_address(),
+        'language' => LANGUAGE_NONE,
+      ),
+      'published_unpublished' => (object) array(
+        'nid' => $nodes['published']->nid,
+        'uid' => 1,
+        'cid' => NULL,
+        'pid' => 0,
+        'status' => COMMENT_NOT_PUBLISHED,
+        'subject' => 'Comment Unpublished',
+        'hostname' => ip_address(),
+        'language' => LANGUAGE_NONE,
+      ),
+      'unpublished_published' => (object) array(
+        'nid' => $nodes['unpublished']->nid,
+        'uid' => 1,
+        'cid' => NULL,
+        'pid' => 0,
+        'status' => COMMENT_NOT_PUBLISHED,
+        'subject' => 'Comment Published on Unpublished node',
+        'hostname' => ip_address(),
+        'language' => LANGUAGE_NONE,
+      ),
+    );
+
+    $comment_labels = array();
+    foreach ($comments as $comment) {
+      comment_save($comment);
+      $comment_labels[$comment->cid] = $comment->subject;
+    }
+
+    // Test as a non-admin.
+    $normal_user = $this->drupalCreateUser(array('access content', 'access comments'));
+    $GLOBALS['user'] = $normal_user;
+    $referencable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          $comments['published_published']->cid => $comments['published_published']->subject,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('Published', 'CONTAINS'),
+        ),
+        'result' => array(
+          $comments['published_published']->cid => $comments['published_published']->subject,
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('invalid comment', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+      array(
+        'arguments' => array(
+          array('Comment Unpublished', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+    );
+    $this->assertReferencable($field, $referencable_tests, 'Comment handler');
+
+    // Test as a comment admin.
+    $admin_user = $this->drupalCreateUser(array('access content', 'access comments', 'administer comments'));
+    $GLOBALS['user'] = $admin_user;
+    $referencable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          $comments['published_published']->cid => $comments['published_published']->subject,
+          $comments['published_unpublished']->cid => $comments['published_unpublished']->subject,
+        ),
+      ),
+    );
+    $this->assertReferencable($field, $referencable_tests, 'Comment handler (comment admin)');
+
+    // Test as a node and comment admin.
+    $admin_user = $this->drupalCreateUser(array('access content', 'access comments', 'administer comments', 'bypass node access'));
+    $GLOBALS['user'] = $admin_user;
+    $referencable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          $comments['published_published']->cid => $comments['published_published']->subject,
+          $comments['published_unpublished']->cid => $comments['published_unpublished']->subject,
+          $comments['unpublished_published']->cid => $comments['unpublished_published']->subject,
+        ),
+      ),
+    );
+    $this->assertReferencable($field, $referencable_tests, 'Comment handler (comment + node admin)');
+  }
+}

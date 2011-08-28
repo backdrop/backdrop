@@ -27,3 +27,27 @@ function entityreference_field_schema($field) {
     );
   }
 }
+
+/**
+ * Update the field configuration to the new plugin structure.
+ */
+function entityreference_update_7000() {
+  // Enable ctools.
+  if (!module_enable(array('ctools'))) {
+    throw new Exception('This version of Entity Reference requires ctools, but it could not be enabled.');
+  }
+
+  // Get the list of fields of type 'entityreference'.
+  $fields = array();
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field_info['type'] == 'entityreference') {
+      $settings = &$field['settings'];
+      if (!isset($settings['handler'])) {
+        $settings['handler'] = 'base';
+        $settings['handler_settings']['target_bundles'] = $settings['target_bundles'];
+        unset($settings['target_bundles']);
+        field_update_field($field);
+      }
+    }
+  }
+}

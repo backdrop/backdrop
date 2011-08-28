@@ -2,5 +2,14 @@ name = Entity Reference
 description = Provides a field that can reference other entities.
 core = 7.x
 dependencies[] = entity
+dependencies[] = ctools
 
+; Migrate handler.
 files[] = entityreference.migrate.inc
+
+; Our default entity handler.
+files[] = entityreference.handler.inc
+files[] = handler/base.inc
+
+; Tests.
+files[] = tests/entityreference.handlers.test
