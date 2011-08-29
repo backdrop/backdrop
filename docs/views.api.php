@@ -279,6 +279,7 @@ function hook_views_api() {
   return array(
     'api' => 2,
     'path' => drupal_get_path('module', 'example') . '/includes/views',
+    'template path' => drupal_get_path('module', 'example') . 'themes',
   );
 }
 
