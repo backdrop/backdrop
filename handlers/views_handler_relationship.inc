@@ -60,7 +60,15 @@ class views_handler_relationship extends views_handler {
   function option_definition() {
     $options = parent::option_definition();
 
-    $label = !empty($this->definition['label']) ? $this->definition['label'] : $this->definition['field'];
+
+    // Relationships definitions should define a default label, but if they aren't get another default value.
+    if (!empty($this->definition['label'])) {
+      $label = $this->definition['label'];
+    }
+    else {
+      $label = !empty($this->definition['field']) ? $this->definition['field'] : $this->definition['base field'];
+    }
+
     $options['label'] = array('default' => $label, 'translatable' => TRUE);
     $options['required'] = array('default' => FALSE);
 
