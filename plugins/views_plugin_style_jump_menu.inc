@@ -98,7 +98,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     foreach ($sets as $title => $records) {
       foreach ($records as $row_index => $row) {
         $this->view->row_index = $row_index;
-        $path = strip_tags($this->get_field($this->view->row_index, $this->options['path']));
+        $path = html_entity_decode(strip_tags($this->get_field($this->view->row_index, $this->options['path'])), ENT_QUOTES);
         // Putting a '/' in front messes up url() so let's take that out
         // so users don't shoot themselves in the foot.
         if (strpos($path, '/') === 0) {
@@ -111,7 +111,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
         $path = $url_options['path'];
 
         $path = url($path, $url_options);
-        $field = strip_tags($this->row_plugin->render($row));
+        $field = html_entity_decode(strip_tags($this->row_plugin->render($row)), ENT_QUOTES);
         $key = md5($path . $field) . "::" . $path;
         if ($title) {
           $options[$title][$key] = $field;
