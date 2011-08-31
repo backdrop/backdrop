@@ -553,6 +553,20 @@ function template_preprocess_views_view_table(&$vars) {
         $vars['rows'][$num][$column] .= $field_output;
       }
     }
+
+    // Remove columns if the option is hide empty column is checked and the field is not empty.
+    if (!empty($options['info'][$field]['empty_column'])) {
+      $empty = TRUE;
+      foreach ($vars['rows'] as $num => $columns) {
+        $empty &= empty($columns[$column]);
+      }
+      if ($empty) {
+        foreach ($vars['rows'] as $num => &$columns) {
+          unset($columns[$column]);
+          unset($vars['header'][$column]);
+        }
+      }
+    }
   }
 
   $count = 0;
