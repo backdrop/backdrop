@@ -43,29 +43,29 @@ class views_handler_area_view extends views_handler_area {
    */
   function render($empty = FALSE) {
     if (!empty($this->options['view_to_insert'])) {
-      list($view_name, $view_display) = explode(':', $this->options['view_to_insert']);
+      list($view_name, $display_id) = explode(':', $this->options['view_to_insert']);
 
       $view = views_get_view($view_name);
-      if (empty($view)) {
+      if (empty($view) || !$view->access($display_id)) {
         return;
       }
-      $view->set_display($view_display);
+      $view->set_display($display_id);
 
       // Avoid recursion
       $view->parent_views += $this->view->parent_views;
-      $view->parent_views[] = "$view_name:$view_display";
+      $view->parent_views[] = "$view_name:$display_id";
 
       // Check if the view is part of the parent views of this view
-      $search = "$view_name:$view_display";
+      $search = "$view_name:$display_id";
       if (in_array($search, $this->view->parent_views)) {
-        drupal_set_message(t("Recursion detected in view @view display @display.", array('@view' => $view_name, '@display' => $view_display)), 'error');
+        drupal_set_message(t("Recursion detected in view @view display @display.", array('@view' => $view_name, '@display' => $display_id)), 'error');
       }
       else {
         if (!empty($this->options['inherit_arguments']) && !empty($this->view->args)) {
-          return $view->preview($view_display, $this->view->args);
+          return $view->preview($display_id, $this->view->args);
         }
         else {
-          return $view->preview($view_display);
+          return $view->preview($display_id);
         }
       }
     }
