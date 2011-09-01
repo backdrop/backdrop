@@ -337,7 +337,11 @@ class views_plugin_query_default extends views_plugin_query {
       return FALSE;
     }
 
-    return $this->queue_table($table, $relationship, $this->adjust_join($join, $relationship), $alias);
+    if ($join && $relationship) {
+      $join = $this->adjust_join($join, $relationship);
+    }
+
+    return $this->queue_table($table, $relationship, $join, $alias);
   }
 
   /**
