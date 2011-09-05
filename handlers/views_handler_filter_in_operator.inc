@@ -364,7 +364,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
     }
 
     if (!in_array($this->operator, $this->operator_values(1))) {
-      $errors[] = t('The operator is invalid.');
+      $errors[] = t('The operator is invalid on filter: @filter.', array('@filter' => $this->ui_name(TRUE)));
     }
     if (is_array($this->value)) {
       if (!isset($this->value_options)) {
@@ -384,11 +384,11 @@ class views_handler_filter_in_operator extends views_handler_filter {
       }
       // Choose different kind of ouput for 0, a single and multiple values.
       if (count($this->value) == 0) {
-        $errors[] = t('No valid values found.');
+        $errors[] = t('No valid values found on filter: @filter.', array('@filter' => $this->ui_name(TRUE)));
       }
     }
     elseif (!empty($this->value) && ($this->operator == 'in' || $this->operator == 'not in')) {
-      $errors[] = t('The value @value is not an array for @operator', array('@value' => views_var_export($this->value), '@operator' => $this->operator));
+      $errors[] = t('The value @value is not an array for @operator on filter: @filter', array('@value' => views_var_export($this->value), '@operator' => $this->operator, '@filter' => $this->ui_name(TRUE)));
     }
     return $errors;
   }
