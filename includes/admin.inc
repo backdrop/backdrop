@@ -3096,7 +3096,7 @@ function views_ui_edit_details_form($form, &$form_state) {
   $form['details']['tag'] = array(
     '#type' => 'textfield',
     '#title' => t('View tag'),
-    '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
+    '#description' => t('Optionally, enter a comma delimited list of tags for this view to use in filtering and sorting views on the administrative page.'),
     '#default_value' => $view->tag,
     '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
   );

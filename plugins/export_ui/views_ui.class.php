@@ -128,10 +128,13 @@ class views_ui extends ctools_export_ui {
     );
 
     $tags = array();
-    if (isset($form_state['views'])) {
-      foreach ($form_state['views'] as $name => $view) {
+    if (isset($form_state['object']->items)) {
+      foreach ($form_state['object']->items as $name => $view) {
         if (!empty($view->tag)) {
-          $tags[$view->tag] = $view->tag;
+          $view_tags = drupal_explode_tags($view->tag);
+          foreach ($view_tags as $tag) {
+            $tags[$tag] = $tag;
+          }
         }
       }
     }
@@ -162,6 +165,17 @@ class views_ui extends ctools_export_ui {
   }
 
   function list_filter($form_state, $view) {
+    // Don't filter by tags if all is set up.
+    if ($form_state['values']['tag'] != 'all') {
+      // If none is selected check whether the view has a tag.
+      if ($form_state['values']['tag'] == 'none') {
+        return !empty($view->tag);
+      }
+      else {
+        // Check whether the tag can be found in the views tag.
+        return strpos($view->tag, $form_state['values']['tag']) === FALSE;
+      }
+    }
     if ($form_state['values']['base'] != 'all' && $form_state['values']['base'] != $view->base_table) {
       return TRUE;
     }
