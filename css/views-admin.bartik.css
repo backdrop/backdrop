@@ -3,6 +3,14 @@
  * in the Bartik theme.
  */
  
+/* @group Lists */
+
+.views-display-top .secondary .action-list {
+  padding-left: 0; /* LTR */
+}
+
+/* @end */
+
 /* @group Attachment details tabs
  *
  * The tabs that switch between sections

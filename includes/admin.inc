@@ -1192,7 +1192,7 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
  */
 function views_ui_render_display_top($view, $display_id) {
   $element['#theme_wrappers'] = array('views_container');
-  $element['#attributes']['class'] = array('views-display-top');
+  $element['#attributes']['class'] = array('views-display-top', 'clearfix');
   $element['#attributes']['id'] = array('views-display-top');
 
   // Extra actions for the display

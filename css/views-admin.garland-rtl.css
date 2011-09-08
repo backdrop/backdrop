@@ -3,3 +3,11 @@
  * in the Garland theme.
  */
  
+ /* @group Lists */
+ 
+.views-displays .secondary .action-list {
+  left: auto;
+  right: 1px;
+}
+ 
+ /* @end */

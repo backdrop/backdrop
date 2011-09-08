@@ -27,3 +27,17 @@
 }
 
 /* @end */
+
+/* @group Attachment details tabs */
+
+.views-display-top ul.secondary {
+  float: right;
+}
+
+.views-displays .secondary .action-list  li:first-child {
+  -moz-border-radius: 7px 0 0 0;
+  -webkit-border-radius: 7px 0 0 0;
+  border-radius: 7px 0 0 0;
+}
+
+/* @end */
