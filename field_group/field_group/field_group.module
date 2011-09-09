@@ -479,7 +479,7 @@ function field_group_field_group_format_settings($group) {
 function field_group_pre_render_prepare(&$group) {
 
   // Prepare extra classes.
-  $group->classes = array($group->format_type, str_replace('_', '-', $group->group_name));
+  $group->classes = array('field-group-' . $group->format_type, str_replace('_', '-', $group->group_name));
   if (isset($group->format_settings['formatter'])) {
     $group->collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
     // Open or closed horizontal or vertical tabs will be collapsible by default.
