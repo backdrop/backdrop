@@ -188,4 +188,7 @@ return $this->sanitize_value($value, 'xss');
 In contrast to 6.x views_get_page_view now does stores the current view, not the current page display.
 
 <h3>Removed views-view-row-node</h3>
-Due to changes in comment.module there is no extra views-view-row-node template needed to display the comments.If you do some custom stuff there you should can do now everything in your node.tpl.php
+Due to changes in comment.module there is no extra views-view-row-node template needed to display the comments. If you do some custom stuff there you should now be able to do everything in your node.tpl.php.
+
+<h3>Entity type Key on Base tables</h3>
+During the development of the drupal7 version of views the entity type associated with a table got added to $data['name']['table']['base']['entity type']. It should be moved to $data['name']['table']['entity type'].

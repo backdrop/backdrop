@@ -1481,11 +1481,11 @@ class views_plugin_query_default extends views_plugin_query {
     }
     $table_data = views_fetch_data($base_table);
 
-    // Bail out if the base-table has not specified the according entity-type.
-    if (!isset($table_data['table']['base']['entity type'])) {
+    // Bail out if the table has not specified the according entity-type.
+    if (!isset($table_data['table']['entity type'])) {
       return FALSE;
     }
-    $entity_type = $table_data['table']['base']['entity type'];
+    $entity_type = $table_data['table']['entity type'];
     $info = entity_get_info($entity_type);
     $id_alias = $this->get_field_alias($base_table_alias, $info['entity keys']['id']);
 

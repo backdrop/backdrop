@@ -26,10 +26,10 @@ function comment_views_data() {
   $data['comment']['table']['base'] = array(
     'field' => 'cid',
     'title' => t('Comment'),
-    'entity type' => 'comment',
     'help' => t("Comments are responses to node content."),
     'access query tag' => 'comment_access',
   );
+  $data['comment']['table']['entity type'] = 'comment';
 
   // Provide a "default relationship" to keep older views from choking.
   $data['comment']['table']['default_relationship'] = array(

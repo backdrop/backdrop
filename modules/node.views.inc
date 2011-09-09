@@ -26,13 +26,14 @@ function node_views_data() {
   $data['node']['table']['base'] = array(
     'field' => 'nid',
     'title' => t('Content'),
-    'entity type' => 'node',
     'weight' => -10,
     'access query tag' => 'node_access',
     'defaults' => array(
       'field' => 'title',
     ),
   );
+  $data['node']['table']['entity type'] = 'node';
+
 
   // For other base tables, explain how we join
   $data['node']['table']['join'] = array(

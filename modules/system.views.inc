@@ -33,6 +33,8 @@ function system_views_data() {
       'field' => 'filename'
     ),
   );
+  $data['file_managed']['table']['entity type'] = 'file';
+
 
   // The file table does not inherently join to the node table,
   // but may things (such as upload.module) can add relationships
