@@ -932,8 +932,7 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
   if (!$hasChildren) {
 
     // Remove empty elements from the #groups.
-    if (empty($element) && isset($form_groups[$name])) {
-      unset($form_groups[$name]);
+    if (empty($element) && isset($form_groups[$name]) && !is_array($form_groups[$name])) {
       foreach ($form_groups as $group_name => $group) {
         $group_children = array_flip($group->children);
         if (isset($group_children[$name])) {
@@ -1619,6 +1618,12 @@ function field_group_attach_groups(&$element, $view_mode, $form_state = array())
  * @return $element Array with re-arranged fields in forms.
  */
 function field_group_build_pre_render($element) {
+
+  // Skip the nesting and field_group functions if no fieldgroups.
+  // This could be because you don't see them in the UI or programmatically.
+  if (empty($element['#fieldgroups'])) {
+    return $element;
+  }
 
   // Merge our #fieldgroups with #groups to avoid conflicts on fieldset types.
   $element['#groups'] = array_merge($element['#groups'], $element['#fieldgroups']);

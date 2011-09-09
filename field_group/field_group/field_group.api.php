@@ -3,6 +3,22 @@
 /**
  * @file
  * Hooks provided by the Field group module.
+ *
+ * Fieldgroup is a module that will wrap fields and other fieldgroups. Nothing more, nothing less.
+ * For this there are formatters we can create on forms and view modes.
+ *
+ * Some of the elements defined in fieldgroup will be ported to the elements module.
+ *
+ * DEVELOPERS NOTES
+ *
+ * - Fieldgroup uses a ''#fieldgroups' property to know what fieldgroups are to be pre_rendered and
+ *   rendered by the field_group module. This means we need to be sure our groups are in #fieldgroups.
+ *   #fieldgroups is later merged with the normal #groups that can be used by any other module.
+ *   This is done to be sure fieldgroup is not taking fieldsets from profile2, commerce line items,
+ *   commerce user profiles, ... .
+ *   When trying to merge a programmatically created field wrapper (div, markup, fieldset, ...) into
+ *   groups, you might consider adding it in #field_groups as well if you want the element processed
+ *   by fieldgroup.
  */
 
 /**
@@ -225,7 +241,7 @@ function hook_field_group_pre_render(& $element, $group, & $form) {
       if ($group->format_settings['formatter'] != 'open') {
         $add['#prefix'] = '<div class="field-group-format ' . $classes . '">
           <span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span>
-          <div class="field-group-format-wrapper" style="display: ' . ($collapsed ? 'none' : 'block') . ';">';
+          <div class="field-group-format-wrapper" style="display: none;">';
         $add['#suffix'] = '</div></div>';
       }
       else {
