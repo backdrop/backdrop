@@ -29,7 +29,7 @@ Drupal.behaviors.MultiPage = {
         $(this).append('<div class="multipage-controls clearfix"></div>').append($controls);
         
         // Check if the submit button needs to move to the latest pane.
-        if (Drupal.settings.multipage_move_submit && $('.form-actions').length) {
+        if (Drupal.settings.field_group.multipage_move_submit && $('.form-actions').length) {
           $('.form-actions', $form).remove().appendTo($($controls, $panes.last()));
         }
         

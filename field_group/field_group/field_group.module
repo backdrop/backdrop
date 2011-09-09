@@ -713,8 +713,12 @@ function field_group_pre_render_multipage_group(&$element, &$group, &$form) {
   $move_additional = isset($group->format_settings['instance_settings']['move_additional']) ? ($group->format_settings['instance_settings']['move_additional'] && isset($form['additional_settings'])) : isset($form['additional_settings']);
   $move_button = isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : 0;
 
-  drupal_add_js(array('multipage_move_submit' => $move_button, 'multipage_move_additional' => $move_additional), 'setting');
-
+  drupal_add_js(array(
+    'field_group' => array(
+      'multipage_move_submit' => (bool) $move_button,
+      'multipage_move_additional' => (bool) $move_additional
+    )
+  ), 'setting');
 
 }
 
