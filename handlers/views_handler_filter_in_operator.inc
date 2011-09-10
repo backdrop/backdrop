@@ -23,6 +23,9 @@ class views_handler_filter_in_operator extends views_handler_filter {
    *
    * This can use a guard to be used to reduce database hits as much as
    * possible.
+   *
+   * @return
+   *   Return the stored values in $this->value_options if someone expects it.
    */
   function get_value_options() {
     if (isset($this->value_options)) {
@@ -40,6 +43,8 @@ class views_handler_filter_in_operator extends views_handler_filter {
     else {
       $this->value_options = array(t('Yes'), t('No'));
     }
+
+    return $this->value_options;
   }
 
   function expose_options() {
@@ -375,6 +380,9 @@ class views_handler_filter_in_operator extends views_handler_filter {
         // Don't validate if the field is exposed and no default value is provided.
         return $errors;
       }
+
+      // Some filter_in_operator usage uses optgroups forms, so flatten it.
+      $this->value_options = form_options_flatten($this->value_options);
 
       // Remove every element which is not known.
       foreach ($this->value as $value) {
