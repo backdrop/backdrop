@@ -1371,6 +1371,12 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
 
 /**
  * Read all groups.
+ *
+ * @param $params
+ *   Parameters for the query
+ *   $name The name of the entity.
+ *   $bundle The name of the bundle.
+ *   $view_mode The view mode.
  */
 function field_group_read_groups($params = array()) {
 

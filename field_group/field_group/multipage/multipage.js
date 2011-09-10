@@ -13,7 +13,7 @@ Drupal.behaviors.MultiPage = {
       var paneWithFocus;
 
       // Check if there are some wrappers that can be converted to multipages.
-      var $panes = $('> div.multipage', this);
+      var $panes = $('> div.field-group-multipage', this);
       var $form = $panes.parents('form');
       if ($panes.length == 0) {
         return;
