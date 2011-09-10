@@ -331,29 +331,6 @@ function taxonomy_views_data() {
     ),
   );
 
-  // ----------------------------------------------------------------------
-  // taxonomy_term_synonym table
-
-  $data['term_synonym']['moved to'] = 'taxonomy_term_synonym';
-  $data['taxonomy_term_synonym']['table']['group']  = t('Taxonomy term');
-
-  $data['taxonomy_term_synonym']['table']['join'] = array(
-    'taxonomy_term_data' => array(
-      // links directly to taxonomy_term_data via tid
-      'left_field' => 'tid',
-      'field' => 'tid',
-    ),
-  );
-
-  $data['taxonomy_term_synonym']['name'] = array(
-    'title' => t('Term synonym'),
-    'help' => t('Term synonyms may be used to find terms by alternate names.'),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
-      'many to one' => TRUE,
-      'empty field name' => t('Uncategorized'),
-    ),
-  );
   return $data;
 }
 
