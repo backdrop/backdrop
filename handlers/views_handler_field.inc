@@ -49,10 +49,6 @@ class views_handler_field extends views_handler {
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-
-    $this->options += array(
-      'exclude' => FALSE,
-    );
   }
 
   /**
