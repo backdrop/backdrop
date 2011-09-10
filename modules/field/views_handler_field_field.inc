@@ -57,6 +57,11 @@ class views_handler_field_field extends views_handler_field {
         $this->limit_values = TRUE;
       }
 
+      // If "First and last only" is chosen, limit the values
+      if (!empty($this->options['delta_first_last'])) {
+        $this->limit_values = TRUE;
+      }
+
       // Otherwise, we only limit values if the user hasn't selected "all", 0, or
       // the value matching field cardinality.
       if ((intval($this->options['delta_limit']) && ($this->options['delta_limit'] != $field['cardinality'])) || intval($this->options['delta_offset'])) {
@@ -306,6 +311,9 @@ class views_handler_field_field extends views_handler_field {
     $options['delta_reversed'] = array(
       'default' => FALSE,
     );
+    $options['delta_first_last'] = array(
+      'default' => FALSE,
+    );
 
     $options['multi_type'] = array(
       'default' => 'separator'
@@ -489,10 +497,17 @@ class views_handler_field_field extends views_handler_field {
       '#title' => t('Reversed'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['delta_reversed'],
-      '#suffix' => '</div>',
-      '#process' => array('form_process_checkbox', 'ctools_dependent_process'),
+      '#suffix' => $suffix,
       '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#description' => t('(start from last values)'),
+      '#fieldset' => 'multiple_field_settings',
+    );
+    $form['delta_first_last'] = array(
+      '#title' => t('First and last only'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->options['delta_first_last'],
+      '#suffix' => '</div>',
+      '#dependency' => array('edit-options-group-rows' => array(TRUE)),
       '#fieldset' => 'multiple_field_settings',
     );
   }
@@ -697,12 +712,22 @@ class views_handler_field_field extends views_handler_field {
         }
       }
 
+      // Determine if only the first and last values should be shown
+      $delta_first_last = $this->options['delta_first_last'];
+
       $new_values = array();
       for ($i = 0; $i < $delta_limit; $i++) {
         $new_delta = $offset + $i;
 
         if (isset($all_values[$new_delta])) {
-          $new_values[] = $all_values[$new_delta];
+          // If first-last option was selected, only use the first and last values
+          if (!$delta_first_last
+            // Use the first value.
+            || $new_delta == $offset
+            // Use the last value.
+            || $new_delta == ($delta_limit + $offset - 1)) {
+            $new_values[] = $all_values[$new_delta];
+          }
         }
       }
       $entity->{$this->definition['field_name']}[$langcode] = $new_values;
