@@ -129,7 +129,11 @@ function views_ui_preview($view, $display_id, $args = array()) {
     $view->set_exposed_input($exposed_input);
 
     // Store the current view URL for later use:
-    $view->set_display($display_id);
+
+    if (!$view->set_display($display_id)) {
+      return t('Invalid display id @display', array('@display' => $display_id));
+    }
+
     $view->set_arguments($args);
 
     if ($view->display_handler->get_option('path')) {
@@ -951,7 +955,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form_state['no_cache'] = TRUE;
 
   if ($display_id) {
-    $view->set_display($display_id);
+    if (!$view->set_display($display_id)) {
+      $form['#markup'] = t('Invalid display id @display', array('@display' => $display_id));
+      return $form;
+    }
+
     $view->fix_missing_relationships();
   }
 
