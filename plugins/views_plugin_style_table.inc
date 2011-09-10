@@ -52,7 +52,12 @@ class views_plugin_style_table extends views_plugin_style {
         return;
       }
       $sort = $this->options['default'];
-      $this->order = !empty($this->options['order']) ? $this->options['order'] : 'asc';
+      if (!empty($this->options['info'][$sort]['default_sort_order'])) {
+        $this->order = $this->options['info'][$sort]['default_sort_order'];
+      }
+      else {
+        $this->order = !empty($this->options['order']) ? $this->options['order'] : 'asc';
+      }
     }
     else {
       $sort = $_GET['order'];
@@ -154,14 +159,6 @@ class views_plugin_style_table extends views_plugin_style {
       '#title' => t('Enable Drupal style "sticky" table headers (Javascript)'),
       '#default_value' => !empty($this->options['sticky']),
       '#description' => t('(Sticky header effects will not be active for preview below, only on live output.)'),
-    );
-
-    $form['order'] = array(
-      '#type' => 'select',
-      '#title' => t('Default sort order'),
-      '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
-      '#default_value' => $this->options['order'],
-      '#description' => t('If a default sort order is selected, what order should it use by default.'),
     );
 
     $form['summary'] = array(
