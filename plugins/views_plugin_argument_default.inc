@@ -56,7 +56,7 @@ class views_plugin_argument_default extends views_plugin {
   /**
    * Provide the default form form for submitting options
    */
-  function options_submit(&$form, &$form_state) { }
+  function options_submit(&$form, &$form_state, &$options = array()) { }
 
   /**
    * Determine if the administrator has the privileges to use this

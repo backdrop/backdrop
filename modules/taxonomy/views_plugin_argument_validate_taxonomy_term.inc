@@ -69,8 +69,8 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
   }
 
   function options_submit(&$form, &$form_state, &$options = array()) {
-    // filter trash out of the options so we don't store giant unnecessary arrays
-    $form_state['values']['vocabularies'] = array_filter($form_state['values']['vocabularies']);
+    // Filter unselected items so we don't unnecessarily store giant arrays.
+    $options['vocabularies'] = array_filter($options['vocabularies']);
   }
 
   function convert_options(&$options) {
