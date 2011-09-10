@@ -193,6 +193,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
   function process_summary_arguments(&$args) {
     $type = $this->options['type'];
     $transform = $this->options['transform'];
+    $vocabularies = array_filter($this->options['vocabularies']);
 
     if ($type == 'convert') {
       $arg_keys = array_flip($args);
