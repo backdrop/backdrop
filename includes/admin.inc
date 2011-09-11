@@ -1318,6 +1318,10 @@ function views_ui_edit_form_submit_duplicate_display($form, &$form_state) {
   $new_display_id = $view->add_display($display->display_plugin);
   $view->display[$new_display_id] = clone $display;
   $view->display[$new_display_id]->id = $new_display_id;
+
+  // By setting the current display the changed marker will appear on the new
+  // display.
+  $view->current_display = $new_display_id;
   views_ui_cache_set($view);
 
   // Redirect to the new display's edit page.
