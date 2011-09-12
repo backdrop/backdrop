@@ -78,7 +78,6 @@ class views_handler_argument_date extends views_handler_argument_formula {
       $plugin = $this->get_plugin($type);
       $name = $this->options[$option];
       if (in_array($name, array('date', 'node_created', 'node_changed'))) {
-        dsm($name);
 
         // Write which plugin to use.
         $output = $indent . $prefix . "['$option'] = '$name';\n";
