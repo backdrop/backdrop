@@ -1595,7 +1595,7 @@ function vpr($message) {
  */
 function vsm($message) {
   if (module_exists('devel')) {
-    dsm($message);
+    dpm($message);
   }
 }
 
