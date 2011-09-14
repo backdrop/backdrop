@@ -128,7 +128,6 @@ function views_ui_preview($view, $display_id, $args = array()) {
 
     $view->set_exposed_input($exposed_input);
 
-    // Store the current view URL for later use:
 
     if (!$view->set_display($display_id)) {
       return t('Invalid display id @display', array('@display' => $display_id));
@@ -136,6 +135,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
 
     $view->set_arguments($args);
 
+    // Store the current view URL for later use:
     if ($view->display_handler->get_option('path')) {
       $path = $view->get_url();
     }
@@ -144,6 +144,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
     $view->override_path = 'admin/structure/views/nojs/preview/' . $view->name . '/' . $display_id;
 
     // Also override $_GET['q'] so we get the pager.
+    $original_path = current_path();
     $_GET['q'] = $view->override_path;
     if ($args) {
       $_GET['q'] .= '/' . implode('/', $args);
@@ -156,6 +157,10 @@ function views_ui_preview($view, $display_id, $args = array()) {
     views_ui_contextual_links_suppress_push();
     $preview = $view->preview($display_id, $args);
     views_ui_contextual_links_suppress_pop();
+
+    // Reset variables.
+    unset($view->override_path);
+    $_GET['q'] = $original_path;
 
     // Prepare the query information and statistics to show either above or
     // below the view preview.
