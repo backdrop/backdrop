@@ -70,6 +70,7 @@ files[] = modules/comment/views_handler_argument_comment_user_uid.inc
 files[] = modules/comment/views_handler_field_comment.inc
 files[] = modules/comment/views_handler_field_comment_depth.inc
 files[] = modules/comment/views_handler_field_comment_link.inc
+files[] = modules/comment/views_handler_field_comment_link_approve.inc
 files[] = modules/comment/views_handler_field_comment_link_delete.inc
 files[] = modules/comment/views_handler_field_comment_link_edit.inc
 files[] = modules/comment/views_handler_field_comment_link_reply.inc

@@ -294,6 +294,16 @@ function comment_views_data() {
     ),
   );
 
+
+  // link to approve comment
+  $data['comment']['approve_comment'] = array(
+    'field' => array(
+      'title' => t('Approve link'),
+      'help' => t('Provide a simple link to approve the comment.'),
+      'handler' => 'views_handler_field_comment_link_approve',
+    ),
+  );
+
   // link to reply to comment
   $data['comment']['replyto_comment'] = array(
     'field' => array(
