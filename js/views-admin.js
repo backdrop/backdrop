@@ -308,15 +308,16 @@ Drupal.viewsUi.OptionsSearch = function ($form) {
  */
 Drupal.viewsUi.OptionsSearch.prototype.getOptions = function ($allOptions) {
   var $ = jQuery;
-  var i, $label, $option;
+  var i, $label, $description, $option;
   var options = [];
   var length = $allOptions.length;
   for (i = 0; i < length; i++) {
     $option = $($allOptions[i]);
     $label = $option.find('label');
+    $description = $option.find('div.description');
     options[i] = {
-      // Search on the lowercase version of the label text.
-      'labelText': $label.text().toLowerCase(),
+      // Search on the lowercase version of the label text + description.
+      'searchText': $label.text().toLowerCase() + " " + $description.text().toLowerCase(),
       // Maintain a reference to the jQuery object for each row, so we don't
       // have to create a new object inside the performance-sensitive keyup
       // handler.
@@ -332,7 +333,7 @@ Drupal.viewsUi.OptionsSearch.prototype.getOptions = function ($allOptions) {
 Drupal.viewsUi.OptionsSearch.prototype.handleKeyup = function (event) {
   var found, i, j, option, search, words, wordsLength, zebraClass, zebraCounter;
 
-  // Determine the user's search query. The label text has been converted to
+  // Determine the user's search query. The search text has been converted to
   // lowercase.
   search = this.$searchBox.val().toLowerCase();
   words = search.split(' ');
@@ -341,16 +342,16 @@ Drupal.viewsUi.OptionsSearch.prototype.handleKeyup = function (event) {
   // Start the counter for restriping rows.
   zebraCounter = 0;
 
-  // Search through the labels in the form for matching text.
+  // Search through the search texts in the form for matching text.
   var length = this.options.length;
   for (i = 0; i < length; i++) {
     // Use a local variable for the option being searched, for performance.
     option = this.options[i];
     found = true;
-    // Each word in the search string has to match the label in order for the
-    // label to be shown.
+    // Each word in the search string has to match the item in order for the
+    // item to be shown.
     for (j = 0; j < wordsLength; j++) {
-      if (option.labelText.indexOf(words[j]) === -1) {
+      if (option.searchText.indexOf(words[j]) === -1) {
         found = false;
       }
     }
