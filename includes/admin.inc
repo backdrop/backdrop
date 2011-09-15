@@ -4510,6 +4510,13 @@ function views_ui_admin_settings_basic() {
   $form = array();
   $form['#attached']['css'] = views_ui_get_admin_css();
 
+  $options = array();
+  foreach (list_themes() as $name => $theme) {
+    if ($theme->status) {
+      $options[$name] = $theme->info['name'];
+    }
+  }
+
   // This is not currently a fieldset but we may want it to be later,
   // so this will make it easier to change if we do.
   $form['basic'] = array();
@@ -4537,6 +4544,14 @@ function views_ui_admin_settings_basic() {
     '#title' => t('Always show advanced display settings'),
     '#description' => t('Default to showing advanced display settings, such as relationships and contextual filters.'),
     '#default_value' => variable_get('views_ui_show_advanced_column', FALSE),
+  );
+
+  $form['basic']['views_ui_custom_theme'] = array(
+    '#type' => 'select',
+    '#title' => t('Custom admin theme for the Views UI'),
+    '#options' => array('_default' => t('- Use default -')) + $options,
+    '#default_value' => variable_get('views_ui_custom_theme', '_default'),
+    '#description' => t('In some cases you might want to select a different admin theme for the Views UI.')
   );
 
   $form['basic']['views_exposed_filter_any_label'] = array(
