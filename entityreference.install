@@ -50,5 +50,26 @@ function entityreference_update_7000() {
         field_update_field($field);
       }
     }
+
+    // Update the instance configurations.
+    foreach ($field['bundles'] as $entity_type => $bundles) {
+      foreach ($bundles as $bundle) {
+        $instance = field_info_instance($entity_type, $field_name, $bundle);
+        $save = FALSE;
+        if ($instance['widget']['type'] == 'entityreference_autocomplete') {
+          $instance['widget']['type'] = 'entityreference_autocomplete_tags';
+          $save = TRUE;
+        }
+        // When the autocomplete path is the default value, remove it from
+        // the configuration.
+        if (isset($instance['widget']['settings']['path']) && $instance['widget']['settings']['path'] == 'entityreference/autocomplete') {
+          unset($instance['widget']['settings']['path']);
+          $save = TRUE;
+        }
+        if ($save) {
+          field_update_instance($instance);
+        }
+      }
+    }
   }
 }

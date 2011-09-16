@@ -46,10 +46,17 @@ function entityreference_field_info() {
 function entityreference_menu() {
   $items = array();
 
-  $items['entityreference/autocomplete/%/%/%'] = array(
+  $items['entityreference/autocomplete/single/%/%/%'] = array(
     'title' => 'Entity Reference Autocomplete',
     'page callback' => 'entityreference_autocomplete_callback',
-    'page arguments' => array(2, 3, 4),
+    'page arguments' => array(2, 3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['entityreference/autocomplete/tags/%/%/%'] = array(
+    'title' => 'Entity Reference Autocomplete',
+    'page callback' => 'entityreference_autocomplete_callback',
+    'page arguments' => array(2, 3, 4, 5),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -264,7 +271,24 @@ function entityreference_field_widget_info() {
     'settings' => array(
       'match_operator' => 'CONTAINS',
       'size' => 60,
-      'path' => 'entityreference/autocomplete',
+      // We don't have a default here, because it's not the same between
+      // the two widgets, and the Field API doesn't update default
+      // settings when the widget changes.
+      'path' => '',
+    ),
+  );
+
+  $widgets['entityreference_autocomplete_tags'] = array(
+    'label' => t('Autocomplete (Tags style)'),
+    'description' => t('An autocomplete text field.'),
+    'field types' => array('entityreference'),
+    'settings' => array(
+      'match_operator' => 'CONTAINS',
+      'size' => 60,
+      // We don't have a default here, because it's not the same between
+      // the two widgets, and the Field API doesn't update default
+      // settings when the widget changes.
+      'path' => '',
     ),
     'behaviors' => array(
       'multiple values' => FIELD_BEHAVIOR_CUSTOM,
@@ -291,7 +315,7 @@ function entityreference_field_widget_settings_form($field, $instance) {
 
   $form = array();
 
-  if ($widget['type'] == 'entityreference_autocomplete') {
+  if ($widget['type'] == 'entityreference_autocomplete' || $widget['type'] == 'entityreference_autocomplete_tags') {
     $form['match_operator'] = array(
       '#type' => 'select',
       '#title' => t('Autocomplete matching'),
@@ -332,11 +356,23 @@ function entityreference_query_entityreference_alter(QueryAlterableInterface $qu
  * Implements hook_field_widget_form().
  */
 function entityreference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  if ($instance['widget']['type'] == 'entityreference_autocomplete') {
+  $handler = entityreference_get_handler($field);
+
+  if ($instance['widget']['type'] == 'entityreference_autocomplete' || $instance['widget']['type'] == 'entityreference_autocomplete_tags') {
+
+    if ($instance['widget']['type'] == 'entityreference_autocomplete') {
+      // We let the Field API handles multiple values for us, only take
+      // care of the one matching our delta.
+      if (isset($items[$delta])) {
+        $items = array($items[$delta]);
+      }
+      else {
+        $items = array();
+      }
+    }
+
     $entity_ids = array();
     $entity_labels = array();
-
-    $handler = entityreference_get_handler($field);
 
     // Build an array of entities ID.
     foreach ($items as $item) {
@@ -356,19 +392,47 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
       $entity_labels[] = $key;
     }
 
-    return $element + array(
-      '#type' => 'textfield',
-      '#maxlength' => 1024,
-      '#default_value' => implode(', ', $entity_labels),
-      '#autocomplete_path' => $instance['widget']['settings']['path'] . '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'],
-      '#size' => $instance['widget']['settings']['size'],
-      '#element_validate' => array('_entityreference_autocomplete_validate'),
-    );
+    if ($instance['widget']['type'] == 'entityreference_autocomplete') {
+      $path = !empty($instance['widget']['settings']['path']) ? $instance['widget']['settings']['path'] : 'entityreference/autocomplete/single';
+      $element['target_id'] = array(
+        '#type' => 'textfield',
+        '#maxlength' => 1024,
+        '#default_value' => implode(', ', $entity_labels),
+        '#autocomplete_path' => $path . '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'],
+        '#size' => $instance['widget']['settings']['size'],
+        '#element_validate' => array('_entityreference_autocomplete_validate'),
+      );
+    }
+    else {
+      $path = !empty($instance['widget']['settings']['path']) ? $instance['widget']['settings']['path'] : 'entityreference/autocomplete/tags';
+      return $element + array(
+        '#type' => 'textfield',
+        '#maxlength' => 1024,
+        '#default_value' => implode(', ', $entity_labels),
+        '#autocomplete_path' => $path . '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'],
+        '#size' => $instance['widget']['settings']['size'],
+        '#element_validate' => array('_entityreference_autocomplete_tags_validate'),
+      );
+    }
   }
   return $element;
 }
 
 function _entityreference_autocomplete_validate($element, &$form_state, $form) {
+  // If a value was entered into the autocomplete...
+  $value = '';
+  if (!empty($element['#value'])) {
+    // Take "label (entity id)', match the id from parenthesis.
+    if (preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
+      $value = $matches[1];
+    }
+  }
+
+  // Update the value of this element so the field can validate the product IDs.
+  form_set_value($element, $value, $form_state);
+}
+
+function _entityreference_autocomplete_tags_validate($element, &$form_state, $form) {
   $value = array();
   // If a value was entered into the autocomplete...
   if (!empty($element['#value'])) {
@@ -398,7 +462,7 @@ function entityreference_field_widget_error($element, $error) {
 /**
  * Menu callback: autocomplete the label of an entity.
  */
-function entityreference_autocomplete_callback($field_name, $entity_type, $bundle_name, $string = '') {
+function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $string = '') {
   $field = field_info_field($field_name);
   $instance = field_info_instance($entity_type, $field_name, $bundle_name);
   $matches = array();
@@ -409,13 +473,21 @@ function entityreference_autocomplete_callback($field_name, $entity_type, $bundl
 
   $handler = entityreference_get_handler($field);
 
-  // The user enters a comma-separated list of tags. We only autocomplete the last tag.
-  $tags_typed = drupal_explode_tags($string);
-  $tag_last = drupal_strtolower(array_pop($tags_typed));
+  if ($type == 'tags') {
+    // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+    $tags_typed = drupal_explode_tags($string);
+    $tag_last = drupal_strtolower(array_pop($tags_typed));
+    if (!empty($tag_last)) {
+      $prefix = count($tags_typed) ? implode(', ', $tags_typed) . ', ' : '';
+    }
+  }
+  else {
+    // The user enters a single tag.
+    $prefix = '';
+    $tag_last = $string;
+  }
 
   if (!empty($tag_last)) {
-    $prefix = count($tags_typed) ? implode(', ', $tags_typed) . ', ' : '';
-
     // Get an array of matching entities.
     $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
 
