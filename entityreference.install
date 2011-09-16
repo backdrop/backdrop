@@ -40,7 +40,8 @@ function entityreference_update_7000() {
   // Get the list of fields of type 'entityreference'.
   $fields = array();
   foreach (field_info_fields() as $field_name => $field) {
-    if ($field_info['type'] == 'entityreference') {
+    // Update the field configuration.
+    if ($field['type'] == 'entityreference') {
       $settings = &$field['settings'];
       if (!isset($settings['handler'])) {
         $settings['handler'] = 'base';
