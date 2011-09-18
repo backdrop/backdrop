@@ -944,7 +944,7 @@ function &views_set_page_view($view = NULL) {
  * $view object.
  *
  * @return view
- *   A fully formed, empty $view object. 
+ *   A fully formed, empty $view object.
  */
 function &views_get_page_view() {
   return views_set_page_view();
@@ -1300,7 +1300,7 @@ function views_get_applicable_views($type) {
   // @todo: Use a smarter flagging system so that we don't have to
   // load every view for this.
   $result = array();
-  $views = views_get_all_views();
+  $views = views_get_all_views(TRUE);
 
   foreach ($views as $view) {
     // Skip disabled views.
