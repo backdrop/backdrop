@@ -17,6 +17,8 @@ class views_handler_field_comment extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
     $options['link_to_comment'] = array('default' => TRUE);
+    $options['link_to_node'] = array('default' => FALSE);
+
     return $options;
   }
 
@@ -30,14 +32,27 @@ class views_handler_field_comment extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_comment'],
     );
+    $form['link_to_node'] = array(
+      '#title' => t('Link to field to the node if there is no comment.'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->options['link_to_node'],
+    );
     parent::options_form($form, $form_state);
   }
 
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_comment']) && $data !== NULL && $data !== '') {
+    if (!empty($this->options['link_to_comment'])) {
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = "comment/". $this->get_value($values, 'cid');
-      $this->options['alter']['fragment'] = "comment-" . $this->get_value($values, 'cid');
+      $nid = $this->get_value($values, 'nid');
+      $cid = $this->get_value($values, 'cid');
+      if (!empty($cid)) {
+        $this->options['alter']['path'] = "comment/" . $cid;
+        $this->options['alter']['fragment'] = "comment-" . $cid;
+      }
+      // If there is no comment link to the node.
+      else if ($this->options['link_to_node']) {
+        $this->options['alter']['path'] = "node/" . $nid;
+      }
     }
 
     return $data;
