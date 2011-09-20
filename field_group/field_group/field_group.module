@@ -1302,7 +1302,7 @@ function theme_multipage_pane($variables) {
       $title = t('Step %count of %total', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children)));
       break;
     case 3:
-      $title = t('Step %count of %total @label', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children), '@label' => $element['#title']));
+      $title = t('Step %count of %total !label', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children), '!label' => $element['#title']));
       break;
     case 0:
     default:
