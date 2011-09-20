@@ -40,13 +40,21 @@ Drupal.FieldGroup.Effects.processAccordion = {
   execute: function (context, settings, type) {
     $('div.field-group-accordion-wrapper', context).once('fieldgroup-effects', function () {
       var wrapper = $(this);
-      
+
       wrapper.accordion({
         autoHeight: false,
         active: '.field-group-accordion-active',
-        collapsible: true
+        collapsible: true,
+        changestart: function(event, ui) {
+          if ($(this).hasClass('effect-none')) {
+            ui.options.animated = false;
+          }
+          else {
+            ui.options.animated = 'slide';
+          }
+        }
       });
-        
+
       if (type == 'form') {
         // Add required fields mark to any element containing required fields
         wrapper.find('div.accordion-item').each(function(i){
@@ -108,8 +116,8 @@ Drupal.FieldGroup.Effects.processTabs = {
 
 /**
  * Implements Drupal.FieldGroup.processHook().
- * 
- * TODO clean this up meaning check if this is really 
+ *
+ * TODO clean this up meaning check if this is really
  *      necessary.
  */
 Drupal.FieldGroup.Effects.processDiv = {
@@ -124,14 +132,14 @@ Drupal.FieldGroup.Effects.processDiv = {
       var $toggler = $('span.field-group-format-toggler:first', $wrapper);
       var $link = $('<a class="field-group-format-title" href="#"></a>');
       $link.prepend($toggler.contents());
-      
+
       // Add required field markers if needed
       if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
         $link.append(' ').append($('.form-required').eq(0).clone());
       }
-      
+
       $link.appendTo($toggler);
-      
+
       // .wrapInner() does not retain bound events.
       $link.click(function () {
         var wrapper = $wrapper.get(0);
@@ -153,7 +161,7 @@ Drupal.FieldGroup.Effects.processDiv = {
         $wrapper.toggleClass('collapsed');
         return false;
       });
-      
+
     });
   }
 };
@@ -166,10 +174,10 @@ Drupal.behaviors.fieldGroup = {
     if (settings.field_group == undefined) {
       return;
     }
-    
+
     // Execute all of them.
     $.each(Drupal.FieldGroup.Effects, function (func) {
-      // We check for a wrapper function in Drupal.field_group as 
+      // We check for a wrapper function in Drupal.field_group as
       // alternative for dynamic string function calls.
       var type = func.toLowerCase().replace("process", "");
       if (settings.field_group[type] != undefined && $.isFunction(this.execute)) {
@@ -180,7 +188,7 @@ Drupal.behaviors.fieldGroup = {
     // Fixes css for fieldgroups under vertical tabs.
     $('.fieldset-wrapper .fieldset > legend').css({display: 'block'});
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
-    
+
   }
 };
 

@@ -272,7 +272,7 @@ function field_group_field_group_formatter_info() {
       'accordion' => array(
         'label' => t('Accordion group'),
         'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('effect' => 'none', 'classes' => ''),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
@@ -453,7 +453,19 @@ function field_group_field_group_format_settings($group) {
       );
     case 'tabs':
     case 'htabs':
+      unset($form['instance_settings']['description']);
+      if (isset($form['instance_settings']['required_fields'])) {
+        unset($form['instance_settings']['required_fields']);
+      }
+      break;
     case 'accordion':
+      $form['instance_settings']['effect'] = array(
+        '#title' => t('Effect'),
+        '#type' => 'select',
+        '#options' => array('none' => t('None'), 'bounceslide' => t('Bounce slide')),
+        '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
+        '#weight' => 2,
+      );
       unset($form['instance_settings']['description']);
       if (isset($form['instance_settings']['required_fields'])) {
         unset($form['instance_settings']['required_fields']);
@@ -614,13 +626,15 @@ function field_group_pre_render_div(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_accordion(&$element, $group, &$form) {
+  $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+
+  $group->classes .= " effect-$effect";
 
   $element += array(
     '#type' => 'markup',
     '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
     '#suffix' => '</div>',
   );
-
 }
 
 /**
