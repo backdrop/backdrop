@@ -394,7 +394,7 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
 
     if ($instance['widget']['type'] == 'entityreference_autocomplete') {
       $path = !empty($instance['widget']['settings']['path']) ? $instance['widget']['settings']['path'] : 'entityreference/autocomplete/single';
-      $element['target_id'] = array(
+      $element += array(
         '#type' => 'textfield',
         '#maxlength' => 1024,
         '#default_value' => implode(', ', $entity_labels),
@@ -402,10 +402,11 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
         '#size' => $instance['widget']['settings']['size'],
         '#element_validate' => array('_entityreference_autocomplete_validate'),
       );
+      return array('target_id' => $element);
     }
     else {
       $path = !empty($instance['widget']['settings']['path']) ? $instance['widget']['settings']['path'] : 'entityreference/autocomplete/tags';
-      return $element + array(
+      $element += array(
         '#type' => 'textfield',
         '#maxlength' => 1024,
         '#default_value' => implode(', ', $entity_labels),
@@ -413,9 +414,9 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
         '#size' => $instance['widget']['settings']['size'],
         '#element_validate' => array('_entityreference_autocomplete_tags_validate'),
       );
+      return $element;
     }
   }
-  return $element;
 }
 
 function _entityreference_autocomplete_validate($element, &$form_state, $form) {
