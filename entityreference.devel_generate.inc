@@ -17,7 +17,7 @@ function entityreference_devel_generate($object, $field, $instance, $bundle) {
 function _entityreference_devel_generate($object, $field, $instance, $bundle) {
   $object_field = array();
   // Get all the entity that are referencable here.
-  $referencable_entity = entityreference_get_referencable_entities($field);
+  $referencable_entity = entityreference_get_handler($field)->getReferencableEntities();
   if (is_array($referencable_entity) && !empty($referencable_entity)) {
     // Get a random key.
     $object_field['target_id'] = array_rand($referencable_entity);
