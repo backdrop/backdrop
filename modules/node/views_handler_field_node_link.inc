@@ -25,11 +25,11 @@ class views_handler_field_node_link extends views_handler_field_entity {
 
   function render($values) {
     if ($entity = $this->get_value($values)) {
-      return $this->render_link($entity);
+      return $this->render_link($entity, $values);
     }
   }
 
-  function render_link($node) {
+  function render_link($node, $values) {
     if (node_access('view', $node)) {
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = "node/$node->nid";
