@@ -33,6 +33,8 @@ class views_plugin_style_grid extends views_plugin_style {
       '#type' => 'textfield',
       '#title' => t('Number of columns'),
       '#default_value' => $this->options['columns'],
+      '#required' => TRUE,
+      '#element_validate' => array('views_element_validate_integer'),
     );
     $form['alignment'] = array(
       '#type' => 'radios',
