@@ -952,9 +952,11 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
     // Remove empty elements from the #groups.
     if (empty($element) && isset($form_groups[$name]) && !is_array($form_groups[$name])) {
       foreach ($form_groups as $group_name => $group) {
-        $group_children = array_flip($group->children);
-        if (isset($group_children[$name])) {
-          unset($form_groups[$group_name]->children[$group_children[$name]]);
+        if (isset($group->children)) {
+          $group_children = array_flip($group->children);
+          if (isset($group_children[$name])) {
+            unset($form_groups[$group_name]->children[$group_children[$name]]);
+          }
         }
       }
     }
