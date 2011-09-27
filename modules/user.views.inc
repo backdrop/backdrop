@@ -412,6 +412,29 @@ function user_views_data() {
     ),
   );
 
+  // permission table
+  $data['role_permission']['table']['group']  = t('User');
+  $data['role_permission']['table']['join'] = array(
+     // Directly links to users table.
+    'users' => array(
+      'left_table' => 'users_roles',
+      'left_field' => 'rid',
+      'field' => 'rid',
+    ),
+  );
+
+  $data['role_permission']['permission'] = array(
+    'title' => t('Permission'),
+    'help' => t('The user permissions.'),
+    'field' => array(
+      'handler' => 'views_handler_field_user_permissions',
+      'no group by' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_user_permissions',
+    ),
+  );
+
   // ----------------------------------------------------------------------
   // authmap table
 
