@@ -353,13 +353,15 @@ function user_views_data() {
       'left_field' => 'uid',
       'field' => 'uid',
     ),
+  );
+  
+  $data['users_roles']['table']['default_relationship'] = array(
     'node' => array(
-      'left_field' => 'uid',
+      'table' => 'node',
       'field' => 'uid',
     ),
     'node_revision' => array(
-      'left_table' => 'node',
-      'left_field' => 'uid',
+      'table' => 'node_revision',
       'field' => 'uid',
     ),
   );
@@ -400,15 +402,16 @@ function user_views_data() {
       'left_field' => 'rid',
       'field' => 'rid',
     ),
+  );
+  
+  $data['role']['table']['default_relationship'] = array(
     'node' => array(
-      'left_table' => 'users_roles',
-      'left_field' => 'rid',
-      'field' => 'rid',
+      'table' => 'node',
+      'field' => 'uid',
     ),
     'node_revision' => array(
-      'left_table' => 'users_roles',
-      'left_field' => 'rid',
-      'field' => 'rid',
+      'table' => 'node_revision',
+      'field' => 'uid',
     ),
   );
 

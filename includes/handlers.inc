@@ -366,6 +366,8 @@ class views_handler extends views_object {
       '#collapsed' => TRUE,
       '#weight' => 150,
     );
+    // Allow to alter the default values brought into the form.
+    drupal_alter('views_handler_options', $this->options, $view);
   }
 
   /**
