@@ -756,7 +756,15 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['style_plugin'] = $page['style']['style_plugin'];
     // Not every style plugin supports row style plugins.
     $display_options['row_plugin'] = isset($page['style']['row_plugin']) ? $page['style']['row_plugin'] : 'fields';
-    $display_options['pager']['type'] = $page['pager'] ? 'full' : (empty($page['items_per_page']) ? 'none' : 'some');
+    if (empty($page['items_per_page'])) {
+      $display_options['pager']['type'] = 'none';
+    }
+    elseif ($page['pager']) {
+      $display_options['pager']['type'] = 'full';
+    }
+    else {
+      $display_options['pager']['type'] = 'some';
+    }
     $display_options['pager']['options']['items_per_page'] = $page['items_per_page'];
     if (!empty($page['link'])) {
       $display_options['menu']['type'] = 'normal';
