@@ -4706,7 +4706,7 @@ function views_ui_admin_settings_advanced() {
     ;
     $form['extenders']['views_display_extenders'] = array(
       '#title' => t('Display extenders'),
-      '#default_value' => variable_get('views_display_extenders', array()),
+      '#default_value' => views_get_enabled_display_extenders(),
       '#options' => $options,
       '#type' => 'checkboxes',
       '#description' => t('Select extensions of the views interface.')

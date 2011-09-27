@@ -88,6 +88,8 @@ function views_views_plugins() {
         'title' => t('Empty display extender'),
         'help' => t('Default settings for this view.'),
         'handler' => 'views_plugin_display_extender',
+        // You can force the plugin to be enabled
+        'enabled' => FALSE,
         'no ui' => TRUE,
       ),
     ),
@@ -537,4 +539,17 @@ class views_plugin extends views_object {
     }
     return check_plain($this->definition['title']);
   }
+}
+
+/**
+ * Get enabled display extenders.
+ */
+function views_get_enabled_display_extenders() {
+  $enabled = array_filter(variable_get('views_display_extenders', array()));
+  $options = views_fetch_plugin_names('display_extender');
+  foreach ($options as $name => $plugin) {
+    $enabled[$name] = $name;
+  }
+
+  return $enabled;
 }

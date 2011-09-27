@@ -151,7 +151,7 @@ class views_plugin_display extends views_plugin {
   function construct() {
     // Load extenders as soon as possible
     $this->extender = array();
-    $extenders = array_filter(variable_get('views_display_extenders', array()));
+    $extenders = views_get_enabled_display_extenders();
     // If you update to the dev version the registry might not be loaded yet.
     if (!empty($extenders) && class_exists('views_plugin_display_extender')) {
       foreach ($extenders as $extender) {
