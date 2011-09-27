@@ -346,9 +346,15 @@ function template_preprocess_views_view_summary(&$vars) {
     $url_options['query'] = $view->exposed_raw_input;
   }
 
+  $active_urls = drupal_map_assoc(array(
+    url($_GET['q'], array('alias' => TRUE)), // force system path
+    url($_GET['q']), // could be an alias
+  ));
+
   // Collect all arguments foreach row, to be able to alter them for example by the validator.
   // This is not done per single argument value, because this could cause performance problems.
   $row_args = array();
+
   foreach ($vars['rows'] as $id => $row) {
     $row_args[$id] = $argument->summary_argument($row);
   }
@@ -367,7 +373,7 @@ function template_preprocess_views_view_summary(&$vars) {
     }
     $vars['rows'][$id]->url = url($view->get_url($args, $base_path), $url_options);
     $vars['rows'][$id]->count = intval($row->{$argument->count_alias});
-    if ($vars['rows'][$id]->url == base_path() . $_GET['q'] || $vars['rows'][$id]->url == base_path() . drupal_get_path_alias($_GET['q'])) {
+    if (isset($active_urls[$vars['rows'][$id]->url])) {
       $vars['row_classes'][$id] = 'active';
     }
   }
@@ -389,6 +395,10 @@ function template_preprocess_views_view_summary_unformatted(&$vars) {
   }
 
   $count = 0;
+  $active_urls = drupal_map_assoc(array(
+    url($_GET['q'], array('alias' => TRUE)), // force system path
+    url($_GET['q']), // could be an alias
+  ));
 
   // Collect all arguments foreach row, to be able to alter them for example by the validator.
   // This is not done per single argument value, because this could cause performance problems.
@@ -413,7 +423,7 @@ function template_preprocess_views_view_summary_unformatted(&$vars) {
     }
     $vars['rows'][$id]->url = url($view->get_url($args, $base_path), $url_options);
     $vars['rows'][$id]->count = intval($row->{$argument->count_alias});
-    if ($vars['rows'][$id]->url == base_path() . $_GET['q'] || $vars['rows'][$id]->url == base_path() . drupal_get_path_alias($_GET['q'])) {
+    if (isset($active_urls[$vars['rows'][$id]->url])) {
       $vars['row_classes'][$id] = 'active';
     }
   }
