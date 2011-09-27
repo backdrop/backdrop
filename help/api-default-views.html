@@ -62,9 +62,10 @@ There are a small number of gotchas in doing this that you must be aware of.
 
 <li>The 'arguments' change based upon which of the 3 types you're overriding. There's the 'display', the 'style' and the 'row' style. The above code is assuming the display, which is usually just <em>views_view</em>. Here are the possibilities:
 
-<pre>display: array('view' => NULL),
+<pre>display: array('view_array' => array(), 'view' => NULL),
 style: array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
-row style: array('view' => NULL, 'options' => NULL, 'row' => NULL),
+row: array('view' => NULL, 'options' => NULL, 'row' => NULL, 'field_alias' => NULL),
+field: array('view' => NULL, 'field' => NULL, 'row' => NULL),
 </pre>
 
 Be sure to use the right arguments line or the theme system will not properly translate.
