@@ -59,8 +59,9 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['subquery_sort'] = array('default' => array(NULL)); // TODO: Correct structure?
-    $options['subquery_order'] = array('default' => 'DESC'); // Descending more useful.
+    $options['subquery_sort'] = array('default' => NULL);
+    // Descending more useful.
+    $options['subquery_order'] = array('default' => 'DESC');
     $options['subquery_regenerate'] = array('default' => FALSE);
     $options['subquery_view'] = array('default' => FALSE);
     $options['subquery_namespace'] = array('default' => FALSE);
@@ -80,11 +81,13 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     foreach ($sorts as $sort_id => $sort) {
       $sort_options[$sort_id] = "$sort[group]: $sort[title]";
     }
+    $base_table_data = views_fetch_data($this->definition['base']);
 
     $form['subquery_sort'] = array(
       '#type' => 'select',
       '#title' => t('Representative sort criteria'),
-      '#default_value' => $this->options['subquery_sort'],
+      // Provide the base field as sane default sort option.
+      '#default_value' => !empty($this->options['subquery_sort']) ? $this->options['subquery_sort'] : $this->definition['base'] . '.' . $base_table_data['table']['base']['field'],
       '#options' => $sort_options,
       '#description' => theme('advanced_help_topic', array('module' => 'views', 'topic' => 'relationship-representative')) .
         t("The sort criteria is applied to the data brought in by the relationship to determine how a representative item is obtained for each row. For example, to show the most recent node for each user, pick 'Content: Updated date'."),
