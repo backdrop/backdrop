@@ -263,6 +263,19 @@ function hook_field_group_pre_render(& $element, $group, & $form) {
 }
 
 /**
+ * Implements hook_field_group_pre_render().
+ *
+ * Function that fungates as last resort to alter the pre_render build.
+ */
+function hook_field_group_pre_render_alter(&$element, $group, & $form) {
+
+  if ($group->format_type == 'htab') {
+    $element['#theme_wrappers'] = array('my_horizontal_tab');
+  }
+
+}
+
+/**
  * Implements hook_field_group_build_pre_render_alter().
  *
  * Function that fungates as last resort where you can alter things. It is
