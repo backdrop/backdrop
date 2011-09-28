@@ -83,8 +83,7 @@ function field_group_permission() {
 }
 
 /**
- * Menu load
- * Load a group instance based on group and bundle name.
+ * Menu Wildcard loader function to load group definitions.
  *
  * @param $group_name
  *   The name of the group, as contained in the path.
@@ -108,19 +107,37 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $args_pop = array_pop($args);
   $mode = array_pop($args_pop);
 
+  return field_group_load($group_name, $entity_type, $bundle_name, $mode);
+}
+
+/**
+ * Loads a group definition.
+ *
+ * @param $group_name
+ *   The name of the group.
+ * @param $entity_type
+ *   The name of the entity.
+ * @param $bundle_name
+ *   The name of the bundle.
+ * @param $mode
+ *   The view mode to load.
+ */
+function field_group_load($group_name, $entity_type, $bundle_name, $mode) {
+
   ctools_include('export');
   $objects = ctools_export_load_object('field_group', 'conditions', array(
     'group_name' => $group_name,
     'entity_type' => $entity_type,
     'bundle' => $bundle_name,
-    'mode' => $mode
+    'mode' => $mode,
   ));
   $object = array_shift($objects);
+
   if ($object && isset($object->data)) {
     return field_group_unpack($object);
   }
-  return $object;
 
+  return $object;
 }
 
 /**
