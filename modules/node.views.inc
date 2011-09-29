@@ -380,7 +380,7 @@ function node_views_data() {
   // uid field
   $data['node']['uid'] = array(
     'title' => t('Author uid'),
-    'help' => t('If you need more fields then the uid add the content: author relationship'),
+    'help' => t('The user authoring the content. If you need more fields then the uid add the content: author relationship'),
     'relationship' => array(
       'title' => t('Author'),
       'help' => t('Relate content to the user who created it.'),
@@ -390,7 +390,7 @@ function node_views_data() {
       'label' => t('author'),
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
+      'handler' => 'views_handler_filter_user_name',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
