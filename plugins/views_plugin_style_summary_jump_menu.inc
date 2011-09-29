@@ -99,8 +99,8 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       $args = $this->view->args;
       $args[$argument->position] = $row_args[$id];
       $base_path = NULL;
-      if (!empty($argument->options['style_options']['base_path'])) {
-        $base_path = $argument->options['style_options']['base_path'];
+      if (!empty($argument->options['summary_options']['base_path'])) {
+        $base_path = $argument->options['summary_options']['base_path'];
       }
       $path = url($this->view->get_url($args, $base_path), $url_options);
       $summary_value = strip_tags($argument->summary_name($row));
