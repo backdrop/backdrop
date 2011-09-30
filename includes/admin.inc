@@ -2464,24 +2464,7 @@ function views_ui_standard_submit($form, &$form_state) {
   // Determine whether the values the user entered are intended to apply to
   // the current display or the default display.
 
-  // Make sure the dropdown exists in the first place.
-  if (isset($form_state['values']['override']['dropdown'])) {
-    // #default_value is used to determine whether it was the default value or not.
-    // So the availible options are: $display and 'default', not 'defaults'.
-    $was_defaulted = (bool) ($form['override']['dropdown']['#default_value'] === 'defaults');
-    $is_defaulted = (bool) ($form_state['values']['override']['dropdown'] === 'default');
-
-    if ($was_defaulted !== $is_defaulted && isset($form['#section'])) {
-      // We're changing which display these values apply to.
-      // Update the #section so it knows what to mark changed.
-      $form['#section'] = str_replace('default-', $form_state['display_id'] . '-', $form['#section']);
-    }
-  }
-  else {
-    // The user didn't get the dropdown for overriding the default display.
-    $was_defaulted = FALSE;
-    $is_defaulted = FALSE;
-  }
+  list($was_defaulted, $is_defaulted) = views_ui_standard_override_values($form, $form_state);
 
   // Mark the changed section of the view as changed.
   // TODO: Document why we are doing this, and see if we still need it.
@@ -2516,6 +2499,32 @@ function views_ui_standard_submit($form, &$form_state) {
   if (function_exists($submit_handler)) {
     $submit_handler($form, $form_state);
   }
+}
+
+/**
+ * Return the was_defaulted and is_defaulted state of a form.
+ */
+function views_ui_standard_override_values($form, $form_state) {
+  // Make sure the dropdown exists in the first place.
+  if (isset($form_state['values']['override']['dropdown'])) {
+    // #default_value is used to determine whether it was the default value or not.
+    // So the availible options are: $display and 'default', not 'defaults'.
+    $was_defaulted = (bool) ($form['override']['dropdown']['#default_value'] === 'defaults');
+    $is_defaulted = (bool) ($form_state['values']['override']['dropdown'] === 'default');
+
+    if ($was_defaulted !== $is_defaulted && isset($form['#section'])) {
+      // We're changing which display these values apply to.
+      // Update the #section so it knows what to mark changed.
+      $form['#section'] = str_replace('default-', $form_state['display_id'] . '-', $form['#section']);
+    }
+  }
+  else {
+    // The user didn't get the dropdown for overriding the default display.
+    $was_defaulted = FALSE;
+    $is_defaulted = FALSE;
+  }
+
+  return array($was_defaulted, $is_defaulted);
 }
 
 /**
