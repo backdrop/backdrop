@@ -617,7 +617,7 @@ function views_block_view($delta) {
           $output = $view->display_handler->view_special_blocks($type);
           // Before returning the block output, convert it to a renderable
           // array with contextual links.
-          views_add_block_contextual_links($output, $view, $display_id);
+          views_add_block_contextual_links($output, $view, $display_id, 'special_block_' . $type);
           $view->destroy();
           return $output;
         }
@@ -660,8 +660,11 @@ function views_block_view($delta) {
  * @param $display_id
  *   The ID of the display within the view that was used to generate the block
  *   content.
+ * @param $block_type
+ *   The type of the block. If it's block it's a regular views display,
+ *   but 'special_block_-exp' exist as well.
  */
-function views_add_block_contextual_links(&$block, $view, $display_id) {
+function views_add_block_contextual_links(&$block, $view, $display_id, $block_type = 'block') {
   // Do not add contextual links to an empty block.
   if (!empty($block['content'])) {
     // Contextual links only work on blocks whose content is a renderable
@@ -671,7 +674,7 @@ function views_add_block_contextual_links(&$block, $view, $display_id) {
       $block['content'] = array('#markup' => $block['content']);
     }
     // Add the contextual links.
-    views_add_contextual_links($block['content'], 'block', $view, $display_id);
+    views_add_contextual_links($block['content'], $block_type, $view, $display_id);
   }
 }
 
@@ -751,6 +754,8 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
     // avoid displaying any contextual links at all, a display plugin can still
     // set 'contextual links locations' to, e.g., an empty array.)
     $plugin += array('contextual links locations' => array('view'));
+    // On exposed_forms blocks contextual links should always be visible.
+    $plugin['contextual links locations'][] = 'special_block_-exp';
     $has_links = !empty($plugin['contextual links']) && !empty($plugin['contextual links locations']);
     if ($has_links && in_array($location, $plugin['contextual links locations'])) {
       foreach ($plugin['contextual links'] as $module => $link) {
