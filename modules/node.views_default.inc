@@ -264,7 +264,8 @@ function node_views_default_views() {
 
   /* Display: Attachment */
   $handler = $view->new_display('attachment', 'Attachment', 'attachment');
-  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['pager']['type'] = 'none';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Content: Title */
   $handler->display->display_options['arguments']['title']['id'] = 'title';
