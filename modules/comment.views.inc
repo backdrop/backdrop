@@ -354,7 +354,6 @@ function comment_views_data() {
     'relationship' => array(
       'title' => t('Author'),
       'help' => t("The User ID of the comment's author."),
-      'help' => t('Relate comment to the user who created it.'),
       'base' => 'users',
       'base field' => 'uid',
       'handler' => 'views_handler_relationship',
