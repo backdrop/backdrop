@@ -28,11 +28,12 @@ Drupal.behaviors.horizontalTabs = {
       $(this).wrap('<div class="horizontal-tabs clearfix"></div>').before(tab_list);
 
       // Transform each fieldset into a tab.
-      $fieldsets.each(function () {
+      $fieldsets.each(function (i) {
         var horizontal_tab = new Drupal.horizontalTab({
           title: $('> legend', this).text(),
           fieldset: $(this)
         });
+        horizontal_tab.item.addClass('horizontal-tab-button-' + i);
         tab_list.append(horizontal_tab.item);
         $(this)
           .removeClass('collapsible collapsed')
