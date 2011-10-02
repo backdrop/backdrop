@@ -130,7 +130,7 @@ function taxonomy_views_data() {
   // tid field
   $data['taxonomy_term_data']['tid'] = array(
     'title' => t('Term ID'),
-    'help' => t('The taxonomy term ID.'),
+    'help' => t('The tid of a taxonomy term.'),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
