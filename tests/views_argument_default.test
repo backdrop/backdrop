@@ -25,10 +25,12 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
     $view = $this->view_argument_default_fixed();
 
     $view->set_display('default');
-    $view->execute_display();
-    $view->destroy();
+    $view->pre_execute();
+    $view->init_handlers();
 
-    $this->assertEqual($view->args[0], $this->random, 'Fixed argument should be used by default.');
+    $this->assertEqual($view->argument['null']->get_default_argument(), $this->random, 'Fixed argument should be used by default.');
+
+    $view->destroy();
 
     // Take sure that a normal argument provided is used
     $view = $this->view_argument_default_fixed();
