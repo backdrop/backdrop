@@ -204,9 +204,9 @@ input.form-radio {
   margin-left: 16px; /* LTR */
 }
 
-/* Hide 'remove' checkboxes. This might be scoped too widely. */
-[class*="form-type-checkbox"][class*="remove"] {
-  display: none;
+/* Hide 'remove' checkboxes. */
+.views-remove-checkbox {
+    display: none;
 }
 
 /* sizes the labels of checkboxes and radio button to the height of the text */
