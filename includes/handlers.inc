@@ -192,7 +192,7 @@ class views_handler extends views_object {
       $display_id,
       $this->handler_type,
       $options['table'],
-      $options['field']
+      $options['id']
     );
 
     $this->unpack_options($this->options, $options);

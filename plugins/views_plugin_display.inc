@@ -2790,7 +2790,7 @@ class views_plugin_display extends views_plugin {
       $handler = views_get_handler($info['table'], $info['field'], $handler_type);
       if ($handler) {
         $handler->init($this->view, $info);
-        $handler->unpack_translatables($translatable, array_merge($parents, array($type, $info['table'], $info['field'])));
+        $handler->unpack_translatables($translatable, array_merge($parents, array($type, $info['table'], $info['id'])));
       }
 
       // Prevent reference problems.
