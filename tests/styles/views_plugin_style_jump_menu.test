@@ -39,12 +39,13 @@ class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
     $this->assertEqual(count($form['jump']['#options']), 4 + 1);
 
     // Check that all titles are part of the form as well.
-    foreach ($form['jump']['#options'] as $key => $title) {
+    $options = array_values($form['jump']['#options']);
+    foreach ($options as $key => $title) {
       // The first one is the choose label.
       if ($key == 0) {
         continue;
       }
-      $this->assertTrue(array_search(trim($title), $this->nodeTitles), 'Every node title should appear on the jump list, as we do not filter');
+      $this->assertTrue($this->nodeTitles[$key - 1] == trim($title), t('Title @title should appear on the jump list, as we do not filter', array('@title' => $title)));
     }
   }
 
