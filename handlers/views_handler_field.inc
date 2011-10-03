@@ -1106,7 +1106,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
     // If the path is empty do not build a link around the given text and return
     // it as is.
     // http://www.example.com URLs will not have a $url['path'], so check host as well.
-    if (empty($url['path']) && empty($url['host'])) {
+    if (empty($url['path']) && empty($url['host']) && empty($url['fragment'])) {
       return $text;
     }
 
