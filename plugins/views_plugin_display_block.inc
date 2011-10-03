@@ -218,6 +218,9 @@ class views_plugin_display_block extends views_plugin_display {
    * exists in the blocks table. Dirty fix untill http://drupal.org/node/235673 gets in.
    */
   function save_block_cache($delta, $cache_setting) {
+    if (strlen($delta) >= 32) {
+      $delta = md5($delta);
+    }
     if (db_table_exists('block') && $bid = db_query("SELECT bid FROM {block} WHERE module = 'views' AND delta = :delta", array(
         ':delta' => $delta))->fetchField()) {
       db_update('block')
