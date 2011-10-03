@@ -70,7 +70,10 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $edit = array( );
     // Add a display and override the pager settings.
     $this->drupalPost('admin/structure/views/view/test_store_pager_settings/edit', $edit, t('Add Page'));
-    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/page_1/pager', array(), t('Override'));
+    $edit = array(
+      'override[dropdown]' => 'page_1',
+    );
+    $this->drupalPost('admin/structure/views/nojs/display/test_store_pager_settings/page_1/pager', $edit, t('Apply'));
 
     $edit = array(
       'pager[type]' => 'mini',
