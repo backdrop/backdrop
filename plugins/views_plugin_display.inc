@@ -2016,7 +2016,7 @@ class views_plugin_display extends views_plugin {
       break;
       case 'display_id':
         if ($form_state['values']['display_id']) {
-          if (preg_match('/[^a-zA-Z0-9_]/', $form_state['values']['display_id'])) {
+          if (preg_match('/[^a-z0-9_]/', $form_state['values']['display_id'])) {
             form_error($form['options']['display_id'], t('Display name must be letters, numbers, or underscores only.'));
           }
 
