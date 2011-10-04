@@ -3198,7 +3198,7 @@ function views_ui_edit_display_form($form, &$form_state) {
  */
 function views_ui_edit_display_form_validate($form, &$form_state) {
   $display = &$form_state['view']->display[$form_state['display_id']];
-  $display->handler->options_validate($form, $form_state);
+  $display->handler->options_validate($form['options'], $form_state);
 
   if (form_get_errors()) {
     $form_state['rerender'] = TRUE;
