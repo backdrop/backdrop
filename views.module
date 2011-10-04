@@ -1146,7 +1146,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
   }
 
   // DEBUG -- identify missing handlers
-  vpr("Missing handler: $table $field $key");
+  vpr("Missing handler: @table @field @key", array('@table' => $table, '@field' => $field, '@key' => $key));
   $broken = array(
     'title' => t('Broken handler @table.@field', array('@table' => $table, '@field' => $field)),
     'handler' => 'views_handler_' . $key . '_broken',
@@ -1566,33 +1566,45 @@ function views_export_view(&$view, $indent = '') {
 // Views debug helper functions
 
 /**
- * Provide debug output for Views. This relies on devel.module
+ * Provide debug output for Views.
+ *
+ * This relies on devel.module
+ * or on the debug() function if you use a simpletest.
+ *
+ * @param $message
+ *   The message/variable which should be debugged.
+ *   This either could be
+ *     * an array/object which is converted to pretty output
+ *     * a translation source string which is used together with the parameter placeholders.
+ *
+ * @param $placeholder
+ *   The placeholders which are used for the translation source string.
  */
-function views_debug($message) {
+function views_debug($message, $placeholders = array()) {
+  if (!is_string($message)) {
+    $output = '<pre>' . var_export($message, TRUE) . '</pre>';
+  }
   if (module_exists('devel') && variable_get('views_devel_output', FALSE) && user_access('access devel information')) {
-    if (is_string($message)) {
-      $output = $message;
-    }
-    else {
-      $output = var_export($message, TRUE);
-    }
     if (variable_get('views_devel_region', 'footer') != 'watchdog') {
-      drupal_add_region_content(variable_get('views_devel_region', 'footer'), '<pre>' . $output . '</pre>');
+      $output = empty($output) ? t($message, $placeholders) : $output;
+      drupal_add_region_content(variable_get('views_devel_region', 'footer'), $output);
     }
     else {
-      watchdog('views_logging', '<pre>' . $output . '</pre>');
+      $output = $message;
+      watchdog('views_logging', $output, $placeholders);
     }
   }
   elseif (isset($GLOBALS['drupal_test_info'])) {
-    debug($message);
+    $output = empty($output) ? t($message, $placeholders) : $output;
+    debug($output);
   }
 }
 
 /**
  * Shortcut to views_debug()
  */
-function vpr($message) {
-  views_debug($message);
+function vpr($message, $placeholders = array()) {
+  views_debug($message, $placeholders);
 }
 
 /**
