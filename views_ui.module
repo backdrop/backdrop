@@ -537,18 +537,18 @@ function views_ui_ctools_plugin_directory($module, $plugin) {
  */
 function views_ui_get_wizard($wizard_type) {
   ctools_include('plugins');
-  $w = ctools_get_plugins('views_ui', 'views_wizard', $wizard_type);
+  $wizard = ctools_get_plugins('views_ui', 'views_wizard', $wizard_type);
   // @todo - handle this via an alter hook instead.
-  if (!$w) {
+  if (!$wizard) {
     // Must be a base table using the default wizard plugin.
     $base_tables = views_fetch_base_tables();
     if (!empty($base_tables[$wizard_type])) {
-      $w = views_ui_views_wizard_defaults();
-      $w['base_table'] = $wizard_type;
-      $w['title'] = $base_tables[$wizard_type]['title'];
+      $wizard = views_ui_views_wizard_defaults();
+      $wizard['base_table'] = $wizard_type;
+      $wizard['title'] = $base_tables[$wizard_type]['title'];
     }
   }
-  return $w;
+  return $wizard;
 }
 
 /**
