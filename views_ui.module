@@ -547,6 +547,10 @@ function views_ui_get_wizard($wizard_type) {
       $wizard['base_table'] = $wizard_type;
       $wizard['title'] = $base_tables[$wizard_type]['title'];
     }
+    // The plugin is neither a base table nor an existing wizard.
+    else {
+      vpr('Views Wizard: @wizard does not exist. Be sure to implement hook_ctools_plugin_directory.', array('@wizard' => $wizard_type));
+    }
   }
   return $wizard;
 }
