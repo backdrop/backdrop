@@ -2303,7 +2303,7 @@ function views_trim_text($alter, $value) {
     $value = rtrim(preg_replace('/(?:<(?!.+>)|&(?!.+;)).*$/us', '', $value));
 
     if (!empty($alter['ellipsis'])) {
-      $value .= '...';
+      $value .= t('...');
     }
   }
   if (!empty($alter['html'])) {
