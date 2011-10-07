@@ -382,11 +382,11 @@ class views_handler_filter_in_operator extends views_handler_filter {
       }
 
       // Some filter_in_operator usage uses optgroups forms, so flatten it.
-      $this->value_options = form_options_flatten($this->value_options);
+      $flat_options = form_options_flatten($this->value_options, TRUE);
 
       // Remove every element which is not known.
       foreach ($this->value as $value) {
-        if (!isset($this->value_options[$value])) {
+        if (!isset($flat_options[$value])) {
           unset($this->value[$value]);
         }
       }
