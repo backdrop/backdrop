@@ -1136,6 +1136,15 @@ function field_group_field_extra_fields() {
     );
   }
 
+  // Field to itegrate with overlay module.
+  if (module_exists('overlay')) {
+    $extra['user']['user']['form']['overlay_control'] = array(
+      'label' => t('Administrative overlay'),
+      'description' => t('Administrative overlay'),
+      'weight' => -5,
+    );
+  }
+
   // Field to itegrate with contact module.
   if (module_exists('contact')) {
     $extra['user']['user']['form']['contact'] = array(
