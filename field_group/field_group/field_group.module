@@ -83,8 +83,7 @@ function field_group_permission() {
 }
 
 /**
- * Menu load
- * Load a group instance based on group and bundle name.
+ * Menu Wildcard loader function to load group definitions.
  *
  * @param $group_name
  *   The name of the group, as contained in the path.
@@ -108,19 +107,37 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $args_pop = array_pop($args);
   $mode = array_pop($args_pop);
 
+  return field_group_group_load($group_name, $entity_type, $bundle_name, $mode);
+}
+
+/**
+ * Loads a group definition.
+ *
+ * @param $group_name
+ *   The name of the group.
+ * @param $entity_type
+ *   The name of the entity.
+ * @param $bundle_name
+ *   The name of the bundle.
+ * @param $mode
+ *   The view mode to load.
+ */
+function field_group_group_load($group_name, $entity_type, $bundle_name, $mode) {
+
   ctools_include('export');
   $objects = ctools_export_load_object('field_group', 'conditions', array(
     'group_name' => $group_name,
     'entity_type' => $entity_type,
     'bundle' => $bundle_name,
-    'mode' => $mode
+    'mode' => $mode,
   ));
   $object = array_shift($objects);
+
   if ($object && isset($object->data)) {
     return field_group_unpack($object);
   }
-  return $object;
 
+  return $object;
 }
 
 /**
@@ -1515,7 +1532,7 @@ function field_group_pack($group) {
  * @param $ctools_crud
  *  Is this function called by the ctools crud delete.
  */
-function field_group_export_delete($group, $ctools_crud = TRUE) {
+function field_group_group_export_delete($group, $ctools_crud = TRUE) {
 
   $query = db_delete('field_group');
 
@@ -1541,7 +1558,7 @@ function field_group_export_delete($group, $ctools_crud = TRUE) {
 }
 
 /**
- * field_group_save().
+ * field_group_group_save().
  *
  * Saves a group definition.
  * This function is called by ctools export when calls are made
@@ -1550,7 +1567,7 @@ function field_group_export_delete($group, $ctools_crud = TRUE) {
  * @param $group
  *   A group definition.
  */
-function field_group_save(& $group) {
+function field_group_group_save(& $group) {
 
   // Prepare the record.
   $object = field_group_pack($group);
@@ -1719,11 +1736,13 @@ function field_group_fields_nest(&$element) {
  * @param $form The form object itself.
  */
 function field_group_pre_render(& $element, $group, & $form) {
+
   // Only run the pre_render function if the group has elements.
   // $group->group_name
   if ($element == array()) {
     return;
   }
+
   // Let modules define their wrapping element.
   // Note that the group element has no properties, only elements.
   foreach (module_implements('field_group_pre_render') as $module) {
@@ -1735,4 +1754,8 @@ function field_group_pre_render(& $element, $group, & $form) {
       $function($element, $group, $form);
     }
   }
+
+  // Allow others to alter the pre_render.
+  drupal_alter('field_group_pre_render', $element, $group, $form);
+
 }

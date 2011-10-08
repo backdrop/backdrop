@@ -17,8 +17,8 @@ function field_group_schema() {
       'key' => 'identifier',
       'identifier' => 'field_group',
       'default hook' => 'field_group_info',
-      'save callback' => 'field_group_save',
-      'delete callback' => 'field_group_export_delete',
+      'save callback' => 'field_group_group_save',
+      'delete callback' => 'field_group_group_export_delete',
       'can disable' => TRUE,
       'api' => array(
         'owner' => 'field_group',
@@ -163,6 +163,7 @@ function field_group_install() {
         'formatter' => preg_match("/fieldset/", $group->settings['form']['style']) ? 'collapsible' : 'collapsed',
         'instance_settings' => array(),
       );
+      $new->identifier = $new->group_name . '|' . $new->entity_type . '|' . $new->bundle . '|' . $new->mode;
       ctools_export_crud_save('field_group', $new);
 
       // The full node.
@@ -174,6 +175,7 @@ function field_group_install() {
         'formatter' => 'collapsible',
         'instance_settings' => array(),
       );
+      $new->identifier = $new->group_name . '|' . $new->entity_type . '|' . $new->bundle . '|' . $new->mode;
       ctools_export_crud_save('field_group', $new);
 
       // The teaser node.
@@ -185,6 +187,7 @@ function field_group_install() {
         'formatter' => 'collapsible',
         'instance_settings' => array(),
       );
+      $new->identifier = $new->group_name . '|' . $new->entity_type . '|' . $new->bundle . '|' . $new->mode;
       ctools_export_crud_save('field_group', $new);
 
     }
@@ -196,9 +199,6 @@ function field_group_install() {
     ->fields(array('weight' => 1))
     ->condition('name', 'field_group')
     ->execute();
-
-  // Create the identifiers if any groups are inserted at install.
-  _field_group_recreate_identifiers();
 
 }
 
