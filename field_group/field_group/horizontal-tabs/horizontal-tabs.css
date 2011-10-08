@@ -90,3 +90,9 @@ div.field-group-htabs-wrapper .field-group-format-wrapper {
   clear: both;
   padding: 0 0 0.6em;
 }
+/*hide*/
+.horizontal-tabs .horizontal-tab-hidden {
+  display: block;
+  position: absolute;
+  top: -100000px;
+}
