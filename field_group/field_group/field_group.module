@@ -240,14 +240,14 @@ function field_group_field_group_formatter_info() {
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1),
         'default_formatter' => 'open',
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
         'default_formatter' => 'collapsible',
       ),
       'tabs' => array(
@@ -259,7 +259,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
         'default_formatter' => 'closed',
       ),
       'htabs' => array(
@@ -272,7 +272,7 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
       ),
       'multipage-group' => array(
         'label' => ('Multipage group'),
@@ -284,7 +284,7 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('start', 'no-start'),
         'description' => t('This fieldgroup renders the content in a page.'),
         'default_formatter' => 'no-start',
-        'instance_settings' => array('classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
@@ -296,7 +296,7 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a div, part of accordion group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
       ),
     ),
     'display' => array(
@@ -304,14 +304,14 @@ function field_group_field_group_formatter_info() {
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => ''),
+        'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('description' => '', 'classes' => ''),
         'default_formatter' => 'collapsible',
       ),
       'tabs' => array(
@@ -323,7 +323,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('description' => '', 'classes' => ''),
         'default_formatter' => 'closed',
       ),
       'htabs' => array(
@@ -335,13 +335,13 @@ function field_group_field_group_formatter_info() {
         'label' => t('Horizontal tab item'),
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('description' => '', 'classes' => ''),
         'default_formatter' => 'closed',
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
         'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
-        'instance_settings' => array('classes' => ''),
+        'instance_settings' => array('description' => '', 'classes' => ''),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
@@ -383,7 +383,8 @@ function field_group_field_group_format_settings($group) {
       '#weight' => 1,
     );
   }
-  if ($mode == 'form') {
+
+  if (isset($formatter['instance_settings']['required_fields']) && $mode == 'form') {
     $form['instance_settings']['required_fields'] = array(
       '#type' => 'checkbox',
       '#title' => t('Mark group for required fields.'),
@@ -391,19 +392,24 @@ function field_group_field_group_format_settings($group) {
       '#weight' => 2,
     );
   }
-  $form['instance_settings']['classes'] = array(
-    '#title' => t('Extra CSS classes'),
-    '#type' => 'textfield',
-    '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : (isset($formatter['instance_settings']['classes']) ? $formatter['instance_settings']['classes'] : ''),
-    '#weight' => 3,
-    '#element_validate' => array('field_group_validate_css_class'),
-  );
-  $form['instance_settings']['description'] = array(
-    '#title' => t('Description'),
-    '#type' => 'textarea',
-    '#default_value' => isset($group->format_settings['instance_settings']['description']) ? $group->format_settings['instance_settings']['description'] : (isset($formatter['instance_settings']['description']) ? $formatter['instance_settings']['description'] : ''),
-    '#weight' => 0,
-  );
+
+  if (isset($formatter['instance_settings']['classes'])) {
+    $form['instance_settings']['classes'] = array(
+      '#title' => t('Extra CSS classes'),
+      '#type' => 'textfield',
+      '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : (isset($formatter['instance_settings']['classes']) ? $formatter['instance_settings']['classes'] : ''),
+      '#weight' => 3,
+      '#element_validate' => array('field_group_validate_css_class'),
+    );
+  }
+  if (isset($formatter['instance_settings']['description'])) {
+    $form['instance_settings']['description'] = array(
+      '#title' => t('Description'),
+      '#type' => 'textarea',
+      '#default_value' => isset($group->format_settings['instance_settings']['description']) ? $group->format_settings['instance_settings']['description'] : (isset($formatter['instance_settings']['description']) ? $formatter['instance_settings']['description'] : ''),
+      '#weight' => 0,
+    );
+  }
 
   // Add optional instance_settings.
   switch ($group->format_type) {
@@ -470,10 +476,6 @@ function field_group_field_group_format_settings($group) {
       );
     case 'tabs':
     case 'htabs':
-      unset($form['instance_settings']['description']);
-      if (isset($form['instance_settings']['required_fields'])) {
-        unset($form['instance_settings']['required_fields']);
-      }
       break;
     case 'accordion':
       $form['instance_settings']['effect'] = array(
@@ -483,10 +485,6 @@ function field_group_field_group_format_settings($group) {
         '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
         '#weight' => 2,
       );
-      unset($form['instance_settings']['description']);
-      if (isset($form['instance_settings']['required_fields'])) {
-        unset($form['instance_settings']['required_fields']);
-      }
       break;
     case 'multipage':
       break;
