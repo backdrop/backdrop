@@ -1132,7 +1132,7 @@ function field_group_field_extra_fields() {
     $extra['user']['user']['form']['picture'] = array(
       'label' => t('Picture'),
       'description' => t('User picture'),
-      'weight' => -5,
+      'weight' => 5,
     );
   }
 
@@ -1141,7 +1141,7 @@ function field_group_field_extra_fields() {
     $extra['user']['user']['form']['overlay_control'] = array(
       'label' => t('Administrative overlay'),
       'description' => t('Administrative overlay'),
-      'weight' => -5,
+      'weight' => 5,
     );
   }
 
@@ -1150,7 +1150,7 @@ function field_group_field_extra_fields() {
     $extra['user']['user']['form']['contact'] = array(
       'label' => t('Contact'),
       'description' => t('Contact user element'),
-      'weight' => -5,
+     'weight' => 5,
     );
   }
 
@@ -1159,7 +1159,16 @@ function field_group_field_extra_fields() {
     $extra['user']['user']['form']['locale'] = array(
       'label' => t('Language settings'),
       'description' => t('Language settings for the user account.'),
-      'weight' => -5,
+      'weight' => 5,
+    );
+  }
+
+  // Field to integrate with the wysiwyg module on user settings.
+  if (module_exists('wysiwyg')) {
+    $extra['user']['user']['form']['wysiwyg'] = array(
+      'label' => t('Wysiwyg status'),
+      'description' => t('Text formats enabled for rich-text editing'),
+      'weight' => 5,
     );
   }
 
