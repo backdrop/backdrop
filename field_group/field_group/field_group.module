@@ -107,7 +107,7 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $args_pop = array_pop($args);
   $mode = array_pop($args_pop);
 
-  return field_group_group_load($group_name, $entity_type, $bundle_name, $mode);
+  return field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode);
 }
 
 /**
@@ -122,7 +122,7 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
  * @param $mode
  *   The view mode to load.
  */
-function field_group_group_load($group_name, $entity_type, $bundle_name, $mode) {
+function field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode) {
 
   ctools_include('export');
   $objects = ctools_export_load_object('field_group', 'conditions', array(
