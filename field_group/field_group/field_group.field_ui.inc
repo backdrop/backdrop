@@ -47,9 +47,6 @@ function field_group_field_ui_form_params($form, $display_overview) {
  */
 function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display_overview = FALSE) {
 
-  // Add extra guidelines for webmaster.
-  $form['#prefix'] = (isset($form['#prefix']) ? $form['#prefix'] : '') . t('<p class="fieldgroup-help">Fields can be dragged into groups with unlimited nesting. Each fieldgroup format comes with a configuration form, specific for that format type.<br />Note that some formats come in pair. These types have a html wrapper to nest its fieldgroup children. E.g. Place accordion items into the accordion, vertical tabs in vertical tab group and horizontal tabs in the horizontal tab group. There is one exception to this rule, you can use a vertical tab without a wrapper when the additional settings tabs are available. E.g. node forms.</p>');
-
   // Only start altering the form if we need to.
   if (empty($form['#fields']) && empty($form['#extra'])) {
     return;
@@ -300,6 +297,10 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
+
+  // Create the settings for fieldgroup as vertical tabs (merged with DS).
+  field_group_field_ui_create_vertical_tabs($form, $form_state, $params);
+
 }
 
 /**
@@ -713,6 +714,102 @@ function field_group_delete_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
 }
 
+/**
+ * Create vertical tabs.
+ */
+function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params) {
+
+  $form_state['field_group_params'] = $params;
+
+  $entity_info = entity_get_info($params->entity_type);
+  $view_modes = array();
+  if ($params->mode != 'default') {
+    $view_modes['default'] = t('Default');
+  }
+  if ($params->mode != 'form') {
+    $view_modes['0'] = t('Form');
+  }
+  foreach ($entity_info['view modes'] as $view_mode => $data) {
+    if ($data['custom settings'] && $params->mode != $view_mode) {
+      $view_modes[$view_mode] = $data['label'];
+    }
+  }
+
+  // Add additional settings vertical tab.
+  if (!isset($form['additional_settings'])) {
+    $form['additional_settings'] = array(
+      '#type' => 'vertical_tabs',
+      '#theme_wrappers' => array('vertical_tabs'),
+      '#prefix' => '<div>',
+      '#suffix' => '</div>',
+      '#tree' => TRUE,
+    );
+    $form['#attached']['js'][] = 'misc/form.js';
+    $form['#attached']['js'][] = 'misc/collapse.js';
+  }
+
+  // Add extra guidelines for webmaster.
+  $form['additional_settings']['field_group'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Fieldgroups'),
+    '#description' => t('<p class="fieldgroup-help">Fields can be dragged into groups with unlimited nesting. Each fieldgroup format comes with a configuration form, specific for that format type.<br />Note that some formats come in pair. These types have a html wrapper to nest its fieldgroup children. E.g. Place accordion items into the accordion, vertical tabs in vertical tab group and horizontal tabs in the horizontal tab group. There is one exception to this rule, you can use a vertical tab without a wrapper when the additional settings tabs are available. E.g. node forms.</p>'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#parents' => array('additional_settings'),
+  );
+  $form['additional_settings']['field_group']['fieldgroup_clone'] = array(
+    '#title' => t('Select source view mode or form'),
+    '#description' => t('Clone fieldgroups from selected view mode to the current display'),
+    '#type' => 'select',
+    '#options' => $view_modes,
+    '#default_value' => 'none'
+  );
+  $form['additional_settings']['field_group']['fieldgroup_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clone'),
+    '#submit' => array('field_group_field_ui_clone_field_groups')
+  );
+
+}
+
+/**
+ * Submit handler to save existing fieldgroups from one view mode or form to another.
+ */
+function field_group_field_ui_clone_field_groups($form, &$form_state) {
+
+  $source_mode = $form_state['values']['additional_settings']['fieldgroup_clone'] == 0 ? 'form' : $form_state['values']['additional_settings']['fieldgroup_clone'];
+  $groups_to_clone = field_group_read_groups(array('bundle' => $form_state['field_group_params']->bundle, 'entity_type' => $form_state['field_group_params']->entity_type));
+  $source_groups = $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode];
+
+  $fields = array_keys($form_state['values']['fields']);
+
+  if (!empty($source_groups)) {
+
+    foreach ($source_groups as $source_group) {
+
+      if (in_array($source_group->group_name, $fields)) {
+        drupal_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
+        continue;
+      }
+
+      // Recreate the identifier and reset the id.
+      $source_group->id = NULL;
+      $source_group->mode = $form_state['field_group_params']->mode;
+      $source_group->identifier = $source_group->group_name . '|' . $source_group->entity_type . '|' . $source_group->bundle . '|' . $form_state['field_group_params']->mode;
+      $source_group->disabled = FALSE;
+      unset($source_group->export_type, $source_group->type, $source_group->table);
+
+      // Save and enable it in ctools.
+      ctools_include('export');
+      ctools_export_crud_save('field_group', $source_group);
+      ctools_export_crud_enable('field_group', $source_group->identifier);
+
+      drupal_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
+
+    }
+  }
+
+}
 /**
  * eof().
  */

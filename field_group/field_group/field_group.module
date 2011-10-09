@@ -1444,7 +1444,8 @@ function field_group_read_groups($params = array()) {
   }
 
   foreach ($records as $group) {
-    // Deleted groups
+    // Deleted groups.
+    // @TODO remove the code below and add something meaningfull for "disabled" state.
     if (isset($group->disabled) && $group->disabled) {
       continue;
     }
