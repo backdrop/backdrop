@@ -336,8 +336,8 @@ function views_ui_add_form($form, &$form_state) {
   // selected.
   $wizard_plugins = views_ui_get_wizards();
   $options = array();
-  foreach ($wizard_plugins as $key => $w) {
-    $options[$key] = $w['title'];
+  foreach ($wizard_plugins as $key => $wizard) {
+    $options[$key] = $wizard['title'];
   }
   $form['displays']['show']['wizard_key'] = array(
     '#type' => 'select',
@@ -674,10 +674,10 @@ function views_ui_nojs_submit($form, &$form_state) {
  * Validate the add view form.
  */
 function views_ui_wizard_form_validate($form, &$form_state) {
-  $w = views_ui_get_wizard($form_state['values']['show']['wizard_key']);
-  $form_state['wizard'] = $w;
-  $get_instance = $w['get_instance'];
-  $form_state['wizard_instance'] = $get_instance($w);
+  $wizard = views_ui_get_wizard($form_state['values']['show']['wizard_key']);
+  $form_state['wizard'] = $wizard;
+  $get_instance = $wizard['get_instance'];
+  $form_state['wizard_instance'] = $get_instance($wizard);
   $errors = $form_state['wizard_instance']->validate($form, $form_state);
   foreach ($errors as $name => $message) {
     form_set_error($name, $message);
