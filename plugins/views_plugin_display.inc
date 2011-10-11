@@ -53,31 +53,35 @@ class views_plugin_display extends views_plugin {
     $this->unpack_options($this->options, $options);
 
     // Translate changed settings:
-    // Check if any of the previous values now managed by
-    // pluggable pagers have been changed.
-    // If yes, perform the conversion
     $items_per_page = $this->get_option('items_per_page');
     $offset = $this->get_option('offset');
-    $type = $this->get_option('use_pager');
-    if ((!empty($items_per_page) && $items_per_page != 10) || !empty($offset) || !empty($type)) {
-      if (!$type) {
+    $use_pager = $this->get_option('use_pager');
+    $pager = $this->get_option('pager');
+    // Check if the pager options were already converted.
+    if (!empty($pager)) {
+      // Find out the right pager type.
+      // If the view "use pager" it's a normal/full pager.
+      if ($use_pager) {
+        $type = 'full';
+      }
+      // If it does not use pager, but 0 items per page it should not page
+      // else it should display just a certain amount of items.
+      else {
         $type = $items_per_page ? 'some' : 'none';
       }
 
-      if ($type == 1) {
-        $type = 'full';
-      }
-
+      // Setup the pager options.
       $pager = array(
         'type' => $type,
         'options' => array(
-          'offset' => $offset
+          'offset' => intval($offset)
         ),
       );
 
       if ($items_per_page) {
         $pager['options']['items_per_page'] = $items_per_page;
       }
+      // Setup the pager element.
       if ($id = $this->get_option('pager_element')) {
         $pager['options']['id'] = $id;
       }
@@ -89,6 +93,7 @@ class views_plugin_display extends views_plugin {
       $this->set_option('use_pager', NULL);
       $this->set_option('pager', $pager);
     }
+
 
     // Plugable headers, footer and empty texts are
     // not compatible with previous version of views
