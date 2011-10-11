@@ -12,9 +12,6 @@ function field_group_features_export_alter(&$export, $module_name) {
   //Make sure we have fresh data by loading directly.
   ctools_include('export');
   $field_groups = ctools_export_load_object('field_group');
-  foreach ($field_groups as &$field_group) {
-    field_group_unpack($field_group);
-  }
 
   //Add fieldgroups based on the fields that are present.
   if (!empty($export['features']['field'])) {
@@ -23,7 +20,7 @@ function field_group_features_export_alter(&$export, $module_name) {
 
       foreach ($field_groups as $group_id => $group) {
         if ($group->entity_type == $entity_type && $group->bundle == $bundle
-          && in_array($field_name, $group->children)) {
+          && in_array($field_name, $group->data['children'])) {
           $export['features']['field_group'][$group_id] = $group_id;
         }
       }
