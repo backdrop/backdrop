@@ -58,7 +58,7 @@ class views_plugin_display extends views_plugin {
     $use_pager = $this->get_option('use_pager');
     $pager = $this->get_option('pager');
     // Check if the pager options were already converted.
-    if (!empty($pager)) {
+    if ((!empty($items_per_page) && $items_per_page != 10) || !empty($offset) || !empty($use_pager)) {
       // Find out the right pager type.
       // If the view "use pager" it's a normal/full pager.
       if ($use_pager) {
