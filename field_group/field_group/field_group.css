@@ -13,6 +13,11 @@ div.field-group-tabs-wrapper div.field-type-file fieldset {
    padding: 2.5em 0 0;
    position: relative;
 }
+div.vertical-tabs .vertical-tabs-panes .fieldset-wrapper legend{
+  display:block;
+  min-height:20px;
+  margin-left:-20px;
+}
 
 div.field-group-tabs-wrapper div.field-type-image legend,
 div.field-group-tabs-wrapper div.field-type-file legend {
