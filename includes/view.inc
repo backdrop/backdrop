@@ -1190,7 +1190,7 @@ class view extends views_db_object {
    * @param $callbacks
    *   A menu callback array passed from views_menu_alter().
    */
-  function execute_hook_menu($display_id = NULL, $callbacks = array()) {
+  function execute_hook_menu($display_id = NULL, &$callbacks = array()) {
     // Prepare the view with the information we have.
 
     // This was probably already called, but it's good to be safe.
