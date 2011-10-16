@@ -1274,7 +1274,7 @@ function views_ui_render_display_top($view, $display_id) {
   }
 
   // Buttons for adding a new display.
-  foreach (views_fetch_plugin_names('display') as $type => $label) {
+  foreach (views_fetch_plugin_names('display', NULL, array($view->base_table)) as $type => $label) {
     $element['add_display'][$type] = array(
       '#type' => 'submit',
       '#value' => t('Add !display', array('!display' => $label)),
@@ -4691,7 +4691,7 @@ function views_ui_admin_settings_advanced() {
   $form['locale']['views_localization_plugin'] =  array(
     '#type' => 'radios',
     '#title' => t('Translation method'),
-    '#options' => views_fetch_plugin_names('localization', NULL, array(), TRUE),
+    '#options' => views_fetch_plugin_names('localization', NULL, array()),
     '#default_value' => views_get_localization_plugin(),
     '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
   );
