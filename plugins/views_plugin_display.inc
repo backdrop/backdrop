@@ -58,7 +58,16 @@ class views_plugin_display extends views_plugin {
     $use_pager = $this->get_option('use_pager');
     $pager = $this->get_option('pager');
     // Check if the pager options were already converted.
-    if ((!empty($items_per_page) && $items_per_page != 10) || !empty($offset) || !empty($use_pager)) {
+    // The pager settings of a Views 2.x view specifying 10 items with an
+    // offset of 0 and no pager is the same as of a Views 3.x view with
+    // default settings. In this case, the only way to determine which case we
+    // are dealing with is checking the API version but that's only available
+    // for exported Views as it's not stored in the database.
+    // If you would like to change this code, really take care that you thought
+    // of every possibility.
+    // @TODO: Provide a way to convert the database views as well.
+    if (((!empty($items_per_page) && $items_per_page != 10) || !empty($offset) || !empty($use_pager))
+      || (!empty($view->api_version) && $view->api_version == 2)) {
       // Find out the right pager type.
       // If the view "use pager" it's a normal/full pager.
       if ($use_pager) {
