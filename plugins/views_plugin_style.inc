@@ -260,11 +260,11 @@ class views_plugin_style extends views_plugin {
       }
 
       $output .= theme($this->theme_functions(),
-      array(
-        'view' => $this->view,
-        'options' => $this->options,
-        'rows' => $rows,
-        'title' => $title)
+        array(
+          'view' => $this->view,
+          'options' => $this->options,
+          'rows' => $rows,
+          'title' => $title)
       );
     }
     unset($this->view->row_index);
