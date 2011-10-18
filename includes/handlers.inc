@@ -1191,6 +1191,11 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
         $field = "($field + INTERVAL '$offset_seconds SECONDS')";
       }
       return $field;
+    case 'sqlite':
+      if (!empty($offset)) {
+        $field = "($field + '$offset_seconds')";
+      }
+      return $field;
   }
 }
 
@@ -1257,6 +1262,27 @@ function views_date_sql_format($format, $field, $field_type = 'int', $set_offset
         );
       $format = strtr($format, $replace);
       return "TO_CHAR($field, '$format')";
+    case 'sqlite':
+      $replace = array(
+        'Y' => '%Y', // 4 digit year number
+        'y' => '%Y', // no format for 2 digit year number
+        'M' => '%m', // no format for 3 letter month name
+        'm' => '%m', // month number with leading zeros
+        'n' => '%m', // no format for month number without leading zeros
+        'F' => '%m', // no format for full month name
+        'D' => '%d', // no format for 3 letter day name
+        'd' => '%d', // day of month number with leading zeros
+        'l' => '%d', // no format for full day name
+        'j' => '%d', // no format for day of month number without leading zeros
+        'W' => '%W', // ISO week number
+        'H' => '%H', // 24 hour hour with leading zeros
+        'h' => '%H', // no format for 12 hour hour with leading zeros
+        'i' => '%M', // minutes with leading zeros
+        's' => '%S', // seconds with leading zeros
+        'A' => '', // no format for  AM/PM
+      );
+      $format = strtr($format, $replace);
+      return "strftime('$format', $field, 'unixepoch')";
   }
 }
 
