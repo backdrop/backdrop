@@ -44,7 +44,6 @@ class views_plugin_style extends views_plugin {
 
     $this->options += array(
       'grouping' => '',
-      'group_rendered' => TRUE,
     );
 
     $this->definition += array(
@@ -153,7 +152,6 @@ class views_plugin_style extends views_plugin {
   function option_definition() {
     $options = parent::option_definition();
     $options['grouping'] = array('default' => '');
-    $options['group_rendered'] = array('default' => TRUE);
     if ($this->uses_row_class()) {
       $options['row_class'] = array('default' => '');
     }
@@ -178,12 +176,6 @@ class views_plugin_style extends views_plugin {
           '#options' => $options,
           '#default_value' => $this->options['grouping'],
           '#description' => t('You may optionally specify a field by which to group the records. Leave blank to not group.'),
-        );
-        $form['group_rendered'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Use rendered output to group rows'),
-          '#default_value' => $this->options['group_rendered'],
-          '#description' => t('If enabled the rendered output of the grouping field is used to group the rows.'),
         );
       }
     }
@@ -237,26 +229,21 @@ class views_plugin_style extends views_plugin {
     }
 
     // Group the rows according to the grouping field, if specified.
-    $sets = $this->render_grouping(
-      $this->view->result,
-      $this->options['grouping'],
-      $this->options['group_rendered']
-    );
+    $sets = $this->render_grouping($this->view->result, $this->options['grouping']);
 
     // Render each group separately and concatenate.  Plugins may override this
     // method if they wish some other way of handling grouping.
     $output = '';
-    foreach ($sets as $group) {
-      $title = $group['group'];
+    foreach ($sets as $title => $records) {
       if ($this->uses_row_plugin()) {
         $rows = array();
-        foreach ($group['rows'] as $row_index => $row) {
+        foreach ($records as $row_index => $row) {
           $this->view->row_index = $row_index;
           $rows[$row_index] = $this->row_plugin->render($row);
         }
       }
       else {
-        $rows = $group['rows'];
+        $rows = $records;
       }
 
       $output .= theme($this->theme_functions(),
@@ -279,12 +266,10 @@ class views_plugin_style extends views_plugin {
    * @param $grouping_field
    *   The field id on which to group.  If empty, the result set will be given
    *   a single group with an empty string as a label.
-   * @param $group_rendered
-   *   Whether to use the renderd or the raw field value for grouping.
    * @return
    *   The grouped record set.
    */
-  function render_grouping($records, $grouping_field = '', $group_rendered = TRUE) {
+  function render_grouping($records, $grouping_field = '') {
     // Make sure fields are rendered
     $this->render_fields($this->view->result);
     $sets = array();
@@ -295,29 +280,17 @@ class views_plugin_style extends views_plugin {
         // we can control any special formatting of the grouping field through
         // the admin or theme layer or anywhere else we'd like.
         if (isset($this->view->field[$grouping_field])) {
-          $group_content = $this->get_field($index, $grouping_field);
+          $grouping = $this->get_field($index, $grouping_field);
           if ($this->view->field[$grouping_field]->options['label']) {
-            $group_content = $this->view->field[$grouping_field]->options['label'] . ': ' . $group_content;
-          }
-          if ($group_rendered) {
-            $grouping = $group_content;
-          }
-          else {
-            $grouping = $this->get_field_value($index, $grouping_field);
-          }
-          if (empty($sets[$grouping]['group'])) {
-            $sets[$grouping]['group'] = $group_content;
+            $grouping = $this->view->field[$grouping_field]->options['label'] . ': ' . $grouping;
           }
         }
-        $sets[$grouping]['rows'][$index] = $row;
+        $sets[$grouping][$index] = $row;
       }
     }
     else {
       // Create a single group with an empty grouping field.
-      $sets[''] = array(
-        'group' => '',
-        'rows' => $records,
-      );
+      $sets[''] = $records;
     }
     return $sets;
   }
@@ -372,21 +345,6 @@ class views_plugin_style extends views_plugin {
     if (isset($this->rendered_fields[$index][$field])) {
       return $this->rendered_fields[$index][$field];
     }
-  }
-
-  /**
-  * Get the raw field value.
-  *
-  * @param $index
-  *   The index count of the row.
-  * @param $field
-  *    The id of the field.
-  */
-  function get_field_value($index, $field) {
-    $this->view->row_index = $index;
-    $value = $this->view->field[$field]->get_value($this->view->result[$index]);
-    unset($this->view->row_index);
-    return $value;
   }
 
   function validate() {
