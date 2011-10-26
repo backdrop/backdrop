@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Tests some general style plugin related functionality.
+ */
+class ViewsPluginStyleTestCase extends ViewsSqlTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Styles',
+      'description' => 'Test general style functionality.',
+      'group' => 'Views Plugins',
+    );
+  }
+
+  /**
+   * Tests the groupby features of styles.
+   */
+  function testGroupBy() {
+    $view = $this->getBasicView();
+    // Setup grouping by the job.
+    $view->init_display();
+    $view->init_style();
+    $view->style_plugin->options['grouping'] = 'job';
+
+    // Reduce the amount of items to make the test a bit easier.
+    // Set up the pager.
+    $view->display['default']->handler->override_option('pager', array(
+      'type' => 'some',
+      'options' => array('items_per_page' => 3),
+    ));
+
+    // Add the job field .
+    $view->display['default']->handler->override_option('fields', array(
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+      ),
+      'job' => array(
+        'id' => 'job',
+        'table' => 'views_test',
+        'field' => 'job',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Now run the query and groupby the result.
+    $this->executeView($view);
+
+    $sets = $view->style_plugin->render_grouping($view->result, $view->style_plugin->options['grouping']);
+
+    $expected = array();
+    // Use Job: as label, so be sure that the label is used for groupby as well.
+    $expected['Job: Singer'] = array();
+    $expected['Job: Singer'][0] = new StdClass();
+    $expected['Job: Singer'][0]->views_test_name = 'John';
+    $expected['Job: Singer'][0]->views_test_job = 'Singer';
+    $expected['Job: Singer'][0]->views_test_id = '1';
+    $expected['Job: Singer'][1] = new StdClass();
+    $expected['Job: Singer'][1]->views_test_name = 'George';
+    $expected['Job: Singer'][1]->views_test_job = 'Singer';
+    $expected['Job: Singer'][1]->views_test_id = '2';
+    $expected['Job: Drummer'] = array();
+    $expected['Job: Drummer'][2] = new StdClass();
+    $expected['Job: Drummer'][2]->views_test_name = 'Ringo';
+    $expected['Job: Drummer'][2]->views_test_job = 'Drummer';
+    $expected['Job: Drummer'][2]->views_test_id = '3';
+
+    $this->assertEqual($sets, $expected, t('The style plugin should prober groupby the results'));
+  }
+}
