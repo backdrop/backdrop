@@ -124,7 +124,7 @@ function template_preprocess_views_view(&$vars) {
       'views' => array(
         'ajax_path' => url('views/ajax'),
         'ajaxViews' => array(
-          array(
+          'views_dom_id:' . $vars['dom_id'] => array(
             'view_name' => $view->name,
             'view_display_id' => $view->current_display,
             'view_args' => check_plain(implode('/', $view->args)),
