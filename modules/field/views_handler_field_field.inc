@@ -778,7 +778,19 @@ class views_handler_field_field extends views_handler_field {
 
     foreach (element_children($render_array) as $count) {
       $items[$count]['rendered'] = $render_array[$count];
-      $items[$count]['raw'] = $render_array['#items'][$count];
+      // field_view_field() adds an #access property to the render array that
+      // determines whether or not the current user is allowed to view the
+      // field in the context of the current entity. We need to respect this
+      // parameter when we pull out the children of the field array for
+      // rendering.
+      if (isset($render_array['#access'])) {
+        $items[$count]['rendered']['#access'] = $render_array['#access'];
+      }
+      // Only add the raw field items (for use in tokens) if the curent user
+      // has access to view the field content.
+      if (!isset($items[$count]['rendered']['#access']) || $items[$count]['rendered']['#access']) {
+        $items[$count]['raw'] = $render_array['#items'][$count];
+      }
     }
     return $items;
   }
