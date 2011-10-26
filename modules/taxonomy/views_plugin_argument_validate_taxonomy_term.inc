@@ -102,6 +102,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         if (!$term) {
           return FALSE;
         }
+        $this->argument->validated_title = check_plain($term->name);
         return empty($vocabularies) || !empty($vocabularies[$term->machine_name]);
 
       case 'tids':
