@@ -410,7 +410,7 @@ function list_field_views_data($field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
     foreach ($table_data as $field => $field_data) {
-      if (isset($field_data['filter'])) {
+      if (isset($field_data['filter']) && $field != 'delta') {
         $data[$table_name][$field]['filter']['handler'] = 'views_handler_filter_field_list';
       }
     }
