@@ -102,6 +102,11 @@ class view extends views_db_object {
   var $override_path = NULL;
 
   /**
+   * Allow to override the used database which is used for this query.
+   */
+  var $base_database = NULL;
+
+  /**
    * Constructor
    */
   function __construct() {
