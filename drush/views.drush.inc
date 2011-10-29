@@ -185,7 +185,7 @@ function views_revert_allviews($views) {
  * Checks on wether or not the view is overridden is handled in views_revert_views_revert()
  * We perform a check here anyway in case someone somehow calls this function on their own...
  */
-function views_revert_view($view) {
+function views_revert_view(view $view) {
   // check anyway just in case
   if ($view->type == t('Overridden')) {
     // Revert the view.

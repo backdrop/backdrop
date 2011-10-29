@@ -31,7 +31,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $this->assertViewDestroy($view);
   }
 
-  function assertViewDestroy($view) {
+  function assertViewDestroy(view $view) {
     $this->assertFalse(isset($view->display['default']->handler), 'Make sure all displays are destroyed.');
     $this->assertFalse(isset($view->display['attachment_1']->handler), 'Make sure all displays are destroyed.');
 

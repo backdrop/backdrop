@@ -19,7 +19,7 @@
  *   An array of analyze results organized into arrays keyed by 'ok',
  *   'warning' and 'error'.
  */
-function views_analyze_view(&$view) {
+function views_analyze_view(view $view) {
   $view->init_display();
   $messages = module_invoke_all('views_analyze', $view);
 
@@ -32,7 +32,7 @@ function views_analyze_view(&$view) {
  * This is based upon the format of drupal_set_message which uses separate
  * boxes for "ok", "warning" and "error".
  */
-function views_analyze_format_result($view, $messages) {
+function views_analyze_format_result(view $view, $messages) {
   if (empty($messages)) {
     $messages = array(views_ui_analysis(t('View analysis can find nothing to report.'), 'ok'));
   }
@@ -96,7 +96,7 @@ function views_ui_analysis($message, $type = 'error') {
  * There are other analysis tools in core specific sections, such as
  * node.views.inc as well.
  */
-function views_ui_views_analyze($view) {
+function views_ui_views_analyze(view $view) {
   $ret = array();
   // Check for something other than the default display:
   if (count($view->display) < 2) {

@@ -18,8 +18,8 @@ class views_plugin_pager extends views_plugin {
    *   The display handler.
    */
   function init(&$view, &$display, $options = array()) {
-    $this->view = &$view;
-    $this->display = &$display;
+    $this->view = $view;
+    $this->display = $display;
 
     $this->unpack_options($this->options, $options);
   }

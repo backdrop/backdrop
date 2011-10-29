@@ -17,7 +17,7 @@
  * @param $display
  *   The display being rendered, if applicable.
  */
-function _views_theme_functions($hook, $view, $display = NULL) {
+function _views_theme_functions($hook, view $view, $display = NULL) {
   $themes = array();
 
   if ($display) {
@@ -190,7 +190,7 @@ function template_preprocess_views_view_fields(&$vars) {
     $empty = $field_output !== 0 && empty($field_output);
     if (empty($field->options['exclude']) && (!$empty || (empty($field->options['hide_empty']) && empty($vars['options']['hide_empty'])))) {
       $object = new stdClass();
-      $object->handler = &$view->field[$id];
+      $object->handler = $view->field[$id];
       $object->inline = !empty($vars['options']['inline'][$id]);
 
       $object->element_type = $object->handler->element_type(TRUE, !$vars['options']['default_field_elements'], $object->inline);
@@ -447,7 +447,7 @@ function template_preprocess_views_view_table(&$vars) {
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
 
-  $fields   = &$view->field;
+  $fields   = $view->field;
   $columns  = $handler->sanitize_columns($options['columns'], $fields);
 
   $active   = !empty($handler->active) ? $handler->active : '';
@@ -788,11 +788,11 @@ function template_preprocess_views_view_rss(&$vars) {
   global $base_url;
   global $language;
 
-  $view     = &$vars['view'];
+  $view     = $vars['view'];
   $options  = &$vars['options'];
   $items    = &$vars['rows'];
 
-  $style    = &$view->style_plugin;
+  $style    = $view->style_plugin;
 
   // The RSS 2.0 "spec" doesn't indicate HTML can be used in the description.
   // We strip all HTML tags, but need to prevent double encoding from properly
@@ -848,9 +848,9 @@ function template_preprocess_views_view_rss(&$vars) {
  * Default theme function for all RSS rows.
  */
 function template_preprocess_views_view_row_rss(&$vars) {
-  $view     = &$vars['view'];
+  $view     = $vars['view'];
   $options  = &$vars['options'];
-  $item     = &$vars['row'];
+  $item     = $vars['row'];
 
   $vars['title'] = check_plain($item->title);
   $vars['link'] = check_url($item->link);

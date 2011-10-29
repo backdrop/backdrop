@@ -22,7 +22,7 @@ class views_plugin_localization extends views_plugin {
    *   The view object.
    */
   function init(&$view) {
-    $this->view = &$view;
+    $this->view = $view;
   }
 
   /**

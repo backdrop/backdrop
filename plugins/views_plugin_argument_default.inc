@@ -30,7 +30,7 @@ class views_plugin_argument_default extends views_plugin {
    * it is linked to.
    */
   function init(&$view, &$argument, $options) {
-    $this->view = &$view;
+    $this->view = $view;
     $this->argument = &$argument;
 
     $this->convert_options($options);

@@ -693,7 +693,7 @@ function node_views_query_substitutions() {
 /**
  * Implements hook_views_analyze().
  */
-function node_views_analyze($view) {
+function node_views_analyze(view $view) {
   $ret = array();
   // Check for something other than the default display:
   if ($view->base_table == 'node') {

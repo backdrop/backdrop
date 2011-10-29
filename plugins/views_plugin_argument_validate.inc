@@ -25,8 +25,8 @@ class views_plugin_argument_validate extends views_plugin {
    * it is linked to.
    */
   function init(&$view, &$argument, $options) {
-    $this->view = &$view;
-    $this->argument = &$argument;
+    $this->view = $view;
+    $this->argument = $argument;
 
     $this->convert_options($options);
     $this->unpack_options($this->options, $options);
@@ -99,4 +99,3 @@ class views_plugin_argument_validate extends views_plugin {
 /**
  * @}
  */
-

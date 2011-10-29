@@ -588,7 +588,7 @@ function hook_views_form_submit($form, &$form_state) {
  * Adding output to the view can be accomplished by placing text on
  * $view->attachment_before and $view->attachment_after.
  */
-function hook_views_pre_view(&$view, &$display_id, &$args) {
+function hook_views_pre_view(view $view, &$display_id, &$args) {
   // example code here
 }
 
@@ -599,7 +599,7 @@ function hook_views_pre_view(&$view, &$display_id, &$args) {
  * Adding output to the view can be accomplished by placing text on
  * $view->attachment_before and $view->attachment_after.
  */
-function hook_views_pre_build(&$view) {
+function hook_views_pre_build(view $view) {
   // example code here
 }
 
@@ -610,7 +610,7 @@ function hook_views_pre_build(&$view) {
  * Adding output to the view can be accomplished by placing text on
  * $view->attachment_before and $view->attachment_after.
  */
-function hook_views_post_build(&$view) {
+function hook_views_post_build(view $view) {
   // example code here
 }
 
@@ -621,7 +621,7 @@ function hook_views_post_build(&$view) {
  * Adding output to the view can be accomplished by placing text on
  * $view->attachment_before and $view->attachment_after.
  */
-function hook_views_pre_execute(&$view) {
+function hook_views_pre_execute(view $view) {
   // example code here
 }
 
@@ -634,7 +634,7 @@ function hook_views_pre_execute(&$view) {
  * $view->attachment_before and $view->attachment_after. Altering the
  * content can be achieved by editing the items of $view->result.
  */
-function hook_views_post_execute(&$view) {
+function hook_views_post_execute(view $view) {
   // example code here
 }
 
@@ -649,7 +649,7 @@ function hook_views_post_execute(&$view) {
  *
  * This hook can be utilized by themes.
  */
-function hook_views_pre_render(&$view) {
+function hook_views_pre_render(view $view) {
   // example code here
 }
 
@@ -675,7 +675,7 @@ function hook_views_pre_render(&$view) {
  *
  * This hook can be utilized by themes.
  */
-function hook_views_post_render(&$view, &$output, &$cache) {
+function hook_views_post_render(view $view, &$output, &$cache) {
 
 }
 
@@ -688,7 +688,7 @@ function hook_views_post_render(&$view, &$output, &$cache) {
  * file, if 'path' is unspecified.
  *
  */
-function hook_views_query_alter(&$view, &$query) {
+function hook_views_query_alter(view $view, view_plugin_query $query) {
   // example code here
 }
 
@@ -710,7 +710,7 @@ function hook_views_query_alter(&$view, &$query) {
  *
  * @see theme_table
  */
-function hook_views_preview_info_alter(&$rows, $view) {
+function hook_views_preview_info_alter(&$rows, view $view) {
   // example code here
 }
 
@@ -725,7 +725,7 @@ function hook_views_preview_info_alter(&$rows, $view) {
  * @param $display_id
  *   The current display id which is edited. For example that's 'default' or 'page_1'.
  */
-function hook_views_ui_display_top_links_alter(&$links, $view, $display_id) {
+function hook_views_ui_display_top_links_alter(&$links, view $view, $display_id) {
   // example code here
 }
 

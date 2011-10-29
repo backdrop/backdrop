@@ -7,7 +7,7 @@ This code will help you do that.
 
 <pre>
 &lt;?php
-function my_module_views_pre_execute(&$view) {
+function my_module_views_pre_execute(view $view) {
   if ($view->name == 'my_view' && $view->current_display == 'my_display') {
     $view->get_total_rows = TRUE;
   }

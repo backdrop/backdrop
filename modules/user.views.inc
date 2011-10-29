@@ -537,7 +537,7 @@ function user_views_plugins() {
 /**
  * Allow replacement of current userid so we can cache these queries
  */
-function user_views_query_substitutions($view) {
+function user_views_query_substitutions(view $view) {
   global $user;
   return array('***CURRENT_USER***' => intval($user->uid));
 }

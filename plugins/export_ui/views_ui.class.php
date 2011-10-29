@@ -164,7 +164,7 @@ class views_ui extends ctools_export_ui {
     );
   }
 
-  function list_filter($form_state, $view) {
+  function list_filter($form_state, view $view) {
     // Don't filter by tags if all is set up.
     if ($form_state['values']['tag'] != 'all') {
       // If none is selected check whether the view has a tag.
@@ -194,7 +194,7 @@ class views_ui extends ctools_export_ui {
   }
 
 
-  function list_build_row($view, &$form_state, $operations) {
+  function list_build_row(view $view, &$form_state, $operations) {
     if (!empty($view->human_name)) {
       $title = $view->human_name;
     }
@@ -313,7 +313,7 @@ class views_ui extends ctools_export_ui {
 
     $form_state = array(
       'plugin' => $this->plugin,
-      'object' => &$this,
+      'object' => $this,
       'ajax' => $js,
       'item' => $item,
       'op' => 'add',
@@ -440,5 +440,3 @@ function views_ui_clone_form($form, &$form_state) {
 
   return $form;
 }
-
-

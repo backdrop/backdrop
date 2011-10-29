@@ -25,8 +25,8 @@ class views_plugin_cache extends views_plugin {
    *   The display handler.
    */
   function init(&$view, &$display) {
-    $this->view = &$view;
-    $this->display = &$display;
+    $this->view = $view;
+    $this->display = $display;
 
     if (is_object($display->handler)) {
       $options = $display->handler->get_option('cache');
@@ -52,7 +52,7 @@ class views_plugin_cache extends views_plugin {
    *   The cache type, either 'query', 'result' or 'output'.
    */
    function cache_expire($type) { }
-   
+
    /**
     * Determine expiration time in the cache table of the cache type
     * or CACHE_PERMANENT if item shouldn't be removed automatically from cache.
@@ -172,7 +172,7 @@ class views_plugin_cache extends views_plugin {
    */
   function cache_start() {
     $this->storage['head'] = drupal_add_html_head();
-    $this->storage['css'] = drupal_add_css();  
+    $this->storage['css'] = drupal_add_css();
     $this->storage['js'] = drupal_add_js();
   }
 
@@ -251,9 +251,9 @@ class views_plugin_cache extends views_plugin {
     global $user;
 
     if (!isset($this->_results_key)) {
-      
+
       $build_info = $this->view->build_info;
-      
+
       foreach (array('query', 'count_query') as $index) {
         $query = clone $build_info[$index];
         $query->preExecute();

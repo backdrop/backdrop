@@ -91,7 +91,7 @@ function views_get_table_join($table, $base_table) {
     }
 
     if (isset($h['arguments'])) {
-      call_user_func_array(array(&$handler, 'construct'), $h['arguments']);
+      call_user_func_array(array($handler, 'construct'), $h['arguments']);
     }
     else {
       $handler->construct();
@@ -217,7 +217,7 @@ class views_handler extends views_object {
       }
     }
 
-    $this->query = &$view->query;
+    $this->query = $view->query;
   }
 
   function option_definition() {
@@ -386,7 +386,7 @@ class views_handler extends views_object {
    * Provide a form for aggregation settings.
    */
   function groupby_form(&$form, &$form_state) {
-    $view = &$form_state['view'];
+    $view = $form_state['view'];
     $display_id = $form_state['display_id'];
     $types = views_object_types();
     $type = $form_state['type'];
@@ -700,7 +700,7 @@ class views_handler extends views_object {
  */
 class views_many_to_one_helper {
   function views_many_to_one_helper(&$handler) {
-    $this->handler = &$handler;
+    $this->handler = $handler;
   }
 
   static function option_definition(&$options) {
@@ -799,8 +799,8 @@ class views_many_to_one_helper {
 
     // shortcuts
     $options = $this->handler->options;
-    $view = &$this->handler->view;
-    $query = &$this->handler->query;
+    $view = $this->handler->view;
+    $query = $this->handler->query;
 
     if (!empty($options['require_value'])) {
       $join->type = 'INNER';
@@ -1012,7 +1012,7 @@ class views_many_to_one_helper {
  *   - operator: Either 'and' or 'or'
  *   - value: An array of numeric values.
  */
-function views_break_phrase_string($str, &$handler = NULL) {
+function views_break_phrase_string($str, $handler = NULL) {
   if (!$handler) {
     $handler = new stdClass();
   }
@@ -1065,7 +1065,7 @@ function views_break_phrase_string($str, &$handler = NULL) {
  * @return $handler
  *   The new handler object.
  */
-function views_break_phrase($str, &$handler = NULL) {
+function views_break_phrase($str, $handler = NULL) {
   if (!$handler) {
     $handler = new stdClass();
   }
@@ -1540,7 +1540,7 @@ class views_join {
 /**
  * Join handler for relationships that join with a subquery as the left field.
  * eg:
- *  LEFT JOIN node node_term_data ON ([YOUR SUBQUERY HERE]) = node_term_data.nid 
+ *  LEFT JOIN node node_term_data ON ([YOUR SUBQUERY HERE]) = node_term_data.nid
  *
  * join definition
  *   same as views_join class above, except:
@@ -1551,7 +1551,7 @@ class views_join_subquery extends views_join {
     parent::construct($table, $left_table, $left_field, $field, $extra, $type);
     $this->left_query = $this->definition['left_query'];
   }
-  
+
   /**
    * Build the SQL for the join this object represents.
    *

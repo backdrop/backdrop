@@ -26,8 +26,8 @@ class views_plugin_row extends views_plugin {
    * Initialize the row plugin.
    */
   function init(&$view, &$display, $options = NULL) {
-    $this->view = &$view;
-    $this->display = &$display;
+    $this->view = $view;
+    $this->display = $display;
 
     // Overlay incoming options on top of defaults
     $this->unpack_options($this->options, isset($options) ? $options : $display->handler->get_option('row_options'));
@@ -144,4 +144,3 @@ class views_plugin_row extends views_plugin {
 /**
  * @}
  */
-

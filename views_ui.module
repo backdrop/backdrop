@@ -247,7 +247,7 @@ function views_ui_custom_theme() {
 /**
  * Page title callback for the Edit View page.
  */
-function views_ui_edit_page_title($view) {
+function views_ui_edit_page_title(view $view) {
   module_load_include('inc', 'views_ui', 'includes/admin');
   $bases = views_fetch_base_tables();
   $name = $view->get_human_name();
@@ -305,7 +305,7 @@ function views_ui_cache_load($name) {
  * Specialized cache function to add a flag to our view, include an appropriate
  * include, and cache more easily.
  */
-function views_ui_cache_set(&$view) {
+function views_ui_cache_set(view $view) {
   if (!empty($view->locked)) {
     drupal_set_message(t('Changes cannot be made to a locked view.'), 'error');
     return;
@@ -454,7 +454,7 @@ function theme_views_ui_view_preview_section($vars) {
  * @param $title
  *   Add a bolded title of this section.
  */
-function views_ui_view_preview_section_handler_links($view, $type, $title = FALSE) {
+function views_ui_view_preview_section_handler_links(view $view, $type, $title = FALSE) {
   $display = $view->display_handler->display;
   $handlers = $view->display_handler->get_handlers($type);
   $links = array();
@@ -486,7 +486,7 @@ function views_ui_view_preview_section_handler_links($view, $type, $title = FALS
 /**
  * Returns a link to editing a certain display setting.
  */
-function views_ui_view_preview_section_display_category_links($view, $type, $title) {
+function views_ui_view_preview_section_display_category_links(view $view, $type, $title) {
   $display = $view->display_handler->display;
   $links = array(
     $type . '-edit' => array(
@@ -502,7 +502,7 @@ function views_ui_view_preview_section_display_category_links($view, $type, $tit
 /**
  * Returns all contextual links for the main content part of the view.
  */
-function views_ui_view_preview_section_rows_links($view) {
+function views_ui_view_preview_section_rows_links(view $view) {
   $display = $view->display_handler->display;
   $links = array();
   $links = array_merge($links, views_ui_view_preview_section_handler_links($view, 'filter', TRUE));
@@ -759,7 +759,7 @@ function views_ui_ajax_get_form($form_id) {
  * @return
  *   An array of links to this view's display paths.
  */
-function _views_ui_get_paths($view) {
+function _views_ui_get_paths(view $view) {
   $all_paths = array();
   if (empty($view->display)) {
     $all_paths[] = t('Edit this view to add a display.');
@@ -794,7 +794,7 @@ function _views_ui_get_paths($view) {
  * @return
  *   An array of display types that this view includes.
  */
-function _views_ui_get_displays_list($view) {
+function _views_ui_get_displays_list(view $view) {
   $displays = array();
   foreach ($view->display as $display) {
     if (!empty($display->handler->definition['admin'])) {
