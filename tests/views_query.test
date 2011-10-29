@@ -6,7 +6,7 @@
  */
 
 /**
- * Abstract class for views testing
+ * Abstract class for views testing.
  */
 abstract class ViewsTestCase extends DrupalWebTestCase {
   /**
@@ -29,7 +29,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Helper function: verify a result set returned by view.
+   * Helper function: verify a result set returned by view..
    *
    * Inverse of ViewsTestCase::assertIdenticalResultset().
    *

@@ -1,10 +1,11 @@
 <?php
+
 /**
  * @file
- * Tests the views analyse system.
+ * Tests the views analyze system.
  */
 
-class ViewsAnalyzeTest extends viewsSqlTest {
+class ViewsAnalyzeTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
       'name' => 'Views Analyze',
@@ -26,9 +27,9 @@ class ViewsAnalyzeTest extends viewsSqlTest {
   }
 
   /**
-   * Tests that analyse works in general.
+   * Tests that analyze works in general.
    */
-  function testAnalyseBasic() {
+  function testAnalyzeBasic() {
     $this->drupalLogin($this->admin);
     // Enable the frontpage view and click the analyse button.
     $view = views_get_view('frontpage');

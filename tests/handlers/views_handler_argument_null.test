@@ -32,7 +32,7 @@ class ViewsHandlerArgumentNullTest extends ViewsSqlTest {
 
     $this->executeView($view);
 
-    // Take sure that the argument is not validated yet.
+    // Make sure that the argument is not validated yet.
     unset($view->argument['null']->argument_validated);
     $this->assertTrue($view->argument['null']->validate_arg(26));
     // test must_not_be option.

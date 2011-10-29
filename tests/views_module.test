@@ -1,6 +1,8 @@
 <?php
+
 module_load_include('test', 'views', 'tests/views_query');
-class viewsModuleTest extends ViewsSqlTest {
+
+class ViewsModuleTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
       'name' => 'Tests views.module',
@@ -76,7 +78,7 @@ class viewsModuleTest extends ViewsSqlTest {
       $this->assertEqual($result_text, $expect[$key]);
     }
   }
-  
+
   /**
    * Tests the dynamic includes of templates via module feature.
    */
@@ -96,7 +98,7 @@ class viewsModuleTest extends ViewsSqlTest {
     $types = array('field', 'area', 'filter');
     foreach ($types as $type) {
       $handler = views_get_handler($this->randomName(), $this->randomName(), $type);
-      $this->assertEqual('views_handler_' . $type . '_broken', get_class($handler), t('Take sure that a broken handler of type: @type are created', array('@type' => $type)));
+      $this->assertEqual('views_handler_' . $type . '_broken', get_class($handler), t('Make sure that a broken handler of type: @type are created', array('@type' => $type)));
     }
 
     $views_data = $this->viewsData();

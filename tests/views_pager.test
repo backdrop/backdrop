@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- *   Tests the pluggable pager system
+ * Tests the pluggable pager system.
  */
 
 class ViewsPagerTest extends DrupalWebTestCase {
@@ -20,7 +21,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
   /**
    * Pagers was sometimes not stored.
    *
-   * See: http://drupal.org/node/652712.
+   * @see http://drupal.org/node/652712
    */
   public function testStorePagerSettings() {
     $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration'));
@@ -116,7 +117,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
    * Test the none-pager-query.
    */
   public function testNoLimit() {
-    // Create 11 nodes and take sure that everyone is returned.
+    // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     for ($i = 0; $i < 11; $i++) {
       $this->drupalCreateNode();
@@ -125,7 +126,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view->set_display('default');
     $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 11, 'Take sure that every item is returned in the result');
+    $this->assertEqual(count($view->result), 11, 'Make sure that every item is returned in the result');
 
     $view->destroy();
 
@@ -143,7 +144,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view->pre_execute();
     $view->execute();
 
-    $this->assertEqual(count($view->result), 8, 'Take sure that every item beside the first three is returned in the result');
+    $this->assertEqual(count($view->result), 8, 'Make sure that every item beside the first three is returned in the result');
 
     // Check some public functions.
     $this->assertFalse($view->query->pager->use_pager());
@@ -177,7 +178,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
    * Test the some pager plugin.
    */
   public function testLimit() {
-    // Create 11 nodes and take sure that everyone is returned.
+    // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     for ($i = 0; $i < 11; $i++) {
       $this->drupalCreateNode();
@@ -185,7 +186,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view = $this->viewsPagerLimit();
     $view->set_display('default');
     $view->execute();
-    $this->assertEqual(count($view->result), 5, 'Take sure that only a certain count of items is returned');
+    $this->assertEqual(count($view->result), 5, 'Make sure that only a certain count of items is returned');
     $view->destroy();
 
     // Setup and test a offset.
@@ -202,7 +203,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view->display_handler->set_option('pager', $pager);
     $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 3, 'Take sure that only a certain count of items is returned');
+    $this->assertEqual(count($view->result), 3, 'Make sure that only a certain count of items is returned');
 
     // Check some public functions.
     $this->assertFalse($view->query->pager->use_pager());
@@ -237,7 +238,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
    * Test the normal pager.
    */
   public function testNormalPager() {
-    // Create 11 nodes and take sure that everyone is returned.
+    // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     for ($i = 0; $i < 11; $i++) {
       $this->drupalCreateNode();
@@ -246,7 +247,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view->set_display('default');
     $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 5, 'Take sure that only a certain count of items is returned');
+    $this->assertEqual(count($view->result), 5, 'Make sure that only a certain count of items is returned');
     $view->destroy();
 
     // Setup and test a offset.
@@ -263,7 +264,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     $view->display_handler->set_option('pager', $pager);
     $view->pre_execute();
     $view->execute();
-    $this->assertEqual(count($view->result), 3, 'Take sure that only a certain count of items is returned');
+    $this->assertEqual(count($view->result), 3, 'Make sure that only a certain count of items is returned');
 
     // Test items per page = 0
     $view = $this->viewPagerFullZeroItemsPerPage();
@@ -411,7 +412,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
    * Test rendering with NULL pager.
    */
   public function testRenderNullPager() {
-    // Create 11 nodes and take sure that everyone is returned.
+    // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     for ($i = 0; $i < 11; $i++) {
       $this->drupalCreateNode();

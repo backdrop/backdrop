@@ -6,9 +6,9 @@
 class ViewsBasicTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Basic query test'),
-      'description' => t('A basic query test for Views.'),
-      'group' => t('Views')
+      'name' => 'Basic query test',
+      'description' => 'A basic query test for Views.',
+      'group' => 'Views'
     );
   }
 

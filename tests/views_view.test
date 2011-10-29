@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Test the view class.
  */
-class viewsViewTest extends ViewsSqlTest {
+class ViewsViewTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
       'name' => 'Test the view class',
@@ -31,15 +32,15 @@ class viewsViewTest extends ViewsSqlTest {
   }
 
   function assertViewDestroy($view) {
-    $this->assertFalse(isset($view->display['default']->handler), 'Take sure all displays are destroyed.');
-    $this->assertFalse(isset($view->display['attachment_1']->handler), 'Take sure all displays are destroyed.');
+    $this->assertFalse(isset($view->display['default']->handler), 'Make sure all displays are destroyed.');
+    $this->assertFalse(isset($view->display['attachment_1']->handler), 'Make sure all displays are destroyed.');
 
-    $this->assertFalse(isset($view->filter), 'Take sure all handlers are destroyed');
-    $this->assertFalse(isset($view->field), 'Take sure all handlers are destroyed');
-    $this->assertFalse(isset($view->argument), 'Take sure all handlers are destroyed');
-    $this->assertFalse(isset($view->relationship), 'Take sure all handlers are destroyed');
-    $this->assertFalse(isset($view->sort), 'Take sure all handlers are destroyed');
-    $this->assertFalse(isset($view->area), 'Take sure all handlers are destroyed');
+    $this->assertFalse(isset($view->filter), 'Make sure all handlers are destroyed');
+    $this->assertFalse(isset($view->field), 'Make sure all handlers are destroyed');
+    $this->assertFalse(isset($view->argument), 'Make sure all handlers are destroyed');
+    $this->assertFalse(isset($view->relationship), 'Make sure all handlers are destroyed');
+    $this->assertFalse(isset($view->sort), 'Make sure all handlers are destroyed');
+    $this->assertFalse(isset($view->area), 'Make sure all handlers are destroyed');
 
     $keys = array('current_display', 'display_handler', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
     foreach ($keys as $key) {
@@ -60,14 +61,14 @@ class viewsViewTest extends ViewsSqlTest {
     $view->delete();
 
     $view = views_get_view($view->name);
-    $this->assertNotNull($view, 'Take sure that the old view is still in the static cache.');
+    $this->assertNotNull($view, 'Make sure that the old view is still in the static cache.');
 
     $view = views_get_view($view->name, TRUE);
-    $this->assertNull($view, "Take sure that the old view get's cleared by the reset parameter.");
+    $this->assertNull($view, "Make sure that the old view gets cleared by the reset parameter.");
   }
 
   function testValidate() {
-    // Test a view with multiple displays. 
+    // Test a view with multiple displays.
     // Validating a view shouldn't change the active display.
     // @todo: Create an extra validation view.
     $view = $this->view_test_destroy();

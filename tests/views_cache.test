@@ -1,19 +1,21 @@
 <?php
+
 /**
  * @file
- *   test cache system.
+ * Test cache system.
  */
 
 module_load_include('test', 'views', 'tests/views_query');
+
 /**
  * Basic test for pluggable caching.
  */
 class ViewsCacheTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Cache'),
-      'description' => t('Tests pluggable caching for views.'),
-      'group' => t('Views Plugins')
+      'name' => 'Cache',
+      'description' => 'Tests pluggable caching for views.',
+      'group' => 'Views Plugins'
     );
   }
 
@@ -143,4 +145,3 @@ class ViewsCacheTest extends ViewsSqlTest {
     $this->assertEqual(6, count($view->result), t('The number of returned rows match.'));
   }
 }
-

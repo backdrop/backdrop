@@ -2,7 +2,7 @@
 
 module_load_include('test', 'views', 'tests/views_query');
 
-class viewsTranslatableTest extends ViewsSqlTest {
+class ViewsTranslatableTest extends ViewsSqlTest {
   var $strings;
 
   public static function getInfo() {
@@ -48,17 +48,17 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $view = $this->view_unpack_translatable();
     $view->init_localization();
 
-    $this->assertEqual('views_plugin_localization_test', get_class($view->localization_plugin), 'Take sure that init_localization initiales the right translation plugin');
+    $this->assertEqual('views_plugin_localization_test', get_class($view->localization_plugin), 'Make sure that init_localization initializes the right translation plugin');
 
     $view->export_locale_strings();
 
     $expected_strings = $this->strings;
     $result_strings = $view->localization_plugin->get_export_strings();
-    $this->assertEqual(sort($expected_strings), sort($result_strings), 'Take sure that the localisation plugin got every translatable string.');
+    $this->assertEqual(sort($expected_strings), sort($result_strings), 'Make sure that the localization plugin got every translatable string.');
   }
 
   public function testUi() {
-    // Take sure that the string is not translated on the ui.
+    // Make sure that the string is not translated in the UI.
     $view = $this->view_unpack_translatable();
     $view->save();
     views_invalidate_cache();
@@ -67,11 +67,11 @@ class viewsTranslatableTest extends ViewsSqlTest {
     $this->drupalLogin($admin_user);
 
     $this->drupalGet("admin/structure/views/view/$view->name/edit");
-    $this->assertNoText('-translated', 'Take sure that no strings get\'s translated in the ui.');
+    $this->assertNoText('-translated', 'Make sure that no strings get translated in the UI.');
   }
 
   /**
-   * Take sure that the translations get's into the loaded view.
+   * Make sure that the translations get into the loaded view.
    */
   public function testTranslation() {
     $view = $this->view_unpack_translatable();
@@ -83,11 +83,11 @@ class viewsTranslatableTest extends ViewsSqlTest {
     foreach ($this->strings as $string) {
       $expected_strings[] = $string .= '-translated';
     }
-    $this->assertEqual(sort($expected_strings), sort($view->localization_plugin->translated_strings), 'Take sure that every string got loaded translated');
+    $this->assertEqual(sort($expected_strings), sort($view->localization_plugin->translated_strings), 'Make sure that every string got loaded translated');
   }
 
   /**
-   * Take sure that the different things have the right translation keys.
+   * Make sure that the different things have the right translation keys.
    */
   public function testTranslationKey() {
     $view = $this->view_unpack_translatable();

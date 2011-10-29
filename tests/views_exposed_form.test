@@ -1,8 +1,10 @@
 <?php
+
 /**
  * @file
  * Test exposed forms.
  */
+
 class ViewsExposedFormTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
@@ -83,14 +85,13 @@ class ViewsExposedFormTest extends ViewsSqlTest {
     // Now check the sort criteria.
     $this->drupalGet('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created');
     $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose sort'));
-    $this->assertNoFieldById('edit-options-expose-label', '', t('Take sure no label field is shown'));
+    $this->assertNoFieldById('edit-options-expose-label', '', t('Make sure no label field is shown'));
 
     // Click the Expose sort button.
     $edit = array();
     $this->drupalPost('admin/structure/views/nojs/config-item/test_exposed_admin_ui/default/sort/created', $edit, t('Expose sort'));
     // Check the label of the expose button
     $this->helperButtonHasLabel('edit-options-expose-button-button', t('Hide sort'));
-    $this->assertFieldById('edit-options-expose-label', '', t('Take sure a label field is shown'));
+    $this->assertFieldById('edit-options-expose-label', '', t('Make sure a label field is shown'));
   }
 }
-

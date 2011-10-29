@@ -7,7 +7,7 @@
 
 module_load_include('test', 'views', 'tests/views_query');
 
-class viewsUserArgumentValidate extends viewsSqlTest {
+class ViewsUserArgumentValidate extends ViewsSqlTest {
   public static function getInfo() {
     return array(
       'name' => 'Tests user argument validator',

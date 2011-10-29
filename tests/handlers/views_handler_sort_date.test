@@ -6,9 +6,9 @@
 class ViewsHandlerSortDateTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Sort: date'),
-      'description' => t('Test the core views_handler_sort_date handler.'),
-      'group' => t('Views Handlers'),
+      'name' => 'Sort: date',
+      'description' => 'Test the core views_handler_sort_date handler.',
+      'group' => 'Views Handlers',
     );
   }
 

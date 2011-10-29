@@ -6,9 +6,9 @@
 class ViewsHandlerSortTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Sort: generic'),
-      'description' => t('Test the core views_handler_sort handler.'),
-      'group' => t('Views Handlers'),
+      'name' => 'Sort: generic',
+      'description' => 'Test the core views_handler_sort handler.',
+      'group' => 'Views Handlers',
     );
   }
 

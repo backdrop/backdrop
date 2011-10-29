@@ -48,6 +48,6 @@ class ViewsHandlerTestXss extends ViewsSqlTest {
       $view->result[$counter]->views_test_name = $input;
       $this->assertEqual($view->field['name']->advanced_render($view->result[$counter]), $expected_result);
       $counter++;
-    } 
+    }
   }
 }

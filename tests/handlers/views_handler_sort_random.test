@@ -6,9 +6,9 @@
 class ViewsHandlerSortRandomTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => t('Sort: random'),
-      'description' => t('Test the core views_handler_sort_random handler.'),
-      'group' => t('Views Handlers'),
+      'name' => 'Sort: random',
+      'description' => 'Test the core views_handler_sort_random handler.',
+      'group' => 'Views Handlers',
     );
   }
 

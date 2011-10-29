@@ -1,6 +1,6 @@
 <?php
 
-class viewsHandlerFilterNumericTest extends ViewsSqlTest {
+class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
   var $column_map = array();
 
   public static function getInfo() {
