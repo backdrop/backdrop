@@ -1404,7 +1404,7 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  *   - - operator: defaults to =
  *   - - value: Must be set. If an array, operator will be defaulted to IN.
  *   - - numeric: If true, the value will not be surrounded in quotes.
- *   - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
+ *   - - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
  */
 class views_join {
   /**
