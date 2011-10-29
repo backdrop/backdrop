@@ -216,7 +216,8 @@ function user_views_data() {
     ),
   );
 
-  $data['users']['timestamp_year'] = array(
+  $data['users']['timestamp_year']['moved to'] = array('users', 'created_year');
+  $data['users']['created_year'] = array(
     'title' => t('Created year'),
     'help' => t('In the form of YYYY.'),
     'argument' => array(
@@ -247,7 +248,7 @@ function user_views_data() {
     'title' => t('Created week'),
     'help' => t('In the form of WW (01 - 53).'),
     'argument' => array(
-      'field' => 'timestamp',
+      'field' => 'created',
       'handler' => 'views_handler_argument_node_created_week',
     ),
   );
