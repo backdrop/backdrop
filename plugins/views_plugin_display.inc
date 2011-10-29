@@ -39,8 +39,8 @@ class views_plugin_display extends views_plugin {
   var $extender = array();
 
   function init(&$view, &$display, $options = NULL) {
-    $this->view = $view;
-    $this->display = $display;
+    $this->view = &$view;
+    $this->display = &$display;
 
     // Make some modifications:
     if (!isset($options) && isset($display->display_options)) {
@@ -864,7 +864,7 @@ class views_plugin_display extends views_plugin {
           }
 
           $handler->init($this->view, $info);
-          $this->handlers[$type][$id] = $handler;
+          $this->handlers[$type][$id] = &$handler;
         }
 
         // Prevent reference problems.

@@ -84,7 +84,7 @@ function views_ui_check_advanced_help() {
 /**
  * Returns the results of the live preview.
  */
-function views_ui_preview(view $view, $display_id, $args = array()) {
+function views_ui_preview($view, $display_id, $args = array()) {
   // When this function is invoked as a page callback, each Views argument is
   // passed separately.
   if (!is_array($args)) {
@@ -821,8 +821,8 @@ function theme_views_ui_view_info($variables) {
 /**
  * Page to delete a view.
  */
-function views_ui_break_lock_confirm($form, &$form_state, view $view) {
-  $form_state['view'] = $view;
+function views_ui_break_lock_confirm($form, &$form_state, $view) {
+  $form_state['view'] = &$view;
   $form = array();
 
   if (empty($view->locked)) {
@@ -858,7 +858,7 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
  *
  * This function handles access to the display.
  */
-function views_ui_edit_page_display(view $view, $display_id) {
+function views_ui_edit_page_display($view, $display_id) {
   // Determine the displays available for editing.
   if ($tabs = views_ui_edit_page_display_tabs($view)) {
     // If a display isn't specified, use the first one.
@@ -911,7 +911,7 @@ function views_ui_edit_page($view, $display_id = NULL) {
   return $build;
 }
 
-function views_ui_build_preview(view $view, $display_id) {
+function views_ui_build_preview($view, $display_id) {
   if (isset($_POST['ajax_html_ids'])) {
     unset($_POST['ajax_html_ids']);
   }
@@ -947,7 +947,7 @@ function views_ui_build_preview(view $view, $display_id) {
  * @todo Rename to views_ui_edit_view_form(). See that function for the "old"
  *   version.
  */
-function views_ui_edit_form($form, &$form_state, view $view, $display_id = NULL) {
+function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // Do not allow the form to be cached, because $form_state['view'] can become
   // stale between page requests.
   // @see views_ui_ajax_get_form() for how this affects #ajax.
@@ -1150,7 +1150,7 @@ function views_ui_edit_form($form, &$form_state, view $view, $display_id = NULL)
 /**
  * Provide the preview formulas and the preview output, too.
  */
-function views_ui_preview_form($form, &$form_state, view $view, $display_id = 'default') {
+function views_ui_preview_form($form, &$form_state, $view, $display_id = 'default') {
   $form_state['no_cache'] = TRUE;
   $form_state['view'] = $view;
 
@@ -1203,7 +1203,7 @@ function views_ui_preview_form($form, &$form_state, view $view, $display_id = 'd
 /**
  * Render the top of the display so it can be updated during ajax operations.
  */
-function views_ui_render_display_top(view $view, $display_id) {
+function views_ui_render_display_top($view, $display_id) {
   $element['#theme_wrappers'] = array('views_container');
   $element['#attributes']['class'] = array('views-display-top', 'clearfix');
   $element['#attributes']['id'] = array('views-display-top');
@@ -1438,7 +1438,7 @@ function views_ui_edit_form_submit_delay_destination($form, &$form_state) {
  * having them as secondary local tasks isn't desired. The caller is responsible
  * for setting the active tab's #active property to TRUE.
  */
-function views_ui_edit_page_display_tabs(view $view) {
+function views_ui_edit_page_display_tabs($view) {
   $tabs = array();
 
   // Create a tab for each display.
@@ -1470,7 +1470,7 @@ function views_ui_edit_page_display_tabs(view $view) {
 /**
  * Controls whether or not the default display should have its own tab on edit.
  */
-function views_ui_show_default_display(view $view) {
+function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
   $advanced_mode = variable_get('views_ui_show_master_display', FALSE);
   // For other users, show the default display only if there are no others, and
@@ -1483,7 +1483,7 @@ function views_ui_show_default_display(view $view) {
 /**
  * Returns a renderable array representing the edit page for one display.
  */
-function views_ui_get_display_tab(view $view, $display_id) {
+function views_ui_get_display_tab($view, $display_id) {
   $build = array();
   $display = $view->display[$display_id];
   // If the plugin doesn't exist, display an error message instead of an edit
@@ -1512,7 +1512,7 @@ function views_ui_get_display_tab(view $view, $display_id) {
  * @return array
  *   A renderable page build array.
  */
-function views_ui_get_display_tab_details(view $view, views_plugin_display $display) {
+function views_ui_get_display_tab_details($view, $display) {
   $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
     '#theme_wrappers' => array('container'),
@@ -1719,7 +1719,7 @@ function views_ui_get_display_tab_details(view $view, views_plugin_display $disp
  * This function might be more logical as a method on an object, if a suitable
  * object emerges out of refactoring.
  */
-function views_ui_edit_form_get_build_from_option($id, $option, view $view, views_plugin_display $display) {
+function views_ui_edit_form_get_build_from_option($id, $option, $view, $display) {
   $option_build = array();
   $option_build['#theme'] = 'views_ui_display_tab_setting';
 
@@ -2034,7 +2034,7 @@ function views_ui_import_validate($form, &$form_state) {
     form_set_error('', t('Unable to import view.'));
   }
 
-  $form_state['view'] = $view;
+  $form_state['view'] = &$view;
 }
 
 /**
@@ -2120,7 +2120,7 @@ function views_ui_edit_view_form_delete($form, &$form_state) {
 /**
  * Add information about a section to a display.
  */
-function views_ui_edit_form_get_bucket($type, view $view, views_plugin_display $display) {
+function views_ui_edit_form_get_bucket($type, $view, $display) {
   $build = array(
     '#theme_wrappers' => array('views_ui_display_tab_bucket'),
   );
@@ -2316,7 +2316,7 @@ function views_ui_edit_form_get_bucket($type, view $view, views_plugin_display $
 /**
  * Regenerate the current tab for AJAX updates.
  */
-function views_ui_regenerate_tab(view $view, &$output, $display_id) {
+function views_ui_regenerate_tab(&$view, &$output, $display_id) {
   if (!$view->set_display('default')) {
     return;
   }
@@ -2481,7 +2481,7 @@ function views_ui_standard_submit($form, &$form_state) {
   elseif ($was_defaulted && !$is_defaulted) {
     // We were using the default display's values, but we're now overriding
     // the default display and saving values specific to this display.
-    $display = $form_state['view']->display[$form_state['display_id']];
+    $display = &$form_state['view']->display[$form_state['display_id']];
     $display->handler->options_override($form, $form_state);
     $display->handler->options_submit($form, $form_state);
   }
@@ -2490,7 +2490,7 @@ function views_ui_standard_submit($form, &$form_state) {
     // to go back to the default display.
     // Overwrite the default display with the current form values, and make
     // the current display use the new default values.
-    $display = $form_state['view']->display[$form_state['display_id']];
+    $display = &$form_state['view']->display[$form_state['display_id']];
     $display->handler->options_override($form, $form_state);
     $display->handler->options_submit($form, $form_state);
   }
@@ -2545,7 +2545,7 @@ function views_ui_standard_cancel($form, &$form_state) {
  * the current display.
  */
 function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $displays = $view->display;
   $current_display = $view->display[$display_id];
@@ -2608,7 +2608,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
  *   - current: The number of the current form on the stack.
  *   - total: The total number of forms originally on the stack.
  */
-function views_ui_get_form_progress(view $view) {
+function views_ui_get_form_progress($view) {
   $progress = FALSE;
   if (!empty($view->stack)) {
     $stack = $view->stack;
@@ -2700,7 +2700,7 @@ function views_ui_ajax_forms($key = NULL) {
  * is the same as another. Since the arguments differ slightly
  * we do a lot of spiffy concatenation here.
  */
-function views_ui_build_identifier($key, view $view, $display_id, $args) {
+function views_ui_build_identifier($key, $view, $display_id, $args) {
   $form = views_ui_ajax_forms($key);
   // Automatically remove the single-form cache if it exists and
   // does not match the key.
@@ -2717,13 +2717,13 @@ function views_ui_build_identifier($key, view $view, $display_id, $args) {
  * Build up a $form_state object suitable for use with drupal_build_form
  * based on known information about a form.
  */
-function views_ui_build_form_state($js, $key, view $view, $display_id, $args) {
+function views_ui_build_form_state($js, $key, &$view, $display_id, $args) {
   $form = views_ui_ajax_forms($key);
   // Build up form state
   $form_state = array(
     'form_key' => $key,
     'form_id' => $form['form_id'],
-    'view' => $view,
+    'view' => &$view,
     'ajax' => $js,
     'display_id' => $display_id,
     'no_redirect' => TRUE,
@@ -2755,12 +2755,12 @@ function views_ui_build_form_url($form_state) {
  * Add another form to the stack; clicking 'apply' will go to this form
  * rather than closing the ajax popup.
  */
-function views_ui_add_form_to_stack($key, view $view, $display_id, $args, $top = FALSE) {
+function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FALSE) {
   if (empty($view->stack)) {
     $view->stack = array();
   }
 
-  $stack = array(views_ui_build_identifier($key, $view, $display_id, $args), $key, $view, $display_id, $args);
+  $stack = array(views_ui_build_identifier($key, $view, $display_id, $args), $key, &$view, $display_id, $args);
   // If we're being asked to add this form to the bottom of the stack, no
   // special logic is required. Our work is equally easy if we were asked to add
   // to the top of the stack, but there's nothing in it yet.
@@ -2794,7 +2794,7 @@ function views_ui_add_form_to_stack($key, view $view, $display_id, $args, $top =
  * We do this for consistency and to make it easy to chain forms
  * together.
  */
-function views_ui_ajax_form($js, $key, view $view, $display_id = '') {
+function views_ui_ajax_form($js, $key, $view, $display_id = '') {
   // Reset the cache of IDs. Drupal rather aggressively prevents id duplication
   // but this causes it to remember IDs that are no longer even being used.
   if (isset($_POST['ajax_html_ids'])) {
@@ -2898,7 +2898,7 @@ function views_ui_remove_display_form_restore($form, &$form_state) {
  * Form constructor callback to display analysis information on a view
  */
 function views_ui_analyze_view_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
 
   $form['#title'] = t('View analysis');
   $form['#section'] = 'analyze';
@@ -2929,7 +2929,7 @@ function views_ui_analyze_view_form_submit($form, &$form_state) {
  * Form constructor callback to reorder displays on a view
  */
 function views_ui_reorder_displays_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
 
   $form['view'] = array('#type' => 'value', '#value' => $view);
@@ -3104,7 +3104,7 @@ function theme_views_ui_reorder_displays_form($vars) {
  * Form builder to edit details of a view.
  */
 function views_ui_edit_details_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
 
   $form['#title'] = t('View name and description');
   $form['#section'] = 'details';
@@ -3157,14 +3157,14 @@ function views_ui_edit_details_form_submit($form, &$form_state) {
  * Form constructor callback to edit display of a view
  */
 function views_ui_edit_display_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $section = $form_state['section'];
 
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
-  $display = $view->display[$display_id];
+  $display = &$view->display[$display_id];
 
   // Get form from the handler.
   $form['options'] = array(
@@ -3197,7 +3197,7 @@ function views_ui_edit_display_form($form, &$form_state) {
  * Validate handler for views_ui_edit_display_form
  */
 function views_ui_edit_display_form_validate($form, &$form_state) {
-  $display = $form_state['view']->display[$form_state['display_id']];
+  $display = &$form_state['view']->display[$form_state['display_id']];
   $display->handler->options_validate($form['options'], $form_state);
 
   if (form_get_errors()) {
@@ -3209,7 +3209,7 @@ function views_ui_edit_display_form_validate($form, &$form_state) {
  * Submit handler for views_ui_edit_display_form
  */
 function views_ui_edit_display_form_submit($form, &$form_state) {
-  $display = $form_state['view']->display[$form_state['display_id']];
+  $display = &$form_state['view']->display[$form_state['display_id']];
   $display->handler->options_submit($form, $form_state);
 
   views_ui_cache_set($form_state['view']);
@@ -3221,7 +3221,7 @@ function views_ui_edit_display_form_submit($form, &$form_state) {
  * @TODO: Not currently used. Remove unless we implement an override toggle.
  */
 function views_ui_edit_display_form_override($form, &$form_state) {
-  $display = $form_state['view']->display[$form_state['display_id']];
+  $display = &$form_state['view']->display[$form_state['display_id']];
   $display->handler->options_override($form, $form_state);
 
   views_ui_cache_set($form_state['view']);
@@ -3233,7 +3233,7 @@ function views_ui_edit_display_form_override($form, &$form_state) {
  * Form to config items in the views UI.
  */
 function views_ui_config_type_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
 
@@ -3241,7 +3241,7 @@ function views_ui_config_type_form($form, &$form_state) {
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
-  $display = $view->display[$display_id];
+  $display = &$view->display[$display_id];
   $form['#title'] = t('Configure @type', array('@type' => $types[$type]['ltitle']));
   $form['#section'] = $display_id . 'config-item';
 
@@ -3270,7 +3270,7 @@ function views_ui_config_type_form($form, &$form_state) {
  */
 function views_ui_config_type_form_submit($form, &$form_state) {
   $types = views_object_types();
-  $display = $form_state['view']->display[$form_state['display_id']];
+  $display = &$form_state['view']->display[$form_state['display_id']];
 
   // Store in cache
   views_ui_cache_set($form_state['view']);
@@ -3280,7 +3280,7 @@ function views_ui_config_type_form_submit($form, &$form_state) {
  * Form to rearrange items in the views UI.
  */
 function views_ui_rearrange_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
 
@@ -3288,7 +3288,7 @@ function views_ui_rearrange_form($form, &$form_state) {
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
-  $display = $view->display[$display_id];
+  $display = &$view->display[$display_id];
   $form['#title'] = t('Rearrange @type', array('@type' => $types[$type]['ltitle']));
   $form['#section'] = $display_id . 'rearrange-item';
 
@@ -3445,7 +3445,7 @@ function theme_views_ui_expose_filter_form($variables) {
  */
 function views_ui_rearrange_form_submit($form, &$form_state) {
   $types = views_object_types();
-  $display = $form_state['view']->display[$form_state['display_id']];
+  $display = &$form_state['view']->display[$form_state['display_id']];
 
   $old_fields = $display->handler->get_option($types[$form_state['type']]['plural']);
   $new_fields = $order = array();
@@ -3476,7 +3476,7 @@ function views_ui_rearrange_form_submit($form, &$form_state) {
  * Form to rearrange items in the views UI.
  */
 function views_ui_rearrange_filter_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
 
@@ -3484,7 +3484,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
   if (!$view->set_display($display_id)) {
     views_ajax_render(t('Invalid display id @display', array('@display' => $display_id)));
   }
-  $display = $view->display[$display_id];
+  $display = &$view->display[$display_id];
   $form['#title'] = check_plain($display->display_title) . ': ';
   $form['#title'] .= t('Rearrange @type', array('@type' => $types[$type]['ltitle']));
   $form['#section'] = $display_id . 'rearrange-item';
@@ -3747,7 +3747,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
  */
 function views_ui_rearrange_filter_form_submit($form, &$form_state) {
   $types = views_object_types();
-  $display = $form_state['view']->display[$form_state['display_id']];
+  $display = &$form_state['view']->display[$form_state['display_id']];
   $remember_groups = array();
 
   if (!empty($form_state['view']->form_cache)) {
@@ -3853,7 +3853,7 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
  * Form to add_item items in the views UI.
  */
 function views_ui_add_item_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
 
@@ -3869,7 +3869,7 @@ function views_ui_add_item_form($form, &$form_state) {
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
-  $display = $view->display[$display_id];
+  $display = &$view->display[$display_id];
 
   $types = views_object_types();
   $ltitle = $types[$type]['ltitle'];
@@ -4020,7 +4020,7 @@ function views_ui_add_item_form_submit($form, &$form_state) {
  * Form to config_item items in the views UI.
  */
 function views_ui_config_item_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
   $id = $form_state['id'];
@@ -4127,7 +4127,7 @@ function views_ui_config_item_form($form, &$form_state) {
 
       // Get form from the handler.
       $handler->options_form($form['options'], $form_state);
-      $form_state['handler'] = $handler;
+      $form_state['handler'] = &$handler;
     }
 
     $name = NULL;
@@ -4263,7 +4263,7 @@ function views_ui_config_item_form_submit($form, &$form_state) {
  * Form to config_item items in the views UI.
  */
 function views_ui_config_item_group_form($type, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
   $id = $form_state['id'];
@@ -4295,7 +4295,7 @@ function views_ui_config_item_group_form($type, &$form_state) {
       $form['#title'] = t('Configure group settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
       $handler->groupby_form($form['options'], $form_state);
-      $form_state['handler'] = $handler;
+      $form_state['handler'] = &$handler;
     }
 
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_group_form');
@@ -4359,7 +4359,7 @@ function views_ui_config_item_form_expose($form, &$form_state) {
  * Form to config_item items in the views UI.
  */
 function views_ui_config_item_extra_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
   $id = $form_state['id'];
@@ -4391,7 +4391,7 @@ function views_ui_config_item_extra_form($form, &$form_state) {
 
       // Get form from the handler.
       $handler->extra_options_form($form['options'], $form_state);
-      $form_state['handler'] = $handler;
+      $form_state['handler'] = &$handler;
     }
 
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_extra_form');
@@ -4430,7 +4430,7 @@ function views_ui_config_item_extra_form_submit($form, &$form_state) {
  * Form to config_style items in the views UI.
  */
 function views_ui_config_style_form($form, &$form_state) {
-  $view = $form_state['view'];
+  $view = &$form_state['view'];
   $display_id = $form_state['display_id'];
   $type = $form_state['type'];
   $id = $form_state['id'];
@@ -4470,7 +4470,7 @@ function views_ui_config_style_form($form, &$form_state) {
         $plugin->options_form($form['style_options'], $form_state);
       }
 
-      $form_state['handler'] = $handler;
+      $form_state['handler'] = &$handler;
     }
 
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_style_form');
@@ -5031,7 +5031,7 @@ function theme_views_ui_style_plugin_table($variables) {
  *
  * @todo Remove this function once editing the display title is possible.
  */
-function views_ui_get_display_label(view $view, $display_id, $check_changed = TRUE) {
+function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
   $title = views_ui_truncate($title, 25);
 

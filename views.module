@@ -36,7 +36,7 @@ function views_forms($form_id, $args) {
 /**
  * Returns a form ID for a Views form using the name and display of the View.
  */
-function views_form_id(view $view) {
+function views_form_id($view) {
   $parts = array(
     'views_form',
     $view->name,
@@ -268,7 +268,7 @@ function views_preprocess_node(&$vars) {
 function views_preprocess_comment(&$vars) {
   // The 'view' attribute of the node is added in template_preprocess_views_view_row_comment()
   if (!empty($vars['node']->view) && !empty($vars['node']->view->name)) {
-    $vars['view'] = $vars['node']->view;
+    $vars['view'] = &$vars['node']->view;
     $vars['theme_hook_suggestions'][] = 'comment__view__' . $vars['node']->view->name;
     if (!empty($vars['node']->view->current_display)) {
       $vars['theme_hook_suggestions'][] = 'comment__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
@@ -664,7 +664,7 @@ function views_block_view($delta) {
  *   The type of the block. If it's block it's a regular views display,
  *   but 'special_block_-exp' exist as well.
  */
-function views_add_block_contextual_links(&$block, view $view, $display_id, $block_type = 'block') {
+function views_add_block_contextual_links(&$block, $view, $display_id, $block_type = 'block') {
   // Do not add contextual links to an empty block.
   if (!empty($block['content'])) {
     // Contextual links only work on blocks whose content is a renderable
@@ -742,7 +742,7 @@ function views_add_block_contextual_links(&$block, view $view, $display_id, $blo
  * @see views_page_alter()
  * @see template_preprocess_views_view()
  */
-function views_add_contextual_links(&$render_element, $location, view $view, $display_id) {
+function views_add_contextual_links(&$render_element, $location, $view, $display_id) {
   // Do not do anything if the view is configured to hide its administrative
   // links.
   if (empty($view->hide_admin_links)) {
@@ -1450,7 +1450,7 @@ function views_view_is_enabled($view) {
 /**
  * Returns TRUE if a view is disabled, FALSE otherwise.
  */
-function views_view_is_disabled(view $view) {
+function views_view_is_disabled($view) {
   return !empty($view->disabled);
 }
 
@@ -1544,21 +1544,21 @@ function views_load_display_records(&$views) {
 /**
  * Export CRUD callback to save a view.
  */
-function views_save_view(view $view) {
+function views_save_view(&$view) {
   return $view->save();
 }
 
 /**
  * Export CRUD callback to delete a view.
  */
-function views_delete_view(view $view) {
+function views_delete_view(&$view) {
   return $view->delete(TRUE);
 }
 
 /**
  * Export CRUD callback to export a view.
  */
-function views_export_view(view $view, $indent = '') {
+function views_export_view(&$view, $indent = '') {
   return $view->export($indent);
 }
 
@@ -1641,7 +1641,7 @@ function vpr_trace() {
  * Returns TRUE if the passed-in view contains handlers with views form
  * implementations, FALSE otherwise.
  */
-function views_view_has_form_elements(view $view) {
+function views_view_has_form_elements($view) {
   foreach ($view->field as $field) {
     if (property_exists($field, 'views_form_callback') || method_exists($field, 'views_form')) {
       return TRUE;
@@ -1663,7 +1663,7 @@ function views_view_has_form_elements(view $view) {
  * step (the default 'views_form_views_form' step). That way it is actually
  * possible for modules to have a multistep form if they need to.
  */
-function views_form($form, &$form_state, view $view, $output) {
+function views_form($form, &$form_state, $view, $output) {
   $form_state['step'] = isset($form_state['step']) ? $form_state['step'] : 'views_form_views_form';
 
   $form = array();
@@ -1711,7 +1711,7 @@ function views_form_submit($form, &$form_state) {
  * Callback for the main step of a Views form.
  * Invoked by views_form().
  */
-function views_form_views_form($form, &$form_state, view $view, $output) {
+function views_form_views_form($form, &$form_state, $view, $output) {
   $form['#prefix'] = '<div class="views-form">';
   $form['#suffix'] = '</div>';
   $form['#theme'] = 'views_form_views_form';
@@ -1850,8 +1850,8 @@ function views_exposed_form($form, &$form_state) {
   // Make sure that we validate because this form might be submitted
   // multiple times per page.
   $form_state['must_validate'] = TRUE;
-  $view = $form_state['view'];
-  $display = $form_state['display'];
+  $view = &$form_state['view'];
+  $display = &$form_state['display'];
 
   $form_state['input'] = $view->get_exposed_input();
 
@@ -1992,7 +1992,7 @@ function views_exposed_form_cache($views_name, $display_name, $form_output = NUL
 /**
  * Build a list of theme function names for use most everywhere.
  */
-function views_theme_functions($hook, view $view, $display = NULL) {
+function views_theme_functions($hook, $view, $display = NULL) {
   require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'views') . "/theme/theme.inc";
   return _views_theme_functions($hook, $view, $display);
 }
@@ -2000,7 +2000,7 @@ function views_theme_functions($hook, view $view, $display = NULL) {
 /**
  * Substitute current time; this works with cached queries.
  */
-function views_views_query_substitutions(view $view) {
+function views_views_query_substitutions($view) {
   global $language_content;
   return array(
     '***CURRENT_VERSION***' => VERSION,

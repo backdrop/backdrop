@@ -15,8 +15,8 @@ class views_plugin_access extends views_plugin {
    *   The display handler.
    */
   function init(&$view, &$display) {
-    $this->view = $view;
-    $this->display = $display;
+    $this->view = &$view;
+    $this->display = &$display;
 
     if (is_object($display->handler)) {
       $options = $display->handler->get_option('access');

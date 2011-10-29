@@ -301,13 +301,13 @@ class view extends views_db_object {
         // This assumes that the 'default' handler is always first. It always
         // is. Make sure of it.
         if ($id != 'default') {
-          $this->display[$id]->handler->default_display = $this->display['default']->handler;
+          $this->display[$id]->handler->default_display = &$this->display['default']->handler;
         }
       }
     }
 
     $this->current_display = 'default';
-    $this->display_handler = $this->display['default']->handler;
+    $this->display_handler = &$this->display['default']->handler;
 
     return TRUE;
   }
@@ -377,7 +377,7 @@ class view extends views_db_object {
     }
 
     // Set a shortcut
-    $this->display_handler = $this->display[$display_id]->handler;
+    $this->display_handler = &$this->display[$display_id]->handler;
 
     return TRUE;
   }
@@ -626,7 +626,7 @@ class view extends views_db_object {
     // Iterate through each argument and process.
     foreach ($this->argument as $id => $arg) {
       $position++;
-      $argument = $this->argument[$id];
+      $argument = &$this->argument[$id];
 
       if ($argument->broken()) {
         continue;
@@ -2206,7 +2206,7 @@ class views_db_object {
       $this->display[$id]->handler->init($this, $this->display[$id]);
       // If this is NOT the default display handler, let it know which is
       if ($id != 'default') {
-        $this->display[$id]->handler->default_display = $this->display['default']->handler;
+        $this->display[$id]->handler->default_display = &$this->display['default']->handler;
       }
     }
 

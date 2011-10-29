@@ -44,8 +44,8 @@ class views_plugin_argument_validate_php extends views_plugin_argument_validate 
 
   function validate_argument($argument) {
     // set up variables to make it easier to reference during the argument.
-    $view = $this->view;
-    $handler = $this->argument;
+    $view = &$this->view;
+    $handler = &$this->argument;
 
     ob_start();
     $result = eval($this->options['code']);
@@ -53,3 +53,4 @@ class views_plugin_argument_validate_php extends views_plugin_argument_validate 
     return $result;
   }
 }
+

@@ -24,7 +24,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
    *  An associative array mapping the columns of the result set from the view
    *  (as keys) and the expected result set (as values).
    */
-  protected function assertIdenticalResultset(view $view, $expected_result, $column_map = array(), $message = 'Identical result set') {
+  protected function assertIdenticalResultset($view, $expected_result, $column_map = array(), $message = 'Identical result set') {
     return $this->assertIdenticalResultsetHelper($view, $expected_result, $column_map, $message, 'assertIdentical');
   }
 
@@ -41,11 +41,11 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
    *  An associative array mapping the columns of the result set from the view
    *  (as keys) and the expected result set (as values).
    */
-  protected function assertNotIdenticalResultset(view $view, $expected_result, $column_map = array(), $message = 'Identical result set') {
+  protected function assertNotIdenticalResultset($view, $expected_result, $column_map = array(), $message = 'Identical result set') {
     return $this->assertIdenticalResultsetHelper($view, $expected_result, $column_map, $message, 'assertNotIdentical');
   }
 
-  protected function assertIdenticalResultsetHelper(view $view, $expected_result, $column_map, $message, $assert_method) {
+  protected function assertIdenticalResultsetHelper($view, $expected_result, $column_map, $message, $assert_method) {
     // Convert $view->result to an array of arrays.
     $result = array();
     foreach ($view->result as $key => $value) {
@@ -112,7 +112,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
   /**
    * Helper function to execute a view with debugging.
    */
-  protected function executeView(view $view, $args = array()) {
+  protected function executeView($view, $args = array()) {
     $view->set_display();
     $view->pre_execute($args);
     $view->execute();

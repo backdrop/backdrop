@@ -14,8 +14,8 @@ class views_plugin_exposed_form extends views_plugin {
    *   The display handler.
    */
   function init(&$view, &$display, $options = array()) {
-    $this->view = $view;
-    $this->display = $display;
+    $this->view = &$view;
+    $this->display = &$display;
 
     $this->unpack_options($this->options, $options);
   }
@@ -112,8 +112,8 @@ class views_plugin_exposed_form extends views_plugin {
   function render_exposed_form($block = FALSE) {
     // Deal with any exposed filters we may have, before building.
     $form_state = array(
-      'view' => $this->view,
-      'display' => $this->display,
+      'view' => &$this->view,
+      'display' => &$this->display,
       'method' => 'get',
       'rerender' => TRUE,
       'no_redirect' => TRUE,

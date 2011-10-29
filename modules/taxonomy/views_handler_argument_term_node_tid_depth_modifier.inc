@@ -45,7 +45,7 @@ class views_handler_argument_term_node_tid_depth_modifier extends views_handler_
         unset($handler);
       }
 
-      $handler = $this->view->argument[$key];
+      $handler = &$this->view->argument[$key];
       if (empty($handler->definition['accept depth modifier'])) {
         continue;
       }

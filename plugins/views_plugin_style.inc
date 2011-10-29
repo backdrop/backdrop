@@ -32,8 +32,8 @@ class views_plugin_style extends views_plugin {
    *   from at least two locations. If it's not included, look on the display.
    */
   function init(&$view, &$display, $options = NULL) {
-    $this->view = $view;
-    $this->display = $display;
+    $this->view = &$view;
+    $this->display = &$display;
 
     // Overlay incoming options on top of defaults
     $this->unpack_options($this->options, isset($options) ? $options : $display->handler->get_option('style_options'));

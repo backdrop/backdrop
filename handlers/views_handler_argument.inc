@@ -648,7 +648,7 @@ class views_handler_argument extends views_handler {
     }
 
     if (!empty($info['method args'])) {
-      return call_user_func_array(array($this, $info['method']), $info['method args']);
+      return call_user_func_array(array(&$this, $info['method']), $info['method args']);
     }
     else {
       return $this->{$info['method']}();
