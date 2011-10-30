@@ -119,7 +119,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
         else {
           $options[$key] = $field;
         }
-        $paths[$path] = $path;
+        $paths[$path] = $key;
         $this->view->row_index++;
       }
     }
@@ -127,7 +127,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
     $default_value = '';
     if ($this->options['default_value'] && !empty($paths[url($_GET['q'])])) {
-      $default_value = url($_GET['q']);
+      $default_value = $paths[url($_GET['q'])];
     }
 
     ctools_include('jump-menu');
