@@ -31,9 +31,26 @@ function views_ui_get_admin_css() {
   $themes = list_themes();
   $theme_key = $GLOBALS['theme'];
   while ($theme_key) {
-    $list[$module_path . "/css/views-admin.$theme_key.css"] = array(
-      'group' => CSS_THEME,
-    );
+    // Try to find the admin css file for non-core themes.
+    if (!in_array($theme_key, array('garland', 'seven', 'bartik'))) {
+      $theme_path = drupal_get_path('theme', $theme_key);
+      // First search in the css directory, then in the root folder of the theme.
+      if (file_exists($theme_path . "/css/views-admin.$theme_key.css")) {
+        $list[$theme_path . "/css/views-admin.$theme_key.css"] = array(
+          'group' => CSS_THEME,
+        );
+      }
+      else if (file_exists($theme_path . "/views-admin.$theme_key.css")) {
+        $list[$theme_path . "/views-admin.$theme_key.css"] = array(
+          'group' => CSS_THEME,
+        );
+      }
+    }
+    else {
+      $list[$module_path . "/css/views-admin.$theme_key.css"] = array(
+        'group' => CSS_THEME,
+      );
+    }
     $theme_key = isset($themes[$theme_key]->base_theme) ? $themes[$theme_key]->base_theme : '';
   }
   // Views contains style overrides for the following modules
