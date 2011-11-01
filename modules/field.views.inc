@@ -33,7 +33,7 @@ function field_views_data() {
     drupal_alter('field_views_data', $result, $field, $module);
 
     if (is_array($result)) {
-      $data = array_merge($data, $result);
+      $data = drupal_array_merge_deep($result, $data);
     }
   }
 
