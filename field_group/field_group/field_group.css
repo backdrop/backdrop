@@ -7,7 +7,8 @@
  */
 .vertical-tabs fieldset.default-fallback,
 div.field-group-tabs-wrapper div.field-type-image fieldset,
-div.field-group-tabs-wrapper div.field-type-file fieldset {
+div.field-group-tabs-wrapper div.field-type-file fieldset,
+div.field-group-tabs-wrapper div.field-type-datetime fieldset {
    border: 1px solid #CCCCCC;
    margin: 1em 0;
    padding: 2.5em 0 0;
@@ -16,6 +17,7 @@ div.field-group-tabs-wrapper div.field-type-file fieldset {
 
 div.field-group-tabs-wrapper div.field-type-image legend,
 div.field-group-tabs-wrapper div.field-type-file legend,
+div.field-group-tabs-wrapper div.field-type-datetime legend,
 .vertical-tabs .field-group-fieldset legend {
   display: block;
 }
