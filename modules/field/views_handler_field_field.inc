@@ -683,7 +683,7 @@ class views_handler_field_field extends views_handler_field {
     }
 
     // The field we are trying to display doesn't exist on this entity.
-    if (empty($entity->{$this->definition['field_name']})) {
+    if (!isset($entity->{$this->definition['field_name']})) {
       return array();
     }
 
@@ -737,7 +737,7 @@ class views_handler_field_field extends views_handler_field {
       return $entity;
     }
     else {
-      return $entity->{$this->definition['field_name']}[$langcode];
+      return !empty($entity->{$this->definition['field_name']}[$langcode]) ? $entity->{$this->definition['field_name']}[$langcode] : array();
     }
   }
 
