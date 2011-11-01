@@ -442,7 +442,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       $sorts += $this->plugin['available_sorts'];
     }
 
-    // If there is no sorts option availible continue.
+    // If there is no sorts option available continue.
     if (!empty($sorts)) {
       $form['displays']['show']['sort'] = array(
         '#type' => 'select',

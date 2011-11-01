@@ -34,7 +34,7 @@ class views_plugin_display extends views_plugin {
   var $handlers = array();
 
   /**
-   * Stores all availible display extenders.
+   * Stores all available display extenders.
    */
   var $extender = array();
 
