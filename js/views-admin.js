@@ -861,6 +861,9 @@ Drupal.behaviors.viewsUiOverrideSelect.attach = function (context, settings) {
       if ($(this).val() == 'default') {
         $submit.val(Drupal.t('Apply (all displays)'));
       }
+      else if ($(this).val() == 'default_revert') {
+        $submit.val(Drupal.t('Revert to default'));
+      }
       else {
         $submit.val(Drupal.t('Apply (this display)'));
       }

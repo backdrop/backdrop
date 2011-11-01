@@ -2481,7 +2481,7 @@ function views_ui_standard_submit($form, &$form_state) {
   // Determine whether the values the user entered are intended to apply to
   // the current display or the default display.
 
-  list($was_defaulted, $is_defaulted) = views_ui_standard_override_values($form, $form_state);
+  list($was_defaulted, $is_defaulted, $revert) = views_ui_standard_override_values($form, $form_state);
 
   // Mark the changed section of the view as changed.
   // TODO: Document why we are doing this, and see if we still need it.
@@ -2491,7 +2491,16 @@ function views_ui_standard_submit($form, &$form_state) {
 
   // Based on the user's choice in the display dropdown, determine which display
   // these changes apply to.
-  if ($was_defaulted === $is_defaulted) {
+  if ($revert) {
+    // If it's revert just change the override and return.
+    $display = &$form_state['view']->display[$form_state['display_id']];
+    $display->handler->options_override($form, $form_state);
+
+    // Don't execute the normal submit handling but still store the changed view into cache.
+    views_ui_cache_set($form_state['view']);
+    return;
+  }
+  elseif ($was_defaulted === $is_defaulted) {
     // We're not changing which display these form values apply to.
     // Run the regular submit handler for this form.
   }
@@ -2519,15 +2528,16 @@ function views_ui_standard_submit($form, &$form_state) {
 }
 
 /**
- * Return the was_defaulted and is_defaulted state of a form.
+ * Return the was_defaulted, is_defaulted and revert state of a form.
  */
 function views_ui_standard_override_values($form, $form_state) {
   // Make sure the dropdown exists in the first place.
   if (isset($form_state['values']['override']['dropdown'])) {
     // #default_value is used to determine whether it was the default value or not.
-    // So the availible options are: $display and 'default', not 'defaults'.
-    $was_defaulted = (bool) ($form['override']['dropdown']['#default_value'] === 'defaults');
-    $is_defaulted = (bool) ($form_state['values']['override']['dropdown'] === 'default');
+    // So the available options are: $display, 'default' and 'default_revert', not 'defaults'.
+    $was_defaulted = ($form['override']['dropdown']['#default_value'] === 'defaults');
+    $is_defaulted = ($form_state['values']['override']['dropdown'] === 'default');
+    $revert = ($form_state['values']['override']['dropdown'] === 'default_revert');
 
     if ($was_defaulted !== $is_defaulted && isset($form['#section'])) {
       // We're changing which display these values apply to.
@@ -2539,9 +2549,10 @@ function views_ui_standard_override_values($form, $form_state) {
     // The user didn't get the dropdown for overriding the default display.
     $was_defaulted = FALSE;
     $is_defaulted = FALSE;
+    $revert = FALSE;
   }
 
-  return array($was_defaulted, $is_defaulted);
+  return array($was_defaulted, $is_defaulted, $revert);
 }
 
 /**
@@ -2581,6 +2592,7 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
 
   // Determine whether any other displays have overrides for this section.
   $section_overrides = FALSE;
+  $section_defaulted = $current_display->handler->is_defaulted($section);
   foreach ($displays as $id => $display) {
     if ($id === 'default' || $id === $display_id) {
       continue;
@@ -2592,6 +2604,10 @@ function views_ui_standard_display_dropdown(&$form, &$form_state, $section) {
 
   $display_dropdown['default'] = ($section_overrides ? t('All displays (except overridden)') : t('All displays'));
   $display_dropdown[$display_id] = t('This @display_type (override)', array('@display_type' => $current_display->display_plugin));
+  // Only display the revert option if we are in a overridden section.
+  if (!$section_defaulted) {
+    $display_dropdown['default_revert'] = t('Revert to default');
+  }
 
   $form['override'] = array(
     '#prefix' => '<div class="views-override clearfix container-inline">',

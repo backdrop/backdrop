@@ -905,4 +905,31 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->assertText($new_block_title);
     $this->assertNoText($view['block[title]']);
   }
+
+  /**
+   * Tests that the revert to all displays select-option works as expected.
+   */
+  function testRevertAllDisplays() {
+    // Create a basic view with a page, block.
+    // Because there is both a title on page and block we expect the title on
+    // the block be overriden.
+    $view['human_name'] = $this->randomName(16);
+    $view['name'] = strtolower($this->randomName(16));
+    $view['page[create]'] = 1;
+    $view['page[title]'] = $this->randomName(16);
+    $view['page[path]'] = $this->randomName(16);
+    $view['block[create]'] = 1;
+    $view['block[title]'] = $this->randomName(16);
+    $this->drupalPost('admin/structure/views/add', $view, t('Continue & edit'));
+
+    // Revert the title of the block back to the default ones, but submit some
+    // new values to be sure that the new value is not stored.
+    $edit = array();
+    $edit['title'] = $new_block_title = $this->randomName();
+    $edit['override[dropdown]'] = 'default_revert';
+
+    $this->drupalPost("admin/structure/views/nojs/display/{$view['name']}/block/title", $edit, t('Apply'));
+    $this->drupalPost("admin/structure/views/view/{$view['name']}/edit/block", array(), t('Save'));
+    $this->assertText($view['page[title]']);
+  }
 }
