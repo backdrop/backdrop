@@ -20,7 +20,7 @@ function node_views_data() {
 
   // Define the base group of this table. Fields that don't
   // have a group defined will go into this field by default.
-  $data['node']['table']['group']  = t('Content');
+  $data['node']['table']['group'] = t('Content');
 
   // Advertise this table as a possible base table
   $data['node']['table']['base'] = array(
@@ -235,9 +235,12 @@ function node_views_data() {
     ),
   );
 
-  // links to operate on the node
+  // Define some fields based upon views_handler_field_entity in the entity
+  // table so they can be re-used with other query backends.
+  // @see views_handler_field_entity
 
-  $data['node']['view_node'] = array(
+  $data['node']['view_node']['moved to'] = array('views_entity_node', 'view_node');
+  $data['views_entity_node']['view_node'] = array(
     'field' => array(
       'title' => t('Link'),
       'help' => t('Provide a simple link to the content.'),
@@ -245,7 +248,8 @@ function node_views_data() {
     ),
   );
 
-  $data['node']['edit_node'] = array(
+  $data['node']['edit_node']['moved to'] = array('views_entity_node', 'edit_node');
+  $data['views_entity_node']['edit_node'] = array(
     'field' => array(
       'title' => t('Edit link'),
       'help' => t('Provide a simple link to edit the content.'),
@@ -253,7 +257,8 @@ function node_views_data() {
     ),
   );
 
-  $data['node']['delete_node'] = array(
+  $data['node']['delete_node']['moved to'] = array('views_entity_node', 'delete_node');
+  $data['views_entity_node']['delete_node'] = array(
     'field' => array(
       'title' => t('Delete link'),
       'help' => t('Provide a simple link to delete the content.'),

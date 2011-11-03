@@ -2,6 +2,12 @@
 /**
  * A handler to display data from entity objects.
  *
+ * Fields based upon this handler work with all query-backends if the tables
+ * used by the query backend have an 'entity type' specified. In order to
+ * make fields based upon this handler automatically available to all compatible
+ * query backends, the views field can be defined in the table
+ * @code views_entity_{ENTITY_TYPE} @endcode.
+ *
  * @ingroup views_field_handlers
  */
 class views_handler_field_entity extends views_handler_field {
@@ -22,6 +28,17 @@ class views_handler_field_entity extends views_handler_field {
   public $base_field;
 
   /**
+   * Initialize the entity type.
+   */
+  public function init(&$view, &$options) {
+    parent::init($view, $options);
+
+    // Initialize the entity-type used.
+    $table_data = views_fetch_data($this->table);
+    $this->entity_type = $table_data['table']['entity type'];
+  }
+
+  /**
    * Overriden to add the field for the entity id.
    */
   function query() {
@@ -35,7 +52,7 @@ class views_handler_field_entity extends views_handler_field {
           $this->table_alias = $relationship->alias;
 
           $table_data = views_fetch_data($base_table);
-          $this->base_field = $table_data['table']['base']['field'];
+          $this->base_field = empty($relationship->definition['base field']) ? $table_data['table']['base']['field'] : $relationship->definition['base field'];
         }
       }
     }
