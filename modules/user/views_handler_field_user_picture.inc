@@ -22,6 +22,7 @@ class views_handler_field_user_picture extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
     $options['link_photo_to_profile'] = array('default' => TRUE);
+    $options['image_style'] = array('default' => '');
     return $options;
   }
 
@@ -33,20 +34,60 @@ class views_handler_field_user_picture extends views_handler_field {
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_photo_to_profile'],
     );
+
+    if (module_exists('image')) {
+      $styles = image_styles();
+      $style_options = array('' => t('Default'));
+      foreach ($styles as $style) {
+        $style_options[$style['name']] = $style['name'];
+      }
+
+      $form['image_style'] = array(
+        '#title' => t('Image preset'),
+        '#description' => t('Using <em>Default</em> will use the site-wide image style for user pictures set in the <a href="!account-settings">Account settings</a>.', array('!account-settings' => url('admin/config/people/accounts', array('fragment' => 'edit-personalization')))),
+        '#type' => 'select',
+        '#options' => $style_options,
+        '#default_value' => $this->options['image_style'],
+      );
+    }
   }
 
   function render($values) {
-    // Fake an account object.
-    $account = new stdClass();
-    if ($this->options['link_photo_to_profile']) {
-      // Prevent template_preprocess_user_picture from adding a link
-      // by not setting the uid.
-      $account->uid = $this->get_value($values, 'uid');
+    if ($this->options['image_style'] && module_exists('image')) {
+      // @todo: Switch to always using theme('user_picture') when it starts
+      // supporting image styles. See http://drupal.org/node/1021564
+      if ($picture_fid = $this->get_value($values)) {
+        $picture = file_load($picture_fid);
+        $picture_filepath = $picture->uri;
+      }
+      else {
+        $picture_filepath = variable_get('user_picture_default', '');
+      }
+      if (file_valid_uri($picture_filepath)) {
+        $output = theme('image_style', array('style_name' => $this->options['image_style'], 'path' => $picture_filepath));
+        if ($this->options['link_photo_to_profile'] && user_access('access user profiles')) {
+          $uid = $this->get_value($values, 'uid');
+          $output = l($output, "user/$uid", array('html' => TRUE));
+        }
+      }
+      else {
+        $output = '';
+      }
     }
-    $account->name = $this->get_value($values, 'name');
-    $account->mail = $this->get_value($values, 'mail');
-    $account->picture = $this->get_value($values);
+    else {
+      // Fake an account object.
+      $account = new stdClass();
+      if ($this->options['link_photo_to_profile']) {
+        // Prevent template_preprocess_user_picture from adding a link
+        // by not setting the uid.
+        $account->uid = $this->get_value($values, 'uid');
+      }
+      $account->name = $this->get_value($values, 'name');
+      $account->mail = $this->get_value($values, 'mail');
+      $account->picture = $this->get_value($values);
+      $output = theme('user_picture', array('account' => $account));
+    }
 
-    return theme('user_picture', array('account' => $account));
+    return $output;
   }
 }
