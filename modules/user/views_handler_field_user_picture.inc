@@ -43,7 +43,7 @@ class views_handler_field_user_picture extends views_handler_field {
       }
 
       $form['image_style'] = array(
-        '#title' => t('Image preset'),
+        '#title' => t('Image style'),
         '#description' => t('Using <em>Default</em> will use the site-wide image style for user pictures set in the <a href="!account-settings">Account settings</a>.', array('!account-settings' => url('admin/config/people/accounts', array('fragment' => 'edit-personalization')))),
         '#type' => 'select',
         '#options' => $style_options,
