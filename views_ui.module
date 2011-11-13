@@ -89,6 +89,12 @@ function views_ui_menu() {
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
   ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/preview/%'] = array(
+    'page callback' => 'views_ui_build_preview',
+    'page arguments' => array(4, 6),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/preview/%/ajax'] = array(
     'page callback' => 'views_ui_build_preview',
     'page arguments' => array(4, 6),

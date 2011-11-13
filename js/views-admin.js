@@ -391,6 +391,11 @@ Drupal.behaviors.viewsUiPreview.attach = function (context, settings) {
   else {
     $('#preview-args').parent().hide();
   }
+
+  // Executes an initial preview.
+  if ($('#edit-displays-live-preview').once('edit-displays-live-preview').is(':checked')) {
+    $('#preview-submit').once('edit-displays-live-preview').click();
+  }
 };
 
 

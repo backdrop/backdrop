@@ -919,7 +919,7 @@ function views_ui_edit_page($view, $display_id = NULL) {
   if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
     $build = array();
     $build['edit_form'] = drupal_get_form('views_ui_edit_form', $view, $display_id);
-    $build['preview'] = views_ui_build_preview($view, $display_id);
+    $build['preview'] = views_ui_build_preview($view, $display_id, FALSE);
   }
   else {
     $build = $display_id;
@@ -928,7 +928,7 @@ function views_ui_edit_page($view, $display_id = NULL) {
   return $build;
 }
 
-function views_ui_build_preview($view, $display_id) {
+function views_ui_build_preview($view, $display_id, $render = TRUE) {
   if (isset($_POST['ajax_html_ids'])) {
     unset($_POST['ajax_html_ids']);
   }
@@ -949,7 +949,7 @@ function views_ui_build_preview($view, $display_id) {
   $build['preview'] = array(
     '#theme_wrappers' => array('container'),
     '#attributes' => array('id' => 'views-live-preview'),
-    '#markup' => views_ui_preview($view->clone_view(), $display_id, $args),
+    '#markup' => $render ? views_ui_preview($view->clone_view(), $display_id, $args) : '',
   );
 
   return $build;
@@ -1213,6 +1213,7 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
     //   we may need to split Preview into a separate form.
     '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
   );
+  $form['#action'] = url('admin/structure/views/view/' . $view->name .'/preview/' . $display_id);
 
   return $form;
 }
