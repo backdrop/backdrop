@@ -2509,6 +2509,7 @@ function views_ui_standard_submit($form, &$form_state) {
     // We were using the default display's values, but we're now overriding
     // the default display and saving values specific to this display.
     $display = &$form_state['view']->display[$form_state['display_id']];
+    // options_override toggles the override of this section.
     $display->handler->options_override($form, $form_state);
     $display->handler->options_submit($form, $form_state);
   }
@@ -2518,6 +2519,7 @@ function views_ui_standard_submit($form, &$form_state) {
     // Overwrite the default display with the current form values, and make
     // the current display use the new default values.
     $display = &$form_state['view']->display[$form_state['display_id']];
+    // options_override toggles the override of this section.
     $display->handler->options_override($form, $form_state);
     $display->handler->options_submit($form, $form_state);
   }
@@ -4170,8 +4172,9 @@ function views_ui_config_item_form($form, &$form_state) {
     }
 
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name, t('Remove'), 'remove');
-    // Don't execute validations for the remove button.
-    $form['buttons']['remove']['#limit_validation_errors'] = array();
+    // Only validate the override values, because this values are required for
+    // the override selection.
+    $form['buttons']['remove']['#limit_validation_errors'] = array(array('override'));
   }
 
   return $form;
@@ -4362,6 +4365,12 @@ function views_ui_config_item_group_form_submit($form, &$form_state) {
  */
 function views_ui_config_item_form_remove($form, &$form_state) {
   // Store the item back on the view
+  list($was_defaulted, $is_defaulted) = views_ui_standard_override_values($form, $form_state);
+  // If the display selection was changed toggle the override value.
+  if ($was_defaulted != $is_defaulted) {
+    $display =& $form_state['view']->display[$form_state['display_id']];
+    $display->handler->options_override($form, $form_state);
+  }
   $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], NULL);
 
   // Write to cache
