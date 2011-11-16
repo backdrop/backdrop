@@ -50,6 +50,67 @@ class EntityReferenceHandler_base implements EntityReferenceHandler {
       '#multiple' => TRUE,
       '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.')
     );
+
+    $form['sort']['type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Sort by'),
+      '#options' => array(
+        'none' => t("Don't sort"),
+        'property' => t('A property of the base table of the entity'),
+        'field' => t('A field attached to this entity'),
+      ),
+      '#default_value' => isset($field['settings']['handler_settings']['sort']['type']) ? $field['settings']['handler_settings']['sort']['type'] : 'none',
+    );
+
+    $form['sort']['property'] = array(
+      '#type' => 'select',
+      '#title' => t('Sort property'),
+      '#options' => drupal_map_assoc($entity_info['schema_fields_sql']['base table']),
+      '#default_value' => isset($field['settings']['handler_settings']['sort']['property']) ? $field['settings']['handler_settings']['sort']['property'] : '',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="field[settings][handler_settings][sort][type]"]' => array('value' => 'property'),
+        ),
+      ),
+    );
+
+    $fields = array();
+    foreach (field_info_instances($field['settings']['target_type']) as $bundle_name => $bundle_instances) {
+      foreach ($bundle_instances as $instance_name => $instance_info) {
+        $field_info = field_info_field($instance_name);
+        foreach ($field_info['columns'] as $column_name => $column_info) {
+          $fields[$instance_name . ':' . $column_name] = t('@label (column @column)', array('@label' => $instance_info['label'], '@column' => $column_name));
+        }
+      }
+    }
+
+    $form['sort']['field'] = array(
+      '#type' => 'select',
+      '#title' => t('Sort field'),
+      '#options' => $fields,
+      '#default_value' => isset($field['settings']['handler_settings']['sort']['type']) ? $field['settings']['handler_settings']['sort']['type'] : '',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="field[settings][handler_settings][sort][type]"]' => array('value' => 'field'),
+        ),
+      ),
+    );
+
+    $form['sort']['direction'] = array(
+      '#type' => 'select',
+      '#title' => t('Sort direction'),
+      '#options' => array(
+        'ASC' => t('Ascending'),
+        'DESC' => t('Descending'),
+      ),
+      '#default_value' => isset($field['settings']['handler_settings']['sort']['direction']) ? $field['settings']['handler_settings']['sort']['direction'] : 'ASC',
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="field[settings][handler_settings][sort][type]"]' => array('value' => 'none'),
+        ),
+      ),
+    );
+
     return $form;
   }
 
@@ -124,6 +185,18 @@ class EntityReferenceHandler_base implements EntityReferenceHandler {
     $query->addTag($this->field['settings']['target_type'] . '_access');
     $query->addTag('entityreference');
     $query->addMetaData('field', $this->field);
+
+    // Add the sort option.
+    if (!empty($this->field['settings']['handler_settings']['sort'])) {
+      $sort_settings = $this->field['settings']['handler_settings']['sort'];
+      if ($sort_settings['type'] == 'property') {
+        $query->propertyOrderBy($sort_settings['property'], $sort_settings['direction']);
+      }
+      elseif ($sort_settings['type'] == 'field') {
+        list($field, $column) = explode(':', $sort_settings['field'], 2);
+        $query->fieldOrderBy($field, $column, $sort_settings['direction']);
+      }
+    }
 
     return $query;
   }
