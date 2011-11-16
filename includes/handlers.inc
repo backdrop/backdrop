@@ -1452,7 +1452,7 @@ class views_join {
    */
   function build_join($select_query, $table, $view_query) {
     if (empty($this->definition['table formula'])) {
-      $right_table = $this->table;
+      $right_table = "{" . $this->table . "}";
     }
     else {
       $right_table = $this->definition['table formula'];

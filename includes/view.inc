@@ -552,8 +552,7 @@ class view extends views_db_object {
   }
 
   /**
-   * Run the pre_query() on all active handlers
-   * and some plugins.
+   * Run the pre_query() on all active handlers.
    */
   function _pre_query() {
     foreach (views_object_types() as $key => $info) {
@@ -565,7 +564,6 @@ class view extends views_db_object {
         $position++;
       }
     }
-    $this->query->pre_query();
   }
 
   /**

@@ -489,11 +489,6 @@ class views_plugin extends views_object {
   function options_submit(&$form, &$form_state) { }
 
   /**
-   * React prior to building the query.
-   */
-  function pre_query() { }
-
-  /**
    * Add anything to the query that we might need to.
    */
   function query() { }
