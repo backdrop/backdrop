@@ -8,16 +8,14 @@ class views_handler_filter_comment_user_uid extends views_handler_filter_user_na
   function query() {
     $this->ensure_my_table();
 
-    $subselect = db_select('comments', 'c');
+    $subselect = db_select('comment', 'c');
     $subselect->addField('c', 'cid');
-    $subselect->where("uid $this->operator $this->value");
+    $subselect->condition('c.uid', $this->value, $this->operator);
     $subselect->where("nid = $this->table_alias.nid");
-    $subselect = $subselect->countQuery();
 
     $condition = db_or()
       ->condition("$this->table_alias.uid", $this->value, $this->operator)
-      ->where("0 < (" . (string) $subselect . ")")
-      ->condition(0, $subselect, '<');
+      ->exists($subselect);
 
     $this->query->add_where(0, $condition);
   }
