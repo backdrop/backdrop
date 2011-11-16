@@ -1009,8 +1009,11 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * @see SelectQuery::addTag
    */
-  function add_tag($tag) {
-    $this->tags[] = $tag;
+  function add_tag($tag, $base_table = NULL) {
+    $this->tags[] = array(
+      'tag' => $tag,
+      'base_table' => $base_table,
+    );
   }
 
   /**
@@ -1131,6 +1134,18 @@ class views_plugin_query_default extends views_plugin_query {
     );
   }
 
+  function pre_query() {
+    // Add the access control tag to the query.
+    if (empty($this->options['disable_sql_rewrite'])) {
+      $base_table_data = views_fetch_data($this->base_table);
+      if (isset($base_table_data['table']['base']['access query tag'])) {
+        $access_tag = $base_table_data['table']['base']['access query tag'];
+        $this->add_tag($access_tag, $this->base_table);
+      }
+    }
+  }
+
+
   /**
    * Generate a query and a countquery from all of the information supplied
    * to the object.
@@ -1185,11 +1200,6 @@ class views_plugin_query_default extends views_plugin_query {
       ->select($this->base_table, $this->base_table, $options)
       ->addTag('views')
       ->addTag('views_' . $this->view->name);
-
-    // Add the tags added to the view itself.
-    foreach ($this->tags as $tag) {
-      $query->addTag($tag);
-    }
 
     if (!empty($distinct)) {
       $query->distinct();
@@ -1295,6 +1305,44 @@ class views_plugin_query_default extends views_plugin_query {
 
     $view->build_info['query'] = $this->query();
     $view->build_info['count_query'] = $this->query(TRUE);
+
+    // Alter the queries.
+    foreach ($this->tags as $tag) {
+      $base_table = $tag['base_table'];
+      $this->execute_alter_hooks($view->build_info['query'], $tag['tag'], $base_table);
+      $this->execute_alter_hooks($view->build_info['count_query'], $tag['tag'], $base_table);
+    }
+  }
+
+  /**
+   * Manually alter a SelectQuery.
+   *
+   * Core doesn't allow defining a different base table for every tag,
+   * making it impossible to property perform access control across
+   * relationships. We run every tag one by one, mimicking the alter process
+   * performed in SelectQuery::preExecute().
+   */
+  protected function execute_alter_hooks(SelectQueryInterface $query, $tag, $base_table = NULL) {
+    // Save the old tags and metadata.
+    // For some reason, those are public.
+    $old_tags = $query->alterTags;
+    $old_metadata = $query->alterMetaData;
+
+    $query->alterTags = array($tag => TRUE);
+    if (isset($base_table)) {
+      // Use an explicit base table.
+      $query->alterMetaData['base_table'] = $base_table;
+    }
+    else {
+      // Else, use the first table of the query.
+      $tables = $query->getTables();
+      $query->alterMetaData['base_table'] = key($tables);
+    }
+    drupal_alter(array('query', 'query_' . $tag), $query);
+
+    // Restore the tags and metadata.
+    $query->alterTags = $old_tags;
+    $query->alterMetaData = $old_metadata;
   }
 
   /**
@@ -1311,15 +1359,6 @@ class views_plugin_query_default extends views_plugin_query {
 
     $query->addMetaData('view', $view);
     $count_query->addMetaData('view', $view);
-
-    if (empty($this->options['disable_sql_rewrite'])) {
-      $base_table_data = views_fetch_data($this->base_table);
-      if (isset($base_table_data['table']['base']['access query tag'])) {
-        $access_tag = $base_table_data['table']['base']['access query tag'];
-        $query->addTag($access_tag);
-        $count_query->addTag($access_tag);
-      }
-    }
 
     $items = array();
     if ($query) {
