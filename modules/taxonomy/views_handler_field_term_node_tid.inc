@@ -134,7 +134,8 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
 
   function add_self_tokens(&$tokens, $item) {
     foreach(array('tid', 'name', 'vocabulary_machine_name', 'vocabulary') as $token) {
-      $tokens['[' . $this->options['id'] . '-' . $token . ']'] = isset($item[$token]) ? $item[$token] : '';
+      // Replace _ with - for the vocabulary machine name.
+      $tokens['[' . $this->options['id'] . '-' . str_replace('_', '-', $token). ']'] = isset($item[$token]) ? $item[$token] : '';
     }
   }
 }
