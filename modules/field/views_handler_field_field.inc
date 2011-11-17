@@ -788,7 +788,7 @@ class views_handler_field_field extends views_handler_field {
       }
       // Only add the raw field items (for use in tokens) if the curent user
       // has access to view the field content.
-      if (!isset($items[$count]['rendered']['#access']) || $items[$count]['rendered']['#access']) {
+      if ((!isset($items[$count]['rendered']['#access']) || $items[$count]['rendered']['#access']) && !empty($render_array['#items'][$count])) {
         $items[$count]['raw'] = $render_array['#items'][$count];
       }
     }
