@@ -2276,7 +2276,7 @@ class views_plugin_display extends views_plugin {
         // if row, $style will be empty.
         $plugin = $this->get_plugin(empty($style) ? 'row' : 'style');
         if ($plugin) {
-          $plugin->options_submit($form[$section], $form_state);
+          $plugin->options_submit($form['options'][$section], $form_state);
         }
         $this->set_option($section, $form_state['values'][$section]);
         break;
