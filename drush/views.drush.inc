@@ -19,6 +19,10 @@ function views_drush_help($section) {
       return $help;
     case 'drush:views-list':
       return dt('Show a list of available views with information about them.');
+    case 'drush:views-enable':
+      return dt('Enable the specified views. Follow the command with a space delimited list of view names');
+    case 'drush:views-disable':
+      return dt('Disable the specified views. Follow the command with a space delimited list of view names');
   }
 }
 
@@ -75,6 +79,28 @@ function views_drush_command() {
     'description' => 'Get a list of all Views analyze warnings',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     'aliases' => array('va'),
+  );
+  $items['views-enable'] = array(
+    'drupal dependencies' => array('views'),
+    'description' => 'Enable the specified views.',
+    'arguments' => array(
+      'views' => 'A space delimited list of view names.',
+    ),
+    'aliases' => array('ven'),
+    'examples' => array(
+      'drush ven frontpage taxonomy_term' => 'Enable the frontpage and taxonomy_term views.',
+    ),
+  );
+  $items['views-disable'] = array(
+    'drupal dependencies' => array('views'),
+    'description' => 'Disable the specified views.',
+    'arguments' => array(
+      'views' => 'A space delimited list of view names.',
+    ),
+    'aliases' => array('vdis'),
+    'examples' => array(
+      'drush ven frontpage taxonomy_term' => 'Disable the frontpage and taxonomy_term views.',
+    ),
   );
 
   return $items;
@@ -400,6 +426,62 @@ function drush_views_analyze() {
     }
   }
   drush_log(dt('A total of @total views were analyzed and @messages problems were found.', array('@total' => $total, '@messages' => $messages_count)), 'ok');
+}
+
+/**
+ * Enables views
+ */
+function drush_views_enable() {
+  $viewnames = _convert_csv_to_array(func_get_args());
+  // Return early if no view names were specified.
+  if (empty($viewnames)) {
+    return drush_set_error(dt('Please specify a space delimited list of view names to enable'));
+  }
+  _views_drush_changestatus($viewnames, FALSE);
+}
+
+/**
+ * Disables views
+ */
+function drush_views_disable() {
+  $viewnames = _convert_csv_to_array(func_get_args());
+  // Return early if no view names were specified.
+  if (empty($viewnames)) {
+    return drush_set_error(dt('Please specify a space delimited list of view names to disable'));
+  }
+  _views_drush_changestatus($viewnames, TRUE);
+}
+
+/*
+* Helper function to enable / disable views
+ * @param $viewnames: array of viewnames to process
+ * @param $status: TRUE to disable or FALSE to enable the view
+ */
+function _views_drush_changestatus($viewnames = array(), $status = NULL) {
+  if ($status !== NULL && !empty($viewnames)) {
+    $changed = FALSE;
+    $processed = $status ? dt('disabled') : dt('enabled');
+    $views_status = variable_get('views_defaults', array());
+
+    foreach ($viewnames as $key => $viewname) {
+      if ($views_status[$viewname] !== $status) {
+        $views_status[$viewname] = $status;
+        $changed = TRUE;
+        drush_log(dt("The view '!name' has been !processed", array('!name' => $viewname, '!processed' => $processed)), 'success');
+      }
+      else {
+        drush_set_error(dt("The view '!name' is already !processed", array('!name' => $viewname, '!processed' => $processed)));
+      }
+    }
+    // If we made changes to views status, save them and clear caches
+    if ($changed) {
+      variable_set('views_defaults', $views_status);
+      views_invalidate_cache();
+      drush_log(dt("Views cache was cleared"), 'ok');
+      menu_rebuild();
+      drush_log(dt("Menu cache was cleared"), 'ok');
+    }
+  }
 }
 
 /**
