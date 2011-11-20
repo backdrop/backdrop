@@ -1407,6 +1407,14 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  *   - - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
  */
 class views_join {
+  var $table = NULL;
+  var $left_table = NULL;
+  var $left_field = NULL;
+  var $field = NULL;
+  var $extra = NULL;
+  var $type = NULL;
+  var $definition = array();
+
   /**
    * Construct the views_join object.
    */
