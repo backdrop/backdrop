@@ -99,7 +99,7 @@ function views_drush_command() {
     ),
     'aliases' => array('vdis'),
     'examples' => array(
-      'drush ven frontpage taxonomy_term' => 'Disable the frontpage and taxonomy_term views.',
+      'drush vdis frontpage taxonomy_term' => 'Disable the frontpage and taxonomy_term views.',
     ),
   );
 
