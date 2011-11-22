@@ -689,7 +689,7 @@ class views_handler_field_field extends views_handler_field {
 
     // We are supposed to show only certain deltas.
     if ($this->limit_values && !empty($entity->{$this->definition['field_name']})) {
-      $all_values = $entity->{$this->definition['field_name']}[$langcode];
+      $all_values = !empty($entity->{$this->definition['field_name']}[$langcode]) ? $entity->{$this->definition['field_name']}[$langcode] : array();
       if ($this->options['delta_reversed']) {
         $all_values = array_reverse($all_values);
       }
