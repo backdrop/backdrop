@@ -539,8 +539,21 @@ function hook_views_default_views() {
 }
 
 /**
+ * Alter default views defined by other modules.
+ *
  * This hook is called right before all default views are cached to the
  * database. It takes a keyed array of views by reference.
+ *
+ * Example usage to add a field to a view:
+ * @code
+ *   $handler =& $view->display['DISPLAY_ID']->handler;
+ *   // Add the user name field to the view.
+ *   $handler->display->display_options['fields']['name']['id'] = 'name';
+ *   $handler->display->display_options['fields']['name']['table'] = 'users';
+ *   $handler->display->display_options['fields']['name']['field'] = 'name';
+ *   $handler->display->display_options['fields']['name']['label'] = 'Author';
+ *   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
+ * @endcode
  */
 function hook_views_default_views_alter(&$views) {
   if (isset($views['taxonomy_term'])) {
