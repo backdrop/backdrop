@@ -47,7 +47,7 @@ interface EntityReferenceHandler {
   /**
    * Generate a settings form for this handler.
    */
-  public static function settingsForm($field);
+  public static function settingsForm($field, $instance);
 }
 
 /**
@@ -62,7 +62,7 @@ class EntityReferenceHandler_broken implements EntityReferenceHandler {
     $this->field = $field;
   }
 
-  public static function settingsForm($field) {
+  public static function settingsForm($field, $instance) {
     $form['handler'] = array(
       '#markup' => t('The selected handler is broken.'),
     );

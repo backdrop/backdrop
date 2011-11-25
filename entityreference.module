@@ -188,6 +188,7 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
     '#process' => array('entityreference_render_settings'),
     '#tree' => TRUE,
     '#field' => $field,
+    '#instance' => $instance,
   );
 
   return $form;
@@ -212,11 +213,12 @@ function entityreference_render_settings($element, $form_state) {
 
   // Rebuild the field configuration based on the submitted structure.
   $field = $element['#field'];
+  $instance = $element['#instance'];
   if (isset($form_state['values']['field']['settings'])) {
     $field['settings'] = $form_state['values']['field']['settings'] + $field['settings'];
   }
 
-  $element += call_user_func(array($class, 'settingsForm'), $field);
+  $element += call_user_func(array($class, 'settingsForm'), $field, $instance);
   return $element;
 }
 

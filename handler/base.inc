@@ -34,7 +34,7 @@ class EntityReferenceHandler_base implements EntityReferenceHandler {
   /**
    * Implements EntityReferenceHandler::settingsForm().
    */
-  public static function settingsForm($field) {
+  public static function settingsForm($field, $instance) {
     $entity_info = entity_get_info($field['settings']['target_type']);
     $bundles = array();
     foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
