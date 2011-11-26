@@ -192,3 +192,33 @@ Due to changes in comment.module there is no extra views-view-row-node template 
 
 <h3>Entity type Key on Base tables</h3>
 During the development of the drupal7 version of views the entity type associated with a table got added to $data['name']['table']['base']['entity type']. It should be moved to $data['name']['table']['entity type'].
+
+<h3>Changed views_plugin_style::render_grouping()</h3>
+The parameters as well as the structure of the methods return have changed.
+The method now accepts a third optional parameter called "$group_rendered".
+This parameter defines whether to use the rendered or the raw field value for grouping.
+Intention for adding the parameter was that the grouping could have been acted
+unexpected if the rendered field contained unique values e.g. by using drupal_html_id().
+<dl>
+<dt>New return structure</dt>
+<dd>
+{grouping value} is the value affected by the new parameter.
+<pre>
+  array (
+    {grouping value} => array(
+      'group' => {rendered_value of the grouping field},
+      'rows' => array({group rows}),
+    ),
+  );
+</pre>
+</dd>
+<dt>Old return structure</dt>
+<dd>
+<strong>If the new parameter isn't explicitly set or its value is NULL the structure of the return will be the same as in D6!</strong>
+<pre>
+  array (
+    {rendered_value of the grouping field} => array({group rows}),
+  );
+</pre>
+</dd>
+</dl>
