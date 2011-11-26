@@ -13,7 +13,8 @@ class views_handler_field_node extends views_handler_field {
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    if (!empty($this->options['link_to_node'])) {
+    // Don't add the additional fields to groupby
+    if (!empty($this->options['link_to_node']) && !$this->view->display_handler->use_group_by()) {
       $this->additional_fields['nid'] = array('table' => 'node', 'field' => 'nid');
       if (module_exists('translation')) {
         $this->additional_fields['language'] = array('table' => 'node', 'field' => 'language');
@@ -47,7 +48,7 @@ class views_handler_field_node extends views_handler_field {
    * Data should be made XSS safe prior to calling this function.
    */
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_node'])) {
+    if (!empty($this->options['link_to_node']) && !empty($this->additional_fields['nid'])) {
       if ($data !== NULL && $data !== '') {
         $this->options['alter']['make_link'] = TRUE;
         $this->options['alter']['path'] = "node/" . $this->get_value($values, 'nid');
