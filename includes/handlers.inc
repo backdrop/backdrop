@@ -1397,6 +1397,8 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  *       be set in the cached definition because it can't know aliases; this field
  *       can only be used by realtime joins.
  *   - - field: Field or formula
+ *       in formulas we can reference the right table by using %alias
+ *       @see SelectQueryInterface::addJoin()
  *   - - operator: defaults to =
  *   - - value: Must be set. If an array, operator will be defaulted to IN.
  *   - - numeric: If true, the value will not be surrounded in quotes.

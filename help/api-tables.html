@@ -140,8 +140,10 @@ Quite a few more fields are available in this definition:
   <dt>extra</dt>
   <dd>Either a string that's directly added, or an array of items. Each item is, itself, an array:
     <dl>
+      <dt>table</dt>
+      <dd>table should not be set in most cases, as it would be filled with the right table alias. Set it to NULL if you want to use a formular in "field"</dd>
       <dt>field</dt>
-      <dd>Field or formula</dd>
+      <dd>Field or formula, therein "%alias" can be used to reference the right table.</dd>
       <dt>operator</dt>
       <dd>Similar to filters, this is the operator, such as &gt;, &lt;, =, etc. Defaults to = or IN.</dd>
       <dt>value</dt>
