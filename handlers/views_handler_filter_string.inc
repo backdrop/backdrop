@@ -113,6 +113,17 @@ class views_handler_filter_string extends views_handler_filter {
         ),
       );
     }
+    // Add regexp support for MySQL.
+    if (in_array(db_driver(), array('mysql', 'mysqli'))) {
+      $operators += array(
+        'regular_expression' => array(
+          'title' => t('Regular expression'),
+          'short' => t('regex'),
+          'method' => 'op_regex',
+          'values' => 1,
+        ),
+      );
+    }
 
     return $operators;
   }
@@ -292,6 +303,10 @@ class views_handler_filter_string extends views_handler_filter {
   function op_longer($field) {
     $placeholder = $this->placeholder();
     $this->query->add_where_expression($this->options['group'], "LENGTH($field) > $placeholder", array($placeholder => $this->value));
+  }
+
+  function op_regex($field) {
+    $this->query->add_where($this->options['group'], $field, $this->value, 'RLIKE');
   }
 
   function op_empty($field) {

@@ -89,6 +89,18 @@ class views_handler_filter_numeric extends views_handler_filter {
       );
     }
 
+    // Add regexp support for MySQL.
+    if (in_array(db_driver(), array('mysql', 'mysqli'))) {
+      $operators += array(
+        'regular_expression' => array(
+          'title' => t('Regular expression'),
+          'short' => t('regex'),
+          'method' => 'op_regex',
+          'values' => 1,
+        ),
+      );
+    }
+
     return $operators;
   }
 
@@ -236,6 +248,10 @@ class views_handler_filter_numeric extends views_handler_filter {
     }
 
     $this->query->add_where($this->options['group'], $field, NULL, $operator);
+  }
+
+  function op_regex($field) {
+    $this->query->add_where($this->options['group'], $field, $this->value, 'RLIKE');
   }
 
   function admin_summary() {
