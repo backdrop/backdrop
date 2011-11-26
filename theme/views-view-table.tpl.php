@@ -31,10 +31,10 @@
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($rows as $count => $row): ?>
-      <tr class="<?php print implode(' ', $row_classes[$count]); ?>">
+    <?php foreach ($rows as $row_count => $row): ?>
+      <tr class="<?php print implode(' ', $row_classes[$row_count]); ?>">
         <?php foreach ($row as $field => $content): ?>
-          <td <?php if ($field_classes[$field][$count]) { print 'class="'. $field_classes[$field][$count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$count]); ?>>
+          <td <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
             <?php print $content; ?>
           </td>
         <?php endforeach; ?>
