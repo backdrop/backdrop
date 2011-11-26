@@ -219,7 +219,8 @@ function _views_find_module_templates($cache, $path) {
           $templates[strtr($file, '-', '_')] = array(
             'template' => $file,
             'path' => dirname($files[$match]->uri),
-            'variables' => $info['variables'],
+            'variables' => isset($info['variables']) ? $info['variables'] : NULL,
+            'render element' => isset($info['render element']) ? $info['render element'] : NULL,
             'base hook' => $hook,
             'includes' => isset($info['includes']) ? $info['includes'] : NULL,
           );
