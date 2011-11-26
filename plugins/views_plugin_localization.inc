@@ -139,7 +139,9 @@ class views_plugin_localization extends views_plugin {
         $translatable[] = array('value' => $display->display_title, 'keys' => array('display_title'));
       }
       // Unpack handlers.
-      $this->view->display[$display_id]->handler->unpack_translatables($translatable);
+      if (is_object($this->view->display[$display_id]->handler)) {
+        $this->view->display[$display_id]->handler->unpack_translatables($translatable);
+      }
       foreach ($translatable as $data) {
         $data['keys'] = array_merge(array($this->view->name, $display_id), $data['keys']);
         switch ($op) {
