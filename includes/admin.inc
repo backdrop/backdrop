@@ -2106,6 +2106,10 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
     // Find out the first display which has a changed path and redirect to this url.
     $old_view = views_get_view($form_state['view']->name);
     foreach ($old_view->display as $id => $display) {
+      // Only check for displays with a path.
+      if (!isset($display->display_options['path'])) {
+        continue;
+      }
       $old_path = $display->display_options['path'];
       if (($display->display_plugin == 'page') && ($old_path == $destination) && ($old_path != $form_state['view']->display[$id]->display_options['path'])) {
         $destination = $form_state['view']->display[$id]->display_options['path'];
