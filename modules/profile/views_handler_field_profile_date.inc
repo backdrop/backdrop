@@ -42,7 +42,7 @@ class views_handler_field_profile_date extends views_handler_field_date {
     // birthdays.
 
     // But we *can* deal with non-year stuff:
-    $date = gmmktime(0, 0, 0, $value['month'], $value['day'], 1970);
+    $date = gmmktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
     $replace = array(
       // day
       'd' => sprintf('%02d', $value['day']),
