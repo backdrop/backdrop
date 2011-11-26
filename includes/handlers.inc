@@ -1124,14 +1124,15 @@ function views_get_timezone() {
   }
 
   // set up the database timezone
-  if (in_array(db_driver(), array('mysql', 'mysqli', 'pgsql'))) {
+  $db_type = Database::getConnection()->databaseType();
+  if (in_array($db_type, array('mysql', 'pgsql'))) {
     $offset = '+00:00';
     static $already_set = FALSE;
     if (!$already_set) {
-      if (db_driver() == 'pgsql') {
+      if ($db_type == 'pgsql') {
         db_query("SET TIME ZONE INTERVAL '$offset' HOUR TO MINUTE");
       }
-      elseif (db_driver() == 'mysql') {
+      elseif ($db_type == 'mysql') {
         db_query("SET @@session.time_zone = '$offset'");
       }
 
@@ -1157,7 +1158,7 @@ function views_get_timezone() {
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
-  $db_type = db_driver();
+  $db_type = Database::getConnection()->databaseType();
   $offset = $set_offset !== NULL ? $set_offset : views_get_timezone();
   if (isset($offset) && !is_numeric($offset)) {
     $dtz = new DateTimeZone($offset);
@@ -1167,7 +1168,6 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
 
   switch ($db_type) {
     case 'mysql':
-    case 'mysqli':
       switch ($field_type) {
         case 'int':
           $field = "DATE_ADD('19700101', INTERVAL $field SECOND)";
@@ -1216,11 +1216,10 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_format($format, $field, $field_type = 'int', $set_offset = NULL) {
-  $db_type = db_driver();
+  $db_type = Database::getConnection()->databaseType();
   $field = views_date_sql_field($field, $field_type, $set_offset);
   switch ($db_type) {
     case 'mysql':
-    case 'mysqli':
       $replace = array(
         'Y' => '%Y',
         'y' => '%y',
@@ -1303,7 +1302,7 @@ function views_date_sql_format($format, $field, $field_type = 'int', $set_offset
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set_offset = NULL) {
-  $db_type = db_driver();
+  $db_type = Database::getConnection()->databaseType();
   $field = views_date_sql_field($field, $field_type, $set_offset);
 
   // Note there is no space after FROM to avoid db_rewrite problems
@@ -1326,7 +1325,6 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
   case('WEEK'):  // ISO week number for date
     switch ($db_type) {
       case('mysql'):
-      case('mysqli'):
         // WEEK using arg 3 in mysql should return the same value as postgres EXTRACT
         return "WEEK($field, 3)";
       case('pgsql'):
@@ -1335,7 +1333,6 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
   case('DOW'):
     switch ($db_type) {
       case('mysql'):
-      case('mysqli'):
         // mysql returns 1 for Sunday through 7 for Saturday
         // php date functions and postgres use 0 for Sunday and 6 for Saturday
         return "INTEGER(DAYOFWEEK($field) - 1)";
@@ -1345,7 +1342,6 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
   case('DOY'):
     switch ($db_type) {
       case('mysql'):
-      case('mysqli'):
         return "DAYOFYEAR($field)";
       case('pgsql'):
         return "EXTRACT(DOY FROM($field))";

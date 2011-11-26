@@ -8,7 +8,7 @@
  * Implements hook_install().
  */
 function views_install() {
-  if (db_driver() == 'pgsql') {
+  if (Database::getConnection()->databaseType() == 'pgsql') {
     db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
     db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
     db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
@@ -376,7 +376,7 @@ function views_update_6006() {
  * one result to be returned for each item.
  */
 function views_update_6007() {
-  if (db_driver() == 'pgsql') {
+  if (Database::getConnection()->databaseType() == 'pgsql') {
     db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
     db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
     db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
@@ -418,7 +418,7 @@ function views_schema_6009() {
 function views_update_6009() {
   $schema = views_schema_6009();
 
-  if (db_driver() == 'pgsql') {
+  if (Database::getConnection()->databaseType() == 'pgsql') {
     db_query('ALTER TABLE {views_display} RENAME "display_options" TO "display_options_old"');
     db_add_field('views_display', 'display_options', $schema['views_display']['fields']['display_options']);
 
