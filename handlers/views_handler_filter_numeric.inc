@@ -90,7 +90,7 @@ class views_handler_filter_numeric extends views_handler_filter {
     }
 
     // Add regexp support for MySQL.
-    if (in_array(db_driver(), array('mysql', 'mysqli'))) {
+    if (DatabaseConnection::getConnection()->databaseType() == 'mysql') {
       $operators += array(
         'regular_expression' => array(
           'title' => t('Regular expression'),
