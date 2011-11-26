@@ -625,7 +625,7 @@ function template_preprocess_views_view_row_comment(&$vars) {
   // Put the view on the node so we can retrieve it in the preprocess.
   $node->view = &$view;
 
-  $build = comment_view_multiple(array($comment->cid => $comment), $node);
+  $build = comment_view_multiple(array($comment->cid => $comment), $node, $plugin->options['view_mode']);
   // If we're displaying the comments without links, remove them from the
   // renderable array. There is no way to avoid building them in the first
   // place (see comment_build_content()).
