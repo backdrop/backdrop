@@ -52,6 +52,7 @@ function views_ajax() {
 
       // Override the display's pager_element with the one actually used.
       if (isset($pager_element)) {
+        $commands[] = views_ajax_command_scroll_top('.view-dom-id-' . $dom_id);
         $view->display[$display_id]->handler->set_option('pager_element', $pager_element);
       }
       // Reuse the same DOM id so it matches that in Drupal.settings.
@@ -145,6 +146,20 @@ function views_ajax_command_add_tab($id, $title, $body) {
     'id' => $id,
     'title' => $title,
     'body' => $body,
+  );
+  return $command;
+}
+
+/**
+ * Scroll to top of the current view.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function views_ajax_command_scroll_top($selector) {
+  $command = array(
+    'command' => 'viewsScrollTop',
+    'selector' => $selector,
   );
   return $command;
 }
