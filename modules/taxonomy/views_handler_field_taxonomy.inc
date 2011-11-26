@@ -24,6 +24,7 @@ class views_handler_field_taxonomy extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
     $options['link_to_taxonomy'] = array('default' => FALSE);
+    $options['convert_spaces'] = array('default' => FALSE);
     return $options;
   }
 
@@ -36,6 +37,12 @@ class views_handler_field_taxonomy extends views_handler_field {
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_taxonomy']),
+    );
+     $form['convert_spaces'] = array(
+      '#title' => t('Convert spaces in term names to hyphens'),
+      '#description' => t('This allows links to work with Views taxonomy term arguments.'),
+      '#type' => 'checkbox',
+      '#default_value' => !empty($this->options['convert_spaces']),
     );
     parent::options_form($form, $form_state);
   }
@@ -56,6 +63,11 @@ class views_handler_field_taxonomy extends views_handler_field {
       $uri = entity_uri('taxonomy_term', $term);
       $this->options['alter']['path'] = $uri['path'];
     }
+
+    if (!empty($this->options['convert_spaces'])) {
+      $data = str_replace(' ', '-', $data);
+    }
+
     return $data;
   }
 
