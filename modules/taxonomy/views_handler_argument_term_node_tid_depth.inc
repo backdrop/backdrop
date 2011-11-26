@@ -82,7 +82,7 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
       $tids = new stdClass();
       $tids->value = $this->argument;
       $tids = views_break_phrase($this->argument, $tids);
-      if ($tids->value == -1) {
+      if ($tids->value == array(-1)) {
         return FALSE;
       }
 

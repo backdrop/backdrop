@@ -102,7 +102,7 @@ class views_plugin_argument_validate_node extends views_plugin_argument_validate
         $nids = new stdClass();
         $nids->value = array($argument);
         $nids = views_break_phrase($argument, $nids);
-        if ($nids->value == -1) {
+        if ($nids->value == array(-1)) {
           return FALSE;
         }
 
