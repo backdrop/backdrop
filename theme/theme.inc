@@ -113,8 +113,7 @@ function template_preprocess_views_view(&$vars) {
     // we set up a running counter, $dom_id, to issue a "unique" identifier for
     // each view. This identifier is written to both Drupal.settings and the DIV
     // wrapper.
-    static $dom_id = 1;
-    $vars['dom_id'] = !empty($view->dom_id) ? $view->dom_id : $dom_id++;
+    $vars['dom_id'] = !empty($view->dom_id) ? $view->dom_id : md5($view->name . REQUEST_TIME . rand());
     $vars['classes_array'][] = 'view-dom-id-' . $vars['dom_id'];
   }
 
