@@ -484,6 +484,28 @@ function comment_views_data() {
     ),
   );
 
+  // last_comment_uid
+  $data['node_comment_statistics']['last_comment_uid'] = array(
+    'title' => t('Last comment uid'),
+    'help' => t('The User ID of the author of the last comment of a node.'),
+    'relationship' => array(
+      'title' => t('Last comment author'),
+      'base' => 'users',
+      'base field' => 'uid',
+      'handler' => 'views_handler_relationship',
+      'label' => t('Last comment author'),
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+    'field' => array(
+      'handler' => 'views_handler_filter_user_name',
+    ),
+  );
+
   return $data;
 }
 
