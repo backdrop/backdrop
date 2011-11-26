@@ -40,6 +40,7 @@ function views_views_plugins() {
         'contextual links locations' => array('page'),
         'use ajax' => TRUE,
         'use pager' => TRUE,
+        'use more' => TRUE,
         'accept attachments' => TRUE,
         'admin' => t('Page'),
         'help topic' => 'display-page',
