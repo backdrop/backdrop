@@ -114,7 +114,7 @@ class views_handler_filter_string extends views_handler_filter {
       );
     }
     // Add regexp support for MySQL.
-    if (DatabaseConnection::getConnection()->databaseType() == 'mysql') {
+    if (Database::getConnection()->databaseType() == 'mysql') {
       $operators += array(
         'regular_expression' => array(
           'title' => t('Regular expression'),
