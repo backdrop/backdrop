@@ -121,7 +121,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
     $show_stats = variable_get('views_ui_show_sql_query_where', 'above');
   }
 
-  $combined = ($show_query === $show_stats);
+  $combined = show_query && $show_stats;
 
   $rows = array('query' => array(), 'statistics' => array());
   $output = '';
