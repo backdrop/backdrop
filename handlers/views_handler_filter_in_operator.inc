@@ -309,7 +309,12 @@ class views_handler_filter_in_operator extends views_handler_filter {
 
         $keys = $this->value;
         $value = array_shift($keys);
-        $values = check_plain($this->value_options[$value]);
+        if (isset($this->value_options[$value])) {
+          $values = check_plain($this->value_options[$value]);
+        }
+        else {
+          $values = '';
+        }
       }
       else {
         foreach ($this->value as $value) {
@@ -320,7 +325,9 @@ class views_handler_filter_in_operator extends views_handler_filter {
             $values .= '...';
             break;
           }
-          $values .= check_plain($this->value_options[$value]);
+          if (isset($this->value_options[$value])) {
+            $values .= check_plain($this->value_options[$value]);
+          }
         }
       }
     }
