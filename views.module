@@ -1586,13 +1586,21 @@ function views_debug($message, $placeholders = array()) {
     $output = '<pre>' . var_export($message, TRUE) . '</pre>';
   }
   if (module_exists('devel') && variable_get('views_devel_output', FALSE) && user_access('access devel information')) {
-    if (variable_get('views_devel_region', 'footer') != 'watchdog') {
-      $output = empty($output) ? t($message, $placeholders) : $output;
-      drupal_add_region_content(variable_get('views_devel_region', 'footer'), $output);
-    }
-    else {
+    $devel_region = variable_get('views_devel_region', 'footer');
+    if ($devel_region == 'watchdog') {
       $output = $message;
       watchdog('views_logging', $output, $placeholders);
+    }
+    else if ($devel_region == 'message') {
+      $output = empty($output) ? t($message, $placeholders) : $output;
+      dpm($output);
+    }
+    else if ($devel_region == 'drupal_debug') {
+      $output = empty($output) ? t($message, $placeholders) : $output;
+      dd($output);
+    }
+    else {
+      drupal_add_region_content($devel_region, $output);
     }
   }
   elseif (isset($GLOBALS['drupal_test_info'])) {

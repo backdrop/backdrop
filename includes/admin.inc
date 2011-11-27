@@ -4740,8 +4740,8 @@ function views_ui_admin_settings_advanced() {
 
   $form['debug']['views_devel_output'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable views performance statistics via the Devel module'),
-    '#description' => t("Check this to enable some Views query and performance statistics <em>if Devel is installed</em>."),
+    '#title' => t('Enable views performance statistics/debug messages via the Devel module'),
+    '#description' => t("Check this to enable some Views query and performance statistics/debug messages <em>if Devel is installed</em>."),
     '#default_value' => variable_get('views_devel_output', FALSE),
   );
 
@@ -4760,10 +4760,14 @@ function views_ui_admin_settings_advanced() {
 
   $regions = system_region_list(variable_get('theme_default', 'garland'));
   $regions['watchdog'] = t('Watchdog');
+  if (module_exists('devel')) {
+    $regions['message'] = t('Devel message(dpm)');
+    $regions['drupal_debug'] = t('Devel logging (tmp://drupal_debug.txt)');
+  }
 
   $form['debug']['views_devel_region'] = array(
     '#type' => 'select',
-    '#title' => t('Page region to output performance statistics'),
+    '#title' => t('Page region to output performance statistics/debug messages'),
     '#default_value' => variable_get('views_devel_region', 'footer'),
     '#options' => $regions,
     '#dependency' => array('edit-views-devel-output' => array(1)),

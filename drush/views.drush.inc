@@ -241,6 +241,8 @@ function views_development_settings() {
   variable_set('views_ui_show_sql_query', TRUE);
   variable_set('views_ui_show_performance_statistics', TRUE);
   variable_set('views_show_additional_queries', TRUE);
+  variable_set('views_devel_output', TRUE);
+  variable_set('views_devel_region', 'message');
   $message = dt("Setup the new views settings.");
   drush_log($message, 'success');
 }
