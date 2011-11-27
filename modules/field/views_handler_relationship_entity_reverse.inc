@@ -31,6 +31,10 @@ class views_handler_relationship_entity_reverse extends views_handler_relationsh
       $first['type'] = 'INNER';
     }
 
+    if (!empty($this->definition['join_extra'])) {
+      $first['extra'] = $this->definition['join_extra'];
+    }
+
     if (!empty($this->definition['join_handler']) && class_exists($this->definition['join_handler'])) {
       $first_join = new $this->definition['join_handler'];
     }
