@@ -350,7 +350,7 @@ function comment_views_data() {
 
   $data['comment']['uid'] = array(
     'title' => t('Author uid'),
-    'help' => t('If you need more fields then the uid add the comment: author relationship'),
+    'help' => t('If you need more fields than the uid add the comment: author relationship'),
     'relationship' => array(
       'title' => t('Author'),
       'help' => t("The User ID of the comment's author."),
