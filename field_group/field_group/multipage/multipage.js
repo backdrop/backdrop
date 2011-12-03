@@ -140,6 +140,7 @@ Drupal.multipageControl.prototype = {
    */
   nextPage: function () {
     this.wrapper.next().data('multipageControl').focus();
+    $('html, body').scrollTop(this.wrapper.parents('.field-group-multipage-group-wrapper').offset().top);
   },
   
   /**
@@ -147,6 +148,7 @@ Drupal.multipageControl.prototype = {
    */
   previousPage: function () {
     this.wrapper.prev().data('multipageControl').focus();
+    $('html, body').scrollTop(this.wrapper.parents('.field-group-multipage-group-wrapper').offset().top);
   },
 
   /**
