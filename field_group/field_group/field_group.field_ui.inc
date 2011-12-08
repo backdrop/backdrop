@@ -779,6 +779,11 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
 
   $source_mode = (!$form_state['values']['additional_settings']['fieldgroup_clone']) ? 'form' : $form_state['values']['additional_settings']['fieldgroup_clone'];
   $groups_to_clone = field_group_read_groups(array('bundle' => $form_state['field_group_params']->bundle, 'entity_type' => $form_state['field_group_params']->entity_type));
+  if (!isset($groups_to_clone[$form_state['field_group_params']->entity_type], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode])) {
+    drupal_set_message(t('There where no fieldgroups found to clone from @source', array('@source' => $source_mode)), 'warning');
+    return;
+  }
+
   $source_groups = $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode];
 
   $fields = array_keys($form_state['values']['fields']);
