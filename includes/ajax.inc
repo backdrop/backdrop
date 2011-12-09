@@ -50,6 +50,16 @@ function views_ajax() {
       // such as tablesorts, exposed filters and paging assume $_GET.
       $_GET += $_POST;
 
+      // Overwrite the destination.
+      // @see drupal_get_destination()
+      $origin_destination = $path;
+      $query = drupal_http_build_query($_REQUEST);
+      if ($query != '') {
+        $origin_destination .= '?' . $query;
+      }
+      $destination = &drupal_static('drupal_get_destination');
+      $destination = array('destination' => $origin_destination);
+
       // Override the display's pager_element with the one actually used.
       if (isset($pager_element)) {
         $commands[] = views_ajax_command_scroll_top('.view-dom-id-' . $dom_id);
