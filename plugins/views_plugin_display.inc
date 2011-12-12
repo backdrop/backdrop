@@ -171,7 +171,7 @@ class views_plugin_display extends views_plugin {
       foreach ($extenders as $extender) {
         $data = views_fetch_plugin_data('display_extender', $extender);
         if (isset($data['handler']) && class_exists($data['handler'])) {
-          $this->extender[$extender] = new $data['handler']($view, $this);
+          $this->extender[$extender] = new $data['handler']($this->view, $this);
         }
         else {
           vpr('Invalid display extender @extender', array('@handler' => $extender));
