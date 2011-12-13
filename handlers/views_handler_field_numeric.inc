@@ -57,6 +57,7 @@ class views_handler_field_numeric extends views_handler_field {
         ',' => t('Comma'),
         ' ' => t('Space'),
         '.' => t('Decimal'),
+        '\'' => t('Apostrophe'),
       ),
       '#default_value' => $this->options['separator'],
       '#description' => t('What single character to use as the thousands separator.'),
