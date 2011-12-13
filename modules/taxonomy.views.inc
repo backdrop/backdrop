@@ -150,6 +150,10 @@ function taxonomy_views_data() {
       'hierarchy table' => 'taxonomy_term_hierarchy',
       'numeric' => TRUE,
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+      'help' => t('Taxonomy term weight.'),
+    ),
   );
 
   $data['taxonomy_term_data']['tid_representative'] = array(
