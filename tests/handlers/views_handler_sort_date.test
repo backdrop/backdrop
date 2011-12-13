@@ -21,7 +21,7 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
   }
 
   protected function orderResultSetDateHelper($date, $granularity) {
-    switch ('granularity') {
+    switch ($granularity) {
       case 'second':
       default:
         return $date;
