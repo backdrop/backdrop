@@ -345,7 +345,7 @@ class views_handler_field_field extends views_handler_field {
     if (count($field['columns']) == 1) {
       $form['click_sort_column'] = array(
         '#type' => 'value',
-        '#value' => isset($column_names[0]) ? $column_names : '',
+        '#value' => isset($column_names[0]) ? $column_names[0] : '',
       );
     }
     else {
