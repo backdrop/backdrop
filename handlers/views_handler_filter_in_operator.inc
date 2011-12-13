@@ -10,6 +10,12 @@
 class views_handler_filter_in_operator extends views_handler_filter {
   var $value_form_type = 'checkboxes';
 
+  /**
+   * @var array
+   * Stores all operations which are available on the form.
+   */
+  var $value_options = NULL;
+
   function construct() {
     parent::construct();
     $this->value_title = t('Options');
