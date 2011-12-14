@@ -30,4 +30,3 @@ class views_handler_field_node_link_translate extends views_handler_field_node_l
     return $text;
   }
 }
-

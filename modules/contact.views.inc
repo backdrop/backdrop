@@ -14,4 +14,3 @@ function contact_views_data() {
   );
   return $data;
 }
-

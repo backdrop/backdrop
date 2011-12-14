@@ -74,4 +74,3 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
     return $text;
   }
 }
-

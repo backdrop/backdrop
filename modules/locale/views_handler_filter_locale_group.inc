@@ -14,4 +14,3 @@ class views_handler_filter_locale_group extends views_handler_filter_in_operator
     }
   }
 }
-

@@ -53,4 +53,3 @@ class views_plugin_argument_validate_php extends views_plugin_argument_validate 
     return $result;
   }
 }
-

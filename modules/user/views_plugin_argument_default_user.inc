@@ -74,4 +74,3 @@ class views_plugin_argument_default_user extends views_plugin_argument_default {
     }
   }
 }
-

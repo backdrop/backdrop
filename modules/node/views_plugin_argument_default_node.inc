@@ -23,4 +23,3 @@ class views_plugin_argument_default_node extends views_plugin_argument_default {
     }
   }
 }
-

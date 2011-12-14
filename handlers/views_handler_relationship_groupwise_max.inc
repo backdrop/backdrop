@@ -108,7 +108,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
       '#default_value' => $this->options['subquery_namespace'],
     );
 
-    
+
     // WIP: This stuff doens't work yet: namespacing issues.
     // A list of suitable views to pick one as the subview.
     $views = array('' => '<none>');
@@ -380,4 +380,3 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     $this->alias = $this->query->add_relationship($alias, $join, $this->definition['base'], $this->relationship);
   }
 }
-

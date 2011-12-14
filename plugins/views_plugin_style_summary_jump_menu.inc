@@ -127,4 +127,3 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
     return drupal_render($form);
   }
 }
-

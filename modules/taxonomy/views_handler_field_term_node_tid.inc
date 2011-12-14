@@ -139,4 +139,3 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
     }
   }
 }
-

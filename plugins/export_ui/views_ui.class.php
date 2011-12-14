@@ -440,5 +440,3 @@ function views_ui_clone_form($form, &$form_state) {
 
   return $form;
 }
-
-

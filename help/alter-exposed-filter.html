@@ -4,7 +4,7 @@ As a consequence, it *always* thinks the value was submitted, even if it was not
 
 <pre>
 &lt;?php
-if (empty($form_state['view']->exposed_input[$identifier])) . 
+if (empty($form_state['view']->exposed_input[$identifier])) .
 		{ $form_state['input'][$identifier] = $default_value; }
 ?&gt;
 </pre>
@@ -18,14 +18,14 @@ To do this, I used the following function, where geoip_redirect_get_tid() loads 
 <pre>
 &lt;?php
 function MODULENAME_form_views_exposed_form_alter(&$form, $form_state) {
-  if(strpos($form['#id'], 'volunteer-directory') !== FALSE) {   
+  if(strpos($form['#id'], 'volunteer-directory') !== FALSE) {
     $city_tid = geoip_redirect_get_tid();
     if(is_numeric($city_tid) && $city_tid != 7660) {
       if (empty($form_state['view']->exposed_input['tid']))  {
         $form_state['input']['tid'] = $city_tid;
       }
     }
-  }   
+  }
 }
 ?&gt;
 </pre>

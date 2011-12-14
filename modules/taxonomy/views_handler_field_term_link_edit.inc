@@ -50,4 +50,3 @@ class views_handler_field_term_link_edit extends views_handler_field {
     }
   }
 }
-

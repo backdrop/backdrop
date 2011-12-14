@@ -23,4 +23,3 @@ class views_handler_sort_search_score extends views_handler_sort {
     // sort on the raw scores with this handler.
   }
 }
-

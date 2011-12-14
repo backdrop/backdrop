@@ -94,7 +94,7 @@ class views_handler_filter_search extends views_handler_filter {
    * and $this->value respectively.
    */
   function query() {
-    // Since attachment views don't validate the exposed input, parse the search 
+    // Since attachment views don't validate the exposed input, parse the search
     // expression if required.
     if (!$this->parsed) {
       $this->query_parse_search_expression($this->value);

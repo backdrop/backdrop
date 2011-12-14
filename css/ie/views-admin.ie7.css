@@ -7,7 +7,7 @@
 }
 
 /**
- * The column width for the bucket containers in the query details section 
+ * The column width for the bucket containers in the query details section
  * is not being calculated to 32% correctly. Give IE7 a slightly smaller
  * width so that the three columns line up next to each other
  */
@@ -73,8 +73,8 @@
 
 /**
  * IE7 is interpreting a top margin of 18px from somewhere. remove it
- */ 
- 
+ */
+
 .page-admin-structure-views #content .views-display-setting {
   margin-top: 0;
 }

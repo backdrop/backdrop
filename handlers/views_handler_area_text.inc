@@ -108,4 +108,3 @@ class views_handler_area_text extends views_handler_area {
   }
 
 }
-

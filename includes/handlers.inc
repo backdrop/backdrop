@@ -1546,7 +1546,7 @@ class views_join {
 /**
  * Join handler for relationships that join with a subquery as the left field.
  * eg:
- *  LEFT JOIN node node_term_data ON ([YOUR SUBQUERY HERE]) = node_term_data.nid 
+ *  LEFT JOIN node node_term_data ON ([YOUR SUBQUERY HERE]) = node_term_data.nid
  *
  * join definition
  *   same as views_join class above, except:
@@ -1557,7 +1557,7 @@ class views_join_subquery extends views_join {
     parent::construct($table, $left_table, $left_field, $field, $extra, $type);
     $this->left_query = $this->definition['left_query'];
   }
-  
+
   /**
    * Build the SQL for the join this object represents.
    *

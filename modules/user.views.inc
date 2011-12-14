@@ -355,7 +355,7 @@ function user_views_data() {
       'field' => 'uid',
     ),
   );
-  
+
   $data['users_roles']['table']['default_relationship'] = array(
     'node' => array(
       'table' => 'node',
@@ -404,7 +404,7 @@ function user_views_data() {
       'field' => 'rid',
     ),
   );
-  
+
   $data['role']['table']['default_relationship'] = array(
     'node' => array(
       'table' => 'node',

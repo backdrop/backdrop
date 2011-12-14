@@ -49,4 +49,3 @@ class views_handler_field_comment_link_edit extends views_handler_field_comment_
     return $text;
   }
 }
-

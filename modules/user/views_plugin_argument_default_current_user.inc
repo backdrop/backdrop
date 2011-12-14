@@ -15,4 +15,3 @@ class views_plugin_argument_default_current_user extends views_plugin_argument_d
     return $user->uid;
   }
 }
-

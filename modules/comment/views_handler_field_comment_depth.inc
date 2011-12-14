@@ -10,4 +10,3 @@ class views_handler_field_comment_depth extends views_handler_field {
     return count(explode('.', $values->comments_thread)) - 1;
   }
 }
-

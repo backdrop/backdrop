@@ -2,13 +2,13 @@
  * The .garland.css file is intended to contain styles that override declarations
  * in the Garland theme.
  */
- 
+
 /* @group Attachment details tabs
  *
  * The tabs that switch between sections
  */
 
-.views-displays .region-content .secondary, 
+.views-displays .region-content .secondary,
 .views-displays .region-content .secondary {
   padding-bottom: 0;
   padding-left: 0;
@@ -82,7 +82,7 @@
 .views-filterable-options .form-type-checkbox {
   margin: 0;
 }
- 
+
 .views-filterable-options .even .form-type-checkbox {
   background-color: #F9F9F9;
 }
@@ -157,7 +157,7 @@
       #f1f1f1 100%);
 }
 
-.ctools-button-processed ol li, 
+.ctools-button-processed ol li,
 .ctools-button-processed ul li {
   margin: 0;
   padding-bottom: 0;
@@ -216,9 +216,9 @@
 /* @group Dependent */
 
 .dependent-options,
-.form-checkboxes.dependent-options, 
-.form-radios.dependent-options, 
-.form-checkboxes .form-item.dependent-options, 
+.form-checkboxes.dependent-options,
+.form-radios.dependent-options,
+.form-checkboxes .form-item.dependent-options,
 .form-radios .form-item.dependent-options {
   margin-left: 25px;
 }

@@ -3,4 +3,3 @@
 - If the text is not bolded (ex: links to click, options to check), it
 got /italicized/.
 - If it's user-entered text it got 'single quotes'.
-

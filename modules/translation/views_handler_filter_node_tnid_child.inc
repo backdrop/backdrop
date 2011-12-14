@@ -12,4 +12,3 @@ class views_handler_filter_node_tnid_child extends views_handler_filter {
     $this->query->add_where_expression($this->options['group'], "$table.tnid <> $table.nid AND $table.tnid > 0");
   }
 }
-

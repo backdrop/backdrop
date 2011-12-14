@@ -23,4 +23,3 @@ class views_handler_field_user_link_cancel extends views_handler_field_user_link
     }
   }
 }
-

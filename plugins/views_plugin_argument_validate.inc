@@ -99,4 +99,3 @@ class views_plugin_argument_validate extends views_plugin {
 /**
  * @}
  */
-

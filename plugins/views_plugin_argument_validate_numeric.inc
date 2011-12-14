@@ -14,4 +14,3 @@ class views_plugin_argument_validate_numeric extends views_plugin_argument_valid
     return is_numeric($argument);
   }
 }
-

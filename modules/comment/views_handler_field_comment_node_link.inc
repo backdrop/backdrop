@@ -58,4 +58,3 @@ class views_handler_field_comment_node_link extends views_handler_field {
     return !empty($node->content['links']['comment']) ? drupal_render($node->content['links']['comment']) : '';
   }
 }
-

@@ -5,7 +5,7 @@ Because the output is run through the standard node template mechanism (typicall
 Views does add an extra 'suggestion' to the list of possible node templates: <strong>node--view--VIEWNAME.tpl.php</strong> -- you may use this to theme a node specifically for the view. This can be handy for creating very small teasers and the like.
 
 You may opt to display the full node body or the node teaser, and you may add the node links (such as the 'comment' links that appear after a node) or not.
- 
+
 Because of this behavior, <strong>the node row style does not utilize fields</strong> and the Fields section will not be displayed.
 
 <strong>Please note that this row style performs a node_load() for every row, and as such can produce a lot of extra queries.</strong> Sometimes this is necessary, but it can have a negative impact on your site's performance!

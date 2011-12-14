@@ -8,7 +8,7 @@ class views_handler_field_user_picture extends views_handler_field {
     parent::construct();
     $this->additional_fields['uid'] = 'uid';
     $this->additional_fields['name'] = 'name';
-    $this->additional_fields['mail'] = 'mail';   
+    $this->additional_fields['mail'] = 'mail';
   }
 
   function element_type($none_supported = FALSE, $default_empty = FALSE, $inline = FALSE) {

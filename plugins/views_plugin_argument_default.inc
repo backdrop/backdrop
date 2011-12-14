@@ -93,4 +93,3 @@ class views_plugin_argument_default extends views_plugin {
 /**
  * @}
  */
-

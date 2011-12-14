@@ -23,4 +23,3 @@ class views_handler_argument_node_vid extends views_handler_argument_numeric {
     return $titles;
   }
 }
-

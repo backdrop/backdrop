@@ -272,7 +272,7 @@ class views_plugin_style_table extends views_plugin_style {
       '#markup' => '<div class="description form-item">' . t('Place fields into columns; you may combine multiple fields into the same column. If you do, the separator in the column specified will be used to separate the fields. Check the sortable box to make that column click sortable, and check the default sort radio to determine which column will be sorted by default, if any. You may control column order and field labels in the fields section.') . '</div>',
     );
   }
-  
+
   function even_empty() {
     return parent::even_empty() || !empty($this->options['empty_table']);
   }
