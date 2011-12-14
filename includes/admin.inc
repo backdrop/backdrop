@@ -878,7 +878,7 @@ function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
  */
 function views_ui_edit_page_display($view, $display_id) {
   // Determine the displays available for editing.
-  if ($tabs = views_ui_edit_page_display_tabs($view)) {
+  if ($tabs = views_ui_edit_page_display_tabs($view, $display_id)) {
     // If a display isn't specified, use the first one.
     if (empty($display_id)) {
       foreach ($tabs as $id => $tab) {
@@ -910,12 +910,6 @@ function views_ui_edit_page_display($view, $display_id) {
  * Page callback for the Edit View page.
  */
 function views_ui_edit_page($view, $display_id = NULL) {
-  // If the user has enabled the master display, remove 'default' from the url.
-  // If the user hasn't enabled the master display redirect to the first other display.
-  if (arg(6) == 'default') {
-    drupal_goto("admin/structure/views/view/$view->name/edit");
-  }
-
   $display_id = views_ui_edit_page_display($view, $display_id);
   if (!in_array($display_id, array(MENU_ACCESS_DENIED, MENU_NOT_FOUND))) {
     $build = array();
@@ -1283,7 +1277,7 @@ function views_ui_render_display_top($view, $display_id) {
   }
 
   // Determine the displays available for editing.
-  if ($tabs = views_ui_edit_page_display_tabs($view)) {
+  if ($tabs = views_ui_edit_page_display_tabs($view, $display_id)) {
     if ($display_id) {
       $tabs[$display_id]['#active'] = TRUE;
     }
@@ -1456,8 +1450,13 @@ function views_ui_edit_form_submit_delay_destination($form, &$form_state) {
  * these tabs as secondary local tasks, or it can be called from elsewhere if
  * having them as secondary local tasks isn't desired. The caller is responsible
  * for setting the active tab's #active property to TRUE.
+ *
+ * @param $view
+ *    The view which will be edited.
+ * @param $display_id
+ *    The display_id which is edited on the current request.
  */
-function views_ui_edit_page_display_tabs($view) {
+function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
   $tabs = array();
 
   // Create a tab for each display.
@@ -1479,7 +1478,7 @@ function views_ui_edit_page_display_tabs($view) {
   }
 
   // If the default display isn't supposed to be shown, don't display its tab, unless it's the only display.
-  if (!views_ui_show_default_display($view) && count($tabs) > 1) {
+  if ((!views_ui_show_default_display($view) && $display_id != 'default') && count($tabs) > 1) {
     $tabs['default']['#access'] = FALSE;
   }
 
