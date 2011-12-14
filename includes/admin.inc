@@ -843,7 +843,8 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
   $form = array();
 
   if (empty($view->locked)) {
-    return t('There is no lock on view %view to break.', array('%name' => $view->name));
+    $form['#markup'] = t('There is no lock on view %view to break.', array('%name' => $view->name));
+    return $form;
   }
 
   $cancel = 'admin/structure/views/view/' . $view->name . '/edit';
