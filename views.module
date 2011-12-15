@@ -1422,7 +1422,7 @@ function views_get_views_as_options($views_only = FALSE, $filter = 'all', $exclu
   foreach ($views as $view) {
     // Return only views.
     if ($views_only && $view->name != $exclude_view_name) {
-      $options[$view->name] = $view_name;
+      $options[$view->name] = $view->name;
     }
     // Return views with display ids.
     else {
