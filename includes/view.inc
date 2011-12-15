@@ -20,6 +20,13 @@ class view extends views_db_object {
   var $base_table = 'node';
   var $base_field = 'nid';
 
+  /**
+   * The name of the view.
+   *
+   * @var string
+   */
+  var $name = "";
+
   // State variables
   var $built = FALSE;
   var $executed = FALSE;

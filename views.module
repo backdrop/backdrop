@@ -1427,7 +1427,7 @@ function views_get_views_as_options($views_only = FALSE, $filter = 'all', $exclu
     // Return views with display ids.
     else {
       foreach ($view->display as $display_id => $display) {
-        if (!($view->name == $exclude_view_name && $view->current_display != $exclude_view_display)) {
+        if (!($view->name == $exclude_view_name && $display_id == $exclude_view_display)) {
           if ($optgroup) {
             $options[$view->name][$view->name . ':' . $display->id] = t('@view : @display', array('@view' => $view->name, '@display' => $display->id));
           }
