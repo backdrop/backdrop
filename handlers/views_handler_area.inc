@@ -73,6 +73,13 @@ class views_handler_area extends views_handler {
   function render($empty = FALSE) {
     return '';
   }
+
+  /**
+   * Area handlers shouldn't have groupby.
+   */
+  function use_group_by() {
+    return FALSE;
+  }
 }
 
 /**

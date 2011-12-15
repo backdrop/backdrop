@@ -4048,12 +4048,17 @@ function views_ui_add_item_form_submit($form, &$form_state) {
       $id = $form_state['view']->add_item($form_state['display_id'], $type, $table, $field);
 
       // check to see if we have group by settings
-      if ($form_state['view']->display_handler->use_group_by()) {
+      $key = $type;
+      // Footer,header and empty text have a different internal handler type(area).
+      if (isset($types[$type]['type'])) {
+        $key = $types[$type]['type'];
+      }
+      $handler = views_get_handler($table, $field, $key);
+      if ($form_state['view']->display_handler->use_group_by() && $handler->use_group_by()) {
         views_ui_add_form_to_stack('config-item-group', $form_state['view'], $form_state['display_id'], array($type, $id));
       }
 
       // check to see if this type has settings, if so add the settings form first
-      $handler = views_get_handler($table, $field, $type);
       if ($handler && $handler->has_extra_options()) {
         views_ui_add_form_to_stack('config-item-extra', $form_state['view'], $form_state['display_id'], array($type, $id));
       }
