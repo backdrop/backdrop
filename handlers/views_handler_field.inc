@@ -692,10 +692,10 @@ class views_handler_field extends views_handler {
         ),
       );
       $form['alter']['alt'] = array(
-        '#title' => t('Alt text'),
+        '#title' => t('Title text'),
         '#type' => 'textfield',
         '#default_value' => $this->options['alter']['alt'],
-        '#description' => t('Text to place as "alt" text which most browsers display as a tooltip when hovering over the link.'),
+        '#description' => t('Text to place as "title" text which most browsers display as a tooltip when hovering over the link.'),
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1),
         ),
