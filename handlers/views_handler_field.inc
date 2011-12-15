@@ -896,7 +896,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
       '#type' => 'checkbox',
       '#title' => t('Hide if empty'),
       '#default_value' => $this->options['hide_empty'],
-      '#description' => t('Enable to hide this field if it is empty. Note that the field label or rewritten output may still be displayed. To hide labels, check the style or row style settings for empty fields. To hide rewritten content, check the "Do not rewrite if empty" checkbox.'),
+      '#description' => t('Enable to hide this field if it is empty. Note that the field label or rewritten output may still be displayed. To hide labels, check the style or row style settings for empty fields. To hide rewritten content, check the "Hide rewriting if empty" checkbox.'),
       '#fieldset' => 'empty_field_behavior',
     );
 
