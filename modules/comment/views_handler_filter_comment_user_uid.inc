@@ -11,7 +11,7 @@ class views_handler_filter_comment_user_uid extends views_handler_filter_user_na
     $subselect = db_select('comment', 'c');
     $subselect->addField('c', 'cid');
     $subselect->condition('c.uid', $this->value, $this->operator);
-    $subselect->where("nid = $this->table_alias.nid");
+    $subselect->where("c.nid = $this->table_alias.nid");
 
     $condition = db_or()
       ->condition("$this->table_alias.uid", $this->value, $this->operator)
