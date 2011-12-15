@@ -23,7 +23,7 @@ class views_handler_field_comment_link extends views_handler_field {
       '#default_value' => $this->options['text'],
     );
     $form['link_to_node'] = array(
-      '#title' => t('Link to field to the node if there is no comment.'),
+      '#title' => t('Link field to the node if there is no comment.'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_node'],
     );
