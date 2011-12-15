@@ -50,7 +50,29 @@ class views_plugin_display extends views_plugin {
     if ($this->is_default_display() && isset($options['defaults'])) {
       unset($options['defaults']);
     }
-    $this->unpack_options($this->options, $options);
+
+    // Cache for unpack_options, but not if we are in the ui.
+    static $unpack_options = array();
+    if (empty($view->editing)) {
+      $cid = 'unpack_options:' . md5(serialize(array($this->options, $options)));
+      if (empty($unpack_options[$cid])) {
+        $cache = views_cache_get($cid, TRUE);
+        if (!empty($cache->data)) {
+          $this->options = $cache->data;
+        }
+        else {
+          $this->unpack_options($this->options, $options);
+          views_cache_set($cid, $this->options, TRUE);
+        }
+        $unpack_options[$cid] = $this->options;
+      }
+      else {
+        $this->options = $unpack_options[$cid];
+      }
+    }
+    else {
+      $this->unpack_options($this->options, $options);
+    }
 
     // Translate changed settings:
     $items_per_page = $this->get_option('items_per_page');
