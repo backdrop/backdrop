@@ -1383,7 +1383,7 @@ class views_plugin_query_default extends views_plugin_query {
           drupal_set_message($e->getMessage(), 'error');
         }
         else {
-          debug('Exception: ' . $e->getMessage());
+          vpr('Exception in @human_name[@view_name]: @message', array('@human_name' => $view->human_name, '@view_name' => $view->name, '@message' => $e->getMessage()));
         }
       }
 
