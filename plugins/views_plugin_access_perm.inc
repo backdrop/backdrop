@@ -30,6 +30,7 @@ class views_plugin_access_perm extends views_plugin_access {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $perms = array();
     $module_info = system_get_info('module');
 

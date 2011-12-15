@@ -18,6 +18,7 @@ class views_plugin_argument_validate_php extends views_plugin_argument_validate 
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $form['code'] = array(
       '#type' => 'textarea',
       '#title' => t('PHP validate code'),

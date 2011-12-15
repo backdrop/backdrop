@@ -13,6 +13,7 @@ class views_plugin_cache_time extends views_plugin_cache {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $options = array(60, 300, 1800, 3600, 21600, 518400);
     $options = drupal_map_assoc($options, 'format_interval');
     $options = array(-1 => t('Never cache')) + $options;

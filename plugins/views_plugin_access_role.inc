@@ -36,6 +36,7 @@ class views_plugin_access_role extends views_plugin_access {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $form['role'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Role'),

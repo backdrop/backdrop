@@ -162,6 +162,7 @@ class views_plugin_style extends views_plugin {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     // Only fields-based views can handle grouping.  Style plugins can also exclude
     // themselves from being groupable by setting their "use grouping" definiton
     // key to FALSE.

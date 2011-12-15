@@ -16,6 +16,7 @@ class views_plugin_argument_default_raw extends views_plugin_argument_default {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     // Using range(1, 10) will create an array keyed 0-9, which allows arg() to
     // properly function since it is also zero-based.
     $form['index'] = array(

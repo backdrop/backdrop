@@ -16,6 +16,7 @@ class views_plugin_argument_default_php extends views_plugin_argument_default {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $form['code'] = array(
       '#type' => 'textarea',
       '#title' => t('PHP contextual filter code'),

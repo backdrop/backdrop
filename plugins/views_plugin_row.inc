@@ -51,6 +51,7 @@ class views_plugin_row extends views_plugin {
    * Provide a form for setting options.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     if (isset($this->base_table)) {
       $view = &$form_state['view'];
 
