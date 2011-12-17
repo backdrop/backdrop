@@ -163,6 +163,8 @@ class views_handler_filter_search extends views_handler_filter {
       $placeholder = $this->placeholder();
       $this->query->add_having_expression($this->options['group'], "COUNT(*) >= $placeholder", array($placeholder => $matches));
     }
+    // Set to NULL to prevent PDO exception when views object is cached.
+    $this->search_query = NULL;
   }
 }
 
