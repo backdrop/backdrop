@@ -98,7 +98,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     foreach ($sets as $title => $records) {
       foreach ($records as $row_index => $row) {
         $this->view->row_index = $row_index;
-        $path = html_entity_decode(strip_tags($this->get_field($this->view->row_index, $this->options['path'])), ENT_QUOTES);
+        $path = strip_tags(decode_entities($this->get_field($this->view->row_index, $this->options['path'])));
         // Putting a '/' in front messes up url() so let's take that out
         // so users don't shoot themselves in the foot.
         $base_path = base_path();
@@ -111,7 +111,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
         $url_options = drupal_parse_url($path);
 
         $path = url($url_options['path'], $url_options);
-        $field = html_entity_decode(strip_tags($this->row_plugin->render($row)), ENT_QUOTES);
+        $field = strip_tags(decode_entities($this->row_plugin->render($row)));
         $key = md5($path . $field) . "::" . $path;
         if ($title) {
           $options[$title][$key] = $field;

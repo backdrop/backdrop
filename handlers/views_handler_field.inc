@@ -1086,12 +1086,12 @@ If you would like to have the characters %5B and %5D please use the html entity 
     // sanitize it ourselves.
     $path = $alter['path'];
 
-    // html_entity_decode removes <front>, so check whether its different to front.
+    // strip_tags() removes <front>, so check whether its different to front.
     if ($path != '<front>') {
       // Use strip tags as there should never be HTML in the path.
       // However, we need to preserve special characters like " that
       // were removed by check_plain().
-      $path = strip_tags(html_entity_decode(strtr($path, $tokens)));
+      $path = strip_tags(decode_entities(strtr($path, $tokens)));
 
       if (!empty($alter['path_case']) && $alter['path_case'] != 'none') {
         $path = $this->case_transform($path, $this->options['alter']['path_case']);
@@ -1145,7 +1145,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
     $alt = strtr($alter['alt'], $tokens);
     // Set the title attribute of the link only if it improves accessibility
     if ($alt && $alt != $text) {
-      $options['attributes']['title'] = html_entity_decode($alt, ENT_QUOTES);
+      $options['attributes']['title'] = decode_entities($alt);
     }
 
     $class = strtr($alter['link_class'], $tokens);
@@ -1231,7 +1231,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
       // Use strip tags as there should never be HTML in the path.
       // However, we need to preserve special characters like " that
       // were removed by check_plain().
-      $tokens['!' . $count] = isset($this->view->args[$count - 1]) ? strip_tags(html_entity_decode($this->view->args[$count - 1])) : '';
+      $tokens['!' . $count] = isset($this->view->args[$count - 1]) ? strip_tags(decode_entities($this->view->args[$count - 1])) : '';
     }
 
     // Now add replacements for our fields.
