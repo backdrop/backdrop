@@ -3928,6 +3928,7 @@ function views_ui_add_item_form($form, &$form_state) {
 
   $types = views_object_types();
   $ltitle = $types[$type]['ltitle'];
+  $section = $types[$type]['plural'];
 
   if (!empty($types[$type]['type'])) {
     $type = $types[$type]['type'];
@@ -3935,6 +3936,10 @@ function views_ui_add_item_form($form, &$form_state) {
 
   $form['#title'] = t('Add @type', array('@type' => $ltitle));
   $form['#section'] = $display_id . 'add-item';
+
+
+  // Add the display override dropdown.
+  views_ui_standard_display_dropdown($form, $form_state, $section);
 
   // Figure out all the base tables allowed based upon what the relationships provide.
   $base_tables = $view->get_base_tables();
@@ -4027,6 +4032,10 @@ function views_ui_add_item_form($form, &$form_state) {
   ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $ltitle)));
 
+  // Remove the default submit function.
+  $form['buttons']['submit']['#submit'] = array_diff($form['buttons']['submit']['#submit'], array('views_ui_standard_submit'));
+  $form['buttons']['submit']['#submit'][] = 'views_ui_add_item_form_submit';
+
   return $form;
 }
 
@@ -4036,6 +4045,26 @@ function views_ui_add_item_form($form, &$form_state) {
 function views_ui_add_item_form_submit($form, &$form_state) {
   $type = $form_state['type'];
   $types = views_object_types();
+  $section = $types[$type]['plural'];
+
+  // Handle the override select.
+  list($was_defaulted, $is_defaulted) = views_ui_standard_override_values($form, $form_state);
+  if ($was_defaulted && !$is_defaulted) {
+    // We were using the default display's values, but we're now overriding
+    // the default display and saving values specific to this display.
+    $display = &$form_state['view']->display[$form_state['display_id']];
+    // set_override toggles the override of this section.
+    $display->handler->set_override($section);
+  }
+  elseif (!$was_defaulted && $is_defaulted) {
+    // We used to have an override for this display, but the user now wants
+    // to go back to the default display.
+    // Overwrite the default display with the current form values, and make
+    // the current display use the new default values.
+    $display = &$form_state['view']->display[$form_state['display_id']];
+    // options_override toggles the override of this section.
+    $display->handler->set_override($section);
+  }
 
   if (!empty($form_state['values']['name']) && is_array($form_state['values']['name'])) {
     // Loop through each of the items that were checked and add them to the view.
