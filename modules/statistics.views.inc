@@ -103,6 +103,27 @@ function statistics_views_data() {
      ),
   );
 
+  // accesslog.aid
+  $data['accesslog']['aid'] = array(
+    'title' => t('Aid'),
+    'help' => t('Unique access event ID.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+      'name field' => 'wid',
+      'numeric' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   // session id
   $data['accesslog']['sid'] = array(
     'title' => t('Session ID'),
