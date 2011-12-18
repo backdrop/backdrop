@@ -609,39 +609,6 @@ class view extends views_db_object {
   }
 
   /**
-   * Prepare arguments and set default args to args.
-   */
-  function _pre_query_argument() {
-    // build arguments.
-    $position = -1;
-
-    // Iterate through each argument and process.
-    foreach ($this->argument as $id => $arg) {
-      $position++;
-      $argument = &$this->argument[$id];
-
-      if ($argument->broken()) {
-        continue;
-      }
-
-      $arg = isset($this->args[$position]) ? $this->args[$position] : NULL;
-      $argument->position = $position;
-
-      if (isset($arg) || $argument->has_default_argument()) {
-        if (!isset($arg)) {
-          $arg = $argument->get_default_argument();
-          // make sure default args get put back.
-          if (isset($arg)) {
-            $this->args[$position] = $arg;
-          }
-          // remember that this argument was computed, not passed on the URL.
-          $argument->is_default = TRUE;
-        }
-      }
-    }
-  }
-
-  /**
    * Build all the arguments.
    */
   function _build_arguments() {
@@ -677,7 +644,17 @@ class view extends views_db_object {
       $arg = isset($this->args[$position]) ? $this->args[$position] : NULL;
       $argument->position = $position;
 
-      if (isset($arg)) {
+      if (isset($arg) || $argument->has_default_argument()) {
+        if (!isset($arg)) {
+          $arg = $argument->get_default_argument();
+          // make sure default args get put back.
+          if (isset($arg)) {
+            $this->args[$position] = $arg;
+          }
+          // remember that this argument was computed, not passed on the URL.
+          $argument->is_default = TRUE;
+        }
+
         // Set the argument, which will also validate that the argument can be set.
         if (!$argument->set_argument($arg)) {
           $status = $argument->validate_fail($arg);
@@ -816,9 +793,6 @@ class view extends views_db_object {
 
     // Run through our handlers and ensure they have necessary information.
     $this->init_handlers();
-
-    // Setup the default arguments.
-    $this->_pre_query_argument();
 
     // Let the handlers interact with each other if they really want.
     $this->_pre_query();
