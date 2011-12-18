@@ -33,7 +33,6 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
   }
 
   function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
     $form['base_path'] = array(
       '#type' => 'textfield',
       '#title' => t('Base path'),
