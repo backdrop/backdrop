@@ -21,15 +21,17 @@
   <?php if (!empty($title)) : ?>
     <caption><?php print $title; ?></caption>
   <?php endif; ?>
-  <thead>
-    <tr>
-      <?php foreach ($header as $field => $label): ?>
-        <th <?php if ($header_classes[$field]) { print 'class="'. $header_classes[$field] . '" '; } ?>>
-          <?php print $label; ?>
-        </th>
-      <?php endforeach; ?>
-    </tr>
-  </thead>
+  <?php if (!empty($header)) : ?>
+    <thead>
+      <tr>
+        <?php foreach ($header as $field => $label): ?>
+          <th <?php if ($header_classes[$field]) { print 'class="'. $header_classes[$field] . '" '; } ?>>
+            <?php print $label; ?>
+          </th>
+        <?php endforeach; ?>
+      </tr>
+    </thead>
+  <?php endif; ?>
   <tbody>
     <?php foreach ($rows as $row_count => $row): ?>
       <tr class="<?php print implode(' ', $row_classes[$row_count]); ?>">

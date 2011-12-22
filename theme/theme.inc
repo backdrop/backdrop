@@ -442,6 +442,7 @@ function template_preprocess_views_view_table(&$vars) {
   $result   = $vars['result'] = $vars['rows'];
   $vars['rows'] = array();
   $vars['field_classes'] = array();
+  $vars['header'] = array();
 
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
