@@ -664,7 +664,7 @@ function field_group_pre_render_accordion_item(&$element, $group, &$form) {
 
   $element += array(
     '#type' => 'markup',
-    '#prefix' => '<h3 class="field-group-format-toggler ' . $group->format_type . ($group->collapsed ? '' : ' field-group-accordion-active') . '">' . check_plain(t($group->label)) . '</h3>
+    '#prefix' => '<h3 class="field-group-format-toggler ' . $group->format_type . ($group->collapsed ? '' : ' field-group-accordion-active') . '"><a href="#">' . check_plain(t($group->label)) . '</a></h3>
     <div class="field-group-format-wrapper ' . $group->classes . '">',
     '#suffix' => '</div>',
     //'#attributes' => array('class' => array($group->format_type)),
