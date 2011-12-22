@@ -28,7 +28,3 @@ div.field-group-tabs-wrapper div.field-type-datetime legend,
 form .ui-accordion h3, form .ui-accordion h3.ui-state-active {
   padding-left: 2em;
 }
-
-.ui-accordion h3.ui-state-active {
-  background: url("/misc/ui/images/ui-bg_glass_75_e6e6e6_1x400.png") repeat-x scroll 50% 50% #E6E6E6;
-}
