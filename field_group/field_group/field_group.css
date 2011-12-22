@@ -17,7 +17,6 @@ div.field-group-tabs-wrapper div.field-type-datetime fieldset {
 
 div.field-group-tabs-wrapper div.field-type-image legend,
 div.field-group-tabs-wrapper div.field-type-file legend,
-div.field-group-tabs-wrapper div.field-type-datetime legend,
-.vertical-tabs .field-group-fieldset legend {
+div.field-group-tabs-wrapper div.field-type-datetime legend {
   display: block;
 }

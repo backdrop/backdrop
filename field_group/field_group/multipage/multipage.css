@@ -1,125 +1,125 @@
 .multipage-controls-list #edit-actions {
-  float: left !important;
+  float: left;
 }
 
 .multipage-button {    
-  margin-bottom: 1em !important;
-  margin-top: 0 !important;
-  float: left !important;
-  line-height: 36px !important;
+  margin-bottom: 1em;
+  margin-top: 0;
+  float: left;
+  line-height: 36px;
 }
 
 .multipage-button a {    
-  padding-top: 10px !important;
+  padding-top: 10px;
 }
 
 .multipage-counter{
-  float: right !important;
-  margin-right: 5px !important;
-  height: 0 !important;
-  position: relative !important;
-  top: 1.8em !important;
-  line-height: 30px !important;
-  font: 12px arial,sans-serif !important;
-  font-weight: bold !important;
-  color:#666 !important;
+  float: right;
+  margin-right: 5px;
+  height: 0;
+  position: relative;
+  top: 1.8em;
+  line-height: 30px;
+  font: 12px arial,sans-serif;
+  font-weight: bold;
+  color:#666;
 }
 
 a.multipage-link-previous{
-  font: 12px arial,sans-serif !important;
-  font-weight: bold !important;
-  color:#666 !important;
-  -webkit-transition: color 218ms !important;
-  -moz-transition: color 218ms !important;
-  -o-transition: color 218ms !important;
-  transition: color 218ms !important;
+  font: 12px arial,sans-serif;
+  font-weight: bold;
+  color:#666;
+  -webkit-transition: color 218ms;
+  -moz-transition: color 218ms;
+  -o-transition: color 218ms;
+  transition: color 218ms;
 }
 
 a.multipage-link-previous:hover{
-  text-decoration:none !important;
-  color: #333 !important;
+  text-decoration:none;
+  color: #333;
 }
 
 .multipage-controls-list input.form-submit{
   background:none;
   border: none;
-  border-radius: 2px !important;
-  -moz-border-radius: 2px !important;
-  -webkit-border-radius: 2px !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  font: 12px arial,sans-serif !important;
-  font-weight: bold !important;
-  color: #666 !important;
-  text-shadow: 0 1px 0 white !important;
-  padding: 7px 12px !important;
-  background: -webkit-gradient(linear,0% 40%,0% 70%,from(whiteSmoke),to(#F1F1F1)) !important;
-  -o-transition: border-top-color 0.218s,border-right-color 0.218s,border-bottom-color 0.218s,border-left-color .218s !important;
-  -webkit-transition: border-color .218s !important;
+  border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font: 12px arial,sans-serif;
+  font-weight: bold;
+  color: #666;
+  text-shadow: 0 1px 0 white;
+  padding: 7px 12px;
+  background: -webkit-gradient(linear,0% 40%,0% 70%,from(whiteSmoke),to(#F1F1F1));
+  -o-transition: border-top-color 0.218s,border-right-color 0.218s,border-bottom-color 0.218s,border-left-color .218s;
+  -webkit-transition: border-color .218s;
 }
 
 .multipage-controls-list input.form-submit:hover{
-  color:#333 !important;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.1) !important;
-  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1) !important;
-  border-color: #939393 !important;
+  color:#333;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  border-color: #939393;
 }
 
 .multipage-controls-list input.form-submit:active{
-  background: -webkit-gradient(linear,0% 40%,0% 70%,from(#F1F1F1),to(whiteSmoke)) !important;
+  background: -webkit-gradient(linear,0% 40%,0% 70%,from(#F1F1F1),to(whiteSmoke));
 }
 
 .multipage-controls-list input#edit-submit{
-  background-image: -moz-linear-gradient(top,#4d90fe,#4787ed) !important;
-  background-image: -o-linear-gradient(top,#4d90fe,#4787ed) !important;
-  background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed)) !important;
-  color: white !important;
-  text-shadow: none !important;
-  text-transform: uppercase !important;
-  min-width: 79px !important;
+  background-image: -moz-linear-gradient(top,#4d90fe,#4787ed);
+  background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
+  color: white;
+  text-shadow: none;
+  text-transform: uppercase;
+  min-width: 79px;
 }
 
 .multipage-controls-list input#edit-submit:hover{
-  background-image: -moz-linear-gradient(top,#4d90fe,#357ae8) !important;
-  background-image: -o-linear-gradient(top,#4d90fe,#357ae8) !important;
-  background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#357ae8)) !important;
-  color: white !important;
-  text-shadow: none !important;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.2) !important;
-  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.2) !important;
+  background-image: -moz-linear-gradient(top,#4d90fe,#357ae8);
+  background-image: -o-linear-gradient(top,#4d90fe,#357ae8);
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#357ae8));
+  color: white;
+  text-shadow: none;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
 .multipage-controls-list input#edit-submit:active{
-  background: #4D90FE !important;
-  border-color: #2F5BB7 !important;
+  background: #4D90FE;
+  border-color: #2F5BB7;
 }
 
 .multipage-controls-list input#edit-delete{
-  background-image: -moz-linear-gradient(top,#dd4b39,#d14836) !important;
-  background-image: -o-linear-gradient(top,#dd4b39,#d14836) !important;
-  background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#d14836)) !important;
-  text-shadow: 0 1px rgba(0, 0, 0, 0.1) !important;
-  border: 1px solid transparent !important;
-  color: white !important;
-  text-shadow: none !important;
+  background-image: -moz-linear-gradient(top,#dd4b39,#d14836);
+  background-image: -o-linear-gradient(top,#dd4b39,#d14836);
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#d14836));
+  text-shadow: 0 1px rgba(0, 0, 0, 0.1);
+  border: 1px solid transparent;
+  color: white;
+  text-shadow: none;
 
 }
 
 .multipage-controls-list input#edit-delete:hover{
-  background-image: -moz-linear-gradient(top,#dd4b39,#c53727) !important;
-  background-image: -o-linear-gradient(top,#dd4b39,#c53727) !important;
-  background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#c53727)) !important;
+  background-image: -moz-linear-gradient(top,#dd4b39,#c53727);
+  background-image: -o-linear-gradient(top,#dd4b39,#c53727);
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#c53727));
   border: 1px solid #B0281A!important;
   border-bottom: 1px solid #AF301F!important;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.2) !important;
-  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.2) !important;
-  color: white !important;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  color: white;
 }
 
 .multipage-controls-list input#edit-delete:active{
-  background-image: -moz-linear-gradient(top,#dd4b39,#b0281a) !important;
-  background-image: -o-linear-gradient(top,#dd4b39,#b0281a) !important;
-  background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#b0281a)) !important;
+  background-image: -moz-linear-gradient(top,#dd4b39,#b0281a);
+  background-image: -o-linear-gradient(top,#dd4b39,#b0281a);
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#b0281a));
   border: 1px solid #992A1b!important;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }

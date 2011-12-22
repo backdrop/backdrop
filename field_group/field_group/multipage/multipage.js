@@ -25,8 +25,8 @@ Drupal.behaviors.MultiPage = {
       // Transform each div.multipage-pane into a multipage with controls.
       $panes.each(function () {
         
-        $controls = $('<div class="multipage-controls-list"></div>');
-        $(this).append('<div class="multipage-controls clearfix"></div>').append($controls);
+        $controls = $('<div class="multipage-controls-list clearfix"></div>');
+        $(this).append($controls);
         
         // Check if the submit button needs to move to the latest pane.
         if (Drupal.settings.field_group.multipage_move_submit && $('.form-actions').length) {
