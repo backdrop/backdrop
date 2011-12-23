@@ -62,6 +62,8 @@ class views_handler_field_entity extends views_handler_field {
     if (method_exists($this->query, 'add_field')) {
       $this->field_alias = $this->query->add_field($this->table_alias, $this->base_field, '');
     }
+
+    $this->add_additional_fields();
   }
 
   /**
@@ -74,9 +76,23 @@ class views_handler_field_entity extends views_handler_field {
   }
 
   /**
-   * Overridden to return the entity object.
+   * Overridden to return the entity object, or a certain property of the entity.
    */
   function get_value($values, $field = NULL) {
-    return isset($this->entities[$this->view->row_index]) ? $this->entities[$this->view->row_index] : FALSE;
+    if (isset($this->entities[$this->view->row_index])) {
+      $entity = $this->entities[$this->view->row_index];
+      // Support to get a certain part of the entity.
+      if (isset($field) && isset($entity->{$field})) {
+        return $entity->{$field};
+      }
+      // Support to get a part of the values as the normal get_value.
+      elseif (isset($field) && isset($values->{$this->aliases[$field]})) {
+        return $values->{$this->aliases[$field]};
+      }
+      else {
+        return $entity;
+      }
+    }
+    return FALSE;
   }
 }
