@@ -14,7 +14,7 @@ class views_handler_field_node extends views_handler_field {
   function init(&$view, &$options) {
     parent::init($view, $options);
     // Don't add the additional fields to groupby
-    if (!empty($this->options['link_to_node']) && !$this->view->display_handler->use_group_by()) {
+    if (!empty($this->options['link_to_node'])) {
       $this->additional_fields['nid'] = array('table' => 'node', 'field' => 'nid');
       if (module_exists('translation')) {
         $this->additional_fields['language'] = array('table' => 'node', 'field' => 'language');
