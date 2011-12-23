@@ -341,7 +341,7 @@ function field_group_field_group_formatter_info() {
       'accordion' => array(
         'label' => t('Accordion group'),
         'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
-        'instance_settings' => array('description' => '', 'classes' => ''),
+        'instance_settings' => array('description' => '', 'classes' => '', 'effect' => 'bounceslide'),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
