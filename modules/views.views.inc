@@ -68,6 +68,14 @@ function views_views_data() {
     ),
   );
 
+  $data['views']['result'] = array(
+    'title' => t('Result summary'),
+    'help' => t('Shows result summary, for example the items per page.'),
+    'area' => array(
+      'handler' => 'views_handler_area_result',
+    ),
+  );
+
   if (module_invoke('ctools', 'api_version', '1.7.1')) {
     $data['views']['expression'] = array(
       'title' => t('Math expression'),

@@ -10,6 +10,7 @@ stylesheets[all][] = css/views.css
 dependencies[] = ctools
 ; Handlers
 files[] = handlers/views_handler_area.inc
+files[] = handlers/views_handler_area_result.inc
 files[] = handlers/views_handler_area_text.inc
 files[] = handlers/views_handler_area_view.inc
 files[] = handlers/views_handler_argument.inc
