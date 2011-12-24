@@ -53,12 +53,17 @@ class view extends views_db_object {
   // Exposed widget input
   var $exposed_data = array();
   var $exposed_input = array();
+  // Exposed widget input directly from the $form_state['values'].
+  var $exposed_raw_input = array();
 
   // Used to store views that were previously running if we recurse.
   var $old_view = array();
 
-  // To avoid recursion in views embebed into areas
+  // To avoid recursion in views embedded into areas.
   var $parent_views = array();
+
+  // Is the current stored view runned as an attachment to another view.
+  var $is_attachment = NULL;
 
   // Stores the next steps of form items to handle.
   // It's an array of stack items, which contain the form id, the type of form,
