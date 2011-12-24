@@ -11,6 +11,16 @@
  * @ingroup views_field_handlers
  */
 class views_handler_field_prerender_list extends views_handler_field {
+  /**
+   * Stores all items which are used to render the items.
+   * It should be keyed first by the id of the base table, for example nid.
+   * The second key is the id of the thing which is displayed multiple times
+   * per row, for example the tid.
+   *
+   * @var array
+   */
+  var $items = array();
+
   function option_definition() {
     $options = parent::option_definition();
 
