@@ -115,7 +115,7 @@ Drupal.ajax.prototype.commands.viewsScrollTop = function (ajax, response, status
   // and scroll the first element that has a non-zero top.
   var scrollTarget = response.selector;
   while ($(scrollTarget).scrollTop() == 0 && $(scrollTarget).parent()) {
-    scrollTarget = $(scrollTarget).parent()
+    scrollTarget = $(scrollTarget).parent();
   }
   // Only scroll upward
   if (offset.top - 10 < $(scrollTarget).scrollTop()) {
