@@ -28,6 +28,7 @@ class views_plugin_display_page extends views_plugin_display {
         'description' => array('default' => '', 'translatable' => FALSE),
         'weight' => array('default' => 0),
         'name' => array('default' => variable_get('menu_default_node_menu', 'navigation')),
+        'context' => array('default' => ''),
        ),
     );
     $options['tab_options'] = array(
@@ -146,6 +147,12 @@ class views_plugin_display_page extends views_plugin_display {
         case 'default tab':
           $items[$path]['type'] = MENU_DEFAULT_LOCAL_TASK;
           break;
+      }
+
+      // Add context for contextual links.
+      // @see menu_contextual_links()
+      if (!empty($menu['context'])) {
+        $items[$path]['context'] = MENU_CONTEXT_INLINE;
       }
 
       // If this is a 'default' tab, check to see if we have to create teh
@@ -370,6 +377,13 @@ class views_plugin_display_page extends views_plugin_display {
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
           '#description' => t('The lower the weight the higher/further left it will appear.'),
           '#dependency' => array('radio:menu[type]' => array('normal', 'tab', 'default tab')),
+        );
+        $form['menu']['context'] = array(
+          '#title' => t('Context'),
+          '#type' => 'checkbox',
+          '#default_value' => !empty($menu['context']),
+          '#description' => t('Displays the link in contextual links'),
+          '#dependency' => array('radio:menu[type]' => array('tab')),
         );
         break;
       case 'tab_options':
