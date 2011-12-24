@@ -373,6 +373,9 @@ function field_views_field_default_views_data($field) {
           'title short' => $title_short_delta,
           'help' => t('Delta - Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
         );
+        $data[$table]['delta']['field'] = array(
+          'handler' => 'views_handler_field_numeric',
+        );
         $data[$table]['delta']['argument'] = array(
           'field' => 'delta',
           'table' => $table,
