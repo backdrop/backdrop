@@ -5,8 +5,6 @@
  * Test cache system.
  */
 
-module_load_include('test', 'views', 'tests/views_query');
-
 /**
  * Basic test for pluggable caching.
  */

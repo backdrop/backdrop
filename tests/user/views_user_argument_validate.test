@@ -5,7 +5,6 @@
  * Tests views user argument argument handler.
  */
 
-module_load_include('test', 'views', 'tests/views_query');
 
 class ViewsUserArgumentValidate extends ViewsSqlTest {
   public static function getInfo() {

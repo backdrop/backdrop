@@ -1,7 +1,5 @@
 <?php
 
-module_load_include('test', 'views', 'tests/views_query');
-
 class ViewsTranslatableTest extends ViewsSqlTest {
   var $strings;
 
