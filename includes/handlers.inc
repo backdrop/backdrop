@@ -10,16 +10,35 @@
 function _views_create_handler($definition, $type = 'handler', $handler_type = NULL) {
 //  debug('Instantiating handler ' . $definition['handler']);
   if (empty($definition['handler'])) {
+    vpr('_views_create_handler - type: @type - failed: handler has not been provided.',
+      array('@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type)
+    );
     return;
   }
 
   // class_exists will automatically load the code file.
   if (!empty($definition['override handler']) &&
       !class_exists($definition['override handler'])) {
+    vpr(
+      '_views_create_handler - loading override handler @type failed: class @override_handler could not be loaded. ' .
+      'Verify the class file has been registered in the corresponding .info-file (files[]).',
+      array(
+        '@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type,
+        '@override_handler' => $definition['override handler']
+      )
+    );
     return;
   }
 
   if (!class_exists($definition['handler'])) {
+    vpr(
+      '_views_create_handler - loading handler @type failed: class @handler could not be loaded. ' .
+      'Verify the class file has been registered in the corresponding .info-file (files[]).',
+      array(
+        '@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type,
+        '@handler' => $definition['handler']
+      )
+    );
     return;
   }
 
