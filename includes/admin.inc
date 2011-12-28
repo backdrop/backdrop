@@ -1188,8 +1188,8 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
   // Add the preview button
   $form['button'] = array(
     '#type' => 'submit',
-      '#value' => t('Update preview'),
-      '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
+    '#value' => t('Update preview'),
+    '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
     '#pre_render' => array('ctools_dependent_pre_render'),
     '#prefix' => '<div id="preview-submit-wrapper">',
     '#suffix' => '</div>',
