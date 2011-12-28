@@ -4792,7 +4792,7 @@ function views_ui_admin_settings_advanced() {
     '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
   );
 
-  $regions = system_region_list(variable_get('theme_default', 'garland'));
+  $regions = array();
   $regions['watchdog'] = t('Watchdog');
   if (module_exists('devel')) {
     $regions['message'] = t('Devel message(dpm)');

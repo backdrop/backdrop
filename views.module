@@ -1591,16 +1591,13 @@ function views_debug($message, $placeholders = array()) {
       $output = $message;
       watchdog('views_logging', $output, $placeholders);
     }
-    else if ($devel_region == 'message') {
-      $output = empty($output) ? t($message, $placeholders) : $output;
-      dpm($output);
-    }
     else if ($devel_region == 'drupal_debug') {
       $output = empty($output) ? t($message, $placeholders) : $output;
       dd($output);
     }
     else {
-      drupal_add_region_content($devel_region, $output);
+      $output = empty($output) ? t($message, $placeholders) : $output;
+      dpm($output);
     }
   }
   elseif (isset($GLOBALS['drupal_test_info'])) {
