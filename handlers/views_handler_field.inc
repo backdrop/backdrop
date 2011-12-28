@@ -844,12 +844,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#description' => t('If checked, all HTML tags will be stripped.'),
         '#default_value' => $this->options['alter']['strip_tags'],
       );
-      $form['alter']['trim_whitespace'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Remove whitespace'),
-        '#description' => t('If checked, all whitespaces at the beginning and the end of the output will be removed.'),
-        '#default_value' => $this->options['alter']['trim_whitespace'],
-      );
+
       $form['alter']['preserve_tags'] = array(
         '#type' => 'textfield',
         '#title' => t('Preserve certain tags'),
@@ -858,6 +853,13 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#dependency' => array(
           'edit-options-alter-strip-tags' => array(1),
         ),
+      );
+
+      $form['alter']['trim_whitespace'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Remove whitespace'),
+        '#description' => t('If checked, all whitespaces at the beginning and the end of the output will be removed.'),
+        '#default_value' => $this->options['alter']['trim_whitespace'],
       );
 
       $form['alter']['nl2br'] = array(
