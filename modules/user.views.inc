@@ -182,6 +182,15 @@ function user_views_data() {
     ),
   );
 
+  // link
+  $data['users']['view_user'] = array(
+    'field' => array(
+      'title' => t('Link'),
+      'help' => t('Provide a simple link to the user.'),
+      'handler' => 'views_handler_field_user_link',
+    ),
+  );
+
   // created field
   $data['users']['created'] = array(
     'title' => t('Created date'), // The item it appears as on the UI,
