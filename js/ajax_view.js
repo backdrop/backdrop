@@ -35,8 +35,19 @@ Drupal.views.ajaxView = function(settings) {
     ajax_path = ajax_path[0];
   }
 
+  // Check if there are any GET parameters to send to views.
+  var queryString = window.location.search || '';
+  if (queryString !== '') {
+    // Remove the question mark and Drupal path component if any.
+    var queryString = queryString.slice(1).replace(/q=[^&]+&?/, '');
+    if (queryString !== '') {
+      // If there is a '?' in ajax_path, clean url are on and & should be used to add parameters.
+      queryString = ((/\?/.test(ajax_path)) ? '&' : '?') + queryString;
+    }
+  }
+
   this.element_settings = {
-    url: ajax_path + window.location.search,
+    url: ajax_path + queryString,
     submit: settings,
     setClick: true,
     event: 'click',
