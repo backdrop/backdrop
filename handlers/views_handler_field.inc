@@ -1018,7 +1018,13 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $value = $this->render_altered($alter, $tokens);
     }
 
-    if ((($this->options['hide_empty'] && empty($value)) || ($this->options['hide_alter_empty'] && empty($this->original_value))) && ($value !== 0 || $this->options['empty_zero'])) {
+    // Check whether the value is empty and return nothing, so the field isn't rendered.
+    // First check whether the field should be hidden if the value(hide_alter_empty = TRUE) /the rewrite is empty (hide_alter_empty = FALSE).
+    // For numeric values you can specify whether "0"/0 should be empty.
+    if ((($this->options['hide_empty'] && empty($value))
+        || ($this->options['hide_alter_empty'] && empty($this->original_value)))
+      && (($value !== 0 && $value !== '0')
+        || $this->options['empty_zero'])) {
       return '';
     }
 
