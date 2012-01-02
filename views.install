@@ -600,11 +600,11 @@ function views_schema_7300() {
 /**
  * Make sure the human_name field is added to the views_view table.
  *
- * If you updated from 6.x-2.x-dev to 7.x-3.x you had already schema
- * version 6014, so the update 6013 isn't runned, and never was.
- * As a result the human_name field is missing in the database.
+ * If you updated from 6.x-2.x-dev to 7.x-3.x you already had schema
+ * version 6014, so update 6013 never was nor will be run. As a result,
+ * the human_name field is missing from the database.
  *
- * Add the human_name field if it doesn't exists before.
+ * This will add the human_name field if it doesn't already exist.
  */
 function views_update_7300() {
   views_update_6013();
