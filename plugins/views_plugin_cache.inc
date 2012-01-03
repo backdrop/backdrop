@@ -251,10 +251,16 @@ class views_plugin_cache extends views_plugin {
 
       $build_info = $this->view->build_info;
 
-      foreach (array('query', 'count_query') as $index) {
-        $query = clone $build_info[$index];
-        $query->preExecute();
-        $build_info[$index] = (string)$query;
+      $query_plugin = $this->view->display_handler->get_plugin('query');
+
+      foreach (array('query','count_query') as $index) {
+        // If the default query back-end is used generate SQL query strings from
+        // the query objects.
+        if ($build_info[$index] instanceof SelectQueryInterface) {
+          $query = clone $build_info[$index];
+          $query->preExecute();
+          $build_info[$index] = (string)$query;
+        }
       }
       $key_data = array(
         'build_info' => $build_info,
