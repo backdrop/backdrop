@@ -25,6 +25,17 @@ class views_plugin_row_node_rss extends views_plugin_row {
     return $options;
   }
 
+  /**
+   * Override init function to convert fulltext view-mode to full.
+   */
+  function init(&$view, &$display, $options = NULL) {
+    parent::init($view, $display, $options);
+
+    if ($this->options['item_length'] == 'fulltext') {
+      $this->options['item_length'] = 'full';
+    }
+  }
+
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
@@ -45,12 +56,16 @@ class views_plugin_row_node_rss extends views_plugin_row {
    * Return the main options, which are shown in the summary title.
    */
   function options_form_summary_options() {
-    return array(
-      'fulltext' => t('Full text'),
-      'teaser' => t('Title plus teaser'),
-      'title' => t('Title only'),
-      'default' => t('Use default RSS settings'),
-    );
+    $entity_info = entity_get_info('node');
+    $options = array();
+    if (!empty($entity_info['view modes'])) {
+      foreach ($entity_info['view modes'] as $mode => $settings) {
+        $options[$mode] = $settings['label'];
+      }
+    }
+    $options['title'] = t('Title only');
+    $options['default'] = t('Use site default RSS settings');
+    return $options;
   }
 
   function summary_title() {
@@ -78,9 +93,9 @@ class views_plugin_row_node_rss extends views_plugin_row {
       return;
     }
 
-    $item_length = $this->options['item_length'];
-    if ($item_length == 'default') {
-      $item_length = variable_get('feed_item_length', 'teaser');
+    $display_mode = $this->options['item_length'];
+    if ($display_mode == 'default') {
+      $display_mode = variable_get('feed_item_length', 'teaser');
     }
 
     // Load the specified node:
@@ -112,19 +127,25 @@ class views_plugin_row_node_rss extends views_plugin_row {
 
     // The node gets built and modules add to or modify $node->rss_elements
     // and $node->rss_namespaces.
-    $build = node_view($node, 'rss');
+
+    $build_mode = $display_mode;
+
+    $build = node_view($node, $build_mode);
     unset($build['#theme']);
 
     if (!empty($node->rss_namespaces)) {
       $this->view->style_plugin->namespaces = array_merge($this->view->style_plugin->namespaces, $node->rss_namespaces);
+    } else {
+      $this->view->style_plugin->namespaces = array_merge($this->view->style_plugin->namespaces, rdf_get_namespaces());
     }
+
 
     // Hide the links if desired.
     if (!$this->options['links']) {
       hide($build['links']);
     }
 
-    if ($item_length != 'title') {
+    if ($display_mode != 'title') {
       // We render node contents and force links to be last.
       $build['links']['#weight'] = 1000;
       $item_text .= drupal_render($build);
