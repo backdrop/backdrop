@@ -4254,9 +4254,11 @@ function views_ui_config_item_form_submit_temporary($form, &$form_state) {
   $item = $form_state['handler']->options;
   $types = views_object_types();
 
-  $type = $form_state['type'];
+  // For footer/header $handler_type is area but $type is footer/header.
+  // For all other handle types it's the same.
+  $handler_type = $type = $form_state['type'];
   if (!empty($types[$type]['type'])) {
-    $type = $types[$type]['type'];
+    $handler_type = $types[$type]['type'];
   }
 
   $override = NULL;
@@ -4272,7 +4274,7 @@ function views_ui_config_item_form_submit_temporary($form, &$form_state) {
 
   // Create a new handler and unpack the options from the form onto it. We
   // can use that for storage.
-  $handler = views_get_handler($item['table'], $item['field'], $type, $override);
+  $handler = views_get_handler($item['table'], $item['field'], $handler_type, $override);
   $handler->init($form_state['view'], $item);
 
 
@@ -4307,9 +4309,11 @@ function views_ui_config_item_form_submit($form, &$form_state) {
   $item = $form_state['handler']->options;
   $types = views_object_types();
 
-  $type = $form_state['type'];
+  // For footer/header $handler_type is area but $type is footer/header.
+  // For all other handle types it's the same.
+  $handler_type = $type = $form_state['type'];
   if (!empty($types[$type]['type'])) {
-    $type = $types[$type]['type'];
+    $handler_type = $types[$type]['type'];
   }
 
   $override = NULL;
@@ -4325,7 +4329,7 @@ function views_ui_config_item_form_submit($form, &$form_state) {
 
   // Create a new handler and unpack the options from the form onto it. We
   // can use that for storage.
-  $handler = views_get_handler($item['table'], $item['field'], $type, $override);
+  $handler = views_get_handler($item['table'], $item['field'], $handler_type, $override);
   $handler->init($form_state['view'], $item);
 
 
