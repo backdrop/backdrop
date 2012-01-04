@@ -43,8 +43,7 @@ class views_plugin_style extends views_plugin {
     }
 
     $this->options += array(
-      'grouping' => '',
-      'group_rendered' => TRUE,
+      'grouping' => array(),
     );
 
     $this->definition += array(
@@ -152,8 +151,7 @@ class views_plugin_style extends views_plugin {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['grouping'] = array('default' => '');
-    $options['group_rendered'] = array('default' => TRUE);
+    $options['grouping'] = array('default' => array());
     if ($this->uses_row_class()) {
       $options['row_class'] = array('default' => '');
     }
@@ -173,19 +171,35 @@ class views_plugin_style extends views_plugin {
 
       // If there are no fields, we can't group on them.
       if (count($options) > 1) {
-        $form['grouping'] = array(
-          '#type' => 'select',
-          '#title' => t('Grouping field'),
-          '#options' => $options,
-          '#default_value' => $this->options['grouping'],
-          '#description' => t('You may optionally specify a field by which to group the records. Leave blank to not group.'),
-        );
-        $form['group_rendered'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Use rendered output to group rows'),
-          '#default_value' => $this->options['group_rendered'],
-          '#description' => t('If enabled the rendered output of the grouping field is used to group the rows.'),
-        );
+        // This is for backward compability, when there was just a single select form.
+        if (is_string($this->options['grouping'])) {
+          $grouping = $this->options['grouping'];
+          $this->options['grouping'] = array();
+          $this->options['grouping'][0]['field'] = $grouping;
+        }
+        if (is_string($this->options['group_rendered'])) {
+          $this->options['grouping'][0]['rendered'] = $this->options['group_rendered'];
+        }
+
+        $c = count($this->options['grouping']);
+        // Add a form for every grouping, plus one.
+        for ($i = 0; $i <= $c; $i++) {
+          $grouping = !empty($this->options['grouping'][$i]) ? $this->options['grouping'][$i] : array();
+          $grouping += array('field' => '', 'rendered' => TRUE);
+          $form['grouping'][$i]['field'] = array(
+            '#type' => 'select',
+            '#title' => t('Grouping field Nr.@number', array('@number' => $i + 1)),
+            '#options' => $options,
+            '#default_value' => $grouping['field'],
+            '#description' => t('You may optionally specify a field by which to group the records. Leave blank to not group.'),
+          );
+          $form['grouping'][$i]['rendered'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Use rendered output to group rows'),
+            '#default_value' => $grouping['rendered'],
+            '#description' => t('If enabled the rendered output of the grouping field is used to group the rows.'),
+          );
+        }
       }
     }
 
@@ -199,6 +213,15 @@ class views_plugin_style extends views_plugin {
 
       if ($this->uses_fields()) {
         $form['row_class']['#description'] .= ' ' . t('You may use field tokens from as per the "Replacement patterns" used in "Rewrite the output of this field" for all fields.');
+      }
+    }
+  }
+
+  function options_validate(&$form, &$form_state) {
+    // Don't save grouping if no field is specified.
+    foreach ($form_state['values']['style_options']['grouping'] as $index => $grouping) {
+      if (empty($grouping['field'])) {
+        unset($form_state['values']['style_options']['grouping'][$index]);
       }
     }
   }
@@ -237,36 +260,63 @@ class views_plugin_style extends views_plugin {
       return;
     }
 
-    // Group the rows according to the grouping field, if specified.
+    // Group the rows according to the grouping instructions, if specified.
     $sets = $this->render_grouping(
       $this->view->result,
       $this->options['grouping'],
-      (bool) $this->options['group_rendered']
+      TRUE
     );
 
-    // Render each group separately and concatenate.  Plugins may override this
-    // method if they wish some other way of handling grouping.
-    $output = '';
-    foreach ($sets as $group) {
-      $title = $group['group'];
-      if ($this->uses_row_plugin()) {
-        $rows = array();
-        foreach ($group['rows'] as $row_index => $row) {
-          $this->view->row_index = $row_index;
-          $rows[$row_index] = $this->row_plugin->render($row);
-        }
-      }
-      else {
-        $rows = $group['rows'];
-      }
+    return $this->render_grouping_sets($sets);
+  }
 
-      $output .= theme($this->theme_functions(),
-        array(
-          'view' => $this->view,
-          'options' => $this->options,
-          'rows' => $rows,
-          'title' => $title)
-      );
+  /**
+   * Render the grouping sets.
+   *
+   * Plugins may override this method if they wish some other way of handling
+   * grouping.
+   *
+   * @param $sets
+   *   Array containing the grouping sets to render.
+   * @param $level
+   *   Integer indicating the hierarchical level of the grouping.
+   *
+   * @return string
+   *   Rendered output of given grouping sets.
+   */
+  function render_grouping_sets($sets, $level = 0) {
+    $output = '';
+    foreach ($sets as $set) {
+      $row = reset($set['rows']);
+      // Render as a grouping set.
+      if (is_array($row) && isset($row['group'])) {
+        $output .= theme(views_theme_functions('views_view_grouping', $this->view, $this->display),
+          array(
+            'view' => $this->view,
+            'grouping' => $this->options['grouping'][$level],
+            'grouping_level' => $level,
+            'rows' => $set['rows'],
+            'title' => $set['group'])
+        );
+      }
+      // Render as a record set.
+      else {
+        if ($this->uses_row_plugin()) {
+          foreach ($set['rows'] as $index => $row) {
+            $this->view->row_index = $index;
+            $set['rows'][$index] = $this->row_plugin->render($row);
+          }
+        }
+
+        $output .= theme($this->theme_functions(),
+          array(
+            'view' => $this->view,
+            'options' => $this->options,
+            'grouping_level' => $level,
+            'rows' => $set['rows'],
+            'title' => $set['group'])
+        );
+      }
     }
     unset($this->view->row_index);
     return $output;
@@ -277,42 +327,94 @@ class views_plugin_style extends views_plugin {
    *
    * @param $records
    *   An array of records from the view to group.
-   * @param $grouping_field
-   *   The field id on which to group.  If empty, the result set will be given
-   *   a single group with an empty string as a label.
+   * @param $groupings
+   *   An array of grouping instructions on which fields to group. If empty, the
+   *   result set will be given a single group with an empty string as a label.
    * @param $group_rendered
-   *   Boolean value to switch whether to use the rendered or the raw field
-   *   value for grouping. If set to NULL the return is structured as before
-   *   Views 7.x-3.0-rc2.
+   *   Boolean value whether to use the rendered or the raw field value for
+   *   grouping. If set to NULL the return is structured as before
+   *   Views 7.x-3.0-rc2. After Views 7.x-3.0 this boolean is only used if
+   *   $groupings is an old-style string or if the rendered option is missing
+   *   for a grouping instruction.
    * @return
    *   The grouped record set.
+   *   A nested set structure is generated if multiple grouping fields are used.
+   *
+   *   @code
+   *   array(
+   *     'grouping_field_1:grouping_1' => array(
+   *       'group' => 'grouping_field_1:content_1',
+   *       'rows' => array(
+   *         'grouping_field_2:grouping_a' => array(
+   *           'group' => 'grouping_field_2:content_a',
+   *           'rows' => array(
+   *             $row_index_1 => $row_1,
+   *             $row_index_2 => $row_2,
+   *             // ...
+   *           )
+   *         ),
+   *       ),
+   *     ),
+   *     'grouping_field_1:grouping_2' => array(
+   *       // ...
+   *     ),
+   *   )
+   *   @endcode
    */
-  function render_grouping($records, $grouping_field = '', $group_rendered = NULL) {
+  function render_grouping($records, $groupings = array(), $group_rendered = NULL) {
+    // This is for backward compability, when $groupings was a string containing
+    // the ID of a single field.
+    if (is_string($groupings)) {
+      $rendered = $group_rendered === NULL ? TRUE : $group_rendered;
+      $groupings = array(array('field' => $groupings, 'rendered' => $rendered));
+    }
+
     // Make sure fields are rendered
     $this->render_fields($this->view->result);
     $sets = array();
-    if ($grouping_field) {
+    if ($groupings) {
       foreach ($records as $index => $row) {
-        $grouping = '';
-        // Group on the rendered version of the field, not the raw.  That way,
-        // we can control any special formatting of the grouping field through
-        // the admin or theme layer or anywhere else we'd like.
-        if (isset($this->view->field[$grouping_field])) {
-          $group_content = $this->get_field($index, $grouping_field);
-          if ($this->view->field[$grouping_field]->options['label']) {
-            $group_content = $this->view->field[$grouping_field]->options['label'] . ': ' . $group_content;
+        // Iterate through configured grouping fields to determine the
+        // hierarchically positioned set where the current row belongs to.
+        // While iterating, parent groups, that do not exist yet, are added.
+        $set = &$sets;
+        foreach ($groupings as $info) {
+          $field = $info['field'];
+          $rendered = isset($info['rendered']) ? $info['rendered'] : $group_rendered;
+          $grouping = '';
+          $group_content = '';
+          // Group on the rendered version of the field, not the raw.  That way,
+          // we can control any special formatting of the grouping field through
+          // the admin or theme layer or anywhere else we'd like.
+          if (isset($this->view->field[$field])) {
+            $group_content = $this->get_field($index, $field);
+            if ($this->view->field[$field]->options['label']) {
+              $group_content = $this->view->field[$field]->options['label'] . ': ' . $group_content;
+            }
+            if ($rendered) {
+              $grouping = $group_content;
+            }
+            else {
+              $grouping = $this->get_field_value($index, $field);
+              // Not all field handlers return a scalar value,
+              // e.g. views_handler_field_field.
+              if (!is_scalar($grouping)) {
+                $grouping = md5(serialize($grouping));
+              }
+            }
           }
-          if ($group_rendered) {
-            $grouping = $group_content;
+
+          // Create the group if it does not exist yet.
+          if (empty($set[$grouping])) {
+            $set[$grouping]['group'] = $group_content;
+            $set[$grouping]['rows'] = array();
           }
-          else {
-            $grouping = $this->get_field_value($index, $grouping_field);
-          }
-          if (empty($sets[$grouping]['group'])) {
-            $sets[$grouping]['group'] = $group_content;
-          }
+
+          // Move the set reference into the row set of the group we just determined.
+          $set = &$set[$grouping]['rows'];
         }
-        $sets[$grouping]['rows'][$index] = $row;
+        // Add the row to the hierarchically positioned row set we just determined.
+        $set[$index] = $row;
       }
     }
     else {
