@@ -467,6 +467,7 @@ class views_handler_argument extends views_handler {
         'form method' => 'default_argument_form',
         'has default argument' => TRUE,
         'default only' => TRUE, // this can only be used for missing argument, not validation failure
+        'breadcrumb' => TRUE, // generate a breadcrumb to here
       ),
       'not found' => array(
         'title' => t('Hide view'),
