@@ -609,3 +609,23 @@ function views_schema_7300() {
 function views_update_7300() {
   views_update_6013();
 }
+
+function views_schema_7301() {
+  $schema = views_schema(__FUNCTION__);
+  $schema['views_view']['fields']['name']['length'] = 128;
+  return $schema;
+}
+
+/**
+ * Enlarge the name column
+ */
+function views_update_7301() {
+  $new_field = array(
+    'type' => 'varchar',
+    'length' => '128',
+    'default' => '',
+    'not null' => TRUE,
+    'description' => 'The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores.',
+  );
+  db_change_field('views_view', 'name', 'name', $new_field);
+}
