@@ -1524,69 +1524,6 @@ class view extends views_db_object {
   }
 
   /**
-   * Load a view from the database based upon either vid or name.
-   *
-   * This is a static factory method that implements internal caching for
-   * view objects.
-   *
-   * @param $arg
-   *  The name of the view or its internal view id (vid)
-   * @param $reset
-   *  If TRUE, reset this entry in the load cache.
-   * @return view
-   *   A view object or NULL if it was not available.
-   */
-  static function &load($arg, $reset = FALSE) {
-    static $cache = array();
-
-    // We want a NULL value to return TRUE here, so we can't use isset() or empty().
-    if (!array_key_exists($arg, $cache) || $reset) {
-      $result = db_select('views_view', 'v')
-        ->fields('v')
-        ->condition(is_numeric($arg) ? 'vid' : 'name', $arg)
-        ->execute();
-      if ($result->rowCount() == 0) {
-        $cache[$arg] = NULL;
-      }
-      else {
-        $view = new view();
-        $view->load_row($result->fetchObject());
-        $view->type = t('Normal');
-        // Load all of our subtables.
-        foreach ($view->db_objects() as $key) {
-          $object_name = "views_$key";
-          $result = db_select($object_name, 'v')
-            ->fields('v')
-            ->condition('vid', $view->vid)
-            ->orderBy('position')
-            ->execute();
-          foreach ($result as $data) {
-            $object = new $object_name(FALSE);
-            $object->load_row($data);
-
-            // Because it can get complicated with this much indirection,
-            // make a shortcut reference.
-            $location = &$view->$key;
-
-            // If we have a basic id field, load the item onto the view based on
-            // this ID, otherwise push it on.
-            if (!empty($object->id)) {
-              $location[$object->id] = $object;
-            }
-            else {
-              $location[] = $object;
-            }
-          }
-        }
-        $view->loaded = TRUE;
-        $cache[$arg] = $view;
-      }
-    }
-
-    return $cache[$arg];
-  }
-
-  /**
    * Static factory method to load a list of views based upon a $where clause.
    *
    * Although this method could be implemented to simply iterate over views::load(),
