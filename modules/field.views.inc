@@ -416,6 +416,9 @@ function list_field_views_data($field) {
       if (isset($field_data['filter']) && $field != 'delta') {
         $data[$table_name][$field]['filter']['handler'] = 'views_handler_filter_field_list';
       }
+      if (isset($field_data['argument']) && $field != 'delta') {
+        $data[$table_name][$field]['argument']['handler'] = 'views_handler_argument_field_list';
+      }
     }
   }
   return $data;
