@@ -19,7 +19,7 @@ class views_plugin_style_table extends views_plugin_style {
     $options['override'] = array('default' => TRUE);
     $options['sticky'] = array('default' => FALSE);
     $options['order'] = array('default' => 'asc');
-    $options['summary'] = array('default' => '');
+    $options['summary'] = array('default' => '', 'translatable' => TRUE);
     $options['empty_table'] = array('default' => FALSE);
 
     return $options;
