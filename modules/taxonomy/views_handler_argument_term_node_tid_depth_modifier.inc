@@ -4,7 +4,9 @@
  * Argument handler for to modify depth for a previous term.
  *
  * This handler is actually part of the node table and has some restrictions,
- * because it uses a subquery to find nodes with
+ * because it uses a subquery to find nodes with.
+ *
+ * @ingroup views_argument_handlers
  */
 class views_handler_argument_term_node_tid_depth_modifier extends views_handler_argument {
   function options_form(&$form, &$form_state) { }

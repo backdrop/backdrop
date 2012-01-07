@@ -3,6 +3,8 @@
 /**
  * Argument handler to accept a user id to check for nodes that
  * user posted or commented on.
+ *
+ * @ingroup views_argument_handlers
  */
 class views_handler_argument_comment_user_uid extends views_handler_argument {
   function title() {

@@ -2,6 +2,8 @@
 
 /**
  * Simple handler for arguments using group by.
+ *
+ * @ingroup views_argument_handlers
  */
 class views_handler_argument_group_by_numeric extends views_handler_argument  {
   function query($group_by = FALSE) {

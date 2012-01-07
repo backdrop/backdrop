@@ -1,7 +1,13 @@
 <?php
 /**
  * @file
+ * Contains views_handler_argument_field_list handler
+ */
+
+/**
  * Argument handler for list field to show the human readable name in the summary.
+ *
+ * @ingroup views_argument_handlers
  */
 class views_handler_argument_field_list extends views_handler_argument_numeric {
   /**

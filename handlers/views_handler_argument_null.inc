@@ -1,6 +1,8 @@
 <?php
 /**
  * Argument handler that ignores the argument.
+ *
+ * @ingroup views_argument_handlers
  */
 class views_handler_argument_null extends views_handler_argument {
   function option_definition() {

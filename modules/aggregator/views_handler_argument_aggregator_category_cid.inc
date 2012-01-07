@@ -2,6 +2,8 @@
 
 /**
  * Argument handler to accept an aggregator category id.
+ *
+ * @ingroup views_argument_handlers
  */
 class views_handler_argument_aggregator_category_cid extends views_handler_argument_numeric {
   /**

@@ -2,6 +2,8 @@
 
 /**
  * Argument handler to accept a vocabulary machine name.
+ *
+ * @ingroup views_argument_handlers
  */
 class views_handler_argument_vocabulary_machine_name extends views_handler_argument_string {
   /**
