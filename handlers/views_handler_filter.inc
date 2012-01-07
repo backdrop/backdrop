@@ -499,7 +499,7 @@ class views_handler_filter extends views_handler {
    * Tell the renderer about our exposed form. This only needs to be
    * overridden for particularly complex forms. And maybe not even then.
    *
-   * @return
+   * @return array|null
    *   An array with the following keys:
    *   - operator: The $form key of the operator. Set to NULL if no operator.
    *   - value: The $form key of the value. Set to NULL if no value.
