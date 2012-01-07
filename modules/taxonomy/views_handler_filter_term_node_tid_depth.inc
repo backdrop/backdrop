@@ -3,7 +3,9 @@
  * Filter handler for taxonomy terms with depth.
  *
  * This handler is actually part of the node table and has some restrictions,
- * because it uses a subquery to find nodes with
+ * because it uses a subquery to find nodes with.
+ *
+ * @ingroup views_filter_handlers
  */
 class views_handler_filter_term_node_tid_depth extends views_handler_filter_term_node_tid {
   function operator_options($which = 'title') {

@@ -1,6 +1,8 @@
 <?php
 /**
  * Filter by node_access records.
+ *
+ * @ingroup views_filter_handlers
  */
 class views_handler_filter_node_access extends views_handler_filter {
   function admin_summary() { }

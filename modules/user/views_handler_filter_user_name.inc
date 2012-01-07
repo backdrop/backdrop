@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Filter handler for usernames
+ * Filter handler for usernames.
+ *
+ * @ingroup views_filter_handlers
  */
 class views_handler_filter_user_name extends views_handler_filter_in_operator {
   var $always_multiple = TRUE;

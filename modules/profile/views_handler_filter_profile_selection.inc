@@ -2,6 +2,8 @@
 
 /**
  * Filter by a selection widget in the profile.
+ *
+ * @ingroup views_filter_handlers
  */
 class views_handler_filter_profile_selection extends views_handler_filter_in_operator {
   function get_value_options() {
