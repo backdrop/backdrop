@@ -3,6 +3,8 @@
 /**
  * Basic textfield filter to handle string filtering commands
  * including equality, like, not like, etc.
+ *
+ * @ingroup views_filter_handlers
  */
 class views_handler_filter_string extends views_handler_filter {
   // exposed filter options
