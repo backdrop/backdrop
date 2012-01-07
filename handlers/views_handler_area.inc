@@ -84,6 +84,8 @@ class views_handler_area extends views_handler {
 
 /**
  * A special handler to take the place of missing or broken handlers.
+ *
+ * @ingroup views_area_handlers
  */
 class views_handler_area_broken extends views_handler_area {
   function ui_name($short = FALSE) {

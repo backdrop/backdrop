@@ -2,7 +2,12 @@
 
 /**
  * @file
+ * Contains views_handler_area_view handler.
+ */
+/**
  * Views area handlers. Insert a view inside of an area.
+ *
+ * @ingroup views_area_handlers
  */
 class views_handler_area_view extends views_handler_area {
 

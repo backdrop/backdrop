@@ -2,13 +2,14 @@
 
 /**
  * @file
- * Views area handler to display some configurable result summary.
+ * Contains views_handler_area_result handler.
  */
 
 /**
+ * Views area handler to display some configurable result summary.
+ *
  * @ingroup views_area_handlers Views' area handlers
-*/
-
+ */
 class views_handler_area_result extends views_handler_area {
 
   function option_definition() {
