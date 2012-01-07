@@ -50,6 +50,8 @@
  * If your use of this relationship handler is likely to result in large
  * data sets, you might want to consider storing statistics in a separate table,
  * in the same way as node_comment_statistics.
+ *
+ * @ingroup views_relationship_handlers
  */
 class views_handler_relationship_groupwise_max extends views_handler_relationship {
 

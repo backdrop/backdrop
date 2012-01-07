@@ -4,6 +4,11 @@
  * Views' relationship handlers.
  */
 
+/**
+ * A relationship handlers which reverse entity references.
+ *
+ * @ingroup views_relationship_handlers
+ */
 class views_handler_relationship_entity_reverse extends views_handler_relationship  {
   function init(&$view, &$options) {
     parent::init($view, $options);

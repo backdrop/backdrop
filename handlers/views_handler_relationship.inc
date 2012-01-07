@@ -152,6 +152,8 @@ class views_handler_relationship extends views_handler {
 
 /**
  * A special handler to take the place of missing or broken handlers.
+ *
+ * @ingroup views_relationship_handlers
  */
 class views_handler_relationship_broken extends views_handler_relationship {
   function ui_name($short = FALSE) {
