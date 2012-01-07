@@ -100,6 +100,13 @@ class view extends views_db_object {
   var $display_handler;
 
   /**
+   * Stores all display handlers of this view.
+   *
+   * @var array[views_display]
+   */
+  var $display;
+
+  /**
    * The current used style plugin.
    *
    * @var views_plugin_style
