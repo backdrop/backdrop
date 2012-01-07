@@ -2,6 +2,8 @@
 /**
  * @file
  * Provides a comment approve link.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_comment_link_approve extends views_handler_field_comment_link {
   function construct() {

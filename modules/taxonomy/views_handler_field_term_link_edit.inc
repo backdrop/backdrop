@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Field handler to present a term edit link .
+ * Field handler to present a term edit link.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_term_link_edit extends views_handler_field {
   function construct() {

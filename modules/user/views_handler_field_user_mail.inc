@@ -1,6 +1,8 @@
 <?php
 /**
- * Field handler to provide acess control for the email field
+ * Field handler to provide acess control for the email field.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_user_mail extends views_handler_field_user {
   function option_definition() {

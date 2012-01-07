@@ -3,6 +3,8 @@
 /**
  * Field handler to provide simple renderer that allows linking to aggregator
  * category.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_aggregator_category extends views_handler_field {
   /**

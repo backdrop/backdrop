@@ -1,6 +1,8 @@
 <?php
 /**
  * Field handler to provide simple renderer that allows linking to a node.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_search_score extends views_handler_field_numeric {
   function option_definition() {

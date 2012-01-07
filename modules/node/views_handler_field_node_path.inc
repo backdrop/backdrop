@@ -7,6 +7,8 @@
 
 /**
  * Field handler to present the path to the node.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_node_path extends views_handler_field {
 

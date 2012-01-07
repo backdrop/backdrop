@@ -1,6 +1,8 @@
 <?php
 /**
  * Base field handler to present a link.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_comment_link extends views_handler_field {
   function construct() {

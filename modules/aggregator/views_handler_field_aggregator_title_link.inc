@@ -3,6 +3,8 @@
  /**
  * Field handler that turns an item's title into a clickable link to the original
  * source article.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_aggregator_title_link extends views_handler_field {
   function construct() {

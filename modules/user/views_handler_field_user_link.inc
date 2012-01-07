@@ -1,6 +1,8 @@
 <?php
 /**
  * Field handler to present a link to the user.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_user_link extends views_handler_field {
   function construct() {

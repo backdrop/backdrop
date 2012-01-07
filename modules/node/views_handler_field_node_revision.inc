@@ -1,9 +1,13 @@
 <?php
 /**
- * @file
  * Contains the basic 'node_revision' field handler.
  */
 
+/**
+ * A basic node_revision handler.
+ *
+ * @ingroup views_field_handlers
+ */
 class views_handler_field_node_revision extends views_handler_field_node {
   function init(&$view, &$options) {
     parent::init($view, $options);

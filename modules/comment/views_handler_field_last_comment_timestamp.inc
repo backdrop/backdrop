@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Field handler to display the timestamp of a comment with the count of comments.
+ *
+ * @ingroup views_field_handlers
+ */
 class views_handler_field_last_comment_timestamp extends views_handler_field_date {
   function construct() {
     parent::construct();

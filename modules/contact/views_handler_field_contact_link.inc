@@ -1,6 +1,8 @@
 <?php
 /**
  * A field that links to the user contact page, if access is permitted.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_contact_link extends views_handler_field_user_link {
 

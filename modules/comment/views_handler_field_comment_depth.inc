@@ -1,6 +1,8 @@
 <?php
 /**
- * Field handler to display the depth of a comment
+ * Field handler to display the depth of a comment.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_comment_depth extends views_handler_field {
   /**

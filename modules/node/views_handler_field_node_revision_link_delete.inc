@@ -1,6 +1,8 @@
 <?php
 /**
  * Field handler to present delete a node revision.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_node_revision_link_delete extends views_handler_field_node_link {
   function construct() {

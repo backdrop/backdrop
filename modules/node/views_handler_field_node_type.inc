@@ -2,6 +2,8 @@
 
 /**
  * Field handler to translate a node type into its readable form.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_node_type extends views_handler_field_node {
   function option_definition() {

@@ -2,6 +2,8 @@
 
 /**
  * Field handler to translate a language into its readable form.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_locale_language extends views_handler_field {
   function option_definition() {

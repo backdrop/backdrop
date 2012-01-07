@@ -3,6 +3,8 @@
 /**
  * Field handler to provide simple renderer that allows linking to a taxonomy
  * term.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_taxonomy extends views_handler_field {
   /**

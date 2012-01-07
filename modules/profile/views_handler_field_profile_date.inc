@@ -4,6 +4,8 @@
  *
  * The dates are stored serialized, which makes them mostly useless from
  * SQL. About all we can do is unserialize and display them.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_profile_date extends views_handler_field_date {
   function options_form(&$form, &$form_state) {

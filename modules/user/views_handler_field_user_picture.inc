@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Field handler to provide simple renderer that allows using a themed user link
+ * Field handler to provide simple renderer that allows using a themed user link.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_user_picture extends views_handler_field {
   function construct() {

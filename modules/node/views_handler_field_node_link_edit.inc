@@ -1,6 +1,8 @@
 <?php
 /**
  * Field handler to present a link node edit.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_node_link_edit extends views_handler_field_node_link {
 

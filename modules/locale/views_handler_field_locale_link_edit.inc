@@ -2,6 +2,8 @@
 
 /**
  * Field handler to present a link to edit a translation.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_locale_link_edit extends views_handler_field {
   function construct() {

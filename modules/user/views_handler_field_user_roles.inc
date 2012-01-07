@@ -1,6 +1,8 @@
 <?php
 /**
  * Field handler to provide a list of roles.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_user_roles extends views_handler_field_prerender_list {
   function construct() {

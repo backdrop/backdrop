@@ -1,6 +1,8 @@
 <?php
 /**
  * Field handler to translate a node type into its readable form.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_file_status extends views_handler_field {
   function render($values) {
