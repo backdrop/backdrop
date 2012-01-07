@@ -36,6 +36,24 @@ class views_handler_filter extends views_handler {
   var $operator = '=';
 
   /**
+   * @var bool
+   * Disable the possibility to force a single value.
+   */
+  var $always_multiple = FALSE;
+
+  /**
+   * @var bool
+   * Disable the possibility to use operators.
+   */
+  var $no_operator = FALSE;
+
+  /**
+   * @var bool
+   * Disable the possibility to allow a exposed input to be optional.
+   */
+  var $always_required = FALSE;
+
+  /**
    * Provide some extra help to get the operator/value easier to use.
    *
    * This likely has to be overridden by filters which are more complex
