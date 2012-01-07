@@ -175,6 +175,11 @@ class views_plugin_pager extends views_plugin {
   function post_execute(&$result) { }
 
   /**
+   * Perform any needed actions just before rendering.
+   */
+  function pre_render(&$result) { }
+
+  /**
    * Render the pager.
    *
    * Called during the view render process, this will render the

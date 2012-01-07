@@ -1025,6 +1025,11 @@ class view extends views_db_object {
         $cache->cache_start();
       }
 
+      // Run pre_render for the pager as it might change the result.
+      if (!empty($this->query->pager)) {
+        $this->query->pager->pre_render($this->result);
+      }
+
       // Initialize the style plugin.
       $this->init_style();
 
