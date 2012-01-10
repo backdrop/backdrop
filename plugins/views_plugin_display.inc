@@ -42,6 +42,9 @@ class views_plugin_display extends views_plugin {
     $this->view = &$view;
     $this->display = &$display;
 
+    // Track changes that the user should know about.
+    $changed = FALSE;
+
     // Make some modifications:
     if (!isset($options) && isset($display->display_options)) {
       $options = $display->display_options;
@@ -123,6 +126,7 @@ class views_plugin_display extends views_plugin {
       $this->set_option('offset', NULL);
       $this->set_option('use_pager', NULL);
       $this->set_option('pager', $pager);
+      $changed = TRUE;
     }
 
 
@@ -152,6 +156,7 @@ class views_plugin_display extends views_plugin {
             }
             $this->set_option($area, array('text' => $options));
             $converted = TRUE;
+            $changed = TRUE;
           }
         }
         // Ensure that options are at least an empty array
@@ -169,6 +174,7 @@ class views_plugin_display extends views_plugin {
       $this->set_option('query', $query_settings);
       // Clear the values
       $this->set_option('distinct', NULL);
+      $changed = TRUE;
     }
 
     // Convert field language settings.
@@ -176,10 +182,12 @@ class views_plugin_display extends views_plugin {
     if (isset($query_options['options']['field_language'])) {
       $this->set_option('field_language', $query_options['options']['field_language']);
       unset($query_options['options']['field_language']);
+      $changed = TRUE;
     }
     if (isset($query_options['options']['field_language_add_to_query'])) {
       $this->set_option('field_language_add_to_query', $query_options['options']['field_language_add_to_query']);
       unset($query_options['options']['field_language_add_to_query']);
+      $changed = TRUE;
     }
     $this->set_option('query', $query_options);
 
@@ -196,6 +204,12 @@ class views_plugin_display extends views_plugin {
         $filter['group']++;
       }
       $this->set_option('filters', $filters);
+      $changed = TRUE;
+    }
+
+    // Mark the view as changed so the user has a chance to save it.
+    if ($changed) {
+      $this->view->changed = TRUE;
     }
   }
 
