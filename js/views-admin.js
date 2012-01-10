@@ -547,7 +547,7 @@ Drupal.viewsUi.rearrangeFilterHandler.prototype.duplicateGroupsOperator = functi
   dropdowns = this.operator;
 
   // Move the operator to a new row just above the second group.
-  titleRow = $('tr#views-group-title-1');
+  titleRow = $('tr#views-group-title-2');
   newRow = $('<tr class="filter-group-operator-row"><td colspan="5"></td></tr>');
   newRow.find('td').append(this.operator);
   newRow.insertBefore(titleRow);

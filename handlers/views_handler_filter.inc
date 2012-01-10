@@ -89,7 +89,7 @@ class views_handler_filter extends views_handler {
 
     $options['operator'] = array('default' => '=');
     $options['value'] = array('default' => '');
-    $options['group'] = array('default' => '0');
+    $options['group'] = array('default' => '1');
     $options['exposed'] = array('default' => FALSE);
     $options['expose'] = array(
       'contains' => array(

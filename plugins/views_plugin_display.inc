@@ -182,6 +182,21 @@ class views_plugin_display extends views_plugin {
       unset($query_options['options']['field_language_add_to_query']);
     }
     $this->set_option('query', $query_options);
+
+    // Convert filter groups.
+    $filter_groups = $this->get_option('filter_groups');
+    // Only convert if it wasn't converted yet, which is the case if there is a 0 group.
+    if (isset($filter_groups['groups'][0])) {
+      // Update filter groups.
+      $filter_groups ['groups'] = views_array_key_plus($filter_groups['groups']);
+      $this->set_option('filter_groups', $filter_groups);
+      // Update the filter group on each filter.
+      $filters = $this->get_option('filters');
+      foreach ($filters as &$filter) {
+        $filter['group']++;
+      }
+      $this->set_option('filters', $filters);
+    }
   }
 
   function construct() {
@@ -629,7 +644,7 @@ class views_plugin_display extends views_plugin {
       'filter_groups' => array(
         'contains' => array(
           'operator' => array('default' => 'AND'),
-          'groups' => array('default' => array(0 => 'AND')),
+          'groups' => array('default' => array(1 => 'AND')),
         ),
       ),
       'filters' => array(

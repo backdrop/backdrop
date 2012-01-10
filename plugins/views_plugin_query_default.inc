@@ -1030,13 +1030,24 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Construct the "WHERE" or "HAVING" part of the query.
    *
+   * As views has to wrap the conditions from arguments with AND, a special
+   * group is wrapped around all conditions. This special group has the ID 0.
+   * There is other code in filters which makes sure that the group IDs are
+   * higher than zero.
+   *
    * @param $where
    *   'where' or 'having'.
    */
   function build_condition($where = 'where') {
     $has_condition = FALSE;
-    $main_group = $this->group_operator == 'OR' ? db_or() : db_and();
+    $has_arguments = FALSE;
+    $has_filter = FALSE;
+
+    $main_group = db_and();
+    $filter_group = $this->group_operator == 'OR' ? db_or() : db_and();
+
     foreach ($this->$where as $group => $info) {
+
       if (!empty($info['conditions'])) {
         $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
         foreach ($info['conditions'] as $key => $clause) {
@@ -1055,10 +1066,27 @@ class views_plugin_query_default extends views_plugin_query {
             $sub_group->condition($clause['field'], $clause['value'], $clause['operator']);
           }
         }
-        $main_group->condition($sub_group);
+
+        // Add the item to the filter group.
+        if ($group != 0) {
+          $has_filter = TRUE;
+          $filter_group->condition($sub_group);
+        }
+        else {
+          $has_arguments = TRUE;
+          $main_group->condition($sub_group);
+        }
       }
     }
-    if ($has_condition) {
+
+    if ($has_filter) {
+      $main_group->condition($filter_group);
+    }
+
+    if (!$has_arguments && $has_condition) {
+      return $filter_group;
+    }
+    if ($has_arguments && $has_condition) {
       return $main_group;
     }
   }

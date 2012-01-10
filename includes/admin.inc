@@ -3612,7 +3612,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
     );
 
     $form['remove_groups'][$id] = array(); // to prevent a notice
-    if ($id != 0) {
+    if ($id != 1) {
       $form['remove_groups'][$id] = array(
         '#type' => 'submit',
         '#value' => t('Remove group @group', array('@group' => $id)),
@@ -3623,7 +3623,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
         '#group' => $id,
       );
     }
-    $group_options[$id] = $id == 0 ? t('Default group') : t('Group @group', array('@group' => $id));
+    $group_options[$id] = $id == 1 ? t('Default group') : t('Group @group', array('@group' => $id));
     $form['#group_renders'][$id] = array();
   }
 
@@ -3635,7 +3635,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
   foreach ($handlers as $id => $field) {
     // If the group does not exist, move the filters to the default group.
     if (empty($field['group']) || empty($groups['groups'][$field['group']])) {
-      $field['group'] = 0;
+      $field['group'] = 1;
     }
 
     $handler = $display->handler->get_handler($type, $id);
@@ -3647,7 +3647,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
     // the default group to prevent weird errors from having it be in its
     // own group:
     if (!$grouping && $field['group'] == 'ungroupable') {
-      $field['group'] = 0;
+      $field['group'] = 1;
     }
 
     // Place this item into the proper group for rendering.
@@ -3883,11 +3883,11 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
     // The actual update button was clicked. Remove the empty groups, and
     // renumber them sequentially.
     ksort($remember_groups);
-    $groups['groups'] = array_values(array_intersect_key($groups['groups'], $remember_groups));
+    $groups['groups'] = views_array_key_plus(array_values(array_intersect_key($groups['groups'], $remember_groups)));
     // Change the 'group' key on each field to match. Here, $mapping is an
     // array whose keys are the old group numbers and whose values are the new
     // (sequentially numbered) ones.
-    $mapping = array_flip(array_keys($remember_groups));
+    $mapping = array_flip(views_array_key_plus(array_keys($remember_groups)));
     foreach ($new_fields as &$new_field) {
       $new_field['group'] = $mapping[$new_field['group']];
     }
