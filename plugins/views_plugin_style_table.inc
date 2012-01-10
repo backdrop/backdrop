@@ -166,6 +166,7 @@ class views_plugin_style_table extends views_plugin_style {
       '#title' => t('Table summary'),
       '#description' => t('This value will be displayed as table-summary attribute in the html. Set this for better accessiblity of your site.'),
       '#default_value' => $this->options['summary'],
+      '#maxlength' => 255,
     );
 
     // Note: views UI registers this theme handler on our behalf. Your module
