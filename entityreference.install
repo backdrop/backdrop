@@ -34,7 +34,7 @@ function entityreference_field_schema($field) {
 function entityreference_update_7000() {
   // Enable ctools.
   if (!module_enable(array('ctools'))) {
-    throw new Exception('This version of Entity Reference requires ctools, but it could not be enabled.');
+    throw new DrupalUpdateException('This version of Entity Reference requires ctools, but it could not be enabled.');
   }
 
   // Get the list of fields of type 'entityreference'.
