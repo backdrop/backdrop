@@ -16,7 +16,7 @@ class views_handler_argument_field_list extends views_handler_argument_numeric {
    */
   var $allowed_values = NULL;
 
-  function init($view, &$options) {
+  function init(&$view, &$options) {
     parent::init($view, $options);
     $field = field_info_field($this->definition['field_name']);
     $this->allowed_values = list_allowed_values($field);
