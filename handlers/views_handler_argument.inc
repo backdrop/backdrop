@@ -32,6 +32,8 @@
 class views_handler_argument extends views_handler {
   var $name_field = NULL;
   var $validator = NULL;
+  var $argument = NULL;
+  var $value = NULL;
 
   /**
    * Constructor
