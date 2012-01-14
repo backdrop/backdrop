@@ -175,6 +175,12 @@ class views_handler extends views_object {
   public $table_alias;
 
   /**
+   * The actual field in the database table, maybe different
+   * on other kind of query plugins/special handlers.
+   */
+  var $real_field;
+
+  /**
    * init the handler with necessary data.
    * @param $view
    *   The $view object this handler is attached to.
