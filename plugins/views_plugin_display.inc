@@ -201,7 +201,12 @@ class views_plugin_display extends views_plugin {
       // Update the filter group on each filter.
       $filters = $this->get_option('filters');
       foreach ($filters as &$filter) {
-        $filter['group']++;
+        if (isset($filter['group'])) {
+          $filter['group']++;
+        }
+        else {
+          $filter['group'] = 1;
+        }
       }
       $this->set_option('filters', $filters);
       $changed = TRUE;
