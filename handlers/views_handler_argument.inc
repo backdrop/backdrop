@@ -30,10 +30,23 @@
  * @ingroup views_argument_handlers
  */
 class views_handler_argument extends views_handler {
-  var $name_field = NULL;
   var $validator = NULL;
   var $argument = NULL;
   var $value = NULL;
+
+  /**
+   * The table to use for the name, should it not be in the same table as the argument.
+   * @var string
+   */
+  var $name_table;
+
+  /**
+   * The field to use for the name to use in the summary, which is
+   * the displayed output. For example, for the node: nid argument,
+   * the argument itself is the nid, but node.title is displayed.
+   * @var string
+   */
+  var $name_field;
 
   /**
    * Constructor
