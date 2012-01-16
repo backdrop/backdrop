@@ -1716,6 +1716,7 @@ class views_plugin_display extends views_plugin {
 
         // Default text.
         // We have some options, so make a list.
+        $output = '';
         if (!empty($options)) {
           $output = t('<p>The following tokens are available for this link.</p>');
           foreach (array_keys($options) as $type) {
