@@ -921,6 +921,7 @@ function template_preprocess_views_exposed_form(&$vars) {
     $widget = new stdClass;
     // set up defaults so that there's always something there.
     $widget->label = $widget->operator = $widget->widget = NULL;
+    $widget->id = 'checkboxes';
     $widget->widget = $checkboxes;
     $vars['widgets']['checkboxes'] = $widget;
   }
