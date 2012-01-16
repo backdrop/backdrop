@@ -481,8 +481,6 @@ function template_preprocess_views_view_table(&$vars) {
     $query += $view->exposed_raw_input;
   }
 
-  $header = array();
-
   // Fields must be rendered in order as of Views 2.3, so we will pre-render
   // everything.
   $renders = $handler->render_fields($result);
