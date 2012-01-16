@@ -2286,7 +2286,7 @@ function views_process_check_options($element, &$form_state) {
  * @param $alter
  *   - max_length: Maximum lenght of the string, the rest gets truncated.
  *   - word_boundary: Trim only on a word boundary.
- *   - ellipsis: Trim only on a word boundary.
+ *   - ellipsis: Show an ellipsis (...) at the end of the trimmed string.
  *   - html: Take sure that the html is correct.
  *
  * @param $value
