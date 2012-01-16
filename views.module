@@ -58,7 +58,7 @@ function views_api_minimum_version() {
  */
 function views_theme($existing, $type, $theme, $path) {
   $path = drupal_get_path('module', 'views');
-  include_once $path . '/theme/theme.inc';
+  ctools_include('theme', 'views', 'theme');
 
   // Some quasi clever array merging here.
   $base = array(
