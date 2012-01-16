@@ -183,7 +183,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         '#default_value' => $default_value,
       );
 
-      if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
+      if (!empty($form_state['exposed']) && isset($identifier) && !isset($form_state['input'][$identifier])) {
         $form_state['input'][$identifier] = $default_value;
       }
     }
