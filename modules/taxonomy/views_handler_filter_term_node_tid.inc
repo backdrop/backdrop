@@ -50,7 +50,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
 
     if ($this->options['limit']) {
       // We only do this when the form is displayed.
-      if ($this->options['vocabulary'] == 0) {
+      if (empty($this->options['vocabulary'])) {
         $first_vocabulary = reset($vocabularies);
         $this->options['vocabulary'] = $first_vocabulary->machine_name;
       }
