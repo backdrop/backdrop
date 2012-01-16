@@ -253,7 +253,7 @@ function system_views_data() {
       'base' => 'node',
       'base field' => 'nid',
       'relationship field' => 'id',
-      'extra' => array(array('table' => 'file_usage', 'field' => 'type', 'operator' => '=', 'value' => 'node')),
+      'extra' => array(array('field' => 'type', 'value' => 'node')),
     ),
   );
   $data['file_usage']['node_to_file'] = array(
