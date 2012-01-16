@@ -606,6 +606,7 @@ function comment_views_plugins() {
         'theme' => 'views_view_row_rss',
         'path' => drupal_get_path('module', 'views') . '/modules/comment', // not necessary for most modules
         'base' => array('comment'), // only works with 'comment' as base.
+        'uses options' => TRUE,
         'type' => 'feed',
         'help topic' => 'style-comment-rss',
       ),

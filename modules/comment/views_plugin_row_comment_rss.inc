@@ -11,6 +11,32 @@ class views_plugin_row_comment_rss extends views_plugin_row {
    var $base_table = 'comment';
    var $base_field = 'cid';
 
+  function option_definition() {
+    $options = parent::option_definition();
+
+    $options['item_length'] = array('default' => 'default');
+    $options['links'] = FALSE;
+
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
+    $form['item_length'] = array(
+      '#type' => 'select',
+      '#title' => t('Display type'),
+      '#options' => $this->options_form_summary_options(),
+      '#default_value' => $this->options['item_length'],
+    );
+    $form['links'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display links'),
+      '#default_value' => $this->options['links'],
+    );
+  }
+
+
   function pre_render($result) {
     $cids = array();
     $nids = array();
@@ -27,6 +53,27 @@ class views_plugin_row_comment_rss extends views_plugin_row {
 
     $this->nodes = node_load_multiple($nids);
   }
+
+  /**
+   * Return the main options, which are shown in the summary title
+   *
+   * @see views_plugin_row_node_rss::options_form_summary_options()
+   * @todo: Maybe provide a views_plugin_row_rss_entity and reuse this method
+   * in views_plugin_row_comment|node_rss.inc
+   */
+  function options_form_summary_options() {
+    $entity_info = entity_get_info('node');
+    $options = array();
+    if (!empty($entity_info['view modes'])) {
+      foreach ($entity_info['view modes'] as $mode => $settings) {
+        $options[$mode] = $settings['label'];
+      }
+    }
+    $options['title'] = t('Title only');
+    $options['default'] = t('Use site default RSS settings');
+    return $options;
+  }
+
 
   function render($row) {
     global $base_url;
@@ -70,7 +117,7 @@ class views_plugin_row_comment_rss extends views_plugin_row {
 
     // The comment gets built and modules add to or modify
     // $comment->rss_elements and $comment->rss_namespaces.
-    $build = comment_view($comment, $this->nodes[$comment->cid], 'rss');
+    $build = comment_view($comment, $this->nodes[$comment->nid], 'rss');
     unset($build['#theme']);
 
     if (!empty($comment->rss_namespaces)) {
