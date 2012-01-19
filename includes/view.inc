@@ -133,6 +133,58 @@ class view extends views_db_object {
   var $base_database = NULL;
 
   /**
+   * Here comes a list of the possible handler which are active on this view.
+   */
+
+  /**
+   * Stores the field handlers which are initialized on this view.
+   * @var array[views_handler_field]
+   */
+  var $field;
+
+  /**
+   * Stores the argument handlers which are initialized on this view.
+   * @var array[views_handler_argument]
+   */
+  var $argument;
+
+  /**
+   * Stores the sort handlers which are initialized on this view.
+   * @var array[views_handler_sort]
+   */
+  var $sort;
+
+  /**
+   * Stores the filter handlers which are initialized on this view.
+   * @var array[views_handler_filter]
+   */
+  var $filter;
+
+  /**
+   * Stores the relationship handlers which are initialized on this view.
+   * @var array[views_handler_relationship]
+   */
+  var $relationship;
+
+  /**
+   * Stores the area handlers for the header which are initialized on this view.
+   * @var array[views_handler_area]
+   */
+  var $header;
+
+  /**
+   * Stores the area handlers for the footer which are initialized on this view.
+   * @var array[views_handler_area]
+   */
+  var $footer;
+
+  /**
+   * Stores the area handlers for the empty text which are initialized on this view.
+   * @var array[views_handler_area]
+   */
+  var $empty;
+
+  /**
    * Constructor
    */
   function __construct() {
