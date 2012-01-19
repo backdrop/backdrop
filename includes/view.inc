@@ -1900,6 +1900,8 @@ class view extends views_db_object {
  * Base class for views' database objects.
  */
 class views_db_object {
+  public $db_table;
+
   /**
    * Initialize this object, setting values from schema defaults.
    *
