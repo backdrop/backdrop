@@ -72,7 +72,7 @@ class views_plugin_style_rss extends views_plugin_style {
 
   function render() {
     if (empty($this->row_plugin)) {
-      debug('views_plugin_style_default: Missing row plugin');
+      vpr('views_plugin_style_default: Missing row plugin');
       return;
     }
     $rows = '';
