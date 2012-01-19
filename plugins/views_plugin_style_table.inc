@@ -10,6 +10,19 @@
  * @ingroup views_style_plugins
  */
 class views_plugin_style_table extends views_plugin_style {
+
+  /**
+   * Contains the current active sort column.
+   * @var string
+   */
+  public $active;
+
+  /**
+   * Contains the current active sort order, either desc or asc.
+   * @var string
+   */
+  public $order;
+
   function option_definition() {
     $options = parent::option_definition();
 
@@ -26,7 +39,9 @@ class views_plugin_style_table extends views_plugin_style {
   }
 
   /**
-   * Determine if we should provide sorting based upon $_GET inputs.
+   * Determine if we should provide sorting based upon $_GET inputs
+   *
+   * @return bool
    */
   function build_sort() {
     if (!isset($_GET['order']) && ($this->options['default'] == -1 || empty($this->view->field[$this->options['default']]))) {
@@ -102,6 +117,9 @@ class views_plugin_style_table extends views_plugin_style {
    *   be requested from the current display. The running render should
    *   send the fields through, as they may be different than what the
    *   display has listed due to access control or other changes.
+   *
+   * @return array
+   *    An array of all the sanitized columns.
    */
   function sanitize_columns($columns, $fields = NULL) {
     $sanitized = array();
