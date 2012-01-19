@@ -1,6 +1,6 @@
 In Views, a plugin is a bit like a handler, but plugins are not directly responsible for building the query. Instead, they are objects that are used to display the view or make other modifications.
 
-There are 6 types of plugins in Views:
+There are 10 types of plugins in Views:
 <dl>
 <dt>Display</dt>
 <dd>Display plugins are responsible for controlling <strong>where</strong> a view lives. Page and block are the most common displays, as well as the ubiquitous 'default' display which is likely what will be embedded.</dd>
@@ -14,9 +14,26 @@ There are 6 types of plugins in Views:
 <dd>Validator plugins can ensure arguments are valid, and even do transformations on the arguments.</dd>
 <dt>Access</dt>
 <dd>Access plugins are responsible for controlling access to the view.</dd>
+<dt>Query</dt>
+<dd>Query plugins generate and execute a query, it can be seen as a data backend. The default implementation
+is using sql.</dd>
+<dt>Cache</dt>
+<dd>Cache plugins control the storage and loading of caches. Currently they can do both result and render caching,
+but maybe one day cache the generated query</dd>
+<dt>Pager plugins</dt>
+<dd>Pager plugins take care of everything regarding pagers. From getting and setting the total amount of items
+to render the pager and setting the global pager arrays.</dd>
+<dt>Exposed form plugins</dt>
+<dd>Exposed form plugins are responsible for building, rendering and controlling exposed forms. They can expose new
+parts of the view to the user and more.</dd>
+<dt>Localization plugins</dt>
+<dd>Localization plugins take care how the view options are translated. There are example implementations
+for t(), none translation and i18n.</dd>
 </dl>
 
 Plugins are registered by implementing <strong>hook_views_plugins()</strong> in your modulename.views.inc file and returning an array of data.
+For examples please look at views_views_plugins() in views/includes/plugins.inc as it has examples
+for all of them.
 
 The array will look something like this:
 <pre>
@@ -39,6 +56,21 @@ The array will look something like this:
      'access' =&gt; array(
       // ... list of access plugins,
      ),
+     'query' =&gt; array(
+       // ... list of query plugins,
+      ),,
+     'cache' =&gt; array(
+       // ... list of cache plugins,
+      ),,
+     'pager' =&gt; array(
+       // ... list of pager plugins,
+      ),,
+     'exposed_form' =&gt; array(
+       // ... list of exposed_form plugins,
+      ),,
+     'localization' =&gt; array(
+       // ... list of localization plugins,
+      ),
   );
 </pre>
 
