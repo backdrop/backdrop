@@ -185,7 +185,7 @@ class views_plugin_style extends views_plugin {
         // Add a form for every grouping, plus one.
         for ($i = 0; $i <= $c; $i++) {
           $grouping = !empty($this->options['grouping'][$i]) ? $this->options['grouping'][$i] : array();
-          $grouping += array('field' => '', 'rendered' => TRUE, 'rendered_strip' => FALSE);
+          $grouping += array('field' => '', 'rendered' => TRUE);
           $form['grouping'][$i]['field'] = array(
             '#type' => 'select',
             '#title' => t('Grouping field Nr.@number', array('@number' => $i + 1)),
@@ -198,11 +198,6 @@ class views_plugin_style extends views_plugin {
             '#title' => t('Use rendered output to group rows'),
             '#default_value' => $grouping['rendered'],
             '#description' => t('If enabled the rendered output of the grouping field is used to group the rows.'),
-          );
-          $form['grouping'][$i]['rendered_strip'] = array(
-            '#type' => 'checkbox',
-            '#title' => t('Remove tags from rendered output'),
-            '#default_value' => $grouping['rendered_strip'],
           );
         }
       }
@@ -386,9 +381,6 @@ class views_plugin_style extends views_plugin {
         foreach ($groupings as $info) {
           $field = $info['field'];
           $rendered = isset($info['rendered']) ? $info['rendered'] : $group_rendered;
-          $rendered_strip = isset($info['rendered_strip']) ? $info['rendered_strip'] : FALSE;
-          debug("strip");
-          debug($rendered_strip);
           $grouping = '';
           $group_content = '';
           // Group on the rendered version of the field, not the raw.  That way,
@@ -401,9 +393,6 @@ class views_plugin_style extends views_plugin {
             }
             if ($rendered) {
               $grouping = $group_content;
-              if ($rendered_strip) {
-                $grouping = strip_tags($group_content);
-              }
             }
             else {
               $grouping = $this->get_field_value($index, $field);

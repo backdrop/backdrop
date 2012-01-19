@@ -13,7 +13,7 @@
 class views_handler_area_result extends views_handler_area {
 
   function option_definition() {
-    $options = parent::option_definition();
+    parent::option_definition();
 
     $options['content'] = array(
       'default' => 'Displaying @start - @end of @total',
