@@ -452,9 +452,9 @@ class views_plugin extends views_object {
   var $view = NULL;
 
   /**
-   * The current used display plugin.
+   * The current used views display.
    *
-   * @var views_plugin_display
+   * @var views_display
    */
   var $display = NULL;
 
