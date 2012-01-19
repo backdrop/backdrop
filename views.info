@@ -33,6 +33,7 @@ files[] = handlers/views_handler_field_numeric.inc
 files[] = handlers/views_handler_field_prerender_list.inc
 files[] = handlers/views_handler_field_time_interval.inc
 files[] = handlers/views_handler_field_serialized.inc
+files[] = handlers/views_handler_field_machine_name.inc
 files[] = handlers/views_handler_field_url.inc
 files[] = handlers/views_handler_filter.inc
 files[] = handlers/views_handler_filter_boolean_operator.inc
