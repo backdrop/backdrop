@@ -50,7 +50,7 @@ class views_handler_field_machine_name extends views_handler_field {
     );
   }
 
-  function pre_render($values) {
+  function pre_render(&$values) {
     $this->get_value_options();
   }
 
