@@ -243,6 +243,7 @@ function views_development_settings() {
   variable_set('views_show_additional_queries', TRUE);
   variable_set('views_devel_output', TRUE);
   variable_set('views_devel_region', 'message');
+  variable_set('views_ui_display_embed', TRUE);
   $message = dt("Setup the new views settings.");
   drush_log($message, 'success');
 }

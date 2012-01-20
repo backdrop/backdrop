@@ -4655,6 +4655,13 @@ function views_ui_admin_settings_basic() {
     '#default_value' => variable_get('views_ui_show_advanced_column', FALSE),
   );
 
+  $form['basic']['views_ui_display_embed'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show the embed display in the ui.'),
+    '#description' => t('Allow advanced user to use the embed view display. The plugin itself works if it\'s not visible in the ui'),
+    '#default_value' => variable_get('views_ui_display_embed', FALSE),
+  );
+
   $form['basic']['views_ui_custom_theme'] = array(
     '#type' => 'select',
     '#title' => t('Custom admin theme for the Views UI'),
