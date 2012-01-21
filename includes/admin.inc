@@ -311,7 +311,7 @@ function views_ui_add_form($form, &$form_state) {
   );
   $form['name'] = array(
     '#type' => 'machine_name',
-    '#maxlength' => 32,
+    '#maxlength' => 128,
     '#machine_name' => array(
       'exists' => 'views_get_view',
       'source' => array('human_name'),
