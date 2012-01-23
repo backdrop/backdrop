@@ -156,12 +156,15 @@ class ViewsHandlerFilterStringTest extends ViewsSqlTest {
         'field' => 'description',
         'relationship' => 'none',
         'operator' => 'word',
-        'value' => 'musician producer',
+        'value' => 'actor',
       ),
     ));
 
     $this->executeView($view);
     $resultset = array(
+      array(
+        'name' => 'George',
+      ),
       array(
         'name' => 'Ringo',
       ),
@@ -191,6 +194,7 @@ class ViewsHandlerFilterStringTest extends ViewsSqlTest {
     );
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
+
   function testFilterStringStarts() {
     $view = $this->getBasicView();
 
@@ -214,6 +218,7 @@ class ViewsHandlerFilterStringTest extends ViewsSqlTest {
     );
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
+
   function testFilterStringNotStarts() {
     $view = $this->getBasicView();
 

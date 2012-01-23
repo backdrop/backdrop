@@ -111,6 +111,9 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
 
   /**
    * Helper function to execute a view with debugging.
+   *
+   * @param view $view
+   * @param array $args
    */
   protected function executeView($view, $args = array()) {
     $view->set_display();
