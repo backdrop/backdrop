@@ -1095,6 +1095,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
 
   $data = views_fetch_data($table, FALSE);
   $handler = NULL;
+  views_include('handlers');
 
   // Support old views_data entries conversion.
 

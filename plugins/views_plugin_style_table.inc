@@ -126,7 +126,6 @@ class views_plugin_style_table extends views_plugin_style {
     if ($fields === NULL) {
       $fields = $this->display->handler->get_option('fields');
     }
-
     // Preconfigure the sanitized array so that the order is retained.
     foreach ($fields as $field => $info) {
       // Set to itself so that if it isn't touched, it gets column
