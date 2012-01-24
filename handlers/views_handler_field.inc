@@ -331,6 +331,9 @@ class views_handler_field extends views_handler {
   /**
    * Get the value that's supposed to be rendered.
    *
+   * This api exists so that other modules can easy set the values of the field
+   * without having the need to change the render method as well.
+   *
    * @param $values
    *   An object containing all retrieved values.
    * @param $field
