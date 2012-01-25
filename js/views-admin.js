@@ -1,5 +1,17 @@
 Drupal.viewsUi = {};
 
+Drupal.behaviors.viewsUiEditView = {};
+
+/**
+ * Improve the user experience of the views edit interface.
+ */
+Drupal.behaviors.viewsUiEditView.attach = function (context, settings) {
+  // Only show the SQL rewrite warning when the user has chosen the
+  // corresponding checkbox.
+  jQuery('#edit-query-options-disable-sql-rewrite').click(function () {
+    jQuery('.sql-rewrite-warning').toggleClass('js-hide');
+  });
+};
 
 Drupal.behaviors.viewsUiAddView = {};
 
