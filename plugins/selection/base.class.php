@@ -1,34 +1,29 @@
 <?php
 
-$plugin = array(
-  'title' => t('Simple (with optional filter by bundle)'),
-  'handler' => 'EntityReferenceHandler_base',
-  'weight' => -100,
-);
-
 /**
  * A generic Entity handler.
  *
  * The generic base implementation has a variety of overrides to workaround
  * core's largely deficient entity handling.
  */
-class EntityReferenceHandler_base implements EntityReferenceHandler {
+class EntityReference_SelectionHandler_Generic implements EntityReference_SelectionHandler {
 
   /**
    * Implements EntityReferenceHandler::getInstance().
    */
-  public static function getInstance($field) {
+  public static function getInstance($field, $instance) {
     $entity_type = $field['settings']['target_type'];
-    if (class_exists($class_name = 'EntityReferenceHandler_' . $entity_type)) {
-      return new $class_name($field);
+    if (class_exists($class_name = 'EntityReference_SelectionHandler_Generic_' . $entity_type)) {
+      return new $class_name($field, $instance);
     }
     else {
-      return new EntityReferenceHandler_base($field);
+      return new EntityReference_SelectionHandler_Generic($field, $instance);
     }
   }
 
-  protected function __construct($field) {
+  protected function __construct($field, $instance) {
     $this->field = $field;
+    $this->instance = $instance;
   }
 
   /**
@@ -171,7 +166,7 @@ class EntityReferenceHandler_base implements EntityReferenceHandler {
   protected function buildEntityFieldQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', $this->field['settings']['target_type']);
-    if ($this->field['settings']['handler_settings']['target_bundles']) {
+    if (!empty($this->field['settings']['handler_settings']['target_bundles'])) {
       $query->entityCondition('bundle', $this->field['settings']['handler_settings']['target_bundles'], 'IN');
     }
     if (isset($match)) {
@@ -242,7 +237,7 @@ class EntityReferenceHandler_base implements EntityReferenceHandler {
  *
  * This only exists to workaround core bugs.
  */
-class EntityReferenceHandler_node extends EntityReferenceHandler_base {
+class EntityReference_SelectionHandler_Generic_node extends EntityReference_SelectionHandler_Generic {
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // Adding the 'node_access' tag is sadly insufficient for nodes: core
     // requires us to also know about the concept of 'published' and
@@ -261,7 +256,7 @@ class EntityReferenceHandler_node extends EntityReferenceHandler_base {
  *
  * This only exists to workaround core bugs.
  */
-class EntityReferenceHandler_user extends EntityReferenceHandler_base {
+class EntityReference_SelectionHandler_Generic_user extends EntityReference_SelectionHandler_Generic {
   public function buildEntityFieldQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = parent::buildEntityFieldQuery($match, $match_operator);
 
@@ -319,7 +314,7 @@ class EntityReferenceHandler_user extends EntityReferenceHandler_base {
  *
  * This only exists to workaround core bugs.
  */
-class EntityReferenceHandler_comment extends EntityReferenceHandler_base {
+class EntityReference_SelectionHandler_Generic_comment extends EntityReference_SelectionHandler_Generic {
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // Adding the 'comment_access' tag is sadly insufficient for comments: core
     // requires us to also know about the concept of 'published' and
@@ -368,7 +363,7 @@ class EntityReferenceHandler_comment extends EntityReferenceHandler_base {
  *
  * This only exists to workaround core bugs.
  */
-class EntityReferenceHandler_file extends EntityReferenceHandler_base {
+class EntityReference_SelectionHandler_Generic_file extends EntityReference_SelectionHandler_Generic {
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // Core forces us to know about 'permanent' vs. 'temporary' files.
     $tables = $query->getTables();
@@ -393,7 +388,7 @@ class EntityReferenceHandler_file extends EntityReferenceHandler_base {
  *
  * This only exists to workaround core bugs.
  */
-class EntityReferenceHandler_taxonomy_term extends EntityReferenceHandler_base {
+class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityReference_SelectionHandler_Generic {
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // The Taxonomy module doesn't implement any proper taxonomy term access,
     // and as a consequence doesn't make sure that taxonomy terms cannot be viewed

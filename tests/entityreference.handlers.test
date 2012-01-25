@@ -13,11 +13,11 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
   }
 
   public function setUp() {
-    parent::setUp(array('entity', 'entityreference'));
+    parent::setUp('entityreference');
   }
 
   protected function assertReferencable($field, $tests, $handler_name) {
-    $handler = entityreference_get_handler($field);
+    $handler = entityreference_get_selection_handler($field);
 
     foreach ($tests as $test) {
       foreach ($test['arguments'] as $arguments) {
@@ -41,7 +41,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
       'settings' => array(
         'handler' => 'base',
         'target_type' => 'node',
-        'target_bundles' => array(),
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
       ),
       'field_name' => 'test_field',
       'type' => 'entityreference',
@@ -159,7 +161,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
       'settings' => array(
         'handler' => 'base',
         'target_type' => 'user',
-        'target_bundles' => array(),
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
       ),
       'field_name' => 'test_field',
       'type' => 'entityreference',
@@ -278,7 +282,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
       'settings' => array(
         'handler' => 'base',
         'target_type' => 'comment',
-        'target_bundles' => array(),
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
       ),
       'field_name' => 'test_field',
       'type' => 'entityreference',

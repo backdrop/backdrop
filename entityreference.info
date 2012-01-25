@@ -8,9 +8,10 @@ dependencies[] = ctools
 ; Migrate handler.
 files[] = entityreference.migrate.inc
 
-; Our default entity handler.
-files[] = entityreference.handler.inc
-files[] = handler/base.inc
+; Our plugins.
+files[] = plugins/selection/abstract.inc
+files[] = plugins/selection/base.class.php
+files[] = plugins/behavior/abstract.inc
 
 ; Tests.
 files[] = tests/entityreference.handlers.test

@@ -5,7 +5,7 @@
  */
 function entityreference_ctools_plugin_directory($module, $plugin) {
   if ($module == 'entityreference') {
-    return $plugin;
+    return 'plugins/' . $plugin;
   }
 }
 
@@ -13,8 +13,21 @@ function entityreference_ctools_plugin_directory($module, $plugin) {
  * Implements hook_ctools_plugin_type().
  */
 function entityreference_ctools_plugin_type() {
-  $plugins['handler'] = array();
+  $plugins['selection'] = array();
+  $plugins['behavior'] = array('process' => 'entityreference_behavior_plugin_process');
   return $plugins;
+}
+
+/**
+ * CTools callback; Process the behavoir plugins.
+ */
+function entityreference_behavior_plugin_process(&$plugin, $info) {
+  $plugin += array(
+    'description' => '',
+    'behavior type' => 'field',
+    'access callback' => FALSE,
+    'force enabled' => FALSE,
+  );
 }
 
 /**
@@ -25,7 +38,7 @@ function entityreference_field_info() {
     'label' => t('Entity Reference'),
     'description' => t('This field reference another entity.'),
     'settings' => array(
-      // Default to the core target entity type node. 
+      // Default to the core target entity type node.
       'target_type' => 'node',
       // The handler for this field.
       'handler' => 'base',
@@ -71,21 +84,92 @@ function entityreference_field_is_empty($item, $field) {
   return !isset($item['target_id']) || !is_numeric($item['target_id']);
 }
 
+
 /**
- * Get the handler for a given entityreference field.
+ * Get the behavior handlers for a given entityreference field.
+ */
+function entityreference_get_behavior_handlers($field, $instance = NULL) {
+  $object_cache = drupal_static(__FUNCTION__);
+  $identifier = $field['field_name'];
+  if (!empty($instance)) {
+    $identifier .= ':' . $instance['entity_type'] . ':' . $instance['bundle'];
+  }
+
+  if (!isset($object_cache[$identifier])) {
+    $object_cache[$identifier] = array();
+
+    // Merge in defaults.
+    $field['settings'] += array('behaviors' => array());
+
+    $object_cache[$field['field_name']] = array();
+    $behaviors = !empty($field['settings']['handler_settings']['behaviors']) ? $field['settings']['handler_settings']['behaviors'] : array();
+    if (!empty($instance['settings']['behaviors'])) {
+      $behaviors = array_merge($behaviors, $instance['settings']['behaviors']);
+    }
+    foreach ($behaviors as $behavior => $settings) {
+      if (empty($settings['status'])) {
+        // Behavior is not enabled.
+        continue;
+      }
+
+      $object_cache[$identifier][] = _entityreference_get_behavior_handler($behavior, $field, $instance);
+    }
+  }
+
+  return $object_cache[$identifier];
+}
+
+/**
+ * Get the behavior handler for a given entityreference field and instance.
+ *
+ * @param $handler
+ *   The behavior handler name.
+ */
+function _entityreference_get_behavior_handler($behavior, $field, $instance = NULL) {
+  $object_cache = drupal_static(__FUNCTION__);
+
+  if (!isset($object_cache[$behavior])) {
+    ctools_include('plugins');
+    $class = ctools_plugin_load_class('entityreference', 'behavior', $behavior, 'class');
+
+    $class = class_exists($class) ? $class : 'EntityReference_BehaviorHandler_Broken';
+    $object_cache[$behavior] = new $class($behavior, $field, $instance);
+  }
+
+  return $object_cache[$behavior];
+}
+
+/**
+ * Get the selection handler for a given entityreference field.
  *
  * The handler contains most of the business logic of the field.
  */
-function entityreference_get_handler($field) {
-  $handler = $field['settings']['handler'];
-  ctools_include('plugins');
-  $class = ctools_plugin_load_class('entityreference', 'handler', $handler, 'handler');
+function entityreference_get_selection_handler($field, $instance = NULL) {
+  $object_cache = drupal_static(__FUNCTION__);
 
-  if (class_exists($class)) {
-    return call_user_func(array($class, 'getInstance'), $field);
+  if (!isset($object_cache[$field['field_name']])) {
+    ctools_include('plugins');
+    $handler = $field['settings']['handler'];
+    $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
+
+    if (class_exists($class)) {
+      $object_cache[$field['field_name']] = call_user_func(array($class, 'getInstance'), $field, $instance);
+    }
+    else {
+      $object_cache[$field['field_name']] = EntityReference_SelectionHandler_Broken::getInstance($field, $instance);
+    }
   }
-  else {
-    return EntityReferenceHandler_broken::getInstance($field);
+
+  return $object_cache[$field['field_name']];
+}
+
+/**
+ * Implements hook_field_load().
+ */
+function entityreference_field_load($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field) as $handler) {
+    $handler->load($entity_type, $entities, $field, $instances, $langcode, $items);
   }
 }
 
@@ -100,7 +184,7 @@ function entityreference_field_validate($entity_type, $entity, $field, $instance
     }
   }
 
-  $valid_ids = entityreference_get_handler($field)->validateReferencableEntities(array_keys($ids));
+  $valid_ids = entityreference_get_selection_handler($field, $instance)->validateReferencableEntities(array_keys($ids));
 
   $invalid_entities = array_diff_key($ids, array_flip($valid_ids));
   if ($invalid_entities) {
@@ -110,6 +194,11 @@ function entityreference_field_validate($entity_type, $entity, $field, $instance
         'message' => t('The referenced entity (@type: @id) is invalid.', array('@type' => $field['settings']['target_type'], '@id' => $id)),
       );
     }
+  }
+
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->validate($entity_type, $entity, $field, $instance, $langcode, $items, $errors);
   }
 }
 
@@ -122,6 +211,41 @@ function entityreference_field_presave($entity_type, $entity, $field, $instance,
   foreach ($items as $delta => $item) {
     $items[$delta]['target_type'] = $field['settings']['target_type'];
   }
+
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->presave($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_insert().
+ */
+function entityreference_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->insert($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_update().
+ */
+function entityreference_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->update($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_delete().
+ */
+function entityreference_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->delete($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
 }
 
 /**
@@ -129,6 +253,7 @@ function entityreference_field_presave($entity_type, $entity, $field, $instance,
  */
 function entityreference_field_settings_form($field, $instance, $has_data) {
   $settings = $field['settings'];
+  $settings += array('handler' => 'base');
 
   // Select the target entity type.
   $entity_type_options = array();
@@ -153,7 +278,7 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
   );
 
   ctools_include('plugins');
-  $handlers = ctools_get_plugins('entityreference', 'handler');
+  $handlers = ctools_get_plugins('entityreference', 'selection');
   uasort($handlers, 'ctools_plugin_sort');
   $handlers_options = array();
   foreach ($handlers as $handler => $handler_info) {
@@ -195,6 +320,22 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
 }
 
 /**
+ * Implements hook_field_instance_settings_form().
+ */
+function entityreference_field_instance_settings_form($field, $instance) {
+  $settings = $instance['settings'];
+  ctools_include('plugins');
+  $class = ctools_plugin_load_class('entityreference', 'selection', $field['settings']['handler'], 'class');
+  if (!class_exists($class)) {
+    $class = 'EntityReference_SelectionHandler_Broken';
+  }
+
+  _entityreference_get_behavior_elements($form, $class, $field, $instance, 'instance');
+
+  return $form;
+}
+
+/**
  * #process callback: generates the handler settings form.
  *
  * @see entityreference_field_settings_form()
@@ -206,9 +347,9 @@ function entityreference_render_settings($element, $form_state) {
   $handler = drupal_array_get_nested_value($form_state['values'], $parents);
 
   ctools_include('plugins');
-  $class = ctools_plugin_load_class('entityreference', 'handler', $handler, 'handler');
+  $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
   if (!class_exists($class)) {
-    $class = 'EntityReferenceHandler_broken';
+    $class = 'EntityReference_SelectionHandler_Broken';
   }
 
   // Rebuild the field configuration based on the submitted structure.
@@ -218,8 +359,77 @@ function entityreference_render_settings($element, $form_state) {
     $field['settings'] = $form_state['values']['field']['settings'] + $field['settings'];
   }
 
+  _entityreference_get_behavior_elements($element, $class, $field, $instance, 'field');
+
   $element += call_user_func(array($class, 'settingsForm'), $field, $instance);
   return $element;
+}
+
+/**
+ * Get the field or instance elements for the field configuration.
+ */
+function _entityreference_get_behavior_elements(&$element, $class, $field, $instance, $level) {
+  // Add the accessible behavior handlers.
+  $behavior_plugins = entityreference_get_accessible_behavior_plugins($class, $field, $instance);
+
+  if ($behavior_plugins[$level]) {
+    $element['behaviors'] = array();
+
+    foreach ($behavior_plugins[$level] as $name => $plugin) {
+      if ($level == 'field') {
+        $settings = !empty($field['settings']['handler_settings']['behaviors'][$name]) ? $field['settings']['handler_settings']['behaviors'][$name] : array();
+      }
+      else {
+        $settings = !empty($instance['settings']['behaviors'][$name]) ? $instance['settings']['behaviors'][$name] : array();
+      }
+      $settings += array('status' => $plugin['force enabled']);
+      $element['behaviors'][$name] = array(
+        '#type' => 'fieldset',
+        '#title' => $plugin['title'],
+        '#default_value' => $settings['status'],
+      );
+      $element['behaviors'][$name]['status'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable %title', array('%title' => $plugin['title'])),
+        '#default_value' => $settings['status'],
+        '#disabled' => $plugin['force enabled'],
+      );
+
+      $handler = _entityreference_get_behavior_handler($name, $field, $instance);
+      if ($behavior_elements = $handler->settingsForm()) {
+        $enable_element = $level == 'field' ? 'field[settings][handler_settings][behaviors]' : 'instance[settings][behaviors]';
+        foreach ($behavior_elements as $key => &$behavior_element) {
+          $behavior_element += array(
+            '#default_value' => !empty($settings[$key]) ? $settings[$key] : NULL,
+            '#states' => array(
+              'visible' => array(
+                ':input[name="' . $enable_element . '[' . $name . '][status]"]' => array('checked' => TRUE),
+              ),
+            ),
+          );
+        }
+
+        // Get the behavior settings.
+        $element['behaviors'][$name] += $behavior_elements;
+      }
+    }
+  }
+}
+
+/**
+ * Get all accessible behavior plugins.
+ */
+function entityreference_get_accessible_behavior_plugins($select_class, $field, $instance) {
+  ctools_include('plugins');
+  $plugins = array('field' => array(), 'instance' => array());
+  foreach (ctools_get_plugins('entityreference', 'behavior') as $name => $plugin) {
+    $handler = _entityreference_get_behavior_handler($name, $field, $instance);
+    $level = $plugin['behavior type'];
+    if ($handler->access($select_class)) {
+      $plugins[$level][$name] = $plugin;
+    }
+  }
+  return $plugins;
 }
 
 /**
@@ -343,22 +553,24 @@ function entityreference_field_widget_settings_form($field, $instance) {
 /**
  * Implements hook_options_list().
  */
-function entityreference_options_list($field) {
-  return entityreference_get_handler($field)->getReferencableEntities();
+function entityreference_options_list($field, $instance = NULL) {
+  return entityreference_get_selection_handler($field, $instance)->getReferencableEntities();
 }
 
 /**
  * Implements hook_query_TAG_alter().
  */
 function entityreference_query_entityreference_alter(QueryAlterableInterface $query) {
-  entityreference_get_handler($query->getMetadata('field'))->entityFieldQueryAlter($query);
+  $field = $query->getMetadata('field');
+  $instance = $query->getMetadata('instance');
+  entityreference_get_selection_handler($field, $instance)->entityFieldQueryAlter($query);
 }
 
 /**
  * Implements hook_field_widget_form().
  */
 function entityreference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $handler = entityreference_get_handler($field);
+  $handler = entityreference_get_selection_handler($field, $instance);
 
   if ($instance['widget']['type'] == 'entityreference_autocomplete' || $instance['widget']['type'] == 'entityreference_autocomplete_tags') {
 
@@ -474,7 +686,7 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
     return MENU_ACCESS_DENIED;
   }
 
-  $handler = entityreference_get_handler($field);
+  $handler = entityreference_get_selection_handler($field, $instance);
 
   if ($type == 'tags') {
     // The user enters a comma-separated list of tags. We only autocomplete the last tag.
@@ -639,7 +851,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 
   switch ($display['type']) {
     case 'entityreference_label':
-      $handler = entityreference_get_handler($field);
+      $handler = entityreference_get_selection_handler($field, $instance);
 
       foreach ($items as $delta => $item) {
         $label = $handler->getLabel($item['entity']);

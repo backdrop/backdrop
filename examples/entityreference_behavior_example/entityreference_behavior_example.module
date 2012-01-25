@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Example module to demonstrate Entity reference behavior handlers.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function entityreference_behavior_example_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'entityreference') {
+    return 'plugins/' . $plugin;
+  }
+}
