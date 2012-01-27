@@ -118,6 +118,10 @@ class views_handler_relationship extends views_handler {
       $def['type'] = 'INNER';
     }
 
+    if (!empty($this->definition['extra'])) {
+      $def['extra'] = $this->definition['extra'];
+    }
+
     if (!empty($def['join_handler']) && class_exists($def['join_handler'])) {
       $join = new $def['join_handler'];
     }
