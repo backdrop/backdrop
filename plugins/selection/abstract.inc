@@ -47,7 +47,7 @@ interface EntityReference_SelectionHandler {
   /**
    * Generate a settings form for this handler.
    */
-  public function settingsForm($field, $instance);
+  public static function settingsForm($field, $instance);
 }
 
 /**
@@ -63,7 +63,7 @@ class EntityReference_SelectionHandler_Broken implements EntityReference_Selecti
     $this->instance = $instance;
   }
 
-  public function settingsForm($field, $instance) {
+  public static function settingsForm($field, $instance) {
     $form['selection_handler'] = array(
       '#markup' => t('The selected selection handler is broken.'),
     );
