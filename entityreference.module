@@ -355,7 +355,8 @@ function entityreference_render_settings($element, $form_state) {
   // Rebuild the field configuration based on the submitted structure.
   $field = $element['#field'];
   $instance = $element['#instance'];
-  if (isset($form_state['values']['field']['settings'])) {
+
+  if (!empty($form_state['submitted']) && isset($form_state['values']['field']['settings'])) {
     $field['settings'] = $form_state['values']['field']['settings'] + $field['settings'];
   }
 
