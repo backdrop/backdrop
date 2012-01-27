@@ -252,6 +252,26 @@ function entityreference_field_delete($entity_type, $entity, $field, $instance, 
  * Implements hook_field_settings_form().
  */
 function entityreference_field_settings_form($field, $instance, $has_data) {
+  // The field settings infrastructure is not AJAX enabled by default,
+  // because it doesn't pass over the $form_state.
+  // Build the whole form into a #process in which we actually have access
+  // to the form state.
+  $form = array(
+    '#type' => 'container',
+    '#process' => array('_entityreference_field_settings_process'),
+    '#element_validate' => array('_entityreference_field_settings_validate'),
+    '#field' => $field,
+    '#instance' => $instance,
+    '#has_data' => $has_data,
+  );
+  return $form;
+}
+
+function _entityreference_field_settings_process($form, $form_state) {
+  $field = isset($form_state['entityreference']['field']) ? $form_state['entityreference']['field'] : $form['#field'];
+  $instance = isset($form_state['entityreference']['instance']) ? $form_state['entityreference']['instance'] : $form['#instance'];
+  $has_data = $form['#has_data'];
+
   $settings = $field['settings'];
   $settings += array('handler' => 'base');
 
@@ -272,7 +292,8 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
     '#size' => 1,
     '#ajax' => array(
       'callback' => 'entityreference_settings_ajax',
-      'wrapper' => 'entityreference-settings',
+      'wrapper' => $form['#id'],
+      'element' => $form['#array_parents'],
     ),
     '#limit_validation_errors' => array(),
   );
@@ -293,7 +314,8 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
     '#required' => TRUE,
     '#ajax' => array(
       'callback' => 'entityreference_settings_ajax',
-      'wrapper' => 'entityreference-settings',
+      'wrapper' => $form['#id'],
+      'element' => $form['#array_parents'],
     ),
     '#limit_validation_errors' => array(),
   );
@@ -309,14 +331,25 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
 
   $form['handler_settings'] = array(
     '#type' => 'container',
-    '#id' => 'entityreference-settings',
-    '#process' => array('entityreference_render_settings'),
     '#tree' => TRUE,
-    '#field' => $field,
-    '#instance' => $instance,
   );
 
+  $handler = entityreference_get_selection_handler($field, $instance);
+  $form['handler_settings'] += $handler->settingsForm($field, $instance);
+
+  _entityreference_get_behavior_elements($form['handler_settings'], get_class($handler), $field, $instance, 'field');
+
   return $form;
+}
+
+function _entityreference_field_settings_validate($form, &$form_state) {
+  // Store the new values in the form state.
+  $field = $form['#field'];
+
+  if (isset($form_state['values']['field'])) {
+    $field = drupal_array_merge_deep($field, $form_state['values']['field']);
+  }
+  $form_state['entityreference']['field'] = $field;
 }
 
 /**
@@ -333,37 +366,6 @@ function entityreference_field_instance_settings_form($field, $instance) {
   _entityreference_get_behavior_elements($form, $class, $field, $instance, 'instance');
 
   return $form;
-}
-
-/**
- * #process callback: generates the handler settings form.
- *
- * @see entityreference_field_settings_form()
- */
-function entityreference_render_settings($element, $form_state) {
-  $parents = $element['#parents'];
-  array_pop($parents);
-  $parents[] = 'handler';
-  $handler = drupal_array_get_nested_value($form_state['values'], $parents);
-
-  ctools_include('plugins');
-  $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
-  if (!class_exists($class)) {
-    $class = 'EntityReference_SelectionHandler_Broken';
-  }
-
-  // Rebuild the field configuration based on the submitted structure.
-  $field = $element['#field'];
-  $instance = $element['#instance'];
-
-  if (!empty($form_state['submitted']) && isset($form_state['values']['field']['settings'])) {
-    $field['settings'] = $form_state['values']['field']['settings'] + $field['settings'];
-  }
-
-  _entityreference_get_behavior_elements($element, $class, $field, $instance, 'field');
-
-  $element += call_user_func(array($class, 'settingsForm'), $field, $instance);
-  return $element;
 }
 
 /**
@@ -440,17 +442,7 @@ function entityreference_get_accessible_behavior_plugins($select_class, $field, 
  */
 function entityreference_settings_ajax($form, $form_state) {
   $trigger = $form_state['triggering_element'];
-  $parents = $trigger['#array_parents'];
-  if ($trigger['#type'] == 'radio') {
-    // Pop the radio itself.
-    array_pop($parents);
-  }
-  // Pop the container.
-  array_pop($parents);
-  $parents[] = 'handler_settings';
-
-  $element = drupal_array_get_nested_value($form, $parents);
-  return $element;
+  return drupal_array_get_nested_value($form, $trigger['#ajax']['element']);
 }
 
 /**
