@@ -218,10 +218,13 @@ class views_plugin_style extends views_plugin {
   }
 
   function options_validate(&$form, &$form_state) {
-    // Don't save grouping if no field is specified.
-    foreach ($form_state['values']['style_options']['grouping'] as $index => $grouping) {
-      if (empty($grouping['field'])) {
-        unset($form_state['values']['style_options']['grouping'][$index]);
+    // Don't run validation on style plugins without the grouping setting.
+    if (isset($form_state['values']['style_options']['grouping'])) {
+      // Don't save grouping if no field is specified.
+      foreach ($form_state['values']['style_options']['grouping'] as $index => $grouping) {
+        if (empty($grouping['field'])) {
+          unset($form_state['values']['style_options']['grouping'][$index]);
+        }
       }
     }
   }
