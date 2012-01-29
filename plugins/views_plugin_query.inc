@@ -33,11 +33,17 @@ class views_plugin_query extends views_plugin {
 
   /**
    * Let modules modify the query just prior to finalizing it.
+   *
+   * @param view $view
+   *   The view which is executed.
    */
   function alter(&$view) {  }
 
   /**
    * Builds the necessary info to execute the query.
+   *
+   * @param view $view
+   *   The view which is executed.
    */
   function build(&$view) { }
 
@@ -49,6 +55,9 @@ class views_plugin_query extends views_plugin {
    * $view->pager['current_page'].
    *
    * $view->result should contain an array of objects.
+   *
+   * @param view $view
+   *   The view which is executed.
    */
   function execute(&$view) {  }
 
@@ -57,6 +66,9 @@ class views_plugin_query extends views_plugin {
    *
    * This signature is something that can be used when perusing query logs to
    * discern where particular queries might be coming from.
+   *
+   * @param view $view
+   *   The view which is executed.
    */
   function add_signature(&$view) { }
 
