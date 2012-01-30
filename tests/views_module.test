@@ -12,6 +12,7 @@ class ViewsModuleTest extends ViewsSqlTest {
 
   public function setUp() {
     parent::setUp();
+    drupal_theme_rebuild();
   }
 
   public function viewsData() {
@@ -86,7 +87,11 @@ class ViewsModuleTest extends ViewsSqlTest {
     $views_status['frontpage'] = FALSE; // false is enabled
     variable_set('views_defaults', $views_status);
 
-    $registry = theme_get_registry();
+    $existing = array();
+    $type = array();
+    $theme = array();
+    $path = array();
+    $registry = views_theme($existing, $type, $theme, $path);
     $this->assertTrue(isset($registry['views_view__frontpage']));
   }
 

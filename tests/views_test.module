@@ -17,7 +17,7 @@ function views_test_permission() {
  */
 function views_test_views_api() {
   return array(
-    'api' => '3.0-alpha1',
+    'api' => 3.0,
     'template path' => drupal_get_path('module', 'views_test') . '/templates',
   );
 }
