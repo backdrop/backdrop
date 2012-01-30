@@ -13,15 +13,9 @@ function entityreference_field_schema($field) {
           'unsigned' => TRUE,
           'not null' => FALSE,
         ),
-        'target_type' => array(
-          'description' => 'The type of the target entity',
-          'type' => 'varchar',
-          'length' => 255,
-          'not null' => TRUE,
-        ),
       ),
       'indexes' => array(
-        'target_entity' => array('target_type', 'target_id'),
+        'target_id' => array('target_id'),
       ),
       'foreign keys' => array(),
     );
@@ -132,5 +126,34 @@ function entityreference_update_7000() {
         }
       }
     }
+  }
+}
+
+/**
+ * Drop "target_type" from the field schema.
+ */
+function entityreference_update_7001() {
+  if (!module_exists('field_sql_storage')) {
+    return;
+  }
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] != 'entityreference') {
+      // Not an entity reference field.
+      continue;
+    }
+    if ($field['storage']['type'] !== 'field_sql_storage') {
+      // Field doesn't use SQL storage.
+      continue;
+    }
+    $table_name = _field_sql_storage_tablename($field);
+    $revision_name = _field_sql_storage_revision_tablename($field);
+
+    db_drop_field($table_name, $field_name . '_target_type');
+    db_drop_index($table_name, $field_name . '_target_entity');
+    db_add_index($table_name, $field_name . '_target_id', array($field_name . '_target_id'));
+
+    db_drop_field($revision_name, $field_name . '_target_type');
+    db_drop_index($revision_name, $field_name . '_target_entity');
+    db_add_index($revision_name, $field_name . '_target_id', array($field_name . '_target_id'));
   }
 }

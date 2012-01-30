@@ -208,10 +208,6 @@ function entityreference_field_validate($entity_type, $entity, $field, $instance
  * Adds the target type to the field data structure when saving.
  */
 function entityreference_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  foreach ($items as $delta => $item) {
-    $items[$delta]['target_type'] = $field['settings']['target_type'];
-  }
-
   // Invoke the behaviors.
   foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
     $handler->presave($entity_type, $entity, $field, $instance, $langcode, $items);
