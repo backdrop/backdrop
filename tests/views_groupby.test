@@ -3,10 +3,11 @@
 class ViewsQueryGroupByTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
-      'name' => 'Groupby UI',
-      'description' => 'Tests UI of aggregate functionality.',
-      'group' => 'Views UI',
+      'name' => 'Groupby',
+      'description' => 'Tests aggregate functionality of views, for example count.',
+      'group' => 'Views',
     );
+
   }
 
   /**
@@ -276,16 +277,20 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
 }
 
 class viewsUiGroupbyTestCase extends DrupalWebTestCase {
-  public function setUp() {
-    parent::setUp('views', 'views_ui');
-    module_enable(array('views_ui'));
+  function setUp() {
+    // Enable views_ui.
+    parent::setUp('views_ui', 'views_test');
+
+    // Create and log in a user with administer views permission.
+    $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));
+    $this->drupalLogin($views_admin);
   }
 
   public static function getInfo() {
     return array(
-      'name' => 'Groupby',
-      'description' => 'Tests aggregate functionality of views, for example count.',
-      'group' => 'Views',
+      'name' => 'Groupby UI',
+      'description' => 'Tests UI of aggregate functionality.',
+      'group' => 'Views UI',
     );
   }
 
@@ -295,11 +300,6 @@ class viewsUiGroupbyTestCase extends DrupalWebTestCase {
    * @todo: this should check the change of the settings as well.
    */
   function testGroupBySave() {
-    $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration'));
-    $this->drupalLogin($admin_user);
-    views_invalidate_cache();
-    menu_rebuild();
-
     $this->drupalGet('admin/structure/views/view/test_views_groupby_save/edit');
 
     $edit = array(
