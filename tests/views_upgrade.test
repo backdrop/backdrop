@@ -19,9 +19,9 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
   protected function setUp() {
 //     // To import a view the user needs use PHP for settings rights, so enable php module.
     parent::setUp();
-//
-// //     $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration', 'use PHP for settings'));
-// //     $this->drupalLogin($admin_user);
+
+    module_enable(array('php'));
+    $this->resetAll();
   }
 
   function viewsData() {
@@ -53,6 +53,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
   public function testMovedTo() {
     // Test moving on field lavel.
     $view = $this->viewsMovedToField();
+    $view->update();
     $view->build();
 
 //     $this->assertEqual('old_field_1', $view->field['old_field_1']->options['id'], "Id shouldn't change during conversion");
@@ -63,6 +64,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
 
     // Test moving on handler lavel.
     $view = $this->viewsMovedToHandler();
+    $view->update();
     $view->build();
 
 //     $this->assertEqual('old_field_2', $view->field['old_field_2']->options['id']);
@@ -75,6 +77,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
 
     // Test moving on table level.
     $view = $this->viewsMovedToTable();
+    $view->update();
     $view->build();
 
     $this->assertEqual('views_test', $view->base_table, 'Make sure that view->base_table gets automatically converted.');
@@ -90,6 +93,8 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
    * is used.
    */
   public function testUpgradeImport() {
+    $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration', 'use PHP for settings'));
+    $this->drupalLogin($admin_user);
     $edit = array(
       'view' => $this->viewUpgradeImport(),
     );
