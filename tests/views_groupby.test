@@ -11,7 +11,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   }
 
   /**
-   * Test aggregatate count feature.
+   * Test aggregate count feature.
    */
   public function testAggregateCount() {
     // Create 2 nodes of type1 and 3 nodes of type2
