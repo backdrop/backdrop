@@ -390,6 +390,7 @@ function _entityreference_get_behavior_elements(&$element, $class, $field, $inst
       $element['behaviors'][$name]['status'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable %title', array('%title' => $plugin['title'])),
+        '#description' => $plugin['description'],
         '#default_value' => $settings['status'],
         '#disabled' => $plugin['force enabled'],
       );
