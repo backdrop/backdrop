@@ -9,6 +9,20 @@
 interface EntityReference_BehaviorHandler {
 
   /**
+   * Alter the field schema.
+   *
+   * @see hook_field_schema()
+   */
+  public function schema_alter(&$schema, $field);
+
+  /**
+   * Alter the properties information of a field instance.
+   *
+   * @see entity_hook_field_info()
+   */
+  public function property_info_alter(&$info, $entity_type, $field, $instance, $field_type);
+
+  /**
    * Act on loading entity reference fields of entities.
    *
    * @see hook_field_load()
@@ -84,6 +98,10 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
     $this->field = $field;
     $this->instance = $instance;
   }
+
+  public function schema_alter(&$schema, $field) {}
+
+  public function property_info_alter(&$info, $entity_type, $field, $instance, $field_type) {}
 
   public function load($entity_type, $entities, $field, $instances, $langcode, &$items) {}
 

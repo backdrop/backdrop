@@ -29,6 +29,12 @@ function entityreference_field_schema($field) {
         'columns' => array('target_id' => $entity_info['entity keys']['id']),
       );
     }
+
+    // Invoke the behaviors to allow them to change the schema.
+    foreach (entityreference_get_behavior_handlers($field) as $handler) {
+      $handler->schema_alter($schema, $field);
+    }
+
     return $schema;
   }
 }

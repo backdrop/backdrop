@@ -465,6 +465,11 @@ function entityreference_field_property_callback(&$info, $entity_type, $field, $
 
   // Then apply the default.
   entity_metadata_field_default_property_callback($info, $entity_type, $field, $instance, $field_type);
+
+  // Invoke the behaviors to allow them to change the properties.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->property_info_alter($info, $entity_type, $field, $instance, $field_type);
+  }
 }
 
 /**
