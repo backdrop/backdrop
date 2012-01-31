@@ -584,7 +584,7 @@ class views_handler_argument extends views_handler {
     $summary_plugins = array();
     $format_options = array();
     foreach ($style_plugins as $key => $plugin) {
-      if ($plugin['type'] == 'summary') {
+      if (isset($plugin['type']) && $plugin['type'] == 'summary') {
         $summary_plugins[$key] = $plugin;
         $format_options[$key] = $plugin['title'];
       }
