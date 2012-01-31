@@ -252,6 +252,11 @@ class views_handler_filter_string extends views_handler_filter {
   function op_word($field) {
     $where = $this->operator == 'word' ? db_or() : db_and();
 
+    // Don't filter on empty strings.
+    if (empty($this->value)) {
+      return;
+    }
+
     preg_match_all('/ (-?)("[^"]+"|[^" ]+)/i', ' ' . $this->value, $matches, PREG_SET_ORDER);
     foreach ($matches as $match) {
       $phrase = false;
