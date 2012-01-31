@@ -726,6 +726,11 @@ function entityreference_field_formatter_info() {
         'link' => FALSE,
       ),
     ),
+    'entityreference_entity_id' => array(
+      'label' => t('Entity id'),
+      'description' => t('Display the id of the referenced entities.'),
+      'field types' => array('entityreference'),
+    ),
     'entityreference_entity_view' => array(
       'label' => t('Rendered entity'),
       'description' => t('Display the referenced entities rendered by entity_view().'),
@@ -856,6 +861,12 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
         else {
           $result[$delta] = array('#markup' => check_plain($label));
         }
+      }
+      break;
+
+    case 'entityreference_entity_id':
+      foreach ($items as $delta => $item) {
+        $result[$delta] = array('#markup' => check_plain($item['target_id']));
       }
       break;
 
