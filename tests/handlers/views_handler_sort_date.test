@@ -12,30 +12,126 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
     );
   }
 
-  protected function orderResultSetDate($result_set, $column, $granularity, $reverse = TRUE) {
-    // Build a technical sort column.
-    foreach ($result_set as &$result) {
-      $result['_sort'] = $this->orderResultSetDateHelper($result[$column], $granularity);
+  protected function expectedResultSet($granularity, $reverse = TRUE) {
+    $expected = array();
+    if (!$reverse) {
+      switch ($granularity) {
+          case 'second':
+            $expected = array(
+              array('name' => 'John'),
+              array('name' => 'Paul'),
+              array('name' => 'Meredith'),
+              array('name' => 'Ringo'),
+              array('name' => 'George'),
+            );
+            break;
+          case 'minute':
+            $expected = array(
+              array('name' => 'John'),
+              array('name' => 'Paul'),
+              array('name' => 'Ringo'),
+              array('name' => 'Meredith'),
+              array('name' => 'George'),
+            );
+            break;
+          case 'hour':
+            $expected = array(
+              array('name' => 'John'),
+              array('name' => 'Ringo'),
+              array('name' => 'Paul'),
+              array('name' => 'Meredith'),
+              array('name' => 'George'),
+            );
+            break;
+          case 'day':
+            $expected = array(
+              array('name' => 'John'),
+              array('name' => 'Ringo'),
+              array('name' => 'Paul'),
+              array('name' => 'Meredith'),
+              array('name' => 'George'),
+            );
+            break;
+          case 'month':
+            $expected = array(
+              array('name' => 'John'),
+              array('name' => 'George'),
+              array('name' => 'Ringo'),
+              array('name' => 'Paul'),
+              array('name' => 'Meredith'),
+            );
+            break;
+          case 'year':
+            $expected = array(
+              array('name' => 'John'),
+              array('name' => 'George'),
+              array('name' => 'Ringo'),
+              array('name' => 'Paul'),
+              array('name' => 'Meredith'),
+            );
+            break;
+        }
     }
-    return $this->orderResultSet($result_set, '_sort', $reverse);
-  }
+    else {
+      switch ($granularity) {
+        case 'second':
+          $expected = array(
+            array('name' => 'George'),
+            array('name' => 'Ringo'),
+            array('name' => 'Meredith'),
+            array('name' => 'Paul'),
+            array('name' => 'John'),
+          );
+          break;
+        case 'minute':
+          $expected = array(
+            array('name' => 'George'),
+            array('name' => 'Ringo'),
+            array('name' => 'Meredith'),
+            array('name' => 'Paul'),
+            array('name' => 'John'),
+           );
+          break;
+        case 'hour':
+          $expected = array(
+            array('name' => 'George'),
+            array('name' => 'Ringo'),
+            array('name' => 'Paul'),
+            array('name' => 'Meredith'),
+            array('name' => 'John'),
+          );
+          break;
+        case 'day':
+          $expected = array(
+            array('name' => 'George'),
+            array('name' => 'John'),
+            array('name' => 'Ringo'),
+            array('name' => 'Paul'),
+            array('name' => 'Meredith'),
+          );
+          break;
+        case 'month':
+          $expected = array(
+            array('name' => 'John'),
+            array('name' => 'George'),
+            array('name' => 'Ringo'),
+            array('name' => 'Paul'),
+            array('name' => 'Meredith'),
+          );
+          break;
+        case 'year':
+          $expected = array(
+            array('name' => 'John'),
+            array('name' => 'George'),
+            array('name' => 'Ringo'),
+            array('name' => 'Paul'),
+            array('name' => 'Meredith'),
+          );
+          break;
+      }
+    }
 
-  protected function orderResultSetDateHelper($date, $granularity) {
-    switch ($granularity) {
-      case 'second':
-      default:
-        return $date;
-      case 'minute':
-        return date('YmdHi', $date);
-      case 'hour':
-        return date('YmdH', $date);
-      case 'day':
-        return date('Ymd', $date);
-      case 'month':
-        return date('Ym', $date);
-      case 'year':
-        return date('Y', $date);
-    }
+    return $expected;
   }
 
   /**
@@ -48,10 +144,10 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
 
         // Change the fields.
         $view->display['default']->handler->override_option('fields', array(
-          'id' => array(
-            'id' => 'id',
+          'name' => array(
+            'id' => 'name',
             'table' => 'views_test',
-            'field' => 'id',
+            'field' => 'name',
             'relationship' => 'none',
           ),
           'created' => array(
@@ -69,8 +165,15 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
             'table' => 'views_test',
             'field' => 'created',
             'relationship' => 'none',
-            'granularity' => 'second',
+            'granularity' => $granularity,
             'order' => $reverse ? 'DESC' : 'ASC',
+          ),
+          'id' => array(
+            'id' => 'id',
+            'table' => 'views_test',
+            'field' => 'id',
+            'relationship' => 'none',
+            'order' => 'ASC',
           ),
         ));
 
@@ -79,9 +182,11 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
 
         // Verify the result.
         $this->assertEqual(count($this->dataSet()), count($view->result), t('The number of returned rows match.'));
-        $this->assertIdenticalResultset($view, $this->orderResultSetDate($this->dataSet(), 'created', $granularity, $reverse), array(
-          'views_test_created' => 'created',
+        $this->assertIdenticalResultset($view, $this->expectedResultSet($granularity, $reverse), array(
+          'views_test_name' => 'name',
         ), t('Result is returned correctly when ordering by granularity @granularity, @reverse.', array('@granularity' => $granularity, '@reverse' => $reverse ? t('reverse') : t('forward'))));
+        $view->destroy();
+        unset($view);
       }
     }
   }
