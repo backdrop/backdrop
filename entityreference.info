@@ -8,9 +8,8 @@ dependencies[] = ctools
 ; Migrate handler.
 files[] = entityreference.migrate.inc
 
-; Our plugins.
+; Our plugins interfaces and abstract implementations.
 files[] = plugins/selection/abstract.inc
-files[] = plugins/selection/base.class.php
 files[] = plugins/behavior/abstract.inc
 
 ; Tests.

@@ -3,7 +3,3 @@ description = Provides some example code for implementing Entity Reference behav
 core = 7.x
 package = Fields
 dependencies[] = entityreference
-
-; Behavior handlers
-files[] = plugins/behavior/test_field_behavior.class.php
-files[] = plugins/behavior/test_instance_behavior.class.php
