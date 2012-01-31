@@ -525,6 +525,17 @@ function user_views_data() {
 function user_views_plugins() {
   return array(
     'module' => 'views', // This just tells our themes are elsewhere.
+    'row' => array(
+      'user' => array(
+        'title' => t('User'),
+        'help' => t('Display the user with standard user view.'),
+        'handler' => 'views_plugin_row_user_view',
+        'base' => array('users'), // only works with 'users' as base.
+        'uses options' => TRUE,
+        'type' => 'normal',
+        'help topic' => 'style-users',
+      ),
+    ),
     'argument default' => array(
       'user' => array(
         'title' => t('User ID from URL'),

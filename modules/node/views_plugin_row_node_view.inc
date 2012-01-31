@@ -8,6 +8,8 @@
  * Plugin which performs a node_view on the resulting object.
  *
  * Most of the code on this object is in the theme function.
+ *
+ * @ingroup views_row_plugins
  */
 class views_plugin_row_node_view extends views_plugin_row {
   // Basic properties that let the row style follow relationships.

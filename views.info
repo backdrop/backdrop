@@ -194,6 +194,7 @@ files[] = modules/user/views_handler_filter_user_roles.inc
 files[] = modules/user/views_plugin_argument_default_current_user.inc
 files[] = modules/user/views_plugin_argument_default_user.inc
 files[] = modules/user/views_plugin_argument_validate_user.inc
+files[] = modules/user/views_plugin_row_user_view.inc
 ; Plugins
 files[] = plugins/views_plugin_access.inc
 files[] = plugins/views_plugin_access_none.inc
