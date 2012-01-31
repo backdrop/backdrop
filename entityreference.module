@@ -338,7 +338,7 @@ function _entityreference_field_settings_process($form, $form_state) {
   $handler = entityreference_get_selection_handler($field, $instance);
   $form['handler_settings'] += $handler->settingsForm($field, $instance);
 
-  _entityreference_get_behavior_elements($form['handler_settings'], get_class($handler), $field, $instance, 'field');
+  _entityreference_get_behavior_elements($form['handler_settings'], $field, $instance, 'field');
 
   return $form;
 }
@@ -357,14 +357,7 @@ function _entityreference_field_settings_validate($form, &$form_state) {
  * Implements hook_field_instance_settings_form().
  */
 function entityreference_field_instance_settings_form($field, $instance) {
-  $settings = $instance['settings'];
-  ctools_include('plugins');
-  $class = ctools_plugin_load_class('entityreference', 'selection', $field['settings']['handler'], 'class');
-  if (!class_exists($class)) {
-    $class = 'EntityReference_SelectionHandler_Broken';
-  }
-
-  _entityreference_get_behavior_elements($form, $class, $field, $instance, 'instance');
+  _entityreference_get_behavior_elements($form, $field, $instance, 'instance');
 
   return $form;
 }
@@ -372,9 +365,9 @@ function entityreference_field_instance_settings_form($field, $instance) {
 /**
  * Get the field or instance elements for the field configuration.
  */
-function _entityreference_get_behavior_elements(&$element, $class, $field, $instance, $level) {
+function _entityreference_get_behavior_elements(&$element, $field, $instance, $level) {
   // Add the accessible behavior handlers.
-  $behavior_plugins = entityreference_get_accessible_behavior_plugins($class, $field, $instance);
+  $behavior_plugins = entityreference_get_accessible_behavior_plugins($field, $instance);
 
   if ($behavior_plugins[$level]) {
     $element['behaviors'] = array();
@@ -424,13 +417,13 @@ function _entityreference_get_behavior_elements(&$element, $class, $field, $inst
 /**
  * Get all accessible behavior plugins.
  */
-function entityreference_get_accessible_behavior_plugins($select_class, $field, $instance) {
+function entityreference_get_accessible_behavior_plugins($field, $instance) {
   ctools_include('plugins');
   $plugins = array('field' => array(), 'instance' => array());
   foreach (ctools_get_plugins('entityreference', 'behavior') as $name => $plugin) {
     $handler = _entityreference_get_behavior_handler($name, $field, $instance);
     $level = $plugin['behavior type'];
-    if ($handler->access($select_class)) {
+    if ($handler->access($field, $instance)) {
       $plugins[$level][$name] = $plugin;
     }
   }

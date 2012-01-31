@@ -72,7 +72,7 @@ interface EntityReference_BehaviorHandler {
   /**
    * Determine if handler should appear.
    */
-  public function access($selection_class);
+  public function access($field, $instance);
 }
 
 /**
@@ -117,7 +117,7 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
 
   public function settingsForm() {}
 
-  public function access($selection_class) {
+  public function access($field, $instance) {
     return TRUE;
   }
 }
@@ -131,9 +131,5 @@ class EntityReference_BehaviorHandler_Broken extends EntityReference_BehaviorHan
       '#markup' => t('The selected behavior handler is broken.'),
     );
     return $form;
-  }
-
-  public function access($selection_class) {
-    return TRUE;
   }
 }
