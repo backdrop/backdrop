@@ -372,6 +372,9 @@ class views_handler_field extends views_handler {
         'max_length' => array('default' => ''),
         'word_boundary' => array('default' => TRUE),
         'ellipsis' => array('default' => TRUE),
+        'more_link' => array('default' => FALSE),
+        'more_link_text' => array('default' => '', 'translatable' => TRUE),
+        'more_link_path' => array('default' => ''),
         'strip_tags' => array('default' => FALSE),
         'trim' => array('default' => FALSE),
         'preserve_tags' => array('default' => ''),
@@ -791,6 +794,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1),
           'edit-options-alter-alter-text' => array(1),
+          'edit-options-alter-more-link' => array(1),
         ),
       );
 
@@ -828,6 +832,39 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#default_value' => $this->options['alter']['ellipsis'],
         '#dependency' => array(
           'edit-options-alter-trim' => array(1),
+        ),
+      );
+
+      $form['alter']['more_link'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Add a read-more link if output is trimmed.'),
+        '#description' => t('If checked, a read-more link will be added at the end of the trimmed output'),
+        '#default_value' => $this->options['alter']['more_link'],
+        '#dependency' => array(
+          'edit-options-alter-trim' => array(1),
+        ),
+      );
+
+      $form['alter']['more_link_text'] = array(
+        '#type' => 'textfield',
+        '#title' => t('More link text'),
+        '#default_value' => $this->options['alter']['more_link_text'],
+        '#description' => t('The text which will be displayed on the more link. You may enter data from this view as per the "Replacement patterns" above.'),
+        '#dependency_count' => 2,
+        '#dependency' => array(
+          'edit-options-alter-trim' => array(1),
+          'edit-options-alter-more-link' => array(1),
+        ),
+      );
+      $form['alter']['more_link_path'] = array(
+        '#type' => 'textfield',
+        '#title' => t('More link path'),
+        '#default_value' => $this->options['alter']['more_link_path'],
+        '#description' => t('The path which is used for the more link. You may enter data from this view as per the "Replacement patterns" above.'),
+        '#dependency_count' => 2,
+        '#dependency' => array(
+          'edit-options-alter-trim' => array(1),
+          'edit-options-alter-more-link' => array(1),
         ),
       );
 
@@ -1035,8 +1072,28 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $value = strip_tags($value, $alter['preserve_tags']);
     }
 
+    $suffix = '';
     if (!empty($alter['trim']) && !empty($alter['max_length'])) {
+      $length = strlen($value);
       $value = $this->render_trim_text($alter, $value);
+      if ($this->options['alter']['more_link'] && strlen($value) < $length) {
+        $tokens = $this->get_render_tokens($alter);
+        $more_link_text = $this->options['alter']['more_link_text'] ? $this->options['alter']['more_link_text'] : t('more');
+        $more_link_text = strtr(filter_xss_admin($more_link_text), $tokens);
+        $more_link_path = $this->options['alter']['more_link_path'];
+        $more_link_path = strip_tags(decode_entities(strtr($more_link_path, $tokens)));
+
+        // Take sure that paths which was runned through url() does work as well.
+        $base_path = base_path();
+        // Checks whether the path starts with the base_path.
+        if (strpos($more_link_path, $base_path) === 0) {
+          $more_link_path = drupal_substr($more_link_path, drupal_strlen($base_path));
+        }
+
+        $more_link = l($more_link_text, $more_link_path);
+
+        $suffix .= " " . $more_link;
+      }
     }
 
     if (!empty($alter['nl2br'])) {
@@ -1050,7 +1107,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $value = $this->render_as_link($alter, $value, $tokens);
     }
 
-    return $value;
+    return $value . $suffix;
   }
 
   /**
