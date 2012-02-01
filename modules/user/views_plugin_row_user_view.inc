@@ -34,7 +34,7 @@ class views_plugin_row_user_view extends views_plugin_row {
       '#title' => t('View mode'),
       '#default_value' => $this->options['view_mode'],
      );
-    $form['help']['#markup'] = t("Display the user with standard user view. It might be necessary to add a user-profile.tpl.php in your themes template folder, because the default !user-profile template don't show the username per default.", array('!user-profile' => l('user-profile', 'http://api.drupal.org/api/drupal/modules--user--user-profile.tpl.php/7')));
+    $form['help']['#markup'] = t("Display the user with standard user view. It might be necessary to add a user-profile.tpl.php in your themes template folder, because the default <a href=\"@user-profile-api-link\">user-profile</a>e template don't show the username per default.", array('@user-profile-api-link' => url('http://api.drupal.org/api/drupal/modules--user--user-profile.tpl.php/7')));
   }
 
 
