@@ -1947,6 +1947,11 @@ function views_ui_import_page($form, &$form_state) {
     '#description' => t('Enter the name to use for this view if it is different from the source view. Leave blank to use the name of the view.'),
   );
 
+  $form['name_override'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace an existing view if one exists with the same name'),
+  );
+
   $form['view'] = array(
     '#type' => 'textarea',
     '#title' => t('Paste view code here'),
@@ -2000,8 +2005,15 @@ function views_ui_import_validate($form, &$form_state) {
   }
 
   $test = views_get_view($view->name);
-  if ($test && $test->type != t('Default')) {
-    form_set_error('', t('A view by that name already exists; please choose a different name'));
+  if (!$form_state['values']['name_override']) {
+    if ($test && $test->type != t('Default')) {
+      form_set_error('', t('A view by that name already exists; please choose a different name'));
+    }
+  }
+  else {
+    if ($test->vid) {
+      $view->vid = $test->vid;
+    }
   }
 
   // Make sure base table gets set properly if it got moved.
