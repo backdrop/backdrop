@@ -133,12 +133,15 @@ class views_handler_filter extends views_handler {
     $form['clear_markup_start'] = array(
       '#markup' => '<div class="clearfix">',
     );
+    // Add the subform from operator_form().
     $this->show_operator_form($form, $form_state);
+    // Add the subform from value_form().
     $this->show_value_form($form, $form_state);
     $form['clear_markup_end'] = array(
       '#markup' => '</div>',
     );
     if ($this->can_expose()) {
+      // Add the subform from expose_form().
       $this->show_expose_form($form, $form_state);
     }
   }
@@ -176,10 +179,12 @@ class views_handler_filter extends views_handler {
   }
 
   /**
-   * Provide a form for setting the operator.
+   * Options form subform for setting the operator.
    *
    * This may be overridden by child classes, and it must
    * define $form['operator'];
+   *
+   * @see options_form().
    */
   function operator_form(&$form, &$form_state) {
     $options = $this->operator_options();
@@ -222,10 +227,12 @@ class views_handler_filter extends views_handler {
   }
 
   /**
-   * Provide a form for setting options.
+   * Options form subform for setting options.
    *
    * This should be overridden by all child classes and it must
    * define $form['value']
+   *
+   * @see options_form().
    */
   function value_form(&$form, &$form_state) { $form['value'] = array(); }
 
@@ -289,6 +296,11 @@ class views_handler_filter extends views_handler {
     }
   }
 
+  /**
+   * Options form subform for exposed filter options.
+   *
+   * @see options_form().
+   */
   function expose_form(&$form, &$form_state) {
     $form['#theme'] = 'views_ui_expose_filter_form';
     // #flatten will move everything from $form['expose'][$key] to $form[$key]
