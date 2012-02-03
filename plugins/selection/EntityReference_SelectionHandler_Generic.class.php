@@ -38,20 +38,29 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
    */
   public static function settingsForm($field, $instance) {
     $entity_info = entity_get_info($field['settings']['target_type']);
-    $bundles = array();
-    foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
-      $bundles[$bundle_name] = $bundle_info['label'];
-    }
 
-    $form['target_bundles'] = array(
-      '#type' => 'select',
-      '#title' => t('Target bundles'),
-      '#options' => $bundles,
-      '#default_value' => isset($field['settings']['handler_settings']['target_bundles']) ? $field['settings']['handler_settings']['target_bundles'] : array(),
-      '#size' => 6,
-      '#multiple' => TRUE,
-      '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.')
-    );
+    if (!empty($entity_info['entity keys']['bundle'])) {
+      $bundles = array();
+      foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+        $bundles[$bundle_name] = $bundle_info['label'];
+      }
+
+      $form['target_bundles'] = array(
+        '#type' => 'select',
+        '#title' => t('Target bundles'),
+        '#options' => $bundles,
+        '#default_value' => isset($field['settings']['handler_settings']['target_bundles']) ? $field['settings']['handler_settings']['target_bundles'] : array(),
+        '#size' => 6,
+        '#multiple' => TRUE,
+        '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.')
+      );
+    }
+    else {
+      $form['target_bundles'] = array(
+        '#type' => 'value',
+        '#value' => array(),
+      );
+    }
 
     $form['sort']['type'] = array(
       '#type' => 'radios',
