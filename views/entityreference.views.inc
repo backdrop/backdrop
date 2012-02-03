@@ -32,6 +32,11 @@ function entityreference_field_views_data($field) {
     }
   }
 
+  // Invoke the behaviors to allow them to change the properties.
+  foreach (entityreference_get_behavior_handlers($field) as $handler) {
+    $handler->views_data_alter($data, $field);
+  }
+
   return $data;
 }
 

@@ -23,6 +23,13 @@ interface EntityReference_BehaviorHandler {
   public function property_info_alter(&$info, $entity_type, $field, $instance, $field_type);
 
   /**
+   * Alter the views data of a field.
+   *
+   * @see entityreference_field_views_data()
+   */
+  public function views_data_alter(&$data, $field);
+
+  /**
    * Act on loading entity reference fields of entities.
    *
    * @see hook_field_load()
@@ -102,6 +109,8 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
   public function schema_alter(&$schema, $field) {}
 
   public function property_info_alter(&$info, $entity_type, $field, $instance, $field_type) {}
+
+  public function views_data_alter(&$data, $field) {}
 
   public function load($entity_type, $entities, $field, $instances, $langcode, &$items) {}
 
