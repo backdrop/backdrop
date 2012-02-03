@@ -13,6 +13,13 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
    */
   public static function getInstance($field, $instance) {
     $entity_type = $field['settings']['target_type'];
+
+    // Check if the entity type does exist and has a base table.
+    $entity_info = entity_get_info($entity_type);
+    if (empty($entity_info['base table'])) {
+      return EntityReference_SelectionHandler_Broken::getInstance($field, $instance);
+    }
+
     if (class_exists($class_name = 'EntityReference_SelectionHandler_Generic_' . $entity_type)) {
       return new $class_name($field, $instance);
     }
