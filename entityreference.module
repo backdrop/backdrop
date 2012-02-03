@@ -86,9 +86,14 @@ function entityreference_menu() {
  * Implements hook_field_is_empty().
  */
 function entityreference_field_is_empty($item, $field) {
-  return !isset($item['target_id']) || !is_numeric($item['target_id']);
-}
+  $empty = !isset($item['target_id']) || !is_numeric($item['target_id']);
 
+  // Invoke the behaviors to allow them to override the empty status.
+  foreach (entityreference_get_behavior_handlers($field) as $handler) {
+    $handler->is_empty_alter($empty, $item, $field);
+  }
+  return $empty;
+}
 
 /**
  * Get the behavior handlers for a given entityreference field.
@@ -184,9 +189,13 @@ function entityreference_field_load($entity_type, $entities, $field, $instances,
 function entityreference_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   $ids = array();
   foreach ($items as $delta => $item) {
-    if (!entityreference_field_is_empty($item, $field)) {
+    if (!entityreference_field_is_empty($item, $field) && $item['target_id'] !== NULL) {
       $ids[$item['target_id']] = $delta;
     }
+  }
+
+  if (!$ids) {
+    return;
   }
 
   $valid_ids = entityreference_get_selection_handler($field, $instance)->validateReferencableEntities(array_keys($ids));
@@ -809,34 +818,39 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
   // Collect every possible entity attached to any of the entities.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
-      $target_ids[] = $item['target_id'];
+      if (isset($item['target_id'])) {
+        $target_ids[] = $item['target_id'];
+      }
     }
   }
 
   if ($target_ids) {
     $target_entities = entity_load($field['settings']['target_type'], $target_ids);
+  }
+  else {
+    $target_entities = array();
+  }
 
-    // Iterate through the fieldable entities again to attach the loaded data.
-    foreach ($entities as $id => $entity) {
-      $rekey = FALSE;
+  // Iterate through the fieldable entities again to attach the loaded data.
+  foreach ($entities as $id => $entity) {
+    $rekey = FALSE;
 
-      foreach ($items[$id] as $delta => $item) {
-        // Check whether the referenced entity could be loaded and that the user has access to it.
-        if (isset($target_entities[$item['target_id']]) && entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']])) {
-          // Replace the instance value with the term data.
-          $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
-        }
-        // Otherwise, unset the instance value, since the entity does not exists or should not be accessible.
-        else {
-          unset($items[$id][$delta]);
-          $rekey = TRUE;
-        }
+    foreach ($items[$id] as $delta => $item) {
+      // Check whether the referenced entity could be loaded and that the user has access to it.
+      if (isset($target_entities[$item['target_id']]) && entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']])) {
+        // Replace the instance value with the term data.
+        $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
       }
-
-      if ($rekey) {
-        // Rekey the items array.
-        $items[$id] = array_values($items[$id]);
+      // Otherwise, unset the instance value, since the entity does not exists or should not be accessible.
+      else {
+        unset($items[$id][$delta]);
+        $rekey = TRUE;
       }
+    }
+
+    if ($rekey) {
+      // Rekey the items array.
+      $items[$id] = array_values($items[$id]);
     }
   }
 }

@@ -37,6 +37,13 @@ interface EntityReference_BehaviorHandler {
   public function load($entity_type, $entities, $field, $instances, $langcode, &$items);
 
   /**
+   * Alter the empty status of a field item.
+   *
+   * @see hook_field_is_empty()
+   */
+  public function is_empty_alter(&$empty, $item, $field);
+
+  /**
    * Act on validating an entity reference field.
    *
    * @see hook_field_validate()
@@ -113,6 +120,8 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
   public function views_data_alter(&$data, $field) {}
 
   public function load($entity_type, $entities, $field, $instances, $langcode, &$items) {}
+
+  public function is_empty_alter(&$empty, $item, $field) {}
 
   public function validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {}
 
