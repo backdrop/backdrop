@@ -177,8 +177,9 @@ class views_plugin_style extends views_plugin {
           $this->options['grouping'] = array();
           $this->options['grouping'][0]['field'] = $grouping;
         }
-        if (is_string($this->options['group_rendered'])) {
+        if (isset($this->options['group_rendered']) && is_string($this->options['group_rendered'])) {
           $this->options['grouping'][0]['rendered'] = $this->options['group_rendered'];
+          unset($this->options['group_rendered']);
         }
 
         $c = count($this->options['grouping']);
