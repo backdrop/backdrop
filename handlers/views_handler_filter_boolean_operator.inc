@@ -10,6 +10,8 @@
  *    - on-off: On/Off
  *    - enabled-disabled: Enabled/Disabled
  * - accept null: Treat a NULL value as false.
+ * - use equal: If you use this flag the query will use = 1 instead of <> 0.
+ *   This might be helpful for performance reasons.
  *
  * @ingroup views_filter_handlers
  */
