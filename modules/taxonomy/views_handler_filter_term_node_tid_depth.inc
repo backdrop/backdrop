@@ -89,6 +89,6 @@ class views_handler_filter_term_node_tid_depth extends views_handler_filter_term
     }
 
     $subquery->condition($where);
-    $this->query->add_where(0, "$this->table_alias.$this->real_field", $subquery, 'IN');
+    $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field", $subquery, 'IN');
   }
 }
