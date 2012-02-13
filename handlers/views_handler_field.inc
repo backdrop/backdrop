@@ -1049,13 +1049,14 @@ If you would like to have the characters %5B and %5D please use the html entity 
    */
   function render_text($alter) {
     $value = $this->last_render;
-    if (!empty($this->options['alter']['trim_whitespace'])) {
-      $value = trim($value);
-    }
 
     if (!empty($alter['alter_text']) && $alter['text'] !== '') {
       $tokens = $this->get_render_tokens($alter);
       $value = $this->render_altered($alter, $tokens);
+    }
+
+    if (!empty($this->options['alter']['trim_whitespace'])) {
+      $value = trim($value);
     }
 
     // Check whether the value is empty and return nothing, so the field isn't rendered.
