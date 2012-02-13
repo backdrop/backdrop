@@ -516,8 +516,10 @@ function entityreference_field_widget_info() {
  * Implements hook_field_widget_info_alter().
  */
 function entityreference_field_widget_info_alter(&$info) {
-  $info['options_select']['field types'][] = 'entityreference';
-  $info['options_buttons']['field types'][] = 'entityreference';
+  if (module_exists('options')) {
+    $info['options_select']['field types'][] = 'entityreference';
+    $info['options_buttons']['field types'][] = 'entityreference';
+  }
 }
 
 /**
