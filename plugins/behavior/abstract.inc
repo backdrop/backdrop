@@ -9,6 +9,14 @@
 interface EntityReference_BehaviorHandler {
 
   /**
+   * Constructor for the behavior.
+   *
+   * @param $behavior
+   *   The name of the behavior plugin.
+   */
+  public function __construct($behavior);
+
+  /**
    * Alter the field schema.
    *
    * @see hook_field_schema()
@@ -81,7 +89,7 @@ interface EntityReference_BehaviorHandler {
   /**
    * Generate a settings form for this handler.
    */
-  public function settingsForm();
+  public function settingsForm($field, $instance);
 
   /**
    * Determine if handler should appear.
@@ -94,23 +102,22 @@ interface EntityReference_BehaviorHandler {
  */
 abstract class EntityReference_BehaviorHandler_Abstract implements EntityReference_BehaviorHandler {
 
-  public function __construct($behavior, array $field, array $instance = NULL) {
+  /**
+   * The name of the behavior plugin.
+   */
+  protected $behavior;
+
+  /**
+   * The plugin definition.
+   */
+  protected $plugin;
+
+  public function __construct($behavior) {
+    $this->behavior = $behavior;
+
     ctools_include('plugins');
     $plugin = ctools_get_plugins('entityreference', 'behavior', $behavior);
     $this->plugin = $plugin;
-
-    if ($plugin['behavior type'] == 'field') {
-      $this->settings = !empty($field['settings']['handler_settings']['behavior']) ? $field['settings']['handler_settings']['behavior'] : array();
-    }
-    else {
-      $this->settings = !empty($instance['settings']['behavior']) ? $instance['settings']['behavior'] : array();
-    }
-
-    $this->status = !empty($settings['status']) ? $settings['status'] : FALSE;
-    unset($this->settings['status']);
-
-    $this->field = $field;
-    $this->instance = $instance;
   }
 
   public function schema_alter(&$schema, $field) {}
@@ -133,7 +140,7 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
 
   public function delete($entity_type, $entity, $field, $instance, $langcode, &$items) {}
 
-  public function settingsForm() {}
+  public function settingsForm($field, $instance) {}
 
   public function access($field, $instance) {
     return TRUE;
@@ -144,7 +151,7 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
  * A broken implementation of EntityReference_BehaviorHandler.
  */
 class EntityReference_BehaviorHandler_Broken extends EntityReference_BehaviorHandler_Abstract {
-  public function settingsForm() {
+  public function settingsForm($field, $instance) {
     $form['behavior_handler'] = array(
       '#markup' => t('The selected behavior handler is broken.'),
     );
