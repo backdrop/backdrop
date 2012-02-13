@@ -49,6 +49,15 @@ function _entityreference_entity_get_info($entity_type = NULL) {
   $entity_info = &drupal_static(__FUNCTION__);
 
   if (!isset($entity_info)) {
+    // Protect against recursion. Some modules might indirectly call
+    // drupal_get_schema() in hook_entity_info(), for example by implementing
+    // ctools exportables for bundles.
+    static $recurse = FALSE;
+    if ($recurse) {
+      return array();
+    }
+
+    $recurse = TRUE;
     $entity_info = module_invoke_all('entity_info');
     // Merge in default values.
     foreach ($entity_info as $name => $data) {
