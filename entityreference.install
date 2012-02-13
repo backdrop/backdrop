@@ -156,24 +156,28 @@ function entityreference_update_7001() {
       // Not an entity reference field.
       continue;
     }
+
+    // Update the field settings.
+    $field = field_info_field($field_name);
+    unset($field['indexes']['target_entity']);
+    $field['indexes']['target_id'] = array('target_id');
+    field_update_field($field);
+
     if ($field['storage']['type'] !== 'field_sql_storage') {
-      // Field doesn't use SQL storage.
+      // Field doesn't use SQL storage, we cannot modify the schema.
       continue;
     }
     $table_name = _field_sql_storage_tablename($field);
     $revision_name = _field_sql_storage_revision_tablename($field);
 
-    db_drop_field($table_name, $field_name . '_target_type');
     db_drop_index($table_name, $field_name . '_target_entity');
+    db_drop_index($table_name, $field_name . '_target_id');
+    db_drop_field($table_name, $field_name . '_target_type');
     db_add_index($table_name, $field_name . '_target_id', array($field_name . '_target_id'));
 
-    db_drop_field($revision_name, $field_name . '_target_type');
     db_drop_index($revision_name, $field_name . '_target_entity');
+    db_drop_index($revision_name, $field_name . '_target_id');
+    db_drop_field($revision_name, $field_name . '_target_type');
     db_add_index($revision_name, $field_name . '_target_id', array($field_name . '_target_id'));
-
-    // Update the field settings.
-    $field = field_info_field($field_name);
-    $field['indexes'] = array('target_id' => array('target_id'));
-    field_update_field($field);
   }
 }
