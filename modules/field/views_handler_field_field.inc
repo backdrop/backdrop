@@ -697,9 +697,14 @@ class views_handler_field_field extends views_handler_field {
       // Offset is calculated differently when row grouping for a field is
       // not enabled. Since there are multiple rows, the delta needs to be
       // taken into account, so that different values are shown per row.
-      if (!$this->options['group_rows'] && isset($values->{$this->aliases['delta']})) {
+      if (!$this->options['group_rows'] && isset($this->aliases['delta']) && isset($values->{$this->aliases['delta']})) {
         $delta_limit = 1;
         $offset = $values->{$this->aliases['delta']};
+      }
+      // Single fields don't have a delta available so choose 0.
+      elseif (!$this->options['group_rows'] && !$this->multiple) {
+        $delta_limit = 1;
+        $offset = 0;
       }
       else {
         $delta_limit = $this->options['delta_limit'];
