@@ -532,7 +532,7 @@ function field_group_pre_render_prepare(&$group) {
     $group->classes .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
   }
 
-  $group->description = isset($group->format_settings['instance_settings']['description']) ? filter_xss_admin($group->format_settings['instance_settings']['description']) : '';
+  $group->description = isset($group->format_settings['instance_settings']['description']) ? filter_xss_admin(t($group->format_settings['instance_settings']['description'])) : '';
 
 }
 
