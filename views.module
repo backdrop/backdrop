@@ -786,6 +786,7 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
           $render_element['#contextual_links'][$module] = array($link['parent path'], $args);
           $render_element['#views_contextual_links_info'][$module] = array(
             'location' => $location,
+            'view' => $view,
             'view_name' => $view->name,
             'view_display_id' => $display_id,
           );
