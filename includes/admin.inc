@@ -743,7 +743,15 @@ function views_ui_add_form_store_edit_submit($form, &$form_state) {
   }
   // Just cache it temporarily to edit it.
   views_ui_cache_set($view);
-  $form_state['redirect'] = 'admin/structure/views/view/' . $view->name;
+
+  // If there is a destination query, ensure we still redirect the user to the
+  // edit view page, and then redirect the user to the destination.
+  $destination = array();
+  if (isset($_GET['destination'])) {
+    $destination = drupal_get_destination();
+    unset($_GET['destination']);
+  }
+  $form_state['redirect'] = array('admin/structure/views/view/' . $view->name, array('query' => $destination));
 }
 
 /**
