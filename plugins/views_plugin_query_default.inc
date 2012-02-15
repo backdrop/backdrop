@@ -934,7 +934,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * @param $table
    *   The table this field is part of. If a formula, enter NULL.
-   *   If you want to orderby random use "rand" as table and
+   *   If you want to orderby random use "rand" as table and nothing else.
    * @param $field
    *   The field or formula to sort on. If already a field, enter NULL
    *   and put in the alias.
@@ -949,7 +949,9 @@ class views_plugin_query_default extends views_plugin_query {
    *   Any params that should be passed through to the add_field.
    */
   function add_orderby($table, $field = NULL, $order = 'ASC', $alias = '', $params = array()) {
-    if ($table) {
+    // Only ensure the table if it's not the special random key.
+    // @todo: Maybe it would make sense to just add a add_orderby_rand or something similar.
+    if ($table && $table != 'rand') {
       $this->ensure_table($table);
     }
 
