@@ -195,11 +195,24 @@ class views_handler_field_field extends views_handler_field {
 
       // Filter by language, if field translation is enabled.
       $field = $this->field_info;
-      if (field_is_translatable($entity_type, $field) && !empty($this->query->options['field_language_add_to_query'])) {
+      if (field_is_translatable($entity_type, $field) && !empty($this->view->display_handler->options['field_language_add_to_query'])) {
         $column = $this->table_alias . '.language';
         // By the same reason as field_language the field might be LANGUAGE_NONE in reality so allow it as well.
         // @see this::field_language()
-        $this->query->add_where(0, $column, array($this->query->options['field_language'], LANGUAGE_NONE));
+        global $language_content;
+        $default_language = language_default('language');
+        $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
+                                array($language_content->language, $default_language),
+                                $this->view->display_handler->options['field_language']);
+        $placeholder = $this->placeholder();
+        $language_fallback_candidates = array($language);
+        if (variable_get('locale_field_language_fallback', TRUE)) {
+          $language_fallback_candidates = array_merge($language_fallback_candidates, language_fallback_get_candidates());
+        }
+        else {
+          $language_fallback_candidates[] = LANGUAGE_NONE;
+        }
+        $this->query->add_where_expression(0, "$column IN($placeholder) OR $column IS NULL", array($placeholder => $language_fallback_candidates));
       }
     }
 
