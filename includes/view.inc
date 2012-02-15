@@ -113,6 +113,14 @@ class view extends views_db_object {
    */
    var $style_plugin;
 
+  /**
+   * Stored the changed options of the style plugin.
+   *
+   * @deprecated Better use $view->style_plugin->options
+   * @var array
+   */
+  var $style_options;
+
    /**
    * Allow to override the url of the current view.
    *
