@@ -147,7 +147,7 @@ class views_handler_field_field extends views_handler_field {
     }
     else {
       $this->field_alias = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['revision'], '', $params);
-      $this->aliases['entity id'] = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['id'], '', $params);
+      $this->aliases['entity_id'] = $this->query->add_field($this->base_table_alias, $entity_info['entity keys']['id'], '', $params);
     }
 
 
@@ -166,7 +166,7 @@ class views_handler_field_field extends views_handler_field {
       // Add the fields that we're actually grouping on.
       $options = array();
 
-      if ($this->options['group_column'] != 'entity id') {
+      if ($this->options['group_column'] != 'entity_id') {
         $options = array($this->options['group_column'] => $this->options['group_column']);
       }
 
@@ -520,7 +520,7 @@ class views_handler_field_field extends views_handler_field {
     // With "field API" fields, the column target of the grouping function
     // and any additional grouping columns must be specified.
     $group_columns = array(
-      'entity id' => t('Entity ID'),
+      'entity_id' => t('Entity ID'),
     ) + drupal_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
 
     $form['group_column'] = array(
@@ -569,7 +569,7 @@ class views_handler_field_field extends views_handler_field {
           }
           else {
             $revision_id = $object->{$this->field_alias};
-            $entity_id = $object->{$this->aliases['entity id']};
+            $entity_id = $object->{$this->aliases['entity_id']};
             $entities_by_type[$entity_type][$key] = array($entity_id, $revision_id);
           }
         }
