@@ -6,10 +6,6 @@
  * @ingroup views_field_handlers
  */
 class views_handler_field_comment_link_approve extends views_handler_field_comment_link {
-  function construct() {
-    parent::construct();
-    $this->additional_fields['status'] = 'status';
-  }
   function access() {
     //needs permission to administer comments in general
     return user_access('administer comments');

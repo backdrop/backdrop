@@ -4,7 +4,7 @@
  *
  * @ingroup views_field_handlers
  */
-class views_handler_field_comment_node_link extends views_handler_field {
+class views_handler_field_comment_node_link extends views_handler_field_entity {
   function construct() {
     parent::construct();
 
@@ -45,10 +45,7 @@ class views_handler_field_comment_node_link extends views_handler_field {
 
   function render($values) {
     // Build fake $node.
-    $node = new stdClass();
-    $node->nid      = $this->get_value($values, 'nid');
-    $node->type     = $this->get_value($values, 'type');
-    $node->comment  = $this->get_value($values, 'comment');
+    $node = $this->get_value($values);
 
     // Call comment.module's hook_link: comment_link($type, $node = NULL, $teaser = FALSE)
     // Call node by reference so that something is changed here
