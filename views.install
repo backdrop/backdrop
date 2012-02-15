@@ -275,7 +275,7 @@ function views_update_6000() {
   // views_schema_6000() rather than the default views_schema().
   // This is important for processing subsequent table updates.
   $schema = views_schema_6000();
-  _drupal_initialize_schema('views', $schema);
+  _drupal_schema_initialize($schema, 'views');
 
   foreach ($schema as $name => $table) {
     db_create_table($name, $table);
