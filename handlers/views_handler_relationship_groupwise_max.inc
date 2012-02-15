@@ -192,10 +192,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
   function left_query($options) {
     // Either load another view, or create one on the fly.
     if ($options['subquery_view']) {
-      // We don't use views_get_view because we want our own class of view.
-      views_include('view');
-      $temp_view = view::load($options['subquery_view']);
-
+      $temp_view = views_get_view($options['subquery_view']);
       // Remove all fields from default display
       unset($temp_view->display['default']->display_options['fields']);
     }
