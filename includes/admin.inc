@@ -4497,7 +4497,7 @@ function views_ui_config_item_extra_form($form, &$form_state) {
   $item = $view->get_item($display_id, $type, $id);
 
   if ($item) {
-    $handler = views_get_handler($item['table'], $item['field'], $type);
+    $handler = $view->display_handler->get_handler($type, $id);
     if (empty($handler)) {
       $form['markup'] = array('#markup' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
     }
