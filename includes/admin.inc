@@ -4792,7 +4792,8 @@ function views_ui_admin_settings_advanced() {
   $form['debug']['views_sql_signature'] = array(
     '#type' => 'checkbox',
     '#title' => t('Add Views signature to all SQL queries'),
-    '#description' => t("All Views-generated queries will include a special 'VIEWS' = 'VIEWS' string in the WHERE clause. This makes identifying Views queries in database server logs simpler, but should only be used when troubleshooting."),
+    '#description' => t("All Views-generated queries will include the name of the views and display 'view-name:display-name' as a string  at the end of the SELECT clause. This makes identifying Views queries in database server logs simpler, but should only be used when troubleshooting."),
+
     '#default_value' => variable_get('views_sql_signature', FALSE),
   );
 
