@@ -181,6 +181,11 @@ class views_handler extends views_object {
   var $real_field;
 
   /**
+   * The relationship used for this field.
+   */
+  var $relationship = NULL;
+
+  /**
    * init the handler with necessary data.
    * @param $view
    *   The $view object this handler is attached to.
