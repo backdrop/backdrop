@@ -41,6 +41,15 @@ class view extends views_db_object {
    */
   var $description;
 
+  /**
+   * The "tags" of a view.
+   * The tags are stored as a single string, though it is used as multiple tags
+   * for example in the views overview.
+   *
+   * @var string
+   */
+  var $tag;
+
   // State variables
   var $built = FALSE;
   var $executed = FALSE;
