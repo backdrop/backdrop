@@ -50,6 +50,13 @@ class view extends views_db_object {
    */
   var $tag;
 
+  /**
+   * The human readable name of the view.
+   *
+   * @var string
+   */
+  var $human_name;
+
   // State variables
   var $built = FALSE;
   var $executed = FALSE;
