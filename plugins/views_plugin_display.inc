@@ -802,7 +802,14 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
-   * Get the display or row plugin, if it exists.
+   * Get the instance of a plugin, for example style or row.
+   *
+   * @param string $type
+   *   The type of the plugin.
+   * @param string $name
+   *   The name of the plugin defined in hook_views_plugins.
+   *
+   * @return views_plugin|FALSE
    */
   function get_plugin($type = 'style', $name = NULL) {
     static $cache = array();
