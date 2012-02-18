@@ -113,14 +113,13 @@ class ViewsHandlersTest extends ViewsSqlTest {
    *
    * @param $first
    *   The first value to check.
-   * @param $second
-   *   The second value to check.
-   * @param $message
+   * @param views_handler $handler
+   * @param string $message
    *   The message to display along with the assertion.
-   * @param $group
+   * @param string $group
    *   The type of assertion - examples are "Browser", "PHP".
    *
-   * @return
+   * @return bool
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertEqualValue($first, $handler, $message = '', $group = 'Other') {
