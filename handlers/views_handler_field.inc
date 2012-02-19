@@ -7,6 +7,23 @@
  */
 
 /**
+ * Indicator of the render_text() mehtod for rendering a single item.
+ * (If no render_item() is present).
+ */
+define('VIEWS_HANDLER_RENDER_TEXT_PHASE_SINGLE_ITEM', 0);
+
+/**
+ * Indicator of the render_text() method for rendering the whole element.
+ * (if no render_item() method is available).
+ */
+define('VIEWS_HANDLER_RENDER_TEXT_PHASE_COMPLETELY', 1);
+
+/**
+ * Indicator of the render_text() method for rendering the empty text.
+ */
+define('VIEWS_HANDLER_RENDER_TEXT_PHASE_EMPTY', 2);
+
+/**
  * Base field handler that has no options and renders an unformatted field.
  *
  * Definition terms:
@@ -1012,13 +1029,15 @@ If you would like to have the characters %5B and %5D please use the html entity 
           $this->original_value = $this->last_render;
 
           $alter = $item + $this->options['alter'];
+          $alter['phase'] = VIEWS_HANDLER_RENDER_TEXT_PHASE_SINGLE_ITEM;
           $items[] = $this->render_text($alter);
         }
 
         $value = $this->render_items($items);
       }
       else {
-        $value = $this->render_text($this->options['alter']);
+        $alter = array('phase' => VIEWS_HANDLER_RENDER_TEXT_PHASE_COMPLETELY) + $this->options['alter'];
+        $value = $this->render_text($alter);
       }
 
       if (is_array($value)) {
@@ -1034,6 +1053,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
         $alter = $this->options['alter'];
         $alter['alter_text'] = 1;
         $alter['text'] = $this->options['empty'];
+        $alter['phase'] = VIEWS_HANDLER_RENDER_TEXT_PHASE_EMPTY;
         $this->last_render = $this->render_text($alter);
       }
     }
@@ -1059,14 +1079,23 @@ If you would like to have the characters %5B and %5D please use the html entity 
       $value = trim($value);
     }
 
+    // Check if there should be no further rewrite for empty values.
+    $no_rewrite_for_empty = $this->options['hide_alter_empty'] && empty($this->original_value);
+
     // Check whether the value is empty and return nothing, so the field isn't rendered.
     // First check whether the field should be hidden if the value(hide_alter_empty = TRUE) /the rewrite is empty (hide_alter_empty = FALSE).
     // For numeric values you can specify whether "0"/0 should be empty.
     if ((($this->options['hide_empty'] && empty($value))
-        || ($this->options['hide_alter_empty'] && empty($this->original_value)))
+        || ($alter['phase'] != VIEWS_HANDLER_RENDER_TEXT_PHASE_EMPTY && $no_rewrite_for_empty))
       && (($value !== 0 && $value !== '0')
         || $this->options['empty_zero'])) {
       return '';
+    }
+    // Only in empty phase.
+    if ($alter['phase'] == VIEWS_HANDLER_RENDER_TEXT_PHASE_EMPTY && $no_rewrite_for_empty) {
+      // If we got here then $alter contains the value of "No results text"
+      // and so there is nothing left to do.
+      return $value;
     }
 
     if (!empty($alter['strip_tags'])) {
