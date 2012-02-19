@@ -144,6 +144,13 @@ class view extends views_db_object {
    */
   var $style_options;
 
+  /**
+   * Stores the current active row while rendering.
+   *
+   * @var int
+   */
+  var $row_index;
+
    /**
    * Allow to override the url of the current view.
    *
