@@ -6,6 +6,9 @@
  */
 
 class ViewsUserTestCase extends ViewsSqlTest {
+  var $users = array();
+  var $nodes = array();
+
   public static function getInfo() {
     return array(
       'name' => 'Tests basic user integration',
