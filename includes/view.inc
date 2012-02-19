@@ -2426,6 +2426,13 @@ class views_display extends views_db_object {
    */
   var $handler;
 
+  /**
+   * Stores all options of the display, like fields, filters etc.
+   *
+   * @var array
+   */
+  var $display_options;
+
   var $db_table = 'views_display';
   function views_display($init = TRUE) {
     parent::init($init);
