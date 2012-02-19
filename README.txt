@@ -15,7 +15,5 @@ Navigate to administer >> build >> modules. Enable Views and Views UI.
 If you're new to Views, try the Simple Views module which can create some
 often used Views for you, this might save you some time.
 
-Recommended modules for use with Views:
-  Voting API
-  Views Bonus Pack
-  Views Bulk Operations
+Here you can find many modules extending the functionality of Views:
+  http://drupal.org/taxonomy/term/89
