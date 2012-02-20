@@ -168,7 +168,8 @@ class views_plugin_style extends views_plugin {
     // @TODO: Document "uses grouping" in docs.php when docs.php is written.
     if ($this->uses_fields() && $this->definition['uses grouping']) {
       $options = array('' => t('- None -'));
-      $options += $this->display->handler->get_field_labels();
+      $field_labels = $this->display->handler->get_field_labels();
+      $options += $field_labels;
 
       // If there are no fields, we can't group on them.
       if (count($options) > 1) {
@@ -200,11 +201,17 @@ class views_plugin_style extends views_plugin {
             '#title' => t('Use rendered output to group rows'),
             '#default_value' => $grouping['rendered'],
             '#description' => t('If enabled the rendered output of the grouping field is used to group the rows.'),
+            '#dependency' => array(
+              'edit-style-options-grouping-' . $i . '-field' => array_keys($field_labels),
+            )
           );
           $form['grouping'][$i]['rendered_strip'] = array(
             '#type' => 'checkbox',
             '#title' => t('Remove tags from rendered output'),
             '#default_value' => $grouping['rendered_strip'],
+            '#dependency' => array(
+              'edit-style-options-grouping-' . $i . '-field' => array_keys($field_labels),
+            )
           );
         }
       }
