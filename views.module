@@ -964,6 +964,8 @@ function &views_get_page_view() {
 /**
  * Set the current 'current view' that is being built/rendered so that it is
  * easy for other modules or items in drupal_eval to identify
+ *
+ * @return view
  */
 function &views_set_current_view($view = NULL) {
   static $cache = NULL;
@@ -978,6 +980,8 @@ function &views_set_current_view($view = NULL) {
  * Find out what, if any, current view is currently in use. Please note that
  * this returns a reference, so be careful! You can unintentionally modify the
  * $view object.
+ *
+ * @return view
  */
 function &views_get_current_view() {
   return views_set_current_view();
