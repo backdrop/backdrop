@@ -76,6 +76,16 @@ function views_views_data() {
     ),
   );
 
+  if (module_exists('contextual')) {
+    $data['views']['contextual_links'] = array(
+      'title' => t('Contextual Links'),
+      'help' => t('Display fields in a contextual links menu.'),
+      'field' => array(
+        'handler' => 'views_handler_field_contextual_links',
+      ),
+    );
+  }
+
   if (module_invoke('ctools', 'api_version', '1.7.1')) {
     $data['views']['expression'] = array(
       'title' => t('Math expression'),

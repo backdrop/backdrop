@@ -1129,6 +1129,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
     if (!empty($alter['nl2br'])) {
       $value = nl2br($value);
     }
+    $this->last_render_text = $value;
 
     if (!empty($alter['make_link']) && !empty($alter['path'])) {
       if (!isset($tokens)) {

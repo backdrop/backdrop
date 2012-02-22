@@ -24,6 +24,7 @@ files[] = handlers/views_handler_argument_group_by_numeric.inc
 files[] = handlers/views_handler_field.inc
 files[] = handlers/views_handler_field_counter.inc
 files[] = handlers/views_handler_field_boolean.inc
+files[] = handlers/views_handler_field_contextual_links.inc
 files[] = handlers/views_handler_field_custom.inc
 files[] = handlers/views_handler_field_date.inc
 files[] = handlers/views_handler_field_entity.inc
