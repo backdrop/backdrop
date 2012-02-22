@@ -206,7 +206,7 @@ class views_handler_field_field extends views_handler_field {
                                 $this->view->display_handler->options['field_language']);
         $placeholder = $this->placeholder();
         $language_fallback_candidates = array($language);
-        if (variable_get('locale_field_language_fallback', TRUE)) {
+        if (variable_get('locale_field_language_fallback', TRUE) && module_exists('locale')) {
           $language_fallback_candidates = array_merge($language_fallback_candidates, language_fallback_get_candidates());
         }
         else {
