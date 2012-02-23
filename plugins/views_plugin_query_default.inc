@@ -190,6 +190,10 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => '',
       'bool' => FALSE,
     );
+    $options['query_tags'] = array(
+      'default' => array(),
+      'bool' => FALSE,
+    );
 
     return $options;
   }
@@ -225,6 +229,23 @@ class views_plugin_query_default extends views_plugin_query {
       '#description' => t('If set, this comment will be embedded in the query and passed to the SQL server. This can be helpful for logging or debugging.'),
       '#default_value' => $this->options['query_comment'],
     );
+    $form['query_tags'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Query Tags'),
+      '#description' => t('If set, these tags will be appended to the query and can be used to identify the query in a module. This can be helpful for altering queries.'),
+      '#default_value' => implode(', ', $this->options['query_tags']),
+      '#element_validate' => array('views_element_validate_tags'),
+    );
+  }
+
+  /**
+   * Special submit handling.
+   */
+  function options_submit($form, &$form_state) {
+    $element = array('#parents' => array('query', 'options', 'query_tags'));
+    $value = explode(',', drupal_array_get_nested_value($form_state['values'], $element['#parents']));
+    $value = array_filter(array_map('trim', $value));
+    form_set_value($element, $value, $form_state);
   }
 
   // ----------------------------------------------------------------
@@ -1276,6 +1297,13 @@ class views_plugin_query_default extends views_plugin_query {
       $query->comment($this->options['query_comment']);
     }
 
+    // Add the query tags.
+    if (!empty($this->options['query_tags'])) {
+      foreach ($this->options['query_tags'] as $tag) {
+        $query->addTag($tag);
+      }
+    }
+
     // Add all query substitutions as metadata.
     $query->addMetaData('views_substitutions', module_invoke_all('views_query_substitutions', $this));
 
@@ -1544,4 +1572,17 @@ function views_query_default_aggregation_method_simple($group_type, $field) {
 function views_query_default_aggregation_method_distinct($group_type, $field) {
   $group_type = str_replace('_distinct', '', $group_type);
   return strtoupper($group_type) . '(DISTINCT ' . $field . ')';
+}
+
+/**
+ * Validation callback for query tags.
+ */
+function views_element_validate_tags($element, &$form_state) {
+  $values = array_map('trim', explode(',', $element['#value']));
+  foreach ($values as $value) {
+    if (preg_match("/[^a-z_]/", $value)) {
+      form_error($element, t('The query tags may only contain lower-case alphabetical characters and underscores.'));
+      return;
+    }
+  }
 }
