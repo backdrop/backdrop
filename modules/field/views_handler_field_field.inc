@@ -68,6 +68,12 @@ class views_handler_field_field extends views_handler_field {
         $this->limit_values = TRUE;
       }
     }
+
+    // Convert old style entity id group column to new format.
+    // @todo Remove for next major version.
+    if ($this->options['group_column'] == 'entity id') {
+      $this->options['group_column'] = 'entity_id';
+    }
   }
 
   /**
