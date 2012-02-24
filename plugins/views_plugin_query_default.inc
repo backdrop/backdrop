@@ -241,7 +241,7 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Special submit handling.
    */
-  function options_submit($form, &$form_state) {
+  function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
     $value = explode(',', drupal_array_get_nested_value($form_state['values'], $element['#parents']));
     $value = array_filter(array_map('trim', $value));
