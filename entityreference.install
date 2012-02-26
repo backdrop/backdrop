@@ -1,10 +1,20 @@
 <?php
 
 /**
+ * Implements hook_uninstall().
+ */
+function entityreference_uninstall() {
+  variable_del('entityreference:base-tables');
+}
+
+/**
  * Implements hook_field_schema().
  */
 function entityreference_field_schema($field) {
   if ($field['type'] == 'entityreference') {
+    // Load the base table configuration from the cache.
+    $base_tables = variable_get('entityreference:base-tables', array());
+
     $schema = array(
       'columns' => array(
         'target_id' => array(
@@ -22,11 +32,11 @@ function entityreference_field_schema($field) {
 
     // Create a foreign key to the target entity type base type, if available.
     $entity_type = $field['settings']['target_type'];
-    $entity_info = _entityreference_entity_get_info($entity_type);
-    if (isset($entity_info['base table'])) {
-      $schema['foreign keys'][$entity_info['base table']] = array(
-        'table' => $entity_info['base table'],
-        'columns' => array('target_id' => $entity_info['entity keys']['id']),
+    if (isset($base_tables[$entity_type])) {
+      list($base_table, $id_column) = $base_tables[$entity_type];
+      $schema['foreign keys'][$base_table] = array(
+        'table' => $base_table,
+        'columns' => array('target_id' => $id_column),
       );
     }
 
@@ -36,65 +46,6 @@ function entityreference_field_schema($field) {
     }
 
     return $schema;
-  }
-}
-
-/**
- * Replacement for entity_get_info() that is safe to call inside a hook_schema().
- *
- * The normal entity_get_info() indirectly calls drupal_get_schema() and as
- * a consequence is not safe from inside a hook_schema() or hook_field_schema().
- */
-function _entityreference_entity_get_info($entity_type = NULL) {
-  $entity_info = &drupal_static(__FUNCTION__);
-
-  if (!isset($entity_info)) {
-    // Protect against recursion. Some modules might indirectly call
-    // drupal_get_schema() in hook_entity_info(), for example by implementing
-    // ctools exportables for bundles.
-    static $recurse = FALSE;
-    if ($recurse) {
-      return array();
-    }
-
-    $recurse = TRUE;
-    $entity_info = module_invoke_all('entity_info');
-    // Merge in default values.
-    foreach ($entity_info as $name => $data) {
-      $entity_info[$name] += array(
-        'fieldable' => FALSE,
-        'controller class' => 'DrupalDefaultEntityController',
-        'static cache' => TRUE,
-        'field cache' => TRUE,
-        'load hook' => $name . '_load',
-        'bundles' => array(),
-        'view modes' => array(),
-        'entity keys' => array(),
-        'translation' => array(),
-      );
-      $entity_info[$name]['entity keys'] += array(
-        'revision' => '',
-        'bundle' => '',
-      );
-      foreach ($entity_info[$name]['view modes'] as $view_mode => $view_mode_info) {
-        $entity_info[$name]['view modes'][$view_mode] += array(
-          'custom settings' => FALSE,
-        );
-      }
-      // If no bundle key is provided, assume a single bundle, named after
-      // the entity type.
-      if (empty($entity_info[$name]['entity keys']['bundle']) && empty($entity_info[$name]['bundles'])) {
-        $entity_info[$name]['bundles'] = array($name => array('label' => $entity_info[$name]['label']));
-      }
-    }
-    // Let other modules alter the entity info.
-    drupal_alter('entity_info', $entity_info);
-  }
-  if (isset($entity_type)) {
-    return isset($entity_info[$entity_type]) ? $entity_info[$entity_type] : NULL;
-  }
-  else {
-    return $entity_info;
   }
 }
 

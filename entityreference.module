@@ -59,6 +59,25 @@ function entityreference_field_info() {
 }
 
 /**
+ * Implements hook_flush_caches().
+ */
+function entityreference_flush_caches() {
+  // Because of the intricacies of the info hooks, we are forced to keep a
+  // separate list of the base tables of each entities, so that we can use
+  // it in entityreference_field_schema() without calling entity_get_info().
+  // See http://drupal.org/node/1416558 for details.
+  $base_tables = array();
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    if (!empty($entity_info['base table']) && !empty($entity_info['entity keys']['id'])) {
+      $base_tables[$entity_type] = array($entity_info['base table'], $entity_info['entity keys']['id']);
+    }
+  }
+  // We are using a variable because cache is going to be cleared right after
+  // hook_flush_caches() is finished.
+  variable_set('entityreference:base-tables', $base_tables);
+}
+
+/**
  * Implements hook_menu().
  */
 function entityreference_menu() {
