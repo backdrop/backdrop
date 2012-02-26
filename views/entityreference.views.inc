@@ -41,6 +41,14 @@ function entityreference_field_views_data($field) {
 }
 
 /**
+ * Options callback for Views handler views_handler_filter_in_operator.
+ */
+function entityreference_views_handler_options_list($field_name) {
+  $field = field_info_field($field_name);
+  return entityreference_options_list($field);
+}
+
+/**
  * Implements hook_field_views_data_views_data_alter().
  *
  * Views integration to provide reverse relationships on entityreference fields.
