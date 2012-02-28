@@ -470,6 +470,9 @@ function template_preprocess_views_view_table(&$vars) {
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
 
+  $default_row_class = $handler->options['default_row_class'];
+  $row_class_special = $handler->options['row_class_special'];
+
   $fields   = &$view->field;
   $columns  = $handler->sanitize_columns($options['columns'], $fields);
 
@@ -608,14 +611,18 @@ function template_preprocess_views_view_table(&$vars) {
 
   $count = 0;
   foreach ($vars['rows'] as $num => $row) {
-    $vars['row_classes'][$num][] = ($count++ % 2 == 0) ? 'odd' : 'even';
+    if ($row_class_special) {
+      $vars['row_classes'][$num][] = ($count++ % 2 == 0) ? 'odd' : 'even';
+    }
     if ($row_class = $handler->get_row_class($num)) {
       $vars['row_classes'][$num][] = $row_class;
     }
   }
 
-  $vars['row_classes'][0][] = 'views-row-first';
-  $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
+  if ($row_class_special) {
+    $vars['row_classes'][0][] = 'views-row-first';
+    $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
+  }
 
   $vars['classes_array'] = array('views-table');
   if (empty($vars['rows']) && !empty($options['empty_table'])) {
@@ -645,6 +652,8 @@ function template_preprocess_views_view_grid(&$vars) {
   $result   = $view->result;
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
+  $default_row_class = $handler->options['default_row_class'];
+  $row_class_special = $handler->options['row_class_special'];
 
   $columns  = $options['columns'];
 
@@ -710,22 +719,30 @@ function template_preprocess_views_view_grid(&$vars) {
   // Apply the row classes
   foreach ($rows as $row_number => $row) {
     $row_classes = array();
-    $row_classes[] =  'row-' . ($row_number + 1);
-    if ($row_number == 0) {
-      $row_classes[] =  'row-first';
+    if ($default_row_class) {
+      $row_classes[] =  'row-' . ($row_number + 1);
     }
-    if (count($rows) == ($row_number + 1)) {
-      $row_classes[] =  'row-last';
+    if ($row_class_special) {
+      if ($row_number == 0) {
+        $row_classes[] =  'row-first';
+      }
+      if (count($rows) == ($row_number + 1)) {
+        $row_classes[] =  'row-last';
+      }
     }
     $vars['row_classes'][$row_number] = implode(' ', $row_classes);
     foreach ($rows[$row_number] as $column_number => $item) {
       $column_classes = array();
-      $column_classes[] = 'col-'. ($column_number + 1);
-      if ($column_number == 0) {
-        $column_classes[] = 'col-first';
+      if ($default_row_class) {
+        $column_classes[] = 'col-'. ($column_number + 1);
       }
-      elseif (count($rows[$row_number]) == ($column_number + 1)) {
-        $column_classes[] = 'col-last';
+      if ($row_class_special) {
+        if ($column_number == 0) {
+          $column_classes[] = 'col-first';
+        }
+        elseif (count($rows[$row_number]) == ($column_number + 1)) {
+          $column_classes[] = 'col-last';
+        }
       }
       if (isset($row_indexes[$row_number][$column_number]) && $column_class = $view->style_plugin->get_row_class($row_indexes[$row_number][$column_number])) {
         $column_classes[] = $column_class;
@@ -746,22 +763,29 @@ function template_preprocess_views_view_grid(&$vars) {
 function template_preprocess_views_view_unformatted(&$vars) {
   $view = $vars['view'];
   $rows = $vars['rows'];
+  $style = $view->style_plugin;
 
   $vars['classes_array'] = array();
   $vars['classes'] = array();
+  $default_row_class = $style->options['default_row_class'];
+  $row_class_special = $style->options['row_class_special'];
   // Set up striping values.
   $count = 0;
   $max = count($rows);
   foreach ($rows as $id => $row) {
     $count++;
-    $vars['classes'][$id][] = 'views-row';
-    $vars['classes'][$id][] = 'views-row-' . $count;
-    $vars['classes'][$id][] = 'views-row-' . ($count % 2 ? 'odd' : 'even');
-    if ($count == 1) {
-      $vars['classes'][$id][] = 'views-row-first';
+    if ($default_row_class) {
+      $vars['classes'][$id][] = 'views-row';
+      $vars['classes'][$id][] = 'views-row-' . $count;
     }
-    if ($count == $max) {
-      $vars['classes'][$id][] = 'views-row-last';
+    if ($row_class_special) {
+      $vars['classes'][$id][] = 'views-row-' . ($count % 2 ? 'odd' : 'even');
+      if ($count == 1) {
+        $vars['classes'][$id][] = 'views-row-first';
+      }
+      if ($count == $max) {
+        $vars['classes'][$id][] = 'views-row-last';
+      }
     }
 
     if ($row_class = $view->style_plugin->get_row_class($id)) {
