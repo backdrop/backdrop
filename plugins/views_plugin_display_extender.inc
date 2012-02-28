@@ -12,7 +12,7 @@ class views_plugin_display_extender extends views_plugin {
   /**
    * Provide a form to edit options for this plugin.
    */
-  function options_definition(&$options) { }
+  function options_definition_alter(&$options) { }
 
   /**
    * Provide a form to edit options for this plugin.

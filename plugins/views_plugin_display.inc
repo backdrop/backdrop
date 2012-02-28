@@ -686,7 +686,7 @@ class views_plugin_display extends views_plugin {
     }
 
     foreach ($this->extender as $extender) {
-      $extender->option_definition($options);
+      $extender->options_definition_alter($options);
     }
 
     return $options;
