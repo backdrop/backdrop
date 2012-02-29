@@ -496,6 +496,11 @@ class views_handler_filter extends views_handler {
       $form['#size'] = NULL;
     }
 
+    // Cleanup in case the translated element's (radios or checkboxes) display value contains html.
+    if ($form['#type'] == 'select') {
+      $this->prepare_filter_select_options($form['#options']);
+    }
+
     if ($type == 'value' && empty($this->always_required) && empty($this->options['expose']['required']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
       $any_label = variable_get('views_exposed_filter_any_label', 'new_any') == 'old_any' ? t('<Any>') : t('- Any -');
       $form['#options'] = array('All' => $any_label) + $form['#options'];
@@ -504,6 +509,25 @@ class views_handler_filter extends views_handler {
 
     if (!empty($this->options['expose']['required'])) {
       $form['#required'] = TRUE;
+    }
+  }
+
+
+
+  /**
+   * Sanitizes the HTML select element's options.
+   *
+   * The function is recursive to support optgroups.
+   */
+  function prepare_filter_select_options(&$options) {
+    foreach ($options as $value => $label) {
+      // Recurse for optgroups.
+      if (is_array($label)) {
+        $this->prepare_filter_select_options($options[$value]);
+      }
+      else {
+        $options[$value] = strip_tags(decode_entities($label));
+      }
     }
   }
 
