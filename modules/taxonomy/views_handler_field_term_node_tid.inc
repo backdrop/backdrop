@@ -51,7 +51,6 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
       '#type' => 'checkbox',
       '#title' => t('Limit terms by vocabulary'),
       '#default_value'=> $this->options['limit'],
-      '#fieldset' => 'more',
     );
 
     $options = array();
@@ -68,7 +67,6 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
       '#options' => $options,
       '#default_value' => $this->options['vocabularies'],
       '#dependency' => array('edit-options-limit' => array(TRUE)),
-      '#fieldset' => 'more',
     );
 
     parent::options_form($form, $form_state);
