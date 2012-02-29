@@ -601,8 +601,8 @@ function template_preprocess_views_view_table(&$vars) {
         $empty &= empty($columns[$column]);
       }
       if ($empty) {
-        foreach ($vars['rows'] as $num => &$columns) {
-          unset($columns[$column]);
+        foreach ($vars['rows'] as $num => &$column_items) {
+          unset($column_items[$column]);
           unset($vars['header'][$column]);
         }
       }
