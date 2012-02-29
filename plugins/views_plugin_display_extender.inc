@@ -3,7 +3,7 @@
  * @todo
  */
 class views_plugin_display_extender extends views_plugin {
-  function __construct(&$view, &$display) {
+  function init(&$view, &$display) {
     $this->view = $view;
     $this->display = $display;
   }

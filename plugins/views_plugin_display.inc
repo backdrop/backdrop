@@ -42,6 +42,23 @@ class views_plugin_display extends views_plugin {
     $this->view = &$view;
     $this->display = &$display;
 
+    // Load extenders as soon as possible.
+    $this->extender = array();
+    $extenders = views_get_enabled_display_extenders();
+    // If you update to the dev version the registry might not be loaded yet.
+    if (!empty($extenders) && class_exists('views_plugin_display_extender')) {
+      foreach ($extenders as $extender) {
+        $plugin = views_get_plugin('display_extender', $extender);
+        if ($plugin) {
+          $plugin->init($this->view, $this);
+          $this->extender[$extender] = $plugin;
+        }
+        else {
+          vpr('Invalid display extender @extender', array('@handler' => $extender));
+        }
+      }
+    }
+
     // Track changes that the user should know about.
     $changed = FALSE;
 
@@ -216,25 +233,6 @@ class views_plugin_display extends views_plugin {
     if ($changed) {
       $this->view->changed = TRUE;
     }
-  }
-
-  function construct() {
-    // Load extenders as soon as possible
-    $this->extender = array();
-    $extenders = views_get_enabled_display_extenders();
-    // If you update to the dev version the registry might not be loaded yet.
-    if (!empty($extenders) && class_exists('views_plugin_display_extender')) {
-      foreach ($extenders as $extender) {
-        $data = views_fetch_plugin_data('display_extender', $extender);
-        if (isset($data['handler']) && class_exists($data['handler'])) {
-          $this->extender[$extender] = new $data['handler']($this->view, $this);
-        }
-        else {
-          vpr('Invalid display extender @extender', array('@handler' => $extender));
-        }
-      }
-    }
-    parent::construct();
   }
 
   function destroy() {
