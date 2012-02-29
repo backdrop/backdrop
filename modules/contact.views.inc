@@ -4,7 +4,7 @@
  * Provide views data and handlers for contact.module
  */
 
-function contact_views_data() {
+function contact_views_data_alter(&$data) {
   $data['users']['contact'] = array(
     'field' => array(
       'title' => t('Link to contact page'),
@@ -12,5 +12,4 @@ function contact_views_data() {
       'handler' => 'views_handler_field_contact_link',
     ),
   );
-  return $data;
 }
