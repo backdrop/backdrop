@@ -2830,7 +2830,7 @@ function views_ui_build_form_url($form_state) {
  * Add another form to the stack; clicking 'apply' will go to this form
  * rather than closing the ajax popup.
  */
-function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FALSE) {
+function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FALSE, $rebuild_keys = FALSE) {
   if (empty($view->stack)) {
     $view->stack = array();
   }
@@ -2860,6 +2860,11 @@ function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FAL
     // Now that the previously $first slot is free, move the new form into it.
     $view->stack[$first] = $stack;
     ksort($view->stack);
+
+    // Start the keys from 0 again, if requested.
+    if ($rebuild_keys) {
+      $view->stack = array_values($view->stack);
+    }
   }
 }
 
@@ -4468,6 +4473,8 @@ function views_ui_config_item_form_expose($form, &$form_state) {
   }
 
   $form_state['view']->set_item($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
+
+  views_ui_add_form_to_stack($form_state['form_key'], $form_state['view'], $form_state['display_id'], array($form_state['type'], $form_state['id']), TRUE, TRUE);
 
   views_ui_cache_set($form_state['view']);
   $form_state['rerender'] = TRUE;
