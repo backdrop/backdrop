@@ -505,7 +505,7 @@ function comment_views_data() {
       'handler' => 'views_handler_argument_numeric',
     ),
     'field' => array(
-      'handler' => 'views_handler_filter_user_name',
+      'handler' => 'views_handler_field_numeric',
     ),
   );
 
