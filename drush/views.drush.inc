@@ -50,7 +50,7 @@ function views_drush_command() {
   $items['views-dev'] = array(
     'callback' => 'views_development_settings',
     'drupal dependencies' => array('views'),
-    'description' => 'Setup the views settings to a more developer oriented value..',
+    'description' => 'Set the Views settings to more developer-oriented values.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     'aliases' => array('vd'),
   );
@@ -236,6 +236,7 @@ function views_development_settings() {
   variable_set('views_ui_show_listing_filters', TRUE);
   variable_set('views_ui_show_master_display', TRUE);
   variable_set('views_ui_show_advanced_column', TRUE);
+  variable_set('views_ui_always_live_preview', FALSE);
   variable_set('views_ui_always_live_preview_button', TRUE);
   variable_set('views_ui_show_preview_information', TRUE);
   variable_set('views_ui_show_sql_query', TRUE);
