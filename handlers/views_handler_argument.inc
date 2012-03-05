@@ -79,6 +79,9 @@ class views_handler_argument extends views_handler {
       $this->options['summary']['format'] = $options['style_plugin'];
     }
 
+    // Setup default value.
+    $options['style_options'] = isset($options['style_options']) ? $options['style_options'] : array();
+
     if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc') {
       $this->options['default_action'] = 'summary';
       $this->options['summary']['sort_order'] = 'asc';
