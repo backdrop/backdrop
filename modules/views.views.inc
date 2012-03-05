@@ -86,6 +86,14 @@ function views_views_data() {
     );
   }
 
+  $data['views']['combine'] = array(
+   'title' => t('Combine fields filter'),
+    'help' => t('Combine two fields together and search by them.'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_combine',
+    ),
+  );
+
   if (module_invoke('ctools', 'api_version', '1.7.1')) {
     $data['views']['expression'] = array(
       'title' => t('Math expression'),

@@ -39,6 +39,7 @@ files[] = handlers/views_handler_field_url.inc
 files[] = handlers/views_handler_filter.inc
 files[] = handlers/views_handler_filter_boolean_operator.inc
 files[] = handlers/views_handler_filter_boolean_operator_string.inc
+files[] = handlers/views_handler_filter_combine.inc
 files[] = handlers/views_handler_filter_date.inc
 files[] = handlers/views_handler_filter_equality.inc
 files[] = handlers/views_handler_filter_group_by_numeric.inc
