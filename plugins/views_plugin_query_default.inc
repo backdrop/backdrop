@@ -90,6 +90,22 @@ class views_plugin_query_default extends views_plugin_query {
    var $tags = array();
 
   /**
+   * Is the view marked as not distinct.
+   *
+   * @var bool
+   */
+  var $no_distinct;
+
+  /**
+   * Defines the distinct type.
+   * - FALSE if it's distinct by base field.
+   * - TRUE if it just adds the sql distinct keyword.
+   *
+   * @var bool
+   */
+  public $pure_distinct = FALSE;
+
+  /**
    * Constructor; Create the basic query object and fill with default values.
    */
   function init($base_table = 'node', $base_field = 'nid', $options) {
@@ -140,11 +156,20 @@ class views_plugin_query_default extends views_plugin_query {
   // Utility methods to set flags and data.
 
   /**
-   * Set the base field to be distinct.
+   * Set the view to be distinct.
+   *
+   * There are either distinct per base field or distinct in the pure sql way,
+   * based on $pure_distinct.
+   *
+   * @param bool $value
+   *   Should the view by distincted.
+   * @param bool $pure_distinct
+   *   Should only the sql keyword be added.
    */
-  function set_distinct($value = TRUE) {
+  function set_distinct($value = TRUE, $pure_distinct = FALSE) {
     if (!(isset($this->no_distinct) && $value)) {
       $this->distinct = $value;
+      $this->pure_distinct = $pure_distinct;
     }
   }
 
@@ -182,6 +207,10 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
+    $options['pure_distinct'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
     $options['slave'] = array(
       'default' => FALSE,
       'bool' => TRUE,
@@ -216,6 +245,13 @@ class views_plugin_query_default extends views_plugin_query {
       '#title' => t('Distinct'),
       '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
       '#default_value' => !empty($this->options['distinct']),
+    );
+    $form['pure_distinct'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Pure Distinct'),
+      '#description' => t('This will prevent views from adding the base column to the distinct field. If this is not selected and the base column is a primary key, then a non-pure distinct will not function properly because the primary key is always unique.'),
+      '#default_value' => !empty($this->options['pure_distinct']),
+      '#dependency' => array('edit-query-options-distinct' => '1'),
     );
     $form['slave'] = array(
       '#type' => 'checkbox',
@@ -1192,8 +1228,10 @@ class views_plugin_query_default extends views_plugin_query {
   function query($get_count = FALSE) {
     // Check query distinct value.
     if (empty($this->no_distinct) && $this->distinct && !empty($this->fields)) {
-      $base_field_alias = $this->add_field($this->base_table, $this->base_field);
-      $this->add_groupby($base_field_alias);
+      if ($this->pure_distinct === FALSE){
+        $base_field_alias = $this->add_field($this->base_table, $this->base_field);
+        $this->add_groupby($base_field_alias);
+      }
       $distinct = TRUE;
     }
 
@@ -1340,7 +1378,7 @@ class views_plugin_query_default extends views_plugin_query {
   function build(&$view) {
     // Make the query distinct if the option was set.
     if (!empty($this->options['distinct'])) {
-      $this->set_distinct();
+      $this->set_distinct(TRUE, !empty($this->options['pure_distinct']));
     }
 
     // Store the view in the object to be able to use it later.
