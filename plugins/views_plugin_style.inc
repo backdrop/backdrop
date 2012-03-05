@@ -22,6 +22,15 @@ class views_plugin_style extends views_plugin {
    * Store all available tokens row rows.
    */
   var $row_tokens = array();
+
+  /**
+   * Contains the row plugin, if it's initialized
+   * and the style itself supports it.
+   *
+   * @var views_plugin_row
+   */
+  var $row_plugin;
+
   /**
    * Initialize a style plugin.
    *
