@@ -135,8 +135,15 @@ class views_plugin_row_node_rss extends views_plugin_row {
 
     if (!empty($node->rss_namespaces)) {
       $this->view->style_plugin->namespaces = array_merge($this->view->style_plugin->namespaces, $node->rss_namespaces);
-    } else if (module_exists('rdf')) {
-      $this->view->style_plugin->namespaces = array_merge($this->view->style_plugin->namespaces, rdf_get_namespaces());
+    }
+    elseif (function_exists('rdf_get_namespaces')) {
+      // Merge RDF namespaces in the XML namespaces in case they are used
+      // further in the RSS content.
+      $xml_rdf_namespaces = array();
+      foreach (rdf_get_namespaces() as $prefix => $uri) {
+        $xml_rdf_namespaces['xmlns:' . $prefix] = $uri;
+      }
+      $this->view->style_plugin->namespaces += $xml_rdf_namespaces;
     }
 
     // Hide the links if desired.
