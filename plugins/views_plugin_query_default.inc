@@ -1446,6 +1446,9 @@ class views_plugin_query_default extends views_plugin_query {
       }
 
     }
+    else {
+      $start = microtime(TRUE);
+    }
     $view->execute_time = microtime(TRUE) - $start;
   }
 
