@@ -117,7 +117,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     }
 
     $this->argument->argument = $account->uid;
-    $this->argument->validated_title = isset($account->name) ? check_plain($account->name) : check_plain(variable_get('anonymous', t('Anonymous')));
+    $this->argument->validated_title = check_plain(format_username($account));
     return TRUE;
   }
 
