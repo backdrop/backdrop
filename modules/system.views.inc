@@ -431,6 +431,23 @@ function system_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
+  $data['file_usage']['id'] = array(
+    'title' => t('Entity ID'),
+    'help' => t('The ID of the entity that is related to the file.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
   $data['file_usage']['count'] = array(
     'title' => t('Use count'),
     'help' => t('The number of times the file is used by this entity.'),
