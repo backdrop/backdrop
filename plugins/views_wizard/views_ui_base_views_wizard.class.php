@@ -549,6 +549,16 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         }
       }
     }
+
+    // If any of the displays use the table style, take sure that the fields
+    // always have a labels by unsetting the override.
+    foreach ($display_options as &$options) {
+      if ($options['style_plugin'] == 'table') {
+        foreach ($display_options['default']['fields'] as &$field) {
+          unset($field['label']);
+        }
+      }
+    }
   }
 
   /**
