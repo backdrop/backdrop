@@ -268,7 +268,7 @@ class views_plugin_cache extends views_plugin {
         'super-user' => $user->uid == 1, // special caching for super user.
         'language' => $GLOBALS['language']->language,
       );
-      foreach (array('exposed_info', 'page', 'sort', 'order') as $key) {
+      foreach (array('exposed_info', 'page', 'sort', 'order', 'items_per_page', 'offset') as $key) {
         if (isset($_GET[$key])) {
           $key_data[$key] = $_GET[$key];
         }
