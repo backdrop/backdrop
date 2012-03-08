@@ -98,17 +98,17 @@ class views_handler_filter extends views_handler {
     $options['operator'] = array('default' => '=');
     $options['value'] = array('default' => '');
     $options['group'] = array('default' => '1');
-    $options['exposed'] = array('default' => FALSE);
+    $options['exposed'] = array('default' => FALSE, 'bool' => TRUE);
     $options['expose'] = array(
       'contains' => array(
         'operator_id' => array('default' => FALSE),
         'label' => array('default' => '', 'translatable' => TRUE),
-        'use_operator' => array('default' => 0),
+        'use_operator' => array('default' => FALSE, 'bool' => TRUE),
         'operator' => array('default' => ''),
         'identifier' => array('default' => ''),
-        'required' => array('default' => 0),
-        'remember' => array('default' => 0),
-        'multiple' => array('default' => 0),
+        'required' => array('default' => FALSE, 'bool' => TRUE),
+        'remember' => array('default' => FALSE, 'bool' => TRUE),
+        'multiple' => array('default' => FALSE, 'bool' => TRUE),
       ),
     );
 

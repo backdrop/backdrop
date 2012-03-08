@@ -75,7 +75,7 @@ class views_handler_relationship extends views_handler {
     }
 
     $options['label'] = array('default' => $label, 'translatable' => TRUE);
-    $options['required'] = array('default' => FALSE);
+    $options['required'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }

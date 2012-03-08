@@ -64,7 +64,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     $options['subquery_sort'] = array('default' => NULL);
     // Descending more useful.
     $options['subquery_order'] = array('default' => 'DESC');
-    $options['subquery_regenerate'] = array('default' => FALSE);
+    $options['subquery_regenerate'] = array('default' => FALSE, 'bool' => TRUE);
     $options['subquery_view'] = array('default' => FALSE);
     $options['subquery_namespace'] = array('default' => FALSE);
 

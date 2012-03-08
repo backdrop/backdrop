@@ -22,7 +22,7 @@ class views_handler_field_aggregator_category extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_category'] = array('default' => FALSE);
+    $options['link_to_category'] = array('default' => FALSE, 'bool' => TRUE);
     return $options;
   }
 

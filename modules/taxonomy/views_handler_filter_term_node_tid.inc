@@ -38,10 +38,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $options = parent::option_definition();
 
     $options['type'] = array('default' => 'textfield');
-    $options['limit'] = array('default' => TRUE);
+    $options['limit'] = array('default' => TRUE, 'bool' => TRUE);
     $options['vocabulary'] = array('default' => 0);
     $options['hierarchy'] = array('default' => 0);
-    $options['error_message'] = array('default' => TRUE);
+    $options['error_message'] = array('default' => TRUE, 'bool' => TRUE);
 
     return $options;
   }

@@ -183,17 +183,17 @@ class views_handler_argument extends views_handler {
     $options['exception'] = array(
       'contains' => array(
         'value' => array('default' => 'all'),
-        'title_enable' => array('default' => 0),
+        'title_enable' => array('default' => FALSE, 'bool' => TRUE),
         'title' => array('default' => t('All'), 'translatable' => TRUE),
       ),
     );
-    $options['title_enable'] = array('default' => 0);
+    $options['title_enable'] = array('default' => FALSE, 'bool' => TRUE);
     $options['title'] = array('default' => '', 'translatable' => TRUE);
-    $options['breadcrumb_enable'] = array('default' => 0);
+    $options['breadcrumb_enable'] = array('default' => FALSE, 'bool' => TRUE);
     $options['breadcrumb'] = array('default' => '', 'translatable' => TRUE);
     $options['default_argument_type'] = array('default' => 'fixed', 'export' => 'export_plugin');
     $options['default_argument_options'] = array('default' => array(), 'export' => FALSE);
-    $options['default_argument_skip_url'] = array('default' => FALSE);
+    $options['default_argument_skip_url'] = array('default' => FALSE, 'bool' => TRUE);
     $options['summary_options'] = array('default' => array(), 'export' => FALSE);
     $options['summary'] = array(
       'contains' => array(
@@ -202,7 +202,7 @@ class views_handler_argument extends views_handler {
         'format' => array('default' => 'default_summary', 'export' => 'export_summary'),
       ),
     );
-    $options['specify_validation'] = array('default' => 0);
+    $options['specify_validation'] = array('default' => FALSE, 'bool' => TRUE);
     $options['validate'] = array(
       'contains' => array(
         'type' => array('default' => 'none', 'export' => 'export_validation'),

@@ -26,16 +26,16 @@ class views_handler_argument_string extends views_handler_argument {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['glossary'] = array('default' => FALSE);
+    $options['glossary'] = array('default' => FALSE, 'bool' => TRUE);
     $options['limit'] = array('default' => 0);
     $options['case'] = array('default' => 'none');
     $options['path_case'] = array('default' => 'none');
-    $options['transform_dash'] = array('default' => FALSE);
-    $options['break_phrase'] = array('default' => FALSE);
+    $options['transform_dash'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
 
     if (!empty($this->definition['many to one'])) {
-      $options['add_table'] = array('default' => FALSE);
-      $options['require_value'] = array('default' => FALSE);
+      $options['add_table'] = array('default' => FALSE, 'bool' => TRUE);
+      $options['require_value'] = array('default' => FALSE, 'bool' => TRUE);
     }
 
     return $options;

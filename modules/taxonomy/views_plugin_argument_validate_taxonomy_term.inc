@@ -27,7 +27,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
     $options = parent::option_definition();
     $options['vocabularies'] = array('default' => array());
     $options['type'] = array('default' => 'tid');
-    $options['transform'] = array('default' => FALSE);
+    $options['transform'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }

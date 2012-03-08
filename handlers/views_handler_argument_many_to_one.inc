@@ -32,11 +32,11 @@ class views_handler_argument_many_to_one extends views_handler_argument {
     $options = parent::option_definition();
 
     if (!empty($this->definition['numeric'])) {
-      $options['break_phrase'] = array('default' => FALSE);
+      $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
     }
 
-    $options['add_table'] = array('default' => FALSE);
-    $options['require_value'] = array('default' => FALSE);
+    $options['add_table'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['require_value'] = array('default' => FALSE, 'bool' => TRUE);
 
     if (isset($this->helper)) {
       $this->helper->option_definition($options);

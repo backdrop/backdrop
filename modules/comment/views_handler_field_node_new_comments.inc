@@ -31,7 +31,7 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['link_to_comment'] = array('default' => TRUE);
+    $options['link_to_comment'] = array('default' => TRUE, 'bool' => TRUE);
 
     return $options;
   }

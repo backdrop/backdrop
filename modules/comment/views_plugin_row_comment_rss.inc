@@ -16,7 +16,7 @@ class views_plugin_row_comment_rss extends views_plugin_row {
     $options = parent::option_definition();
 
     $options['item_length'] = array('default' => 'default');
-    $options['links'] = FALSE;
+    $options['links'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }

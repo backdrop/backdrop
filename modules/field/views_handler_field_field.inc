@@ -324,6 +324,7 @@ class views_handler_field_field extends views_handler_field {
     // Options used for multiple value fields.
     $options['group_rows'] = array(
       'default' => TRUE,
+      'bool' => TRUE,
     );
     // If we know the exact number of allowed values, then that can be
     // the default. Otherwise, default to 'all'.
@@ -335,9 +336,11 @@ class views_handler_field_field extends views_handler_field {
     );
     $options['delta_reversed'] = array(
       'default' => FALSE,
+      'bool' => TRUE,
     );
     $options['delta_first_last'] = array(
       'default' => FALSE,
+      'bool' => TRUE,
     );
 
     $options['multi_type'] = array(
@@ -349,6 +352,7 @@ class views_handler_field_field extends views_handler_field {
 
     $options['field_api_classes'] = array(
       'default' => FALSE,
+      'bool' => TRUE,
     );
 
     return $options;

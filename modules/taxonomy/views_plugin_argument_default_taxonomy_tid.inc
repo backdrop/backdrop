@@ -26,10 +26,10 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['term_page'] = array('default' => TRUE);
-    $options['node'] = array('default' => FALSE);
+    $options['term_page'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['node'] = array('default' => FALSE, 'bool' => TRUE);
     $options['anyall'] = array('default' => ',');
-    $options['limit'] = array('default' => FALSE);
+    $options['limit'] = array('default' => FALSE, 'bool' => TRUE);
     $options['vocabularies'] = array('default' => array());
 
     return $options;

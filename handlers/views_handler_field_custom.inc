@@ -19,8 +19,8 @@ class views_handler_field_custom extends views_handler_field {
     $options = parent::option_definition();
 
     // Override the alter text option to always alter the text.
-    $options['alter']['contains']['alter_text'] = array('default' => TRUE);
-    $options['hide_alter_empty'] = array('default' => FALSE);
+    $options['alter']['contains']['alter_text'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['hide_alter_empty'] = array('default' => FALSE, 'bool' => TRUE);
     return $options;
   }
 

@@ -33,7 +33,7 @@ class views_handler_field_ncs_last_comment_name extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['link_to_user'] = array('default' => TRUE);
+    $options['link_to_user'] = array('default' => TRUE, 'bool' => TRUE);
 
     return $options;
   }

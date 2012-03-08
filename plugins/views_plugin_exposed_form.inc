@@ -43,8 +43,8 @@ class views_plugin_exposed_form extends views_plugin {
     $options['exposed_sorts_label'] = array('default' => 'Sort by', 'translatable' => TRUE);
     $options['sort_asc_label'] = array('default' => 'Asc', 'translatable' => TRUE);
     $options['sort_desc_label'] = array('default' => 'Desc', 'translatable' => TRUE);
-    $options['autosubmit'] = array('default' => FALSE);
-    $options['autosubmit_hide'] = array('default' => TRUE);
+    $options['autosubmit'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['autosubmit_hide'] = array('default' => TRUE, 'bool' => TRUE);
     return $options;
   }
 

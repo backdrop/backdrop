@@ -13,7 +13,7 @@
 class views_plugin_style_summary_unformatted extends views_plugin_style_summary {
   function option_definition() {
     $options = parent::option_definition();
-    $options['inline'] = array('default' => FALSE);
+    $options['inline'] = array('default' => FALSE, 'bool' => TRUE);
     $options['separator'] = array('default' => '');
     return $options;
   }

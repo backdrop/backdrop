@@ -378,32 +378,32 @@ class views_handler_field extends views_handler {
     $options['exclude'] = array('default' => FALSE, 'bool' => TRUE);
     $options['alter'] = array(
       'contains' => array(
-        'alter_text' => array('default' => FALSE),
+        'alter_text' => array('default' => FALSE, 'bool' => TRUE),
         'text' => array('default' => '', 'translatable' => TRUE),
-        'make_link' => array('default' => FALSE),
+        'make_link' => array('default' => FALSE, 'bool' => TRUE),
         'path' => array('default' => '', 'translatable' => TRUE),
-        'absolute' => array('default' => '', 'translatable' => FALSE),
-        'external' => array('default' => '', 'translatable' => FALSE),
-        'replace_spaces' => array('default' => '', 'translatable' => FALSE),
+        'absolute' => array('default' => FALSE, 'bool' => TRUE),
+        'external' => array('default' => FALSE, 'bool' => TRUE),
+        'replace_spaces' => array('default' => FALSE, 'bool' => TRUE),
         'path_case' => array('default' => 'none', 'translatable' => FALSE),
-        'trim_whitespace' => array('default' => FALSE),
+        'trim_whitespace' => array('default' => FALSE, 'bool' => TRUE),
         'alt' => array('default' => '', 'translatable' => TRUE),
         'rel' => array('default' => ''),
         'link_class' => array('default' => ''),
         'prefix' => array('default' => '', 'translatable' => TRUE),
         'suffix' => array('default' => '', 'translatable' => TRUE),
         'target' => array('default' => '', 'translatable' => TRUE),
-        'nl2br' => array('default' => FALSE),
+        'nl2br' => array('default' => FALSE, 'bool' => TRUE),
         'max_length' => array('default' => ''),
-        'word_boundary' => array('default' => TRUE),
-        'ellipsis' => array('default' => TRUE),
-        'more_link' => array('default' => FALSE),
+        'word_boundary' => array('default' => TRUE, 'bool' => TRUE),
+        'ellipsis' => array('default' => TRUE, 'bool' => TRUE),
+        'more_link' => array('default' => FALSE, 'bool' => TRUE),
         'more_link_text' => array('default' => '', 'translatable' => TRUE),
         'more_link_path' => array('default' => ''),
-        'strip_tags' => array('default' => FALSE),
-        'trim' => array('default' => FALSE),
+        'strip_tags' => array('default' => FALSE, 'bool' => TRUE),
+        'trim' => array('default' => FALSE, 'bool' => TRUE),
         'preserve_tags' => array('default' => ''),
-        'html' => array('default' => FALSE),
+        'html' => array('default' => FALSE, 'bool' => TRUE),
       ),
     );
     $options['element_type'] = array('default' => '');
@@ -411,17 +411,17 @@ class views_handler_field extends views_handler {
 
     $options['element_label_type'] = array('default' => '');
     $options['element_label_class'] = array('default' => '');
-    $options['element_label_colon'] = array('default' => TRUE);
+    $options['element_label_colon'] = array('default' => TRUE, 'bool' => TRUE);
 
     $options['element_wrapper_type'] = array('default' => '');
     $options['element_wrapper_class'] = array('default' => '');
 
-    $options['element_default_classes'] = array('default' => TRUE);
+    $options['element_default_classes'] = array('default' => TRUE, 'bool' => TRUE);
 
     $options['empty'] = array('default' => '', 'translatable' => TRUE);
-    $options['hide_empty'] = array('default' => FALSE);
-    $options['empty_zero'] = array('default' => FALSE);
-    $options['hide_alter_empty'] = array('default' => TRUE);
+    $options['hide_empty'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['empty_zero'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['hide_alter_empty'] = array('default' => TRUE, 'bool' => TRUE);
 
     return $options;
   }

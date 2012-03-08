@@ -30,11 +30,11 @@ class views_plugin_style_table extends views_plugin_style {
     $options['columns'] = array('default' => array());
     $options['default'] = array('default' => '');
     $options['info'] = array('default' => array());
-    $options['override'] = array('default' => TRUE);
-    $options['sticky'] = array('default' => FALSE);
+    $options['override'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['sticky'] = array('default' => FALSE, 'bool' => TRUE);
     $options['order'] = array('default' => 'asc');
     $options['summary'] = array('default' => '', 'translatable' => TRUE);
-    $options['empty_table'] = array('default' => FALSE);
+    $options['empty_table'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }

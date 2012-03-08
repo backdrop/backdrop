@@ -16,7 +16,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
   function option_definition() {
     $options = parent::option_definition();
     $options['type'] = array('default' => 'uid');
-    $options['restrict_roles'] = array('default' => FALSE);
+    $options['restrict_roles'] = array('default' => FALSE, 'bool' => TRUE);
     $options['roles'] = array('default' => array());
 
     return $options;

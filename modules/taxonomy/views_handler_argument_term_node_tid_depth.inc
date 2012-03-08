@@ -18,9 +18,9 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
     $options = parent::option_definition();
 
     $options['depth'] = array('default' => 0);
-    $options['break_phrase'] = array('default' => FALSE);
-    $options['set_breadcrumb'] = array('default' => FALSE);
-    $options['use_taxonomy_term_path'] = array('default' => FALSE);
+    $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['set_breadcrumb'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['use_taxonomy_term_path'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }

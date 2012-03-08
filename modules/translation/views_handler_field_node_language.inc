@@ -13,7 +13,7 @@
 class views_handler_field_node_language extends views_handler_field_node {
   function option_definition() {
     $options = parent::option_definition();
-    $options['native_language'] = array('default' => FALSE);
+    $options['native_language'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }

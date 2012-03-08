@@ -36,7 +36,7 @@ class views_handler_sort extends views_handler {
     $options = parent::option_definition();
 
     $options['order'] = array('default' => 'ASC');
-    $options['exposed'] = array('default' => FALSE);
+    $options['exposed'] = array('default' => FALSE, 'bool' => TRUE);
     $options['expose'] = array(
       'contains' => array(
         'label' => array('default' => '', 'translatable' => TRUE),

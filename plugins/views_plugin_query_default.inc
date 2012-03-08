@@ -219,11 +219,9 @@ class views_plugin_query_default extends views_plugin_query {
     );
     $options['query_comment'] = array(
       'default' => '',
-      'bool' => FALSE,
     );
     $options['query_tags'] = array(
       'default' => array(),
-      'bool' => FALSE,
     );
 
     return $options;

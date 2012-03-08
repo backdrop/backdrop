@@ -36,8 +36,8 @@ class views_plugin_row_node_view extends views_plugin_row {
     $options = parent::option_definition();
 
     $options['view_mode'] = array('default' => 'teaser');
-    $options['links'] = array('default' => TRUE);
-    $options['comments'] = array('default' => FALSE);
+    $options['links'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['comments'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }

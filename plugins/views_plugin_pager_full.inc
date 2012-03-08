@@ -29,7 +29,7 @@ class views_plugin_pager_full extends views_plugin_pager {
         'items_per_page' => array('default' => FALSE, 'bool' => TRUE),
         'items_per_page_label' => array('default' => 'Items per page', 'translatable' => TRUE),
         'items_per_page_options' => array('default' => '5, 10, 20, 40, 60'),
-        'items_per_page_options_all' => array('default' => FALSE),
+        'items_per_page_options_all' => array('default' => FALSE, 'bool' => TRUE),
         'items_per_page_options_all_label' => array('default' => '- All -', 'translatable' => TRUE),
 
         'offset' => array('default' => FALSE, 'bool' => TRUE),

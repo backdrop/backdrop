@@ -168,8 +168,8 @@ class views_plugin_style extends views_plugin {
     $options['grouping'] = array('default' => array());
     if ($this->uses_row_class()) {
       $options['row_class'] = array('default' => '');
-      $options['default_row_class'] = array('default' => TRUE);
-      $options['row_class_special'] = array('default' => TRUE);
+      $options['default_row_class'] = array('default' => TRUE, 'bool' => TRUE);
+      $options['row_class_special'] = array('default' => TRUE, 'bool' => TRUE);
     }
 
     return $options;

@@ -24,9 +24,9 @@ class views_handler_field_user_name extends views_handler_field_user {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['overwrite_anonymous'] = array('default' => FALSE);
+    $options['overwrite_anonymous'] = array('default' => FALSE, 'bool' => TRUE);
     $options['anonymous_text'] = array('default' => '', 'translatable' => TRUE);
-    $options['format_username'] = array('default' => TRUE);
+    $options['format_username'] = array('default' => TRUE, 'bool' => TRUE);
 
     return $options;
   }

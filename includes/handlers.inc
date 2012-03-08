@@ -737,7 +737,7 @@ class views_many_to_one_helper {
   }
 
   static function option_definition(&$options) {
-    $options['reduce_duplicates'] = array('default' => FALSE);
+    $options['reduce_duplicates'] = array('default' => FALSE, 'bool' => TRUE);
   }
 
   function options_form(&$form, &$form_state) {

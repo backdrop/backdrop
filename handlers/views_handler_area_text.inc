@@ -16,7 +16,7 @@ class views_handler_area_text extends views_handler_area {
     $options = parent::option_definition();
     $options['content'] = array('default' => '', 'translatable' => TRUE, 'format_key' => 'format');
     $options['format'] = array('default' => NULL);
-    $options['tokenize'] = array('default' => FALSE);
+    $options['tokenize'] = array('default' => FALSE, 'bool' => TRUE);
     return $options;
   }
 

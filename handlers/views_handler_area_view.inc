@@ -16,7 +16,7 @@ class views_handler_area_view extends views_handler_area {
     $options = parent::option_definition();
 
     $options['view_to_insert'] = array('default' => '');
-    $options['inherit_arguments'] = array('default' => FALSE, 'boolean' => TRUE);
+    $options['inherit_arguments'] = array('default' => FALSE, 'bool' => TRUE);
     return $options;
   }
 
