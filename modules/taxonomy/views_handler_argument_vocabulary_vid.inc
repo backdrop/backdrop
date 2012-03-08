@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_vocabulary_vid.
+ */
+
+/**
  * Argument handler to accept a vocabulary id.
  *
  * @ingroup views_argument_handlers

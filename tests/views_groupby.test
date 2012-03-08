@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Test aggregate functionality of Views.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsQueryGroupByTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(
@@ -276,6 +284,9 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   }
 }
 
+/**
+ * @todo.
+ */
 class viewsUiGroupbyTestCase extends DrupalWebTestCase {
   function setUp() {
     // Enable views_ui.

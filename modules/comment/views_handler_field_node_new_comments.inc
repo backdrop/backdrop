@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_node_new_comments.
+ */
+
+/**
  * Field handler to display the number of new comments.
  *
  * @ingroup views_field_handlers

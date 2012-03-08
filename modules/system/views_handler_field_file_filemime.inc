@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_file_filemime.
+ */
+
+/**
  * Field handler to add rendering MIME type images as an option on the filemime field.
  *
  * @ingroup views_field_handlers

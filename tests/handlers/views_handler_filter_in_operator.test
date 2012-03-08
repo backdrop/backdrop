@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsHandlerFilterInOperator.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsHandlerFilterInOperator extends ViewsSqlTest {
   public static function getInfo() {
     return array(

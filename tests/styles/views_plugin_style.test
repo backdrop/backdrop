@@ -2,6 +2,10 @@
 
 /**
  * @file
+ * Definition of ViewsPluginStyleTestCase.
+ */
+
+/**
  * Tests some general style plugin related functionality.
  */
 class ViewsPluginStyleTestCase extends ViewsSqlTest {

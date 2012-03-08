@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_comment_node_link.
+ */
+
 /**
  * Handler for showing comment module's node link.
  *

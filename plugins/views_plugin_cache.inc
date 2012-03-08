@@ -1,9 +1,21 @@
 <?php
 
 /**
- * The base plugin to handle caching.
+ * @file
+ * Definition of views_plugin_cache.
+ */
+
+/**
+ * @defgroup views_cache_plugins Views cache plugins
+ * @{
  *
- * @ingroup views_cache_plugins
+ * @todo.
+ *
+ * @see hook_views_plugins()
+ */
+
+/**
+ * The base plugin to handle caching.
  */
 class views_plugin_cache extends views_plugin {
   /**
@@ -296,5 +308,8 @@ class views_plugin_cache extends views_plugin {
 
     return $this->_output_key;
   }
-
 }
+
+/**
+ * @}
+ */

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * @todo.
+ */
+
+/**
  * Field handler to provide simple renderer that allows linking to a node.
  *
  * @ingroup views_filter_handlers
@@ -170,6 +175,9 @@ class views_handler_filter_search extends views_handler_filter {
   }
 }
 
+/**
+ * @todo.
+ */
 class viewsSearchQuery extends SearchQuery {
   public function &conditions() {
     return $this->conditions;

@@ -2,9 +2,12 @@
 
 /**
  * @file
- * Tests views user argument default plugin.
+ * Definition of ViewsUserArgumentDefault.
  */
 
+/**
+ * Tests views user argument default plugin.
+ */
 class ViewsUserArgumentDefault extends ViewsSqlTest {
   public static function getInfo() {
     return array(

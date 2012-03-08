@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_user_name.
+ */
+
 /**
  * Field handler to provide simple renderer that allows using a themed user link.
  *

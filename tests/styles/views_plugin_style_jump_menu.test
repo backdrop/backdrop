@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of viewsPluginStyleJumpMenuTest.
+ */
+
+/**
+ * @todo.
+ */
 class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

@@ -1,6 +1,12 @@
 <?php
+
 /**
- * @defgroup views_filter_handlers Views' filter handlers
+ * @file
+ * @todo.
+ */
+
+/**
+ * @defgroup views_filter_handlers Views filter handlers
  * @{
  * Handlers to tell Views how to filter queries.
  *
@@ -22,6 +28,8 @@
 
 /**
  * Base class for filters.
+ *
+ * @ingroup views_filter_handlers
  */
 class views_handler_filter extends views_handler {
   /**
@@ -184,7 +192,7 @@ class views_handler_filter extends views_handler {
    * This may be overridden by child classes, and it must
    * define $form['operator'];
    *
-   * @see options_form().
+   * @see options_form()
    */
   function operator_form(&$form, &$form_state) {
     $options = $this->operator_options();
@@ -232,7 +240,7 @@ class views_handler_filter extends views_handler {
    * This should be overridden by all child classes and it must
    * define $form['value']
    *
-   * @see options_form().
+   * @see options_form()
    */
   function value_form(&$form, &$form_state) { $form['value'] = array(); }
 
@@ -299,7 +307,7 @@ class views_handler_filter extends views_handler {
   /**
    * Options form subform for exposed filter options.
    *
-   * @see options_form().
+   * @see options_form()
    */
   function expose_form(&$form, &$form_state) {
     $form['#theme'] = 'views_ui_expose_filter_form';

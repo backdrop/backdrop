@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of views_test_plugin_access_test_dynamic.
+ */
+
+/**
+ * @todo.
+ */
 class views_test_plugin_access_test_dynamic extends views_plugin_access {
   function option_definition() {
     $options = parent::option_definition();

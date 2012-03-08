@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Tests views UI Wizard.
+ * Tests Views UI Wizard.
  */
 
 /**
@@ -19,6 +19,9 @@ class ViewsUIWizardHelper extends DrupalWebTestCase {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   public static function getInfo() {
     return array(
@@ -145,6 +148,9 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
   public static function getInfo() {
     return array(
@@ -250,6 +256,9 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
   protected $node_type_with_tags;
   protected $node_type_without_tags;
@@ -415,6 +424,9 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
   public static function getInfo() {
     return array(
@@ -482,6 +494,9 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
   public static function getInfo() {
     return array(
@@ -564,6 +579,9 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
   public static function getInfo() {
     return array(
@@ -609,6 +627,9 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   public static function getInfo() {
     return array(
@@ -767,6 +788,9 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   }
 }
 
+/**
+ * @todo.
+ */
 class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
   public static function getInfo() {
     return array(

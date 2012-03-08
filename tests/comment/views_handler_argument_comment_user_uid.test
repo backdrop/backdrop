@@ -1,6 +1,11 @@
 <?php
+
 /**
  * @file
+ * Definition of viewsHandlerArgumentCommentUserUidTest.
+ */
+
+/**
  * Test the argument_comment_user_uid handler.
  */
 class viewsHandlerArgumentCommentUserUidTest extends ViewsSqlTest {

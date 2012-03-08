@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_user_name.
+ */
+
+/**
  * Filter handler for usernames.
  *
  * @ingroup views_filter_handlers

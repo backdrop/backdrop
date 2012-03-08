@@ -1,10 +1,8 @@
 <?php
 
 /**
- * @file theme.inc
- *
- * An array of preprocessors to fill variables for templates and helper
- * functions to make theming easier.
+ * @file
+ * Preprocessors and helper functions to make theming easier.
  */
 
 /**
@@ -1077,7 +1075,7 @@ function theme_views_container($variables) {
 }
 
 /**
- * @defgroup views_templates Views' template files
+ * @defgroup views_templates Views template files
  * @{
  * All views templates can be overridden with a variety of names, using
  * the view, the display ID of the view, the display type of the view,
@@ -1119,6 +1117,6 @@ function theme_views_container($variables) {
  * Important! When adding a new template to your theme, be sure to flush the
  * theme registry cache!
  *
- * @see _views_theme_functions
+ * @see _views_theme_functions()
  * @}
  */

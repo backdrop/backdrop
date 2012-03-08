@@ -1,17 +1,14 @@
 <?php
+
 /**
  * @file
- * Provide views data and handlers for user.module
- */
-
-/**
- * @defgroup views_profile_module profile.module handlers
+ * Provide views data and handlers for user.module.
  *
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function profile_views_data() {
   $data['profile_values']['moved to'] = 'profile_value';
@@ -218,7 +215,3 @@ function profile_views_fetch_field($field) {
   // @todo: add access control to hidden fields.
   return $data;
 }
-
-/**
- * @}
- */

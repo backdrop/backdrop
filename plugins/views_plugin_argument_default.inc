@@ -1,17 +1,18 @@
 <?php
+
 /**
  * @file
- * Contains the fixed argument default plugin.
+ * Definition of views_plugin_argument_default.
  */
 
 /**
- * @defgroup views_argument_default_plugins Views' argument default plugins
+ * @defgroup views_argument_default_plugins Views argument default plugins
  * @{
  *
  * Allow specialized methods of filling in arguments when they aren't
  * provided.
  *
- * @see hook_views_plugins
+ * @see hook_views_plugins()
  */
 
 /**

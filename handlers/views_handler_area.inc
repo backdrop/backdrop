@@ -1,16 +1,22 @@
 <?php
+
 /**
  * @file
  * Views area handlers.
  */
 
 /**
- * @defgroup views_area_handlers Views' area handlers
+ * @defgroup views_area_handlers Views area handlers
  * @{
  * Handlers to tell Views what can display in header, footer
  * and empty text in a view.
  */
 
+/**
+ * Base class for area handlers.
+ *
+ * @ingroup views_area_handlers
+ */
 class views_handler_area extends views_handler {
   /**
    * Get this field's label.

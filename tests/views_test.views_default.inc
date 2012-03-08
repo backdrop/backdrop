@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- *   Test views
+ * Test views.
  */
 
 /**

@@ -1,12 +1,12 @@
 <?php
+
 /**
  * @file
- *
  * Provides the basic object definitions used by plugins and handlers.
  */
 
 /**
- * Basic definition for many views objects
+ * Basic definition for many views objects.
  */
 class views_object {
   /**

@@ -1,18 +1,14 @@
 <?php
+
 /**
  * @file
- * Provide views data and handlers for node.module
- */
-
-/**
- * @defgroup views_node_module node.module handlers
+ * Provide views data and handlers for node.module.
  *
- * Includes the tables 'node', 'node_revision' and 'history'.
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function node_views_data() {
   // ----------------------------------------------------------------
@@ -665,7 +661,7 @@ function node_views_plugins() {
 }
 
 /**
- * Implements hook_preprocess_node
+ * Implements hook_preprocess_node().
  */
 function node_row_node_view_preprocess_node(&$vars) {
   $node = $vars['node'];
@@ -747,7 +743,3 @@ function node_views_analyze($view) {
 
   return $ret;
 }
-
-/**
- * @}
- */

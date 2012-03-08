@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * @todo.
+ */
+
+/**
  * Implements hook_permission().
  */
 function views_test_permission() {

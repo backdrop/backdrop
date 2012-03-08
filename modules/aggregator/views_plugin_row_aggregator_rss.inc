@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains the Aggregator Item RSS row style plugin.

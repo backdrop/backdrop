@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_prerender_list.
+ */
+
+/**
  * Field handler to provide a list of items.
  *
  * The items are expected to be loaded by a child object during pre_render,

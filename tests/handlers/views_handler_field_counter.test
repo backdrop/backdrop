@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsHandlerFilterCounterTest.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsHandlerFilterCounterTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

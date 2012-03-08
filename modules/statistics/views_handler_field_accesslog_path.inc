@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_accesslog_path.
+ */
+
 /**
  * Field handler to provide simple renderer that turns a URL into a clickable link.
  *

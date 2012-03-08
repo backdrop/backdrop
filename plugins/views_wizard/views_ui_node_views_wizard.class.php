@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsUiNodeViewsWizard.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function row_style_options($type) {

@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_comment_depth.
+ */
+
 /**
  * Field handler to display the depth of a comment.
  *

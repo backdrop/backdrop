@@ -2,8 +2,9 @@
 
 /**
  * @file
- * Contains views_handler_area_view handler.
+ * Definition of views_handler_area_view.
  */
+
 /**
  * Views area handlers. Insert a view inside of an area.
  *

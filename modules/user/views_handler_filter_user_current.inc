@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_user_current.
+ */
+
+/**
  * Filter handler for the current user.
  *
  * @ingroup views_filter_handlers

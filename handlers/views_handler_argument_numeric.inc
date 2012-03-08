@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Contains the numeric argument handler.
+ * Definition of views_handler_argument_numeric.
  */
 
 /**

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_locale_language.
+ */
+
+/**
  * Filter by language.
  *
  * @ingroup views_filter_handlers

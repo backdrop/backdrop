@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsAccessTest.
+ */
+
+/**
  * Basic test for pluggable access.
  */
 class ViewsAccessTest extends ViewsSqlTest {

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_term_node_tid.
+ */
+
+/**
  * Filter by term id.
  *
  * @ingroup views_filter_handlers

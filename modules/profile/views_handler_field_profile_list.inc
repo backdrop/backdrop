@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_profile_list.
+ */
+
 /**
  * Field handler display a profile list item.
  *

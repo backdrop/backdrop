@@ -1,8 +1,10 @@
 <?php
+
 /**
  * @file
  * Contains views templates on behalf of the node module.
  */
+
 function node_views_templates() {
   // Only the standard install profile has the image field provided so only show it for it.
   if (variable_get('install_profile', 'standard') != 'standard') {

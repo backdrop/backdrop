@@ -2,14 +2,9 @@
 
 /**
  * @file
+ * Provide views data and handlers for translation.module.
  *
- * Provide views data and handlers for translation.module
- */
-
-/**
- * @defgroup views_translation_module translation.module handlers
- *
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
@@ -144,7 +139,3 @@ function translation_views_data_alter(&$data) {
 
 
 }
-
-/**
- * @}
- */

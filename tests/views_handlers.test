@@ -2,9 +2,12 @@
 
 /**
  * @file
- * Test abstract handlers of views.
+ * Definition of ViewsHandlersTest.
  */
 
+/**
+ * Test abstract handlers of views.
+ */
 class ViewsHandlersTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

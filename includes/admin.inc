@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file admin.inc
+ * @file
  * Provides the Views' administrative interface.
  */
 
@@ -399,11 +400,11 @@ function views_ui_add_form($form, &$form_state) {
 /**
  * Helper form element validator: integer.
  *
- * @see _element_validate_integer_positive
- *
  * The problem with this is that the function is private so it's not guaranteed
  * that it might not be renamed/changed. In the future field.module or something else
  * should provide a public validate function.
+ *
+ * @see _element_validate_integer_positive()
  */
 function views_element_validate_integer($element, &$form_state) {
   $value = $element['#value'];
@@ -966,11 +967,13 @@ function views_ui_build_preview($view, $display_id, $render = TRUE) {
  *
  * @todo Rename to views_ui_edit_view_form(). See that function for the "old"
  *   version.
+ *
+ * @see views_ui_ajax_get_form()
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // Do not allow the form to be cached, because $form_state['view'] can become
   // stale between page requests.
-  // @see views_ui_ajax_get_form() for how this affects #ajax.
+  // See views_ui_ajax_get_form() for how this affects #ajax.
   // @todo To remove this and allow the form to be cacheable:
   //   - Change $form_state['view'] to $form_state['temporary']['view'].
   //   - Add a #process function to initialize $form_state['temporary']['view']
@@ -1914,7 +1917,7 @@ function views_ui_pre_render_move_argument_options($form) {
  * While doing that, create a container element underneath each option, which
  * contains the settings related to that option.
  *
- * @see form_process_radios
+ * @see form_process_radios()
  */
 function views_ui_process_container_radios($element) {
   if (count($element['#options']) > 0) {
@@ -1945,7 +1948,7 @@ function views_ui_process_container_radios($element) {
   return $element;
 }
 
-/*
+/**
  * Import a view from cut & paste.
  */
 function views_ui_import_page($form, &$form_state) {
@@ -5247,7 +5250,7 @@ function views_ui_default_button($element, &$form_state, $form) {
  *
  * Therefore it builds up a table of each field which is used in any view.
  *
- * @see field_ui_fields_list
+ * @see field_ui_fields_list()
  */
 function views_ui_field_list() {
   $views = views_get_all_views();

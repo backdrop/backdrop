@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_filter_file_status.
+ */
+
 /**
  * Filter by file status.
  *

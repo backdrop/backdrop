@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_comment_link.
+ */
+
 /**
  * Base field handler to present a link.
  *

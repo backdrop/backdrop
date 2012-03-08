@@ -1,11 +1,13 @@
 <?php
-/**
- * @defgroup views_argument_handlers Handlers for arguments
- * @{
- */
 
 /**
  * @file
+ * Handlers for various date arguments.
+ *
+ * @ingroup views_argument_handlers
+ */
+
+/**
  * Argument handler for a full date (CCYYMMDD)
  */
 class views_handler_argument_node_created_fulldate extends views_handler_argument_date {
@@ -173,7 +175,3 @@ class views_handler_argument_node_created_week extends views_handler_argument_da
     return t('Week @week', array('@week' => $created));
   }
 }
-
-/**
- * @}
- */

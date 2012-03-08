@@ -1,8 +1,15 @@
 <?php
+
 /**
- * Filter for new content
+ * @file
+ * Definition of views_handler_filter_history_user_timestamp.
+ */
+
+/**
+ * Filter for new content.
  *
- * The handler is named history_user, because of compability reasons, the table is history.
+ * The handler is named history_user, because of compability reasons, the table
+ * is history.
  *
  * @ingroup views_filter_handlers
  */

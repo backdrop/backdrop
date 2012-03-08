@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Contains the search row style plugin.
+ * Definition of views_plugin_row_search_view.
  */
 
 /**

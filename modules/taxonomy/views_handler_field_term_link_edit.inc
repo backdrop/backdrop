@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_term_link_edit.
+ */
+
+/**
  * Field handler to present a term edit link.
  *
  * @ingroup views_field_handlers

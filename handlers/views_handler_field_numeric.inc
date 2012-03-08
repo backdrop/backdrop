@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_numeric.
+ */
+
 /**
  * Render a field as a numeric value
  *

@@ -1,12 +1,14 @@
 <?php
 
 /**
- * @file ajax.inc
- *
+ * @file
  * Handles the server side AJAX interactions of Views.
- *
- * @defgroup ajax Views ajax library
+ */
+
+/**
+ * @defgroup ajax Views AJAX library
  * @{
+ * Handles the server side AJAX interactions of Views.
  */
 
 /**

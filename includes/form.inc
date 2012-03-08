@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file form.inc
+ * @file
  * Views' replacements for Drupal's form functions.
  *
  */

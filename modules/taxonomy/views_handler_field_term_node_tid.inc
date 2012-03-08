@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_term_node_tid.
+ */
+
+/**
  * Field handler to display all taxonomy terms of a node.
  *
  * @ingroup views_field_handlers

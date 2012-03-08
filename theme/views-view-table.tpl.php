@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file views-view-table.tpl.php
+ * @file
  * Template to display a view as a table.
  *
  * - $title : The title of this group of rows.  May be empty.

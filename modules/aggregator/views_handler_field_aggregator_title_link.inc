@@ -1,6 +1,11 @@
 <?php
 
- /**
+/**
+ * @file
+ * Definition of views_handler_field_aggregator_title_link.
+ */
+
+/**
  * Field handler that turns an item's title into a clickable link to the original
  * source article.
  *

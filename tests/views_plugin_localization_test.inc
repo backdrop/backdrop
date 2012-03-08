@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_plugin_localization_test.
+ */
+
+/**
  * A stump localisation plugin which has static variables to cache the input.
  */
 class views_plugin_localization_test extends views_plugin_localization {

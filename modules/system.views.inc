@@ -1,19 +1,14 @@
 <?php
+
 /**
  * @file
+ * Provide views data and handlers for system.module.
  *
- * Provide views data and handlers for system tables that are not represented by
- * their own module.
+ * @ingroup views_module_handlers
  */
 
 /**
- * @defgroup views_system_module system.module handlers
- *
- * @{
- */
-
-/**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function system_views_data() {
   $data = array();
@@ -586,7 +581,3 @@ function _views_file_status($choice = NULL) {
 
   return $status;
 }
-
-/**
- * @}
- */

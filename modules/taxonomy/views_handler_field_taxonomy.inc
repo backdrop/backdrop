@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_taxonomy.
+ */
+
+/**
  * Field handler to provide simple renderer that allows linking to a taxonomy
  * term.
  *

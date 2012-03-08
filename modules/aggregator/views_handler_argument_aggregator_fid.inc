@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_aggregator_fid.
+ */
+
+/**
  * Argument handler to accept an aggregator feed id.
  *
  * @ingroup views_argument_handlers

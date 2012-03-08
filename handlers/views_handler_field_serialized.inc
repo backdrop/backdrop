@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_serialized.
+ */
+
+/**
  * Field handler to show data of serialized fields.
  *
  * @ingroup views_field_handlers

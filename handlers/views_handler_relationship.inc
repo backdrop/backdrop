@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @file
  * Views' relationship handlers.
  */
 
 /**
- * @defgroup views_relationship_handlers Views' relationship handlers
+ * @defgroup views_relationship_handlers Views relationship handlers
  * @{
  * Handlers to tell Views how to create alternate relationships.
  */
@@ -31,6 +32,8 @@
  * - label: The default label to provide for this relationship, which is
  *   shown in parentheses next to any field/sort/filter/argument that uses
  *   the relationship.
+ *
+ * @ingroup views_relationship_handlers
  */
 class views_handler_relationship extends views_handler {
   /**

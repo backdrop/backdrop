@@ -1,6 +1,12 @@
 <?php
+
 /**
- * @defgroup views_field_handlers Views' field handlers
+ * @file
+ * @todo.
+ */
+
+/**
+ * @defgroup views_field_handlers Views field handlers
  * @{
  * Handlers to tell Views how to build and display fields.
  *
@@ -33,6 +39,8 @@ define('VIEWS_HANDLER_RENDER_TEXT_PHASE_EMPTY', 2);
  *                      'field' => fieldname); as many fields as are necessary
  *                      may be in this array.
  * - click sortable: If TRUE, this field may be click sorted.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field extends views_handler {
   var $field_alias = 'unknown';
@@ -1373,7 +1381,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
   /**
    * Document any special tokens this field might use for itself.
    *
-   * @see add_self_tokens() for details.
+   * @see add_self_tokens()
    */
   function document_self_tokens(&$tokens) { }
 

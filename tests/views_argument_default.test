@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsArgumentDefaultTest.
+ */
+
+/**
  * Basic test for pluggable argument default.
  */
 class ViewsArgumentDefaultTest extends ViewsSqlTest {

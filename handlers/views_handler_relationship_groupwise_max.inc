@@ -1,6 +1,6 @@
 <?php
-// $Id$
-/*
+
+/**
  * @file
  * Relationship for groupwise maximum handler.
  */

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_counter.
+ */
+
+/**
  * Field handler to show a counter of the current row.
  *
  * @ingroup views_field_handlers

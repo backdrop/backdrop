@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsHandlerAreaTextTest.
+ */
+
+/**
  * Tests the text area handler.
  *
  * @see views_handler_area_text

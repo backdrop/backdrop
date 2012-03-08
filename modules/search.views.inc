@@ -1,18 +1,14 @@
 <?php
+
 /**
  * @file
- * Provide views data and handlers for search.module
- */
-
-/**
- * @defgroup views_search_module search.module handlers
+ * Provide views data and handlers for search.module.
  *
- * Includes the tables 'search_index'
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function search_views_data() {
   // Basic table information.
@@ -134,7 +130,7 @@ function search_views_data() {
 }
 
 /**
- * Implements hook_views_plugins
+ * Implements hook_views_plugins().
  */
 function search_views_plugins() {
   return;
@@ -204,8 +200,3 @@ function template_preprocess_views_view_row_search(&$vars) {
 //$vars['score'] = $item->score;
   $vars['snippet'] = search_excerpt($vars['view']->value, $node->body);
 }
-
-
-/**
- * @}
- */

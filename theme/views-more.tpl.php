@@ -1,7 +1,8 @@
 <?php
+
 /**
- * @file views-more.tpl.php
- * Theme the more link
+ * @file
+ * Theme the more link.
  *
  * - $view: The view object.
  * - $more_url: the url for the more link.

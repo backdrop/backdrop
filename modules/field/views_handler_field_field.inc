@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_field.
+ */
+
+/**
  * Helper function: Return an array of formatter options for a field type.
  *
  * Borrowed from field_ui.

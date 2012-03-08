@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_time_interval.
+ */
+
 /**
  * A handler to provide proper displays for time intervals.
  *

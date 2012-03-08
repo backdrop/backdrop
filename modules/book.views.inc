@@ -1,17 +1,14 @@
 <?php
+
 /**
  * @file
- * Provide views data and handlers for book.module
- */
-
-/**
- * @defgroup views_book_module book.module handlers
+ * Provide views data and handlers for book.module.
  *
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function book_views_data() {
   // ----------------------------------------------------------------------
@@ -117,7 +114,3 @@ function book_views_data() {
 
   return $data;
 }
-
-/**
- * @}
- */

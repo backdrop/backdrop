@@ -2,17 +2,13 @@
 
 /**
  * @file
- * Provide Views data and handlers for field.module
- */
-
-/**
- * @defgroup views_field_module field.module handlers
+ * Provide Views data and handlers for field.module.
  *
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  *
  * Field modules can implement hook_field_views_data() to override
  * the default behavior for adding fields.
@@ -41,7 +37,7 @@ function field_views_data() {
 }
 
 /**
- * Implements hook_views_data_alter()
+ * Implements hook_views_data_alter().
  *
  * Field modules can implement hook_field_views_data_views_data_alter() to
  * alter the views data on a per field basis. This is weirdly named so as
@@ -423,7 +419,3 @@ function list_field_views_data($field) {
   }
   return $data;
 }
-
-/**
- * @}
- */

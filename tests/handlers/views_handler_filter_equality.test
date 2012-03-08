@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsHandlerFilterEqualityTest.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsHandlerFilterEqualityTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

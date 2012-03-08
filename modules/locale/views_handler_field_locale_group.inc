@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_locale_group.
+ */
+
+/**
  * Field handler to translate a group into its readable form.
  *
  * @ingroup views_field_handlers

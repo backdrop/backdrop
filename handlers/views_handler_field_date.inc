@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_date.
+ */
+
 /**
  * A handler to provide proper displays for dates.
  *

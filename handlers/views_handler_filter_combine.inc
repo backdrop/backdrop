@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_combine.
+ */
+
+/**
  * Filter handler which allows to search on multiple fields.
  *
  * @ingroup views_field_handlers

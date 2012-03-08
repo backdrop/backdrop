@@ -1,7 +1,13 @@
 <?php
+
 /**
  * @file
+ * Definition of viewsHandlerFilterCommentUserUidTest.
+ */
+
+/**
  * Test the filter_comment_user_uid handler.
+ *
  * The actual stuff is done in the parent class.
  */
 class viewsHandlerFilterCommentUserUidTest extends viewsHandlerArgumentCommentUserUidTest {

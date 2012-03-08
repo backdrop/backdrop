@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_user_language.
+ */
+
+/**
  * Views field handler for user language.
  *
  * @ingroup views_field_handlers

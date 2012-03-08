@@ -2,9 +2,12 @@
 
 /**
  * @file
- * Test glossary view ( summary of arguments ).
+ * Definition of ViewsGlossaryTestCase.
  */
 
+/**
+ * Test glossary view ( summary of arguments ).
+ */
 class ViewsGlossaryTestCase extends ViewsSqlTest {
   public static function getInfo() {
     return array(

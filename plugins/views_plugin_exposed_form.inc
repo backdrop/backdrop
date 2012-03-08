@@ -1,6 +1,21 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_plugin_exposed_form.
+ */
+
+/**
+ * @defgroup views_exposed_form_plugins Views exposed form plugins
+ * @{
+ *
+ * They can handle the validation/submission and rendering of exposed forms.
+ * If needed, it is possible to add additional form elements.
+ *
+ * @see hook_views_plugins()
+ */
+
+/**
  * The base plugin to handle exposed filter forms.
  */
 class views_plugin_exposed_form extends views_plugin {
@@ -300,3 +315,7 @@ class views_plugin_exposed_form extends views_plugin {
     $form_state['values'] = array();
   }
 }
+
+/**
+ * @}
+ */

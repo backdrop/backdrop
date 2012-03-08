@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_filter_term_node_tid_depth.
+ */
+
 /**
  * Filter handler for taxonomy terms with depth.
  *

@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_contact_link.
+ */
+
 /**
  * A field that links to the user contact page, if access is permitted.
  *

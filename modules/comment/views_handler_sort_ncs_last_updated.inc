@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_sort_ncs_last_updated.
+ */
+
 /**
  * Sort handler for the newer of last comment / node updated.
  *

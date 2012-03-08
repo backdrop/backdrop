@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains the 'taxonomy term' argument validator plugin.

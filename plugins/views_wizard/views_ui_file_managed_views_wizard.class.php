@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsUiFileManagedViewsWizard.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsUiFileManagedViewsWizard extends ViewsUiBaseViewsWizard {
   protected function default_display_options($form, $form_state) {
     $display_options = parent::default_display_options($form, $form_state);

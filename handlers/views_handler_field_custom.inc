@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_custom.
+ */
+
+/**
  * A handler to provide a field that is completely custom by the administrator.
  *
  * @ingroup views_field_handlers

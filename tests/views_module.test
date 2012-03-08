@@ -1,6 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsModuleTest.
+ */
 
+/**
+ * Tests basic functions from the Views module.
+ */
 class ViewsModuleTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

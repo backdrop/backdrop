@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsTranslatableTest.
+ */
+
+/**
+ * Tests Views pluggable translations.
+ */
 class ViewsTranslatableTest extends ViewsSqlTest {
   var $strings;
 
@@ -11,7 +19,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
     );
   }
 
-  /*
+  /**
    * The views plugin definition. Override it if you test provides a plugin.
    */
   public function viewsPlugins() {

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_comment_user_uid.
+ */
+
+/**
  * Argument handler to accept a user id to check for nodes that
  * user posted or commented on.
  *

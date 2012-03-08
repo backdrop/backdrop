@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_ncs_last_updated.
+ */
 /**
  * Field handler to display the newer of last comment / node updated.
  *

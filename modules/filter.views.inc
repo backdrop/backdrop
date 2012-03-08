@@ -1,18 +1,14 @@
 <?php
+
 /**
  * @file
  * Provide basic views data for filter.module.
- */
-
-/**
- * @defgroup views_filter_module filter.module handlers
  *
- * Only includes the table 'filter_formats'.
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function filter_views_data() {
   // ----------------------------------------------------------------------
@@ -35,7 +31,3 @@ function filter_views_data() {
 
   return $data;
 }
-
-/**
- * @}
- */

@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Contains views_handler_argument_field_list handler
+ * Definition of views_handler_argument_field_list.
  */
 
 /**
@@ -53,4 +54,3 @@ class views_handler_argument_field_list extends views_handler_argument_numeric {
     }
   }
 }
-

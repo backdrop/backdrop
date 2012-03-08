@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_filter_format_name.
+ */
+
 /**
  * Field handler to output the name of an input format.
  *

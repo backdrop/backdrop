@@ -2,10 +2,12 @@
 
 /**
  * @file
- * Tests views user argument argument handler.
+ * Definition of ViewsUserArgumentValidate.
  */
 
-
+/**
+ * Tests views user argument argument handler.
+ */
 class ViewsUserArgumentValidate extends ViewsSqlTest {
   public static function getInfo() {
     return array(

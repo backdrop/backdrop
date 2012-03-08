@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_file_uri.
+ */
+
+/**
  * Field handler to add rendering file paths as file URLs instead of as internal file URIs.
  */
 class views_handler_field_file_uri extends views_handler_field_file {

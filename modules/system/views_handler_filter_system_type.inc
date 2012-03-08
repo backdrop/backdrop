@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_system_type.
+ */
+
+/**
  * Filter by system type.
  */
 class views_handler_filter_system_type extends views_handler_filter_in_operator {

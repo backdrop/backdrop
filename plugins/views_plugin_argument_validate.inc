@@ -1,22 +1,21 @@
 <?php
+
 /**
  * @file
  * Contains the base argument validator plugin.
  */
 
 /**
- * @defgroup views_argument_validate_plugins Views' argument validate plugins
+ * @defgroup views_argument_validate_plugins Views argument validate plugins
  * @{
  *
  * Allow specialized methods of validating arguments.
  *
- * @see hook_views_plugins
+ * @see hook_views_plugins()
  */
 
 /**
  * Base argument validator plugin to provide basic functionality.
- *
- * @ingroup views_argument_validate_plugins
  */
 class views_plugin_argument_validate extends views_plugin {
 

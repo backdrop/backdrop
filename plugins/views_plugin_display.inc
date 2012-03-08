@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @file
  * Contains the base display plugin.
  */
 
 /**
- * @defgroup views_display_plugins Views' display plugins
+ * @defgroup views_display_plugins Views display plugins
  * @{
  * Display plugins control how Views interact with the rest of Drupal.
  *
@@ -14,14 +15,12 @@
  * handle creating Views from an external module source, such as
  * a Panels pane, or an insert view, or a CCK field type.
  *
- * @see hook_views_plugins
+ * @see hook_views_plugins()
  */
 
 /**
  * The default display plugin handler. Display plugins handle options and
  * basic mechanisms for different output methods.
- *
- * @ingroup views_display_plugins
  */
 class views_plugin_display extends views_plugin {
   /**

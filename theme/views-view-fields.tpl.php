@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file views-view-fields.tpl.php
+ * @file
  * Default simple view template to all the fields as a row.
  *
  * - $view: The view in use.

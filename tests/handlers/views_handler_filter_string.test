@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsHandlerFilterStringTest.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsHandlerFilterStringTest extends ViewsSqlTest {
   var $column_map = array();
 

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsHandlerSortDateTest.
+ */
+
+/**
  * Test for core views_handler_sort_date handler.
  */
 class ViewsHandlerSortDateTest extends ViewsSqlTest {

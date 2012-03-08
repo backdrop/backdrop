@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_filter_boolean_operator.
+ */
+
 /**
  * Simple filter to handle matching of boolean values
  *

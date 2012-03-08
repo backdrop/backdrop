@@ -1,9 +1,9 @@
 <?php
+
 /**
  * @file
- * Views' relationship handlers.
+ * Definition of views_handler_relationship_node_term_data.
  */
-
 
 /**
  * Relationship handler to return the taxonomy terms of nodes.

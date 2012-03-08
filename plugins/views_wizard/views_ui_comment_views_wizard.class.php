@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsUiCommentViewsWizard.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function row_style_options($type) {

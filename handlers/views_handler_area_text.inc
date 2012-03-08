@@ -2,13 +2,14 @@
 
 /**
  * @file
- * Contains views_handler_area_text handler.
+ * Definition of views_handler_area_text.
  */
 
 /**
  * Views area text handler.
- * @ingroup views_area_handlers Views' area handlers
-*/
+ *
+ * @ingroup views_area_handlers
+ */
 class views_handler_area_text extends views_handler_area {
 
   function option_definition() {
@@ -106,5 +107,4 @@ class views_handler_area_text extends views_handler_area {
       return check_markup($value, $format, '', FALSE);
     }
   }
-
 }

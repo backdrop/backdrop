@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_term_node_tid_depth_modif.
+ */
+
+/**
  * Argument handler for to modify depth for a previous term.
  *
  * This handler is actually part of the node table and has some restrictions,

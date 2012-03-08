@@ -1,7 +1,7 @@
 <?php
+
 /**
- * @file views-ui-edit-item.tpl.php
- *
+ * @file
  * This template handles the printing of fields/filters/sort criteria/arguments or relationships.
  */
 ?>

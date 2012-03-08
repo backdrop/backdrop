@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file views_ui.module
+ * @file
  * Provide structure for the administrative interface to Views.
  */
 

@@ -1,10 +1,11 @@
 <?php
+
 /**
  * @file
  * Drush integration of views.
  *
- * * drush cache-clear views - Clears the views specific caches.
- * * views-revert - Drush command to revert views overridden in the system.
+ * drush cache-clear views - Clears the views specific caches.
+ * views-revert - Drush command to revert views overridden in the system.
  */
 
 /**
@@ -456,8 +457,8 @@ function drush_views_disable() {
   _views_drush_changestatus($viewnames, TRUE);
 }
 
-/*
-* Helper function to enable / disable views
+/**
+ * Helper function to enable / disable views
  * @param $viewnames: array of viewnames to process
  * @param $status: TRUE to disable or FALSE to enable the view
  */

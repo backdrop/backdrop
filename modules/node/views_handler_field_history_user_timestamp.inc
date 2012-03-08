@@ -1,8 +1,15 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_history_user_timestamp.
+ */
+
 /**
  * Field handler to display the marker for new content.
  *
- * The handler is named history_user, because of compability reasons, the table is history.
+ * The handler is named history_user, because of compability reasons, the table
+ * is history.
  *
  * @ingroup views_field_handlers
  */

@@ -1,6 +1,14 @@
 <?php
+
 /**
- * @todo
+ * @file
+ * Definition of views_plugin_display_extender.
+ */
+
+/**
+ * @todo.
+ *
+ * @ingroup views_display_plugins
  */
 class views_plugin_display_extender extends views_plugin {
   function init(&$view, &$display) {

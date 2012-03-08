@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_vocabulary_vid.
+ */
+
+/**
  * Filter by vocabulary id.
  *
  * @ingroup views_filter_handlers

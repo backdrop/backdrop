@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsUiTaxonomyTermViewsWizard.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsUiTaxonomyTermViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function default_display_options($form, $form_state) {

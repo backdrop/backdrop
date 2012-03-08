@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_taxonomy.
+ */
+
+/**
  * Argument handler for basic taxonomy tid.
  *
  * @ingroup views_argument_handlers

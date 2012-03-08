@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains the current user argument default plugin.

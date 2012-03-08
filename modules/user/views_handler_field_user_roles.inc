@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_user_roles.
+ */
+
 /**
  * Field handler to provide a list of roles.
  *

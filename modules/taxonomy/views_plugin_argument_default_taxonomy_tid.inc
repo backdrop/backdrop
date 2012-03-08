@@ -1,9 +1,13 @@
 <?php
+
 /**
  * @file
- *   Taxonomy tid default argument.
+ * Definition of views_plugin_argument_default_taxonomy_tid.
  */
 
+/**
+ * Taxonomy tid default argument.
+ */
 class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_default {
   function init(&$view, &$argument, $options) {
     parent::init($view, $argument, $options);

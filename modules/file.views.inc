@@ -1,14 +1,10 @@
 <?php
-/**
- * @file
- *
- * Provide views data and handlers for file.module
- */
 
 /**
- * @defgroup views_file_module file.module handlers
+ * @file
+ * Provide views data and handlers for file.module.
  *
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
@@ -75,7 +71,3 @@ function file_field_views_data_views_data_alter(&$data, $field) {
     );
   }
 }
-
-/**
- * @}
- */

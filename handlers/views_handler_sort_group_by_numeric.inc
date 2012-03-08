@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_sort_group_by_numeric.
+ */
+
 /**
  * Handler for GROUP BY on simple numeric fields.
  *

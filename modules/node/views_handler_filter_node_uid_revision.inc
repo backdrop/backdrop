@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Contains handler views_handler_filter_node_uid_revision.
+ * Definition of views_handler_filter_node_uid_revision.
  */
 
 /**

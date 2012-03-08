@@ -2,14 +2,9 @@
 
 /**
  * @file
- *
  * Provides views data and handlers for locale.module.
- */
-
-/**
- * @defgroup views_locale_module locale.module handlers
  *
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
@@ -200,7 +195,3 @@ function locale_views_data() {
 
   return $data;
 }
-
-/**
- * @}
- */

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file views.install
+ * @file
  * Contains install and update functions for Views.
  */
 

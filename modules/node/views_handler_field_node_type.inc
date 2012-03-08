@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_node_type.
+ */
+
+/**
  * Field handler to translate a node type into its readable form.
  *
  * @ingroup views_field_handlers

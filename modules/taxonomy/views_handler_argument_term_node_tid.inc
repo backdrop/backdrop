@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_argument_term_node_tid.
+ */
+
 /**
  * Allow taxonomy term ID(s) as argument.
  *

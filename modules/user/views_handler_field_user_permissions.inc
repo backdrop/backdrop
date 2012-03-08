@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_user_permissions.
+ */
+
 /**
  * Field handler to provide a list of permissions.
  *

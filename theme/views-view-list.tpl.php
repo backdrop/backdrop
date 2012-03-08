@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file views-view-list.tpl.php
+ * @file
  * Default simple view template to display a list of rows.
  *
  * - $title : The title of this group of rows.  May be empty.

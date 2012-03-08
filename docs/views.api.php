@@ -1,60 +1,282 @@
 <?php
+
 /**
  * @file
- * This file contains no working PHP code; it exists to provide additional documentation
- * for doxygen as well as to document hooks in the standard Drupal manner.
+ * Hooks provided by the Views module.
  */
 
 /**
- * @mainpage Views 2 API Manual
+ * @mainpage Views 3 API Manual
  *
  * Much of this information is actually stored in the advanced help; please
  * check the API topic. This help will primarily be aimed at documenting
  * classes and function calls.
  *
- * An online version of the advanced help API documentation is available from:
- * @link http://views-help.doc.logrus.com/help/views/api @endlink
- *
  * Topics:
- * - @ref view_lifetime
- * - @ref views_hooks
- * - @ref views_handlers
- * - @ref views_plugins
- * - @ref views_templates
+ * - @link views_lifetime The life of a view @endlink
+ * - @link views_hooks Views hooks @endlink
+ * - @link views_handlers About Views handlers @endlink
+ * - @link views_plugins About Views plugins @endlink
+ * - @link views_templates Views template files @endlink
+ * - @link views_module_handlers Views module handlers @endlink
  */
 
 /**
- * @page view_lifetime The life of a view
- *
+ * @defgroup views_lifetime The life of a view
+ * @{
  * This page explains the basic cycle of a view and what processes happen.
+ *
+ * @todo.
+ * @}
  */
 
 /**
- * @page views_handlers About Views' handlers
+ * @defgroup views_handlers About Views handlers
+ * @{
+ * In Views, a handler is an object that is part of the view and is part of the
+ * query building flow.
  *
- * This page explains what views handlers are, how they're written, and what
- * the basic conventions are.
+ * Handlers are objects; much of the time, the base handlers will work, but
+ * often you'll need to override the handler for something. One typical handler
+ * override will be views_handler_filter_operator_in which allows you to have a
+ * filter select from a list of options; you'll need to override this to provide
+ * your list.
  *
- * - @ref views_field_handlers
- * - @ref views_sort_handlers
- * - @ref views_filter_handlers
- * - @ref views_argument_handlers
- * - @ref views_relationship_handlers
+ * Handlers have two distint code flows; the UI flow and the view building flow.
+ *
+ * For the query flow:
+ * - handler->construct()
+ *   - Create the initial handler; at this time it is not yet attached to a
+ *     view. It is here that you can set basic defaults if needed, but there
+ *     will be no knowledge of the environment yet.
+ * - handler->set_definition()
+ *   - Set the data from hook_views_data() relevant to the handler.
+ * - handler->init()
+ *   - Attach the handler to a view, and usually provides the options from the
+ *     display.
+ * - handler->pre_query()
+ *   - Run prior to the query() stage to do early processing.
+ * - handler->query()
+ *   - Do the bulk of the work this handler needs to do to add itself to the
+ *     query.
+ *
+ * Fields, being the only handlers concerned with output, also have an extended
+ * piece of the flow:
+ *
+ * - handler->pre_render(&$values)
+ *   - Called prior to the actual rendering, this allows handlers to query for
+ *     extra data; the entire resultset is available here, and this is where
+ *     items that have "multiple values" per record can do their extra query for
+ *     all of the records available. There are several examples of this at work
+ *     in the code.
+ * - handler->render()
+ *   - This does the actual work of rendering the field.
+ *
+ * Most handlers are just extensions of existing classes with a few tweaks that
+ * are specific to the field in question. For example:
+ *
+ * @code
+ * class views_handler_filter_node_type extends views_handler_filter_in_operator {
+ *   function get_value_options() {
+ *     if (!isset($this-&gt;value_options)) {
+ *       $this-&gt;value_title = t('Node type');
+ *       $types = node_get_types();
+ *       foreach ($types as $type => $info) {
+ *         $options[$type] = $info-&gt;name;
+ *       }
+ *       $this-&gt;value_options = $options;
+ *     }
+ *   }
+ * }
+ * @endcode
+ *
+ * <i>views_handler_filter_in_operator</i> provides a simple mechanism to set
+ * the list used and the rest of the handler is perfectly fine for this.
+ *
+ * Handlers are stored in their own files and loaded on demand.
+ * Like all other module files, they must first be registered through the
+ * module's info file. For example:
+ *
+ * @code
+ * name = Example module
+ * description = "Gives an example of a module."
+ * core = 7.x
+ * files[] = example.module
+ * files[] = example.install
+ *
+ * ; Views handlers
+ * files[] = includes/views/handlers/example_handler_argument_string.inc
+ * @endcode
+ *
+ * The best place to learn more about handlers and how they work is to explore
+ * @link views_handlers Views' handlers @endlink and use existing handlers as a
+ * guide and a model. Understanding how views_handler and its child classes work
+ * is handy but you can do a lot just following these models. You can also
+ * explore the views module directory, particularly node.views.inc.
+ *
+ * Please note that while all handler names in views are prefixed with views_,
+ * you should use your own module's name to prefix your handler names in order
+ * to ensure namespace safety. Note that the basic pattern for handler naming
+ * goes like this:
+ *
+ * [module]_handler_[type]_[tablename]_[fieldname].
+ *
+ * Sometimes table and fieldname are not appropriate, but something that
+ * resembles what the table/field would be can be used.
+ *
+ * See also:
+ * - @link views_field_handlers Views field handlers @endlink
+ * - @link views_sort_handlers Views sort handlers @endlink
+ * - @link views_filter_handlers Views filter handlers @endlink
+ * - @link views_argument_handlers Views argument handlers @endlink
+ * - @link views_relationship_handlers Views relationship handlers @endlink
+ * @}
  */
 
 /**
- * @page views_plugins About Views' plugins
+ * @defgroup views_plugins About Views plugins
  *
- * This page explains what views plugins are, how they're written, and what
- * the basic conventions are.
+ * In Views, a plugin is a bit like a handler, but plugins are not directly
+ * responsible for building the query. Instead, they are objects that are used
+ * to display the view or make other modifications.
  *
- * - @ref views_display_plugins
- * - @ref views_style_plugins
- * - @ref views_row_plugins
+ * There are 10 types of plugins in Views:
+ * - Display
+ *   - Display plugins are responsible for controlling <strong>where</strong> a
+ *     view lives. Page and block are the most common displays, as well as the
+ *     ubiquitous 'default' display which is likely what will be embedded.
+ * - Style
+ *   - Style plugins control how a view is displayed. For the most part they are
+ *     object wrappers around theme templates.
+ * - Row style
+ *   - Row styles handle each individual record from a node.
+ * - Argument default
+ *   - Argument default plugins allow pluggable ways of providing arguments for
+ *     blocks. Views includes plugins to extract node and user IDs from the URL;
+ *     additional plugins could be used for a wide variety of tasks.
+ * - Argument validator
+ *   - Validator plugins can ensure arguments are valid, and even do
+ *     transformations on the arguments.
+ * - Access
+ *   - Access plugins are responsible for controlling access to the view.
+ * - Query
+ *   - Query plugins generate and execute a query, it can be seen as a data
+ *     backend. The default implementation is using sql.
+ * - Cache
+ *   - Cache plugins control the storage and loading of caches. Currently they
+ *     can do both result and render caching, but maybe one day cache the
+ *     generated query
+ * - Pager plugins
+ *   - Pager plugins take care of everything regarding pagers. From getting and
+ *     setting the total amount of items to render the pager and setting the
+ *     global pager arrays.
+ * - Exposed form plugins
+ *   - Exposed form plugins are responsible for building, rendering and
+ *     controlling exposed forms. They can expose new parts of the view to the
+ *     user and more.
+ * - Localization plugins
+ *   - Localization plugins take care how the view options are translated. There
+ *     are example implementations for t(), none translation and i18n.
+ *
+ * Plugins are registered by implementing <strong>hook_views_plugins()</strong
+ * in your modulename.views.inc file and returning an array of data.
+ * For examples please look at views_views_plugins() in
+ * views/includes/plugins.inc as it has examples for all of them.
+ *
+ * For example plugins please look at the one provided by views, too.
+ *
+ * Similar to handlers take sure that you added the plugin file to the
+ * module.info.
+ *
+ * The array will look something like this:
+ * @code
+ * return array(
+ *   'display' => array(
+ *     // ... list of display plugins,
+ *    ),
+ *   'style' => array(
+ *     // ... list of style plugins,
+ *    ),
+ *   'row' => array(
+ *     // ... list of row style plugins,
+ *    ),
+ *   'argument default' => array(
+ *     // ... list of argument default plugins,
+ *    ),
+ *   'argument validator' => array(
+ *     // ... list of argument validator plugins,
+ *    ),
+ *    'access' => array(
+ *     // ... list of access plugins,
+ *    ),
+ *    'query' => array(
+ *      // ... list of query plugins,
+ *     ),,
+ *    'cache' => array(
+ *      // ... list of cache plugins,
+ *     ),,
+ *    'pager' => array(
+ *      // ... list of pager plugins,
+ *     ),,
+ *    'exposed_form' => array(
+ *      // ... list of exposed_form plugins,
+ *     ),,
+ *    'localization' => array(
+ *      // ... list of localization plugins,
+ *     ),
+ * );
+ * @endcode
+ *
+ * Each plugin will be registered with an identifier for the plugin, plus a
+ * fairly lengthy list of items that can define how and where the plugin is
+ * used. Here is an example from Views core:
+ *
+ * @code
+ *     'node' => array(
+ *       'title' => t('Node'),
+ *       'help' => t('Display the node with standard node view.'),
+ *       'handler' => 'views_plugin_row_node_view',
+ *       'path' => drupal_get_path('module', 'views') . '/modules/node', // not necessary for most modules
+ *       'theme' => 'views_view_row_node',
+ *       'base' => array('node'), // only works with 'node' as base.
+ *       'uses options' => TRUE,
+ *       'type' => 'normal',
+ *     ),
+ * @endcode
+ *
+ * Of particular interest is the <em>path</em> directive, which works a little
+ * differently from handler registration; each plugin must define its own path,
+ * rather than relying on a global info for the paths. For example:
+ *
+ * @code
+ *    'feed' => array(
+ *       'title' => t('Feed'),
+ *       'help' => t('Display the view as a feed, such as an RSS feed.'),
+ *       'handler' => 'views_plugin_display_feed',
+ *       'uses hook menu' => TRUE,
+ *       'use ajax' => FALSE,
+ *       'use pager' => FALSE,
+ *       'accept attachments' => FALSE,
+ *       'admin' => t('Feed'),
+ *       'help topic' => 'display-feed',
+ *     ),
+ * @endcode
+ *
+ * Please be sure to prefix your plugin identifiers with your module name to
+ * ensure namespace safety; after all, two different modules could try to
+ * implement the 'grid2' plugin, and that would cause one plugin to completely
+ * fail.
+ *
+ * @todo Finish this document.
+ *
+ * See also:
+ * - @link views_display_plugins Views display plugins @endlink
+ * - @link views_style_plugins Views style plugins @endlink
+ * - @link views_row_plugins Views row plugins @endlink
  */
 
 /**
- * @defgroup views_hooks Views' hooks
+ * @defgroup views_hooks Views hooks
  * @{
  * Hooks that can be implemented by other modules in order to implement the
  * Views API.
@@ -721,7 +943,7 @@ function hook_views_query_alter(&$view, &$query) {
  * Warning: $view is not a reference in PHP4 and cannot be modified here. But it IS
  * a reference in PHP5, and can be modified. Please be careful with it.
  *
- * @see theme_table
+ * @see theme_table()
  */
 function hook_views_preview_info_alter(&$rows, $view) {
   // example code here
@@ -754,8 +976,13 @@ function hook_views_ui_display_top_links_alter(&$links, $view, $display_id) {
 function hook_views_ajax_data_alter(&$commands, $view) {
 }
 
-
+/**
+ * @}
+ */
 
 /**
+ * @defgroup views_module_handlers Views module handlers
+ * @{
+ * Handlers exposed by various modules to Views.
  * @}
  */

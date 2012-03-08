@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_aggregator_xss.
+ */
+
 /**
  * Filters htmls tags from item.
  *

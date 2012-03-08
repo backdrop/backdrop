@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_node_revision_link_revert.
+ */
+
 /**
  * Field handler to present a link to revert a node to a revision.
  *

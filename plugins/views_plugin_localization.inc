@@ -6,9 +6,16 @@
  */
 
 /**
- * The base plugin to handle localization of Views strings.
+ * @defgroup views_localization_plugins Views localization plugins
+ * @{
  *
- * @ingroup views_localization_plugins
+ * @todo.
+ *
+ * @see hook_views_plugins()
+ */
+
+/**
+ * The base plugin to handle localization of Views strings.
  */
 class views_plugin_localization extends views_plugin {
   // Store for exported strings
@@ -159,3 +166,7 @@ class views_plugin_localization extends views_plugin {
     }
   }
 }
+
+/**
+ * @}
+ */

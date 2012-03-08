@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_sort_menu_hierarchy.
+ */
+
+/**
  * Sort in menu hierarchy order.
  *
  * Given a field name of 'p' this produces an ORDER BY on p1, p2, ..., p9.

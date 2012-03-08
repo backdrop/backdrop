@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_plugin_argument_validate_user.
+ */
+
+/**
  * Validate whether an argument is a valid user.
  *
  * This supports either numeric arguments (UID) or strings (username) and

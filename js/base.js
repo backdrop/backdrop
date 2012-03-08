@@ -1,6 +1,5 @@
 /**
- * @file base.js
- *
+ * @file
  * Some basic behaviors and utility functions for Views.
  */
 (function ($) {

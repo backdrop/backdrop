@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_sort_random.
+ */
+
+/**
  * Handle a random sort.
  *
  * @ingroup views_sort_handlers

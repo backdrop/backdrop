@@ -2,9 +2,12 @@
 
 /**
  * @file
- * Tests the pluggable pager system.
+ * Definition of ViewsPagerTest.
  */
 
+/**
+ * Tests the pluggable pager system.
+ */
 class ViewsPagerTest extends DrupalWebTestCase {
   public static function getInfo() {
     return array(

@@ -1,12 +1,20 @@
 <?php
+
 /**
- * @defgroup views_sort_handlers Views' sort handlers
+ * @file
+ * @todo.
+ */
+
+/**
+ * @defgroup views_sort_handlers Views sort handlers
  * @{
  * Handlers to tell Views how to sort queries
  */
 
 /**
  * Base sort handler that has no options and performs a simple sort
+ *
+ * @ingroup views_sort_handlers
  */
 class views_handler_sort extends views_handler {
 

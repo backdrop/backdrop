@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_file.
+ */
+
 /**
  * Field handler to provide simple renderer that allows linking to a file.
  *

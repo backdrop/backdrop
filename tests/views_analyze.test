@@ -2,9 +2,12 @@
 
 /**
  * @file
- * Tests the views analyze system.
+ * Definition of ViewsAnalyzeTest.
  */
 
+/**
+ * Tests the views analyze system.
+ */
 class ViewsAnalyzeTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

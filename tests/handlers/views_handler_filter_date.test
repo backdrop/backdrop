@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsHandlerFilterDateTest.
+ */
+
+/**
  * Tests the handler filter_date.
  */
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {

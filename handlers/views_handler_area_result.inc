@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Contains views_handler_area_result handler.
+ * Definition of views_handler_area_result.
  */
 
 /**
  * Views area handler to display some configurable result summary.
  *
- * @ingroup views_area_handlers Views' area handlers
+ * @ingroup views_area_handlers
  */
 class views_handler_area_result extends views_handler_area {
 
@@ -90,4 +90,3 @@ class views_handler_area_result extends views_handler_area {
     return $output;
   }
 }
-

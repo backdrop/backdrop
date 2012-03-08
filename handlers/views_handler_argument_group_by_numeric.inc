@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_group_by_numeric.
+ */
+
+/**
  * Simple handler for arguments using group by.
  *
  * @ingroup views_argument_handlers

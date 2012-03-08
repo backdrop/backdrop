@@ -1,11 +1,12 @@
 <?php
+
 /**
- * @file view.inc
+ * @file
  * Provides the view object type and associated methods.
  */
 
 /**
- * @defgroup views_objects Objects that represent a View or part of a view.
+ * @defgroup views_objects Objects that represent a View or part of a view
  * @{
  * These objects are the core of Views do the bulk of the direction and
  * storing of data. All database activity is in these objects.
@@ -122,7 +123,7 @@ class view extends views_db_object {
   // Stores the next steps of form items to handle.
   // It's an array of stack items, which contain the form id, the type of form,
   // the view, the display and some additional arguments.
-  // @see views_ui_add_form_to_stack().
+  // @see views_ui_add_form_to_stack()
   // var $stack;
 
   /**
@@ -1992,9 +1993,9 @@ class view extends views_db_object {
     $this->process_locale_strings('delete');
   }
 
- /**
-  * Export localized strings.
-  */
+  /**
+   * Export localized strings.
+   */
   function export_locale_strings() {
     $this->process_locale_strings('export');
   }

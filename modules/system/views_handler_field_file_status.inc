@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_file_status.
+ */
+
 /**
  * Field handler to translate a node type into its readable form.
  *

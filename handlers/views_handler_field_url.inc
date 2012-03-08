@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_url.
+ */
+
+/**
  * Field handler to provide simple renderer that turns a URL into a clickable link.
  *
  * @ingroup views_field_handlers

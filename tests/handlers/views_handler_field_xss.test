@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsHandlerTestXss.
+ */
+
+/**
+ * @todo.
+ *
  * @see CommonXssUnitTest
  */
 class ViewsHandlerTestXss extends ViewsSqlTest {

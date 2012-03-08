@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -173,7 +174,7 @@ function views_theme($existing, $type, $theme, $path) {
  * @param $path
  *   The path to search.
  *
- * @see drupal_find_theme_templates
+ * @see drupal_find_theme_templates()
  */
 function _views_find_module_templates($cache, $path) {
   $templates = array();
@@ -281,7 +282,7 @@ function views_preprocess_comment(&$vars) {
   }
 }
 
-/*
+/**
  * Implement hook_permission().
  */
 function views_permission() {
@@ -807,7 +808,7 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
  * @param $all
  *   Boolean to return all languages or only enabled ones
  *
- * @see locale_language_list
+ * @see locale_language_list()
  */
 function views_language_list($field = 'name', $all = FALSE) {
   if ($all) {
@@ -2129,23 +2130,22 @@ function views_embed_view($name, $display_id = 'default') {
 }
 
 /**
-* Get the result of a view.
-*
-* @param string $name
-*      The name of the view to retrieve the data from.
-* @param string $display_id
-*      The display id. On the edit page for the view in question, you'll find
-*      a list of displays at the left side of the control area. "Master"
-*      will be at the top of that list. Hover your cursor over the name of the
-*      display you want to use. An URL will appear in the status bar of your
-*      browser. This is usually at the bottom of the window, in the chrome.
-*      Everything after #views-tab- is the display ID, e.g. page_1.
+ * Get the result of a view.
+ *
+ * @param string $name
+ *   The name of the view to retrieve the data from.
+ * @param string $display_id
+ *   The display id. On the edit page for the view in question, you'll find
+ *   a list of displays at the left side of the control area. "Master"
+ *   will be at the top of that list. Hover your cursor over the name of the
+ *   display you want to use. An URL will appear in the status bar of your
+ *   browser. This is usually at the bottom of the window, in the chrome.
+ *   Everything after #views-tab- is the display ID, e.g. page_1.
  * @param ...
  *   Any additional parameters will be passed as arguments.
-* @return
-*      array
-*          An array containing an object for each view item.
-*/
+ * @return array
+ *   An array containing an object for each view item.
+ */
 function views_get_view_result($name, $display_id = NULL) {
   $args = func_get_args();
   array_shift($args); // remove $name
@@ -2228,7 +2228,7 @@ function views_var_export($var, $prefix = '', $init = TRUE) {
  * @return
  *   The cleaned identifier.
  *
- * @see drupal_clean_css_identifier
+ * @see drupal_clean_css_identifier()
  */
 function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
   // By default, we filter using Drupal's coding standards.

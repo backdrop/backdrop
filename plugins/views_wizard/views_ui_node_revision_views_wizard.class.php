@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsUiNodeRevisionViewsWizard.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsUiNodeRevisionViewsWizard extends ViewsUiNodeViewsWizard {
 
   protected function default_display_options($form, $form_state) {

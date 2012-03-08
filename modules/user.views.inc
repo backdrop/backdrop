@@ -1,17 +1,14 @@
 <?php
+
 /**
  * @file
- * Provide views data and handlers for user.module
- */
-
-/**
- * @defgroup views_user_module user.module handlers
+ * Provide views data and handlers for user.module.
  *
- * @{
+ * @ingroup views_module_handlers
  */
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function user_views_data() {
   // ----------------------------------------------------------------
@@ -521,7 +518,7 @@ function user_views_data() {
 }
 
 /**
- * Implements hook_views_plugins
+ * Implements hook_views_plugins().
  */
 function user_views_plugins() {
   return array(
@@ -566,7 +563,3 @@ function user_views_query_substitutions($view) {
   global $user;
   return array('***CURRENT_USER***' => intval($user->uid));
 }
-
-/**
- * @}
- */

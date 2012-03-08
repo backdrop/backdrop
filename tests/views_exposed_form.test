@@ -2,9 +2,12 @@
 
 /**
  * @file
- * Test exposed forms.
+ * Definition of ViewsExposedFormTest.
  */
 
+/**
+ * Test exposed forms.
+ */
 class ViewsExposedFormTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

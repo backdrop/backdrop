@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file views-view-rss.tpl.php
+ * @file
  * Default template for feed displays that use the RSS style.
  *
  * @ingroup views_templates

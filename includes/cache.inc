@@ -1,9 +1,8 @@
 <?php
+
 /**
- * @file cache.inc
- *
- * Functions to load Views' data so that it knows what is available to
- * build queries from.
+ * @file
+ * Load Views' data so that it knows what is available to build queries from.
  */
 
 /**

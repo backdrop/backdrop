@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_locale_language.
+ */
+
+/**
  * Argument handler to accept a language.
  *
  * @ingroup views_argument_handlers

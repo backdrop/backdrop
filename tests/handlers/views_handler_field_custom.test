@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Definition of ViewsHandlerFieldCustomTest.
+ */
+
+/**
+ * @todo.
+ */
 class ViewsHandlerFieldCustomTest extends ViewsSqlTest {
   public static function getInfo() {
     return array(

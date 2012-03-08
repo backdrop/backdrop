@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_filter_string.
+ */
+
+/**
  * Basic textfield filter to handle string filtering commands
  * including equality, like, not like, etc.
  *

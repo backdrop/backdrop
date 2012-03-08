@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file handlers.inc
+ * @file
  * Defines the various handler objects to help build and display views.
  */
 
@@ -556,11 +557,11 @@ class views_handler extends views_object {
     }
   }
 
- /**
-  * Check whether current user has access to this handler.
-  *
-  * @return boolean
-  */
+  /**
+   * Check whether current user has access to this handler.
+   *
+   * @return boolean
+   */
   function access() {
     if (isset($this->definition['access callback']) && function_exists($this->definition['access callback'])) {
       if (isset($this->definition['access arguments']) && is_array($this->definition['access arguments'])) {
@@ -1030,7 +1031,7 @@ class views_many_to_one_helper {
   }
 }
 
-/*
+/**
  * Break x,y,z and x+y+z into an array. Works for strings.
  *
  * @param $str
@@ -1085,7 +1086,8 @@ function views_break_phrase_string($str, &$handler = NULL) {
 
   return $handler;
 }
-/*
+
+/**
  * Break x,y,z and x+y+z into an array. Numeric only.
  *
  * @param $str
@@ -1386,7 +1388,7 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  */
 
 /**
- * @defgroup views_join_handlers Views' join handlers
+ * @defgroup views_join_handlers Views join handlers
  * @{
  * Handlers to tell Views how to join tables together.
 

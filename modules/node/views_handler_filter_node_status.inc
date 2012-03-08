@@ -1,6 +1,12 @@
 <?php
+
 /**
- * Filter by published status
+ * @file
+ * Definition of views_handler_filter_node_status.
+ */
+
+/**
+ * Filter by published status.
  *
  * @ingroup views_filter_handlers
  */

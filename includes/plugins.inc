@@ -1,15 +1,15 @@
 <?php
+
 /**
- * @file plugins.inc
+ * @file
  * Built in plugins for Views output handling.
- *
  */
 
 // @todo: Remove this once update.php can use the registry
 views_include('base');
 
 /**
- * Implements hook_views_plugins
+ * Implements hook_views_plugins().
  */
 function views_views_plugins() {
   $js_path = drupal_get_path('module', 'ctools') . '/js';

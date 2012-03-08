@@ -1,7 +1,14 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_plugin_access_role.
+ */
+
+/**
  * Access plugin that provides role-based access control.
+ *
+ * @ingroup views_access_plugins
  */
 class views_plugin_access_role extends views_plugin_access {
   function access($account) {

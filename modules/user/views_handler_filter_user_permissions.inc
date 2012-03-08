@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_filter_user_permissions.
+ */
+
 /**
  * Filter handler for user roles.
  *

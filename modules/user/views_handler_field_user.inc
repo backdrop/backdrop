@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_user.
+ */
+
+/**
  * Field handler to provide simple renderer that allows linking to a user.
  *
  * @ingroup views_field_handlers

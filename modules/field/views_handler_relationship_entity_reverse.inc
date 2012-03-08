@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Views' relationship handlers.
+ * Definition of views_handler_relationship_entity_reverse.
  */
 
 /**

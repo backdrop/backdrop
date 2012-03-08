@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsBasicTest.
+ */
+
+/**
  * Basic test class for Views query builder tests.
  */
 class ViewsBasicTest extends ViewsSqlTest {

@@ -2,6 +2,10 @@
 
 /**
  * @file
+ * Definition of ViewsPluginStyleUnformattedTestCase.
+ */
+
+/**
  * Tests the default/unformatted row style.
  */
 class ViewsPluginStyleUnformattedTestCase extends ViewsSqlTest {

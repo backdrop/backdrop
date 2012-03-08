@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_plugin_pager_mini.
+ */
+
+/**
  * The plugin to handle full pager.
  *
  * @ingroup views_pager_plugins

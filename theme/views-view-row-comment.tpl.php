@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file views-view-row-comment.tpl.php
+ * @file
  * Default simple view template to display a single comment.
  *
  * Rather than doing anything with this particular template, it is more

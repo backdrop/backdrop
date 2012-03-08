@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of viewsHandlerFieldUserNameTest.
+ */
+
+/**
  * Tests the field username handler.
  *
  * @see views_handler_field_user_name

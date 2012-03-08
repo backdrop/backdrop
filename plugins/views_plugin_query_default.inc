@@ -1,12 +1,14 @@
 <?php
+
 /**
- * @file views_plugin_query_default.inc
- * Defines the default query object which builds SQL to execute using the
- * Drupal database API.
+ * @file
+ * Defines the default query object.
  */
 
 /**
  * Object used to create a SELECT query.
+ *
+ * @ingroup views_query_plugins
  */
 class views_plugin_query_default extends views_plugin_query {
 
@@ -1066,7 +1068,7 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Adds a query tag to the sql object.
    *
-   * @see SelectQuery::addTag
+   * @see SelectQuery::addTag()
    */
   function add_tag($tag) {
     $this->tags[] = $tag;

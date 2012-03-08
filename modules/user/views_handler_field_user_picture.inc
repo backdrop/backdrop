@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_user_picture.
+ */
+
+/**
  * Field handler to provide simple renderer that allows using a themed user link.
  *
  * @ingroup views_field_handlers

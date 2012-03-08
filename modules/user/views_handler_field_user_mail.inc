@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_user_mail.
+ */
+
 /**
  * Field handler to provide acess control for the email field.
  *

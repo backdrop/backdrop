@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_node_revision.
+ */
+
 /**
  * Contains the basic 'node_revision' field handler.
  */

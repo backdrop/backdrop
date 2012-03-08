@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_argument_formula.
+ */
+
 /**
  * Abstract argument handler for simple formulae.
  *

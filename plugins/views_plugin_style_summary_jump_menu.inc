@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains the default summary style plugin, which displays items in an HTML list.

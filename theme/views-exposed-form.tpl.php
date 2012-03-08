@@ -1,7 +1,7 @@
 <?php
+
 /**
- * @file views-exposed-form.tpl.php
- *
+ * @file
  * This template handles the layout of the views exposed filter form.
  *
  * Variables available:

@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_argument_null.
+ */
+
 /**
  * Argument handler that ignores the argument.
  *

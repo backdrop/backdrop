@@ -1,7 +1,12 @@
 <?php
 
 /**
- * @defgroup views_style_plugins Views' style plugins
+ * @file
+ * Definition of views_plugin_style.
+ */
+
+/**
+ * @defgroup views_style_plugins Views style plugins
  * @{
  * Style plugins control how a view is rendered. For example, they
  * can choose to display a collection of fields, node_view() output,
@@ -11,7 +16,7 @@
  * a single record. Not all style plugins can utilize this, so it is
  * up to the plugin to set this up and call through to the row plugin.
  *
- * @see hook_views_plugins
+ * @see hook_views_plugins()
  */
 
 /**

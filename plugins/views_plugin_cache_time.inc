@@ -1,7 +1,14 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_plugin_cache_time.
+ */
+
+/**
  * Simple caching of query results for Views displays.
+ *
+ * @ingroup views_cache_plugins
  */
 class views_plugin_cache_time extends views_plugin_cache {
   function option_definition() {

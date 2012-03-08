@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @file
+ * Definition of ViewsHandlerTestFileSize.
+ */
+
+/**
+ * @todo.
+ *
  * @see CommonXssUnitTest
  */
 class ViewsHandlerTestFileSize extends ViewsSqlTest {

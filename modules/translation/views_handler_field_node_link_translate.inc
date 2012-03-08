@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Definition of views_handler_field_node_link_translate.
+ */
+
 /**
  * Field handler to present a link node translate.
  *

@@ -1,7 +1,12 @@
 <?php
 
 /**
- * Filter based on comment node status
+ * @file
+ * Definition of views_handler_filter_node_comment.
+ */
+
+/**
+ * Filter based on comment node status.
  *
  * @ingroup views_filter_handlers
  */

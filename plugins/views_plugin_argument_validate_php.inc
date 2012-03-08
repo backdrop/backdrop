@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains the php code argument validator plugin.

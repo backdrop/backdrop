@@ -1,7 +1,8 @@
 <?php
+
 /**
- * @file views-view-summary-unformatted.tpl.php
- * Default simple view template to display a group of summary lines
+ * @file
+ * Default simple view template to display a group of summary lines.
  *
  * This wraps items in a span if set to inline, or a div if not.
  *

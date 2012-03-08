@@ -2,11 +2,14 @@
 
 /**
  * @file
+ * Definition of ViewsUpgradeTestCase.
+ */
+
+/**
  * Try to test the upgrade path of all conversions.
  *
  * You can find all conversions by searching for "moved to".
  */
-
 class ViewsUpgradeTestCase extends ViewsSqlTest {
   public static function getInfo() {
     return array(

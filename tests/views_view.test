@@ -1,7 +1,12 @@
 <?php
 
 /**
- * Test the view class.
+ * @file
+ * Definition of ViewsViewTest.
+ */
+
+/**
+ * Views class tests.
  */
 class ViewsViewTest extends ViewsSqlTest {
   public static function getInfo() {

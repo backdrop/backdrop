@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_argument_string.
+ */
+
+/**
  * Basic argument handler to implement string arguments that may have length
  * limits.
  *

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Definition of views_handler_field_last_comment_timestamp.
+ */
+
+/**
  * Field handler to display the timestamp of a comment with the count of comments.
  *
  * @ingroup views_field_handlers
