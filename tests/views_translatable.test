@@ -82,8 +82,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   public function testTranslation() {
     $view = $this->view_unpack_translatable();
     $view->set_display('default');
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
 
     $expected_strings = array();
     foreach ($this->strings as $string) {

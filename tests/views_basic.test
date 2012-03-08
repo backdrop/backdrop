@@ -24,7 +24,7 @@ class ViewsBasicTest extends ViewsSqlTest {
     $view = $this->getBasicView();
 
     // Execute the view.
-    $view->execute();
+    $this->executeView($view);
 
     // Verify the result.
     $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
@@ -63,7 +63,7 @@ class ViewsBasicTest extends ViewsSqlTest {
     ));
 
     // Execute the view.
-    $view->execute();
+    $this->executeView($view);
 
     // Build the expected result.
     $dataset = array(
@@ -144,7 +144,7 @@ class ViewsBasicTest extends ViewsSqlTest {
 
     // Execute with a view
     $view->set_arguments(array(27));
-    $view->execute();
+    $this->executeView($view);
 
     // Build the expected result.
     $dataset = array(
@@ -164,7 +164,7 @@ class ViewsBasicTest extends ViewsSqlTest {
 
     // Test "show all" if no argument is present.
     $view = $saved_view;
-    $view->execute();
+    $this->executeView($view);
 
     // Build the expected result.
     $dataset = $this->dataSet();

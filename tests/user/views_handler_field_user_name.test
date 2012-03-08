@@ -22,8 +22,7 @@ class viewsHandlerFieldUserNameTest extends ViewsSqlTest {
   function testUserName() {
     $view = $this->view_user_name();
     $view->init_display();
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
 
     $view->row_index = 0;
 

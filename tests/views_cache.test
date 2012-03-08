@@ -79,7 +79,7 @@ class ViewsCacheTest extends ViewsSqlTest {
       'output_lifespan' => '3600',
     ));
 
-    $view->execute();
+    $this->executeView($view);
     // Verify the result.
     $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
 
@@ -100,7 +100,7 @@ class ViewsCacheTest extends ViewsSqlTest {
       'output_lifespan' => '3600',
     ));
 
-    $view->execute();
+    $this->executeView($view);
     // Verify the result.
     $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
   }
@@ -116,7 +116,7 @@ class ViewsCacheTest extends ViewsSqlTest {
       'type' => 'none',
     ));
 
-    $view->execute();
+    $this->executeView($view);
     // Verify the result.
     $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
 
@@ -138,7 +138,7 @@ class ViewsCacheTest extends ViewsSqlTest {
       'output_lifespan' => '3600',
     ));
 
-    $view->execute();
+    $this->executeView($view);
     // Verify the result.
     $this->assertEqual(6, count($view->result), t('The number of returned rows match.'));
   }

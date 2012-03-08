@@ -39,8 +39,7 @@ class ViewsHandlerFieldTest extends ViewsSqlTest {
   function _testHideIfEmpty() {
     $view = $this->getBasicView();
     $view->init_display();
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
 
     $column_map_reversed = array_flip($this->column_map);
     $view->row_index = 0;
@@ -80,8 +79,7 @@ class ViewsHandlerFieldTest extends ViewsSqlTest {
   function _testEmptyText() {
     $view = $this->getBasicView();
     $view->init_display();
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
 
     $column_map_reversed = array_flip($this->column_map);
     $view->row_index = 0;

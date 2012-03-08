@@ -8,7 +8,7 @@
 /**
  * Tests the pluggable pager system.
  */
-class ViewsPagerTest extends DrupalWebTestCase {
+class ViewsPagerTest extends ViewsTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Pager',
@@ -127,8 +127,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     }
     $view = $this->viewsPagerNoLimit();
     $view->set_display('default');
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
     $this->assertEqual(count($view->result), 11, 'Make sure that every item is returned in the result');
 
     $view->destroy();
@@ -144,8 +143,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
       ),
     );
     $view->display_handler->set_option('pager', $pager);
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
 
     $this->assertEqual(count($view->result), 8, 'Make sure that every item beside the first three is returned in the result');
 
@@ -188,7 +186,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     }
     $view = $this->viewsPagerLimit();
     $view->set_display('default');
-    $view->execute();
+    $this->executeView($view);
     $this->assertEqual(count($view->result), 5, 'Make sure that only a certain count of items is returned');
     $view->destroy();
 
@@ -204,8 +202,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
       ),
     );
     $view->display_handler->set_option('pager', $pager);
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
     $this->assertEqual(count($view->result), 3, 'Make sure that only a certain count of items is returned');
 
     // Check some public functions.
@@ -248,8 +245,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     }
     $view = $this->viewsPagerFull();
     $view->set_display('default');
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
     $this->assertEqual(count($view->result), 5, 'Make sure that only a certain count of items is returned');
     $view->destroy();
 
@@ -265,15 +261,13 @@ class ViewsPagerTest extends DrupalWebTestCase {
       ),
     );
     $view->display_handler->set_option('pager', $pager);
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
     $this->assertEqual(count($view->result), 3, 'Make sure that only a certain count of items is returned');
 
     // Test items per page = 0
     $view = $this->viewPagerFullZeroItemsPerPage();
     $view->set_display('default');
-    $view->pre_execute();
-    $view->execute();
+    $this->executeView($view);
 
     $this->assertEqual(count($view->result), 11, 'All items are return');
 
@@ -295,7 +289,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     );
 
     $view->display_handler->set_option('pager', $pager);
-    $view->execute();
+    $this->executeView($view);
     $this->assertEqual($view->query->pager->get_items_per_page(), 0);
     $this->assertEqual(count($view->result), 11);
   }
@@ -422,7 +416,7 @@ class ViewsPagerTest extends DrupalWebTestCase {
     }
     $view = $this->viewsPagerFullFields();
     $view->set_display('default');
-    $view->execute();
+    $this->executeView($view);
     $view->use_ajax = TRUE; // force the value again here
     $view->query->pager = NULL;
     $output = $view->render();
