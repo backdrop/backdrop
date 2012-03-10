@@ -1682,6 +1682,11 @@ function views_view_has_form_elements($view) {
  */
 function views_form($form, &$form_state, $view, $output) {
   $form_state['step'] = isset($form_state['step']) ? $form_state['step'] : 'views_form_views_form';
+  // Cache the built form to prevent it from being rebuilt prior to validation
+  // and submission, which could lead to data being processed incorrectly,
+  // because the views rows (and thus, the form elements as well) have changed
+  // in the meantime.
+  $form_state['cache'] = TRUE;
 
   $form = array();
   $query = drupal_get_query_parameters($_GET, array('q'));
