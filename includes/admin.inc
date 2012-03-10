@@ -2319,7 +2319,11 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
     $description = $handler->admin_summary();
     $link_text = $field_name . (empty($description) ? '' : " ($description)");
-    $build['fields'][$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => array('class' => array('views-ajax-link')), 'html' => TRUE));
+    $link_attributes = array('class' => array('views-ajax-link'));
+    if (!empty($field['exclude'])) {
+      $link_attributes['class'][] = 'views-field-excluded';
+    }
+    $build['fields'][$id]['#link'] = l($link_text, "admin/structure/views/nojs/config-item/$view->name/$display->id/$type/$id", array('attributes' => $link_attributes, 'html' => TRUE));
     $build['fields'][$id]['#class'][] = drupal_clean_css_identifier($display->id . '-' . $type . '-' . $id);
     if (!empty($view->changed_sections[$display->id . '-' . $type . '-' . $id])) {
       // @TODO: #changed is no longer being used?
