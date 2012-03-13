@@ -1057,7 +1057,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
     }
 
     if (empty($this->last_render)) {
-      if (($this->last_render !== 0 && $this->last_render !== '0') || !empty($this->options['empty_zero'])) {
+      if ($this->is_value_empty($this->last_render, $this->options['empty_zero'], FALSE)) {
         $alter = $this->options['alter'];
         $alter['alter_text'] = 1;
         $alter['text'] = $this->options['empty'];
@@ -1067,6 +1067,27 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
     }
 
     return $this->last_render;
+  }
+
+  /**
+   * Checks if a field value is empty.
+   *
+   * @param $value
+   *   The field value.
+   * @param bool $empty_zero
+   *   Whether or not this field is configured to consider 0 as empty.
+   * @param bool $skip_empty
+   *   Whether or not to use empty() to check the value.
+   *
+   * @return bool
+   * TRUE if the value is considered empty, FALSE otherwise.
+   */
+  function is_value_empty($value, $empty_zero, $skip_empty = TRUE) {
+    $empty = isset($value) && ($empty_zero || ($value !== 0 && $value !== '0'));
+    if ($skip_empty) {
+      $empty = empty($value) && $empty;
+    }
+    return $empty;
   }
 
   /**
@@ -1088,15 +1109,14 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
     }
 
     // Check if there should be no further rewrite for empty values.
-    $no_rewrite_for_empty = $this->options['hide_alter_empty'] && empty($this->original_value);
+    $no_rewrite_for_empty = $this->options['hide_alter_empty'] && $this->is_value_empty($this->original_value, $this->options['empty_zero']);
 
     // Check whether the value is empty and return nothing, so the field isn't rendered.
     // First check whether the field should be hidden if the value(hide_alter_empty = TRUE) /the rewrite is empty (hide_alter_empty = FALSE).
     // For numeric values you can specify whether "0"/0 should be empty.
     if ((($this->options['hide_empty'] && empty($value))
         || ($alter['phase'] != VIEWS_HANDLER_RENDER_TEXT_PHASE_EMPTY && $no_rewrite_for_empty))
-      && (($value !== 0 && $value !== '0')
-        || $this->options['empty_zero'])) {
+      && $this->is_value_empty($value, $this->options['empty_zero'], FALSE)) {
       return '';
     }
     // Only in empty phase.

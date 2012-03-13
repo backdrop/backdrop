@@ -43,34 +43,212 @@ class ViewsHandlerFieldTest extends ViewsSqlTest {
 
     $column_map_reversed = array_flip($this->column_map);
     $view->row_index = 0;
+    $random_name = $this->randomName();
+    $random_value = $this->randomName();
 
+    // Test when results are not rewritten and empty values are not hidden.
+    $view->field['name']->options['hide_alter_empty'] = FALSE;
+    $view->field['name']->options['hide_empty'] = FALSE;
+    $view->field['name']->options['empty_zero'] = FALSE;
+
+    // Test a valid string.
+    $view->result[0]->{$column_map_reversed['name']} = $random_name;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_name, 'By default, a string should not be treated as empty.');
+
+    // Test an empty string.
+    $view->result[0]->{$column_map_reversed['name']} = "";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'By default, "" should not be treated as empty.');
+
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, '0', 'By default, 0 should not be treated as empty.');
+
+    // Test zero as a string.
+    $view->result[0]->{$column_map_reversed['name']} = "0";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "0", 'By default, "0" should not be treated as empty.');
+
+    // Test when results are not rewritten and non-zero empty values are hidden.
+    $view->field['name']->options['hide_alter_empty'] = TRUE;
     $view->field['name']->options['hide_empty'] = TRUE;
+    $view->field['name']->options['empty_zero'] = FALSE;
+
+    // Test a valid string.
+    $view->result[0]->{$column_map_reversed['name']} = $random_name;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_name, 'If hide_empty is checked, a string should not be treated as empty.');
+
+    // Test an empty string.
     $view->result[0]->{$column_map_reversed['name']} = "";
     $render = $view->field['name']->advanced_render($view->result[0]);
     $this->assertIdentical($render, "", 'If hide_empty is checked, "" should be treated as empty.');
 
-    $view->field['name']->options['empty_zero'] = FALSE;
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, '0', 'If hide_empty is checked, but not empty_zero, 0 should not be treated as empty.');
+
+    // Test zero as a string.
     $view->result[0]->{$column_map_reversed['name']} = "0";
     $render = $view->field['name']->advanced_render($view->result[0]);
-    $this->assertIdentical($render, "0", 'If hide_empty is checked, but not empty_zero, "0" should be treated as not empty.');
+    $this->assertIdentical($render, "0", 'If hide_empty is checked, but not empty_zero, "0" should not be treated as empty.');
 
+    // Test when results are not rewritten and all empty values are hidden.
+    $view->field['name']->options['hide_alter_empty'] = TRUE;
+    $view->field['name']->options['hide_empty'] = TRUE;
     $view->field['name']->options['empty_zero'] = TRUE;
+
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'If hide_empty and empty_zero are checked, 0 should be treated as empty.');
+
+    // Test zero as a string.
+    $view->result[0]->{$column_map_reversed['name']} = "0";
     $render = $view->field['name']->advanced_render($view->result[0]);
     $this->assertIdentical($render, "", 'If hide_empty and empty_zero are checked, "0" should be treated as empty.');
 
+    // Test when results are rewritten to a valid string and non-zero empty
+    // results are hidden.
     $view->field['name']->options['hide_alter_empty'] = FALSE;
+    $view->field['name']->options['hide_empty'] = TRUE;
+    $view->field['name']->options['empty_zero'] = FALSE;
     $view->field['name']->options['alter']['alter_text'] = TRUE;
-    $view->result[0]->{$column_map_reversed['name']} = "";
-    $random_name = $this->randomName();
     $view->field['name']->options['alter']['text'] = $random_name;
-    $render = $view->field['name']->advanced_render($view->result[0]);
-    $this->assertIdentical($render, $random_name, 'If hide_empty but not hide_alter_empty is checked, some rewrite should appear even if the value is empty.');
 
-    $view->field['name']->options['hide_alter_empty'] = TRUE;
-    $random_name = $this->randomName();
-    $view->field['name']->options['alter']['text'] = $random_name;
+    // Test a valid string.
+    $view->result[0]->{$column_map_reversed['name']} = $random_value;
     $render = $view->field['name']->advanced_render($view->result[0]);
-    $this->assertIdentical($render, "", 'If hide_empty and hide_alter_empty are checked, rewrite should be empty all the time.');
+    $this->assertIdentical($render, $random_name, 'If the rewritten string is not empty, it should not be treated as empty.');
+
+    // Test an empty string.
+    $view->result[0]->{$column_map_reversed['name']} = "";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_name, 'If the rewritten string is not empty, "" should not be treated as empty.');
+
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_name, 'If the rewritten string is not empty, 0 should not be treated as empty.');
+
+    // Test zero as a string.
+    $view->result[0]->{$column_map_reversed['name']} = "0";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_name, 'If the rewritten string is not empty, "0" should not be treated as empty.');
+
+    // Test when results are rewritten to an empty string and non-zero empty results are hidden.
+    $view->field['name']->options['hide_alter_empty'] = TRUE;
+    $view->field['name']->options['hide_empty'] = TRUE;
+    $view->field['name']->options['empty_zero'] = FALSE;
+    $view->field['name']->options['alter']['alter_text'] = TRUE;
+    $view->field['name']->options['alter']['text'] = "";
+
+    // Test a valid string.
+    $view->result[0]->{$column_map_reversed['name']} = $random_name;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_name, 'If the rewritten string is empty, it should not be treated as empty.');
+
+    // Test an empty string.
+    $view->result[0]->{$column_map_reversed['name']} = "";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'If the rewritten string is empty, "" should be treated as empty.');
+
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, '0', 'If the rewritten string is empty, 0 should not be treated as empty.');
+
+    // Test zero as a string.
+    $view->result[0]->{$column_map_reversed['name']} = "0";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "0", 'If the rewritten string is empty, "0" should not be treated as empty.');
+
+    // Test when results are rewritten to zero as a string and non-zero empty
+    // results are hidden.
+    $view->field['name']->options['hide_alter_empty'] = FALSE;
+    $view->field['name']->options['hide_empty'] = TRUE;
+    $view->field['name']->options['empty_zero'] = FALSE;
+    $view->field['name']->options['alter']['alter_text'] = TRUE;
+    $view->field['name']->options['alter']['text'] = "0";
+
+    // Test a valid string.
+    $view->result[0]->{$column_map_reversed['name']} = $random_name;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "0", 'If the rewritten string is zero and empty_zero is not checked, the string rewritten as 0 should not be treated as empty.');
+
+    // Test an empty string.
+    $view->result[0]->{$column_map_reversed['name']} = "";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "0", 'If the rewritten string is zero and empty_zero is not checked, "" rewritten as 0 should not be treated as empty.');
+
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "0", 'If the rewritten string is zero and empty_zero is not checked, 0 should not be treated as empty.');
+
+    // Test zero as a string.
+    $view->result[0]->{$column_map_reversed['name']} = "0";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "0", 'If the rewritten string is zero and empty_zero is not checked, "0" should not be treated as empty.');
+
+    // Test when results are rewritten to a valid string and non-zero empty
+    // results are hidden.
+    $view->field['name']->options['hide_alter_empty'] = TRUE;
+    $view->field['name']->options['hide_empty'] = TRUE;
+    $view->field['name']->options['empty_zero'] = FALSE;
+    $view->field['name']->options['alter']['alter_text'] = TRUE;
+    $view->field['name']->options['alter']['text'] = $random_value;
+
+    // Test a valid string.
+    $view->result[0]->{$column_map_reversed['name']} = $random_name;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_value, 'If the original and rewritten strings are valid, it should not be treated as empty.');
+
+    // Test an empty string.
+    $view->result[0]->{$column_map_reversed['name']} = "";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'If either the original or rewritten string is invalid, "" should be treated as empty.');
+
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_value, 'If the original and rewritten strings are valid, 0 should not be treated as empty.');
+
+    // Test zero as a string.
+    $view->result[0]->{$column_map_reversed['name']} = "0";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, $random_value, 'If the original and rewritten strings are valid, "0" should not be treated as empty.');
+
+    // Test when results are rewritten to zero as a string and all empty
+    // original values and results are hidden.
+    $view->field['name']->options['hide_alter_empty'] = TRUE;
+    $view->field['name']->options['hide_empty'] = TRUE;
+    $view->field['name']->options['empty_zero'] = TRUE;
+    $view->field['name']->options['alter']['alter_text'] = TRUE;
+    $view->field['name']->options['alter']['text'] = "0";
+
+    // Test a valid string.
+    $view->result[0]->{$column_map_reversed['name']} = $random_name;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'If the rewritten string is zero, it should be treated as empty.');
+
+    // Test an empty string.
+    $view->result[0]->{$column_map_reversed['name']} = "";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'If the rewritten string is zero, "" should be treated as empty.');
+
+    // Test zero as an integer.
+    $view->result[0]->{$column_map_reversed['name']} = 0;
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'If the rewritten string is zero, 0 should not be treated as empty.');
+
+    // Test zero as a string.
+    $view->result[0]->{$column_map_reversed['name']} = "0";
+    $render = $view->field['name']->advanced_render($view->result[0]);
+    $this->assertIdentical($render, "", 'If the rewritten string is zero, "0" should not be treated as empty.');
   }
 
   /**
