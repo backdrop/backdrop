@@ -791,7 +791,8 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
   if (!empty($source_groups)) {
 
     foreach ($source_groups as $source_group) {
-
+      // TODO Check if the fields can be copied into the same region.
+      // See #1348948: Undefined index: name dans _field_ui_reduce_order()
       if (in_array($source_group->group_name, $fields)) {
         drupal_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
         continue;
