@@ -422,6 +422,7 @@ function node_views_data() {
   // Define the base group of this table. Fields that don't
   // have a group defined will go into this field by default.
   $data['node_revisions']['moved to'] = 'node_revision';
+  $data['node_revision']['table']['entity type'] = 'node';
   $data['node_revision']['table']['group']  = t('Content revision');
   // Support the conversion of the field body
   $data['node_revisions']['body']['moved to'] = array('field_revision_data', 'body-revision_id');
@@ -536,6 +537,14 @@ function node_views_data() {
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  $data['node_revision']['link_to_revision'] = array(
+    'field' => array(
+      'title' => t('Link'),
+      'help' => t('Provide a simple link to the revision.'),
+      'handler' => 'views_handler_field_node_revision_link',
     ),
   );
 

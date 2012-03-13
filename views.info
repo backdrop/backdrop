@@ -119,6 +119,7 @@ files[] = modules/node/views_handler_field_node_link.inc
 files[] = modules/node/views_handler_field_node_link_delete.inc
 files[] = modules/node/views_handler_field_node_link_edit.inc
 files[] = modules/node/views_handler_field_node_revision.inc
+files[] = modules/node/views_handler_field_node_revision_link.inc
 files[] = modules/node/views_handler_field_node_revision_link_delete.inc
 files[] = modules/node/views_handler_field_node_revision_link_revert.inc
 files[] = modules/node/views_handler_field_node_path.inc
