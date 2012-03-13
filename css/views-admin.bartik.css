@@ -67,6 +67,15 @@
   background-color: #f6f6f6;
 }
 
+.views-ui-dialog a {
+  color: #0071b3;
+}
+
+.views-ui-dialog a:hover,
+.views-ui-dialog a:focus {
+  color: #018fe2;
+}
+
 /* @end */
 
 /* @group CTools */
