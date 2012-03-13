@@ -1,15 +1,21 @@
-Tables are described to Views via hook_views_data(), which returns an array of table information, keyed by the name of the table. For example, if your module is describing three tables, 'foo', 'bar' and 'baz', your array will look like this:
-<pre>$data = array(
-  'foo' =&gt; array(
-    // ...info here...
-  ),
-  'bar' =&gt; array(
-    // ...info here...
-  ),
-  'baz' =&gt; array(
-    // ...info here...
-  ),
-);
+Tables are described to Views by implementing hook_views_data(). This should be placed in MODULENAME.views.inc and it will be autoloaded (see <a href="topic:views/api">Views' API</a>). The hook implementation should return an array of table information, keyed by the name of the table. For example, if your module is describing three tables, 'foo', 'bar' and 'baz', your hook will look like this:
+<pre>  /**
+   * Implements hook_views_data().
+   */
+  function MODULENAME_views_data() {
+    $data = array(
+      'foo' =&gt; array(
+        // ...info about the table named 'foo'...
+      ),
+      'bar' =&gt; array(
+        // ...info about the table named 'bar'...
+      ),
+      'baz' =&gt; array(
+        // ...info about the table named 'baz'...
+      ),
+    );
+    return $data;
+  }
 </pre>
 
 The key should be the actual database name of the table (not including prefix), but it can be an alias as long as the join information (explained later) contains the real name of the table.
