@@ -1691,8 +1691,6 @@ function views_form($form, &$form_state, $view, $output) {
   $form = array();
   $query = drupal_get_query_parameters($_GET, array('q'));
   $form['#action'] = url($view->get_url(), array('query' => $query));
-  $form['#validate'] = array('views_form_validate');
-  $form['#submit'] = array('views_form_submit');
   // Tell the preprocessor whether it should hide the header, footer, pager...
   $form['show_view_elements'] = array(
     '#type' => 'value',
@@ -1701,32 +1699,6 @@ function views_form($form, &$form_state, $view, $output) {
 
   $form = $form_state['step']($form, $form_state, $view, $output);
   return $form;
-}
-
-/**
- * The basic form validate handler.
- * Fires the hook_views_form_validate() function.
- */
-function views_form_validate($form, &$form_state) {
-  // Fire the hook. Doesn't use module_invoke_all() because $form_state needs
-  // to be passed by reference.
-  foreach (module_implements('views_form_validate') as $module) {
-    $function = $module . '_views_form_validate';
-    $function($form, $form_state);
-  }
-}
-
-/**
- * The basic form submit handler.
- * Fires the hook_views_form_submit() function.
- */
-function views_form_submit($form, &$form_state) {
-  // Fire the hook. Doesn't use module_invoke_all() because $form_state needs
-  // to be passed by reference.
-  foreach (module_implements('views_form_submit') as $module) {
-    $function = $module . '_views_form_submit';
-    $function($form, $form_state);
-  }
 }
 
 /**
