@@ -475,6 +475,11 @@ class views_plugin extends views_object {
   var $plugin_type = NULL;
 
   /**
+   * The plugin name of this plugin, for example table or full.
+   */
+  var $plugin_name = NULL;
+
+  /**
    * Init will be called after construct, when the plugin is attached to a
    * view and a display.
    */
