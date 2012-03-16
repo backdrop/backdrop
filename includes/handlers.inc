@@ -58,6 +58,7 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
   else {
     $handler->is_plugin = TRUE;
     $handler->plugin_type = $type;
+    $handler->plugin_name = $definition['name'];
   }
 
   // let the handler have something like a constructor.
