@@ -1258,7 +1258,15 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
 
     if (isset($url['query'])) {
       $path = strtr($path, array('?' . $url['query'] => ''));
-      $options['query'] = drupal_get_query_array($url['query']);
+      $query = drupal_get_query_array($url['query']);
+      // Remove query parameters that were assigned a query string replacement
+      // token for which there is no value available.
+      foreach ($query as $param => $val) {
+        if ($val == '%' . $param) {
+          unset($query[$param]);
+        }
+      }
+      $options['query'] = $query;
     }
     if (isset($url['fragment'])) {
       $path = strtr($path, array('#' . $url['fragment'] => ''));
@@ -1359,6 +1367,11 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
       // However, we need to preserve special characters like " that
       // were removed by check_plain().
       $tokens['!' . $count] = isset($this->view->args[$count - 1]) ? strip_tags(decode_entities($this->view->args[$count - 1])) : '';
+    }
+
+    // Add replacements for query string parameters.
+    foreach ($_GET as $param => $val) {
+      $tokens['%' . $param] = strip_tags(decode_entities($val));
     }
 
     // Now add replacements for our fields.
