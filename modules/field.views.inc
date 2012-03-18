@@ -338,7 +338,7 @@ function field_views_field_default_views_data($field) {
         'handler' => $argument,
         'additional fields' => $additional_fields,
         'field_name' => $field['field_name'],
-        'empty field name' => t('<No value>'),
+        'empty field name' => t('- No value -'),
       );
       $data[$table][$column_real_name]['filter'] = array(
         'field' => $column_real_name,
@@ -377,7 +377,7 @@ function field_views_field_default_views_data($field) {
           'table' => $table,
           'handler' => 'views_handler_argument_numeric',
           'additional fields' => $additional_fields,
-          'empty field name' => t('<No value>'),
+          'empty field name' => t('- No value -'),
           'field_name' => $field['field_name'],
         );
         $data[$table]['delta']['filter'] = array(
