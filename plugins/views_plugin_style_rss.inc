@@ -71,6 +71,21 @@ class views_plugin_style_rss extends views_plugin_style {
     return array();
   }
 
+  /**
+   * Get RSS feed description.
+   *
+   * @return string
+   *   The string containing the description with the tokens replaced.
+   */
+  function get_description() {
+    $description = $this->options['description'];
+
+    // Allow substitutions from the first row.
+    $description = $this->tokenize_value($description, 0);
+
+    return $description;
+  }
+
   function render() {
     if (empty($this->row_plugin)) {
       vpr('views_plugin_style_default: Missing row plugin');
