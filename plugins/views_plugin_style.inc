@@ -89,15 +89,18 @@ class views_plugin_style extends views_plugin {
 
   /**
    * Return TRUE if this style also uses fields.
+   *
+   * @return bool
    */
   function uses_fields() {
     // If we use a row plugin, ask the row plugin. Chances are, we don't
     // care, it does.
+    $row_uses_fields = FALSE;
     if ($this->uses_row_plugin() && !empty($this->row_plugin)) {
-      return $this->row_plugin->uses_fields();
+      $row_uses_fields = $this->row_plugin->uses_fields();
     }
-    // Otherwise, maybe we do.
-    return !empty($this->definition['uses fields']);
+    // Otherwise, check the definition or the option.
+    return $row_uses_fields || !empty($this->definition['uses fields']) || !empty($this->options['uses_fields']);
   }
 
   /**
@@ -171,6 +174,7 @@ class views_plugin_style extends views_plugin {
       $options['default_row_class'] = array('default' => TRUE, 'bool' => TRUE);
       $options['row_class_special'] = array('default' => TRUE, 'bool' => TRUE);
     }
+    $options['uses_fields'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }
@@ -255,6 +259,15 @@ class views_plugin_style extends views_plugin {
         '#description' => t('Add css classes to the first and last line, as well as odd/even classes for striping.'),
         '#type' => 'checkbox',
         '#default_value' => $this->options['row_class_special'],
+      );
+    }
+
+    if (!$this->uses_fields() || !empty($this->options['uses_fields'])) {
+      $form['uses_fields'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Force using fields'),
+        '#description' => t('If neither the row nor the style plugin supports fields, this field allows to enable them, so you can for example use groupby.'),
+        '#default_value' => $this->options['uses_fields'],
       );
     }
   }

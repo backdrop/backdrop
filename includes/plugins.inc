@@ -135,6 +135,7 @@ function views_views_plugins() {
         'help' => t('Displays rows in a grid.'),
         'handler' => 'views_plugin_style_grid',
         'theme' => 'views_view_grid',
+        'uses fields' => FALSE,
         'uses row plugin' => TRUE,
         'uses row class' => TRUE,
         'uses options' => TRUE,
