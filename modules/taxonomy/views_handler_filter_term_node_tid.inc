@@ -341,6 +341,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $this->value_options = array();
 
     if ($this->value) {
+      $this->value = array_filter($this->value);
       $result = db_select('taxonomy_term_data', 'td')
         ->fields('td')
         ->condition('td.tid', $this->value)
