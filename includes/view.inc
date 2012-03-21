@@ -1959,6 +1959,7 @@ class view extends views_db_object {
     $this->localization_plugin = views_get_plugin('localization', views_get_localization_plugin());
 
     if (empty($this->localization_plugin)) {
+      $this->localization_plugin = views_get_plugin('localization', 'none');
       return FALSE;
     }
 
