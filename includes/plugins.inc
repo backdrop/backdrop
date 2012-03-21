@@ -194,6 +194,16 @@ function views_views_plugins() {
         'type' => 'normal',
         'help topic' => 'style-row-fields',
       ),
+      'rss_fields' => array(
+        'title' => t('Fields'),
+        'help' => t('Display fields as RSS items.'),
+        'handler' => 'views_plugin_row_rss_fields',
+        'theme' => 'views_view_row_rss',
+        'uses fields' => TRUE,
+        'uses options' => TRUE,
+        'type' => 'feed',
+        'help topic' => 'style-row-fields',
+      ),
     ),
     'argument default' => array(
       'parent' => array(

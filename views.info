@@ -236,6 +236,7 @@ files[] = plugins/views_plugin_query.inc
 files[] = plugins/views_plugin_query_default.inc
 files[] = plugins/views_plugin_row.inc
 files[] = plugins/views_plugin_row_fields.inc
+files[] = plugins/views_plugin_row_rss_fields.inc
 files[] = plugins/views_plugin_style.inc
 files[] = plugins/views_plugin_style_default.inc
 files[] = plugins/views_plugin_style_grid.inc
