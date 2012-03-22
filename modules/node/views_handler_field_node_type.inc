@@ -29,7 +29,6 @@ class views_handler_field_node_type extends views_handler_field_node {
       '#description' => t('Display field as the content type machine name.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['machine_name']),
-      '#fieldset' => 'more',
     );
   }
 
