@@ -69,6 +69,10 @@ class views_handler_field_contextual_links extends views_handler_field {
         $path = $this->view->field[$field]->options['alter']['path'];
       }
       if (!empty($title)) {
+        // Make sure that tokens are replaced for this paths as well.
+        $tokens = $this->get_render_tokens(array());
+        $path = strip_tags(decode_entities(strtr($path, $tokens)));
+
         $links[$field] = array(
           'href' => $path,
           'title' => $title,
