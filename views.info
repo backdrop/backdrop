@@ -260,6 +260,7 @@ files[] = tests/handlers/views_handler_field_file_size.test
 files[] = tests/handlers/views_handler_field_math.test
 files[] = tests/handlers/views_handler_field_url.test
 files[] = tests/handlers/views_handler_field_xss.test
+files[] = tests/handlers/views_handler_filter_combine.test
 files[] = tests/handlers/views_handler_filter_date.test
 files[] = tests/handlers/views_handler_filter_equality.test
 files[] = tests/handlers/views_handler_filter_in_operator.test

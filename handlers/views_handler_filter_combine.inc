@@ -71,7 +71,7 @@ class views_handler_filter_combine extends views_handler_filter_string {
         }
       }
       $expression = implode(', ', $seperated_fields);
-      $expression = "CONCAT($expression)";
+      $expression = "CONCAT_WS(' ', $expression)";
 
       $info = $this->operators();
       if (!empty($info[$this->operator]['method'])) {
