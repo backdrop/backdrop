@@ -8,7 +8,6 @@
 /**
  * @defgroup views_access_plugins Views access plugins
  * @{
- *
  * @todo.
  *
  * @see hook_views_plugins()

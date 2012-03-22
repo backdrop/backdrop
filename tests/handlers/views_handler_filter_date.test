@@ -6,7 +6,7 @@
  */
 
 /**
- * Tests the handler filter_date.
+ * Tests the core views_handler_filter_date handler.
  */
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -67,7 +67,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
 
 
   /**
-   * Test the filter operator between/not between.
+   * Tests the filter operator between/not between.
    */
   function testBetween() {
     // Test between with min and max.

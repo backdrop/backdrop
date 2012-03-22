@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Provides a handler that adds contextual links.
  *
  * @ingroup views_field_handlers
  */

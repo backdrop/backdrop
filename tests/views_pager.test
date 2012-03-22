@@ -117,7 +117,7 @@ class ViewsPagerTest extends ViewsTestCase {
   }
 
   /**
-   * Test the none-pager-query.
+   * Tests the none-pager-query.
    */
   public function testNoLimit() {
     // Create 11 nodes and make sure that everyone is returned.
@@ -176,7 +176,7 @@ class ViewsPagerTest extends ViewsTestCase {
   }
 
   /**
-   * Test the some pager plugin.
+   * Tests the some pager plugin.
    */
   public function testLimit() {
     // Create 11 nodes and make sure that everyone is returned.
@@ -235,7 +235,7 @@ class ViewsPagerTest extends ViewsTestCase {
   }
 
   /**
-   * Test the normal pager.
+   * Tests the normal pager.
    */
   public function testNormalPager() {
     // Create 11 nodes and make sure that everyone is returned.
@@ -399,14 +399,14 @@ class ViewsPagerTest extends ViewsTestCase {
   }
 
   /**
-   * Test the minipager.
+   * Tests the minipager.
    */
   public function testMiniPager() {
     // the functionality is the same as the normal pager, so i don't know what to test here.
   }
 
   /**
-   * Test rendering with NULL pager.
+   * Tests rendering with NULL pager.
    */
   public function testRenderNullPager() {
     // Create 11 nodes and make sure that everyone is returned.

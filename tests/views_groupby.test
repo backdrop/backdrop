@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Test aggregate functionality of Views.
+ * Tests aggregate functionality of Views.
  */
 
 /**
- * @todo.
+ * Tests aggregate functionality of views, for example count.
  */
 class ViewsQueryGroupByTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -19,7 +19,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   }
 
   /**
-   * Test aggregate count feature.
+   * Tests aggregate count feature.
    */
   public function testAggregateCount() {
     // Create 2 nodes of type1 and 3 nodes of type2
@@ -285,7 +285,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
 }
 
 /**
- * @todo.
+ * Tests UI of aggregate functionality..
  */
 class viewsUiGroupbyTestCase extends DrupalWebTestCase {
   function setUp() {

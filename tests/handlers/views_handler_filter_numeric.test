@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests the numeric filter handler.
  */
 class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
   var $column_map = array();

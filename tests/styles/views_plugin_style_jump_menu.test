@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests jump menu style functionality.
  */
 class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
   public static function getInfo() {

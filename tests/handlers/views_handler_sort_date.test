@@ -6,7 +6,7 @@
  */
 
 /**
- * Test for core views_handler_sort_date handler.
+ * Tests for core views_handler_sort_date handler.
  */
 class ViewsHandlerSortDateTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -140,7 +140,7 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
   }
 
   /**
-   * Test numeric ordering of the result set.
+   * Tests numeric ordering of the result set.
    */
   public function testDateOrdering() {
     foreach (array('second', 'minute', 'hour', 'day', 'month', 'year') as $granularity) {

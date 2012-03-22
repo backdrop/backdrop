@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests the core views_handler_filter_string handler.
  */
 class ViewsHandlerFilterStringTest extends ViewsSqlTest {
   var $column_map = array();

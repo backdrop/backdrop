@@ -2,11 +2,11 @@
 
 /**
  * @file
- * @todo.
+ * Provides the interface and base class for Views Wizard plugins.
  */
 
 /**
- * @todo.
+ * Defines a common interface for Views Wizard plugins.
  */
 interface ViewsWizardInterface {
   function __construct($plugin);

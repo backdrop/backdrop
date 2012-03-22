@@ -7,7 +7,6 @@
 
 /**
  * @defgroup views_argument_handlers Views argument handlers
- *
  * Handlers to tell Views how to contextually filter queries.
  * @{
  */

@@ -18,7 +18,7 @@ class ViewsViewTest extends ViewsSqlTest {
   }
 
   /**
-   * Test the deconstructor to be sure that every kind of heavy objects are removed.
+   * Tests the deconstructor to be sure that every kind of heavy objects are removed.
    */
   function testDestroy() {
     $view = $this->view_test_destroy();

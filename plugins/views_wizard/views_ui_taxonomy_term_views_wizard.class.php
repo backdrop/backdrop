@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests creating taxonomy views with the wizard.
  */
 class ViewsUiTaxonomyTermViewsWizard extends ViewsUiBaseViewsWizard {
 

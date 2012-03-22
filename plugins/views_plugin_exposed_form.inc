@@ -8,9 +8,9 @@
 /**
  * @defgroup views_exposed_form_plugins Views exposed form plugins
  * @{
+ * Plugins that handle the validation/submission and rendering of exposed forms.
  *
- * They can handle the validation/submission and rendering of exposed forms.
- * If needed, it is possible to add additional form elements.
+ * If needed, it is possible to use them to add additional form elements.
  *
  * @see hook_views_plugins()
  */

@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests a dynamic access plugin.
  */
 class views_test_plugin_access_test_dynamic extends views_plugin_access {
   function option_definition() {

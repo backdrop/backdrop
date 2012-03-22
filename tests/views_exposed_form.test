@@ -6,7 +6,7 @@
  */
 
 /**
- * Test exposed forms.
+ * Tests exposed forms.
  */
 class ViewsExposedFormTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -57,7 +57,7 @@ class ViewsExposedFormTest extends ViewsSqlTest {
   }
 
   /**
-   * Test the admin interface of exposed filter and sort items.
+   * Tests the admin interface of exposed filter and sort items.
    */
   function testExposedAdminUi() {
     $admin_user = $this->drupalCreateUser(array('administer views', 'administer site configuration'));

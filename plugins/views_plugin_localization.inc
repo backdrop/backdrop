@@ -8,7 +8,6 @@
 /**
  * @defgroup views_localization_plugins Views localization plugins
  * @{
- *
  * @todo.
  *
  * @see hook_views_plugins()

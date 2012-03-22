@@ -6,7 +6,7 @@
  */
 
 /**
- * Test abstract handlers of views.
+ * Tests abstract handlers of views.
  */
 class ViewsHandlersTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -40,7 +40,7 @@ class ViewsHandlersTest extends ViewsSqlTest {
   }
 
   /**
-   * Test views_break_phrase_string function.
+   * Tests views_break_phrase_string function.
    */
   function test_views_break_phrase_string() {
     $empty_stdclass = new stdClass();
@@ -76,7 +76,7 @@ class ViewsHandlersTest extends ViewsSqlTest {
   }
 
   /**
-   * Test views_break_phrase function.
+   * Tests views_break_phrase function.
    */
   function test_views_break_phrase() {
     $empty_stdclass = new stdClass();

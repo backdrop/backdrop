@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests creating comment views with the wizard.
  */
 class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
 

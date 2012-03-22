@@ -18,7 +18,7 @@ class ViewsBasicTest extends ViewsSqlTest {
   }
 
   /**
-   * Test a trivial result set.
+   * Tests a trivial result set.
    */
   public function testSimpleResultSet() {
     $view = $this->getBasicView();
@@ -35,7 +35,7 @@ class ViewsBasicTest extends ViewsSqlTest {
   }
 
   /**
-   * Test filtering of the result set.
+   * Tests filtering of the result set.
    */
   public function testSimpleFiltering() {
     $view = $this->getBasicView();
@@ -93,7 +93,7 @@ class ViewsBasicTest extends ViewsSqlTest {
   }
 
   /**
-   * Test simple argument.
+   * Tests simple argument.
    */
   public function testSimpleArgument() {
     $view = $this->getBasicView();

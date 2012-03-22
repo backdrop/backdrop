@@ -8,7 +8,6 @@
 /**
  * @defgroup views_pager_plugins Views pager plugins
  * @{
- *
  * @todo.
  *
  * @see hook_views_plugins()

@@ -6,7 +6,7 @@
  */
 
 /**
- * Test Views argument validators.
+ * Tests Views argument validators.
  */
 class ViewsArgumentValidatorTest extends ViewsSqlTest {
   public static function getInfo() {

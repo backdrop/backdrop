@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests creating managed files views with the wizard.
  */
 class ViewsUiFileManagedViewsWizard extends ViewsUiBaseViewsWizard {
   protected function default_display_options($form, $form_state) {

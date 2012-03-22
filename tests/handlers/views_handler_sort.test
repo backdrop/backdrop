@@ -6,7 +6,7 @@
  */
 
 /**
- * Test for core views_handler_sort handler.
+ * Tests for core views_handler_sort handler.
  */
 class ViewsHandlerSortTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -18,7 +18,7 @@ class ViewsHandlerSortTest extends ViewsSqlTest {
   }
 
   /**
-   * Test numeric ordering of the result set.
+   * Tests numeric ordering of the result set.
    */
   public function testNumericOrdering() {
     $view = $this->getBasicView();
@@ -69,7 +69,7 @@ class ViewsHandlerSortTest extends ViewsSqlTest {
   }
 
   /**
-   * Test string ordering of the result set.
+   * Tests string ordering of the result set.
    */
   public function testStringOrdering() {
     $view = $this->getBasicView();

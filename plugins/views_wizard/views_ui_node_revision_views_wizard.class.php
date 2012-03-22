@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests creating node revision views with the wizard.
  */
 class ViewsUiNodeRevisionViewsWizard extends ViewsUiNodeViewsWizard {
 

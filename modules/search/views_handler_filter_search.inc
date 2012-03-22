@@ -2,7 +2,7 @@
 
 /**
  * @file
- * @todo.
+ * Contains a search filter handler.
  */
 
 /**
@@ -176,7 +176,7 @@ class views_handler_filter_search extends views_handler_filter {
 }
 
 /**
- * @todo.
+ * Extends the core SearchQuery.
  */
 class viewsSearchQuery extends SearchQuery {
   public function &conditions() {

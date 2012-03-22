@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests the core views_handler_filter_in_operator handler.
  */
 class ViewsHandlerFilterInOperator extends ViewsSqlTest {
   public static function getInfo() {

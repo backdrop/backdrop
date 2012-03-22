@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests the core views_handler_argument_null handler.
  */
 class ViewsHandlerArgumentNullTest extends ViewsSqlTest {
   public static function getInfo() {

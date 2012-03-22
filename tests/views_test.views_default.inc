@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Test views.
+ * Tests views.
  */
 
 /**

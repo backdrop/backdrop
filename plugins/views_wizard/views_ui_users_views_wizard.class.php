@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests creating user views with the wizard.
  */
 class ViewsUiUsersViewsWizard extends ViewsUiBaseViewsWizard {
   protected function default_display_options($form, $form_state) {

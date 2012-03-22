@@ -8,10 +8,10 @@
 /**
  * @defgroup views_row_plugins Views row plugins
  * @{
+ * Row plugins control how Views outputs an individual record.
  *
- * Row plugins control how Views outputs an individual record. They are
- * tightly coupled to style plugins, in that a style plugin is what calls
- * the row plugin.
+ * They are tightly coupled to style plugins, in that a style plugin is what
+ * calls the row plugin.
  *
  * @see hook_views_plugins()
  */

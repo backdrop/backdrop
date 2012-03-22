@@ -24,7 +24,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
   }
 
   /**
-   * Test fixed default argument.
+   * Tests fixed default argument.
    */
   function testArgumentDefaultFixed() {
     $view = $this->view_argument_default_fixed();

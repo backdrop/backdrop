@@ -6,7 +6,7 @@
  */
 
 /**
- * @todo.
+ * Tests the core views_handler_field_custom handler.
  */
 class ViewsHandlerFieldCustomTest extends ViewsSqlTest {
   public static function getInfo() {

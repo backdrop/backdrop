@@ -51,7 +51,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
   }
 
   /**
-   * Test the moved to parameter in general.
+   * Tests the moved to parameter in general.
    */
   public function testMovedTo() {
     // Test moving on field lavel.
@@ -90,7 +90,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
   }
 
   /**
-   * Test a import via ui.
+   * Tests a import via ui.
    *
    * To ensure the general functionality, the recent comments view from drupal6
    * is used.

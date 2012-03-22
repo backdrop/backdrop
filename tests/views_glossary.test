@@ -6,7 +6,7 @@
  */
 
 /**
- * Test glossary view ( summary of arguments ).
+ * Tests glossary view ( summary of arguments ).
  */
 class ViewsGlossaryTestCase extends ViewsSqlTest {
   public static function getInfo() {
@@ -22,7 +22,7 @@ class ViewsGlossaryTestCase extends ViewsSqlTest {
   }
 
   /**
-   * Test the default glossary view.
+   * Tests the default glossary view.
    */
   public function testGlossaryView() {
     // create a contentype and add some nodes, with a non random title.

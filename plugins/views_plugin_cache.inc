@@ -8,7 +8,6 @@
 /**
  * @defgroup views_cache_plugins Views cache plugins
  * @{
- *
  * @todo.
  *
  * @see hook_views_plugins()
