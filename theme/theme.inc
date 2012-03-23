@@ -468,8 +468,8 @@ function template_preprocess_views_view_table(&$vars) {
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
 
-  $default_row_class = $handler->options['default_row_class'];
-  $row_class_special = $handler->options['row_class_special'];
+  $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
+  $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
 
   $fields   = &$view->field;
   $columns  = $handler->sanitize_columns($options['columns'], $fields);
@@ -654,8 +654,8 @@ function template_preprocess_views_view_grid(&$vars) {
   $result   = $view->result;
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
-  $default_row_class = $handler->options['default_row_class'];
-  $row_class_special = $handler->options['row_class_special'];
+  $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
+  $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
 
   $columns  = $options['columns'];
 
@@ -766,11 +766,12 @@ function template_preprocess_views_view_unformatted(&$vars) {
   $view = $vars['view'];
   $rows = $vars['rows'];
   $style = $view->style_plugin;
+  $options = $style->options;
 
   $vars['classes_array'] = array();
   $vars['classes'] = array();
-  $default_row_class = $style->options['default_row_class'];
-  $row_class_special = $style->options['row_class_special'];
+  $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : FALSE;
+  $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : FALSE;
   // Set up striping values.
   $count = 0;
   $max = count($rows);
@@ -795,7 +796,7 @@ function template_preprocess_views_view_unformatted(&$vars) {
     }
 
     // Flatten the classes to a string for each row for the template file.
-    $vars['classes_array'][$id] = implode(' ', $vars['classes'][$id]);
+    $vars['classes_array'][$id] = isset($vars['classes'][$id]) ? implode(' ', $vars['classes'][$id]) : '';
   }
 }
 
