@@ -534,6 +534,10 @@ function template_preprocess_views_view_table(&$vars) {
         }
         $vars['header_classes'][$field] .= $class;
       }
+      // Add a CSS align class to each field if one was set
+      if (!empty($options['info'][$field]['align'])) {
+        $vars['header_classes'][$field] .= ' ' . drupal_clean_css_identifier($options['info'][$field]['align']);
+      }
 
       // Add a header label wrapper if one was selected.
       if ($vars['header'][$field]) {
