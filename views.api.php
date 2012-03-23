@@ -5,8 +5,6 @@
  * Describe hooks provided by the Views module.
  */
 
-// NOTE: Comments marked with *** are best guesses, and need verification.
-
 /**
  * @mainpage Views 3 API Manual
  *
@@ -332,11 +330,11 @@ function hook_views_data() {
   $data['example_table']['table']['group'] = t('Example table');
 
   // Define this as a base table – a table that can be described in itself by
-  // views (and not just being brought in as a relationship)***. In reality this
+  // views (and not just being brought in as a relationship). In reality this
   // is not very useful for this table, as it isn't really a distinct object of
   // its own, but it makes a good example.
   $data['example_table']['table']['base'] = array(
-    'field' => 'nid', // This is the identifier field for the view.***
+    'field' => 'nid', // This is the identifier field for the view.
     'title' => t('Example table'),
     'help' => t('Example table contains example content and can be related to nodes.'),
     'weight' => -10,
@@ -432,7 +430,7 @@ function hook_views_data() {
       'handler' => 'views_handler_filter_boolean_operator',
       // Note that you can override the field-wide label:
       'label' => t('Published'),
-      // This setting is used by the filter handler.***
+      // This setting is used by the boolean filter handler, as possible option.
       'type' => 'yes-no',
       // use boolean_field = 1 instead of boolean_field <> 0 in WHERE statment.
       'use equal' => TRUE,
@@ -548,7 +546,8 @@ function hook_views_data_alter(&$data) {
  *     - accept attachments: Set to TRUE to allow attachment displays to be
  *       attached to this display type.
  *     - contextual links locations: An array with places where contextual links
- *       should be added. Can for example be 'page' or 'block'.***
+ *       should be added. Can for example be 'page' or 'block'. If you don't
+ *       specify it there will be contextual links around the rendered view.
  *     - uses hook menu: Set to TRUE to have the display included by
  *       views_menu_alter(). views_menu_alter executes then execute_hook_menu
  *       on the display object.
@@ -948,9 +947,9 @@ function hook_views_pre_render(&$view) {
  *   The cache settings.
  */
 function hook_views_post_render(&$view, &$output, &$cache) {
-  // When using full pager, disable any time-based caching if the results don't
-  // fill the first page.***
-  if ($view->query->pager instanceof views_plugin_pager_full && $cache->options['type'] == 'time') {
+  // When using full pager, disable any time-based caching if there are less
+  // then 10 results.
+  if ($view->query->pager instanceof views_plugin_pager_full && $cache->options['type'] == 'time' && count($view->result) < 10) {
     $cache['options']['results_lifespan'] = 0;
     $cache['options']['output_lifespan'] = 0;
   }
