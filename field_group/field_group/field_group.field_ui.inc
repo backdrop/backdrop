@@ -767,8 +767,29 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
   $form['additional_settings']['field_group']['fieldgroup_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Clone'),
+    '#validate' => array('field_group_field_ui_clone_field_groups_validate'),
     '#submit' => array('field_group_field_ui_clone_field_groups')
   );
+
+}
+
+/**
+ * Validate handler to validate saving existing fieldgroups from one view mode or form to another.
+ */
+function field_group_field_ui_clone_field_groups_validate($form, &$form_state) {
+
+  $source_mode = $form_state['#source_mode'] = $form_state['values']['additional_settings']['fieldgroup_clone'] == '0' ? 'form' : $form_state['values']['additional_settings']['fieldgroup_clone'];
+  $groups_to_clone = $form_state['#groups_to_clone'] = field_group_read_groups(array('bundle' => $form_state['field_group_params']->bundle, 'entity_type' => $form_state['field_group_params']->entity_type));
+
+  $form_state['#source_groups'] = array();
+  if (!empty($groups_to_clone) && isset($groups_to_clone[$form_state['field_group_params']->entity_type], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode])) {
+    $form_state['#source_groups'] = $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode];
+  }
+
+  if (empty($form_state['#source_groups'])) {
+    // Report error found with selection.
+    form_set_error('additional_settings][fieldgroup_clone', t('No field groups were found in selected view mode.'));
+  }
 
 }
 
@@ -777,20 +798,13 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
  */
 function field_group_field_ui_clone_field_groups($form, &$form_state) {
 
-  $source_mode = (!$form_state['values']['additional_settings']['fieldgroup_clone']) ? 'form' : $form_state['values']['additional_settings']['fieldgroup_clone'];
-  $groups_to_clone = field_group_read_groups(array('bundle' => $form_state['field_group_params']->bundle, 'entity_type' => $form_state['field_group_params']->entity_type));
-  if (!isset($groups_to_clone[$form_state['field_group_params']->entity_type], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode])) {
-    drupal_set_message(t('There where no fieldgroups found to clone from @source', array('@source' => $source_mode)), 'warning');
-    return;
-  }
-
-  $source_groups = $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode];
+  $source_mode = $form_state['#source_mode'];
+  $groups_to_clone = $form_state['#groups_to_clone'];
 
   $fields = array_keys($form_state['values']['fields']);
+  if (!empty($form_state['#source_groups'])) {
 
-  if (!empty($source_groups)) {
-
-    foreach ($source_groups as $source_group) {
+    foreach ($form_state['#source_groups'] as $source_group) {
       // TODO Check if the fields can be copied into the same region.
       // See #1348948: Undefined index: name dans _field_ui_reduce_order()
       if (in_array($source_group->group_name, $fields)) {

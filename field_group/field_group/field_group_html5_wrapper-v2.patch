@@ -1,0 +1,66 @@
+diff --git a/field_group.module b/field_group.module
+index fc6aaba..ce3675c 100755
+--- a/field_group.module
++++ b/field_group.module
+@@ -278,6 +278,11 @@ function field_group_field_group_formatter_info() {
+         'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+         'default_formatter' => 'open',
+       ),
++      'html5' => array(
++        'label' => t('HTML5'),
++        'description' => t('This fieldgroup renders the inner content in a semantic HTML5 wrapper'),
++        'instance_settings' => array('wrapper' => '', 'classes' => ''),
++      ),
+       'fieldset' => array(
+         'label' => t('Fieldset'),
+         'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
+@@ -330,6 +335,11 @@ function field_group_field_group_formatter_info() {
+         'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => ''),
+         'default_formatter' => 'collapsible',
+       ),
++      'html5' => array(
++        'label' => t('HTML5'),
++        'description' => t('This fieldgroup renders the inner content in a semantic HTML5 wrapper'),
++        'instance_settings' => array('wrapper' => '', 'classes' => ''),
++      ),
+       'fieldset' => array(
+         'label' => t('Fieldset'),
+         'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
+@@ -496,6 +506,14 @@ function field_group_field_group_format_settings($group) {
+         '#weight' => 3,
+       );
+       break;
++    case 'html5':
++      $form['instance_settings']['wrapper'] = array(
++        '#title' => t('HTML5 wrapper'),
++        '#type' => 'select',
++        '#options' => array('section' => t('Section'), 'article' => t('Article'), 'header' => t('Header'), 'footer' => t('footer'), 'aside' => t('Aside')),
++        '#default_value' => isset($group->format_settings['instance_settings']['wrapper']) ? $group->format_settings['instance_settings']['wrapper'] : 'section',
++      );
++      break;
+     case 'fieldset':
+       break;
+     case 'multipage-group':
+@@ -693,6 +711,22 @@ function field_group_pre_render_div(&$element, $group, &$form) {
+ 
+ /**
+  * Implements field_group_pre_render_<format-type>.
++ * Format type: HTML5.
++ *
++ * @param $element The field group form element.
++ * @param $group The Field group object prepared for pre_render.
++ * @param $form The root element or form.
++ */
++function field_group_pre_render_html5(&$element, $group, &$form) {
++  $element += array(
++    '#type' => 'markup',
++    '#prefix' => '<' . $group->format_settings['instance_settings']['wrapper'] . ' id="' . $element['#id'] . '" class="field-group-format ' . $group->classes . '">',
++    '#suffix' => '</' . $group->format_settings['instance_settings']['wrapper'] . '>',
++  );
++}
++
++/**
++ * Implements field_group_pre_render_<format-type>.
+  * Format type: Accordion.
+  *
+  * @param $element The field group form element.
