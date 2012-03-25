@@ -516,6 +516,11 @@ class views_handler_argument extends views_handler {
         'method' => 'default_empty',
         'breadcrumb' => TRUE, // generate a breadcrumb to here
       ),
+      'access denied' => array(
+        'title' => t('Display "Access Denied"'),
+        'method' => 'default_access_denied',
+        'breadcrumb' => FALSE, // generate a breadcrumb to here
+      ),
     );
 
     if ($this->view->display_handler->has_path()) {
@@ -712,6 +717,17 @@ class views_handler_argument extends views_handler {
   function default_not_found() {
     // Set a failure condition and let the display manager handle it.
     $this->view->build_info['fail'] = TRUE;
+    return FALSE;
+  }
+
+  /**
+   * Default action: access denied.
+   *
+   * If an argument was expected and was not given, in this case, report
+   * the view as 'access denied'.
+   */
+  function default_access_denied() {
+    $this->view->build_info['denied'] = TRUE;
     return FALSE;
   }
 
