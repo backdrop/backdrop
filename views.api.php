@@ -933,7 +933,7 @@ function hook_views_pre_render(&$view) {
  * And then in the post render, create an array with the text that should
  * go there:
  *
- * strtr($output, array('<!--post-FIELD-1-->', 'output for FIELD of nid 1');
+ * strtr($output, array('<!--post-FIELD-1-->' => 'output for FIELD of nid 1');
  *
  * All of the cached result data will be available in $view->result, as well,
  * so all ids used in the query should be discoverable.
