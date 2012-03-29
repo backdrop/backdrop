@@ -2144,7 +2144,7 @@ class views_db_object {
     }
     $schema = drupal_get_schema($this->db_table);
 
-    $output = $indent . '$' . $identifier . ' = new ' . get_class($this) . ";\n";
+    $output = $indent . '$' . $identifier . ' = new ' . get_class($this) . "();\n";
     // Go through our schema and build correlations.
     foreach ($schema['fields'] as $field => $info) {
       if (!empty($info['no export'])) {
