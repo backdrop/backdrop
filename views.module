@@ -1900,7 +1900,7 @@ function views_exposed_form($form, &$form_state) {
     '#id' => drupal_html_id('edit-submit-' . $view->name),
   );
 
-  $form['#action'] = url($view->get_url());
+  $form['#action'] = url($view->display_handler->get_url());
   $form['#theme'] = views_theme_functions('views_exposed_form', $view, $display);
   $form['#id'] = drupal_clean_css_identifier('views_exposed_form-' . check_plain($view->name) . '-' . check_plain($display->id));
 //  $form['#attributes']['class'] = array('views-exposed-form');

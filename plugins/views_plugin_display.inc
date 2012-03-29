@@ -756,6 +756,10 @@ class views_plugin_display extends views_plugin {
     }
   }
 
+  function get_url() {
+    return $this->view->get_url();
+  }
+
   /**
    * Check to see if the display needs a breadcrumb
    *
