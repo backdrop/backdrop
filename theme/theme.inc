@@ -611,6 +611,11 @@ function template_preprocess_views_view_table(&$vars) {
     }
   }
 
+  // Hide table header if all labels are empty.
+  if (!array_filter($vars['header'])) {
+    $vars['header'] = array();
+  }
+
   $count = 0;
   foreach ($vars['rows'] as $num => $row) {
     if ($row_class_special) {
