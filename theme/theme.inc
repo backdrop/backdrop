@@ -937,7 +937,7 @@ function template_preprocess_views_exposed_form(&$vars) {
 
     $widget->id = isset($form[$info['value']]['#id']) ? $form[$info['value']]['#id'] : '';
     if (!empty($info['label'])) {
-      $widget->label = $info['label'];
+      $widget->label = check_plain($info['label']);
     }
     if (!empty($info['operator'])) {
       $widget->operator = drupal_render($form[$info['operator']]);
