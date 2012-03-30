@@ -78,7 +78,8 @@ Drupal.behaviors.MultiPage = {
  */
 Drupal.multipageControl = function (settings) {
   var self = this;
-  $.extend(this, settings, Drupal.theme('multipage', settings));
+  var controls = Drupal.theme('multipage', settings);
+  $.extend(self, settings, controls);
 
   this.nextLink.click(function () {
     self.nextPage();
@@ -132,7 +133,7 @@ Drupal.multipageControl.prototype = {
         .val(this.wrapper.attr('id'));
     // Mark the active control for screen readers.
     $('#active-multipage-control').remove();
-    this.nextLink.append('<span id="active-multipage-control" class="element-invisible">' + Drupal.t('(active page)') + '</span>');
+    this.nextLink.after('<span id="active-multipage-control" class="element-invisible">' + Drupal.t('(active page)') + '</span>');
   },
   
   /**
@@ -155,6 +156,7 @@ Drupal.multipageControl.prototype = {
    * Shows a horizontal tab pane.
    */
   tabShow: function () {
+    console.log(this.nextLink);
     // Display the tab.
     this.item.show();
     // Update .first marker for items. We need recurse from parent to retain the
@@ -208,7 +210,9 @@ Drupal.multipageControl.prototype = {
 Drupal.theme.prototype.multipage = function (settings) {
   var controls = {};
   controls.item = $('<span class="multipage-button"></span>');
-  controls.item.append(controls.nextLink = $('<input type="button" class="form-submit multipage-link-next" value="" />').val(controls.nextTitle = Drupal.t('Next page')));
+  controls.nextLink = $('<input type="button" class="form-submit multipage-link-next" value="" />');
+  controls.nextTitle = Drupal.t('Next page');
+  controls.item.append(controls.nextLink.val(controls.nextTitle));
   controls.item.append(controls.previousLink = $('<a class="multipage-link-previous" href="#"></a>'));
   if (!settings.has_next) {
     controls.nextLink.hide();
@@ -216,6 +220,7 @@ Drupal.theme.prototype.multipage = function (settings) {
   if (settings.has_previous) {
     controls.previousLink.append(controls.previousTitle = $('<strong></strong>').text(Drupal.t('Previous')));
   }
+  
   return controls;
 };
 
