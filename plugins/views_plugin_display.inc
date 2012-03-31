@@ -1454,8 +1454,8 @@ class views_plugin_display extends views_plugin {
         );
         $form['use_more_always'] = array(
           '#type' => 'checkbox',
-          '#title' => t('Do not display more link unless there is more content'),
-          '#description' => t("This will display the more link even if there are no more items to display."),
+          '#title' => t("Display 'more' link only if there is more content"),
+          '#description' => t("Leave this unchecked to display the 'more' link even if there are no more items to display."),
           '#default_value' => !$this->get_option('use_more_always'),
             '#dependency' => array(
               'edit-use-more' => array(TRUE),
