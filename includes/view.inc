@@ -1176,7 +1176,13 @@ class view extends views_db_object {
         $function($this);
       }
 
-      // Let the theme play too, because pre render is a very themey thing.
+      // Let the themes play too, because pre render is a very themey thing.
+      foreach ($GLOBALS['base_theme_info'] as $base) {
+        $function = $base->name . '_views_pre_render';
+        if (function_exists($function)) {
+          $function($this);
+        }
+      }
       $function = $GLOBALS['theme'] . '_views_pre_render';
       if (function_exists($function)) {
         $function($this);
@@ -1200,7 +1206,13 @@ class view extends views_db_object {
       $function($this, $this->display_handler->output, $cache);
     }
 
-    // Let the theme play too, because post render is a very themey thing.
+    // Let the themes play too, because post render is a very themey thing.
+    foreach ($GLOBALS['base_theme_info'] as $base) {
+      $function = $base->name . '_views_post_render';
+      if (function_exists($function)) {
+        $function($this);
+      }
+    }
     $function = $GLOBALS['theme'] . '_views_post_render';
     if (function_exists($function)) {
       $function($this, $this->display_handler->output, $cache);
