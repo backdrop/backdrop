@@ -38,13 +38,34 @@ function _field_view_formatter_options($field_type = NULL) {
 class views_handler_field_field extends views_handler_field {
   /**
    * An array to store field renderable arrays for use by render_items.
+   * @var array
    */
   public $items = array();
 
   /**
    * Store the field informations.
+   * @var array
    */
   public $field_info = array();
+
+
+  /**
+   * Does the field supports multiple field values.
+   * @var bool
+   */
+  public $multiple;
+
+  /**
+   * Does the rendered fields get limited.
+   * @var bool
+   */
+  public $limit_values;
+
+  /**
+   * A shortcut for $view->base_table.
+   * @var string
+   */
+  public $base_table;
 
   function init(&$view, &$options) {
     parent::init($view, $options);
@@ -82,7 +103,8 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
-   * Return TRUE if the user has access to view this field.
+   * @return bool
+   *  Return TRUE if the user has access to view this field.
    */
   function access() {
     $base_table = $this->get_base_table();
@@ -280,7 +302,7 @@ class views_handler_field_field extends views_handler_field {
     }
 
     $this->ensure_my_table();
-    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_sort_column']);
+    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_ sort_column']);
     if (!isset($this->aliases[$column])) {
       // Column is not in query; add a sort on it (without adding the column).
       $this->aliases[$column] = $this->table_alias . '.' . $column;
