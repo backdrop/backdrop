@@ -56,6 +56,13 @@ class views_plugin_query_default extends views_plugin_query {
    */
   var $groupby = array();
 
+
+  /**
+   * An array of fields.
+   */
+  var $fields = array();
+
+
   /**
    * The table header to use for tablesort. This matters because tablesort
    * needs to modify the query and needs the header.
