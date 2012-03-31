@@ -469,7 +469,10 @@ function hook_views_data() {
  * returned by MODULENAME_views_api(), or the same directory as the .module
  * file, if 'path' is unspecified.
  *
- * @see hook_views_data().
+ * @param $data
+ *   An array of all Views data, passed by reference, see hook_views_data().
+ *
+ * @see hook_views_data()
  */
 function hook_views_data_alter(&$data) {
   // This example alters the title of the node: nid field for the admin.
@@ -487,7 +490,7 @@ function hook_views_data_alter(&$data) {
   // the node title.
 
   $data['node']['title']['handler'] = 'modulename_handlers_field_node_title';
-  
+
   // Note that the $data array is not returned – it is modified by reference.
 }
 
