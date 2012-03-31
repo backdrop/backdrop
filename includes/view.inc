@@ -1716,21 +1716,30 @@ class view extends views_db_object {
       $this->vid = NULL;
     }
 
-    // If we have no vid or our vid is a string, this is a new view.
-    if (!empty($this->vid)) {
-      // remove existing table entries
+    $transaction = db_transaction();
+
+    try {
+      // If we have no vid or our vid is a string, this is a new view.
+      if (!empty($this->vid)) {
+        // remove existing table entries
+        foreach ($this->db_objects() as $key) {
+          db_delete('views_' . $key)
+            ->condition('vid', $this->vid)
+            ->execute();
+        }
+      }
+
+      $this->save_row(!empty($this->vid) ? 'vid' : FALSE);
+
+      // Save all of our subtables.
       foreach ($this->db_objects() as $key) {
-        db_delete('views_' . $key)
-          ->condition('vid', $this->vid)
-          ->execute();
+        $this->_save_rows($key);
       }
     }
-
-    $this->save_row(!empty($this->vid) ? 'vid' : FALSE);
-
-    // Save all of our subtables.
-    foreach ($this->db_objects() as $key) {
-      $this->_save_rows($key);
+    catch (Exception $e) {
+      $transaction->rollback();
+      watchdog_exception('views', $e);
+      throw $e;
     }
 
     $this->save_locale_strings();
