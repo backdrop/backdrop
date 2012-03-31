@@ -25,8 +25,6 @@ function views_ajax() {
 
     $commands = array();
 
-    $arg = explode('/', $_REQUEST['view_path']);
-
     // Remove all of this stuff from $_GET so it doesn't end up in pagers and tablesort URLs.
     foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state') as $key) {
       if (isset($_GET[$key])) {
