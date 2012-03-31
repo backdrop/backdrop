@@ -1371,6 +1371,9 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
 
     // Add replacements for query string parameters.
     foreach ($_GET as $param => $val) {
+      if (is_array($val)) {
+        $val = implode(', ', $val);
+      }
       $tokens['%' . $param] = strip_tags(decode_entities($val));
     }
 
