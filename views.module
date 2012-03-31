@@ -454,13 +454,20 @@ function views_arg_load($value, $name, $display_id, $index) {
 }
 
 /**
- * Page callback entry point; requires a view and a display id, then
- * passes control to the display handler.
+ * Page callback: Displays a page view, given a name and display id.
+ *
+ * @param $name
+ *   The name of a view.
+ * @param $display_id
+ *   The display id of a view.
+ *
+ * @return
+ *   Either the HTML of a fully-executed view, or MENU_NOT_FOUND.
  */
-function views_page() {
+function views_page($name, $display_id) {
   $args = func_get_args();
-  $name = array_shift($args);
-  $display_id = array_shift($args);
+  // Remove $name and $display_id from the arguments.
+  unset($args[0], $args[1]);
 
   // Load the view and render it.
   if ($view = views_get_view($name)) {
@@ -468,7 +475,7 @@ function views_page() {
   }
 
   // Fallback; if we get here no view was found or handler was not valid.
-  return drupal_not_found();
+  return MENU_NOT_FOUND;
 }
 
 /**
