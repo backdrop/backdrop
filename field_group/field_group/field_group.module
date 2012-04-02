@@ -507,6 +507,7 @@ function field_group_pre_render_prepare(&$group) {
 
   // Prepare extra classes.
   $group->classes = array('field-group-' . $group->format_type, str_replace('_', '-', $group->group_name));
+
   if (isset($group->format_settings['formatter'])) {
     $group->collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
     // Open or closed horizontal or vertical tabs will be collapsible by default.
@@ -612,7 +613,7 @@ function field_group_pre_render_div(&$element, $group, &$form) {
   if ($group->format_settings['formatter'] != 'open') {
     $element['#prefix'] = '<div class="field-group-format ' . $group->classes . '">
       <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
-      <div class="field-group-format-wrapper" style="display: ' . ($group->collapsed ? 'none' : 'block') . ';">';
+      <div class="field-group-format-wrapper" style="display: ' . (!empty($group->collapsed) ? 'none' : 'block') . ';">';
     $element['#suffix'] = '</div></div>';
   }
   else {
