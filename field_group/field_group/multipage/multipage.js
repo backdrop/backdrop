@@ -156,7 +156,6 @@ Drupal.multipageControl.prototype = {
    * Shows a horizontal tab pane.
    */
   tabShow: function () {
-    console.log(this.nextLink);
     // Display the tab.
     this.item.show();
     // Update .first marker for items. We need recurse from parent to retain the
