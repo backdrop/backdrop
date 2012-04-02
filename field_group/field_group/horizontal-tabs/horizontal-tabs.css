@@ -39,6 +39,7 @@ div.horizontal-tabs {
   padding-top: 0; 
   margin: 0;
   min-width: 5em; /* IE7 */
+  outline: none; /* Chrome */
   float: left;
 }
 .horizontal-tabs ul.horizontal-tabs-list li.selected {
