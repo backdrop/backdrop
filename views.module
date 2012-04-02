@@ -467,7 +467,8 @@ function views_arg_load($value, $name, $display_id, $index) {
 function views_page($name, $display_id) {
   $args = func_get_args();
   // Remove $name and $display_id from the arguments.
-  unset($args[0], $args[1]);
+  array_shift($args[0]);
+  array_shift($args[1]);
 
   // Load the view and render it.
   if ($view = views_get_view($name)) {
