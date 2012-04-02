@@ -302,7 +302,7 @@ class views_handler_field_field extends views_handler_field {
     }
 
     $this->ensure_my_table();
-    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_ sort_column']);
+    $column = _field_sql_storage_columnname($this->definition['field_name'], $this->options['click_sort_column']);
     if (!isset($this->aliases[$column])) {
       // Column is not in query; add a sort on it (without adding the column).
       $this->aliases[$column] = $this->table_alias . '.' . $column;
