@@ -9,11 +9,11 @@
  * that are a part of this feature.
  */
 function field_group_features_export_alter(&$export, $module_name) {
-  //Make sure we have fresh data by loading directly.
+  // Make sure we have fresh data by loading directly.
   ctools_include('export');
   $field_groups = ctools_export_load_object('field_group');
 
-  //Add fieldgroups based on the fields that are present.
+  // Add fieldgroups based on the fields that are present.
   if (!empty($export['features']['field'])) {
     foreach ($export['features']['field'] as $field) {
       list($entity_type, $bundle, $field_name) = explode('-', $field);
@@ -21,13 +21,18 @@ function field_group_features_export_alter(&$export, $module_name) {
       foreach ($field_groups as $group_id => $group) {
         if ($group->entity_type == $entity_type && $group->bundle == $bundle
           && in_array($field_name, $group->data['children'])) {
-          $export['features']['field_group'][$group_id] = $group_id;
+          if (isset($group->export_module) && $group->export_module != $module_name) {
+            $export['dependencies'][$group->export_module] = $group->export_module;
+          }
+          else {
+            $export['features']['field_group'][$group_id] = $group_id;
+          }
         }
       }
     }
   }
 
-  //Add any parent field groups that haven't been selected.
+  // Add any parent field groups that haven't been selected.
   if (!empty($export['features']['field_group'])) {
     foreach ($export['features']['field_group'] as $id) {
       $group = isset($field_groups[$id]) ? $field_groups[$id] : FALSE;
@@ -37,7 +42,12 @@ function field_group_features_export_alter(&$export, $module_name) {
         $parent_group = isset($field_groups[$parent_id]) ? $field_groups[$parent_id] : FALSE;
 
         if ($parent_group && !isset($export['features']['field_group'][$parent_id])) {
-          $export['features']['field_group'][$parent_id] = $parent_id;
+          if (isset($parent_group->export_module) && $parent_group->export_module != $module_name) {
+            $export['dependencies'][$parent_group->export_module] = $parent_group->export_module;
+          }
+          else {
+            $export['features']['field_group'][$parent_id] = $parent_id;
+          }
         }
       }
     }
