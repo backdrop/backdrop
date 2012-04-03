@@ -18,8 +18,6 @@ function field_group_field_ui_form_params($form, $display_overview) {
   $params->admin_path = _field_ui_bundle_admin_path($params->entity_type, $params->bundle);
   $params->display_overview = $display_overview;
 
-  $formatters = field_group_formatter_info();
-
   if ($display_overview) {
     $params->region_callback = 'field_group_display_overview_row_region';
     $params->mode = $form['#view_mode'];
