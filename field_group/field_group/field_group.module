@@ -1782,3 +1782,24 @@ function field_group_pre_render(& $element, $group, & $form) {
   drupal_alter('field_group_pre_render', $element, $group, $form);
 
 }
+
+/**
+ * Hides field groups including children in a form.
+ *
+ * @param array $element
+ *   A render array. Can be a form, node, user, ...
+ * @param array $group_names
+ *   An array of field group names that should be hidden.
+ */
+function field_group_hide_field_groups(&$element, $group_names) {
+  foreach ($group_names as $group_name) {
+    if (isset($form['#fieldgroups'][$group_name]) && isset($form['#group_children'])) {
+      // Hide the field group.
+      $form['#fieldgroups'][$group_name]->format_type = 'hidden';
+      // Hide the elements inside the field group.
+      foreach (array_keys($form['#group_children'], $group_name) as $field_name) {
+        $form[$field_name]['#access'] = FALSE;
+      }
+    }
+  }
+}
