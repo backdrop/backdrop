@@ -430,6 +430,17 @@ function field_group_read_groups($params = array()) {
 }
 
 /**
+ * Hides field groups including children in a render array.
+ *
+ * @param array $element
+ *   A render array. Can be a form, node, user, ...
+ * @param array $group_names
+ *   An array of field group names that should be hidden.
+ */
+function field_group_hide_field_groups(&$element, $group_names) {
+}
+
+/**
  * @} End of "addtogroup utility functions".
  */
 

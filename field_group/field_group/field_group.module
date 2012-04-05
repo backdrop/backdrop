@@ -1784,7 +1784,7 @@ function field_group_pre_render(& $element, $group, & $form) {
 }
 
 /**
- * Hides field groups including children in a form.
+ * Hides field groups including children in a render array.
  *
  * @param array $element
  *   A render array. Can be a form, node, user, ...
