@@ -784,9 +784,25 @@ function field_group_field_ui_clone_field_groups_validate($form, &$form_state) {
     $form_state['#source_groups'] = $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode];
   }
 
+  // Check for types are not known in current mode.
+  if ($form_state['field_group_params']->mode != 'form') {
+    $non_existing_types = array('multipage', 'multipage-group');
+  }
+  else {
+    $non_existing_types = array('div');
+  }
+
+  foreach ($form_state['#source_groups'] as $key => $group) {
+    if (in_array($group->format_type, $non_existing_types)) {
+      unset($form_state['#source_groups'][$key]);
+      drupal_set_message(t('Skipping @group because this type does not exist in current mode', array('@group' => $group->label)), 'warning');
+    }
+  }
+
   if (empty($form_state['#source_groups'])) {
     // Report error found with selection.
     form_set_error('additional_settings][fieldgroup_clone', t('No field groups were found in selected view mode.'));
+    return;
   }
 
 }
@@ -803,8 +819,6 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
   if (!empty($form_state['#source_groups'])) {
 
     foreach ($form_state['#source_groups'] as $source_group) {
-      // TODO Check if the fields can be copied into the same region.
-      // See #1348948: Undefined index: name dans _field_ui_reduce_order()
       if (in_array($source_group->group_name, $fields)) {
         drupal_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
         continue;
@@ -815,6 +829,7 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
       $source_group->mode = $form_state['field_group_params']->mode;
       $source_group->identifier = $source_group->group_name . '|' . $source_group->entity_type . '|' . $source_group->bundle . '|' . $form_state['field_group_params']->mode;
       $source_group->disabled = FALSE;
+      $source_group->children = array();
       unset($source_group->export_type, $source_group->type, $source_group->table);
 
       // Save and enable it in ctools.
