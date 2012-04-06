@@ -550,10 +550,6 @@ function field_group_field_overview_validate($form, &$form_state) {
 
   // Validate if any information was provided in the 'add new group' row.
   if (array_filter(array($group['label'], $group['group_name']))) {
-    // Missing label.
-    if (!$group['label']) {
-      form_set_error('fields][_add_new_group][label', t('Add new group: you need to provide a label.'));
-    }
 
     // Missing group name.
     if (!$group['group_name']) {
