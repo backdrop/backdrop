@@ -1,11 +1,11 @@
 .multipage-controls-list #edit-actions {
-  float: left;
+  float: left; /* LTR */
 }
 
 .multipage-button {    
   margin-bottom: 1em;
   margin-top: 0;
-  float: left;
+  float: left; /* LTR */
   line-height: 36px;
 }
 
@@ -13,9 +13,9 @@
   padding-top: 10px;
 }
 
-.multipage-counter{
-  float: right;
-  margin-right: 5px;
+.multipage-counter {
+  float: right; /* LTR */
+  margin-right: 5px; /* LTR */
   height: 0;
   position: relative;
   top: 1.8em;
@@ -25,7 +25,7 @@
   color:#666;
 }
 
-a.multipage-link-previous{
+a.multipage-link-previous {
   font: 12px arial,sans-serif;
   font-weight: bold;
   color:#666;
@@ -35,12 +35,12 @@ a.multipage-link-previous{
   transition: color 218ms;
 }
 
-a.multipage-link-previous:hover{
+a.multipage-link-previous:hover {
   text-decoration:none;
   color: #333;
 }
 
-.multipage-controls-list input.form-submit{
+.multipage-controls-list input.form-submit {
   background:none;
   border: none;
   border-radius: 2px;
@@ -57,18 +57,18 @@ a.multipage-link-previous:hover{
   -webkit-transition: border-color .218s;
 }
 
-.multipage-controls-list input.form-submit:hover{
+.multipage-controls-list input.form-submit:hover {
   color:#333;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   border-color: #939393;
 }
 
-.multipage-controls-list input.form-submit:active{
+.multipage-controls-list input.form-submit:active {
   background: -webkit-gradient(linear,0% 40%,0% 70%,from(#F1F1F1),to(whiteSmoke));
 }
 
-.multipage-controls-list input#edit-submit{
+.multipage-controls-list input#edit-submit {
   background-image: -moz-linear-gradient(top,#4d90fe,#4787ed);
   background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
   background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
@@ -78,7 +78,7 @@ a.multipage-link-previous:hover{
   min-width: 79px;
 }
 
-.multipage-controls-list input#edit-submit:hover{
+.multipage-controls-list input#edit-submit:hover {
   background-image: -moz-linear-gradient(top,#4d90fe,#357ae8);
   background-image: -o-linear-gradient(top,#4d90fe,#357ae8);
   background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#357ae8));
@@ -88,12 +88,12 @@ a.multipage-link-previous:hover{
   -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
-.multipage-controls-list input#edit-submit:active{
+.multipage-controls-list input#edit-submit:active {
   background: #4D90FE;
   border-color: #2F5BB7;
 }
 
-.multipage-controls-list input#edit-delete{
+.multipage-controls-list input#edit-delete {
   background-image: -moz-linear-gradient(top,#dd4b39,#d14836);
   background-image: -o-linear-gradient(top,#dd4b39,#d14836);
   background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#d14836));
@@ -104,7 +104,7 @@ a.multipage-link-previous:hover{
 
 }
 
-.multipage-controls-list input#edit-delete:hover{
+.multipage-controls-list input#edit-delete:hover {
   background-image: -moz-linear-gradient(top,#dd4b39,#c53727);
   background-image: -o-linear-gradient(top,#dd4b39,#c53727);
   background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#c53727));
@@ -115,7 +115,7 @@ a.multipage-link-previous:hover{
   color: white;
 }
 
-.multipage-controls-list input#edit-delete:active{
+.multipage-controls-list input#edit-delete:active {
   background-image: -moz-linear-gradient(top,#dd4b39,#b0281a);
   background-image: -o-linear-gradient(top,#dd4b39,#b0281a);
   background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#b0281a));

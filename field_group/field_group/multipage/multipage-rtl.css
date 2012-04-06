@@ -1,0 +1,13 @@
+.multipage-controls-list #edit-actions {
+  float: right !important;
+}
+
+.multipage-button {    
+  float: right !important;
+}
+
+.multipage-counter{
+  float: left !important;
+  margin-right: 0 !important;
+  margin-left: 5px !important;
+}

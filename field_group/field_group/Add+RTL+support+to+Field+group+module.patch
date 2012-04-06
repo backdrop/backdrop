@@ -1,0 +1,212 @@
+From 2811a28d0d088ea8eb24f8961ce3fb3d476942dd Fri, 6 Apr 2012 16:33:13 +0200
+From: hass <hass@85918.no-reply.drupal.org>
+Date: Fri, 6 Apr 2012 16:32:53 +0200
+Subject: [PATCH] Add RTL support to Field group module
+
+diff --git a/field_group-rtl.css b/field_group-rtl.css
+new file mode 100644
+index 0000000..26c1816
+--- /dev/null
++++ b/field_group-rtl.css
+@@ -0,0 +1,7 @@
++/**
++ * Override the accordion default style for view_modes.
++ */
++form .ui-accordion h3, form .ui-accordion h3.ui-state-active {
++  padding-left: 0;
++  padding-right: 2em;
++}
+diff --git a/horizontal-tabs/horizontal-tabs-rtl.css b/horizontal-tabs/horizontal-tabs-rtl.css
+new file mode 100644
+index 0000000..e579eea
+--- /dev/null
++++ b/horizontal-tabs/horizontal-tabs-rtl.css
+@@ -0,0 +1,15 @@
++div.horizontal-tabs {
++  margin: 0 0 1em 0;
++}
++
++.horizontal-tabs ul.horizontal-tabs-list {
++  border-right: 0;
++  border-left: 1px solid #dedede;
++}
++
++/* Layout of each tab */
++.horizontal-tabs ul.horizontal-tabs-list li {
++  border-right: 0;
++  border-left: 1px solid #ccc;
++  float: right;
++}
+diff --git a/horizontal-tabs/horizontal-tabs.css b/horizontal-tabs/horizontal-tabs.css
+index 846a21c..b4a7b23 100644
+--- a/horizontal-tabs/horizontal-tabs.css
++++ b/horizontal-tabs/horizontal-tabs.css
+@@ -1,5 +1,3 @@
+-@CHARSET "UTF-8";
+-
+ div.horizontal-tabs {
+   margin: 0 0 1em 0; /* LTR */
+   padding: 0;
+@@ -16,7 +14,7 @@
+   list-style: none;
+   list-style-image: none; /* IE6 */
+   background-color: #dedede;
+-  border-right: 1px solid #dedede;
++  border-right: 1px solid #dedede; /* LTR */
+   width: 100%;
+   height: auto;
+   clear: both;
+@@ -38,13 +36,13 @@
+ /* Layout of each tab */
+ .horizontal-tabs ul.horizontal-tabs-list li {
+   background: #eee;
+-  border-right: 1px solid #ccc;
++  border-right: 1px solid #ccc; /* LTR */
+   padding: 1px;
+   padding-top: 0; 
+   margin: 0;
+   min-width: 5em; /* IE7 */
+   outline: none; /* Chrome */
+-  float: left;
++  float: left; /* LTR */
+ }
+ .horizontal-tabs ul.horizontal-tabs-list li.selected {
+   background-color: #fff;
+diff --git a/multipage/multipage-rtl.css b/multipage/multipage-rtl.css
+new file mode 100644
+index 0000000..9c79167
+--- /dev/null
++++ b/multipage/multipage-rtl.css
+@@ -0,0 +1,13 @@
++.multipage-controls-list #edit-actions {
++  float: right !important;
++}
++
++.multipage-button {    
++  float: right !important;
++}
++
++.multipage-counter{
++  float: left !important;
++  margin-right: 0 !important;
++  margin-left: 5px !important;
++}
+diff --git a/multipage/multipage.css b/multipage/multipage.css
+index c3b19fb..7c974a3 100644
+--- a/multipage/multipage.css
++++ b/multipage/multipage.css
+@@ -1,11 +1,11 @@
+ .multipage-controls-list #edit-actions {
+-  float: left;
++  float: left; /* LTR */
+ }
+ 
+ .multipage-button {    
+   margin-bottom: 1em;
+   margin-top: 0;
+-  float: left;
++  float: left; /* LTR */
+   line-height: 36px;
+ }
+ 
+@@ -13,9 +13,9 @@
+   padding-top: 10px;
+ }
+ 
+-.multipage-counter{
+-  float: right;
+-  margin-right: 5px;
++.multipage-counter {
++  float: right; /* LTR */
++  margin-right: 5px; /* LTR */
+   height: 0;
+   position: relative;
+   top: 1.8em;
+@@ -25,7 +25,7 @@
+   color:#666;
+ }
+ 
+-a.multipage-link-previous{
++a.multipage-link-previous {
+   font: 12px arial,sans-serif;
+   font-weight: bold;
+   color:#666;
+@@ -35,12 +35,12 @@
+   transition: color 218ms;
+ }
+ 
+-a.multipage-link-previous:hover{
++a.multipage-link-previous:hover {
+   text-decoration:none;
+   color: #333;
+ }
+ 
+-.multipage-controls-list input.form-submit{
++.multipage-controls-list input.form-submit {
+   background:none;
+   border: none;
+   border-radius: 2px;
+@@ -57,18 +57,18 @@
+   -webkit-transition: border-color .218s;
+ }
+ 
+-.multipage-controls-list input.form-submit:hover{
++.multipage-controls-list input.form-submit:hover {
+   color:#333;
+   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+   -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+   border-color: #939393;
+ }
+ 
+-.multipage-controls-list input.form-submit:active{
++.multipage-controls-list input.form-submit:active {
+   background: -webkit-gradient(linear,0% 40%,0% 70%,from(#F1F1F1),to(whiteSmoke));
+ }
+ 
+-.multipage-controls-list input#edit-submit{
++.multipage-controls-list input#edit-submit {
+   background-image: -moz-linear-gradient(top,#4d90fe,#4787ed);
+   background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
+   background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
+@@ -78,7 +78,7 @@
+   min-width: 79px;
+ }
+ 
+-.multipage-controls-list input#edit-submit:hover{
++.multipage-controls-list input#edit-submit:hover {
+   background-image: -moz-linear-gradient(top,#4d90fe,#357ae8);
+   background-image: -o-linear-gradient(top,#4d90fe,#357ae8);
+   background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#357ae8));
+@@ -88,12 +88,12 @@
+   -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+ }
+ 
+-.multipage-controls-list input#edit-submit:active{
++.multipage-controls-list input#edit-submit:active {
+   background: #4D90FE;
+   border-color: #2F5BB7;
+ }
+ 
+-.multipage-controls-list input#edit-delete{
++.multipage-controls-list input#edit-delete {
+   background-image: -moz-linear-gradient(top,#dd4b39,#d14836);
+   background-image: -o-linear-gradient(top,#dd4b39,#d14836);
+   background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#d14836));
+@@ -104,7 +104,7 @@
+ 
+ }
+ 
+-.multipage-controls-list input#edit-delete:hover{
++.multipage-controls-list input#edit-delete:hover {
+   background-image: -moz-linear-gradient(top,#dd4b39,#c53727);
+   background-image: -o-linear-gradient(top,#dd4b39,#c53727);
+   background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#c53727));
+@@ -115,7 +115,7 @@
+   color: white;
+ }
+ 
+-.multipage-controls-list input#edit-delete:active{
++.multipage-controls-list input#edit-delete:active {
+   background-image: -moz-linear-gradient(top,#dd4b39,#b0281a);
+   background-image: -o-linear-gradient(top,#dd4b39,#b0281a);
+   background-image: -webkit-gradient(linear,left top,left bottom,from(#dd4b39),to(#b0281a));
