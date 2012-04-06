@@ -207,15 +207,17 @@ Drupal.multipageControl.prototype = {
  *   - previousTitle: The jQuery element that contains the group title
  */
 Drupal.theme.prototype.multipage = function (settings) {
+
   var controls = {};
   controls.item = $('<span class="multipage-button"></span>');
-  controls.nextLink = $('<input type="button" class="form-submit multipage-link-next" value="" />');
-  controls.nextTitle = Drupal.t('Next page');
-  controls.item.append(controls.nextLink.val(controls.nextTitle));
   
   controls.previousLink = $('<input type="button" class="form-submit multipage-link-previous" value="" />');
   controls.previousTitle = Drupal.t('Previous page');
-  controls.item.append(controls.previousLink.val(controls.previousTitle));
+  controls.item.append(controls.previousLink.val(controls.previousTitle));  
+  
+  controls.nextLink = $('<input type="button" class="form-submit multipage-link-next" value="" />');
+  controls.nextTitle = Drupal.t('Next page');
+  controls.item.append(controls.nextLink.val(controls.nextTitle));
   
   if (!settings.has_next) {
     controls.nextLink.hide();
