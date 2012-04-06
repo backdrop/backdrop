@@ -268,7 +268,7 @@ function field_group_field_group_formatter_info() {
         'instance_settings' => array('classes' => ''),
       ),
       'htab' => array(
-        'label' => t('Horizontal tab item'),
+        'label' => t('Horizontal tab'),
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'closed',
@@ -695,6 +695,16 @@ function field_group_pre_render_htabs(&$element, $group, &$form) {
     '#suffix' => '</div>',
   );
 
+  // By default vertical_tabs don't have titles but you can override it in the theme.
+  if (!empty($group->label)) {
+    $element['#title'] = check_plain($group->label);
+
+    // On forms use theme_form_element to add the title.
+    if ($group->mode == 'form') {
+      $element['#theme_wrappers'][] = 'form_element';
+    }
+  }
+
 }
 
 /**
@@ -795,6 +805,17 @@ function field_group_pre_render_tabs(&$element, $group, &$form) {
     '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
     '#suffix' => '</div>',
   );
+
+  // By default vertical_tabs don't have titles but you can override it in the theme.
+  if (!empty($group->label)) {
+    $element['#title'] = check_plain($group->label);
+
+    // On forms use theme_form_element to add the title.
+    if ($group->mode == 'form') {
+      $element['#theme_wrappers'][] = 'form_element';
+    }
+  }
+
   $element[$group->group_name . '__active_tab'] = array(
     '#type' => 'hidden',
     '#default_value' => '',

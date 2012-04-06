@@ -27,7 +27,7 @@ div.horizontal-tabs {
   border: 0;
 }
 
-fieldset.vertical-tabs-pane legend {
+fieldset.horizontal-tabs-pane legend {
   display: none;
 }
 
