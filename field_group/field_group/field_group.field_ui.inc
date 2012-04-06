@@ -301,6 +301,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
   // Show a warning if the user has not set up required containers
   if ($form['#groups']) {
+
     $parent_requirements = array(
       'multipage' => array(
         'parent' => 'multipage-group',
@@ -315,6 +316,15 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         'message' => 'Each Accordion item element needs to have a parent Accordion group element.',
       ),
     );
+
+    // On display overview tabs need to be checked.
+    if ($display_overview) {
+      $parent_requirements['tab'] = array(
+        'parent' => 'tabs',
+        'message' => 'Each Vertical tab element needs to have a parent Vertical tabs group element.',
+      );
+    }
+
     foreach ($form['#groups'] as $group_name) {
       $group = field_group_load_field_group($group_name, $params->entity_type, $params->bundle, $params->mode);
       if (isset($parent_requirements[$group->format_type])) {
