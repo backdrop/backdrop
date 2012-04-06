@@ -4,6 +4,7 @@
  * Fix for fieldsets in vertical tabs.
  * Note that this can only be hardcoded to the Seven theme
  * where people who override this, are in trouble.
+ * This can be removed in next d7 release.
  */
 .vertical-tabs fieldset.default-fallback,
 div.field-group-tabs-wrapper div.field-type-image fieldset,
