@@ -212,12 +212,16 @@ Drupal.theme.prototype.multipage = function (settings) {
   controls.nextLink = $('<input type="button" class="form-submit multipage-link-next" value="" />');
   controls.nextTitle = Drupal.t('Next page');
   controls.item.append(controls.nextLink.val(controls.nextTitle));
-  controls.item.append(controls.previousLink = $('<a class="multipage-link-previous" href="#"></a>'));
+  
+  controls.previousLink = $('<input type="button" class="form-submit multipage-link-previous" value="" />');
+  controls.previousTitle = Drupal.t('Previous page');
+  controls.item.append(controls.previousLink.val(controls.previousTitle));
+  
   if (!settings.has_next) {
     controls.nextLink.hide();
   }
-  if (settings.has_previous) {
-    controls.previousLink.append(controls.previousTitle = $('<strong></strong>').text(Drupal.t('Previous')));
+  if (!settings.has_previous) {
+    controls.previousLink.hide();
   }
   
   return controls;
