@@ -22,6 +22,20 @@ Module project page:
 Documentation page: 
   http://drupal.org/node/1017838
   http://drupal.org/node/1017962
+
+Available group types:
+  - Fieldsets
+  - Horizontal tabs
+  - Vertical tabs
+  - Accordions
+  - Divs
+  - Multipage steps: <strong>Note: This is only client side.
+  
+There is a 7.x-2.x branch started which will include:
+
+  - Moving horizontal tabs to the elements module
+  - CTools content type and Panels integration
+  - HTML5 group type  
   
 To submit bug reports and feature suggestions, or to track changes:
   http://drupal.org/project/issues/field_group
