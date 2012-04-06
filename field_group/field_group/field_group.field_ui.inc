@@ -299,6 +299,35 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   // Create the settings for fieldgroup as vertical tabs (merged with DS).
   field_group_field_ui_create_vertical_tabs($form, $form_state, $params);
 
+  // Show a warning if the user has not set up required containers
+  if ($form['#groups']) {
+    $parent_requirements = array(
+      'multipage' => array(
+        'parent' => 'multipage-group',
+        'message' => 'Each Multipage element needs to have a parent Multipage group element.',
+      ),
+      'tab' => array(
+        'parent' => 'tabs',
+        'message' => 'Each Vertical tab element needs to have a parent Vertical tabs group element.',
+      ),
+      'htab' => array(
+        'parent' => 'htabs',
+        'message' => 'Each Horizontal tab element needs to have a parent Horizontal tabs group element.',
+      ),
+      'accordion-item' => array(
+        'parent' => 'accordion',
+        'message' => 'Each Accordion item element needs to have a parent Accordion group element.',
+      ),
+    );
+    foreach ($form['#groups'] as $group_name) {
+      $group = field_group_load_field_group($group_name, $params->entity_type, $params->bundle, $params->mode);
+      if (isset($parent_requirements[$group->format_type])) {
+        if (!$group->parent_name || field_group_load_field_group($group->parent_name, $params->entity_type, $params->bundle, $params->mode)->format_type != $parent_requirements[$group->format_type]['parent']) {
+          drupal_set_message(t($parent_requirements[$group->format_type]['message']), 'warning', FALSE);
+        }
+      }
+    }
+  }
 }
 
 /**

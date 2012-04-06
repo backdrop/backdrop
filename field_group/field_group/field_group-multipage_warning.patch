@@ -1,0 +1,32 @@
+diff --git a/field_group.field_ui.inc b/field_group.field_ui.inc
+index 5d1c9c9..6dc6d42 100755
+--- a/field_group.field_ui.inc
++++ b/field_group.field_ui.inc
+@@ -300,7 +300,19 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
+ 
+   // Create the settings for fieldgroup as vertical tabs (merged with DS).
+   field_group_field_ui_create_vertical_tabs($form, $form_state, $params);
+-
++  
++  // Show a warning if the user has not set up containers for multipage elements
++  if ($form['#groups']) {
++    foreach ($form['#groups'] as $group_name) {
++      $group = field_group_load_field_group($group_name, $params->entity_type, $params->bundle, $params->mode);
++      if ($group->format_type == 'multipage') {
++        if (!$group->parent_name || field_group_load_field_group($group->parent_name, $params->entity_type, $params->bundle, $params->mode)->format_type != 'multipage-group') {
++          drupal_set_message('Each Multipage element needs to have a parent Multipage Group element.' , 'warning', FALSE);
++          break;
++        }
++      }
++    }
++  }
+ }
+ 
+ /**
+@@ -817,4 +829,4 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
+ }
+ /**
+  * eof().
+- */
+\ No newline at end of file
++ */
