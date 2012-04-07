@@ -82,19 +82,24 @@ class views_handler_field_contextual_links extends views_handler_field {
         }
       }
     }
-    $build = array(
-      '#prefix' => '<div class="contextual-links-wrapper">',
-      '#suffix' => '</div>',
-      '#theme' => 'links__contextual',
-      '#links' => $links,
-      '#attributes' => array('class' => array('contextual-links')),
-      '#attached' => array(
-        'library' => array(array('contextual', 'contextual-links')),
-      ),
-      '#access' => user_access('access contextual links'),
-    );
 
-    return drupal_render($build);
+    if (!empty($links)) {
+      $build = array(
+        '#prefix' => '<div class="contextual-links-wrapper">',
+        '#suffix' => '</div>',
+        '#theme' => 'links__contextual',
+        '#links' => $links,
+        '#attributes' => array('class' => array('contextual-links')),
+        '#attached' => array(
+          'library' => array(array('contextual', 'contextual-links')),
+        ),
+        '#access' => user_access('access contextual links'),
+      );
+      return drupal_render($build);
+    }
+    else {
+      return '';
+    }
   }
 
   function query() { }
