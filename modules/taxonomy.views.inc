@@ -493,6 +493,7 @@ function views_taxonomy_set_breadcrumb(&$breadcrumb, &$argument) {
     }
     if (!empty($argument->options['use_taxonomy_term_path'])) {
       $path = taxonomy_term_uri($parent);
+      $path = $path['path'];
     }
     else {
       $args[$argument->position] = $parent->tid;
