@@ -315,11 +315,17 @@ class views_handler extends views_object {
    *   The value being rendered.
    * @param $type
    *   The type of sanitization needed. If not provided, check_plain() is used.
+   *
+   * @return string
+   *   Returns the safe value.
    */
   function sanitize_value($value, $type = NULL) {
     switch ($type) {
       case 'xss':
         $value = filter_xss($value);
+        break;
+      case 'xss_admin':
+        $value = filter_xss_admin($value);
         break;
       case 'url':
         $value = check_url($value);

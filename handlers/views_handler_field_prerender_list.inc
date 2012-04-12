@@ -89,7 +89,7 @@ class views_handler_field_prerender_list extends views_handler_field {
   function render_items($items) {
     if (!empty($items)) {
       if ($this->options['type'] == 'separator') {
-        return implode($this->sanitize_value($this->options['separator']), $items);
+        return implode($this->sanitize_value($this->options['separator'], 'xss_admin'), $items);
       }
       else {
         return theme('item_list',
