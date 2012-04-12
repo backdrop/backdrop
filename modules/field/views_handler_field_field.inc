@@ -203,7 +203,7 @@ class views_handler_field_field extends views_handler_field {
         $options = array($this->options['group_column'] => $this->options['group_column']);
       }
 
-      $options += $this->options['group_columns'];
+      $options += is_array($this->options['group_columns']) ? $this->options['group_columns'] : array();
 
 
       $fields = array();
