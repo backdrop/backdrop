@@ -1193,6 +1193,7 @@ class views_plugin_query_default extends views_plugin_query {
       }
       // This is a formula, using no tables.
       elseif (empty($field['table'])) {
+        $non_aggregates[] = $fieldname;
         $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
         $query->addExpression($string, $fieldname, $placeholders);
       }
