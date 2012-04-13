@@ -251,6 +251,7 @@ files[] = plugins/views_plugin_style_table.inc
 ; Tests
 files[] = tests/handlers/views_handler_area_text.test
 files[] = tests/handlers/views_handler_argument_null.test
+files[] = tests/handlers/views_handler_argument_string.test
 files[] = tests/handlers/views_handler_field.test
 files[] = tests/handlers/views_handler_field_boolean.test
 files[] = tests/handlers/views_handler_field_custom.test
