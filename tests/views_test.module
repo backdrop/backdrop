@@ -28,14 +28,14 @@ function views_test_views_api() {
 }
 
 /**
- * Implements hook_views_data()
+ * Implements hook_views_data().
  */
 function views_test_views_data() {
   return  variable_get('views_test_views_data', array());
 }
 
 /**
- * Implements hook_views_plugins()
+ * Implements hook_views_plugins().
  */
 function views_test_views_plugins() {
   return variable_get('views_test_views_plugins', array());

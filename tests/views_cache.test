@@ -7,6 +7,8 @@
 
 /**
  * Basic test for pluggable caching.
+ *
+ * @see views_plugin_cache
  */
 class ViewsCacheTest extends ViewsSqlTest {
   public static function getInfo() {
@@ -19,6 +21,8 @@ class ViewsCacheTest extends ViewsSqlTest {
 
   /**
    * Build and return a basic view of the views_test table.
+   *
+   * @return view
    */
   protected function getBasicView() {
     views_include('view');
@@ -68,6 +72,8 @@ class ViewsCacheTest extends ViewsSqlTest {
 
   /**
    * Tests time based caching.
+   *
+   * @see views_plugin_cache_time
    */
   function testTimeCaching() {
     // Create a basic result which just 2 results.
@@ -107,6 +113,8 @@ class ViewsCacheTest extends ViewsSqlTest {
 
   /**
    * Tests no caching.
+   *
+   * @see views_plugin_cache_time
    */
   function testNoneCaching() {
     // Create a basic result which just 2 results.
@@ -129,13 +137,11 @@ class ViewsCacheTest extends ViewsSqlTest {
 
     drupal_write_record('views_test', $record);
 
-    // The Result should be the same as before, because of the caching.
+    // The Result changes, because the view is not cached.
     $view = $this->getBasicView();
     $view->set_display();
     $view->display_handler->override_option('cache', array(
-      'type' => 'time',
-      'results_lifespan' => '3600',
-      'output_lifespan' => '3600',
+      'type' => 'none',
     ));
 
     $this->executeView($view);
