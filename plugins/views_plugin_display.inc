@@ -228,6 +228,25 @@ class views_plugin_display extends views_plugin {
       $changed = TRUE;
     }
 
+    // Filter groups were allowed to be rewritten without its filters, so
+    // before this update the view was using the default values. To be sure that
+    // the existing view isn't broken, don't use this overridden values but copy
+    // them from the default display. Only do this if the filters are overridden
+    // but the filter_groups are not marked as so.
+    if (!$this->is_default_display() && !$this->options['defaults']['filters'] && $this->options['defaults']['filter_groups']) {
+      // Set filter_groups to be overridden and save the value in the
+      // display_options as well.
+      $this->options['defaults']['filter_groups'] = FALSE;
+      $this->display->display_options['defaults']['filter_groups'] = $this->options['defaults']['filter_groups'];
+      // Copy the filter_groups from the default, and add them to the
+      // display_options as well. $this->default_display is not initialized at
+      // this point.
+      $this->options['filter_groups'] = $this->view->display['default']->handler->options['filter_groups'];
+      $this->display->display_options['filter_groups'] = $this->options['filter_groups'];
+
+      $changed = TRUE;
+    }
+
     // Mark the view as changed so the user has a chance to save it.
     if ($changed) {
       $this->view->changed = TRUE;
@@ -418,6 +437,7 @@ class views_plugin_display extends views_plugin {
       'sorts' => array('sorts'),
       'arguments' => array('arguments'),
       'filters' => array('filters', 'filter_groups'),
+      'filter_groups' => array('filters', 'filter_groups'),
     );
 
     // If the display cannot use a pager, then we cannot default it.
@@ -2415,6 +2435,13 @@ class views_plugin_display extends views_plugin {
 
   /**
    * Flip the override setting for the given section.
+   *
+   * @param string $section
+   *   Which option should be marked as overridden, for example "filters".
+   * @param bool $new_state
+   *   Select the new state of the option.
+   *     - TRUE: Revert to default.
+   *     - FALSE: Mark it as overridden.
    */
   function set_override($section, $new_state = NULL) {
     $options = $this->defaultable_sections($section);
