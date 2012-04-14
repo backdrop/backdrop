@@ -2694,6 +2694,15 @@ class views_plugin_display extends views_plugin {
 
   /**
    * Check if the provided identifier is unique.
+   *
+   * @param string $id
+   *   The id of the handler which is checked.
+   * @param string $identifier
+   *   The actual get identifier configured in the exposed settings.
+   *
+   * @return bool
+   *   Returns whether the identifier is unique on all handlers.
+   *
    */
   function is_identifier_unique($id, $identifier) {
     foreach (views_object_types() as $type => $info) {
