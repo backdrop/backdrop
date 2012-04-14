@@ -33,17 +33,23 @@ class views_object {
    * @code
    * 'option_name' => array(
    *  - 'default' => default value,
-   *  - 'translatable' => TRUE/FALSE (wrap in t() on export if true),
-   *  - 'contains' => array of items this contains, with its own defaults, etc.
-   *      If contains is set, the default will be ignored and assumed to
-   *      be array()
-   *
+   *  - 'translatable' => (optional) TRUE/FALSE (wrap in t() on export if true),
+   *  - 'contains' => (optional) array of items this contains, with its own
+   *      defaults, etc. If contains is set, the default will be ignored and
+   *      assumed to be array().
+   *  - 'bool' => (optional) TRUE/FALSE Is the value a boolean value. This will
+   *      change the export format to TRUE/FALSE instead of 1/0.
+   *  - 'export' => (optional) FALSE or a callback for special export handling
+   *      if necessary.
+   *  - 'unpack_translatable' => (optional) callback for special handling for
+   *      translating data within the option, if necessary.
    *  ),
-   *  @endcode
-   * Each option may have any of the following functions:
-   *  - export_option_OPTIONNAME -- Special export handling if necessary.
-   *  - translate_option_OPTIONNAME -- Special handling for translating data
-   *    within the option, if necessary.
+   *
+   * @return array
+   *   Returns the options of this handler/plugin.
+   *
+   * @see views_object::export_option()
+   * @see views_object::unpack_translatable()
    */
   function option_definition() { return array(); }
 
@@ -56,6 +62,8 @@ class views_object {
   /**
    * Set default options on this object. Called by the constructor in a
    * complex chain to deal with backward compatibility.
+   *
+   * @deprecated since views2
    */
   function options(&$options) { }
 
