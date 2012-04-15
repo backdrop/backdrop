@@ -19,6 +19,8 @@
 class views_plugin_query extends views_plugin {
   /**
    * A pager plugin that should be provided by the display.
+   *
+   * @var views_plugin_pager
    */
   var $pager = NULL;
 
