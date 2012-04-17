@@ -47,6 +47,7 @@ function views_analyze_format_result($view, $messages) {
 
   $output = '';
   foreach ($types as $type => $messages) {
+    $type .= ' messages';
     $message = '';
     if (count($messages) > 1) {
       $message = theme('item_list', array('items' => $messages));
