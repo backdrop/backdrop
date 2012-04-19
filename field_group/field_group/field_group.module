@@ -698,11 +698,6 @@ function field_group_pre_render_htabs(&$element, $group, &$form) {
   // By default vertical_tabs don't have titles but you can override it in the theme.
   if (!empty($group->label)) {
     $element['#title'] = check_plain($group->label);
-
-    // On forms use theme_form_element to add the title.
-    if ($group->mode == 'form') {
-      $element['#theme_wrappers'][] = 'form_element';
-    }
   }
 
 }
@@ -809,11 +804,6 @@ function field_group_pre_render_tabs(&$element, $group, &$form) {
   // By default vertical_tabs don't have titles but you can override it in the theme.
   if (!empty($group->label)) {
     $element['#title'] = check_plain($group->label);
-
-    // On forms use theme_form_element to add the title.
-    if ($group->mode == 'form') {
-      $element['#theme_wrappers'][] = 'form_element';
-    }
   }
 
   $element[$group->group_name . '__active_tab'] = array(
