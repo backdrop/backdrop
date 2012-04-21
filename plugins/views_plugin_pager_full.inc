@@ -24,6 +24,8 @@ class views_plugin_pager_full extends views_plugin_pager {
     $options['offset'] = array('default' => 0);
     $options['id'] = array('default' => 0);
     $options['total_pages'] = array('default' => '');
+    // Use the same default quantity that core uses by default.
+    $options['quantity'] = array('default' => 9);
     $options['expose'] = array(
       'contains' => array(
         'items_per_page' => array('default' => FALSE, 'bool' => TRUE),
@@ -34,6 +36,14 @@ class views_plugin_pager_full extends views_plugin_pager {
 
         'offset' => array('default' => FALSE, 'bool' => TRUE),
         'offset_label' => array('default' => 'Offset', 'translatable' => TRUE),
+      ),
+    );
+    $options['tags'] = array(
+      'contains' => array(
+        'first' => array('default' => '« first', 'translatable' => TRUE),
+        'previous' => array('default' => '‹ previous', 'translatable' => TRUE),
+        'next' => array('default' => 'next ›', 'translatable' => TRUE),
+        'last' => array('default' => 'last »', 'translatable' => TRUE),
       ),
     );
     return $options;
@@ -71,6 +81,51 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#title' => t('Number of pages'),
       '#description' => t('The total number of pages. Leave empty to show all pages.'),
       '#default_value' => $this->options['total_pages'],
+    );
+
+    $form['quantity'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Number of pager links visible'),
+      '#description' => t('Specify the number of links to pages to display in the pager.'),
+      '#default_value' => $this->options['quantity'],
+    );
+
+    $form['tags'] = array (
+      '#type' => 'fieldset',
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+      '#title' => t('Tags'),
+      '#input' => TRUE,
+      '#description' => t('A lists of labels for the controls in the pager'),
+    );
+
+    $form['tags']['first'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Text for "first"-link'),
+      '#description' => t('Text for "first"-link'),
+      '#default_value' => $this->options['tags']['first'],
+    );
+
+    $form['tags']['previous'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Text for "previous"-link'),
+      '#description' => t('Text for "previous"-link'),
+      '#default_value' => $this->options['tags']['previous'],
+    );
+
+    $form['tags']['next'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Text for "next"-link'),
+      '#description' => t('Text for "next"-link'),
+      '#default_value' => $this->options['tags']['next'],
+    );
+
+    $form['tags']['last'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Text for "last"-link'),
+      '#description' => t('Text for "last"-link'),
+      '#default_value' => $this->options['tags']['last'],
     );
 
     $form['expose'] = array (
@@ -212,8 +267,19 @@ class views_plugin_pager_full extends views_plugin_pager {
 
   function render($input) {
     $pager_theme = views_theme_functions('pager', $this->view, $this->display);
+    // The 0, 1, 3, 4 index are correct. See theme_pager documentation.
+    $tags = array(
+      0 => $this->options['tags']['first'],
+      1 => $this->options['tags']['previous'],
+      3 => $this->options['tags']['next'],
+      4 => $this->options['tags']['last'],
+    );
     $output = theme($pager_theme, array(
-      'parameters' => $input, 'element' => $this->options['id']));
+      'tags' => $tags,
+      'element' => $this->options['id'],
+      'parameters' => $input,
+      'quantity' => $this->options['quantity'],
+    ));
     return $output;
   }
 

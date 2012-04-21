@@ -116,12 +116,15 @@ class ViewsTranslatableTest extends ViewsSqlTest {
         'Offset1' => array('pager', 'expose', 'offset_label'),
         'Master1' => array('title'),
         'title1' => array('title'),
+        'Tag first1' => array('pager', 'tags', 'first'),
+        'Tag prev1' => array('pager', 'tags', 'previous'),
+        'Tag next1' => array('pager', 'tags', 'next'),
+        'Tag last1' => array('pager', 'tags', 'last'),
         'Items per page1' => array('pager', 'expose', 'items_per_page_label'),
         'fieldlabel1' => array('field', 'node', 'nid', 'label'),
         'filterlabel1' => array('filter', 'node', 'nid', 'expose', 'label'),
         '- All -' => array('pager', 'expose', 'items_per_page_options_all_label'),
       );
-
       foreach ($translatables as $translatable) {
         $this->assertEqual($translatable['keys'], $this->string_keys[$translatable['value']]);
       }
@@ -155,6 +158,11 @@ class ViewsTranslatableTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['options']['items_per_page'] = '10';
     $handler->display->display_options['pager']['options']['offset'] = '0';
     $handler->display->display_options['pager']['options']['id'] = '0';
+    $handler->display->display_options['pager']['options']['quantity'] = '9';
+    $handler->display->display_options['pager']['options']['tags']['first'] = 'Tag first1';
+    $handler->display->display_options['pager']['options']['tags']['previous'] = 'Tag prev1';
+    $handler->display->display_options['pager']['options']['tags']['next'] = 'Tag next1';
+    $handler->display->display_options['pager']['options']['tags']['last'] = 'Tag last1';
     $handler->display->display_options['pager']['options']['expose']['items_per_page'] = TRUE;
     $handler->display->display_options['pager']['options']['expose']['items_per_page_label'] = 'Items per page1';
     $handler->display->display_options['pager']['options']['expose']['offset'] = TRUE;
