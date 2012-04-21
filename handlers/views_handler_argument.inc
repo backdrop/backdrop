@@ -380,6 +380,7 @@ class views_handler_argument extends views_handler {
               '#prefix' => '<div id="edit-options-validate-options-' . $id . '-wrapper">',
               '#suffix' => '</div>',
               '#type' => 'item',
+              // Even if the plugin has no options add the key to the form_state.
               '#input' => TRUE, // trick it into checking input to make #process run
               '#dependency' => array(
                 'edit-options-specify-validation' => array('1'),
@@ -579,6 +580,8 @@ class views_handler_argument extends views_handler {
             '#suffix' => '</div>',
             '#id' => 'edit-options-argument-default-options-' . $id,
             '#type' => 'item',
+            // Even if the plugin has no options add the key to the form_state.
+            '#input' => TRUE,
             '#dependency' => array(
               'radio:options[default_action]' => array('default'),
               'edit-options-default-argument-type' => array($id)
