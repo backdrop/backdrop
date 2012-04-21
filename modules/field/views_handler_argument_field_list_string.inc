@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of views_handler_argument_field_list.
+ * Definition of views_handler_argument_field_list_text.
  */
 
 /**
@@ -11,7 +11,7 @@
  *
  * @ingroup views_argument_handlers
  */
-class views_handler_argument_field_list extends views_handler_argument_numeric {
+class views_handler_argument_field_list_string extends views_handler_argument_string {
   /**
    * Stores the allowed values of this field.
    *
@@ -27,6 +27,7 @@ class views_handler_argument_field_list extends views_handler_argument_numeric {
 
   function option_definition() {
     $options = parent::option_definition();
+
     $options['summary']['contains']['human'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
@@ -48,11 +49,11 @@ class views_handler_argument_field_list extends views_handler_argument_numeric {
     $value = $data->{$this->name_alias};
     // If the list element has a human readable name show it,
     if (isset($this->allowed_values[$value]) && !empty($this->options['summary']['human'])) {
-      return field_filter_xss($this->allowed_values[$value]);
+      return $this->case_transform(field_filter_xss($this->allowed_values[$value]), $this->options['case']);
     }
     // else fallback to the key.
     else {
-      return check_plain($value);
+      return $this->case_transform(check_plain($value), $this->options['case']);
     }
   }
 }

@@ -224,7 +224,7 @@ class views_handler_argument_string extends views_handler_argument {
   }
 
   function summary_argument($data) {
-    $value = $this->case_transform($data->{$this->base_alias}, 'path_case');
+    $value = $this->case_transform($data->{$this->base_alias}, $this->options['path_case']);
     if (!empty($this->options['transform_dash'])) {
       $value = strtr($value, ' ', '-');
     }

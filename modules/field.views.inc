@@ -408,12 +408,17 @@ function field_views_field_default_views_data($field) {
 function list_field_views_data($field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
-    foreach ($table_data as $field => $field_data) {
-      if (isset($field_data['filter']) && $field != 'delta') {
-        $data[$table_name][$field]['filter']['handler'] = 'views_handler_filter_field_list';
+    foreach ($table_data as $field_name => $field_data) {
+      if (isset($field_data['filter']) && $field_name != 'delta') {
+        $data[$table_name][$field_name]['filter']['handler'] = 'views_handler_filter_field_list';
       }
-      if (isset($field_data['argument']) && $field != 'delta') {
-        $data[$table_name][$field]['argument']['handler'] = 'views_handler_argument_field_list';
+      if (isset($field_data['argument']) && $field_name != 'delta') {
+        if ($field['type'] == 'list_text') {
+          $data[$table_name][$field_name]['argument']['handler'] = 'views_handler_argument_field_list_string';
+        }
+        else {
+          $data[$table_name][$field_name]['argument']['handler'] = 'views_handler_argument_field_list';
+        }
       }
     }
   }
