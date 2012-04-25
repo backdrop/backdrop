@@ -180,13 +180,16 @@ class views_plugin_display_block extends views_plugin_display {
   /**
    * Block views use exposed widgets only if AJAX is set.
    */
-  function uses_exposed() {
-    if ($this->use_ajax()) {
-      return parent::uses_exposed();
+    function uses_exposed() {
+      if ($this->use_ajax()) {
+        return parent::uses_exposed();
+      }
+      //Warn user that for blocks, exposed filters only work with AJAX.
+      if (parent::uses_exposed()) {
+        drupal_set_message(t('Exposed filters in block displays require "Use AJAX" to be set to work correctly.'),'error',FALSE);
+      }
+      return FALSE;
     }
-
-    return FALSE;
-  }
 
   /**
    * Update the block delta when you change the machine readable name of the display.
