@@ -1076,15 +1076,21 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
    *   The field value.
    * @param bool $empty_zero
    *   Whether or not this field is configured to consider 0 as empty.
-   * @param bool $skip_empty
+   * @param bool $no_skip_empty
    *   Whether or not to use empty() to check the value.
    *
    * @return bool
    * TRUE if the value is considered empty, FALSE otherwise.
    */
-  function is_value_empty($value, $empty_zero, $skip_empty = TRUE) {
-    $empty = isset($value) && ($empty_zero || ($value !== 0 && $value !== '0'));
-    if ($skip_empty) {
+  function is_value_empty($value, $empty_zero, $no_skip_empty = TRUE) {
+    if (!isset($value)) {
+      $empty = TRUE;
+    }
+    else {
+      $empty = ($empty_zero || ($value !== 0 && $value !== '0'));
+    }
+
+    if ($no_skip_empty) {
       $empty = empty($value) && $empty;
     }
     return $empty;
