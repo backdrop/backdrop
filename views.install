@@ -426,7 +426,7 @@ function views_update_6009() {
     $sql = "SELECT vid, id, display_options_old FROM {views_display}";
     $result = db_query($sql);
     foreach ($result as $row) {
-      $row['display_options_old'] = db_decode_blob($row['display_options_old']);
+      $row['display_options_old'] = $row['display_options_old'];
       $sql = "UPDATE {views_display} SET display_options = :display_optons WHERE vid = :vid AND id = :id";
       db_query($sql, array(
         ':display_optons' => $row['display_options_old'],

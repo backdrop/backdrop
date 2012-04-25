@@ -79,7 +79,7 @@ function profile_views_get_fields() {
         }
         else {
           // serialized fields or modified version
-          $row->options = unserialize(db_decode_blob($row->options));
+          $row->options = unserialize($row->options);
         }
       }
       $fields[$row->fid] = $row;

@@ -2181,7 +2181,7 @@ class views_db_object {
 
         // serialized defaults must be set as serialized.
         if (isset($info['serialize'])) {
-          $this->$field = unserialize(db_decode_blob($this->$field));
+          $this->$field = unserialize($this->$field);
         }
       }
       $value = $this->$field;
