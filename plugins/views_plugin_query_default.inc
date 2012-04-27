@@ -1483,7 +1483,6 @@ class views_plugin_query_default extends views_plugin_query {
       catch (Exception $e) {
         $view->result = array();
         if (!empty($view->live_preview)) {
-          drupal_set_message(time());
           drupal_set_message($e->getMessage(), 'error');
         }
         else {
