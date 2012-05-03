@@ -173,6 +173,11 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
             $keys = array_keys($options);
             $default_value = array_shift($keys);
           }
+          // Due to #1464174 there is a chance that array('') was saved in the admin ui.
+          // Let's choose a safe default value.
+          elseif ($default_value == array('')) {
+            $default_value = 'All';
+          }
           else {
             $copy = $default_value;
             $default_value = array_shift($copy);
