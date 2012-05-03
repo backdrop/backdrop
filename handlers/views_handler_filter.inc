@@ -533,6 +533,11 @@ class views_handler_filter extends views_handler {
       if (is_array($label)) {
         $this->prepare_filter_select_options($options[$value]);
       }
+      // FAPI has some special value to allow hierarchy.
+      // @see _form_options_flatten
+      elseif (is_object($label)) {
+        $this->prepare_filter_select_options($options[$value]->option);
+      }
       else {
         $options[$value] = strip_tags(decode_entities($label));
       }
