@@ -303,15 +303,6 @@ function comment_views_data() {
     ),
   );
 
-  // link to disapprove comment
-  $data['comment']['disapprove_comment'] = array(
-    'field' => array(
-      'title' => t('Disapprove link'),
-      'help' => t('Provide a simple link to disapprove the comment.'),
-      'handler' => 'views_handler_field_comment_link_disapprove',
-    ),
-  );
-
   // link to reply to comment
   $data['comment']['replyto_comment'] = array(
     'field' => array(
