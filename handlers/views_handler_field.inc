@@ -13,7 +13,7 @@
  */
 
 /**
- * Indicator of the render_text() mehtod for rendering a single item.
+ * Indicator of the render_text() method for rendering a single item.
  * (If no render_item() is present).
  */
 define('VIEWS_HANDLER_RENDER_TEXT_PHASE_SINGLE_ITEM', 0);
