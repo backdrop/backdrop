@@ -142,7 +142,7 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     if (!empty($results[$entity_type])) {
       $entities = entity_load($entity_type, array_keys($results[$entity_type]));
       foreach ($entities as $entity_id => $entity) {
-        $options[$entity_id] = $this->getLabel($entity);
+        $options[$entity_id] = check_plain($this->getLabel($entity));
       }
     }
 

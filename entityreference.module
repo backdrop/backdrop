@@ -783,11 +783,13 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
     // Loop through the products and convert them into autocomplete output.
     foreach ($entity_labels as $entity_id => $label) {
       $key = "$label ($entity_id)";
+      // Strip things like starting/trailing white spaces, line breaks and tags.
+      $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
       // Names containing commas or quotes must be wrapped in quotes.
       if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
         $key = '"' . str_replace('"', '""', $key) . '"';
       }
-      $matches[$prefix . $key] = '<div class="reference-autocomplete">' . check_plain($label) . '</div>';
+      $matches[$prefix . $key] = '<div class="reference-autocomplete">' . $label . '</div>';
     }
   }
 

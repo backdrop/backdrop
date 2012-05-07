@@ -18,6 +18,10 @@ interface EntityReference_SelectionHandler {
 
   /**
    * Return a list of referencable entities.
+   *
+   * @return
+   *   An array of referencable entities, which keys are entity ids and
+   *   values (safe HTML) labels to be displayed to the user.
    */
   public function getReferencableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0);
 

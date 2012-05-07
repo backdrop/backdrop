@@ -51,31 +51,32 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     );
 
     // Build a set of test data.
+    // Titles contain HTML-special characters to test escaping.
     $nodes = array(
       'published1' => (object) array(
         'type' => 'article',
         'status' => 1,
-        'title' => 'Node published1',
+        'title' => 'Node published1 (<&>)',
         'uid' => 1,
       ),
       'published2' => (object) array(
         'type' => 'article',
         'status' => 1,
-        'title' => 'Node published2',
+        'title' => 'Node published2 (<&>)',
         'uid' => 1,
       ),
       'unpublished' => (object) array(
         'type' => 'article',
         'status' => 0,
-        'title' => 'Node unpublished',
+        'title' => 'Node unpublished (<&>)',
         'uid' => 1,
       ),
     );
 
     $node_labels = array();
-    foreach ($nodes as $node) {
+    foreach ($nodes as $key => $node) {
       node_save($node);
-      $node_labels[$node->nid] = $node->title;
+      $node_labels[$key] = check_plain($node->title);
     }
 
     // Test as a non-admin.
@@ -87,8 +88,8 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published1']->nid => $nodes['published1']->title,
-          $nodes['published2']->nid => $nodes['published2']->title,
+          $nodes['published1']->nid => $node_labels['published1'],
+          $nodes['published2']->nid => $node_labels['published2'],
         ),
       ),
       array(
@@ -97,7 +98,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Published1', 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published1']->nid => $nodes['published1']->title,
+          $nodes['published1']->nid => $node_labels['published1'],
         ),
       ),
       array(
@@ -106,7 +107,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Published2', 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published2']->nid => $nodes['published2']->title,
+          $nodes['published2']->nid => $node_labels['published2'],
         ),
       ),
       array(
@@ -133,9 +134,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published1']->nid => $nodes['published1']->title,
-          $nodes['published2']->nid => $nodes['published2']->title,
-          $nodes['unpublished']->nid => $nodes['unpublished']->title,
+          $nodes['published1']->nid => $node_labels['published1'],
+          $nodes['published2']->nid => $node_labels['published2'],
+          $nodes['unpublished']->nid => $node_labels['unpublished'],
         ),
       ),
       array(
@@ -143,7 +144,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Node unpublished', 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['unpublished']->nid => $nodes['unpublished']->title,
+          $nodes['unpublished']->nid => $node_labels['unpublished'],
         ),
       ),
     );
@@ -175,14 +176,14 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
       'anonymous' => user_load(0),
       'admin' => user_load(1),
       'non_admin' => (object) array(
-        'name' => 'non_admin',
+        'name' => 'non_admin <&>',
         'mail' => 'non_admin@example.com',
         'roles' => array(),
         'pass' => user_password(),
         'status' => 1,
       ),
       'blocked' => (object) array(
-        'name' => 'blocked',
+        'name' => 'blocked <&>',
         'mail' => 'blocked@example.com',
         'roles' => array(),
         'pass' => user_password(),
@@ -198,7 +199,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
       if (!isset($user->uid)) {
         $users[$key] = $user = user_save(drupal_anonymous_user(), (array) $user);
       }
-      $user_labels[$user->uid] = $user->name;
+      $user_labels[$key] = check_plain($user->name);
     }
 
     // Test as a non-admin.
@@ -209,8 +210,8 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $users['admin']->uid => $users['admin']->name,
-          $users['non_admin']->uid => $users['non_admin']->name,
+          $users['admin']->uid => $user_labels['admin'],
+          $users['non_admin']->uid => $user_labels['non_admin'],
         ),
       ),
       array(
@@ -219,7 +220,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('NON_ADMIN', 'CONTAINS'),
         ),
         'result' => array(
-          $users['non_admin']->uid => $users['non_admin']->name,
+          $users['non_admin']->uid => $user_labels['non_admin'],
         ),
       ),
       array(
@@ -244,10 +245,10 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $users['anonymous']->uid => $users['anonymous']->name,
-          $users['admin']->uid => $users['admin']->name,
-          $users['non_admin']->uid => $users['non_admin']->name,
-          $users['blocked']->uid => $users['blocked']->name,
+          $users['anonymous']->uid => $user_labels['anonymous'],
+          $users['admin']->uid => $user_labels['admin'],
+          $users['non_admin']->uid => $user_labels['non_admin'],
+          $users['blocked']->uid => $user_labels['blocked'],
         ),
       ),
       array(
@@ -255,7 +256,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('blocked', 'CONTAINS'),
         ),
         'result' => array(
-          $users['blocked']->uid => $users['blocked']->name,
+          $users['blocked']->uid => $user_labels['blocked'],
         ),
       ),
       array(
@@ -264,7 +265,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('anonymous', 'CONTAINS'),
         ),
         'result' => array(
-          $users['anonymous']->uid => $users['anonymous']->name,
+          $users['anonymous']->uid => $user_labels['anonymous'],
         ),
       ),
     );
@@ -317,7 +318,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         'cid' => NULL,
         'pid' => 0,
         'status' => COMMENT_PUBLISHED,
-        'subject' => 'Comment Published',
+        'subject' => 'Comment Published <&>',
         'hostname' => ip_address(),
         'language' => LANGUAGE_NONE,
       ),
@@ -327,7 +328,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         'cid' => NULL,
         'pid' => 0,
         'status' => COMMENT_NOT_PUBLISHED,
-        'subject' => 'Comment Unpublished',
+        'subject' => 'Comment Unpublished <&>',
         'hostname' => ip_address(),
         'language' => LANGUAGE_NONE,
       ),
@@ -337,16 +338,16 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         'cid' => NULL,
         'pid' => 0,
         'status' => COMMENT_NOT_PUBLISHED,
-        'subject' => 'Comment Published on Unpublished node',
+        'subject' => 'Comment Published on Unpublished node <&>',
         'hostname' => ip_address(),
         'language' => LANGUAGE_NONE,
       ),
     );
 
     $comment_labels = array();
-    foreach ($comments as $comment) {
+    foreach ($comments as $key => $comment) {
       comment_save($comment);
-      $comment_labels[$comment->cid] = $comment->subject;
+      $comment_labels[$key] = check_plain($comment->subject);
     }
 
     // Test as a non-admin.
@@ -358,7 +359,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comments['published_published']->subject,
+          $comments['published_published']->cid => $comment_labels['published_published'],
         ),
       ),
       array(
@@ -366,7 +367,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Published', 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comments['published_published']->subject,
+          $comments['published_published']->cid => $comment_labels['published_published'],
         ),
       ),
       array(
@@ -393,8 +394,8 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comments['published_published']->subject,
-          $comments['published_unpublished']->cid => $comments['published_unpublished']->subject,
+          $comments['published_published']->cid => $comment_labels['published_published'],
+          $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
         ),
       ),
     );
@@ -409,9 +410,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comments['published_published']->subject,
-          $comments['published_unpublished']->cid => $comments['published_unpublished']->subject,
-          $comments['unpublished_published']->cid => $comments['unpublished_published']->subject,
+          $comments['published_published']->cid => $comment_labels['published_published'],
+          $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
+          $comments['unpublished_published']->cid => $comment_labels['unpublished_published'],
         ),
       ),
     );
