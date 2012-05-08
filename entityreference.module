@@ -367,7 +367,7 @@ function _entityreference_field_settings_process($form, $form_state) {
     '#options' => $entity_type_options,
     '#default_value' => $field['settings']['target_type'],
     '#required' => TRUE,
-    '#description' => t('The entity type that can be referenced thru this field.'),
+    '#description' => t('The entity type that can be referenced through this field.'),
     '#disabled' => $has_data,
     '#size' => 1,
     '#ajax' => array(
