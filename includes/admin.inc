@@ -4992,7 +4992,14 @@ function _views_sort_types($a, $b) {
 /**
  * Fetch a list of all fields available for a given base type.
  *
- * @return
+ * @param (array|string) $base
+ *   A list or a single base_table, for example node.
+ * @param string $type
+ *   The handler type, for example field or filter.
+ * @param bool $grouping
+ *   Should the result grouping by its 'group' label.
+ *
+ * @return array
  *   A keyed array of in the form of 'base_table' => 'Description'.
  */
 function views_fetch_fields($base, $type, $grouping = FALSE) {
