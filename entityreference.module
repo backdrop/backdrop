@@ -682,7 +682,6 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
     }
 
     $autocomplete_path .= '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'];
-    unset($entity->nid);
     list($id) = entity_extract_ids($entity_type, $entity);
     $autocomplete_path .= '/' . $id;
 
