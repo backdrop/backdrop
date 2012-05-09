@@ -170,26 +170,18 @@ function _entityreference_get_behavior_handler($behavior) {
 
 /**
  * Get the selection handler for a given entityreference field.
- *
- * The handler contains most of the business logic of the field.
  */
-function entityreference_get_selection_handler($field, $instance = NULL) {
-  $object_cache = drupal_static(__FUNCTION__);
+function entityreference_get_selection_handler($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
+  ctools_include('plugins');
+  $handler = $field['settings']['handler'];
+  $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
 
-  if (!isset($object_cache[$field['field_name']])) {
-    ctools_include('plugins');
-    $handler = $field['settings']['handler'];
-    $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
-
-    if (class_exists($class)) {
-      $object_cache[$field['field_name']] = call_user_func(array($class, 'getInstance'), $field, $instance);
-    }
-    else {
-      $object_cache[$field['field_name']] = EntityReference_SelectionHandler_Broken::getInstance($field, $instance);
-    }
+  if (class_exists($class)) {
+    return call_user_func(array($class, 'getInstance'), $field, $instance, $entity_type, $entity);
   }
-
-  return $object_cache[$field['field_name']];
+  else {
+    return EntityReference_SelectionHandler_Broken::getInstance($field, $instance, $entity_type, $entity);
+  }
 }
 
 /**
@@ -217,7 +209,7 @@ function entityreference_field_validate($entity_type, $entity, $field, $instance
     return;
   }
 
-  $valid_ids = entityreference_get_selection_handler($field, $instance)->validateReferencableEntities(array_keys($ids));
+  $valid_ids = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->validateReferencableEntities(array_keys($ids));
 
   $invalid_entities = array_diff_key($ids, array_flip($valid_ids));
   if ($invalid_entities) {
@@ -627,24 +619,25 @@ function entityreference_field_widget_settings_form($field, $instance) {
 /**
  * Implements hook_options_list().
  */
-function entityreference_options_list($field, $instance = NULL) {
-  return entityreference_get_selection_handler($field, $instance)->getReferencableEntities();
+function entityreference_options_list($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
+  return entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->getReferencableEntities();
 }
 
 /**
  * Implements hook_query_TAG_alter().
  */
 function entityreference_query_entityreference_alter(QueryAlterableInterface $query) {
-  $field = $query->getMetadata('field');
-  $instance = $query->getMetadata('instance');
-  entityreference_get_selection_handler($field, $instance)->entityFieldQueryAlter($query);
+  $handler = $query->getMetadata('entityreference_selection_handler');
+  $handler->entityFieldQueryAlter($query);
 }
 
 /**
  * Implements hook_field_widget_form().
  */
 function entityreference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $handler = entityreference_get_selection_handler($field, $instance);
+  $entity_type = $instance['entity_type'];
+  $entity = isset($element['#entity']) ? $element['#entity'] : NULL;
+  $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
   if ($instance['widget']['type'] == 'entityreference_autocomplete' || $instance['widget']['type'] == 'entityreference_autocomplete_tags') {
 
@@ -670,8 +663,8 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
     // Load those entities and loop through them to extract their labels.
     $entities = entity_load($field['settings']['target_type'], $entity_ids);
 
-    foreach ($entities as $entity_id => $entity) {
-      $label = $handler->getLabel($entity);
+    foreach ($entities as $entity_id => $entity_item) {
+      $label = $handler->getLabel($entity_item);
       $key = "$label ($entity_id)";
       // Labels containing commas or quotes must be wrapped in quotes.
       if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
@@ -680,25 +673,36 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
       $entity_labels[] = $key;
     }
 
+    // Prepare the autocomplete path.
+    if (!empty($instance['widget']['settings']['path'])) {
+      $autocomplete_path = $instance['widget']['settings']['path'];
+    }
+    else {
+      $autocomplete_path = $instance['widget']['type'] == 'entityreference_autocomplete' ? 'entityreference/autocomplete/single' : 'entityreference/autocomplete/tags';
+    }
+
+    $autocomplete_path .= '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'];
+    unset($entity->nid);
+    list($id) = entity_extract_ids($entity_type, $entity);
+    $autocomplete_path .= '/' . $id;
+
     if ($instance['widget']['type'] == 'entityreference_autocomplete') {
-      $path = !empty($instance['widget']['settings']['path']) ? $instance['widget']['settings']['path'] : 'entityreference/autocomplete/single';
       $element += array(
         '#type' => 'textfield',
         '#maxlength' => 1024,
         '#default_value' => implode(', ', $entity_labels),
-        '#autocomplete_path' => $path . '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'],
+        '#autocomplete_path' => $autocomplete_path,
         '#size' => $instance['widget']['settings']['size'],
         '#element_validate' => array('_entityreference_autocomplete_validate'),
       );
       return array('target_id' => $element);
     }
     else {
-      $path = !empty($instance['widget']['settings']['path']) ? $instance['widget']['settings']['path'] : 'entityreference/autocomplete/tags';
       $element += array(
         '#type' => 'textfield',
         '#maxlength' => 1024,
         '#default_value' => implode(', ', $entity_labels),
-        '#autocomplete_path' => $path . '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'],
+        '#autocomplete_path' => $autocomplete_path,
         '#size' => $instance['widget']['settings']['size'],
         '#element_validate' => array('_entityreference_autocomplete_tags_validate'),
       );
@@ -750,8 +754,22 @@ function entityreference_field_widget_error($element, $error) {
 
 /**
  * Menu callback: autocomplete the label of an entity.
+ *
+ * @param $type
+ *   The widget type (i.e. 'single' or 'tags').
+ * @param $field_name
+ *   The name of the entity-reference field.
+ * @param $entity_type
+ *   The entity type.
+ * @param $bundle_name
+ *   The bundle name.
+ * @param $entity_id
+ *   Optional; The entity ID the entity-reference field is attached to.
+ *   Defaults to ''.
+ * @param $string
+ *   The label of the entity to query by.
  */
-function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $string = '') {
+function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
   $field = field_info_field($field_name);
   $instance = field_info_instance($entity_type, $field_name, $bundle_name);
   $matches = array();
@@ -760,7 +778,8 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
     return MENU_ACCESS_DENIED;
   }
 
-  $handler = entityreference_get_selection_handler($field, $instance);
+  $entity = $entity_id !== '' ? entity_load_single($entity_type, $entity_id) : NULL;
+  $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
   if ($type == 'tags') {
     // The user enters a comma-separated list of tags. We only autocomplete the last tag.
@@ -937,7 +956,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 
   switch ($display['type']) {
     case 'entityreference_label':
-      $handler = entityreference_get_selection_handler($field, $instance);
+      $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
       foreach ($items as $delta => $item) {
         $label = $handler->getLabel($item['entity']);

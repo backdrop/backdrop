@@ -14,7 +14,7 @@ interface EntityReference_SelectionHandler {
    *   A field datastructure.
    * @return EntityReferenceHandler
    */
-  public static function getInstance($field, $instance);
+  public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL);
 
   /**
    * Return a list of referencable entities.
@@ -58,8 +58,8 @@ interface EntityReference_SelectionHandler {
  * A null implementation of EntityReference_SelectionHandler.
  */
 class EntityReference_SelectionHandler_Broken implements EntityReference_SelectionHandler {
-  public static function getInstance($field, $instance) {
-    return new EntityReference_SelectionHandler_Broken($field, $instance);
+  public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
+    return new EntityReference_SelectionHandler_Broken($field, $instance, $entity_type, $entity);
   }
 
   protected function __construct($field, $instance) {

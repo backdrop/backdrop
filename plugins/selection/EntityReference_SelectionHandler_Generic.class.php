@@ -11,26 +11,28 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
   /**
    * Implements EntityReferenceHandler::getInstance().
    */
-  public static function getInstance($field, $instance) {
-    $entity_type = $field['settings']['target_type'];
+  public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
+    $target_entity_type = $field['settings']['target_type'];
 
     // Check if the entity type does exist and has a base table.
-    $entity_info = entity_get_info($entity_type);
+    $entity_info = entity_get_info($target_entity_type);
     if (empty($entity_info['base table'])) {
       return EntityReference_SelectionHandler_Broken::getInstance($field, $instance);
     }
 
-    if (class_exists($class_name = 'EntityReference_SelectionHandler_Generic_' . $entity_type)) {
-      return new $class_name($field, $instance);
+    if (class_exists($class_name = 'EntityReference_SelectionHandler_Generic_' . $target_entity_type)) {
+      return new $class_name($field, $instance, $entity_type, $entity);
     }
     else {
-      return new EntityReference_SelectionHandler_Generic($field, $instance);
+      return new EntityReference_SelectionHandler_Generic($field, $instance, $entity_type, $entity);
     }
   }
 
-  protected function __construct($field, $instance) {
+  protected function __construct($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
     $this->field = $field;
     $this->instance = $instance;
+    $this->entity_type = $entity_type;
+    $this->entity = $entity;
   }
 
   /**
@@ -196,6 +198,7 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     $query->addTag($this->field['settings']['target_type'] . '_access');
     $query->addTag('entityreference');
     $query->addMetaData('field', $this->field);
+    $query->addMetaData('entityreference_selection_handler', $this);
 
     // Add the sort option.
     if (!empty($this->field['settings']['handler_settings']['sort'])) {
