@@ -8,7 +8,7 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
   /**
    * Implements EntityReferenceHandler::getInstance().
    */
-  public static function getInstance($field, $instance) {
+  public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
     return new EntityReference_SelectionHandler_Views($field, $instance);
   }
 
