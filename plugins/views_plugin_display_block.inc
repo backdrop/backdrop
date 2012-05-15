@@ -31,10 +31,10 @@ class views_plugin_display_block extends views_plugin_display {
 
     if (empty($desc)) {
       if ($this->display->display_title == $this->definition['title']) {
-        $desc = t('View: @view', array('@view' => $this->view->get_human_name()));
+        $desc = t('View: !view', array('!view' => $this->view->get_human_name()));
       }
       else {
-        $desc = t('View: @view: @display', array('@view' => $this->view->get_human_name(), '@display' => $this->display->display_title));
+        $desc = t('View: !view: !display', array('!view' => $this->view->get_human_name(), '!display' => $this->display->display_title));
       }
     }
     return array(
