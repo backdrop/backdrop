@@ -86,11 +86,6 @@ class views_plugin_display_block extends views_plugin_display {
       'value' => views_ui_truncate($block_description, 24),
     );
 
-    $cache_type = $this->get_option('block_caching');
-    if (empty($cache_type)) {
-      $cache_type = DRUPAL_NO_CACHE;
-    }
-
     $types = $this->block_caching_modes();
     $options['block_caching'] = array(
       'category' => 'other',
