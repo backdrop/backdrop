@@ -32,13 +32,9 @@ class views_handler_field_contextual_links extends views_handler_field {
       '#default_value' => $this->options['fields'],
     );
     $form['destination'] = array(
-      '#type' => 'select',
+      '#type' => 'checkbox',
       '#title' => t('Include destination'),
       '#description' => t('Include a "destination" parameter in the link to return the user to the original view upon completing the contextual action.'),
-      '#options' => array(
-        '0' => t('No'),
-        '1' => t('Yes'),
-      ),
       '#default_value' => $this->options['destination'],
     );
   }
