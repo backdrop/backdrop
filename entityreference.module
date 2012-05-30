@@ -681,9 +681,11 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
       $autocomplete_path = $instance['widget']['type'] == 'entityreference_autocomplete' ? 'entityreference/autocomplete/single' : 'entityreference/autocomplete/tags';
     }
 
-    $autocomplete_path .= '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'];
-    list($id) = entity_extract_ids($entity_type, $entity);
-    $autocomplete_path .= '/' . $id;
+    $autocomplete_path .= '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'] . '/';
+    if ($entity) {
+      list($id) = entity_extract_ids($entity_type, $entity);
+      $autocomplete_path .= $id;
+    }
 
     if ($instance['widget']['type'] == 'entityreference_autocomplete') {
       $element += array(
