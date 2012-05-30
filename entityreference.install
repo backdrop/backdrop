@@ -154,7 +154,7 @@ function entityreference_update_7002() {
     $table_name = _field_sql_storage_tablename($field);
     $revision_name = _field_sql_storage_revision_tablename($field);
 
-    db_change_field($table_name, $field_name . '_target_type', array(
+    db_change_field($table_name, $field_name . '_target_id', $field_name . '_target_id', array(
       'description' => 'The id of the target entity.',
       'type' => 'int',
       'unsigned' => TRUE,
