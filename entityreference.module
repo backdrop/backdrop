@@ -729,9 +729,14 @@ function _entityreference_autocomplete_validate($element, &$form_state, $form) {
     // Take "label (entity id)', match the id from parenthesis.
     if (preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
       $value = $matches[1];
+    } else {
+      // Try to get a match from the input string when the user didn't use the
+      // autocomplete but filled in a value manually.
+      $field = field_info_field($element['#field_name']);
+      $handler = entityreference_get_selection_handler($field);
+      $value = $handler->validateAutocompleteInput($element['#value'], $element, $form_state, $form);
     }
   }
-
   // Update the value of this element so the field can validate the product IDs.
   form_set_value($element, $value, $form_state);
 }
@@ -748,10 +753,17 @@ function _entityreference_autocomplete_tags_validate($element, &$form_state, $fo
         $value[] = array(
           'target_id' => $matches[1],
         );
+      } else {
+        // Try to get a match from the input string when the user didn't use the
+        // autocomplete but filled in a value manually.
+        $field = field_info_field($element['#field_name']);
+        $handler = entityreference_get_selection_handler($field);
+        $value[] = array(
+          'target_id' => $handler->validateAutocompleteInput($entity, $element, $form_state, $form),
+        );
       }
     }
   }
-
   // Update the value of this element so the field can validate the product IDs.
   form_set_value($element, $value, $form_state);
 }
