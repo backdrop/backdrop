@@ -15,7 +15,7 @@ class views_handler_field_contextual_links extends views_handler_field {
     $options = parent::option_definition();
 
     $options['fields'] = array('default' => array());
-    $options['destination'] = array('default' => 1);
+    $options['destination'] = array('default' => TRUE, 'bool' => TRUE);
 
     return $options;
   }
