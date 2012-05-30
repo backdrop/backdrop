@@ -10,6 +10,16 @@ function entityreference_ctools_plugin_directory($module, $plugin) {
 }
 
 /**
+ * Implements hook_init().
+ */
+function entityreference_init() {
+  // Include feeds.module integration.
+  if (module_exists('feeds')) {
+    module_load_include('inc','entityreference','entityreference.feeds');
+  }
+}
+
+/**
  * Implements hook_ctools_plugin_type().
  */
 function entityreference_ctools_plugin_type() {

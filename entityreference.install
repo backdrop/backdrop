@@ -18,10 +18,10 @@ function entityreference_field_schema($field) {
     $schema = array(
       'columns' => array(
         'target_id' => array(
-          'description' => 'The id of the target entity',
+          'description' => 'The id of the target entity.',
           'type' => 'int',
           'unsigned' => TRUE,
-          'not null' => FALSE,
+          'not null' => TRUE,
         ),
       ),
       'indexes' => array(
@@ -130,5 +130,35 @@ function entityreference_update_7001() {
     db_drop_index($revision_name, $field_name . '_target_id');
     db_drop_field($revision_name, $field_name . '_target_type');
     db_add_index($revision_name, $field_name . '_target_id', array($field_name . '_target_id'));
+  }
+}
+
+/**
+ * Make the target_id column NOT NULL.
+ */
+function entityreference_update_7002() {
+  if (!module_exists('field_sql_storage')) {
+    return;
+  }
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] != 'entityreference') {
+      // Not an entity reference field.
+      continue;
+    }
+
+    if ($field['storage']['type'] !== 'field_sql_storage') {
+      // Field doesn't use SQL storage, we cannot modify the schema.
+      continue;
+    }
+
+    $table_name = _field_sql_storage_tablename($field);
+    $revision_name = _field_sql_storage_revision_tablename($field);
+
+    db_change_field($table_name, $field_name . '_target_type', array(
+      'description' => 'The id of the target entity.',
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+    ));
   }
 }
