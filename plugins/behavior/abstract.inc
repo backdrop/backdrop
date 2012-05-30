@@ -89,7 +89,7 @@ interface EntityReference_BehaviorHandler {
   /**
    * Act after updating an entity reference field.
    *
-   * @see hook_field_attach_insert()
+   * @see hook_field_attach_update()
    */
   public function postUpdate($entity_type, $entity, $field, $instance);
 

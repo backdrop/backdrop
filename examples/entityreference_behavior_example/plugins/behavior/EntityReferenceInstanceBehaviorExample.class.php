@@ -24,7 +24,7 @@ class EntityReferenceInstanceBehaviorExample extends EntityReference_BehaviorHan
   public function settingsForm($field, $instance) {
     $form['test_instance'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Instance behavoir setting'),
+      '#title' => t('Instance behavior setting'),
     );
     return $form;
   }

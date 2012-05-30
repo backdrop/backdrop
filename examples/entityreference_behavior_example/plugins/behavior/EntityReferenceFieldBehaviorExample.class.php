@@ -24,7 +24,7 @@ class EntityReferenceFieldBehaviorExample extends EntityReference_BehaviorHandle
   public function settingsForm($field, $instance) {
     $form['test_field'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Field behavoir setting'),
+      '#title' => t('Field behavior setting'),
     );
     return $form;
   }
