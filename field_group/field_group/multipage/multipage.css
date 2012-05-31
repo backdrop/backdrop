@@ -69,9 +69,12 @@ a.multipage-link-previous:hover {
 }
 
 .multipage-controls-list input#edit-submit {
-  background-image: -moz-linear-gradient(top,#4d90fe,#4787ed);
+  background: #4D90FE; /* for non-css3 browsers */
+  background-image: #4D90FE; /* for non-css3 browsers */
   background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
-  background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4D90FE', endColorstr='#4787ED'); /* for IE */
+  background: -webkit-gradient(linear, center top, center bottom, from(#4D90FE), to(#4787ED)); /* for webkit browsers */
+  background: -moz-linear-gradient(center top,  #4D90FE,  #4787ED); /* for firefox 3.6+ */ 
   color: white;
   text-shadow: none;
   text-transform: uppercase;
