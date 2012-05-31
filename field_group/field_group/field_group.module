@@ -1804,12 +1804,12 @@ function field_group_pre_render(& $element, $group, & $form) {
  */
 function field_group_hide_field_groups(&$element, $group_names) {
   foreach ($group_names as $group_name) {
-    if (isset($form['#fieldgroups'][$group_name]) && isset($form['#group_children'])) {
+    if (isset($element['#fieldgroups'][$group_name]) && isset($element['#group_children'])) {
       // Hide the field group.
-      $form['#fieldgroups'][$group_name]->format_type = 'hidden';
+      $element['#fieldgroups'][$group_name]->format_type = 'hidden';
       // Hide the elements inside the field group.
-      foreach (array_keys($form['#group_children'], $group_name) as $field_name) {
-        $form[$field_name]['#access'] = FALSE;
+      foreach (array_keys($element['#group_children'], $group_name) as $field_name) {
+        $element[$field_name]['#access'] = FALSE;
       }
     }
   }
