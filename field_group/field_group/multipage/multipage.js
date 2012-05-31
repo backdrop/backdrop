@@ -50,8 +50,8 @@ Drupal.behaviors.MultiPage = {
         }
         
       });
-      
-      if (!paneWithFocus) {
+
+      if (paneWithFocus === undefined) {
         // If the current URL has a fragment and one of the tabs contains an
         // element that matches the URL fragment, activate that tab.
         if (window.location.hash && $(window.location.hash, this).length) {
@@ -61,7 +61,7 @@ Drupal.behaviors.MultiPage = {
           paneWithFocus = $('multipage-open', this).length ? $('multipage-open', this) : $('> .multipage-pane:first', this);
         }
       }
-      if (paneWithFocus.length) {
+      if (paneWithFocus !== undefined) {
         paneWithFocus.data('multipageControl').focus();
       }
     });
