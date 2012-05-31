@@ -71,18 +71,6 @@ function field_group_menu() {
 }
 
 /**
- * Implements hook_permission().
- */
-function field_group_permission() {
-  return array(
-    'administer fieldgroups' => array(
-      'title' => t('Administer fieldgroups'),
-      'description' => t('Display the administration for fieldgroups.'),
-    ),
-  );
-}
-
-/**
  * Menu Wildcard loader function to load group definitions.
  *
  * @param $group_name
