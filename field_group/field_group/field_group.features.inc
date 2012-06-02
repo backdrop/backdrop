@@ -20,7 +20,7 @@ function field_group_features_export_alter(&$export, $module_name) {
 
       foreach ($field_groups as $group_id => $group) {
         if ($group->entity_type == $entity_type && $group->bundle == $bundle
-          && in_array($field_name, $group->data['children'])) {
+          && in_array($field_name, $group->data['children']) && in_array($group->identifier, $export['features']['field_group'])) {
           if (isset($group->export_module) && $group->export_module != $module_name) {
             $export['dependencies'][$group->export_module] = $group->export_module;
           }
