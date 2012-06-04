@@ -134,6 +134,13 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
   }
 
   /**
+   * Implements EntityReferenceHandler::validateAutocompleteInput().
+   */
+  public function validateAutocompleteInput($input, &$element, &$form_state, $form) {
+    return NULL;
+  }
+
+  /**
    * Implements EntityReferenceHandler::getLabel().
    */
   public function getLabel($entity) {
