@@ -83,6 +83,14 @@ function views_views_data() {
     );
   }
 
+  $data['views']['ctools_dropdown'] = array(
+    'title' => t('Dropdown links'),
+    'help' => t('Displays fields in a dropdown list, like on the views listing page.'),
+    'field' => array(
+      'handler' => 'views_handler_field_ctools_dropdown',
+    ),
+  );
+
   $data['views']['combine'] = array(
    'title' => t('Combine fields filter'),
     'help' => t('Combine two fields together and search by them.'),
