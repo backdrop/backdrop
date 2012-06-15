@@ -208,4 +208,37 @@ class ViewsCacheTest extends ViewsSqlTest {
 
   }
 
+  /**
+   * Check that HTTP headers are cached for views.
+   */
+  function testHttpHeadersCaching() {
+    // Create a few nodes to appear in RSS feed.
+    for ($i = 0; $i < 5; $i++) {
+      $this->drupalCreateNode();
+    }
+
+    // Make the first request and check returned content type.
+    $this->drupalGet('test_feed_http_headers_caching');
+    $first_content = $this->drupalGetContent();
+    $first_content_type = $this->drupalGetHeader('content-type');
+    $expected_type = 'application/rss+xml';
+    $this->assertIdentical(0, strpos(trim($first_content_type), $expected_type), t('Expected content type returned.'));
+
+    // Check that we have 5 items in RSS feed returned by the first request.
+    $xml = simplexml_load_string($first_content);
+    $items = $xml->xpath('/rss/channel/item');
+    $this->assertEqual(5, count($items), t('The number of RSS feed items matched.'));
+
+    // Create another node to be sure we get cached results on the second
+    // request.
+    $this->drupalCreateNode();
+
+    // Make the second request, check content type and content matching.
+    $this->drupalGet('test_feed_http_headers_caching');
+    $second_content = $this->drupalGetContent();
+    $this->assertEqual($first_content, $second_content, t('The second result fetched from cache.'));
+    $second_content_type = $this->drupalGetHeader('content-type');
+    $this->assertEqual($first_content_type, $second_content_type, t('Content types of responses are equal.'));
+  }
+
 }

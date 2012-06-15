@@ -185,6 +185,7 @@ class views_plugin_cache extends views_plugin {
     $this->storage['head'] = drupal_add_html_head();
     $this->storage['css'] = drupal_add_css();
     $this->storage['js'] = drupal_add_js();
+    $this->storage['headers'] = drupal_get_http_header();
   }
 
   /**
@@ -215,6 +216,9 @@ class views_plugin_cache extends views_plugin {
     $settings = isset($js['settings']['data']) ? $js['settings']['data'] : array();
     $settings_start = isset($js_start['settings']['data']) ? $js_start['settings']['data'] : array();
     $this->storage['js']['settings'] = array_diff_assoc($settings, $settings_start);
+
+    // Get difference of HTTP headers.
+    $this->storage['headers'] = array_diff_assoc(drupal_get_http_header(), $this->storage['headers']);
   }
 
   /**
@@ -239,6 +243,11 @@ class views_plugin_cache extends views_plugin {
             drupal_add_js($setting, 'setting');
           }
         }
+      }
+    }
+    if (!empty($this->storage['headers'])) {
+      foreach ($this->storage['headers'] as $name => $value) {
+        drupal_add_http_header($name, $value);
       }
     }
   }
