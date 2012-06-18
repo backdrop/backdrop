@@ -692,10 +692,16 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
     }
 
     $autocomplete_path .= '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'] . '/';
+    // Use <NULL> as a placeholder in the URL when we don't have an entity.
+    // Most webservers collapse two consecutive slashes.
+    $id = 'NULL';
     if ($entity) {
-      list($id) = entity_extract_ids($entity_type, $entity);
-      $autocomplete_path .= $id;
+      list($eid) = entity_extract_ids($entity_type, $entity);
+      if ($eid) {
+        $id = $eid;
+      }
     }
+    $autocomplete_path .= $id;
 
     if ($instance['widget']['type'] == 'entityreference_autocomplete') {
       $element += array(
@@ -801,7 +807,13 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
     return MENU_ACCESS_DENIED;
   }
 
-  $entity = $entity_id !== '' ? entity_load_single($entity_type, $entity_id) : NULL;
+  $entity = NULL;
+  if ($entity_id !== 'NULL') {
+    $entity = entity_load_single($entity_type, $entity_id);
+    if (!$entity || !entity_access('view', $entity_type, $entity)) {
+      return MENU_ACCESS_DENIED;
+    }
+  }
   $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
   if ($type == 'tags') {
