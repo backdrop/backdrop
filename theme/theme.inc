@@ -266,7 +266,7 @@ function template_preprocess_views_view_fields(&$vars) {
 
       // Set up the label for the value and the HTML to make it easier
       // on the template.
-      $object->label = filter_xss_admin($view->field[$id]->label());
+      $object->label = check_plain($view->field[$id]->label());
       $object->label_html = '';
       if ($object->label) {
         $object->label_html .= $object->label;
@@ -498,7 +498,7 @@ function template_preprocess_views_view_table(&$vars) {
 
     // render the header labels
     if ($field == $column && empty($fields[$field]->options['exclude'])) {
-      $label = !empty($fields[$field]) ? filter_xss_admin($fields[$field]->label()) : '';
+      $label = check_plain(!empty($fields[$field]) ? $fields[$field]->label() : '');
       if (empty($options['info'][$field]['sortable']) || !$fields[$field]->click_sortable()) {
         $vars['header'][$field] = $label;
       }
@@ -509,7 +509,7 @@ function template_preprocess_views_view_table(&$vars) {
           $initial = ($order == 'asc') ? 'desc' : 'asc';
         }
 
-        $title = t('sort by @s', array('@s' => strip_tags($label)));
+        $title = t('sort by @s', array('@s' => $label));
         if ($active == $field) {
           $label .= theme('tablesort_indicator', array('style' => $initial));
         }
