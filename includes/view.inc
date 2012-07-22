@@ -1789,6 +1789,11 @@ class view extends views_db_object {
     if ($this->vid == 'new') {
       $this->vid = NULL;
     }
+    // If there is no vid, check if a view with this machine name already exists.
+    elseif (empty($this->vid)) {
+      $vid = db_query("SELECT vid from {views_view} WHERE name = :name", array(':name' => $this->name))->fetchField();
+      $this->vid = $vid ? $vid : NULL;
+    }
 
     $transaction = db_transaction();
 
