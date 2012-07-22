@@ -414,6 +414,8 @@ class views_plugin_display extends views_plugin {
       'group_by' => array('group_by'),
       'query' => array('query'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
+      'use_more_always' => array('use_more', 'use_more_always', 'use_more_text'),
+      'use_more_text' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display', 'link_url'),
 
       // Force these to cascade properly.
@@ -552,7 +554,8 @@ class views_plugin_display extends views_plugin {
       ),
       'use_more_always' => array(
         'default' => FALSE,
-        'bool' => FALSE,
+        'bool' => TRUE,
+        'export' => 'export_option_always',
       ),
       'use_more_text' => array(
         'default' => 'more',

@@ -49,6 +49,7 @@ class views_object {
    *   Returns the options of this handler/plugin.
    *
    * @see views_object::export_option()
+   * @see views_object::export_option_always()
    * @see views_object::unpack_translatable()
    */
   function option_definition() { return array(); }
@@ -256,6 +257,17 @@ class views_object {
       }
     }
     return $output;
+  }
+
+  /**
+   * Always exports the option, regardless of the default value.
+   */
+  function export_option_always($indent, $prefix, $storage, $option, $definition, $parents) {
+    // If there is no default, the option will always be exported.
+    unset($definition['default']);
+    // Unset our export method to prevent recursion.
+    unset($definition['export']);
+    return $this->export_option($indent, $prefix, $storage, $option, $definition, $parents);
   }
 
   /**
