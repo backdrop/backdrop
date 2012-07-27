@@ -603,7 +603,7 @@ class view extends views_db_object {
     foreach ($this->display_handler->get_option('relationships') as $id => $options) {
       $options['table'] = views_move_table($options['table']);
       $data = views_fetch_data($options['table'], FALSE);
-      if (isset($data[$options['field']])) {
+      if (isset($data[$options['field']]['relationship']['base'])) {
         $base_tables[$data[$options['field']]['relationship']['base']] = TRUE;
       }
     }
