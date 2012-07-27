@@ -1823,8 +1823,8 @@ class view extends views_db_object {
 
     $this->save_locale_strings();
 
-    cache_clear_all('views_urls', 'cache_views');
-    cache_clear_all(); // clear the page cache as well.
+    // Clear caches.
+    views_invalidate_cache();
   }
 
   /**
@@ -1861,8 +1861,8 @@ class view extends views_db_object {
     cache_clear_all('views_query:' . $this->name, 'cache_views');
 
     if ($clear) {
-      cache_clear_all(); // this clears the block and page caches only.
-      menu_rebuild(); // force a menu rebuild when a view is deleted.
+      // Clear caches.
+      views_invalidate_cache();
     }
   }
 

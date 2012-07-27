@@ -1082,6 +1082,18 @@ function hook_views_ajax_data_alter(&$commands, $view) {
 }
 
 /**
+ * Allow modules to respond to the Views cache being invalidated.
+ *
+ * This hook should fire whenever a view is enabled, disabled, created,
+ * updated, or deleted.
+ *
+ * @see views_invalidate_cache()
+ */
+function hook_views_invalidate_cache() {
+  cache_clear_all('views:*', 'cache_mymodule', TRUE);
+}
+
+/**
  * @}
  */
 
