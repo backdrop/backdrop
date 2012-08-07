@@ -33,7 +33,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   }
 
   /**
-  /* Test the general offset functionality.
+   * Test the general offset functionality.
    */
   function testOffset() {
     $view = $this->views_test_offset();

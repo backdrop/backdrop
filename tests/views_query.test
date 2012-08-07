@@ -413,4 +413,21 @@ abstract class ViewsSqlTest extends ViewsTestCase {
 
     return $view;
   }
+
+  /**
+   * Build and return a Page view of the views_test table.
+   *
+   * @return view
+   */
+  protected function getBasicPageView() {
+    views_include('view');
+    $view = $this->getBasicView();
+
+    // In order to test exposed filters, we have to disable
+    // the exposed forms cache.
+    drupal_static_reset('views_exposed_form_cache');
+
+    $display = $view->new_display('page', 'Page', 'page_1');
+    return $view;
+  }
 }

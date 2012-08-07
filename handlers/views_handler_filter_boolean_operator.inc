@@ -129,6 +129,9 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
   }
 
   function admin_summary() {
+    if ($this->is_a_group()) {
+      return t('grouped');
+    }
     if (!empty($this->options['exposed'])) {
       return t('exposed');
     }

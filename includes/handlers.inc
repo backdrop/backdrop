@@ -672,6 +672,18 @@ class views_handler extends views_object {
   }
 
   /**
+   * Returns TRUE if the exposed filter works like a grouped filter.
+   */
+  function is_a_group() { return FALSE; }
+
+  /**
+   * Define if the exposed input has to be submitted multiple times.
+   * This is TRUE when exposed filters grouped are using checkboxes as
+   * widgets.
+   */
+  function multiple_exposed_input() { return FALSE; }
+
+  /**
    * Take input from exposed handlers and assign to this handler, if necessary.
    */
   function accept_exposed_input($input) { return TRUE; }
