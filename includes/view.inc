@@ -2045,6 +2045,7 @@ class view extends views_db_object {
     $this->init_display();
 
     $errors = array();
+    $this->display_errors = NULL;
 
     $current_display = $this->current_display;
     foreach ($this->display as $id => $display) {
@@ -2056,6 +2057,8 @@ class view extends views_db_object {
         $result = $this->display[$id]->handler->validate();
         if (!empty($result) && is_array($result)) {
           $errors = array_merge($errors, $result);
+          // Mark this display as having validation errors.
+          $this->display_errors[$id] = TRUE;
         }
       }
     }
