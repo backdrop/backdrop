@@ -411,6 +411,7 @@ class views_plugin_display extends views_plugin {
       'css_class' => array('css_class'),
       'use_ajax' => array('use_ajax'),
       'hide_attachment_summary' => array('hide_attachment_summary'),
+      'hide_admin_links' => array('hide_admin_links'),
       'group_by' => array('group_by'),
       'query' => array('query'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
@@ -475,6 +476,7 @@ class views_plugin_display extends views_plugin {
           'display_description' => FALSE,
           'use_ajax' => TRUE,
           'hide_attachment_summary' => TRUE,
+          'hide_admin_links' => FALSE,
           'pager' => TRUE,
           'pager_options' => TRUE,
           'use_more' => TRUE,
@@ -531,6 +533,10 @@ class views_plugin_display extends views_plugin {
         'bool' => TRUE,
       ),
       'hide_attachment_summary' => array(
+        'default' => FALSE,
+        'bool' => TRUE,
+      ),
+      'hide_admin_links' => array(
         'default' => FALSE,
         'bool' => TRUE,
       ),
@@ -1214,6 +1220,14 @@ class views_plugin_display extends views_plugin {
         'desc' => t('Change whether or not to display attachments when displaying a contextual filter summary.'),
       );
     }
+    if (!isset($this->definition['contextual links locations']) || !empty($this->definition['contextual links locations'])) {
+      $options['hide_admin_links'] = array(
+        'category' => 'other',
+        'title' => t('Hide contextual links'),
+        'value' => $this->get_option('hide_admin_links') ? t('Yes') : t('No'),
+        'desc' => t('Change whether or not to display contextual links for this view.'),
+      );
+    }
 
     $pager_plugin = $this->get_plugin('pager');
     if (!$pager_plugin) {
@@ -1481,6 +1495,14 @@ class views_plugin_display extends views_plugin {
           '#default_value' => $this->get_option('hide_attachment_summary') ? 1 : 0,
         );
         break;
+      case 'hide_admin_links':
+        $form['#title'] .= t('Hide contextual links on this view.');
+        $form['hide_admin_links'] = array(
+          '#type' => 'radios',
+          '#options' => array(1 => t('Yes'), 0 => t('No')),
+          '#default_value' => $this->get_option('hide_admin_links') ? 1 : 0,
+        );
+      break;
       case 'use_more':
         $form['#title'] .= t('Add a more link to the bottom of the display.');
         $form['use_more'] = array(
@@ -2330,6 +2352,7 @@ class views_plugin_display extends views_plugin {
         break;
       case 'use_ajax':
       case 'hide_attachment_summary':
+      case 'hide_admin_links':
         $this->set_option($section, (bool)$form_state['values'][$section]);
         break;
       case 'use_more':
@@ -2628,6 +2651,10 @@ class views_plugin_display extends views_plugin {
 
     foreach ($this->extender as $extender) {
       $extender->pre_execute();
+    }
+
+    if ($this->get_option('hide_admin_links')) {
+      $this->view->hide_admin_links = TRUE;
     }
   }
 
