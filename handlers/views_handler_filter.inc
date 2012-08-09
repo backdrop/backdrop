@@ -176,7 +176,7 @@ class views_handler_filter extends views_handler {
    * Returns TRUE if the exposed filter works like a grouped filter.
    */
   function is_a_group() {
-    return !empty($this->options['is_grouped']);
+    return $this->is_exposed() && !empty($this->options['is_grouped']);
   }
 
   /**
@@ -578,16 +578,18 @@ class views_handler_filter extends views_handler {
    * Validate the build group options form.
    */
   function build_group_validate($form, &$form_state) {
-    if (empty($form_state['values']['options']['group_info']['identifier'])) {
-      form_error($form['group_info']['identifier'], t('The identifier is required if the filter is exposed.'));
-    }
+    if (!empty($form_state['values']['options']['group_info'])) {
+      if (empty($form_state['values']['options']['group_info']['identifier'])) {
+        form_error($form['group_info']['identifier'], t('The identifier is required if the filter is exposed.'));
+      }
 
-    if (!empty($form_state['values']['options']['group_info']['identifier']) && $form_state['values']['options']['group_info']['identifier'] == 'value') {
-      form_error($form['group_info']['identifier'], t('This identifier is not allowed.'));
-    }
+      if (!empty($form_state['values']['options']['group_info']['identifier']) && $form_state['values']['options']['group_info']['identifier'] == 'value') {
+        form_error($form['group_info']['identifier'], t('This identifier is not allowed.'));
+      }
 
-    if (!$this->view->display_handler->is_identifier_unique($form_state['id'], $form_state['values']['options']['group_info']['identifier'])) {
-      form_error($form['group_info']['identifier'], t('This identifier is used by another handler.'));
+      if (!$this->view->display_handler->is_identifier_unique($form_state['id'], $form_state['values']['options']['group_info']['identifier'])) {
+        form_error($form['group_info']['identifier'], t('This identifier is used by another handler.'));
+      }
     }
 
     if (!empty($form_state['values']['options']['group_info']['group_items'])) {
