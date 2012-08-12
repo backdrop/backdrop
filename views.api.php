@@ -518,7 +518,8 @@ function hook_views_data_alter(&$data) {
  * This hook should be placed in MODULENAME.views.inc and it will be
  * auto-loaded. MODULENAME.views.inc must be in the directory specified by the
  * 'path' key returned by MODULENAME_views_api(), or the same directory as the
- * .module file, if 'path' is unspecified.
+ * .module file, if 'path' is unspecified. All plugin files need to be
+ * referenced in MODULENAME.info with the files[] directive.
  *
  * @return
  *   An array on the form $plugins['PLUGIN TYPE']['PLUGIN NAME']. The plugin
@@ -603,7 +604,7 @@ function hook_views_plugins() {
       'path' => drupal_get_path('module', 'views') . '/modules/taxonomy',
     ),
   );
-  
+
   return array(
     'module' => 'views', // This just tells our themes are elsewhere.
     'argument validator' => array(
