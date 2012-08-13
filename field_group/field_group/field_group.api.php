@@ -87,7 +87,7 @@ function hook_field_group_formatter_info() {
     'form' => array(
       'fieldset' => array(
         'label' => t('Fieldset'),
-        'description' => t('This fieldgroup renders the inner content in a fieldset with the titel as legend.'),
+        'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('classes' => ''),
         'default_formatter' => 'collapsible',
@@ -96,7 +96,7 @@ function hook_field_group_formatter_info() {
     'display' => array(
       'div' => array(
         'label' => t('Div'),
-        'description' => t('This fieldgroup renders the inner content in a simple div with the titel as legend.'),
+        'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('effect' => 'none', 'speed' => 'fast', 'classes' => ''),
         'default_formatter' => 'collapsible',
