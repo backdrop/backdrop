@@ -114,6 +114,7 @@ class views_handler_filter extends views_handler {
       'contains' => array(
         'operator_id' => array('default' => FALSE),
         'label' => array('default' => '', 'translatable' => TRUE),
+        'description' => array('default' => '', 'translatable' => TRUE),
         'use_operator' => array('default' => FALSE, 'bool' => TRUE),
         'operator' => array('default' => ''),
         'identifier' => array('default' => ''),
@@ -138,6 +139,7 @@ class views_handler_filter extends views_handler {
     $options['group_info'] = array(
       'contains' => array(
         'label' => array('default' => '', 'translatable' => TRUE),
+        'description' => array('default' => '', 'translatable' => TRUE),
         'identifier' => array('default' => ''),
         'optional' => array('default' => TRUE, 'bool' => TRUE),
         'widget' => array('default' => 'select'),
@@ -488,6 +490,13 @@ class views_handler_filter extends views_handler {
       '#size' => 40,
     );
 
+    $form['expose']['description'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->options['expose']['description'],
+      '#title' => t('Description'),
+      '#size' => 60,
+    );
+
     if (!empty($form['operator']['#type'])) {
        // Increase the width of the left (operator) column.
       $form['operator']['#prefix'] = '<div class="views-group-box views-left-40">';
@@ -660,6 +669,7 @@ class views_handler_filter extends views_handler {
       'operator' => $this->options['id'] . '_op',
       'identifier' => $this->options['id'],
       'label' => $this->definition['title'],
+      'description' => NULL,
       'remember' => FALSE,
       'multiple' => FALSE,
       'required' => FALSE,
@@ -672,6 +682,7 @@ class views_handler_filter extends views_handler {
   function build_group_options() {
     $this->options['group_info'] = array(
       'label' => $this->definition['title'],
+      'description' => NULL,
       'identifier' => $this->options['id'],
       'optional' => TRUE,
       'widget' => 'select',
@@ -816,6 +827,7 @@ class views_handler_filter extends views_handler {
       '#title' => t('Label'),
       '#size' => 40,
     );
+
     $form['group_info']['optional'] = array(
       '#type' => 'checkbox',
       '#title' => t('Optional'),
@@ -864,6 +876,12 @@ class views_handler_filter extends views_handler {
       '#default_value' => $this->options['group_info']['label'],
       '#title' => t('Label'),
       '#size' => 40,
+    );
+    $form['group_info']['description'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->options['group_info']['description'],
+      '#title' => t('Description'),
+      '#size' => 60,
     );
     $form['group_info']['optional'] = array(
       '#type' => 'checkbox',
@@ -1108,6 +1126,7 @@ class views_handler_filter extends views_handler {
       return array(
         'value' => $this->options['group_info']['identifier'],
         'label' => $this->options['group_info']['label'],
+        'description' => $this->options['group_info']['description'],
       );
     }
 
@@ -1115,6 +1134,7 @@ class views_handler_filter extends views_handler {
       'operator' => $this->options['expose']['operator_id'],
       'value' => $this->options['expose']['identifier'],
       'label' => $this->options['expose']['label'],
+      'description' => $this->options['expose']['description'],
     );
   }
 
