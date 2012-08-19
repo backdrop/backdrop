@@ -183,7 +183,7 @@ class views_handler_argument extends views_handler {
       'contains' => array(
         'value' => array('default' => 'all'),
         'title_enable' => array('default' => FALSE, 'bool' => TRUE),
-        'title' => array('default' => t('All'), 'translatable' => TRUE),
+        'title' => array('default' => 'All', 'translatable' => TRUE),
       ),
     );
     $options['title_enable'] = array('default' => FALSE, 'bool' => TRUE);
