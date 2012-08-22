@@ -256,3 +256,11 @@ function field_group_update_7003() {
   _field_group_recreate_identifiers();
 
 }
+
+/**
+ * Update hook to make sure identifier is set as unique key.
+ */
+function field_group_update_7004() {
+  db_drop_unique_key('field_group', 'identifier');
+  db_add_unique_key('field_group', 'identifier', array('identifier'));
+}
