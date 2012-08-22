@@ -41,7 +41,6 @@ fieldset.horizontal-tabs-pane fieldset legend {
   padding-top: 0; 
   margin: 0;
   min-width: 5em; /* IE7 */
-  outline: none; /* Chrome */
   float: left; /* LTR */
 }
 .horizontal-tabs ul.horizontal-tabs-list li.selected {
