@@ -239,13 +239,28 @@ Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
 Drupal.FieldGroup.Effects.processMultipage = {
   execute: function (context, settings, type) {
     if (type == 'form') {
+      
+      var $firstErrorItem = false;
+      
       // Add required fields mark to any element containing required fields
       $('div.multipage-pane').each(function(i){
         if ($('.error', $(this)).length) {
+          
+          // Save first error item, for focussing it.
+          if (!$firstErrorItem) {
+            $firstErrorItem = $(this).data('multipageControl');
+          }          
+          
           Drupal.FieldGroup.setGroupWithfocus($(this));
           $(this).data('multipageControl').focus();
         }
       });
+
+      // Focus on first multipage that has an error.
+      if ($firstErrorItem) {
+        $firstErrorItem.focus();
+      }
+      
     }
   }
 }
