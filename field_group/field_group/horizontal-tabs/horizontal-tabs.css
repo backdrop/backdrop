@@ -61,6 +61,9 @@ fieldset.horizontal-tabs-pane fieldset legend {
 .horizontal-tabs ul.horizontal-tabs-list li:focus {
   background-color: #ddd;
 }
+.horizontal-tabs ul.horizontal-tabs-list :focus {
+  outline: none;
+}
 .horizontal-tabs ul.horizontal-tabs-list li a:focus strong,
 .horizontal-tabs ul.horizontal-tabs-list li a:active strong,
 .horizontal-tabs ul.horizontal-tabs-list li a:hover strong {
