@@ -574,7 +574,7 @@ function field_group_field_overview_validate($form, &$form_state) {
       }
 
       // Group name already exists.
-      if (field_group_exists($group_name, $entity_type, $bundle, $mode)) {
+      if (!empty($form_values[$group_name])) {
         form_set_error('fields][_add_new_group][group_name', t('Add new group: the group name %group_name already exists.', array('%group_name' => $group_name)));
       }
     }
