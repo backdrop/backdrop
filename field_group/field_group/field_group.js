@@ -201,6 +201,23 @@ Drupal.behaviors.fieldGroup = {
     $('.fieldset-wrapper .fieldset > legend').css({display: 'block'});
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
 
+
+    // Add a new ID to each fieldset.
+    $('.group-wrapper fieldset').each(function() {
+      // Tats bad, but we have to keep the actual id to prevent layouts to break.
+      var fieldgorupID = 'field_group-' + $(this).attr('id') + ' ' + $(this).attr('id');
+      $(this).attr('id', fieldgorupID);
+    })
+    // Set the hash in url to remember last userselection.
+    $('.group-wrapper ul li').each(function() {
+      var fieldGroupNavigationListIndex = $(this).index();
+      $(this).children('a').click(function() {
+        var fieldset = $('.group-wrapper fieldset').get(fieldGroupNavigationListIndex);
+        // Grab the first id, holding the wanted hashurl.
+        var hashUrl = $(fieldset).attr('id').replace(/^field_group-/, '').split(' ')[0];
+        window.location.hash = hashUrl;
+      });
+    });
   }
 };
 
