@@ -62,6 +62,16 @@ function field_group_menu() {
             'type' => MENU_CALLBACK,
             'file' => 'field_group.field_ui.inc',
           ) + $access;
+
+          $items["$path/groups/%field_group_menu/enable"] = array(
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'title' => 'Enable',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('field_group_enable_form', $group_position),
+            'type' => MENU_CALLBACK,
+            'file' => 'field_group.field_ui.inc',
+          ) + $access;
+
         }
       }
     }
@@ -1428,31 +1438,39 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
 /**
  * Read all groups.
  *
- * @param $params
+ * @param $conditions
  *   Parameters for the query
  *   $name The name of the entity.
  *   $bundle The name of the bundle.
  *   $view_mode The view mode.
+ * @param $enabled
+ *   Return enabled or disabled groups.
  */
-function field_group_read_groups($params = array()) {
+function field_group_read_groups($conditions = array(), $enabled = TRUE) {
 
   $groups = array();
   ctools_include('export');
 
-  if (empty($params)) {
+  if (empty($conditions)) {
     $records = ctools_export_load_object('field_group');
   }
   else {
-    $records = ctools_export_load_object('field_group', 'conditions', $params);
+    $records = ctools_export_load_object('field_group', 'conditions', $conditions);
   }
 
   foreach ($records as $group) {
-    // Deleted groups.
-    // @TODO remove the code below and add something meaningfull for "disabled" state.
-    if (isset($group->disabled) && $group->disabled) {
+
+    // Return only enabled groups.
+    if ($enabled && isset($group->disabled) && $group->disabled) {
       continue;
     }
+    // Return only disabled groups.
+    elseif (!$enabled && (!isset($group->disabled) || !$group->disabled)) {
+      continue;
+    }
+
     $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = field_group_unpack($group);
+
   }
   return $groups;
 

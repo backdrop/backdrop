@@ -421,11 +421,13 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
  *
  * @param Array $params
  *   The Entity type where field groups are requested.
+ * @param $enabled
+ *   Return enabled or disabled groups.*
  *
  * @see field_group_info_groups()
  * @see ctools_export_load_object()
  */
-function field_group_read_groups($params = array()) {
+function field_group_read_groups($conditions = array(), $enabled = TRUE) {
   // This function loads the requested groups through ctools export api.
 }
 
