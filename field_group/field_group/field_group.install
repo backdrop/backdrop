@@ -264,3 +264,33 @@ function field_group_update_7004() {
   db_drop_unique_key('field_group', 'identifier');
   db_add_unique_key('field_group', 'identifier', array('identifier'));
 }
+
+/**
+ * Checks all existing groups and removes optional HTML classes
+ * while adding them as extra classes.
+ */
+function field_group_update_7005() {
+
+  // Migrate the field groups so they have a unique identifier.
+  $result = db_select('field_group', 'fg')
+    ->fields('fg')
+    ->execute();
+  $rows = array();
+  foreach($result as $row) {
+    //$row->identifier = $row->group_name . '|' . $row->entity_type . '|' . $row->bundle . '|' . $row->mode;
+    $row->data = unserialize($row->data);
+    $classes = explode(" ", $row->data['format_settings']['instance_settings']['classes']);
+    $optional_classes = array(str_replace("_", "-", $row->group_name), 'field-group-' . $row->data['format_type']);
+    foreach ($optional_classes as $optional_class) {
+      if (!in_array($optional_class, $classes)) {
+        $classes[] = $optional_class;
+      }
+    }
+    $row->data['format_settings']['instance_settings']['classes'] = implode(" ", $classes);
+    $rows[] = $row;
+  }
+  foreach ($rows as $row) {
+    drupal_write_record('field_group', $row, array('id'));
+  }
+
+}

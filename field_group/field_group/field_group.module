@@ -503,33 +503,8 @@ function field_group_field_group_format_settings($group) {
  */
 function field_group_pre_render_prepare(&$group) {
 
-  // Prepare extra classes.
-  $group->classes = array('field-group-' . $group->format_type, str_replace('_', '-', $group->group_name));
-
-  if (isset($group->format_settings['formatter'])) {
-    $group->collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
-    // Open or closed horizontal or vertical tabs will be collapsible by default.
-    if ($group->format_type == 'tab' || $group->format_type == 'htab') {
-      $group->collapsible = TRUE;
-    }
-    $group->collapsed = in_array($group->format_settings['formatter'], array('collapsed', 'closed'));
-    if ($group->collapsible) {
-      $group->classes[] = 'collapsible';
-      if ($group->collapsed) {
-        $group->classes[] = 'collapsed';
-      }
-    }
-  }
-
-  // Add a required-fields class to trigger the js.
-  if (isset($group->format_settings['instance_settings']) && !empty($group->format_settings['instance_settings']['required_fields'])) {
-    $group->classes[] = 'required-fields';
-  }
-
-  $group->classes = implode(' ', $group->classes);
-  if (isset($group->format_settings['instance_settings'], $group->format_settings['instance_settings']['classes'])) {
-    $group->classes .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
-  }
+  $classes = _field_group_get_html_classes($group);
+  $group->classes = $classes->required . ' ' . $group->format_settings['instance_settings']['classes'];
 
   $group->description = isset($group->format_settings['instance_settings']['description']) ? filter_xss_admin(t($group->format_settings['instance_settings']['description'])) : '';
 
@@ -609,13 +584,13 @@ function field_group_pre_render_div(&$element, $group, &$form) {
 
   $group->classes .= " speed-$speed effect-$effect";
   if ($group->format_settings['formatter'] != 'open') {
-    $element['#prefix'] = '<div class="field-group-format ' . $group->classes . '">
+    $element['#prefix'] = '<div class="' . $group->classes . '">
       <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
       <div class="field-group-format-wrapper" style="display: ' . (!empty($group->collapsed) ? 'none' : 'block') . ';">';
     $element['#suffix'] = '</div></div>';
   }
   else {
-    $element['#prefix'] = '<div class="field-group-format ' . $group->group_name . ' ' . $group->classes . '">';
+    $element['#prefix'] = '<div class="' . $group->group_name . ' ' . $group->classes . '">';
     if ($show_label) {
       $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
     }
@@ -1819,4 +1794,52 @@ function field_group_hide_field_groups(&$element, $group_names) {
       }
     }
   }
+}
+
+/**
+ * Calculates html classes for a group.
+ */
+function _field_group_get_html_classes(&$group) {
+
+  if (isset($group->format_settings['formatter'])) {
+    $group->collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
+    // Open or closed horizontal or vertical tabs will be collapsible by default.
+    if ($group->format_type == 'tab' || $group->format_type == 'htab') {
+      $group->collapsible = TRUE;
+    }
+    $group->collapsed = in_array($group->format_settings['formatter'], array('collapsed', 'closed'));
+  }
+
+  $classes = new stdClass();
+
+  // Prepare extra classes, required and optional ones.
+  $optional = array(str_replace('_', '-', $group->group_name));
+  if ($group->format_type == 'multipage') {
+    $required = array('field-group-' . $group->format_type);
+  }
+  else {
+    $required = array();
+    $optional[] = 'field-group-' . $group->format_type;
+  }
+
+  if (isset($group->format_settings['formatter']) && $group->collapsible) {
+    $required[] = 'collapsible';
+    if ($group->collapsed) {
+      $required[] = 'collapsed';
+    }
+  }
+
+  // Add a required-fields class to trigger the js.
+  if (isset($group->format_settings['instance_settings']) && !empty($group->format_settings['instance_settings']['required_fields'])) {
+    $required[] = 'required-fields';
+  }
+
+  $classes->required = implode(' ', $required);
+  $classes->optional = implode(' ', $optional);
+  if (isset($group->format_settings['instance_settings'], $group->format_settings['instance_settings']['classes'])) {
+    $classes->optional .= ' ' . check_plain($group->format_settings['instance_settings']['classes']);
+  }
+
+  return $classes;
+
 }
