@@ -968,7 +968,8 @@ function field_group_disabled_groups_overview($disabled_groups, $entity_info, $p
     $row[] = $group->group_name;
     $row[] = $formatter_options[$group->format_type];
     $row[] = render($summary);
-    $row[] = l(t('Enable'), $entity_info['bundles'][$params->bundle]['admin']['real path'] . '/groups/' . $group->group_name . '/enable/' . $group->mode);
+    $path = (isset($entity_info['bundles'][$params->bundle]['admin']['real path']) ? $entity_info['bundles'][$params->bundle]['admin']['real path'] : $entity_info['bundles'][$params->bundle]['admin']['path']);
+    $row[] = l(t('Enable'), $path . '/groups/' . $group->group_name . '/enable/' . $group->mode);
 
     $table['#rows'][] = $row;
   }
