@@ -362,6 +362,8 @@ function field_group_add_row($name, $parent_options, $params) {
     '#js_settings' => array('rowHandler' => 'group'),
     '#region_callback' => $params->region_callback,
     'label' => array(
+      '#title_display' => 'invisible',
+      '#title' => t('Label for new group'),
       '#type' => 'textfield',
       '#size' => 15,
       '#description' => t('Label'),
@@ -379,6 +381,8 @@ function field_group_add_row($name, $parent_options, $params) {
     ),
     'parent_wrapper' => array(
       'parent' => array(
+        '#title_display' => 'invisible',
+        '#title' => t('Parent for new group'),
         '#type' => 'select',
         '#options' => $parent_options,
         '#empty_value' => '',
@@ -394,6 +398,8 @@ function field_group_add_row($name, $parent_options, $params) {
     ),
     'group_name' => array(
       '#type' => 'textfield',
+      '#title_display' => 'invisible',
+      '#title' => t('Machine name for new group'),
       // This field should stay LTR even for RTL languages.
       '#field_prefix' => '<span dir="ltr">group_',
       '#field_suffix' => '</span>&lrm;',
@@ -851,11 +857,17 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
   // Show disabled fieldgroups, and make it possible to enable them again.
   if ($disabled_groups && isset($disabled_groups[$params->entity_type][$params->bundle][$params->mode])) {
     $form['additional_settings']['disabled_field_groups'] = array(
+
       '#type' => 'fieldset',
+
       '#title' => t('Disabled fieldgroups'),
+
       '#collapsible' => TRUE,
+
       '#collapsed' => FALSE,
+
       '#parents' => array('additional_settings'),
+
     );
     $form['additional_settings']['disabled_field_groups']['overview'] = field_group_disabled_groups_overview($disabled_groups[$params->entity_type][$params->bundle][$params->mode], $entity_info, $params);
   }
