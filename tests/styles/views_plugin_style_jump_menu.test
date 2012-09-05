@@ -9,6 +9,14 @@
  * Tests jump menu style functionality.
  */
 class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
+
+  /**
+   * Stores all created nodes.
+   *
+   * @var array
+   */
+  var $nodes;
+
   public static function getInfo() {
     return array(
       'name' => 'Jump menu',

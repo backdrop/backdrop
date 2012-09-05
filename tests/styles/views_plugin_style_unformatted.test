@@ -8,14 +8,7 @@
 /**
  * Tests the default/unformatted row style.
  */
-class ViewsPluginStyleUnformattedTestCase extends ViewsSqlTest {
-
-  /**
-   * Stores all created nodes.
-   *
-   * @var array
-   */
-  var $nodes;
+class ViewsPluginStyleUnformattedTestCase extends ViewsPluginStyleTestBase {
 
   public static function getInfo() {
     return array(
@@ -23,19 +16,6 @@ class ViewsPluginStyleUnformattedTestCase extends ViewsSqlTest {
       'description' => 'Test unformatted style functionality.',
       'group' => 'Views Plugins',
     );
-  }
-
-  /**
-   * Stores a view output in the elements.
-   */
-  function storeViewPreview($output) {
-    $htmlDom = new DOMDocument();
-    @$htmlDom->loadHTML($output);
-    if ($htmlDom) {
-      // It's much easier to work with simplexml than DOM, luckily enough
-      // we can just simply import our DOM tree.
-      $this->elements = simplexml_import_dom($htmlDom);
-    }
   }
 
   /**

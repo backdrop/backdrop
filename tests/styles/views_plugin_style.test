@@ -8,7 +8,7 @@
 /**
  * Tests some general style plugin related functionality.
  */
-class ViewsPluginStyleTestCase extends ViewsSqlTest {
+class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
   public static function getInfo() {
     return array(
       'name' => 'Styles',
@@ -229,20 +229,6 @@ class ViewsPluginStyleTestCase extends ViewsSqlTest {
       unset($expected['Drummer']['rows']['Age: 28']);
 
       $this->assertEqual($sets_new_value, $expected, t('The style plugins should proper group the results with grouping by the value.'));
-    }
-  }
-
-
-  /**
-   * Stores a view output in the elements.
-   */
-  function storeViewPreview($output) {
-    $htmlDom = new DOMDocument();
-    @$htmlDom->loadHTML($output);
-    if ($htmlDom) {
-      // It's much easier to work with simplexml than DOM, luckily enough
-      // we can just simply import our DOM tree.
-      $this->elements = simplexml_import_dom($htmlDom);
     }
   }
 
