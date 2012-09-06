@@ -24,9 +24,7 @@ abstract class views_plugin_style_mapping extends views_plugin_style {
    *   - #filter: (optional) A method on the plugin to filter field options.
    *   - #toggle: (optional) If this select should be toggled by a checkbox.
    */
-  protected function define_mapping() {
-    return array();
-  }
+  abstract protected function define_mapping();
 
   /**
    * Overrides views_plugin_style::option_definition().
