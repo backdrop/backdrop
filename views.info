@@ -299,6 +299,7 @@ files[] = tests/views_upgrade.test
 files[] = tests/views_test.views_default.inc
 files[] = tests/comment/views_handler_argument_comment_user_uid.test
 files[] = tests/comment/views_handler_filter_comment_user_uid.test
+files[] = tests/node/views_node_revision_relations.test
 files[] = tests/taxonomy/views_handler_relationship_node_term_data.test
 files[] = tests/user/views_handler_field_user_name.test
 files[] = tests/user/views_user_argument_default.test
