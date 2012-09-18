@@ -331,7 +331,7 @@ class EntityReference_SelectionHandler_Generic_user extends EntityReference_Sele
       // database.
       $conditions = &$query->conditions();
       foreach ($conditions as $key => $condition) {
-        if ($condition['field'] == 'users.name') {
+        if ($key !== '#conjunction' && $condition['field'] == 'users.name') {
           // Remove the condition.
           unset($conditions[$key]);
 
@@ -387,8 +387,8 @@ class EntityReference_SelectionHandler_Generic_comment extends EntityReference_S
     // in the database. We have to alter the query ourself to go fetch the
     // bundle.
     $conditions = &$query->conditions();
-    foreach ($conditions as $id => &$condition) {
-      if (is_array($condition) && $condition['field'] == 'node_type') {
+    foreach ($conditions as $key => &$condition) {
+      if ($key !== '#conjunction' && $condition['field'] == 'node_type') {
         $condition['field'] = $node_alias . '.type';
         foreach ($condition['value'] as &$value) {
           if (substr($value, 0, 13) == 'comment_node_') {
@@ -454,8 +454,8 @@ class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityRefer
     // column in the database. We have to alter the query ourself to go fetch
     // the bundle.
     $conditions = &$query->conditions();
-    foreach ($conditions as $id => &$condition) {
-      if (is_array($condition) && $condition['field'] == 'vocabulary_machine_name') {
+    foreach ($conditions as $key => &$condition) {
+      if ($key !== '#conjunction' && $condition['field'] == 'vocabulary_machine_name') {
         $condition['field'] = $vocabulary_alias . '.machine_name';
         break;
       }
