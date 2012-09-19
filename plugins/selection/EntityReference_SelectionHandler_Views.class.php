@@ -34,18 +34,18 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
       }
     }
 
-    if ($options) {
-      // The value of the 'view_and_display' select below will need to be split
-      // into 'view_name' and 'view_display' in the final submitted values, so
-      // we massage the data at validate time on the wrapping element (not
-      // ideal).
-      $form['view']['#element_validate'] = array('entityreference_view_settings_validate');
+    // The value of the 'view_and_display' select below will need to be split
+    // into 'view_name' and 'view_display' in the final submitted values, so
+    // we massage the data at validate time on the wrapping element (not
+    // ideal).
+    $form['view']['#element_validate'] = array('entityreference_view_settings_validate');
 
-      $options = array('' => '<' . t('none') . '>') + $options;
-      $default = !empty($view_settings['view_name']) ? $view_settings['view_name'] . ':' . $view_settings['display_name'] : '';
+    if ($options) {
+      $default = !empty($view_settings['view_name']) ? $view_settings['view_name'] . ':' . $view_settings['display_name'] : NULL;
       $form['view']['view_and_display'] = array(
         '#type' => 'select',
         '#title' => t('View used to select the entities'),
+        '#required' => TRUE,
         '#options' => $options,
         '#default_value' => $default,
         '#description' => '<p>' . t('Choose the view and display that select the entities that can be referenced.<br />Only views with a display of type "Entity Reference" are eligible.') . '</p>',
@@ -162,8 +162,8 @@ function entityreference_view_settings_validate($element, &$form_state, $form) {
     list($view, $display) = explode(':', $element['view_and_display']['#value']);
   }
   else {
-    $view = '';
-    $display = '';
+    form_error($element, t('The views entity selection mode requires a view.'));
+    return;
   }
 
   // Explode the 'args' string into an actual array. Beware, explode() turns an

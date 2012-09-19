@@ -342,7 +342,13 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
   // to the form state.
   $form = array(
     '#type' => 'container',
-    '#process' => array('_entityreference_field_settings_process'),
+    '#attached' => array(
+      'css' => array(drupal_get_path('module', 'entityreference') . '/entityreference.admin.css'),
+    ),
+    '#process' => array(
+      '_entityreference_field_settings_process',
+      '_entityreference_field_settings_ajax_process',
+    ),
     '#element_validate' => array('_entityreference_field_settings_validate'),
     '#field' => $field,
     '#instance' => $instance,
@@ -374,11 +380,7 @@ function _entityreference_field_settings_process($form, $form_state) {
     '#description' => t('The entity type that can be referenced through this field.'),
     '#disabled' => $has_data,
     '#size' => 1,
-    '#ajax' => array(
-      'callback' => 'entityreference_settings_ajax',
-      'wrapper' => $form['#id'],
-      'element' => $form['#array_parents'],
-    ),
+    '#ajax' => TRUE,
     '#limit_validation_errors' => array(),
   );
 
@@ -391,16 +393,19 @@ function _entityreference_field_settings_process($form, $form_state) {
   }
 
   $form['handler'] = array(
-    '#type' => 'radios',
-    '#title' => t('Entity selection mode'),
+    '#type' => 'fieldset',
+    '#title' => t('Entity selection'),
+    '#tree' => TRUE,
+    '#process' => array('_entityreference_form_process_merge_parent'),
+  );
+
+  $form['handler']['handler'] = array(
+    '#type' => 'select',
+    '#title' => t('Mode'),
     '#options' => $handlers_options,
     '#default_value' => $settings['handler'],
     '#required' => TRUE,
-    '#ajax' => array(
-      'callback' => 'entityreference_settings_ajax',
-      'wrapper' => $form['#id'],
-      'element' => $form['#array_parents'],
-    ),
+    '#ajax' => TRUE,
     '#limit_validation_errors' => array(),
   );
   $form['handler_submit'] = array(
@@ -413,36 +418,112 @@ function _entityreference_field_settings_process($form, $form_state) {
     '#submit' => array('entityreference_settings_ajax_submit'),
   );
 
-  $form['handler_settings'] = array(
+  $form['handler']['handler_settings'] = array(
     '#type' => 'container',
-    '#tree' => TRUE,
+    '#attributes' => array('class' => array('entityreference-settings')),
   );
 
   $handler = entityreference_get_selection_handler($field, $instance);
-  $form['handler_settings'] += $handler->settingsForm($field, $instance);
+  $form['handler']['handler_settings'] += $handler->settingsForm($field, $instance);
 
-  _entityreference_get_behavior_elements($form['handler_settings'], $field, $instance, 'field');
+  _entityreference_get_behavior_elements($form, $field, $instance, 'field');
+  $form['behaviors'] += array(
+    '#type' => 'fieldset',
+    '#title' => t('Additional behaviors'),
+    '#parents' => array_merge($form['#parents'], array('handler_settings', 'behaviors')),
+  );
 
   return $form;
+}
+
+function _entityreference_field_settings_ajax_process($form, $form_state) {
+  _entityreference_field_settings_ajax_process_element($form, $form);
+  return $form;
+}
+
+function _entityreference_field_settings_ajax_process_element(&$element, $main_form) {
+  if (isset($element['#ajax']) && $element['#ajax'] === TRUE) {
+    $element['#ajax'] = array(
+      'callback' => 'entityreference_settings_ajax',
+      'wrapper' => $main_form['#id'],
+      'element' => $main_form['#array_parents'],
+    );
+  }
+
+  foreach (element_children($element) as $key) {
+    _entityreference_field_settings_ajax_process_element($element[$key], $main_form);
+  }
+}
+
+function _entityreference_form_process_merge_parent($element) {
+  $parents = $element['#parents'];
+  array_pop($parents);
+  $element['#parents'] = $parents;
+  return $element;
+}
+
+function _entityreference_element_validate_filter(&$element, &$form_state) {
+  $element['#value'] = array_filter($element['#value']);
+  form_set_value($element, $element['#value'], $form_state);
 }
 
 function _entityreference_field_settings_validate($form, &$form_state) {
   // Store the new values in the form state.
   $field = $form['#field'];
-
   if (isset($form_state['values']['field'])) {
-    $field = drupal_array_merge_deep($field, $form_state['values']['field']);
+    $field['settings'] = $form_state['values']['field']['settings'];
   }
   $form_state['entityreference']['field'] = $field;
+
+  unset($form_state['values']['field']['settings']['handler_submit']);
 }
 
 /**
  * Implements hook_field_instance_settings_form().
  */
 function entityreference_field_instance_settings_form($field, $instance) {
-  _entityreference_get_behavior_elements($form, $field, $instance, 'instance');
+  $form['settings'] = array(
+    '#type' => 'container',
+    '#attached' => array(
+      'css' => array(drupal_get_path('module', 'entityreference') . '/entityreference.admin.css'),
+    ),
+    '#weight' => 10,
+    '#tree' => TRUE,
+    '#process' => array(
+      '_entityreference_form_process_merge_parent',
+      '_entityreference_field_instance_settings_form',
+      '_entityreference_field_settings_ajax_process',
+    ),
+    '#element_validate' => array('_entityreference_field_instance_settings_validate'),
+    '#field' => $field,
+    '#instance' => $instance,
+  );
 
   return $form;
+}
+
+function _entityreference_field_instance_settings_form($form, $form_state) {
+  $field = isset($form_state['entityreference']['field']) ? $form_state['entityreference']['field'] : $form['#field'];
+  $instance = isset($form_state['entityreference']['instance']) ? $form_state['entityreference']['instance'] : $form['#instance'];
+
+  _entityreference_get_behavior_elements($form, $field, $instance, 'instance');
+  $form['behaviors'] += array(
+    '#type' => 'fieldset',
+    '#title' => t('Additional behaviors'),
+    '#process' => array(
+      '_entityreference_field_settings_ajax_process',
+    ),
+  );
+  return $form;
+}
+
+function _entityreference_field_instance_settings_validate($form, &$form_state) {
+  // Store the new values in the form state.
+  $instance = $form['#instance'];
+  if (isset($form_state['values']['instance'])) {
+    $instance = drupal_array_merge_deep($instance, $form_state['values']['instance']);
+  }
+  $form_state['entityreference']['instance'] = $instance;
 }
 
 /**
@@ -463,35 +544,39 @@ function _entityreference_get_behavior_elements(&$element, $field, $instance, $l
         $settings = !empty($instance['settings']['behaviors'][$name]) ? $instance['settings']['behaviors'][$name] : array();
       }
       $settings += array('status' => $plugin['force enabled']);
+
+      // Render the checkbox.
       $element['behaviors'][$name] = array(
-        '#type' => 'fieldset',
-        '#title' => $plugin['title'],
-        '#default_value' => $settings['status'],
+        '#tree' => TRUE,
       );
       $element['behaviors'][$name]['status'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Enable %title', array('%title' => $plugin['title'])),
+        '#title' => check_plain($plugin['title']),
         '#description' => $plugin['description'],
         '#default_value' => $settings['status'],
         '#disabled' => $plugin['force enabled'],
+        '#ajax' => TRUE,
       );
 
-      $handler = _entityreference_get_behavior_handler($name);
-      if ($behavior_elements = $handler->settingsForm($field, $instance)) {
-        $enable_element = $level == 'field' ? 'field[settings][handler_settings][behaviors]' : 'instance[settings][behaviors]';
-        foreach ($behavior_elements as $key => &$behavior_element) {
-          $behavior_element += array(
-            '#default_value' => !empty($settings[$key]) ? $settings[$key] : NULL,
-            '#states' => array(
-              'visible' => array(
-                ':input[name="' . $enable_element . '[' . $name . '][status]"]' => array('checked' => TRUE),
-              ),
+      if ($settings['status']) {
+        $handler = _entityreference_get_behavior_handler($name);
+        if ($behavior_elements = $handler->settingsForm($field, $instance)) {
+          foreach ($behavior_elements as $key => &$behavior_element) {
+            $behavior_element += array(
+              '#default_value' => !empty($settings[$key]) ? $settings[$key] : NULL,
+            );
+          }
+
+          // Get the behavior settings.
+          $behavior_elements += array(
+            '#type' => 'container',
+            '#process' => array('_entityreference_form_process_merge_parent'),
+            '#attributes' => array(
+              'class' => array('entityreference-settings'),
             ),
           );
+          $element['behaviors'][$name]['settings'] = $behavior_elements;
         }
-
-        // Get the behavior settings.
-        $element['behaviors'][$name] += $behavior_elements;
       }
     }
   }

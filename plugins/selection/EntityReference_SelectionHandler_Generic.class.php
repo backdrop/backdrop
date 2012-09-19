@@ -41,6 +41,14 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
   public static function settingsForm($field, $instance) {
     $entity_info = entity_get_info($field['settings']['target_type']);
 
+    // Merge-in default values.
+    $field['settings']['handler_settings'] += array(
+      'target_bundles' => array(),
+      'sort' => array(
+        'type' => 'none',
+      )
+    );
+
     if (!empty($entity_info['entity keys']['bundle'])) {
       $bundles = array();
       foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
@@ -48,13 +56,14 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
       }
 
       $form['target_bundles'] = array(
-        '#type' => 'select',
+        '#type' => 'checkboxes',
         '#title' => t('Target bundles'),
         '#options' => $bundles,
-        '#default_value' => isset($field['settings']['handler_settings']['target_bundles']) ? $field['settings']['handler_settings']['target_bundles'] : array(),
+        '#default_value' => $field['settings']['handler_settings']['target_bundles'],
         '#size' => 6,
         '#multiple' => TRUE,
-        '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.')
+        '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.'),
+        '#element_validate' => array('_entityreference_element_validate_filter'),
       );
     }
     else {
@@ -65,64 +74,80 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     }
 
     $form['sort']['type'] = array(
-      '#type' => 'radios',
+      '#type' => 'select',
       '#title' => t('Sort by'),
       '#options' => array(
         'none' => t("Don't sort"),
         'property' => t('A property of the base table of the entity'),
         'field' => t('A field attached to this entity'),
       ),
-      '#default_value' => isset($field['settings']['handler_settings']['sort']['type']) ? $field['settings']['handler_settings']['sort']['type'] : 'none',
+      '#ajax' => TRUE,
+      '#limit_validation_errors' => array(),
+      '#default_value' => $field['settings']['handler_settings']['sort']['type'],
     );
 
-    $form['sort']['property'] = array(
-      '#type' => 'select',
-      '#title' => t('Sort property'),
-      '#options' => drupal_map_assoc($entity_info['schema_fields_sql']['base table']),
-      '#default_value' => isset($field['settings']['handler_settings']['sort']['property']) ? $field['settings']['handler_settings']['sort']['property'] : '',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="field[settings][handler_settings][sort][type]"]' => array('value' => 'property'),
-        ),
-      ),
+    $form['sort']['settings'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('entityreference-settings')),
+      '#process' => array('_entityreference_form_process_merge_parent'),
     );
 
-    $fields = array();
-    foreach (field_info_instances($field['settings']['target_type']) as $bundle_name => $bundle_instances) {
-      foreach ($bundle_instances as $instance_name => $instance_info) {
-        $field_info = field_info_field($instance_name);
-        foreach ($field_info['columns'] as $column_name => $column_info) {
-          $fields[$instance_name . ':' . $column_name] = t('@label (column @column)', array('@label' => $instance_info['label'], '@column' => $column_name));
+    if ($field['settings']['handler_settings']['sort']['type'] == 'property') {
+      // Merge-in default values.
+      $field['settings']['handler_settings']['sort'] += array(
+        'property' => NULL,
+      );
+
+      $form['sort']['settings']['property'] = array(
+        '#type' => 'select',
+        '#title' => t('Sort property'),
+        '#required' => TRUE,
+        '#options' => drupal_map_assoc($entity_info['schema_fields_sql']['base table']),
+        '#default_value' => $field['settings']['handler_settings']['sort']['property'],
+      );
+    }
+    elseif ($field['settings']['handler_settings']['sort']['type'] == 'field') {
+      // Merge-in default values.
+      $field['settings']['handler_settings']['sort'] += array(
+        'field' => NULL,
+      );
+
+      $fields = array();
+      foreach (field_info_instances($field['settings']['target_type']) as $bundle_name => $bundle_instances) {
+        foreach ($bundle_instances as $instance_name => $instance_info) {
+          $field_info = field_info_field($instance_name);
+          foreach ($field_info['columns'] as $column_name => $column_info) {
+            $fields[$instance_name . ':' . $column_name] = t('@label (column @column)', array('@label' => $instance_info['label'], '@column' => $column_name));
+          }
         }
       }
+
+      $form['sort']['settings']['field'] = array(
+        '#type' => 'select',
+        '#title' => t('Sort field'),
+        '#required' => TRUE,
+        '#options' => $fields,
+        '#default_value' => $field['settings']['handler_settings']['sort']['field'],
+      );
     }
 
-    $form['sort']['field'] = array(
-      '#type' => 'select',
-      '#title' => t('Sort field'),
-      '#options' => $fields,
-      '#default_value' => isset($field['settings']['handler_settings']['sort']['type']) ? $field['settings']['handler_settings']['sort']['type'] : '',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="field[settings][handler_settings][sort][type]"]' => array('value' => 'field'),
-        ),
-      ),
-    );
+    if ($field['settings']['handler_settings']['sort']['type'] != 'none') {
+      // Merge-in default values.
+      $field['settings']['handler_settings']['sort'] += array(
+        'direction' => 'ASC',
+      );
 
-    $form['sort']['direction'] = array(
-      '#type' => 'select',
-      '#title' => t('Sort direction'),
-      '#options' => array(
-        'ASC' => t('Ascending'),
-        'DESC' => t('Descending'),
-      ),
-      '#default_value' => isset($field['settings']['handler_settings']['sort']['direction']) ? $field['settings']['handler_settings']['sort']['direction'] : 'ASC',
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="field[settings][handler_settings][sort][type]"]' => array('value' => 'none'),
+      $form['sort']['settings']['direction'] = array(
+        '#type' => 'select',
+        '#title' => t('Sort direction'),
+        '#required' => TRUE,
+        '#options' => array(
+          'ASC' => t('Ascending'),
+          'DESC' => t('Descending'),
         ),
-      ),
-    );
+        '#default_value' => $field['settings']['handler_settings']['sort']['direction'],
+      );
+    }
 
     return $form;
   }
