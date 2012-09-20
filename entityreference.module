@@ -852,7 +852,7 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
     $tag_last = $string;
   }
 
-  if (!empty($tag_last)) {
+  if (isset($tag_last)) {
     // Get an array of matching entities.
     $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
 
