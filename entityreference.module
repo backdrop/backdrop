@@ -97,14 +97,16 @@ function entityreference_menu() {
     'title' => 'Entity Reference Autocomplete',
     'page callback' => 'entityreference_autocomplete_callback',
     'page arguments' => array(2, 3, 4, 5),
-    'access callback' => TRUE,
+    'access callback' => 'entityreference_autocomplete_access_callback',
+    'access arguments' => array(2, 3, 4, 5),
     'type' => MENU_CALLBACK,
   );
   $items['entityreference/autocomplete/tags/%/%/%'] = array(
     'title' => 'Entity Reference Autocomplete',
     'page callback' => 'entityreference_autocomplete_callback',
     'page arguments' => array(2, 3, 4, 5),
-    'access callback' => TRUE,
+    'access callback' => 'entityreference_autocomplete_access_callback',
+    'access arguments' => array(2, 3, 4, 5),
     'type' => MENU_CALLBACK,
   );
 
@@ -782,6 +784,30 @@ function entityreference_field_widget_error($element, $error) {
 }
 
 /**
+ * Menu Access callback for the autocomplete widget.
+ *
+ * @param $type
+ *   The widget type (i.e. 'single' or 'tags').
+ * @param $field_name
+ *   The name of the entity-reference field.
+ * @param $entity_type
+ *   The entity type.
+ * @param $bundle_name
+ *   The bundle name.
+ * @return
+ *   True if user can access this menu item.
+ */
+function entityreference_autocomplete_access_callback($type, $field_name, $entity_type, $bundle_name) {
+  $field = field_info_field($field_name);
+  $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+
+  if (!$field || !$instance || $field['type'] != 'entityreference' || !field_access('edit', $field, $entity_type)) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+/**
  * Menu callback: autocomplete the label of an entity.
  *
  * @param $type
@@ -802,10 +828,6 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
   $field = field_info_field($field_name);
   $instance = field_info_instance($entity_type, $field_name, $bundle_name);
   $matches = array();
-
-  if (!$field || !$instance || $field['type'] != 'entityreference' || !field_access('edit', $field, $entity_type)) {
-    return MENU_ACCESS_DENIED;
-  }
 
   $entity = NULL;
   if ($entity_id !== 'NULL') {
