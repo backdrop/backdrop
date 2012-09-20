@@ -21,7 +21,7 @@ class entityreference_plugin_row_fields extends views_plugin_row_fields {
     parent::options_form($form, $form_state);
 
     // Expand the description of the 'Inline field' checkboxes.
-    $form['inline']['#description'] .= '<br>' . t("<strong>Note:</strong> In 'Entity Reference' displays, all fields will be displayed inline unless an explicit selection of inline fields is made here." );
+    $form['inline']['#description'] .= '<br />' . t("<strong>Note:</strong> In 'Entity Reference' displays, all fields will be displayed inline unless an explicit selection of inline fields is made here." );
   }
 
   function pre_render($row) {

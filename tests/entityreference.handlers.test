@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains EntityReferenceHandlersTestCase
+ */
+
+/**
  * Test for Entity Reference handlers.
  */
 class EntityReferenceHandlersTestCase extends DrupalWebTestCase {

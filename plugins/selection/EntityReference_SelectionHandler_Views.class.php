@@ -30,7 +30,7 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
     foreach ($displays as $data) {
       list($view, $display_id) = $data;
       if ($view->base_table == $entity_info['base table']) {
-        $options[$view->name . ':' . $display_id] = $view->name .' - ' . $view->display[$display_id]->display_title;
+        $options[$view->name . ':' . $display_id] = $view->name . ' - ' . $view->display[$display_id]->display_title;
       }
     }
 
@@ -42,7 +42,7 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
       $form['view']['#element_validate'] = array('entityreference_view_settings_validate');
 
       $options = array('' => '<' . t('none') . '>') + $options;
-      $default = !empty($view_settings['view_name']) ? $view_settings['view_name'] . ':' .$view_settings['display_name'] : '';
+      $default = !empty($view_settings['view_name']) ? $view_settings['view_name'] . ':' . $view_settings['display_name'] : '';
       $form['view']['view_and_display'] = array(
         '#type' => 'select',
         '#title' => t('View used to select the entities'),

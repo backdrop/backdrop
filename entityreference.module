@@ -15,7 +15,7 @@ function entityreference_ctools_plugin_directory($module, $plugin) {
 function entityreference_init() {
   // Include feeds.module integration.
   if (module_exists('feeds')) {
-    module_load_include('inc','entityreference','entityreference.feeds');
+    module_load_include('inc', 'entityreference', 'entityreference.feeds');
   }
 }
 
@@ -46,7 +46,7 @@ function entityreference_behavior_plugin_process(&$plugin, $info) {
 }
 
 /**
- * Implementation of hook_field_info().
+ * Implements hook_field_info().
  */
 function entityreference_field_info() {
   $field_info['entityreference'] = array(
@@ -737,7 +737,8 @@ function _entityreference_autocomplete_validate($element, &$form_state, $form) {
     // Take "label (entity id)', match the id from parenthesis.
     if (preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
       $value = $matches[1];
-    } else {
+    }
+    else {
       // Try to get a match from the input string when the user didn't use the
       // autocomplete but filled in a value manually.
       $field = field_info_field($element['#field_name']);
@@ -761,7 +762,8 @@ function _entityreference_autocomplete_tags_validate($element, &$form_state, $fo
         $value[] = array(
           'target_id' => $matches[1],
         );
-      } else {
+      }
+      else {
         // Try to get a match from the input string when the user didn't use the
         // autocomplete but filled in a value manually.
         $field = field_info_field($element['#field_name']);

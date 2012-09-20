@@ -3,19 +3,19 @@
 class EntityReferenceFieldBehaviorExample extends EntityReference_BehaviorHandler_Abstract {
 
   public function load($entity_type, $entities, $field, $instances, $langcode, &$items) {
-    drupal_set_message('Do something on load!');
+    drupal_set_message(t('Do something on load!'));
   }
 
   public function insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    drupal_set_message('Do something on insert!');
+    drupal_set_message(t('Do something on insert!'));
   }
 
   public function update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    drupal_set_message('Do something on update!');
+    drupal_set_message(t('Do something on update!'));
   }
 
   public function delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    drupal_set_message('Do something on delete!');
+    drupal_set_message(t('Do something on delete!'));
   }
 
   /**
