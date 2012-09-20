@@ -896,6 +896,7 @@ function entityreference_field_formatter_info() {
       'field types' => array('entityreference'),
       'settings' => array(
         'view_mode' => '',
+        'links' => TRUE,
       ),
     ),
   );
@@ -933,6 +934,12 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
         '#default_value' => $settings['view_mode'],
       );
     }
+
+    $element['links'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show links'),
+      '#default_value' => $settings['links'],
+    );
   }
 
   return $element;
@@ -954,6 +961,7 @@ function entityreference_field_formatter_settings_summary($field, $instance, $vi
   if ($display['type'] == 'entityreference_entity_view') {
     $entity_info = entity_get_info($field['settings']['target_type']);
     $summary[] = t('Rendered as @mode', array('@mode' => isset($entity_info['view modes'][$settings['view_mode']]['label']) ? $entity_info['view modes'][$settings['view_mode']]['label'] : $settings['view_mode']));
+    $summary[] = !empty($settigs['links']) ? t('Display links') : t('Do not display links');
   }
 
   return implode('<br />', $summary);
@@ -1010,6 +1018,7 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
  */
 function entityreference_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $result = array();
+  $settings = $display['settings'];
 
   switch ($display['type']) {
     case 'entityreference_label':
@@ -1045,7 +1054,11 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 
         $entity = clone $item['entity'];
         unset($entity->content);
-        $result[$delta] = entity_view($field['settings']['target_type'], array($item['target_id'] => $entity), $display['settings']['view_mode'], $langcode, FALSE);
+        $result[$delta] = entity_view($field['settings']['target_type'], array($item['target_id'] => $entity), $settings['view_mode'], $langcode, FALSE);
+
+        if (empty($settings['links']) && isset($result[$delta][$field['settings']['target_type']][$item['target_id']]['links'])) {
+          $result[$delta][$field['settings']['target_type']][$item['target_id']]['links']['#access'] = FALSE;
+        }
         $depth = 0;
       }
       break;
