@@ -38,6 +38,7 @@ class views_handler_field_boolean extends views_handler_field {
       'true-false' => array(t('True'), t('False')),
       'on-off' => array(t('On'), t('Off')),
       'enabled-disabled' => array(t('Enabled'), t('Disabled')),
+      'boolean' => array(1, 0),
       'unicode-yes-no' => array('✔', '✖'),
     );
     $output_formats = isset($this->definition['output formats']) ? $this->definition['output formats'] : array();
