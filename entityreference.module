@@ -425,11 +425,13 @@ function _entityreference_field_settings_process($form, $form_state) {
   $form['handler']['handler_settings'] += $handler->settingsForm($field, $instance);
 
   _entityreference_get_behavior_elements($form, $field, $instance, 'field');
-  $form['behaviors'] += array(
-    '#type' => 'fieldset',
-    '#title' => t('Additional behaviors'),
-    '#parents' => array_merge($form['#parents'], array('handler_settings', 'behaviors')),
-  );
+  if (!empty($form['behaviors'])) {
+    $form['behaviors'] += array(
+      '#type' => 'fieldset',
+      '#title' => t('Additional behaviors'),
+      '#parents' => array_merge($form['#parents'], array('handler_settings', 'behaviors')),
+    );
+  }
 
   return $form;
 }
@@ -505,13 +507,15 @@ function _entityreference_field_instance_settings_form($form, $form_state) {
   $instance = isset($form_state['entityreference']['instance']) ? $form_state['entityreference']['instance'] : $form['#instance'];
 
   _entityreference_get_behavior_elements($form, $field, $instance, 'instance');
-  $form['behaviors'] += array(
-    '#type' => 'fieldset',
-    '#title' => t('Additional behaviors'),
-    '#process' => array(
-      '_entityreference_field_settings_ajax_process',
-    ),
-  );
+  if (!empty($form['behaviors'])) {
+    $form['behaviors'] += array(
+      '#type' => 'fieldset',
+      '#title' => t('Additional behaviors'),
+      '#process' => array(
+        '_entityreference_field_settings_ajax_process',
+      ),
+    );
+  }
   return $form;
 }
 
