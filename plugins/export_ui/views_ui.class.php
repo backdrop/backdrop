@@ -376,6 +376,11 @@ class views_ui extends ctools_export_ui {
   }
 
   function list_page($js, $input) {
+    // Remove filters values from session if filters are hidden.
+    if (!variable_get('views_ui_show_listing_filters', FALSE) && isset($_SESSION['ctools_export_ui'][$this->plugin['name']])) {
+      unset($_SESSION['ctools_export_ui'][$this->plugin['name']]);
+    }
+
     // wrap output in a div for CSS
     $output = parent::list_page($js, $input);
     if (is_string($output)) {
