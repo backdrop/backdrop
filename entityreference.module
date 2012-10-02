@@ -331,6 +331,49 @@ function entityreference_field_attach_delete($entity_type, $entity) {
 }
 
 /**
+ * Implements hook_entity_insert().
+ */
+function entityreference_entity_insert($entity, $entity_type) {
+  entityreference_entity_crud($entity, $entity_type, 'entityPostInsert');
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function entityreference_entity_update($entity, $entity_type) {
+  entityreference_entity_crud($entity, $entity_type, 'entityPostUpdate');
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function entityreference_entity_delete($entity, $entity_type) {
+  entityreference_entity_crud($entity, $entity_type, 'entityPostDelete');
+}
+
+/**
+ * Invoke a behavior based on entity CRUD.
+ *
+ * @param $entity
+ *   The entity object.
+ * @param $entity_type
+ *   The entity type.
+ * @param $method_name
+ *   The method to invoke.
+ */
+function entityreference_entity_crud($entity, $entity_type, $method_name) {
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+    $field = field_info_field($field_name);
+    if ($field['type'] == 'entityreference') {
+      foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+        $handler->{$method_name}($entity_type, $entity, $field, $instance);
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_field_settings_form().
  */
 function entityreference_field_settings_form($field, $instance, $has_data) {
