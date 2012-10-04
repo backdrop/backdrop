@@ -873,6 +873,10 @@ function _entityreference_autocomplete_validate($element, &$form_state, $form) {
       // autocomplete but filled in a value manually.
       $field = field_info_field($element['#field_name']);
       $handler = entityreference_get_selection_handler($field);
+      $field_name = $element['#field_name'];
+      $field = field_info_field($field_name);
+      $instance = field_info_instance($element['#entity_type'], $field_name, $element['#bundle']);
+      $handler = entityreference_get_selection_handler($field, $instance);
       $value = $handler->validateAutocompleteInput($element['#value'], $element, $form_state, $form);
     }
   }
