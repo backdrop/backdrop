@@ -21,6 +21,7 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['alignment'] = array('default' => 'horizontal');
     $options['fill_single_line'] = array('default' => TRUE, 'bool' => TRUE);
     $options['summary'] = array('default' => '');
+    $options['caption'] = array('default' => '');
 
     return $options;
   }
@@ -52,10 +53,17 @@ class views_plugin_style_grid extends views_plugin_style {
       '#default_value' => !empty($this->options['fill_single_line']),
     );
 
+    $form['caption'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Short description of table'),
+      '#description' => t('Include a caption for better accessibility of your table.'),
+      '#default_value' => $this->options['caption'],
+    );
+
     $form['summary'] = array(
       '#type' => 'textfield',
       '#title' => t('Table summary'),
-      '#description' => t('This value will be displayed as table-summary attribute in the html. Set this for better accessiblity of your site.'),
+      '#description' => t('This value will be displayed as table-summary attribute in the html. Use this to give a summary of complex tables.'),
       '#default_value' => $this->options['summary'],
     );
   }

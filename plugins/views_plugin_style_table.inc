@@ -33,6 +33,7 @@ class views_plugin_style_table extends views_plugin_style {
     $options['override'] = array('default' => TRUE, 'bool' => TRUE);
     $options['sticky'] = array('default' => FALSE, 'bool' => TRUE);
     $options['order'] = array('default' => 'asc');
+    $options['caption'] = array('default' => '', 'translatable' => TRUE);
     $options['summary'] = array('default' => '', 'translatable' => TRUE);
     $options['empty_table'] = array('default' => FALSE, 'bool' => TRUE);
 
@@ -179,10 +180,18 @@ class views_plugin_style_table extends views_plugin_style {
       '#description' => t('(Sticky header effects will not be active for preview below, only on live output.)'),
     );
 
+    $form['caption'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Short description of table'),
+      '#description' => t('Include a caption for better accessibility of your table.'),
+      '#default_value' => $this->options['caption'],
+      '#maxlength' => 255,
+    );
+
     $form['summary'] = array(
       '#type' => 'textfield',
       '#title' => t('Table summary'),
-      '#description' => t('This value will be displayed as table-summary attribute in the html. Set this for better accessiblity of your site.'),
+      '#description' => t('This value will be displayed as table-summary attribute in the html. Use this to give a summary of complex tables.'),
       '#default_value' => $this->options['summary'],
       '#maxlength' => 255,
     );

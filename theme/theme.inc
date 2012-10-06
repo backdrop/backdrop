@@ -649,8 +649,17 @@ function template_preprocess_views_view_table(&$vars) {
   }
   $vars['classes_array'][] = 'cols-'. count($vars['header']);
 
+  // Add the summary to the list if set.
   if (!empty($handler->options['summary'])) {
-    $vars['attributes_array'] = array('summary' => $handler->options['summary']);
+    $vars['attributes_array'] = array('summary' => filter_xss_admin($handler->options['summary']));
+  }
+
+  // Add the caption to the list if set.
+  if (!empty($handler->options['caption'])) {
+    $vars['caption'] = filter_xss_admin($handler->options['caption']);
+  }
+  else {
+    $vars['caption'] = '';
   }
 }
 
@@ -762,8 +771,18 @@ function template_preprocess_views_view_grid(&$vars) {
   }
   $vars['rows'] = $rows;
   $vars['class'] = 'views-view-grid cols-' . $columns;
+
+  // Add the summary to the list if set.
   if (!empty($handler->options['summary'])) {
-    $vars['attributes_array'] = array('summary' => $handler->options['summary']);
+    $vars['attributes_array'] = array('summary' => filter_xss_admin($handler->options['summary']));
+  }
+
+  // Add the caption to the list if set.
+  if (!empty($handler->options['caption'])) {
+    $vars['caption'] = filter_xss_admin($handler->options['caption']);
+  }
+  else {
+    $vars['caption'] = '';
   }
 }
 

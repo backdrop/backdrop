@@ -6,6 +6,7 @@
  *
  * - $title : The title of this group of rows.  May be empty.
  * - $header: An array of header labels keyed by field id.
+ * - $caption: The caption for this table. May be empty.
  * - $header_classes: An array of header classes keyed by field id.
  * - $fields: An array of CSS IDs to use for each field id.
  * - $classes: A class or classes to apply to the table, based on settings.
@@ -19,8 +20,8 @@
  */
 ?>
 <table <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
-  <?php if (!empty($title)) : ?>
-    <caption><?php print $title; ?></caption>
+   <?php if (!empty($title) || !empty($caption)) : ?>
+     <caption><?php print $caption . $title; ?></caption>
   <?php endif; ?>
   <?php if (!empty($header)) : ?>
     <thead>
