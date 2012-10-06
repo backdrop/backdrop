@@ -17,6 +17,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     $options['hide'] = array('default' => FALSE, 'bool' => TRUE);
     $options['path'] = array('default' => '');
     $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
+    $options['label'] = array('default' => '', 'translatable' => TRUE);
     $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
     $options['default_value'] = array('default' => FALSE, 'bool' => TRUE);
 
@@ -66,6 +67,13 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       '#type' => 'textfield',
       '#title' => t('Button text'),
       '#default_value' => $this->options['text'],
+    );
+
+    $form['label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Selector label'),
+      '#default_value' => $this->options['label'],
+      '#description' => t('The text that will appear as the the label of the selector element. If blank no label tag will be used.'),
     );
 
     $form['choose'] = array(
@@ -135,6 +143,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     $settings = array(
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
+      'title' => $this->options['label'],
       'choose' => $this->options['choose'],
       'default_value' => $default_value,
     );
