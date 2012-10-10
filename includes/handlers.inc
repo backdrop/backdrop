@@ -751,6 +751,13 @@ class views_handler extends views_object {
  *
  */
 class views_many_to_one_helper {
+  /**
+   * Contains possible existing placeholders used by the query.
+   *
+   * @var array
+   */
+  public $placeholders = array();
+
   function views_many_to_one_helper(&$handler) {
     $this->handler = &$handler;
   }
