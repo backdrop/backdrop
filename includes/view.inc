@@ -1258,6 +1258,7 @@ class view extends views_db_object {
         $cache->cache_set('output');
       }
     }
+    $this->render_time = microtime(TRUE) - $start;
 
     $exposed_form->post_render($this->display_handler->output);
 
@@ -1286,7 +1287,6 @@ class view extends views_db_object {
     if (!empty($this->live_preview) && variable_get('views_show_additional_queries', FALSE)) {
       $this->end_query_capture();
     }
-    $this->render_time = microtime(TRUE) - $start;
 
     return $this->display_handler->output;
   }
