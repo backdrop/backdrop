@@ -1578,7 +1578,7 @@ class views_plugin_query_default extends views_plugin_query {
         ),
       ),
       'stddev_pop' => array(
-        'title' => t('Standard derivation'),
+        'title' => t('Standard deviation'),
         'method' => 'views_query_default_aggregation_method_simple',
         'handler' => array(
           'argument' => 'views_handler_argument_group_by_numeric',
