@@ -1130,12 +1130,14 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
     $rekey = FALSE;
 
     foreach ($items[$id] as $delta => $item) {
-      // Check whether the referenced entity could be loaded and that the user has access to it.
-      if (isset($target_entities[$item['target_id']]) && entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']])) {
+      // Check whether the referenced entity could be loaded.
+      if (isset($target_entities[$item['target_id']])) {
         // Replace the instance value with the term data.
         $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
+        // Check whether the user has access to the referenced entity.
+        $items[$id][$delta]['access'] = entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']]);
       }
-      // Otherwise, unset the instance value, since the entity does not exists or should not be accessible.
+      // Otherwise, unset the instance value, since the entity does not exist.
       else {
         unset($items[$id][$delta]);
         $rekey = TRUE;
@@ -1155,6 +1157,13 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
 function entityreference_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $result = array();
   $settings = $display['settings'];
+
+  // Rebuild the items list to contain only those with access.
+  foreach ($items as $key => $item) {
+    if (empty($item['access'])) {
+      unset($items[$key]);
+    }
+  }
 
   switch ($display['type']) {
     case 'entityreference_label':
