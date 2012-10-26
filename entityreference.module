@@ -762,7 +762,12 @@ function entityreference_field_widget_settings_form($field, $instance) {
  * Implements hook_options_list().
  */
 function entityreference_options_list($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
-  return entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->getReferencableEntities();
+  $options = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->getReferencableEntities();
+  if (count($options) == 1) {
+    $key = key($options);
+    $options = $options[$key];
+  }
+  return $options;
 }
 
 /**
@@ -993,15 +998,17 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
     $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
 
     // Loop through the products and convert them into autocomplete output.
-    foreach ($entity_labels as $entity_id => $label) {
-      $key = "$label ($entity_id)";
-      // Strip things like starting/trailing white spaces, line breaks and tags.
-      $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
-      // Names containing commas or quotes must be wrapped in quotes.
-      if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
-        $key = '"' . str_replace('"', '""', $key) . '"';
+    foreach ($entity_labels as $values) {
+      foreach ($values as $entity_id => $label) {
+        $key = "$label ($entity_id)";
+        // Strip things like starting/trailing white spaces, line breaks and tags.
+        $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
+        // Names containing commas or quotes must be wrapped in quotes.
+        if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
+          $key = '"' . str_replace('"', '""', $key) . '"';
+        }
+        $matches[$prefix . $key] = '<div class="reference-autocomplete">' . $label . '</div>';
       }
-      $matches[$prefix . $key] = '<div class="reference-autocomplete">' . $label . '</div>';
     }
   }
 

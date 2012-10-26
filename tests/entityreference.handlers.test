@@ -27,10 +27,18 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     foreach ($tests as $test) {
       foreach ($test['arguments'] as $arguments) {
         $result = call_user_func_array(array($handler, 'getReferencableEntities'), $arguments);
-        $this->assertEqual($result, $test['result'], t('Valid result set returned by @handler.', array('@handler' => $handler_name)));
+        $this->assertEqual($result, $test['result'], format_string('Valid result set returned by @handler.', array('@handler' => $handler_name)));
 
         $result = call_user_func_array(array($handler, 'countReferencableEntities'), $arguments);
-        $this->assertEqual($result, count($test['result']), t('Valid count returned by @handler.', array('@handler' => $handler_name)));
+        if (!empty($test['result'])) {
+          $bundle = key($test['result']);
+          $count = count($test['result'][$bundle]);
+        }
+        else {
+          $count = 0;
+        }
+
+        $this->assertEqual($result, $count, format_string('Valid count returned by @handler.', array('@handler' => $handler_name)));
       }
     }
   }
@@ -93,8 +101,10 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published1']->nid => $node_labels['published1'],
-          $nodes['published2']->nid => $node_labels['published2'],
+          'article' => array(
+            $nodes['published1']->nid => $node_labels['published1'],
+            $nodes['published2']->nid => $node_labels['published2'],
+          ),
         ),
       ),
       array(
@@ -103,7 +113,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Published1', 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published1']->nid => $node_labels['published1'],
+          'article' => array(
+            $nodes['published1']->nid => $node_labels['published1'],
+          ),
         ),
       ),
       array(
@@ -112,7 +124,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Published2', 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published2']->nid => $node_labels['published2'],
+          'article' => array(
+            $nodes['published2']->nid => $node_labels['published2'],
+          ),
         ),
       ),
       array(
@@ -139,9 +153,11 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['published1']->nid => $node_labels['published1'],
-          $nodes['published2']->nid => $node_labels['published2'],
-          $nodes['unpublished']->nid => $node_labels['unpublished'],
+          'article' => array(
+            $nodes['published1']->nid => $node_labels['published1'],
+            $nodes['published2']->nid => $node_labels['published2'],
+            $nodes['unpublished']->nid => $node_labels['unpublished'],
+          ),
         ),
       ),
       array(
@@ -149,7 +165,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Node unpublished', 'CONTAINS'),
         ),
         'result' => array(
-          $nodes['unpublished']->nid => $node_labels['unpublished'],
+          'article' => array(
+            $nodes['unpublished']->nid => $node_labels['unpublished'],
+          ),
         ),
       ),
     );
@@ -215,8 +233,10 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $users['admin']->uid => $user_labels['admin'],
-          $users['non_admin']->uid => $user_labels['non_admin'],
+          'user' => array(
+            $users['admin']->uid => $user_labels['admin'],
+            $users['non_admin']->uid => $user_labels['non_admin'],
+          ),
         ),
       ),
       array(
@@ -225,7 +245,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('NON_ADMIN', 'CONTAINS'),
         ),
         'result' => array(
-          $users['non_admin']->uid => $user_labels['non_admin'],
+          'user' => array(
+            $users['non_admin']->uid => $user_labels['non_admin'],
+          ),
         ),
       ),
       array(
@@ -250,10 +272,12 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $users['anonymous']->uid => $user_labels['anonymous'],
-          $users['admin']->uid => $user_labels['admin'],
-          $users['non_admin']->uid => $user_labels['non_admin'],
-          $users['blocked']->uid => $user_labels['blocked'],
+          'user' => array(
+            $users['anonymous']->uid => $user_labels['anonymous'],
+            $users['admin']->uid => $user_labels['admin'],
+            $users['non_admin']->uid => $user_labels['non_admin'],
+            $users['blocked']->uid => $user_labels['blocked'],
+          ),
         ),
       ),
       array(
@@ -261,7 +285,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('blocked', 'CONTAINS'),
         ),
         'result' => array(
-          $users['blocked']->uid => $user_labels['blocked'],
+          'user' => array(
+            $users['blocked']->uid => $user_labels['blocked'],
+          ),
         ),
       ),
       array(
@@ -270,7 +296,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('anonymous', 'CONTAINS'),
         ),
         'result' => array(
-          $users['anonymous']->uid => $user_labels['anonymous'],
+          'user' => array(
+            $users['anonymous']->uid => $user_labels['anonymous'],
+          ),
         ),
       ),
     );
@@ -364,7 +392,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comment_labels['published_published'],
+          'comment_node_article' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+          ),
         ),
       ),
       array(
@@ -372,7 +402,9 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array('Published', 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comment_labels['published_published'],
+          'comment_node_article' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+          ),
         ),
       ),
       array(
@@ -399,8 +431,10 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comment_labels['published_published'],
-          $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
+          'comment_node_article' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+            $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
+          ),
         ),
       ),
     );
@@ -415,9 +449,11 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          $comments['published_published']->cid => $comment_labels['published_published'],
-          $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
-          $comments['unpublished_published']->cid => $comment_labels['unpublished_published'],
+          'comment_node_article' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+            $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
+            $comments['unpublished_published']->cid => $comment_labels['unpublished_published'],
+          ),
         ),
       ),
     );
