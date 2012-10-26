@@ -968,6 +968,31 @@ function entityreference_autocomplete_access_callback($type, $field_name, $entit
 function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
   $field = field_info_field($field_name);
   $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+
+  return entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id, $string);
+}
+
+/**
+ * Return JSON based on given field, instance and string.
+ *
+ * This function can be used by other modules that wish to pass a mocked
+ * definition of the field on instance.
+ *
+ * @param $type
+ *   The widget type (i.e. 'single' or 'tags').
+ * @param $field
+ *   The field array defintion.
+ * @param $instance
+ *   The instance array defintion.
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity_id
+ *   Optional; The entity ID the entity-reference field is attached to.
+ *   Defaults to ''.
+ * @param $string
+ *   The label of the entity to query by.
+ */
+function entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id = '', $string = '') {
   $matches = array();
 
   $entity = NULL;
@@ -977,6 +1002,7 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
       return MENU_ACCESS_DENIED;
     }
   }
+
   $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
   if ($type == 'tags') {
