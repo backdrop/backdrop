@@ -167,10 +167,12 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     $results = $query->execute();
 
     if (!empty($results[$entity_type])) {
+      $entity_info = entity_get_info($entity_type);
       $entities = entity_load($entity_type, array_keys($results[$entity_type]));
       foreach ($entities as $entity_id => $entity) {
         list(,, $bundle) = entity_extract_ids($entity_type, $entity);
-        $options[$bundle][$entity_id] = check_plain($this->getLabel($entity));
+        $bundle_label = check_plain($entity_info['bundles'][$bundle]['label']);
+        $options[$bundle_label][$entity_id] = check_plain($this->getLabel($entity));
       }
     }
 
