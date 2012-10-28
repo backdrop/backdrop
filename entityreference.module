@@ -762,12 +762,21 @@ function entityreference_field_widget_settings_form($field, $instance) {
  * Implements hook_options_list().
  */
 function entityreference_options_list($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
-  $options = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->getReferencableEntities();
-  if (count($options) == 1) {
-    $key = key($options);
-    $options = $options[$key];
+  if (!$options = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->getReferencableEntities()) {
+    return array();
   }
-  return $options;
+
+  // Rebuild the array, by changing the bundle key into the bundle label.
+  $target_type = $field['settings']['target_type'];
+  $entity_info = entity_get_info($target_type);
+
+  $return = array();
+  foreach ($options as $bundle => $entity_ids) {
+    $bundle_label = check_plain($entity_info['bundles'][$bundle]['label']);
+    $return[$bundle_label] = $entity_ids;
+  }
+
+  return count($return) == 1 ? reset($return) : $return;
 }
 
 /**
