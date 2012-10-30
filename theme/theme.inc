@@ -1040,18 +1040,12 @@ function theme_views_mini_pager($vars) {
   $tags = $vars['tags'];
   $element = $vars['element'];
   $parameters = $vars['parameters'];
-  $quantity = $vars['quantity'];
 
-  // Calculate various markers within this pager piece:
-  // Middle is used to "center" pages around the current page.
-  $pager_middle = ceil($quantity / 2);
   // current is the page we are currently paged to
   $pager_current = $pager_page_array[$element] + 1;
   // max is the maximum page number
   $pager_max = $pager_total[$element];
   // End of marker calculations.
-
-
 
   if ($pager_total[$element] > 1) {
 
