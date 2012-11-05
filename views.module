@@ -2511,6 +2511,10 @@ if (!function_exists('system_views_api')) {
   function system_views_api() { return views_views_api(); }
 }
 
+if (!function_exists('tracker_views_api')) {
+  function tracker_views_api() { return views_views_api(); }
+}
+
 if (!function_exists('taxonomy_views_api')) {
   function taxonomy_views_api() { return views_views_api(); }
 }
