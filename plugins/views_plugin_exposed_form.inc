@@ -324,6 +324,7 @@ class views_plugin_exposed_form extends views_plugin {
       $this->view->exposed_data = array();
     }
 
+    $form_state['redirect'] = current_path();
     $form_state['values'] = array();
   }
 }
