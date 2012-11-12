@@ -459,4 +459,117 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     );
     $this->assertReferencable($field, $referencable_tests, 'Comment handler (comment + node admin)');
   }
+
+  /**
+   * Assert sorting by field works for non-admins.
+   *
+   * Since we are sorting on a field, we need to make sure the base-table
+   * is added, and access-control is behaving as expected.
+   */
+  public function testSortByField() {
+    // Add text field to entity, to sort by.
+    $field_info = array(
+      'field_name' => 'field_text',
+      'type' => 'text',
+      'entity_types' => array('node'),
+    );
+    field_create_field($field_info);
+
+    $instance = array(
+      'label' => 'Text Field',
+      'field_name' => 'field_text',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'settings' => array(),
+      'required' => FALSE,
+    );
+    field_create_instance($instance);
+
+
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'node',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+          // Add sorting.
+          'sort' => array(
+            'type' => 'field',
+            'field' => 'field_text:value',
+            'direction' => 'DESC',
+          ),
+        ),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    $nodes = array(
+      'published1' => (object) array(
+        'type' => 'article',
+        'status' => 1,
+        'title' => 'Node published1 (<&>)',
+        'uid' => 1,
+        'field_text' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => 1,
+            ),
+          ),
+        ),
+      ),
+      'published2' => (object) array(
+        'type' => 'article',
+        'status' => 1,
+        'title' => 'Node published2 (<&>)',
+        'uid' => 1,
+        'field_text' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => 2,
+            ),
+          ),
+        ),
+      ),
+      'unpublished' => (object) array(
+        'type' => 'article',
+        'status' => 0,
+        'title' => 'Node unpublished (<&>)',
+        'uid' => 1,
+        'field_text' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => 3,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    $node_labels = array();
+    foreach ($nodes as $key => $node) {
+      node_save($node);
+      $node_labels[$key] = check_plain($node->title);
+    }
+
+    // Test as a non-admin.
+    $normal_user = $this->drupalCreateUser(array('access content'));
+    $GLOBALS['user'] = $normal_user;
+
+    $handler = entityreference_get_selection_handler($field);
+
+    // Not only assert the result, but make sure the keys are sorted as
+    // expected.
+    $result = $handler->getReferencableEntities();
+    $expected_result = array(
+      $nodes['published2']->nid => $node_labels['published2'],
+      $nodes['published1']->nid => $node_labels['published1'],
+    );
+    $this->assertIdentical($result['article'], $expected_result, 'Query sorted by field returned expected vaules for non-admin.');
+  }
 }
