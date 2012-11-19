@@ -29,9 +29,27 @@ class views_handler_filter_search extends views_handler_filter {
     $options = parent::option_definition();
 
     $options['operator']['default'] = 'optional';
+    $options['remove_score'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }
+
+  /**
+   * Overrides views_handler_filter::options_form().
+   *
+   * Add an option to remove search scores from the query.
+   */
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
+    $form['remove_score'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Remove search score'),
+      '#description' => t('Check this box to remove the search score from the query. This can help reduce help reduce duplicate search results when using this filter.'),
+      '#default_value' => $this->options['remove_score'],
+    );
+  }
+
 
   /**
    * Provide simple equality operator
@@ -126,12 +144,14 @@ class views_handler_filter_search extends views_handler_filter {
 
       $search_condition = db_and();
 
-      // Create a new join to relate the 'serach_total' table to our current 'search_index' table.
-      $join = new views_join;
-      $join->construct('search_total', $search_index, 'word', 'word');
-      $search_total = $this->query->add_relationship('search_total', $join, $search_index);
+      if (!$this->options['remove_score']) {
+        // Create a new join to relate the 'serach_total' table to our current 'search_index' table.
+        $join = new views_join;
+        $join->construct('search_total', $search_index, 'word', 'word');
+        $search_total = $this->query->add_relationship('search_total', $join, $search_index);
 
-      $this->search_score = $this->query->add_field('', "SUM($search_index.score * $search_total.count)", 'score', array('aggregate' => TRUE));
+        $this->search_score = $this->query->add_field('', "SUM($search_index.score * $search_total.count)", 'score', array('aggregate' => TRUE));
+      }
 
       if (empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;
