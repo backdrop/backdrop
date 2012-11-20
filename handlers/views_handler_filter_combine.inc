@@ -64,14 +64,14 @@ class views_handler_filter_combine extends views_handler_filter_string {
     }
     if ($fields) {
       $count = count($fields);
-      $seperated_fields = array();
+      $separated_fields = array();
       foreach ($fields as $key => $field) {
-        $seperated_fields[] = $field;
+        $separated_fields[] = $field;
         if ($key < $count - 1) {
-          $seperated_fields[] = "' '";
+          $separated_fields[] = "' '";
         }
       }
-      $expression = implode(', ', $seperated_fields);
+      $expression = implode(', ', $separated_fields);
       $expression = "CONCAT_WS(' ', $expression)";
 
       $info = $this->operators();
