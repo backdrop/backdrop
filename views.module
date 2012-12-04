@@ -373,7 +373,7 @@ function views_menu() {
     'page callback' => 'views_ajax_autocomplete_user',
     'theme callback' => 'ajax_base_page_theme',
     'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access arguments' => array('access user profiles'),
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
