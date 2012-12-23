@@ -960,10 +960,10 @@ class view extends views_db_object {
 
     if ($this->display_handler->uses_exposed()) {
       $exposed_form = $this->display_handler->get_plugin('exposed_form');
-      // (1) Record the errors before rendering the exposed form widgets
+      // (1) Record the errors before rendering the exposed form widgets.
       $errors_before = form_set_error();
       $this->exposed_widgets = $exposed_form->render_exposed_form();
-      // (2) Record the errors after rendering the exposed form widgets
+      // (2) Record the errors after rendering the exposed form widgets.
       $errors_after = form_set_error();
       // Find out if the validation of any of the elements in the exposed form
       // has failed by comparing (1) and (2) above. Don't mess with the view
