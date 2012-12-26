@@ -11,7 +11,7 @@
 function entityreference_migrate_api() {
   return array(
     'api' => 2,
-    'field_handlers' => array('MigrateEntityReferenceFieldHandler'),
+    'field handlers' => array('MigrateEntityReferenceFieldHandler'),
   );
 }
 
