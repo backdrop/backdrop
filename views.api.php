@@ -663,10 +663,10 @@ function hook_views_api() {
  * This hook allows modules to provide their own views which can either be used
  * as-is or as a "starter" for users to build from.
  *
- * This hook should be placed in MODULENAME.views.inc and it will be
- * auto-loaded. MODULENAME.views.inc must be in the directory specified by the
- * 'path' key returned by MODULENAME_views_api(), or the same directory as the
- * .module file, if 'path' is unspecified.
+ * This hook should be placed in MODULENAME.views_default.inc and it will be
+ * auto-loaded. MODULENAME.views_default.inc must be in the directory specified
+ * by the 'path' key returned by MODULENAME_views_api(), or the same directory
+ * as the .module file, if 'path' is unspecified.
  *
  * The $view->disabled boolean flag indicates whether the View should be
  * enabled (FALSE) or disabled (TRUE) by default.
