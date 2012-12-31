@@ -783,6 +783,10 @@ class views_plugin_display extends views_plugin {
     if ($display_id && !empty($this->view->display[$display_id]) && is_object($this->view->display[$display_id]->handler)) {
       return $this->view->display[$display_id]->handler->get_path();
     }
+
+    if ($this->get_option('link_display') == 'custom_url' && $this->get_option('link_url')) {
+      return $this->get_option('link_url');
+    }
   }
 
   function get_url() {
