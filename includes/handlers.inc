@@ -1430,7 +1430,7 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  *   // PHP 4 doesn't call constructors of the base class automatically from a
  *   // constructor of a derived class. It is your responsibility to propagate
  *   // the call to constructors upstream where appropriate.
- *   function construct($table, $left_table, $left_field, $field, $extra = array(), $type = 'LEFT') {
+ *   function construct($table = NULL, $left_table = NULL, $left_field = NULL, $field = NULL, $extra = array(), $type = 'LEFT') {
  *     parent::construct($table, $left_table, $left_field, $field, $extra, $type);
  *   }
  *
