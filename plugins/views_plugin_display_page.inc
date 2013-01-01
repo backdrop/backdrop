@@ -251,9 +251,12 @@ class views_plugin_display_page extends views_plugin_display {
       ),
     );
 
-    $path = strip_tags('/' . $this->get_option('path'));
+    $path = strip_tags($this->get_option('path'));
     if (empty($path)) {
-      $path = t('None');
+      $path = t('No path is set');
+    }
+    else {
+      $path = '/' . $path;
     }
 
     $options['path'] = array(
