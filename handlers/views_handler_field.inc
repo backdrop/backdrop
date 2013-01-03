@@ -410,7 +410,7 @@ class views_handler_field extends views_handler {
         'link_class' => array('default' => ''),
         'prefix' => array('default' => '', 'translatable' => TRUE),
         'suffix' => array('default' => '', 'translatable' => TRUE),
-        'target' => array('default' => '', 'translatable' => TRUE),
+        'target' => array('default' => ''),
         'nl2br' => array('default' => FALSE, 'bool' => TRUE),
         'max_length' => array('default' => ''),
         'word_boundary' => array('default' => TRUE, 'bool' => TRUE),
