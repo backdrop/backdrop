@@ -785,7 +785,7 @@ class views_plugin_display extends views_plugin {
     }
 
     if ($this->get_option('link_display') == 'custom_url' && $link_url = $this->get_option('link_url')) {
-      return link_url;
+      return $link_url;
     }
   }
 
