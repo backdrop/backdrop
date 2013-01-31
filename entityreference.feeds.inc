@@ -15,13 +15,41 @@ function entityreference_feeds_processor_targets_alter(&$targets, $entity_type, 
   foreach (field_info_instances($entity_type, $bundle_name) as $name => $instance) {
     $info = field_info_field($name);
     if ($info['type'] == 'entityreference') {
+      // We don't use ":guid" in key, not to break existing configurations.
       $targets[$name] = array(
-        'name'        => check_plain($instance['label']),
+        'name'        => check_plain($instance['label'] . t(' (Entity reference by Feeds GUID)')),
         'callback'    => 'entityreference_feeds_set_target',
-        'description' => t('The field instance @label of @id', array(
+        'description' => t('The field instance @label of @id matched by Feeds GUID.', array(
           '@label' => $instance['label'],
           '@id'    => $name,
         )),
+      );
+      $targets[$name . ':url'] = array(
+        'name'        => check_plain($instance['label'] . t(' (Entity reference by Feeds URL)')),
+        'callback'    => 'entityreference_feeds_set_target',
+        'description' => t('The field instance @label of @id matched by Feeds URL.', array(
+          '@label' => $instance['label'],
+          '@id'    => $name,
+        )),
+        'real_target' => $name,
+      );
+      $targets[$name . ':etid'] = array(
+        'name'        => check_plain($instance['label'] . t(' (Entity reference by Entity ID)')),
+        'callback'    => 'entityreference_feeds_set_target',
+        'description' => t('The field instance @label of @id matched by Entity ID.', array(
+          '@label' => $instance['label'],
+          '@id'    => $name,
+        )),
+        'real_target' => $name,
+      );
+      $targets[$name . ':label'] = array(
+        'name'        => check_plain($instance['label'] . t(' (Entity reference by Entity label)')),
+        'callback'    => 'entityreference_feeds_set_target',
+        'description' => t('The field instance @label of @id matched by Entity label.', array(
+          '@label' => $instance['label'],
+          '@id'    => $name,
+        )),
+        'real_target' => $name,
       );
     }
   }
@@ -42,12 +70,8 @@ function entityreference_feeds_processor_targets_alter(&$targets, $entity_type, 
  *   The target key on $entity to map to.
  * @param $value
  *   The value to map. MUST be an array.
- * @param $mapping
- *   Array of mapping settings for current value.
- * @param $input_format
- *   TRUE if an input format should be applied.
  */
-function entityreference_feeds_set_target($source, $entity, $target, $value, $mapping, $input_format = FALSE) {
+function entityreference_feeds_set_target($source, $entity, $target, $value) {
 
   // Don't do anything if we weren't given any data.
   if (empty($value)) {
@@ -62,8 +86,19 @@ function entityreference_feeds_set_target($source, $entity, $target, $value, $ma
     $values = array($value);
   }
 
+  // Determine the field we are matching against.
+  if (strpos($target, ':') === FALSE) {
+    $match_key = 'guid';
+  }
+  else {
+    list($target, $match_key) = explode(':', $target, 2);
+  }
+
   // Get some useful field information.
   $info = field_info_field($target);
+  if ($match_key == 'label') {
+    $handler = entityreference_get_selection_handler($info);
+  }
 
   // Set the language of the field depending on the mapping.
   $language = isset($mapping['language']) ? $mapping['language'] : LANGUAGE_NONE;
@@ -75,13 +110,27 @@ function entityreference_feeds_set_target($source, $entity, $target, $value, $ma
 
     // Only process if this value was set for this instance.
     if ($value) {
-
-      // Fetch the entity ID resulting from the mapping table look-up.
-      $entity_id = db_query(
-        'SELECT entity_id FROM {feeds_item} WHERE guid = :guid',
-        array(':guid' => $value)
-      )->fetchField();
-
+      switch ($match_key) {
+        case 'guid':
+        case 'url':
+          // Fetch the entity ID resulting from the mapping table look-up.
+          $entity_id = db_select('feeds_item', 'fi')
+            ->fields('fi', array('entity_id'))
+            ->condition($match_key, $value,'=')
+            ->execute()
+            ->fetchField();
+          break;
+        case 'etid':
+          $entity_id = $value;
+          break;
+        case 'label':
+          $options = $handler->getReferencableEntities($value, '=');
+          $options = reset($options);
+          $etids = array_keys($options);
+          // Use the first matching entity.
+          $entity_id = reset($etids);
+          break;
+      }
       /*
        * Only add a reference to an existing entity ID if there exists a
        * mapping between it and the provided GUID.  In cases where no such
@@ -106,6 +155,7 @@ function entityreference_feeds_set_target($source, $entity, $target, $value, $ma
          * this opportunity later, we need to destroy the hash.
          */
         unset($entity->feeds_item->hash);
+        $source->log('entityreference', t('No existing entity found for entity @source_id entityreference to source entity @value', array('@source_id' => $entity->feeds_item->entity_id, '@value' => $value)));
       }
     }
 

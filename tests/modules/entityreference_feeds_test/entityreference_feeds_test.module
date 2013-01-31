@@ -1,0 +1,104 @@
+<?php
+
+/**
+ * @file
+ * Support module for Entity reference - Feeds integration.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function entityreference_feeds_test_install() {
+  field_info_cache_clear();
+  // Entity reference field - mapped by ID.
+  $field = array(
+    'field_name' => 'field_er_id',
+    'type' => 'entityreference',
+    'cardinality' => 1,
+    'settings' => array(
+      'target_type' => 'node',
+      'handler' => 'base',
+      'handler_settings' => array(
+        'target_bundles' => array('article' => 'article'),
+      ),
+    ),
+  );
+  field_create_field($field);
+
+  $instance = array(
+    'field_name' => 'field_er_id',
+    'entity_type' => 'node',
+    'label' => 'Ref - entity ID',
+    'bundle' => 'article',
+  );
+  field_create_instance($instance);
+
+  // Entity reference field - mapped by Feeds GUID.
+  $field = array(
+    'field_name' => 'field_er_guid',
+    'type' => 'entityreference',
+    'cardinality' => 1,
+    'settings' => array(
+      'target_type' => 'node',
+      'handler' => 'base',
+      'handler_settings' => array(
+        'target_bundles' => array('article' => 'article'),
+      ),
+    ),
+  );
+  field_create_field($field);
+
+  $instance = array(
+    'field_name' => 'field_er_guid',
+    'entity_type' => 'node',
+    'label' => 'Ref - feeds GUID',
+    'bundle' => 'article',
+  );
+  field_create_instance($instance);
+
+  // Entity reference field - mapped by Feeds URL.
+  $field = array(
+    'field_name' => 'field_er_url',
+    'type' => 'entityreference',
+    'cardinality' => 1,
+    'settings' => array(
+      'target_type' => 'node',
+      'handler' => 'base',
+      'handler_settings' => array(
+        'target_bundles' => array('article' => 'article'),
+      ),
+    ),
+  );
+  field_create_field($field);
+
+  $instance = array(
+    'field_name' => 'field_er_url',
+    'entity_type' => 'node',
+    'label' => 'Ref - feeds URL',
+    'bundle' => 'article',
+  );
+  field_create_instance($instance);
+
+  // Entity reference field - mapped by Label.
+  $field = array(
+    'field_name' => 'field_er_label',
+    'type' => 'entityreference',
+    'cardinality' => 1,
+    'settings' => array(
+      'target_type' => 'node',
+      'handler' => 'base',
+      'handler_settings' => array(
+        'target_bundles' => array('article' => 'article'),
+      ),
+    ),
+  );
+  field_create_field($field);
+
+  $instance = array(
+    'field_name' => 'field_er_label',
+    'entity_type' => 'node',
+    'label' => 'Ref - entity label',
+    'bundle' => 'article',
+  );
+  field_create_instance($instance);
+}

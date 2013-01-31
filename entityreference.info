@@ -21,3 +21,4 @@ files[] = views/entityreference_plugin_row_fields.inc
 files[] = tests/entityreference.handlers.test
 files[] = tests/entityreference.taxonomy.test
 files[] = tests/entityreference.admin.test
+files[] = tests/entityreference.feeds.test

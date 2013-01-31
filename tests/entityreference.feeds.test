@@ -1,0 +1,248 @@
+<?php
+
+/**
+ * @file
+ * Test case for simple CCK field mapper mappers/content.inc.
+ */
+
+/**
+ * Class for testing Feeds field mapper.
+ */
+class FeedsMapperFieldTestCase extends DrupalWebTestCase{
+  /**
+   * Test info function.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Feeds integration (field mapper)',
+      'description' => 'Test Feeds Mapper support for fields.',
+      'group' => 'Entity Reference',
+    );
+  }
+
+  /**
+   * Set-up function.
+   */
+  public function setUp() {
+    parent::setUp();
+    module_enable(array('entityreference_feeds_test'), TRUE);
+    $this->resetAll();
+
+    if (!module_exists('feeds')) {
+      return;
+    }
+
+    $permissions[] = 'access content';
+    $permissions[] = 'administer site configuration';
+    $permissions[] = 'administer content types';
+    $permissions[] = 'administer nodes';
+    $permissions[] = 'bypass node access';
+    $permissions[] = 'administer taxonomy';
+    $permissions[] = 'administer users';
+    $permissions[] = 'administer feeds';
+
+    // Create an admin user and log in.
+    $this->admin_user = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->admin_user);
+  }
+
+  /**
+   * Check if mapping exists.
+   *
+   * @param string $id
+   *   ID of the importer.
+   * @param integer $i
+   *   The key of the mapping.
+   * @param string $source
+   *   The source field.
+   * @param string $target
+   *   The target field.
+   *
+   * @return integer
+   *   -1 if the mapping doesn't exist, the key of the mapping otherwise.
+   */
+  public function mappingExists($id, $i, $source, $target) {
+
+    $current_mappings = $this->getCurrentMappings($id);
+
+    if ($current_mappings) {
+      foreach ($current_mappings as $key => $mapping) {
+        if ($mapping['source'] == $source && $mapping['target'] == $target && $key == $i) {
+          return $key;
+        }
+      }
+    }
+
+    return -1;
+  }
+
+  /**
+   * Adds mappings to a given configuration.
+   *
+   * @param string $id
+   *   ID of the importer.
+   * @param array $mappings
+   *   An array of mapping arrays. Each mapping array must have a source and
+   *   an target key and can have a unique key.
+   * @param bool $test_mappings
+   *   (optional) TRUE to automatically test mapping configs. Defaults to TRUE.
+   */
+  public function addMappings($id, $mappings, $test_mappings = TRUE) {
+
+    $path = "admin/structure/feeds/$id/mapping";
+
+    // Iterate through all mappings and add the mapping via the form.
+    foreach ($mappings as $i => $mapping) {
+
+      if ($test_mappings) {
+        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
+        $this->assertEqual($current_mapping_key, -1, 'Mapping does not exist before addition.');
+      }
+
+      // Get unique flag and unset it. Otherwise, drupalPost will complain that
+      // Split up config and mapping.
+      $config = $mapping;
+      unset($config['source'], $config['target']);
+      $mapping = array('source' => $mapping['source'], 'target' => $mapping['target']);
+
+      // Add mapping.
+      $this->drupalPost($path, $mapping, t('Add'));
+
+      // If there are other configuration options, set them.
+      if ($config) {
+        $this->drupalPostAJAX(NULL, array(), 'mapping_settings_edit_' . $i);
+
+        // Set some settings.
+        $edit = array();
+        foreach ($config as $key => $value) {
+          $edit["config[$i][settings][$key]"] = $value;
+        }
+        $this->drupalPostAJAX(NULL, $edit, 'mapping_settings_update_' . $i);
+        $this->drupalPost(NULL, array(), t('Save'));
+      }
+
+      if ($test_mappings) {
+        $current_mapping_key = $this->mappingExists($id, $i, $mapping['source'], $mapping['target']);
+        $this->assertTrue($current_mapping_key >= 0, 'Mapping exists after addition.');
+      }
+    }
+  }
+
+  /**
+   * Gets an array of current mappings from the feeds_importer config.
+   *
+   * @param string $id
+   *   ID of the importer.
+   *
+   * @return bool|array
+   *   FALSE if the importer has no mappings, or an an array of mappings.
+   */
+  public function getCurrentMappings($id) {
+    $config = db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => $id))->fetchField();
+
+    $config = unserialize($config);
+
+    // We are very specific here. 'mappings' can either be an array or not
+    // exist.
+    if (array_key_exists('mappings', $config['processor']['config'])) {
+      $this->assertTrue(is_array($config['processor']['config']['mappings']), 'Mappings is an array.');
+
+      return $config['processor']['config']['mappings'];
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Basic test loading a double entry CSV file.
+   */
+  public function test() {
+    if (!module_exists('feeds')) {
+      return;
+    }
+
+    $this->drupalLogin($this->admin_user);
+    $this->drupalGet('admin/structure/types/manage/article/fields');
+    $this->assertText('Ref - entity ID', t('Found Entity reference field %field.', array('%field' => 'field_er_id')));
+    $this->assertText('Ref - entity label', t('Found Entity reference field %field.', array('%field' => 'field_er_label')));
+    $this->assertText('Ref - feeds GUID', t('Found Entity reference field %field.', array('%field' => 'field_er_guid')));
+    $this->assertText('Ref - feeds URL', t('Found Entity reference field %field.', array('%field' => 'field_er_url')));
+
+    // Add feeds importer
+    $this->drupalGet('admin/structure/feeds');
+    $this->clickLink('Add importer');
+    $this->drupalPost('admin/structure/feeds/create', array('name' => 'Nodes', 'id' => 'nodes'), 'Create');
+    $this->assertText('Your configuration has been created with default settings.');
+
+    $this->drupalPost('admin/structure/feeds/nodes/settings/', array('content_type' => '', 'import_period' => -1), 'Save');
+    $this->assertText('Your changes have been saved.');
+
+    $this->drupalPost("admin/structure/feeds/nodes/fetcher", array('plugin_key' => 'FeedsFileFetcher'), 'Save');
+    $config = unserialize(db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => 'nodes'))->fetchField());
+    $this->assertEqual($config['fetcher']['plugin_key'], 'FeedsFileFetcher', 'Verified correct fetcher (FeedsFileFetcher).');
+
+    $this->drupalPost("admin/structure/feeds/nodes/parser", array('plugin_key' => 'FeedsCSVParser'), 'Save');
+    $config = unserialize(db_query("SELECT config FROM {feeds_importer} WHERE id = :id", array(':id' => 'nodes'))->fetchField());
+    $this->assertEqual($config['parser']['plugin_key'], 'FeedsCSVParser', 'Verified correct parser (FeedsCSVParser).');
+
+    $this->drupalPost('admin/structure/feeds/nodes/settings/FeedsNodeProcessor', array('content_type' => 'article'), 'Save');
+    $this->assertText('Your changes have been saved.');
+
+    $this->addMappings('nodes', array(
+        0 => array(
+          'source' => 'title',
+          'target' => 'title',
+        ),
+        1 => array(
+          'source' => 'nid',
+          'target' => 'nid',
+          'unique' => TRUE,
+        ),
+        2 => array(
+          'source' => 'permalink',
+          'target' => 'url',
+          'unique' => TRUE,
+        ),
+        3 => array(
+          'source' => 'nid',
+          'target' => 'guid',
+          'unique' => TRUE,
+        ),
+        4 => array(
+          'source' => 'parent_nid',
+          'target' => 'field_er_id:etid',
+        ),
+        5 => array(
+          'source' => 'parent_title',
+          'target' => 'field_er_label:label',
+        ),
+        6 => array(
+          'source' => 'parent_url',
+          'target' => 'field_er_url:url',
+        ),
+        7 => array(
+          'source' => 'parent_guid',
+          'target' => 'field_er_guid',
+        ),
+      )
+    );
+
+    $file = realpath(getcwd()) . '/' . drupal_get_path('module', 'entityreference') . '/tests/feeds_test.csv';
+    $this->assertTrue(file_exists($file), 'Source file exists');
+
+    $this->drupalPost('import/nodes', array('files[feeds]' => $file), 'Import');
+    $this->assertText('Created 2 nodes');
+
+    $parent = node_load(1);
+    $this->assertTrue(empty($parent->field_er_id['und'][0]['target_id']), t('Parent node: Import by entity ID OK.'));
+    $this->assertTrue(empty($parent->field_er_label['und'][0]['target_id']), t('Parent node: Import by entity label OK.'));
+    $this->assertTrue(empty($parent->field_er_guid['und'][0]['target_id']), t('Parent node: Import by feeds GUID OK.'));
+    $this->assertTrue(empty($parent->field_er_url['und'][0]['target_id']), t('Parent node: Import by feeds URL OK.'));
+
+    $child = node_load(2);
+    $this->assertTrue($child->field_er_id['und'][0]['target_id'] == 1, t('Child node: Import by entity ID OK.'));
+    $this->assertTrue($child->field_er_label['und'][0]['target_id'] == 1, t('Child node: Import by entity label OK.'));
+    $this->assertTrue($child->field_er_guid['und'][0]['target_id'] == 1, t('Child node: Import by feeds GUID OK.'));
+    $this->assertTrue($child->field_er_url['und'][0]['target_id'] == 1, t('Child node: Import by feeds URL OK.'));
+  }
+}
