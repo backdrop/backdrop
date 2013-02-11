@@ -476,7 +476,7 @@ class views_plugin_display extends views_plugin {
           'display_description' => FALSE,
           'use_ajax' => TRUE,
           'hide_attachment_summary' => TRUE,
-          'hide_admin_links' => FALSE,
+          'hide_admin_links' => TRUE,
           'pager' => TRUE,
           'pager_options' => TRUE,
           'use_more' => TRUE,
