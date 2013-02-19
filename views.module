@@ -341,6 +341,7 @@ function views_permission() {
     'administer views' => array(
       'title' => t('Administer views'),
       'description' => t('Access the views administration pages.'),
+      'restrict access' => TRUE,
     ),
     'access all views' => array(
       'title' => t('Bypass views access control'),
