@@ -346,8 +346,8 @@ class views_object {
       $value = $options;
       // Build source data and add to the array
       $format = NULL;
-      if (isset($definition['format_key']) && isset($options[$definition['format_key']])) {
-        $format = $options[$definition['format_key']];
+      if (isset($definition['format_key']) && isset($storage[$definition['format_key']])) {
+        $format = $storage[$definition['format_key']];
       }
       $translatable[] = array(
         'value' => $value,
