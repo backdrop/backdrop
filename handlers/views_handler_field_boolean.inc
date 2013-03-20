@@ -25,6 +25,8 @@ class views_handler_field_boolean extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
     $options['type'] = array('default' => 'yes-no');
+    $options['type_custom_true'] = array('default' => '', 'translatable' => TRUE);
+    $options['type_custom_false'] = array('default' => '', 'translatable' => TRUE);
     $options['not'] = array('definition bool' => 'reverse');
 
     return $options;
@@ -42,7 +44,8 @@ class views_handler_field_boolean extends views_handler_field {
       'unicode-yes-no' => array('✔', '✖'),
     );
     $output_formats = isset($this->definition['output formats']) ? $this->definition['output formats'] : array();
-    $this->formats = array_merge($default_formats, $output_formats);
+    $custom_format = array('custom' => array(t('Custom')));
+    $this->formats = array_merge($default_formats, $output_formats, $custom_format);
   }
 
   function options_form(&$form, &$form_state) {
@@ -56,6 +59,29 @@ class views_handler_field_boolean extends views_handler_field {
       '#options' => $options,
       '#default_value' => $this->options['type'],
     );
+
+    $form['type_custom_true'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Custom output for TRUE'),
+      '#default_value' => $this->options['type_custom_true'],
+      '#states' => array(
+        'visible' => array(
+          'select[name="options[type]"]' => array('value' => 'custom'),
+        ),
+      ),
+    );
+
+    $form['type_custom_false'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Custom output for FALSE'),
+      '#default_value' => $this->options['type_custom_false'],
+      '#states' => array(
+        'visible' => array(
+          'select[name="options[type]"]' => array('value' => 'custom'),
+        ),
+      ),
+    );
+
     $form['not'] = array(
       '#type' => 'checkbox',
       '#title' => t('Reverse'),
@@ -71,7 +97,10 @@ class views_handler_field_boolean extends views_handler_field {
       $value = !$value;
     }
 
-    if (isset($this->formats[$this->options['type']])) {
+    if ($this->options['type'] == 'custom') {
+      return $value ? filter_xss_admin($this->options['type_custom_true']) : filter_xss_admin($this->options['type_custom_false']);
+    }
+    else if (isset($this->formats[$this->options['type']])) {
       return $value ? $this->formats[$this->options['type']][0] : $this->formats[$this->options['type']][1];
     }
     else {

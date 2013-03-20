@@ -66,11 +66,43 @@ class ViewsHandlerFieldBooleanTest extends ViewsSqlTest {
     $this->assertEqual('✖', $view->field['age']->advanced_render($view->result[0]));
     $this->assertEqual('✔', $view->field['age']->advanced_render($view->result[1]));
 
-    // Set a custom output format.
+    // Set a custom output format programmatically.
     $view->field['age']->formats['test'] = array(t('Test-True'), t('Test-False'));
     $view->field['age']->options['type'] = 'test';
     $this->assertEqual(t('Test-False'), $view->field['age']->advanced_render($view->result[0]));
     $this->assertEqual(t('Test-True'), $view->field['age']->advanced_render($view->result[1]));
 
+    // Set a custom output format through the UI using plain-text inputs.
+    $view->field['age']->options['type'] = 'custom';
+    $values = array(
+      'false' => 'Nay',
+      'true' => 'Yay',
+    );
+    $view->field['age']->options['type_custom_false'] = $values['false'];
+    $view->field['age']->options['type_custom_true'] = $values['true'];
+    $this->assertEqual($values['false'], $view->field['age']->advanced_render($view->result[0]));
+    $this->assertEqual($values['true'], $view->field['age']->advanced_render($view->result[1]));
+
+    // Set a custom output format through the UI using valid HTML inputs.
+    $view->field['age']->options['type'] = 'custom';
+    $values = array(
+      'false' => '<div class="bar">Nay</div>',
+      'true' => '<div class="foo">Yay</div>',
+    );
+    $view->field['age']->options['type_custom_false'] = $values['false'];
+    $view->field['age']->options['type_custom_true'] = $values['true'];
+    $this->assertEqual($values['false'], $view->field['age']->advanced_render($view->result[0]));
+    $this->assertEqual($values['true'], $view->field['age']->advanced_render($view->result[1]));
+
+    // Set a custom output format through the UI using unsafe inputs.
+    $view->field['age']->options['type'] = 'custom';
+    $values = array(
+      'false' => '<script>alert("Nay");</script>',
+      'true' => '<script>alert("Yay");</script>',
+    );
+    $view->field['age']->options['type_custom_false'] = $values['false'];
+    $view->field['age']->options['type_custom_true'] = $values['true'];
+    $this->assertNotEqual($values['false'], $view->field['age']->advanced_render($view->result[0]));
+    $this->assertNotEqual($values['true'], $view->field['age']->advanced_render($view->result[1]));
   }
 }
