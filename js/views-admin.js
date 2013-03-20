@@ -209,7 +209,7 @@ Drupal.viewsUi.addItemForm.prototype.handleCheck = function (event) {
  */
 Drupal.viewsUi.addItemForm.prototype.refreshCheckedItems = function() {
   // Perhaps we should precache the text div, too.
-  this.$selected_div.find('.views-selected-options').html(this.checkedItems.join(', '));
+  this.$selected_div.find('.views-selected-options').html(Drupal.checkPlain(this.checkedItems.join(', ')));
   Drupal.viewsUi.resizeModal('', true);
 }
 

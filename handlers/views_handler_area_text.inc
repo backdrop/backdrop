@@ -56,7 +56,7 @@ class views_handler_area_text extends views_handler_area {
         if (!empty($options[$type])) {
           $items = array();
           foreach ($options[$type] as $key => $value) {
-            $items[] = $key . ' == ' . $value;
+            $items[] = $key . ' == ' . check_plain($value);
           }
           $output .= theme('item_list',
             array(
