@@ -103,7 +103,8 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         if (!$term) {
           return FALSE;
         }
-        $this->argument->validated_title = check_plain($term->name);
+        $term = taxonomy_term_load($term->tid);
+        $this->argument->validated_title = check_plain(entity_label('taxonomy_term', $term));
         return empty($vocabularies) || !empty($vocabularies[$term->machine_name]);
 
       case 'tids':
@@ -151,8 +152,8 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
               $validated_cache[$term->tid] = FALSE;
               return FALSE;
             }
-
-            $titles[] = $validated_cache[$term->tid] = check_plain($term->name);
+            $term = taxonomy_term_load($term->tid);
+            $titles[] = $validated_cache[$term->tid] = check_plain(entity_label('taxonomy_term', $term));
             unset($test[$term->tid]);
           }
         }
@@ -185,7 +186,8 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
           if ($type == 'convert') {
             $this->argument->argument = $term->tid;
           }
-          $this->argument->validated_title = check_plain($term->name);
+          $term = taxonomy_term_load($term->tid);
+          $this->argument->validated_title = check_plain(entity_label('taxonomy_term', $term));
           return TRUE;
         }
         return FALSE;
