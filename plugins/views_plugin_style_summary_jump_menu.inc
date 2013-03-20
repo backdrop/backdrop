@@ -20,6 +20,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
     $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
     $options['label'] = array('default' => '', 'translatable' => TRUE);
     $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
+    $options['inline'] = array('default' => TRUE, 'bool' => TRUE);
     $options['default_value'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
@@ -78,6 +79,12 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       '#description' => t('The text that will appear as the selected option in the jump menu.'),
     );
 
+    $form['inline'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Set this field to display inline'),
+      '#default_value' => !empty($this->options['inline']),
+    );
+
     $form['default_value'] = array(
       '#type' => 'checkbox',
       '#title' => t('Select the current contextual filter value'),
@@ -129,6 +136,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       'button' => $this->options['text'],
       'title' => $this->options['label'],
       'choose' => $this->options['choose'],
+      'inline' => $this->options['inline'],
       'default_value' => $default_value,
     );
 
