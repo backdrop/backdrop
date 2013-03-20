@@ -18,9 +18,9 @@ class views_handler_argument_aggregator_iid extends views_handler_argument_numer
     $titles = array();
     $placeholders = implode(', ', array_fill(0, sizeof($this->value), '%d'));
 
-    $result = db_select('aggregator_item')
+    $result = db_select('aggregator_item', 'ai')
       ->condition('iid', $this->value, 'IN')
-      ->fields(array('title'))
+      ->fields('ai', array('title'))
       ->execute();
     foreach ($result as $term) {
       $titles[] = check_plain($term->title);
