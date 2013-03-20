@@ -258,7 +258,7 @@ class views_handler_filter_numeric extends views_handler_filter {
   }
 
   function op_regex($field) {
-    $this->query->add_where($this->options['group'], $field, $this->value, 'RLIKE');
+    $this->query->add_where($this->options['group'], $field, $this->value['value'], 'RLIKE');
   }
 
   function admin_summary() {
