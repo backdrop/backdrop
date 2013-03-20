@@ -69,7 +69,7 @@ Drupal.views.ajaxView = function(settings) {
 };
 
 Drupal.views.ajaxView.prototype.attachExposedFormAjax = function() {
-  var button = $('input[type=submit], input[type=image]', this.$exposed_form);
+  var button = $('input[type=submit], button[type=submit], input[type=image]', this.$exposed_form);
   button = button[0];
 
   this.exposedFormAjax = new Drupal.ajax($(button).attr('id'), button, this.element_settings);
