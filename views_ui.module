@@ -845,6 +845,7 @@ function _views_ui_get_displays_list($view) {
 
 function views_ui_library_alter(&$libraries, $module) {
   if ($module == 'system' && isset($libraries['ui.dialog'])) {
+    // Only apply the fix, if we don't have an up to date jQueryUI version.
     if (version_compare($libraries['ui.dialog']['version'], '1.7.2', '>=') && version_compare($libraries['ui.dialog']['version'], '1.10.0', '<')) {
       $libraries['ui.dialog']['js'][drupal_get_path('module', 'views') . '/js/jquery.ui.dialog.patch.js'] = array();
     }
