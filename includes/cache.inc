@@ -28,9 +28,11 @@ function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
         $cache[$table] = $data->data;
       }
       else {
-        // No cache entry, rebuild.
-        $cache = _views_fetch_data_build();
-        $fully_loaded = TRUE;
+        if (!$fully_loaded) {
+          // No cache entry, rebuild.
+          $cache = _views_fetch_data_build();
+          $fully_loaded = TRUE;
+        }
       }
     }
     if (isset($cache[$table])) {
