@@ -255,10 +255,11 @@ Drupal.behaviors.viewsUiRenderAddViewButton.attach = function (context, settings
   // away from the item. We use mouseleave instead of mouseout because
   // the user is going to trigger mouseout when she moves from the trigger
   // link to the sub menu items.
-  // We use the live binder because the open class on this item will be
+  //
+  // We use the 'li.add' selector because the open class on this item will be
   // toggled on and off and we want the handler to take effect in the cases
   // that the class is present, but not when it isn't.
-  $('li.add', $menu).live('mouseleave', function (event) {
+  $menu.delegate('li.add', 'mouseleave', function (event) {
     var $this = $(this);
     var $trigger = $this.children('a[href="#"]');
     if ($this.children('.action-list').is(':visible')) {
