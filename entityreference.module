@@ -791,6 +791,11 @@ function entityreference_query_entityreference_alter(QueryAlterableInterface $qu
  * Implements hook_field_widget_form().
  */
 function entityreference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  // Ensure that the entity target type exists before displaying the widget.
+  $entity_info = entity_get_info($field['settings']['target_type']);
+  if (empty($entity_info)){
+    return;
+  }
   $entity_type = $instance['entity_type'];
   $entity = isset($element['#entity']) ? $element['#entity'] : NULL;
   $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
