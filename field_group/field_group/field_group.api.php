@@ -346,6 +346,18 @@ function hook_field_group_info() {
 }
 
 /**
+ * Alter the field group definitions provided by other modules.
+ *
+ * @param array $groups
+ *   Reference to an array of field group definition objects.
+ */
+function hook_field_group_info_alter(&$groups) {
+  if (!empty($groups['group_issue_metadata|node|project_issue|form'])) {
+    $groups['group_issue_metadata|node|project_issue|form']->data['children'][] = 'taxonomy_vocabulary_9';
+  }
+}
+
+/**
  * Implements hook_field_group_update_field_group().
  *
  * This hook is invoked by ctools export API.

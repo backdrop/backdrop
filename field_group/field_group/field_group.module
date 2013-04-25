@@ -1447,6 +1447,7 @@ function field_group_read_groups($conditions = array(), $enabled = TRUE) {
     $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = field_group_unpack($group);
 
   }
+  drupal_alter('field_group_info', $groups);
   return $groups;
 
 }
