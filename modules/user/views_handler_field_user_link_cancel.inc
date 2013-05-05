@@ -22,7 +22,7 @@ class views_handler_field_user_link_cancel extends views_handler_field_user_link
     if ($uid && user_cancel_access($account)) {
       $this->options['alter']['make_link'] = TRUE;
 
-      $text = !empty($this->options['text']) ? $this->options['text'] : t('cancel');
+      $text = !empty($this->options['text']) ? $this->options['text'] : t('Cancel account');
 
       $this->options['alter']['path'] = "user/$uid/cancel";
       $this->options['alter']['query'] = drupal_get_destination();
