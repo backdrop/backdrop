@@ -71,6 +71,7 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
         'group_type' => 'group',
         'content' => $this->options['text_input_required'],
         'format' => $this->options['text_input_required_format'],
+        'empty' => TRUE,
       );
       $handler = views_get_handler('views', 'area', 'area');
       $handler->init($this->view, $options);
