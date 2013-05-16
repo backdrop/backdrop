@@ -234,6 +234,11 @@ function field_group_field_group_formatter_info() {
 
   return array(
     'form' => array(
+      'html-element' => array(
+        'label' => t('HTML element'),
+        'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
+        'instance_settings' => array('element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
+      ),
       'div' => array(
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
@@ -298,6 +303,11 @@ function field_group_field_group_formatter_info() {
       ),
     ),
     'display' => array(
+      'html-element' => array(
+        'label' => t('HTML element'),
+        'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
+        'instance_settings' => array('element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
+      ),
       'div' => array(
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
@@ -411,6 +421,23 @@ function field_group_field_group_format_settings($group) {
 
   // Add optional instance_settings.
   switch ($group->format_type) {
+    case 'html-element':
+      $form['instance_settings']['element'] = array(
+        '#title' => t('Element'),
+        '#type' => 'textfield',
+        '#default_value' => isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : $formatter['instance_settings']['element'],
+        '#description' => t('E.g. div, section, aside etc.'),
+        '#weight' => 2,
+      );
+
+      $form['instance_settings']['attributes'] = array(
+        '#title' => t('Attributes'),
+        '#type' => 'textfield',
+        '#default_value' => isset($group->format_settings['instance_settings']['attributes']) ? $group->format_settings['instance_settings']['attributes'] : $formatter['instance_settings']['attributes'],
+        '#description' => t('E.g. name="anchor"'),
+        '#weight' => 4,
+      );
+      break;
     case 'div':
       $form['instance_settings']['show_label'] = array(
         '#title' => t('Show label'),
@@ -563,6 +590,43 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
   $element['#attached']['js'][] = 'misc/form.js';
   $element['#attached']['js'][] = 'misc/collapse.js';
 
+}
+
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: HTML element.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_html_element(&$element, $group, &$form) {
+  $html_element = isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : 'div';
+  $attributes = isset($group->format_settings['instance_settings']['attributes']) ? ' ' . $group->format_settings['instance_settings']['attributes'] : '';
+  $group->classes = trim($group->classes);
+
+  // This regex split the attributes string so that we can pass that
+  // later to drupal_attributes().
+  preg_match_all('/([^\s=]+)="([^"]+)"/', $attributes, $matches);
+
+  $element_attributes = array();
+  // Put the attribute and the value together.
+  foreach ($matches[1] as $key => $attribute) {
+    $element_attributes[$attribute] = $matches[2][$key];
+  }
+
+  // Add the classes to the attributes array.
+  if (!isset($element_attributes['class']) && $group->classes) {
+    $element_attributes['class'] = $group->classes;
+  }
+  elseif (isset($element_attributes['class']) && $group->classes) {
+    $element_attributes['class'] .= ' ' . $group->classes;
+  }
+
+  $attributes = drupal_attributes($element_attributes);
+
+  $element['#prefix'] = '<' . $html_element . $attributes . '>';
+  $element['#suffix'] = '</' . $html_element . '>';
 }
 
 /**
