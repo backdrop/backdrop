@@ -84,6 +84,14 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         'title' => 'Node unpublished (<&>)',
         'uid' => 1,
       ),
+      // Title purposefully starts with same characters as published1 and
+      // published2 above but contains a slash.
+      'published_withslash' => (object) array(
+        'type' => 'article',
+        'status' => 1,
+        'title' => 'Node pub/lished1',
+        'uid' => 1,
+      ),
     );
 
     $node_labels = array();
@@ -104,6 +112,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           'article' => array(
             $nodes['published1']->nid => $node_labels['published1'],
             $nodes['published2']->nid => $node_labels['published2'],
+            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
           ),
         ),
       ),
@@ -141,6 +150,18 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         ),
         'result' => array(),
       ),
+      // Searching for "Node pub/" should return only the published_withslash node
+      // and not published1 and published2 from above.
+      array(
+        'arguments' => array(
+          array('Node pub/', 'CONTAINS'),
+        ),
+        'result' => array(
+          'article' => array(
+            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
+          ),
+        ),
+      ),
     );
     $this->assertReferencable($field, $referencable_tests, 'Node handler');
 
@@ -156,6 +177,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
           'article' => array(
             $nodes['published1']->nid => $node_labels['published1'],
             $nodes['published2']->nid => $node_labels['published2'],
+            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
             $nodes['unpublished']->nid => $node_labels['unpublished'],
           ),
         ),
