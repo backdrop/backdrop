@@ -261,6 +261,7 @@ files[] = tests/handlers/views_handler_field_boolean.test
 files[] = tests/handlers/views_handler_field_custom.test
 files[] = tests/handlers/views_handler_field_counter.test
 files[] = tests/handlers/views_handler_field_date.test
+files[] = tests/handlers/views_handler_field_file_extension.test
 files[] = tests/handlers/views_handler_field_file_size.test
 files[] = tests/handlers/views_handler_field_math.test
 files[] = tests/handlers/views_handler_field_url.test
