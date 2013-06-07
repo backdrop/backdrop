@@ -408,7 +408,7 @@ function views_ui_add_form($form, &$form_state) {
  */
 function views_element_validate_integer($element, &$form_state) {
   $value = $element['#value'];
-  if ($value !== '' && (!is_numeric($value) || intval($value) != $value)) {
+  if ($value !== '' && (!is_numeric($value) || intval($value) != $value || abs($value) != $value)) {
     form_error($element, t('%name must be a positive integer.', array('%name' => $element['#title'])));
   }
 }
