@@ -276,7 +276,7 @@ class views_plugin_pager_full extends views_plugin_pager {
     );
     $output = theme($pager_theme, array(
       'tags' => $tags,
-      'element' => $this->options['id'],
+      'element' => $this->get_pager_id(),
       'parameters' => $input,
       'quantity' => $this->options['quantity'],
     ));
@@ -308,11 +308,12 @@ class views_plugin_pager_full extends views_plugin_pager {
     // array hasn't been initialized before.
     $page = isset($_GET['page']) ? explode(',', $_GET['page']) : array();
 
-    for ($i = 0; $i <= $this->options['id'] || $i < count($pager_page_array); $i++) {
+    $pager_id = $this->get_pager_id();
+    for ($i = 0; $i <= $pager_id || $i < count($pager_page_array); $i++) {
       $pager_page_array[$i] = empty($page[$i]) ? 0 : $page[$i];
     }
 
-    $this->current_page = intval($pager_page_array[$this->options['id']]);
+    $this->current_page = intval($pager_page_array[$pager_id]);
 
     if ($this->current_page < 0) {
       $this->current_page = 0;
@@ -348,24 +349,25 @@ class views_plugin_pager_full extends views_plugin_pager {
       // Dump information about what we already know into the globals.
       global $pager_page_array, $pager_total, $pager_total_items, $pager_limits;
       // Set the limit.
-      $pager_limits[$this->options['id']] = $this->options['items_per_page'];
+      $pager_id = $this->get_pager_id();
+      $pager_limits[$pager_id] = $this->options['items_per_page'];
       // Set the item count for the pager.
-      $pager_total_items[$this->options['id']] = $this->total_items;
+      $pager_total_items[$pager_id] = $this->total_items;
       // Calculate and set the count of available pages.
-      $pager_total[$this->options['id']] = $this->get_pager_total();
+      $pager_total[$pager_id] = $this->get_pager_total();
 
       // See if the requested page was within range:
       if ($this->current_page < 0) {
         $this->current_page = 0;
       }
-      else if ($this->current_page >= $pager_total[$this->options['id']]) {
+      else if ($this->current_page >= $pager_total[$pager_id]) {
         // Pages are numbered from 0 so if there are 10 pages, the last page is 9.
-        $this->current_page = $pager_total[$this->options['id']] - 1;
+        $this->current_page = $pager_total[$pager_id] - 1;
       }
 
       // Put this number in to guarantee that we do not generate notices when the pager
       // goes to look for it later.
-      $pager_page_array[$this->options['id']] = $this->current_page;
+      $pager_page_array[$pager_id] = $this->current_page;
     }
   }
 

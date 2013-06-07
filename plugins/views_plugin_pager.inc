@@ -107,7 +107,7 @@ class views_plugin_pager extends views_plugin {
    * Get the pager id, if it exists
    */
   function get_pager_id() {
-    return isset($this->options['id']) ? $this->options['id'] : 0;
+    return !empty($this->options['id']) ? $this->options['id'] : 0;
   }
 
   /**
