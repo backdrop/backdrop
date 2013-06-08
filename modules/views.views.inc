@@ -110,5 +110,14 @@ function views_views_data() {
     );
   }
 
+  $data['views']['fields_compare'] = array(
+    'title' => t('Fields comparison'),
+    'help' => t('Compare database fields against eachother.'),
+    'filter' => array(
+      'help' => t('Use fields comparison to filter the result of the view.'),
+      'handler' => 'views_handler_filter_fields_compare',
+    )
+  );
+
   return $data;
 }
