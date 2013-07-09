@@ -31,6 +31,10 @@ function views_test_views_api() {
  * Implements hook_views_data().
  */
 function views_test_views_data() {
+  // Count how often this hook is called.
+  $count = variable_get('views_test_views_data_count', 0);
+  $count++;
+  variable_set('views_test_views_data_count', $count);
   return  variable_get('views_test_views_data', array());
 }
 

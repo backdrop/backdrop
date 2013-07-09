@@ -23,15 +23,30 @@ function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
   if ($table) {
     if (!isset($cache[$table])) {
       $cid = 'views_data:' . $table;
-      $data = views_cache_get($cid, TRUE);
-      if (!empty($data->data)) {
+      if ($data = views_cache_get($cid, TRUE)) {
         $cache[$table] = $data->data;
       }
       else {
         if (!$fully_loaded) {
-          // No cache entry, rebuild.
-          $cache = _views_fetch_data_build();
+          // Try to load the full views cache.
+          if ($data = views_cache_get('views_data', TRUE)) {
+            $cache = $data->data;
+          }
+          else {
+            // No cache entry, rebuild.
+            $cache = _views_fetch_data_build();
+          }
           $fully_loaded = TRUE;
+        }
+
+        // Write back a cache for this table.
+        if (isset($cache[$table])) {
+          views_cache_set($cid, $cache[$table], TRUE);
+        }
+        else {
+          // If there is still no information about that table, it is missing.
+          // Write an empty array to avoid repeated rebuilds.
+          views_cache_set($cid, array(), TRUE);
         }
       }
     }
@@ -82,11 +97,6 @@ function _views_fetch_data_build() {
 
   // Keep a record with all data.
   views_cache_set('views_data', $cache, TRUE);
-  // Save data in seperate cache entries.
-  foreach ($cache as $key => $data) {
-    $cid = 'views_data:' . $key;
-    views_cache_set($cid, $data, TRUE);
-  }
   return $cache;
 }
 

@@ -152,6 +152,51 @@ class ViewsModuleTest extends ViewsSqlTest {
   }
 
   /**
+   * Tests views_fetch_data().
+   */
+  function testFetchData() {
+
+    // Make sure we start with a empty cache.
+    $this->resetStaticViewsDataCache();
+    cache_clear_all('*', 'cache_views', TRUE);
+    variable_set('views_test_views_data_count', 0);
+
+    // Request info about an existing table.
+    $this->assertTrue(views_fetch_data('views_test'), 'Data about existing table returned');
+    // This should have triggered a views data rebuild, and written a cache
+    // entry for all tables and the requested table but no other tables.
+    $this->assertEqual(variable_get('views_test_views_data_count', 0), 1, 'Views data rebuilt once');
+    $this->assertTrue(cache_get('views_data:en', 'cache_views'), 'Cache for all tables written.');
+    $this->assertTrue(cache_get('views_data:views_test:en', 'cache_views'), 'Cache for requested table written.');
+    $this->assertFalse(cache_get('views_data:views_test_previous:en', 'cache_views'), 'No Cache written for not requested table.');
+    $this->assertTrue(drupal_static('_views_fetch_data_fully_loaded'), 'Views data is fully loaded');
+
+    $this->resetStaticViewsDataCache();
+
+    // Request the same table again.
+    $this->assertTrue(views_fetch_data('views_test'), 'Data about existing table returned');
+    $this->assertEqual(variable_get('views_test_views_data_count', 0), 1, 'Views data rebuilt once');
+    $this->assertFalse(drupal_static('_views_fetch_data_fully_loaded'), 'Views data is not fully loaded');
+
+    $this->resetStaticViewsDataCache();
+
+    // Request a missing table, this should load the full cache from cache but
+    // not rebuilt.
+    $this->assertFalse(views_fetch_data('views_test_missing'), 'No data about missing table returned');
+    $this->assertEqual(variable_get('views_test_views_data_count', 0), 1, 'Views data rebuilt once');
+    $this->assertTrue(drupal_static('_views_fetch_data_fully_loaded'), 'Views data is fully loaded');
+
+    $this->resetStaticViewsDataCache();
+
+    // Request the same empty table again, this should load only that (empty)
+    // cache for that table.
+    $this->assertFalse(views_fetch_data('views_test_missing'), 'No data about missing table returned');
+    $this->assertEqual(variable_get('views_test_views_data_count', 0), 1, 'Views data rebuilt once');
+    $this->assertFalse(drupal_static('_views_fetch_data_fully_loaded'), 'Views data is not fully loaded');
+
+  }
+
+  /**
    * Ensure that a certain handler is a instance of a certain table/field.
    */
   function assertInstanceHandler($handler, $table, $field, $id) {
@@ -159,5 +204,14 @@ class ViewsModuleTest extends ViewsSqlTest {
     $field_data = $table_data[$field][$id];
 
     $this->assertEqual($field_data['handler'], get_class($handler));
+  }
+
+  /**
+   * Resets the views data cache.
+   */
+  protected function resetStaticViewsDataCache() {
+    drupal_static_reset('_views_fetch_data_cache');
+    drupal_static_reset('_views_fetch_data_recursion_protected');
+    drupal_static_reset('_views_fetch_data_fully_loaded');
   }
 }
