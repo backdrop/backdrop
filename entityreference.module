@@ -1090,7 +1090,7 @@ function entityreference_field_formatter_info() {
       'description' => t('Display the referenced entities rendered by entity_view().'),
       'field types' => array('entityreference'),
       'settings' => array(
-        'view_mode' => '',
+        'view_mode' => 'default',
         'links' => TRUE,
       ),
     ),
@@ -1114,21 +1114,20 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
 
   if ($display['type'] == 'entityreference_entity_view') {
     $entity_info = entity_get_info($field['settings']['target_type']);
-    $options = array();
+    $options = array('default' => t('Default'));
     if (!empty($entity_info['view modes'])) {
       foreach ($entity_info['view modes'] as $view_mode => $view_mode_settings) {
         $options[$view_mode] = $view_mode_settings['label'];
       }
     }
 
-    if (count($options) > 1) {
-      $element['view_mode'] = array(
-        '#type' => 'select',
-        '#options' => $options,
-        '#title' => t('View mode'),
-        '#default_value' => $settings['view_mode'],
-      );
-    }
+    $element['view_mode'] = array(
+      '#type' => 'select',
+      '#options' => $options,
+      '#title' => t('View mode'),
+      '#default_value' => $settings['view_mode'],
+      '#access' => count($options) > 1,
+    );
 
     $element['links'] = array(
       '#type' => 'checkbox',
@@ -1155,7 +1154,11 @@ function entityreference_field_formatter_settings_summary($field, $instance, $vi
 
   if ($display['type'] == 'entityreference_entity_view') {
     $entity_info = entity_get_info($field['settings']['target_type']);
-    $summary[] = t('Rendered as @mode', array('@mode' => isset($entity_info['view modes'][$settings['view_mode']]['label']) ? $entity_info['view modes'][$settings['view_mode']]['label'] : $settings['view_mode']));
+    $view_mode_label = $settings['view_mode'] == 'default' ? t('Default') : $settings['view_mode'];
+    if (isset($entity_info['view modes'][$settings['view_mode']]['label'])) {
+      $view_mode_label = $entity_info['view modes'][$settings['view_mode']]['label'];
+    }
+    $summary[] = t('Rendered as @mode', array('@mode' => $view_mode_label));
     $summary[] = !empty($settings['links']) ? t('Display links') : t('Do not display links');
   }
 
