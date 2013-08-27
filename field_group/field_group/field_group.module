@@ -778,6 +778,10 @@ function field_group_pre_render_html5(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_accordion(&$element, $group, &$form) {
+
+  // Add the jQuery UI accordion.
+  drupal_add_library('system', 'ui.accordion');
+
   $element += array(
     '#type' => 'markup',
     '#prefix' => '<div class="' . $group->classes . '">',
