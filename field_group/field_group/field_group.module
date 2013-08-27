@@ -611,6 +611,7 @@ function field_group_field_group_format_settings($group) {
 function field_group_pre_render_prepare(&$group) {
 
   $classes = _field_group_get_html_classes($group);
+
   $group->classes = implode(' ', $classes->required);
   $group->description = isset($group->format_settings['instance_settings']['description']) ? filter_xss_admin(t($group->format_settings['instance_settings']['description'])) : '';
 
