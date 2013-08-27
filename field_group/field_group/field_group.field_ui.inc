@@ -265,10 +265,10 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#type' => 'select',
         '#options' => $formatter_options,
         '#default_value' => 'fieldset',
+        '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
+      '#cell_attributes' => array('colspan' => 3),
     ),
-    'settings_summary' => array(),
-    'settings_edit' => array(),
   );
 
   if (!$display_overview) {
