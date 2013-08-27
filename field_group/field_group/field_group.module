@@ -332,7 +332,7 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
       ),
       'multipage-group' => array(
         'label' => t('Multipage group'),
@@ -405,7 +405,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Horizontal tab item'),
         'format_types' => array('open', 'closed'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
-        'instance_settings' => array('description' => '', 'classes' => ''),
+        'instance_settings' => array('description' => '', 'classes' => '', 'id' => ''),
         'default_formatter' => 'closed',
       ),
       'accordion' => array(

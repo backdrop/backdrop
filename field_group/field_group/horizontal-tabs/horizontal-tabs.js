@@ -183,8 +183,10 @@ Drupal.horizontalTab.prototype = {
  */
 Drupal.theme.prototype.horizontalTab = function (settings) {
   var tab = {};
+  var idAttr = settings.fieldset.attr('id');
+
   tab.item = $('<li class="horizontal-tab-button" tabindex="-1"></li>')
-    .append(tab.link = $('<a href="#"></a>')
+    .append(tab.link = $('<a href="#' + idAttr + '"></a>')
       .append(tab.title = $('<strong></strong>').text(settings.title))
       .append(tab.summary = $('<span class="summary"></span>')
     )
