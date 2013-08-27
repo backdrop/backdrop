@@ -108,14 +108,14 @@ function _field_group_install_read_groups() {
       ->condition('group_type', 'standard');
     foreach ($query->execute() as $record) {
       $record['settings'] = unserialize($record['settings']);
-      $groups[$record['group_name']] = $record;
+      $groups[$record['group_name'] . '-' . $record['type_name']] = $record;
     }
     foreach ($groups as $key => $group) {
       $query2 = db_select('content_group_fields', 'cgf', array('fetch' => PDO::FETCH_ASSOC))
         ->fields('cgf')
         ->condition('group_name', $group['group_name']);
       foreach ($query2->execute() as $field) {
-        $groups[$field['group_name']]['children'][] = $field;
+        $groups[$field['group_name'] . '-' . $field['type_name']]['children'][] = $field;
       }
     }
   }
