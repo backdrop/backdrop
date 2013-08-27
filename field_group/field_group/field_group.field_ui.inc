@@ -466,26 +466,15 @@ function field_group_formatter_row_update(& $group, $settings) {
  */
 function field_group_formatter_settings_update(& $group, $settings) {
 
-  // Fetch the field_group formatter defaults.
-  $field_group_types = field_group_formatter_info();
-  $mode = $group->mode == 'form' ? 'form' : 'display';
-  $formatter = $field_group_types[$mode][$group->format_type];
-
   // for format changes we load the defaults.
   if (empty($settings['format_settings']['settings'])) {
-    $group->format_settings = array(
-      'formatter' => isset($formatter['default_formatter']) ? $formatter['default_formatter'] : '',
-      'instance_settings' => $formatter['instance_settings']
-    );
+    $mode = $group->mode == 'form' ? 'form' : 'display';
+    $group->format_settings = _field_group_get_default_formatter_settings($group->format_type, $mode);
   }
   else {
     $group->format_type = $settings['format']['type'];
     $group->label = $settings['format_settings']['settings']['label'];
     $group->format_settings = $settings['format_settings']['settings'];
-    // This is avoided now, cause of the form_state['field_group']
-    // ctools_include('export');
-    // ctools_export_crud_save('field_group', $group);
-    // cache_clear_all('field_groups', 'cache_field');
   }
 }
 
@@ -580,7 +569,7 @@ function field_group_field_overview_validate($form, &$form_state) {
       }
 
       // Group name already exists.
-      if (!empty($form_values[$group_name])) {
+      if (field_group_exists($group_name, $entity_type, $bundle, $mode)) {
         form_set_error('fields][_add_new_group][group_name', t('Add new group: the group name %group_name already exists.', array('%group_name' => $group_name)));
       }
     }
@@ -672,10 +661,21 @@ function field_group_field_overview_submit($form, &$form_state) {
     $group->children = array_keys($children[$group_name]);
     $group->parent_name = $form_values[$group_name]['parent'];
     $group->weight = $form_values[$group_name]['weight'];
+
+    $old_format_type = $group->format_type;
     $group->format_type = isset($form_values[$group_name]['format']['type']) ? $form_values[$group_name]['format']['type'] : 'visible';
     if (isset($form_state['field_group'][$group_name]->format_settings)) {
       $group->format_settings = $form_state['field_group'][$group_name]->format_settings;
     }
+
+    // If the format type is changed, make sure we have all required format settings.
+    if ($group->format_type != $old_format_type) {
+      $mode = $group->mode == 'form' ? 'form' : 'display';
+      $default_formatter_settings = _field_group_get_default_formatter_settings($group->format_type, $mode);
+      $group->format_settings += $default_formatter_settings;
+      $group->format_settings['instance_settings'] += $default_formatter_settings['instance_settings'];
+    }
+
     ctools_export_crud_save('field_group', $group);
   }
 
@@ -690,6 +690,17 @@ function field_group_field_overview_submit($form, &$form_state) {
 function field_group_validate_css_class($element, &$form_state) {
   if (!empty($form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes']) && !preg_match('!^[A-Za-z0-9-_ ]+$!', $form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes'])) {
     form_error($element, t('The css class must include only letters, numbers, underscores and dashes.'));
+  }
+}
+
+/**
+ * Validate the entered css class from the submitted format settings.
+ * @param Array $element The validated element
+ * @param Array $form_state The state of the form.
+ */
+function field_group_validate_id($element, &$form_state) {
+  if (!empty($form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['id']) && !preg_match('!^[A-Za-z0-9-_]+$!', $form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['id'])) {
+    form_error($element, t('The id must include only letters, numbers, underscores and dashes.'));
   }
 }
 

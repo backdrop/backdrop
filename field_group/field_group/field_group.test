@@ -24,10 +24,11 @@
  * Group UI tests.
  */
 class GroupUITestCase extends DrupalWebTestCase {
+
   public static function getInfo() {
     return array(
-      'name' => 'Group UI tests',
-      'description' => 'Test the group UI functionality.',
+      'name' => 'UI tests',
+      'description' => 'Test the field group UI.',
       'group' => 'Field group',
     );
   }
@@ -36,19 +37,19 @@ class GroupUITestCase extends DrupalWebTestCase {
     parent::setUp('field_test', 'field_group');
 
     // Create test user.
-    $admin_user = $this->drupalCreateUser(array('administer content types'));
+    $admin_user = $this->drupalCreateUser(array('administer content types', 'administer nodes', 'access administration pages', 'bypass node access'));
     $this->drupalLogin($admin_user);
+  }
+
+  /**
+   * Test the creation a group on the article content type.
+   */
+  function createGroup() {
 
     // Create random group name.
     $this->group_label = $this->randomName(8);
     $this->group_name_input = drupal_strtolower($this->randomName(8));
     $this->group_name = 'group_' . $this->group_name_input;
-  }
-
-  /**
-   * Creates a group on the article content type.
-   */
-  function createGroup() {
 
     // Setup new group.
     $group = array(
@@ -57,7 +58,8 @@ class GroupUITestCase extends DrupalWebTestCase {
     );
 
     // Add new group on the 'Manage fields' page.
-    $this->drupalPost('admin/structure/types/manage/article/fields',  $group, t('Save'));
+    $this->drupalPost('admin/structure/types/manage/article/fields', $group, t('Save'));
+
     $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
 
     // Test if group is in the $groups array.
@@ -65,7 +67,7 @@ class GroupUITestCase extends DrupalWebTestCase {
     $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
 
     // Add new group on the 'Manage display' page.
-    $this->drupalPost('admin/structure/types/manage/article/display',  $group, t('Save'));
+    $this->drupalPost('admin/structure/types/manage/article/display', $group, t('Save'));
     $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
 
     // Test if group is in the $groups array.
@@ -77,6 +79,7 @@ class GroupUITestCase extends DrupalWebTestCase {
    * Delete a group.
    */
   function deleteGroup() {
+
     $this->drupalPost('admin/structure/types/manage/article/groups/' . $this->group_name . '/delete/form', array(), t('Delete'));
     $this->assertRaw(t('The group %label has been deleted from the %article content type.', array('%label' => $this->group_label, '%article' => 'Article')), t('Group removal message displayed on screen.'));
 
@@ -104,13 +107,382 @@ class GroupUITestCase extends DrupalWebTestCase {
    * Nest a field underneath a group.
    */
   function testNestField() {
+
     $this->createGroup();
+
     $edit = array(
       'fields[field_image][parent]' => $this->group_name,
     );
     $this->drupalPost('admin/structure/types/manage/article/fields', $edit, t('Save'));
     $this->assertRaw(t('Your settings have been saved.'), t('Settings saved'));
+
     $groups = field_group_info_groups('node', 'article', 'form', TRUE);
-    $this->assertTrue(in_array('field_image', $groups[$this->group_name]->children), t('Image is a child of %group', array('%group' => $this->group_label)));
+    $this->assertTrue(in_array('field_image', $groups[$this->group_name]->children), t('Image is a child of %group', array('%group' => $this->group_name)));
   }
+
+}
+
+/**
+ * Group display tests
+ */
+class GroupDisplayTestCase extends DrupalWebTestCase {
+
+  protected $node;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Display tests',
+      'description' => 'Test the field group display.',
+      'group' => 'Field group',
+    );
+  }
+
+  function setUp() {
+
+    parent::setUp('field_test', 'field_group');
+
+    $node = new stdClass();
+    $node->type = 'article';
+    $node->title = $this->randomName();
+    $node->status = 1;
+
+    // Create test fields.
+    $test_fields = array('field_test', 'field_test_2');
+    foreach ($test_fields as $field_name) {
+
+      $field = array(
+        'field_name' => $field_name,
+        'type' => 'test_field',
+        'cardinality' => 1,
+      );
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'bundle' => 'article',
+        'label' => $this->randomName(),
+        'display' => array(
+          'default' => array(
+            'type' => 'field_test_default',
+            'settings' => array(
+              'test_formatter_setting' => $this->randomName(),
+            ),
+          ),
+          'teaser' => array(
+            'type' => 'field_test_default',
+            'settings' => array(
+              'test_formatter_setting' => $this->randomName(),
+            ),
+          ),
+        ),
+      );
+      field_create_field($field);
+      field_create_instance($instance);
+
+      $node->{$field_name}[LANGUAGE_NONE][0]['value'] = mt_rand(1, 127);
+    }
+
+    node_save($node);
+    $this->node = $node;
+  }
+
+  /**
+   * Create a new group.
+   * @param array $data
+   *   Data for the field group.
+   */
+  function createGroup($mode, array $data) {
+
+    $group_name = 'group_' . drupal_strtolower($this->randomName(8));
+    $identifier = $group_name . '|node|article|' . $mode;
+
+    $field_group = new stdClass;
+    $field_group->disabled = FALSE;
+    $field_group->api_version = 1;
+    $field_group->identifier = $identifier;
+    $field_group->group_name = $group_name;
+    $field_group->entity_type = 'node';
+    $field_group->bundle = 'article';
+    $field_group->mode = $mode;
+    $field_group->parent_name = '';
+    $field_group->children = $data['children'];
+    $field_group->data = $data;
+    drupal_write_record('field_group', $field_group);
+    ctools_export_crud_enable('field_group', $field_group->identifier);
+
+    return $field_group;
+  }
+
+  /**
+   * Test the div formatter.
+   */
+  function testDiv() {
+
+    $data = array(
+      'label' => 'Wrapper',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'div',
+      'format_settings' => array(
+        'label' => 'Link',
+        'instance_settings' => array(
+          'required_fields' => 0,
+          'id' => 'wrapper-id',
+          'classes' => 'test-class',
+          'description' => '',
+          'show_label' => FALSE,
+          'label_element' => 'h3',
+          'effect' => 'none',
+          'speed' => 'fast',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $group = $this->createGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $this->drupalGet('node/' . $this->node->nid);
+
+    // Test group ids and classes.
+    $this->assertRaw('id="wrapper-id"', t('Wrapper id set on wrapper div'));
+    $this->assertRaw('class="' . $group->group_name . ' test-class', t('Test class set on wrapper div') . 'class="' . $group->group_name . ' test-class');
+
+    // Test group label.
+    $this->assertNoRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is not shown'));
+
+    // Set show label to true.
+    $group->data['format_settings']['instance_settings']['show_label'] = TRUE;
+    drupal_write_record('field_group', $group, array('identifier'));
+    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $this->drupalGet('node/' . $this->node->nid);
+    $this->assertRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is shown'));
+  }
+
+  /**
+   * Test the horizontal tabs formatter.
+   */
+  function testHorizontalTabs() {
+
+    $data = array(
+      'label' => 'Tab 1',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'htab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class',
+          'description' => '',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $first_tab = $this->createGroup('default', $data);
+    $first_tab_id = 'node_article_full_' . $first_tab->group_name;
+
+    $data = array(
+      'label' => 'Tab 2',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test_2',
+      ),
+      'format_type' => 'htab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-2',
+          'description' => 'description of second tab',
+        ),
+        'formatter' => 'closed',
+      ),
+    );
+    $second_tab = $this->createGroup('default', $data);
+    $second_tab_id = 'node_article_full_' . $first_tab->group_name;
+
+    $data = array(
+      'label' => 'Tabs',
+      'weight' => '1',
+      'children' => array(
+        0 => $first_tab->group_name,
+        1 => $second_tab->group_name,
+      ),
+      'format_type' => 'htabs',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-wrapper',
+        ),
+      ),
+    );
+    $tabs = $this->createGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+
+    $this->drupalGet('node/' . $this->node->nid);
+
+    // Test properties.
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
+    $this->assertFieldByXPath("//fieldset[contains(@class, 'test-class-2')]", NULL, t('Test class set on second tab'));
+    $this->assertRaw('<div class="fieldset-description">description of second tab</div>', t('Description of tab is shown'));
+    $this->assertRaw('class="collapsible collapsed test-class-2', t('Second tab is default collapsed'));
+
+    // Test if correctly nested
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$first_tab_id')]", NULL, 'First tab is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$second_tab_id')]", NULL, 'Second tab is displayed as child of the wrapper.');
+
+  }
+
+  /**
+   * Test the vertical tabs formatter.
+   */
+  function testVerticalTabs() {
+
+    $data = array(
+      'label' => 'Tab 1',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'tab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class',
+          'description' => '',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $first_tab = $this->createGroup('default', $data);
+    $first_tab_id = 'node_article_full_' . $first_tab->group_name;
+
+    $data = array(
+      'label' => 'Tab 2',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test_2',
+      ),
+      'format_type' => 'tab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-2',
+          'description' => 'description of second tab',
+        ),
+        'formatter' => 'closed',
+      ),
+    );
+    $second_tab = $this->createGroup('default', $data);
+    $second_tab_id = 'node_article_full_' . $first_tab->group_name;
+
+    $data = array(
+      'label' => 'Tabs',
+      'weight' => '1',
+      'children' => array(
+        0 => $first_tab->group_name,
+        1 => $second_tab->group_name,
+      ),
+      'format_type' => 'tabs',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-wrapper',
+        ),
+      ),
+    );
+    $tabs = $this->createGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+
+    $this->drupalGet('node/' . $this->node->nid);
+
+    // Test properties.
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
+    $this->assertFieldByXPath("//fieldset[contains(@class, 'test-class-2')]", NULL, t('Test class set on second tab'));
+    $this->assertRaw('<div class="fieldset-description">description of second tab</div>', t('Description of tab is shown'));
+    $this->assertRaw('class="collapsible collapsed test-class-2', t('Second tab is default collapsed'));
+
+    // Test if correctly nested
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$first_tab_id')]", NULL, 'First tab is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$second_tab_id')]", NULL, 'Second tab is displayed as child of the wrapper.');
+  }
+
+  /**
+   * Test the accordion formatter.
+   */
+  function testAccordion() {
+
+    $data = array(
+      'label' => 'Accordion item 1',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'accordion-item',
+      'format_settings' => array(
+        'label' => 'Accordion item 1',
+        'instance_settings' => array(
+          'classes' => 'test-class',
+        ),
+        'formatter' => 'closed',
+      ),
+    );
+    $first_item = $this->createGroup('default', $data);
+    $first_item_id = 'node_article_full_' . $first_item->group_name;
+
+    $data = array(
+      'label' => 'Accordion item 2',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test_2',
+      ),
+      'format_type' => 'accordion-item',
+      'format_settings' => array(
+        'label' => 'Tab 2',
+        'instance_settings' => array(
+          'classes' => 'test-class-2',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $second_item = $this->createGroup('default', $data);
+    $second_item_id = 'node_article_full_' . $second_item->group_name;
+
+    $data = array(
+      'label' => 'Accordion',
+      'weight' => '1',
+      'children' => array(
+        0 => $first_item->group_name,
+        1 => $second_item->group_name,
+      ),
+      'format_type' => 'accordion',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-wrapper',
+          'effect' => 'bounceslide'
+        ),
+      ),
+    );
+    $accordion = $this->createGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+
+    $this->drupalGet('node/' . $this->node->nid);
+
+    // Test properties.
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
+    $this->assertFieldByXPath("//div[contains(@class, 'effect-bounceslide')]", NULL, t('Correct effect is set on the accordion'));
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, t('Accordion item with test-class is shown'));
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-2')]", NULL, t('Accordion item with test-class-2 is shown'));
+    $this->assertFieldByXPath("//h3[contains(@class, 'field-group-accordion-active')]", NULL, t('Accordion item 2 was set active'));
+
+    // Test if correctly nested
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class')]", NULL, 'First item is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class-2')]", NULL, 'Second item is displayed as child of the wrapper.');
+  }
+
 }

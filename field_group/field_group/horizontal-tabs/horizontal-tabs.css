@@ -25,12 +25,14 @@ div.horizontal-tabs {
   border: 0;
 }
 
-fieldset.horizontal-tabs-pane legend {
+fieldset.horizontal-tabs-pane legend,
+fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane legend {
   display: none;
 }
 
-fieldset.horizontal-tabs-pane fieldset legend {
-	display: block;
+fieldset.horizontal-tabs-pane fieldset legend,
+fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane fieldset legend {
+  display: block;
 }
 
 /* Layout of each tab */
@@ -38,7 +40,7 @@ fieldset.horizontal-tabs-pane fieldset legend {
   background: #eee;
   border-right: 1px solid #ccc; /* LTR */
   padding: 1px;
-  padding-top: 0; 
+  padding-top: 0;
   margin: 0;
   min-width: 5em; /* IE7 */
   float: left; /* LTR */
@@ -75,7 +77,7 @@ fieldset.horizontal-tabs-pane fieldset legend {
   text-decoration: none;
   padding: 0.5em 0.6em 0.3em 0.6em;
   position:relative;
-  top: 0px;  
+  top: 0px;
 }
 .horizontal-tabs ul.horizontal-tabs-list .selected strong {
   color: #000;
@@ -89,9 +91,9 @@ fieldset.horizontal-tabs-pane fieldset legend {
 }
 
 /**
- * tab content 
+ * tab content
  */
-div.field-group-htabs-wrapper .field-group-format-wrapper { 
+div.field-group-htabs-wrapper .field-group-format-wrapper {
   clear: both;
   padding: 0 0 0.6em;
 }
