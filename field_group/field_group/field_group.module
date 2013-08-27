@@ -1653,28 +1653,29 @@ function field_group_exists($group_name, $entity_type, $bundle, $mode) {
 
 /**
  * Unpacks a database row in a FieldGroup object.
- * @param $group
+ * @param $packed_group
  *   Database result object with stored group data.
  * @return $group
  *   Field group object.
  */
-function field_group_unpack($group) {
+function field_group_unpack($packed_group) {
+  if (!isset($packed_group->data)) {
+    return $packed_group;
+  }
 
   // Extract unserialized data.
-  if (isset($group->data)) {
-    $data = $group->data;
-    unset($group->data);
-    $group->label = $data['label'];
-    $group->weight = $data['weight'];
-    $group->children = $data['children'];
-    $group->format_type = !empty($data['format_type']) ? $data['format_type'] : 'fieldset';
-    if (isset($data['format_settings'])) {
-      $group->format_settings = $data['format_settings'];
-    }
+  $group = clone $packed_group;
+  $data = $group->data;
+  unset($group->data);
+  $group->label = $data['label'];
+  $group->weight = $data['weight'];
+  $group->children = $data['children'];
+  $group->format_type = !empty($data['format_type']) ? $data['format_type'] : 'fieldset';
+  if (isset($data['format_settings'])) {
+    $group->format_settings = $data['format_settings'];
   }
 
   return $group;
-
 }
 
 /**
