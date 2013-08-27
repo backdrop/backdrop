@@ -117,7 +117,9 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $args_pop = array_pop($args);
   $mode = array_pop($args_pop);
 
-  return field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode);
+  $group = field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode);
+
+  return empty($group) ? FALSE : $group;
 }
 
 /**
