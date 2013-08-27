@@ -546,7 +546,7 @@ function field_group_field_group_format_settings($group) {
       $form['instance_settings']['wrapper'] = array(
         '#title' => t('HTML5 wrapper'),
         '#type' => 'select',
-        '#options' => array('section' => t('Section'), 'article' => t('Article'), 'header' => t('Header'), 'footer' => t('footer'), 'aside' => t('Aside')),
+        '#options' => array('section' => t('Section'), 'article' => t('Article'), 'header' => t('Header'), 'footer' => t('Footer'), 'aside' => t('Aside')),
         '#default_value' => isset($group->format_settings['instance_settings']['wrapper']) ? $group->format_settings['instance_settings']['wrapper'] : 'section',
       );
       break;
