@@ -1998,9 +1998,15 @@ function field_group_hide_field_groups(&$element, $group_names) {
       // Hide the field group.
       $element['#fieldgroups'][$group_name]->format_type = 'hidden';
       // Hide the elements inside the field group.
+      $sub_groups = array();
       foreach (array_keys($element['#group_children'], $group_name) as $field_name) {
-        $element[$field_name]['#access'] = FALSE;
+        if (isset($element['#fieldgroups'][$field_name])) {
+          $sub_groups[] = $field_name;
+        } else {
+          $element[$field_name]['#access'] = FALSE;
+        }
       }
+      field_group_hide_field_groups($element, $sub_groups);
     }
   }
 }
