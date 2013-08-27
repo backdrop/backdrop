@@ -323,7 +323,7 @@ function field_group_field_group_formatter_info() {
         'default_formatter' => 'closed',
       ),
       'htabs' => array(
-        'label' => ('Horizontal tabs group'),
+        'label' => t('Horizontal tabs group'),
         'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
         'instance_settings' => array('classes' => ''),
       ),
@@ -335,7 +335,7 @@ function field_group_field_group_formatter_info() {
         'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
       ),
       'multipage-group' => array(
-        'label' => ('Multipage group'),
+        'label' => t('Multipage group'),
         'description' => t('This fieldgroup renders groups on separate pages.'),
         'instance_settings' => array('classes' => '', 'page_header' => 3, 'move_additional' => 1, 'page_counter' => 1, 'move_button' => 0),
       ),
@@ -397,7 +397,7 @@ function field_group_field_group_formatter_info() {
         'default_formatter' => 'closed',
       ),
       'htabs' => array(
-        'label' => ('Horizontal tabs group'),
+        'label' => t('Horizontal tabs group'),
         'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
         'instance_settings' => array('classes' => ''),
       ),
