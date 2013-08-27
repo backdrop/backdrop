@@ -1906,6 +1906,19 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
     $group_references[$group_name] = &$element[$group_name];
   }
 
+  // Loop through all form children looking for those that are supposed to be
+  // in groups, and insert placeholder element for the new group field in the
+  // correct location within the form structure.
+  $element_clone = array();
+  foreach (element_children($element) as $child_name) {
+    $element_clone[$child_name] = $element[$child_name];
+    // If this element is in a group, create the placeholder element.
+    if (isset($element['#group_children'][$child_name])) {
+      $element_clone[$element['#group_children'][$child_name]] = array();
+    }
+  }
+  $element = array_merge($element_clone, $element);
+
   // Move all children to their parents. Use the flat list of references for
   // direct access as we don't know where in the root_element hierarchy the
   // parent currently is situated.
@@ -1935,6 +1948,7 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
         // If this is a group, we have to use a reference to keep the reference
         // list intact (but if it is a field we don't mind).
         $group_references[$parent_name][$child_name] = &$element[$child_name];
+        $group_references[$parent_name]['#weight'] = $element['#groups'][$parent_name]->weight;
       }
 
       // The child has been copied to its parent: remove it from the root element.
