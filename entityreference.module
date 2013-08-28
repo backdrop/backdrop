@@ -1024,7 +1024,9 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   $entity = NULL;
   if ($entity_id !== 'NULL') {
     $entity = entity_load_single($entity_type, $entity_id);
-    if (!$entity || !entity_access('view', $entity_type, $entity)) {
+    $has_view_access = (entity_access('view', $entity_type, $entity) !== FALSE);
+    $has_update_access = (entity_access('update', $entity_type, $entity) !== FALSE);
+    if (!$entity || !($has_view_access || $has_update_access)) {
       return MENU_ACCESS_DENIED;
     }
   }
@@ -1197,7 +1199,9 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
         // Replace the instance value with the term data.
         $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
         // Check whether the user has access to the referenced entity.
-        $items[$id][$delta]['access'] = entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']]);
+        $has_view_access = (entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
+        $has_update_access = (entity_access('update', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
+        $items[$id][$delta]['access'] = ($has_view_access || $has_update_access);
       }
       // Otherwise, unset the instance value, since the entity does not exist.
       else {
