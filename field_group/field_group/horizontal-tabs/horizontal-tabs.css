@@ -25,14 +25,9 @@ div.horizontal-tabs {
   border: 0;
 }
 
-fieldset.horizontal-tabs-pane legend,
-fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane legend {
+fieldset.horizontal-tabs-pane > legend,
+fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane > legend {
   display: none;
-}
-
-fieldset.horizontal-tabs-pane fieldset legend,
-fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane fieldset legend {
-  display: block;
 }
 
 /* Layout of each tab */
