@@ -739,7 +739,11 @@ function field_group_pre_render_div(&$element, $group, &$form) {
     $element['#suffix'] = '</div></div>';
   }
   else {
-    $element['#prefix'] = '<div id="' . $element['#id'] . '" class="' . $group->group_name . ' ' . $group->classes . '">';
+    $class_attribute = '';
+    if (!empty($group->classes)) {
+      $class_attribute = 'class = "' . $group->classes . '"';
+    }
+    $element['#prefix'] = '<div id="' . $element['#id'] . '"' . $class_attribute . '>';
     if ($show_label) {
       $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
     }
@@ -2080,10 +2084,14 @@ function _field_group_get_html_classes(&$group) {
 
     // Extra required classes for div.
     if ($group->format_type == 'div') {
-      $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
-      $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
-
-      $required[] = 'speed-' . $speed . 'effect-$effect';
+      if (!empty($group->format_settings['instance_settings']['effect'])) {
+        $effect = $group->format_settings['instance_settings']['effect'];
+        // Only add effect class when an effect was selected.
+        if ($effect != 'none') {
+          $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
+          $required[] = 'speed-' . $speed . 'effect-' . $effect;
+        }
+      }
     }
 
     // Extra required classes for accordions.
