@@ -1567,14 +1567,16 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
   if (!isset($entity_type)) {
     return $groups;
   }
-  else {
-    if (isset($groups[$entity_type][$bundle][$view_mode])) {
-      return $groups[$entity_type][$bundle][$view_mode];
-    }
-    else {
-      return array();
-    }
+  elseif (!isset($bundle) && isset($groups[$entity_type])) {
+    return $groups[$entity_type];
   }
+  elseif (!isset($view_mode) && isset($groups[$entity_type][$bundle])) {
+    return $groups[$entity_type][$bundle];
+  }
+  elseif (isset($groups[$entity_type][$bundle][$view_mode])) {
+    return $groups[$entity_type][$bundle][$view_mode];
+  }
+  return array();
 }
 
 /**
