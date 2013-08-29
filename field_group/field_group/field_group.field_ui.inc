@@ -633,7 +633,7 @@ function field_group_field_overview_submit($form, &$form_state) {
     }
 
     $classes = _field_group_get_html_classes($new_group);
-    $new_group->format_settings['instance_settings']['classes'] = $classes->optional;
+    $new_group->format_settings['instance_settings']['classes'] = implode(' ', $classes->optional);
 
     // Save and enable it in ctools.
     ctools_export_crud_save('field_group', $new_group);
