@@ -8,11 +8,12 @@ branches:
     - travis_ci
 before_script:
   - pear channel-discover pear.drush.org
-  - pear install drush/drush
+  # Newer drush versions won't run site-install because Backdrop doesn't match
+  # expectations about Drupal 7/8 versions. Drush 5.7 doesn't check the version
+  # at all, so it works for now.
+  - pear install drush/drush-5.7.0
   - phpenv rehash
   - mysql -e 'create database backdrop;'
-  - pwd
-  - drush --version
   - chmod a+w sites/default
   - drush si --db-url=mysql://root:@localhost/backdrop -y
   - chmod go-w sites/default
