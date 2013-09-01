@@ -23,4 +23,4 @@ before_script:
   - drush si --db-url=mysql://root:@localhost/backdrop -y
   - chmod go-w sites/default
   - drush en simpletest -y
-script: php ./core/scripts/run-tests.sh --php `which php` --concurrency 8 --url 'http://localhost' --all
+script: php ./core/scripts/run-tests.sh --php `which php` --concurrency 16 --url 'http://localhost' --all
