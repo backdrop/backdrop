@@ -17,9 +17,11 @@ before_script:
   # Import the PHP configuration.
   - phpenv config-add core/misc/travis-php.ini
 
+  - which php
+
   # Install Backdrop with Drush.
   - mysql -e 'create database backdrop;'
   - chmod a+w sites/default
   - drush si --db-url=mysql://root:@localhost/backdrop -y
   - chmod go-w sites/default
-script: php ./core/scripts/run-tests.sh --url 'http://localhost' --all
+script: php ./core/scripts/run-tests.sh --php /usr/bin/php --url 'http://localhost' --all
