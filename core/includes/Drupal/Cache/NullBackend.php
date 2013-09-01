@@ -5,7 +5,7 @@
  * Definition of NullBackend.
  */
 
-namespace Drupal\Core\Cache;
+namespace Drupal\Cache;
 
 /**
  * Defines a stub cache implementation.
@@ -21,61 +21,61 @@ namespace Drupal\Core\Cache;
 class NullBackend implements CacheBackendInterface {
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::__construct().
+   * Implements Drupal\Cache\CacheBackendInterface::__construct().
    */
   function __construct($bin) {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::get().
+   * Implements Drupal\Cache\CacheBackendInterface::get().
    */
   function get($cid) {
     return FALSE;
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::getMultiple().
+   * Implements Drupal\Cache\CacheBackendInterface::getMultiple().
    */
   function getMultiple(&$cids) {
     return array();
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::set().
+   * Implements Drupal\Cache\CacheBackendInterface::set().
    */
   function set($cid, $data, $expire = CACHE_PERMANENT) {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::delete().
+   * Implements Drupal\Cache\CacheBackendInterface::delete().
    */
   function delete($cid) {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::deleteMultiple().
+   * Implements Drupal\Cache\CacheBackendInterface::deleteMultiple().
    */
   function deleteMultiple(array $cids) {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::deletePrefix().
+   * Implements Drupal\Cache\CacheBackendInterface::deletePrefix().
    */
   function deletePrefix($prefix) {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::flush().
+   * Implements Drupal\Cache\CacheBackendInterface::flush().
    */
   function flush() {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::expire().
+   * Implements Drupal\Cache\CacheBackendInterface::expire().
    */
   function expire() {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::garbageCollection().
+   * Implements Drupal\Cache\CacheBackendInterface::garbageCollection().
    */
   function garbageCollection() {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::isEmpty().
+   * Implements Drupal\Cache\CacheBackendInterface::isEmpty().
    */
   function isEmpty() {
     return TRUE;

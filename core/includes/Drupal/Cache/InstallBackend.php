@@ -5,7 +5,7 @@
  * Definition of InstallBackend.
  */
 
-namespace Drupal\Core\Cache;
+namespace Drupal\Cache;
 
 use Exception;
 
@@ -34,26 +34,26 @@ use Exception;
 class InstallBackend extends DatabaseBackend {
 
   /**
-   * Overrides Drupal\Core\Cache\CacheBackendInterface::get().
+   * Overrides Drupal\Cache\DatabaseBackend::get().
    */
   function get($cid) {
     return FALSE;
   }
 
   /**
-   * Overrides Drupal\Core\Cache\CacheBackendInterface::getMultiple().
+   * Overrides Drupal\Cache\DatabaseBackend::getMultiple().
    */
   function getMultiple(&$cids) {
     return array();
   }
 
   /**
-   * Overrides Drupal\Core\Cache\CacheBackendInterface::set().
+   * Overrides Drupal\Cache\DatabaseBackend::set().
    */
   function set($cid, $data, $expire = CACHE_PERMANENT) {}
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::delete().
+   * Implements Drupal\Cache\DatabaseBackend::delete().
    */
   function delete($cid) {
     try {
@@ -65,7 +65,7 @@ class InstallBackend extends DatabaseBackend {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::deleteMultiple().
+   * Implements Drupal\Cache\DatabaseBackend::deleteMultiple().
    */
   function deleteMultiple(array $cids) {
     try {
@@ -77,7 +77,7 @@ class InstallBackend extends DatabaseBackend {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::deletePrefix().
+   * Implements Drupal\Cache\DatabaseBackend::deletePrefix().
    */
   function deletePrefix($prefix) {
     try {
@@ -89,7 +89,7 @@ class InstallBackend extends DatabaseBackend {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::flush().
+   * Implements Drupal\Cache\DatabaseBackend::flush().
    */
   function flush() {
     try {
@@ -101,7 +101,7 @@ class InstallBackend extends DatabaseBackend {
   }
 
   /**
-   * Overrides Drupal\Core\Cache\CacheBackendInterface::isEmpty().
+   * Overrides Drupal\Cache\DatabaseBackend::isEmpty().
    */
   function isEmpty() {
     return TRUE;

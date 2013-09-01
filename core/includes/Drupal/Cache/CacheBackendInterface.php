@@ -5,7 +5,7 @@
  * Definition of CacheBackendInterface.
  */
 
-namespace Drupal\Core\Cache;
+namespace Drupal\Cache;
 
 /**
  * Defines an interface for cache implementations.
