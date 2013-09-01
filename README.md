@@ -38,6 +38,8 @@ audience of developers who value ease of use and ease of learning over
 architectural flexibility. You can join Backdrop's developer community at
 https://github.com/backdrop/backdrop
 
+[![Build Status](https://travis-ci.org/backdrop/backdrop.png)](https://travis-ci.org/backdrop/backdrop)
+
 License
 -------
 Backdrop is GPL v2 software. See the LICENSE.txt file in the core directory
