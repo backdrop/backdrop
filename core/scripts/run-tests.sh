@@ -226,7 +226,7 @@ function simpletest_script_parse_args() {
       else {
         // Argument not found in list.
         simpletest_script_print_error("Unknown argument '$arg'.");
-        exit;
+        exit(1);
       }
     }
     else {
@@ -239,7 +239,7 @@ function simpletest_script_parse_args() {
   // Validate the concurrency argument
   if (!is_numeric($args['concurrency']) || $args['concurrency'] <= 0) {
     simpletest_script_print_error("--concurrency must be a strictly positive integer.");
-    exit;
+    exit(1);
   }
 
   return array($args, $count);
@@ -269,7 +269,7 @@ function simpletest_script_init($server_software) {
   else {
     simpletest_script_print_error('Unable to automatically determine the path to the PHP interpreter. Supply the --php command line argument.');
     simpletest_script_help();
-    exit();
+    exit(0);
   }
 
   // Get url from arguments.
@@ -373,7 +373,7 @@ function simpletest_script_run_one_test($test_id, $test_class) {
     $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
     $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
     $status = ($had_fails || $had_exceptions ? 'fail' : 'pass');
-    simpletest_script_print($info['name'] . ' ' . _simpletest_format_summary_line($test->results) . "\n", simpletest_script_color_code($status));
+    simpletest_script_print($info['name'] . ' ' . _simpletest_format_summary_line($test->results) . "\n", $status);
 
     // Finished, kill this runner.
     exit(0);
@@ -634,7 +634,7 @@ function simpletest_script_format_result($result) {
   $summary = sprintf("%-9.9s %-10.10s %-17.17s %4.4s %-35.35s\n",
     $results_map[$result->status], $result->message_group, basename($result->file), $result->line, $result->function);
 
-  simpletest_script_print($summary, simpletest_script_color_code($result->status));
+  simpletest_script_print($summary, $result->status);
 
   $lines = explode("\n", wordwrap(trim(strip_tags($result->message)), 76));
   foreach ($lines as $line) {
@@ -649,7 +649,7 @@ function simpletest_script_format_result($result) {
  * @param $message The message to print.
  */
 function simpletest_script_print_error($message) {
-  simpletest_script_print("  ERROR: $message\n", SIMPLETEST_SCRIPT_COLOR_FAIL);
+  simpletest_script_print("  ERROR: $message\n", 'fail');
 }
 
 /**
@@ -657,12 +657,21 @@ function simpletest_script_print_error($message) {
  * color code will be used.
  *
  * @param $message The message to print.
- * @param $color_code The color code to use for coloring.
+ * @param $status One of the following:
+ *   - pass
+ *   - debug
+ *   - exception
+ *   - fail
  */
-function simpletest_script_print($message, $color_code) {
+function simpletest_script_print($message, $status) {
   global $args;
   if ($args['color']) {
-    echo "\033[" . $color_code . "m" . $message . "\033[0m";
+    $color_code = simpletest_script_color_code($message_type);
+    $message = "\033[" . $color_code . "m" . $message . "\033[0m";
+  }
+  // For fails and exceptions, print to the error log.
+  if ($status === 'fail' || $status === 'exception') {
+    fwrite(STDERR, $message);
   }
   else {
     echo $message;
