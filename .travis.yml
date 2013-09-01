@@ -3,11 +3,16 @@
 language: php
 php:
   - 5.3
+branches:
+  only:
+    - travis_ci
 before_script:
   - pear channel-discover pear.drush.org
   - pear install drush/drush
   - phpenv rehash
   - mysql -e 'create database backdrop;'
+  - pwd
+  - drush --version
   - chmod a+w sites/default
   - drush si --db-url=mysql://root:@localhost/backdrop -y
   - chmod go-w sites/default
