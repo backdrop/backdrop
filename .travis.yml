@@ -8,5 +8,7 @@ before_script:
   - pear install drush/drush
   - phpenv rehash
   - mysql -e 'create database backdrop;'
+  - chmod a+w sites/default
   - drush si --db-url=mysql://root:@localhost/backdrop -y
+  - chmod go-w sites/default
 script: php ./core/scripts/run-tests.sh --url 'http://localhost' --all
