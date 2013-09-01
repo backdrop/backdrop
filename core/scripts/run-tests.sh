@@ -13,7 +13,7 @@ list($args, $count) = simpletest_script_parse_args();
 
 if ($args['help'] || $count == 0) {
   simpletest_script_help();
-  exit;
+  exit(0);
 }
 
 if ($args['execute-test']) {
@@ -30,7 +30,7 @@ else {
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 if (!module_exists('simpletest')) {
   simpletest_script_print_error("The simpletest module must be enabled before this script can run.");
-  exit;
+  exit(1);
 }
 
 if ($args['clean']) {
@@ -43,7 +43,7 @@ if ($args['clean']) {
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
-  exit;
+  exit(0);
 }
 
 // Load SimpleTest files.
@@ -64,7 +64,7 @@ if ($args['list']) {
       echo " - " . $info['name'] . ' (' . $class . ')' . "\n";
     }
   }
-  exit;
+  exit(0);
 }
 
 $test_list = simpletest_script_get_test_list();
@@ -89,6 +89,9 @@ simpletest_log_read($test_id, $last_prefix, $last_test_class);
 // Stop the timer.
 simpletest_script_reporter_timer_stop();
 
+$status_code = simpletest_script_result_status_code();
+
+
 // Display results before database is cleared.
 simpletest_script_reporter_display_results();
 
@@ -100,7 +103,7 @@ if ($args['xml']) {
 simpletest_clean_results_table($test_id);
 
 // Test complete, exit.
-exit;
+exit($status_code);
 
 /**
  * Print help text.
@@ -326,7 +329,7 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
 
       if (!is_resource($process)) {
         echo "Unable to fork test process. Aborting.\n";
-        exit;
+        exit(1);
       }
 
       // Register our new child.
@@ -453,7 +456,7 @@ function simpletest_script_get_test_list() {
 
   if (empty($test_list)) {
     simpletest_script_print_error('No valid tests were specified.');
-    exit;
+    exit(0);
   }
   return $test_list;
 }
@@ -576,6 +579,16 @@ function simpletest_script_reporter_timer_stop() {
   $end = timer_stop('run-tests');
   echo "Test run duration: " . format_interval($end['time'] / 1000);
   echo "\n\n";
+}
+
+/**
+ * Check if this test run had any failures.
+ */
+function simpletest_script_result_status_code() {
+  global $args, $test_id, $results_map;
+
+  $errorCount = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND (status = :exception OR status = :error)", array(':test_id' => $test_id, ':exception' => 'exception', ':error' => 'error'))->fetchField();
+  return $errorCount > 0 ? 1 : 0;
 }
 
 /**
