@@ -4,6 +4,19 @@ language: php
 php:
   - 5.3
 before_script:
+  # Install Apache and FastCGI extension to connect to PHP-FPM.
+  - sudo apt-get update > /dev/null
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  - sudo a2enmod rewrite actions fastcgi alias
+  - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
+  - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
+  - sudo apachectl restart
+
+  # Start PHP-FPM. There is no process manager available to start PHP-FPM on
+  # Travis CI currently, so we have to locate and enable it manually.
+  - sudo cp /home/travis/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default /home/travis/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
+  - /home/travis/.phpenv/versions/`php -r "print PHP_VERSION;"`/sbin/php-fpm
+
   # Install Drush. Newer drush versions won't run site-install because Backdrop
   # doesn't match expectations about Drupal 7/8 versions. Drush 5.7 doesn't
   # check the version at all, so it works for now.
@@ -12,7 +25,7 @@ before_script:
   - phpenv rehash
 
   # Import the PHP configuration.
-  - phpenv config-add core/misc/travis-php.ini
+  - phpenv config-add core/misc/travis-ci/php.ini
 
   # Install Backdrop with Drush.
   - mysql -e 'create database backdrop;'
