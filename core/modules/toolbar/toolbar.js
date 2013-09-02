@@ -3,7 +3,7 @@
 Drupal.toolbar = Drupal.toolbar || {};
 
 /**
- * Attach toggling behavior and notify the overlay of the toolbar.
+ * Attach toggling behavior.
  */
 Drupal.behaviors.toolbar = {
   attach: function(context) {
