@@ -709,9 +709,6 @@ class DrupalUnitTestCase extends DrupalTestCase {
     // Reset all statics so that test is performed with a clean environment.
     drupal_static_reset();
 
-    // Generate temporary prefixed database to ensure that tests have a clean starting point.
-    $this->databasePrefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
-
     // Create test directory.
     $public_files_directory = $this->originalFileDirectory . '/simpletest/' . substr($this->databasePrefix, 10);
     file_prepare_directory($public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
