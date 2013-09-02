@@ -328,7 +328,7 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
       $process = proc_open($command, array(), $pipes, NULL, NULL, array('bypass_shell' => TRUE));
 
       if (!is_resource($process)) {
-        echo "Unable to fork test process. Aborting.\n";
+        simpletest_script_print_error('Unable to fork test process. Aborting.');
         exit(1);
       }
 
@@ -350,7 +350,7 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
         // The child exited, unregister it.
         proc_close($child['process']);
         if ($status['exitcode']) {
-          echo 'FATAL ' . $test_class . ': test runner returned a non-zero error code (' . $status['exitcode'] . ').' . "\n";
+          simpletest_script_print_error('FATAL ' . $test_class . ': test runner returned a non-zero error code (' . $status['exitcode'] . ').');
         }
         unset($children[$cid]);
       }
@@ -379,7 +379,7 @@ function simpletest_script_run_one_test($test_id, $test_class) {
     exit(0);
   }
   catch (Exception $e) {
-    echo (string) $e;
+    simpletest_script_print_error((string) $e);
     exit(1);
   }
 }
@@ -666,7 +666,7 @@ function simpletest_script_print_error($message) {
 function simpletest_script_print($message, $status) {
   global $args;
   if ($args['color']) {
-    $color_code = simpletest_script_color_code($message_type);
+    $color_code = simpletest_script_color_code($status);
     $message = "\033[" . $color_code . "m" . $message . "\033[0m";
   }
   // For fails and exceptions, print to the error log.
