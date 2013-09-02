@@ -139,10 +139,7 @@ class SessionTestCase extends DrupalWebTestCase {
     $this->assertSessionEmpty(TRUE);
 
     // The same behavior is expected when caching is enabled.
-    $config = config('system.performance');
-    $config->set('cache', 1);
-    $config->save();
-
+    variable_set('cache', 1);
     $this->drupalGet('');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);

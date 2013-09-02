@@ -69,9 +69,7 @@ class StatisticsLoggingTestCase extends DrupalWebTestCase {
     $this->node = $this->drupalCreateNode(array('title' => $this->randomName(255), 'uid' => $this->auth_user->uid));
 
     // Enable page caching.
-    $config = config('system.performance');
-    $config->set('cache', 1);
-    $config->save();
+    variable_set('cache', TRUE);
 
     // Enable access logging.
     variable_set('statistics_enable_access_log', 1);
