@@ -643,13 +643,13 @@ function simpletest_script_format_result($result) {
 }
 
 /**
- * Print error message prefixed with "  ERROR: " and displayed in fail color
+ * Print error message prefixed with "ERROR: " and displayed in fail color
  * if color output is enabled.
  *
  * @param $message The message to print.
  */
 function simpletest_script_print_error($message) {
-  simpletest_script_print("  ERROR: $message\n", 'fail');
+  simpletest_script_print("ERROR: $message\n", 'fail');
 }
 
 /**
