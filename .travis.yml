@@ -27,10 +27,13 @@ before_script:
   # Import the PHP configuration.
   - phpenv config-add core/misc/travis-ci/php.ini
 
-  # Install Backdrop with Drush.
+  # Set MySQL configuration and create the database.
+  - mysql -e 'SET GLOBAL wait_timeout = 5400;'
   - mysql -e 'create database backdrop;'
+
+  # Install Backdrop with Drush.
   - chmod a+w sites/default
-  - drush si --db-url=mysql://root:@localhost/backdrop -y
+  - drush si --db-url=mysql://travis:@localhost/backdrop -y
   - chmod go-w sites/default
   - drush en simpletest -y
 script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --verbose --all
