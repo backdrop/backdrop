@@ -1655,7 +1655,7 @@ class CommonDrupalRenderTestCase extends DrupalWebTestCase {
     // Create an element with a child and subchild.  Each element loads a
     // different JavaScript file using #attached.
     $parent_js = drupal_get_path('module', 'user') . '/user.js';
-    $child_js = drupal_get_path('module', 'forum') . '/forum.js';
+    $child_js = drupal_get_path('module', 'node') . '/node.js';
     $subchild_js = drupal_get_path('module', 'book') . '/book.js';
     $element = array(
       '#type' => 'fieldset',

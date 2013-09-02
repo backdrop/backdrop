@@ -470,21 +470,21 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $this->resetAll();
     $this->assertModules(array('module_test'), TRUE);
     variable_set('dependency_test', 'dependency');
-    // module_test creates a dependency chain: forum depends on poll, which
-    // depends on php. The correct enable order is, php, poll, forum.
-    $expected_order = array('php', 'poll', 'forum');
+    // module_test creates a dependency chain: contact depends on poll, which
+    // depends on php. The correct enable order is, php, poll, contact.
+    $expected_order = array('php', 'poll', 'contact');
 
     // Enable the modules through the UI, verifying that the dependency chain
     // is correct.
     $edit = array();
-    $edit['modules[Core][forum][enable]'] = 'forum';
+    $edit['modules[Core][contact][enable]'] = 'contact';
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('forum'), FALSE);
-    $this->assertText(t('You must enable the Poll, PHP Filter modules to install Forum.'), t('Dependency chain created.'));
+    $this->assertModules(array('contact'), FALSE);
+    $this->assertText(t('You must enable the Poll, PHP Filter modules to install Contact.'), t('Dependency chain created.'));
     $edit['modules[Core][poll][enable]'] = 'poll';
     $edit['modules[Core][php][enable]'] = 'php';
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('forum', 'poll', 'php'), TRUE);
+    $this->assertModules(array('contact', 'poll', 'php'), TRUE);
 
     // Check the actual order which is saved by module_test_modules_enabled().
     $this->assertIdentical(variable_get('test_module_enable_order', FALSE), $expected_order, t('Modules enabled in the correct order.'));
@@ -494,31 +494,33 @@ class ModuleDependencyTestCase extends ModuleTestCase {
    * Tests attempting to uninstall a module that has installed dependents.
    */
   function testUninstallDependents() {
-    // Enable the forum module.
-    $edit = array('modules[Core][forum][enable]' => 'forum');
+    // Enable both language and locale modules.
+    $edit = array('modules[Core][language][enable]' => 'language');
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('forum'), TRUE);
+    $this->assertModules(array('language'), TRUE);
+    $edit = array('modules[Core][locale][enable]' => 'locale');
+    $this->drupalPost('admin/modules', $edit, t('Save configuration'));
+    $this->assertModules(array('locale'), TRUE);
 
-    // Disable forum and comment. Both should now be installed but disabled.
-    $edit = array('modules[Core][forum][enable]' => FALSE);
+    // Disable locale and language. Both should now be installed but disabled.
+    $edit = array('modules[Core][locale][enable]' => FALSE);
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('forum'), FALSE);
-    $edit = array('modules[Core][comment][enable]' => FALSE);
+    $this->assertModules(array('locale'), FALSE);
+    $edit = array('modules[Core][language][enable]' => FALSE);
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('comment'), FALSE);
+    $this->assertModules(array('language'), FALSE);
 
-    // Check that the taxonomy module cannot be uninstalled.
+    // Check that the language module cannot be uninstalled.
     $this->drupalGet('admin/modules/uninstall');
-    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="uninstall[comment]"]');
-    $this->assert(count($checkbox) == 1, t('Checkbox for uninstalling the comment module is disabled.'));
+    $checkbox = $this->xpath('//input[@type="checkbox" and @disabled="disabled" and @name="uninstall[language]"]');
+    $this->assert(count($checkbox) == 1, t('Checkbox for uninstalling the language module is disabled.'));
 
-    // Uninstall the forum module, and check that taxonomy now can also be
-    // uninstalled.
-    $edit = array('uninstall[forum]' => 'forum');
+    // Uninstall the locale module, check that language then can be uninstalled.
+    $edit = array('uninstall[locale]' => 'locale');
     $this->drupalPost('admin/modules/uninstall', $edit, t('Uninstall'));
     $this->drupalPost(NULL, NULL, t('Uninstall'));
     $this->assertText(t('The selected modules have been uninstalled.'), t('Modules status has been updated.'));
-    $edit = array('uninstall[comment]' => 'comment');
+    $edit = array('uninstall[language]' => 'language');
     $this->drupalPost('admin/modules/uninstall', $edit, t('Uninstall'));
     $this->drupalPost(NULL, NULL, t('Uninstall'));
     $this->assertText(t('The selected modules have been uninstalled.'), t('Modules status has been updated.'));
