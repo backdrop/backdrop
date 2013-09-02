@@ -116,9 +116,7 @@ class BootstrapPageCacheTestCase extends DrupalWebTestCase {
    * Test support for requests containing If-Modified-Since and If-None-Match headers.
    */
   function testConditionalRequests() {
-    $config = config('system.performance');
-    $config->set('cache', 1);
-    $config->save();
+    variable_set('cache', 1);
 
     // Fill the cache.
     $this->drupalGet('');
@@ -156,9 +154,7 @@ class BootstrapPageCacheTestCase extends DrupalWebTestCase {
    * Test cache headers.
    */
   function testPageCache() {
-    $config = config('system.performance');
-    $config->set('cache', 1);
-    $config->save();
+    variable_set('cache', 1);
 
     // Fill the cache.
     $this->drupalGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')));
@@ -202,9 +198,7 @@ class BootstrapPageCacheTestCase extends DrupalWebTestCase {
    * mod_deflate Apache module.
    */
   function testPageCompression() {
-    $config = config('system.performance');
-    $config->set('cache', 1);
-    $config->save();
+    variable_set('cache', 1);
 
     // Fill the cache and verify that output is compressed.
     $this->drupalGet('', array(), array('Accept-Encoding: gzip,deflate'));
@@ -297,18 +291,14 @@ class HookBootExitTestCase extends DrupalWebTestCase {
    */
   function testHookBootExit() {
     // Test with cache disabled. Boot and exit should always fire.
-    $config = config('system.performance');
-    $config->set('cache', 0);
-    $config->save();
-
+    variable_set('cache', 0);
     $this->drupalGet('');
     $calls = 1;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with disabled cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with disabled cache.'));
 
     // Test with normal cache. Boot and exit should be called.
-    $config->set('cache', 1);
-    $config->save();
+    variable_set('cache', 1);
     $this->drupalGet('');
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));
