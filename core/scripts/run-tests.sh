@@ -13,7 +13,7 @@ list($args, $count) = simpletest_script_parse_args();
 
 if ($args['help'] || $count == 0) {
   simpletest_script_help();
-  exit;
+  exit(0);
 }
 
 if ($args['execute-test']) {
@@ -30,7 +30,7 @@ else {
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 if (!module_exists('simpletest')) {
   simpletest_script_print_error("The simpletest module must be enabled before this script can run.");
-  exit;
+  exit(1);
 }
 
 if ($args['clean']) {
@@ -43,7 +43,7 @@ if ($args['clean']) {
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
-  exit;
+  exit(0);
 }
 
 // Load SimpleTest files.
@@ -64,7 +64,7 @@ if ($args['list']) {
       echo " - " . $info['name'] . ' (' . $class . ')' . "\n";
     }
   }
-  exit;
+  exit(0);
 }
 
 $test_list = simpletest_script_get_test_list();
@@ -89,6 +89,9 @@ simpletest_log_read($test_id, $last_prefix, $last_test_class);
 // Stop the timer.
 simpletest_script_reporter_timer_stop();
 
+$status_code = simpletest_script_result_status_code();
+
+
 // Display results before database is cleared.
 simpletest_script_reporter_display_results();
 
@@ -100,7 +103,7 @@ if ($args['xml']) {
 simpletest_clean_results_table($test_id);
 
 // Test complete, exit.
-exit;
+exit($status_code);
 
 /**
  * Print help text.
@@ -223,7 +226,7 @@ function simpletest_script_parse_args() {
       else {
         // Argument not found in list.
         simpletest_script_print_error("Unknown argument '$arg'.");
-        exit;
+        exit(1);
       }
     }
     else {
@@ -236,7 +239,7 @@ function simpletest_script_parse_args() {
   // Validate the concurrency argument
   if (!is_numeric($args['concurrency']) || $args['concurrency'] <= 0) {
     simpletest_script_print_error("--concurrency must be a strictly positive integer.");
-    exit;
+    exit(1);
   }
 
   return array($args, $count);
@@ -266,7 +269,7 @@ function simpletest_script_init($server_software) {
   else {
     simpletest_script_print_error('Unable to automatically determine the path to the PHP interpreter. Supply the --php command line argument.');
     simpletest_script_help();
-    exit();
+    exit(0);
   }
 
   // Get url from arguments.
@@ -325,8 +328,8 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
       $process = proc_open($command, array(), $pipes, NULL, NULL, array('bypass_shell' => TRUE));
 
       if (!is_resource($process)) {
-        echo "Unable to fork test process. Aborting.\n";
-        exit;
+        simpletest_script_print_error('Unable to fork test process. Aborting.');
+        exit(1);
       }
 
       // Register our new child.
@@ -347,7 +350,7 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
         // The child exited, unregister it.
         proc_close($child['process']);
         if ($status['exitcode']) {
-          echo 'FATAL ' . $test_class . ': test runner returned a non-zero error code (' . $status['exitcode'] . ').' . "\n";
+          simpletest_script_print_error('FATAL ' . $test_class . ': test runner returned a non-zero error code (' . $status['exitcode'] . ').');
         }
         unset($children[$cid]);
       }
@@ -370,13 +373,13 @@ function simpletest_script_run_one_test($test_id, $test_class) {
     $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
     $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
     $status = ($had_fails || $had_exceptions ? 'fail' : 'pass');
-    simpletest_script_print($info['name'] . ' ' . _simpletest_format_summary_line($test->results) . "\n", simpletest_script_color_code($status));
+    simpletest_script_print($info['name'] . ' ' . _simpletest_format_summary_line($test->results) . "\n", $status);
 
     // Finished, kill this runner.
     exit(0);
   }
   catch (Exception $e) {
-    echo (string) $e;
+    simpletest_script_print_error((string) $e);
     exit(1);
   }
 }
@@ -453,7 +456,7 @@ function simpletest_script_get_test_list() {
 
   if (empty($test_list)) {
     simpletest_script_print_error('No valid tests were specified.');
-    exit;
+    exit(0);
   }
   return $test_list;
 }
@@ -579,6 +582,16 @@ function simpletest_script_reporter_timer_stop() {
 }
 
 /**
+ * Check if this test run had any failures.
+ */
+function simpletest_script_result_status_code() {
+  global $args, $test_id, $results_map;
+
+  $errorCount = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND (status = :exception OR status = :error)", array(':test_id' => $test_id, ':exception' => 'exception', ':error' => 'error'))->fetchField();
+  return $errorCount > 0 ? 1 : 0;
+}
+
+/**
  * Display test results.
  */
 function simpletest_script_reporter_display_results() {
@@ -621,7 +634,7 @@ function simpletest_script_format_result($result) {
   $summary = sprintf("%-9.9s %-10.10s %-17.17s %4.4s %-35.35s\n",
     $results_map[$result->status], $result->message_group, basename($result->file), $result->line, $result->function);
 
-  simpletest_script_print($summary, simpletest_script_color_code($result->status));
+  simpletest_script_print($summary, $result->status);
 
   $lines = explode("\n", wordwrap(trim(strip_tags($result->message)), 76));
   foreach ($lines as $line) {
@@ -630,13 +643,13 @@ function simpletest_script_format_result($result) {
 }
 
 /**
- * Print error message prefixed with "  ERROR: " and displayed in fail color
+ * Print error message prefixed with "ERROR: " and displayed in fail color
  * if color output is enabled.
  *
  * @param $message The message to print.
  */
 function simpletest_script_print_error($message) {
-  simpletest_script_print("  ERROR: $message\n", SIMPLETEST_SCRIPT_COLOR_FAIL);
+  simpletest_script_print("ERROR: $message\n", 'fail');
 }
 
 /**
@@ -644,12 +657,21 @@ function simpletest_script_print_error($message) {
  * color code will be used.
  *
  * @param $message The message to print.
- * @param $color_code The color code to use for coloring.
+ * @param $status One of the following:
+ *   - pass
+ *   - debug
+ *   - exception
+ *   - fail
  */
-function simpletest_script_print($message, $color_code) {
+function simpletest_script_print($message, $status) {
   global $args;
   if ($args['color']) {
-    echo "\033[" . $color_code . "m" . $message . "\033[0m";
+    $color_code = simpletest_script_color_code($status);
+    $message = "\033[" . $color_code . "m" . $message . "\033[0m";
+  }
+  // For fails and exceptions, print to the error log.
+  if ($status === 'fail' || $status === 'exception') {
+    fwrite(STDERR, $message);
   }
   else {
     echo $message;
