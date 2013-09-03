@@ -75,37 +75,6 @@ function system_admin_menu_block_page() {
 }
 
 /**
- * Menu callback; prints a listing of admin tasks, organized by module.
- */
-function system_admin_index() {
-  $module_info = system_get_info('module');
-  foreach ($module_info as $module => $info) {
-    $module_info[$module] = new stdClass();
-    $module_info[$module]->info = $info;
-  }
-  uasort($module_info, 'system_sort_modules_by_info_name');
-  $menu_items = array();
-
-  foreach ($module_info as $module => $info) {
-    // Only display a section if there are any available tasks.
-    if ($admin_tasks = system_get_module_admin_tasks($module, $info->info)) {
-      // Sort links by title.
-      uasort($admin_tasks, 'drupal_sort_title');
-      // Move 'Configure permissions' links to the bottom of each section.
-      $permission_key = "admin/people/permissions#module-$module";
-      if (isset($admin_tasks[$permission_key])) {
-        $permission_task = $admin_tasks[$permission_key];
-        unset($admin_tasks[$permission_key]);
-        $admin_tasks[$permission_key] = $permission_task;
-      }
-
-      $menu_items[$info->info['name']] = array($info->info['description'], $admin_tasks);
-    }
-  }
-  return theme('system_admin_index', array('menu_items' => $menu_items));
-}
-
-/**
  * Menu callback; displays a listing of all themes.
  */
 function system_themes_page() {
@@ -2459,58 +2428,6 @@ function theme_admin_page($variables) {
     $output .= '</div>';
   }
   $output .= '</div>';
-  return $output;
-}
-
-/**
- * Returns HTML for the output of the dashboard page.
- *
- * @param $variables
- *   An associative array containing:
- *   - menu_items: An array of modules to be displayed.
- *
- * @ingroup themeable
- */
-function theme_system_admin_index($variables) {
-  $menu_items = $variables['menu_items'];
-
-  $stripe = 0;
-  $container = array('left' => '', 'right' => '');
-  $flip = array('left' => 'right', 'right' => 'left');
-  $position = 'left';
-
-  // Iterate over all modules.
-  foreach ($menu_items as $module => $block) {
-    list($description, $items) = $block;
-
-    // Output links.
-    if (count($items)) {
-      $block = array();
-      $block['title'] = $module;
-      $block['content'] = theme('admin_block_content', array('content' => $items));
-      $block['description'] = t($description);
-      $block['show'] = TRUE;
-
-      if ($block_output = theme('admin_block', array('block' => $block))) {
-        if (!isset($block['position'])) {
-          // Perform automatic striping.
-          $block['position'] = $position;
-          $position = $flip[$position];
-        }
-        $container[$block['position']] .= $block_output;
-      }
-    }
-  }
-
-  $output = '<div class="admin clearfix">';
-  $output .= theme('system_compact_link');
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
-    $output .= '</div>';
-  }
-  $output .= '</div>';
-
   return $output;
 }
 
