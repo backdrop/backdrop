@@ -966,14 +966,6 @@ div.add-or-remove-shortcuts {
   padding: 0 5px 5px 0; /* LTR */
 }
 
-/* User login block */
-#user-login-form .openid-links {
-  margin-left: 0; /* LTR */
-}
-#user-login-form .openid-links .user-link {
-  margin-left: 1.5em; /* LTR */
-}
-
 /* Disable overlay message */
 #overlay-disable-message {
   background-color: #addafc;
