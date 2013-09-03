@@ -188,6 +188,10 @@ function system_theme() {
       'variables' => array('content' => NULL),
       'file' => 'system.admin.inc',
     ),
+    'system_admin_index' => array(
+      'variables' => array('menu_items' => NULL),
+      'file' => 'system.admin.inc',
+    ),
     'system_powered_by' => array(
       'variables' => array(),
     ),
