@@ -443,7 +443,7 @@ abstract class DrupalTestCase {
   /**
    * Logs verbose message in a text file.
    *
-   * The a link to the vebose message will be placed in the test results via
+   * The a link to the verbose message will be placed in the test results via
    * as a passing assertion with the text '[verbose message]'.
    *
    * @param $message
@@ -705,6 +705,13 @@ class DrupalUnitTestCase extends DrupalTestCase {
 
     // Store necessary current values before switching to the test environment.
     $this->originalFileDirectory = variable_get('file_public_path', conf_path() . '/files');
+
+    // Generate a temporary prefixed database to ensure that tests have a clean starting point.
+    $this->databasePrefix = 'simpletest' . mt_rand(1000, 1000000);
+    db_update('simpletest_test_id')
+      ->fields(array('last_prefix' => $this->databasePrefix))
+      ->condition('test_id', $this->testId)
+      ->execute();
 
     // Reset all statics so that test is performed with a clean environment.
     drupal_static_reset();
