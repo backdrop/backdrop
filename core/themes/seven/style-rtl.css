@@ -223,11 +223,3 @@ div.add-or-remove-shortcuts {
 #block-node-recent .more-link {
   padding: 0 0 5px 5px;
 }
-
-/* User login block */
-#user-login-form .openid-links {
-  margin-right: 0;
-}
-#user-login-form .openid-links .user-link {
-  margin-right: 1.5em;
-}
