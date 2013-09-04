@@ -2463,7 +2463,7 @@ function theme_admin_page($variables) {
 }
 
 /**
- * Returns HTML for the output of the dashboard page.
+ * Returns HTML for the output of admin index page.
  *
  * @param $variables
  *   An associative array containing:
