@@ -18,7 +18,7 @@ class DashboardBlocksTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp();
+    parent::setUp('dashboard');
 
     // Create and log in an administrative user having access to the dashboard.
     $admin_user = $this->drupalCreateUser(array('access dashboard', 'administer blocks', 'access administration pages', 'administer modules'));
