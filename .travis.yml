@@ -36,4 +36,4 @@ before_script:
   - drush si --db-url=mysql://travis:@localhost/backdrop -y
   - chmod go-w sites/default
   - drush en simpletest -y
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --all
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --verbose SimpleTest
