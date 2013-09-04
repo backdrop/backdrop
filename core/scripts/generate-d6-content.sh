@@ -22,7 +22,7 @@ $_SERVER['REQUEST_METHOD']  = 'GET';
 $_SERVER['QUERY_STRING']    = '';
 $_SERVER['PHP_SELF']        = $_SERVER['REQUEST_URI'] = '/';
 $_SERVER['HTTP_USER_AGENT'] = 'console';
-$modules_to_enable          = array('path', 'poll');
+$modules_to_enable          = array('path');
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
@@ -141,47 +141,6 @@ for ($i = 0; $i < 24; $i++) {
     $node->log = "added $i revision";
     $node->taxonomy = $node_terms;
     node_save($node);
-  }
-}
-
-// Create poll content
-for ($i = 0; $i < 12; $i++) {
-  $uid = intval($i / 4) + 3;
-  $user = user_load($uid);
-  $node = new stdClass();
-  $node->uid = $uid;
-  $node->type = 'poll';
-  $node->sticky = 0;
-  $node->title = "poll title $i";
-  $type = node_get_types('type', $node->type);
-  if ($type->has_body) {
-    $node->body = str_repeat("node body ($node->type) - $i", 100);
-    $node->teaser = node_teaser($node->body);
-    $node->filter = variable_get('filter_default_format', 1);
-    $node->format = FILTER_FORMAT_DEFAULT;
-  }
-  $node->status = intval($i / 2) % 2;
-  $node->language = '';
-  $node->revision = 1;
-  $node->promote = $i % 2;
-  $node->created = $now + $i * 43200;
-  $node->log = "added $i poll";
-
-  $nbchoices = ($i % 4) + 2;
-  for ($c = 0; $c < $nbchoices; $c++) {
-    $node->choice[] = array('chtext' => "Choice $c for poll $i");
-  }
-  node_save($node);
-  path_set_alias("node/$node->nid", "content/poll/$i");
-  path_set_alias("node/$node->nid/results", "content/poll/$i/results");
-
-  // Add some votes
-  for ($v = 0; $v < ($i % 4) + 5; $v++) {
-    $c = $v % $nbchoices;
-    $form_state = array();
-    $form_state['values']['choice'] = $c;
-    $form_state['values']['op'] = t('Vote');
-    drupal_execute('poll_view_voting', $form_state, $node);
   }
 }
 

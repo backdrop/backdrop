@@ -28,7 +28,7 @@ class HelpTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('poll');
+    parent::setUp('dblog');
 
     $this->getModuleList();
 
