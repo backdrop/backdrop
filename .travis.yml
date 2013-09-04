@@ -11,6 +11,7 @@ before_script:
   - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
   - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
   - sudo apachectl restart
+  - sudo find / -name error.log
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
@@ -36,4 +37,8 @@ before_script:
   - drush si --db-url=mysql://travis:@localhost/backdrop -y
   - chmod go-w sites/default
   - drush en simpletest -y
+  - sudo find / -name error.log
 script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --verbose SimpleTest
+after_failure:
+  - echo "Failures detected. Outputing additional"
+  - sudo cat /var/log/apache2/error.log
