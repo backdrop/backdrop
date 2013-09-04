@@ -23,7 +23,7 @@ $_SERVER['REQUEST_METHOD']  = 'GET';
 $_SERVER['QUERY_STRING']    = '';
 $_SERVER['PHP_SELF']        = $_SERVER['REQUEST_URI'] = '/';
 $_SERVER['HTTP_USER_AGENT'] = 'console';
-$modules_to_enable          = array('path', 'poll', 'taxonomy');
+$modules_to_enable          = array('path', 'taxonomy');
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
@@ -211,52 +211,6 @@ for ($i = 0; $i < 24; $i++) {
       $node->{$field_name}[LANGUAGE_NONE][] = array('tid' => $tid);
     }
     node_save($node);
-  }
-}
-
-// Create poll content
-for ($i = 0; $i < 12; $i++) {
-  $uid = intval($i / 4) + 3;
-  $user = user_load($uid);
-  $node = new stdClass();
-  $node->uid = $uid;
-  $node->type = 'poll';
-  $node->sticky = 0;
-  $node->title = "poll title $i";
-  $node->language = LANGUAGE_NONE;
-  $node->status = intval($i / 2) % 2;
-  $node->revision = 1;
-  $node->promote = $i % 2;
-  $node->created = REQUEST_TIME + $i * 43200;
-  $node->runtime = 0;
-  $node->active = 1;
-  $node->log = "added $i poll";
-  $node->path = array('alias' => "content/poll/$i");
-
-  $nbchoices = ($i % 4) + 2;
-  for ($c = 0; $c < $nbchoices; $c++) {
-    $node->choice[] = array('chtext' => "Choice $c for poll $i", 'chvotes' => 0, 'weight' => 0);
-  }
-  node_save($node);
-  $path = array(
-    'alias' => "content/poll/$i/results",
-    'source' => "node/$node->nid/results",
-  );
-  path_save($path);
-
-  // Add some votes
-  $node = node_load($node->nid);
-  $choices = array_keys($node->choice);
-  $original_user = $GLOBALS['user'];
-  for ($v = 0; $v < ($i % 4); $v++) {
-    drupal_static_reset('ip_address');
-    $_SERVER['REMOTE_ADDR'] = "127.0.$v.1";
-    $GLOBALS['user'] = drupal_anonymous_user();// We should have already allowed anon to vote.
-    $c = $v % $nbchoices;
-    $form_state = array();
-    $form_state['values']['choice'] = $choices[$c];
-    $form_state['values']['op'] = t('Vote');
-    drupal_form_submit('poll_view_voting', $form_state, $node);
   }
 }
 
