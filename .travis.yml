@@ -37,7 +37,7 @@ before_script:
   - chmod go-w sites/default
   - drush en simpletest -y
   - sudo find / -name error.log
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --verbose SimpleTest
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --all
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - sudo cat /var/log/apache2/error.log
