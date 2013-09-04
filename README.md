@@ -31,12 +31,21 @@ Installation
 
 3. Follow the instructions provided in the installer.
 
+Bug Reports and Feature Requests
+--------------------------------
+Because of Github restrictions on the use of labels and issue assignment,
+we use a separate issue tracker that is not under the main repository at
+https://github.com/backdrop/backdrop-issues/issues. Please use this tracker
+for reporting all bugs and features.
+
 Developers
 ----------
 Backdrop is a fork of Drupal. It is an experiment in preserving the legacy
 audience of developers who value ease of use and ease of learning over
-architectural flexibility. You can join Backdrop's developer community at
-https://github.com/backdrop/backdrop
+architectural flexibility. You can join Backdrop's developer community by
+forking Backdrop from https://github.com/backdrop/backdrop. If submitting
+a pull request, please open an issue using the issue tracker first and
+then reference it in the title of the pull request.
 
 [![Build Status](https://travis-ci.org/backdrop/backdrop.png)](https://travis-ci.org/backdrop/backdrop)
 
