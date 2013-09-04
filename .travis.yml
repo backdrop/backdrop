@@ -6,7 +6,7 @@ php:
 before_script:
   # Install Apache and FastCGI extension to connect to PHP-FPM.
   - sudo apt-get update > /dev/null
-  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  - sudo apt-get install apache2 libapache2-mod-fastcgi > /dev/null
   - sudo a2enmod rewrite actions fastcgi alias
   - sudo cp -f core/misc/travis-ci/vhost.conf /etc/apache2/sites-available/default
   - sudo sed -i -e "s,/var/www,`pwd`,g" /etc/apache2/sites-available/default
@@ -14,8 +14,8 @@ before_script:
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
-  - sudo cp /home/travis/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default /home/travis/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
-  - /home/travis/.phpenv/versions/`php -r "print PHP_VERSION;"`/sbin/php-fpm
+  - sudo cp $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
+  - $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/sbin/php-fpm
 
   # Install Drush. Newer drush versions won't run site-install because Backdrop
   # doesn't match expectations about Drupal 7/8 versions. Drush 5.7 doesn't
@@ -37,3 +37,7 @@ before_script:
   - chmod go-w sites/default
   - drush en simpletest -y
 script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --all
+after_failure:
+  - echo "Failures detected. Outputing additional logs:"
+  - sudo cat /var/log/apache2/error.log
+  - sudo cat /var/log/mysql/error.log
