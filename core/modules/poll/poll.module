@@ -979,18 +979,3 @@ function poll_user_predelete($account) {
     ->condition('uid', $account->uid)
     ->execute();
 }
-
-/**
- * Implements hook_rdf_mapping().
- */
-function poll_rdf_mapping() {
-  return array(
-    array(
-      'type' => 'node',
-      'bundle' => 'poll',
-      'mapping' => array(
-        'rdftype' => array('sioc:Post', 'sioct:Poll'),
-      ),
-    ),
-  );
-}

@@ -1974,23 +1974,6 @@ function format_date($timestamp, $type = 'medium', $format = '', $timezone = NUL
 }
 
 /**
- * Returns an ISO8601 formatted date based on the given date.
- *
- * Callback for use within hook_rdf_mapping() implementations.
- *
- * @param $date
- *   A UNIX timestamp.
- *
- * @return string
- *   An ISO8601 formatted date.
- */
-function date_iso8601($date) {
-  // The DATE_ISO8601 constant cannot be used here because it does not match
-  // date('c') and produces invalid RDF markup.
-  return date('c', $date);
-}
-
-/**
  * Translates a formatted date string.
  *
  * Callback for preg_replace_callback() within format_date().
