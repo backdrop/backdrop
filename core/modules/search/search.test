@@ -437,9 +437,6 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     $this->drupalPost(NULL, $edit, t('Preview'));
     $this->drupalPost(NULL, $edit, t('Save'));
 
-    // Enable counting of statistics.
-    variable_set('statistics_count_content_views', 1);
-
     // Then View one of the nodes a bunch of times.
     for ($i = 0; $i < 5; $i ++) {
       $this->drupalGet('node/' . $nodes['views'][1]->nid);
