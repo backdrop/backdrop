@@ -233,7 +233,7 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
           'description' => '',
           'show_label' => FALSE,
           'label_element' => 'h3',
-          'effect' => 'none',
+          'effect' => 'blink',
           'speed' => 'fast',
         ),
         'formatter' => 'open',
@@ -245,18 +245,27 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     $this->drupalGet('node/' . $this->node->nid);
 
     // Test group ids and classes.
-    $this->assertRaw('id="wrapper-id"', t('Wrapper id set on wrapper div'));
-    $this->assertRaw('class="' . $group->group_name . ' test-class', t('Test class set on wrapper div') . 'class="' . $group->group_name . ' test-class');
+    $this->assertFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, t('Wrapper id set on wrapper div'));
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, t('Test class set on wrapper div') . 'class="' . $group->group_name . ' test-class');
 
     // Test group label.
     $this->assertNoRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is not shown'));
 
     // Set show label to true.
     $group->data['format_settings']['instance_settings']['show_label'] = TRUE;
+
     drupal_write_record('field_group', $group, array('identifier'));
-    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
     $this->drupalGet('node/' . $this->node->nid);
     $this->assertRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is shown'));
+
+    // Change to collapsible
+    $group->data['format_settings']['formatter'] = 'collapsible';
+    drupal_write_record('field_group', $group, array('identifier'));
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $this->drupalGet('node/' . $this->node->nid);
+    $this->assertFieldByXPath("//div[contains(@class, 'speed-fast')]", NULL, t('Speed class is set'));
+    $this->assertFieldByXPath("//div[contains(@class, 'effect-blink')]", NULL, t('Effect class is set'));
   }
 
   /**

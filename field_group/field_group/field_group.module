@@ -2091,12 +2091,17 @@ function _field_group_get_html_classes(&$group) {
 
     // Extra required classes for div.
     if ($group->format_type == 'div') {
-      if (!empty($group->format_settings['instance_settings']['effect'])) {
-        $effect = $group->format_settings['instance_settings']['effect'];
-        // Only add effect class when an effect was selected.
-        if ($effect != 'none') {
-          $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
-          $required[] = 'speed-' . $speed . 'effect-' . $effect;
+      if ($group->format_settings['formatter'] != 'open') {
+
+        $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
+        $required[] = 'speed-' . $speed;
+
+        if (!empty($group->format_settings['instance_settings']['effect'])) {
+          $effect = $group->format_settings['instance_settings']['effect'];
+          // Only add effect class when an effect was selected.
+          if ($effect != 'none') {
+            $required[] = 'effect-' . $effect;
+          }
         }
       }
     }
