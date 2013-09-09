@@ -1866,7 +1866,7 @@ function field_group_build_entity_groups(&$vars, $type) {
   }
 
   // No groups on the entity.
-  if (empty($element['#groups'])) {
+  if (empty($element['#fieldgroups'])) {
     return $element;
   }
 
@@ -1911,7 +1911,7 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
 
   // Create all groups and keep a flat list of references to these groups.
   $group_references = array();
-  foreach ($element['#groups'] as $group_name => $group) {
+  foreach ($element['#fieldgroups'] as $group_name => $group) {
     // Construct own weight, as some fields (for example preprocess fields) don't have weight set.
     $element[$group_name] = array('#child_weight' => -20);
     $group_references[$group_name] = &$element[$group_name];
@@ -1935,7 +1935,7 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
   // parent currently is situated.
   foreach ($element['#group_children'] as $child_name => $parent_name) {
 
-    // Entity beïng viewed
+    // Entity being viewed
     if ($vars) {
       // If not a group, check vars['content'] for empty field.
       if (!isset($element['#groups'][$child_name]) && isset($vars['content'][$child_name])) {
@@ -1953,7 +1953,7 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
         unset($element[$child_name]);
       }
     }
-    // Form beïng viewed
+    // Form being viewed
     else {
 
       // Block denied fields (#access) before they are put in groups.
@@ -1963,7 +1963,7 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
         // If this is a group, we have to use a reference to keep the reference
         // list intact (but if it is a field we don't mind).
         $group_references[$parent_name][$child_name] = &$element[$child_name];
-        $group_references[$parent_name]['#weight'] = $element['#groups'][$parent_name]->weight;
+        $group_references[$parent_name]['#weight'] = $element['#fieldgroups'][$parent_name]->weight;
       }
 
       // The child has been copied to its parent: remove it from the root element.
@@ -1977,7 +1977,7 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
 
   // Bring extra element wrappers to achieve a grouping of fields.
   // This will mainly be prefix and suffix altering.
-  foreach ($element['#groups'] as $group_name => $group) {
+  foreach ($element['#fieldgroups'] as $group_name => $group) {
     field_group_pre_render($group_references[$group_name], $group, $element);
   }
 
