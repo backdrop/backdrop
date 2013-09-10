@@ -294,3 +294,32 @@ function field_group_update_7005() {
   }
 
 }
+
+/**
+ * Save all optional HTML classes for fieldgroups located in features.
+ * If you need the optional classes, recreate feature after this update.
+ * If not, you can revert it.
+ */
+function field_group_update_7006() {
+  ctools_include("export");
+  // Migrate the field groups so they have a unique identifier.
+  $field_groups = ctools_export_load_object("field_group");
+  foreach ($field_groups as $row) {
+
+    // Only update feature field_groups this time.
+    // Don't touch the fieldgroups in db.
+    if ($row->export_type == EXPORT_IN_CODE) {
+      $classes = explode(" ", $row->data['format_settings']['instance_settings']['classes']);
+      $optional_classes = array(str_replace("_", "-", $row->group_name), 'field-group-' . $row->data['format_type']);
+      foreach ($optional_classes as $optional_class) {
+        if (!in_array($optional_class, $classes)) {
+          $classes[] = $optional_class;
+        }
+      }
+      $row->data['format_settings']['instance_settings']['classes'] = implode(" ", $classes);
+      unset($row->id);
+      drupal_write_record('field_group', $row);
+    }
+  }
+
+}
