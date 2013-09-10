@@ -459,7 +459,7 @@ function field_group_field_group_format_settings($group) {
   if (isset($formatter['instance_settings']['required_fields']) && $mode == 'form') {
     $form['instance_settings']['required_fields'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Mark group for required fields.'),
+      '#title' => t('Mark group as required if it contains required fields.'),
       '#default_value' => isset($group->format_settings['instance_settings']['required_fields']) ? $group->format_settings['instance_settings']['required_fields'] : (isset($formatter['instance_settings']['required_fields']) ? $formatter['instance_settings']['required_fields'] : ''),
       '#weight' => 2,
     );
