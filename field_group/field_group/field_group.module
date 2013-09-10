@@ -2096,13 +2096,8 @@ function _field_group_get_html_classes(&$group) {
         $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
         $required[] = 'speed-' . $speed;
 
-        if (!empty($group->format_settings['instance_settings']['effect'])) {
-          $effect = $group->format_settings['instance_settings']['effect'];
-          // Only add effect class when an effect was selected.
-          if ($effect != 'none') {
-            $required[] = 'effect-' . $effect;
-          }
-        }
+        $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+        $required[] = 'effect-' . $effect;
       }
     }
 
