@@ -49,12 +49,12 @@ function language_types_initialize($type) {
  * @see hook_language_types_info().
  */
 function language_types_info() {
-  $language_types = &drupal_static(__FUNCTION__);
+  $language_types = &backdrop_static(__FUNCTION__);
 
   if (!isset($language_types)) {
     $language_types = module_invoke_all('language_types_info');
     // Let other modules alter the list of language types.
-    drupal_alter('language_types_info', $language_types);
+    backdrop_alter('language_types_info', $language_types);
   }
 
   return $language_types;
@@ -78,7 +78,7 @@ function language_types_info() {
  *   An array of language type names.
  */
 function language_types_get_configurable($stored = TRUE) {
-  $configurable = &drupal_static(__FUNCTION__);
+  $configurable = &backdrop_static(__FUNCTION__);
 
   if ($stored && !isset($configurable)) {
     $types = variable_get('language_types', language_types_get_default());
@@ -121,8 +121,8 @@ function language_types_set() {
   // Ensure that we are getting the defined language negotiation information. An
   // invocation of module_enable() or module_disable() could outdate the cached
   // information.
-  drupal_static_reset('language_types_info');
-  drupal_static_reset('language_negotiation_info');
+  backdrop_static_reset('language_types_info');
+  backdrop_static_reset('language_negotiation_info');
 
   // Determine which language types are configurable and which not by checking
   // whether the 'fixed' key is defined. Non-configurable (fixed) language types
@@ -150,7 +150,7 @@ function language_types_set() {
 
   // Ensure that subsequent calls of language_types_get_configurable() return
   // the updated language type information.
-  drupal_static_reset('language_types_get_configurable');
+  backdrop_static_reset('language_types_get_configurable');
 }
 
 /**
@@ -233,7 +233,7 @@ function language_negotiation_get_switch_links($type, $path) {
 
       if (!empty($result)) {
         // Allow modules to provide translations for specific links.
-        drupal_alter('language_switch_links', $result, $type, $path);
+        backdrop_alter('language_switch_links', $result, $type, $path);
         $links = (object) array('links' => $result, 'provider' => $id);
         break;
       }
@@ -250,8 +250,8 @@ function language_negotiation_purge() {
   // Ensure that we are getting the defined language negotiation information. An
   // invocation of module_enable() or module_disable() could outdate the cached
   // information.
-  drupal_static_reset('language_negotiation_info');
-  drupal_static_reset('language_types_info');
+  backdrop_static_reset('language_negotiation_info');
+  backdrop_static_reset('language_types_info');
 
   $defined_providers = language_negotiation_info();
   foreach (language_types_info() as $type => $type_info) {
@@ -321,7 +321,7 @@ function language_negotiation_set($type, $language_providers) {
  *   An array of language providers.
  */
 function language_negotiation_info() {
-  $language_providers = &drupal_static(__FUNCTION__);
+  $language_providers = &backdrop_static(__FUNCTION__);
 
   if (!isset($language_providers)) {
     // Collect all the module-defined language negotiation providers.
@@ -337,7 +337,7 @@ function language_negotiation_info() {
     );
 
     // Let other modules alter the list of language providers.
-    drupal_alter('language_negotiation_info', $language_providers);
+    backdrop_alter('language_negotiation_info', $language_providers);
   }
 
   return $language_providers;
@@ -356,7 +356,7 @@ function language_negotiation_info() {
  *   The language provider's return value.
  */
 function language_provider_invoke($provider_id, $provider = NULL) {
-  $results = &drupal_static(__FUNCTION__);
+  $results = &backdrop_static(__FUNCTION__);
 
   if (!isset($results[$provider_id])) {
     global $user;
@@ -454,7 +454,7 @@ function language_url_split_prefix($path, $languages) {
  *   An array of language codes.
  */
 function language_fallback_get_candidates($type = LANGUAGE_TYPE_CONTENT) {
-  $fallback_candidates = &drupal_static(__FUNCTION__);
+  $fallback_candidates = &backdrop_static(__FUNCTION__);
 
   if (!isset($fallback_candidates)) {
     // Get languages ordered by weight, add LANGUAGE_NONE as the last one.
@@ -462,7 +462,7 @@ function language_fallback_get_candidates($type = LANGUAGE_TYPE_CONTENT) {
     $fallback_candidates[] = LANGUAGE_NONE;
 
     // Let other modules hook in and add/change candidates.
-    drupal_alter('language_fallback_candidates', $fallback_candidates);
+    backdrop_alter('language_fallback_candidates', $fallback_candidates);
   }
 
   return $fallback_candidates;

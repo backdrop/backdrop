@@ -8,13 +8,13 @@
 /**
  * Sets up a base class for the Statistics module.
  */
-class StatisticsTestCase extends DrupalWebTestCase {
+class StatisticsTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('statistics');
 
     // Create user.
-    $this->blocking_user = $this->drupalCreateUser(array(
+    $this->blocking_user = $this->backdropCreateUser(array(
       'access administration pages',
       'access site reports',
       'access statistics',
@@ -23,7 +23,7 @@ class StatisticsTestCase extends DrupalWebTestCase {
       'administer statistics',
       'administer users',
     ));
-    $this->drupalLogin($this->blocking_user);
+    $this->backdropLogin($this->blocking_user);
 
     // Enable access logging.
     variable_set('statistics_enable_access_log', 1);
@@ -48,10 +48,10 @@ class StatisticsTestCase extends DrupalWebTestCase {
 /**
  * Tests that logging via statistics_exit() works for cached and uncached pages.
  *
- * Subclass DrupalWebTestCase rather than StatisticsTestCase, because we want
+ * Subclass BackdropWebTestCase rather than StatisticsTestCase, because we want
  * to test requests from an anonymous user.
  */
-class StatisticsLoggingTestCase extends DrupalWebTestCase {
+class StatisticsLoggingTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Statistics logging tests',
@@ -63,10 +63,10 @@ class StatisticsLoggingTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('statistics');
 
-    $this->auth_user = $this->drupalCreateUser(array('access content', 'create page content', 'edit own page content'));
+    $this->auth_user = $this->backdropCreateUser(array('access content', 'create page content', 'edit own page content'));
 
     // Ensure we have a node page to access.
-    $this->node = $this->drupalCreateNode(array('title' => $this->randomName(255), 'uid' => $this->auth_user->uid));
+    $this->node = $this->backdropCreateNode(array('title' => $this->randomName(255), 'uid' => $this->auth_user->uid));
 
     // Enable page caching.
     variable_set('cache', TRUE);
@@ -91,8 +91,8 @@ class StatisticsLoggingTestCase extends DrupalWebTestCase {
     );
 
     // Verify logging of an uncached page.
-    $this->drupalGet($path);
-    $this->assertIdentical($this->drupalGetHeader('X-Drupal-Cache'), 'MISS', t('Testing an uncached page.'));
+    $this->backdropGet($path);
+    $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', t('Testing an uncached page.'));
     $log = db_query('SELECT * FROM {accesslog}')->fetchAll(PDO::FETCH_ASSOC);
     $this->assertTrue(is_array($log) && count($log) == 1, t('Page request was logged.'));
     $this->assertEqual(array_intersect_key($log[0], $expected), $expected);
@@ -100,8 +100,8 @@ class StatisticsLoggingTestCase extends DrupalWebTestCase {
     $this->assertIdentical($node_counter['totalcount'], '1');
 
     // Verify logging of a cached page.
-    $this->drupalGet($path);
-    $this->assertIdentical($this->drupalGetHeader('X-Drupal-Cache'), 'HIT', t('Testing a cached page.'));
+    $this->backdropGet($path);
+    $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', t('Testing a cached page.'));
     $log = db_query('SELECT * FROM {accesslog}')->fetchAll(PDO::FETCH_ASSOC);
     $this->assertTrue(is_array($log) && count($log) == 2, t('Page request was logged.'));
     $this->assertEqual(array_intersect_key($log[1], $expected), $expected);
@@ -109,8 +109,8 @@ class StatisticsLoggingTestCase extends DrupalWebTestCase {
     $this->assertIdentical($node_counter['totalcount'], '2');
 
     // Test logging from authenticated users
-    $this->drupalLogin($this->auth_user);
-    $this->drupalGet($path);
+    $this->backdropLogin($this->auth_user);
+    $this->backdropGet($path);
     $log = db_query('SELECT * FROM {accesslog}')->fetchAll(PDO::FETCH_ASSOC);
     // Check the 6th item since login and account pages are also logged
     $this->assertTrue(is_array($log) && count($log) == 6, t('Page request was logged.'));
@@ -124,7 +124,7 @@ class StatisticsLoggingTestCase extends DrupalWebTestCase {
       'title' => truncate_utf8(t('Edit Basic page') . ' ' . $this->node->title, 255),
       'path' => $path,
     );
-    $this->drupalGet($path);
+    $this->backdropGet($path);
     $log = db_query('SELECT * FROM {accesslog}')->fetchAll(PDO::FETCH_ASSOC);
     $this->assertTrue(is_array($log) && count($log) == 7, t('Page request was logged.'));
     $this->assertEqual(array_intersect_key($log[6], $expected), $expected);
@@ -133,7 +133,7 @@ class StatisticsLoggingTestCase extends DrupalWebTestCase {
     $long_path = $this->randomName(256);
 
     // Test that the long path is properly truncated when logged.
-    $this->drupalGet($long_path);
+    $this->backdropGet($long_path);
     $log = db_query('SELECT * FROM {accesslog}')->fetchAll(PDO::FETCH_ASSOC);
     $this->assertTrue(is_array($log) && count($log) == 8, 'Page request was logged for a path over 255 characters.');
     $this->assertEqual($log[7]['path'], truncate_utf8($long_path, 255));
@@ -157,7 +157,7 @@ class StatisticsReportsTestCase extends StatisticsTestCase {
    * Verifies that 'Recent hits' renders properly and displays the added hit.
    */
   function testRecentHits() {
-    $this->drupalGet('admin/reports/hits');
+    $this->backdropGet('admin/reports/hits');
     $this->assertText('test', t('Hit title found.'));
     $this->assertText('node/1', t('Hit URL found.'));
     $this->assertText('Anonymous', t('Hit user found.'));
@@ -167,7 +167,7 @@ class StatisticsReportsTestCase extends StatisticsTestCase {
    * Verifies that 'Top pages' renders properly and displays the added hit.
    */
   function testTopPages() {
-    $this->drupalGet('admin/reports/pages');
+    $this->backdropGet('admin/reports/pages');
     $this->assertText('test', t('Hit title found.'));
     $this->assertText('node/1', t('Hit URL found.'));
   }
@@ -176,7 +176,7 @@ class StatisticsReportsTestCase extends StatisticsTestCase {
    * Verifies that 'Top referrers' renders properly and displays the added hit.
    */
   function testTopReferrers() {
-    $this->drupalGet('admin/reports/referrers');
+    $this->backdropGet('admin/reports/referrers');
     $this->assertText('http://example.com', t('Hit referrer found.'));
   }
 
@@ -184,7 +184,7 @@ class StatisticsReportsTestCase extends StatisticsTestCase {
    * Verifies that 'Details' page renders properly and displays the added hit.
    */
   function testDetails() {
-    $this->drupalGet('admin/reports/access/1');
+    $this->backdropGet('admin/reports/access/1');
     $this->assertText('test', t('Hit title found.'));
     $this->assertText('node/1', t('Hit URL found.'));
     $this->assertText('Anonymous', t('Hit user found.'));
@@ -194,8 +194,8 @@ class StatisticsReportsTestCase extends StatisticsTestCase {
    * Verifies that access logging is working and is reported correctly.
    */
   function testAccessLogging() {
-    $this->drupalGet('admin/reports/referrers');
-    $this->drupalGet('admin/reports/hits');
+    $this->backdropGet('admin/reports/referrers');
+    $this->backdropGet('admin/reports/hits');
     $this->assertText('Top referrers in the past 3 days', t('Hit title found.'));
     $this->assertText('admin/reports/referrers', t('Hit URL found.'));
   }
@@ -205,8 +205,8 @@ class StatisticsReportsTestCase extends StatisticsTestCase {
    */
   function testPopularContentBlock() {
     // Visit a node to have something show up in the block.
-    $node = $this->drupalCreateNode(array('type' => 'page', 'uid' => $this->blocking_user->uid));
-    $this->drupalGet('node/' . $node->nid);
+    $node = $this->backdropCreateNode(array('type' => 'page', 'uid' => $this->blocking_user->uid));
+    $this->backdropGet('node/' . $node->nid);
 
     // Configure and save the block.
     $block = block_load('statistics', 'popular');
@@ -218,10 +218,10 @@ class StatisticsReportsTestCase extends StatisticsTestCase {
     $block->visibility = 0;
     $edit = array('statistics_block_top_day_num' => 3, 'statistics_block_top_all_num' => 3, 'statistics_block_top_last_num' => 3);
     module_invoke('statistics', 'block_save', 'popular', $edit);
-    drupal_write_record('block', $block);
+    backdrop_write_record('block', $block);
 
     // Get some page and check if the block is displayed.
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     $this->assertText('Popular content', t('Found the popular content block.'));
     $this->assertText("Today's", t('Found today\'s popular content.'));
     $this->assertText('All time', t('Found the alll time popular content.'));
@@ -252,8 +252,8 @@ class StatisticsBlockVisitorsTestCase extends StatisticsTestCase {
 
     // Verify the IP address from accesslog appears on the top visitors page
     // and that a 'block IP address' link is displayed.
-    $this->drupalLogin($this->blocking_user);
-    $this->drupalGet('admin/reports/visitors');
+    $this->backdropLogin($this->blocking_user);
+    $this->backdropGet('admin/reports/visitors');
     $this->assertText($test_ip_address, t('IP address found.'));
     $this->assertText(t('block IP address'), t('Block IP link displayed'));
 
@@ -262,21 +262,21 @@ class StatisticsBlockVisitorsTestCase extends StatisticsTestCase {
     $this->assertText(t('IP address blocking'), t('IP blocking page displayed.'));
     $edit = array();
     $edit['ip'] = $test_ip_address;
-    $this->drupalPost('admin/config/people/ip-blocking', $edit, t('Add'));
+    $this->backdropPost('admin/config/people/ip-blocking', $edit, t('Add'));
     $ip = db_query("SELECT iid from {blocked_ips} WHERE ip = :ip", array(':ip' => $edit['ip']))->fetchField();
     $this->assertNotEqual($ip, FALSE, t('IP address found in database'));
     $this->assertRaw(t('The IP address %ip has been blocked.', array('%ip' => $edit['ip'])), t('IP address was blocked.'));
 
     // Verify that the block/unblock link on the top visitors page has been
     // altered.
-    $this->drupalGet('admin/reports/visitors');
+    $this->backdropGet('admin/reports/visitors');
     $this->assertText(t('unblock IP address'), t('Unblock IP address link displayed'));
 
     // Unblock the IP address.
     $this->clickLink('unblock IP address');
     $this->assertRaw(t('Are you sure you want to delete %ip?', array('%ip' => $test_ip_address)), t('IP address deletion confirmation found.'));
     $edit = array();
-    $this->drupalPost('admin/config/people/ip-blocking/delete/1', NULL, t('Delete'));
+    $this->backdropPost('admin/config/people/ip-blocking/delete/1', NULL, t('Delete'));
     $this->assertRaw(t('The IP address %ip was deleted.', array('%ip' => $test_ip_address)), t('IP address deleted.'));
   }
 }
@@ -284,7 +284,7 @@ class StatisticsBlockVisitorsTestCase extends StatisticsTestCase {
 /**
  * Test statistics administration screen.
  */
-class StatisticsAdminTestCase extends DrupalWebTestCase {
+class StatisticsAdminTestCase extends BackdropWebTestCase {
   protected $privileged_user;
   protected $test_node;
 
@@ -298,9 +298,9 @@ class StatisticsAdminTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('statistics');
-    $this->privileged_user = $this->drupalCreateUser(array('access statistics', 'administer statistics', 'view post access counter', 'create page content'));
-    $this->drupalLogin($this->privileged_user);
-    $this->test_node = $this->drupalCreateNode(array('type' => 'page', 'uid' => $this->privileged_user->uid));
+    $this->privileged_user = $this->backdropCreateUser(array('access statistics', 'administer statistics', 'view post access counter', 'create page content'));
+    $this->backdropLogin($this->privileged_user);
+    $this->test_node = $this->backdropCreateNode(array('type' => 'page', 'uid' => $this->privileged_user->uid));
   }
 
   /**
@@ -310,28 +310,28 @@ class StatisticsAdminTestCase extends DrupalWebTestCase {
     $this->assertFalse(variable_get('statistics_enable_access_log', 0), t('Access log is disabled by default.'));
     $this->assertFalse(variable_get('statistics_count_content_views', 0), t('Count content view log is disabled by default.'));
 
-    $this->drupalGet('admin/reports/pages');
+    $this->backdropGet('admin/reports/pages');
     $this->assertRaw(t('No statistics available.'), t('Verifying text shown when no statistics is available.'));
 
     // Enable access log and counter on content view.
     $edit['statistics_enable_access_log'] = 1;
     $edit['statistics_count_content_views'] = 1;
-    $this->drupalPost('admin/config/system/statistics', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/system/statistics', $edit, t('Save configuration'));
     $this->assertTrue(variable_get('statistics_enable_access_log'), t('Access log is enabled.'));
     $this->assertTrue(variable_get('statistics_count_content_views'), t('Count content view log is enabled.'));
 
     // Hit the node.
-    $this->drupalGet('node/' . $this->test_node->nid);
+    $this->backdropGet('node/' . $this->test_node->nid);
 
-    $this->drupalGet('admin/reports/pages');
+    $this->backdropGet('admin/reports/pages');
     $this->assertText('node/1', t('Test node found.'));
 
     // Hit the node again (the counter is incremented after the hit, so
     // "1 view" will actually be shown when the node is hit the second time).
-    $this->drupalGet('node/' . $this->test_node->nid);
+    $this->backdropGet('node/' . $this->test_node->nid);
     $this->assertText('1 view', t('Node is viewed once.'));
 
-    $this->drupalGet('node/' . $this->test_node->nid);
+    $this->backdropGet('node/' . $this->test_node->nid);
     $this->assertText('2 views', t('Node is viewed 2 times.'));
   }
 
@@ -341,7 +341,7 @@ class StatisticsAdminTestCase extends DrupalWebTestCase {
   function testDeleteNode() {
     variable_set('statistics_count_content_views', 1);
 
-    $this->drupalGet('node/' . $this->test_node->nid);
+    $this->backdropGet('node/' . $this->test_node->nid);
 
     $result = db_select('node_counter', 'n')
       ->fields('n', array('nid'))
@@ -367,23 +367,23 @@ class StatisticsAdminTestCase extends DrupalWebTestCase {
     variable_set('statistics_enable_access_log', 1);
 
     variable_set('user_cancel_method', 'user_cancel_delete');
-    $this->drupalLogout($this->privileged_user);
-    $account = $this->drupalCreateUser(array('access content', 'cancel account'));
-    $this->drupalLogin($account);
-    $this->drupalGet('node/' . $this->test_node->nid);
+    $this->backdropLogout($this->privileged_user);
+    $account = $this->backdropCreateUser(array('access content', 'cancel account'));
+    $this->backdropLogin($account);
+    $this->backdropGet('node/' . $this->test_node->nid);
 
     $account = user_load($account->uid, TRUE);
 
-    $this->drupalGet('user/' . $account->uid . '/edit');
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
 
     $timestamp = time();
-    $this->drupalPost(NULL, NULL, t('Cancel account'));
+    $this->backdropPost(NULL, NULL, t('Cancel account'));
     // Confirm account cancellation request.
-    $this->drupalGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login));
     $this->assertFalse(user_load($account->uid, TRUE), t('User is not found in the database.'));
 
-    $this->drupalGet('admin/reports/visitors');
+    $this->backdropGet('admin/reports/visitors');
     $this->assertNoText($account->name, t('Did not find user in visitor statistics.'));
   }
 
@@ -396,11 +396,11 @@ class StatisticsAdminTestCase extends DrupalWebTestCase {
     variable_set('statistics_day_timestamp', 8640000);
     variable_set('statistics_flush_accesslog_timer', 1);
 
-    $this->drupalGet('node/' . $this->test_node->nid);
-    $this->drupalGet('node/' . $this->test_node->nid);
+    $this->backdropGet('node/' . $this->test_node->nid);
+    $this->backdropGet('node/' . $this->test_node->nid);
     $this->assertText('1 view', t('Node is viewed once.'));
 
-    $this->drupalGet('admin/reports/pages');
+    $this->backdropGet('admin/reports/pages');
     $this->assertText('node/' . $this->test_node->nid, t('Hit URL found.'));
 
     // statistics_cron will subtract the statistics_flush_accesslog_timer
@@ -409,7 +409,7 @@ class StatisticsAdminTestCase extends DrupalWebTestCase {
     sleep(2);
     $this->cronRun();
 
-    $this->drupalGet('admin/reports/pages');
+    $this->backdropGet('admin/reports/pages');
     $this->assertNoText('node/' . $this->test_node->nid, t('No hit URL found.'));
 
     $result = db_select('node_counter', 'nc')
@@ -440,12 +440,12 @@ class StatisticsTokenReplaceTestCase extends StatisticsTestCase {
     global $language_interface;
 
     // Create user and node.
-    $user = $this->drupalCreateUser(array('create page content'));
-    $this->drupalLogin($user);
-    $node = $this->drupalCreateNode(array('type' => 'page', 'uid' => $user->uid));
+    $user = $this->backdropCreateUser(array('create page content'));
+    $this->backdropLogin($user);
+    $node = $this->backdropCreateNode(array('type' => 'page', 'uid' => $user->uid));
 
     // Hit the node.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $statistics = statistics_get($node->nid);
 
     // Generate and test tokens.

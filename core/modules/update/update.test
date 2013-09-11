@@ -22,7 +22,7 @@
 /**
  * Base class to define some shared functions used by all update tests.
  */
-class UpdateTestHelper extends DrupalWebTestCase {
+class UpdateTestHelper extends BackdropWebTestCase {
   /**
    * Refresh the update status based on the desired available update scenario.
    *
@@ -38,15 +38,15 @@ class UpdateTestHelper extends DrupalWebTestCase {
     // Save the map for update_test_mock_page() to use.
     variable_set('update_test_xml_map', $xml_map);
     // Manually check the update status.
-    $this->drupalGet('admin/reports/updates/check');
+    $this->backdropGet('admin/reports/updates/check');
   }
 
   /**
    * Run a series of assertions that are applicable for all update statuses.
    */
   protected function standardTests() {
-    $this->assertRaw('<h3>' . t('Drupal core') . '</h3>');
-    $this->assertRaw(l(t('Drupal'), 'http://example.com/project/drupal'), t('Link to the Drupal project appears.'));
+    $this->assertRaw('<h3>' . t('Backdrop core') . '</h3>');
+    $this->assertRaw(l(t('Backdrop'), 'http://example.com/project/backdrop'), t('Link to the Backdrop project appears.'));
     $this->assertNoText(t('No available releases found'));
   }
 
@@ -64,8 +64,8 @@ class UpdateCoreTestCase extends UpdateTestHelper {
 
   function setUp() {
     parent::setUp('update_test', 'update');
-    $admin_user = $this->drupalCreateUser(array('administer site configuration', 'administer modules'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer modules'));
+    $this->backdropLogin($admin_user);
   }
 
   /**
@@ -73,7 +73,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    */
   function testNoUpdatesAvailable() {
     $this->setSystemInfo7_0();
-    $this->refreshUpdateStatus(array('drupal' => '0'));
+    $this->refreshUpdateStatus(array('backdrop' => '0'));
     $this->standardTests();
     $this->assertText(t('Up to date'));
     $this->assertNoText(t('Update available'));
@@ -85,14 +85,14 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    */
   function testNormalUpdateAvailable() {
     $this->setSystemInfo7_0();
-    $this->refreshUpdateStatus(array('drupal' => '1'));
+    $this->refreshUpdateStatus(array('backdrop' => '1'));
     $this->standardTests();
     $this->assertNoText(t('Up to date'));
     $this->assertText(t('Update available'));
     $this->assertNoText(t('Security update required!'));
-    $this->assertRaw(l('7.1', 'http://example.com/drupal-7-1-release'), t('Link to release appears.'));
-    $this->assertRaw(l(t('Download'), 'http://example.com/drupal-7-1.tar.gz'), t('Link to download appears.'));
-    $this->assertRaw(l(t('Release notes'), 'http://example.com/drupal-7-1-release'), t('Link to release notes appears.'));
+    $this->assertRaw(l('7.1', 'http://example.com/backdrop-7-1-release'), t('Link to release appears.'));
+    $this->assertRaw(l(t('Download'), 'http://example.com/backdrop-7-1.tar.gz'), t('Link to download appears.'));
+    $this->assertRaw(l(t('Release notes'), 'http://example.com/backdrop-7-1-release'), t('Link to release notes appears.'));
   }
 
   /**
@@ -100,14 +100,14 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    */
   function testSecurityUpdateAvailable() {
     $this->setSystemInfo7_0();
-    $this->refreshUpdateStatus(array('drupal' => '2-sec'));
+    $this->refreshUpdateStatus(array('backdrop' => '2-sec'));
     $this->standardTests();
     $this->assertNoText(t('Up to date'));
     $this->assertNoText(t('Update available'));
     $this->assertText(t('Security update required!'));
-    $this->assertRaw(l('7.2', 'http://example.com/drupal-7-2-release'), t('Link to release appears.'));
-    $this->assertRaw(l(t('Download'), 'http://example.com/drupal-7-2.tar.gz'), t('Link to download appears.'));
-    $this->assertRaw(l(t('Release notes'), 'http://example.com/drupal-7-2-release'), t('Link to release notes appears.'));
+    $this->assertRaw(l('7.2', 'http://example.com/backdrop-7-2-release'), t('Link to release appears.'));
+    $this->assertRaw(l(t('Download'), 'http://example.com/backdrop-7-2.tar.gz'), t('Link to download appears.'));
+    $this->assertRaw(l(t('Release notes'), 'http://example.com/backdrop-7-2-release'), t('Link to release notes appears.'));
   }
 
   /**
@@ -126,7 +126,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
       ),
     );
     variable_set('update_test_system_info', $system_info);
-    $this->refreshUpdateStatus(array('drupal' => 'dev'));
+    $this->refreshUpdateStatus(array('backdrop' => 'dev'));
     $this->assertNoText(t('2001-Sep-'));
     $this->assertText(t('Up to date'));
     $this->assertNoText(t('Update available'));
@@ -139,10 +139,10 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   function testModulePageRunCron() {
     $this->setSystemInfo7_0();
     variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('drupal' => '0'));
+    variable_set('update_test_xml_map', array('backdrop' => '0'));
 
     $this->cronRun();
-    $this->drupalGet('admin/modules');
+    $this->backdropGet('admin/modules');
     $this->assertNoText(t('No update information available.'));
   }
 
@@ -153,14 +153,14 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $this->setSystemInfo7_0();
     // Instead of using refreshUpdateStatus(), set these manually.
     variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('drupal' => '0'));
+    variable_set('update_test_xml_map', array('backdrop' => '0'));
 
-    $this->drupalGet('admin/reports/updates');
+    $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
     $this->assertText(t('Checked available update data for one project.'));
-    $this->drupalGet('admin/modules');
-    $this->assertNoText(t('There are updates available for your version of Drupal.'));
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/modules');
+    $this->assertNoText(t('There are updates available for your version of Backdrop.'));
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
   }
 
   /**
@@ -170,14 +170,14 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $this->setSystemInfo7_0();
     // Instead of using refreshUpdateStatus(), set these manually.
     variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('drupal' => '1'));
+    variable_set('update_test_xml_map', array('backdrop' => '1'));
 
-    $this->drupalGet('admin/reports/updates');
+    $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
     $this->assertText(t('Checked available update data for one project.'));
-    $this->drupalGet('admin/modules');
-    $this->assertText(t('There are updates available for your version of Drupal.'));
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/modules');
+    $this->assertText(t('There are updates available for your version of Backdrop.'));
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
   }
 
   /**
@@ -187,32 +187,32 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $this->setSystemInfo7_0();
     // Instead of using refreshUpdateStatus(), set these manually.
     variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('drupal' => '2-sec'));
+    variable_set('update_test_xml_map', array('backdrop' => '2-sec'));
 
-    $this->drupalGet('admin/reports/updates');
+    $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
     $this->assertText(t('Checked available update data for one project.'));
-    $this->drupalGet('admin/modules');
-    $this->assertNoText(t('There are updates available for your version of Drupal.'));
-    $this->assertText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/modules');
+    $this->assertNoText(t('There are updates available for your version of Backdrop.'));
+    $this->assertText(t('There is a security update available for your version of Backdrop.'));
 
     // Make sure admin/appearance warns you you're missing a security update.
-    $this->drupalGet('admin/appearance');
-    $this->assertNoText(t('There are updates available for your version of Drupal.'));
-    $this->assertText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/appearance');
+    $this->assertNoText(t('There are updates available for your version of Backdrop.'));
+    $this->assertText(t('There is a security update available for your version of Backdrop.'));
 
     // Make sure duplicate messages don't appear on Update status pages.
-    $this->drupalGet('admin/reports/status');
+    $this->backdropGet('admin/reports/status');
     // We're expecting "There is a security update..." inside the status report
-    // itself, but the drupal_set_message() appears as an li so we can prefix
+    // itself, but the backdrop_set_message() appears as an li so we can prefix
     // with that and search for the raw HTML.
-    $this->assertNoRaw('<li>' . t('There is a security update available for your version of Drupal.'));
+    $this->assertNoRaw('<li>' . t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/reports/updates');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/reports/updates');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/reports/updates/settings');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/reports/updates/settings');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
   }
 
   /**
@@ -248,8 +248,8 @@ class UpdateTestContribCase extends UpdateTestHelper {
 
   function setUp() {
     parent::setUp('update_test', 'update', 'aaa_update_test', 'bbb_update_test', 'ccc_update_test');
-    $admin_user = $this->drupalCreateUser(array('administer site configuration'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->backdropLogin($admin_user);
   }
 
   /**
@@ -267,12 +267,12 @@ class UpdateTestContribCase extends UpdateTestHelper {
       ),
     );
     variable_set('update_test_system_info', $system_info);
-    $this->refreshUpdateStatus(array('drupal' => '0', 'aaa_update_test' => 'no-releases'));
-    $this->drupalGet('admin/reports/updates');
+    $this->refreshUpdateStatus(array('backdrop' => '0', 'aaa_update_test' => 'no-releases'));
+    $this->backdropGet('admin/reports/updates');
     // Cannot use $this->standardTests() because we need to check for the
     // 'No available releases found' string.
-    $this->assertRaw('<h3>' . t('Drupal core') . '</h3>');
-    $this->assertRaw(l(t('Drupal'), 'http://example.com/project/drupal'));
+    $this->assertRaw('<h3>' . t('Backdrop core') . '</h3>');
+    $this->assertRaw(l(t('Backdrop'), 'http://example.com/project/backdrop'));
     $this->assertText(t('Up to date'));
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertNoText(t('Update available'));
@@ -297,7 +297,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     variable_set('update_test_system_info', $system_info);
     $this->refreshUpdateStatus(
       array(
-        'drupal' => '0',
+        'backdrop' => '0',
         'aaa_update_test' => '1_0',
       )
     );
@@ -354,7 +354,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
       ),
     );
     variable_set('update_test_system_info', $system_info);
-    $this->refreshUpdateStatus(array('drupal' => '0', '#all' => '1_0'));
+    $this->refreshUpdateStatus(array('backdrop' => '0', '#all' => '1_0'));
     $this->standardTests();
     // We're expecting the report to say all projects are up to date.
     $this->assertText(t('Up to date'));
@@ -377,7 +377,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     // we're really testing that the project listings are in the right order.
     $bbb_project_link = '<div class="project"><a href="http://example.com/project/bbb_update_test">BBB Update test</a>';
     $ccc_project_link = '<div class="project"><a href="http://example.com/project/ccc_update_test">CCC Update test</a>';
-    $this->assertTrue(strpos($this->drupalGetContent(), $bbb_project_link) < strpos($this->drupalGetContent(), $ccc_project_link), "'BBB Update test' project is listed before the 'CCC Update test' project");
+    $this->assertTrue(strpos($this->backdropGetContent(), $bbb_project_link) < strpos($this->backdropGetContent(), $ccc_project_link), "'BBB Update test' project is listed before the 'CCC Update test' project");
   }
 
   /**
@@ -412,7 +412,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     );
     variable_set('update_test_system_info', $system_info);
     $xml_mapping = array(
-      'drupal' => '0',
+      'backdrop' => '0',
       'update_test_subtheme' => '1_0',
       'update_test_basetheme' => '1_1-sec',
     );
@@ -458,7 +458,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     variable_set('update_max_fetch_attempts', 99999);
     variable_set('update_test_system_info', $system_info);
     $xml_mapping = array(
-      'drupal' => '0',
+      'backdrop' => '0',
       'update_test_subtheme' => '1_0',
       'update_test_basetheme' => '1_1-sec',
     );
@@ -509,7 +509,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     variable_set('update_test_system_info', $system_info);
 
     $xml_mapping = array(
-      'drupal' => '0',
+      'backdrop' => '0',
       'aaa_update_test' => '1_0',
       'bbb_update_test' => 'does-not-exist',
       'ccc_update_test' => '1_0',
@@ -549,8 +549,8 @@ class UpdateTestContribCase extends UpdateTestHelper {
    */
   function testHookUpdateStatusAlter() {
     variable_set('allow_authorize_operations', TRUE);
-    $update_admin_user = $this->drupalCreateUser(array('administer site configuration', 'administer software updates'));
-    $this->drupalLogin($update_admin_user);
+    $update_admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer software updates'));
+    $this->backdropLogin($update_admin_user);
 
     $system_info = array(
       '#all' => array(
@@ -571,11 +571,11 @@ class UpdateTestContribCase extends UpdateTestHelper {
     variable_set('update_test_update_status', $update_status);
     $this->refreshUpdateStatus(
       array(
-        'drupal' => '0',
+        'backdrop' => '0',
         'aaa_update_test' => '1_0',
       )
     );
-    $this->drupalGet('admin/reports/updates');
+    $this->backdropGet('admin/reports/updates');
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertText(t('Security update required!'));
     $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), t('Link to aaa_update_test project appears.'));
@@ -583,19 +583,19 @@ class UpdateTestContribCase extends UpdateTestHelper {
     // Visit the reports page again without the altering and make sure the
     // status is back to normal.
     variable_set('update_test_update_status', array());
-    $this->drupalGet('admin/reports/updates');
+    $this->backdropGet('admin/reports/updates');
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertNoText(t('Security update required!'));
     $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), t('Link to aaa_update_test project appears.'));
 
     // Turn the altering back on and visit the Update manager UI.
     variable_set('update_test_update_status', $update_status);
-    $this->drupalGet('admin/modules/update');
+    $this->backdropGet('admin/modules/update');
     $this->assertText(t('Security update'));
 
     // Turn the altering back off and visit the Update manager UI.
     variable_set('update_test_update_status', array());
-    $this->drupalGet('admin/modules/update');
+    $this->backdropGet('admin/modules/update');
     $this->assertNoText(t('Security update'));
   }
 
@@ -613,8 +613,8 @@ class UpdateTestUploadCase extends UpdateTestHelper {
   public function setUp() {
     parent::setUp('update', 'update_test');
     variable_set('allow_authorize_operations', TRUE);
-    $admin_user = $this->drupalCreateUser(array('administer software updates', 'administer site configuration'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer software updates', 'administer site configuration'));
+    $this->backdropLogin($admin_user);
   }
 
   /**
@@ -622,26 +622,26 @@ class UpdateTestUploadCase extends UpdateTestHelper {
    */
   public function testUploadModule() {
     // Images are not valid archives, so get one and try to install it. We
-    // need an extra variable to store the result of drupalGetTestFiles()
+    // need an extra variable to store the result of backdropGetTestFiles()
     // since reset() takes an argument by reference and passing in a constant
     // emits a notice in strict mode.
-    $imageTestFiles = $this->drupalGetTestFiles('image');
+    $imageTestFiles = $this->backdropGetTestFiles('image');
     $invalidArchiveFile = reset($imageTestFiles);
     $edit = array(
       'files[project_upload]' => $invalidArchiveFile->uri,
     );
     // This also checks that the correct archive extensions are allowed.
-    $this->drupalPost('admin/modules/install', $edit, t('Install'));
+    $this->backdropPost('admin/modules/install', $edit, t('Install'));
     $this->assertText(t('Only files with the following extensions are allowed: @archive_extensions.', array('@archive_extensions' => archiver_get_extensions())),'Only valid archives can be uploaded.');
 
     // Check to ensure an existing module can't be reinstalled. Also checks that
     // the archive was extracted since we can't know if the module is already
     // installed until after extraction.
-    $validArchiveFile = drupal_get_path('module', 'update') . '/tests/aaa_update_test.tar.gz';
+    $validArchiveFile = backdrop_get_path('module', 'update') . '/tests/aaa_update_test.tar.gz';
     $edit = array(
       'files[project_upload]' => $validArchiveFile,
     );
-    $this->drupalPost('admin/modules/install', $edit, t('Install'));
+    $this->backdropPost('admin/modules/install', $edit, t('Install'));
     $this->assertText(t('@module_name is already installed.', array('@module_name' => 'AAA Update test')), 'Existing module was extracted and not reinstalled.');
   }
 
@@ -649,7 +649,7 @@ class UpdateTestUploadCase extends UpdateTestHelper {
    * Ensure that archiver extensions are properly merged in the UI.
    */
   function testFileNameExtensionMerging() {
-    $this->drupalGet('admin/modules/install');    
+    $this->backdropGet('admin/modules/install');    
     // Make sure the bogus extension supported by update_test.module is there.
     $this->assertPattern('/file extensions are supported:.*update-test-extension/', t("Found 'update-test-extension' extension"));
     // Make sure it didn't clobber the first option from core.
@@ -667,33 +667,33 @@ class UpdateTestUploadCase extends UpdateTestHelper {
     );
     variable_set('update_test_system_info', $setting);
     variable_set('update_fetch_url', url('update-test', array('absolute' => TRUE)));
-    variable_set('update_test_xml_map', array('drupal' => '2-sec'));
+    variable_set('update_test_xml_map', array('backdrop' => '2-sec'));
     // Initialize the update status.
-    $this->drupalGet('admin/reports/updates');
+    $this->backdropGet('admin/reports/updates');
 
     // Now, make sure none of the Update manager pages have duplicate messages
     // about core missing a security update.
 
-    $this->drupalGet('admin/modules/install');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/modules/install');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/modules/update');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/modules/update');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/appearance/install');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/appearance/install');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/appearance/update');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/appearance/update');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/reports/updates/install');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/reports/updates/install');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/reports/updates/update');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/reports/updates/update');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->drupalGet('admin/update/ready');
-    $this->assertNoText(t('There is a security update available for your version of Drupal.'));
+    $this->backdropGet('admin/update/ready');
+    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
   }
 
 }

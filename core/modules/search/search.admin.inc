@@ -19,7 +19,7 @@ function search_reindex_confirm() {
 function search_reindex_confirm_submit(&$form, &$form_state) {
   if ($form['confirm']) {
     search_reindex();
-    drupal_set_message(t('The index will be rebuilt.'));
+    backdrop_set_message(t('The index will be rebuilt.'));
     $form_state['redirect'] = 'admin/config/search/settings';
     return;
   }
@@ -67,7 +67,7 @@ function search_admin_settings($form) {
   $form['status']['status'] = array('#markup' => $status);
   $form['status']['wipe'] = array('#type' => 'submit', '#value' => t('Re-index site'), '#submit' => array('search_admin_reindex_submit'));
 
-  $items = drupal_map_assoc(array(10, 20, 50, 100, 200, 500));
+  $items = backdrop_map_assoc(array(10, 20, 50, 100, 200, 500));
 
   // Indexing throttle:
   $form['indexing_throttle'] = array(
@@ -159,7 +159,7 @@ function search_admin_settings_submit($form, &$form_state) {
   // If these settings change, the index needs to be rebuilt.
   if ((variable_get('minimum_word_size', 3) != $form_state['values']['minimum_word_size']) ||
       (variable_get('overlap_cjk', TRUE) != $form_state['values']['overlap_cjk'])) {
-    drupal_set_message(t('The index will be rebuilt.'));
+    backdrop_set_message(t('The index will be rebuilt.'));
     search_reindex();
   }
   $current_modules = variable_get('search_active_modules', array('node', 'user'));
@@ -171,7 +171,7 @@ function search_admin_settings_submit($form, &$form_state) {
     $new_modules = array_filter($form_state['values']['search_active_modules']);
   }
   if (array_diff($current_modules, $new_modules)) {
-    drupal_set_message(t('The active search modules have been changed.'));
+    backdrop_set_message(t('The active search modules have been changed.'));
     variable_set('menu_rebuild_needed', TRUE);
   }
 }

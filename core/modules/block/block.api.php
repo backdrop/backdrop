@@ -13,7 +13,7 @@
 /**
  * Define all blocks provided by the module.
  *
- * This hook declares to Drupal what blocks are provided by your module and can
+ * This hook declares to Backdrop what blocks are provided by your module and can
  * optionally specify initial block configuration settings.
  *
  * In hook_block_info(), each block your module provides is given a unique
@@ -43,7 +43,7 @@
  *     This is used to identify the block on administration screens, and
  *     is not displayed to non-administrative users.
  *   - 'cache': (optional) A bitmask describing what kind of caching is
- *     appropriate for the block. Drupal provides the following bitmask
+ *     appropriate for the block. Backdrop provides the following bitmask
  *     constants for defining cache granularity:
  *     - DRUPAL_CACHE_PER_ROLE (default): The block can change depending on the
  *       roles the user viewing the page belongs to.
@@ -156,7 +156,7 @@ function hook_block_configure($delta = '') {
       '#type' => 'select',
       '#title' => t('Number of recent content items to display'),
       '#default_value' => variable_get('node_recent_block_count', 10),
-      '#options' => drupal_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
+      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
     );
   }
   return $form;

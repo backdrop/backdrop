@@ -1,9 +1,9 @@
 <?php
 
 
-class FileTranferTest extends DrupalWebTestCase {
+class FileTranferTest extends BackdropWebTestCase {
   protected $hostname = 'localhost';
-  protected $username = 'drupal';
+  protected $username = 'backdrop';
   protected $password = 'password';
   protected $port = '42';
 

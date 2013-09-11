@@ -8,7 +8,7 @@
 /**
  * Unit tests for the Theme API.
  */
-class ThemeUnitTest extends DrupalWebTestCase {
+class ThemeUnitTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   public static function getInfo() {
@@ -60,9 +60,9 @@ class ThemeUnitTest extends DrupalWebTestCase {
    */
   function testPreprocessForSuggestions() {
     // Test with both an unprimed and primed theme registry.
-    drupal_theme_rebuild();
+    backdrop_theme_rebuild();
     for ($i = 0; $i < 2; $i++) {
-      $this->drupalGet('theme-test/suggestion');
+      $this->backdropGet('theme-test/suggestion');
       $this->assertText('Theme hook implementor=test_theme_theme_test__suggestion(). Foo=template_preprocess_theme_test', 'Theme hook suggestion ran with data available from a preprocess function for the base hook.');
     }
   }
@@ -86,7 +86,7 @@ class ThemeUnitTest extends DrupalWebTestCase {
    * Ensures theme hook_*_alter() implementations can run before anything is rendered.
    */
   function testAlter() {
-    $this->drupalGet('theme-test/alter');
+    $this->backdropGet('theme-test/alter');
     $this->assertText('The altered data is test_theme_theme_test_alter_alter was invoked.', t('The theme was able to implement an alter hook during page building before anything was rendered.'));
   }
 
@@ -101,15 +101,15 @@ class ThemeUnitTest extends DrupalWebTestCase {
     // so it doesn't matter what page we get, as long as it is themed with the
     // test theme. First we test with CSS aggregation disabled.
     variable_set('preprocess_css', 0);
-    $this->drupalGet('theme-test/suggestion');
+    $this->backdropGet('theme-test/suggestion');
     $this->assertNoText('system.base.css', t('The theme\'s .info file is able to override a module CSS file from being added to the page.'));
 
     // Also test with aggregation enabled, simply ensuring no PHP errors are
-    // triggered during drupal_build_css_cache() when a source file doesn't
+    // triggered during backdrop_build_css_cache() when a source file doesn't
     // exist. Then allow remaining tests to continue with aggregation disabled
     // by default.
     variable_set('preprocess_css', 1);
-    $this->drupalGet('theme-test/suggestion');
+    $this->backdropGet('theme-test/suggestion');
     variable_set('preprocess_css', 0);
   }
 
@@ -118,7 +118,7 @@ class ThemeUnitTest extends DrupalWebTestCase {
    */
   function testTemplateOverride() {
     variable_set('theme_default', 'test_theme');
-    $this->drupalGet('theme-test/template-test');
+    $this->backdropGet('theme-test/template-test');
     $this->assertText('Success: Template overridden.', t('Template overridden by defined \'template\' filename.'));
   }
 
@@ -127,8 +127,8 @@ class ThemeUnitTest extends DrupalWebTestCase {
    */
   function testListThemes() {
     $themes = list_themes();
-    // Check if drupal_theme_access() retrieves enabled themes properly from list_themes().
-    $this->assertTrue(drupal_theme_access('test_theme'), t('Enabled theme detected'));
+    // Check if backdrop_theme_access() retrieves enabled themes properly from list_themes().
+    $this->assertTrue(backdrop_theme_access('test_theme'), t('Enabled theme detected'));
     // Check if list_themes() returns disabled themes.
     $this->assertTrue(array_key_exists('test_basetheme', $themes), t('Disabled theme detected'));
     // Check for base theme and subtheme lists.
@@ -157,7 +157,7 @@ class ThemeUnitTest extends DrupalWebTestCase {
 /**
  * Unit tests for theme_table().
  */
-class ThemeTableUnitTest extends DrupalWebTestCase {
+class ThemeTableUnitTest extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Theme Table',
@@ -173,10 +173,10 @@ class ThemeTableUnitTest extends DrupalWebTestCase {
     $header = array('one', 'two', 'three');
     $rows = array(array(1,2,3), array(4,5,6), array(7,8,9));
     $this->content = theme('table', array('header' => $header, 'rows' => $rows));
-    $js = drupal_add_js();
+    $js = backdrop_add_js();
     $this->assertTrue(isset($js['core/misc/tableheader.js']), t('tableheader.js was included when $sticky = TRUE.'));
     $this->assertRaw('sticky-enabled',  t('Table has a class of sticky-enabled when $sticky = TRUE.'));
-    drupal_static_reset('drupal_add_js');
+    backdrop_static_reset('backdrop_add_js');
   }
 
   /**
@@ -189,10 +189,10 @@ class ThemeTableUnitTest extends DrupalWebTestCase {
     $caption = NULL;
     $colgroups = array();
     $this->content = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => $attributes, 'caption' => $caption, 'colgroups' => $colgroups, 'sticky' => FALSE));
-    $js = drupal_add_js();
+    $js = backdrop_add_js();
     $this->assertFalse(isset($js['core/misc/tableheader.js']), t('tableheader.js was not included because $sticky = FALSE.'));
     $this->assertNoRaw('sticky-enabled',  t('Table does not have a class of sticky-enabled because $sticky = FALSE.'));
-    drupal_static_reset('drupal_add_js');
+    backdrop_static_reset('backdrop_add_js');
   }
 
   /**
@@ -217,7 +217,7 @@ class ThemeTableUnitTest extends DrupalWebTestCase {
 /**
  * Tests for common theme functions.
  */
-class ThemeFunctionsTestCase extends DrupalWebTestCase {
+class ThemeFunctionsTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   public static function getInfo() {
@@ -376,14 +376,14 @@ class ThemeFunctionsTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test the use of drupal_pre_render_links() on a nested array of links.
+   * Test the use of backdrop_pre_render_links() on a nested array of links.
    */
-  function testDrupalPreRenderLinks() {
+  function testBackdropPreRenderLinks() {
     // Define the base array to be rendered, containing a variety of different
     // kinds of links.
     $base_array = array(
       '#theme' => 'links',
-      '#pre_render' => array('drupal_pre_render_links'),
+      '#pre_render' => array('backdrop_pre_render_links'),
       '#links' => array(
         'parent_link' => array(
           'title' => 'Parent link original',
@@ -435,7 +435,7 @@ class ThemeFunctionsTestCase extends DrupalWebTestCase {
     // thing. We expect a single <ul> with appropriate links contained within
     // it.
     $render_array = $base_array;
-    $html = drupal_render($render_array);
+    $html = backdrop_render($render_array);
     $dom = new DOMDocument();
     $dom->loadHTML($html);
     $this->assertEqual($dom->getElementsByTagName('ul')->length, 1, t('One "ul" tag found in the rendered HTML.'));
@@ -451,8 +451,8 @@ class ThemeFunctionsTestCase extends DrupalWebTestCase {
     // sure we get two separate <ul>'s with the appropriate links contained
     // within each.
     $render_array = $base_array;
-    $child_html = drupal_render($render_array['first_child']);
-    $parent_html = drupal_render($render_array);
+    $child_html = backdrop_render($render_array['first_child']);
+    $parent_html = backdrop_render($render_array);
     // First check the child HTML.
     $dom = new DOMDocument();
     $dom->loadHTML($child_html);
@@ -477,7 +477,7 @@ class ThemeFunctionsTestCase extends DrupalWebTestCase {
 /**
  * Functional test for initialization of the theme system in hook_init().
  */
-class ThemeHookInitUnitTest extends DrupalWebTestCase {
+class ThemeHookInitUnitTest extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Theme initialization in hook_init()',
@@ -494,7 +494,7 @@ class ThemeHookInitUnitTest extends DrupalWebTestCase {
    * Test that the theme system can generate output when called by hook_init().
    */
   function testThemeInitializationHookInit() {
-    $this->drupalGet('theme-test/hook-init');
+    $this->backdropGet('theme-test/hook-init');
     $this->assertRaw('Themed output generated in hook_init()', t('Themed output generated in hook_init() correctly appears on the page.'));
     $this->assertRaw('bartik/css/style.css', t("The default theme's CSS appears on the page when the theme system is initialized in hook_init()."));
   }
@@ -503,7 +503,7 @@ class ThemeHookInitUnitTest extends DrupalWebTestCase {
 /**
  * Tests autocompletion not loading registry.
  */
-class ThemeFastTestCase extends DrupalWebTestCase {
+class ThemeFastTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Theme fast initialization',
@@ -514,15 +514,15 @@ class ThemeFastTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('theme_test');
-    $this->account = $this->drupalCreateUser(array('access user profiles'));
+    $this->account = $this->backdropCreateUser(array('access user profiles'));
   }
 
   /**
    * Tests access to user autocompletion and verify the correct results.
    */
   function testUserAutocomplete() {
-    $this->drupalLogin($this->account);
-    $this->drupalGet('user/autocomplete/' . $this->account->name);
+    $this->backdropLogin($this->account);
+    $this->backdropGet('user/autocomplete/' . $this->account->name);
     $this->assertText('registry not initialized', t('The registry was not initialized'));
   }
 }
@@ -530,7 +530,7 @@ class ThemeFastTestCase extends DrupalWebTestCase {
 /**
  * Unit tests for theme_html_tag().
  */
-class ThemeHtmlTag extends DrupalUnitTestCase {
+class ThemeHtmlTag extends BackdropUnitTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Theme HTML Tag',
@@ -544,8 +544,8 @@ class ThemeHtmlTag extends DrupalUnitTestCase {
    */
   function testThemeHtmlTag() {
     // Test auto-closure meta tag generation
-    $tag['element'] = array('#tag' => 'meta', '#attributes' => array('name' => 'description', 'content' => 'Drupal test'));
-    $this->assertEqual('<meta name="description" content="Drupal test" />'."\n", theme_html_tag($tag), t('Test auto-closure meta tag generation.'));
+    $tag['element'] = array('#tag' => 'meta', '#attributes' => array('name' => 'description', 'content' => 'Backdrop test'));
+    $this->assertEqual('<meta name="description" content="Backdrop test" />'."\n", theme_html_tag($tag), t('Test auto-closure meta tag generation.'));
 
     // Test title tag generation
     $tag['element'] = array('#tag' => 'title', '#value' => 'title test');
@@ -556,7 +556,7 @@ class ThemeHtmlTag extends DrupalUnitTestCase {
 /**
  * Functional test for attributes of html.tpl.php.
  */
-class ThemeHtmlTplPhpAttributesTestCase extends DrupalWebTestCase {
+class ThemeHtmlTplPhpAttributesTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'html.tpl.php html and body attributes',
@@ -573,7 +573,7 @@ class ThemeHtmlTplPhpAttributesTestCase extends DrupalWebTestCase {
    * Tests that modules and themes can alter variables in html.tpl.php.
    */
   function testThemeHtmlTplPhpAttributes() {
-    $this->drupalGet('');
+    $this->backdropGet('');
     $attributes = $this->xpath('/html[@theme_test_html_attribute="theme test html attribute value"]');
     $this->assertTrue(count($attributes) == 1, t('Attribute set in the html element via hook_preprocess_html() found.'));
     $attributes = $this->xpath('/html/body[@theme_test_body_attribute="theme test body attribute value"]');
@@ -584,7 +584,7 @@ class ThemeHtmlTplPhpAttributesTestCase extends DrupalWebTestCase {
 /**
  * Tests for the ThemeRegistry class.
  */
-class ThemeRegistryTestCase extends DrupalWebTestCase {
+class ThemeRegistryTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
   public static function getInfo() {
     return array(
@@ -635,7 +635,7 @@ class ThemeRegistryTestCase extends DrupalWebTestCase {
 /**
  * Tests for theme_datetime().
  */
-class ThemeDatetime extends DrupalWebTestCase {
+class ThemeDatetime extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   public static function getInfo() {

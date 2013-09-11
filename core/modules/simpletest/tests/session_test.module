@@ -96,7 +96,7 @@ function _session_test_set($value) {
  * anyway.
  */
 function _session_test_no_set($value) {
-  drupal_save_session(FALSE);
+  backdrop_save_session(FALSE);
   _session_test_set($value);
   return t('session saving was disabled, and then %val was set', array('%val' => $value));
 }
@@ -105,11 +105,11 @@ function _session_test_no_set($value) {
  * Menu callback: print the current session ID.
  */
 function _session_test_id() {
-  // Set a value in $_SESSION, so that drupal_session_commit() will start
+  // Set a value in $_SESSION, so that backdrop_session_commit() will start
   // a session.
   $_SESSION['test'] = 'test';
 
-  drupal_session_commit();
+  backdrop_session_commit();
 
   return 'session_id:' . session_id() . "\n";
 }
@@ -125,7 +125,7 @@ function _session_test_id_from_cookie() {
  * Menu callback, sets a message to me displayed on the following page.
  */
 function _session_test_set_message() {
-  drupal_set_message(t('This is a dummy message.'));
+  backdrop_set_message(t('This is a dummy message.'));
   print t('A message was set.');
   // Do not return anything, so the current request does not result in a themed
   // page with messages. The message will be displayed in the following request
@@ -133,10 +133,10 @@ function _session_test_set_message() {
 }
 
 /**
- * Menu callback, sets a message but call drupal_save_session(FALSE).
+ * Menu callback, sets a message but call backdrop_save_session(FALSE).
  */
 function _session_test_set_message_but_dont_save() {
-  drupal_save_session(FALSE);
+  backdrop_save_session(FALSE);
   _session_test_set_message();
 }
 
@@ -145,7 +145,7 @@ function _session_test_set_message_but_dont_save() {
  * having started the session in advance.
  */
 function _session_test_set_not_started() {
-  if (!drupal_session_will_start()) {
+  if (!backdrop_session_will_start()) {
     $_SESSION['session_test_value'] = t('Session was not started');
   }
 }
@@ -169,12 +169,12 @@ function session_test_form_user_login_alter(&$form) {
 }
 
 /**
- * Implements hook_drupal_goto_alter().
+ * Implements hook_backdrop_goto_alter().
  *
  * Force the redirection to go to a non-secure page after being on a secure
  * page through https.php.
  */
-function session_test_drupal_goto_alter(&$path, &$options, &$http_response_code) {
+function session_test_backdrop_goto_alter(&$path, &$options, &$http_response_code) {
   global $base_insecure_url, $is_https_mock;
   // Alter the redirect to use HTTP when using a mock HTTPS request through
   // https.php because form submissions would otherwise redirect to a

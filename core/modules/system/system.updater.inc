@@ -2,19 +2,19 @@
 
 /**
  * @file
- * Subclasses of the Updater class to update Drupal core knows how to update.
+ * Subclasses of the Updater class to update Backdrop core knows how to update.
  * At this time, only modules and themes are supported.
  */
 
 /**
  * Class for updating modules using FileTransfer classes via authorize.php.
  */
-class ModuleUpdater extends Updater implements DrupalUpdaterInterface {
+class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
 
   /**
    * Return the directory where a module should be installed.
    *
-   * If the module is already installed, drupal_get_path() will return
+   * If the module is already installed, backdrop_get_path() will return
    * a valid path and we should install it there (although we need to use an
    * absolute path, so we prepend DRUPAL_ROOT). If we're installing a new
    * module, we always want it to go into sites/all/modules, since that's
@@ -24,7 +24,7 @@ class ModuleUpdater extends Updater implements DrupalUpdaterInterface {
    * found on your system, and if there was a copy in sites/all, we'd see it.
    */
   public function getInstallDirectory() {
-    if ($relative_path = drupal_get_path('module', $this->name)) {
+    if ($relative_path = backdrop_get_path('module', $this->name)) {
       $relative_path = dirname($relative_path);
     }
     else {
@@ -34,7 +34,7 @@ class ModuleUpdater extends Updater implements DrupalUpdaterInterface {
   }
 
   public function isInstalled() {
-    return (bool) drupal_get_path('module', $this->name);
+    return (bool) backdrop_get_path('module', $this->name);
   }
 
   public static function canUpdateDirectory($directory) {
@@ -45,7 +45,7 @@ class ModuleUpdater extends Updater implements DrupalUpdaterInterface {
   }
 
   public static function canUpdate($project_name) {
-    return (bool) drupal_get_path('module', $project_name);
+    return (bool) backdrop_get_path('module', $project_name);
   }
 
   /**
@@ -60,7 +60,7 @@ class ModuleUpdater extends Updater implements DrupalUpdaterInterface {
     }
     module_load_include('install', $project);
 
-    if (!$updates = drupal_get_schema_versions($project)) {
+    if (!$updates = backdrop_get_schema_versions($project)) {
       return array();
     }
     $updates_to_run = array();
@@ -90,12 +90,12 @@ class ModuleUpdater extends Updater implements DrupalUpdaterInterface {
 /**
  * Class for updating themes using FileTransfer classes via authorize.php.
  */
-class ThemeUpdater extends Updater implements DrupalUpdaterInterface {
+class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
 
   /**
    * Return the directory where a theme should be installed.
    *
-   * If the theme is already installed, drupal_get_path() will return
+   * If the theme is already installed, backdrop_get_path() will return
    * a valid path and we should install it there (although we need to use an
    * absolute path, so we prepend DRUPAL_ROOT). If we're installing a new
    * theme, we always want it to go into sites/all/themes, since that's
@@ -105,7 +105,7 @@ class ThemeUpdater extends Updater implements DrupalUpdaterInterface {
    * found on your system, and if there was a copy in sites/all, we'd see it.
    */
   public function getInstallDirectory() {
-    if ($relative_path = drupal_get_path('theme', $this->name)) {
+    if ($relative_path = backdrop_get_path('theme', $this->name)) {
       $relative_path = dirname($relative_path);
     }
     else {
@@ -115,7 +115,7 @@ class ThemeUpdater extends Updater implements DrupalUpdaterInterface {
   }
 
   public function isInstalled() {
-    return (bool) drupal_get_path('theme', $this->name);
+    return (bool) backdrop_get_path('theme', $this->name);
   }
 
   static function canUpdateDirectory($directory) {
@@ -127,7 +127,7 @@ class ThemeUpdater extends Updater implements DrupalUpdaterInterface {
   }
 
   public static function canUpdate($project_name) {
-    return (bool) drupal_get_path('theme', $project_name);
+    return (bool) backdrop_get_path('theme', $project_name);
   }
 
   public function postInstall() {

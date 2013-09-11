@@ -26,7 +26,7 @@ function file_test_validator($file, $errors) {
  *   If $filepath is NULL, an array of all previous $filepath parameters
  */
 function file_test_file_scan_callback($filepath = NULL) {
-  $files = &drupal_static(__FUNCTION__, array());
+  $files = &backdrop_static(__FUNCTION__, array());
   if (isset($filepath)) {
     $files[] = $filepath;
   }
@@ -39,14 +39,14 @@ function file_test_file_scan_callback($filepath = NULL) {
  * Reset static variables used by file_test_file_scan_callback().
  */
 function file_test_file_scan_callback_reset() {
-  drupal_static_reset('file_test_file_scan_callback');
+  backdrop_static_reset('file_test_file_scan_callback');
 }
 
 /**
  * Base class for file tests that adds some additional file specific
  * assertions and helper functions.
  */
-class FileTestCase extends DrupalWebTestCase {
+class FileTestCase extends BackdropWebTestCase {
   /**
    * Check that two files have the same values for all fields other than the
    * timestamp.
@@ -176,7 +176,7 @@ class FileTestCase extends DrupalWebTestCase {
     if (!isset($path)) {
       $path = file_default_scheme() . '://' . $this->randomName();
     }
-    $this->assertTrue(drupal_mkdir($path) && is_dir($path), t('Directory was created successfully.'));
+    $this->assertTrue(backdrop_mkdir($path) && is_dir($path), t('Directory was created successfully.'));
     return $path;
   }
 
@@ -191,7 +191,7 @@ class FileTestCase extends DrupalWebTestCase {
    *   Optional contents to save into the file. If a NULL value is provided an
    *   arbitrary string will be used.
    * @param $scheme
-   *   Optional string indicating the stream scheme to use. Drupal core includes
+   *   Optional string indicating the stream scheme to use. Backdrop core includes
    *   public, private, and temporary. The public wrapper is the default.
    * @return
    *   File object.
@@ -216,7 +216,7 @@ class FileTestCase extends DrupalWebTestCase {
 
     $file = new stdClass();
     $file->uri = $filepath;
-    $file->filename = drupal_basename($file->uri);
+    $file->filename = backdrop_basename($file->uri);
     $file->filemime = 'text/plain';
     $file->uid = 1;
     $file->timestamp = REQUEST_TIME;
@@ -224,7 +224,7 @@ class FileTestCase extends DrupalWebTestCase {
     $file->status = 0;
     // Write the record directly rather than calling file_save() so we don't
     // invoke the hooks.
-    $this->assertNotIdentical(drupal_write_record('file_managed', $file), FALSE, t('The file was added to the database.'), 'Create test file');
+    $this->assertNotIdentical(backdrop_write_record('file_managed', $file), FALSE, t('The file was added to the database.'), 'Create test file');
 
     return $file;
   }
@@ -319,19 +319,19 @@ class FileSpaceUsedTest extends FileTestCase {
 
     // Create records for a couple of users with different sizes.
     $file = array('uid' => 2, 'uri' => 'public://example1.txt', 'filesize' => 50, 'status' => FILE_STATUS_PERMANENT);
-    drupal_write_record('file_managed', $file);
+    backdrop_write_record('file_managed', $file);
     $file = array('uid' => 2, 'uri' => 'public://example2.txt', 'filesize' => 20, 'status' => FILE_STATUS_PERMANENT);
-    drupal_write_record('file_managed', $file);
+    backdrop_write_record('file_managed', $file);
     $file = array('uid' => 3, 'uri' => 'public://example3.txt', 'filesize' => 100, 'status' => FILE_STATUS_PERMANENT);
-    drupal_write_record('file_managed', $file);
+    backdrop_write_record('file_managed', $file);
     $file = array('uid' => 3, 'uri' => 'public://example4.txt', 'filesize' => 200, 'status' => FILE_STATUS_PERMANENT);
-    drupal_write_record('file_managed', $file);
+    backdrop_write_record('file_managed', $file);
 
     // Now create some non-permanent files.
     $file = array('uid' => 2, 'uri' => 'public://example5.txt', 'filesize' => 1, 'status' => 0);
-    drupal_write_record('file_managed', $file);
+    backdrop_write_record('file_managed', $file);
     $file = array('uid' => 3, 'uri' => 'public://example6.txt', 'filesize' => 3, 'status' => 0);
-    drupal_write_record('file_managed', $file);
+    backdrop_write_record('file_managed', $file);
   }
 
   /**
@@ -360,7 +360,7 @@ class FileSpaceUsedTest extends FileTestCase {
 /**
  *  This will run tests against the file validation functions (file_validate_*).
  */
-class FileValidatorTest extends DrupalWebTestCase {
+class FileValidatorTest extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'File validator tests',
@@ -374,11 +374,11 @@ class FileValidatorTest extends DrupalWebTestCase {
 
     $this->image = new stdClass();
     $this->image->uri = 'core/misc/druplicon.png';
-    $this->image->filename = drupal_basename($this->image->uri);
+    $this->image->filename = backdrop_basename($this->image->uri);
 
     $this->non_image = new stdClass();
     $this->non_image->uri = 'core/misc/jquery.js';
-    $this->non_image->filename = drupal_basename($this->non_image->uri);
+    $this->non_image->filename = backdrop_basename($this->non_image->uri);
   }
 
   /**
@@ -442,7 +442,7 @@ class FileValidatorTest extends DrupalWebTestCase {
       $this->assertTrue($info['width'] <= 10, t('Image scaled to correct width.'), 'File');
       $this->assertTrue($info['height'] <= 5, t('Image scaled to correct height.'), 'File');
 
-      drupal_unlink('temporary://druplicon.png');
+      backdrop_unlink('temporary://druplicon.png');
     }
     else {
       // TODO: should check that the error is returned if no toolkit is available.
@@ -482,7 +482,7 @@ class FileValidatorTest extends DrupalWebTestCase {
   function testFileValidateSize() {
     global $user;
     $original_user = $user;
-    drupal_save_session(FALSE);
+    backdrop_save_session(FALSE);
 
     // Run these test as uid = 1.
     $user = user_load(1);
@@ -493,7 +493,7 @@ class FileValidatorTest extends DrupalWebTestCase {
     $this->assertEqual(count($errors), 0, t('No size limits enforced on uid=1.'), 'File');
 
     // Run these tests as a regular user.
-    $user = $this->drupalCreateUser();
+    $user = $this->backdropCreateUser();
 
     // Create a file with a size of 1000 bytes, and quotas of only 1 byte.
     $file = new stdClass();
@@ -508,7 +508,7 @@ class FileValidatorTest extends DrupalWebTestCase {
     $this->assertEqual(count($errors), 2, t('Errors for both the file and their limit.'), 'File');
 
     $user = $original_user;
-    drupal_save_session(TRUE);
+    backdrop_save_session(TRUE);
   }
 }
 
@@ -535,13 +535,13 @@ class FileUnmanagedSaveDataTest extends FileTestCase {
     // No filename.
     $filepath = file_unmanaged_save_data($contents);
     $this->assertTrue($filepath, t('Unnamed file saved correctly.'));
-    $this->assertEqual(file_uri_scheme($filepath), file_default_scheme(), t("File was placed in Drupal's files directory."));
+    $this->assertEqual(file_uri_scheme($filepath), file_default_scheme(), t("File was placed in Backdrop's files directory."));
     $this->assertEqual($contents, file_get_contents($filepath), t('Contents of the file are correct.'));
 
     // Provide a filename.
     $filepath = file_unmanaged_save_data($contents, 'public://asdf.txt', FILE_EXISTS_REPLACE);
     $this->assertTrue($filepath, t('Unnamed file saved correctly.'));
-    $this->assertEqual('asdf.txt', drupal_basename($filepath), t('File was named correctly.'));
+    $this->assertEqual('asdf.txt', backdrop_basename($filepath), t('File was named correctly.'));
     $this->assertEqual($contents, file_get_contents($filepath), t('Contents of the file are correct.'));
     $this->assertFilePermissions($filepath, variable_get('file_chmod_file', 0664));
   }
@@ -592,16 +592,16 @@ class FileSaveUploadTest extends FileHookTestCase {
 
   function setUp() {
     parent::setUp();
-    $account = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($account);
 
-    $image_files = $this->drupalGetTestFiles('image');
+    $image_files = $this->backdropGetTestFiles('image');
     $this->image = current($image_files);
 
     list(, $this->image_extension) = explode('.', $this->image->filename);
     $this->assertTrue(is_file($this->image->uri), t("The image file we're going to upload exists."));
 
-    $this->phpfile = current($this->drupalGetTestFiles('php'));
+    $this->phpfile = current($this->backdropGetTestFiles('php'));
     $this->assertTrue(is_file($this->phpfile->uri), t("The PHP file we're going to upload exists."));
 
     $this->maxFidBefore = db_query('SELECT MAX(fid) AS fid FROM {file_managed}')->fetchField();
@@ -609,9 +609,9 @@ class FileSaveUploadTest extends FileHookTestCase {
     // Upload with replace to guarantee there's something there.
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => drupal_realpath($this->image->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri),
     );
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('You WIN!'), t('Found the success message.'));
 
@@ -637,9 +637,9 @@ class FileSaveUploadTest extends FileHookTestCase {
 
     // Upload a second file.
     $max_fid_before = db_query('SELECT MAX(fid) AS fid FROM {file_managed}')->fetchField();
-    $image2 = current($this->drupalGetTestFiles('image'));
-    $edit = array('files[file_test_upload]' => drupal_realpath($image2->uri));
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $image2 = current($this->backdropGetTestFiles('image'));
+    $edit = array('files[file_test_upload]' => backdrop_realpath($image2->uri));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('You WIN!'));
     $max_fid_after = db_query('SELECT MAX(fid) AS fid FROM {file_managed}')->fetchField();
@@ -658,17 +658,17 @@ class FileSaveUploadTest extends FileHookTestCase {
     $this->assertTrue(isset($files[$file2->fid]), t('File was loaded successfully'));
 
     // Upload a third file to a subdirectory.
-    $image3 = current($this->drupalGetTestFiles('image'));
-    $image3_realpath = drupal_realpath($image3->uri);
+    $image3 = current($this->backdropGetTestFiles('image'));
+    $image3_realpath = backdrop_realpath($image3->uri);
     $dir = $this->randomName();
     $edit = array(
       'files[file_test_upload]' => $image3_realpath,
       'file_subdir' => $dir,
     );
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('You WIN!'));
-    $this->assertTrue(is_file('temporary://' . $dir . '/' . trim(drupal_basename($image3_realpath))));
+    $this->assertTrue(is_file('temporary://' . $dir . '/' . trim(backdrop_basename($image3_realpath))));
 
     // Check that file_load_multiple() with no arguments returns FALSE.
     $this->assertFalse(file_load_multiple(), t('No files were loaded.'));
@@ -685,11 +685,11 @@ class FileSaveUploadTest extends FileHookTestCase {
     $extensions = 'foo';
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => drupal_realpath($this->image->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri),
       'extensions' => $extensions,
     );
 
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $message = t('Only files with the following extensions are allowed:') . ' <em class="placeholder">' . $extensions . '</em>';
     $this->assertRaw($message, t('Can\'t upload a disallowed extension'));
@@ -705,11 +705,11 @@ class FileSaveUploadTest extends FileHookTestCase {
     // Now tell file_save_upload() to allow the extension of our test image.
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => drupal_realpath($this->image->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri),
       'extensions' => $extensions,
     );
 
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertNoRaw(t('Only files with the following extensions are allowed:'), t('Can upload an allowed extension.'));
     $this->assertRaw(t('You WIN!'), t('Found the success message.'));
@@ -723,10 +723,10 @@ class FileSaveUploadTest extends FileHookTestCase {
     // Now tell file_save_upload() to allow any extension.
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => drupal_realpath($this->image->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri),
       'allow_all_extensions' => TRUE,
     );
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertNoRaw(t('Only files with the following extensions are allowed:'), t('Can upload any extension.'));
     $this->assertRaw(t('You WIN!'), t('Found the success message.'));
@@ -743,12 +743,12 @@ class FileSaveUploadTest extends FileHookTestCase {
     // safety. Also check to make sure its MIME type was changed.
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => drupal_realpath($this->phpfile->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->phpfile->uri),
       'is_image_file' => FALSE,
       'extensions' => 'php',
     );
 
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->phpfile->filename . '.txt' . '</em>';
     $this->assertRaw($message, t('Dangerous file was renamed.'));
@@ -764,7 +764,7 @@ class FileSaveUploadTest extends FileHookTestCase {
     // Reset the hook counters.
     file_test_reset();
 
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertNoRaw(t('For security reasons, your upload has been renamed'), t('Found no security message.'));
     $this->assertRaw(t('File name is !filename', array('!filename' => $this->phpfile->filename)), t('Dangerous file was not renamed when insecure uploads is TRUE.'));
@@ -790,7 +790,7 @@ class FileSaveUploadTest extends FileHookTestCase {
 
     $extensions = $this->image_extension;
     $edit = array(
-      'files[file_test_upload]' => drupal_realpath($this->image->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri),
       'extensions' => $extensions,
     );
 
@@ -798,7 +798,7 @@ class FileSaveUploadTest extends FileHookTestCase {
     $munged_filename = substr($munged_filename, 0, strrpos($munged_filename, '.'));
     $munged_filename .= '_.' . $this->image_extension;
 
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('For security reasons, your upload has been renamed'), t('Found security message.'));
     $this->assertRaw(t('File name is !filename', array('!filename' => $munged_filename)), t('File was successfully munged.'));
@@ -812,11 +812,11 @@ class FileSaveUploadTest extends FileHookTestCase {
     file_test_reset();
 
     $edit = array(
-      'files[file_test_upload]' => drupal_realpath($this->image->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri),
       'allow_all_extensions' => TRUE,
     );
 
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertNoRaw(t('For security reasons, your upload has been renamed'), t('Found no security message.'));
     $this->assertRaw(t('File name is !filename', array('!filename' => $this->image->filename)), t('File was not munged when allowing any extension.'));
@@ -832,9 +832,9 @@ class FileSaveUploadTest extends FileHookTestCase {
   function testExistingRename() {
     $edit = array(
       'file_test_replace' => FILE_EXISTS_RENAME,
-      'files[file_test_upload]' => drupal_realpath($this->image->uri)
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri)
     );
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('You WIN!'), t('Found the success message.'));
 
@@ -848,9 +848,9 @@ class FileSaveUploadTest extends FileHookTestCase {
   function testExistingReplace() {
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => drupal_realpath($this->image->uri)
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri)
     );
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('You WIN!'), t('Found the success message.'));
 
@@ -864,9 +864,9 @@ class FileSaveUploadTest extends FileHookTestCase {
   function testExistingError() {
     $edit = array(
       'file_test_replace' => FILE_EXISTS_ERROR,
-      'files[file_test_upload]' => drupal_realpath($this->image->uri)
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri)
     );
-    $this->drupalPost('file-test/upload', $edit, t('Submit'));
+    $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('Epic upload FAIL!'), t('Found the failure message.'));
 
@@ -878,7 +878,7 @@ class FileSaveUploadTest extends FileHookTestCase {
    * Test for no failures when not uploading a file.
    */
   function testNoUpload() {
-    $this->drupalPost('file-test/upload', array(), t('Submit'));
+    $this->backdropPost('file-test/upload', array(), t('Submit'));
     $this->assertNoRaw(t('Epic upload FAIL!'), t('Failure message not found.'));
   }
 }
@@ -935,7 +935,7 @@ class FileDirectoryTest extends FileTestCase {
       // in the directory on any recent version of Windows.
 
       // Make directory read only.
-      @drupal_chmod($directory, 0444);
+      @backdrop_chmod($directory, 0444);
       $this->assertFalse(file_prepare_directory($directory, 0), t('Error reported for a non-writeable directory.'), 'File');
 
       // Test directory permission modification.
@@ -946,13 +946,13 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertDirectoryPermissions($directory, variable_get('file_chmod_directory', 0775));
 
     // Remove .htaccess file to then test that it gets re-created.
-    @drupal_unlink(file_default_scheme() . '://.htaccess');
+    @backdrop_unlink(file_default_scheme() . '://.htaccess');
     $this->assertFalse(is_file(file_default_scheme() . '://.htaccess'), t('Successfully removed the .htaccess file in the files directory.'), 'File');
     file_ensure_htaccess();
     $this->assertTrue(is_file(file_default_scheme() . '://.htaccess'), t('Successfully re-created the .htaccess file in the files directory.'), 'File');
     // Verify contents of .htaccess file.
     $file = file_get_contents(file_default_scheme() . '://.htaccess');
-    $this->assertEqual($file, "SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006\nOptions None\nOptions +FollowSymLinks", t('The .htaccess file contains the proper content.'), 'File');
+    $this->assertEqual($file, "SetHandler Backdrop_Security_Do_Not_Remove_See_SA_2006_006\nOptions None\nOptions +FollowSymLinks", t('The .htaccess file contains the proper content.'), 'File');
   }
 
   /**
@@ -1052,7 +1052,7 @@ class FileScanDirectoryTest extends FileTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->path = drupal_get_path('module', 'simpletest') . '/files';
+    $this->path = backdrop_get_path('module', 'simpletest') . '/files';
   }
 
   /**
@@ -1146,10 +1146,10 @@ class FileScanDirectoryTest extends FileTestCase {
    * Check that the recurse option decends into subdirectories.
    */
   function testOptionRecurse() {
-    $files = file_scan_directory(drupal_get_path('module', 'simpletest'), '/^javascript-/', array('recurse' => FALSE));
+    $files = file_scan_directory(backdrop_get_path('module', 'simpletest'), '/^javascript-/', array('recurse' => FALSE));
     $this->assertTrue(empty($files), t("Without recursion couldn't find javascript files."));
 
-    $files = file_scan_directory(drupal_get_path('module', 'simpletest'), '/^javascript-/', array('recurse' => TRUE));
+    $files = file_scan_directory(backdrop_get_path('module', 'simpletest'), '/^javascript-/', array('recurse' => TRUE));
     $this->assertEqual(2, count($files), t('With recursion we found the expected javascript files.'));
   }
 
@@ -1498,12 +1498,12 @@ class FileUnmanagedCopyTest extends FileTestCase {
     $this->assertTrue(file_exists($file->uri), t('File exists after copying onto itself.'));
 
     // Copy the file into same directory without renaming fails.
-    $new_filepath = file_unmanaged_copy($file->uri, drupal_dirname($file->uri), FILE_EXISTS_ERROR);
+    $new_filepath = file_unmanaged_copy($file->uri, backdrop_dirname($file->uri), FILE_EXISTS_ERROR);
     $this->assertFalse($new_filepath, t('Copying onto itself fails.'));
     $this->assertTrue(file_exists($file->uri), t('File exists after copying onto itself.'));
 
     // Copy the file into same directory with renaming works.
-    $new_filepath = file_unmanaged_copy($file->uri, drupal_dirname($file->uri), FILE_EXISTS_RENAME);
+    $new_filepath = file_unmanaged_copy($file->uri, backdrop_dirname($file->uri), FILE_EXISTS_RENAME);
     $this->assertTrue($new_filepath, t('Copying into same directory works.'));
     $this->assertNotEqual($new_filepath, $file->uri, t('Copied file has a new name.'));
     $this->assertTrue(file_exists($file->uri), t('Original file exists after copying onto itself.'));
@@ -2203,8 +2203,8 @@ class FileSaveDataTest extends FileHookTestCase {
     $result = file_save_data($contents);
     $this->assertTrue($result, t('Unnamed file saved correctly.'));
 
-    $this->assertEqual(file_default_scheme(), file_uri_scheme($result->uri), t("File was placed in Drupal's files directory."));
-    $this->assertEqual($result->filename, drupal_basename($result->uri), t("Filename was set to the file's basename."));
+    $this->assertEqual(file_default_scheme(), file_uri_scheme($result->uri), t("File was placed in Backdrop's files directory."));
+    $this->assertEqual($result->filename, backdrop_basename($result->uri), t("Filename was set to the file's basename."));
     $this->assertEqual($contents, file_get_contents($result->uri), t('Contents of the file are correct.'));
     $this->assertEqual($result->filemime, 'application/octet-stream', t('A MIME type was set.'));
     $this->assertEqual($result->status, FILE_STATUS_PERMANENT, t("The file's status was set to permanent."));
@@ -2228,8 +2228,8 @@ class FileSaveDataTest extends FileHookTestCase {
     $result = file_save_data($contents, 'public://' . $filename);
     $this->assertTrue($result, t('Unnamed file saved correctly.'));
 
-    $this->assertEqual('public', file_uri_scheme($result->uri), t("File was placed in Drupal's files directory."));
-    $this->assertEqual($filename, drupal_basename($result->uri), t('File was named correctly.'));
+    $this->assertEqual('public', file_uri_scheme($result->uri), t("File was placed in Backdrop's files directory."));
+    $this->assertEqual($filename, backdrop_basename($result->uri), t('File was named correctly.'));
     $this->assertEqual($contents, file_get_contents($result->uri), t('Contents of the file are correct.'));
     $this->assertEqual($result->filemime, 'text/plain', t('A MIME type was set.'));
     $this->assertEqual($result->status, FILE_STATUS_PERMANENT, t("The file's status was set to permanent."));
@@ -2252,7 +2252,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $result = file_save_data($contents, $existing->uri, FILE_EXISTS_RENAME);
     $this->assertTrue($result, t("File saved successfully."));
 
-    $this->assertEqual('public', file_uri_scheme($result->uri), t("File was placed in Drupal's files directory."));
+    $this->assertEqual('public', file_uri_scheme($result->uri), t("File was placed in Backdrop's files directory."));
     $this->assertEqual($result->filename, $existing->filename, t("Filename was set to the basename of the source, rather than that of the renamed file."));
     $this->assertEqual($contents, file_get_contents($result->uri), t("Contents of the file are correct."));
     $this->assertEqual($result->filemime, 'application/octet-stream', t("A MIME type was set."));
@@ -2280,7 +2280,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $result = file_save_data($contents, $existing->uri, FILE_EXISTS_REPLACE);
     $this->assertTrue($result, t('File saved successfully.'));
 
-    $this->assertEqual('public', file_uri_scheme($result->uri), t("File was placed in Drupal's files directory."));
+    $this->assertEqual('public', file_uri_scheme($result->uri), t("File was placed in Backdrop's files directory."));
     $this->assertEqual($result->filename, $existing->filename, t('Filename was set to the basename of the existing file, rather than preserving the original name.'));
     $this->assertEqual($contents, file_get_contents($result->uri), t('Contents of the file are correct.'));
     $this->assertEqual($result->filemime, 'application/octet-stream', t('A MIME type was set.'));
@@ -2345,15 +2345,15 @@ class FileDownloadTest extends FileTestCase {
     // encoded.
     $filename = $GLOBALS['base_url'] . '/' . file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath() . '/' . rawurlencode($file->filename);
     $this->assertEqual($filename, $url, t('Correctly generated a URL for a created file.'));
-    $this->drupalHead($url);
+    $this->backdropHead($url);
     $this->assertResponse(200, t('Confirmed that the generated URL is correct by downloading the created file.'));
 
     // Test generating an URL to a shipped file (i.e. a file that is part of
-    // Drupal core, a module or a theme, for example a JavaScript file).
+    // Backdrop core, a module or a theme, for example a JavaScript file).
     $filepath = 'core/misc/jquery.js';
     $url = file_create_url($filepath);
     $this->assertEqual($GLOBALS['base_url'] . '/' . $filepath, $url, t('Correctly generated a URL for a shipped file.'));
-    $this->drupalHead($url);
+    $this->backdropHead($url);
     $this->assertResponse(200, t('Confirmed that the generated URL is correct by downloading the shipped file.'));
   }
 
@@ -2370,8 +2370,8 @@ class FileDownloadTest extends FileTestCase {
 
     // Set file_test access header to allow the download.
     file_test_set_return('download', array('x-foo' => 'Bar'));
-    $this->drupalGet($url);
-    $headers = $this->drupalGetHeaders();
+    $this->backdropGet($url);
+    $headers = $this->backdropGetHeaders();
     $this->assertEqual($headers['x-foo'], 'Bar', t('Found header set by file_test module on private download.'));
     $this->assertResponse(200, t('Correctly allowed access to a file when file_test provides headers.'));
 
@@ -2380,12 +2380,12 @@ class FileDownloadTest extends FileTestCase {
 
     // Deny access to all downloads via a -1 header.
     file_test_set_return('download', -1);
-    $this->drupalHead($url);
+    $this->backdropHead($url);
     $this->assertResponse(403, t('Correctly denied access to a file when file_test sets the header to -1.'));
 
     // Try non-existent file.
     $url = file_create_url('private://' . $this->randomName());
-    $this->drupalHead($url);
+    $this->backdropHead($url);
     $this->assertResponse(404, t('Correctly returned 404 response for a non-existent file.'));
   }
 
@@ -2448,7 +2448,7 @@ class FileDownloadTest extends FileTestCase {
       file_test_set_return('download', array('x-foo' => 'Bar'));
     }
 
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     if ($this->assertResponse(200) == 'pass') {
       $this->assertRaw(file_get_contents($file->uri), t('Contents of the file are correct.'));
     }
@@ -2478,7 +2478,7 @@ class FileURLRewritingTest extends FileTestCase {
    */
   function testShippedFileURL()  {
     // Test generating an URL to a shipped file (i.e. a file that is part of
-    // Drupal core, a module or a theme, for example a JavaScript file).
+    // Backdrop core, a module or a theme, for example a JavaScript file).
 
     // Test alteration of file URLs to use a CDN.
     variable_set('file_test_hook_file_url_alter', 'cdn');
@@ -2560,7 +2560,7 @@ class FileNameMungingTest extends FileTestCase {
     // Disable insecure uploads.
     variable_set('allow_insecure_uploads', 0);
     $munged_name = file_munge_filename($this->name, '', TRUE);
-    $messages = drupal_get_messages();
+    $messages = backdrop_get_messages();
     $this->assertTrue(in_array(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $munged_name)), $messages['status']), t('Alert properly set when a file is renamed.'));
     $this->assertNotEqual($munged_name, $this->name, t('The new filename (%munged) has been modified from the original (%original)', array('%munged' => $munged_name, '%original' => $this->name)));
   }
@@ -2597,7 +2597,7 @@ class FileNameMungingTest extends FileTestCase {
 /**
  * Tests for file_get_mimetype().
  */
-class FileMimeTypeTest extends DrupalWebTestCase {
+class FileMimeTypeTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('file_test');
   }
@@ -2682,10 +2682,10 @@ class FileMimeTypeTest extends DrupalWebTestCase {
 /**
  * Tests stream wrapper functions.
  */
-class StreamWrapperTest extends DrupalWebTestCase {
+class StreamWrapperTest extends BackdropWebTestCase {
 
   protected $scheme = 'dummy';
-  protected $classname = 'DrupalDummyStreamWrapper';
+  protected $classname = 'BackdropDummyStreamWrapper';
 
   public static function getInfo() {
     return array(
@@ -2697,7 +2697,7 @@ class StreamWrapperTest extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('file_test');
-    drupal_static_reset('file_get_stream_wrappers');
+    backdrop_static_reset('file_get_stream_wrappers');
   }
 
   function tearDown() {
@@ -2712,7 +2712,7 @@ class StreamWrapperTest extends DrupalWebTestCase {
     // Check the dummy scheme.
     $this->assertEqual($this->classname, file_stream_wrapper_get_class($this->scheme), t('Got correct class name for dummy scheme.'));
     // Check core's scheme.
-    $this->assertEqual('DrupalPublicStreamWrapper', file_stream_wrapper_get_class('public'), t('Got correct class name for public scheme.'));
+    $this->assertEqual('BackdropPublicStreamWrapper', file_stream_wrapper_get_class('public'), t('Got correct class name for public scheme.'));
   }
 
   /**
@@ -2723,7 +2723,7 @@ class StreamWrapperTest extends DrupalWebTestCase {
     $this->assertEqual($this->classname, get_class($instance), t('Got correct class type for dummy scheme.'));
 
     $instance = file_stream_wrapper_get_instance_by_scheme('public');
-    $this->assertEqual('DrupalPublicStreamWrapper', get_class($instance), t('Got correct class type for public scheme.'));
+    $this->assertEqual('BackdropPublicStreamWrapper', get_class($instance), t('Got correct class type for public scheme.'));
   }
 
   /**
@@ -2734,13 +2734,13 @@ class StreamWrapperTest extends DrupalWebTestCase {
     $this->assertEqual($this->classname, get_class($instance), t('Got correct class type for dummy URI.'));
 
     $instance = file_stream_wrapper_get_instance_by_uri('public://foo');
-    $this->assertEqual('DrupalPublicStreamWrapper', get_class($instance), t('Got correct class type for public URI.'));
+    $this->assertEqual('BackdropPublicStreamWrapper', get_class($instance), t('Got correct class type for public URI.'));
 
     // Test file_uri_target().
     $this->assertEqual(file_uri_target('public://foo/bar.txt'), 'foo/bar.txt', t('Got a valid stream target from public://foo/bar.txt.'));
     $this->assertFalse(file_uri_target('foo/bar.txt'), t('foo/bar.txt is not a valid stream.'));
 
-    // Test file_build_uri() and DrupalLocalStreamWrapper::getDirectoryPath().
+    // Test file_build_uri() and BackdropLocalStreamWrapper::getDirectoryPath().
     $this->assertEqual(file_build_uri('foo/bar.txt'), 'public://foo/bar.txt', t('Expected scheme was added.'));
     $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath(), variable_get('file_public_path'), t('Expected default directory path was returned.'));
     $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('temporary')->getDirectoryPath(), variable_get('file_temporary_path'), t('Expected temporary directory path was returned.'));

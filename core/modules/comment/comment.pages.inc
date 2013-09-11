@@ -28,7 +28,7 @@
  */
 function comment_reply($node, $pid = NULL) {
   // Set the breadcrumb trail.
-  drupal_set_breadcrumb(array(l(t('Home'), NULL), l($node->title, 'node/' . $node->nid)));
+  backdrop_set_breadcrumb(array(l(t('Home'), NULL), l($node->title, 'node/' . $node->nid)));
   $op = isset($_POST['op']) ? $_POST['op'] : '';
   $build = array();
 
@@ -36,11 +36,11 @@ function comment_reply($node, $pid = NULL) {
   if ($op == t('Preview')) {
     if (user_access('post comments')) {
       $comment = entity_create('comment', array('nid' => $node->nid, 'pid' => $pid));
-      $build['comment_form'] = drupal_get_form("comment_node_{$node->type}_form", $comment);
+      $build['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
     }
     else {
-      drupal_set_message(t('You are not authorized to post comments.'), 'error');
-      drupal_goto("node/$node->nid");
+      backdrop_set_message(t('You are not authorized to post comments.'), 'error');
+      backdrop_goto("node/$node->nid");
     }
   }
   else {
@@ -57,8 +57,8 @@ function comment_reply($node, $pid = NULL) {
           // parent comment both belong to the same parent node.
           if ($comment->nid != $node->nid) {
             // Attempting to reply to a comment not belonging to the current nid.
-            drupal_set_message(t('The comment you are replying to does not exist.'), 'error');
-            drupal_goto("node/$node->nid");
+            backdrop_set_message(t('The comment you are replying to does not exist.'), 'error');
+            backdrop_goto("node/$node->nid");
           }
           // Display the parent comment
           $comment->node_type = 'comment_node_' . $node->type;
@@ -67,13 +67,13 @@ function comment_reply($node, $pid = NULL) {
           $build['comment_parent'] = comment_view($comment, $node);
         }
         else {
-          drupal_set_message(t('The comment you are replying to does not exist.'), 'error');
-          drupal_goto("node/$node->nid");
+          backdrop_set_message(t('The comment you are replying to does not exist.'), 'error');
+          backdrop_goto("node/$node->nid");
         }
       }
       else {
-        drupal_set_message(t('You are not authorized to view comments.'), 'error');
-        drupal_goto("node/$node->nid");
+        backdrop_set_message(t('You are not authorized to view comments.'), 'error');
+        backdrop_goto("node/$node->nid");
       }
     }
     // This is the case where the comment is in response to a node. Display the node.
@@ -83,16 +83,16 @@ function comment_reply($node, $pid = NULL) {
 
     // Should we show the reply box?
     if ($node->comment != COMMENT_NODE_OPEN) {
-      drupal_set_message(t("This discussion is closed: you can't post new comments."), 'error');
-      drupal_goto("node/$node->nid");
+      backdrop_set_message(t("This discussion is closed: you can't post new comments."), 'error');
+      backdrop_goto("node/$node->nid");
     }
     elseif (user_access('post comments')) {
       $comment = entity_create('comment', array('nid' => $node->nid, 'pid' => $pid));
-      $build['comment_form'] = drupal_get_form("comment_node_{$node->type}_form", $comment);
+      $build['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
     }
     else {
-      drupal_set_message(t('You are not authorized to post comments.'), 'error');
-      drupal_goto("node/$node->nid");
+      backdrop_set_message(t('You are not authorized to post comments.'), 'error');
+      backdrop_goto("node/$node->nid");
     }
   }
 
@@ -108,15 +108,15 @@ function comment_reply($node, $pid = NULL) {
  * @see comment_menu()
  */
 function comment_approve($cid) {
-  if (!isset($_GET['token']) || !drupal_valid_token($_GET['token'], "comment/$cid/approve")) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], "comment/$cid/approve")) {
     return MENU_ACCESS_DENIED;
   }
   if ($comment = comment_load($cid)) {
     $comment->status = COMMENT_PUBLISHED;
     comment_save($comment);
 
-    drupal_set_message(t('Comment approved.'));
-    drupal_goto('node/' . $comment->nid);
+    backdrop_set_message(t('Comment approved.'));
+    backdrop_goto('node/' . $comment->nid);
   }
   return MENU_NOT_FOUND;
 }

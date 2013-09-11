@@ -10,7 +10,7 @@
  *
  * Get an array of all country code => country name pairs as laid out
  * in ISO 3166-1 alpha-2. Originally from the location project
- * (http://drupal.org/project/location).
+ * (http://backdrop.org/project/location).
  *
  * @return
  *   An array of country code => country name pairs.
@@ -287,13 +287,13 @@ function standard_country_list() {
  * a script or regional variant name. See
  * http://www.w3.org/International/articles/language-tags/ for more information.
  *
- * This list is based on languages available from localize.drupal.org. See
- * http://localize.drupal.org/issues for information on how to add languages
+ * This list is based on languages available from localize.backdrop.org. See
+ * http://localize.backdrop.org/issues for information on how to add languages
  * there.
  *
  * The "Left-to-right marker" comments and the enclosed UTF-8 markers are to
  * make otherwise strange looking PHP syntax natural (to not be displayed in
- * right to left). See http://drupal.org/node/128866#comment-528929.
+ * right to left). See http://backdrop.org/node/128866#comment-528929.
  *
  * @return
  *   An array of language code to language name information.

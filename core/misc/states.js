@@ -4,9 +4,9 @@
  * The base States namespace.
  *
  * Having the local states variable allows us to use the States namespace
- * without having to always declare "Drupal.states".
+ * without having to always declare "Backdrop.states".
  */
-var states = Drupal.states = {
+var states = Backdrop.states = {
   // An array of functions that should be postponed.
   postponed: []
 };
@@ -14,7 +14,7 @@ var states = Drupal.states = {
 /**
  * Attaches the states.
  */
-Drupal.behaviors.states = {
+Backdrop.behaviors.states = {
   attach: function (context, settings) {
     for (var selector in settings.states) {
       for (var state in settings.states[selector]) {
@@ -504,7 +504,7 @@ $(document).bind('state:disabled', function(e) {
 $(document).bind('state:required', function(e) {
   if (e.trigger) {
     if (e.value) {
-      $(e.target).closest('.form-item, .form-wrapper').find('label').append('<abbr class="form-required" title="' + Drupal.t('This field is required.') + '">*</abbr>');
+      $(e.target).closest('.form-item, .form-wrapper').find('label').append('<abbr class="form-required" title="' + Backdrop.t('This field is required.') + '">*</abbr>');
     }
     else {
       $(e.target).closest('.form-item, .form-wrapper').find('label .form-required').remove();

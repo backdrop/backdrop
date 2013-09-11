@@ -52,7 +52,7 @@ function dashboard_enable() {
     return;
   }
   if (!$admin_theme = variable_get('admin_theme')) {
-    drupal_theme_initialize();
+    backdrop_theme_initialize();
     $admin_theme = $theme_key;
   }
   foreach ($stashed_blocks as $block) {

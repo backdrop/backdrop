@@ -11,7 +11,7 @@
  * @see aggregator_menu()
  */
 function aggregator_page_last() {
-  drupal_add_feed('aggregator/rss', variable_get('site_name', 'Drupal') . ' ' . t('aggregator'));
+  backdrop_add_feed('aggregator/rss', variable_get('site_name', 'Backdrop') . ' ' . t('aggregator'));
 
   $items = aggregator_load_feed_items('sum');
 
@@ -27,7 +27,7 @@ function aggregator_page_last() {
  * @see aggregator_menu()
  */
 function aggregator_page_source($feed) {
-  drupal_set_title($feed->title);
+  backdrop_set_title($feed->title);
   $feed_source = theme('aggregator_feed_source', array('feed' => $feed));
 
   // It is safe to include the fid in the query because it's loaded from the
@@ -61,7 +61,7 @@ function aggregator_page_source_form($form, $form_state, $feed) {
  * @ingroup forms
  */
 function aggregator_page_category($category) {
-  drupal_add_feed('aggregator/rss/' . $category['cid'], variable_get('site_name', 'Drupal') . ' ' . t('aggregator - @title', array('@title' => $category['title'])));
+  backdrop_add_feed('aggregator/rss/' . $category['cid'], variable_get('site_name', 'Backdrop') . ' ' . t('aggregator - @title', array('@title' => $category['title'])));
 
   // It is safe to include the cid in the query because it's loaded from the
   // database by aggregator_category_load().
@@ -257,7 +257,7 @@ function aggregator_categorize_items_submit($form, &$form_state) {
       }
     }
   }
-  drupal_set_message(t('The categories have been saved.'));
+  backdrop_set_message(t('The categories have been saved.'));
 }
 
 /**
@@ -272,19 +272,19 @@ function aggregator_categorize_items_submit($form, &$form_state) {
 function theme_aggregator_categorize_items($variables) {
   $form = $variables['form'];
 
-  $output = drupal_render($form['feed_source']);
+  $output = backdrop_render($form['feed_source']);
   $rows = array();
   if (!empty($form['items'])) {
     foreach (element_children($form['items']) as $key) {
       $rows[] = array(
-        drupal_render($form['items'][$key]),
-        array('data' => drupal_render($form['categories'][$key]), 'class' => array('categorize-item')),
+        backdrop_render($form['items'][$key]),
+        array('data' => backdrop_render($form['categories'][$key]), 'class' => array('categorize-item')),
       );
     }
   }
   $output .= theme('table', array('header' => array('', t('Categorize')), 'rows' => $rows));
-  $output .= drupal_render($form['submit']);
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render($form['submit']);
+  $output .= backdrop_render_children($form);
 
   return theme('aggregator_wrapper', array('content' => $output));
 }
@@ -417,7 +417,7 @@ function theme_aggregator_page_rss($variables) {
   $feeds = $variables['feeds'];
   $category = $variables['category'];
 
-  drupal_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
+  backdrop_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
 
   $items = '';
   $feed_length = variable_get('feed_item_length', 'fulltext');
@@ -437,7 +437,7 @@ function theme_aggregator_page_rss($variables) {
     $items .= format_rss_item($feed->ftitle . ': ' . $feed->title, $feed->link, $feed->description, array('pubDate' => date('r', $feed->timestamp)));
   }
 
-  $site_name = variable_get('site_name', 'Drupal');
+  $site_name = variable_get('site_name', 'Backdrop');
   $url = url((isset($category) ? 'aggregator/categories/' . $category->cid : 'aggregator'), array('absolute' => TRUE));
   $description = isset($category) ? t('@site_name - aggregated feeds in category @title', array('@site_name' => $site_name, '@title' => $category->title)) : t('@site_name - aggregated feeds', array('@site_name' => $site_name));
 
@@ -484,12 +484,12 @@ function aggregator_page_opml($cid = NULL) {
 function theme_aggregator_page_opml($variables) {
   $feeds = $variables['feeds'];
 
-  drupal_add_http_header('Content-Type', 'text/xml; charset=utf-8');
+  backdrop_add_http_header('Content-Type', 'text/xml; charset=utf-8');
 
   $output  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
   $output .= "<opml version=\"1.1\">\n";
   $output .= "<head>\n";
-  $output .= '<title>' . check_plain(variable_get('site_name', 'Drupal')) . "</title>\n";
+  $output .= '<title>' . check_plain(variable_get('site_name', 'Backdrop')) . "</title>\n";
   $output .= '<dateModified>' . gmdate(DATE_RFC2822, REQUEST_TIME) . "</dateModified>\n";
   $output .= "</head>\n";
   $output .= "<body>\n";

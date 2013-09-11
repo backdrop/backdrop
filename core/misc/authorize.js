@@ -7,7 +7,7 @@
 
 (function ($) {
 
-Drupal.behaviors.authorizeFileTransferForm = {
+Backdrop.behaviors.authorizeFileTransferForm = {
   attach: function(context) {
     $('#edit-connection-settings-authorize-filetransfer-default').change(function() {
       $('.filetransfer').hide().filter('.filetransfer-' + $(this).val()).show();

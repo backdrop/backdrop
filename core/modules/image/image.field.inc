@@ -354,7 +354,7 @@ function image_field_widget_process($element, &$form_state, $form) {
   $widget_settings = $instance['widget']['settings'];
 
   $element['#theme'] = 'image_widget';
-  $element['#attached']['css'][] = drupal_get_path('module', 'image') . '/image.css';
+  $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/image.css';
 
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {
@@ -437,7 +437,7 @@ function theme_image_widget($variables) {
 
   if (isset($element['preview'])) {
     $output .= '<div class="image-preview">';
-    $output .= drupal_render($element['preview']);
+    $output .= backdrop_render($element['preview']);
     $output .= '</div>';
   }
 
@@ -445,7 +445,7 @@ function theme_image_widget($variables) {
   if ($element['fid']['#value'] != 0) {
     $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
   }
-  $output .= drupal_render_children($element);
+  $output .= backdrop_render_children($element);
   $output .= '</div>';
   $output .= '</div>';
 
@@ -578,7 +578,7 @@ function theme_image_formatter($variables) {
   $item = $variables['item'];
 
   // Do not output an empty 'title' attribute.
-  if (drupal_strlen($item['title']) == 0) {
+  if (backdrop_strlen($item['title']) == 0) {
     unset($item['title']);
   }
 

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * GD2 toolkit for image manipulation within Drupal.
+ * GD2 toolkit for image manipulation within Backdrop.
  */
 
 /**
@@ -257,10 +257,10 @@ function image_gd_save(stdClass $image, $destination) {
     $local_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_LOCAL);
     if (!isset($local_wrappers[$scheme])) {
       $permanent_destination = $destination;
-      $destination = drupal_tempnam('temporary://', 'gd_');
+      $destination = backdrop_tempnam('temporary://', 'gd_');
     }
     // Convert stream wrapper URI to normal path.
-    $destination = drupal_realpath($destination);
+    $destination = backdrop_realpath($destination);
   }
 
   $extension = str_replace('jpg', 'jpeg', $image->info['extension']);

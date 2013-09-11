@@ -4,7 +4,7 @@
 /**
  * Attach the child dialog behavior to new content.
  */
-Drupal.behaviors.overlayChild = {
+Backdrop.behaviors.overlayChild = {
   attach: function (context, settings) {
     // Make sure this behavior is not processed more than once.
     if (this.processed) {
@@ -13,7 +13,7 @@ Drupal.behaviors.overlayChild = {
     this.processed = true;
 
     // If we cannot reach the parent window, break out of the overlay.
-    if (!parent.Drupal || !parent.Drupal.overlay) {
+    if (!parent.Backdrop || !parent.Backdrop.overlay) {
       window.location = window.location.href.replace(/([?&]?)render=overlay&?/g, '$1').replace(/\?$/, '');
     }
 
@@ -22,21 +22,21 @@ Drupal.behaviors.overlayChild = {
     // If the entire parent window should be refreshed when the overlay is
     // closed, pass that information to the parent window.
     if (settings.refreshPage) {
-      parent.Drupal.overlay.refreshPage = true;
+      parent.Backdrop.overlay.refreshPage = true;
     }
 
     // If a form has been submitted successfully, then the server side script
     // may have decided to tell the parent window to close the popup dialog.
     if (settings.closeOverlay) {
-      parent.Drupal.overlay.bindChild(window, true);
+      parent.Backdrop.overlay.bindChild(window, true);
       // Use setTimeout to close the child window from a separate thread,
-      // because the current one is busy processing Drupal behaviors.
+      // because the current one is busy processing Backdrop behaviors.
       setTimeout(function () {
         if (typeof settings.redirect == 'string') {
-          parent.Drupal.overlay.redirect(settings.redirect);
+          parent.Backdrop.overlay.redirect(settings.redirect);
         }
         else {
-          parent.Drupal.overlay.close();
+          parent.Backdrop.overlay.close();
         }
       }, 1);
       return;
@@ -45,17 +45,17 @@ Drupal.behaviors.overlayChild = {
     // If one of the regions displaying outside the overlay needs to be
     // reloaded immediately, let the parent window know.
     if (settings.refreshRegions) {
-      parent.Drupal.overlay.refreshRegions(settings.refreshRegions);
+      parent.Backdrop.overlay.refreshRegions(settings.refreshRegions);
     }
 
     // Ok, now we can tell the parent window we're ready.
-    parent.Drupal.overlay.bindChild(window);
+    parent.Backdrop.overlay.bindChild(window);
 
     // IE8 crashes on certain pages if this isn't called; reason unknown.
     window.scrollTo(window.scrollX, window.scrollY);
 
     // Attach child related behaviors to the iframe document.
-    Drupal.overlayChild.attachBehaviors(context, settings);
+    Backdrop.overlayChild.attachBehaviors(context, settings);
 
     // There are two links within the message that informs people about the
     // overlay and how to disable it. Make sure both links are visible when
@@ -75,16 +75,16 @@ Drupal.behaviors.overlayChild = {
 /**
  * Overlay object for child windows.
  */
-Drupal.overlayChild = Drupal.overlayChild || {
+Backdrop.overlayChild = Backdrop.overlayChild || {
   behaviors: {}
 };
 
-Drupal.overlayChild.prototype = {};
+Backdrop.overlayChild.prototype = {};
 
 /**
  * Attach child related behaviors to the iframe document.
  */
-Drupal.overlayChild.attachBehaviors = function (context, settings) {
+Backdrop.overlayChild.attachBehaviors = function (context, settings) {
   $.each(this.behaviors, function () {
     this(context, settings);
   });
@@ -97,8 +97,8 @@ Drupal.overlayChild.attachBehaviors = function (context, settings) {
  * document and handle events that bubble up. This also allows other scripts
  * to bind their own handlers to links and also to prevent overlay's handling.
  */
-Drupal.overlayChild.behaviors.addClickHandler = function (context, settings) {
-  $(document).bind('click.drupal-overlay mouseup.drupal-overlay', $.proxy(parent.Drupal.overlay, 'eventhandlerOverrideLink'));
+Backdrop.overlayChild.behaviors.addClickHandler = function (context, settings) {
+  $(document).bind('click.backdrop-overlay mouseup.backdrop-overlay', $.proxy(parent.Backdrop.overlay, 'eventhandlerOverrideLink'));
 };
 
 /**
@@ -107,7 +107,7 @@ Drupal.overlayChild.behaviors.addClickHandler = function (context, settings) {
  * By default, forms are assumed to keep the flow in the overlay. Thus their
  * action attribute get a ?render=overlay suffix.
  */
-Drupal.overlayChild.behaviors.parseForms = function (context, settings) {
+Backdrop.overlayChild.behaviors.parseForms = function (context, settings) {
   $('form', context).once('overlay', function () {
     // Obtain the action attribute of the form.
     var action = $(this).attr('action');
@@ -126,12 +126,12 @@ Drupal.overlayChild.behaviors.parseForms = function (context, settings) {
 /**
  * Replace the overlay title with a message while loading another page.
  */
-Drupal.overlayChild.behaviors.loading = function (context, settings) {
+Backdrop.overlayChild.behaviors.loading = function (context, settings) {
   var $title;
-  var text = Drupal.t('Loading');
+  var text = Backdrop.t('Loading');
   var dots = '';
 
-  $(document).bind('drupalOverlayBeforeLoad.drupal-overlay.drupal-overlay-child-loading', function () {
+  $(document).bind('backdropOverlayBeforeLoad.backdrop-overlay.backdrop-overlay-child-loading', function () {
     $title = $('#overlay-title').text(text);
     var id = setInterval(function () {
       dots = (dots.length > 10) ? '' : dots + '.';
@@ -143,11 +143,11 @@ Drupal.overlayChild.behaviors.loading = function (context, settings) {
 /**
  * Switch active tab immediately.
  */
-Drupal.overlayChild.behaviors.tabs = function (context, settings) {
+Backdrop.overlayChild.behaviors.tabs = function (context, settings) {
   var $tabsLinks = $('#overlay-tabs > li > a');
 
-  $('#overlay-tabs > li > a').bind('click.drupal-overlay', function () {
-    var active_tab = Drupal.t('(active tab)');
+  $('#overlay-tabs > li > a').bind('click.backdrop-overlay', function () {
+    var active_tab = Backdrop.t('(active tab)');
     $tabsLinks.parent().siblings().removeClass('active').find('element-invisible:contains(' + active_tab + ')').appendTo(this);
     $(this).parent().addClass('active');
   });
@@ -156,7 +156,7 @@ Drupal.overlayChild.behaviors.tabs = function (context, settings) {
 /**
  * If the shortcut add/delete button exists, move it to the overlay titlebar.
  */
-Drupal.overlayChild.behaviors.shortcutAddLink = function (context, settings) {
+Backdrop.overlayChild.behaviors.shortcutAddLink = function (context, settings) {
   // Remove any existing shortcut button markup from the titlebar.
   $('#overlay-titlebar').find('.add-or-remove-shortcuts').remove();
   // If the shortcut add/delete button exists, move it to the titlebar.
@@ -165,7 +165,7 @@ Drupal.overlayChild.behaviors.shortcutAddLink = function (context, settings) {
     $addToShortcuts.insertAfter('#overlay-title');
   }
 
-  $(document).bind('drupalOverlayBeforeLoad.drupal-overlay.drupal-overlay-child-loading', function () {
+  $(document).bind('backdropOverlayBeforeLoad.backdrop-overlay.backdrop-overlay-child-loading', function () {
     $('#overlay-titlebar').find('.add-or-remove-shortcuts').remove();
   });
 };
@@ -173,18 +173,18 @@ Drupal.overlayChild.behaviors.shortcutAddLink = function (context, settings) {
 /**
  * Use displacement from parent window.
  */
-Drupal.overlayChild.behaviors.alterTableHeaderOffset = function (context, settings) {
-  if (Drupal.settings.tableHeaderOffset) {
-    Drupal.overlayChild.prevTableHeaderOffset = Drupal.settings.tableHeaderOffset;
+Backdrop.overlayChild.behaviors.alterTableHeaderOffset = function (context, settings) {
+  if (Backdrop.settings.tableHeaderOffset) {
+    Backdrop.overlayChild.prevTableHeaderOffset = Backdrop.settings.tableHeaderOffset;
   }
-  Drupal.settings.tableHeaderOffset = 'Drupal.overlayChild.tableHeaderOffset';
+  Backdrop.settings.tableHeaderOffset = 'Backdrop.overlayChild.tableHeaderOffset';
 };
 
 /**
- * Callback for Drupal.settings.tableHeaderOffset.
+ * Callback for Backdrop.settings.tableHeaderOffset.
  */
-Drupal.overlayChild.tableHeaderOffset = function () {
-  var topOffset = Drupal.overlayChild.prevTableHeaderOffset ? eval(Drupal.overlayChild.prevTableHeaderOffset + '()') : 0;
+Backdrop.overlayChild.tableHeaderOffset = function () {
+  var topOffset = Backdrop.overlayChild.prevTableHeaderOffset ? eval(Backdrop.overlayChild.prevTableHeaderOffset + '()') : 0;
 
   return topOffset + parseInt($(document.body).css('marginTop'));
 };

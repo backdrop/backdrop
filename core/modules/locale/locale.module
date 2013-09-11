@@ -22,14 +22,14 @@ function locale_help($path, $arg) {
     case 'admin/help#locale':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Locale module allows your Drupal site to be presented in languages other than the default English, and to be multilingual. The Locale module works by maintaining a database of translations, and examining text as it is about to be displayed. When a translation of the text is available in the language to be displayed, the translation is displayed rather than the original text. When a translation is unavailable, the original text is displayed, and then stored for review by a translator. For more information, see the online handbook entry for <a href="@locale">Locale module</a>.', array('@locale' => 'http://drupal.org/handbook/modules/locale/')) . '</p>';
+      $output .= '<p>' . t('The Locale module allows your Backdrop site to be presented in languages other than the default English, and to be multilingual. The Locale module works by maintaining a database of translations, and examining text as it is about to be displayed. When a translation of the text is available in the language to be displayed, the translation is displayed rather than the original text. When a translation is unavailable, the original text is displayed, and then stored for review by a translator. For more information, see the online handbook entry for <a href="@locale">Locale module</a>.', array('@locale' => 'http://backdrop.org/handbook/modules/locale/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Translating interface text') . '</dt>';
-      $output .= '<dd>' . t('Translations of text in the Drupal interface may be provided by:');
+      $output .= '<dd>' . t('Translations of text in the Backdrop interface may be provided by:');
       $output .= '<ul>';
       $output .= '<li>' . t("Translating within your site, using the Locale module's integrated <a href='@translate'>translation interface</a>.", array('@translate' => url('admin/config/regional/translate'))) . '</li>';
-      $output .= '<li>' . t('Importing files from a set of existing translations, known as a translation package. A translation package enables the display of a specific version of Drupal in a specific language, and contains files in the Gettext Portable Object (<em>.po</em>) format. Although not all languages are available for every version of Drupal, translation packages for many languages are available for download from the <a href="@translations">Drupal translations page</a>.', array('@translations' => 'http://localize.drupal.org')) . '</li>';
+      $output .= '<li>' . t('Importing files from a set of existing translations, known as a translation package. A translation package enables the display of a specific version of Backdrop in a specific language, and contains files in the Gettext Portable Object (<em>.po</em>) format. Although not all languages are available for every version of Backdrop, translation packages for many languages are available for download from the <a href="@translations">Backdrop translations page</a>.', array('@translations' => 'http://localize.backdrop.org')) . '</li>';
       $output .= '<li>' . t("If an existing translation package does not meet your needs, the Gettext Portable Object (<em>.po</em>) files within a package may be modified, or new <em>.po</em> files may be created, using a desktop Gettext editor. The Locale module's <a href='@import'>import</a> feature allows the translated strings from a new or modified <em>.po</em> file to be added to your site. The Locale module's <a href='@export'>export</a> feature generates files from your site's translated strings, that can either be shared with others or edited offline by a Gettext translation editor.", array('@import' => url('admin/config/regional/translate/import'), '@export' => url('admin/config/regional/translate/export'))) . '</li>';
       $output .= '</ul></dd>';
       $output .= '<dt>' . t('Configuring a multilingual site') . '</dt>';
@@ -38,10 +38,10 @@ function locale_help($path, $arg) {
       return $output;
 
     case 'admin/config/regional/language':
-      return '<p>' . t('Interface text can be translated. <a href="@translations">Download contributed translations</a> from Drupal.org.', array('@translations' => 'http://localize.drupal.org')) . '</p>';
+      return '<p>' . t('Interface text can be translated. <a href="@translations">Download contributed translations</a> from Backdrop.org.', array('@translations' => 'http://localize.backdrop.org')) . '</p>';
 
     case 'admin/config/regional/language/detection':
-      $output = '<p>' . t("Define how to decide which language is used to display page elements (primarily text provided by Drupal and modules, such as field labels and help text). This decision is made by evaluating a series of detection methods for languages; the first detection method that gets a result will determine which language is used for that type of text. Define the order of evaluation of language detection methods on this page.") . '</p>';
+      $output = '<p>' . t("Define how to decide which language is used to display page elements (primarily text provided by Backdrop and modules, such as field labels and help text). This decision is made by evaluating a series of detection methods for languages; the first detection method that gets a result will determine which language is used for that type of text. Define the order of evaluation of language detection methods on this page.") . '</p>';
       return $output;
 
     case 'admin/config/regional/language/detection/session':
@@ -54,7 +54,7 @@ function locale_help($path, $arg) {
 
     case 'admin/config/regional/translate/import':
       $output = '<p>' . t('This page imports the translated strings contained in an individual Gettext Portable Object (<em>.po</em>) file. Normally distributed as part of a translation package (each translation package may contain several <em>.po</em> files), a <em>.po</em> file may need to be imported after offline editing in a Gettext translation editor. Importing an individual <em>.po</em> file may be a lengthy process.') . '</p>';
-      $output .= '<p>' . t('Note that the <em>.po</em> files within a translation package are imported automatically (if available) when new modules or themes are enabled, or as new languages are added. Since this page only allows the import of one <em>.po</em> file at a time, it may be simpler to download and extract a translation package into your Drupal installation directory and <a href="@language-add">add the language</a> (which automatically imports all <em>.po</em> files within the package). Translation packages are available for download on the <a href="@translations">Drupal translation page</a>.', array('@language-add' => url('admin/config/regional/language/add'), '@translations' => 'http://localize.drupal.org')) . '</p>';
+      $output .= '<p>' . t('Note that the <em>.po</em> files within a translation package are imported automatically (if available) when new modules or themes are enabled, or as new languages are added. Since this page only allows the import of one <em>.po</em> file at a time, it may be simpler to download and extract a translation package into your Backdrop installation directory and <a href="@language-add">add the language</a> (which automatically imports all <em>.po</em> files within the package). Translation packages are available for download on the <a href="@translations">Backdrop translation page</a>.', array('@language-add' => url('admin/config/regional/language/add'), '@translations' => 'http://localize.backdrop.org')) . '</p>';
       return $output;
 
     case 'admin/config/regional/translate/export':
@@ -75,7 +75,7 @@ function locale_menu() {
   // Language negotiation.
   $items['admin/config/regional/language/detection'] = array(
     'title' => 'Detection and selection',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_negotiation_configure_form'),
     'access arguments' => array('administer languages'),
     'weight' => 10,
@@ -84,7 +84,7 @@ function locale_menu() {
   );
   $items['admin/config/regional/language/detection/url'] = array(
     'title' => 'URL language detection configuration',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_negotiation_configure_url_form'),
     'access arguments' => array('administer languages'),
     'file' => 'locale.admin.inc',
@@ -92,7 +92,7 @@ function locale_menu() {
   );
   $items['admin/config/regional/language/detection/session'] = array(
     'title' => 'Session language detection configuration',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_negotiation_configure_session_form'),
     'access arguments' => array('administer languages'),
     'file' => 'locale.admin.inc',
@@ -115,7 +115,7 @@ function locale_menu() {
   );
   $items['admin/config/regional/translate/import'] = array(
     'title' => 'Import',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('locale_translate_import_form'),
     'access arguments' => array('translate interface'),
     'weight' => 20,
@@ -132,7 +132,7 @@ function locale_menu() {
   );
   $items['admin/config/regional/translate/edit/%'] = array(
     'title' => 'Edit string',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('locale_translate_edit_form', 5),
     'access arguments' => array('translate interface'),
     'file' => 'locale.pages.inc',
@@ -158,7 +158,7 @@ function locale_menu() {
   $items['admin/config/regional/date-time/locale/%/edit'] = array(
     'title' => 'Localize date formats',
     'description' => 'Configure date formats for each locale',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('locale_date_format_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'locale.admin.inc',
@@ -166,7 +166,7 @@ function locale_menu() {
   $items['admin/config/regional/date-time/locale/%/reset'] = array(
     'title' => 'Reset date formats',
     'description' => 'Reset localized date formats to global defaults',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('locale_date_format_reset_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'locale.admin.inc',
@@ -514,7 +514,7 @@ function locale_language_insert($language) {
   $domains[$language->langcode] = '';
   locale_language_negotiation_url_domains_save($domains);
 
-  // @todo move these two cache clears out. See http://drupal.org/node/1293252
+  // @todo move these two cache clears out. See http://backdrop.org/node/1293252
   // Changing the language settings impacts the interface.
   cache('page')->flush();
   // Force JavaScript translation file re-creation for the new language.
@@ -538,7 +538,7 @@ function locale_language_update($language) {
     locale_language_negotiation_url_prefixes_save($prefixes);
   }
 
-  // @todo move these two cache clears out. See http://drupal.org/node/1293252
+  // @todo move these two cache clears out. See http://backdrop.org/node/1293252
   // Changing the language settings impacts the interface.
   cache('page')->flush();
   // Force JavaScript translation file re-creation for the modified language.
@@ -594,12 +594,12 @@ function locale_language_delete($language) {
 function locale($string = NULL, $context = NULL, $langcode = NULL) {
   global $language_interface;
 
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['locale'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['locale'] = &backdrop_static(__FUNCTION__);
   }
-  $locale_t = &$drupal_static_fast['locale'];
+  $locale_t = &$backdrop_static_fast['locale'];
 
 
   if (!isset($string)) {
@@ -651,7 +651,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
       $locale_t[$langcode][$context][$string] = (empty($translation->translation) ? TRUE : $translation->translation);
 
       if ($translation->version != VERSION) {
-        // This is the first use of this string under current Drupal version. Save version
+        // This is the first use of this string under current Backdrop version. Save version
         // and clear cache, to include the string into caching next time. Saved version is
         // also a string-history information for later pruning of the tables.
         db_update('locales_source')
@@ -684,7 +684,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
  * Reset static variables used by locale().
  */
 function locale_reset() {
-  drupal_static_reset('locale');
+  backdrop_static_reset('locale');
 }
 
 /**
@@ -706,10 +706,10 @@ function locale_get_plural($count, $langcode = NULL) {
   global $language_interface;
 
   // Used to locally cache the plural formulas for all languages.
-  $plural_formulas = &drupal_static(__FUNCTION__, array());
+  $plural_formulas = &backdrop_static(__FUNCTION__, array());
   // Used to store precomputed plural indexes corresponding to numbers
   // individually for each language.
-  $plural_indexes = &drupal_static(__FUNCTION__ . ':plurals', array());
+  $plural_indexes = &backdrop_static(__FUNCTION__ . ':plurals', array());
 
   $langcode = $langcode ? $langcode : $language_interface->langcode;
 
@@ -774,7 +774,7 @@ function locale_themes_enabled($themes) {
  *   identified projects for the components.
  */
 function locale_system_update($components) {
-  include_once drupal_get_path('module', 'locale') . '/locale.bulk.inc';
+  include_once backdrop_get_path('module', 'locale') . '/locale.bulk.inc';
   if ($batch = locale_translate_batch_import_files(NULL, TRUE)) {
     batch_set($batch);
   }
@@ -783,9 +783,9 @@ function locale_system_update($components) {
 /**
  * Implements hook_js_alter().
  *
- * This function checks all JavaScript files currently added via drupal_add_js()
- * and invokes parsing if they have not yet been parsed for Drupal.t()
- * and Drupal.formatPlural() calls. Also refreshes the JavaScript translation
+ * This function checks all JavaScript files currently added via backdrop_add_js()
+ * and invokes parsing if they have not yet been parsed for Backdrop.t()
+ * and Backdrop.formatPlural() calls. Also refreshes the JavaScript translation
  * file if necessary, and adds it to the page.
  */
 function locale_js_alter(&$javascript) {
@@ -841,7 +841,7 @@ function locale_js_alter(&$javascript) {
   if ($files && !empty($locale_javascripts[$language_interface->langcode])) {
     // Add the translation JavaScript file to the page.
     $file = $dir . '/' . $language_interface->langcode . '_' . $locale_javascripts[$language_interface->langcode] . '.js';
-    $javascript[$file] = drupal_js_defaults($file);
+    $javascript[$file] = backdrop_js_defaults($file);
   }
 }
 
@@ -853,7 +853,7 @@ function locale_js_alter(&$javascript) {
 function locale_library_info_alter(&$libraries, $module) {
   global $language_interface;
   if ($module == 'system' && isset($libraries['system']['ui.datepicker'])) {
-    $datepicker = drupal_get_path('module', 'locale') . '/locale.datepicker.js';
+    $datepicker = backdrop_get_path('module', 'locale') . '/locale.datepicker.js';
     $libraries['system']['ui.datepicker']['js'][$datepicker] = array('group' => JS_THEME);
     $libraries['system']['ui.datepicker']['js'][] = array(
       'data' => array(
@@ -894,11 +894,11 @@ function locale_block_info() {
  */
 function locale_block_view($type) {
   if (language_multilingual()) {
-    $path = drupal_is_front_page() ? '<front>' : $_GET['q'];
+    $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
     $links = language_negotiation_get_switch_links($type, $path);
 
     if (isset($links->links)) {
-      drupal_add_css(drupal_get_path('module', 'locale') . '/locale.css');
+      backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
       $class = "language-switcher-{$links->provider}";
       $variables = array('links' => $links->links, 'attributes' => array('class' => array($class)));
       $block['content'] = theme('links__locale_block', $variables);
@@ -925,11 +925,11 @@ function locale_preprocess_block(&$variables) {
 function locale_url_outbound_alter(&$path, &$options, $original_path) {
   // Only modify internal URLs.
   if (!$options['external'] && language_multilingual()) {
-    static $drupal_static_fast;
-    if (!isset($drupal_static_fast)) {
-      $drupal_static_fast['callbacks'] = &drupal_static(__FUNCTION__);
+    static $backdrop_static_fast;
+    if (!isset($backdrop_static_fast)) {
+      $backdrop_static_fast['callbacks'] = &backdrop_static(__FUNCTION__);
     }
-    $callbacks = &$drupal_static_fast['callbacks'];
+    $callbacks = &$backdrop_static_fast['callbacks'];
 
     if (!isset($callbacks)) {
       $callbacks = array();
@@ -1029,7 +1029,7 @@ function locale_form_language_admin_add_form_alter_submit($form, $form_state) {
     $langcode = $form_state['values']['predefined_langcode'];
   }
 
-  include_once drupal_get_path('module', 'locale') . '/locale.bulk.inc';
+  include_once backdrop_get_path('module', 'locale') . '/locale.bulk.inc';
   locale_translate_add_language_set_batch($langcode);
 }
 

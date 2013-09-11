@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Add language handling functionality to Drupal.
+ * Add language handling functionality to Backdrop.
  */
 
 /**
@@ -13,7 +13,7 @@ function language_help($path, $arg) {
     case 'admin/help#language':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Language module allows you to maintain a list of languages used on your Drupal site for providing language information for content and for interface translation (using the Locale module). For more information, see the online handbook entry for <a href="@language">Language module</a>.', array('@language' => 'http://drupal.org/handbook/modules/language/')) . '</p>';
+      $output .= '<p>' . t('The Language module allows you to maintain a list of languages used on your Backdrop site for providing language information for content and for interface translation (using the Locale module). For more information, see the online handbook entry for <a href="@language">Language module</a>.', array('@language' => 'http://backdrop.org/handbook/modules/language/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Configuring the list of languages') . '</dt>';
@@ -36,7 +36,7 @@ function language_menu() {
   $items['admin/config/regional/language'] = array(
     'title' => 'Languages',
     'description' => 'Configure languages for content and the user interface.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_admin_overview_form'),
     'access arguments' => array('administer languages'),
     'file' => 'language.admin.inc',
@@ -49,7 +49,7 @@ function language_menu() {
   );
   $items['admin/config/regional/language/add'] = array(
     'title' => 'Add language',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_admin_add_form'),
     'access arguments' => array('administer languages'),
     'weight' => 5,
@@ -58,14 +58,14 @@ function language_menu() {
   );
   $items['admin/config/regional/language/edit/%language'] = array(
     'title' => 'Edit language',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_admin_edit_form', 5),
     'access arguments' => array('administer languages'),
     'file' => 'language.admin.inc',
   );
   $items['admin/config/regional/language/delete/%language'] = array(
     'title' => 'Confirm delete',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_admin_delete_form', 5),
     'access arguments' => array('administer languages'),
     'file' => 'language.admin.inc',
@@ -127,12 +127,12 @@ function language_save($language) {
   // Save the record and inform others about the change.
   $t_args = array('%language' => $language->name, '%langcode' => $language->langcode);
   if ($language->is_new) {
-    drupal_write_record('language', $language);
+    backdrop_write_record('language', $language);
     module_invoke_all('language_insert', $language);
     watchdog('language', 'The %language (%langcode) language has been created.', $t_args);
   }
   else {
-    drupal_write_record('language', $language, array('langcode'));
+    backdrop_write_record('language', $language, array('langcode'));
     module_invoke_all('language_update', $language);
     watchdog('language', 'The %language (%langcode) language has been updated.', $t_args);
   }
@@ -147,7 +147,7 @@ function language_save($language) {
   variable_set('language_count', db_query('SELECT COUNT(langcode) FROM {language} WHERE enabled = 1')->fetchField());
 
   // Kill the static cache in language_list().
-  drupal_static_reset('language_list');
+  backdrop_static_reset('language_list');
 
   return $language;
 }
@@ -176,7 +176,7 @@ function language_delete($langcode) {
       variable_set('language_count', variable_get('language_count', 1) - 1);
     }
 
-    drupal_static_reset('language_list');
+    backdrop_static_reset('language_list');
 
     $t_args = array('%language' => $language->name, '%langcode' => $language->langcode);
     watchdog('language', 'The %language (%langcode) language has been removed.', $t_args);
@@ -188,7 +188,7 @@ function language_delete($langcode) {
 /**
  * Implements hook_css_alter().
  *
- * This function checks all CSS files currently added via drupal_add_css() and
+ * This function checks all CSS files currently added via backdrop_add_css() and
  * and checks to see if a related right to left CSS file should be included.
  */
 function language_css_alter(&$css) {

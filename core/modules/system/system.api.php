@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by Drupal core and the System module.
+ * Hooks provided by Backdrop core and the System module.
  */
 
 /**
@@ -30,7 +30,7 @@
  *     system will determine whether a file with the name $module.$group.inc
  *     exists, and automatically load it when required.
  *
- * See system_hook_info() for all hook groups defined by Drupal core.
+ * See system_hook_info() for all hook groups defined by Backdrop core.
  *
  * @see hook_hook_info_alter().
  */
@@ -72,12 +72,12 @@ function hook_hook_info_alter(&$hooks) {
  *
  * @return
  *   An associative array. For each item, the key is the path in question, in
- *   a format acceptable to drupal_match_path(). The value for each item should
+ *   a format acceptable to backdrop_match_path(). The value for each item should
  *   be TRUE (for paths considered administrative) or FALSE (for non-
  *   administrative paths).
  *
  * @see hook_menu()
- * @see drupal_match_path()
+ * @see backdrop_match_path()
  * @see hook_admin_paths_alter()
  */
 function hook_admin_paths() {
@@ -138,7 +138,7 @@ function hook_cron() {
     ':time' => REQUEST_TIME,
     ':never' => AGGREGATOR_CLEAR_NEVER,
   ));
-  $queue = DrupalQueue::get('aggregator_feeds');
+  $queue = BackdropQueue::get('aggregator_feeds');
   foreach ($result as $feed) {
     $queue->createItem($feed);
   }
@@ -158,9 +158,9 @@ function hook_cron() {
  *   An associative array where the key is the queue name and the value is
  *   again an associative array. Possible keys are:
  *   - 'worker callback': The name of the function to call. It will be called
- *     with one argument, the item created via DrupalQueue::createItem() in
+ *     with one argument, the item created via BackdropQueue::createItem() in
  *     hook_cron().
- *   - 'time': (optional) How much time Drupal should spend on calling this
+ *   - 'time': (optional) How much time Backdrop should spend on calling this
  *     worker in seconds. Defaults to 15.
  *
  * @see hook_cron()
@@ -177,14 +177,14 @@ function hook_cron_queue_info() {
 /**
  * Alter cron queue information before cron runs.
  *
- * Called by drupal_cron_run() to allow modules to alter cron queue settings
+ * Called by backdrop_cron_run() to allow modules to alter cron queue settings
  * before any jobs are processesed.
  *
  * @param array $queues
  *   An array of cron queue information.
  *
  * @see hook_cron_queue_info()
- * @see drupal_cron_run()
+ * @see backdrop_cron_run()
  */
 function hook_cron_queue_info_alter(&$queues) {
   // This site has many feeds so let's spend 90 seconds on each cron run
@@ -207,7 +207,7 @@ function hook_cron_queue_info_alter(&$queues) {
  * registered with hook_theme() as normal.
  *
  * For more information about custom element types see the explanation at
- * http://drupal.org/node/169815.
+ * http://backdrop.org/node/169815.
  *
  * @return
  *  An associative array describing the element types being defined. The array
@@ -266,10 +266,10 @@ function hook_element_info_alter(&$type) {
  * hook_init() instead. That is the usual case. If you implement this hook
  * and see an error like 'Call to undefined function', it is likely that
  * you are depending on the presence of a module which has not been loaded yet.
- * It is not loaded because Drupal is still in bootstrap mode.
+ * It is not loaded because Backdrop is still in bootstrap mode.
  *
  * @param $destination
- *   If this hook is invoked as part of a drupal_goto() call, then this argument
+ *   If this hook is invoked as part of a backdrop_goto() call, then this argument
  *   will be a fully-qualified URL that is the destination of the redirect.
  */
 function hook_exit($destination = NULL) {
@@ -286,13 +286,13 @@ function hook_exit($destination = NULL) {
  * @param $javascript
  *   An array of all JavaScript being presented on the page.
  *
- * @see drupal_add_js()
- * @see drupal_get_js()
- * @see drupal_js_defaults()
+ * @see backdrop_add_js()
+ * @see backdrop_get_js()
+ * @see backdrop_js_defaults()
  */
 function hook_js_alter(&$javascript) {
   // Swap out jQuery to use an updated version of the library.
-  $javascript['core/misc/jquery.js']['data'] = drupal_get_path('module', 'jquery_update') . '/jquery.js';
+  $javascript['core/misc/jquery.js']['data'] = backdrop_get_path('module', 'jquery_update') . '/jquery.js';
 }
 
 /**
@@ -309,11 +309,11 @@ function hook_js_alter(&$javascript) {
  *   version_compare() to compare different versions.
  * - 'js': An array of JavaScript elements; each element's key is used as $data
  *   argument, each element's value is used as $options array for
- *   drupal_add_js(). To add library-specific (not module-specific) JavaScript
+ *   backdrop_add_js(). To add library-specific (not module-specific) JavaScript
  *   settings, the key may be skipped, the value must specify
  *   'type' => 'setting', and the actual settings must be contained in a 'data'
  *   element of the value.
- * - 'css': Like 'js', an array of CSS elements passed to drupal_add_css().
+ * - 'css': Like 'js', an array of CSS elements passed to backdrop_add_css().
  * - 'dependencies': An array of libraries that are required for a library. Each
  *   element is an array listing the module and name of another library. Note
  *   that all dependencies for each dependent library will also be added when
@@ -327,8 +327,8 @@ function hook_js_alter(&$javascript) {
  *   An array defining libraries associated with a module.
  *
  * @see system_library_info()
- * @see drupal_add_library()
- * @see drupal_get_library()
+ * @see backdrop_add_library()
+ * @see backdrop_get_library()
  */
 function hook_library_info() {
   // Library One.
@@ -337,10 +337,10 @@ function hook_library_info() {
     'website' => 'http://example.com/library-1',
     'version' => '1.2',
     'js' => array(
-      drupal_get_path('module', 'my_module') . '/library-1.js' => array(),
+      backdrop_get_path('module', 'my_module') . '/library-1.js' => array(),
     ),
     'css' => array(
-      drupal_get_path('module', 'my_module') . '/library-2.css' => array(
+      backdrop_get_path('module', 'my_module') . '/library-2.css' => array(
         'type' => 'file',
         'media' => 'screen',
       ),
@@ -394,7 +394,7 @@ function hook_library_info_alter(&$libraries, $module) {
       // Update the existing Farbtastic to version 2.0.
       $libraries['farbtastic']['version'] = '2.0';
       $libraries['farbtastic']['js'] = array(
-        drupal_get_path('module', 'farbtastic_update') . '/farbtastic-2.0.js' => array(),
+        backdrop_get_path('module', 'farbtastic_update') . '/farbtastic-2.0.js' => array(),
       );
     }
   }
@@ -406,12 +406,12 @@ function hook_library_info_alter(&$libraries, $module) {
  * @param $css
  *   An array of all CSS items (files and inline CSS) being requested on the page.
  *
- * @see drupal_add_css()
- * @see drupal_get_css()
+ * @see backdrop_add_css()
+ * @see backdrop_get_css()
  */
 function hook_css_alter(&$css) {
   // Remove defaults.css file.
-  unset($css[drupal_get_path('module', 'system') . '/defaults.css']);
+  unset($css[backdrop_get_path('module', 'system') . '/defaults.css']);
 }
 
 /**
@@ -447,7 +447,7 @@ function hook_ajax_render_alter($commands) {
  *   Nested array of renderable elements that make up the page.
  *
  * @see hook_page_alter()
- * @see drupal_render_page()
+ * @see backdrop_render_page()
  */
 function hook_page_build(&$page) {
   if (menu_get_object('node', 1)) {
@@ -561,7 +561,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * mymodule_abc_view() will be called with 'def', 'foo', 'bar' and 'baz' as
  * arguments, in that order.
  *
- * Special care should be taken for the page callback drupal_get_form(), because
+ * Special care should be taken for the page callback backdrop_get_form(), because
  * your specific form callback function will always receive $form and
  * &$form_state as the first function arguments:
  * @code
@@ -672,7 +672,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *
  * @return
  *   An array of menu items. Each menu item has a key corresponding to the
- *   Drupal path being registered. The corresponding array value is an
+ *   Backdrop path being registered. The corresponding array value is an
  *   associative array that may contain the following key-value pairs:
  *   - "title": Required. The untranslated title of the menu item.
  *   - "title callback": Function to generate the title; defaults to t().
@@ -687,10 +687,10 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     function, with path component substitution as described above.
  *   - "delivery callback": The function to call to package the result of the
  *     page callback function and send it to the browser. Defaults to
- *     drupal_deliver_html_page() unless a value is inherited from a parent menu
+ *     backdrop_deliver_html_page() unless a value is inherited from a parent menu
  *     item. Note that this function is called even if the access checks fail,
  *     so any custom delivery callback function should take that into account.
- *     See drupal_deliver_html_page() for an example.
+ *     See backdrop_deliver_html_page() for an example.
  *   - "access callback": A function returning TRUE if the user has access
  *     rights to this menu item, and FALSE if not. It can also be a boolean
  *     constant instead of a function, and you can also use numeric values
@@ -795,7 +795,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *
  * For a detailed usage example, see page_example.module.
  * For comprehensive documentation on the menu system, see
- * http://drupal.org/node/102338.
+ * http://backdrop.org/node/102338.
  */
 function hook_menu() {
   $items['example'] = array(
@@ -881,7 +881,7 @@ function hook_menu_link_alter(&$item) {
  */
 function hook_translated_menu_link_alter(&$item, $map) {
   if ($item['href'] == 'devel/cache/clear') {
-    $item['localized_options']['query'] = drupal_get_destination();
+    $item['localized_options']['query'] = backdrop_get_destination();
   }
 }
 
@@ -904,7 +904,7 @@ function hook_menu_link_insert($link) {
   $record['mlid'] = $link['mlid'];
   $record['menu_name'] = $link['menu_name'];
   $record['status'] = 0;
-  drupal_write_record('menu_example', $record);
+  backdrop_write_record('menu_example', $record);
 }
 
 /**
@@ -1023,7 +1023,7 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  *
  * This hook is invoked by menu_get_active_breadcrumb() and allows alteration
  * of the breadcrumb links for the current page, which may be preferred instead
- * of setting a custom breadcrumb via drupal_set_breadcrumb().
+ * of setting a custom breadcrumb via backdrop_set_breadcrumb().
  *
  * Implementations should take into account that menu_get_active_breadcrumb()
  * subsequently performs the following adjustments to the active trail *after*
@@ -1047,7 +1047,7 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  * @param $item
  *   The menu router item of the current page.
  *
- * @see drupal_set_breadcrumb()
+ * @see backdrop_set_breadcrumb()
  * @see menu_get_active_breadcrumb()
  * @see menu_get_active_trail()
  * @see menu_set_active_trail()
@@ -1057,7 +1057,7 @@ function hook_menu_breadcrumb_alter(&$active_trail, $item) {
   // the active trail. This means that menu_get_active_breadcrumb() will remove
   // the last link (for the current page), but since it is added once more here,
   // it will appear.
-  if (!drupal_is_front_page()) {
+  if (!backdrop_is_front_page()) {
     $end = end($active_trail);
     if ($item['href'] == $end['href']) {
       $active_trail[] = $end;
@@ -1135,7 +1135,7 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
  * page. Some legacy modules may not return structured content at all: their
  * pre-rendered markup will be located in $page['content']['main']['#markup'].
  *
- * Pages built by Drupal's core Node module use a standard structure:
+ * Pages built by Backdrop's core Node module use a standard structure:
  *
  * @code
  *   // Node body.
@@ -1158,7 +1158,7 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
  *   Nested array of renderable elements that make up the page.
  *
  * @see hook_page_build()
- * @see drupal_render_page()
+ * @see backdrop_render_page()
  */
 function hook_page_alter(&$page) {
   // Add help text to the user login block.
@@ -1194,7 +1194,7 @@ function hook_page_alter(&$page) {
  *   Nested array of form elements that comprise the form.
  * @param $form_state
  *   A keyed array containing the current state of the form. The arguments
- *   that drupal_get_form() was originally called with are available in the
+ *   that backdrop_get_form() was originally called with are available in the
  *   array $form_state['build_info']['args'].
  * @param $form_id
  *   String representing the name of the form itself. Typically this is the
@@ -1229,7 +1229,7 @@ function hook_form_alter(&$form, &$form_state, $form_id) {
  *   Nested array of form elements that comprise the form.
  * @param $form_state
  *   A keyed array containing the current state of the form. The arguments
- *   that drupal_get_form() was originally called with are available in the
+ *   that backdrop_get_form() was originally called with are available in the
  *   array $form_state['build_info']['args'].
  * @param $form_id
  *   String representing the name of the form itself. Typically this is the
@@ -1237,7 +1237,7 @@ function hook_form_alter(&$form, &$form_state, $form_id) {
  *
  * @see hook_form_alter()
  * @see hook_form_BASE_FORM_ID_alter()
- * @see drupal_prepare_form()
+ * @see backdrop_prepare_form()
  */
 function hook_form_FORM_ID_alter(&$form, &$form_state, $form_id) {
   // Modification for the form with the given form ID goes here. For example, if
@@ -1255,7 +1255,7 @@ function hook_form_FORM_ID_alter(&$form, &$form_state, $form_id) {
 /**
  * Provide a form-specific alteration for shared ('base') forms.
  *
- * By default, when drupal_get_form() is called, Drupal looks for a function
+ * By default, when backdrop_get_form() is called, Backdrop looks for a function
  * with the same name as the form ID, and uses that function to build the form.
  * In contrast, base forms allow multiple form IDs to be mapped to a single base
  * (also called 'factory') form function.
@@ -1269,7 +1269,7 @@ function hook_form_FORM_ID_alter(&$form, &$form_state, $form_id) {
  * $form_state['build_info']['base_form_id'].
  *
  * See hook_forms() for more information on how to implement base forms in
- * Drupal.
+ * Backdrop.
  *
  * Form alter hooks are called in the following order: hook_form_alter(),
  * hook_form_BASE_FORM_ID_alter(), hook_form_FORM_ID_alter(). See
@@ -1285,7 +1285,7 @@ function hook_form_FORM_ID_alter(&$form, &$form_state, $form_id) {
  *
  * @see hook_form_alter()
  * @see hook_form_FORM_ID_alter()
- * @see drupal_prepare_form()
+ * @see backdrop_prepare_form()
  * @see hook_forms()
  */
 function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
@@ -1304,9 +1304,9 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
 /**
  * Map form_ids to form builder functions.
  *
- * By default, when drupal_get_form() is called, the system will look for a
+ * By default, when backdrop_get_form() is called, the system will look for a
  * function with the same name as the form ID, and use that function to build
- * the form. If no such function is found, Drupal calls this hook. Modules
+ * the form. If no such function is found, Backdrop calls this hook. Modules
  * implementing this hook can then provide their own instructions for mapping
  * form IDs to constructor functions. As a result, you can easily map multiple
  * form IDs to a single form constructor (referred to as a 'base' form).
@@ -1334,8 +1334,8 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  * @param $form_id
  *   The unique string identifying the desired form.
  * @param $args
- *   An array containing the original arguments provided to drupal_get_form()
- *   or drupal_form_submit(). These are always passed to the form builder and
+ *   An array containing the original arguments provided to backdrop_get_form()
+ *   or backdrop_form_submit(). These are always passed to the form builder and
  *   do not have to be specified manually in 'callback arguments'.
  *
  * @return
@@ -1388,14 +1388,14 @@ function hook_forms($form_id, $args) {
  *
  * Only use this hook if your code must run even for cached page views. This
  * hook is called before modules or most include files are loaded into memory.
- * It happens while Drupal is still in bootstrap mode.
+ * It happens while Backdrop is still in bootstrap mode.
  *
  * @see hook_init()
  */
 function hook_boot() {
   // We need user_access() in the shutdown function. Make sure it gets loaded.
-  drupal_load('module', 'user');
-  drupal_register_shutdown_function('devel_shutdown');
+  backdrop_load('module', 'user');
+  backdrop_register_shutdown_function('devel_shutdown');
 }
 
 /**
@@ -1415,8 +1415,8 @@ function hook_boot() {
 function hook_init() {
   // Since this file should only be loaded on the front page, it cannot be
   // declared in the info file.
-  if (drupal_is_front_page()) {
-    drupal_add_css(drupal_get_path('module', 'foo') . '/foo.css');
+  if (backdrop_is_front_page()) {
+    backdrop_add_css(backdrop_get_path('module', 'foo') . '/foo.css');
   }
 }
 
@@ -1459,23 +1459,23 @@ function hook_image_toolkits() {
 }
 
 /**
- * Alter an email message created with the drupal_mail() function.
+ * Alter an email message created with the backdrop_mail() function.
  *
  * hook_mail_alter() allows modification of email messages created and sent
- * with drupal_mail(). Usage examples include adding and/or changing message
+ * with backdrop_mail(). Usage examples include adding and/or changing message
  * text, message fields, and message headers.
  *
- * Email messages sent using functions other than drupal_mail() will not
+ * Email messages sent using functions other than backdrop_mail() will not
  * invoke hook_mail_alter(). For example, a contributed module directly
- * calling the drupal_mail_system()->mail() or PHP mail() function
- * will not invoke this hook. All core modules use drupal_mail() for
+ * calling the backdrop_mail_system()->mail() or PHP mail() function
+ * will not invoke this hook. All core modules use backdrop_mail() for
  * messaging, it is best practice but not mandatory in contributed modules.
  *
  * @param $message
  *   An array containing the message data. Keys in this array include:
  *  - 'id':
- *     The drupal_mail() id of the message. Look at module source code or
- *     drupal_mail() for possible id values.
+ *     The backdrop_mail() id of the message. Look at module source code or
+ *     backdrop_mail() for possible id values.
  *  - 'to':
  *     The address or addresses the message will be sent to. The
  *     formatting of this string must comply with RFC 2822.
@@ -1493,7 +1493,7 @@ function hook_image_toolkits() {
  *     Associative array containing mail headers, such as From, Sender,
  *     MIME-Version, Content-Type, etc.
  *  - 'params':
- *     An array of optional parameters supplied by the caller of drupal_mail()
+ *     An array of optional parameters supplied by the caller of backdrop_mail()
  *     that is used to build the message before hook_mail_alter() is invoked.
  *  - 'language':
  *     The language object used to build the message before hook_mail_alter()
@@ -1501,7 +1501,7 @@ function hook_image_toolkits() {
  *  - 'send':
  *     Set to FALSE to abort sending this email message.
  *
- * @see drupal_mail()
+ * @see backdrop_mail()
  */
 function hook_mail_alter(&$message) {
   if ($message['id'] == 'modulename_messagekey') {
@@ -1511,7 +1511,7 @@ function hook_mail_alter(&$message) {
       $message['send'] = FALSE;
       return;
     }
-    $message['body'][] = "--\nMail sent out from " . variable_get('site_name', t('Drupal'));
+    $message['body'][] = "--\nMail sent out from " . variable_get('site_name', t('Backdrop'));
   }
 }
 
@@ -1522,8 +1522,8 @@ function hook_mail_alter(&$message) {
  * hook in order to reorder the implementing modules, which are otherwise
  * ordered by the module's system weight.
  *
- * Note that hooks invoked using drupal_alter() can have multiple variations
- * (such as hook_form_alter() and hook_form_FORM_ID_alter()). drupal_alter()
+ * Note that hooks invoked using backdrop_alter() can have multiple variations
+ * (such as hook_form_alter() and hook_form_FORM_ID_alter()). backdrop_alter()
  * will call all such variants defined by a single module in turn. For the
  * purposes of hook_module_implements_alter(), these variants are treated as
  * a single hook. Thus, to ensure that your implementation of
@@ -1558,14 +1558,14 @@ function hook_module_implements_alter(&$implementations, $hook) {
  *
  * This hook is invoked from _system_rebuild_theme_data() and allows modules to
  * register additional themes outside of the regular 'themes' directories of a
- * Drupal installation.
+ * Backdrop installation.
  *
  * @return
  *   An associative array. Each key is the system name of a theme and each value
  *   is the corresponding path to the theme's .info file.
  */
 function hook_system_theme_info() {
-  $themes['mymodule_test_theme'] = drupal_get_path('module', 'mymodule') . '/mymodule_test_theme/mymodule_test_theme.info';
+  $themes['mymodule_test_theme'] = backdrop_get_path('module', 'mymodule') . '/mymodule_test_theme/mymodule_test_theme.info';
   return $themes;
 }
 
@@ -1575,7 +1575,7 @@ function hook_system_theme_info() {
  * This hook is invoked in _system_rebuild_module_data() and in
  * _system_rebuild_theme_data(). A module may implement this hook in order to
  * add to or alter the data generated by reading the .info file with
- * drupal_parse_info_file().
+ * backdrop_parse_info_file().
  *
  * @param $info
  *   The .info file contents, passed by reference so that it can be altered.
@@ -1617,7 +1617,7 @@ function hook_system_info_alter(&$info, $file, $type) {
  *     permission to trusted users. This should be used for permissions that
  *     have inherent security risks across a variety of potential use cases
  *     (for example, the "administer filters" and "bypass node access"
- *     permissions provided by Drupal core). When set to TRUE, a standard
+ *     permissions provided by Backdrop core). When set to TRUE, a standard
  *     warning message defined in user_admin_permissions() and output via
  *     theme_user_permission_description() will be associated with the
  *     permission and displayed with it on the permission administration page.
@@ -1703,7 +1703,7 @@ function hook_permission() {
  *     possible to split theme functions out into separate files quite easily.
  *   - path: Override the path of the file to be used. Ordinarily the module or
  *     theme path will be used, but if the file will not be in the default
- *     path, include it here. This path should be relative to the Drupal root
+ *     path, include it here. This path should be relative to the Backdrop root
  *     directory.
  *   - template: If specified, this theme implementation is a template, and
  *     this is the template file without an extension. Do not put .tpl.php on
@@ -1847,11 +1847,11 @@ function hook_custom_theme() {
  * particular XML-RPC methods are invoked by a client.
  *
  * @return
- *   An array which maps XML-RPC methods to Drupal functions. Each array
+ *   An array which maps XML-RPC methods to Backdrop functions. Each array
  *   element is either a pair of method => function or an array with four
  *   entries:
  *   - The XML-RPC method name (for example, module.function).
- *   - The Drupal callback function (for example, module_function).
+ *   - The Backdrop callback function (for example, module_function).
  *   - The method signature is an array of XML-RPC types. The first element
  *     of this array is the type of return value and then you should write a
  *     list of the types of the parameters. XML-RPC types are the following
@@ -1875,10 +1875,10 @@ function hook_custom_theme() {
  */
 function hook_xmlrpc() {
   return array(
-    'drupal.login' => 'drupal_login',
+    'backdrop.login' => 'backdrop_login',
     array(
-      'drupal.site.ping',
-      'drupal_directory_ping',
+      'backdrop.site.ping',
+      'backdrop_directory_ping',
       array('boolean', 'string', 'string', 'string', 'string', 'string'),
       t('Handling ping request'))
   );
@@ -1903,7 +1903,7 @@ function hook_xmlrpc() {
  */
 function hook_xmlrpc_alter(&$methods) {
   // Directly change a simple method.
-  $methods['drupal.login'] = 'mymodule_login';
+  $methods['backdrop.login'] = 'mymodule_login';
 
   // Alter complex definitions.
   foreach ($methods as $key => &$method) {
@@ -1912,7 +1912,7 @@ function hook_xmlrpc_alter(&$methods) {
       continue;
     }
     // Perform the wanted manipulation.
-    if ($method[0] == 'drupal.site.ping') {
+    if ($method[0] == 'backdrop.site.ping') {
       $method[1] = 'mymodule_directory_ping';
     }
   }
@@ -1962,7 +1962,7 @@ function hook_watchdog(array $log_entry) {
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
-    '@site_name' => variable_get('site_name', 'Drupal'),
+    '@site_name' => variable_get('site_name', 'Backdrop'),
     '@severity_desc' => $severity_list[$log_entry['severity']],
   ));
 
@@ -1992,43 +1992,43 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  drupal_mail('emaillog', 'entry', $to, $language_interface, $params);
+  backdrop_mail('emaillog', 'entry', $to, $language_interface, $params);
 }
 
 /**
- * Prepare a message based on parameters; called from drupal_mail().
+ * Prepare a message based on parameters; called from backdrop_mail().
  *
  * Note that hook_mail(), unlike hook_mail_alter(), is only called on the
- * $module argument to drupal_mail(), not all modules.
+ * $module argument to backdrop_mail(), not all modules.
  *
  * @param $key
  *   An identifier of the mail.
  * @param $message
  *   An array to be filled in. Elements in this array include:
  *   - id: An ID to identify the mail sent. Look at module source code
- *     or drupal_mail() for possible id values.
+ *     or backdrop_mail() for possible id values.
  *   - to: The address or addresses the message will be sent to. The
  *     formatting of this string must comply with RFC 2822.
  *   - subject: Subject of the e-mail to be sent. This must not contain any
- *     newline characters, or the mail may not be sent properly. drupal_mail()
+ *     newline characters, or the mail may not be sent properly. backdrop_mail()
  *     sets this to an empty string when the hook is invoked.
- *   - body: An array of lines containing the message to be sent. Drupal will
- *     format the correct line endings for you. drupal_mail() sets this to an
+ *   - body: An array of lines containing the message to be sent. Backdrop will
+ *     format the correct line endings for you. backdrop_mail() sets this to an
  *     empty array when the hook is invoked.
  *   - from: The address the message will be marked as being from, which is
- *     set by drupal_mail() to either a custom address or the site-wide
+ *     set by backdrop_mail() to either a custom address or the site-wide
  *     default email address when the hook is invoked.
  *   - headers: Associative array containing mail headers, such as From,
- *     Sender, MIME-Version, Content-Type, etc. drupal_mail() pre-fills
+ *     Sender, MIME-Version, Content-Type, etc. backdrop_mail() pre-fills
  *     several headers in this array.
  * @param $params
- *   An array of parameters supplied by the caller of drupal_mail().
+ *   An array of parameters supplied by the caller of backdrop_mail().
  */
 function hook_mail($key, &$message, $params) {
   $account = $params['account'];
   $context = $params['context'];
   $variables = array(
-    '%site_name' => variable_get('site_name', 'Drupal'),
+    '%site_name' => variable_get('site_name', 'Backdrop'),
     '%username' => user_format_name($account),
   );
   if ($context['hook'] == 'taxonomy') {
@@ -2059,7 +2059,7 @@ function hook_mail($key, &$message, $params) {
   $subject = strtr($context['subject'], $variables);
   $body = strtr($context['message'], $variables);
   $message['subject'] .= str_replace(array("\r", "\n"), '', $subject);
-  $message['body'][] = drupal_html_to_text($body);
+  $message['body'][] = backdrop_html_to_text($body);
 }
 
 /**
@@ -2067,12 +2067,12 @@ function hook_mail($key, &$message, $params) {
  *
  * This hook allows your module to add cache bins to the list of cache bins
  * that will be cleared by the Clear button on the Performance page or
- * whenever drupal_flush_all_caches is invoked.
+ * whenever backdrop_flush_all_caches is invoked.
  *
  * @return
  *   An array of cache bins.
  *
- * @see drupal_flush_all_caches()
+ * @see backdrop_flush_all_caches()
  */
 function hook_flush_caches() {
   return array('example');
@@ -2142,7 +2142,7 @@ function hook_modules_installed($modules) {
  */
 function hook_modules_enabled($modules) {
   if (in_array('lousy_module', $modules)) {
-    drupal_set_message(t('mymodule is not compatible with lousy_module'), 'error');
+    backdrop_set_message(t('mymodule is not compatible with lousy_module'), 'error');
     mymodule_disable_functionality();
   }
 }
@@ -2207,7 +2207,7 @@ function hook_modules_uninstalled($modules) {
  *   then keyed by the following values:
  *   - 'name' A short string to name the wrapper.
  *   - 'class' A string specifying the PHP class that implements the
- *     DrupalStreamWrapperInterface interface.
+ *     BackdropStreamWrapperInterface interface.
  *   - 'description' A string with a short description of what the wrapper does.
  *   - 'type' (Optional) A bitmask of flags indicating what type of streams this
  *     wrapper will access - local or remote, readable and/or writeable, etc.
@@ -2225,19 +2225,19 @@ function hook_stream_wrappers() {
   return array(
     'public' => array(
       'name' => t('Public files'),
-      'class' => 'DrupalPublicStreamWrapper',
+      'class' => 'BackdropPublicStreamWrapper',
       'description' => t('Public local files served by the webserver.'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     ),
     'private' => array(
       'name' => t('Private files'),
-      'class' => 'DrupalPrivateStreamWrapper',
-      'description' => t('Private local files served by Drupal.'),
+      'class' => 'BackdropPrivateStreamWrapper',
+      'description' => t('Private local files served by Backdrop.'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     ),
     'temp' => array(
       'name' => t('Temporary files'),
-      'class' => 'DrupalTempStreamWrapper',
+      'class' => 'BackdropTempStreamWrapper',
       'description' => t('Temporary local files for upload and previews.'),
       'type' => STREAM_WRAPPERS_LOCAL_HIDDEN,
     ),
@@ -2542,9 +2542,9 @@ function hook_file_url_alter(&$uri) {
  * During the 'install' phase, modules can for example assert that
  * library or server versions are available or sufficient.
  * Note that the installation of a module can happen during installation of
- * Drupal itself (by install.php) with an installation profile or later by hand.
+ * Backdrop itself (by install.php) with an installation profile or later by hand.
  * As a consequence, install-time requirements must be checked without access
- * to the full Drupal API, because it is not available during install.php.
+ * to the full Backdrop API, because it is not available during install.php.
  * For localization you should for example use $t = get_t() to
  * retrieve the appropriate localization function name (t() or st()).
  * If a requirement has a severity of REQUIREMENT_ERROR, install.php will abort
@@ -2587,10 +2587,10 @@ function hook_requirements($phase) {
   // Ensure translations don't break at install time
   $t = get_t();
 
-  // Report Drupal version
+  // Report Backdrop version
   if ($phase == 'runtime') {
-    $requirements['drupal'] = array(
-      'title' => $t('Drupal'),
+    $requirements['backdrop'] = array(
+      'title' => $t('Backdrop'),
       'value' => VERSION,
       'severity' => REQUIREMENT_INFO
     );
@@ -2602,7 +2602,7 @@ function hook_requirements($phase) {
     'value' => ($phase == 'runtime') ? l(phpversion(), 'admin/reports/status/php') : phpversion(),
   );
   if (version_compare(phpversion(), DRUPAL_MINIMUM_PHP) < 0) {
-    $requirements['php']['description'] = $t('Your PHP installation is too old. Drupal requires at least PHP %version.', array('%version' => DRUPAL_MINIMUM_PHP));
+    $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => DRUPAL_MINIMUM_PHP));
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
   }
 
@@ -2615,7 +2615,7 @@ function hook_requirements($phase) {
     }
     else {
       $requirements['cron'] = array(
-        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'http://drupal.org/cron')),
+        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'http://backdrop.org/cron')),
         'severity' => REQUIREMENT_ERROR,
         'value' => $t('Never run'),
       );
@@ -2632,13 +2632,13 @@ function hook_requirements($phase) {
 /**
  * Define the current version of the database schema.
  *
- * A Drupal schema definition is an array structure representing one or
+ * A Backdrop schema definition is an array structure representing one or
  * more tables and their related keys and indexes. A schema is defined by
  * hook_schema() which must live in your module's .install file.
  *
  * This hook is called at both install and uninstall time, and in the latter
  * case, it cannot rely on the .module file being loaded or hooks being known.
- * If the .module file is needed, it may be loaded with drupal_load().
+ * If the .module file is needed, it may be loaded with backdrop_load().
  *
  * The tables declared by this hook will be automatically created when
  * the module is first enabled, and removed when the module is uninstalled.
@@ -2650,7 +2650,7 @@ function hook_requirements($phase) {
  * engines. You don't have to deal with the different SQL dialects for table
  * creation and alteration of the supported database engines.
  *
- * See the Schema API Handbook at http://drupal.org/node/146843 for
+ * See the Schema API Handbook at http://backdrop.org/node/146843 for
  * details on schema definition structures.
  *
  * @return
@@ -2814,7 +2814,7 @@ function hook_query_TAG_alter(QueryAlterableInterface $query) {
  * to reflect the current version of the database schema.
  *
  * See the Schema API documentation at
- * @link http://drupal.org/node/146843 http://drupal.org/node/146843 @endlink
+ * @link http://backdrop.org/node/146843 http://backdrop.org/node/146843 @endlink
  * for details on hook_schema and how database tables are defined.
  *
  * Note that since this function is called from a full bootstrap, all functions
@@ -2851,24 +2851,24 @@ function hook_install() {
  *
  * For each patch which requires a database change add a new hook_update_N()
  * which will be called by update.php. The database updates are numbered
- * sequentially according to the version of Drupal you are compatible with.
+ * sequentially according to the version of Backdrop you are compatible with.
  *
  * Schema updates should adhere to the Schema API:
- * @link http://drupal.org/node/150215 http://drupal.org/node/150215 @endlink
+ * @link http://backdrop.org/node/150215 http://backdrop.org/node/150215 @endlink
  *
  * Database updates consist of 3 parts:
- * - 1 digit for Drupal core compatibility
+ * - 1 digit for Backdrop core compatibility
  * - 1 digit for your module's major release version (e.g. is this the 5.x-1.* (1) or 5.x-2.* (2) series of your module?)
  * - 2 digits for sequential counting starting with 00
  *
- * The 2nd digit should be 0 for initial porting of your module to a new Drupal
+ * The 2nd digit should be 0 for initial porting of your module to a new Backdrop
  * core API.
  *
  * Examples:
  * - mymodule_update_5200()
  *   - This is the first update to get the database ready to run mymodule 5.x-2.*.
  * - mymodule_update_6000()
- *   - This is the required update for mymodule to run with Drupal core API 6.x.
+ *   - This is the required update for mymodule to run with Backdrop core API 6.x.
  * - mymodule_update_6100()
  *   - This is the first update to get the database ready to run mymodule 6.x-1.*.
  * - mymodule_update_6200()
@@ -2878,14 +2878,14 @@ function hook_install() {
  *     6.x-1.x branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
- * Drupal. See hook_update_last_removed() to notify Drupal about the removals.
+ * Backdrop. See hook_update_last_removed() to notify Backdrop about the removals.
  * For further information about releases and release numbers see:
- * @link http://drupal.org/node/711070 Maintaining a drupal.org project with Git @endlink
+ * @link http://backdrop.org/node/711070 Maintaining a backdrop.org project with Git @endlink
  *
  * Never renumber update functions.
  *
  * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module. Drupal core's updates are implemented
+ * the same directory as mymodule.module. Backdrop core's updates are implemented
  * using the system module as a name and stored in database/updates.inc.
  *
  * If your update task is potentially time-consuming, you'll need to implement a
@@ -2895,13 +2895,13 @@ function hook_install() {
  * to provide feedback regarding completion level.
  *
  * See the batch operations page for more information on how to use the batch API:
- * @link http://drupal.org/node/180528 http://drupal.org/node/180528 @endlink
+ * @link http://backdrop.org/node/180528 http://backdrop.org/node/180528 @endlink
  *
  * @param $sandbox
  *   Stores information for multipass updates. See above for more information.
  *
- * @throws DrupalUpdateException, PDOException
- *   In case of error, update hooks should throw an instance of DrupalUpdateException
+ * @throws BackdropUpdateException, PDOException
+ *   In case of error, update hooks should throw an instance of BackdropUpdateException
  *   with a meaningful message for the user. If a database query fails for whatever
  *   reason, it will throw a PDOException.
  *
@@ -2954,7 +2954,7 @@ function hook_update_N(&$sandbox) {
   return t('The update did what it was supposed to do.');
 
   // In case of an error, simply throw an exception with an error message.
-  throw new DrupalUpdateException('Something went wrong; here is what you should do.');
+  throw new BackdropUpdateException('Something went wrong; here is what you should do.');
 }
 
 /**
@@ -3006,7 +3006,7 @@ function hook_update_dependencies() {
  * Return a number which is no longer available as hook_update_N().
  *
  * If you remove some update functions from your mymodule.install file, you
- * should notify Drupal of those missing functions. This way, Drupal can
+ * should notify Backdrop of those missing functions. This way, Backdrop can
  * ensure that no update is accidentally skipped.
  *
  * Implementations of this hook should be placed in a mymodule.install file in
@@ -3041,7 +3041,7 @@ function hook_update_last_removed() {
  *
  * When hook_uninstall() is called, your module will already be disabled, so
  * its .module file will not be automatically included. If you need to call API
- * functions from your .module file in this hook, use drupal_load() to make
+ * functions from your .module file in this hook, use backdrop_load() to make
  * them available. (Keep this usage to a minimum, though, especially when
  * calling API functions that invoke hooks, or API functions from modules
  * listed as dependencies, since these may not be available or work as expected
@@ -3151,13 +3151,13 @@ function hook_registry_files_alter(&$files, $modules) {
  * will receive the global installation state variable, $install_state, as
  * input, and has the opportunity to access or modify any of its settings. See
  * the install_state_defaults() function in the installer for the list of
- * $install_state settings used by Drupal core.
+ * $install_state settings used by Backdrop core.
  *
  * At the end of your task function, you can indicate that you want the
  * installer to pause and display a page to the user by returning any themed
  * output that should be displayed on that page (but see below for tasks that
  * use the form API or batch API; the return values of these task functions are
- * handled differently). You should also use drupal_set_title() within the task
+ * handled differently). You should also use backdrop_set_title() within the task
  * callback function to set a custom page title. For some tasks, however, you
  * may want to simply do some processing and pass control to the next task
  * without ending the page request; to indicate this, simply do not send back
@@ -3178,7 +3178,7 @@ function hook_registry_files_alter(&$files, $modules) {
  * see whether or not the current installation is interactive, if you need
  * access to this information.
  *
- * Remember that a user installing Drupal interactively will be able to reload
+ * Remember that a user installing Backdrop interactively will be able to reload
  * an installation page multiple times, so you should use variable_set() and
  * variable_get() if you are collecting any data that you need to store and
  * inspect later. It is important to remove any temporary variables using
@@ -3231,7 +3231,7 @@ function hook_registry_files_alter(&$files, $modules) {
  *       - INSTALL_TASK_RUN_IF_REACHED: This indicates that the task will run
  *       on each installation page request that reaches it. This is rarely
  *       necessary for an installation profile to use; it is primarily used by
- *       the Drupal installer for bootstrap-related tasks.
+ *       the Backdrop installer for bootstrap-related tasks.
  *     - 'function'
  *       Normally this does not need to be set, but it can be used to force the
  *       installer to call a different function when the task is run (rather
@@ -3292,11 +3292,11 @@ function hook_install_tasks() {
     // last task defined by your profile, you should also use this function to
     // call variable_del('myprofile_needs_batch_processing') and clean up the
     // variable that was used above. If you want the user to pass to the final
-    // Drupal installation tasks uninterrupted, return no output from this
+    // Backdrop installation tasks uninterrupted, return no output from this
     // function. Otherwise, return themed output that the user will see (for
     // example, a confirmation page explaining that your profile's tasks are
     // complete, with a link to reload the current page and therefore pass on
-    // to the final Drupal installation tasks when the user is ready to do so).
+    // to the final Backdrop installation tasks when the user is ready to do so).
     'myprofile_final_site_setup' => array(
     ),
   );
@@ -3304,27 +3304,27 @@ function hook_install_tasks() {
 }
 
 /**
- * Change the page the user is sent to by drupal_goto().
+ * Change the page the user is sent to by backdrop_goto().
  *
  * @param $path
- *   A Drupal path or a full URL.
+ *   A Backdrop path or a full URL.
  * @param $options
  *   An associative array of additional URL options to pass to url().
  * @param $http_response_code
- *   The HTTP status code to use for the redirection. See drupal_goto() for more
+ *   The HTTP status code to use for the redirection. See backdrop_goto() for more
  *   information.
  */
-function hook_drupal_goto_alter(&$path, &$options, &$http_response_code) {
+function hook_backdrop_goto_alter(&$path, &$options, &$http_response_code) {
   // A good addition to misery module.
   $http_response_code = 500;
 }
 
 /**
- * Alter XHTML HEAD tags before they are rendered by drupal_get_html_head().
+ * Alter XHTML HEAD tags before they are rendered by backdrop_get_html_head().
  *
  * Elements available to be altered are only those added using
- * drupal_add_html_head_link() or drupal_add_html_head(). CSS and JS files
- * are handled using drupal_add_css() and drupal_add_js(), so the head links
+ * backdrop_add_html_head_link() or backdrop_add_html_head(). CSS and JS files
+ * are handled using backdrop_add_css() and backdrop_add_js(), so the head links
  * for those files will not appear in the $head_elements array.
  *
  * @param $head_elements
@@ -3343,18 +3343,18 @@ function hook_html_head_alter(&$head_elements) {
 /**
  * Alter the full list of installation tasks.
  *
- * You can use this hook to change or replace any part of the Drupal
+ * You can use this hook to change or replace any part of the Backdrop
  * installation process that occurs after the installation profile is selected.
  *
  * @param $tasks
  *   An array of all available installation tasks, including those provided by
- *   Drupal core. You can modify this array to change or replace individual
+ *   Backdrop core. You can modify this array to change or replace individual
  *   steps within the installation process.
  * @param $install_state
  *   An array of information about the current installation state.
  */
 function hook_install_tasks_alter(&$tasks, $install_state) {
-  // Replace the entire site configuration form provided by Drupal core
+  // Replace the entire site configuration form provided by Backdrop core
   // with a custom callback function defined by this installation profile.
   $tasks['install_configure_form']['function'] = 'myprofile_install_configure_form';
 }
@@ -3374,9 +3374,9 @@ function hook_install_tasks_alter(&$tasks, $install_state) {
  * @see file_default_mimetype_mapping()
  */
 function hook_file_mimetype_mapping_alter(&$mapping) {
-  // Add new MIME type 'drupal/info'.
-  $mapping['mimetypes']['example_info'] = 'drupal/info';
-  // Add new extension '.info' and map it to the 'drupal/info' MIME type.
+  // Add new MIME type 'backdrop/info'.
+  $mapping['mimetypes']['example_info'] = 'backdrop/info';
+  // Add new extension '.info' and map it to the 'backdrop/info' MIME type.
   $mapping['extensions']['info'] = 'example_info';
   // Override existing extension mapping for '.ogg' files.
   $mapping['extensions']['ogg'] = 189;
@@ -3650,7 +3650,7 @@ function hook_date_formats_alter(&$formats) {
 /**
  * Alters the delivery callback used to send the result of the page callback to the browser.
  *
- * Called by drupal_deliver_page() to allow modules to alter how the
+ * Called by backdrop_deliver_page() to allow modules to alter how the
  * page is delivered to the browser.
  *
  * This hook is intended for altering the delivery callback based on
@@ -3681,13 +3681,13 @@ function hook_date_formats_alter(&$formats) {
  * @param $callback
  *   The name of a function.
  *
- * @see drupal_deliver_page()
+ * @see backdrop_deliver_page()
  */
 function hook_page_delivery_callback_alter(&$callback) {
   // jQuery sets a HTTP_X_REQUESTED_WITH header of 'XMLHttpRequest'.
   // If a page would normally be delivered as an html page, and it is called
   // from jQuery, deliver it instead as an Ajax response.
-  if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && $callback == 'drupal_deliver_html_page') {
+  if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && $callback == 'backdrop_deliver_html_page') {
     $callback = 'ajax_deliver';
   }
 }
@@ -3718,7 +3718,7 @@ function hook_system_themes_page_alter(&$theme_groups) {
  *
  * @param $path
  *   The path being constructed, which, if a path alias, has been resolved to a
- *   Drupal path by the database, and which also may have been altered by other
+ *   Backdrop path by the database, and which also may have been altered by other
  *   modules before this one.
  * @param $original_path
  *   The original path, before being checked for path aliases or altered by any
@@ -3726,7 +3726,7 @@ function hook_system_themes_page_alter(&$theme_groups) {
  * @param $path_language
  *   The language of the path.
  *
- * @see drupal_get_normal_path()
+ * @see backdrop_get_normal_path()
  */
 function hook_url_inbound_alter(&$path, $original_path, $path_language) {
   // Create the path user/me/edit, which allows a user to edit their account.
@@ -3754,7 +3754,7 @@ function hook_url_inbound_alter(&$path, $original_path, $path_language) {
  * @see url()
  */
 function hook_url_outbound_alter(&$path, &$options, $original_path) {
-  // Use an external RSS feed rather than the Drupal one.
+  // Use an external RSS feed rather than the Backdrop one.
   if ($path == 'rss.xml') {
     $path = 'http://example.com/rss.xml';
     $options['external'] = TRUE;
@@ -3894,7 +3894,7 @@ function hook_tokens_alter(array &$replacements, array $context) {
     // of a field (field_title).
     if (isset($context['tokens']['title'])) {
       $title = field_view_field('node', $node, 'field_title', 'default', $language_code);
-      $replacements[$context['tokens']['title']] = drupal_render($title);
+      $replacements[$context['tokens']['title']] = backdrop_render($title);
     }
   }
 }
@@ -4038,9 +4038,9 @@ function hook_batch_alter(&$batch) {
 }
 
 /**
- * Provide information on Updaters (classes that can update Drupal).
+ * Provide information on Updaters (classes that can update Backdrop).
  *
- * An Updater is a class that knows how to update various parts of the Drupal
+ * An Updater is a class that knows how to update various parts of the Backdrop
  * file system, for example to update modules that have newer releases, or to
  * install a new theme.
  *
@@ -4058,7 +4058,7 @@ function hook_batch_alter(&$batch) {
  *     doesn't matter, but if you need to override an existing Updater, make
  *     sure your Updater has a lighter weight so that it comes first.
  *
- * @see drupal_get_updaters()
+ * @see backdrop_get_updaters()
  * @see hook_updater_info_alter()
  */
 function hook_updater_info() {
@@ -4079,7 +4079,7 @@ function hook_updater_info() {
 /**
  * Alter the Updater information array.
  *
- * An Updater is a class that knows how to update various parts of the Drupal
+ * An Updater is a class that knows how to update various parts of the Backdrop
  * file system, for example to update modules that have newer releases, or to
  * install a new theme.
  *
@@ -4087,7 +4087,7 @@ function hook_updater_info() {
  *   Associative array of updaters as defined through hook_updater_info().
  *   Alter this array directly.
  *
- * @see drupal_get_updaters()
+ * @see backdrop_get_updaters()
  * @see hook_updater_info()
  */
 function hook_updater_info_alter(&$updaters) {
@@ -4122,7 +4122,7 @@ function hook_countries_alter(&$countries) {
  *   Supported values are MENU_SITE_OFFLINE, MENU_ACCESS_DENIED,
  *   MENU_NOT_FOUND and MENU_SITE_ONLINE. Any other value than
  *   MENU_SITE_ONLINE will skip the default menu handling system and be passed
- *   for delivery to drupal_deliver_page() with a NULL
+ *   for delivery to backdrop_deliver_page() with a NULL
  *   $default_delivery_callback.
  * @param $path
  *   Contains the system path that is going to be loaded. This is read only,
@@ -4159,7 +4159,7 @@ function hook_menu_site_status_alter(&$menu_site_status, $path) {
  *   - 'file': Required. The include file containing the FileTransfer class.
  *     This should be a separate .inc file, not just the .module file, so that
  *     the minimum possible code is loaded when authorize.php is running.
- *   - 'file path': Optional. The directory (relative to the Drupal root)
+ *   - 'file path': Optional. The directory (relative to the Backdrop root)
  *     where the include file lives. If not defined, defaults to the base
  *     directory of the module implementing the hook.
  *   - 'weight': Optional. Integer weight used for sorting connection types on
@@ -4168,7 +4168,7 @@ function hook_menu_site_status_alter(&$menu_site_status, $path) {
  * @see FileTransfer
  * @see authorize.php
  * @see hook_filetransfer_info_alter()
- * @see drupal_get_filetransfer_info()
+ * @see backdrop_get_filetransfer_info()
  */
 function hook_filetransfer_info() {
   $info['sftp'] = array(

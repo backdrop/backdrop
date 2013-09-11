@@ -67,10 +67,10 @@ function field_create_field($field) {
     throw new FieldException('Attempt to create a field with invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character');
   }
 
-  // Field name cannot be longer than 32 characters. We use drupal_strlen()
+  // Field name cannot be longer than 32 characters. We use backdrop_strlen()
   // because the DB layer assumes that column widths are given in characters,
   // not bytes.
-  if (drupal_strlen($field['field_name']) > 32) {
+  if (backdrop_strlen($field['field_name']) > 32) {
     throw new FieldException(t('Attempt to create a field with a name longer than 32 characters: %name',
       array('%name' => $field['field_name'])));
   }
@@ -169,14 +169,14 @@ function field_create_field($field) {
   );
 
   // Store the field and get the id back.
-  drupal_write_record('field_config', $record);
+  backdrop_write_record('field_config', $record);
   $field['id'] = $record['id'];
 
   // Invoke hook_field_storage_create_field after the field is
   // complete (e.g. it has its id).
   try {
     // Invoke hook_field_storage_create_field after
-    // drupal_write_record() sets the field id.
+    // backdrop_write_record() sets the field id.
     module_invoke($storage_type['module'], 'field_storage_create_field', $field);
   }
   catch (Exception $e) {
@@ -283,7 +283,7 @@ function field_update_field($field) {
 
   // Store the field and create the id.
   $primary_key = array('id');
-  drupal_write_record('field_config', $field, $primary_key);
+  backdrop_write_record('field_config', $field, $primary_key);
 
   // Clear caches
   field_cache_clear(TRUE);
@@ -623,7 +623,7 @@ function _field_write_instance($instance, $update = FALSE) {
     'data' => $data,
     'deleted' => $instance['deleted'],
   );
-  // We need to tell drupal_update_record() the primary keys to trigger an
+  // We need to tell backdrop_update_record() the primary keys to trigger an
   // update.
   if ($update) {
     $record['id'] = $instance['id'];
@@ -632,7 +632,7 @@ function _field_write_instance($instance, $update = FALSE) {
   else {
     $primary_key = array();
   }
-  drupal_write_record('field_config_instance', $record, $primary_key);
+  backdrop_write_record('field_config_instance', $record, $primary_key);
 }
 
 /**

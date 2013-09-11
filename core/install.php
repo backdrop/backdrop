@@ -2,14 +2,14 @@
 
 /**
  * @file
- * Initiates a browser-based installation of Drupal.
+ * Initiates a browser-based installation of Backdrop.
  */
 
-// Change the directory to the Drupal root.
+// Change the directory to the Backdrop root.
 chdir('..');
 
 /**
- * Root directory of Drupal installation.
+ * Root directory of Backdrop installation.
  */
 define('DRUPAL_ROOT', getcwd());
 
@@ -27,10 +27,10 @@ define('MAINTENANCE_MODE', 'install');
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
 if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Drupal requires at least PHP 5.3.2. See the <a href="http://drupal.org/requirements">system requirements</a> page for more information.';
+  print 'Your PHP installation is too old. Backdrop requires at least PHP 5.3.2. See the <a href="http://backdrop.org/requirements">system requirements</a> page for more information.';
   exit;
 }
 
 // Start the installer.
 require_once DRUPAL_ROOT . '/core/includes/install.core.inc';
-install_drupal();
+install_backdrop();

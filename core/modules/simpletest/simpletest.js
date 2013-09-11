@@ -3,7 +3,7 @@
 /**
  * Add the cool table collapsing on the testing overview page.
  */
-Drupal.behaviors.simpleTestMenuCollapse = {
+Backdrop.behaviors.simpleTestMenuCollapse = {
   attach: function (context, settings) {
     var timeout = null;
     // Adds expand-collapse functionality.
@@ -58,7 +58,7 @@ Drupal.behaviors.simpleTestMenuCollapse = {
  * Select/deselect all the inner checkboxes when the outer checkboxes are
  * selected/deselected.
  */
-Drupal.behaviors.simpleTestSelectAll = {
+Backdrop.behaviors.simpleTestSelectAll = {
   attach: function (context, settings) {
     $('td.simpletest-select-all').each(function () {
       var testCheckboxes = settings.simpleTest['simpletest-test-group-' + $(this).attr('id')].testNames;

@@ -21,9 +21,9 @@ function theme_test_theme($existing, $type, $theme, $path) {
  * Implements hook_system_theme_info().
  */
 function theme_test_system_theme_info() {
-  $themes['test_theme'] = drupal_get_path('module', 'theme_test') . '/themes/test_theme/test_theme.info';
-  $themes['test_basetheme'] = drupal_get_path('module', 'theme_test') . '/themes/test_basetheme/test_basetheme.info';
-  $themes['test_subtheme'] = drupal_get_path('module', 'theme_test') . '/themes/test_subtheme/test_subtheme.info';
+  $themes['test_theme'] = backdrop_get_path('module', 'theme_test') . '/themes/test_theme/test_theme.info';
+  $themes['test_basetheme'] = backdrop_get_path('module', 'theme_test') . '/themes/test_basetheme/test_basetheme.info';
+  $themes['test_subtheme'] = backdrop_get_path('module', 'theme_test') . '/themes/test_subtheme/test_subtheme.info';
   return $themes;
 }
 
@@ -66,7 +66,7 @@ function theme_test_init() {
     // First, force the theme registry to be rebuilt on this page request. This
     // allows us to test a full initialization of the theme system in the code
     // below.
-    drupal_theme_rebuild();
+    backdrop_theme_rebuild();
     // Next, initialize the theme system by storing themed text in a global
     // variable. We will use this later in theme_test_hook_init_page_callback()
     // to test that even when the theme system is initialized this early, it is
@@ -116,7 +116,7 @@ function _theme_custom_theme() {
 }
 
 /**
- * Page callback, calls drupal_alter().
+ * Page callback, calls backdrop_alter().
  *
  * This is for testing that the theme can have hook_*_alter() implementations
  * that run during page callback execution, even before theme() is called for
@@ -124,7 +124,7 @@ function _theme_custom_theme() {
  */
 function _theme_test_alter() {
   $data = 'foo';
-  drupal_alter('theme_test_alter', $data);
+  backdrop_alter('theme_test_alter', $data);
   return "The altered data is $data.";
 }
 

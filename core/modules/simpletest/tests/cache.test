@@ -1,6 +1,6 @@
 <?php
 
-class CacheTestCase extends DrupalWebTestCase {
+class CacheTestCase extends BackdropWebTestCase {
   protected $default_bin = 'page';
   protected $default_cid = 'test_temporary';
   protected $default_value = 'CacheTest';
@@ -134,7 +134,7 @@ class CacheSavingCase extends CacheTestCase {
    * Test the saving and restoring of an array.
    */
   function testArray() {
-    $this->checkVariable(array('drupal1', 'drupal2' => 'drupal3', 'drupal4' => array('drupal5', 'drupal6')));
+    $this->checkVariable(array('backdrop1', 'backdrop2' => 'backdrop3', 'backdrop4' => array('backdrop5', 'backdrop6')));
   }
 
   /**
@@ -144,7 +144,7 @@ class CacheSavingCase extends CacheTestCase {
     $test_object = new stdClass();
     $test_object->test1 = $this->randomName(100);
     $test_object->test2 = 100;
-    $test_object->test3 = array('drupal1', 'drupal2' => 'drupal3', 'drupal4' => array('drupal5', 'drupal6'));
+    $test_object->test3 = array('backdrop1', 'backdrop2' => 'backdrop3', 'backdrop4' => array('backdrop5', 'backdrop6'));
 
 
     cache()->set('test_object', $test_object);
@@ -165,7 +165,7 @@ class CacheSavingCase extends CacheTestCase {
    * Test no empty cids are written in cache table.
    */
   function testNoEmptyCids() {
-    $this->drupalGet('user/register');
+    $this->backdropGet('user/register');
     $this->assertFalse(cache()->get(''), t('No cache entry is written with an empty cid.'));
   }
 }
@@ -315,7 +315,7 @@ class CacheClearCase extends CacheTestCase {
   }
 
   /**
-   * Test drupal_flush_all_caches().
+   * Test backdrop_flush_all_caches().
    */
   function testFlushAllCaches() {
     // Create cache entries for each flushed cache bin.
@@ -327,7 +327,7 @@ class CacheClearCase extends CacheTestCase {
     }
 
     // Remove all caches then make sure that they are cleared.
-    drupal_flush_all_caches();
+    backdrop_flush_all_caches();
 
     foreach ($bins as $id => $bin) {
       $cid = 'test_cid_clear' . $id;

@@ -45,7 +45,7 @@ function xmlrpc_server($callbacks) {
   // with those defined by modules implementing the _xmlrpc hook.
   // Built-in methods are overridable.
   $callbacks = array_merge($defaults, (array) $callbacks);
-  drupal_alter('xmlrpc', $callbacks);
+  backdrop_alter('xmlrpc', $callbacks);
   foreach ($callbacks as $key => $callback) {
     // we could check for is_array($callback)
     if (is_int($key)) {
@@ -64,7 +64,7 @@ function xmlrpc_server($callbacks) {
   $data = file_get_contents('php://input');
   if (!$data) {
     print 'XML-RPC server accepts POST requests only.';
-    drupal_exit();
+    backdrop_exit();
   }
   $xmlrpc_server->message = xmlrpc_message($data);
   if (!xmlrpc_message_parse($xmlrpc_server->message)) {
@@ -123,10 +123,10 @@ function xmlrpc_server_error($error, $message = FALSE) {
  */
 function xmlrpc_server_output($xml) {
   $xml = '<?xml version="1.0"?>' . "\n" . $xml;
-  drupal_add_http_header('Content-Length', strlen($xml));
-  drupal_add_http_header('Content-Type', 'text/xml');
+  backdrop_add_http_header('Content-Length', strlen($xml));
+  backdrop_add_http_header('Content-Type', 'text/xml');
   echo $xml;
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
@@ -180,7 +180,7 @@ function xmlrpc_server_call($xmlrpc_server, $methodname, $args) {
   if ($args && !is_array($args)) {
     $args = array($args);
   }
-  // Has this method been mapped to a Drupal function by us or by modules?
+  // Has this method been mapped to a Backdrop function by us or by modules?
   if (!isset($xmlrpc_server->callbacks[$methodname])) {
     return xmlrpc_error(-32601, t('Server error. Requested method @methodname not specified.', array("@methodname" => $xmlrpc_server->message->methodname)));
   }

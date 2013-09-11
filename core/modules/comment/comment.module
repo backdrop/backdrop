@@ -4,7 +4,7 @@
  * @file
  * Enables users to comment on published content.
  *
- * When enabled, the Comment module creates a discussion board for each Drupal
+ * When enabled, the Comment module creates a discussion board for each Backdrop
  * node. Users can post comments to discuss a forum topic, story, collaborative
  * book page, etc.
  */
@@ -76,7 +76,7 @@ function comment_help($path, $arg) {
   switch ($path) {
     case 'admin/help#comment':
       $output = '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Comment module allows users to comment on site content, set commenting defaults and permissions, and moderate comments. For more information, see the online handbook entry for <a href="@comment">Comment module</a>.', array('@comment' => 'http://drupal.org/handbook/modules/comment/')) . '</p>';
+      $output .= '<p>' . t('The Comment module allows users to comment on site content, set commenting defaults and permissions, and moderate comments. For more information, see the online handbook entry for <a href="@comment">Comment module</a>.', array('@comment' => 'http://backdrop.org/handbook/modules/comment/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Default and custom settings') . '</dt>';
@@ -448,7 +448,7 @@ function comment_block_configure($delta = '') {
     '#type' => 'select',
     '#title' => t('Number of recent comments'),
     '#default_value' => variable_get('comment_block_count', 10),
-    '#options' => drupal_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
+    '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
   );
 
   return $form;
@@ -506,7 +506,7 @@ function comment_permalink($cid) {
     // Return the node view, this will show the correct comment in context.
     return menu_execute_active_handler('node/' . $node->nid, FALSE);
   }
-  drupal_not_found();
+  backdrop_not_found();
 }
 
 /**
@@ -765,7 +765,7 @@ function comment_node_page_additions($node) {
   // Append comment form if needed.
   if (user_access('post comments') && $node->comment == COMMENT_NODE_OPEN && (variable_get('comment_form_location_' . $node->type, COMMENT_FORM_BELOW) == COMMENT_FORM_BELOW)) {
     $comment = entity_create('comment', array('nid' => $node->nid));
-    $additions['comment_form'] = drupal_get_form("comment_node_{$node->type}_form", $comment);
+    $additions['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
   }
 
   if ($additions) {
@@ -945,7 +945,7 @@ function comment_prepare_thread(&$comments) {
  *   content language of the current request.
  *
  * @return
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  */
 function comment_view($comment, $node, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
@@ -993,7 +993,7 @@ function comment_view($comment, $node, $view_mode = 'full', $langcode = NULL) {
 
   // Allow modules to modify the structured comment.
   $type = 'comment';
-  drupal_alter(array('comment_view', 'entity_view'), $build, $type);
+  backdrop_alter(array('comment_view', 'entity_view'), $build, $type);
 
   return $build;
 }
@@ -1029,7 +1029,7 @@ function comment_build_content($comment, $node, $view_mode = 'full', $langcode =
 
   $comment->content['links'] = array(
     '#theme' => 'links__comment',
-    '#pre_render' => array('drupal_pre_render_links'),
+    '#pre_render' => array('backdrop_pre_render_links'),
     '#attributes' => array('class' => array('links', 'inline')),
   );
   if (empty($comment->in_preview)) {
@@ -1080,7 +1080,7 @@ function comment_links($comment, $node) {
           'title' => t('approve'),
           'href' => "comment/$comment->cid/approve",
           'html' => TRUE,
-          'query' => array('token' => drupal_get_token("comment/$comment->cid/approve")),
+          'query' => array('token' => backdrop_get_token("comment/$comment->cid/approve")),
         );
       }
     }
@@ -1122,9 +1122,9 @@ function comment_links($comment, $node) {
  *   language is provided the current content language is used.
  *
  * @return
- *   An array in the format expected by drupal_render().
+ *   An array in the format expected by backdrop_render().
  *
- * @see drupal_render()
+ * @see backdrop_render()
  */
 function comment_view_multiple($comments, $node, $view_mode = 'full', $weight = 0, $langcode = NULL) {
   field_attach_prepare_view('comment', $comments, $view_mode, $langcode);
@@ -1156,7 +1156,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         'class' => array('comment-node-type-settings-form'),
       ),
       '#attached' => array(
-        'js' => array(drupal_get_path('module', 'comment') . '/comment-node-form.js'),
+        'js' => array(backdrop_get_path('module', 'comment') . '/comment-node-form.js'),
       ),
     );
     // Unlike coment_form_node_form_alter(), all of these settings are applied
@@ -1193,7 +1193,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_ANONYMOUS_MAY_CONTACT => t('Anonymous posters may leave their contact information'),
         COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous posters must leave their contact information'),
       ),
-      '#access' => user_access('post comments', drupal_anonymous_user()),
+      '#access' => user_access('post comments', backdrop_anonymous_user()),
     );
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
@@ -1234,7 +1234,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
       'class' => array('comment-node-settings-form'),
     ),
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'comment') . '/comment-node-form.js'),
+      'js' => array(backdrop_get_path('module', 'comment') . '/comment-node-form.js'),
      ),
     '#weight' => 30,
   );
@@ -1349,7 +1349,7 @@ function comment_node_predelete($node) {
  * Implements hook_node_update_index().
  */
 function comment_node_update_index($node) {
-  $index_comments = &drupal_static(__FUNCTION__);
+  $index_comments = &backdrop_static(__FUNCTION__);
 
   if ($index_comments === NULL) {
     // Find and save roles that can 'access comments' or 'search content'.
@@ -1377,7 +1377,7 @@ function comment_node_update_index($node) {
       $comments = comment_load_multiple($cids);
       comment_prepare_thread($comments);
       $build = comment_view_multiple($comments, $node);
-      return drupal_render($build);
+      return backdrop_render($build);
     }
   }
   return '';
@@ -1515,7 +1515,7 @@ function comment_delete_multiple($cids) {
  * @return
  *   An array of comment objects, indexed by comment ID.
  *
- * @todo Remove $conditions in Drupal 8.
+ * @todo Remove $conditions in Backdrop 8.
  *
  * @see entity_load()
  * @see EntityFieldQuery
@@ -1649,9 +1649,9 @@ function comment_get_display_page($cid, $node_type) {
  * @see comment_menu()
  */
 function comment_edit_page($comment) {
-  drupal_set_title(t('Edit comment %comment', array('%comment' => $comment->subject)), PASS_THROUGH);
+  backdrop_set_title(t('Edit comment %comment', array('%comment' => $comment->subject)), PASS_THROUGH);
   $node = node_load($comment->nid);
-  return drupal_get_form("comment_node_{$node->type}_form", $comment);
+  return backdrop_get_form("comment_node_{$node->type}_form", $comment);
 }
 
 /**
@@ -1690,7 +1690,7 @@ function comment_form($form, &$form_state, $comment) {
   $form['#node'] = $node;
 
   // Use #comment-form as unique jump target, regardless of node type.
-  $form['#id'] = drupal_html_id('comment_form');
+  $form['#id'] = backdrop_html_id('comment_form');
   $form['#theme'] = array('comment_form__node_' . $node->type, 'comment_form');
 
   $anonymous_contact = variable_get('comment_anonymous_' . $node->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT);
@@ -1892,7 +1892,7 @@ function comment_form_build_preview($form, &$form_state) {
 function comment_preview($comment) {
   global $user;
 
-  drupal_set_title(t('Preview comment'), PASS_THROUGH);
+  backdrop_set_title(t('Preview comment'), PASS_THROUGH);
 
   $node = node_load($comment->nid);
 
@@ -2077,11 +2077,11 @@ function comment_form_submit($form, &$form_state) {
     // Explain the approval queue if necessary.
     if ($comment->status == COMMENT_NOT_PUBLISHED) {
       if (!user_access('administer comments')) {
-        drupal_set_message(t('Your comment has been queued for review by site administrators and will be published after approval.'));
+        backdrop_set_message(t('Your comment has been queued for review by site administrators and will be published after approval.'));
       }
     }
     else {
-      drupal_set_message(t('Your comment has been posted.'));
+      backdrop_set_message(t('Your comment has been posted.'));
     }
     $query = array();
     // Find the current display page for this comment.
@@ -2094,7 +2094,7 @@ function comment_form_submit($form, &$form_state) {
   }
   else {
     watchdog('content', 'Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', array('%subject' => $comment->subject), WATCHDOG_WARNING);
-    drupal_set_message(t('Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', array('%subject' => $comment->subject)), 'error');
+    backdrop_set_message(t('Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', array('%subject' => $comment->subject)), 'error');
     // Redirect the user to the node they are commenting on.
     $redirect = 'node/' . $node->nid;
   }
@@ -2191,7 +2191,7 @@ function theme_comment_post_forbidden($variables) {
 
   // Since this is expensive to compute, we cache it so that a page with many
   // comments only has to query the database once for all the links.
-  $authenticated_post_comments = &drupal_static(__FUNCTION__, NULL);
+  $authenticated_post_comments = &backdrop_static(__FUNCTION__, NULL);
 
   if (!$user->uid) {
     if (!isset($authenticated_post_comments)) {
@@ -2202,7 +2202,7 @@ function theme_comment_post_forbidden($variables) {
     }
 
     if ($authenticated_post_comments) {
-      // We cannot use drupal_get_destination() because these links
+      // We cannot use backdrop_get_destination() because these links
       // sometimes appear on /node and taxonomy listing pages.
       if (variable_get('comment_form_location_' . $node->type, COMMENT_FORM_BELOW) == COMMENT_FORM_SEPARATE_PAGE) {
         $destination = array('destination' => "comment/reply/$node->nid#comment-form");
@@ -2254,7 +2254,7 @@ function _comment_get_modes() {
  * Returns an array of "comments per page" values that users can select from.
  */
 function _comment_per_page() {
-  return drupal_map_assoc(array(10, 30, 50, 70, 90, 150, 200, 250, 300));
+  return backdrop_map_assoc(array(10, 30, 50, 70, 90, 150, 200, 250, 300));
 }
 
 /**
@@ -2400,7 +2400,7 @@ function comment_unpublish_action($comment, $context = array()) {
  */
 function comment_unpublish_by_keyword_action($comment, $context) {
   foreach ($context['keywords'] as $keyword) {
-    $text = drupal_render($comment);
+    $text = backdrop_render($comment);
     if (strpos($text, $keyword) !== FALSE) {
       $comment->status = COMMENT_NOT_PUBLISHED;
       watchdog('action', 'Unpublished comment %subject.', array('%subject' => $comment->subject));
@@ -2421,7 +2421,7 @@ function comment_unpublish_by_keyword_action_form($context) {
     '#title' => t('Keywords'),
     '#type' => 'textarea',
     '#description' => t('The comment will be unpublished if it contains any of the phrases above. Use a case-sensitive, comma-separated list of phrases. Example: funny, bungee jumping, "Company, Inc."'),
-    '#default_value' => isset($context['keywords']) ? drupal_implode_tags($context['keywords']) : '',
+    '#default_value' => isset($context['keywords']) ? backdrop_implode_tags($context['keywords']) : '',
   );
 
   return $form;
@@ -2433,7 +2433,7 @@ function comment_unpublish_by_keyword_action_form($context) {
  * @see comment_unpublish_by_keyword_action()
  */
 function comment_unpublish_by_keyword_action_submit($form, $form_state) {
-  return array('keywords' => drupal_explode_tags($form_state['values']['keywords']));
+  return array('keywords' => backdrop_explode_tags($form_state['values']['keywords']));
 }
 
 /**

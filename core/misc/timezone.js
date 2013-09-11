@@ -3,7 +3,7 @@
 /**
  * Set the client's system time zone as default values of form fields.
  */
-Drupal.behaviors.setTimezone = {
+Backdrop.behaviors.setTimezone = {
   attach: function (context, settings) {
     $('select.timezone-detect', context).once('timezone', function () {
       var dateString = Date();

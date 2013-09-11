@@ -3,7 +3,7 @@
 /**
  * @file
  * Callbacks and related functions invoked by authorize.php to update projects
- * on the Drupal site. We use the Batch API to actually update each individual
+ * on the Backdrop site. We use the Batch API to actually update each individual
  * project on the site. All of the code in this file is run at a low bootstrap
  * level (modules are not loaded), so these functions cannot assume access to
  * the rest of the update module code.
@@ -41,7 +41,7 @@ function update_authorize_run_update($filetransfer, $projects) {
     'init_message' => t('Preparing to update your site'),
     'operations' => $operations,
     'finished' => 'update_authorize_update_batch_finished',
-    'file' => drupal_get_path('module', 'update') . '/update.authorize.inc',
+    'file' => backdrop_get_path('module', 'update') . '/update.authorize.inc',
   );
 
   batch_set($batch);
@@ -81,7 +81,7 @@ function update_authorize_run_install($filetransfer, $project, $updater_name, $l
     'operations' => $operations,
     // @todo Use a different finished callback for different messages?
     'finished' => 'update_authorize_install_batch_finished',
-    'file' => drupal_get_path('module', 'update') . '/update.authorize.inc',
+    'file' => backdrop_get_path('module', 'update') . '/update.authorize.inc',
   );
   batch_set($batch);
 

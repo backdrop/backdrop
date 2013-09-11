@@ -12,7 +12,7 @@ require_once __DIR__ . '/query.inc';
  * @{
  * API to handle database schemas.
  *
- * A Drupal schema definition is an array structure representing one or
+ * A Backdrop schema definition is an array structure representing one or
  * more tables and their related keys and indexes. A schema is defined by
  * hook_schema(), which usually lives in a modulename.install file.
  *
@@ -99,7 +99,7 @@ require_once __DIR__ . '/query.inc';
  * of the named column.
  *
  * As an example, here is a SUBSET of the schema definition for
- * Drupal's 'node' table. It show four fields (nid, vid, type, and
+ * Backdrop's 'node' table. It show four fields (nid, vid, type, and
  * title), the primary key on field 'nid', a unique key named 'vid' on
  * field 'vid', and two indexes, one named 'nid' on field 'nid' and
  * one named 'node_title_type' on the field 'title' and the first four
@@ -154,7 +154,7 @@ require_once __DIR__ . '/query.inc';
  * );
  * @endcode
  *
- * @see drupal_install_schema()
+ * @see backdrop_install_schema()
  */
 
 abstract class DatabaseSchema implements QueryPlaceholderInterface {
@@ -261,10 +261,10 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *
    * The information_schema is a SQL standard that provides information about the
    * database server and the databases, schemas, tables, columns and users within
-   * it. This makes information_schema a useful tool to use across the drupal
+   * it. This makes information_schema a useful tool to use across the backdrop
    * database drivers and is used by a few different functions. The function below
    * describes the conditions to be meet when querying information_schema.tables
-   * for drupal tables or information associated with drupal tables. Even though
+   * for backdrop tables or information associated with backdrop tables. Even though
    * this is the standard method, not all databases follow standards and so this
    * method should be overwritten by a database driver if the database provider
    * uses alternate methods. Because information_schema.tables is used in a few
@@ -299,7 +299,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * Check if a table exists.
    *
    * @param $table
-   *   The name of the table in drupal (no prefixing).
+   *   The name of the table in backdrop (no prefixing).
    *
    * @return
    *   TRUE if the given table exists, otherwise FALSE.
@@ -341,7 +341,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * Check if a column exists in the given table.
    *
    * @param $table
-   *   The name of the table in drupal (no prefixing).
+   *   The name of the table in backdrop (no prefixing).
    * @param $name
    *   The name of the column.
    *
@@ -361,11 +361,11 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   }
 
   /**
-   * Returns a mapping of Drupal schema field names to DB-native field types.
+   * Returns a mapping of Backdrop schema field names to DB-native field types.
    *
-   * Because different field types do not map 1:1 between databases, Drupal has
+   * Because different field types do not map 1:1 between databases, Backdrop has
    * its own normalized field type names. This function returns a driver-specific
-   * mapping table from Drupal names to the native names for each database.
+   * mapping table from Backdrop names to the native names for each database.
    *
    * @return array
    *   An array of Schema API field types to driver-specific field types.
@@ -473,9 +473,9 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * Checks if an index exists in the given table.
    *
    * @param $table
-   *   The name of the table in drupal (no prefixing).
+   *   The name of the table in backdrop (no prefixing).
    * @param $name
-   *   The name of the index in drupal (no prefixing).
+   *   The name of the index in backdrop (no prefixing).
    *
    * @return
    *   TRUE if the given index exists, otherwise FALSE.
@@ -639,7 +639,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   abstract public function changeField($table, $field, $field_new, $spec, $keys_new = array());
 
   /**
-   * Create a new table from a Drupal table definition.
+   * Create a new table from a Backdrop table definition.
    *
    * @param $name
    *   The name of the table to create.

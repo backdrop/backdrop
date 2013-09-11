@@ -32,7 +32,7 @@ function node_test_node_view($node, $view_mode) {
       'key' => 'testElement',
       'value' => t('Value of testElement RSS element for node !nid.', array('!nid' => $node->nid)),
     );
-    $node->rss_namespaces['xmlns:drupaltest'] = 'http://example.com/test-namespace';
+    $node->rss_namespaces['xmlns:backdroptest'] = 'http://example.com/test-namespace';
 
     // Add content that should be displayed only in the RSS feed.
     $node->content['extra_feed_content'] = array(
@@ -127,7 +127,7 @@ function node_test_node_presave($node) {
   if ($node->title == 'testing_node_presave') {
     // Sun, 19 Nov 1978 05:00:00 GMT
     $node->created = 280299600;
-    // Drupal 1.0 release.
+    // Backdrop 1.0 release.
     $node->changed = 979534800;
   }
   // Determine changes.

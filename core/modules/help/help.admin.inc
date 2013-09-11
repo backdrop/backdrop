@@ -6,13 +6,13 @@
  */
 
 /**
- * Page callback: Prints a page listing a glossary of Drupal terminology.
+ * Page callback: Prints a page listing a glossary of Backdrop terminology.
  *
  * @see help_menu()
  */
 function help_main() {
   // Add CSS
-  drupal_add_css(drupal_get_path('module', 'help') . '/help.css');
+  backdrop_add_css(backdrop_get_path('module', 'help') . '/help.css');
   $output = '<h2>' . t('Help topics') . '</h2><p>' . t('Help is available on the following items:') . '</p>' . help_links_as_list();
   return $output;
 }
@@ -29,9 +29,9 @@ function help_page($name) {
   $output = '';
   if (module_hook($name, 'help')) {
     $info = system_get_info('module');
-    drupal_set_title($info[$name]['name']);
+    backdrop_set_title($info[$name]['name']);
 
-    $temp = module_invoke($name, 'help', "admin/help#$name", drupal_help_arg());
+    $temp = module_invoke($name, 'help', "admin/help#$name", backdrop_help_arg());
     if (empty($temp)) {
       $output .= t("No help is available for module %module.", array('%module' => $info[$name]['name']));
     }
@@ -60,7 +60,7 @@ function help_page($name) {
  *   A string containing the formatted list.
  */
 function help_links_as_list() {
-  $empty_arg = drupal_help_arg();
+  $empty_arg = backdrop_help_arg();
   $module_info = system_rebuild_module_data();
 
   $modules = array();

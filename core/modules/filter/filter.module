@@ -13,7 +13,7 @@ function filter_help($path, $arg) {
     case 'admin/help#filter':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Filter module allows administrators to configure text formats. A text format defines the HTML tags, codes, and other input allowed in content and comments, and is a key feature in guarding against potentially damaging input from malicious users. For more information, see the online handbook entry for <a href="@filter">Filter module</a>.', array('@filter' => 'http://drupal.org/handbook/modules/filter/')) . '</p>';
+      $output .= '<p>' . t('The Filter module allows administrators to configure text formats. A text format defines the HTML tags, codes, and other input allowed in content and comments, and is a key feature in guarding against potentially damaging input from malicious users. For more information, see the online handbook entry for <a href="@filter">Filter module</a>.', array('@filter' => 'http://backdrop.org/handbook/modules/filter/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Configuring text formats') . '</dt>';
@@ -21,7 +21,7 @@ function filter_help($path, $arg) {
       $output .= '<dt>' . t('Applying filters to text') . '</dt>';
       $output .= '<dd>' . t('Each text format uses filters to manipulate text, and most formats apply several different filters to text in a specific order. Each filter is designed for a specific purpose, and generally either adds, removes, or transforms elements within user-entered text before it is displayed. A filter does not change the actual content, but instead, modifies it temporarily before it is displayed. One filter may remove unapproved HTML tags, while another automatically adds HTML to make URLs display as clickable links.') . '</dd>';
       $output .= '<dt>' . t('Defining text formats') . '</dt>';
-      $output .= '<dd>' . t('One format is included by default: <em>Plain text</em> (which removes all HTML tags). Additional formats may be created by your installation profile when you install Drupal, and more can be created by an administrator on the <a href="@text-formats">Text formats page</a>.', array('@text-formats' => url('admin/config/content/formats'))) . '</dd>';
+      $output .= '<dd>' . t('One format is included by default: <em>Plain text</em> (which removes all HTML tags). Additional formats may be created by your installation profile when you install Backdrop, and more can be created by an administrator on the <a href="@text-formats">Text formats page</a>.', array('@text-formats' => url('admin/config/content/formats'))) . '</dd>';
       $output .= '<dt>' . t('Choosing a text format') . '</dt>';
       $output .= '<dd>' . t('Users with access to more than one text format can use the <em>Text format</em> fieldset to choose between available text formats when creating or editing multi-line content. Administrators can define the text formats available to each user role, and control the order of formats listed in the <em>Text format</em> fieldset on the <a href="@text-formats">Text formats page</a>.', array('@text-formats' => url('admin/config/content/formats'))) . '</dd>';
       $output .= '</dl>';
@@ -95,7 +95,7 @@ function filter_menu() {
   $items['admin/config/content/formats'] = array(
     'title' => 'Text formats',
     'description' => 'Configure how content input by users is filtered, including allowed HTML tags. Also allows enabling of module-provided filters.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_admin_overview'),
     'access arguments' => array('administer filters'),
     'file' => 'filter.admin.inc',
@@ -122,7 +122,7 @@ function filter_menu() {
   );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
     'title' => 'Disable text format',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_admin_disable', 4),
     'access callback' => '_filter_disable_format_access',
     'access arguments' => array(4),
@@ -333,10 +333,10 @@ function filter_permission() {
     if (!empty($permission)) {
       // Only link to the text format configuration page if the user who is
       // viewing this will have access to that page.
-      $format_name_replacement = user_access('administer filters') ? l($format->name, 'admin/config/content/formats/' . $format->format) : drupal_placeholder($format->name);
+      $format_name_replacement = user_access('administer filters') ? l($format->name, 'admin/config/content/formats/' . $format->format) : backdrop_placeholder($format->name);
       $perms[$permission] = array(
         'title' => t("Use the !text_format text format", array('!text_format' => $format_name_replacement,)),
-        'description' => drupal_placeholder(t('Warning: This permission may have security implications depending on how the text format is configured.')),
+        'description' => backdrop_placeholder(t('Warning: This permission may have security implications depending on how the text format is configured.')),
       );
     }
   }
@@ -365,7 +365,7 @@ function filter_permission_name($format) {
 function filter_modules_enabled($modules) {
   // Reset the static cache of module-provided filters, in case any of the
   // newly enabled modules defines a new filter or alters existing ones.
-  drupal_static_reset('filter_get_filters');
+  backdrop_static_reset('filter_get_filters');
 }
 
 /**
@@ -374,7 +374,7 @@ function filter_modules_enabled($modules) {
 function filter_modules_disabled($modules) {
   // Reset the static cache of module-provided filters, in case any of the
   // newly disabled modules defined or altered any filters.
-  drupal_static_reset('filter_get_filters');
+  backdrop_static_reset('filter_get_filters');
 }
 
 /**
@@ -391,7 +391,7 @@ function filter_modules_disabled($modules) {
  */
 function filter_formats($account = NULL) {
   global $language_interface;
-  $formats = &drupal_static(__FUNCTION__, array());
+  $formats = &backdrop_static(__FUNCTION__, array());
 
   // All available formats are cached for performance.
   if (!isset($formats['all'])) {
@@ -432,8 +432,8 @@ function filter_formats($account = NULL) {
 function filter_formats_reset() {
   cache()->deletePrefix('filter_formats');
   cache()->deletePrefix('filter_list_format');
-  drupal_static_reset('filter_list_format');
-  drupal_static_reset('filter_formats');
+  backdrop_static_reset('filter_list_format');
+  backdrop_static_reset('filter_formats');
 }
 
 /**
@@ -538,7 +538,7 @@ function filter_default_format($account = NULL) {
  */
 function filter_fallback_format() {
   // This variable is automatically set in the database for all installations
-  // of Drupal. In the event that it gets disabled or deleted somehow, there
+  // of Backdrop. In the event that it gets disabled or deleted somehow, there
   // is no safe default to return, since we do not want to risk making an
   // existing (and potentially unsafe) text format on the site automatically
   // available to all users. Returning NULL at least guarantees that this
@@ -558,7 +558,7 @@ function filter_fallback_format_title() {
  * Return a list of all filters provided by modules.
  */
 function filter_get_filters() {
-  $filters = &drupal_static(__FUNCTION__, array());
+  $filters = &backdrop_static(__FUNCTION__, array());
 
   if (empty($filters)) {
     foreach (module_implements('filter_info') as $module) {
@@ -577,7 +577,7 @@ function filter_get_filters() {
       }
     }
     // Allow modules to alter filter definitions.
-    drupal_alter('filter_info', $filters);
+    backdrop_alter('filter_info', $filters);
 
     uasort($filters, '_filter_list_cmp');
   }
@@ -653,7 +653,7 @@ function _filter_format_is_cacheable($format) {
  *   filter name.
  */
 function filter_list_format($format_id) {
-  $filters = &drupal_static(__FUNCTION__, array());
+  $filters = &backdrop_static(__FUNCTION__, array());
   $filter_info = filter_get_filters();
 
   if (!isset($filters['all'])) {
@@ -835,7 +835,7 @@ function filter_process_format($element) {
   $element['value'] += element_info($element['#base_type']);
 
   // Turn original element into a text format wrapper.
-  $path = drupal_get_path('module', 'filter');
+  $path = backdrop_get_path('module', 'filter');
   $element['#attached']['js'][] = $path . '/filter.js';
   $element['#attached']['css'][] = $path . '/filter.css';
 
@@ -1090,7 +1090,7 @@ function filter_dom_serialize($dom_document) {
  * throw exceptions.
  *
  * This function attempts to solve the problem by creating a DocumentFragment
- * and imitating the behavior in drupal_get_js(), commenting the CDATA tag.
+ * and imitating the behavior in backdrop_get_js(), commenting the CDATA tag.
  *
  * @param $dom_document
  *   The DOMDocument containing the $dom_element.
@@ -1104,7 +1104,7 @@ function filter_dom_serialize($dom_document) {
 function filter_dom_serialize_escape_cdata_element($dom_document, $dom_element, $comment_start = '//', $comment_end = '') {
   foreach ($dom_element->childNodes as $node) {
     if (get_class($node) == 'DOMCdataSection') {
-      // See drupal_get_js().  This code is more or less duplicated there.
+      // See backdrop_get_js().  This code is more or less duplicated there.
       $embed_prefix = "\n<!--{$comment_start}--><![CDATA[{$comment_start} ><!--{$comment_end}\n";
       $embed_suffix = "\n{$comment_start}--><!]]>{$comment_end}\n";
 
@@ -1144,7 +1144,7 @@ function theme_filter_guidelines($variables) {
   $format = $variables['format'];
   $attributes['class'][] = 'filter-guidelines-item';
   $attributes['class'][] = 'filter-guidelines-' . $format->format;
-  $output = '<div' . drupal_attributes($attributes) . '>';
+  $output = '<div' . backdrop_attributes($attributes) . '>';
   $output .= '<h3>' . check_plain($format->name) . '</h3>';
   $output .= theme('filter_tips', array('tips' => _filter_tips($format->format, FALSE)));
   $output .= '</div>';
@@ -1268,7 +1268,7 @@ function _filter_html_tips($filter, $format, $long = FALSE) {
   $output .= '<p>' . t('This site allows HTML content. While learning all of HTML may feel intimidating, learning how to use a very small number of the most basic HTML "tags" is very easy. This table provides examples for each tag that is enabled on this site.') . '</p>';
   $output .= '<p>' . t('For more information see W3C\'s <a href="@html-specifications">HTML Specifications</a> or use your favorite search engine to find other sites that explain HTML.', array('@html-specifications' => 'http://www.w3.org/TR/html/')) . '</p>';
   $tips = array(
-    'a' => array(t('Anchors are used to make links to other pages.'), '<a href="' . $base_url . '">' . check_plain(variable_get('site_name', 'Drupal')) . '</a>'),
+    'a' => array(t('Anchors are used to make links to other pages.'), '<a href="' . $base_url . '">' . check_plain(variable_get('site_name', 'Backdrop')) . '</a>'),
     'br' => array(t('By default line break tags are automatically added, so use this tag to add additional ones. Use of this tag is different because it is not used with an open/close pair like all the others. Use the extra " /" inside the tag to maintain XHTML 1.0 compatibility'), t('Text with <br />line break')),
     'p' => array(t('By default paragraph tags are automatically added, so use this tag to add additional ones.'), '<p>' . t('Paragraph one.') . '</p> <p>' . t('Paragraph two.') . '</p>'),
     'strong' => array(t('Strong', array(), array('context' => 'Font weight')), '<strong>' . t('Strong', array(), array('context' => 'Font weight')) . '</strong>'),

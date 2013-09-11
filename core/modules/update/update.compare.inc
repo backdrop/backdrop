@@ -29,7 +29,7 @@
  * @see update_project_cache()
  */
 function update_get_projects() {
-  $projects = &drupal_static(__FUNCTION__, array());
+  $projects = &backdrop_static(__FUNCTION__, array());
   if (empty($projects)) {
     // Retrieve the projects from cache, if present.
     $projects = update_project_cache('update_project_projects');
@@ -44,7 +44,7 @@ function update_get_projects() {
         _update_process_info_list($projects, $theme_data, 'theme', FALSE);
       }
       // Allow other modules to alter projects before fetching and comparing.
-      drupal_alter('update_projects', $projects);
+      backdrop_alter('update_projects', $projects);
       // Cache the site's project data for at most 1 hour.
       _update_cache_set('update_project_projects', $projects, REQUEST_TIME + 3600);
     }
@@ -140,10 +140,10 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     $project_name = $file->info['project'];
 
     // Figure out what project type we're going to use to display this module
-    // or theme. If the project name is 'drupal', we don't want it to show up
-    // under the usual "Modules" section, we put it at a special "Drupal Core"
+    // or theme. If the project name is 'backdrop', we don't want it to show up
+    // under the usual "Modules" section, we put it at a special "Backdrop Core"
     // section at the top of the report.
-    if ($project_name == 'drupal') {
+    if ($project_name == 'backdrop') {
       $project_display_type = 'core';
     }
     else {
@@ -157,8 +157,8 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     }
     // Add a list of sub-themes that "depend on" the project and a list of base
     // themes that are "required by" the project.
-    if ($project_name == 'drupal') {
-      // Drupal core is always required, so this extra info would be noise.
+    if ($project_name == 'backdrop') {
+      // Backdrop core is always required, so this extra info would be noise.
       $sub_themes = array();
       $base_themes = array();
     }
@@ -222,7 +222,7 @@ function update_get_project_name($file) {
     $project_name = $file->info['project'];
   }
   elseif (isset($file->info['package']) && (strpos($file->info['package'], 'Core') === 0)) {
-    $project_name = 'drupal';
+    $project_name = 'backdrop';
   }
   return $project_name;
 }
@@ -257,7 +257,7 @@ function update_process_project_info(&$projects) {
       }
       elseif (!isset($info['major'])) {
         // This would only happen for version strings that don't follow the
-        // drupal.org convention. We let contribs define "major" in their
+        // backdrop.org convention. We let contribs define "major" in their
         // .info in this case, and only if that's missing would we hit this.
         $info['major'] = -1;
       }
@@ -319,7 +319,7 @@ function update_calculate_project_data($available) {
   // Give other modules a chance to alter the status (for example, to allow a
   // contrib module to provide fine-grained settings to ignore specific
   // projects or releases).
-  drupal_alter('update_status', $projects);
+  backdrop_alter('update_status', $projects);
 
   // Cache the site's update status for at most 1 hour.
   _update_cache_set('update_project_data', $projects, REQUEST_TIME + 3600);
@@ -404,7 +404,7 @@ function update_calculate_project_update_status($project, &$project_data, $avail
         $project_data['extra'][] = array(
           'class' => array('project-not-secure'),
           'label' => t('Project not secure'),
-          'data' => t('This project has been labeled insecure by the Drupal security team, and is no longer available for download. Immediately disabling everything included by this project is strongly recommended!'),
+          'data' => t('This project has been labeled insecure by the Backdrop security team, and is no longer available for download. Immediately disabling everything included by this project is strongly recommended!'),
         );
         break;
       case 'unpublished':
@@ -484,7 +484,7 @@ function update_calculate_project_update_status($project, &$project_data, $avail
 
   // Make sure we never tell the admin to downgrade. If we recommended an
   // earlier version than the one they're running, they'd face an
-  // impossible data migration problem, since Drupal never supports a DB
+  // impossible data migration problem, since Backdrop never supports a DB
   // downgrade path. In the unfortunate case that what they're running is
   // unsupported, and there's nothing newer for them to upgrade to, we
   // can't print out a "Recommended version", but just have to tell them
@@ -721,7 +721,7 @@ function update_calculate_project_update_status($project, &$project_data, $avail
  * Note: while both of these arrays are expensive to compute (in terms of disk
  * I/O and some fairly heavy CPU processing), neither of these is the actual
  * data about available updates that we have to fetch over the network from
- * updates.drupal.org. That information is stored with the
+ * updates.backdrop.org. That information is stored with the
  * 'update_available_releases' cache ID -- it needs to persist longer than 1
  * hour and never get invalidated just by visiting a page on the site.
  *
@@ -767,7 +767,7 @@ function update_project_cache($cid) {
  * Filter the project .info data to only save attributes we need.
  *
  * @param array $info
- *   Array of .info file data as returned by drupal_parse_info_file().
+ *   Array of .info file data as returned by backdrop_parse_info_file().
  *
  * @return
  *   Array of .info file data we need for the Update manager.
@@ -785,5 +785,5 @@ function update_filter_project_info($info) {
     'project status url',
     'version',
   );
-  return array_intersect_key($info, drupal_map_assoc($whitelist));
+  return array_intersect_key($info, backdrop_map_assoc($whitelist));
 }

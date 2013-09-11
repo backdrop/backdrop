@@ -5,7 +5,7 @@
  * Tests for simpletest.module.
  */
 
-class SimpleTestFunctionalTest extends DrupalWebTestCase {
+class SimpleTestFunctionalTest extends BackdropWebTestCase {
   /**
    * The results array that has been parsed by getTestResults().
    */
@@ -30,8 +30,8 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
       parent::setUp('simpletest');
 
       // Create and login user
-      $admin_user = $this->drupalCreateUser(array('administer unit tests'));
-      $this->drupalLogin($admin_user);
+      $admin_user = $this->backdropCreateUser(array('administer unit tests'));
+      $this->backdropLogin($admin_user);
     }
     else {
       parent::setUp('non_existent_module');
@@ -44,36 +44,36 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
   function testInternalBrowser() {
     global $conf;
     if (!$this->inCURL()) {
-      $this->drupalGet('node');
-      $this->assertTrue($this->drupalGetHeader('Date'), t('An HTTP header was received.'));
-      $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => variable_get('site_name', 'Drupal'))), t('Site title matches.'));
+      $this->backdropGet('node');
+      $this->assertTrue($this->backdropGetHeader('Date'), t('An HTTP header was received.'));
+      $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => variable_get('site_name', 'Backdrop'))), t('Site title matches.'));
       $this->assertNoTitle('Foo', t('Site title does not match.'));
       // Make sure that we are locked out of the installer when prefixing
       // using the user-agent header. This is an important security check.
       global $base_url;
 
-      $this->drupalGet($base_url . '/core/install.php', array('external' => TRUE));
+      $this->backdropGet($base_url . '/core/install.php', array('external' => TRUE));
       $this->assertResponse(403, 'Cannot access install.php with a "simpletest" user-agent header.');
 
-      $user = $this->drupalCreateUser();
-      $this->drupalLogin($user);
-      $headers = $this->drupalGetHeaders(TRUE);
+      $user = $this->backdropCreateUser();
+      $this->backdropLogin($user);
+      $headers = $this->backdropGetHeaders(TRUE);
       $this->assertEqual(count($headers), 2, t('There was one intermediate request.'));
       $this->assertTrue(strpos($headers[0][':status'], '302') !== FALSE, t('Intermediate response code was 302.'));
       $this->assertFalse(empty($headers[0]['location']), t('Intermediate request contained a Location header.'));
       $this->assertEqual($this->getUrl(), $headers[0]['location'], t('HTTP redirect was followed'));
-      $this->assertFalse($this->drupalGetHeader('Location'), t('Headers from intermediate request were reset.'));
+      $this->assertFalse($this->backdropGetHeader('Location'), t('Headers from intermediate request were reset.'));
       $this->assertResponse(200, t('Response code from intermediate request was reset.'));
 
       // Test the maximum redirection option.
-      $this->drupalLogout();
+      $this->backdropLogout();
       $edit = array(
         'name' => $user->name,
         'pass' => $user->pass_raw
       );
       variable_set('simpletest_maximum_redirects', 1);
-      $this->drupalPost('user?destination=user/logout', $edit, t('Log in'));
-      $headers = $this->drupalGetHeaders(TRUE);
+      $this->backdropPost('user?destination=user/logout', $edit, t('Log in'));
+      $headers = $this->backdropGetHeaders(TRUE);
       $this->assertEqual(count($headers), 2, t('Simpletest stopped following redirects after the first one.'));
     }
   }
@@ -84,33 +84,33 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
   function testUserAgentValidation() {
     if (!$this->inCURL()) {
       global $base_url;
-      $simpletest_path = $base_url . '/' . drupal_get_path('module', 'simpletest');
+      $simpletest_path = $base_url . '/' . backdrop_get_path('module', 'simpletest');
       $HTTP_path = $simpletest_path .'/tests/http.php?q=node';
       $https_path = $simpletest_path .'/tests/https.php?q=node';
       // Generate a valid simpletest User-Agent to pass validation.
       $this->assertTrue(preg_match('/simpletest\d+/', $this->databasePrefix, $matches), t('Database prefix contains simpletest prefix.'));
-      $test_ua = drupal_generate_test_ua($matches[0]);
+      $test_ua = backdrop_generate_test_ua($matches[0]);
       $this->additionalCurlOptions = array(CURLOPT_USERAGENT => $test_ua);
 
       // Test pages only available for testing.
-      $this->drupalGet($HTTP_path);
+      $this->backdropGet($HTTP_path);
       $this->assertResponse(200, t('Requesting http.php with a legitimate simpletest User-Agent returns OK.'));
-      $this->drupalGet($https_path);
+      $this->backdropGet($https_path);
       $this->assertResponse(200, t('Requesting https.php with a legitimate simpletest User-Agent returns OK.'));
 
       // Now slightly modify the HMAC on the header, which should not validate.
       $this->additionalCurlOptions = array(CURLOPT_USERAGENT => $test_ua . 'X');
-      $this->drupalGet($HTTP_path);
+      $this->backdropGet($HTTP_path);
       $this->assertResponse(403, t('Requesting http.php with a bad simpletest User-Agent fails.'));
-      $this->drupalGet($https_path);
+      $this->backdropGet($https_path);
       $this->assertResponse(403, t('Requesting https.php with a bad simpletest User-Agent fails.'));
 
       // Use a real User-Agent and verify that the special files http.php and
       // https.php can't be accessed.
       $this->additionalCurlOptions = array(CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12');
-      $this->drupalGet($HTTP_path);
+      $this->backdropGet($HTTP_path);
       $this->assertResponse(403, t('Requesting http.php with a normal User-Agent fails.'));
-      $this->drupalGet($https_path);
+      $this->backdropGet($https_path);
       $this->assertResponse(403, t('Requesting https.php with a normal User-Agent fails.'));
     }
   }
@@ -134,11 +134,11 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
       // Run twice so test_ids can be accumulated.
       for ($i = 0; $i < 2; $i++) {
         // Run this test from web interface.
-        $this->drupalGet('admin/config/development/testing');
+        $this->backdropGet('admin/config/development/testing');
 
         $edit = array();
         $edit['SimpleTestFunctionalTest'] = TRUE;
-        $this->drupalPost(NULL, $edit, t('Run tests'));
+        $this->backdropPost(NULL, $edit, t('Run tests'));
 
         // Parse results and confirm that they are correct.
         $this->getTestResults();
@@ -158,8 +158,8 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
     $this->pass($this->pass);
     $this->fail($this->fail);
 
-    $this->drupalCreateUser(array($this->valid_permission));
-    $this->drupalCreateUser(array($this->invalid_permission));
+    $this->backdropCreateUser(array($this->valid_permission));
+    $this->backdropCreateUser(array($this->invalid_permission));
 
     $this->pass(t('Test ID is @id.', array('@id' => $this->testId)));
 
@@ -314,14 +314,14 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
    * Check if the test is being run from inside a CURL request.
    */
   function inCURL() {
-    return (bool) drupal_valid_test_ua();
+    return (bool) backdrop_valid_test_ua();
   }
 }
 
 /**
  * Test internal testing framework browser.
  */
-class SimpleTestBrowserTestCase extends DrupalWebTestCase {
+class SimpleTestBrowserTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'SimpleTest browser',
@@ -336,19 +336,19 @@ class SimpleTestBrowserTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test DrupalWebTestCase::getAbsoluteUrl().
+   * Test BackdropWebTestCase::getAbsoluteUrl().
    */
   function testGetAbsoluteUrl() {
     // Testbed runs with Clean URLs disabled, so disable it here.
     variable_set('clean_url', 0);
     $url = 'user/login';
 
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $absolute = url($url, array('absolute' => TRUE));
     $this->assertEqual($absolute, $this->url, t('Passed and requested URL are equal.'));
     $this->assertEqual($this->url, $this->getAbsoluteUrl($this->url), t('Requested and returned absolute URL are equal.'));
 
-    $this->drupalPost(NULL, array(), t('Log in'));
+    $this->backdropPost(NULL, array(), t('Log in'));
     $this->assertEqual($absolute, $this->url, t('Passed and requested URL are equal.'));
     $this->assertEqual($this->url, $this->getAbsoluteUrl($this->url), t('Requested and returned absolute URL are equal.'));
 
@@ -371,7 +371,7 @@ class SimpleTestBrowserTestCase extends DrupalWebTestCase {
 </body>
 </html>
 EOF;
-    $this->drupalSetContent($testpage);
+    $this->backdropSetContent($testpage);
 
     // Matches the first link.
     $urls = $this->xpath('//a[text()=:text]', array(':text' => 'A "weird" link, just to bother the dumb "XPath 1.0"'));
@@ -382,14 +382,14 @@ EOF;
   }
 }
 
-class SimpleTestMailCaptureTestCase extends DrupalWebTestCase {
+class SimpleTestMailCaptureTestCase extends BackdropWebTestCase {
   /**
    * Implement getInfo().
    */
   public static function getInfo() {
     return array(
       'name' => 'SimpleTest e-mail capturing',
-      'description' => 'Test the SimpleTest e-mail capturing logic, the assertMail assertion and the drupalGetMails function.',
+      'description' => 'Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.',
       'group' => 'SimpleTest',
     );
   }
@@ -402,22 +402,22 @@ class SimpleTestMailCaptureTestCase extends DrupalWebTestCase {
     $subject = $this->randomString(64);
     $body = $this->randomString(128);
     $message = array(
-      'id' => 'drupal_mail_test',
+      'id' => 'backdrop_mail_test',
       'headers' => array('Content-type'=> 'text/html'),
       'subject' => $subject,
       'to' => 'foobar@example.com',
       'body' => $body,
     );
 
-    // Before we send the e-mail, drupalGetMails should return an empty array.
-    $captured_emails = $this->drupalGetMails();
+    // Before we send the e-mail, backdropGetMails should return an empty array.
+    $captured_emails = $this->backdropGetMails();
     $this->assertEqual(count($captured_emails), 0, t('The captured e-mails queue is empty.'), t('E-mail'));
 
     // Send the e-mail.
-    $response = drupal_mail_system('simpletest', 'drupal_mail_test')->mail($message);
+    $response = backdrop_mail_system('simpletest', 'backdrop_mail_test')->mail($message);
 
     // Ensure that there is one e-mail in the captured e-mails array.
-    $captured_emails = $this->drupalGetMails();
+    $captured_emails = $this->backdropGetMails();
     $this->assertEqual(count($captured_emails), 1, t('One e-mail was captured.'), t('E-mail'));
 
     // Assert that the e-mail was sent by iterating over the message properties
@@ -429,31 +429,31 @@ class SimpleTestMailCaptureTestCase extends DrupalWebTestCase {
     // Send additional e-mails so more than one e-mail is captured.
     for ($index = 0; $index < 5; $index++) {
       $message = array(
-        'id' => 'drupal_mail_test_' . $index,
+        'id' => 'backdrop_mail_test_' . $index,
         'headers' => array('Content-type'=> 'text/html'),
         'subject' => $this->randomString(64),
         'to' => $this->randomName(32) . '@example.com',
         'body' => $this->randomString(512),
       );
-      drupal_mail_system('drupal_mail_test', $index)->mail($message);
+      backdrop_mail_system('backdrop_mail_test', $index)->mail($message);
     }
 
     // There should now be 6 e-mails captured.
-    $captured_emails = $this->drupalGetMails();
+    $captured_emails = $this->backdropGetMails();
     $this->assertEqual(count($captured_emails), 6, t('All e-mails were captured.'), t('E-mail'));
 
-    // Test different ways of getting filtered e-mails via drupalGetMails().
-    $captured_emails = $this->drupalGetMails(array('id' => 'drupal_mail_test'));
+    // Test different ways of getting filtered e-mails via backdropGetMails().
+    $captured_emails = $this->backdropGetMails(array('id' => 'backdrop_mail_test'));
     $this->assertEqual(count($captured_emails), 1, t('Only one e-mail is returned when filtering by id.'), t('E-mail'));
-    $captured_emails = $this->drupalGetMails(array('id' => 'drupal_mail_test', 'subject' => $subject));
+    $captured_emails = $this->backdropGetMails(array('id' => 'backdrop_mail_test', 'subject' => $subject));
     $this->assertEqual(count($captured_emails), 1, t('Only one e-mail is returned when filtering by id and subject.'), t('E-mail'));
-    $captured_emails = $this->drupalGetMails(array('id' => 'drupal_mail_test', 'subject' => $subject, 'from' => 'this_was_not_used@example.com'));
+    $captured_emails = $this->backdropGetMails(array('id' => 'backdrop_mail_test', 'subject' => $subject, 'from' => 'this_was_not_used@example.com'));
     $this->assertEqual(count($captured_emails), 0, t('No e-mails are returned when querying with an unused from address.'), t('E-mail'));
 
-    // Send the last e-mail again, so we can confirm that the drupalGetMails-filter
+    // Send the last e-mail again, so we can confirm that the backdropGetMails-filter
     // correctly returns all e-mails with a given property/value.
-    drupal_mail_system('drupal_mail_test', $index)->mail($message);
-    $captured_emails = $this->drupalGetMails(array('id' => 'drupal_mail_test_4'));
+    backdrop_mail_system('backdrop_mail_test', $index)->mail($message);
+    $captured_emails = $this->backdropGetMails(array('id' => 'backdrop_mail_test_4'));
     $this->assertEqual(count($captured_emails), 2, t('All e-mails with the same id are returned when filtering by id.'), t('E-mail'));
   }
 }
@@ -461,7 +461,7 @@ class SimpleTestMailCaptureTestCase extends DrupalWebTestCase {
 /**
  * Test Folder creation
  */
-class SimpleTestFolderTestCase extends DrupalWebTestCase {
+class SimpleTestFolderTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Testing SimpleTest setUp',
@@ -483,7 +483,7 @@ class SimpleTestFolderTestCase extends DrupalWebTestCase {
 /**
  * Test required modules for tests.
  */
-class SimpleTestMissingDependentModuleUnitTest extends DrupalUnitTestCase {
+class SimpleTestMissingDependentModuleUnitTest extends BackdropUnitTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Testing dependent module test',
@@ -505,12 +505,12 @@ class SimpleTestMissingDependentModuleUnitTest extends DrupalUnitTestCase {
  * Tests a test case that does not run parent::setUp() in its setUp() method.
  *
  * If a test case does not call parent::setUp(), running
- * DrupalTestCase::tearDown() would destroy the main site's database tables.
+ * BackdropTestCase::tearDown() would destroy the main site's database tables.
  * Therefore, we ensure that tests which are not set up properly are skipped.
  *
- * @see DrupalTestCase
+ * @see BackdropTestCase
  */
-class SimpleTestBrokenSetUp extends DrupalWebTestCase {
+class SimpleTestBrokenSetUp extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Broken SimpleTest method',
@@ -521,11 +521,11 @@ class SimpleTestBrokenSetUp extends DrupalWebTestCase {
 
   function setUp() {
     // If the test is being run from the main site, set up normally.
-    if (!drupal_valid_test_ua()) {
+    if (!backdrop_valid_test_ua()) {
       parent::setUp('simpletest');
       // Create and log in user.
-      $admin_user = $this->drupalCreateUser(array('administer unit tests'));
-      $this->drupalLogin($admin_user);
+      $admin_user = $this->backdropCreateUser(array('administer unit tests'));
+      $this->backdropLogin($admin_user);
     }
     // If the test is being run from within simpletest, set up the broken test.
     else {
@@ -536,7 +536,7 @@ class SimpleTestBrokenSetUp extends DrupalWebTestCase {
 
   function tearDown() {
     // If the test is being run from the main site, tear down normally.
-    if (!drupal_valid_test_ua()) {
+    if (!backdrop_valid_test_ua()) {
       parent::tearDown();
     }
     else {
@@ -551,9 +551,9 @@ class SimpleTestBrokenSetUp extends DrupalWebTestCase {
   function testBreakSetUp() {
     // If the test is being run from the main site, run it again from the web
     // interface within the simpletest child site.
-    if (!drupal_valid_test_ua()) {
+    if (!backdrop_valid_test_ua()) {
       $edit['SimpleTestBrokenSetUp'] = TRUE;
-      $this->drupalPost('admin/config/development/testing', $edit, t('Run tests'));
+      $this->backdropPost('admin/config/development/testing', $edit, t('Run tests'));
 
       // Verify that the broken test and its tearDown() method are skipped.
       $this->assertRaw(t('The test setUp() method has been run.'));
@@ -571,7 +571,7 @@ class SimpleTestBrokenSetUp extends DrupalWebTestCase {
 /**
  * Tests missing requirements to run test.
  */
-class SimpleTestMissingCheckedRequirements extends DrupalWebTestCase {
+class SimpleTestMissingCheckedRequirements extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Broken requirements test',
@@ -582,15 +582,15 @@ class SimpleTestMissingCheckedRequirements extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('simpletest');
-    $admin_user = $this->drupalCreateUser(array('administer unit tests'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer unit tests'));
+    $this->backdropLogin($admin_user);
   }
 
   /**
    * Overrides checkRequirements().
    */
   protected function checkRequirements() {
-    if (drupal_valid_test_ua()) {
+    if (backdrop_valid_test_ua()) {
       return array(
         'Test is not allowed to run.'
       );
@@ -604,10 +604,10 @@ class SimpleTestMissingCheckedRequirements extends DrupalWebTestCase {
   protected function testCheckRequirements() {
     // If this is the main request, run the web test script and then assert
     // that the child tests did not run.
-    if (!drupal_valid_test_ua()) {
+    if (!backdrop_valid_test_ua()) {
       // Run this test from web interface.
       $edit['SimpleTestMissingCheckedRequirements'] = TRUE;
-      $this->drupalPost('admin/config/development/testing', $edit, t('Run tests'));
+      $this->backdropPost('admin/config/development/testing', $edit, t('Run tests'));
       $this->assertRaw('Test is not allowed to run.', 'Test check for requirements came up.');
       $this->assertNoText('Test ran when it failed requirements check.', 'Test requirements stopped test from running.');
     }
@@ -620,18 +620,18 @@ class SimpleTestMissingCheckedRequirements extends DrupalWebTestCase {
 /**
  * Verifies that tests bundled with installation profile modules are found.
  */
-class SimpleTestInstallationProfileModuleTestsTestCase extends DrupalWebTestCase {
+class SimpleTestInstallationProfileModuleTestsTestCase extends BackdropWebTestCase {
   /**
    * Use the Testing profile.
    *
-   * The Testing profile contains drupal_system_listing_compatible_test.test,
+   * The Testing profile contains backdrop_system_listing_compatible_test.test,
    * which attempts to:
    * - run tests using the Minimal profile (which does not contain the
-   *   drupal_system_listing_compatible_test.module)
-   * - but still install the drupal_system_listing_compatible_test.module
+   *   backdrop_system_listing_compatible_test.module)
+   * - but still install the backdrop_system_listing_compatible_test.module
    *   contained in the Testing profile.
    *
-   * @see DrupalSystemListingCompatibleTestCase
+   * @see BackdropSystemListingCompatibleTestCase
    */
   protected $profile = 'testing';
 
@@ -646,21 +646,21 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends DrupalWebTestCase
   function setUp() {
     parent::setUp(array('simpletest'));
 
-    $this->admin_user = $this->drupalCreateUser(array('administer unit tests'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer unit tests'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
    * Tests existence of test case located in an installation profile module.
    */
   function testInstallationProfileTests() {
-    $this->drupalGet('admin/config/development/testing');
+    $this->backdropGet('admin/config/development/testing');
     $this->assertText('Installation profile module tests helper');
     $edit = array(
-      'DrupalSystemListingCompatibleTestCase' => TRUE,
+      'BackdropSystemListingCompatibleTestCase' => TRUE,
     );
-    $this->drupalPost(NULL, $edit, t('Run tests'));
-    $this->assertText('DrupalSystemListingCompatibleTestCase test executed.');
+    $this->backdropPost(NULL, $edit, t('Run tests'));
+    $this->assertText('BackdropSystemListingCompatibleTestCase test executed.');
   }
 }
 
@@ -669,15 +669,15 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends DrupalWebTestCase
  *
  * @see SimpleTestInstallationProfileModuleTestsTestCase
  */
-class SimpleTestOtherInstallationProfileModuleTestsTestCase extends DrupalWebTestCase {
+class SimpleTestOtherInstallationProfileModuleTestsTestCase extends BackdropWebTestCase {
   /**
    * Use the Minimal profile.
    *
-   * The Testing profile contains drupal_system_listing_compatible_test.test,
+   * The Testing profile contains backdrop_system_listing_compatible_test.test,
    * which should not be found.
    *
    * @see SimpleTestInstallationProfileModuleTestsTestCase
-   * @see DrupalSystemListingCompatibleTestCase
+   * @see BackdropSystemListingCompatibleTestCase
    */
   protected $profile = 'minimal';
 
@@ -692,15 +692,15 @@ class SimpleTestOtherInstallationProfileModuleTestsTestCase extends DrupalWebTes
   function setUp() {
     parent::setUp(array('simpletest'));
 
-    $this->admin_user = $this->drupalCreateUser(array('administer unit tests'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer unit tests'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
    * Tests that tests located in another installation profile do not appear.
    */
   function testOtherInstallationProfile() {
-    $this->drupalGet('admin/config/development/testing');
+    $this->backdropGet('admin/config/development/testing');
     $this->assertNoText('Installation profile module tests helper');
   }
 }

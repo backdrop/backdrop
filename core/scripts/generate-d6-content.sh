@@ -2,12 +2,12 @@
 <?php
 
 /**
- * Generate content for a Drupal 6 database to test the upgrade process.
+ * Generate content for a Backdrop 6 database to test the upgrade process.
  *
- * Run this script at the root of an existing Drupal 6 installation.
+ * Run this script at the root of an existing Backdrop 6 installation.
  * Steps to use this generation script:
- * - Install drupal 6.
- * - Run this script from your Drupal ROOT directory.
+ * - Install backdrop 6.
+ * - Run this script from your Backdrop ROOT directory.
  * - Use the dump-database-d6.sh to generate the D7 file
  *   modules/simpletest/tests/upgrade/database.filled.php
  */
@@ -24,9 +24,9 @@ $_SERVER['PHP_SELF']        = $_SERVER['REQUEST_URI'] = '/';
 $_SERVER['HTTP_USER_AGENT'] = 'console';
 $modules_to_enable          = array('path', 'poll');
 
-// Bootstrap Drupal.
+// Bootstrap Backdrop.
 include_once './includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+backdrop_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 // Enable requested modules
 include_once './modules/system/system.admin.inc';
@@ -39,7 +39,7 @@ system_modules_submit(NULL, $form_state);
 unset($form_state);
 
 // Run cron after installing
-drupal_cron_run();
+backdrop_cron_run();
 
 // Create six users
 for ($i = 0; $i < 6; $i++) {
@@ -181,7 +181,7 @@ for ($i = 0; $i < 12; $i++) {
     $form_state = array();
     $form_state['values']['choice'] = $c;
     $form_state['values']['op'] = t('Vote');
-    drupal_execute('poll_view_voting', $form_state, $node);
+    backdrop_execute('poll_view_voting', $form_state, $node);
   }
 }
 

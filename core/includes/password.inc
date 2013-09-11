@@ -15,7 +15,7 @@
 
 /**
  * The standard log2 number of iterations for password stretching. This should
- * increase by 1 every Drupal version in order to counteract increases in the
+ * increase by 1 every Backdrop version in order to counteract increases in the
  * speed and power of computers available to crack the hashes.
  */
 const DRUPAL_HASH_COUNT = 16;
@@ -104,7 +104,7 @@ function _password_generate_salt($count_log2) {
   $itoa64 = _password_itoa64();
   $output .= $itoa64[$count_log2];
   // 6 bytes is the standard salt for a portable phpass hash.
-  $output .= _password_base64_encode(drupal_random_bytes(6), 6);
+  $output .= _password_base64_encode(backdrop_random_bytes(6), 6);
   return $output;
 }
 
@@ -231,7 +231,7 @@ function user_check_password($password, $account) {
   if (substr($account->pass, 0, 2) == 'U$') {
     // This may be an updated password from user_update_7000(). Such hashes
     // have 'U' added as the first character and need an extra md5() (see the
-    // Drupal 7 documentation).
+    // Backdrop 7 documentation).
     $stored_hash = substr($account->pass, 1);
     $password = md5($password);
   }
@@ -242,14 +242,14 @@ function user_check_password($password, $account) {
   $type = substr($stored_hash, 0, 3);
   switch ($type) {
     case '$S$':
-      // A normal Drupal 7 password using sha512.
+      // A normal Backdrop 7 password using sha512.
       $hash = _password_crypt('sha512', $password, $stored_hash);
       break;
     case '$H$':
       // phpBB3 uses "$H$" for the same thing as "$P$".
     case '$P$':
       // A phpass password generated using md5.  This is an
-      // imported password or from an earlier Drupal version.
+      // imported password or from an earlier Backdrop version.
       $hash = _password_crypt('md5', $password, $stored_hash);
       break;
     default:
@@ -265,7 +265,7 @@ function user_check_password($password, $account) {
  * password is available. A new hash is needed when the desired iteration count
  * has changed through a change in the variable password_count_log2 or
  * DRUPAL_HASH_COUNT or if the user's password hash was generated in an update
- * like user_update_7000() (see the Drupal 7 documentation).
+ * like user_update_7000() (see the Backdrop 7 documentation).
  *
  * Alternative implementations of this function might use other criteria based
  * on the fields in $account.

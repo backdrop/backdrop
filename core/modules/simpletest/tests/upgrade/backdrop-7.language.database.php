@@ -5,7 +5,7 @@
  * Database additions for language tests. Used in upgrade.language.test.
  *
  * This dump only contains data and schema components relevant for language
- * functionality. The drupal-7.filled.database.php file is imported before
+ * functionality. The backdrop-7.filled.database.php file is imported before
  * this dump, so the two form the database structure expected in tests
  * altogether.
  */
@@ -247,7 +247,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '1',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'An AJAX HTTP error occurred.',
   'context' => '',
@@ -255,7 +255,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '2',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'HTTP Result Code: !status',
   'context' => '',
@@ -263,7 +263,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '3',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'An AJAX HTTP request terminated abnormally.',
   'context' => '',
@@ -271,7 +271,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '4',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'Debugging information follows.',
   'context' => '',
@@ -279,7 +279,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '5',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'Path: !uri',
   'context' => '',
@@ -287,7 +287,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '6',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'StatusText: !statusText',
   'context' => '',
@@ -295,7 +295,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '7',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'ResponseText: !responseText',
   'context' => '',
@@ -303,7 +303,7 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '8',
-  'location' => 'misc/drupal.js',
+  'location' => 'misc/backdrop.js',
   'textgroup' => 'default',
   'source' => 'ReadyState: !readyState',
   'context' => '',
@@ -480,7 +480,7 @@ db_insert('variable')->fields(array(
 ))
 ->values(array(
   'name' => 'javascript_parsed',
-  'value' => 'a:16:{i:0;s:14:"misc/drupal.js";i:1;s:14:"misc/jquery.js";i:2;s:19:"misc/jquery.once.js";s:10:"refresh:ca";s:7:"waiting";i:3;s:29:"misc/ui/jquery.ui.core.min.js";i:4;s:21:"misc/jquery.ba-bbq.js";i:5;s:33:"modules/overlay/overlay-parent.js";i:6;s:32:"modules/contextual/contextual.js";i:7;s:21:"misc/jquery.cookie.js";i:8;s:26:"modules/toolbar/toolbar.js";i:9;s:32:"modules/overlay/overlay-child.js";i:10;s:19:"misc/tableheader.js";i:11;s:17:"misc/tabledrag.js";i:12;s:12:"misc/form.js";i:13;s:16:"misc/collapse.js";s:10:"refresh:cv";s:7:"waiting";}',
+  'value' => 'a:16:{i:0;s:14:"misc/backdrop.js";i:1;s:14:"misc/jquery.js";i:2;s:19:"misc/jquery.once.js";s:10:"refresh:ca";s:7:"waiting";i:3;s:29:"misc/ui/jquery.ui.core.min.js";i:4;s:21:"misc/jquery.ba-bbq.js";i:5;s:33:"modules/overlay/overlay-parent.js";i:6;s:32:"modules/contextual/contextual.js";i:7;s:21:"misc/jquery.cookie.js";i:8;s:26:"modules/toolbar/toolbar.js";i:9;s:32:"modules/overlay/overlay-child.js";i:10;s:19:"misc/tableheader.js";i:11;s:17:"misc/tabledrag.js";i:12;s:12:"misc/form.js";i:13;s:16:"misc/collapse.js";s:10:"refresh:cv";s:7:"waiting";}',
 ))
 ->values(array(
   'name' => 'language_count',

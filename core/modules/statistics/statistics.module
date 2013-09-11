@@ -13,11 +13,11 @@ function statistics_help($path, $arg) {
     case 'admin/help#statistics':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Statistics module shows you how often a given page is viewed, who viewed it, the previous page the user visited (referrer URL), and when it was viewed. These statistics are useful in determining how users are visiting and navigating your site. For more information, see the online handbook entry for the <a href="@statistics">Statistics module</a>.', array('@statistics' => url('http://drupal.org/handbook/modules/statistics/'))) . '</p>';
+      $output .= '<p>' . t('The Statistics module shows you how often a given page is viewed, who viewed it, the previous page the user visited (referrer URL), and when it was viewed. These statistics are useful in determining how users are visiting and navigating your site. For more information, see the online handbook entry for the <a href="@statistics">Statistics module</a>.', array('@statistics' => url('http://backdrop.org/handbook/modules/statistics/'))) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing logs') . '</dt>';
-      $output .= '<dd>' . t('To enable collection of statistics, the <em>Enable access log</em> checkbox on the <a href="@statistics-settings">Statistics settings page</a> must be checked. The <em>Discard access logs older than</em> setting on the settings page specifies the length of time entries are kept in the log before they are deleted. This setting requires a correctly configured <a href="@cron">cron maintenance task</a> to run.', array('@statistics-settings' => url('admin/config/system/statistics'), '@cron' => 'http://drupal.org/cron')) . '</dd>';
+      $output .= '<dd>' . t('To enable collection of statistics, the <em>Enable access log</em> checkbox on the <a href="@statistics-settings">Statistics settings page</a> must be checked. The <em>Discard access logs older than</em> setting on the settings page specifies the length of time entries are kept in the log before they are deleted. This setting requires a correctly configured <a href="@cron">cron maintenance task</a> to run.', array('@statistics-settings' => url('admin/config/system/statistics'), '@cron' => 'http://backdrop.org/cron')) . '</dd>';
       $output .= '<dt>' . t('Viewing site usage') . '</dt>';
       $output .= '<dd>' . t('The Statistics module can help you break down details about your users and how they are using the site. The module offers four reports:');
       $output .= '<ul><li>' . t('<a href="@recent-hits">Recent hits</a> displays information about the latest activity on your site, including the URL and title of the page that was accessed, the user name (if available) and the IP address of the viewer.', array('@recent-hits' => url('admin/reports/hits'))) . '</li>';
@@ -31,7 +31,7 @@ function statistics_help($path, $arg) {
       $output .= '</dl>';
       return $output;
     case 'admin/config/system/statistics':
-      return '<p>' . t('Settings for the statistical information that Drupal will keep about the site. See <a href="@statistics">site statistics</a> for the actual information.', array('@statistics' => url('admin/reports/hits'))) . '</p>';
+      return '<p>' . t('Settings for the statistical information that Backdrop will keep about the site. See <a href="@statistics">site statistics</a> for the actual information.', array('@statistics' => url('admin/reports/hits'))) . '</p>';
     case 'admin/reports/hits':
       return '<p>' . t("This page displays the site's most recent hits.") . '</p>';
     case 'admin/reports/referrers':
@@ -55,7 +55,7 @@ function statistics_exit() {
   // performance decrease for non-database page caches, but with Statistics
   // module, it is likely to also have 'statistics_enable_access_log' enabled,
   // in which case we need to bootstrap to the session phase anyway.
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
+  backdrop_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
 
   if (variable_get('statistics_count_content_views', 0)) {
     // We are counting content views.
@@ -74,14 +74,14 @@ function statistics_exit() {
     }
   }
   if (variable_get('statistics_enable_access_log', 0)) {
-    drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+    backdrop_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
 
     // For anonymous users unicode.inc will not have been loaded.
     include_once DRUPAL_ROOT . '/core/includes/unicode.inc';
     // Log this page access.
     db_insert('accesslog')
       ->fields(array(
-        'title' => truncate_utf8(strip_tags(drupal_get_title()), 255),
+        'title' => truncate_utf8(strip_tags(backdrop_get_title()), 255),
         'path' => truncate_utf8($_GET['q'], 255),
         'url' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
         'hostname' => ip_address(),
@@ -175,7 +175,7 @@ function statistics_menu() {
   $items['admin/config/system/statistics'] = array(
     'title' => 'Statistics',
     'description' => 'Control details about what and how your site logs access statistics.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('statistics_settings_form'),
     'access arguments' => array('administer statistics'),
     'file' => 'statistics.admin.inc',
@@ -324,7 +324,7 @@ function statistics_block_info() {
  */
 function statistics_block_configure($delta = '') {
   // Popular content block settings
-  $numbers = array('0' => t('Disabled')) + drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40));
+  $numbers = array('0' => t('Disabled')) + backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40));
   $form['statistics_block_top_day_num'] = array('#type' => 'select', '#title' => t("Number of day's top views to display"), '#default_value' => variable_get('statistics_block_top_day_num', 0), '#options' => $numbers, '#description' => t('How many content items to display in "day" list.'));
   $form['statistics_block_top_all_num'] = array('#type' => 'select', '#title' => t('Number of all time views to display'), '#default_value' => variable_get('statistics_block_top_all_num', 0), '#options' => $numbers, '#description' => t('How many content items to display in "all time" list.'));
   $form['statistics_block_top_last_num'] = array('#type' => 'select', '#title' => t('Number of most recent views to display'), '#default_value' => variable_get('statistics_block_top_last_num', 0), '#options' => $numbers, '#description' => t('How many content items to display in "recently viewed" list.'));
@@ -378,7 +378,7 @@ function statistics_block_view($delta = '') {
  * statistics module.
  */
 function _statistics_link($path, $width = 35) {
-  $title = drupal_get_path_alias($path);
+  $title = backdrop_get_path_alias($path);
   $title = truncate_utf8($title, $width, FALSE, TRUE);
   return l($title, $path);
 }

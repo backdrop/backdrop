@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Displays the Drupal administration interface in an overlay.
+ * Displays the Backdrop administration interface in an overlay.
  */
 
 /**
@@ -13,7 +13,7 @@ function overlay_help($path, $arg) {
     case 'admin/help#overlay':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Overlay module makes the administration pages on your site display in a JavaScript overlay of the page you were viewing when you clicked the administrative link, instead of replacing the page in your browser window. Use the close link on the overlay to return to the page you were viewing when you clicked the link. For more information, see the online handbook entry for <a href="@overlay">Overlay module</a>.', array('@overlay' => 'http://drupal.org/handbook/modules/overlay')) . '</p>';
+      $output .= '<p>' . t('The Overlay module makes the administration pages on your site display in a JavaScript overlay of the page you were viewing when you clicked the administrative link, instead of replacing the page in your browser window. Use the close link on the overlay to return to the page you were viewing when you clicked the link. For more information, see the online handbook entry for <a href="@overlay">Overlay module</a>.', array('@overlay' => 'http://backdrop.org/handbook/modules/overlay')) . '</p>';
       return $output;
   }
 }
@@ -130,7 +130,7 @@ function overlay_init() {
     // <front>#overlay=admin/modules to actually enable the overlay.
     if (isset($_SESSION['overlay_enable_redirect']) && $_SESSION['overlay_enable_redirect']) {
       unset($_SESSION['overlay_enable_redirect']);
-      drupal_goto('<front>', array('fragment' => 'overlay=' . $current_path));
+      backdrop_goto('<front>', array('fragment' => 'overlay=' . $current_path));
     }
 
     if (isset($_GET['render']) && $_GET['render'] == 'overlay') {
@@ -143,7 +143,7 @@ function overlay_init() {
       // If this page shouldn't be rendered inside the overlay, redirect to the
       // parent.
       elseif (!path_is_admin($current_path)) {
-        overlay_close_dialog($current_path, array('query' => drupal_get_query_parameters(NULL, array('q', 'render'))));
+        overlay_close_dialog($current_path, array('query' => backdrop_get_query_parameters(NULL, array('q', 'render'))));
       }
 
       // Indicate that we are viewing an overlay child page.
@@ -194,12 +194,12 @@ function overlay_exit() {
  * Implements hook_library_info().
  */
 function overlay_library_info() {
-  $module_path = drupal_get_path('module', 'overlay');
+  $module_path = backdrop_get_path('module', 'overlay');
 
   // Overlay parent.
   $libraries['parent'] = array(
     'title' => 'Overlay: Parent',
-    'website' => 'http://drupal.org/handbook/modules/overlay',
+    'website' => 'http://backdrop.org/handbook/modules/overlay',
     'version' => '1.0',
     'js' => array(
       $module_path . '/overlay-parent.js' => array(),
@@ -215,7 +215,7 @@ function overlay_library_info() {
   // Overlay child.
   $libraries['child'] = array(
     'title' => 'Overlay: Child',
-    'website' => 'http://drupal.org/handbook/modules/overlay',
+    'website' => 'http://backdrop.org/handbook/modules/overlay',
     'version' => '1.0',
     'js' => array(
       $module_path . '/overlay-child.js' => array(),
@@ -229,11 +229,11 @@ function overlay_library_info() {
 }
 
 /**
- * Implements hook_drupal_goto_alter().
+ * Implements hook_backdrop_goto_alter().
  */
-function overlay_drupal_goto_alter(&$path, &$options, &$http_response_code) {
+function overlay_backdrop_goto_alter(&$path, &$options, &$http_response_code) {
   if (overlay_get_mode() == 'child') {
-    // The authorize.php script bootstraps Drupal to a very low level, where
+    // The authorize.php script bootstraps Backdrop to a very low level, where
     // the PHP code that is necessary to close the overlay properly will not be
     // loaded. Therefore, if we are redirecting to authorize.php inside the
     // overlay, instead redirect back to the current page with instructions to
@@ -242,7 +242,7 @@ function overlay_drupal_goto_alter(&$path, &$options, &$http_response_code) {
     if ($path == system_authorized_get_url() || $path == system_authorized_batch_processing_url()) {
       $_SESSION['overlay_close_dialog'] = array($path, $options);
       $path = current_path();
-      $options = drupal_get_query_parameters();
+      $options = backdrop_get_query_parameters();
     }
 
     // If the current page request is inside the overlay, add ?render=overlay
@@ -307,14 +307,14 @@ function overlay_user_dismiss_message() {
   // the anonymous role. In this case, we do not display the message to disable
   // the overlay, so there is nothing to dismiss. Also, protect against
   // cross-site request forgeries by validating a token.
-  if (empty($user->uid) || !isset($_GET['token']) || !drupal_valid_token($_GET['token'], 'overlay')) {
+  if (empty($user->uid) || !isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'overlay')) {
     return MENU_ACCESS_DENIED;
   }
   else {
     user_save(user_load($user->uid), array('data' => array('overlay_message_dismissed' => 1)));
-    drupal_set_message(t('The message has been dismissed. You can change your overlay settings at any time by visiting your profile page.'));
+    backdrop_set_message(t('The message has been dismissed. You can change your overlay settings at any time by visiting your profile page.'));
     // Destination is normally given. Go to the user profile as a fallback.
-    drupal_goto('user/' . $user->uid . '/edit');
+    backdrop_goto('user/' . $user->uid . '/edit');
   }
 }
 
@@ -327,7 +327,7 @@ function overlay_user_dismiss_message() {
  * users, because the links control per-user settings. Therefore, because some
  * screen readers are unable to properly read overlay contents, site builders
  * are discouraged from granting the "access overlay" permission to the
- * anonymous role. See http://drupal.org/node/890284.
+ * anonymous role. See http://backdrop.org/node/890284.
  */
 function overlay_disable_message() {
   global $user;
@@ -342,7 +342,7 @@ function overlay_disable_message() {
         '#title' => t('If you have problems accessing administrative pages on this site, disable the overlay on your profile page.'),
         '#href' => 'user/' . $user->uid . '/edit',
         '#options' => array(
-          'query' => drupal_get_destination(),
+          'query' => backdrop_get_destination(),
           'fragment' => 'edit-overlay-control',
           'attributes' => array(
             'id' => 'overlay-profile-link',
@@ -358,9 +358,9 @@ function overlay_disable_message() {
         '#title' => t('Dismiss this message.'),
         '#href' => 'overlay/dismiss-message',
         '#options' => array(
-          'query' => drupal_get_destination() + array(
+          'query' => backdrop_get_destination() + array(
             // Add a token to protect against cross-site request forgeries.
-            'token' => drupal_get_token('overlay'),
+            'token' => backdrop_get_token('overlay'),
           ),
           'attributes' => array(
             'id' => 'overlay-dismiss-message',
@@ -399,7 +399,7 @@ function theme_overlay_disable_message($variables) {
   }
 
   // Render the links.
-  $output = drupal_render($element['profile_link']) . ' ' . drupal_render($element['dismiss_message_link']);
+  $output = backdrop_render($element['profile_link']) . ' ' . backdrop_render($element['dismiss_message_link']);
 
   // Add a heading for screen-reader users. The heading doesn't need to be seen
   // by sighted users.
@@ -476,7 +476,7 @@ function overlay_preprocess_maintenance_page(&$variables) {
  */
 function template_preprocess_overlay(&$variables) {
   $variables['tabs'] = menu_primary_local_tasks();
-  $variables['title'] = drupal_get_title();
+  $variables['title'] = backdrop_get_title();
   $variables['disable_overlay'] = overlay_disable_message();
   $variables['content_attributes_array']['class'][] = 'clearfix';
 }
@@ -530,7 +530,7 @@ function overlay_preprocess_page(&$variables) {
  * @see overlay_page_delivery_callback_alter()
  */
 function overlay_display_empty_page($value = NULL) {
-  $display_empty_page = &drupal_static(__FUNCTION__, FALSE);
+  $display_empty_page = &backdrop_static(__FUNCTION__, FALSE);
   if (isset($value)) {
     $display_empty_page = $value;
   }
@@ -553,9 +553,9 @@ function overlay_page_delivery_callback_alter(&$callback) {
  * the scripts and styles necessary in order to trigger the overlay to close.
  */
 function overlay_deliver_empty_page() {
-  $empty_page = '<html><head><title></title>' . drupal_get_css() . drupal_get_js() . '</head><body class="overlay"></body></html>';
+  $empty_page = '<html><head><title></title>' . backdrop_get_css() . backdrop_get_js() . '</head><body class="overlay"></body></html>';
   print $empty_page;
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
@@ -582,7 +582,7 @@ function overlay_get_mode() {
  *     links in the parent window will open in an overlay.
  *   - 'child': This is used in the context of the child overlay window (the
  *     page actually appearing within the overlay iframe). If set, JavaScript
- *     and CSS are added so that Drupal behaves nicely from within the overlay.
+ *     and CSS are added so that Backdrop behaves nicely from within the overlay.
  *   - 'none': This is used to avoid adding any overlay-related code to the
  *     page at all. Modules can set this to explicitly prevent the overlay from
  *     being used. For example, since the overlay module itself sets the mode
@@ -601,7 +601,7 @@ function overlay_get_mode() {
  */
 function overlay_set_mode($mode = NULL) {
   global $base_path;
-  $overlay_mode = &drupal_static(__FUNCTION__);
+  $overlay_mode = &backdrop_static(__FUNCTION__);
 
   // Make sure external resources are not included more than once. Also return
   // the current mode, if no mode was specified.
@@ -612,14 +612,14 @@ function overlay_set_mode($mode = NULL) {
 
   switch ($overlay_mode) {
     case 'parent':
-      drupal_add_library('overlay', 'parent');
+      backdrop_add_library('overlay', 'parent');
 
       // Allow modules to act upon overlay events.
       module_invoke_all('overlay_parent_initialize');
       break;
 
     case 'child':
-      drupal_add_library('overlay', 'child');
+      backdrop_add_library('overlay', 'child');
 
       // Allow modules to act upon overlay events.
       module_invoke_all('overlay_child_initialize');
@@ -637,9 +637,9 @@ function overlay_overlay_parent_initialize() {
   foreach ($paths as &$type) {
     $type = str_replace('<front>', variable_get('site_frontpage', 'user'), $type);
   }
-  drupal_add_js(array('overlay' => array('paths' => $paths)), 'setting');
+  backdrop_add_js(array('overlay' => array('paths' => $paths)), 'setting');
   // Pass along the Ajax callback for rerendering sections of the parent window.
-  drupal_add_js(array('overlay' => array('ajaxCallback' => 'overlay-ajax')), 'setting');
+  backdrop_add_js(array('overlay' => array('ajaxCallback' => 'overlay-ajax')), 'setting');
 }
 
 /**
@@ -693,7 +693,7 @@ function overlay_close_dialog($redirect = NULL, $redirect_options = array()) {
     $settings['overlayChild']['redirect'] = url($redirect, $redirect_options);
   }
 
-  drupal_add_js($settings, array('type' => 'setting'));
+  backdrop_add_js($settings, array('type' => 'setting'));
 
   // Since we are closing the overlay as soon as the page is displayed, we do
   // not want to show any of the page's actual content.
@@ -756,7 +756,7 @@ function overlay_supplemental_regions() {
 function _overlay_region_list($type) {
   // Obtain the current theme. We need to first make sure the theme system is
   // initialized, since this function can be called early in the page request.
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   $themes = list_themes();
   $theme = $themes[$GLOBALS['theme']];
   // Return the list of regions stored within the theme's info array, or an
@@ -769,7 +769,7 @@ function _overlay_region_list($type) {
  *
  * @return
  *   An array containing the names of the regions that will be rendered when
- *   drupal_render_page() is called. If empty, then no limits will be imposed,
+ *   backdrop_render_page() is called. If empty, then no limits will be imposed,
  *   and all regions of the page will be rendered.
  *
  * @see overlay_page_alter()
@@ -785,8 +785,8 @@ function overlay_get_regions_to_render() {
  *
  * @param $regions
  *   (Optional) An array containing the names of the regions that should be
- *   rendered when drupal_render_page() is called. Pass in an empty array to
- *   remove all limits and cause drupal_render_page() to render all page
+ *   rendered when backdrop_render_page() is called. Pass in an empty array to
+ *   remove all limits and cause backdrop_render_page() to render all page
  *   regions (the default behavior). If this parameter is omitted, no change
  *   will be made to the current list of regions to render.
  *
@@ -799,7 +799,7 @@ function overlay_get_regions_to_render() {
  * @see overlay_get_regions_to_render()
  */
 function overlay_set_regions_to_render($regions = NULL) {
-  $regions_to_render = &drupal_static(__FUNCTION__, array());
+  $regions_to_render = &backdrop_static(__FUNCTION__, array());
   if (isset($regions)) {
     $regions_to_render = $regions;
   }
@@ -827,12 +827,12 @@ function overlay_render_region($region) {
   // Indicate the region that we will be rendering, so that other regions will
   // be hidden by overlay_page_alter() and overlay_block_list_alter().
   overlay_set_regions_to_render(array($region));
-  // Do what is necessary to force drupal_render_page() to only display HTML
+  // Do what is necessary to force backdrop_render_page() to only display HTML
   // from the requested region. Specifically, declare that the main page
   // content does not need to automatically be added to the page, and pass in
   // a page array that has all theme functions removed (so that overall HTML
   // for the page will not be added either).
-  $system_main_content_added = &drupal_static('system_main_content_added');
+  $system_main_content_added = &backdrop_static('system_main_content_added');
   $system_main_content_added = TRUE;
   $page = array(
     '#type' => 'page',
@@ -840,25 +840,25 @@ function overlay_render_region($region) {
     '#theme_wrappers' => array(),
   );
   // Render the region, but do not cache any JavaScript or CSS associated with
-  // it. This region might not be included the next time drupal_render_page()
+  // it. This region might not be included the next time backdrop_render_page()
   // is called, and we do not want its JavaScript or CSS to erroneously appear
   // on the final rendered page.
-  $original_js = drupal_add_js();
-  $original_css = drupal_add_css();
-  $original_libraries = drupal_static('drupal_add_library');
-  $js = &drupal_static('drupal_add_js');
-  $css = &drupal_static('drupal_add_css');
-  $libraries = &drupal_static('drupal_add_library');
-  $markup = drupal_render_page($page);
+  $original_js = backdrop_add_js();
+  $original_css = backdrop_add_css();
+  $original_libraries = backdrop_static('backdrop_add_library');
+  $js = &backdrop_static('backdrop_add_js');
+  $css = &backdrop_static('backdrop_add_css');
+  $libraries = &backdrop_static('backdrop_add_library');
+  $markup = backdrop_render_page($page);
   $js = $original_js;
   $css = $original_css;
   $libraries = $original_libraries;
   // Indicate that the main page content has not, in fact, been displayed, so
-  // that future calls to drupal_render_page() will be able to render it
+  // that future calls to backdrop_render_page() will be able to render it
   // correctly.
   $system_main_content_added = FALSE;
   // Restore the original behavior of rendering all regions for the next time
-  // drupal_render_page() is called.
+  // backdrop_render_page() is called.
   overlay_set_regions_to_render(array());
   return $markup;
 }
@@ -898,7 +898,7 @@ function overlay_get_rendered_content() {
  * @see overlay_get_rendered_content()
  */
 function overlay_store_rendered_content($id = NULL, $content = NULL) {
-  $rendered_content = &drupal_static(__FUNCTION__, array());
+  $rendered_content = &backdrop_static(__FUNCTION__, array());
   if (isset($id)) {
     $rendered_content[$id] = $content;
   }
@@ -913,10 +913,10 @@ function overlay_store_rendered_content($id = NULL, $content = NULL) {
  *   refresh of this region on the next page load.
  *
  * @see overlay_trigger_refresh()
- * @see Drupal.overlay.refreshRegions()
+ * @see Backdrop.overlay.refreshRegions()
  */
 function overlay_request_refresh($region) {
-  $class = drupal_region_class($region);
+  $class = backdrop_region_class($region);
   $_SESSION['overlay_regions_to_refresh'][] = array($class => $region);
 }
 
@@ -939,7 +939,7 @@ function overlay_request_page_refresh() {
  *
  * @see overlay_request_refresh()
  * @see overlay_request_page_refresh()
- * @see Drupal.overlay.refreshRegions()
+ * @see Backdrop.overlay.refreshRegions()
  */
 function overlay_trigger_refresh() {
   if (!empty($_SESSION['overlay_regions_to_refresh'])) {
@@ -948,11 +948,11 @@ function overlay_trigger_refresh() {
         'refreshRegions' => $_SESSION['overlay_regions_to_refresh'],
       ),
     );
-    drupal_add_js($settings, array('type' => 'setting'));
+    backdrop_add_js($settings, array('type' => 'setting'));
     unset($_SESSION['overlay_regions_to_refresh']);
   }
   if (!empty($_SESSION['overlay_refresh_parent'])) {
-    drupal_add_js(array('overlayChild' => array('refreshPage' => TRUE)), array('type' => 'setting'));
+    backdrop_add_js(array('overlayChild' => array('refreshPage' => TRUE)), array('type' => 'setting'));
     unset($_SESSION['overlay_refresh_parent']);
   }
 }
@@ -965,7 +965,7 @@ function overlay_trigger_refresh() {
  * @param $region
  *   The name of the page region to render.
  *
- * @see Drupal.overlay.refreshRegions()
+ * @see Backdrop.overlay.refreshRegions()
  */
 function overlay_ajax_render_region($region) {
   print overlay_render_region($region);

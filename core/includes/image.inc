@@ -10,13 +10,13 @@
  * @{
  * Functions for image file manipulations.
  *
- * Drupal's image toolkits provide an abstraction layer for common image file
+ * Backdrop's image toolkits provide an abstraction layer for common image file
  * manipulations like scaling, cropping, and rotating. The abstraction frees
  * module authors from the need to support multiple image libraries, and it
  * allows site administrators to choose the library that's best for them.
  *
  * PHP includes the GD library by default so a GD toolkit is installed with
- * Drupal. Other toolkits like ImageMagick are available from contrib modules.
+ * Backdrop. Other toolkits like ImageMagick are available from contrib modules.
  * GD works well for small images, but using it with larger files may cause PHP
  * to run out of memory. In contrast the ImageMagick library does not suffer
  * from this problem, but it requires the ISP to have installed additional
@@ -103,7 +103,7 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
 /**
  * Get details about an image.
  *
- * Drupal supports GIF, JPG and PNG file formats when used with the GD
+ * Backdrop supports GIF, JPG and PNG file formats when used with the GD
  * toolkit, and may support others, depending on which toolkits are
  * installed.
  *
@@ -424,7 +424,7 @@ function image_save(stdClass $image, $destination = NULL) {
     clearstatcache();
     $image->info = image_get_info($destination, $image->toolkit);
 
-    if (drupal_chmod($destination)) {
+    if (backdrop_chmod($destination)) {
       return $return;
     }
   }

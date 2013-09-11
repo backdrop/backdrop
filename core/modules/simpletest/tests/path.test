@@ -6,17 +6,17 @@
  */
 
 /**
- * Unit tests for the drupal_match_path() function in path.inc.
+ * Unit tests for the backdrop_match_path() function in path.inc.
  *
- * @see drupal_match_path().
+ * @see backdrop_match_path().
  */
-class DrupalMatchPathTestCase extends DrupalWebTestCase {
+class BackdropMatchPathTestCase extends BackdropWebTestCase {
   protected $front;
 
   public static function getInfo() {
     return array(
-      'name' => 'Drupal match path',
-      'description' => 'Tests the drupal_match_path() function to make sure it works properly.',
+      'name' => 'Backdrop match path',
+      'description' => 'Tests the backdrop_match_path() function to make sure it works properly.',
       'group' => 'Path API',
     );
   }
@@ -35,24 +35,24 @@ class DrupalMatchPathTestCase extends DrupalWebTestCase {
   /**
    * Run through our test cases, making sure each one works as expected.
    */
-  function testDrupalMatchPath() {
+  function testBackdropMatchPath() {
     // Set up our test cases.
-    $tests = $this->drupalMatchPathTests();
+    $tests = $this->backdropMatchPathTests();
     foreach ($tests as $patterns => $cases) {
       foreach ($cases as $path => $expected_result) {
-        $actual_result = drupal_match_path($path, $patterns);
+        $actual_result = backdrop_match_path($path, $patterns);
         $this->assertIdentical($actual_result, $expected_result, t('Tried matching the path <code>@path</code> to the pattern <pre>@patterns</pre> - expected @expected, got @actual.', array('@path' => $path, '@patterns' => $patterns, '@expected' => var_export($expected_result, TRUE), '@actual' => var_export($actual_result, TRUE))));
       }
     }
   }
 
   /**
-   * Helper function for testDrupalMatchPath(): set up an array of test cases.
+   * Helper function for testBackdropMatchPath(): set up an array of test cases.
    *
    * @return
    *   An array of test cases to cycle through.
    */
-  private function drupalMatchPathTests() {
+  private function backdropMatchPathTests() {
     return array(
       // Single absolute paths.
       'example/1' => array(
@@ -129,7 +129,7 @@ class DrupalMatchPathTestCase extends DrupalWebTestCase {
 /**
  * Tests hook_url_alter functions.
  */
-class UrlAlterFunctionalTest extends DrupalWebTestCase {
+class UrlAlterFunctionalTest extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => t('URL altering'),
@@ -146,8 +146,8 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
    * Test that URL altering works and that it occurs in the correct order.
    */
   function testUrlAlter() {
-    $account = $this->drupalCreateUser(array('administer url aliases'));
-    $this->drupalLogin($account);
+    $account = $this->backdropCreateUser(array('administer url aliases'));
+    $this->backdropLogin($account);
 
     $uid = $account->uid;
     $name = $account->name;
@@ -164,7 +164,7 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
 
     // Test that alias source paths are normalized in the interface.
     $edit = array('source' => "user/$name/edit", 'alias' => 'alias/test2');
-    $this->drupalPost('admin/config/search/path/add', $edit, t('Save'));
+    $this->backdropPost('admin/config/search/path/add', $edit, t('Save'));
     $this->assertText(t('The alias has been saved.'));
 
     // Test that a path always uses its alias.
@@ -195,7 +195,7 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
    * Test current_path() and request_path().
    */
   function testCurrentUrlRequestedPath() {
-    $this->drupalGet('url-alter-test/bar');
+    $this->backdropGet('url-alter-test/bar');
     $this->assertRaw('request_path=url-alter-test/bar', t('request_path() returns the requested path.'));
     $this->assertRaw('current_path=url-alter-test/foo', t('current_path() returns the internal path.'));
   }
@@ -204,7 +204,7 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
    * Tests that $_GET['q'] is initialized when the request path is empty.
    */
   function testGetQInitialized() {
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertText("\$_GET['q'] is non-empty with an empty request path.", "\$_GET['q'] is initialized with an empty request path.");
   }
 
@@ -231,7 +231,7 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
    *
    * @param $original
    *   A string with the aliased or un-normal path that is run through
-   *   drupal_get_normal_path().
+   *   backdrop_get_normal_path().
    * @param $final
    *   A string with the expected result after url().
    * @return
@@ -239,28 +239,28 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
    */
   protected function assertUrlInboundAlter($original, $final) {
     // Test inbound altering.
-    $result = drupal_get_normal_path($original);
+    $result = backdrop_get_normal_path($original);
     $this->assertIdentical($result, $final, t('Altered inbound URL %original, expected %final, and got %result.', array('%original' => $original, '%final' => $final, '%result' => $result)));
   }
 }
 
 /**
- * Unit test for drupal_lookup_path().
+ * Unit test for backdrop_lookup_path().
  */
-class PathLookupTest extends DrupalWebTestCase {
+class PathLookupTest extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Path lookup'),
-      'description' => t('Tests that drupal_lookup_path() returns correct paths.'),
+      'description' => t('Tests that backdrop_lookup_path() returns correct paths.'),
       'group' => t('Path API'),
     );
   }
 
   /**
-   * Test that drupal_lookup_path() returns the correct path.
+   * Test that backdrop_lookup_path() returns the correct path.
    */
-  function testDrupalLookupPath() {
-    $account = $this->drupalCreateUser();
+  function testBackdropLookupPath() {
+    $account = $this->backdropCreateUser();
     $uid = $account->uid;
     $name = $account->name;
 
@@ -271,8 +271,8 @@ class PathLookupTest extends DrupalWebTestCase {
       'alias' => 'foo',
     );
     path_save($path);
-    $this->assertEqual(drupal_lookup_path('alias', $path['source']), $path['alias'], t('Basic alias lookup works.'));
-    $this->assertEqual(drupal_lookup_path('source', $path['alias']), $path['source'], t('Basic source lookup works.'));
+    $this->assertEqual(backdrop_lookup_path('alias', $path['source']), $path['alias'], t('Basic alias lookup works.'));
+    $this->assertEqual(backdrop_lookup_path('source', $path['alias']), $path['source'], t('Basic source lookup works.'));
 
     // Create a language specific alias for the default language (English).
     $path = array(
@@ -281,8 +281,8 @@ class PathLookupTest extends DrupalWebTestCase {
       'langcode' => 'en',
     );
     path_save($path);
-    $this->assertEqual(drupal_lookup_path('alias', $path['source']), $path['alias'], t('English alias overrides language-neutral alias.'));
-    $this->assertEqual(drupal_lookup_path('source', $path['alias']), $path['source'], t('English source overrides language-neutral source.'));
+    $this->assertEqual(backdrop_lookup_path('alias', $path['source']), $path['alias'], t('English alias overrides language-neutral alias.'));
+    $this->assertEqual(backdrop_lookup_path('source', $path['alias']), $path['source'], t('English source overrides language-neutral source.'));
 
     // Create a language-neutral alias for the same path, again.
     $path = array(
@@ -290,7 +290,7 @@ class PathLookupTest extends DrupalWebTestCase {
       'alias' => 'bar',
     );
     path_save($path);
-    $this->assertEqual(drupal_lookup_path('alias', $path['source']), "users/$name", t('English alias still returned after entering a language-neutral alias.'));
+    $this->assertEqual(backdrop_lookup_path('alias', $path['source']), "users/$name", t('English alias still returned after entering a language-neutral alias.'));
 
     // Create a language-specific (xx-lolspeak) alias for the same path.
     $path = array(
@@ -299,9 +299,9 @@ class PathLookupTest extends DrupalWebTestCase {
       'langcode' => 'xx-lolspeak',
     );
     path_save($path);
-    $this->assertEqual(drupal_lookup_path('alias', $path['source']), "users/$name", t('English alias still returned after entering a LOLspeak alias.'));
+    $this->assertEqual(backdrop_lookup_path('alias', $path['source']), "users/$name", t('English alias still returned after entering a LOLspeak alias.'));
     // The LOLspeak alias should be returned if we really want LOLspeak.
-    $this->assertEqual(drupal_lookup_path('alias', $path['source'], 'xx-lolspeak'), 'LOL', t('LOLspeak alias returned if we specify xx-lolspeak to drupal_lookup_path().'));
+    $this->assertEqual(backdrop_lookup_path('alias', $path['source'], 'xx-lolspeak'), 'LOL', t('LOLspeak alias returned if we specify xx-lolspeak to backdrop_lookup_path().'));
 
     // Create a new alias for this path in English, which should override the
     // previous alias for "user/$uid".
@@ -311,33 +311,33 @@ class PathLookupTest extends DrupalWebTestCase {
       'langcode' => 'en',
     );
     path_save($path);
-    $this->assertEqual(drupal_lookup_path('alias', $path['source']), $path['alias'], t('Recently created English alias returned.'));
-    $this->assertEqual(drupal_lookup_path('source', $path['alias']), $path['source'], t('Recently created English source returned.'));
+    $this->assertEqual(backdrop_lookup_path('alias', $path['source']), $path['alias'], t('Recently created English alias returned.'));
+    $this->assertEqual(backdrop_lookup_path('source', $path['alias']), $path['source'], t('Recently created English source returned.'));
 
     // Remove the English aliases, which should cause a fallback to the most
     // recently created language-neutral alias, 'bar'.
     db_delete('url_alias')
       ->condition('langcode', 'en')
       ->execute();
-    drupal_clear_path_cache();
-    $this->assertEqual(drupal_lookup_path('alias', $path['source']), 'bar', t('Path lookup falls back to recently created language-neutral alias.'));
+    backdrop_clear_path_cache();
+    $this->assertEqual(backdrop_lookup_path('alias', $path['source']), 'bar', t('Path lookup falls back to recently created language-neutral alias.'));
 
     // Test the situation where the alias and language are the same, but
     // the source differs. The newer alias record should be returned.
-    $account2 = $this->drupalCreateUser();
+    $account2 = $this->backdropCreateUser();
     $path = array(
       'source' => 'user/' . $account2->uid,
       'alias' => 'bar',
     );
     path_save($path);
-    $this->assertEqual(drupal_lookup_path('source', $path['alias']), $path['source'], t('Newer alias record is returned when comparing two LANGUAGE_NONE paths with the same alias.'));
+    $this->assertEqual(backdrop_lookup_path('source', $path['alias']), $path['source'], t('Newer alias record is returned when comparing two LANGUAGE_NONE paths with the same alias.'));
   }
 }
 
 /**
  * Tests the path_save() function.
  */
-class PathSaveTest extends DrupalWebTestCase {
+class PathSaveTest extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Path save'),
@@ -355,8 +355,8 @@ class PathSaveTest extends DrupalWebTestCase {
   /**
    * Tests that path_save() makes the original path available to modules.
    */
-  function testDrupalSaveOriginalPath() {
-    $account = $this->drupalCreateUser();
+  function testBackdropSaveOriginalPath() {
+    $account = $this->backdropCreateUser();
     $uid = $account->uid;
     $name = $account->name;
 

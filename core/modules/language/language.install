@@ -23,7 +23,7 @@ function language_uninstall() {
 
   // Re-initialize the language system so successive calls to t() and other
   // functions will not expect languages to be present.
-  drupal_language_initialize();
+  backdrop_language_initialize();
 }
 
 /**

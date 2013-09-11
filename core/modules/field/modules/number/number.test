@@ -8,7 +8,7 @@
 /**
  * Tests for number field types.
  */
-class NumberFieldTestCase extends DrupalWebTestCase {
+class NumberFieldTestCase extends BackdropWebTestCase {
   protected $field;
   protected $instance;
   protected $web_user;
@@ -23,8 +23,8 @@ class NumberFieldTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('field_test');
-    $this->web_user = $this->drupalCreateUser(array('access field_test content', 'administer field_test content', 'administer content types'));
-    $this->drupalLogin($this->web_user);
+    $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer content types'));
+    $this->backdropLogin($this->web_user);
   }
 
   /**
@@ -33,7 +33,7 @@ class NumberFieldTestCase extends DrupalWebTestCase {
   function testNumberDecimalField() {
     // Create a field with settings to validate.
     $this->field = array(
-      'field_name' => drupal_strtolower($this->randomName()),
+      'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'number_decimal',
       'settings' => array(
         'precision' => 8, 'scale' => 4, 'decimal_separator' => '.',
@@ -56,7 +56,7 @@ class NumberFieldTestCase extends DrupalWebTestCase {
     field_create_instance($this->instance);
 
     // Display creation form.
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $langcode = LANGUAGE_NONE;
     $this->assertFieldByName("{$this->field['field_name']}[$langcode][0][value]", '', t('Widget is displayed'));
 
@@ -65,7 +65,7 @@ class NumberFieldTestCase extends DrupalWebTestCase {
     $edit = array(
       "{$this->field['field_name']}[$langcode][0][value]" => $value,
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), t('Entity was created'));
@@ -81,11 +81,11 @@ class NumberFieldTestCase extends DrupalWebTestCase {
     );
 
     foreach ($wrong_entries as $wrong_entry) {
-      $this->drupalGet('test-entity/add/test-bundle');
+      $this->backdropGet('test-entity/add/test-bundle');
       $edit = array(
         "{$this->field['field_name']}[$langcode][0][value]" => $wrong_entry,
       );
-      $this->drupalPost(NULL, $edit, t('Save'));
+      $this->backdropPost(NULL, $edit, t('Save'));
       $this->assertText(
         t('There should only be one decimal separator (@separator)',
           array('@separator' => $this->field['settings']['decimal_separator'])),
@@ -103,11 +103,11 @@ class NumberFieldTestCase extends DrupalWebTestCase {
     );
 
     foreach ($wrong_entries as $wrong_entry) {
-      $this->drupalGet('test-entity/add/test-bundle');
+      $this->backdropGet('test-entity/add/test-bundle');
       $edit = array(
         "{$this->field['field_name']}[$langcode][0][value]" => $wrong_entry,
       );
-      $this->drupalPost(NULL, $edit, t('Save'));
+      $this->backdropPost(NULL, $edit, t('Save'));
       $this->assertText(
         t('Only numbers and the decimal separator (@separator) allowed in ',
           array('@separator' => $this->field['settings']['decimal_separator'])),
@@ -121,35 +121,35 @@ class NumberFieldTestCase extends DrupalWebTestCase {
    */
   function testNumberIntegerField() {
     // Display the "Add content type" form.
-    $this->drupalGet('admin/structure/types/add');
+    $this->backdropGet('admin/structure/types/add');
 
     // Add a content type.
     $name = $this->randomName();
-    $type = drupal_strtolower($name);
+    $type = backdrop_strtolower($name);
     $edit = array('name' => $name, 'type' => $type);
-    $this->drupalPost(NULL, $edit, t('Save and add fields'));
+    $this->backdropPost(NULL, $edit, t('Save and add fields'));
 
     // Add an integer field to the newly-created type.
     $label = $this->randomName();
-    $field_name = drupal_strtolower($label);
+    $field_name = backdrop_strtolower($label);
     $edit = array(
       'fields[_add_new_field][label]'=> $label,
       'fields[_add_new_field][field_name]' => $field_name,
       'fields[_add_new_field][type]' => 'number_integer',
       'fields[_add_new_field][widget_type]' => 'number',
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Set the formatter to "number_integer" and to "unformatted", and just
     // check that the settings summary does not generate warnings.
-    $this->drupalGet("admin/structure/types/manage/$type/display");
+    $this->backdropGet("admin/structure/types/manage/$type/display");
     $edit = array(
       "fields[field_$field_name][type]" => 'number_integer',
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     $edit = array(
       "fields[field_$field_name][type]" => 'number_unformatted',
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
   }
 }

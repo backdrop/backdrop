@@ -8,7 +8,7 @@
 /**
 * Class with common helper methods.
 */
-class TaxonomyWebTestCase extends DrupalWebTestCase {
+class TaxonomyWebTestCase extends BackdropWebTestCase {
 
   /**
    * Returns a new vocabulary with random properties.
@@ -18,7 +18,7 @@ class TaxonomyWebTestCase extends DrupalWebTestCase {
     $vocabulary = new stdClass();
     $vocabulary->name = $this->randomName();
     $vocabulary->description = $this->randomName();
-    $vocabulary->machine_name = drupal_strtolower($this->randomName());
+    $vocabulary->machine_name = backdrop_strtolower($this->randomName());
     $vocabulary->help = '';
     $vocabulary->nodes = array('article' => 'article');
     $vocabulary->weight = mt_rand(0, 10);
@@ -56,8 +56,8 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy'));
+    $this->backdropLogin($this->admin_user);
     $this->vocabulary = $this->createVocabulary();
   }
 
@@ -66,36 +66,36 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
    */
   function testVocabularyInterface() {
     // Visit the main taxonomy administration page.
-    $this->drupalGet('admin/structure/taxonomy');
+    $this->backdropGet('admin/structure/taxonomy');
 
     // Create a new vocabulary.
     $this->clickLink(t('Add vocabulary'));
     $edit = array();
-    $machine_name = drupal_strtolower($this->randomName());
+    $machine_name = backdrop_strtolower($this->randomName());
     $edit['name'] = $this->randomName();
     $edit['description'] = $this->randomName();
     $edit['machine_name'] = $machine_name;
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])), t('Vocabulary created successfully'));
 
     // Edit the vocabulary.
-    $this->drupalGet('admin/structure/taxonomy');
+    $this->backdropGet('admin/structure/taxonomy');
     $this->assertText($edit['name'], t('Vocabulary found in the vocabulary overview listing.'));
     $this->clickLink(t('edit vocabulary'));
     $edit = array();
     $edit['name'] = $this->randomName();
-    $this->drupalPost(NULL, $edit, t('Save'));
-    $this->drupalGet('admin/structure/taxonomy');
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropGet('admin/structure/taxonomy');
     $this->assertText($edit['name'], t('Vocabulary found in the vocabulary overview listing.'));
 
     // Try to submit a vocabulary with a duplicate machine name.
     $edit['machine_name'] = $machine_name;
-    $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
     $this->assertText(t('The machine-readable name is already in use. It must be unique.'));
 
     // Try to submit an invalid machine name.
     $edit['machine_name'] = '!&^%';
-    $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
     $this->assertText(t('The machine-readable name must contain only lowercase letters, numbers, and underscores.'));
   }
 
@@ -116,7 +116,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
       $edit[$key . '[weight]'] = $vocabulary->weight;
     }
     // Saving the new weights via the interface.
-    $this->drupalPost('admin/structure/taxonomy', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy', $edit, t('Save'));
 
     // Load the vocabularies from the database.
     $new_vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
@@ -138,7 +138,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     }
     // Confirm that no vocabularies are found in the database.
     $this->assertFalse(taxonomy_vocabulary_load_multiple(FALSE), t('No vocabularies found in the database'));
-    $this->drupalGet('admin/structure/taxonomy');
+    $this->backdropGet('admin/structure/taxonomy');
     // Check the default message for no vocabularies.
     $this->assertText(t('No vocabularies available.'), t('No vocabularies were found.'));
   }
@@ -150,9 +150,9 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     // Create a vocabulary.
     $edit = array(
       'name' => $this->randomName(),
-      'machine_name' => drupal_strtolower($this->randomName()),
+      'machine_name' => backdrop_strtolower($this->randomName()),
     );
-    $this->drupalPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
     $this->assertText(t('Created new vocabulary'), t('New vocabulary was created.'));
 
     // Check the created vocabulary.
@@ -164,12 +164,12 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
 
     // Delete the vocabulary.
     $edit = array();
-    $this->drupalPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit', $edit, t('Delete'));
+    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit', $edit, t('Delete'));
     $this->assertRaw(t('Are you sure you want to delete the vocabulary %name?', array('%name' => $vocabulary->name)), t('[confirm deletion] Asks for confirmation.'));
     $this->assertText(t('Deleting a vocabulary will delete all the terms in it. This action cannot be undone.'), t('[confirm deletion] Inform that all terms will be deleted.'));
 
     // Confirm deletion.
-    $this->drupalPost(NULL, NULL, t('Delete'));
+    $this->backdropPost(NULL, NULL, t('Delete'));
     $this->assertRaw(t('Deleted vocabulary %name.', array('%name' => $vocabulary->name)), t('Vocabulary deleted'));
     entity_get_controller('taxonomy_vocabulary')->resetCache();
     $this->assertFalse(taxonomy_vocabulary_load($vid), t('Vocabulary is not found in the database'));
@@ -192,8 +192,8 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp('taxonomy', 'field_test');
-    $admin_user = $this->drupalCreateUser(array('create article content', 'administer taxonomy'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('create article content', 'administer taxonomy'));
+    $this->backdropLogin($admin_user);
     $this->vocabulary = $this->createVocabulary();
   }
 
@@ -344,7 +344,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
 
     // Change the machine name.
     $old_name = $this->vocabulary->machine_name;
-    $new_name = drupal_strtolower($this->randomName());
+    $new_name = backdrop_strtolower($this->randomName());
     $this->vocabulary->machine_name = $new_name;
     taxonomy_vocabulary_save($this->vocabulary);
 
@@ -363,7 +363,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   function testUninstallReinstall() {
     // Fields and field instances attached to taxonomy term bundles should be
     // removed when the module is uninstalled.
-    $this->field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $this->field = array('field_name' => $this->field_name, 'type' => 'text', 'cardinality' => 4);
     $this->field = field_create_field($this->field);
     $this->instance = array(
@@ -376,7 +376,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
 
     module_disable(array('taxonomy'));
     require_once DRUPAL_ROOT . '/core/includes/install.inc';
-    drupal_uninstall_modules(array('taxonomy'));
+    backdrop_uninstall_modules(array('taxonomy'));
     module_enable(array('taxonomy'));
 
     // Now create a vocabulary with the same name. All field instances
@@ -486,8 +486,8 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp('taxonomy');
-    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'administer nodes', 'bypass node access'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'administer nodes', 'bypass node access'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -501,9 +501,9 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
     $edit['date'] = '1969-01-01 00:00:00 -0500';
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $edit["field_tags[$langcode]"] = $this->randomName();
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/article', $edit, t('Save'));
     // Checks that the node has been saved.
-    $node = $this->drupalGetNodeByTitle($edit['title']);
+    $node = $this->backdropGetNodeByTitle($edit['title']);
     $this->assertEqual($node->created, strtotime($edit['date']), t('Legacy node was saved with the right date.'));
   }
 }
@@ -523,8 +523,8 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp('taxonomy');
-    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
+    $this->backdropLogin($this->admin_user);
     $this->vocabulary = $this->createVocabulary();
 
     $field = array(
@@ -569,7 +569,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     // Edit $term2, setting $term1 as parent.
     $edit = array();
     $edit['parent[]'] = array($term1->tid);
-    $this->drupalPost('taxonomy/term/' . $term2->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term2->tid . '/edit', $edit, t('Save'));
 
     // Check the hierarchy.
     $children = taxonomy_term_load_children($term1->tid);
@@ -607,24 +607,24 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $edit["title"] = $this->randomName();
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $edit[$this->instance['field_name'] . '[' . $langcode .'][]'] = $term1->tid;
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/article', $edit, t('Save'));
 
     // Check that the term is displayed when the node is viewed.
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
-    $this->drupalGet('node/' . $node->nid);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($term1->name, t('Term is displayed when viewing the node.'));
 
     // Edit the node with a different term.
     $edit[$this->instance['field_name'] . '[' . $langcode . '][]'] = $term2->tid;
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($term2->name, t('Term is displayed when viewing the node.'));
 
     // Preview the node.
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Preview'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Preview'));
     $this->assertNoUniqueText($term2->name, t('Term is displayed when previewing the node.'));
-    $this->drupalPost(NULL, NULL, t('Preview'));
+    $this->backdropPost(NULL, NULL, t('Preview'));
     $this->assertNoUniqueText($term2->name, t('Term is displayed when previewing the node again.'));
   }
 
@@ -650,10 +650,10 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $edit["body[$langcode][0][value]"] = $this->randomName();
     // Insert the terms in a comma separated list. Vocabulary 1 is a
     // free-tagging field created by the default profile.
-    $edit[$instance['field_name'] . "[$langcode]"] = drupal_implode_tags($terms);
+    $edit[$instance['field_name'] . "[$langcode]"] = backdrop_implode_tags($terms);
 
     // Preview and verify the terms appear but are not created.
-    $this->drupalPost('node/add/page', $edit, t('Preview'));
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
     foreach ($terms as $term) {
       $this->assertText($term, t('The term appears on the node preview'));
     }
@@ -661,10 +661,10 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->assertTrue(empty($tree), t('The terms are not created on preview.'));
 
     // taxonomy.module does not maintain its static caches.
-    drupal_static_reset();
+    backdrop_static_reset();
 
     // Save, creating the terms.
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
     $this->assertRaw(t('@type %title has been created.', array('@type' => t('Basic page'), '%title' => $edit["title"])), t('The node was created successfully'));
     foreach ($terms as $term) {
       $this->assertText($term, t('The term was saved and appears on the node page'));
@@ -678,16 +678,16 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     }
 
     // Delete term 1 from the term edit page.
-    $this->drupalPost('taxonomy/term/' . $term_objects['term1']->tid . '/edit', array(), t('Delete'));
-    $this->drupalPost(NULL, NULL, t('Delete'));
+    $this->backdropPost('taxonomy/term/' . $term_objects['term1']->tid . '/edit', array(), t('Delete'));
+    $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Delete term 2 from the term delete page.
-    $this->drupalPost('taxonomy/term/' . $term_objects['term2']->tid . '/delete', array(), t('Delete'));
+    $this->backdropPost('taxonomy/term/' . $term_objects['term2']->tid . '/delete', array(), t('Delete'));
     $term_names = array($term_objects['term3']->name, $term_objects['term4']->name);
 
     // Get the node.
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
-    $this->drupalGet('node/' . $node->nid);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    $this->backdropGet('node/' . $node->nid);
 
     foreach ($term_names as $term_name) {
       $this->assertText($term_name, t('The term %name appears on the node page after two terms, %deleted1 and %deleted2, were deleted', array('%name' => $term_name, '%deleted1' => $term_objects['term1']->name, '%deleted2' => $term_objects['term2']->name)));
@@ -698,13 +698,13 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     // Test autocomplete on term 3, which contains a comma.
     // The term will be quoted, and the " will be encoded in unicode (\u0022).
     $input = substr($term_objects['term3']->name, 0, 3);
-    $this->drupalGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input);
+    $this->backdropGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input);
     $this->assertRaw('{"\u0022' . $term_objects['term3']->name . '\u0022":"' . $term_objects['term3']->name . '"}', t('Autocomplete returns term %term_name after typing the first 3 letters.', array('%term_name' => $term_objects['term3']->name)));
 
     // Test autocomplete on term 4 - it is alphanumeric only, so no extra
     // quoting.
     $input = substr($term_objects['term4']->name, 0, 3);
-    $this->drupalGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input);
+    $this->backdropGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input);
     $this->assertRaw('{"' . $term_objects['term4']->name . '":"' . $term_objects['term4']->name . '"}', t('Autocomplete returns term %term_name after typing the first 3 letters.', array('%term_name' => $term_objects['term4']->name)));
 
      // Test taxonomy autocomplete with a nonexistent field.
@@ -712,7 +712,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
      $tag = $this->randomName();
      $message = t("Taxonomy field @field_name not found.", array('@field_name' => $field_name));
      $this->assertFalse(field_info_field($field_name), t('Field %field_name does not exist.', array('%field_name' => $field_name)));
-     $this->drupalGet('taxonomy/autocomplete/' . $field_name . '/' . $tag);
+     $this->backdropGet('taxonomy/autocomplete/' . $field_name . '/' . $tag);
      $this->assertRaw($message, t('Autocomplete returns correct error message when the taxonomy field does not exist.'));
   }
 
@@ -729,14 +729,14 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $edit['parent[]'] = array(0);
 
     // Create the term to edit.
-    $this->drupalPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
 
     $terms = taxonomy_term_load_multiple_by_name($edit['name']);
     $term = reset($terms);
     $this->assertNotNull($term, t('Term found in database'));
 
     // Submitting a term takes us to the add page; we need the List page.
-    $this->drupalGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
+    $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
 
     // Test edit link as accessed from Taxonomy administration pages.
     // Because Simpletest creates its own database when running tests, we know
@@ -752,15 +752,15 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     );
 
     // Edit the term.
-    $this->drupalPost('taxonomy/term/' . $term->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', $edit, t('Save'));
 
     // Check that the term is still present at admin UI after edit.
-    $this->drupalGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
+    $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
     $this->assertText($edit['name'], t('The randomly generated term name is present.'));
     $this->assertLink(t('edit'));
 
     // View the term and check that it is correct.
-    $this->drupalGet('taxonomy/term/' . $term->tid);
+    $this->backdropGet('taxonomy/term/' . $term->tid);
     $this->assertText($edit['name'], t('The randomly generated term name is present.'));
     $this->assertText($edit['description[value]'], t('The randomly generated term description is present.'));
 
@@ -769,22 +769,22 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     // Check that it does NOT show a description when description is blank.
     $term->description = '';
     taxonomy_term_save($term);
-    $this->drupalGet('taxonomy/term/' . $term->tid);
+    $this->backdropGet('taxonomy/term/' . $term->tid);
     $this->assertNoPattern('|class="taxonomy-term-description"|', 'Term page did not display the term description when description was blank.');
 
     // Check that the term feed page is working.
-    $this->drupalGet('taxonomy/term/' . $term->tid . '/feed');
+    $this->backdropGet('taxonomy/term/' . $term->tid . '/feed');
 
     // Check that the term edit page does not try to interpret additional path
     // components as arguments for taxonomy_form_term().
-    $this->drupalGet('taxonomy/term/' . $term->tid . '/edit/' . $this->randomName());
+    $this->backdropGet('taxonomy/term/' . $term->tid . '/edit/' . $this->randomName());
 
     // Delete the term.
-    $this->drupalPost('taxonomy/term/' . $term->tid . '/edit', array(), t('Delete'));
-    $this->drupalPost(NULL, NULL, t('Delete'));
+    $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', array(), t('Delete'));
+    $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Assert that the term no longer exists.
-    $this->drupalGet('taxonomy/term/' . $term->tid);
+    $this->backdropGet('taxonomy/term/' . $term->tid);
     $this->assertResponse(404, t('The taxonomy term page was not found'));
   }
 
@@ -798,12 +798,12 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 
     // Fetch the created terms in the default alphabetical order, i.e. term1
     // precedes term2 alphabetically, and term2 precedes term3.
-    drupal_static_reset('taxonomy_get_tree');
-    drupal_static_reset('taxonomy_get_treeparent');
-    drupal_static_reset('taxonomy_get_treeterms');
+    backdrop_static_reset('taxonomy_get_tree');
+    backdrop_static_reset('taxonomy_get_treeparent');
+    backdrop_static_reset('taxonomy_get_treeterms');
     list($term1, $term2, $term3) = taxonomy_get_tree($this->vocabulary->vid);
 
-    $this->drupalGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
+    $this->backdropGet('admin/structure/taxonomy/' . $this->vocabulary->machine_name);
 
     // Each term has four hidden fields, "tid:1:0[tid]", "tid:1:0[parent]",
     // "tid:1:0[depth]", and "tid:1:0[weight]". Change the order to term2,
@@ -823,23 +823,23 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
       'tid:' . $term1->tid . ':0[depth]' => 0,
       'tid:' . $term1->tid . ':0[weight]' => 2,
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
-    drupal_static_reset('taxonomy_get_tree');
-    drupal_static_reset('taxonomy_get_treeparent');
-    drupal_static_reset('taxonomy_get_treeterms');
+    backdrop_static_reset('taxonomy_get_tree');
+    backdrop_static_reset('taxonomy_get_treeparent');
+    backdrop_static_reset('taxonomy_get_treeterms');
     $terms = taxonomy_get_tree($this->vocabulary->vid);
     $this->assertEqual($terms[0]->tid, $term2->tid, t('Term 2 was moved above term 1.'));
     $this->assertEqual($terms[1]->parents, array($term2->tid), t('Term 3 was made a child of term 2.'));
     $this->assertEqual($terms[2]->tid, $term1->tid, t('Term 1 was moved below term 2.'));
 
-    $this->drupalPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name, array(), t('Reset to alphabetical'));
+    $this->backdropPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name, array(), t('Reset to alphabetical'));
     // Submit confirmation form.
-    $this->drupalPost(NULL, array(), t('Reset to alphabetical'));
+    $this->backdropPost(NULL, array(), t('Reset to alphabetical'));
 
-    drupal_static_reset('taxonomy_get_tree');
-    drupal_static_reset('taxonomy_get_treeparent');
-    drupal_static_reset('taxonomy_get_treeterms');
+    backdrop_static_reset('taxonomy_get_tree');
+    backdrop_static_reset('taxonomy_get_treeparent');
+    backdrop_static_reset('taxonomy_get_treeterms');
     $terms = taxonomy_get_tree($this->vocabulary->vid);
     $this->assertEqual($terms[0]->tid, $term1->tid, t('Term 1 was moved to back above term 2.'));
     $this->assertEqual($terms[1]->tid, $term2->tid, t('Term 2 was moved to back below term 1.'));
@@ -861,7 +861,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
       'parent[]' => array(0, $parent->tid),
     );
     // Save the new term.
-    $this->drupalPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/' . $this->vocabulary->machine_name . '/add', $edit, t('Save'));
 
     // Check that the term was successfully created.
     $terms = taxonomy_term_load_multiple_by_name($edit['name']);
@@ -903,7 +903,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->assertFalse($terms);
 
     // Try to load the term using a substring of the name.
-    $terms = taxonomy_term_load_multiple_by_name(drupal_substr($term->name, 2));
+    $terms = taxonomy_term_load_multiple_by_name(backdrop_substr($term->name, 2));
     $this->assertFalse($terms);
 
     // Create a new term in a different vocabulary with the same name.
@@ -951,8 +951,8 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp('taxonomy');
-    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types'));
+    $this->backdropLogin($this->admin_user);
     $this->vocabulary = $this->createVocabulary();
 
     $field = array(
@@ -996,28 +996,28 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
     $term1 = $this->createTerm($this->vocabulary);
 
     // RSS display must be added manually.
-    $this->drupalGet("admin/structure/types/manage/article/display");
+    $this->backdropGet("admin/structure/types/manage/article/display");
     $edit = array(
       "view_modes_custom[rss]" => '1',
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Change the format to 'RSS category'.
-    $this->drupalGet("admin/structure/types/manage/article/display/rss");
+    $this->backdropGet("admin/structure/types/manage/article/display/rss");
     $edit = array(
       "fields[taxonomy_" . $this->vocabulary->machine_name . "][type]" => 'taxonomy_term_reference_rss_category',
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Post an article.
     $edit = array();
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $this->randomName();
     $edit[$this->instance['field_name'] . '[' . $langcode .'][]'] = $term1->tid;
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/article', $edit, t('Save'));
 
     // Check that the term is displayed when the RSS feed is viewed.
-    $this->drupalGet('rss.xml');
+    $this->backdropGet('rss.xml');
     $test_element = array(
       'key' => 'category',
       'value' => $term1->name,
@@ -1046,13 +1046,13 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     parent::setUp('taxonomy');
 
     // Create an administrative user.
-    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
+    $this->backdropLogin($this->admin_user);
 
     // Create a vocabulary and add two term reference fields to article nodes.
     $this->vocabulary = $this->createVocabulary();
 
-    $this->field_name_1 = drupal_strtolower($this->randomName());
+    $this->field_name_1 = backdrop_strtolower($this->randomName());
     $this->field_1 = array(
       'field_name' => $this->field_name_1,
       'type' => 'taxonomy_term_reference',
@@ -1082,7 +1082,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     );
     field_create_instance($this->instance_1);
 
-    $this->field_name_2 = drupal_strtolower($this->randomName());
+    $this->field_name_2 = backdrop_strtolower($this->randomName());
     $this->field_2 = array(
       'field_name' => $this->field_name_2,
       'type' => 'taxonomy_term_reference',
@@ -1128,10 +1128,10 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $edit["{$this->field_name_1}[$langcode][]"] = $term_1->tid;
     $edit["{$this->field_name_2}[$langcode][]"] = $term_1->tid;
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->backdropPost('node/add/article', $edit, t('Save'));
 
     // Check that the term is indexed, and only once.
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
     $index_count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid = :nid AND tid = :tid', array(
       ':nid' => $node->nid,
       ':tid' => $term_1->tid,
@@ -1140,7 +1140,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
 
     // Update the article to change one term.
     $edit["{$this->field_name_1}[$langcode][]"] = $term_2->tid;
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
     // Check that both terms are indexed.
     $index_count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid = :nid AND tid = :tid', array(
@@ -1156,7 +1156,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
 
     // Update the article to change another term.
     $edit["{$this->field_name_2}[$langcode][]"] = $term_2->tid;
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
     // Check that only one term is indexed.
     $index_count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid = :nid AND tid = :tid', array(
@@ -1241,7 +1241,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     taxonomy_term_save($term1);
 
     // Verify that the page breadcrumbs include a link to the parent term.
-    $this->drupalGet('taxonomy/term/' . $term1->tid);
+    $this->backdropGet('taxonomy/term/' . $term1->tid);
     $this->assertRaw(l($term2->name, 'taxonomy/term/' . $term2->tid), t('Parent term link is displayed when viewing the node.'));
   }
 }
@@ -1261,8 +1261,8 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->taxonomy_admin = $this->drupalCreateUser(array('administer taxonomy'));
-    $this->drupalLogin($this->taxonomy_admin);
+    $this->taxonomy_admin = $this->backdropCreateUser(array('administer taxonomy'));
+    $this->backdropLogin($this->taxonomy_admin);
   }
 
   /**
@@ -1327,8 +1327,8 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp('taxonomy', 'taxonomy_test');
-    $taxonomy_admin = $this->drupalCreateUser(array('administer taxonomy'));
-    $this->drupalLogin($taxonomy_admin);
+    $taxonomy_admin = $this->backdropCreateUser(array('administer taxonomy'));
+    $this->backdropLogin($taxonomy_admin);
   }
 
   /**
@@ -1342,7 +1342,7 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
       'name' => $this->randomName(),
       'antonym' => 'Long',
     );
-    $this->drupalPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add', $edit, t('Save'));
     $terms = taxonomy_term_load_multiple_by_name($edit['name']);
     $term = reset($terms);
     $this->assertEqual($term->antonym, $edit['antonym'], t('Antonym was loaded into the term object'));
@@ -1352,7 +1352,7 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
       'name' => $this->randomName(),
       'antonym' => 'Short',
     );
-    $this->drupalPost('taxonomy/term/' . $term->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', $edit, t('Save'));
     taxonomy_terms_static_reset();
     $term = taxonomy_term_load($term->tid);
     $this->assertEqual($edit['antonym'], $term->antonym, t('Antonym was successfully edited'));
@@ -1382,12 +1382,12 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
   function setUp() {
     parent::setUp('field_test');
 
-    $web_user = $this->drupalCreateUser(array('access field_test content', 'administer field_test content', 'administer taxonomy'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer taxonomy'));
+    $this->backdropLogin($web_user);
     $this->vocabulary = $this->createVocabulary();
 
     // Setup a field and instance.
-    $this->field_name = drupal_strtolower($this->randomName());
+    $this->field_name = backdrop_strtolower($this->randomName());
     $this->field = array(
       'field_name' => $this->field_name,
       'type' => 'taxonomy_term_reference',
@@ -1455,14 +1455,14 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
 
     // Display creation form.
     $langcode = LANGUAGE_NONE;
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertFieldByName("{$this->field_name}[$langcode]", '', t('Widget is displayed'));
 
     // Submit with some value.
     $edit = array(
       "{$this->field_name}[$langcode]" => array($term->tid),
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), t('Entity was created'));
@@ -1472,12 +1472,12 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
     $entities = array($id => $entity);
     field_attach_prepare_view('test_entity', $entities, 'full');
     $entity->content = field_attach_view('test_entity', $entity, 'full');
-    $this->content = drupal_render($entity->content);
+    $this->content = backdrop_render($entity->content);
     $this->assertText($term->name, t('Term name is displayed'));
 
     // Delete the vocabulary and verify that the widget is gone.
     taxonomy_vocabulary_delete($this->vocabulary->vid);
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertNoFieldByName("{$this->field_name}[$langcode]", '', 'Widget is not displayed');
   }
 
@@ -1503,7 +1503,7 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
     );
     field_update_field($this->field);
     // Change the machine name.
-    $new_name = drupal_strtolower($this->randomName());
+    $new_name = backdrop_strtolower($this->randomName());
     $this->vocabulary->machine_name = $new_name;
     taxonomy_vocabulary_save($this->vocabulary);
 
@@ -1535,13 +1535,13 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
   function setUp() {
     parent::setUp('field_test');
 
-    $web_user = $this->drupalCreateUser(array('access field_test content', 'administer field_test content', 'administer taxonomy'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer taxonomy'));
+    $this->backdropLogin($web_user);
     $this->vocabulary1 = $this->createVocabulary();
     $this->vocabulary2 = $this->createVocabulary();
 
     // Set up a field and instance.
-    $this->field_name = drupal_strtolower($this->randomName());
+    $this->field_name = backdrop_strtolower($this->randomName());
     $this->field = array(
       'field_name' => $this->field_name,
       'type' => 'taxonomy_term_reference',
@@ -1586,12 +1586,12 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
 
     // Submit an entity with both terms.
     $langcode = LANGUAGE_NONE;
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertFieldByName("{$this->field_name}[$langcode][]", '', 'Widget is displayed');
     $edit = array(
       "{$this->field_name}[$langcode][]" => array($term1->tid, $term2->tid),
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), 'Entity was created.');
@@ -1601,7 +1601,7 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
     $entities = array($id => $entity);
     field_attach_prepare_view('test_entity', $entities, 'full');
     $entity->content = field_attach_view('test_entity', $entity, 'full');
-    $this->content = drupal_render($entity->content);
+    $this->content = backdrop_render($entity->content);
     $this->assertText($term1->name, 'Term 1 name is displayed.');
     $this->assertText($term2->name, 'Term 2 name is displayed.');
 
@@ -1614,7 +1614,7 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
     field_attach_prepare_view('test_entity', $entities, 'full');
     $entity->content = field_attach_view('test_entity', $entity, 'full');
     $this->plainTextContent = FALSE;
-    $this->content = drupal_render($entity->content);
+    $this->content = backdrop_render($entity->content);
 
     // Term 1 should still be displayed; term 2 should not be.
     $this->assertText($term1->name, 'Term 1 name is displayed.');
@@ -1625,14 +1625,14 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
     $this->assertTrue(sizeof($field_info['settings']['allowed_values']) == 1, 'Only one vocabulary is allowed for the field.');
 
     // The widget should still be displayed.
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertFieldByName("{$this->field_name}[$langcode][]", '', 'Widget is still displayed');
 
     // Term 1 should still pass validation.
     $edit = array(
       "{$this->field_name}[$langcode][]" => array($term1->tid),
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
   }
 }
 
@@ -1651,8 +1651,8 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
+    $this->backdropLogin($this->admin_user);
     $this->vocabulary = $this->createVocabulary();
     $this->langcode = LANGUAGE_NONE;
 
@@ -1701,13 +1701,13 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
     $edit = array();
     $edit['name'] = '<blink>Blinking Text</blink>';
     $edit['parent[]'] = array($term1->tid);
-    $this->drupalPost('taxonomy/term/' . $term2->tid . '/edit', $edit, t('Save'));
+    $this->backdropPost('taxonomy/term/' . $term2->tid . '/edit', $edit, t('Save'));
 
     // Create node with term2.
     $edit = array();
-    $node = $this->drupalCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'article'));
     $edit[$this->instance['field_name'] . '[' . $this->langcode . '][]'] = $term2->tid;
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
     // Generate and test sanitized tokens for term1.
     $tests = array();
@@ -1804,8 +1804,8 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
 
     // Create and log in as a user who has permission to add and edit taxonomy
     // terms and view the administrative theme.
-    $admin_user = $this->drupalCreateUser(array('administer taxonomy', 'view the administration theme'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer taxonomy', 'view the administration theme'));
+    $this->backdropLogin($admin_user);
   }
 
   /**
@@ -1815,16 +1815,16 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
     // Adding a term to a vocabulary is considered an administrative action and
     // should use the administrative theme.
     $vocabulary = $this->createVocabulary();
-    $this->drupalGet('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add');
+    $this->backdropGet('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add');
     $this->assertRaw('seven/style.css', t("The administrative theme's CSS appears on the page for adding a taxonomy term."));
 
     // Viewing a taxonomy term should use the default theme.
     $term = $this->createTerm($vocabulary);
-    $this->drupalGet('taxonomy/term/' . $term->tid);
+    $this->backdropGet('taxonomy/term/' . $term->tid);
     $this->assertRaw('bartik/css/style.css', t("The default theme's CSS appears on the page for viewing a taxonomy term."));
 
     // Editing a taxonomy term should use the same theme as adding one.
-    $this->drupalGet('taxonomy/term/' . $term->tid . '/edit');
+    $this->backdropGet('taxonomy/term/' . $term->tid . '/edit');
     $this->assertRaw('seven/style.css', t("The administrative theme's CSS appears on the page for editing a taxonomy term."));
   }
 }

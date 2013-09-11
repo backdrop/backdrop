@@ -10,7 +10,7 @@
  * @{
  * Functions to coordinate long-running operations across requests.
  *
- * In most environments, multiple Drupal page requests (a.k.a. threads or
+ * In most environments, multiple Backdrop page requests (a.k.a. threads or
  * processes) will execute in parallel. This leads to potential conflicts or
  * race conditions when two requests execute the same code at the same time. A
  * common example of this is a rebuild like menu_rebuild() where we invoke many
@@ -74,7 +74,7 @@ function lock_initialize() {
  * Helper function to get this request's unique id.
  */
 function _lock_id() {
-  // Do not use drupal_static(). This identifier refers to the current
+  // Do not use backdrop_static(). This identifier refers to the current
   // client request, and must not be changed under any circumstances
   // else the shutdown handler may fail to release our locks.
   static $lock_id;
@@ -83,7 +83,7 @@ function _lock_id() {
     // Assign a unique id.
     $lock_id = uniqid(mt_rand(), TRUE);
     // We only register a shutdown function if a lock is used.
-    drupal_register_shutdown_function('lock_release_all', $lock_id);
+    backdrop_register_shutdown_function('lock_release_all', $lock_id);
   }
   return $lock_id;
 }

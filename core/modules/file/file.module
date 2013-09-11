@@ -16,7 +16,7 @@ function file_help($path, $arg) {
     case 'admin/help#file':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The File module defines a <em>File</em> field type for the Field module, which lets you manage and validate uploaded files attached to content on your site (see the <a href="@field-help">Field module help page</a> for more information about fields). For more information, see the online handbook entry for <a href="@file">File module</a>.', array('@field-help' => url('admin/help/field'), '@file' => 'http://drupal.org/handbook/modules/file')) . '</p>';
+      $output .= '<p>' . t('The File module defines a <em>File</em> field type for the Field module, which lets you manage and validate uploaded files attached to content on your site (see the <a href="@field-help">Field module help page</a> for more information about fields). For more information, see the online handbook entry for <a href="@file">File module</a>.', array('@field-help' => url('admin/help/field'), '@file' => 'http://backdrop.org/handbook/modules/file')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Attaching files to content') . '</dt>';
@@ -24,7 +24,7 @@ function file_help($path, $arg) {
       $output .= '<dt>' . t('Managing attachment display') . '</dt>';
       $output .= '<dd>' . t('When you attach a file to content, you can specify whether it is <em>listed</em> or not. Listed files are displayed automatically in a section at the bottom of your content; non-listed files are available for embedding in your content, but are not included in the list at the bottom.') . '</dd>';
       $output .= '<dt>' . t('Managing file locations') . '</dt>';
-      $output .= '<dd>' . t("When you create a File field, you can specify a directory where the files will be stored, which can be within either the <em>public</em> or <em>private</em> files directory. Files in the public directory can be accessed directly through the web server; when public files are listed, direct links to the files are used, and anyone who knows a file's URL can download the file. Files in the private directory are not accessible directly through the web server; when private files are listed, the links are Drupal path requests. This adds to server load and download time, since Drupal must start up and resolve the path for each file download request, but allows for access restrictions.") . '</dd>';
+      $output .= '<dd>' . t("When you create a File field, you can specify a directory where the files will be stored, which can be within either the <em>public</em> or <em>private</em> files directory. Files in the public directory can be accessed directly through the web server; when public files are listed, direct links to the files are used, and anyone who knows a file's URL can download the file. Files in the private directory are not accessible directly through the web server; when private files are listed, the links are Backdrop path requests. This adds to server load and download time, since Backdrop must start up and resolve the path for each file download request, but allows for access restrictions.") . '</dd>';
       $output .= '</dl>';
       return $output;
   }
@@ -56,10 +56,10 @@ function file_menu() {
 /**
  * Implements hook_element_info().
  *
- * The managed file element may be used anywhere in Drupal.
+ * The managed file element may be used anywhere in Backdrop.
  */
 function file_element_info() {
-  $file_path = drupal_get_path('module', 'file');
+  $file_path = backdrop_get_path('module', 'file');
   $types['managed_file'] = array(
     '#input' => TRUE,
     '#process' => array('file_managed_file_process'),
@@ -194,7 +194,7 @@ function file_file_download($uri, $field_type = 'file') {
           $grants = array_merge($grants, array($module => module_invoke($module, 'file_download_access', $field, $entity_type, $entity)));
         }
         // Allow other modules to alter the returned grants/denies.
-        drupal_alter('file_download_access', $grants, $field, $entity_type, $entity);
+        backdrop_alter('file_download_access', $grants, $field, $entity_type, $entity);
 
         if (in_array(TRUE, $grants)) {
           // If TRUE is returned, access is granted and no further checks are
@@ -239,7 +239,7 @@ function file_ajax_upload() {
 
   if (empty($_POST['form_build_id']) || $form_build_id != $_POST['form_build_id']) {
     // Invalid request.
-    drupal_set_message(t('An unrecoverable error occurred. The uploaded file likely exceeded the maximum file size (@size) that this server supports.', array('@size' => format_size(file_upload_max_size()))), 'error');
+    backdrop_set_message(t('An unrecoverable error occurred. The uploaded file likely exceeded the maximum file size (@size) that this server supports.', array('@size' => format_size(file_upload_max_size()))), 'error');
     $commands = array();
     $commands[] = ajax_command_replace(NULL, theme('status_messages'));
     return array('#type' => 'ajax', '#commands' => $commands);
@@ -249,7 +249,7 @@ function file_ajax_upload() {
 
   if (!$form) {
     // Invalid form_build_id.
-    drupal_set_message(t('An unrecoverable error occurred. Use of this form has expired. Try reloading the page and submitting again.'), 'error');
+    backdrop_set_message(t('An unrecoverable error occurred. Use of this form has expired. Try reloading the page and submitting again.'), 'error');
     $commands = array();
     $commands[] = ajax_command_replace(NULL, theme('status_messages'));
     return array('#type' => 'ajax', '#commands' => $commands);
@@ -263,7 +263,7 @@ function file_ajax_upload() {
   $current_file_count = isset($current_element['#file_upload_delta']) ? $current_element['#file_upload_delta'] : 0;
 
   // Process user input. $form and $form_state are modified in the process.
-  drupal_process_form($form['#form_id'], $form, $form_state);
+  backdrop_process_form($form['#form_id'], $form, $form_state);
 
   // Retrieve the element to be rendered.
   foreach ($form_parents as $parent) {
@@ -279,8 +279,8 @@ function file_ajax_upload() {
     $form['#suffix'] .= '<span class="ajax-new-content"></span>';
   }
 
-  $output = theme('status_messages') . drupal_render($form);
-  $js = drupal_add_js();
+  $output = theme('status_messages') . backdrop_render($form);
+  $js = backdrop_add_js();
   $settings = call_user_func_array('array_merge_recursive', $js['settings']['data']);
 
   $commands = array();
@@ -316,7 +316,7 @@ function file_ajax_progress($key) {
     }
   }
 
-  drupal_json_output($progress);
+  backdrop_json_output($progress);
 }
 
 /**
@@ -589,7 +589,7 @@ function file_managed_file_submit($form, &$form_state) {
   // and set $element to the managed_file element that contains that button.
   $parents = $form_state['triggering_element']['#array_parents'];
   $button_key = array_pop($parents);
-  $element = drupal_array_get_nested_value($form, $parents);
+  $element = backdrop_array_get_nested_value($form, $parents);
 
   // No action is needed here for the upload button, because all file uploads on
   // the form are processed by file_managed_file_value() regardless of which
@@ -610,7 +610,7 @@ function file_managed_file_submit($form, &$form_state) {
     // has correct information during the rebuild.
     $values_element = $element['#extended'] ? $element['fid'] : $element;
     form_set_value($values_element, NULL, $form_state);
-    drupal_array_set_nested_value($form_state['input'], $values_element['#parents'], NULL);
+    backdrop_array_set_nested_value($form_state['input'], $values_element['#parents'], NULL);
   }
 
   // Set the form to rebuild so that $form is correctly updated in response to
@@ -677,8 +677,8 @@ function theme_file_managed_file($variables) {
 
   // This wrapper is required to apply JS behaviors and CSS styling.
   $output = '';
-  $output .= '<div' . drupal_attributes($attributes) . '>';
-  $output .= drupal_render_children($element);
+  $output .= '<div' . backdrop_attributes($attributes) . '>';
+  $output .= backdrop_render_children($element);
   $output .= '</div>';
   return $output;
 }
@@ -810,7 +810,7 @@ function file_icon_url($file, $icon_directory = NULL) {
 function file_icon_path($file, $icon_directory = NULL) {
   // Use the default set of icons if none specified.
   if (!isset($icon_directory)) {
-    $icon_directory = variable_get('file_icon_directory', drupal_get_path('module', 'file') . '/icons');
+    $icon_directory = variable_get('file_icon_directory', backdrop_get_path('module', 'file') . '/icons');
   }
 
   // If there's an icon matching the exact mimetype, go for it.
@@ -999,7 +999,7 @@ function file_icon_map($file) {
  *   An integer value.
  */
 function file_get_file_references($file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file') {
-  $references = drupal_static(__FUNCTION__, array());
+  $references = backdrop_static(__FUNCTION__, array());
   $fields = isset($field) ? array($field['field_name'] => $field) : field_info_fields();
 
   foreach ($fields as $field_name => $file_field) {

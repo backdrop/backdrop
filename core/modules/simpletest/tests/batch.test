@@ -8,7 +8,7 @@
 /**
  * Tests for the Batch API.
  */
-class BatchProcessingTestCase extends DrupalWebTestCase {
+class BatchProcessingTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Batch processing',
@@ -26,7 +26,7 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
    */
   function testBatchNoForm() {
     // Displaying the page triggers batch 1.
-    $this->drupalGet('batch-test/no-form');
+    $this->backdropGet('batch-test/no-form');
     $this->assertBatchMessages($this->_resultMessages(1), t('Batch for step 2 performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_1'), t('Execution order was correct.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
@@ -38,34 +38,34 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
   function testBatchForm() {
     // Batch 0: no operation.
     $edit = array('batch' => 'batch_0');
-    $this->drupalPost('batch-test/simple', $edit, 'Submit');
+    $this->backdropPost('batch-test/simple', $edit, 'Submit');
     $this->assertBatchMessages($this->_resultMessages('batch_0'), t('Batch with no operation performed successfully.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
 
     // Batch 1: several simple operations.
     $edit = array('batch' => 'batch_1');
-    $this->drupalPost('batch-test/simple', $edit, 'Submit');
+    $this->backdropPost('batch-test/simple', $edit, 'Submit');
     $this->assertBatchMessages($this->_resultMessages('batch_1'), t('Batch with simple operations performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_1'), t('Execution order was correct.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
 
     // Batch 2: one multistep operation.
     $edit = array('batch' => 'batch_2');
-    $this->drupalPost('batch-test/simple', $edit, 'Submit');
+    $this->backdropPost('batch-test/simple', $edit, 'Submit');
     $this->assertBatchMessages($this->_resultMessages('batch_2'), t('Batch with multistep operation performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_2'), t('Execution order was correct.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
 
     // Batch 3: simple + multistep combined.
     $edit = array('batch' => 'batch_3');
-    $this->drupalPost('batch-test/simple', $edit, 'Submit');
+    $this->backdropPost('batch-test/simple', $edit, 'Submit');
     $this->assertBatchMessages($this->_resultMessages('batch_3'), t('Batch with simple and multistep operations performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_3'), t('Execution order was correct.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
 
     // Batch 4: nested batch.
     $edit = array('batch' => 'batch_4');
-    $this->drupalPost('batch-test/simple', $edit, 'Submit');
+    $this->backdropPost('batch-test/simple', $edit, 'Submit');
     $this->assertBatchMessages($this->_resultMessages('batch_4'), t('Nested batch performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_4'), t('Execution order was correct.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
@@ -75,17 +75,17 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
    * Test batches defined in a multistep form.
    */
   function testBatchFormMultistep() {
-    $this->drupalGet('batch-test/multistep');
+    $this->backdropGet('batch-test/multistep');
     $this->assertText('step 1', t('Form is displayed in step 1.'));
 
     // First step triggers batch 1.
-    $this->drupalPost(NULL, array(), 'Submit');
+    $this->backdropPost(NULL, array(), 'Submit');
     $this->assertBatchMessages($this->_resultMessages('batch_1'), t('Batch for step 1 performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_1'), t('Execution order was correct.'));
     $this->assertText('step 2', t('Form is displayed in step 2.'));
 
     // Second step triggers batch 2.
-    $this->drupalPost(NULL, array(), 'Submit');
+    $this->backdropPost(NULL, array(), 'Submit');
     $this->assertBatchMessages($this->_resultMessages('batch_2'), t('Batch for step 2 performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_2'), t('Execution order was correct.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
@@ -99,7 +99,7 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
     // handlers. Each submit handler modify the submitted 'value'.
     $value = rand(0, 255);
     $edit = array('value' => $value);
-    $this->drupalPost('batch-test/chained', $edit, 'Submit');
+    $this->backdropPost('batch-test/chained', $edit, 'Submit');
     // Check that result messages are present and in the correct order.
     $this->assertBatchMessages($this->_resultMessages('chained'), t('Batches defined in separate submit handlers performed successfully.'));
     // The stack contains execution order of batch callbacks and submit
@@ -111,13 +111,13 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
   /**
    * Test batches defined in a programmatically submitted form.
    *
-   * Same as above, but the form is submitted through drupal_form_execute().
+   * Same as above, but the form is submitted through backdrop_form_execute().
    */
   function testBatchFormProgrammatic() {
     // Batches 1, 2 and 3 are triggered in sequence by different submit
     // handlers. Each submit handler modify the submitted 'value'.
     $value = rand(0, 255);
-    $this->drupalGet('batch-test/programmatic/' . $value);
+    $this->backdropGet('batch-test/programmatic/' . $value);
     // Check that result messages are present and in the correct order.
     $this->assertBatchMessages($this->_resultMessages('chained'), t('Batches defined in separate submit handlers performed successfully.'));
     // The stack contains execution order of batch callbacks and submit
@@ -127,23 +127,23 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test that drupal_form_submit() can run within a batch operation.
+   * Test that backdrop_form_submit() can run within a batch operation.
    */
-  function testDrupalFormSubmitInBatch() {
+  function testBackdropFormSubmitInBatch() {
     // Displaying the page triggers a batch that programmatically submits a
     // form.
     $value = rand(0, 255);
-    $this->drupalGet('batch-test/nested-programmatic/' . $value);
-    $this->assertEqual(batch_test_stack(), array('mock form submitted with value = ' . $value), t('drupal_form_submit() ran successfully within a batch operation.'));
+    $this->backdropGet('batch-test/nested-programmatic/' . $value);
+    $this->assertEqual(batch_test_stack(), array('mock form submitted with value = ' . $value), t('backdrop_form_submit() ran successfully within a batch operation.'));
   }
 
   /**
    * Test batches that return $context['finished'] > 1 do in fact complete.
-   * See http://drupal.org/node/600836
+   * See http://backdrop.org/node/600836
    */
   function testBatchLargePercentage() {
     // Displaying the page triggers batch 5.
-    $this->drupalGet('batch-test/large-percentage');
+    $this->backdropGet('batch-test/large-percentage');
     $this->assertBatchMessages($this->_resultMessages(1), t('Batch for step 2 performed successfully.'));
     $this->assertEqual(batch_test_stack(), $this->_resultStack('batch_5'), t('Execution order was correct.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
@@ -277,7 +277,7 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
 /**
  * Tests for the Batch API Progress page.
  */
-class BatchPageTestCase extends DrupalWebTestCase {
+class BatchPageTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Batch progress page',
@@ -299,13 +299,13 @@ class BatchPageTestCase extends DrupalWebTestCase {
     variable_set('theme_default', 'bartik');
     variable_set('admin_theme', 'seven');
     // Log in as an administrator who can see the administrative theme.
-    $admin_user = $this->drupalCreateUser(array('view the administration theme'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('view the administration theme'));
+    $this->backdropLogin($admin_user);
     // Visit an administrative page that runs a test batch, and check that the
     // theme that was used during batch execution (which the batch callback
     // function saved as a variable) matches the theme used on the
     // administrative page.
-    $this->drupalGet('admin/batch-test/test-theme');
+    $this->backdropGet('admin/batch-test/test-theme');
     // The stack should contain the name of the theme used on the progress
     // page.
     $this->assertEqual(batch_test_stack(), array('seven'), t('A progressive batch correctly uses the theme of the page that started the batch.'));
@@ -316,7 +316,7 @@ class BatchPageTestCase extends DrupalWebTestCase {
  * Tests the function _batch_api_percentage() to make sure that the rounding
  * works properly in all cases.
  */
-class BatchPercentagesUnitTestCase extends DrupalUnitTestCase {
+class BatchPercentagesUnitTestCase extends BackdropUnitTestCase {
   protected $testCases = array();
 
   public static function getInfo() {

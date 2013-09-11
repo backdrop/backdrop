@@ -47,7 +47,7 @@ class TableSort extends SelectQueryExtender {
       $field = preg_replace('/[^A-Za-z0-9_.]+/', '', $ts['sql']);
 
       // Sort order can only be ASC or DESC.
-      $sort = drupal_strtoupper($ts['sort']);
+      $sort = backdrop_strtoupper($ts['sort']);
       $sort = in_array($sort, array('ASC', 'DESC')) ? $sort : '';
       $this->orderBy($field, $sort);
     }
@@ -190,7 +190,7 @@ function tablesort_cell($cell, $header, $ts, $i) {
  *   page request except for those pertaining to table sorting.
  */
 function tablesort_get_query_parameters() {
-  return drupal_get_query_parameters($_GET, array('q', 'sort', 'order'));
+  return backdrop_get_query_parameters($_GET, array('q', 'sort', 'order'));
 }
 
 /**

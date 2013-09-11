@@ -1,14 +1,14 @@
 
 (function ($) {
 
-Drupal.behaviors.pathFieldsetSummaries = {
+Backdrop.behaviors.pathFieldsetSummaries = {
   attach: function (context) {
-    $('fieldset.path-form', context).drupalSetSummary(function (context) {
+    $('fieldset.path-form', context).backdropSetSummary(function (context) {
       var path = $('.form-item-path-alias input').val();
 
       return path ?
-        Drupal.t('Alias: @alias', { '@alias': path }) :
-        Drupal.t('No alias');
+        Backdrop.t('Alias: @alias', { '@alias': path }) :
+        Backdrop.t('No alias');
     });
   }
 };

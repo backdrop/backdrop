@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Common functions that many Drupal modules will need to reference.
+ * Common functions that many Backdrop modules will need to reference.
  *
  * The functions that are critical and need to be available even when serving
  * a cached page are instead located in bootstrap.inc.
@@ -13,14 +13,14 @@
  * @{
  * Functions that are wrappers or custom implementations of PHP functions.
  *
- * Certain PHP functions should not be used in Drupal. Instead, Drupal's
+ * Certain PHP functions should not be used in Backdrop. Instead, Backdrop's
  * replacement functions should be used.
  *
  * For example, for improved or more secure UTF8-handling, or RFC-compliant
- * handling of URLs in Drupal.
+ * handling of URLs in Backdrop.
  *
  * For ease of use and memorizing, all these wrapper functions use the same name
- * as the original PHP function, but prefixed with "drupal_". Beware, however,
+ * as the original PHP function, but prefixed with "backdrop_". Beware, however,
  * that not all wrapper functions support the same arguments as the original
  * functions.
  *
@@ -33,7 +33,7 @@
  *
  * Correct:
  * @code
- *   $my_substring = drupal_substr($original_string, 0, 5);
+ *   $my_substring = backdrop_substr($original_string, 0, 5);
  * @endcode
  *
  * @}
@@ -92,7 +92,7 @@ const JS_SETTING = 200;
 /**
  * Error code indicating that the request exceeded the specified timeout.
  *
- * @see drupal_http_request()
+ * @see backdrop_http_request()
  */
 const HTTP_REQUEST_TIMEOUT = -1;
 
@@ -168,7 +168,7 @@ const DRUPAL_CACHE_GLOBAL = 0x0008;
  * @param $data
  *   Content to be added.
  */
-function drupal_add_region_content($region = NULL, $data = NULL) {
+function backdrop_add_region_content($region = NULL, $data = NULL) {
   static $content = array();
 
   if (isset($region) && isset($data)) {
@@ -186,8 +186,8 @@ function drupal_add_region_content($region = NULL, $data = NULL) {
  * @param $delimiter
  *   Content to be inserted between imploded array elements.
  */
-function drupal_get_region_content($region = NULL, $delimiter = ' ') {
-  $content = drupal_add_region_content();
+function backdrop_get_region_content($region = NULL, $delimiter = ' ') {
+  $content = backdrop_add_region_content();
   if (isset($region)) {
     if (isset($content[$region]) && is_array($content[$region])) {
       return implode($delimiter, $content[$region]);
@@ -206,16 +206,16 @@ function drupal_get_region_content($region = NULL, $delimiter = ' ') {
 /**
  * Gets the name of the currently active install profile.
  *
- * When this function is called during Drupal's initial installation process,
+ * When this function is called during Backdrop's initial installation process,
  * the name of the profile that's about to be installed is stored in the global
- * installation state. At all other times, the standard Drupal systems variable
+ * installation state. At all other times, the standard Backdrop systems variable
  * table contains the name of the current profile, and we can call
  * variable_get() to determine what one is active.
  *
  * @return $profile
  *   The name of the install profile.
  */
-function drupal_get_profile() {
+function backdrop_get_profile() {
   global $install_state;
 
   if (isset($install_state['parameters']['profile'])) {
@@ -236,8 +236,8 @@ function drupal_get_profile() {
  *   Array of links, starting with "home" and proceeding up to but not including
  *   the current page.
  */
-function drupal_set_breadcrumb($breadcrumb = NULL) {
-  $stored_breadcrumb = &drupal_static(__FUNCTION__);
+function backdrop_set_breadcrumb($breadcrumb = NULL) {
+  $stored_breadcrumb = &backdrop_static(__FUNCTION__);
 
   if (isset($breadcrumb)) {
     $stored_breadcrumb = $breadcrumb;
@@ -248,8 +248,8 @@ function drupal_set_breadcrumb($breadcrumb = NULL) {
 /**
  * Gets the breadcrumb trail for the current page.
  */
-function drupal_get_breadcrumb() {
-  $breadcrumb = drupal_set_breadcrumb();
+function backdrop_get_breadcrumb() {
+  $breadcrumb = backdrop_set_breadcrumb();
 
   if (!isset($breadcrumb)) {
     $breadcrumb = menu_get_active_breadcrumb();
@@ -276,12 +276,12 @@ function drupal_get_breadcrumb() {
  *
  * @see theme_html_tag()
  */
-function drupal_add_html_head($data = NULL, $key = NULL) {
-  $stored_head = &drupal_static(__FUNCTION__);
+function backdrop_add_html_head($data = NULL, $key = NULL) {
+  $stored_head = &backdrop_static(__FUNCTION__);
 
   if (!isset($stored_head)) {
     // Make sure the defaults, including Content-Type, come first.
-    $stored_head = _drupal_default_html_head();
+    $stored_head = _backdrop_default_html_head();
   }
 
   if (isset($data) && isset($key)) {
@@ -296,7 +296,7 @@ function drupal_add_html_head($data = NULL, $key = NULL) {
 /**
  * Returns elements that are always displayed in the HEAD tag of the HTML page.
  */
-function _drupal_default_html_head() {
+function _backdrop_default_html_head() {
   // Add default elements. Make sure the Content-Type comes first because the
   // IE browser may be vulnerable to XSS via encoding attacks from any content
   // that comes before this META tag, such as a TITLE tag.
@@ -309,7 +309,7 @@ function _drupal_default_html_head() {
     // Security: This always has to be output first.
     '#weight' => -1000,
   );
-  // Show Drupal and the major version number in the META GENERATOR tag.
+  // Show Backdrop and the major version number in the META GENERATOR tag.
   // Get the major version.
   list($version, ) = explode('.', VERSION);
   $elements['system_meta_generator'] = array(
@@ -317,21 +317,21 @@ function _drupal_default_html_head() {
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'Generator',
-      'content' => 'Drupal ' . $version . ' (http://drupal.org)',
+      'content' => 'Backdrop ' . $version . ' (http://backdrop.org)',
     ),
   );
   // Also send the generator in the HTTP header.
-  $elements['system_meta_generator']['#attached']['drupal_add_http_header'][] = array('X-Generator', $elements['system_meta_generator']['#attributes']['content']);
+  $elements['system_meta_generator']['#attached']['backdrop_add_http_header'][] = array('X-Generator', $elements['system_meta_generator']['#attributes']['content']);
   return $elements;
 }
 
 /**
  * Retrieves output to be displayed in the HEAD tag of the HTML page.
  */
-function drupal_get_html_head() {
-  $elements = drupal_add_html_head();
-  drupal_alter('html_head', $elements);
-  return drupal_render($elements);
+function backdrop_get_html_head() {
+  $elements = backdrop_add_html_head();
+  backdrop_alter('html_head', $elements);
+  return backdrop_render($elements);
 }
 
 /**
@@ -344,18 +344,18 @@ function drupal_get_html_head() {
  * @param $title
  *   The title of the feed.
  */
-function drupal_add_feed($url = NULL, $title = '') {
-  $stored_feed_links = &drupal_static(__FUNCTION__, array());
+function backdrop_add_feed($url = NULL, $title = '') {
+  $stored_feed_links = &backdrop_static(__FUNCTION__, array());
 
   if (isset($url)) {
     $stored_feed_links[$url] = theme('feed_icon', array('url' => $url, 'title' => $title));
 
-    drupal_add_html_head_link(array(
+    backdrop_add_html_head_link(array(
       'rel' => 'alternate',
       'type' => 'application/rss+xml',
       'title' => $title,
       // Force the URL to be absolute, for consistency with other <link> tags
-      // output by Drupal.
+      // output by Backdrop.
       'href' => url($url, array('absolute' => TRUE)),
     ));
   }
@@ -368,8 +368,8 @@ function drupal_add_feed($url = NULL, $title = '') {
  * @param $delimiter
  *   A delimiter to split feeds by.
  */
-function drupal_get_feeds($delimiter = "\n") {
-  $feeds = drupal_add_feed();
+function backdrop_get_feeds($delimiter = "\n") {
+  $feeds = backdrop_add_feed();
   return implode($feeds, $delimiter);
 }
 
@@ -393,7 +393,7 @@ function drupal_get_feeds($delimiter = "\n") {
  * @return
  *   An array containing query parameters, which can be used for url().
  */
-function drupal_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function backdrop_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
   // Set defaults, if none given.
   if (!isset($query)) {
     $query = $_GET;
@@ -414,7 +414,7 @@ function drupal_get_query_parameters(array $query = NULL, array $exclude = array
     }
 
     if (is_array($value)) {
-      $params[$key] = drupal_get_query_parameters($value, $exclude, $string_key);
+      $params[$key] = backdrop_get_query_parameters($value, $exclude, $string_key);
     }
     else {
       $params[$key] = $value;
@@ -433,7 +433,7 @@ function drupal_get_query_parameters(array $query = NULL, array $exclude = array
  * @return
  *   An array of url decoded couples $param_name => $value.
  */
-function drupal_get_query_array($query) {
+function backdrop_get_query_array($query) {
   $result = array();
   if (!empty($query)) {
     foreach (explode('&', $query) as $param) {
@@ -459,10 +459,10 @@ function drupal_get_query_array($query) {
  *   A rawurlencoded string which can be used as or appended to the URL query
  *   string.
  *
- * @see drupal_get_query_parameters()
+ * @see backdrop_get_query_parameters()
  * @ingroup php_wrappers
  */
-function drupal_http_build_query(array $query, $parent = '') {
+function backdrop_http_build_query(array $query, $parent = '') {
   $params = array();
 
   foreach ($query as $key => $value) {
@@ -470,7 +470,7 @@ function drupal_http_build_query(array $query, $parent = '') {
 
     // Recurse into children.
     if (is_array($value)) {
-      $params[] = drupal_http_build_query($value, $key);
+      $params[] = backdrop_http_build_query($value, $key);
     }
     // If a query parameter value is NULL, only append its key.
     elseif (!isset($value)) {
@@ -486,17 +486,17 @@ function drupal_http_build_query(array $query, $parent = '') {
 }
 
 /**
- * Prepares a 'destination' URL query parameter for use with drupal_goto().
+ * Prepares a 'destination' URL query parameter for use with backdrop_goto().
  *
  * Used to direct the user back to the referring page after completing a form.
  * By default the current URL is returned. If a destination exists in the
  * previous request, that destination is returned. As such, a destination can
  * persist across multiple pages.
  *
- * @see drupal_goto()
+ * @see backdrop_goto()
  */
-function drupal_get_destination() {
-  $destination = &drupal_static(__FUNCTION__);
+function backdrop_get_destination() {
+  $destination = &backdrop_static(__FUNCTION__);
 
   if (isset($destination)) {
     return $destination;
@@ -507,7 +507,7 @@ function drupal_get_destination() {
   }
   else {
     $path = $_GET['q'];
-    $query = drupal_http_build_query(drupal_get_query_parameters());
+    $query = backdrop_http_build_query(backdrop_get_query_parameters());
     if ($query != '') {
       $path .= '?' . $query;
     }
@@ -526,7 +526,7 @@ function drupal_get_destination() {
  * The returned array contains a 'path' that may be passed separately to url().
  * For example:
  * @code
- *   $options = drupal_parse_url($_GET['destination']);
+ *   $options = backdrop_parse_url($_GET['destination']);
  *   $my_url = url($options['path'], $options);
  *   $my_link = l('Example link', $options['path'], $options);
  * @endcode
@@ -547,10 +547,10 @@ function drupal_get_destination() {
  *   - 'fragment': The fragment of $url, if existent.
  *
  * @see url()
- * @see drupal_goto()
+ * @see backdrop_goto()
  * @ingroup php_wrappers
  */
-function drupal_parse_url($url) {
+function backdrop_parse_url($url) {
   $options = array(
     'path' => NULL,
     'query' => array(),
@@ -599,7 +599,7 @@ function drupal_parse_url($url) {
 }
 
 /**
- * Encodes a Drupal path for use in a URL.
+ * Encodes a Backdrop path for use in a URL.
  *
  * For aesthetic reasons slashes are not escaped.
  *
@@ -607,14 +607,14 @@ function drupal_parse_url($url) {
  * function should not be encoded in advance.
  *
  * @param $path
- *   The Drupal path to encode.
+ *   The Backdrop path to encode.
  */
-function drupal_encode_path($path) {
+function backdrop_encode_path($path) {
   return str_replace('%2F', '/', rawurlencode($path));
 }
 
 /**
- * Sends the user to a different Drupal page.
+ * Sends the user to a different Backdrop page.
  *
  * This issues an on-site HTTP redirect. The function makes sure the redirected
  * URL is formatted correctly.
@@ -629,20 +629,20 @@ function drupal_encode_path($path) {
  *   $link = l(t('Log in'), 'user/login', array('query' => $query));
  * @endcode
  *
- * Drupal will ensure that messages set by drupal_set_message() and other
+ * Backdrop will ensure that messages set by backdrop_set_message() and other
  * session data are written to the database before the user is redirected.
  *
  * This function ends the request; use it instead of a return in your menu
  * callback.
  *
  * @param $path
- *   A Drupal path or a full URL.
+ *   A Backdrop path or a full URL.
  * @param $options
  *   An associative array of additional URL options to pass to url().
  * @param $http_response_code
  *   Valid values for an actual "goto" as per RFC 2616 section 10.3 are:
  *   - 301 Moved Permanently (the recommended value for most redirects)
- *   - 302 Found (default in Drupal and PHP, sometimes used for spamming search
+ *   - 302 Found (default in Backdrop and PHP, sometimes used for spamming search
  *         engines)
  *   - 303 See Other
  *   - 304 Not Modified
@@ -651,20 +651,20 @@ function drupal_encode_path($path) {
  *   Note: Other values are defined by RFC 2616, but are rarely used and poorly
  *   supported.
  *
- * @see drupal_get_destination()
+ * @see backdrop_get_destination()
  * @see url()
  */
-function drupal_goto($path = '', array $options = array(), $http_response_code = 302) {
+function backdrop_goto($path = '', array $options = array(), $http_response_code = 302) {
   // A destination in $_GET always overrides the function arguments.
   // We do not allow absolute URLs to be passed via $_GET, as this can be an attack vector.
   if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
-    $destination = drupal_parse_url($_GET['destination']);
+    $destination = backdrop_parse_url($_GET['destination']);
     $path = $destination['path'];
     $options['query'] = $destination['query'];
     $options['fragment'] = $destination['fragment'];
   }
 
-  drupal_alter('drupal_goto', $path, $options, $http_response_code);
+  backdrop_alter('backdrop_goto', $path, $options, $http_response_code);
 
   // The 'Location' HTTP header must be absolute.
   $options['absolute'] = TRUE;
@@ -675,45 +675,45 @@ function drupal_goto($path = '', array $options = array(), $http_response_code =
 
   // The "Location" header sends a redirect status code to the HTTP daemon. In
   // some cases this can be wrong, so we make sure none of the code below the
-  // drupal_goto() call gets executed upon redirection.
-  drupal_exit($url);
+  // backdrop_goto() call gets executed upon redirection.
+  backdrop_exit($url);
 }
 
 /**
  * Delivers a "site is under maintenance" message to the browser.
  *
  * Page callback functions wanting to report a "site offline" message should
- * return MENU_SITE_OFFLINE instead of calling drupal_site_offline(). However,
+ * return MENU_SITE_OFFLINE instead of calling backdrop_site_offline(). However,
  * functions that are invoked in contexts where that return value might not
- * bubble up to menu_execute_active_handler() should call drupal_site_offline().
+ * bubble up to menu_execute_active_handler() should call backdrop_site_offline().
  */
-function drupal_site_offline() {
-  drupal_deliver_page(MENU_SITE_OFFLINE);
+function backdrop_site_offline() {
+  backdrop_deliver_page(MENU_SITE_OFFLINE);
 }
 
 /**
  * Delivers a "page not found" error to the browser.
  *
  * Page callback functions wanting to report a "page not found" message should
- * return MENU_NOT_FOUND instead of calling drupal_not_found(). However,
+ * return MENU_NOT_FOUND instead of calling backdrop_not_found(). However,
  * functions that are invoked in contexts where that return value might not
- * bubble up to menu_execute_active_handler() should call drupal_not_found().
+ * bubble up to menu_execute_active_handler() should call backdrop_not_found().
  */
-function drupal_not_found() {
-  drupal_deliver_page(MENU_NOT_FOUND);
+function backdrop_not_found() {
+  backdrop_deliver_page(MENU_NOT_FOUND);
 }
 
 /**
  * Delivers an "access denied" error to the browser.
  *
  * Page callback functions wanting to report an "access denied" message should
- * return MENU_ACCESS_DENIED instead of calling drupal_access_denied(). However,
+ * return MENU_ACCESS_DENIED instead of calling backdrop_access_denied(). However,
  * functions that are invoked in contexts where that return value might not
  * bubble up to menu_execute_active_handler() should call
- * drupal_access_denied().
+ * backdrop_access_denied().
  */
-function drupal_access_denied() {
-  drupal_deliver_page(MENU_ACCESS_DENIED);
+function backdrop_access_denied() {
+  backdrop_deliver_page(MENU_ACCESS_DENIED);
 }
 
 /**
@@ -755,7 +755,7 @@ function drupal_access_denied() {
  *     easy access the array keys are returned in lower case.
  *   - data: A string containing the response body that was received.
  */
-function drupal_http_request($url, array $options = array()) {
+function backdrop_http_request($url, array $options = array()) {
   $result = new stdClass();
 
   // Parse the URL and make sure we can handle the schema.
@@ -828,7 +828,7 @@ function drupal_http_request($url, array $options = array()) {
     // server's ability to make outgoing HTTP requests the next time that
     // requirements checking is performed.
     // See system_requirements().
-    variable_set('drupal_http_request_fails', TRUE);
+    variable_set('backdrop_http_request_fails', TRUE);
 
     return $result;
   }
@@ -841,7 +841,7 @@ function drupal_http_request($url, array $options = array()) {
 
   // Merge the default headers.
   $options['headers'] += array(
-    'User-Agent' => 'Drupal (+http://drupal.org/)',
+    'User-Agent' => 'Backdrop (+http://backdrop.org/)',
   );
 
   // Only add Content-Length if we actually have any content or if it is a POST
@@ -860,13 +860,13 @@ function drupal_http_request($url, array $options = array()) {
 
   // If the database prefix is being used by SimpleTest to run the tests in a copied
   // database then set the user-agent header to the database prefix so that any
-  // calls to other Drupal pages will run the SimpleTest prefixed database. The
+  // calls to other Backdrop pages will run the SimpleTest prefixed database. The
   // user-agent is used to ensure that multiple testing sessions running at the
   // same time won't interfere with each other as they would if the database
   // prefix were stored statically in a file or database variable.
-  $test_info = &$GLOBALS['drupal_test_info'];
+  $test_info = &$GLOBALS['backdrop_test_info'];
   if (!empty($test_info['test_run_id'])) {
-    $options['headers']['User-Agent'] = drupal_generate_test_ua($test_info['test_run_id']);
+    $options['headers']['User-Agent'] = backdrop_generate_test_ua($test_info['test_run_id']);
   }
 
   $request = $options['method'] . ' ' . $path . " HTTP/1.0\r\n";
@@ -1001,7 +1001,7 @@ function drupal_http_request($url, array $options = array()) {
       elseif ($options['max_redirects']) {
         // Redirect to the new location.
         $options['max_redirects']--;
-        $result = drupal_http_request($location, $options);
+        $result = backdrop_http_request($location, $options);
         $result->redirect_code = $code;
       }
       if (!isset($result->redirect_url)) {
@@ -1104,7 +1104,7 @@ function valid_email_address($mail) {
  * Verifies the syntax of the given URL.
  *
  * This function should only be used on actual URLs. It should not be used for
- * Drupal menu paths, which can contain arbitrary characters.
+ * Backdrop menu paths, which can contain arbitrary characters.
  * Valid values per RFC 3986.
  * @param $url
  *   The URL to verify.
@@ -1225,7 +1225,7 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
  * @{
  * Functions to sanitize values.
  *
- * See http://drupal.org/writing-secure-code for information
+ * See http://backdrop.org/writing-secure-code for information
  * on writing secure code.
  */
 
@@ -1236,7 +1236,7 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
  * to being output to an HTML attribute value. It is often called as part of
  * check_url() or filter_xss(), but those functions return an HTML-encoded
  * string, so this function can be called independently when the output needs to
- * be a plain-text string for passing to t(), l(), drupal_attributes(), or
+ * be a plain-text string for passing to t(), l(), backdrop_attributes(), or
  * another function that will call check_plain() separately.
  *
  * @param $uri
@@ -1250,7 +1250,7 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
  *
  * @see check_url()
  */
-function drupal_strip_dangerous_protocols($uri) {
+function backdrop_strip_dangerous_protocols($uri) {
   static $allowed_protocols;
 
   if (!isset($allowed_protocols)) {
@@ -1290,15 +1290,15 @@ function drupal_strip_dangerous_protocols($uri) {
  * @return
  *   A URI stripped of dangerous protocols and encoded for output to an HTML
  *   attribute value. Because it is already encoded, it should not be set as a
- *   value within a $attributes array passed to drupal_attributes(), because
- *   drupal_attributes() expects those values to be plain-text strings. To pass
- *   a filtered URI to drupal_attributes(), call
- *   drupal_strip_dangerous_protocols() instead.
+ *   value within a $attributes array passed to backdrop_attributes(), because
+ *   backdrop_attributes() expects those values to be plain-text strings. To pass
+ *   a filtered URI to backdrop_attributes(), call
+ *   backdrop_strip_dangerous_protocols() instead.
  *
- * @see drupal_strip_dangerous_protocols()
+ * @see backdrop_strip_dangerous_protocols()
  */
 function check_url($uri) {
-  return check_plain(drupal_strip_dangerous_protocols($uri));
+  return check_plain(backdrop_strip_dangerous_protocols($uri));
 }
 
 /**
@@ -1338,13 +1338,13 @@ function filter_xss_admin($string) {
  *   An XSS safe version of $string, or an empty string if $string is not
  *   valid UTF-8.
  *
- * @see drupal_validate_utf8()
+ * @see backdrop_validate_utf8()
  * @ingroup sanitization
  */
 function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd')) {
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
   // site scripting issues on Internet Explorer 6.
-  if (!drupal_validate_utf8($string)) {
+  if (!backdrop_validate_utf8($string)) {
     return '';
   }
   // Store the text format.
@@ -1560,15 +1560,15 @@ function _filter_xss_attributes($attr) {
  * @param $decode
  *   (deprecated) Whether to decode entities in the $string. Set to FALSE if the
  *   $string is in plain text, TRUE otherwise. Defaults to TRUE. This parameter
- *   is deprecated and will be removed in Drupal 8. To process a plain-text URI,
- *   call drupal_strip_dangerous_protocols() or check_url() instead.
+ *   is deprecated and will be removed in Backdrop 8. To process a plain-text URI,
+ *   call backdrop_strip_dangerous_protocols() or check_url() instead.
  *
  * @return
  *   Cleaned up and HTML-escaped version of $string.
  */
 function filter_xss_bad_protocol($string, $decode = TRUE) {
   // Get the plain text representation of the attribute value (i.e. its meaning).
-  // @todo Remove the $decode parameter in Drupal 8, and always assume an HTML
+  // @todo Remove the $decode parameter in Backdrop 8, and always assume an HTML
   //   string that needs decoding.
   if ($decode) {
     if (!function_exists('decode_entities')) {
@@ -1577,7 +1577,7 @@ function filter_xss_bad_protocol($string, $decode = TRUE) {
 
     $string = decode_entities($string);
   }
-  return check_plain(drupal_strip_dangerous_protocols($string));
+  return check_plain(backdrop_strip_dangerous_protocols($string));
 }
 
 /**
@@ -1652,7 +1652,7 @@ function format_xml_elements($array) {
       if ($value['key']) {
         $output .= ' <' . $value['key'];
         if (isset($value['attributes']) && is_array($value['attributes'])) {
-          $output .= drupal_attributes($value['attributes']);
+          $output .= backdrop_attributes($value['attributes']);
         }
 
         if (isset($value['value']) && $value['value'] != '') {
@@ -1875,12 +1875,12 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *   A translated date string in the requested format.
  */
 function format_date($timestamp, $type = 'medium', $format = '', $timezone = NULL, $langcode = NULL) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['timezones'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['timezones'] = &backdrop_static(__FUNCTION__);
   }
-  $timezones = &$drupal_static_fast['timezones'];
+  $timezones = &$backdrop_static_fast['timezones'];
 
   if (!isset($timezone)) {
     $timezone = date_default_timezone_get();
@@ -2077,12 +2077,12 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     dependent URL requires so.
  *   - 'prefix': Only used internally, to modify the path when a language
  *     dependent URL requires so.
- *   - 'script': The script filename in Drupal's root directory to use when
+ *   - 'script': The script filename in Backdrop's root directory to use when
  *     clean URLs are disabled, such as 'index.php'. Defaults to an empty
  *     string, as most modern web servers automatically find 'index.php'. If
  *     clean URLs are disabled, the value of $path is appended as query
  *     parameter 'q' to $options['script'] in the returned URL. When deploying
- *     Drupal on a web server that cannot be configured to automatically find
+ *     Backdrop on a web server that cannot be configured to automatically find
  *     index.php, then hook_url_outbound_alter() can be implemented to force
  *     this value to 'index.php'.
  *   - 'entity_type': The entity type of the object that called url(). Only
@@ -2105,19 +2105,19 @@ function url($path = NULL, array $options = array()) {
 
   if (!isset($options['external'])) {
     // Return an external link if $path contains an allowed absolute URL. Only
-    // call the slow drupal_strip_dangerous_protocols() if $path contains a ':'
+    // call the slow backdrop_strip_dangerous_protocols() if $path contains a ':'
     // before any / ? or #. Note: we could use url_is_external($path) here, but
     // that would require another function call, and performance inside url() is
     // critical.
     $colonpos = strpos($path, ':');
-    $options['external'] = ($colonpos !== FALSE && !preg_match('![/?#]!', substr($path, 0, $colonpos)) && drupal_strip_dangerous_protocols($path) == $path);
+    $options['external'] = ($colonpos !== FALSE && !preg_match('![/?#]!', substr($path, 0, $colonpos)) && backdrop_strip_dangerous_protocols($path) == $path);
   }
 
   // Preserve the original path before altering or aliasing.
   $original_path = $path;
 
   // Allow other modules to alter the outbound URL and options.
-  drupal_alter('url_outbound', $path, $options, $original_path);
+  backdrop_alter('url_outbound', $path, $options, $original_path);
 
   if (isset($options['fragment']) && $options['fragment'] !== '') {
     $options['fragment'] = '#' . $options['fragment'];
@@ -2134,7 +2134,7 @@ function url($path = NULL, array $options = array()) {
     }
     // Append the query.
     if ($options['query']) {
-      $path .= (strpos($path, '?') !== FALSE ? '&' : '?') . drupal_http_build_query($options['query']);
+      $path .= (strpos($path, '?') !== FALSE ? '&' : '?') . backdrop_http_build_query($options['query']);
     }
     if (isset($options['https']) && variable_get('https', FALSE)) {
       if ($options['https'] === TRUE) {
@@ -2173,7 +2173,7 @@ function url($path = NULL, array $options = array()) {
   }
   elseif (!empty($path) && !$options['alias']) {
     $langcode = isset($options['language']) && isset($options['language']->langcode) ? $options['language']->langcode : '';
-    $alias = drupal_get_path_alias($original_path, $langcode);
+    $alias = backdrop_get_path_alias($original_path, $langcode);
     if ($alias != $original_path) {
       $path = $alias;
     }
@@ -2184,9 +2184,9 @@ function url($path = NULL, array $options = array()) {
 
   // With Clean URLs.
   if (!empty($GLOBALS['conf']['clean_url'])) {
-    $path = drupal_encode_path($prefix . $path);
+    $path = backdrop_encode_path($prefix . $path);
     if ($options['query']) {
-      return $base . $path . '?' . drupal_http_build_query($options['query']) . $options['fragment'];
+      return $base . $path . '?' . backdrop_http_build_query($options['query']) . $options['fragment'];
     }
     else {
       return $base . $path . $options['fragment'];
@@ -2204,16 +2204,16 @@ function url($path = NULL, array $options = array()) {
       // parameters.
       $query += $options['query'];
     }
-    $query = $query ? ('?' . drupal_http_build_query($query)) : '';
+    $query = $query ? ('?' . backdrop_http_build_query($query)) : '';
     $script = isset($options['script']) ? $options['script'] : '';
     return $base . $script . $query . $options['fragment'];
   }
 }
 
 /**
- * Returns TRUE if a path is external to Drupal (e.g. http://example.com).
+ * Returns TRUE if a path is external to Backdrop (e.g. http://example.com).
  *
- * If a path cannot be assessed by Drupal's menu handler, then we must
+ * If a path cannot be assessed by Backdrop's menu handler, then we must
  * treat it as potentially insecure.
  *
  * @param $path
@@ -2225,10 +2225,10 @@ function url($path = NULL, array $options = array()) {
  */
 function url_is_external($path) {
   $colonpos = strpos($path, ':');
-  // Avoid calling drupal_strip_dangerous_protocols() if there is any
+  // Avoid calling backdrop_strip_dangerous_protocols() if there is any
   // slash (/), hash (#) or question_mark (?) before the colon (:)
   // occurrence - if any - as this would clearly mean it is not a URL.
-  return $colonpos !== FALSE && !preg_match('![/?#]!', substr($path, 0, $colonpos)) && drupal_strip_dangerous_protocols($path) == $path;
+  return $colonpos !== FALSE && !preg_match('![/?#]!', substr($path, 0, $colonpos)) && backdrop_strip_dangerous_protocols($path) == $path;
 }
 
 /**
@@ -2241,9 +2241,9 @@ function url_is_external($path) {
  *   A ; separated string ready for insertion in a HTTP header. No escaping is
  *   performed for HTML entities, so this string is not safe to be printed.
  *
- * @see drupal_add_http_header()
+ * @see backdrop_add_http_header()
  */
-function drupal_http_header_attributes(array $attributes = array()) {
+function backdrop_http_header_attributes(array $attributes = array()) {
   foreach ($attributes as $attribute => &$data) {
     if (is_array($data)) {
       $data = implode(' ', $data);
@@ -2265,20 +2265,20 @@ function drupal_http_header_attributes(array $attributes = array()) {
  * attribute names, it is strongly recommended to allow only white-listed names,
  * since certain attributes carry security risks and can be abused.
  *
- * Examples of security aspects when using drupal_attributes:
+ * Examples of security aspects when using backdrop_attributes:
  * @code
  *   // By running the value in the following statement through check_plain,
  *   // the malicious script is neutralized.
- *   drupal_attributes(array('title' => t('<script>steal_cookie();</script>')));
+ *   backdrop_attributes(array('title' => t('<script>steal_cookie();</script>')));
  *
- *   // The statement below demonstrates dangerous use of drupal_attributes, and
+ *   // The statement below demonstrates dangerous use of backdrop_attributes, and
  *   // will return an onmouseout attribute with JavaScript code that, when used
  *   // as attribute in a tag, will cause users to be redirected to another site.
  *   //
  *   // In this case, the 'onmouseout' attribute should not be whitelisted --
  *   // you don't want users to have the ability to add this attribute or others
  *   // that take JavaScript commands.
- *   drupal_attributes(array('onmouseout' => 'window.location="http://malicious.com/";')));
+ *   backdrop_attributes(array('onmouseout' => 'window.location="http://malicious.com/";')));
  * @endcode
  *
  * @param $attributes
@@ -2289,7 +2289,7 @@ function drupal_http_header_attributes(array $attributes = array()) {
  *
  * @ingroup sanitization
  */
-function drupal_attributes(array $attributes = array()) {
+function backdrop_attributes(array $attributes = array()) {
   foreach ($attributes as $attribute => &$data) {
     $data = implode(' ', (array) $data);
     $data = $attribute . '="' . check_plain($data) . '"';
@@ -2318,7 +2318,7 @@ function drupal_attributes(array $attributes = array()) {
  *   - 'attributes': An associative array of HTML attributes to apply to the
  *     anchor tag. If element 'class' is included, it must be an array; 'title'
  *     must be a string; other elements are more flexible, as they just need
- *     to work in a call to drupal_attributes($options['attributes']).
+ *     to work in a call to backdrop_attributes($options['attributes']).
  *   - 'html' (default FALSE): Whether $text is HTML or just plain-text. For
  *     example, to make an image tag into a link, this must be set to TRUE, or
  *     you will see the escaped HTML image tag. $text is not sanitized if
@@ -2356,7 +2356,7 @@ function l($text, $path, array $options = array()) {
   );
 
   // Append active class.
-  if (($path == $_GET['q'] || ($path == '<front>' && drupal_is_front_page())) &&
+  if (($path == $_GET['q'] || ($path == '<front>' && backdrop_is_front_page())) &&
       (empty($options['language']) || $options['language']->langcode == $language_url->langcode)) {
     $variables['options']['attributes']['class'][] = 'active';
   }
@@ -2368,7 +2368,7 @@ function l($text, $path, array $options = array()) {
   }
 
   // Move attributes out of options. url() doesn't need them.
-  $attributes = drupal_attributes($variables['options']['attributes']);
+  $attributes = backdrop_attributes($variables['options']['attributes']);
   unset($variables['options']['attributes']);
 
   $url = check_plain(url($variables['path'], $variables['options']));
@@ -2383,8 +2383,8 @@ function l($text, $path, array $options = array()) {
  * Delivers a page callback result to the browser in the appropriate format.
  *
  * This function is most commonly called by menu_execute_active_handler(), but
- * can also be called by error conditions such as drupal_not_found(),
- * drupal_access_denied(), and drupal_site_offline().
+ * can also be called by error conditions such as backdrop_not_found(),
+ * backdrop_access_denied(), and backdrop_site_offline().
  *
  * When a user requests a page, index.php calls menu_execute_active_handler(),
  * which calls the 'page callback' function registered in hook_menu(). The page
@@ -2402,7 +2402,7 @@ function l($text, $path, array $options = array()) {
  * this function is to determine the most appropriate 'delivery callback'
  * function to route the content to. The delivery callback function then
  * sends the content to the browser in the needed format. The default delivery
- * callback is drupal_deliver_html_page(), which delivers the content as an HTML
+ * callback is backdrop_deliver_html_page(), which delivers the content as an HTML
  * page, complete with blocks in addition to the content. This default can be
  * overridden on a per menu router item basis by setting 'delivery callback' in
  * hook_menu() or hook_menu_alter(), and can also be overridden on a per request
@@ -2425,7 +2425,7 @@ function l($text, $path, array $options = array()) {
  * purposes), but it has security implications. Do not call this function
  * directly unless you understand the security implications, and be careful in
  * writing delivery callbacks, so that they do not violate security. See
- * drupal_deliver_html_page() for an example of a delivery callback that
+ * backdrop_deliver_html_page() for an example of a delivery callback that
  * respects security.
  *
  * @param $page_callback_result
@@ -2445,14 +2445,14 @@ function l($text, $path, array $options = array()) {
  * @see hook_menu_alter()
  * @see hook_page_delivery_callback_alter()
  */
-function drupal_deliver_page($page_callback_result, $default_delivery_callback = NULL) {
+function backdrop_deliver_page($page_callback_result, $default_delivery_callback = NULL) {
   if (!isset($default_delivery_callback) && ($router_item = menu_get_item())) {
     $default_delivery_callback = $router_item['delivery_callback'];
   }
-  $delivery_callback = !empty($default_delivery_callback) ? $default_delivery_callback : 'drupal_deliver_html_page';
+  $delivery_callback = !empty($default_delivery_callback) ? $default_delivery_callback : 'backdrop_deliver_html_page';
   // Give modules a chance to alter the delivery callback used, based on
   // request-time context (e.g., HTTP request headers).
-  drupal_alter('page_delivery_callback', $delivery_callback);
+  backdrop_alter('page_delivery_callback', $delivery_callback);
   if (function_exists($delivery_callback)) {
     $delivery_callback($page_callback_result);
   }
@@ -2474,20 +2474,20 @@ function drupal_deliver_page($page_callback_result, $default_delivery_callback =
  *   - A string of HTML content.
  *   - A renderable array of content.
  *
- * @see drupal_deliver_page()
+ * @see backdrop_deliver_page()
  */
-function drupal_deliver_html_page($page_callback_result) {
+function backdrop_deliver_html_page($page_callback_result) {
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
   // for this page request has already set the content type header.
-  if (isset($page_callback_result) && is_null(drupal_get_http_header('Content-Type'))) {
-    drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+  if (isset($page_callback_result) && is_null(backdrop_get_http_header('Content-Type'))) {
+    backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
   }
 
   // Send appropriate HTTP-Header for browsers and search engines.
   global $language_interface;
-  drupal_add_http_header('Content-Language', $language_interface->langcode);
+  backdrop_add_http_header('Content-Language', $language_interface->langcode);
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
@@ -2495,19 +2495,19 @@ function drupal_deliver_html_page($page_callback_result) {
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
         // Print a 404 page.
-        drupal_add_http_header('Status', '404 Not Found');
+        backdrop_add_http_header('Status', '404 Not Found');
 
         watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
 
         // Check for and return a fast 404 page if configured.
-        drupal_fast_404();
+        backdrop_fast_404();
 
         // Keep old path for reference, and to allow forms to redirect to it.
         if (!isset($_GET['destination'])) {
           $_GET['destination'] = $_GET['q'];
         }
 
-        $path = drupal_get_normal_path(variable_get('site_404', ''));
+        $path = backdrop_get_normal_path(variable_get('site_404', ''));
         if ($path && $path != $_GET['q']) {
           // Custom 404 handler. Set the active item in case there are tabs to
           // display, or other dependencies on the path.
@@ -2517,18 +2517,18 @@ function drupal_deliver_html_page($page_callback_result) {
 
         if (empty($return) || $return == MENU_NOT_FOUND || $return == MENU_ACCESS_DENIED) {
           // Standard 404 handler.
-          drupal_set_title(t('Page not found'));
+          backdrop_set_title(t('Page not found'));
           $return = t('The requested page "@path" could not be found.', array('@path' => request_uri()));
         }
 
-        drupal_set_page_content($return);
+        backdrop_set_page_content($return);
         $page = element_info('page');
-        print drupal_render_page($page);
+        print backdrop_render_page($page);
         break;
 
       case MENU_ACCESS_DENIED:
         // Print a 403 page.
-        drupal_add_http_header('Status', '403 Forbidden');
+        backdrop_add_http_header('Status', '403 Forbidden');
         watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
 
         // Keep old path for reference, and to allow forms to redirect to it.
@@ -2536,7 +2536,7 @@ function drupal_deliver_html_page($page_callback_result) {
           $_GET['destination'] = $_GET['q'];
         }
 
-        $path = drupal_get_normal_path(variable_get('site_403', ''));
+        $path = backdrop_get_normal_path(variable_get('site_403', ''));
         if ($path && $path != $_GET['q']) {
           // Custom 403 handler. Set the active item in case there are tabs to
           // display or other dependencies on the path.
@@ -2546,31 +2546,31 @@ function drupal_deliver_html_page($page_callback_result) {
 
         if (empty($return) || $return == MENU_NOT_FOUND || $return == MENU_ACCESS_DENIED) {
           // Standard 403 handler.
-          drupal_set_title(t('Access denied'));
+          backdrop_set_title(t('Access denied'));
           $return = t('You are not authorized to access this page.');
         }
 
-        print drupal_render_page($return);
+        print backdrop_render_page($return);
         break;
 
       case MENU_SITE_OFFLINE:
         // Print a 503 page.
-        drupal_maintenance_theme();
-        drupal_add_http_header('Status', '503 Service unavailable');
-        drupal_set_title(t('Site under maintenance'));
+        backdrop_maintenance_theme();
+        backdrop_add_http_header('Status', '503 Service unavailable');
+        backdrop_set_title(t('Site under maintenance'));
         print theme('maintenance_page', array('content' => filter_xss_admin(variable_get('maintenance_mode_message',
-          t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')))))));
+          t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop')))))));
         break;
     }
   }
   elseif (isset($page_callback_result)) {
     // Print anything besides a menu constant, assuming it's not NULL or
     // undefined.
-    print drupal_render_page($page_callback_result);
+    print backdrop_render_page($page_callback_result);
   }
 
   // Perform end-of-request tasks.
-  drupal_page_footer();
+  backdrop_page_footer();
 }
 
 /**
@@ -2579,23 +2579,23 @@ function drupal_deliver_html_page($page_callback_result) {
  * This function sets the page cache if appropriate, and allows modules to
  * react to the closing of the page by calling hook_exit().
  */
-function drupal_page_footer() {
+function backdrop_page_footer() {
   global $user;
 
   module_invoke_all('exit');
 
   // Commit the user session, if needed.
-  drupal_session_commit();
+  backdrop_session_commit();
 
-  if (variable_get('cache', 0) && ($cache = drupal_page_set_cache())) {
-    drupal_serve_page_from_cache($cache);
+  if (variable_get('cache', 0) && ($cache = backdrop_page_set_cache())) {
+    backdrop_serve_page_from_cache($cache);
   }
   else {
     ob_flush();
   }
 
   _registry_check_code(REGISTRY_WRITE_LOOKUP_CACHE);
-  drupal_cache_system_paths();
+  backdrop_cache_system_paths();
   module_implements_write_cache();
   system_run_automated_cron();
 }
@@ -2603,21 +2603,21 @@ function drupal_page_footer() {
 /**
  * Performs end-of-request tasks.
  *
- * In some cases page requests need to end without calling drupal_page_footer().
- * In these cases, call drupal_exit() instead. There should rarely be a reason
- * to call exit instead of drupal_exit();
+ * In some cases page requests need to end without calling backdrop_page_footer().
+ * In these cases, call backdrop_exit() instead. There should rarely be a reason
+ * to call exit instead of backdrop_exit();
  *
  * @param $destination
- *   If this function is called from drupal_goto(), then this argument
+ *   If this function is called from backdrop_goto(), then this argument
  *   will be a fully-qualified URL that is the destination of the redirect.
  *   This should be passed along to hook_exit() implementations.
  */
-function drupal_exit($destination = NULL) {
-  if (drupal_get_bootstrap_phase() == DRUPAL_BOOTSTRAP_FULL) {
+function backdrop_exit($destination = NULL) {
+  if (backdrop_get_bootstrap_phase() == DRUPAL_BOOTSTRAP_FULL) {
     if (!defined('MAINTENANCE_MODE') || MAINTENANCE_MODE != 'update') {
       module_invoke_all('exit', $destination);
     }
-    drupal_session_commit();
+    backdrop_session_commit();
   }
   exit;
 }
@@ -2639,7 +2639,7 @@ function drupal_exit($destination = NULL) {
  * @return
  *   An associative array.
  */
-function drupal_map_assoc($array, $function = NULL) {
+function backdrop_map_assoc($array, $function = NULL) {
   // array_combine() fails with empty arrays:
   // http://bugs.php.net/bug.php?id=34857.
   $array = !empty($array) ? array_combine($array, $array) : array();
@@ -2677,7 +2677,7 @@ function drupal_map_assoc($array, $function = NULL) {
  *
  * @ingroup php_wrappers
  */
-function drupal_set_time_limit($time_limit) {
+function backdrop_set_time_limit($time_limit) {
   if (function_exists('set_time_limit')) {
     @set_time_limit($time_limit);
   }
@@ -2694,19 +2694,19 @@ function drupal_set_time_limit($time_limit) {
  * @return
  *   The path to the requested item.
  */
-function drupal_get_path($type, $name) {
-  return dirname(drupal_get_filename($type, $name));
+function backdrop_get_path($type, $name) {
+  return dirname(backdrop_get_filename($type, $name));
 }
 
 /**
- * Returns the base URL path (i.e., directory) of the Drupal installation.
+ * Returns the base URL path (i.e., directory) of the Backdrop installation.
  *
  * base_path() adds a "/" to the beginning and end of the returned path if the
  * path is not empty. At the very least, this will return "/".
  *
  * Examples:
  * - http://example.com returns "/" because the path is empty.
- * - http://example.com/drupal/folder returns "/drupal/folder/".
+ * - http://example.com/backdrop/folder returns "/backdrop/folder/".
  */
 function base_path() {
   return $GLOBALS['base_path'];
@@ -2725,7 +2725,7 @@ function base_path() {
  * @param $header
  *   Optional flag to determine if a HTTP 'Link:' header should be sent.
  */
-function drupal_add_html_head_link($attributes, $header = FALSE) {
+function backdrop_add_html_head_link($attributes, $header = FALSE) {
   $element = array(
     '#tag' => 'link',
     '#attributes' => $attributes,
@@ -2736,16 +2736,16 @@ function drupal_add_html_head_link($attributes, $header = FALSE) {
     // Also add a HTTP header "Link:".
     $href = '<' . check_plain($attributes['href']) . '>;';
     unset($attributes['href']);
-    $element['#attached']['drupal_add_http_header'][] = array('Link',  $href . drupal_http_header_attributes($attributes), TRUE);
+    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes), TRUE);
   }
 
-  drupal_add_html_head($element, 'drupal_add_html_head_link:' . $attributes['rel'] . ':' . $href);
+  backdrop_add_html_head($element, 'backdrop_add_html_head_link:' . $attributes['rel'] . ':' . $href);
 }
 
 /**
  * Adds a cascading stylesheet to the stylesheet queue.
  *
- * Calling drupal_static_reset('drupal_add_css') will clear all cascading
+ * Calling backdrop_static_reset('backdrop_add_css') will clear all cascading
  * stylesheets added so far.
  *
  * If CSS aggregation/compression is enabled, all cascading style sheets added
@@ -2764,7 +2764,7 @@ function drupal_add_html_head_link($attributes, $header = FALSE) {
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
  * files do not happen to be needed on a page. This is normally done by calling
- * drupal_add_css() in a hook_init() implementation.
+ * backdrop_add_css() in a hook_init() implementation.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -2779,7 +2779,7 @@ function drupal_add_html_head_link($attributes, $header = FALSE) {
  *     example, system-menus.css rather than simply menus.css. Themes can
  *     override module-supplied CSS files based on their filenames, and this
  *     prefixing helps prevent confusing name collisions for theme developers.
- *     See drupal_get_css() where the overrides are performed. Also, if the
+ *     See backdrop_get_css() where the overrides are performed. Also, if the
  *     direction of the current language is right-to-left (Hebrew, Arabic,
  *     etc.), the function will also look for an RTL CSS file and append it to
  *     the list. The name of this file should have an '-rtl.css' suffix. For
@@ -2842,24 +2842,24 @@ function drupal_add_html_head_link($attributes, $header = FALSE) {
  *     - Then by the 'every_page' flag, with TRUE coming before FALSE.
  *     - Then by weight.
  *     - Then by the order in which the CSS was added. For example, all else
- *       being the same, a stylesheet added by a call to drupal_add_css() that
+ *       being the same, a stylesheet added by a call to backdrop_add_css() that
  *       happened later in the page request gets added to the page after one for
- *       which drupal_add_css() happened earlier in the page request.
+ *       which backdrop_add_css() happened earlier in the page request.
  *   - 'media': The media type for the stylesheet, e.g., all, print, screen.
  *     Defaults to 'all'.
  *   - 'preprocess': If TRUE and CSS aggregation/compression is enabled, the
  *     styles will be aggregated and compressed. Defaults to TRUE.
  *   - 'browsers': An array containing information specifying which browsers
- *     should load the CSS item. See drupal_pre_render_conditional_comments()
+ *     should load the CSS item. See backdrop_pre_render_conditional_comments()
  *     for details.
  *
  * @return
  *   An array of queued cascading stylesheets.
  *
- * @see drupal_get_css()
+ * @see backdrop_get_css()
  */
-function drupal_add_css($data = NULL, $options = NULL) {
-  $css = &drupal_static(__FUNCTION__, array());
+function backdrop_add_css($data = NULL, $options = NULL) {
+  $css = &backdrop_static(__FUNCTION__, array());
 
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
@@ -2934,27 +2934,27 @@ function drupal_add_css($data = NULL, $options = NULL) {
  *   (optional) An array of CSS files. If no array is provided, the default
  *   stylesheets array is used instead.
  * @param $skip_alter
- *   (optional) If set to TRUE, this function skips calling drupal_alter() on
+ *   (optional) If set to TRUE, this function skips calling backdrop_alter() on
  *   $css, useful when the calling function passes a $css array that has already
  *   been altered.
  *
  * @return
  *   A string of XHTML CSS tags.
  *
- * @see drupal_add_css()
+ * @see backdrop_add_css()
  */
-function drupal_get_css($css = NULL, $skip_alter = FALSE) {
+function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
   if (!isset($css)) {
-    $css = drupal_add_css();
+    $css = backdrop_add_css();
   }
 
   // Allow modules and themes to alter the CSS items.
   if (!$skip_alter) {
-    drupal_alter('css', $css);
+    backdrop_alter('css', $css);
   }
 
   // Sort CSS items, so that they appear in the correct order.
-  uasort($css, 'drupal_sort_css_js');
+  uasort($css, 'backdrop_sort_css_js');
 
   // Provide the page with information about the individual CSS files used,
   // information not otherwise available when CSS aggregation is enabled. The
@@ -2962,7 +2962,7 @@ function drupal_get_css($css = NULL, $skip_alter = FALSE) {
   // files removed below are still considered "used" and prevented from being
   // added in a later AJAX request.
   // Skip if no files were added to the page or jQuery.extend() will overwrite
-  // the Drupal.settings.ajaxPageState.css object with an empty array.
+  // the Backdrop.settings.ajaxPageState.css object with an empty array.
   if (!empty($css)) {
     // Cast the array to an object to be on the safe side even if not empty.
     $setting['ajaxPageState']['css'] = (object) array_fill_keys(array_keys($css), 1);
@@ -2973,7 +2973,7 @@ function drupal_get_css($css = NULL, $skip_alter = FALSE) {
   foreach ($css as $key => $item) {
     if ($item['type'] == 'file') {
       // If defined, force a unique basename for this file.
-      $basename = isset($item['basename']) ? $item['basename'] : drupal_basename($item['data']);
+      $basename = isset($item['basename']) ? $item['basename'] : backdrop_basename($item['data']);
       if (isset($previous_item[$basename])) {
         // Remove the previous item that shared the same base name.
         unset($css[$previous_item[$basename]]);
@@ -2991,15 +2991,15 @@ function drupal_get_css($css = NULL, $skip_alter = FALSE) {
     $styles['#attached']['js'][] = array('type' => 'setting', 'data' => $setting);
   }
 
-  return drupal_render($styles);
+  return backdrop_render($styles);
 }
 
 /**
  * Sorts CSS and JavaScript resources.
  *
  * Callback for uasort() within:
- * - drupal_get_css()
- * - drupal_get_js()
+ * - backdrop_get_css()
+ * - backdrop_get_js()
  *
  * This sort order helps optimize front-end performance while providing modules
  * and themes with the necessary control for ordering the CSS and JavaScript
@@ -3007,14 +3007,14 @@ function drupal_get_css($css = NULL, $skip_alter = FALSE) {
  *
  * @param $a
  *   First item for comparison. The compared items should be associative arrays
- *   of member items from drupal_add_css() or drupal_add_js().
+ *   of member items from backdrop_add_css() or backdrop_add_js().
  * @param $b
  *   Second item for comparison.
  *
- * @see drupal_add_css()
- * @see drupal_add_js()
+ * @see backdrop_add_css()
+ * @see backdrop_add_js()
  */
-function drupal_sort_css_js($a, $b) {
+function backdrop_sort_css_js($a, $b) {
   // First order by group, so that, for example, all items in the CSS_SYSTEM
   // group appear before items in the CSS_DEFAULT group, which appear before
   // all items in the CSS_THEME group. Modules may create additional groups by
@@ -3057,7 +3057,7 @@ function drupal_sort_css_js($a, $b) {
  * minimizing network traffic overhead. When aggregation is disabled, grouping
  * allows multiple files to be loaded from a single STYLE tag, enabling sites
  * with many modules enabled or a complex theme being used to stay within IE's
- * 31 CSS inclusion tag limit: http://drupal.org/node/228818.
+ * 31 CSS inclusion tag limit: http://backdrop.org/node/228818.
  *
  * This function puts multiple items into the same group if they are groupable
  * and if they are for the same 'media' and 'browsers'. Items of the 'file' type
@@ -3069,8 +3069,8 @@ function drupal_sort_css_js($a, $b) {
  * between.
  *
  * @param $css
- *   An array of CSS items, as returned by drupal_add_css(), but after
- *   alteration performed by drupal_get_css().
+ *   An array of CSS items, as returned by backdrop_add_css(), but after
+ *   alteration performed by backdrop_get_css().
  *
  * @return
  *   An array of CSS groups. Each group contains the same keys (e.g., 'media',
@@ -3078,10 +3078,10 @@ function drupal_sort_css_js($a, $b) {
  *   each key applying to the group as a whole. Each group also contains an
  *   'items' key, which is the subset of items from $css that are in the group.
  *
- * @see drupal_pre_render_styles()
+ * @see backdrop_pre_render_styles()
  * @see system_element_info()
  */
-function drupal_group_css($css) {
+function backdrop_group_css($css) {
   $groups = array();
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
@@ -3102,7 +3102,7 @@ function drupal_group_css($css) {
     // of information that must be the same for all items in its group. If the
     // item can't be grouped with other items, set $group_keys to FALSE. We
     // put items into a group that can be aggregated together: whether they will
-    // be aggregated is up to the _drupal_css_aggregate() function or an
+    // be aggregated is up to the _backdrop_css_aggregate() function or an
     // override of that function specified in hook_css_alter(), but regardless
     // of the details of that function, a group represents items that can be
     // aggregated. Since a group may be rendered with a single HTML tag, all
@@ -3113,7 +3113,7 @@ function drupal_group_css($css) {
         // Group file items if their 'preprocess' flag is TRUE.
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
-        // flag. See drupal_add_css() for details about that.
+        // flag. See backdrop_add_css() for details about that.
         $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['media'], $item['browsers']) : FALSE;
         break;
       case 'inline':
@@ -3157,14 +3157,14 @@ function drupal_group_css($css) {
  * content together, regardless of the site-wide aggregation setting.
  *
  * @param $css_groups
- *   An array of CSS groups as returned by drupal_group_css(). This function
+ *   An array of CSS groups as returned by backdrop_group_css(). This function
  *   modifies the group's 'data' property for each group that is aggregated.
  *
- * @see drupal_group_css()
- * @see drupal_pre_render_styles()
+ * @see backdrop_group_css()
+ * @see backdrop_pre_render_styles()
  * @see system_element_info()
  */
-function drupal_aggregate_css(&$css_groups) {
+function backdrop_aggregate_css(&$css_groups) {
   $preprocess_css = (variable_get('preprocess_css', FALSE) && (!defined('MAINTENANCE_MODE') || MAINTENANCE_MODE != 'update'));
 
   // For each group that needs aggregation, aggregate its items.
@@ -3174,14 +3174,14 @@ function drupal_aggregate_css(&$css_groups) {
       // the group's data property to the file path of the aggregate file.
       case 'file':
         if ($group['preprocess'] && $preprocess_css) {
-          $css_groups[$key]['data'] = drupal_build_css_cache($group['items']);
+          $css_groups[$key]['data'] = backdrop_build_css_cache($group['items']);
         }
         break;
       // Aggregate all inline CSS content into the group's data property.
       case 'inline':
         $css_groups[$key]['data'] = '';
         foreach ($group['items'] as $item) {
-          $css_groups[$key]['data'] .= drupal_load_stylesheet_content($item['data'], $item['preprocess']);
+          $css_groups[$key]['data'] .= backdrop_load_stylesheet_content($item['data'], $item['preprocess']);
         }
         break;
     }
@@ -3196,7 +3196,7 @@ function drupal_aggregate_css(&$css_groups) {
  * - They are the standard tag intended for linking to a resource.
  * - On Firefox 2 and perhaps other browsers, CSS files included with @import
  *   statements don't get saved when saving the complete web page for offline
- *   use: http://drupal.org/node/145218.
+ *   use: http://backdrop.org/node/145218.
  * - On IE, if only LINK tags and no @import statements are used, all the CSS
  *   files are downloaded in parallel, resulting in faster page load, but if
  *   @import statements are used and span across multiple STYLE tags, all the
@@ -3208,10 +3208,10 @@ function drupal_aggregate_css(&$css_groups) {
  *   http://www.stevesouders.com/blog/2009/04/09/dont-use-import/.
  *
  * However, IE has an annoying limit of 31 total CSS inclusion tags
- * (http://drupal.org/node/228818) and LINK tags are limited to one file per
+ * (http://backdrop.org/node/228818) and LINK tags are limited to one file per
  * tag, whereas STYLE tags can contain multiple @import statements allowing
  * multiple files to be loaded per tag. When CSS aggregation is disabled, a
- * Drupal site can easily have more than 31 CSS files that need to be loaded, so
+ * Backdrop site can easily have more than 31 CSS files that need to be loaded, so
  * using LINK tags exclusively would result in a site that would display
  * incorrectly in IE. Depending on different needs, different strategies can be
  * employed to decide when to use LINK tags and when to use STYLE tags.
@@ -3236,8 +3236,8 @@ function drupal_aggregate_css(&$css_groups) {
  *
  * @param $element
  *   A render array containing:
- *   - '#items': The CSS items as returned by drupal_add_css() and altered by
- *     drupal_get_css().
+ *   - '#items': The CSS items as returned by backdrop_add_css() and altered by
+ *     backdrop_get_css().
  *   - '#group_callback': A function to call to group #items to enable the use
  *     of fewer tags by aggregating files and/or using multiple @import
  *     statements within a single tag.
@@ -3247,9 +3247,9 @@ function drupal_aggregate_css(&$css_groups) {
  * @return
  *   A render array that will render to a string of XHTML CSS tags.
  *
- * @see drupal_get_css()
+ * @see backdrop_get_css()
  */
-function drupal_pre_render_styles($elements) {
+function backdrop_pre_render_styles($elements) {
   // Group and aggregate the items.
   if (isset($elements['#group_callback'])) {
     $elements['#groups'] = $elements['#group_callback']($elements['#items']);
@@ -3320,7 +3320,7 @@ function drupal_pre_render_styles($elements) {
             // On a server under heavy enough load that file_exists() calls need
             // to be minimized, CSS aggregation should be enabled, in which case
             // this code is not run. When aggregation is enabled,
-            // drupal_load_stylesheet() checks file_exists(), but only when
+            // backdrop_load_stylesheet() checks file_exists(), but only when
             // building the aggregate file, which is then reused for many page
             // requests.
             if (file_exists($item['data'])) {
@@ -3423,7 +3423,7 @@ function drupal_pre_render_styles($elements) {
  * variable is emptied to force a rebuild of the cache. Second, the cache file
  * is generated if it is missing on disk. Old cache files are not deleted
  * immediately when the lookup variable is emptied, but are deleted after a set
- * period by drupal_delete_file_if_stale(). This ensures that files referenced
+ * period by backdrop_delete_file_if_stale(). This ensures that files referenced
  * by a cached page will still be available.
  *
  * @param $css
@@ -3432,10 +3432,10 @@ function drupal_pre_render_styles($elements) {
  * @return
  *   The URI of the CSS cache file, or FALSE if the file could not be saved.
  */
-function drupal_build_css_cache($css) {
+function backdrop_build_css_cache($css) {
   $data = '';
   $uri = '';
-  $map = variable_get('drupal_css_cache_files', array());
+  $map = variable_get('backdrop_css_cache_files', array());
   $key = hash('sha256', serialize($css));
   if (isset($map[$key])) {
     $uri = $map[$key];
@@ -3446,7 +3446,7 @@ function drupal_build_css_cache($css) {
     foreach ($css as $stylesheet) {
       // Only 'file' stylesheets can be aggregated.
       if ($stylesheet['type'] == 'file') {
-        $contents = drupal_load_stylesheet($stylesheet['data'], TRUE);
+        $contents = backdrop_load_stylesheet($stylesheet['data'], TRUE);
 
         // Build the base URL of this CSS file: start with the full URL.
         $css_base_url = file_create_url($stylesheet['data']);
@@ -3458,9 +3458,9 @@ function drupal_build_css_cache($css) {
           $css_base_url = substr($css_base_url, strlen($GLOBALS['base_root']));
         }
 
-        _drupal_build_css_path(NULL, $css_base_url . '/');
+        _backdrop_build_css_path(NULL, $css_base_url . '/');
         // Anchor all paths in the CSS with its base URL, ignoring external and absolute paths.
-        $data .= preg_replace_callback('/url\(\s*[\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\s*\)/i', '_drupal_build_css_path', $contents);
+        $data .= preg_replace_callback('/url\(\s*[\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\s*\)/i', '_backdrop_build_css_path', $contents);
       }
     }
 
@@ -3473,7 +3473,7 @@ function drupal_build_css_cache($css) {
 
     // Prefix filename to prevent blocking by firewalls which reject files
     // starting with "ad*".
-    $filename = 'css_' . drupal_hash_base64($data) . '.css';
+    $filename = 'css_' . backdrop_hash_base64($data) . '.css';
     // Create the css/ within the files folder.
     $csspath = 'public://css';
     $uri = $csspath . '/' . $filename;
@@ -3493,16 +3493,16 @@ function drupal_build_css_cache($css) {
     }
     // Save the updated map.
     $map[$key] = $uri;
-    variable_set('drupal_css_cache_files', $map);
+    variable_set('backdrop_css_cache_files', $map);
   }
   return $uri;
 }
 
 /**
- * Prefixes all paths within a CSS file for drupal_build_css_cache().
+ * Prefixes all paths within a CSS file for backdrop_build_css_cache().
  */
-function _drupal_build_css_path($matches, $base = NULL) {
-  $_base = &drupal_static(__FUNCTION__);
+function _backdrop_build_css_path($matches, $base = NULL) {
+  $_base = &backdrop_static(__FUNCTION__);
   // Store base path for preg_replace_callback.
   if (isset($base)) {
     $_base = $base;
@@ -3539,8 +3539,8 @@ function _drupal_build_css_path($matches, $base = NULL) {
  * @return
  *   Contents of the stylesheet, including any resolved @import commands.
  */
-function drupal_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRUE) {
-  // These statics are not cache variables, so we don't use drupal_static().
+function backdrop_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRUE) {
+  // These statics are not cache variables, so we don't use backdrop_static().
   static $_optimize, $basepath;
   if ($reset_basepath) {
     $basepath = '';
@@ -3563,7 +3563,7 @@ function drupal_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRUE)
   // but are merely there to disable certain module CSS files.
   if ($contents = @file_get_contents($file)) {
     // Return the processed stylesheet.
-    return drupal_load_stylesheet_content($contents, $_optimize);
+    return backdrop_load_stylesheet_content($contents, $_optimize);
   }
 
   return '';
@@ -3581,7 +3581,7 @@ function drupal_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRUE)
  * @return
  *   Contents of the stylesheet including the imported stylesheets.
  */
-function drupal_load_stylesheet_content($contents, $optimize = FALSE) {
+function backdrop_load_stylesheet_content($contents, $optimize = FALSE) {
   // Remove multiple charset declarations for standards compliance (and fixing Safari problems).
   $contents = preg_replace('/^@charset\s+[\'"](\S*)\b[\'"];/i', '', $contents);
 
@@ -3627,7 +3627,7 @@ function drupal_load_stylesheet_content($contents, $optimize = FALSE) {
 
   // Replaces @import commands with the actual stylesheet content.
   // This happens recursively but omits external files.
-  $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_drupal_load_stylesheet', $contents);
+  $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_backdrop_load_stylesheet', $contents);
   return $contents;
 }
 
@@ -3637,10 +3637,10 @@ function drupal_load_stylesheet_content($contents, $optimize = FALSE) {
  * This function is used for recursive loading of stylesheets and
  * returns the stylesheet content with all url() paths corrected.
  */
-function _drupal_load_stylesheet($matches) {
+function _backdrop_load_stylesheet($matches) {
   $filename = $matches[1];
   // Load the imported stylesheet and replace @import commands in there as well.
-  $file = drupal_load_stylesheet($filename, NULL, FALSE);
+  $file = backdrop_load_stylesheet($filename, NULL, FALSE);
 
   // Determine the file's directory.
   $directory = dirname($filename);
@@ -3657,21 +3657,21 @@ function _drupal_load_stylesheet($matches) {
 /**
  * Deletes old cached CSS files.
  */
-function drupal_clear_css_cache() {
-  variable_del('drupal_css_cache_files');
-  file_scan_directory('public://css', '/.*/', array('callback' => 'drupal_delete_file_if_stale'));
+function backdrop_clear_css_cache() {
+  variable_del('backdrop_css_cache_files');
+  file_scan_directory('public://css', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
 }
 
 /**
  * Deletes files modified more than a set time ago.
  *
  * Callback for file_scan_directory() within:
- * - drupal_clear_css_cache()
- * - drupal_clear_js_cache()
+ * - backdrop_clear_css_cache()
+ * - backdrop_clear_js_cache()
  */
-function drupal_delete_file_if_stale($uri) {
+function backdrop_delete_file_if_stale($uri) {
   // Default stale file threshold is 30 days.
-  if (REQUEST_TIME - filemtime($uri) > variable_get('drupal_stale_file_threshold', 2592000)) {
+  if (REQUEST_TIME - filemtime($uri) > variable_get('backdrop_stale_file_threshold', 2592000)) {
     file_unmanaged_delete($uri);
   }
 }
@@ -3690,8 +3690,8 @@ function drupal_delete_file_if_stale($uri) {
  * @return
  *   The cleaned identifier.
  */
-function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
-  // By default, we filter using Drupal's coding standards.
+function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
+  // By default, we filter using Backdrop's coding standards.
   $identifier = strtr($identifier, $filter);
 
   // Valid characters in a CSS identifier are:
@@ -3719,8 +3719,8 @@ function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_
  * @return
  *   The cleaned class name.
  */
-function drupal_html_class($class) {
-  return drupal_clean_css_identifier(drupal_strtolower($class));
+function backdrop_html_class($class) {
+  return backdrop_clean_css_identifier(backdrop_strtolower($class));
 }
 
 /**
@@ -3750,14 +3750,14 @@ function drupal_html_class($class) {
  * @return
  *   The cleaned ID.
  */
-function drupal_html_id($id) {
+function backdrop_html_id($id) {
   // If this is an Ajax request, then content returned by this page request will
   // be merged with content already on the base page. The HTML IDs must be
   // unique for the fully merged content. Therefore, initialize $seen_ids to
   // take into account IDs that are already in use on the base page.
-  $seen_ids_init = &drupal_static(__FUNCTION__ . ':init');
+  $seen_ids_init = &backdrop_static(__FUNCTION__ . ':init');
   if (!isset($seen_ids_init)) {
-    // Ideally, Drupal would provide an API to persist state information about
+    // Ideally, Backdrop would provide an API to persist state information about
     // prior page requests in the database, and we'd be able to add this
     // function's $seen_ids static variable to that state information in order
     // to have it properly initialized for this page request. However, no such
@@ -3791,9 +3791,9 @@ function drupal_html_id($id) {
       }
     }
   }
-  $seen_ids = &drupal_static(__FUNCTION__, $seen_ids_init);
+  $seen_ids = &backdrop_static(__FUNCTION__, $seen_ids_init);
 
-  $id = strtr(drupal_strtolower($id), array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+  $id = strtr(backdrop_strtolower($id), array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
 
   // As defined in http://www.w3.org/TR/html4/types.html#type-name, HTML IDs can
   // only contain letters, digits ([0-9]), hyphens ("-"), underscores ("_"),
@@ -3824,7 +3824,7 @@ function drupal_html_id($id) {
  * Provides a standard HTML class name that identifies a page region.
  *
  * It is recommended that template preprocess functions apply this class to any
- * page region that is output by the theme (Drupal core already handles this in
+ * page region that is output by the theme (Backdrop core already handles this in
  * the standard template preprocess implementation). Standardizing the class
  * names in this way allows modules to implement certain features, such as
  * drag-and-drop or dynamic Ajax loading, in a theme-independent way.
@@ -3838,8 +3838,8 @@ function drupal_html_id($id) {
  *
  * @see template_preprocess_region()
  */
-function drupal_region_class($region) {
-  return drupal_html_class("region-$region");
+function backdrop_region_class($region) {
+  return backdrop_html_class("region-$region");
 }
 
 /**
@@ -3862,23 +3862,23 @@ function drupal_region_class($region) {
  *   JavaScript files that are not hosted on the local server. Note that these
  *   external JavaScript references do not get aggregated when preprocessing is
  *   on.
- * - Add settings ('setting'): Adds settings to Drupal's global storage of
+ * - Add settings ('setting'): Adds settings to Backdrop's global storage of
  *   JavaScript settings. Per-page settings are required by some modules to
- *   function properly. All settings will be accessible at Drupal.settings.
+ *   function properly. All settings will be accessible at Backdrop.settings.
  *
  * Examples:
  * @code
- *   drupal_add_js('core/misc/collapse.js');
- *   drupal_add_js('core/misc/collapse.js', 'file');
- *   drupal_add_js('jQuery(document).ready(function () { alert("Hello!"); });', 'inline');
- *   drupal_add_js('jQuery(document).ready(function () { alert("Hello!"); });',
+ *   backdrop_add_js('core/misc/collapse.js');
+ *   backdrop_add_js('core/misc/collapse.js', 'file');
+ *   backdrop_add_js('jQuery(document).ready(function () { alert("Hello!"); });', 'inline');
+ *   backdrop_add_js('jQuery(document).ready(function () { alert("Hello!"); });',
  *     array('type' => 'inline', 'scope' => 'footer', 'weight' => 5)
  *   );
- *   drupal_add_js('http://example.com/example.js', 'external');
- *   drupal_add_js(array('myModule' => array('key' => 'value')), 'setting');
+ *   backdrop_add_js('http://example.com/example.js', 'external');
+ *   backdrop_add_js(array('myModule' => array('key' => 'value')), 'setting');
  * @endcode
  *
- * Calling drupal_static_reset('drupal_add_js') will clear all JavaScript added
+ * Calling backdrop_static_reset('backdrop_add_js') will clear all JavaScript added
  * so far.
  *
  * If JavaScript aggregation is enabled, all JavaScript files added with
@@ -3895,7 +3895,7 @@ function drupal_region_class($region) {
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
  * files are not needed on a page. This is normally done by calling
- * drupal_add_js() in a hook_init() implementation.
+ * backdrop_add_js() in a hook_init() implementation.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -3908,9 +3908,9 @@ function drupal_region_class($region) {
  *     hosted on the local server. These files will not be aggregated if
  *     JavaScript aggregation is enabled.
  *   - 'setting': An associative array with configuration options. The array is
- *     merged directly into Drupal.settings. All modules should wrap their
+ *     merged directly into Backdrop.settings. All modules should wrap their
  *     actual configuration settings in another variable to prevent conflicts in
- *     the Drupal.settings namespace. Items added with a string key will replace
+ *     the Backdrop.settings namespace. Items added with a string key will replace
  *     existing settings with that key; items with numeric array keys will be
  *     added to the existing settings array.
  * @param $options
@@ -3958,8 +3958,8 @@ function drupal_region_class($region) {
  *     and 'every_page' value. In some cases, the order in which the JavaScript
  *     is presented on the page is very important. jQuery, for example, must be
  *     added to the page before any jQuery code is run, so jquery.js uses the
- *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library drupal.js
- *     depends on) uses the JS_LIBRARY group and a weight of -19, drupal.js uses
+ *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library backdrop.js
+ *     depends on) uses the JS_LIBRARY group and a weight of -19, backdrop.js uses
  *     the JS_LIBRARY group and a weight of -1, other libraries use the
  *     JS_LIBRARY group and a weight of 0 or higher, and all other scripts use
  *     one of the other group constants. The exact ordering of JavaScript is as
@@ -3971,9 +3971,9 @@ function drupal_region_class($region) {
  *     - Then by the 'every_page' flag, with TRUE coming before FALSE.
  *     - Then by weight.
  *     - Then by the order in which the JavaScript was added. For example, all
- *       else being the same, JavaScript added by a call to drupal_add_js() that
+ *       else being the same, JavaScript added by a call to backdrop_add_js() that
  *       happened later in the page request gets added to the page after one for
- *       which drupal_add_js() happened earlier in the page request.
+ *       which backdrop_add_js() happened earlier in the page request.
  *   - defer: If set to TRUE, the defer attribute is set on the &lt;script&gt;
  *     tag. Defaults to FALSE.
  *   - cache: If set to FALSE, the JavaScript file is loaded anew on every page
@@ -3983,17 +3983,17 @@ function drupal_region_class($region) {
  *     file will be aggregated. Defaults to TRUE.
  *   - browsers: An array containing information specifying which browsers
  *     should load the JavaScript item. See
- *     drupal_pre_render_conditional_comments() for details.
+ *     backdrop_pre_render_conditional_comments() for details.
  *
  * @return
  *   The current array of JavaScript files, settings, and in-line code,
- *   including Drupal defaults, anything previously added with calls to
- *   drupal_add_js(), and this function call's additions.
+ *   including Backdrop defaults, anything previously added with calls to
+ *   backdrop_add_js(), and this function call's additions.
  *
- * @see drupal_get_js()
+ * @see backdrop_get_js()
  */
-function drupal_add_js($data = NULL, $options = NULL) {
-  $javascript = &drupal_static(__FUNCTION__, array());
+function backdrop_add_js($data = NULL, $options = NULL) {
+  $javascript = &backdrop_static(__FUNCTION__, array());
 
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
@@ -4004,17 +4004,17 @@ function drupal_add_js($data = NULL, $options = NULL) {
   else {
     $options = array();
   }
-  $options += drupal_js_defaults($data);
+  $options += backdrop_js_defaults($data);
 
   // Preprocess can only be set if caching is enabled.
   $options['preprocess'] = $options['cache'] ? $options['preprocess'] : FALSE;
 
   // Tweak the weight so that files of the same weight are included in the
-  // order of the calls to drupal_add_js().
+  // order of the calls to backdrop_add_js().
   $options['weight'] += count($javascript) / 1000;
 
   if (isset($data)) {
-    // Add jquery.js and drupal.js, as well as the basePath setting, the
+    // Add jquery.js and backdrop.js, as well as the basePath setting, the
     // first time a JavaScript file is added.
     if (empty($javascript)) {
       // url() generates the prefix using hook_url_outbound_alter(). Instead of
@@ -4034,8 +4034,8 @@ function drupal_add_js($data = NULL, $options = NULL) {
           'weight' => 0,
           'browsers' => array(),
         ),
-        'core/misc/drupal.js' => array(
-          'data' => 'core/misc/drupal.js',
+        'core/misc/backdrop.js' => array(
+          'data' => 'core/misc/backdrop.js',
           'type' => 'file',
           'scope' => 'header',
           'group' => JS_LIBRARY,
@@ -4048,9 +4048,9 @@ function drupal_add_js($data = NULL, $options = NULL) {
         ),
       );
       // Register all required libraries.
-      drupal_add_library('system', 'jquery', TRUE);
-      drupal_add_library('system', 'jquery.once', TRUE);
-      drupal_add_library('system', 'html5shiv', TRUE);
+      backdrop_add_library('system', 'jquery', TRUE);
+      backdrop_add_library('system', 'jquery.once', TRUE);
+      backdrop_add_library('system', 'html5shiv', TRUE);
     }
 
     switch ($options['type']) {
@@ -4079,10 +4079,10 @@ function drupal_add_js($data = NULL, $options = NULL) {
  * @param $data
  *   (optional) The default data parameter for the JavaScript item array.
  *
- * @see drupal_get_js()
- * @see drupal_add_js()
+ * @see backdrop_get_js()
+ * @see backdrop_add_js()
  */
-function drupal_js_defaults($data = NULL) {
+function backdrop_js_defaults($data = NULL) {
   return array(
     'type' => 'file',
     'group' => JS_DEFAULT,
@@ -4108,10 +4108,10 @@ function drupal_js_defaults($data = NULL) {
  *
  * Note that hook_js_alter(&$javascript) is called during this function call
  * to allow alterations of the JavaScript during its presentation. Calls to
- * drupal_add_js() from hook_js_alter() will not be added to the output
+ * backdrop_add_js() from hook_js_alter() will not be added to the output
  * presentation. The correct way to add JavaScript during hook_js_alter()
  * is to add another element to the $javascript array, deriving from
- * drupal_js_defaults(). See locale_js_alter() for an example of this.
+ * backdrop_js_defaults(). See locale_js_alter() for an example of this.
  *
  * @param $scope
  *   (optional) The scope for which the JavaScript rules should be returned.
@@ -4120,20 +4120,20 @@ function drupal_js_defaults($data = NULL) {
  *   (optional) An array with all JavaScript code. Defaults to the default
  *   JavaScript array for the given scope.
  * @param $skip_alter
- *   (optional) If set to TRUE, this function skips calling drupal_alter() on
+ *   (optional) If set to TRUE, this function skips calling backdrop_alter() on
  *   $javascript, useful when the calling function passes a $javascript array
  *   that has already been altered.
  *
  * @return
  *   All JavaScript code segments and includes for the scope as HTML tags.
  *
- * @see drupal_add_js()
+ * @see backdrop_add_js()
  * @see locale_js_alter()
- * @see drupal_js_defaults()
+ * @see backdrop_js_defaults()
  */
-function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALSE) {
+function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALSE) {
   if (!isset($javascript)) {
-    $javascript = drupal_add_js();
+    $javascript = backdrop_add_js();
   }
   if (empty($javascript)) {
     return '';
@@ -4141,7 +4141,7 @@ function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALS
 
   // Allow modules to alter the JavaScript.
   if (!$skip_alter) {
-    drupal_alter('js', $javascript);
+    backdrop_alter('js', $javascript);
   }
 
   // Filter out elements of the given scope.
@@ -4153,18 +4153,18 @@ function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALS
   }
 
   // Sort the JavaScript so that it appears in the correct order.
-  uasort($items, 'drupal_sort_css_js');
+  uasort($items, 'backdrop_sort_css_js');
 
   // Provide the page with information about the individual JavaScript files
   // used, information not otherwise available when aggregation is enabled.
   $setting['ajaxPageState']['js'] = array_fill_keys(array_keys($items), 1);
   unset($setting['ajaxPageState']['js']['settings']);
-  drupal_add_js($setting, 'setting');
+  backdrop_add_js($setting, 'setting');
 
   // If we're outputting the header scope, then this might be the final time
-  // that drupal_get_js() is running, so add the setting to this output as well
-  // as to the drupal_add_js() cache. If $items['settings'] doesn't exist, it's
-  // because drupal_get_js() was intentionally passed a $javascript argument
+  // that backdrop_get_js() is running, so add the setting to this output as well
+  // as to the backdrop_add_js() cache. If $items['settings'] doesn't exist, it's
+  // because backdrop_get_js() was intentionally passed a $javascript argument
   // stripped of settings, potentially in order to override how settings get
   // output, so in this case, do not add the setting to this output.
   if ($scope == 'header' && isset($items['settings'])) {
@@ -4177,7 +4177,7 @@ function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALS
     '#items' => $items,
   );
 
-  return drupal_render($elements);
+  return backdrop_render($elements);
 }
 
 /**
@@ -4191,8 +4191,8 @@ function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALS
  *
  * @param $element
  *   A render array containing:
- *   - #items: The JavaScript items as returned by drupal_add_js() and
- *     altered by drupal_get_js().
+ *   - #items: The JavaScript items as returned by backdrop_add_js() and
+ *     altered by backdrop_get_js().
  *   - #group_callback: A function to call to group #items. Following
  *     this function, #aggregate_callback is called to aggregate items within
  *     the same group into a single file.
@@ -4202,9 +4202,9 @@ function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALS
  * @return
  *   A render array that will render to a string of JavaScript tags.
  *
- * @see drupal_get_js()
+ * @see backdrop_get_js()
  */
-function drupal_pre_render_scripts($elements) {
+function backdrop_pre_render_scripts($elements) {
   // Group and aggregate the items.
   if (isset($elements['#group_callback'])) {
     $elements['#groups'] = $elements['#group_callback']($elements['#items']);
@@ -4216,7 +4216,7 @@ function drupal_pre_render_scripts($elements) {
   // A dummy query-string is added to filenames, to gain control over
   // browser-caching. The string changes on every update or full cache
   // flush, forcing browsers to load a new copy of the files, as the
-  // URL changed. Files that should not be cached (see drupal_add_js())
+  // URL changed. Files that should not be cached (see backdrop_add_js())
   // get REQUEST_TIME as query-string instead, to enforce reload on every
   // page request.
   $default_query_string = variable_get('css_js_query_string', '0');
@@ -4229,7 +4229,7 @@ function drupal_pre_render_scripts($elements) {
 
   // Since JavaScript may look for arguments in the URL and act on them, some
   // third-party code might require the use of a different query string.
-  $js_version_string = variable_get('drupal_js_version_query_string', 'v=');
+  $js_version_string = variable_get('backdrop_js_version_query_string', 'v=');
 
   // Defaults for each SCRIPT element.
   $element_defaults = array(
@@ -4267,7 +4267,7 @@ function drupal_pre_render_scripts($elements) {
         switch ($item['type']) {
           case 'setting':
             $element['#value_prefix'] = $embed_prefix;
-            $element['#value'] = 'jQuery.extend(Drupal.settings, ' . drupal_json_encode(drupal_array_merge_deep_array($item['data'])) . ");";
+            $element['#value'] = 'jQuery.extend(Backdrop.settings, ' . backdrop_json_encode(backdrop_array_merge_deep_array($item['data'])) . ");";
             $element['#value_suffix'] = $embed_suffix;
             break;
 
@@ -4315,8 +4315,8 @@ function drupal_pre_render_scripts($elements) {
  * between.
  *
  * @param $javascript
- *   An array of JavaScript items, as returned by drupal_add_js(), but after
- *   alteration performed by drupal_get_js().
+ *   An array of JavaScript items, as returned by backdrop_add_js(), but after
+ *   alteration performed by backdrop_get_js().
  *
  * @return
  *   An array of JavaScript groups. Each group contains the same keys (e.g.,
@@ -4325,9 +4325,9 @@ function drupal_pre_render_scripts($elements) {
  *   contains an 'items' key, which is the subset of items from $javascript that
  *   are in the group.
  *
- * @see drupal_pre_render_scripts()
+ * @see backdrop_pre_render_scripts()
  */
-function drupal_group_js($javascript) {
+function backdrop_group_js($javascript) {
   $groups = array();
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
@@ -4347,7 +4347,7 @@ function drupal_group_js($javascript) {
         // Group file items if their 'preprocess' flag is TRUE.
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
-        // flag. See drupal_add_js() for details about that.
+        // flag. See backdrop_add_js() for details about that.
         $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['browsers']) : FALSE;
         break;
 
@@ -4390,20 +4390,20 @@ function drupal_group_js($javascript) {
  * whitespace, and other unnecessary content.
  *
  * @param $js_groups
- *   An array of JavaScript groups as returned by drupal_group_js(). For each
+ *   An array of JavaScript groups as returned by backdrop_group_js(). For each
  *   group that is aggregated, this function sets the value of the group's
  *   'data' key to the URI of the aggregate file.
  *
- * @see drupal_group_js()
- * @see drupal_pre_render_scripts()
+ * @see backdrop_group_js()
+ * @see backdrop_pre_render_scripts()
  */
-function drupal_aggregate_js(&$js_groups) {
+function backdrop_aggregate_js(&$js_groups) {
   // Only aggregate when the site is configured to do so, and not during an
   // update.
   if (variable_get('preprocess_js', FALSE) && (!defined('MAINTENANCE_MODE') || MAINTENANCE_MODE != 'update')) {
     foreach ($js_groups as $key => $group) {
       if ($group['type'] == 'file' && $group['preprocess']) {
-        $js_groups[$key]['data'] = drupal_build_js_cache($group['items']);
+        $js_groups[$key]['data'] = backdrop_build_js_cache($group['items']);
       }
     }
   }
@@ -4418,8 +4418,8 @@ function drupal_aggregate_js(&$js_groups) {
  * are the attached data. For example:
  * @code
  * $build['#attached'] = array(
- *   'js' => array(drupal_get_path('module', 'taxonomy') . '/taxonomy.js'),
- *   'css' => array(drupal_get_path('module', 'taxonomy') . '/taxonomy.css'),
+ *   'js' => array(backdrop_get_path('module', 'taxonomy') . '/taxonomy.js'),
+ *   'css' => array(backdrop_get_path('module', 'taxonomy') . '/taxonomy.css'),
  * );
  * @endcode
  *
@@ -4427,7 +4427,7 @@ function drupal_aggregate_js(&$js_groups) {
  * other kind of attached data, the array key must be the full name of the
  * callback function and each value an array of arguments. For example:
  * @code
- * $build['#attached']['drupal_add_http_header'] = array(
+ * $build['#attached']['backdrop_add_http_header'] = array(
  *   array('Content-Type', 'application/rss+xml; charset=utf-8'),
  * );
  * @endcode
@@ -4460,12 +4460,12 @@ function drupal_aggregate_js(&$js_groups) {
  *   FALSE if there were any missing library dependencies; TRUE if all library
  *   dependencies were met.
  *
- * @see drupal_add_library()
- * @see drupal_add_js()
- * @see drupal_add_css()
- * @see drupal_render()
+ * @see backdrop_add_library()
+ * @see backdrop_add_js()
+ * @see backdrop_add_css()
+ * @see backdrop_render()
  */
-function drupal_process_attached($elements, $group = JS_DEFAULT, $dependency_check = FALSE, $every_page = NULL) {
+function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_check = FALSE, $every_page = NULL) {
   // Add defaults to the special attached structures that should be processed differently.
   $elements['#attached'] += array(
     'library' => array(),
@@ -4476,7 +4476,7 @@ function drupal_process_attached($elements, $group = JS_DEFAULT, $dependency_che
   // Add the libraries first.
   $success = TRUE;
   foreach ($elements['#attached']['library'] as $library) {
-    if (drupal_add_library($library[0], $library[1], $every_page) === FALSE) {
+    if (backdrop_add_library($library[0], $library[1], $every_page) === FALSE) {
       $success = FALSE;
       // Exit if the dependency is missing.
       if ($dependency_check) {
@@ -4487,7 +4487,7 @@ function drupal_process_attached($elements, $group = JS_DEFAULT, $dependency_che
   unset($elements['#attached']['library']);
 
   // Add both the JavaScript and the CSS.
-  // The parameters for drupal_add_js() and drupal_add_css() require special
+  // The parameters for backdrop_add_js() and backdrop_add_css() require special
   // handling.
   foreach (array('js', 'css') as $type) {
     foreach ($elements['#attached'][$type] as $data => $options) {
@@ -4511,7 +4511,7 @@ function drupal_process_attached($elements, $group = JS_DEFAULT, $dependency_che
       if (isset($every_page)) {
         $options['every_page'] = $every_page;
       }
-      call_user_func('drupal_add_' . $type, $data, $options);
+      call_user_func('backdrop_add_' . $type, $data, $options);
     }
     unset($elements['#attached'][$type]);
   }
@@ -4651,8 +4651,8 @@ function drupal_process_attached($elements, $group = JS_DEFAULT, $dependency_che
  *
  * @see form_example_states_form()
  */
-function drupal_process_states(&$elements) {
-  $elements['#attached']['library'][] = array('system', 'drupal.states');
+function backdrop_process_states(&$elements) {
+  $elements['#attached']['library'][] = array('system', 'backdrop.states');
   $elements['#attached']['js'][] = array(
     'type' => 'setting',
     'data' => array('states' => array('#' . $elements['#id'] => $elements['#states'])),
@@ -4681,23 +4681,23 @@ function drupal_process_states(&$elements) {
  *   TRUE if the library was successfully added; FALSE if the library or one of
  *   its dependencies could not be added.
  *
- * @see drupal_get_library()
+ * @see backdrop_get_library()
  * @see hook_library_info()
  * @see hook_library_info_alter()
  */
-function drupal_add_library($module, $name, $every_page = NULL) {
-  $added = &drupal_static(__FUNCTION__, array());
+function backdrop_add_library($module, $name, $every_page = NULL) {
+  $added = &backdrop_static(__FUNCTION__, array());
 
   // Only process the library if it exists and it was not added already.
   if (!isset($added[$module][$name])) {
-    if ($library = drupal_get_library($module, $name)) {
+    if ($library = backdrop_get_library($module, $name)) {
       // Add all components within the library.
       $elements['#attached'] = array(
         'library' => $library['dependencies'],
         'js' => $library['js'],
         'css' => $library['css'],
       );
-      $added[$module][$name] = drupal_process_attached($elements, JS_LIBRARY, TRUE, $every_page);
+      $added[$module][$name] = backdrop_process_attached($elements, JS_LIBRARY, TRUE, $every_page);
     }
     else {
       // Requested library does not exist.
@@ -4732,15 +4732,15 @@ function drupal_add_library($module, $name, $every_page = NULL) {
  *   or FALSE if it does not exist. If no $name was passed, an associative array
  *   of libraries registered by $module is returned (which may be empty).
  *
- * @see drupal_add_library()
+ * @see backdrop_add_library()
  * @see hook_library_info()
  * @see hook_library_info_alter()
  *
- * @todo The purpose of drupal_get_*() is completely different to other page
+ * @todo The purpose of backdrop_get_*() is completely different to other page
  *   requisite API functions; find and use a different name.
  */
-function drupal_get_library($module, $name = NULL) {
-  $libraries = &drupal_static(__FUNCTION__, array());
+function backdrop_get_library($module, $name = NULL) {
+  $libraries = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($libraries[$module])) {
     // Retrieve all libraries associated with the module.
@@ -4749,7 +4749,7 @@ function drupal_get_library($module, $name = NULL) {
       $module_libraries = array();
     }
     // Allow modules to alter the module's registered libraries.
-    drupal_alter('library_info', $module_libraries, $module);
+    backdrop_alter('library_info', $module_libraries, $module);
 
     foreach ($module_libraries as $key => $data) {
       if (is_array($data)) {
@@ -4811,9 +4811,9 @@ function drupal_get_library($module, $name = NULL) {
  * - Rows with the 'tabledrag-leaf' class cannot have child rows.
  * - Rows with the 'tabledrag-root' class cannot be nested under a parent row.
  *
- * Calling drupal_add_tabledrag() would then be written as such:
+ * Calling backdrop_add_tabledrag() would then be written as such:
  * @code
- * drupal_add_tabledrag('my-module-table', 'order', 'sibling', 'my-elements-weight');
+ * backdrop_add_tabledrag('my-module-table', 'order', 'sibling', 'my-elements-weight');
  * @endcode
  *
  * In a more complex case where there are several groups in one column (such as
@@ -4825,11 +4825,11 @@ function drupal_get_library($module, $name = NULL) {
  *
  * $group is still 'my-element-weight', and the additional $subgroup variable
  * will be passed in as 'my-elements-weight-' . $region. This also means that
- * you'll need to call drupal_add_tabledrag() once for every region added.
+ * you'll need to call backdrop_add_tabledrag() once for every region added.
  *
  * @code
  * foreach ($regions as $region) {
- *   drupal_add_tabledrag('my-module-table', 'order', 'sibling', 'my-elements-weight', 'my-elements-weight-' . $region);
+ *   backdrop_add_tabledrag('my-module-table', 'order', 'sibling', 'my-elements-weight', 'my-elements-weight-' . $region);
  * }
  * @endcode
  *
@@ -4842,7 +4842,7 @@ function drupal_get_library($module, $name = NULL) {
  * Note that this function should be called from the theme layer, such as in a
  * .tpl.php file, theme_ function, or in a template_preprocess function, not in
  * a form declaration. Though the same JavaScript could be added to the page
- * using drupal_add_js() directly, this function helps keep template files
+ * using backdrop_add_js() directly, this function helps keep template files
  * clean and readable. It also prevents tabledrag.js from being added twice
  * accidentally.
  *
@@ -4878,14 +4878,14 @@ function drupal_get_library($module, $name = NULL) {
  * @see block-admin-display-form.tpl.php
  * @see theme_menu_overview_form()
  */
-function drupal_add_tabledrag($table_id, $action, $relationship, $group, $subgroup = NULL, $source = NULL, $hidden = TRUE, $limit = 0) {
-  $js_added = &drupal_static(__FUNCTION__, FALSE);
+function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subgroup = NULL, $source = NULL, $hidden = TRUE, $limit = 0) {
+  $js_added = &backdrop_static(__FUNCTION__, FALSE);
   if (!$js_added) {
     // Add the table drag JavaScript to the page before the module JavaScript
     // to ensure that table drag behaviors are registered before any module
     // uses it.
-    drupal_add_library('system', 'jquery.cookie');
-    drupal_add_js('core/misc/tabledrag.js', array('weight' => -1));
+    backdrop_add_library('system', 'jquery.cookie');
+    backdrop_add_js('core/misc/tabledrag.js', array('weight' => -1));
     $js_added = TRUE;
   }
 
@@ -4900,7 +4900,7 @@ function drupal_add_tabledrag($table_id, $action, $relationship, $group, $subgro
     'hidden' => $hidden,
     'limit' => $limit,
   );
-  drupal_add_js($settings, 'setting');
+  backdrop_add_js($settings, 'setting');
 }
 
 /**
@@ -4918,7 +4918,7 @@ function drupal_add_tabledrag($table_id, $action, $relationship, $group, $subgro
  * variable is emptied to force a rebuild of the cache. Second, the cache file
  * is generated if it is missing on disk. Old cache files are not deleted
  * immediately when the lookup variable is emptied, but are deleted after a set
- * period by drupal_delete_file_if_stale(). This ensures that files referenced
+ * period by backdrop_delete_file_if_stale(). This ensures that files referenced
  * by a cached page will still be available.
  *
  * @param $files
@@ -4927,10 +4927,10 @@ function drupal_add_tabledrag($table_id, $action, $relationship, $group, $subgro
  * @return
  *   The URI of the cache file, or FALSE if the file could not be saved.
  */
-function drupal_build_js_cache($files) {
+function backdrop_build_js_cache($files) {
   $contents = '';
   $uri = '';
-  $map = variable_get('drupal_js_cache_files', array());
+  $map = variable_get('backdrop_js_cache_files', array());
   $key = hash('sha256', serialize($files));
   if (isset($map[$key])) {
     $uri = $map[$key];
@@ -4946,7 +4946,7 @@ function drupal_build_js_cache($files) {
     }
     // Prefix filename to prevent blocking by firewalls which reject files
     // starting with "ad*".
-    $filename = 'js_' . drupal_hash_base64($contents) . '.js';
+    $filename = 'js_' . backdrop_hash_base64($contents) . '.js';
     // Create the js/ within the files folder.
     $jspath = 'public://js';
     $uri = $jspath . '/' . $filename;
@@ -4965,7 +4965,7 @@ function drupal_build_js_cache($files) {
       }
     }
     $map[$key] = $uri;
-    variable_set('drupal_js_cache_files', $map);
+    variable_set('backdrop_js_cache_files', $map);
   }
   return $uri;
 }
@@ -4973,10 +4973,10 @@ function drupal_build_js_cache($files) {
 /**
  * Deletes old cached JavaScript files and variables.
  */
-function drupal_clear_js_cache() {
+function backdrop_clear_js_cache() {
   variable_del('javascript_parsed');
-  variable_del('drupal_js_cache_files');
-  file_scan_directory('public://js', '/.*/', array('callback' => 'drupal_delete_file_if_stale'));
+  variable_del('backdrop_js_cache_files');
+  file_scan_directory('public://js', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
 }
 
 /**
@@ -4984,10 +4984,10 @@ function drupal_clear_js_cache() {
  *
  * We use HTML-safe strings, with several characters escaped.
  *
- * @see drupal_json_decode()
+ * @see backdrop_json_decode()
  * @ingroup php_wrappers
  */
-function drupal_json_encode($var) {
+function backdrop_json_encode($var) {
   // Encode <, >, ', &, and " using the json_encode() options parameter.
   return json_encode($var, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 }
@@ -4995,10 +4995,10 @@ function drupal_json_encode($var) {
 /**
  * Converts an HTML-safe JSON string into its PHP equivalent.
  *
- * @see drupal_json_encode()
+ * @see backdrop_json_encode()
  * @ingroup php_wrappers
  */
-function drupal_json_decode($var) {
+function backdrop_json_decode($var) {
   return json_decode($var, TRUE);
 }
 
@@ -5011,12 +5011,12 @@ function drupal_json_decode($var) {
  * @param $var
  *   (optional) If set, the variable will be converted to JSON and output.
  */
-function drupal_json_output($var = NULL) {
+function backdrop_json_output($var = NULL) {
   // We are returning JSON, so tell the browser.
-  drupal_add_http_header('Content-Type', 'application/json');
+  backdrop_add_http_header('Content-Type', 'application/json');
 
   if (isset($var)) {
-    echo drupal_json_encode($var);
+    echo backdrop_json_encode($var);
   }
 }
 
@@ -5026,11 +5026,11 @@ function drupal_json_output($var = NULL) {
  * @return
  *   A salt based on information in settings.php, not in the database.
  */
-function drupal_get_hash_salt() {
-  global $drupal_hash_salt, $databases;
-  // If the $drupal_hash_salt variable is empty, a hash of the serialized
+function backdrop_get_hash_salt() {
+  global $backdrop_hash_salt, $databases;
+  // If the $backdrop_hash_salt variable is empty, a hash of the serialized
   // database credentials is used as a fallback salt.
-  return empty($drupal_hash_salt) ? hash('sha256', serialize($databases)) : $drupal_hash_salt;
+  return empty($backdrop_hash_salt) ? hash('sha256', serialize($databases)) : $backdrop_hash_salt;
 }
 
 /**
@@ -5039,10 +5039,10 @@ function drupal_get_hash_salt() {
  * @return
  *   The private key.
  */
-function drupal_get_private_key() {
-  if (!($key = variable_get('drupal_private_key', 0))) {
-    $key = drupal_hash_base64(drupal_random_bytes(55));
-    variable_set('drupal_private_key', $key);
+function backdrop_get_private_key() {
+  if (!($key = variable_get('backdrop_private_key', 0))) {
+    $key = backdrop_hash_base64(backdrop_random_bytes(55));
+    variable_set('backdrop_private_key', $key);
   }
   return $key;
 }
@@ -5053,8 +5053,8 @@ function drupal_get_private_key() {
  * @param $value
  *   An additional value to base the token on.
  */
-function drupal_get_token($value = '') {
-  return drupal_hmac_base64($value, session_id() . drupal_get_private_key() . drupal_get_hash_salt());
+function backdrop_get_token($value = '') {
+  return backdrop_hmac_base64($value, session_id() . backdrop_get_private_key() . backdrop_get_hash_salt());
 }
 
 /**
@@ -5071,12 +5071,12 @@ function drupal_get_token($value = '') {
  *   True for a valid token, false for an invalid token. When $skip_anonymous
  *   is true, the return value will always be true for anonymous users.
  */
-function drupal_valid_token($token, $value = '', $skip_anonymous = FALSE) {
+function backdrop_valid_token($token, $value = '', $skip_anonymous = FALSE) {
   global $user;
-  return (($skip_anonymous && $user->uid == 0) || ($token == drupal_get_token($value)));
+  return (($skip_anonymous && $user->uid == 0) || ($token == backdrop_get_token($value)));
 }
 
-function _drupal_bootstrap_full() {
+function _backdrop_bootstrap_full() {
   static $called = FALSE;
 
   if ($called) {
@@ -5107,7 +5107,7 @@ function _drupal_bootstrap_full() {
   // Make sure all stream wrappers are registered.
   file_get_stream_wrappers();
 
-  $test_info = &$GLOBALS['drupal_test_info'];
+  $test_info = &$GLOBALS['backdrop_test_info'];
   if (!empty($test_info['in_child_site'])) {
     // Running inside the simpletest child site, log fatal errors to test
     // specific file directory.
@@ -5116,7 +5116,7 @@ function _drupal_bootstrap_full() {
   }
 
   // Initialize $_GET['q'] prior to invoking hook_init().
-  drupal_path_initialize();
+  backdrop_path_initialize();
 
   // Let all modules take action before the menu system handles the request.
   // We do not want this while running update.php.
@@ -5129,7 +5129,7 @@ function _drupal_bootstrap_full() {
     //   (e.g., hook_form_alter(), hook_node_view_alter(), hook_page_alter()),
     //   ahead of when rendering starts.
     menu_set_custom_theme();
-    drupal_theme_initialize();
+    backdrop_theme_initialize();
     module_invoke_all('init');
   }
 }
@@ -5145,18 +5145,18 @@ function _drupal_bootstrap_full() {
  * Page compression requires the PHP zlib extension
  * (http://php.net/manual/en/ref.zlib.php).
  *
- * @see drupal_page_header()
+ * @see backdrop_page_header()
  */
-function drupal_page_set_cache() {
+function backdrop_page_set_cache() {
   global $base_root;
 
-  if (drupal_page_is_cacheable()) {
+  if (backdrop_page_is_cacheable()) {
     $cache = (object) array(
       'cid' => $base_root . request_uri(),
       'data' => array(
         'path' => $_GET['q'],
         'body' => ob_get_clean(),
-        'title' => drupal_get_title(),
+        'title' => backdrop_get_title(),
         'headers' => array(),
       ),
       'expire' => CACHE_TEMPORARY,
@@ -5164,9 +5164,9 @@ function drupal_page_set_cache() {
     );
 
     // Restore preferred header names based on the lower-case names returned
-    // by drupal_get_http_header().
-    $header_names = _drupal_set_preferred_header_name();
-    foreach (drupal_get_http_header() as $name_lower => $value) {
+    // by backdrop_get_http_header().
+    $header_names = _backdrop_set_preferred_header_name();
+    foreach (backdrop_get_http_header() as $name_lower => $value) {
       $cache->data['headers'][$header_names[$name_lower]] = $value;
       if ($name_lower == 'expires') {
         // Use the actual timestamp from an Expires header if available.
@@ -5192,25 +5192,25 @@ function drupal_page_set_cache() {
  * @return
  *   TRUE if cron ran successfully.
  */
-function drupal_cron_run() {
+function backdrop_cron_run() {
   // Allow execution to continue even if the request gets canceled.
   @ignore_user_abort(TRUE);
 
   // Prevent session information from being saved while cron is running.
-  drupal_save_session(FALSE);
+  backdrop_save_session(FALSE);
 
   // Force the current user to anonymous to ensure consistent permissions on
   // cron runs.
   $original_user = $GLOBALS['user'];
-  $GLOBALS['user'] = drupal_anonymous_user();
+  $GLOBALS['user'] = backdrop_anonymous_user();
 
   // Try to allocate enough time to run all the hook_cron implementations.
-  drupal_set_time_limit(240);
+  backdrop_set_time_limit(240);
 
   $return = FALSE;
   // Grab the defined cron queues.
   $queues = module_invoke_all('cron_queue_info');
-  drupal_alter('cron_queue_info', $queues);
+  backdrop_alter('cron_queue_info', $queues);
 
   // Try to acquire cron lock.
   if (!lock_acquire('cron', 240.0)) {
@@ -5221,10 +5221,10 @@ function drupal_cron_run() {
     // Make sure every queue exists. There is no harm in trying to recreate an
     // existing queue.
     foreach ($queues as $queue_name => $info) {
-      DrupalQueue::get($queue_name)->createQueue();
+      BackdropQueue::get($queue_name)->createQueue();
     }
     // Register shutdown callback.
-    drupal_register_shutdown_function('drupal_cron_cleanup');
+    backdrop_register_shutdown_function('backdrop_cron_cleanup');
 
     // Iterate through the modules calling their cron handlers (if any):
     foreach (module_implements('cron') as $module) {
@@ -5251,7 +5251,7 @@ function drupal_cron_run() {
   foreach ($queues as $queue_name => $info) {
     $function = $info['worker callback'];
     $end = time() + (isset($info['time']) ? $info['time'] : 15);
-    $queue = DrupalQueue::get($queue_name);
+    $queue = BackdropQueue::get($queue_name);
     while (time() < $end && ($item = $queue->claimItem())) {
       $function($item->data);
       $queue->deleteItem($item);
@@ -5259,7 +5259,7 @@ function drupal_cron_run() {
   }
   // Restore the user.
   $GLOBALS['user'] = $original_user;
-  drupal_save_session(TRUE);
+  backdrop_save_session(TRUE);
 
   return $return;
 }
@@ -5267,10 +5267,10 @@ function drupal_cron_run() {
 /**
  * Shutdown function: Performs cron cleanup.
  *
- * @see drupal_cron_run()
- * @see drupal_register_shutdown_function()
+ * @see backdrop_cron_run()
+ * @see backdrop_register_shutdown_function()
  */
-function drupal_cron_cleanup() {
+function backdrop_cron_cleanup() {
   // See if the semaphore is still locked.
   if (variable_get('cron_semaphore', FALSE)) {
     watchdog('cron', 'Cron run exceeded the time limit and was aborted.', array(), WATCHDOG_WARNING);
@@ -5288,7 +5288,7 @@ function drupal_cron_cleanup() {
  * depending on what type of object you are looking for. For instance, if you
  * are looking for modules and call:
  * @code
- * drupal_system_listing("/\.module$/", "modules", 'name', 0);
+ * backdrop_system_listing("/\.module$/", "modules", 'name', 0);
  * @endcode
  * this function will search the site-wide modules directory (i.e., /modules/),
  * your install profile's directory (i.e.,
@@ -5302,7 +5302,7 @@ function drupal_cron_cleanup() {
  * = 'name'), or the full file stream URI ($key = 'uri'). If you use a key of
  * 'filename' or 'name', files found later in the search will take precedence
  * over files found earlier (unless they belong to a module or theme not
- * compatible with Drupal core); if you choose a key of 'uri', you will get all
+ * compatible with Backdrop core); if you choose a key of 'uri', you will get all
  * files found.
  *
  * @param string $mask
@@ -5329,7 +5329,7 @@ function drupal_cron_cleanup() {
  *   - 'filename': File name.
  *   - 'name': Name of file without the extension.
  */
-function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1) {
+function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 1) {
   $config = conf_path();
   $files = array();
 
@@ -5341,11 +5341,11 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
   // the 'core/modules' directory is pristine for core; users should avoid
   // any modification by using the sites/all or sites/<domain> directories.
   $profiles = array();
-  $profile = drupal_get_profile();
+  $profile = backdrop_get_profile();
   // For SimpleTest to be able to test modules packaged together with a
   // distribution we need to include the profile of the parent site (in which
   // test runs are triggered).
-  if (drupal_valid_test_ua()) {
+  if (backdrop_valid_test_ua()) {
     $testing_profile = variable_get('simpletest_parent_profile', FALSE);
     if ($testing_profile && $testing_profile != $profile) {
       $profiles[] = $testing_profile;
@@ -5378,7 +5378,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
     // earlier ones, so we want them to overwrite keys in our resulting
     // $files array.
     // The exception to this is if the later file is from a module or theme not
-    // compatible with Drupal core. This may occur during upgrades of Drupal
+    // compatible with Backdrop core. This may occur during upgrades of Backdrop
     // core when new modules exist in core while older contrib modules with the
     // same name exist in a directory such as sites/all/modules/.
     foreach (array_intersect_key($files_to_add, $files) as $file_key => $file) {
@@ -5386,9 +5386,9 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
       // new resource on the list for merging.
       if (file_exists($info_file = dirname($file->uri) . '/' . $file->name . '.info')) {
         // Get the .info file for the module or theme this file belongs to.
-        $info = drupal_parse_info_file($info_file);
+        $info = backdrop_parse_info_file($info_file);
 
-        // If the module or theme is incompatible with Drupal core, remove it
+        // If the module or theme is incompatible with Backdrop core, remove it
         // from the array for the current search directory, so it is not
         // overwritten when merged with the $files array.
         if (isset($info['core']) && $info['core'] != DRUPAL_CORE_COMPATIBILITY) {
@@ -5405,7 +5405,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
 /**
  * Sets the main page content value for later use.
  *
- * Given the nature of the Drupal page handling, this will be called once with
+ * Given the nature of the Backdrop page handling, this will be called once with
  * a string or array. We store that and return it later as the block is being
  * displayed.
  *
@@ -5416,9 +5416,9 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
  *   If called without $content, a renderable array representing the body of
  *   the page.
  */
-function drupal_set_page_content($content = NULL) {
-  $content_block = &drupal_static(__FUNCTION__, NULL);
-  $main_content_display = &drupal_static('system_main_content_added', FALSE);
+function backdrop_set_page_content($content = NULL) {
+  $content_block = &backdrop_static(__FUNCTION__, NULL);
+  $main_content_display = &backdrop_static('system_main_content_added', FALSE);
 
   if (!empty($content)) {
     $content_block = (is_array($content) ? $content : array('main' => array('#markup' => $content)));
@@ -5462,7 +5462,7 @@ function drupal_set_page_content($content = NULL) {
  *   The passed-in element with markup for conditional comments potentially
  *   added to '#prefix' and '#suffix'.
  */
-function drupal_pre_render_conditional_comments($elements) {
+function backdrop_pre_render_conditional_comments($elements) {
   $browsers = isset($elements['#browsers']) ? $elements['#browsers'] : array();
   $browsers += array(
     'IE' => TRUE,
@@ -5523,7 +5523,7 @@ function drupal_pre_render_conditional_comments($elements) {
  * @return
  *   The passed-in elements containing a rendered link in '#markup'.
  */
-function drupal_pre_render_link($element) {
+function backdrop_pre_render_link($element) {
   // By default, link options to pass to l() are normally set in #options.
   $element += array('#options' => array());
   // However, within the scope of renderable elements, #attributes is a valid
@@ -5549,7 +5549,7 @@ function drupal_pre_render_link($element) {
   if (isset($element['#ajax']) && !isset($element['#ajax_processed'])) {
     // If no HTML ID was found above, automatically create one.
     if (!isset($element['#id'])) {
-      $element['#id'] = $element['#options']['attributes']['id'] = drupal_html_id('ajax-link');
+      $element['#id'] = $element['#options']['attributes']['id'] = backdrop_html_id('ajax-link');
     }
     // If #ajax['path] was not specified, use the href as Ajax request URL.
     if (!isset($element['#ajax']['path'])) {
@@ -5574,7 +5574,7 @@ function drupal_pre_render_link($element) {
  *
  * The purpose of this is to allow links to be logically grouped into related
  * categories, so that each child group can be rendered as its own list of
- * links if drupal_render() is called on it, but calling drupal_render() on the
+ * links if backdrop_render() is called on it, but calling backdrop_render() on the
  * parent element will still produce a single list containing all the remaining
  * links, regardless of what group they were in.
  *
@@ -5583,7 +5583,7 @@ function drupal_pre_render_link($element) {
  * @code
  * $node->content['links'] = array(
  *   '#theme' => 'links__node',
- *   '#pre_render' = array('drupal_pre_render_links'),
+ *   '#pre_render' = array('backdrop_pre_render_links'),
  *   'comment' => array(
  *     '#theme' => 'links__node__comment',
  *     '#links' => array(
@@ -5638,7 +5638,7 @@ function drupal_pre_render_link($element) {
  * children, these child-specific properties are ignored, and only the overall
  * properties of the parent are used.
  */
-function drupal_pre_render_links($element) {
+function backdrop_pre_render_links($element) {
   $element += array('#links' => array());
   foreach (element_children($element) as $key) {
     $child = &$element[$key];
@@ -5668,9 +5668,9 @@ function drupal_pre_render_links($element) {
  * @return
  *   The passed-in elements, but #markup appended to #children.
  *
- * @see drupal_render()
+ * @see backdrop_render()
  */
-function drupal_pre_render_markup($elements) {
+function backdrop_pre_render_markup($elements) {
   $elements['#children'] = $elements['#markup'];
   return $elements;
 }
@@ -5683,20 +5683,20 @@ function drupal_pre_render_markup($elements) {
  *   the following keys:
  *   - #type: Value is always 'page'. This pushes the theming through
  *     page.tpl.php (required).
- *   - #show_messages: Suppress drupal_get_message() items. Used by Batch
+ *   - #show_messages: Suppress backdrop_get_message() items. Used by Batch
  *     API (optional).
  *
  * @see hook_page_alter()
  * @see element_info()
  */
-function drupal_render_page($page) {
-  $main_content_display = &drupal_static('system_main_content_added', FALSE);
+function backdrop_render_page($page) {
+  $main_content_display = &backdrop_static('system_main_content_added', FALSE);
 
   // Allow menu callbacks to return strings or arbitrary arrays to render.
   // If the array returned is not of #type page directly, we need to fill
   // in the page with defaults.
   if (is_string($page) || (is_array($page) && (!isset($page['#type']) || ($page['#type'] != 'page')))) {
-    drupal_set_page_content($page);
+    backdrop_set_page_content($page);
     $page = element_info('page');
   }
 
@@ -5707,16 +5707,16 @@ function drupal_render_page($page) {
   }
   // Modules alter the $page as needed. Blocks are populated into regions like
   // 'sidebar_first', 'footer', etc.
-  drupal_alter('page', $page);
+  backdrop_alter('page', $page);
 
   // If no module has taken care of the main content, add it to the page now.
   // This allows the site to still be usable even if no modules that
   // control page regions (for example, the Block module) are enabled.
   if (!$main_content_display) {
-    $page['content']['system_main'] = drupal_set_page_content();
+    $page['content']['system_main'] = backdrop_set_page_content();
   }
 
-  return drupal_render($page);
+  return backdrop_render($page);
 }
 
 /**
@@ -5741,7 +5741,7 @@ function drupal_render_page($page) {
  * these children. For elements that are not allowed to have any children,
  * e.g. buttons or textfields, the theme function can be used to render the
  * element itself. If #theme is not present and the element has children, they
- * are rendered and concatenated into a string by drupal_render_children().
+ * are rendered and concatenated into a string by backdrop_render_children().
  *
  * The #theme_wrappers property contains an array of theme functions which will
  * be called, in order, after #theme has run. These can be used to add further
@@ -5758,12 +5758,12 @@ function drupal_render_page($page) {
  * the placement of the form's children while not at all having to deal with
  * the form markup itself.
  *
- * drupal_render() can optionally cache the rendered output of elements to
- * improve performance. To use drupal_render() caching, set the element's #cache
+ * backdrop_render() can optionally cache the rendered output of elements to
+ * improve performance. To use backdrop_render() caching, set the element's #cache
  * property to an associative array with one or several of the following keys:
  * - 'keys': An array of one or more keys that identify the element. If 'keys'
  *   is set, the cache ID is created automatically from these keys. See
- *   drupal_render_cid_create().
+ *   backdrop_render_cid_create().
  * - 'granularity' (optional): Define the cache granularity using binary
  *   combinations of the cache granularity constants, e.g.
  *   DRUPAL_CACHE_PER_USER to cache for each user separately or
@@ -5777,17 +5777,17 @@ function drupal_render_page($page) {
  * - 'bin': Specify a cache bin to cache the element in. Defaults to 'cache'.
  *
  * This function is usually called from within another function, like
- * drupal_get_form() or a theme function. Elements are sorted internally
+ * backdrop_get_form() or a theme function. Elements are sorted internally
  * using uasort(). Since this is expensive, when passing already sorted
- * elements to drupal_render(), for example from a database query, set
+ * elements to backdrop_render(), for example from a database query, set
  * $elements['#sorted'] = TRUE to avoid sorting them a second time.
  *
- * drupal_render() flags each element with a '#printed' status to indicate that
+ * backdrop_render() flags each element with a '#printed' status to indicate that
  * the element has been rendered, which allows individual elements of a given
  * array to be rendered independently and prevents them from being rendered
- * more than once on subsequent calls to drupal_render() (e.g., as part of a
+ * more than once on subsequent calls to backdrop_render() (e.g., as part of a
  * larger array). If the same array or array element is passed more than once
- * to drupal_render(), it simply returns a NULL value.
+ * to backdrop_render(), it simply returns a NULL value.
  *
  * @param $elements
  *   The structured array describing the data to be rendered.
@@ -5795,7 +5795,7 @@ function drupal_render_page($page) {
  * @return
  *   The rendered HTML.
  */
-function drupal_render(&$elements) {
+function backdrop_render(&$elements) {
   // Early-return nothing if user does not have access.
   if (empty($elements) || (isset($elements['#access']) && !$elements['#access'])) {
     return;
@@ -5808,7 +5808,7 @@ function drupal_render(&$elements) {
 
   // Try to fetch the element's markup from cache and return.
   if (isset($elements['#cache'])) {
-    $cached_output = drupal_render_cache_get($elements);
+    $cached_output = backdrop_render_cache_get($elements);
     if ($cached_output !== FALSE) {
       return $cached_output;
     }
@@ -5854,11 +5854,11 @@ function drupal_render(&$elements) {
     $elements['#children'] = theme($elements['#theme'], $elements);
   }
   // If #theme was not set and the element has children, render them now.
-  // This is the same process as drupal_render_children() but is inlined
+  // This is the same process as backdrop_render_children() but is inlined
   // for speed.
   if ($elements['#children'] == '') {
     foreach ($children as $key) {
-      $elements['#children'] .= drupal_render($elements[$key]);
+      $elements['#children'] .= backdrop_render($elements[$key]);
     }
   }
 
@@ -5881,13 +5881,13 @@ function drupal_render(&$elements) {
 
   // Add any JavaScript state information associated with the element.
   if (!empty($elements['#states'])) {
-    drupal_process_states($elements);
+    backdrop_process_states($elements);
   }
 
   // Add additional libraries, CSS, JavaScript an other custom
   // attached data associated with this element.
   if (!empty($elements['#attached'])) {
-    drupal_process_attached($elements);
+    backdrop_process_attached($elements);
   }
 
   $prefix = isset($elements['#prefix']) ? $elements['#prefix'] : '';
@@ -5896,7 +5896,7 @@ function drupal_render(&$elements) {
 
   // Cache the processed element if #cache is set.
   if (isset($elements['#cache'])) {
-    drupal_render_cache_set($output, $elements);
+    backdrop_render_cache_set($output, $elements);
   }
 
   $elements['#printed'] = TRUE;
@@ -5906,7 +5906,7 @@ function drupal_render(&$elements) {
 /**
  * Renders children of an element and concatenates them.
  *
- * This renders all children of an element using drupal_render() and then
+ * This renders all children of an element using backdrop_render() and then
  * joins them together into a single string.
  *
  * @param $element
@@ -5915,14 +5915,14 @@ function drupal_render(&$elements) {
  *   If the keys of the element's children are already known, they can be passed
  *   in to save another run of element_children().
  */
-function drupal_render_children(&$element, $children_keys = NULL) {
+function backdrop_render_children(&$element, $children_keys = NULL) {
   if ($children_keys === NULL) {
     $children_keys = element_children($element);
   }
   $output = '';
   foreach ($children_keys as $key) {
     if (!empty($element[$key])) {
-      $output .= drupal_render($element[$key]);
+      $output .= backdrop_render($element[$key]);
     }
   }
   return $output;
@@ -5931,7 +5931,7 @@ function drupal_render_children(&$element, $children_keys = NULL) {
 /**
  * Renders an element.
  *
- * This function renders an element using drupal_render(). The top level
+ * This function renders an element using backdrop_render(). The top level
  * element is shown with show() before rendering, so it will always be rendered
  * even if hide() had been previously used on it.
  *
@@ -5941,14 +5941,14 @@ function drupal_render_children(&$element, $children_keys = NULL) {
  * @return
  *   The rendered element.
  *
- * @see drupal_render()
+ * @see backdrop_render()
  * @see show()
  * @see hide()
  */
 function render(&$element) {
   if (is_array($element)) {
     show($element);
-    return drupal_render($element);
+    return backdrop_render($element);
   }
   else {
     // Safe-guard for inappropriate use of render() on flat variables: return
@@ -5960,10 +5960,10 @@ function render(&$element) {
 /**
  * Hides an element from later rendering.
  *
- * The first time render() or drupal_render() is called on an element tree,
+ * The first time render() or backdrop_render() is called on an element tree,
  * as each element in the tree is rendered, it is marked with a #printed flag
  * and the rendered children of the element are cached. Subsequent calls to
- * render() or drupal_render() will not traverse the child tree of this element
+ * render() or backdrop_render() will not traverse the child tree of this element
  * again: they will just use the cached children. So if you want to hide an
  * element, be sure to call hide() on the element before its parent tree is
  * rendered for the first time, as it will have no effect on subsequent
@@ -5989,10 +5989,10 @@ function hide(&$element) {
  * You can also use render($element), which shows the element while rendering
  * it.
  *
- * The first time render() or drupal_render() is called on an element tree,
+ * The first time render() or backdrop_render() is called on an element tree,
  * as each element in the tree is rendered, it is marked with a #printed flag
  * and the rendered children of the element are cached. Subsequent calls to
- * render() or drupal_render() will not traverse the child tree of this element
+ * render() or backdrop_render() will not traverse the child tree of this element
  * again: they will just use the cached children. So if you want to show an
  * element, be sure to call show() on the element before its parent tree is
  * rendered for the first time, as it will have no effect on subsequent
@@ -6022,11 +6022,11 @@ function show(&$element) {
  *   A markup string containing the rendered content of the element, or FALSE
  *   if no cached copy of the element is available.
  *
- * @see drupal_render()
- * @see drupal_render_cache_set()
+ * @see backdrop_render()
+ * @see backdrop_render_cache_set()
  */
-function drupal_render_cache_get($elements) {
-  if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = drupal_render_cid_create($elements)) {
+function backdrop_render_cache_get($elements) {
+  if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = backdrop_render_cid_create($elements)) {
     return FALSE;
   }
   $bin = isset($elements['#cache']['bin']) ? $elements['#cache']['bin'] : 'cache';
@@ -6035,7 +6035,7 @@ function drupal_render_cache_get($elements) {
     // Add additional libraries, JavaScript, CSS and other data attached
     // to this element.
     if (isset($cache->data['#attached'])) {
-      drupal_process_attached($cache->data);
+      backdrop_process_attached($cache->data);
     }
     // Return the rendered output.
     return $cache->data['#markup'];
@@ -6046,7 +6046,7 @@ function drupal_render_cache_get($elements) {
 /**
  * Caches the rendered output of a renderable element.
  *
- * This is called by drupal_render() if the #cache property is set on an
+ * This is called by backdrop_render() if the #cache property is set on an
  * element.
  *
  * @param $markup
@@ -6054,11 +6054,11 @@ function drupal_render_cache_get($elements) {
  * @param $elements
  *   A renderable array.
  *
- * @see drupal_render_cache_get()
+ * @see backdrop_render_cache_get()
  */
-function drupal_render_cache_set(&$markup, $elements) {
+function backdrop_render_cache_set(&$markup, $elements) {
   // Create the cache ID for the element.
-  if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = drupal_render_cid_create($elements)) {
+  if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = backdrop_render_cid_create($elements)) {
     return FALSE;
   }
 
@@ -6070,7 +6070,7 @@ function drupal_render_cache_set(&$markup, $elements) {
   // be retrieved and used.
   $data['#markup'] = &$markup;
   // Persist attached data associated with this element.
-  $attached = drupal_render_collect_attached($elements, TRUE);
+  $attached = backdrop_render_collect_attached($elements, TRUE);
   if ($attached) {
     $data['#attached'] = $attached;
   }
@@ -6084,7 +6084,7 @@ function drupal_render_cache_set(&$markup, $elements) {
  *
  * When caching elements, it is necessary to collect all libraries, JavaScript
  * and CSS into a single array, from both the element itself and all child
- * elements. This allows drupal_render() to add these back to the page when the
+ * elements. This allows backdrop_render() to add these back to the page when the
  * element is returned from cache.
  *
  * @param $elements
@@ -6095,8 +6095,8 @@ function drupal_render_cache_set(&$markup, $elements) {
  * @return
  *   The #attached array for this element and its descendants.
  */
-function drupal_render_collect_attached($elements, $return = FALSE) {
-  $attached = &drupal_static(__FUNCTION__, array());
+function backdrop_render_collect_attached($elements, $return = FALSE) {
+  $attached = &backdrop_static(__FUNCTION__, array());
 
   // Collect all #attached for this element.
   if (isset($elements['#attached'])) {
@@ -6109,7 +6109,7 @@ function drupal_render_collect_attached($elements, $return = FALSE) {
   }
   if ($children = element_children($elements)) {
     foreach ($children as $child) {
-      drupal_render_collect_attached($elements[$child]);
+      backdrop_render_collect_attached($elements[$child]);
     }
   }
 
@@ -6125,7 +6125,7 @@ function drupal_render_collect_attached($elements, $return = FALSE) {
 /**
  * Prepares an element for caching based on a query.
  *
- * This smart caching strategy saves Drupal from querying and rendering to HTML
+ * This smart caching strategy saves Backdrop from querying and rendering to HTML
  * when the underlying query is unchanged.
  *
  * Expensive queries should use the query builder to create the query and then
@@ -6137,20 +6137,20 @@ function drupal_render_collect_attached($elements, $return = FALSE) {
  * @param $function
  *   The name of the function doing this caching. A _pre_render suffix will be
  *   added to this string and is also part of the cache key in
- *   drupal_render_cache_set() and drupal_render_cache_get().
+ *   backdrop_render_cache_set() and backdrop_render_cache_get().
  * @param $expire
  *   The cache expire time, passed eventually to cache()->set().
  * @param $granularity
- *   One or more granularity constants passed to drupal_render_cid_parts().
+ *   One or more granularity constants passed to backdrop_render_cid_parts().
  *
  * @return
  *   A renderable array with the following keys and values:
  *   - #query: The passed-in $query.
  *   - #pre_render: $function with a _pre_render suffix.
- *   - #cache: An associative array prepared for drupal_render_cache_set().
+ *   - #cache: An associative array prepared for backdrop_render_cache_set().
  */
-function drupal_render_cache_by_query($query, $function, $expire = CACHE_TEMPORARY, $granularity = NULL) {
-  $cache_keys = array_merge(array($function), drupal_render_cid_parts($granularity));
+function backdrop_render_cache_by_query($query, $function, $expire = CACHE_TEMPORARY, $granularity = NULL) {
+  $cache_keys = array_merge(array($function), backdrop_render_cid_parts($granularity));
   $query->preExecute();
   $cache_keys[] = hash('sha256', serialize(array((string) $query, $query->getArguments())));
   return array(
@@ -6179,7 +6179,7 @@ function drupal_render_cache_by_query($query, $function, $expire = CACHE_TEMPORA
  *   locale module is enabled it also contains the active language. If
  *   $granularity was passed in, more parts are added.
  */
-function drupal_render_cid_parts($granularity = NULL) {
+function backdrop_render_cid_parts($granularity = NULL) {
   global $theme, $base_root, $user;
 
   $cid_parts[] = $theme;
@@ -6223,14 +6223,14 @@ function drupal_render_cid_parts($granularity = NULL) {
  * @return
  *   The cache ID string, or FALSE if the element may not be cached.
  */
-function drupal_render_cid_create($elements) {
+function backdrop_render_cid_create($elements) {
   if (isset($elements['#cache']['cid'])) {
     return $elements['#cache']['cid'];
   }
   elseif (isset($elements['#cache']['keys'])) {
     $granularity = isset($elements['#cache']['granularity']) ? $elements['#cache']['granularity'] : NULL;
-    // Merge in additional cache ID parts based provided by drupal_render_cid_parts().
-    $cid_parts = array_merge($elements['#cache']['keys'], drupal_render_cid_parts($granularity));
+    // Merge in additional cache ID parts based provided by backdrop_render_cid_parts().
+    $cid_parts = array_merge($elements['#cache']['keys'], backdrop_render_cid_parts($granularity));
     return implode(':', $cid_parts);
   }
   return FALSE;
@@ -6282,12 +6282,12 @@ function element_sort_by_title($a, $b) {
  *   An element type as defined by hook_element_info().
  */
 function element_info($type) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['cache'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['cache'] = &backdrop_static(__FUNCTION__);
   }
-  $cache = &$drupal_static_fast['cache'];
+  $cache = &$backdrop_static_fast['cache'];
 
   if (!isset($cache)) {
     $cache = module_invoke_all('element_info');
@@ -6295,7 +6295,7 @@ function element_info($type) {
       $cache[$element_type]['#type'] = $element_type;
     }
     // Allow modules to alter the element type defaults.
-    drupal_alter('element_info', $cache);
+    backdrop_alter('element_info', $cache);
   }
 
   return isset($cache[$type]) ? $cache[$type] : array();
@@ -6323,8 +6323,8 @@ function element_info_property($type, $property_name, $default = NULL) {
  * - _field_ui_reduce_order()
  * - update_resolve_dependencies()
  * - archiver_get_info()
- * - drupal_get_updaters()
- * - drupal_get_filetransfer_info()
+ * - backdrop_get_updaters()
+ * - backdrop_get_filetransfer_info()
  *
  * @param $a
  *   First item for comparison. The compared items should be associative arrays
@@ -6332,7 +6332,7 @@ function element_info_property($type, $property_name, $default = NULL) {
  * @param $b
  *   Second item for comparison.
  */
-function drupal_sort_weight($a, $b) {
+function backdrop_sort_weight($a, $b) {
   $a_weight = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
   $b_weight = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
   if ($a_weight == $b_weight) {
@@ -6352,7 +6352,7 @@ function drupal_sort_weight($a, $b) {
  * @param $b
  *   Second item for comparison.
  */
-function drupal_sort_title($a, $b) {
+function backdrop_sort_title($a, $b) {
   if (!isset($b['title'])) {
     return -1;
   }
@@ -6387,7 +6387,7 @@ function element_child($key) {
  * Identifies the children of an element array, optionally sorted by weight.
  *
  * The children of a element array are those key/value pairs whose key does
- * not start with a '#'. See drupal_render() for details.
+ * not start with a '#'. See backdrop_render() for details.
  *
  * @param $elements
  *   The element array whose children are to be identified.
@@ -6413,7 +6413,7 @@ function element_children(&$elements, $sort = FALSE) {
         }
       }
       // Only trigger an error if the value is not null.
-      // @see http://drupal.org/node/1283892
+      // @see http://backdrop.org/node/1283892
       elseif (isset($value)) {
         trigger_error(t('"@key" is an invalid render array key', array('@key' => $key)), E_USER_ERROR);
       }
@@ -6508,7 +6508,7 @@ function element_set_attributes(array &$element, array $map) {
  *
  * Instead, use this helper function:
  * @code
- * $value = drupal_array_get_nested_value($form, $parents);
+ * $value = backdrop_array_get_nested_value($form, $parents);
  * @endcode
  *
  * The return value will be NULL, regardless of whether the actual value is NULL
@@ -6517,7 +6517,7 @@ function element_set_attributes(array &$element, array $map) {
  * altered by reference:
  * @code
  * $key_exists = NULL;
- * $value = drupal_array_get_nested_value($form, $parents, $key_exists);
+ * $value = backdrop_array_get_nested_value($form, $parents, $key_exists);
  * if ($key_exists) {
  *   // ... do something with $value ...
  * }
@@ -6544,10 +6544,10 @@ function element_set_attributes(array &$element, array $map) {
  *   (FALSE). This allows to distinguish between the two possibilities when NULL
  *   is returned.
  *
- * @see drupal_array_set_nested_value()
- * @see drupal_array_unset_nested_value()
+ * @see backdrop_array_set_nested_value()
+ * @see backdrop_array_unset_nested_value()
  */
-function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
+function &backdrop_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
   $ref = &$array;
   foreach ($parents as $parent) {
     if (is_array($ref) && array_key_exists($parent, $ref)) {
@@ -6599,7 +6599,7 @@ function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exi
  *
  * Instead, use this helper function:
  * @code
- * drupal_array_set_nested_value($form, $parents, $element);
+ * backdrop_array_set_nested_value($form, $parents, $element);
  * @endcode
  *
  * However if the number of array parent keys is static, the value should always
@@ -6621,10 +6621,10 @@ function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exi
  *   FALSE, PHP throws an error if trying to add into a value that is not an
  *   array. Defaults to FALSE.
  *
- * @see drupal_array_unset_nested_value()
- * @see drupal_array_get_nested_value()
+ * @see backdrop_array_unset_nested_value()
+ * @see backdrop_array_get_nested_value()
  */
-function drupal_array_set_nested_value(array &$array, array $parents, $value, $force = FALSE) {
+function backdrop_array_set_nested_value(array &$array, array $parents, $value, $force = FALSE) {
   $ref = &$array;
   foreach ($parents as $parent) {
     // PHP auto-creates container arrays and NULL entries without error if $ref
@@ -6673,7 +6673,7 @@ function drupal_array_set_nested_value(array &$array, array $parents, $value, $f
  *
  * Instead, use this helper function:
  * @code
- * drupal_array_unset_nested_value($form, $parents, $element);
+ * backdrop_array_unset_nested_value($form, $parents, $element);
  * @endcode
  *
  * However if the number of array parent keys is static, the value should always
@@ -6692,12 +6692,12 @@ function drupal_array_set_nested_value(array &$array, array $parents, $value, $f
  *   (optional) If given, an already defined variable that is altered by
  *   reference.
  *
- * @see drupal_array_set_nested_value()
- * @see drupal_array_get_nested_value()
+ * @see backdrop_array_set_nested_value()
+ * @see backdrop_array_get_nested_value()
  */
-function drupal_array_unset_nested_value(array &$array, array $parents, &$key_existed = NULL) {
+function backdrop_array_unset_nested_value(array &$array, array $parents, &$key_existed = NULL) {
   $unset_key = array_pop($parents);
-  $ref = &drupal_array_get_nested_value($array, $parents, $key_existed);
+  $ref = &backdrop_array_get_nested_value($array, $parents, $key_existed);
   if ($key_existed && is_array($ref) && array_key_exists($unset_key, $ref)) {
     $key_existed = TRUE;
     unset($ref[$unset_key]);
@@ -6712,11 +6712,11 @@ function drupal_array_unset_nested_value(array &$array, array $parents, &$key_ex
  *
  * This helper function should be used when the depth of the array element to be
  * checked may vary (that is, the number of parent keys is variable). See
- * drupal_array_set_nested_value() for details. It is primarily used for form
+ * backdrop_array_set_nested_value() for details. It is primarily used for form
  * structures and renderable arrays.
  *
  * If it is required to also get the value of the checked nested key, use
- * drupal_array_get_nested_value() instead.
+ * backdrop_array_get_nested_value() instead.
  *
  * If the number of array parent keys is static, this helper function is
  * unnecessary and the following code can be used instead:
@@ -6733,20 +6733,20 @@ function drupal_array_unset_nested_value(array &$array, array $parents, &$key_ex
  * @return
  *   TRUE if all the parent keys exist, FALSE otherwise.
  *
- * @see drupal_array_get_nested_value()
+ * @see backdrop_array_get_nested_value()
  */
-function drupal_array_nested_key_exists(array $array, array $parents) {
+function backdrop_array_nested_key_exists(array $array, array $parents) {
   // Although this function is similar to PHP's array_key_exists(), its
-  // arguments should be consistent with drupal_array_get_nested_value().
+  // arguments should be consistent with backdrop_array_get_nested_value().
   $key_exists = NULL;
-  drupal_array_get_nested_value($array, $parents, $key_exists);
+  backdrop_array_get_nested_value($array, $parents, $key_exists);
   return $key_exists;
 }
 
 /**
  * Provides theme registration for themes across .inc files.
  */
-function drupal_common_theme() {
+function backdrop_common_theme() {
   return array(
     // From theme.inc.
     'html' => array(
@@ -6970,9 +6970,9 @@ function drupal_common_theme() {
  * @param $module
  *   The module for which the tables will be created.
  */
-function drupal_install_schema($module) {
-  $schema = drupal_get_schema_unprocessed($module);
-  _drupal_schema_initialize($schema, $module, FALSE);
+function backdrop_install_schema($module) {
+  $schema = backdrop_get_schema_unprocessed($module);
+  _backdrop_schema_initialize($schema, $module, FALSE);
 
   foreach ($schema as $name => $table) {
     db_create_table($name, $table);
@@ -6994,9 +6994,9 @@ function drupal_install_schema($module) {
  *    - success: a boolean indicating whether the query succeeded.
  *    - query: the SQL query(s) executed, passed through check_plain().
  */
-function drupal_uninstall_schema($module) {
-  $schema = drupal_get_schema_unprocessed($module);
-  _drupal_schema_initialize($schema, $module, FALSE);
+function backdrop_uninstall_schema($module) {
+  $schema = backdrop_get_schema_unprocessed($module);
+  _backdrop_schema_initialize($schema, $module, FALSE);
 
   foreach ($schema as $table) {
     if (db_table_exists($table['name'])) {
@@ -7018,8 +7018,8 @@ function drupal_uninstall_schema($module) {
  * hook_schema(), so it allows you to derive your tables from existing
  * specifications.
  *
- * It is also used by drupal_install_schema() and
- * drupal_uninstall_schema() to ensure that a module's tables are
+ * It is also used by backdrop_install_schema() and
+ * backdrop_uninstall_schema() to ensure that a module's tables are
  * created exactly as specified without any changes introduced by a
  * module that implements hook_schema_alter().
  *
@@ -7029,7 +7029,7 @@ function drupal_uninstall_schema($module) {
  *   The name of the table. If not given, the module's complete schema
  *   is returned.
  */
-function drupal_get_schema_unprocessed($module, $table = NULL) {
+function backdrop_get_schema_unprocessed($module, $table = NULL) {
   // Load the .install file to get hook_schema.
   module_load_install($module);
   $schema = module_invoke($module, 'schema');
@@ -7056,7 +7056,7 @@ function drupal_get_schema_unprocessed($module, $table = NULL) {
  *   and fields to improve performance of serialize() and unserialize().
  *   Defaults to TRUE.
  */
-function _drupal_schema_initialize(&$schema, $module, $remove_descriptions = TRUE) {
+function _backdrop_schema_initialize(&$schema, $module, $remove_descriptions = TRUE) {
   // Set the name and module key for all tables.
   foreach ($schema as $name => &$table) {
     if (empty($table['module'])) {
@@ -7086,8 +7086,8 @@ function _drupal_schema_initialize(&$schema, $module, $remove_descriptions = TRU
  *
  * @return An array of fields.
  */
-function drupal_schema_fields_sql($table, $prefix = NULL) {
-  $schema = drupal_get_schema($table);
+function backdrop_schema_fields_sql($table, $prefix = NULL) {
+  $schema = backdrop_get_schema($table);
   $fields = array_keys($schema['fields']);
   if ($prefix) {
     $columns = array();
@@ -7124,13 +7124,13 @@ function drupal_schema_fields_sql($table, $prefix = NULL) {
  *   If the record insert or update failed, returns FALSE. If it succeeded,
  *   returns SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
  */
-function drupal_write_record($table, &$record, $primary_keys = array()) {
+function backdrop_write_record($table, &$record, $primary_keys = array()) {
   // Standardize $primary_keys to an array.
   if (is_string($primary_keys)) {
     $primary_keys = array($primary_keys);
   }
 
-  $schema = drupal_get_schema($table);
+  $schema = backdrop_get_schema($table);
   if (empty($schema)) {
     return FALSE;
   }
@@ -7267,7 +7267,7 @@ function drupal_write_record($table, &$record, $primary_keys = array()) {
  */
 
 /**
- * Parses Drupal module and theme .info files.
+ * Parses Backdrop module and theme .info files.
  *
  * Info files are NOT for placing arbitrary theme and module-specific settings.
  * Use variable_get() and variable_set() for that.
@@ -7299,10 +7299,10 @@ function drupal_write_record($table, &$record, $primary_keys = array()) {
  * @return
  *   The info array.
  *
- * @see drupal_parse_info_format()
+ * @see backdrop_parse_info_format()
  */
-function drupal_parse_info_file($filename) {
-  $info = &drupal_static(__FUNCTION__, array());
+function backdrop_parse_info_file($filename) {
+  $info = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($info[$filename])) {
     if (!file_exists($filename)) {
@@ -7310,14 +7310,14 @@ function drupal_parse_info_file($filename) {
     }
     else {
       $data = file_get_contents($filename);
-      $info[$filename] = drupal_parse_info_format($data);
+      $info[$filename] = backdrop_parse_info_format($data);
     }
   }
   return $info[$filename];
 }
 
 /**
- * Parses data in Drupal's .info format.
+ * Parses data in Backdrop's .info format.
  *
  * Data should be in an .ini-like format to specify values. White-space
  * generally doesn't matter, except inside values:
@@ -7351,9 +7351,9 @@ function drupal_parse_info_file($filename) {
  * @return
  *   The info array.
  *
- * @see drupal_parse_info_file()
+ * @see backdrop_parse_info_file()
  */
-function drupal_parse_info_format($data) {
+function backdrop_parse_info_format($data) {
   $info = array();
   $constants = get_defined_constants();
 
@@ -7437,9 +7437,9 @@ function watchdog_severity_levels() {
 /**
  * Explodes a string of tags into an array.
  *
- * @see drupal_implode_tags()
+ * @see backdrop_implode_tags()
  */
-function drupal_explode_tags($tags) {
+function backdrop_explode_tags($tags) {
   // This regexp allows the following types of user input:
   // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
@@ -7463,9 +7463,9 @@ function drupal_explode_tags($tags) {
 /**
  * Implodes an array of tags into a string.
  *
- * @see drupal_explode_tags()
+ * @see backdrop_explode_tags()
  */
-function drupal_implode_tags($tags) {
+function backdrop_implode_tags($tags) {
   $encoded_tags = array();
   foreach ($tags as $tag) {
     // Commas and quotes in tag names are special cases, so encode them.
@@ -7484,23 +7484,23 @@ function drupal_implode_tags($tags) {
  * Empties cache tables, rebuilds the menu cache and theme registries, and
  * invokes a hook so that other modules' cache data can be cleared as well.
  */
-function drupal_flush_all_caches() {
+function backdrop_flush_all_caches() {
   // Change query-strings on css/js files to enforce reload for all users.
-  _drupal_flush_css_js();
+  _backdrop_flush_css_js();
 
   registry_rebuild();
-  drupal_clear_css_cache();
-  drupal_clear_js_cache();
+  backdrop_clear_css_cache();
+  backdrop_clear_js_cache();
 
   // Rebuild the theme data. Note that the module data is rebuilt above, as
   // part of registry_rebuild().
   system_rebuild_theme_data();
-  drupal_theme_rebuild();
+  backdrop_theme_rebuild();
 
   entity_info_cache_clear();
 
   // @todo D8: Split cache flushing from rebuilding.
-  // @see http://drupal.org/node/996236
+  // @see http://backdrop.org/node/996236
   if (module_exists('node')) {
     node_types_rebuild();
   }
@@ -7531,7 +7531,7 @@ function drupal_flush_all_caches() {
  * Changing the dummy query string appended to CSS and JavaScript files forces
  * all browsers to reload fresh files.
  */
-function _drupal_flush_css_js() {
+function _backdrop_flush_css_js() {
   // The timestamp is converted to base 36 in order to make it more compact.
   variable_set('css_js_query_string', base_convert(REQUEST_TIME, 10, 36));
 }
@@ -7540,7 +7540,7 @@ function _drupal_flush_css_js() {
  * Outputs debug information.
  *
  * The debug information is passed on to trigger_error() after being converted
- * to a string using _drupal_debug_message().
+ * to a string using _backdrop_debug_message().
  *
  * @param $data
  *   Data to be output.
@@ -7562,7 +7562,7 @@ function debug($data, $label = NULL, $print_r = FALSE) {
 }
 
 /**
- * Parses a dependency for comparison by drupal_check_incompatibility().
+ * Parses a dependency for comparison by backdrop_check_incompatibility().
  *
  * @param $dependency
  *   A dependency string, for example 'foo (>=8.x-4.5-beta5, 3.x)'.
@@ -7575,11 +7575,11 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  *   - 'versions' is a list of associative arrays, each containing the keys
  *     'op' and 'version'. 'op' can be one of: '=', '==', '!=', '<>', '<',
  *     '<=', '>', or '>='. 'version' is one piece like '4.5-beta3'.
- *   Callers should pass this structure to drupal_check_incompatibility().
+ *   Callers should pass this structure to backdrop_check_incompatibility().
  *
- * @see drupal_check_incompatibility()
+ * @see backdrop_check_incompatibility()
  */
-function drupal_parse_dependency($dependency) {
+function backdrop_parse_dependency($dependency) {
   // We use named subpatterns and support every op that version_compare
   // supports. Also, op is optional and defaults to equals.
   $p_op = '(?P<operation>!=|==|=|<|<=|>|>=|<>)?';
@@ -7597,7 +7597,7 @@ function drupal_parse_dependency($dependency) {
       if (preg_match("/^\s*$p_op\s*$p_core$p_major\.$p_minor/", $version, $matches)) {
         $op = !empty($matches['operation']) ? $matches['operation'] : '=';
         if ($matches['minor'] == 'x') {
-          // Drupal considers "2.x" to mean any version that begins with
+          // Backdrop considers "2.x" to mean any version that begins with
           // "2" (e.g. 2.0, 2.9 are all "2.x"). PHP's version_compare(),
           // on the other hand, treats "x" as a string; so to
           // version_compare(), "2.x" is considered less than 2.0. This
@@ -7623,7 +7623,7 @@ function drupal_parse_dependency($dependency) {
  * Checks whether a version is compatible with a given dependency.
  *
  * @param $v
- *   The parsed dependency structure from drupal_parse_dependency().
+ *   The parsed dependency structure from backdrop_parse_dependency().
  * @param $current_version
  *   The version to check against (like 4.2).
  *
@@ -7631,9 +7631,9 @@ function drupal_parse_dependency($dependency) {
  *   NULL if compatible, otherwise the original dependency version string that
  *   caused the incompatibility.
  *
- * @see drupal_parse_dependency()
+ * @see backdrop_parse_dependency()
  */
-function drupal_check_incompatibility($v, $current_version) {
+function backdrop_check_incompatibility($v, $current_version) {
   if (!empty($v['versions'])) {
     foreach ($v['versions'] as $required_version) {
       if ((isset($required_version['op']) && !version_compare($current_version, $required_version['version'], $required_version['op']))) {
@@ -7660,7 +7660,7 @@ function drupal_check_incompatibility($v, $current_version) {
  *   are the arguments to pass to the respective method. If multiple methods
  *   are specified, a system.multicall is performed.
  * @param $options
- *   (optional) An array of options to pass along to drupal_http_request().
+ *   (optional) An array of options to pass along to backdrop_http_request().
  *
  * @return
  *   For one request:
@@ -7683,15 +7683,15 @@ function xmlrpc($url, $args, $options = array()) {
  * @see hook_archiver_info_alter()
  */
 function archiver_get_info() {
-  $archiver_info = &drupal_static(__FUNCTION__, array());
+  $archiver_info = &backdrop_static(__FUNCTION__, array());
 
   if (empty($archiver_info)) {
     $cache = cache()->get('archiver_info');
     if ($cache === FALSE) {
       // Rebuild the cache and save it.
       $archiver_info = module_invoke_all('archiver_info');
-      drupal_alter('archiver_info', $archiver_info);
-      uasort($archiver_info, 'drupal_sort_weight');
+      backdrop_alter('archiver_info', $archiver_info);
+      uasort($archiver_info, 'backdrop_sort_weight');
       cache()->set('archiver_info', $archiver_info);
     }
     else {
@@ -7737,7 +7737,7 @@ function archiver_get_extensions() {
  */
 function archiver_get_archiver($file) {
   // Archivers can only work on local paths
-  $filepath = drupal_realpath($file);
+  $filepath = backdrop_realpath($file);
   if (!is_file($filepath)) {
     throw new Exception(t('Archivers can only operate on local files: %file not supported', array('%file' => $file)));
   }
@@ -7758,40 +7758,40 @@ function archiver_get_archiver($file) {
 }
 
 /**
- * Assembles the Drupal Updater registry.
+ * Assembles the Backdrop Updater registry.
  *
- * An Updater is a class that knows how to update various parts of the Drupal
+ * An Updater is a class that knows how to update various parts of the Backdrop
  * file system, for example to update modules that have newer releases, or to
  * install a new theme.
  *
  * @return
- *   The Drupal Updater class registry.
+ *   The Backdrop Updater class registry.
  *
  * @see hook_updater_info()
  * @see hook_updater_info_alter()
  */
-function drupal_get_updaters() {
-  $updaters = &drupal_static(__FUNCTION__);
+function backdrop_get_updaters() {
+  $updaters = &backdrop_static(__FUNCTION__);
   if (!isset($updaters)) {
     $updaters = module_invoke_all('updater_info');
-    drupal_alter('updater_info', $updaters);
-    uasort($updaters, 'drupal_sort_weight');
+    backdrop_alter('updater_info', $updaters);
+    uasort($updaters, 'backdrop_sort_weight');
   }
   return $updaters;
 }
 
 /**
- * Assembles the Drupal FileTransfer registry.
+ * Assembles the Backdrop FileTransfer registry.
  *
  * @return
- *   The Drupal FileTransfer class registry.
+ *   The Backdrop FileTransfer class registry.
  *
  * @see FileTransfer
  * @see hook_filetransfer_info()
  * @see hook_filetransfer_info_alter()
  */
-function drupal_get_filetransfer_info() {
-  $info = &drupal_static(__FUNCTION__);
+function backdrop_get_filetransfer_info() {
+  $info = &backdrop_static(__FUNCTION__);
   if (!isset($info)) {
     // Since we have to manually set the 'file path' default for each
     // module separately, we can't use module_invoke_all().
@@ -7802,14 +7802,14 @@ function drupal_get_filetransfer_info() {
       if (isset($result) && is_array($result)) {
         foreach ($result as &$values) {
           if (empty($values['file path'])) {
-            $values['file path'] = drupal_get_path('module', $module);
+            $values['file path'] = backdrop_get_path('module', $module);
           }
         }
         $info = array_merge_recursive($info, $result);
       }
     }
-    drupal_alter('filetransfer_info', $info);
-    uasort($info, 'drupal_sort_weight');
+    backdrop_alter('filetransfer_info', $info);
+    uasort($info, 'backdrop_sort_weight');
   }
   return $info;
 }

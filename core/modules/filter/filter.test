@@ -8,7 +8,7 @@
 /**
  * Tests for text format and filter CRUD operations.
  */
-class FilterCRUDTestCase extends DrupalWebTestCase {
+class FilterCRUDTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Filter CRUD operations',
@@ -160,7 +160,7 @@ class FilterCRUDTestCase extends DrupalWebTestCase {
   }
 }
 
-class FilterAdminTestCase extends DrupalWebTestCase {
+class FilterAdminTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Filter administration functionality',
@@ -175,56 +175,56 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     // Create users.
     $filtered_html_format = filter_format_load('filtered_html');
     $full_html_format = filter_format_load('full_html');
-    $this->admin_user = $this->drupalCreateUser(array(
+    $this->admin_user = $this->backdropCreateUser(array(
       'administer filters',
       filter_permission_name($filtered_html_format),
       filter_permission_name($full_html_format),
     ));
 
-    $this->web_user = $this->drupalCreateUser(array('create page content', 'edit own page content'));
-    $this->drupalLogin($this->admin_user);
+    $this->web_user = $this->backdropCreateUser(array('create page content', 'edit own page content'));
+    $this->backdropLogin($this->admin_user);
   }
 
   function testFormatAdmin() {
     // Add text format.
-    $this->drupalGet('admin/config/content/formats');
+    $this->backdropGet('admin/config/content/formats');
     $this->clickLink('Add text format');
-    $format_id = drupal_strtolower($this->randomName());
+    $format_id = backdrop_strtolower($this->randomName());
     $name = $this->randomName();
     $edit = array(
       'format' => $format_id,
       'name' => $name,
     );
-    $this->drupalPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
 
     // Verify default weight of the text format.
-    $this->drupalGet('admin/config/content/formats');
+    $this->backdropGet('admin/config/content/formats');
     $this->assertFieldByName("formats[$format_id][weight]", 0, t('Text format weight was saved.'));
 
     // Change the weight of the text format.
     $edit = array(
       "formats[$format_id][weight]" => 5,
     );
-    $this->drupalPost('admin/config/content/formats', $edit, t('Save changes'));
+    $this->backdropPost('admin/config/content/formats', $edit, t('Save changes'));
     $this->assertFieldByName("formats[$format_id][weight]", 5, t('Text format weight was saved.'));
 
     // Edit text format.
-    $this->drupalGet('admin/config/content/formats');
+    $this->backdropGet('admin/config/content/formats');
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
-    $this->drupalGet('admin/config/content/formats/' . $format_id);
-    $this->drupalPost(NULL, array(), t('Save configuration'));
+    $this->backdropGet('admin/config/content/formats/' . $format_id);
+    $this->backdropPost(NULL, array(), t('Save configuration'));
 
     // Verify that the custom weight of the text format has been retained.
-    $this->drupalGet('admin/config/content/formats');
+    $this->backdropGet('admin/config/content/formats');
     $this->assertFieldByName("formats[$format_id][weight]", 5, t('Text format weight was retained.'));
 
     // Disable text format.
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
-    $this->drupalGet('admin/config/content/formats/' . $format_id . '/disable');
-    $this->drupalPost(NULL, array(), t('Disable'));
+    $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
+    $this->backdropPost(NULL, array(), t('Disable'));
 
     // Verify that disabled text format no longer exists.
-    $this->drupalGet('admin/config/content/formats/' . $format_id);
+    $this->backdropGet('admin/config/content/formats/' . $format_id);
     $this->assertResponse(404, t('Disabled text format no longer exists.'));
 
     // Attempt to create a format of the same machine name as the disabled
@@ -233,7 +233,7 @@ class FilterAdminTestCase extends DrupalWebTestCase {
       'format' => $format_id,
       'name' => 'New format',
     );
-    $this->drupalPost('admin/config/content/formats/add', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertText('The machine-readable name is already in use. It must be unique.');
 
     // Attempt to create a format of the same human readable name as the
@@ -242,7 +242,7 @@ class FilterAdminTestCase extends DrupalWebTestCase {
       'format' => 'new_format',
       'name' => $name,
     );
-    $this->drupalPost('admin/config/content/formats/add', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertRaw(t('Text format names must be unique. A format named %name already exists.', array(
       '%name' => $name,
     )));
@@ -263,9 +263,9 @@ class FilterAdminTestCase extends DrupalWebTestCase {
 
     // Check that the fallback format exists and cannot be disabled.
     $this->assertTrue($plain == filter_fallback_format(), t('The fallback format is set to plain text.'));
-    $this->drupalGet('admin/config/content/formats');
+    $this->backdropGet('admin/config/content/formats');
     $this->assertNoRaw('admin/config/content/formats/' . $plain . '/disable', t('Disable link for the fallback format not found.'));
-    $this->drupalGet('admin/config/content/formats/' . $plain . '/disable');
+    $this->backdropGet('admin/config/content/formats/' . $plain . '/disable');
     $this->assertResponse(403, t('The fallback format cannot be disabled.'));
 
     // Verify access permissions to Full HTML format.
@@ -275,7 +275,7 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     // Add an additional tag.
     $edit = array();
     $edit['filters[filter_html][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <quote>';
-    $this->drupalPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
     $this->assertFieldByName('filters[filter_html][settings][allowed_html]', $edit['filters[filter_html][settings][allowed_html]'], t('Allowed HTML tag added.'));
 
     $result = db_query('SELECT * FROM {cache_filter}')->fetchObject();
@@ -291,7 +291,7 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['filters[' . $second_filter . '][weight]'] = 1;
     $edit['filters[' . $first_filter . '][weight]'] = 2;
-    $this->drupalPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->assertFieldByName('filters[' . $second_filter . '][weight]', 1, t('Order saved successfully.'));
     $this->assertFieldByName('filters[' . $first_filter . '][weight]', 2, t('Order saved successfully.'));
 
@@ -312,15 +312,15 @@ class FilterAdminTestCase extends DrupalWebTestCase {
 
     // Add format.
     $edit = array();
-    $edit['format'] = drupal_strtolower($this->randomName());
+    $edit['format'] = backdrop_strtolower($this->randomName());
     $edit['name'] = $this->randomName();
     $edit['roles[2]'] = 1;
     $edit['filters[' . $second_filter . '][status]'] = TRUE;
     $edit['filters[' . $first_filter . '][status]'] = TRUE;
-    $this->drupalPost('admin/config/content/formats/add', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertRaw(t('Added text format %format.', array('%format' => $edit['name'])), t('New filter created.'));
 
-    drupal_static_reset('filter_formats');
+    backdrop_static_reset('filter_formats');
     $format = filter_format_load($edit['format']);
     $this->assertNotNull($format, t('Format found in database.'));
 
@@ -329,7 +329,7 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     $this->assertFieldByName('filters[' . $first_filter . '][status]', '', t('Url filter found.'));
 
     // Disable new filter.
-    $this->drupalPost('admin/config/content/formats/' . $format->format . '/disable', array(), t('Disable'));
+    $this->backdropPost('admin/config/content/formats/' . $format->format . '/disable', array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %format.', array('%format' => $edit['name'])), t('Format successfully disabled.'));
 
     // Allow authenticated users on full HTML.
@@ -337,14 +337,14 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['roles[1]'] = 0;
     $edit['roles[2]'] = 1;
-    $this->drupalPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
     $this->assertRaw(t('The text format %format has been updated.', array('%format' => $format->name)), t('Full HTML format successfully updated.'));
 
     // Switch user.
-    $this->drupalLogout();
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogout();
+    $this->backdropLogin($this->web_user);
 
-    $this->drupalGet('node/add/page');
+    $this->backdropGet('node/add/page');
     $this->assertRaw('<option value="' . $full . '">Full HTML</option>', t('Full HTML filter accessible.'));
 
     // Use filtered HTML and see if it removes tags that are not allowed.
@@ -357,37 +357,37 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     $edit["title"] = $this->randomName();
     $edit["body[$langcode][0][value]"] = $text;
     $edit["body[$langcode][0][format]"] = $filtered;
-    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/page', $edit, t('Save'));
     $this->assertRaw(t('Basic page %title has been created.', array('%title' => $edit["title"])), t('Filtered node created.'));
 
-    $node = $this->drupalGetNodeByTitle($edit["title"]);
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
     $this->assertTrue($node, t('Node found in database.'));
 
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertRaw($body . $extra_text, t('Filter removed invalid tag.'));
 
     // Use plain text and see if it escapes all tags, whether allowed or not.
     $edit = array();
     $edit["body[$langcode][0][format]"] = $plain;
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText(check_plain($text), t('The "Plain text" text format escapes all HTML tags.'));
 
     // Switch user.
-    $this->drupalLogout();
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogout();
+    $this->backdropLogin($this->admin_user);
 
     // Clean up.
     // Allowed tags.
     $edit = array();
     $edit['filters[filter_html][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd>';
-    $this->drupalPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
     $this->assertFieldByName('filters[filter_html][settings][allowed_html]', $edit['filters[filter_html][settings][allowed_html]'], t('Changes reverted.'));
 
     // Full HTML.
     $edit = array();
     $edit['roles[2]'] = FALSE;
-    $this->drupalPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
     $this->assertRaw(t('The text format %format has been updated.', array('%format' => $format->name)), t('Full HTML format successfully reverted.'));
     $this->assertFieldByName('roles[2]', $edit['roles[2]'], t('Changes reverted.'));
 
@@ -395,13 +395,13 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['filters[' . $second_filter . '][weight]'] = 2;
     $edit['filters[' . $first_filter . '][weight]'] = 1;
-    $this->drupalPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
     $this->assertFieldByName('filters[' . $second_filter . '][weight]', $edit['filters[' . $second_filter . '][weight]'], t('Changes reverted.'));
     $this->assertFieldByName('filters[' . $first_filter . '][weight]', $edit['filters[' . $first_filter . '][weight]'], t('Changes reverted.'));
   }
 }
 
-class FilterFormatAccessTestCase extends DrupalWebTestCase {
+class FilterFormatAccessTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $filter_admin_user;
   protected $web_user;
@@ -421,36 +421,36 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
 
     // Create a user who can administer text formats, but does not have
     // specific permission to use any of them.
-    $this->filter_admin_user = $this->drupalCreateUser(array(
+    $this->filter_admin_user = $this->backdropCreateUser(array(
       'administer filters',
       'create page content',
       'edit any page content',
     ));
 
     // Create two text formats.
-    $this->drupalLogin($this->filter_admin_user);
+    $this->backdropLogin($this->filter_admin_user);
     $formats = array();
     for ($i = 0; $i < 2; $i++) {
       $edit = array(
-        'format' => drupal_strtolower($this->randomName()),
+        'format' => backdrop_strtolower($this->randomName()),
         'name' => $this->randomName(),
       );
-      $this->drupalPost('admin/config/content/formats/add', $edit, t('Save configuration'));
+      $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
       $this->resetFilterCaches();
       $formats[] = filter_format_load($edit['format']);
     }
     list($this->allowed_format, $this->disallowed_format) = $formats;
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Create a regular user with access to one of the formats.
-    $this->web_user = $this->drupalCreateUser(array(
+    $this->web_user = $this->backdropCreateUser(array(
       'create page content',
       'edit any page content',
       filter_permission_name($this->allowed_format),
     ));
 
     // Create an administrative user who has access to use both formats.
-    $this->admin_user = $this->drupalCreateUser(array(
+    $this->admin_user = $this->backdropCreateUser(array(
       'administer filters',
       'create page content',
       'edit any page content',
@@ -479,8 +479,8 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
 
     // Make sure that the allowed format appears on the node form and that
     // the disallowed format does not.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('node/add/page');
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('node/add/page');
     $langcode = LANGUAGE_NONE;
     $elements = $this->xpath('//select[@name=:name]/option', array(
       ':name' => "body[$langcode][0][format]",
@@ -531,17 +531,17 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
     $body_format_key = "body[$langcode][0][format]";
 
     // Create node to edit.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $edit = array();
     $edit['title'] = $this->randomName(8);
     $edit[$body_value_key] = $this->randomName(16);
     $edit[$body_format_key] = $this->disallowed_format->format;
-    $this->drupalPost('node/add/page', $edit, t('Save'));
-    $node = $this->drupalGetNodeByTitle($edit['title']);
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($edit['title']);
 
     // Try to edit with a less privileged user.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('node/' . $node->nid);
     $this->clickLink(t('Edit'));
 
     // Verify that body field is read-only and contains replacement value.
@@ -550,11 +550,11 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
     // Verify that title can be changed, but preview displays original body.
     $new_edit = array();
     $new_edit['title'] = $this->randomName(8);
-    $this->drupalPost(NULL, $new_edit, t('Preview'));
+    $this->backdropPost(NULL, $new_edit, t('Preview'));
     $this->assertText($edit[$body_value_key], t('Old body found in preview.'));
 
     // Save and verify that only the title was changed.
-    $this->drupalPost(NULL, $new_edit, t('Save'));
+    $this->backdropPost(NULL, $new_edit, t('Save'));
     $this->assertNoText($edit['title'], t('Old title not found.'));
     $this->assertText($new_edit['title'], t('New title found.'));
     $this->assertText($edit[$body_value_key], t('Old body found.'));
@@ -564,8 +564,8 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
     // use its stored format. (This must be disallowed so that the
     // administrator is never forced to switch the text format to something
     // else.)
-    $this->drupalLogin($this->filter_admin_user);
-    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->backdropLogin($this->filter_admin_user);
+    $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertFieldByXPath("//textarea[@name='$body_value_key' and @disabled='disabled']", t('This field has been disabled because you do not have sufficient permissions to edit it.'), t('Text format access denied message found.'));
 
     // Disable the text format used above.
@@ -575,14 +575,14 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
     // Log back in as the less privileged user and verify that the body field
     // is still disabled, since the less privileged user should not be able to
     // edit content that does not have an assigned format.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertFieldByXPath("//textarea[@name='$body_value_key' and @disabled='disabled']", t('This field has been disabled because you do not have sufficient permissions to edit it.'), t('Text format access denied message found.'));
 
     // Log back in as the filter administrator and verify that the body field
     // can be edited.
-    $this->drupalLogin($this->filter_admin_user);
-    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->backdropLogin($this->filter_admin_user);
+    $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertNoFieldByXPath("//textarea[@name='$body_value_key' and @disabled='disabled']", NULL, t('Text format access denied message not found.'));
     $this->assertFieldByXPath("//select[@name='$body_format_key']", NULL, t('Text format selector found.'));
 
@@ -591,24 +591,24 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
     $old_title = $new_edit['title'];
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), t('Error message is displayed.'));
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, t('Old title found.'));
     $this->assertNoText($new_title, t('New title not found.'));
 
     // Now select a new text format and make sure the node can be saved.
     $edit[$body_format_key] = filter_fallback_format();
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertUrl('node/' . $node->nid);
     $this->assertText($new_title, t('New title found.'));
     $this->assertNoText($old_title, t('Old title not found.'));
 
     // Switch the text format to a new one, then disable that format and all
     // other formats on the site (leaving only the fallback format).
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $edit = array($body_format_key => $this->allowed_format->format);
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertUrl('node/' . $node->nid);
     foreach (filter_formats() as $format) {
       if ($format->format != filter_fallback_format()) {
@@ -621,17 +621,17 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
     // edited. However, we need to verify that the filter administrator still
     // is forced to make a conscious choice to reassign the text to a different
     // format.
-    $this->drupalLogin($this->filter_admin_user);
+    $this->backdropLogin($this->filter_admin_user);
     $old_title = $new_title;
     $new_title = $this->randomName(8);
     $edit = array('title' => $new_title);
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertText(t('!name field is required.', array('!name' => t('Text format'))), t('Error message is displayed.'));
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($old_title, t('Old title found.'));
     $this->assertNoText($new_title, t('New title not found.'));
     $edit[$body_format_key] = filter_fallback_format();
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertUrl('node/' . $node->nid);
     $this->assertText($new_title, t('New title found.'));
     $this->assertNoText($old_title, t('Old title not found.'));
@@ -646,7 +646,7 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
   }
 }
 
-class FilterDefaultFormatTestCase extends DrupalWebTestCase {
+class FilterDefaultFormatTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Default text format functionality',
@@ -658,21 +658,21 @@ class FilterDefaultFormatTestCase extends DrupalWebTestCase {
   function testDefaultTextFormats() {
     // Create two text formats, and two users. The first user has access to
     // both formats, but the second user only has access to the second one.
-    $admin_user = $this->drupalCreateUser(array('administer filters'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer filters'));
+    $this->backdropLogin($admin_user);
     $formats = array();
     for ($i = 0; $i < 2; $i++) {
       $edit = array(
-        'format' => drupal_strtolower($this->randomName()),
+        'format' => backdrop_strtolower($this->randomName()),
         'name' => $this->randomName(),
       );
-      $this->drupalPost('admin/config/content/formats/add', $edit, t('Save configuration'));
+      $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
       $this->resetFilterCaches();
       $formats[] = filter_format_load($edit['format']);
     }
     list($first_format, $second_format) = $formats;
-    $first_user = $this->drupalCreateUser(array(filter_permission_name($first_format), filter_permission_name($second_format)));
-    $second_user = $this->drupalCreateUser(array(filter_permission_name($second_format)));
+    $first_user = $this->backdropCreateUser(array(filter_permission_name($first_format), filter_permission_name($second_format)));
+    $second_user = $this->backdropCreateUser(array(filter_permission_name($second_format)));
 
     // Adjust the weights so that the first and second formats (in that order)
     // are the two lowest weighted formats available to any user.
@@ -680,7 +680,7 @@ class FilterDefaultFormatTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['formats[' . $first_format->format . '][weight]'] = $minimum_weight - 2;
     $edit['formats[' . $second_format->format . '][weight]'] = $minimum_weight - 1;
-    $this->drupalPost('admin/config/content/formats', $edit, t('Save changes'));
+    $this->backdropPost('admin/config/content/formats', $edit, t('Save changes'));
     $this->resetFilterCaches();
 
     // Check that each user's default format is the lowest weighted format that
@@ -692,7 +692,7 @@ class FilterDefaultFormatTestCase extends DrupalWebTestCase {
     // default.
     $edit = array();
     $edit['formats[' . $second_format->format . '][weight]'] = $minimum_weight - 3;
-    $this->drupalPost('admin/config/content/formats', $edit, t('Save changes'));
+    $this->backdropPost('admin/config/content/formats', $edit, t('Save changes'));
     $this->resetFilterCaches();
     $this->assertEqual(filter_default_format($first_user), filter_default_format($second_user), t('After the formats are reordered, both users have the same default format.'));
   }
@@ -706,7 +706,7 @@ class FilterDefaultFormatTestCase extends DrupalWebTestCase {
   }
 }
 
-class FilterNoFormatTestCase extends DrupalWebTestCase {
+class FilterNoFormatTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Unassigned text format functionality',
@@ -729,7 +729,7 @@ class FilterNoFormatTestCase extends DrupalWebTestCase {
 /**
  * Security tests for missing/vanished text formats or filters.
  */
-class FilterSecurityTestCase extends DrupalWebTestCase {
+class FilterSecurityTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Security',
@@ -740,8 +740,8 @@ class FilterSecurityTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('php', 'filter_test');
-    $this->admin_user = $this->drupalCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -749,28 +749,28 @@ class FilterSecurityTestCase extends DrupalWebTestCase {
    */
   function testDisableFilterModule() {
     // Create a new node.
-    $node = $this->drupalCreateNode(array('promote' => 1));
+    $node = $this->backdropCreateNode(array('promote' => 1));
     $body_raw = $node->body[LANGUAGE_NONE][0]['value'];
     $format_id = $node->body[LANGUAGE_NONE][0]['format'];
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText($body_raw, t('Node body found.'));
 
     // Enable the filter_test_replace filter.
     $edit = array(
       'filters[filter_test_replace][status]' => 1,
     );
-    $this->drupalPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
 
     // Verify that filter_test_replace filter replaced the content.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertNoText($body_raw, t('Node body not found.'));
     $this->assertText('Filter: Testing filter', t('Testing filter output found.'));
 
     // Disable the text format entirely.
-    $this->drupalPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
+    $this->backdropPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
 
     // Verify that the content is empty, because the text format does not exist.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertNoText($body_raw, t('Node body not found.'));
   }
 }
@@ -778,7 +778,7 @@ class FilterSecurityTestCase extends DrupalWebTestCase {
 /**
  * Unit tests for core filters.
  */
-class FilterUnitTestCase extends DrupalUnitTestCase {
+class FilterUnitTestCase extends BackdropUnitTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Filter module filters',
@@ -1206,7 +1206,7 @@ http://host.com/some/path?query=foo&bar[baz]=beer#fragment or www.host.com/some/
 http://twitter.com/#!/example/status/22376963142324226
 ftp://user:pass@ftp.example.com/~home/dir1
 sftp://user@nonstandardport:222/dir
-ssh://192.168.0.100/srv/git/drupal.git
+ssh://192.168.0.100/srv/git/backdrop.git
 ' => array(
         '<a href="http://trailingslash.com/">http://trailingslash.com/</a>' => TRUE,
         '<a href="http://www.trailingslash.com/">www.trailingslash.com/</a>' => TRUE,
@@ -1215,7 +1215,7 @@ ssh://192.168.0.100/srv/git/drupal.git
         '<a href="http://twitter.com/#!/example/status/22376963142324226">http://twitter.com/#!/example/status/22376963142324226</a>' => TRUE,
         '<a href="ftp://user:pass@ftp.example.com/~home/dir1">ftp://user:pass@ftp.example.com/~home/dir1</a>' => TRUE,
         '<a href="sftp://user@nonstandardport:222/dir">sftp://user@nonstandardport:222/dir</a>' => TRUE,
-        '<a href="ssh://192.168.0.100/srv/git/drupal.git">ssh://192.168.0.100/srv/git/drupal.git</a>' => TRUE,
+        '<a href="ssh://192.168.0.100/srv/git/backdrop.git">ssh://192.168.0.100/srv/git/backdrop.git</a>' => TRUE,
       ),
       // Encoding.
       '
@@ -1513,7 +1513,7 @@ www.example.com with a newline in comments -->
     $filter->settings = array(
       'filter_url_length' => 496,
     );
-    $path = drupal_get_path('module', 'filter') . '/tests';
+    $path = backdrop_get_path('module', 'filter') . '/tests';
 
     $input = file_get_contents($path . '/filter.url-input.txt');
     $expected = file_get_contents($path . '/filter.url-output.txt');
@@ -1764,7 +1764,7 @@ body {color:red}
 /**
  * Tests for filter hook invocation.
  */
-class FilterHooksTestCase extends DrupalWebTestCase {
+class FilterHooksTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Filter format hooks',
@@ -1775,8 +1775,8 @@ class FilterHooksTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('block', 'filter_test');
-    $admin_user = $this->drupalCreateUser(array('administer filters', 'administer blocks'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer filters', 'administer blocks'));
+    $this->backdropLogin($admin_user);
   }
 
   /**
@@ -1786,10 +1786,10 @@ class FilterHooksTestCase extends DrupalWebTestCase {
     // Add a text format.
     $name = $this->randomName();
     $edit = array();
-    $edit['format'] = drupal_strtolower($this->randomName());
+    $edit['format'] = backdrop_strtolower($this->randomName());
     $edit['name'] = $name;
     $edit['roles[1]'] = 1;
-    $this->drupalPost('admin/config/content/formats/add', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertRaw(t('Added text format %format.', array('%format' => $name)), t('New format created.'));
     $this->assertText('hook_filter_format_insert invoked.', t('hook_filter_format_insert was invoked.'));
 
@@ -1798,7 +1798,7 @@ class FilterHooksTestCase extends DrupalWebTestCase {
     // Update text format.
     $edit = array();
     $edit['roles[2]'] = 1;
-    $this->drupalPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
     $this->assertRaw(t('The text format %format has been updated.', array('%format' => $name)), t('Format successfully updated.'));
     $this->assertText('hook_filter_format_update invoked.', t('hook_filter_format_update() was invoked.'));
 
@@ -1809,7 +1809,7 @@ class FilterHooksTestCase extends DrupalWebTestCase {
     $custom_block['body[value]'] = $this->randomName(32);
     // Use the format created.
     $custom_block['body[format]'] = $format_id;
-    $this->drupalPost('admin/structure/block/add', $custom_block, t('Save block'));
+    $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
     $this->assertText(t('The block has been created.'), t('New block successfully created.'));
 
     // Verify the new block is in the database.
@@ -1817,7 +1817,7 @@ class FilterHooksTestCase extends DrupalWebTestCase {
     $this->assertNotNull($bid, t('New block found in database'));
 
     // Disable the text format.
-    $this->drupalPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
+    $this->backdropPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %format.', array('%format' => $name)), t('Format successfully disabled.'));
     $this->assertText('hook_filter_format_disable invoked.', t('hook_filter_format_disable() was invoked.'));
   }

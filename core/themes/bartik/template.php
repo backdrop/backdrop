@@ -46,7 +46,7 @@ function bartik_process_page(&$variables) {
   $variables['hide_site_slogan'] = theme_get_setting('toggle_slogan') ? FALSE : TRUE;
   if ($variables['hide_site_name']) {
     // If toggle_name is FALSE, the site_name will be empty, so we rebuild it.
-    $variables['site_name'] = filter_xss_admin(variable_get('site_name', 'Drupal'));
+    $variables['site_name'] = filter_xss_admin(variable_get('site_name', 'Backdrop'));
   }
   if ($variables['hide_site_slogan']) {
     // If toggle_site_slogan is FALSE, the site_slogan will be empty, so we rebuild it.
@@ -73,14 +73,14 @@ function bartik_process_page(&$variables) {
  * Implements hook_preprocess_maintenance_page().
  */
 function bartik_preprocess_maintenance_page(&$variables) {
-  // By default, site_name is set to Drupal if no db connection is available
+  // By default, site_name is set to Backdrop if no db connection is available
   // or during site installation. Setting site_name to an empty string makes
   // the site and update pages look cleaner.
   // @see template_preprocess_maintenance_page
   if (!$variables['db_is_active']) {
     $variables['site_name'] = '';
   }
-  drupal_add_css(drupal_get_path('theme', 'bartik') . '/css/maintenance-page.css');
+  backdrop_add_css(backdrop_get_path('theme', 'bartik') . '/css/maintenance-page.css');
 }
 
 /**
@@ -93,7 +93,7 @@ function bartik_process_maintenance_page(&$variables) {
   $variables['hide_site_slogan'] = theme_get_setting('toggle_slogan') ? FALSE : TRUE;
   if ($variables['hide_site_name']) {
     // If toggle_name is FALSE, the site_name will be empty, so we rebuild it.
-    $variables['site_name'] = filter_xss_admin(variable_get('site_name', 'Drupal'));
+    $variables['site_name'] = filter_xss_admin(variable_get('site_name', 'Backdrop'));
   }
   if ($variables['hide_site_slogan']) {
     // If toggle_site_slogan is FALSE, the site_slogan will be empty, so we rebuild it.
@@ -132,7 +132,7 @@ function bartik_field__taxonomy_term_reference($variables) {
   // Render the items.
   $output .= ($variables['element']['#label_display'] == 'inline') ? '<ul class="links inline">' : '<ul class="links">';
   foreach ($variables['items'] as $delta => $item) {
-    $output .= '<li class="taxonomy-term-reference-' . $delta . '"' . $variables['item_attributes'][$delta] . '>' . drupal_render($item) . '</li>';
+    $output .= '<li class="taxonomy-term-reference-' . $delta . '"' . $variables['item_attributes'][$delta] . '>' . backdrop_render($item) . '</li>';
   }
   $output .= '</ul>';
 

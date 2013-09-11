@@ -18,7 +18,7 @@ function aggregator_help($path, $arg) {
     case 'admin/help#aggregator':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Aggregator module is an on-site syndicator and news reader that gathers and displays fresh content from RSS-, RDF-, and Atom-based feeds made available across the web. Thousands of sites (particularly news sites and blogs) publish their latest headlines in feeds, using a number of standardized XML-based formats. For more information, see the online handbook entry for <a href="@aggregator-module">Aggregator module</a>.', array('@aggregator-module' => 'http://drupal.org/handbook/modules/aggregator', '@aggregator' => url('aggregator'))) . '</p>';
+      $output .= '<p>' . t('The Aggregator module is an on-site syndicator and news reader that gathers and displays fresh content from RSS-, RDF-, and Atom-based feeds made available across the web. Thousands of sites (particularly news sites and blogs) publish their latest headlines in feeds, using a number of standardized XML-based formats. For more information, see the online handbook entry for <a href="@aggregator-module">Aggregator module</a>.', array('@aggregator-module' => 'http://backdrop.org/handbook/modules/aggregator', '@aggregator' => url('aggregator'))) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Viewing feeds') . '</dt>';
@@ -28,7 +28,7 @@ function aggregator_help($path, $arg) {
       $output .= '<dt>' . t('OPML integration') . '</dt>';
       $output .= '<dd>' . t('A <a href="@aggregator-opml">machine-readable OPML file</a> of all feeds is available. OPML is an XML-based file format used to share outline-structured information such as a list of RSS feeds. Feeds can also be <a href="@import-opml">imported via an OPML file</a>.', array('@aggregator-opml' => url('aggregator/opml'), '@import-opml' => url('admin/config/services/aggregator'))) . '</dd>';
       $output .= '<dt>' . t('Configuring cron') . '</dt>';
-      $output .= '<dd>' . t('A correctly configured <a href="@cron">cron maintenance task</a> is required to update feeds automatically.', array('@cron' => 'http://drupal.org/cron')) . '</dd>';
+      $output .= '<dd>' . t('A correctly configured <a href="@cron">cron maintenance task</a> is required to update feeds automatically.', array('@cron' => 'http://backdrop.org/cron')) . '</dd>';
       $output .= '</dl>';
       return $output;
     case 'admin/config/services/aggregator':
@@ -40,7 +40,7 @@ function aggregator_help($path, $arg) {
     case 'admin/config/services/aggregator/add/category':
       return '<p>' . t('Categories allow feed items from different feeds to be grouped together. For example, several sport-related feeds may belong to a category named <em>Sports</em>. Feed items may be grouped automatically (by selecting a category when creating or editing a feed) or manually (via the <em>Categorize</em> page available from feed item listings). Each category provides its own feed page and block.') . '</p>';
     case 'admin/config/services/aggregator/add/opml':
-      return '<p>' . t('<acronym title="Outline Processor Markup Language">OPML</acronym> is an XML format used to exchange multiple feeds between aggregators. A single OPML document may contain a collection of many feeds. Drupal can parse such a file and import all feeds at once, saving you the effort of adding them manually. You may either upload a local file from your computer or enter a URL where Drupal can download it.') . '</p>';
+      return '<p>' . t('<acronym title="Outline Processor Markup Language">OPML</acronym> is an XML format used to exchange multiple feeds between aggregators. A single OPML document may contain a collection of many feeds. Backdrop can parse such a file and import all feeds at once, saving you the effort of adding them manually. You may either upload a local file from your computer or enter a URL where Backdrop can download it.') . '</p>';
   }
 }
 
@@ -106,7 +106,7 @@ function aggregator_menu() {
   );
   $items['admin/config/services/aggregator/add/feed'] = array(
     'title' => 'Add feed',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_form_feed'),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_ACTION,
@@ -114,7 +114,7 @@ function aggregator_menu() {
   );
   $items['admin/config/services/aggregator/add/category'] = array(
     'title' => 'Add category',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_form_category'),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_ACTION,
@@ -122,7 +122,7 @@ function aggregator_menu() {
   );
   $items['admin/config/services/aggregator/add/opml'] = array(
     'title' => 'Import OPML',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_form_opml'),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_ACTION,
@@ -130,7 +130,7 @@ function aggregator_menu() {
   );
   $items['admin/config/services/aggregator/remove/%aggregator_feed'] = array(
     'title' => 'Remove items',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_admin_remove_feed', 5),
     'access arguments' => array('administer news feeds'),
     'file' => 'aggregator.admin.inc',
@@ -150,7 +150,7 @@ function aggregator_menu() {
   $items['admin/config/services/aggregator/settings'] = array(
     'title' => 'Settings',
     'description' => 'Configure the behavior of the feed aggregator, including when to discard feed items and how to present feed items and categories.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_admin_form'),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_TASK,
@@ -204,7 +204,7 @@ function aggregator_menu() {
   );
   $items['aggregator/categories/%aggregator_category/categorize'] = array(
     'title' => 'Categorize',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_page_category_form', 2),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_TASK,
@@ -212,7 +212,7 @@ function aggregator_menu() {
   );
   $items['aggregator/categories/%aggregator_category/configure'] = array(
     'title' => 'Configure',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_form_category', 2),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_TASK,
@@ -232,7 +232,7 @@ function aggregator_menu() {
   );
   $items['aggregator/sources/%aggregator_feed/categorize'] = array(
     'title' => 'Categorize',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_page_source_form', 2),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_TASK,
@@ -240,7 +240,7 @@ function aggregator_menu() {
   );
   $items['aggregator/sources/%aggregator_feed/configure'] = array(
     'title' => 'Configure',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_form_feed', 2),
     'access arguments' => array('administer news feeds'),
     'type' => MENU_LOCAL_TASK,
@@ -249,14 +249,14 @@ function aggregator_menu() {
   );
   $items['admin/config/services/aggregator/edit/feed/%aggregator_feed'] = array(
     'title' => 'Edit feed',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_form_feed', 6),
     'access arguments' => array('administer news feeds'),
     'file' => 'aggregator.admin.inc',
   );
   $items['admin/config/services/aggregator/edit/category/%aggregator_category'] = array(
     'title' => 'Edit category',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aggregator_form_category', 6),
     'access arguments' => array('administer news feeds'),
     'file' => 'aggregator.admin.inc',
@@ -313,7 +313,7 @@ function aggregator_cron() {
     ':time' => REQUEST_TIME,
     ':never' => AGGREGATOR_CLEAR_NEVER
   ));
-  $queue = DrupalQueue::get('aggregator_feeds');
+  $queue = BackdropQueue::get('aggregator_feeds');
   foreach ($result as $feed) {
     if ($queue->createItem($feed)) {
       // Add timestamp to avoid queueing item more than once.
@@ -369,7 +369,7 @@ function aggregator_block_configure($delta = '') {
       '#type' => 'select',
       '#title' => t('Number of news items in block'),
       '#default_value' => $value,
-      '#options' => drupal_map_assoc(range(2, 20)),
+      '#options' => backdrop_map_assoc(range(2, 20)),
     );
     return $form;
   }
@@ -591,15 +591,15 @@ function _aggregator_get_variables() {
   // Fetch the feed.
   $fetcher = variable_get('aggregator_fetcher', 'aggregator');
   if ($fetcher == 'aggregator') {
-    include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'aggregator') . '/aggregator.fetcher.inc';
+    include_once DRUPAL_ROOT . '/' . backdrop_get_path('module', 'aggregator') . '/aggregator.fetcher.inc';
   }
   $parser = variable_get('aggregator_parser', 'aggregator');
   if ($parser == 'aggregator') {
-    include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'aggregator') . '/aggregator.parser.inc';
+    include_once DRUPAL_ROOT . '/' . backdrop_get_path('module', 'aggregator') . '/aggregator.parser.inc';
   }
   $processors = variable_get('aggregator_processors', array('aggregator'));
   if (in_array('aggregator', $processors)) {
-    include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'aggregator') . '/aggregator.processor.inc';
+    include_once DRUPAL_ROOT . '/' . backdrop_get_path('module', 'aggregator') . '/aggregator.processor.inc';
   }
   return array($fetcher, $parser, $processors);
 }
@@ -646,7 +646,7 @@ function aggregator_refresh($feed) {
       }
 
       watchdog('aggregator', 'There is new syndicated content from %site.', array('%site' => $feed->title));
-      drupal_set_message(t('There is new syndicated content from %site.', array('%site' => $feed->title)));
+      backdrop_set_message(t('There is new syndicated content from %site.', array('%site' => $feed->title)));
 
       // If there are items on the feed, let all enabled processors do their work on it.
       if (@count($feed->items)) {
@@ -657,7 +657,7 @@ function aggregator_refresh($feed) {
     }
   }
   else {
-    drupal_set_message(t('There is no new syndicated content from %site.', array('%site' => $feed->title)));
+    backdrop_set_message(t('There is no new syndicated content from %site.', array('%site' => $feed->title)));
   }
 
   // Regardless of successful or not, indicate that this feed has been checked.
@@ -682,7 +682,7 @@ function aggregator_refresh($feed) {
  *   An object describing the feed.
  */
 function aggregator_feed_load($fid) {
-  $feeds = &drupal_static(__FUNCTION__);
+  $feeds = &backdrop_static(__FUNCTION__);
   if (!isset($feeds[$fid])) {
     $feeds[$fid] = db_query('SELECT * FROM {aggregator_feed} WHERE fid = :fid', array(':fid' => $fid))->fetchObject();
   }
@@ -700,7 +700,7 @@ function aggregator_feed_load($fid) {
  *   An associative array describing the category.
  */
 function aggregator_category_load($cid) {
-  $categories = &drupal_static(__FUNCTION__);
+  $categories = &backdrop_static(__FUNCTION__);
   if (!isset($categories[$cid])) {
     $categories[$cid] = db_query('SELECT * FROM {aggregator_category} WHERE cid = :cid', array(':cid' => $cid))->fetchAssoc();
   }
@@ -770,7 +770,7 @@ function aggregator_sanitize_configuration() {
 }
 
 /**
- * Helper function for drupal_map_assoc.
+ * Helper function for backdrop_map_assoc.
  *
  * @param $count
  *   Items count.

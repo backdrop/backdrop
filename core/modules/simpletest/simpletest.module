@@ -13,11 +13,11 @@ function simpletest_help($path, $arg) {
     case 'admin/help#simpletest':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Testing module provides a framework for running automated unit tests. It can be used to verify a working state of Drupal before and after any code changes, or as a means for developers to write and execute tests for their modules. For more information, see the online handbook entry for <a href="@simpletest">Testing module</a>.', array('@simpletest' => 'http://drupal.org/handbook/modules/simpletest', '@blocks' => url('admin/structure/block'))) . '</p>';
+      $output .= '<p>' . t('The Testing module provides a framework for running automated unit tests. It can be used to verify a working state of Backdrop before and after any code changes, or as a means for developers to write and execute tests for their modules. For more information, see the online handbook entry for <a href="@simpletest">Testing module</a>.', array('@simpletest' => 'http://backdrop.org/handbook/modules/simpletest', '@blocks' => url('admin/structure/block'))) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Running tests') . '</dt>';
-      $output .= '<dd>' . t('Visit the <a href="@admin-simpletest">Testing page</a> to display a list of available tests. For comprehensive testing, select <em>all</em> tests, or individually select tests for more targeted testing. Note that it might take several minutes for all tests to complete. For more information on creating and modifying your own tests, see the <a href="@simpletest-api">Testing API Documentation</a> in the Drupal handbook.', array('@simpletest-api' => 'http://drupal.org/simpletest', '@admin-simpletest' => url('admin/config/development/testing'))) . '</dd>';
+      $output .= '<dd>' . t('Visit the <a href="@admin-simpletest">Testing page</a> to display a list of available tests. For comprehensive testing, select <em>all</em> tests, or individually select tests for more targeted testing. Note that it might take several minutes for all tests to complete. For more information on creating and modifying your own tests, see the <a href="@simpletest-api">Testing API Documentation</a> in the Backdrop handbook.', array('@simpletest-api' => 'http://backdrop.org/simpletest', '@admin-simpletest' => url('admin/config/development/testing'))) . '</dd>';
       $output .= '<dd>' . t('After the tests run, a message will be displayed next to each test group indicating whether tests within it passed, failed, or had exceptions. A pass means that the test returned the expected results, while fail means that it did not. An exception normally indicates an error outside of the test, such as a PHP warning or notice. If there were failures or exceptions, the results will be expanded to show details, and the tests that had failures or exceptions will be indicated in red or pink rows. You can then use these results to refine your code and tests, until all tests pass.') . '</dd>';
       $output .= '</dl>';
       return $output;
@@ -30,9 +30,9 @@ function simpletest_help($path, $arg) {
 function simpletest_menu() {
   $items['admin/config/development/testing'] = array(
     'title' => 'Testing',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('simpletest_test_form'),
-    'description' => 'Run tests against Drupal core and your modules. These tests help assure that your site code is working as designed.',
+    'description' => 'Run tests against Backdrop core and your modules. These tests help assure that your site code is working as designed.',
     'access arguments' => array('administer unit tests'),
     'file' => 'simpletest.pages.inc',
     'weight' => -5,
@@ -43,7 +43,7 @@ function simpletest_menu() {
   );
   $items['admin/config/development/testing/settings'] = array(
     'title' => 'Settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('simpletest_settings_form'),
     'access arguments' => array('administer unit tests'),
     'type' => MENU_LOCAL_TASK,
@@ -51,7 +51,7 @@ function simpletest_menu() {
   );
   $items['admin/config/development/testing/results/%'] = array(
     'title' => 'Test result',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('simpletest_result_form', 5),
     'description' => 'View result of tests.',
     'access arguments' => array('administer unit tests'),
@@ -94,7 +94,7 @@ function simpletest_theme() {
 function simpletest_js_alter(&$javascript) {
   // Since SimpleTest is a special use case for the table select, stick the
   // SimpleTest JavaScript above the table select.
-  $simpletest = drupal_get_path('module', 'simpletest') . '/simpletest.js';
+  $simpletest = backdrop_get_path('module', 'simpletest') . '/simpletest.js';
   if (array_key_exists($simpletest, $javascript) && array_key_exists('core/misc/tableselect.js', $javascript)) {
     $javascript[$simpletest]['weight'] = $javascript['core/misc/tableselect.js']['weight'] - 1;
   }
@@ -119,10 +119,10 @@ function _simpletest_format_summary_line($summary) {
  * @param $test_list
  *   List of tests to run.
  * @param $reporter
- *   Which reporter to use. Allowed values are: text, xml, html and drupal,
- *   drupal being the default.
+ *   Which reporter to use. Allowed values are: text, xml, html and backdrop,
+ *   backdrop being the default.
  */
-function simpletest_run_tests($test_list, $reporter = 'drupal') {
+function simpletest_run_tests($test_list, $reporter = 'backdrop') {
   $test_id = db_insert('simpletest_test_id')
     ->useDefaults(array('test_id'))
     ->execute();
@@ -143,7 +143,7 @@ function simpletest_run_tests($test_list, $reporter = 'drupal') {
     ),
     'finished' => '_simpletest_batch_finished',
     'progress_message' => '',
-    'css' => array(drupal_get_path('module', 'simpletest') . '/simpletest.css'),
+    'css' => array(backdrop_get_path('module', 'simpletest') . '/simpletest.css'),
     'init_message' => t('Processing test @num of @max - %test.', array('%test' => $info['name'], '@num' => '1', '@max' => count($test_list))),
   );
   batch_set($batch);
@@ -206,7 +206,7 @@ function _simpletest_batch_operation($test_list_init, $test_id, &$context) {
 
 function _simpletest_batch_finished($success, $results, $operations, $elapsed) {
   if ($success) {
-    drupal_set_message(t('The test run finished in @elapsed.', array('@elapsed' => $elapsed)));
+    backdrop_set_message(t('The test run finished in @elapsed.', array('@elapsed' => $elapsed)));
   }
   else {
     // Use the test_id passed as a parameter to _simpletest_batch_operation().
@@ -218,8 +218,8 @@ function _simpletest_batch_finished($success, $results, $operations, $elapsed) {
     list($last_prefix, $last_test_class) = simpletest_last_test_get($test_id);
     simpletest_log_read($test_id, $last_prefix, $last_test_class);
 
-    drupal_set_message(t('The test run did not successfully finish.'), 'error');
-    drupal_set_message(t('Use the <em>Clean environment</em> button to clean-up temporary files and tables.'), 'warning');
+    backdrop_set_message(t('The test run did not successfully finish.'), 'error');
+    backdrop_set_message(t('Use the <em>Clean environment</em> button to clean-up temporary files and tables.'), 'warning');
   }
   module_invoke_all('test_group_finished');
 }
@@ -269,11 +269,11 @@ function simpletest_log_read($test_id, $prefix, $test_class, $during_test = FALS
           'line' => $match[4],
           'file' => $match[3],
         );
-        DrupalTestCase::insertAssert($test_id, $test_class, FALSE, $match[2], $match[1], $caller);
+        BackdropTestCase::insertAssert($test_id, $test_class, FALSE, $match[2], $match[1], $caller);
       }
       else {
         // Unknown format, place the entire message in the log.
-        DrupalTestCase::insertAssert($test_id, $test_class, FALSE, $line, 'Fatal error');
+        BackdropTestCase::insertAssert($test_id, $test_class, FALSE, $line, 'Fatal error');
       }
       $found = TRUE;
     }
@@ -306,7 +306,7 @@ function simpletest_log_read($test_id, $prefix, $test_class, $during_test = FALS
  * @see simpletest_registry_files_alter()
  */
 function simpletest_test_get_all() {
-  $groups = &drupal_static(__FUNCTION__);
+  $groups = &backdrop_static(__FUNCTION__);
 
   if (!$groups) {
     // Load test information from cache if available, otherwise retrieve the
@@ -329,7 +329,7 @@ function simpletest_test_get_all() {
           // If this test class requires a non-existing module, skip it.
           if (!empty($info['dependencies'])) {
             foreach ($info['dependencies'] as $module) {
-              if (!drupal_get_filename('module', $module)) {
+              if (!backdrop_get_filename('module', $module)) {
                 continue 2;
               }
             }
@@ -346,7 +346,7 @@ function simpletest_test_get_all() {
       }
 
       // Allow modules extending core tests to disable originals.
-      drupal_alter('simpletest', $groups);
+      backdrop_alter('simpletest', $groups);
       cache()->set('simpletest', $groups);
     }
   }
@@ -413,10 +413,10 @@ function simpletest_clean_environment() {
   simpletest_clean_temporary_directories();
   if (variable_get('simpletest_clear_results', TRUE)) {
     $count = simpletest_clean_results_table();
-    drupal_set_message(format_plural($count, 'Removed 1 test result.', 'Removed @count test results.'));
+    backdrop_set_message(format_plural($count, 'Removed 1 test result.', 'Removed @count test results.'));
   }
   else {
-    drupal_set_message(t('Clear results is disabled and the test results table will not be cleared.'), 'warning');
+    backdrop_set_message(t('Clear results is disabled and the test results table will not be cleared.'), 'warning');
   }
 
   // Detect test classes that have been added, renamed or deleted.
@@ -429,7 +429,7 @@ function simpletest_clean_environment() {
  */
 function simpletest_clean_database() {
   $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest}') . '%');
-  $schema = drupal_get_schema_unprocessed('simpletest');
+  $schema = backdrop_get_schema_unprocessed('simpletest');
   $count = 0;
   foreach (array_diff_key($tables, $schema) as $table) {
     // Strip the prefix and skip tables without digits following "simpletest",
@@ -441,10 +441,10 @@ function simpletest_clean_database() {
   }
 
   if ($count > 0) {
-    drupal_set_message(format_plural($count, 'Removed 1 leftover table.', 'Removed @count leftover tables.'));
+    backdrop_set_message(format_plural($count, 'Removed 1 leftover table.', 'Removed @count leftover tables.'));
   }
   else {
-    drupal_set_message(t('No leftover tables to remove.'));
+    backdrop_set_message(t('No leftover tables to remove.'));
   }
 }
 
@@ -465,10 +465,10 @@ function simpletest_clean_temporary_directories() {
   }
 
   if ($count > 0) {
-    drupal_set_message(format_plural($count, 'Removed 1 temporary directory.', 'Removed @count temporary directories.'));
+    backdrop_set_message(format_plural($count, 'Removed 1 temporary directory.', 'Removed @count temporary directories.'));
   }
   else {
-    drupal_set_message(t('No temporary directories to remove.'));
+    backdrop_set_message(t('No temporary directories to remove.'));
   }
 }
 

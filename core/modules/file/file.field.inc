@@ -37,7 +37,7 @@ function file_field_settings_form($field, $instance, $has_data) {
   $defaults = field_info_field_settings($field['type']);
   $settings = array_merge($defaults, $field['settings']);
 
-  $form['#attached']['js'][] = drupal_get_path('module', 'file') . '/file.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'file') . '/file.js';
 
   $form['display_field'] = array(
     '#type' => 'checkbox',
@@ -659,7 +659,7 @@ function file_field_widget_process($element, &$form_state, $form) {
   if ($field['cardinality'] != 1) {
     $parents = array_slice($element['#array_parents'], 0, -1);
     $new_path = 'file/ajax/' . implode('/', $parents) . '/' . $form['form_build_id']['#value'];
-    $field_element = drupal_array_get_nested_value($form, $parents);
+    $field_element = backdrop_array_get_nested_value($form, $parents);
     $new_wrapper = $field_element['#id'] . '-ajax-wrapper';
     foreach (element_children($element) as $key) {
       if (isset($element[$key]['#ajax'])) {
@@ -763,17 +763,17 @@ function file_field_widget_submit($form, &$form_state) {
   // have #default_value set appropriately for the current state of the field,
   // so nothing is lost in doing this.
   $parents = array_slice($form_state['triggering_element']['#parents'], 0, -2);
-  drupal_array_set_nested_value($form_state['input'], $parents, NULL);
+  backdrop_array_set_nested_value($form_state['input'], $parents, NULL);
 
   $button = $form_state['triggering_element'];
 
   // Go one level up in the form, to the widgets container.
-  $element = drupal_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
+  $element = backdrop_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
   $field_name = $element['#field_name'];
   $langcode = $element['#language'];
   $parents = $element['#field_parents'];
 
-  $submitted_values = drupal_array_get_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2));
+  $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2));
   foreach ($submitted_values as $delta => $submitted_value) {
     if (!$submitted_value['fid']) {
       unset($submitted_values[$delta]);
@@ -784,7 +784,7 @@ function file_field_widget_submit($form, &$form_state) {
   $submitted_values = array_values($submitted_values);
 
   // Update form_state values.
-  drupal_array_set_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2), $submitted_values);
+  backdrop_array_set_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2), $submitted_values);
 
   // Update items.
   $field_state = field_form_get_state($parents, $field_name, $langcode, $form_state);
@@ -811,7 +811,7 @@ function theme_file_widget($variables) {
     // Add the file size after the file name.
     $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
   }
-  $output .= drupal_render_children($element);
+  $output .= backdrop_render_children($element);
   $output .= '</div>';
 
   return $output;
@@ -881,10 +881,10 @@ function theme_file_widget_multiple($variables) {
 
     // Render everything else together in a column, without the normal wrappers.
     $widget['#theme_wrappers'] = array();
-    $information = drupal_render($widget);
+    $information = backdrop_render($widget);
 
     // Render the previously hidden elements, using render() instead of
-    // drupal_render(), to undo the earlier hide().
+    // backdrop_render(), to undo the earlier hide().
     $operations = '';
     foreach ($operations_elements as $operation_element) {
       $operations .= render($operation_element);
@@ -914,11 +914,11 @@ function theme_file_widget_multiple($variables) {
     );
   }
 
-  drupal_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
+  backdrop_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
 
   $output = '';
   $output = empty($rows) ? '' : theme('table', array('header' => $headers, 'rows' => $rows, 'attributes' => array('id' => $table_id)));
-  $output .= drupal_render_children($element);
+  $output .= backdrop_render_children($element);
   return $output;
 }
 

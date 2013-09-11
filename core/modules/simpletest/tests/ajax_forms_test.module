@@ -13,25 +13,25 @@ function ajax_forms_test_menu() {
   $items = array();
   $items['ajax_forms_test_get_form'] = array(
     'title' => 'AJAX forms simple form test',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ajax_forms_test_simple_form'),
     'access callback' => TRUE,
   );
   $items['ajax_forms_test_ajax_commands_form'] = array(
     'title' => 'AJAX forms AJAX commands test',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ajax_forms_test_ajax_commands_form'),
     'access callback' => TRUE,
   );
   $items['ajax_validation_test'] = array(
     'title' => 'AJAX Validation Test',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ajax_forms_test_validation_form'),
     'access callback' => TRUE,
   );
   $items['ajax_forms_test_lazy_load_form'] = array(
     'title' => 'AJAX forms lazy load test',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ajax_forms_test_lazy_load_form'),
     'access callback' => TRUE,
   );
@@ -452,15 +452,15 @@ function ajax_forms_test_validation_form($form, &$form_state) {
  * Submit handler for the validation form.
  */
 function ajax_forms_test_validation_form_submit($form, $form_state) {
-  drupal_set_message(t("Validation form submitted"));
+  backdrop_set_message(t("Validation form submitted"));
 }
 
 /**
  * Ajax callback for the 'drivertext' element of the validation form.
  */
 function ajax_forms_test_validation_form_callback($form, $form_state) {
-  drupal_set_message("ajax_forms_test_validation_form_callback invoked");
-  drupal_set_message(t("Callback: drivertext=%drivertext, spare_required_field=%spare_required_field", array('%drivertext' => $form_state['values']['drivertext'], '%spare_required_field' => $form_state['values']['spare_required_field'])));
+  backdrop_set_message("ajax_forms_test_validation_form_callback invoked");
+  backdrop_set_message(t("Callback: drivertext=%drivertext, spare_required_field=%spare_required_field", array('%drivertext' => $form_state['values']['drivertext'], '%spare_required_field' => $form_state['values']['spare_required_field'])));
   return '<div id="message_area">ajax_forms_test_validation_form_callback at ' . date('c') . '</div>';
 }
 
@@ -487,9 +487,9 @@ function ajax_forms_test_lazy_load_form($form, &$form_state) {
  */
 function ajax_forms_test_lazy_load_form_submit($form, &$form_state) {
   if ($form_state['values']['add_files']) {
-    drupal_add_js(array('ajax_forms_test_lazy_load_form_submit' => 'executed'), 'setting');
-    drupal_add_css(drupal_get_path('module', 'system') . '/system.admin.css');
-    drupal_add_js(drupal_get_path('module', 'system') . '/system.js');
+    backdrop_add_js(array('ajax_forms_test_lazy_load_form_submit' => 'executed'), 'setting');
+    backdrop_add_css(backdrop_get_path('module', 'system') . '/system.admin.css');
+    backdrop_add_js(backdrop_get_path('module', 'system') . '/system.js');
   }
   $form_state['rebuild'] = TRUE;
 }

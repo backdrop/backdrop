@@ -8,7 +8,7 @@
 /**
  * Tests for the update dependency ordering system.
  */
-class UpdateDependencyOrderingTestCase extends DrupalWebTestCase {
+class UpdateDependencyOrderingTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Update dependency ordering',
@@ -58,7 +58,7 @@ class UpdateDependencyOrderingTestCase extends DrupalWebTestCase {
 /**
  * Tests for missing update dependencies.
  */
-class UpdateDependencyMissingTestCase extends DrupalWebTestCase {
+class UpdateDependencyMissingTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Missing update dependencies',
@@ -88,7 +88,7 @@ class UpdateDependencyMissingTestCase extends DrupalWebTestCase {
 /**
  * Tests for the invocation of hook_update_dependencies().
  */
-class UpdateDependencyHookInvocationTestCase extends DrupalWebTestCase {
+class UpdateDependencyHookInvocationTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Update dependency hook invocation',

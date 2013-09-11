@@ -28,11 +28,11 @@ function hook_language_init() {
 
   switch ($language_interface->langcode) {
     case 'it':
-      $conf['site_name'] = 'Il mio sito Drupal';
+      $conf['site_name'] = 'Il mio sito Backdrop';
       break;
 
     case 'fr':
-      $conf['site_name'] = 'Mon site Drupal';
+      $conf['site_name'] = 'Mon site Backdrop';
       break;
   }
 }
@@ -129,7 +129,7 @@ function hook_language_types_info_alter(array &$language_types) {
  *   - "description": A description of the language provider.
  *   - "config": An internal path pointing to the language provider
  *     configuration page.
- *   - "cache": The value Drupal's page cache should be set to for the current
+ *   - "cache": The value Backdrop's page cache should be set to for the current
  *     language provider to be invoked.
  */
 function hook_language_negotiation_info() {
@@ -140,7 +140,7 @@ function hook_language_negotiation_info() {
         'switcher' => 'custom_language_switcher_callback',
         'url_rewrite' => 'custom_language_url_rewrite_callback',
       ),
-      'file' => drupal_get_path('module', 'custom') . '/custom.module',
+      'file' => backdrop_get_path('module', 'custom') . '/custom.module',
       'weight' => -4,
       'types' => array('custom_language_type'),
       'name' => t('Custom language provider'),

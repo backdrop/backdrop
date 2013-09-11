@@ -2,35 +2,35 @@
 
 /**
  * @file
- * Functions to handle paths in Drupal, including path aliasing.
+ * Functions to handle paths in Backdrop, including path aliasing.
  *
  * These functions are not loaded for cached pages, but modules that need
  * to use them in hook_boot() or hook exit() can make them available, by
- * executing "drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);".
+ * executing "backdrop_bootstrap(DRUPAL_BOOTSTRAP_FULL);".
  */
 
 /**
  * Initialize the $_GET['q'] variable to the proper normal path.
  */
-function drupal_path_initialize() {
-  // Ensure $_GET['q'] is set before calling drupal_normal_path(), to support
+function backdrop_path_initialize() {
+  // Ensure $_GET['q'] is set before calling backdrop_normal_path(), to support
   // path caching with hook_url_inbound_alter().
   if (empty($_GET['q'])) {
     $_GET['q'] = variable_get('site_frontpage', 'user');
   }
-  $_GET['q'] = drupal_get_normal_path($_GET['q']);
+  $_GET['q'] = backdrop_get_normal_path($_GET['q']);
 }
 
 /**
- * Given an alias, return its Drupal system URL if one exists. Given a Drupal
+ * Given an alias, return its Backdrop system URL if one exists. Given a Backdrop
  * system URL return one of its aliases if such a one exists. Otherwise,
  * return FALSE.
  *
  * @param $action
  *   One of the following values:
  *   - wipe: delete the alias cache.
- *   - alias: return an alias for a given Drupal system path (if one exists).
- *   - source: return the Drupal system URL for a path alias (if one exists).
+ *   - alias: return an alias for a given Backdrop system path (if one exists).
+ *   - source: return the Backdrop system URL for a path alias (if one exists).
  * @param $path
  *   The path to investigate for corresponding aliases or system URLs.
  * @param $langcode
@@ -39,17 +39,17 @@ function drupal_path_initialize() {
  *   language.
  *
  * @return
- *   Either a Drupal system path, an aliased path, or FALSE if no path was
+ *   Either a Backdrop system path, an aliased path, or FALSE if no path was
  *   found.
  */
-function drupal_lookup_path($action, $path = '', $langcode = NULL) {
+function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
   global $language_url;
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['cache'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['cache'] = &backdrop_static(__FUNCTION__);
   }
-  $cache = &$drupal_static_fast['cache'];
+  $cache = &$backdrop_static_fast['cache'];
 
   if (!isset($cache)) {
     $cache = array(
@@ -66,7 +66,7 @@ function drupal_lookup_path($action, $path = '', $langcode = NULL) {
   if (!isset($cache['whitelist'])) {
     $cache['whitelist'] = variable_get('path_alias_whitelist', NULL);
     if (!isset($cache['whitelist'])) {
-      $cache['whitelist'] = drupal_path_alias_whitelist_rebuild();
+      $cache['whitelist'] = backdrop_path_alias_whitelist_rebuild();
     }
   }
 
@@ -78,11 +78,11 @@ function drupal_lookup_path($action, $path = '', $langcode = NULL) {
 
   if ($action == 'wipe') {
     $cache = array();
-    $cache['whitelist'] = drupal_path_alias_whitelist_rebuild();
+    $cache['whitelist'] = backdrop_path_alias_whitelist_rebuild();
   }
   elseif ($cache['whitelist'] && $path != '') {
     if ($action == 'alias') {
-      // During the first call to drupal_lookup_path() per language, load the
+      // During the first call to backdrop_lookup_path() per language, load the
       // expected system paths for the page from cache.
       if (!empty($cache['first_call'])) {
         $cache['first_call'] = FALSE;
@@ -181,7 +181,7 @@ function drupal_lookup_path($action, $path = '', $langcode = NULL) {
         else {
           // We can't record anything into $map because we do not have a valid
           // index and there is no need because we have not learned anything
-          // about any Drupal path. Thus cache to $no_source.
+          // about any Backdrop path. Thus cache to $no_source.
           $cache['no_source'][$langcode][$path] = TRUE;
         }
       }
@@ -198,16 +198,16 @@ function drupal_lookup_path($action, $path = '', $langcode = NULL) {
  * Cache an array of the system paths available on each page. We assume
  * that aliases will be needed for the majority of these paths during
  * subsequent requests, and load them in a single query during
- * drupal_lookup_path().
+ * backdrop_lookup_path().
  */
-function drupal_cache_system_paths() {
+function backdrop_cache_system_paths() {
   // Check if the system paths for this page were loaded from cache in this
   // request to avoid writing to cache on every request.
-  $cache = &drupal_static('drupal_lookup_path', array());
+  $cache = &backdrop_static('backdrop_lookup_path', array());
   if (empty($cache['system_paths']) && !empty($cache['map'])) {
     // Generate a cache ID (cid) specifically for this page.
     $cid = current_path();
-    // The static $map array used by drupal_lookup_path() includes all
+    // The static $map array used by backdrop_lookup_path() includes all
     // system paths for the page request.
     if ($paths = current($cache['map'])) {
       $data = array_keys($paths);
@@ -218,13 +218,13 @@ function drupal_cache_system_paths() {
 }
 
 /**
- * Given an internal Drupal path, return the alias set by the administrator.
+ * Given an internal Backdrop path, return the alias set by the administrator.
  *
  * If no path is provided, the function will return the alias of the current
  * page.
  *
  * @param $path
- *   An internal Drupal path.
+ *   An internal Backdrop path.
  * @param $langcode
  *   An optional language code to look up the path in.
  *
@@ -232,13 +232,13 @@ function drupal_cache_system_paths() {
  *   An aliased path if one was found, or the original path if no alias was
  *   found.
  */
-function drupal_get_path_alias($path = NULL, $langcode = NULL) {
+function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
   // If no path is specified, use the current page's path.
   if ($path == NULL) {
     $path = $_GET['q'];
   }
   $result = $path;
-  if ($alias = drupal_lookup_path('alias', $path, $langcode)) {
+  if ($alias = backdrop_lookup_path('alias', $path, $langcode)) {
     $result = $alias;
   }
   return $result;
@@ -248,7 +248,7 @@ function drupal_get_path_alias($path = NULL, $langcode = NULL) {
  * Given a path alias, return the internal path it represents.
  *
  * @param $path
- *   A Drupal path alias.
+ *   A Backdrop path alias.
  * @param $langcode
  *   An optional language code to look up the path in.
  *
@@ -256,15 +256,15 @@ function drupal_get_path_alias($path = NULL, $langcode = NULL) {
  *   The internal path represented by the alias, or the original alias if no
  *   internal path was found.
  */
-function drupal_get_normal_path($path, $langcode = NULL) {
+function backdrop_get_normal_path($path, $langcode = NULL) {
   $original_path = $path;
 
   // Lookup the path alias first.
-  if ($source = drupal_lookup_path('source', $path, $langcode)) {
+  if ($source = backdrop_lookup_path('source', $path, $langcode)) {
     $path = $source;
   }
 
-  // Allow other modules to alter the inbound URL. We cannot use drupal_alter()
+  // Allow other modules to alter the inbound URL. We cannot use backdrop_alter()
   // here because we need to run hook_url_inbound_alter() in the reverse order
   // of hook_url_outbound_alter().
   foreach (array_reverse(module_implements('url_inbound_alter')) as $module) {
@@ -281,16 +281,16 @@ function drupal_get_normal_path($path, $langcode = NULL) {
  * @return
  *   Boolean value: TRUE if the current page is the front page; FALSE if otherwise.
  */
-function drupal_is_front_page() {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['is_front_page'] = &drupal_static(__FUNCTION__);
+function backdrop_is_front_page() {
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['is_front_page'] = &backdrop_static(__FUNCTION__);
   }
-  $is_front_page = &$drupal_static_fast['is_front_page'];
+  $is_front_page = &$backdrop_static_fast['is_front_page'];
 
   if (!isset($is_front_page)) {
-    // As drupal_path_initialize updates $_GET['q'] with the 'site_frontpage' path,
+    // As backdrop_path_initialize updates $_GET['q'] with the 'site_frontpage' path,
     // we can check it against the 'site_frontpage' variable.
     $is_front_page = ($_GET['q'] == variable_get('site_frontpage', 'user'));
   }
@@ -309,8 +309,8 @@ function drupal_is_front_page() {
  * @return
  *   Boolean value: TRUE if the path matches a pattern, FALSE otherwise.
  */
-function drupal_match_path($path, $patterns) {
-  $regexps = &drupal_static(__FUNCTION__);
+function backdrop_match_path($path, $patterns) {
+  $regexps = &backdrop_static(__FUNCTION__);
 
   if (!isset($regexps[$patterns])) {
     // Convert path settings to a regular expression.
@@ -336,18 +336,18 @@ function drupal_match_path($path, $patterns) {
  *
  * Examples:
  * - http://example.com/node/306 returns "node/306".
- * - http://example.com/drupalfolder/node/306 returns "node/306" while
- *   base_path() returns "/drupalfolder/".
+ * - http://example.com/backdropfolder/node/306 returns "node/306" while
+ *   base_path() returns "/backdropfolder/".
  * - http://example.com/path/alias (which is a path alias for node/306) returns
  *   "node/306" as opposed to the path alias.
  *
  * This function is not available in hook_boot() so use $_GET['q'] instead.
  * However, be careful when doing that because in the case of Example #3
  * $_GET['q'] will contain "path/alias". If "node/306" is needed, calling
- * drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL) makes this function available.
+ * backdrop_bootstrap(DRUPAL_BOOTSTRAP_FULL) makes this function available.
  *
  * @return
- *   The current Drupal URL path.
+ *   The current Backdrop URL path.
  *
  * @see request_path()
  */
@@ -364,7 +364,7 @@ function current_path() {
  * @return
  *   An array containing a white list of path aliases.
  */
-function drupal_path_alias_whitelist_rebuild($source = NULL) {
+function backdrop_path_alias_whitelist_rebuild($source = NULL) {
   // When paths are inserted, only rebuild the whitelist if the system path
   // has a top level component which is not already in the whitelist.
   if (!empty($source)) {
@@ -439,11 +439,11 @@ function path_save(&$path) {
   }
 
   if (empty($path['pid'])) {
-    drupal_write_record('url_alias', $path);
+    backdrop_write_record('url_alias', $path);
     module_invoke_all('path_insert', $path);
   }
   else {
-    drupal_write_record('url_alias', $path, array('pid'));
+    backdrop_write_record('url_alias', $path, array('pid'));
     module_invoke_all('path_update', $path);
   }
 
@@ -451,7 +451,7 @@ function path_save(&$path) {
   unset($path['original']);
 
   // Clear the static alias cache.
-  drupal_clear_path_cache($path['source']);
+  backdrop_clear_path_cache($path['source']);
 }
 
 /**
@@ -471,7 +471,7 @@ function path_delete($criteria) {
   }
   $query->execute();
   module_invoke_all('path_delete', $path);
-  drupal_clear_path_cache($path['source']);
+  backdrop_clear_path_cache($path['source']);
 }
 
 /**
@@ -483,7 +483,7 @@ function path_delete($criteria) {
  * non-administrative.
  *
  * @param $path
- *   A Drupal path.
+ *   A Backdrop path.
  *
  * @return
  *   TRUE if the path is administrative, FALSE otherwise.
@@ -493,11 +493,11 @@ function path_delete($criteria) {
  * @see hook_admin_paths_alter()
  */
 function path_is_admin($path) {
-  $path_map = &drupal_static(__FUNCTION__);
+  $path_map = &backdrop_static(__FUNCTION__);
   if (!isset($path_map['admin'][$path])) {
     $patterns = path_get_admin_paths();
-    $path_map['admin'][$path] = drupal_match_path($path, $patterns['admin']);
-    $path_map['non_admin'][$path] = drupal_match_path($path, $patterns['non_admin']);
+    $path_map['admin'][$path] = backdrop_match_path($path, $patterns['admin']);
+    $path_map['non_admin'][$path] = backdrop_match_path($path, $patterns['non_admin']);
   }
   return $path_map['admin'][$path] && !$path_map['non_admin'][$path];
 }
@@ -508,17 +508,17 @@ function path_is_admin($path) {
  * @return array
  *   An associative array containing the following keys:
  *   'admin': An array of administrative paths and regular expressions
- *            in a format suitable for drupal_match_path().
+ *            in a format suitable for backdrop_match_path().
  *   'non_admin': An array of non-administrative paths and regular expressions.
  *
  * @see hook_admin_paths()
  * @see hook_admin_paths_alter()
  */
 function path_get_admin_paths() {
-  $patterns = &drupal_static(__FUNCTION__);
+  $patterns = &backdrop_static(__FUNCTION__);
   if (!isset($patterns)) {
     $paths = module_invoke_all('admin_paths');
-    drupal_alter('admin_paths', $paths);
+    backdrop_alter('admin_paths', $paths);
     // Combine all admin paths into one array, and likewise for non-admin paths,
     // for easier handling.
     $patterns = array();
@@ -550,7 +550,7 @@ function path_get_admin_paths() {
  *   TRUE if it is a valid path AND the current user has access permission,
  *   FALSE otherwise.
  */
-function drupal_valid_path($path, $dynamic_allowed = FALSE) {
+function backdrop_valid_path($path, $dynamic_allowed = FALSE) {
   global $menu_admin;
   // We indicate that a menu administrator is running the menu access check.
   $menu_admin = TRUE;
@@ -580,8 +580,8 @@ function drupal_valid_path($path, $dynamic_allowed = FALSE) {
  * @param $source
  *   An optional system path for which an alias is being changed.
  */
-function drupal_clear_path_cache($source = NULL) {
-  // Clear the drupal_lookup_path() static cache.
-  drupal_static_reset('drupal_lookup_path');
-  drupal_path_alias_whitelist_rebuild($source);
+function backdrop_clear_path_cache($source = NULL) {
+  // Clear the backdrop_lookup_path() static cache.
+  backdrop_static_reset('backdrop_lookup_path');
+  backdrop_path_alias_whitelist_rebuild($source);
 }

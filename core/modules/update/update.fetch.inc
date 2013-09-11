@@ -18,7 +18,7 @@ function update_manual_status() {
     'title' => t('Checking available update data'),
     'progress_message' => t('Trying to check available update data ...'),
     'error_message' => t('Error checking available update data.'),
-    'file' => drupal_get_path('module', 'update') . '/update.fetch.inc',
+    'file' => backdrop_get_path('module', 'update') . '/update.fetch.inc',
   );
   batch_set($batch);
   batch_process('admin/reports/updates');
@@ -28,7 +28,7 @@ function update_manual_status() {
  * Process a step in the batch for fetching available update data.
  */
 function update_fetch_data_batch(&$context) {
-  $queue = DrupalQueue::get('update_fetch_tasks');
+  $queue = BackdropQueue::get('update_fetch_tasks');
   if (empty($context['sandbox']['max'])) {
     $context['finished'] = 0;
     $context['sandbox']['max'] = $queue->numberOfItems();
@@ -83,15 +83,15 @@ function update_fetch_data_finished($success, $results) {
   if ($success) {
     if (!empty($results)) {
       if (!empty($results['updated'])) {
-        drupal_set_message(format_plural($results['updated'], 'Checked available update data for one project.', 'Checked available update data for @count projects.'));
+        backdrop_set_message(format_plural($results['updated'], 'Checked available update data for one project.', 'Checked available update data for @count projects.'));
       }
       if (!empty($results['failures'])) {
-        drupal_set_message(format_plural($results['failures'], 'Failed to get available update data for one project.', 'Failed to get available update data for @count projects.'), 'error');
+        backdrop_set_message(format_plural($results['failures'], 'Failed to get available update data for one project.', 'Failed to get available update data for @count projects.'), 'error');
       }
     }
   }
   else {
-    drupal_set_message(t('An error occurred trying to get available update data.'), 'error');
+    backdrop_set_message(t('An error occurred trying to get available update data.'), 'error');
   }
 }
 
@@ -99,7 +99,7 @@ function update_fetch_data_finished($success, $results) {
  * Attempt to drain the queue of tasks for release history data to fetch.
  */
 function _update_fetch_data() {
-  $queue = DrupalQueue::get('update_fetch_tasks');
+  $queue = BackdropQueue::get('update_fetch_tasks');
   $end = time() + variable_get('update_max_fetch_time', UPDATE_MAX_FETCH_TIME);
   while (time() < $end && ($item = $queue->claimItem())) {
     _update_process_fetch_task($item->data);
@@ -120,7 +120,7 @@ function _update_fetch_data() {
  */
 function _update_process_fetch_task($project) {
   global $base_url;
-  $fail = &drupal_static(__FUNCTION__, array());
+  $fail = &backdrop_static(__FUNCTION__, array());
   // This can be in the middle of a long-running batch, so REQUEST_TIME won't
   // necessarily be valid.
   $now = time();
@@ -136,13 +136,13 @@ function _update_process_fetch_task($project) {
 
   $success = FALSE;
   $available = array();
-  $site_key = drupal_hmac_base64($base_url, drupal_get_private_key());
+  $site_key = backdrop_hmac_base64($base_url, backdrop_get_private_key());
   $url = _update_build_fetch_url($project, $site_key);
   $fetch_url_base = _update_get_fetch_url_base($project);
   $project_name = $project['name'];
 
   if (empty($fail[$fetch_url_base]) || $fail[$fetch_url_base] < $max_fetch_attempts) {
-    $xml = drupal_http_request($url);
+    $xml = backdrop_http_request($url);
     if (!isset($xml->error) && isset($xml->data)) {
       $data = $xml->data;
     }
@@ -150,7 +150,7 @@ function _update_process_fetch_task($project) {
 
   if (!empty($data)) {
     $available = update_parse_xml($data);
-    // @todo: Purge release data we don't need (http://drupal.org/node/238950).
+    // @todo: Purge release data we don't need (http://backdrop.org/node/238950).
     if (!empty($available)) {
       // Only if we fetched and parsed something sane do we return success.
       $success = TRUE;
@@ -229,13 +229,13 @@ function _update_refresh() {
  * @see _update_process_fetch_task()
  */
 function _update_create_fetch_task($project) {
-  $fetch_tasks = &drupal_static(__FUNCTION__, array());
+  $fetch_tasks = &backdrop_static(__FUNCTION__, array());
   if (empty($fetch_tasks)) {
     $fetch_tasks = _update_get_cache_multiple('fetch_task');
   }
   $cid = 'fetch_task::' . $project['name'];
   if (empty($fetch_tasks[$cid])) {
-    $queue = DrupalQueue::get('update_fetch_tasks');
+    $queue = BackdropQueue::get('update_fetch_tasks');
     $queue->createItem($project);
     db_insert('cache_update')
       ->fields(array(
@@ -330,14 +330,14 @@ function _update_cron_notify() {
         else {
           $target_language = $default_language;
         }
-        drupal_mail('update', 'status_notify', $target, $target_language, $params);
+        backdrop_mail('update', 'status_notify', $target, $target_language, $params);
       }
     }
   }
 }
 
 /**
- * Parse the XML of the Drupal release history info files.
+ * Parse the XML of the Backdrop release history info files.
  *
  * @param $raw_xml
  *   A raw XML string of available release data for a given project.

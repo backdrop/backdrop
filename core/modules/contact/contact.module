@@ -13,7 +13,7 @@ function contact_help($path, $arg) {
     case 'admin/help#contact':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Contact module allows visitors to contact site administrators and other users. Users specify a subject, write their message, and can have a copy of their message sent to their own e-mail address. For more information, see the online handbook entry for <a href="@contact">Contact module</a>.', array('@contact' => 'http://drupal.org/handbook/modules/contact/')) . '</p>';
+      $output .= '<p>' . t('The Contact module allows visitors to contact site administrators and other users. Users specify a subject, write their message, and can have a copy of their message sent to their own e-mail address. For more information, see the online handbook entry for <a href="@contact">Contact module</a>.', array('@contact' => 'http://backdrop.org/handbook/modules/contact/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('User contact forms') . '</dt>';
@@ -64,7 +64,7 @@ function contact_menu() {
   );
   $items['admin/structure/contact/add'] = array(
     'title' => 'Add category',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('contact_category_edit_form'),
     'access arguments' => array('administer contact forms'),
     'type' => MENU_LOCAL_ACTION,
@@ -73,21 +73,21 @@ function contact_menu() {
   );
   $items['admin/structure/contact/edit/%contact'] = array(
     'title' => 'Edit contact category',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('contact_category_edit_form', 4),
     'access arguments' => array('administer contact forms'),
     'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/delete/%contact'] = array(
     'title' => 'Delete contact',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('contact_category_delete_form', 4),
     'access arguments' => array('administer contact forms'),
     'file' => 'contact.admin.inc',
   );
   $items['contact'] = array(
     'title' => 'Contact',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('contact_site_form'),
     'access arguments' => array('access site-wide contact form'),
     'type' => MENU_SUGGESTED_ITEM,
@@ -95,7 +95,7 @@ function contact_menu() {
   );
   $items['user/%user/contact'] = array(
     'title' => 'Contact',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('contact_personal_form', 1),
     'type' => MENU_LOCAL_TASK,
     'access callback' => '_contact_personal_tab_access',
@@ -170,7 +170,7 @@ function contact_load($cid) {
 function contact_mail($key, &$message, $params) {
   $language = $message['language'];
   $variables = array(
-    '!site-name' => variable_get('site_name', 'Drupal'),
+    '!site-name' => variable_get('site_name', 'Backdrop'),
     '!subject' => $params['subject'],
     '!category' => isset($params['category']['category']) ? $params['category']['category'] : '',
     '!form-url' => url($_GET['q'], array('absolute' => TRUE, 'language' => $language)),

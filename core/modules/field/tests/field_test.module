@@ -61,7 +61,7 @@ function field_test_menu() {
 
   $items['test-entity/nested/%field_test_entity_test/%field_test_entity_test'] = array(
     'title' => 'Nested entity form',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('field_test_entity_nested_form', 2, 3),
     'access arguments' => array('administer field_test content'),
     'type' => MENU_NORMAL_ITEM,
@@ -162,7 +162,7 @@ function field_test_field_language_alter(&$display_language, $context) {
  *   for that key.
  */
 function field_test_memorize($key = NULL, $value = NULL) {
-  $memorize = &drupal_static(__FUNCTION__, NULL);
+  $memorize = &backdrop_static(__FUNCTION__, NULL);
 
   if (!isset($key)) {
     $return = $memorize;
@@ -253,11 +253,11 @@ function field_test_field_widget_properties_user_alter(&$widget, $context) {
 function field_test_field_widget_form_alter(&$element, &$form_state, $context) {
   switch ($context['field']['field_name']) {
     case 'alter_test_text':
-      drupal_set_message('Field size: ' . $context['instance']['widget']['settings']['size']);
+      backdrop_set_message('Field size: ' . $context['instance']['widget']['settings']['size']);
       break;
 
     case 'alter_test_options':
-      drupal_set_message('Widget type: ' . $context['instance']['widget']['type']);
+      backdrop_set_message('Widget type: ' . $context['instance']['widget']['type']);
       break;
   }
 }

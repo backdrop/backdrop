@@ -1,6 +1,6 @@
 <?php
 
-class ActionsConfigurationTestCase extends DrupalWebTestCase {
+class ActionsConfigurationTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Actions configuration',
@@ -15,20 +15,20 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
    */
   function testActionConfiguration() {
     // Create a user with permission to view the actions administration pages.
-    $user = $this->drupalCreateUser(array('administer actions'));
-    $this->drupalLogin($user);
+    $user = $this->backdropCreateUser(array('administer actions'));
+    $this->backdropLogin($user);
 
     // Make a POST request to admin/config/system/actions/manage.
     $edit = array();
-    $edit['action'] = drupal_hash_base64('system_goto_action');
-    $this->drupalPost('admin/config/system/actions/manage', $edit, t('Create'));
+    $edit['action'] = backdrop_hash_base64('system_goto_action');
+    $this->backdropPost('admin/config/system/actions/manage', $edit, t('Create'));
 
     // Make a POST request to the individual action configuration page.
     $edit = array();
     $action_label = $this->randomName();
     $edit['actions_label'] = $action_label;
     $edit['url'] = 'admin';
-    $this->drupalPost('admin/config/system/actions/configure/' . drupal_hash_base64('system_goto_action'), $edit, t('Save'));
+    $this->backdropPost('admin/config/system/actions/configure/' . backdrop_hash_base64('system_goto_action'), $edit, t('Save'));
 
     // Make sure that the new complex action was saved properly.
     $this->assertText(t('The action has been successfully saved.'), t("Make sure we get a confirmation that we've successfully saved the complex action."));
@@ -42,7 +42,7 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
     $new_action_label = $this->randomName();
     $edit['actions_label'] = $new_action_label;
     $edit['url'] = 'admin';
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Make sure that the action updated properly.
     $this->assertText(t('The action has been successfully saved.'), t("Make sure we get a confirmation that we've successfully updated the complex action."));
@@ -52,13 +52,13 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
     // Make sure that deletions work properly.
     $this->clickLink(t('delete'));
     $edit = array();
-    $this->drupalPost("admin/config/system/actions/delete/$aid", $edit, t('Delete'));
+    $this->backdropPost("admin/config/system/actions/delete/$aid", $edit, t('Delete'));
 
     // Make sure that the action was actually deleted.
     $this->assertRaw(t('Action %action was deleted', array('%action' => $new_action_label)), t('Make sure that we get a delete confirmation message.'));
-    $this->drupalGet('admin/config/system/actions/manage');
+    $this->backdropGet('admin/config/system/actions/manage');
     $this->assertNoText($new_action_label, t("Make sure the action label does not appear on the overview page after we've deleted the action."));
-    $exists = db_query('SELECT aid FROM {actions} WHERE callback = :callback', array(':callback' => 'drupal_goto_action'))->fetchField();
+    $exists = db_query('SELECT aid FROM {actions} WHERE callback = :callback', array(':callback' => 'backdrop_goto_action'))->fetchField();
     $this->assertFalse($exists, t('Make sure the action is gone from the database after being deleted.'));
   }
 }
@@ -66,7 +66,7 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
 /**
  * Test actions executing in a potential loop, and make sure they abort properly.
  */
-class ActionLoopTestCase extends DrupalWebTestCase {
+class ActionLoopTestCase extends BackdropWebTestCase {
   protected $aid;
 
   public static function getInfo() {
@@ -85,19 +85,19 @@ class ActionLoopTestCase extends DrupalWebTestCase {
    * Set up a loop with 3 - 12 recursions, and see if it aborts properly.
    */
   function testActionLoop() {
-    $user = $this->drupalCreateUser(array('administer actions'));
-    $this->drupalLogin($user);
+    $user = $this->backdropCreateUser(array('administer actions'));
+    $this->backdropLogin($user);
 
     $info = actions_loop_test_action_info();
     $this->aid = actions_save('actions_loop_test_log', $info['actions_loop_test_log']['type'], array(), $info['actions_loop_test_log']['label']);
 
     // Delete any existing watchdog messages to clear the plethora of
-    // "Action added" messages from when Drupal was installed.
+    // "Action added" messages from when Backdrop was installed.
     db_delete('watchdog')->execute();
     // To prevent this test from failing when xdebug is enabled, the maximum
     // recursion level should be kept low enough to prevent the xdebug
     // infinite recursion protection mechanism from aborting the request.
-    // See http://drupal.org/node/587634.
+    // See http://backdrop.org/node/587634.
     variable_set('actions_max_stack', mt_rand(3, 12));
     $this->triggerActions();
   }
@@ -108,7 +108,7 @@ class ActionLoopTestCase extends DrupalWebTestCase {
    * times.
    */
   protected function triggerActions() {
-    $this->drupalGet('<front>', array('query' => array('trigger_actions_on_watchdog' => $this->aid)));
+    $this->backdropGet('<front>', array('query' => array('trigger_actions_on_watchdog' => $this->aid)));
     $expected = array();
     $expected[] = 'Triggering action loop';
     for ($i = 1; $i <= variable_get('actions_max_stack', 35); $i++) {

@@ -170,7 +170,7 @@ function theme_update_report($variables) {
       foreach ($project['extra'] as $key => $value) {
         $row .= '<div class="' . implode(' ', $value['class']) . '">';
         $row .= check_plain($value['label']) . ': ';
-        $row .= drupal_placeholder($value['data']);
+        $row .= backdrop_placeholder($value['data']);
         $row .= "</div>\n";
       }
       $row .= "</div>\n";  // extra div.
@@ -205,7 +205,7 @@ function theme_update_report($variables) {
             break;
 
           default:
-            $base_themes[] = drupal_placeholder($base_theme);
+            $base_themes[] = backdrop_placeholder($base_theme);
         }
       }
       $row .= t('Depends on: !basethemes', array('!basethemes' => implode(', ', $base_themes)));
@@ -224,7 +224,7 @@ function theme_update_report($variables) {
     if (!isset($rows[$project['project_type']])) {
       $rows[$project['project_type']] = array();
     }
-    $row_key = isset($project['title']) ? drupal_strtolower($project['title']) : drupal_strtolower($project['name']);
+    $row_key = isset($project['title']) ? backdrop_strtolower($project['title']) : backdrop_strtolower($project['name']);
     $rows[$project['project_type']][$row_key] = array(
       'class' => array($class),
       'data' => array($row),
@@ -232,7 +232,7 @@ function theme_update_report($variables) {
   }
 
   $project_types = array(
-    'core' => t('Drupal core'),
+    'core' => t('Backdrop core'),
     'module' => t('Modules'),
     'theme' => t('Themes'),
     'module-disabled' => t('Disabled modules'),
@@ -245,7 +245,7 @@ function theme_update_report($variables) {
       $output .= theme('table', array('header' => $header, 'rows' => $rows[$type_name], 'attributes' => array('class' => array('update'))));
     }
   }
-  drupal_add_css(drupal_get_path('module', 'update') . '/update.css');
+  backdrop_add_css(backdrop_get_path('module', 'update') . '/update.css');
   return $output;
 }
 

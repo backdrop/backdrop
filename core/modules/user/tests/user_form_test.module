@@ -14,7 +14,7 @@ function user_form_test_menu() {
   $items = array();
   $items['user_form_test_current_password/%user'] = array(
     'title' => 'User form test for current password validation',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_form_test_current_password',1),
     'access arguments' => array('administer users'),
     'type' => MENU_SUGGESTED_ITEM,
@@ -60,5 +60,5 @@ function user_form_test_current_password($form, &$form_state, $account) {
  * Submit function for the test form for user_validate_current_pass().
  */
 function user_form_test_current_password_submit($form, &$form_state) {
-  drupal_set_message(t('The password has been validated and the form submitted successfully.'));
+  backdrop_set_message(t('The password has been validated and the form submitted successfully.'));
 }

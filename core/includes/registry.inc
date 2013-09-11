@@ -10,7 +10,7 @@
  * @{
  * The code registry engine.
  *
- * Drupal maintains an internal registry of all functions or classes in the
+ * Backdrop maintains an internal registry of all functions or classes in the
  * system, allowing it to lazy-load code files as needed (reducing the amount
  * of code that must be parsed on each request).
  */
@@ -62,7 +62,7 @@ function _registry_update() {
     // includes the list of files registered to each module. Any files in the
     // list can then be added to the list of files that the registry will parse,
     // or modify attributes of a file.
-    drupal_alter('registry_files', $files, $modules);
+    backdrop_alter('registry_files', $files, $modules);
     foreach (registry_get_parsed_files() as $filename => $file) {
       // Add the hash for those files we have already parsed.
       if (isset($files[$filename])) {

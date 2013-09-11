@@ -3,14 +3,14 @@
 /**
  * Attaches sticky table headers.
  */
-Drupal.behaviors.tableHeader = {
+Backdrop.behaviors.tableHeader = {
   attach: function (context, settings) {
     if (!$.support.positionFixed) {
       return;
     }
 
     $('table.sticky-enabled', context).once('tableheader', function () {
-      $(this).data("drupal-tableheader", new Drupal.tableHeader(this));
+      $(this).data("backdrop-tableheader", new Backdrop.tableHeader(this));
     });
   }
 };
@@ -21,7 +21,7 @@ Drupal.behaviors.tableHeader = {
  * @param table
  *   DOM object for the table to add a sticky header to.
  */
-Drupal.tableHeader = function (table) {
+Backdrop.tableHeader = function (table) {
   var self = this;
 
   this.originalTable = $(table);
@@ -48,21 +48,21 @@ Drupal.tableHeader = function (table) {
 
   this.originalTable.addClass('sticky-table');
   $(window)
-    .bind('scroll.drupal-tableheader', $.proxy(this, 'eventhandlerRecalculateStickyHeader'))
-    .bind('resize.drupal-tableheader', { calculateWidth: true }, $.proxy(this, 'eventhandlerRecalculateStickyHeader'))
+    .bind('scroll.backdrop-tableheader', $.proxy(this, 'eventhandlerRecalculateStickyHeader'))
+    .bind('resize.backdrop-tableheader', { calculateWidth: true }, $.proxy(this, 'eventhandlerRecalculateStickyHeader'))
     // Make sure the anchor being scrolled into view is not hidden beneath the
     // sticky table header. Adjust the scrollTop if it does.
-    .bind('drupalDisplaceAnchor.drupal-tableheader', function () {
+    .bind('backdropDisplaceAnchor.backdrop-tableheader', function () {
       window.scrollBy(0, -self.stickyTable.outerHeight());
     })
     // Make sure the element being focused is not hidden beneath the sticky
     // table header. Adjust the scrollTop if it does.
-    .bind('drupalDisplaceFocus.drupal-tableheader', function (event) {
+    .bind('backdropDisplaceFocus.backdrop-tableheader', function (event) {
       if (self.stickyVisible && event.clientY < (self.stickyOffsetTop + self.stickyTable.outerHeight()) && event.$target.closest('sticky-header').length === 0) {
         window.scrollBy(0, -self.stickyTable.outerHeight());
       }
     })
-    .triggerHandler('resize.drupal-tableheader');
+    .triggerHandler('resize.backdrop-tableheader');
 
   // We hid the header to avoid it showing up erroneously on page load;
   // we need to unhide it now so that it will show up when expected.
@@ -75,12 +75,12 @@ Drupal.tableHeader = function (table) {
  * @param event
  *   Event being triggered.
  */
-Drupal.tableHeader.prototype.eventhandlerRecalculateStickyHeader = function (event) {
+Backdrop.tableHeader.prototype.eventhandlerRecalculateStickyHeader = function (event) {
   var self = this;
   var calculateWidth = event.data && event.data.calculateWidth;
 
   // Reset top position of sticky table headers to the current top offset.
-  this.stickyOffsetTop = Drupal.settings.tableHeaderOffset ? eval(Drupal.settings.tableHeaderOffset + '()') : 0;
+  this.stickyOffsetTop = Backdrop.settings.tableHeaderOffset ? eval(Backdrop.settings.tableHeaderOffset + '()') : 0;
   this.stickyTable.css('top', this.stickyOffsetTop + 'px');
 
   // Save positioning data.

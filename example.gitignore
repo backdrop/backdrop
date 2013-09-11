@@ -3,8 +3,8 @@
 # control.  This is a common strategy to avoid accidentally including private
 # information in public repositories and patch files.
 #
-# A .gitignore file was included in Drupal core for versions 7.2 through 7.8.
-# As of Drupal 7.9, this is no longer the case, and any changes made to your
+# A .gitignore file was included in Backdrop core for versions 7.2 through 7.8.
+# As of Backdrop 7.9, this is no longer the case, and any changes made to your
 # .gitignore file will no longer be overwritten by core updates.
 
 # Ignore configuration files that may contain sensitive information.

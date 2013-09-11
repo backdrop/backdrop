@@ -15,7 +15,7 @@ function image_style_list() {
   $page['image_style_list'] = array(
     '#markup' => theme('image_style_list', array('styles' => $styles)),
     '#attached' => array(
-      'css' => array(drupal_get_path('module', 'image') . '/image.admin.css' => array()),
+      'css' => array(backdrop_get_path('module', 'image') . '/image.admin.css' => array()),
     ),
   );
 
@@ -36,18 +36,18 @@ function image_style_list() {
  */
 function image_style_form($form, &$form_state, $style) {
   $title = t('Edit %name style', array('%name' => $style['name']));
-  drupal_set_title($title, PASS_THROUGH);
+  backdrop_set_title($title, PASS_THROUGH);
 
   // Adjust this form for styles that must be overridden to edit.
   $editable = (bool) ($style['storage'] & IMAGE_STORAGE_EDITABLE);
 
   if (!$editable && empty($form_state['input'])) {
-    drupal_set_message(t('This image style is currently being provided by a module. Click the "Override defaults" button to change its settings.'), 'warning');
+    backdrop_set_message(t('This image style is currently being provided by a module. Click the "Override defaults" button to change its settings.'), 'warning');
   }
 
   $form_state['image_style'] = $style;
   $form['#tree'] = TRUE;
-  $form['#attached']['css'][drupal_get_path('module', 'image') . '/image.admin.css'] = array();
+  $form['#attached']['css'][backdrop_get_path('module', 'image') . '/image.admin.css'] = array();
 
   // Show the thumbnail preview.
   $form['preview'] = array(
@@ -191,7 +191,7 @@ function image_style_form_add_submit($form, &$form_state) {
     $effect['isid'] = $style['isid'];
     $effect['weight'] = $form_state['values']['weight'];
     image_effect_save($effect);
-    drupal_set_message(t('The image effect was successfully applied.'));
+    backdrop_set_message(t('The image effect was successfully applied.'));
   }
 }
 
@@ -199,7 +199,7 @@ function image_style_form_add_submit($form, &$form_state) {
  * Submit handler for overriding a module-defined style.
  */
 function image_style_form_override_submit($form, &$form_state) {
-  drupal_set_message(t('The %style style has been overridden, allowing you to change its settings.', array('%style' => $form_state['image_style']['name'])));
+  backdrop_set_message(t('The %style style has been overridden, allowing you to change its settings.', array('%style' => $form_state['image_style']['name'])));
   image_default_style_save($form_state['image_style']);
 }
 
@@ -226,7 +226,7 @@ function image_style_form_submit($form, &$form_state) {
 
   image_style_save($style);
   if ($form_state['values']['op'] == t('Update style')) {
-    drupal_set_message(t('Changes to the style have been saved.'));
+    backdrop_set_message(t('Changes to the style have been saved.'));
   }
   $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $style['name'];
 }
@@ -263,7 +263,7 @@ function image_style_add_form($form, &$form_state) {
 function image_style_add_form_submit($form, &$form_state) {
   $style = array('name' => $form_state['values']['name']);
   $style = image_style_save($style);
-  drupal_set_message(t('Style %name was created.', array('%name' => $style['name'])));
+  backdrop_set_message(t('Style %name was created.', array('%name' => $style['name'])));
   $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $style['name'];
 }
 
@@ -319,7 +319,7 @@ function image_style_delete_form_submit($form, &$form_state) {
   $style = $form_state['image_style'];
 
   image_style_delete($style, $form_state['values']['replacement']);
-  drupal_set_message(t('Style %name was deleted.', array('%name' => $style['name'])));
+  backdrop_set_message(t('Style %name was deleted.', array('%name' => $style['name'])));
   $form_state['redirect'] = 'admin/config/media/image-styles';
 }
 
@@ -342,7 +342,7 @@ function image_style_revert_form($form, $form_state, $style) {
  * Submit handler to convert an overridden style to its default.
  */
 function image_style_revert_form_submit($form, &$form_state) {
-  drupal_set_message(t('The %style style has been reverted to its defaults.', array('%style' => $form_state['image_style']['name'])));
+  backdrop_set_message(t('The %style style has been reverted to its defaults.', array('%style' => $form_state['image_style']['name'])));
   image_default_style_revert($form_state['image_style']);
   $form_state['redirect'] = 'admin/config/media/image-styles';
 }
@@ -377,18 +377,18 @@ function image_effect_form($form, &$form_state, $style, $effect) {
   else{
     $title = t('Add %label effect', array('%label' => $effect['label']));
   }
-  drupal_set_title($title, PASS_THROUGH);
+  backdrop_set_title($title, PASS_THROUGH);
 
   $form_state['image_style'] = $style;
   $form_state['image_effect'] = $effect;
 
   // If no configuration for this image effect, return to the image style page.
   if (!isset($effect['form callback'])) {
-    drupal_goto('admin/config/media/image-styles/edit/' . $style['name']);
+    backdrop_goto('admin/config/media/image-styles/edit/' . $style['name']);
   }
 
   $form['#tree'] = TRUE;
-  $form['#attached']['css'][drupal_get_path('module', 'image') . '/image.admin.css'] = array();
+  $form['#attached']['css'][backdrop_get_path('module', 'image') . '/image.admin.css'] = array();
 
   $form['data'] = call_user_func($effect['form callback'], $effect['data']);
 
@@ -420,7 +420,7 @@ function image_effect_form_submit($form, &$form_state) {
   $effect = array_merge($form_state['image_effect'], $form_state['values']);
   $effect['isid'] = $style['isid'];
   image_effect_save($effect);
-  drupal_set_message(t('The image effect was successfully applied.'));
+  backdrop_set_message(t('The image effect was successfully applied.'));
   $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $style['name'];
 }
 
@@ -450,7 +450,7 @@ function image_effect_delete_form_submit($form, &$form_state) {
   $effect = $form_state['image_effect'];
 
   image_effect_delete($effect);
-  drupal_set_message(t('The image effect %name has been deleted.', array('%name' => $effect['label'])));
+  backdrop_set_message(t('The image effect %name has been deleted.', array('%name' => $effect['label'])));
   $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $style['name'];
 }
 
@@ -701,16 +701,16 @@ function theme_image_style_effects($variables) {
     $row = array();
     $form[$key]['weight']['#attributes']['class'] = array('image-effect-order-weight');
     if (is_numeric($key)) {
-      $summary = drupal_render($form[$key]['summary']);
-      $row[] = drupal_render($form[$key]['label']) . (empty($summary) ? '' : ' ' . $summary);
-      $row[] = drupal_render($form[$key]['weight']);
-      $row[] = drupal_render($form[$key]['configure']);
-      $row[] = drupal_render($form[$key]['remove']);
+      $summary = backdrop_render($form[$key]['summary']);
+      $row[] = backdrop_render($form[$key]['label']) . (empty($summary) ? '' : ' ' . $summary);
+      $row[] = backdrop_render($form[$key]['weight']);
+      $row[] = backdrop_render($form[$key]['configure']);
+      $row[] = backdrop_render($form[$key]['remove']);
     }
     else {
       // Add the row for adding a new image effect.
-      $row[] = '<div class="image-style-new">' . drupal_render($form['new']['new']) . drupal_render($form['new']['add']) . '</div>';
-      $row[] = drupal_render($form['new']['weight']);
+      $row[] = '<div class="image-style-new">' . backdrop_render($form['new']['new']) . backdrop_render($form['new']['add']) . '</div>';
+      $row[] = backdrop_render($form['new']['weight']);
       $row[] = array('data' => '', 'colspan' => 2);
     }
 
@@ -736,7 +736,7 @@ function theme_image_style_effects($variables) {
   }
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'image-style-effects')));
-  drupal_add_tabledrag('image-style-effects', 'order', 'sibling', 'image-effect-order-weight');
+  backdrop_add_tabledrag('image-style-effects', 'order', 'sibling', 'image-effect-order-weight');
   return $output;
 }
 
@@ -752,7 +752,7 @@ function theme_image_style_effects($variables) {
 function theme_image_style_preview($variables) {
   $style = $variables['style'];
 
-  $sample_image = variable_get('image_style_preview_image', drupal_get_path('module', 'image') . '/sample.png');
+  $sample_image = variable_get('image_style_preview_image', backdrop_get_path('module', 'image') . '/sample.png');
   $sample_width = 160;
   $sample_height = 160;
 
@@ -834,7 +834,7 @@ function theme_image_anchor($variables) {
   foreach (element_children($element) as $n => $key) {
     $element[$key]['#attributes']['title'] = $element[$key]['#title'];
     unset($element[$key]['#title']);
-    $row[] = drupal_render($element[$key]);
+    $row[] = backdrop_render($element[$key]);
     if ($n % 3 == 3 - 1) {
       $rows[] = $row;
       $row = array();

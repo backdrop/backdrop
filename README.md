@@ -40,7 +40,7 @@ for reporting all bugs and features.
 
 Developers
 ----------
-Backdrop is a fork of Drupal. It is an experiment in preserving the legacy
+Backdrop is a fork of Backdrop. It is an experiment in preserving the legacy
 audience of developers who value ease of use and ease of learning over
 architectural flexibility. You can join Backdrop's developer community by
 forking Backdrop from https://github.com/backdrop/backdrop. If submitting

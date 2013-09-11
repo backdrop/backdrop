@@ -14,5 +14,5 @@
  * @see UpdateScriptFunctionalTest::testRequirements()
  */
 function update_script_test_flush_caches() {
-  drupal_set_message(t('hook_flush_caches() invoked for update_script_test.module.'));
+  backdrop_set_message(t('hook_flush_caches() invoked for update_script_test.module.'));
 }

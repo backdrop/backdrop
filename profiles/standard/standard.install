@@ -180,7 +180,7 @@ function standard_install() {
 
   // Insert default pre-defined node types into the database. For a complete
   // list of available node type attributes, refer to the node type API
-  // documentation at: http://api.drupal.org/api/HEAD/function/hook_node_info.
+  // documentation at: http://api.backdrop.org/api/HEAD/function/hook_node_info.
   $types = array(
     array(
       'type' => 'page',
@@ -306,7 +306,7 @@ function standard_install() {
 
   // Create an image field named "Image", enabled for the 'article' content type.
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See http://api.drupal.org/api/function/field_create_field/7
+  // See http://api.backdrop.org/api/function/field_create_field/7
 
   $field = array(
     'field_name' => 'field_image',
@@ -327,7 +327,7 @@ function standard_install() {
 
 
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See http://api.drupal.org/api/function/field_create_instance/7
+  // See http://api.backdrop.org/api/function/field_create_instance/7
   $instance = array(
     'field_name' => 'field_image',
     'entity_type' => 'node',

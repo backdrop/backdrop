@@ -166,7 +166,7 @@
  *   'grant_update' => 0,
  *   'grant_delete' => 0,
  * );
- * drupal_write_record('node_access', $record);
+ * backdrop_write_record('node_access', $record);
  * @endcode
  * And then in its hook_node_grants() implementation, it would need to return:
  * @code
@@ -483,7 +483,7 @@ function hook_node_predelete($node) {
  * @ingroup node_api_hooks
  */
 function hook_node_delete($node) {
-  drupal_set_message(t('Node: @title has been deleted', array('@title' => $node->title)));
+  backdrop_set_message(t('Node: @title has been deleted', array('@title' => $node->title)));
 }
 
 /**
@@ -529,7 +529,7 @@ function hook_node_insert($node) {
  * Act on nodes being loaded from the database.
  *
  * This hook is invoked during node loading, which is handled by entity_load(),
- * via classes NodeController and DrupalDefaultEntityController. After the node
+ * via classes NodeController and BackdropDefaultEntityController. After the node
  * information is read from the database or the entity cache, hook_load() is
  * invoked on the node's content type module, then field_attach_node_revision()
  * or field_attach_load() is called, then hook_entity_load() is invoked on all
@@ -797,7 +797,7 @@ function hook_node_submit($node, $form, &$form_state) {
  *
  * The module may add elements to $node->content prior to rendering. This hook
  * will be called after hook_view(). The structure of $node->content is a
- * renderable array as expected by drupal_render().
+ * renderable array as expected by backdrop_render().
  *
  * When $view_mode is 'rss', modules can also add extra RSS elements and
  * namespaces to $node->rss_elements and $node->rss_namespaces respectively for
@@ -835,7 +835,7 @@ function hook_node_view($node, $view_mode, $langcode) {
  * If the module wishes to act on the rendered HTML of the node rather than the
  * structured content array, it may use this hook to add a #post_render
  * callback.  Alternatively, it could also implement hook_preprocess_node(). See
- * drupal_render() and theme() documentation respectively for details.
+ * backdrop_render() and theme() documentation respectively for details.
  *
  * @param $build
  *   A renderable array representing the node content.
@@ -984,7 +984,7 @@ function hook_ranking() {
  *   The node type object that is being created.
  */
 function hook_node_type_insert($info) {
-  drupal_set_message(t('You have just created a content type with a machine name %type.', array('%type' => $info->type)));
+  backdrop_set_message(t('You have just created a content type with a machine name %type.', array('%type' => $info->type)));
 }
 
 /**
@@ -1156,7 +1156,7 @@ function hook_insert($node) {
  * (use hook_node_load() to respond to all node loads).
  *
  * This hook is invoked during node loading, which is handled by entity_load(),
- * via classes NodeController and DrupalDefaultEntityController. After the node
+ * via classes NodeController and BackdropDefaultEntityController. After the node
  * information is read from the database or the entity cache, hook_load() is
  * invoked on the node's content type module, then field_attach_node_revision()
  * or field_attach_load() is called, then hook_entity_load() is invoked on all
@@ -1274,7 +1274,7 @@ function hook_view($node, $view_mode) {
     $breadcrumb[] = l(t('Home'), NULL);
     $breadcrumb[] = l(t('Example'), 'example');
     $breadcrumb[] = l($node->field1, 'example/' . $node->field1);
-    drupal_set_breadcrumb($breadcrumb);
+    backdrop_set_breadcrumb($breadcrumb);
   }
 
   $node->content['myfield'] = array(

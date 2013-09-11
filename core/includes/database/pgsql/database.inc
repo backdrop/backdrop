@@ -55,7 +55,7 @@ class DatabaseConnection_pgsql extends DatabaseConnection {
     $connection_options['pdo'] += array(
       // Prepared statements are most effective for performance when queries
       // are recycled (used several times). However, if they are not re-used,
-      // prepared statements become ineffecient. Since most of Drupal's
+      // prepared statements become ineffecient. Since most of Backdrop's
       // prepared queries are not re-used, it should be faster to emulate
       // the preparation than to actually ready statements for re-use. If in
       // doubt, reset to FALSE and measure performance.
@@ -185,7 +185,7 @@ class DatabaseConnection_pgsql extends DatabaseConnection {
     }
 
     // PostgreSQL advisory locks are simply locks to be used by an
-    // application such as Drupal. This will prevent other Drupal proccesses
+    // application such as Backdrop. This will prevent other Backdrop proccesses
     // from altering the sequence while we are.
     $this->query("SELECT pg_advisory_lock(" . POSTGRESQL_NEXTID_LOCK . ")");
 

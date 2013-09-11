@@ -2,7 +2,7 @@
 
 /**
  * @file
- * API for the Drupal menu system.
+ * API for the Backdrop menu system.
  */
 
 /**
@@ -10,15 +10,15 @@
  * @{
  * Define the navigation menus, and route page requests to code based on URLs.
  *
- * The Drupal menu system drives both the navigation system from a user
- * perspective and the callback system that Drupal uses to respond to URLs
+ * The Backdrop menu system drives both the navigation system from a user
+ * perspective and the callback system that Backdrop uses to respond to URLs
  * passed from the browser. For this reason, a good understanding of the
  * menu system is fundamental to the creation of complex modules. As a note,
  * this is related to, but separate from menu.module, which allows menus
  * (which in this context are hierarchical lists of links) to be customized from
- * the Drupal administrative interface.
+ * the Backdrop administrative interface.
  *
- * Drupal's menu system follows a simple hierarchy defined by paths.
+ * Backdrop's menu system follows a simple hierarchy defined by paths.
  * Implementations of hook_menu() define menu items and assign them to
  * paths (which should be unique). The menu system aggregates these items
  * and determines the menu hierarchy from the paths. For example, if the
@@ -55,7 +55,7 @@
  * menu items (see next paragraph) may omit this attribute to use the value
  * provided by the parent item.
  *
- * In the default Drupal interface, you will notice many links rendered as
+ * In the default Backdrop interface, you will notice many links rendered as
  * tabs. These are known in the menu system as "local tasks", and they are
  * rendered as tabs by default, though other presentations are possible.
  * Local tasks function just as other menu items in most respects. It is
@@ -432,7 +432,7 @@ function menu_set_item($path, $router_item) {
  *   objects loaded.
  */
 function menu_get_item($path = NULL, $router_item = NULL) {
-  $router_items = &drupal_static(__FUNCTION__);
+  $router_items = &backdrop_static(__FUNCTION__);
   if (!isset($path)) {
     $path = $_GET['q'];
   }
@@ -454,7 +454,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
     if ($router_item) {
       // Allow modules to alter the router item before it is translated and
       // checked for access.
-      drupal_alter('menu_get_item', $router_item, $path, $original_map);
+      backdrop_alter('menu_get_item', $router_item, $path, $original_map);
 
       $map = _menu_translate($router_item, $original_map);
       $router_item['original_map'] = $original_map;
@@ -477,7 +477,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  * Execute the page callback associated with the current path.
  *
  * @param $path
- *   The drupal path whose handler is to be be executed. If set to NULL, then
+ *   The backdrop path whose handler is to be be executed. If set to NULL, then
  *   the current path is used.
  * @param $deliver
  *   (optional) A boolean to indicate whether the content should be sent to the
@@ -492,7 +492,7 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE) {
   // would not change the global variable. hook_url_inbound_alter() can be used
   // to change the path. Code later will not use the $read_only_path variable.
   $read_only_path = !empty($path) ? $path : $_GET['q'];
-  drupal_alter('menu_site_status', $page_callback_result, $read_only_path);
+  backdrop_alter('menu_site_status', $page_callback_result, $read_only_path);
 
   // Only continue if the site status is not set.
   if ($page_callback_result == MENU_SITE_ONLINE) {
@@ -516,7 +516,7 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE) {
   // return it raw, so calling code can do more processing.
   if ($deliver) {
     $default_delivery_callback = (isset($router_item) && $router_item) ? $router_item['delivery_callback'] : NULL;
-    drupal_deliver_page($page_callback_result, $default_delivery_callback);
+    backdrop_deliver_page($page_callback_result, $default_delivery_callback);
   }
   else {
     return $page_callback_result;
@@ -786,7 +786,7 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
 /**
  * This function translates the path elements in the map using any to_arg
  * helper function. These functions take an argument and return an object.
- * See http://drupal.org/node/109153 for more information.
+ * See http://backdrop.org/node/109153 for more information.
  *
  * @param $map
  *   An array of path arguments (ex: array('node', '5'))
@@ -920,7 +920,7 @@ function _menu_link_translate(&$item, $translate = FALSE) {
   // options array. For performance reasons we only invoke this hook if the link
   // has the 'alter' flag set in the options array.
   if (!empty($item['options']['alter'])) {
-    drupal_alter('translated_menu_link', $item, $map);
+    backdrop_alter('translated_menu_link', $item, $map);
   }
 
   return $map;
@@ -971,10 +971,10 @@ function menu_get_object($type = 'node', $position = 1, $path = NULL) {
  *
  * @return
  *   A structured array representing the specified menu on the current page, to
- *   be rendered by drupal_render().
+ *   be rendered by backdrop_render().
  */
 function menu_tree($menu_name) {
-  $menu_output = &drupal_static(__FUNCTION__, array());
+  $menu_output = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($menu_output[$menu_name])) {
     $tree = menu_tree_page_data($menu_name);
@@ -995,7 +995,7 @@ function menu_tree($menu_name) {
  *   A data structure representing the tree as returned from menu_tree_data.
  *
  * @return
- *   A structured array to be rendered by drupal_render().
+ *   A structured array to be rendered by backdrop_render().
  */
 function menu_tree_output($tree) {
   $build = array();
@@ -1056,7 +1056,7 @@ function menu_tree_output($tree) {
     $build[$data['link']['mlid']] = $element;
   }
   if ($build) {
-    // Make sure drupal_render() does not re-order the links.
+    // Make sure backdrop_render() does not re-order the links.
     $build['#sorted'] = TRUE;
     // Add the theme wrapper for outer markup.
     // Allow menu-specific theme overrides.
@@ -1087,7 +1087,7 @@ function menu_tree_output($tree) {
  *   An tree of menu links in an array, in the order they should be rendered.
  */
 function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
-  $tree = &drupal_static(__FUNCTION__, array());
+  $tree = &backdrop_static(__FUNCTION__, array());
 
   // Use $mlid as a flag for whether the data being loaded is for the whole tree.
   $mlid = isset($link['mlid']) ? $link['mlid'] : 0;
@@ -1152,7 +1152,7 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
  *   The path to use when finding the active trail.
  */
 function menu_tree_set_path($menu_name, $path = NULL) {
-  $paths = &drupal_static(__FUNCTION__);
+  $paths = &backdrop_static(__FUNCTION__);
   if (isset($path)) {
     $paths[$menu_name] = $path;
   }
@@ -1177,7 +1177,7 @@ function menu_tree_get_path($menu_name) {
  * Get the data structure representing a named menu tree, based on the current page.
  *
  * The tree order is maintained by storing each parent in an individual
- * field, see http://drupal.org/node/141866 for more.
+ * field, see http://backdrop.org/node/141866 for more.
  *
  * @param $menu_name
  *   The named menu links to return.
@@ -1196,7 +1196,7 @@ function menu_tree_get_path($menu_name) {
  *   same structure described for the top-level array.
  */
 function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail = FALSE) {
-  $tree = &drupal_static(__FUNCTION__, array());
+  $tree = &backdrop_static(__FUNCTION__, array());
 
   // Check if the active trail has been overridden for this menu tree.
   $active_path = menu_tree_get_path($menu_name);
@@ -1351,7 +1351,7 @@ function menu_build_tree($menu_name, array $parameters = array()) {
  */
 function _menu_build_tree($menu_name, array $parameters = array()) {
   // Static cache of already built menu trees.
-  $trees = &drupal_static(__FUNCTION__, array());
+  $trees = &backdrop_static(__FUNCTION__, array());
 
   // Build the cache id; sort parents to prevent duplicate storage and remove
   // default parameter values.
@@ -1611,10 +1611,10 @@ function theme_menu_link(array $variables) {
   $sub_menu = '';
 
   if ($element['#below']) {
-    $sub_menu = drupal_render($element['#below']);
+    $sub_menu = backdrop_render($element['#below']);
   }
   $output = l($element['#title'], $element['#href'], $element['#localized_options']);
-  return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
+  return '<li' . backdrop_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
 }
 
 /**
@@ -1681,7 +1681,7 @@ function theme_menu_local_action($variables) {
 /**
  * Generates elements for the $arg array in the help hook.
  */
-function drupal_help_arg($arg = array()) {
+function backdrop_help_arg($arg = array()) {
   // Note - the number of empty elements should be > MENU_MAX_PARTS.
   return $arg + array('', '', '', '', '', '', '', '', '', '', '', '');
 }
@@ -1697,7 +1697,7 @@ function menu_get_active_help() {
     return '';
   }
 
-  $arg = drupal_help_arg(arg(NULL));
+  $arg = backdrop_help_arg(arg(NULL));
 
   foreach (module_implements('help') as $module) {
     $function = $module . '_help';
@@ -1722,14 +1722,14 @@ function menu_get_active_help() {
  * @see menu_set_custom_theme()
  */
 function menu_get_custom_theme($initialize = FALSE) {
-  $custom_theme = &drupal_static(__FUNCTION__);
+  $custom_theme = &backdrop_static(__FUNCTION__);
   // Skip this if the site is offline or being installed or updated, since the
   // menu system may not be correctly initialized then.
   if ($initialize && !_menu_site_is_offline(TRUE) && (!defined('MAINTENANCE_MODE') || (MAINTENANCE_MODE != 'update' && MAINTENANCE_MODE != 'install'))) {
     // First allow modules to dynamically set a custom theme for the current
     // page. Since we can only have one, the last module to return a valid
     // theme takes precedence.
-    $custom_themes = array_filter(module_invoke_all('custom_theme'), 'drupal_theme_access');
+    $custom_themes = array_filter(module_invoke_all('custom_theme'), 'backdrop_theme_access');
     if (!empty($custom_themes)) {
       $custom_theme = array_pop($custom_themes);
     }
@@ -1739,7 +1739,7 @@ function menu_get_custom_theme($initialize = FALSE) {
     $router_item = menu_get_item();
     if (!empty($router_item['access']) && !empty($router_item['theme_callback'])) {
       $theme_name = call_user_func_array($router_item['theme_callback'], $router_item['theme_arguments']);
-      if (drupal_theme_access($theme_name)) {
+      if (backdrop_theme_access($theme_name)) {
         $custom_theme = $theme_name;
       }
     }
@@ -1865,8 +1865,8 @@ function menu_navigation_links($menu_name, $level = 0) {
  *     a default local task, then this corresponds to the parent tab.
  */
 function menu_local_tasks($level = 0) {
-  $data = &drupal_static(__FUNCTION__);
-  $root_path = &drupal_static(__FUNCTION__ . ':root_path', '');
+  $data = &backdrop_static(__FUNCTION__);
+  $root_path = &backdrop_static(__FUNCTION__ . ':root_path', '');
   $empty = array(
     'tabs' => array('count' => 0, 'output' => array()),
     'actions' => array('count' => 0, 'output' => array()),
@@ -2062,7 +2062,7 @@ function menu_local_tasks($level = 0) {
     $data['tabs'] = $tabs;
 
     // Allow modules to alter local tasks or dynamically append further tasks.
-    drupal_alter('menu_local_tasks', $data, $router_item, $root_path);
+    backdrop_alter('menu_local_tasks', $data, $router_item, $root_path);
   }
 
   if (isset($data['tabs'][$level])) {
@@ -2135,7 +2135,7 @@ function menu_contextual_links($module, $parent_path, $args) {
     $path_empty[$parent_path] = TRUE;
     return $links;
   }
-  $data = &drupal_static(__FUNCTION__, array());
+  $data = &backdrop_static(__FUNCTION__, array());
   $root_path = $router_item['path'];
 
   // Performance: For a single, normalized path (such as 'node/%') we only query
@@ -2153,11 +2153,11 @@ function menu_contextual_links($module, $parent_path, $args) {
       ->execute()
       ->fetchAllAssoc('path', PDO::FETCH_ASSOC);
   }
-  $parent_length = drupal_strlen($root_path) + 1;
+  $parent_length = backdrop_strlen($root_path) + 1;
   $map = $router_item['original_map'];
   foreach ($data[$root_path] as $item) {
     // Extract the actual "task" string from the path argument.
-    $key = drupal_substr($item['path'], $parent_length);
+    $key = backdrop_substr($item['path'], $parent_length);
 
     // Denormalize and translate the contextual link.
     _menu_translate($item, $map, TRUE);
@@ -2170,7 +2170,7 @@ function menu_contextual_links($module, $parent_path, $args) {
   }
 
   // Allow modules to alter contextual links.
-  drupal_alter('menu_contextual_links', $links, $router_item, $root_path);
+  backdrop_alter('menu_contextual_links', $links, $router_item, $root_path);
 
   // Performance: If the current user does not have access to any links for this
   // router path and no other module added further links, we assign FALSE here
@@ -2239,13 +2239,13 @@ function theme_menu_local_tasks(&$variables) {
     $variables['primary']['#prefix'] = '<h2 class="element-invisible">' . t('Primary tabs') . '</h2>';
     $variables['primary']['#prefix'] .= '<ul class="tabs primary">';
     $variables['primary']['#suffix'] = '</ul>';
-    $output .= drupal_render($variables['primary']);
+    $output .= backdrop_render($variables['primary']);
   }
   if (!empty($variables['secondary'])) {
     $variables['secondary']['#prefix'] = '<h2 class="element-invisible">' . t('Secondary tabs') . '</h2>';
     $variables['secondary']['#prefix'] .= '<ul class="tabs secondary">';
     $variables['secondary']['#suffix'] = '</ul>';
-    $output .= drupal_render($variables['secondary']);
+    $output .= backdrop_render($variables['secondary']);
   }
 
   return $output;
@@ -2262,7 +2262,7 @@ function theme_menu_local_tasks(&$variables) {
  *   E.g., $conf['menu_default_active_menus'] = array('navigation', 'main-menu')
  */
 function menu_set_active_menu_names($menu_names = NULL) {
-  $active = &drupal_static(__FUNCTION__);
+  $active = &backdrop_static(__FUNCTION__);
 
   if (isset($menu_names) && is_array($menu_names)) {
     $active = $menu_names;
@@ -2288,7 +2288,7 @@ function menu_get_active_menu_names() {
  * menu_execute_active_handler() to generate your page output.
  *
  * @param $path
- *   A Drupal path - not a path alias.
+ *   A Backdrop path - not a path alias.
  */
 function menu_set_active_item($path) {
   $_GET['q'] = $path;
@@ -2298,9 +2298,9 @@ function menu_set_active_item($path) {
  * Sets the active trail (path to menu tree root) of the current page.
  *
  * Any trail set by this function will only be used for functionality that calls
- * menu_get_active_trail(). Drupal core only uses trails set here for
+ * menu_get_active_trail(). Backdrop core only uses trails set here for
  * breadcrumbs and the page title and not for menu trees or page content.
- * Additionally, breadcrumbs set by drupal_set_breadcrumb() will override any
+ * Additionally, breadcrumbs set by backdrop_set_breadcrumb() will override any
  * trail set here.
  *
  * To affect the trail used by menu trees, use menu_tree_set_path(). To affect
@@ -2315,7 +2315,7 @@ function menu_set_active_item($path) {
  *   The active trail. See menu_get_active_trail() for details.
  */
 function menu_set_active_trail($new_trail = NULL) {
-  $trail = &drupal_static(__FUNCTION__);
+  $trail = &backdrop_static(__FUNCTION__);
 
   if (isset($new_trail)) {
     $trail = $new_trail;
@@ -2377,7 +2377,7 @@ function menu_set_active_trail($new_trail = NULL) {
     // appending either the preferred link or the menu router item for the
     // current page. Exclude it if we are on the front page.
     $last = end($trail);
-    if ($last['href'] != $preferred_link['href'] && !drupal_is_front_page()) {
+    if ($last['href'] != $preferred_link['href'] && !backdrop_is_front_page()) {
       $trail[] = $preferred_link;
     }
   }
@@ -2402,7 +2402,7 @@ function menu_set_active_trail($new_trail = NULL) {
  *   returned.
  */
 function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
-  $preferred_links = &drupal_static(__FUNCTION__);
+  $preferred_links = &backdrop_static(__FUNCTION__);
 
   if (!isset($path)) {
     $path = $_GET['q'];
@@ -2495,7 +2495,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
  *   starting with the site's home page. Each link item is an associative array
  *   with the following components:
  *   - title: Title of the item.
- *   - href: Drupal path of the item.
+ *   - href: Backdrop path of the item.
  *   - localized_options: Options for passing into the l() function.
  *   - type: A menu type constant, such as MENU_DEFAULT_LOCAL_TASK, or 0 to
  *     indicate it's not really in the menu (used for the home page item).
@@ -2513,7 +2513,7 @@ function menu_get_active_breadcrumb() {
   $breadcrumb = array();
 
   // No breadcrumb for the front page.
-  if (drupal_is_front_page()) {
+  if (backdrop_is_front_page()) {
     return $breadcrumb;
   }
 
@@ -2523,7 +2523,7 @@ function menu_get_active_breadcrumb() {
 
     // Allow modules to alter the breadcrumb, if possible, as that is much
     // faster than rebuilding an entirely new active trail.
-    drupal_alter('menu_breadcrumb', $active_trail, $item);
+    backdrop_alter('menu_breadcrumb', $active_trail, $item);
 
     // Don't show a link to the current page in the breadcrumb trail.
     $end = end($active_trail);
@@ -2622,12 +2622,12 @@ function menu_cache_clear_all() {
  * Resets the menu system static cache.
  */
 function menu_reset_static_cache() {
-  drupal_static_reset('_menu_build_tree');
-  drupal_static_reset('menu_tree');
-  drupal_static_reset('menu_tree_all_data');
-  drupal_static_reset('menu_tree_page_data');
-  drupal_static_reset('menu_load_all');
-  drupal_static_reset('menu_link_get_preferred');
+  backdrop_static_reset('_menu_build_tree');
+  backdrop_static_reset('menu_tree');
+  backdrop_static_reset('menu_tree_all_data');
+  backdrop_static_reset('menu_tree_page_data');
+  backdrop_static_reset('menu_load_all');
+  backdrop_static_reset('menu_link_get_preferred');
 }
 
 /**
@@ -2688,7 +2688,7 @@ function menu_router_build() {
     }
   }
   // Alter the menu as defined in modules, keys are like user/%user.
-  drupal_alter('menu', $callbacks);
+  backdrop_alter('menu', $callbacks);
   list($menu, $masks) = _menu_router_build($callbacks);
   _menu_router_cache($menu);
 
@@ -2699,7 +2699,7 @@ function menu_router_build() {
  * Helper function to store the menu router if we have it in memory.
  */
 function _menu_router_cache($new_menu = NULL) {
-  $menu = &drupal_static(__FUNCTION__);
+  $menu = &backdrop_static(__FUNCTION__);
 
   if (isset($new_menu)) {
     $menu = $new_menu;
@@ -2977,7 +2977,7 @@ function _menu_delete_item($item, $force = FALSE) {
  * @param $item
  *   An associative array representing a menu link item, with elements:
  *   - link_path: (required) The path of the menu item, which should be
- *     normalized first by calling drupal_get_normal_path() on it.
+ *     normalized first by calling backdrop_get_normal_path() on it.
  *   - link_title: (required) Title to appear in menu for the link.
  *   - menu_name: (optional) The machine name of the menu for the link.
  *     Defaults to 'navigation'.
@@ -3000,7 +3000,7 @@ function _menu_delete_item($item, $force = FALSE) {
  *   saved.
  */
 function menu_link_save(&$item, $existing_item = array(), $parent_candidates = array()) {
-  drupal_alter('menu_link', $item);
+  backdrop_alter('menu_link', $item);
 
   // This is the easiest way to handle the unique internal path '<front>',
   // since a path marked as external does not need to match a router path.
@@ -3235,7 +3235,7 @@ function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
  * Helper function to clear the page and block caches at most twice per page load.
  */
 function _menu_clear_page_cache() {
-  $cache_cleared = &drupal_static(__FUNCTION__, 0);
+  $cache_cleared = &backdrop_static(__FUNCTION__, 0);
 
   // Clear the page and block caches, but at most twice, including at
   //  the end of the page load when there are multiple links saved or deleted.
@@ -3246,9 +3246,9 @@ function _menu_clear_page_cache() {
     $cache_cleared = 1;
   }
   elseif ($cache_cleared == 1) {
-    drupal_register_shutdown_function('cache_clear_all');
+    backdrop_register_shutdown_function('cache_clear_all');
     // Keep track of which menus have expanded items.
-    drupal_register_shutdown_function('_menu_set_expanded_menus');
+    backdrop_register_shutdown_function('_menu_set_expanded_menus');
     $cache_cleared = 2;
   }
 }
@@ -3614,7 +3614,7 @@ function _menu_router_build($callbacks) {
           if (!isset($item['file']) && isset($parent['file'])) {
             $item['file'] = $parent['file'];
             if (empty($item['file path']) && isset($item['module']) && isset($parent['module']) && $item['module'] != $parent['module']) {
-              $item['file path'] = drupal_get_path('module', $parent['module']);
+              $item['file path'] = backdrop_get_path('module', $parent['module']);
             }
           }
         }
@@ -3681,7 +3681,7 @@ function _menu_router_build($callbacks) {
 
     // Calculate out the file to be included for each callback, if any.
     if ($item['file']) {
-      $file_path = $item['file path'] ? $item['file path'] : drupal_get_path('module', $item['module']);
+      $file_path = $item['file path'] ? $item['file path'] : backdrop_get_path('module', $item['module']);
       $item['include file'] = $file_path . '/' . $item['file'];
     }
   }
@@ -3799,10 +3799,10 @@ function _menu_site_is_offline($check_only = FALSE) {
       // the maintenance mode settings page.
       if (!$check_only && $_GET['q'] != 'admin/config/development/maintenance') {
         if (user_access('administer site configuration')) {
-          drupal_set_message(t('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance'))), 'status', FALSE);
+          backdrop_set_message(t('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance'))), 'status', FALSE);
         }
         else {
-          drupal_set_message(t('Operating in maintenance mode.'), 'status', FALSE);
+          backdrop_set_message(t('Operating in maintenance mode.'), 'status', FALSE);
         }
       }
     }

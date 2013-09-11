@@ -8,7 +8,7 @@
 /**
  * Test unicode handling features implemented in unicode.inc.
  */
-class TableSortTest extends DrupalUnitTestCase {
+class TableSortTest extends BackdropUnitTestCase {
 
   /**
    * Storage for initial value of $_GET.

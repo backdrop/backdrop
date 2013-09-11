@@ -153,7 +153,7 @@ function hook_image_styles_alter(&$styles) {
 }
 
 /**
- * Provide module-based image styles for reuse throughout Drupal.
+ * Provide module-based image styles for reuse throughout Backdrop.
  *
  * This hook allows your module to provide image styles. This may be useful if
  * you require images to fit within exact dimensions. Note that you should

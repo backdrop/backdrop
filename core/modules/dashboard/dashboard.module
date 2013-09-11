@@ -13,7 +13,7 @@ function dashboard_help($path, $arg) {
     case 'admin/help#dashboard':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Dashboard module provides a <a href="@dashboard">Dashboard page</a> in the administrative interface for organizing administrative tasks and navigation, and tracking information within your site. The Dashboard page contains blocks, which you can add to and arrange using the drag-and-drop interface that appears when you click on the <em>Customize dashboard</em> link. Within this interface, blocks that are not primarily used for site administration do not appear by default, but can be added via the <em>Add other blocks</em> link. For more information, see the online handbook entry for <a href="@handbook">Dashboard module</a>.', array('@handbook' => 'http://drupal.org/handbook/modules/dashboard', '@dashboard' => url('admin/dashboard'))) . '</p>';
+      $output .= '<p>' . t('The Dashboard module provides a <a href="@dashboard">Dashboard page</a> in the administrative interface for organizing administrative tasks and navigation, and tracking information within your site. The Dashboard page contains blocks, which you can add to and arrange using the drag-and-drop interface that appears when you click on the <em>Customize dashboard</em> link. Within this interface, blocks that are not primarily used for site administration do not appear by default, but can be added via the <em>Add other blocks</em> link. For more information, see the online handbook entry for <a href="@handbook">Dashboard module</a>.', array('@handbook' => 'http://backdrop.org/handbook/modules/dashboard', '@dashboard' => url('admin/dashboard'))) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Tracking user activity') . '</dt>';
@@ -247,7 +247,7 @@ function dashboard_theme() {
       // When building the form for configuring dashboard blocks, reuse the
       // Block module's template for the main block configuration form.
       'template' => 'block-admin-display-form',
-      'path' => drupal_get_path('module', 'block'),
+      'path' => backdrop_get_path('module', 'block'),
       'file' => 'block.admin.inc',
       'render element' => 'form',
     ),
@@ -281,7 +281,7 @@ function dashboard_admin($launch_customize = FALSE) {
       'drawer' => url('admin/dashboard/drawer'),
       'blockContent' => url('admin/dashboard/block-content'),
       'updatePath' => url('admin/dashboard/update'),
-      'formToken' => drupal_get_token('dashboard-update'),
+      'formToken' => backdrop_get_token('dashboard-update'),
       'launchCustomize' => $launch_customize,
       'dashboard' => url('admin/dashboard'),
       'emptyBlockText' => t('(empty)'),
@@ -295,7 +295,7 @@ function dashboard_admin($launch_customize = FALSE) {
     '#access' => user_access('administer blocks'),
     '#attached' => array(
       'js' => array(
-        drupal_get_path('module', 'dashboard') . '/dashboard.js',
+        backdrop_get_path('module', 'dashboard') . '/dashboard.js',
         array('data' => $js_settings, 'type' => 'setting'),
       ),
       'library' => array(array('system', 'ui.sortable')),
@@ -318,7 +318,7 @@ function dashboard_admin($launch_customize = FALSE) {
  */
 function dashboard_admin_blocks() {
   global $theme_key;
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   module_load_include('inc', 'block', 'block.admin');
 
   // Prepare the blocks for the current theme, and remove those that are
@@ -336,7 +336,7 @@ function dashboard_admin_blocks() {
 
   // Pass in the above blocks and dashboard regions to the form, so that only
   // dashboard-related regions will be displayed.
-  return drupal_get_form('dashboard_admin_display_form', $blocks, $theme_key, $dashboard_regions);
+  return backdrop_get_form('dashboard_admin_display_form', $blocks, $theme_key, $dashboard_regions);
 }
 
 /**
@@ -395,7 +395,7 @@ function dashboard_form_dashboard_admin_display_form_alter(&$form, &$form_state)
  */
 function dashboard_form_block_admin_configure_alter(&$form, &$form_state) {
   global $theme_key;
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   // Hide the dashboard regions from the region select list on the block
   // configuration form, for all themes except the current theme (since the
   // other themes do not display the dashboard).
@@ -466,7 +466,7 @@ function dashboard_is_visible() {
  */
 function dashboard_region_descriptions() {
   $regions = module_invoke_all('dashboard_regions');
-  drupal_alter('dashboard_regions', $regions);
+  backdrop_alter('dashboard_regions', $regions);
   return $regions;
 }
 
@@ -474,7 +474,7 @@ function dashboard_region_descriptions() {
  * Returns an array of dashboard region names.
  */
 function dashboard_regions() {
-  $regions = &drupal_static(__FUNCTION__);
+  $regions = &backdrop_static(__FUNCTION__);
   if (!isset($regions)) {
     $regions = array_keys(dashboard_region_descriptions());
   }
@@ -512,7 +512,7 @@ function dashboard_show_disabled() {
 
   // Theme the output and end the page request.
   print theme('dashboard_disabled_blocks', array('blocks' => $blocks));
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
@@ -526,7 +526,7 @@ function dashboard_show_disabled() {
  * @see dashboard_menu()
  */
 function dashboard_show_block_content($module, $delta) {
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   global $theme_key;
 
   $blocks = array();
@@ -539,19 +539,19 @@ function dashboard_show_block_content($module, $delta) {
   $block_object->enabled = $block_object->page_match = TRUE;
   $blocks[$module . "_" . $delta] = $block_object;
   $build = _block_get_renderable_region($blocks);
-  $rendered_block = drupal_render($build);
+  $rendered_block = backdrop_render($build);
   print $rendered_block;
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
  * Sets the new weight of each region according to the drag-and-drop order.
  */
 function dashboard_update() {
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   global $theme_key;
   // Check the form token to make sure we have a valid request.
-  if (!empty($_REQUEST['form_token']) && drupal_valid_token($_REQUEST['form_token'], 'dashboard-update')) {
+  if (!empty($_REQUEST['form_token']) && backdrop_valid_token($_REQUEST['form_token'], 'dashboard-update')) {
     parse_str($_REQUEST['regions'], $regions);
     foreach ($regions as $region_name => $blocks) {
       if ($region_name == 'disabled_blocks') {
@@ -583,9 +583,9 @@ function dashboard_update() {
           ->execute();
       }
     }
-    drupal_set_message(t('The configuration options have been saved.'), 'status', FALSE);
+    backdrop_set_message(t('The configuration options have been saved.'), 'status', FALSE);
   }
-  drupal_exit();
+  backdrop_exit();
 }
 
 /**
@@ -600,7 +600,7 @@ function dashboard_update() {
  */
 function theme_dashboard($variables) {
   extract($variables);
-  drupal_add_css(drupal_get_path('module', 'dashboard') . '/dashboard.css');
+  backdrop_add_css(backdrop_get_path('module', 'dashboard') . '/dashboard.css');
   return '<div id="dashboard" class="clearfix">' . $element['#children'] . '</div>';
 }
 

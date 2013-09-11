@@ -46,7 +46,7 @@ function actions_loop_test_action_info() {
  * Write a message to the log.
  */
 function actions_loop_test_log() {
-  $count = &drupal_static(__FUNCTION__, 0);
+  $count = &backdrop_static(__FUNCTION__, 0);
   $count++;
   watchdog_skip_semaphore('actions_loop_test', "Test log #$count");
 }

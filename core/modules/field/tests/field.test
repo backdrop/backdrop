@@ -8,7 +8,7 @@
 /**
  * Parent class for Field API tests.
  */
-class FieldTestCase extends DrupalWebTestCase {
+class FieldTestCase extends BackdropWebTestCase {
   var $default_storage = 'field_sql_storage';
 
   /**
@@ -16,7 +16,7 @@ class FieldTestCase extends DrupalWebTestCase {
    */
   function setUp() {
     // Since this is a base class for many test cases, support the same
-    // flexibility that DrupalWebTestCase::setUp() has for the modules to be
+    // flexibility that BackdropWebTestCase::setUp() has for the modules to be
     // passed in as either an array or a variable number of string arguments.
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
@@ -74,7 +74,7 @@ class FieldTestCase extends DrupalWebTestCase {
 class FieldAttachTestCase extends FieldTestCase {
   function setUp() {
     // Since this is a base class for many test cases, support the same
-    // flexibility that DrupalWebTestCase::setUp() has for the modules to be
+    // flexibility that BackdropWebTestCase::setUp() has for the modules to be
     // passed in as either an array or a variable number of string arguments.
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
@@ -85,7 +85,7 @@ class FieldAttachTestCase extends FieldTestCase {
     }
     parent::setUp($modules);
 
-    $this->field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $this->field = array('field_name' => $this->field_name, 'type' => 'test_field', 'cardinality' => 4);
     $this->field = field_create_field($this->field);
     $this->field_id = $this->field['id'];
@@ -341,9 +341,9 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
     $instance = field_info_instance($instance['entity_type'], $instance['field_name'], $instance['bundle']);
 
     // The storage details are indexed by a storage engine type.
-    $this->assertTrue(array_key_exists('drupal_variables', $field['storage']['details']), t('The storage type is Drupal variables.'));
+    $this->assertTrue(array_key_exists('backdrop_variables', $field['storage']['details']), t('The storage type is Backdrop variables.'));
 
-    $details = $field['storage']['details']['drupal_variables'];
+    $details = $field['storage']['details']['backdrop_variables'];
 
     // The field_test storage details are indexed by variable name. The details
     // are altered, so moon and mars are correct for this test.
@@ -529,7 +529,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   function testFieldAttachCreateRenameBundle() {
     // Create a new bundle. This has to be initiated by the module so that its
     // hook_entity_info() is consistent.
-    $new_bundle = 'test_bundle_' . drupal_strtolower($this->randomName());
+    $new_bundle = 'test_bundle_' . backdrop_strtolower($this->randomName());
     field_test_create_bundle($new_bundle);
 
     // Add an instance to that bundle.
@@ -551,7 +551,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
 
     // Rename the bundle. This has to be initiated by the module so that its
     // hook_entity_info() is consistent.
-    $new_bundle = 'test_bundle_' . drupal_strtolower($this->randomName());
+    $new_bundle = 'test_bundle_' . backdrop_strtolower($this->randomName());
     field_test_rename_bundle($this->instance['bundle'], $new_bundle);
 
     // Check that the instance definition has been updated.
@@ -570,7 +570,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   function testFieldAttachDeleteBundle() {
     // Create a new bundle. This has to be initiated by the module so that its
     // hook_entity_info() is consistent.
-    $new_bundle = 'test_bundle_' . drupal_strtolower($this->randomName());
+    $new_bundle = 'test_bundle_' . backdrop_strtolower($this->randomName());
     field_test_create_bundle($new_bundle);
 
     // Add an instance to that bundle.
@@ -578,7 +578,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
     field_create_instance($this->instance);
 
     // Create a second field for the test bundle
-    $field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $field = array('field_name' => $field_name, 'type' => 'test_field', 'cardinality' => 1);
     field_create_field($field);
     $instance = array(
@@ -664,7 +664,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     field_update_instance($this->instance);
     field_attach_prepare_view($entity_type, array($entity->ftid => $entity), 'full');
     $entity->content = field_attach_view($entity_type, $entity, 'full');
-    $output = drupal_render($entity->content);
+    $output = backdrop_render($entity->content);
     $this->content = $output;
     $this->assertRaw($this->instance['label'], "Label is displayed.");
     foreach ($values as $delta => $value) {
@@ -678,7 +678,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     field_update_instance($this->instance);
     field_attach_prepare_view($entity_type, array($entity->ftid => $entity), 'full');
     $entity->content = field_attach_view($entity_type, $entity, 'full');
-    $output = drupal_render($entity->content);
+    $output = backdrop_render($entity->content);
     $this->content = $output;
     $this->assertNoRaw($this->instance['label'], "Hidden label: label is not displayed.");
 
@@ -693,7 +693,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     field_update_instance($this->instance);
     field_attach_prepare_view($entity_type, array($entity->ftid => $entity), 'full');
     $entity->content = field_attach_view($entity_type, $entity, 'full');
-    $output = drupal_render($entity->content);
+    $output = backdrop_render($entity->content);
     $this->content = $output;
     $this->assertNoRaw($this->instance['label'], "Hidden field: label is not displayed.");
     foreach ($values as $delta => $value) {
@@ -715,7 +715,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     field_update_instance($this->instance);
     field_attach_prepare_view($entity_type, array($entity->ftid => $entity), 'full');
     $entity->content = field_attach_view($entity_type, $entity, 'full');
-    $output = drupal_render($entity->content);
+    $output = backdrop_render($entity->content);
     $display = $formatter_setting;
     foreach ($values as $delta => $value) {
       $display .= "|$delta:{$value['value']}";
@@ -738,7 +738,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     field_update_instance($this->instance);
     field_attach_prepare_view($entity_type, array($entity->ftid => $entity), 'full');
     $entity->content = field_attach_view($entity_type, $entity, 'full');
-    $output = drupal_render($entity->content);
+    $output = backdrop_render($entity->content);
     $this->content = $output;
     foreach ($values as $delta => $value) {
       $this->content = $output;
@@ -1002,8 +1002,8 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
 
     $langcode = LANGUAGE_NONE;
     // Pretend the form has been built.
-    drupal_prepare_form('field_test_entity_form', $form, $form_state);
-    drupal_process_form('field_test_entity_form', $form, $form_state);
+    backdrop_prepare_form('field_test_entity_form', $form, $form_state);
+    backdrop_process_form('field_test_entity_form', $form, $form_state);
     $form_state['values'][$this->field_name][$langcode] = $values;
     field_attach_submit($entity_type, $entity, $form, $form_state);
 
@@ -1088,7 +1088,7 @@ class FieldInfoTestCase extends FieldTestCase {
     // Create a field, verify it shows up.
     $core_fields = field_info_fields();
     $field = array(
-      'field_name' => drupal_strtolower($this->randomName()),
+      'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'test_field',
     );
     field_create_field($field);
@@ -1288,8 +1288,8 @@ class FieldFormTestCase extends FieldTestCase {
   function setUp() {
     parent::setUp('field_test');
 
-    $web_user = $this->drupalCreateUser(array('access field_test content', 'administer field_test content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content'));
+    $this->backdropLogin($web_user);
 
     $this->field_single = array('field_name' => 'field_single', 'type' => 'test_field');
     $this->field_multiple = array('field_name' => 'field_multiple', 'type' => 'test_field', 'cardinality' => 4);
@@ -1323,21 +1323,21 @@ class FieldFormTestCase extends FieldTestCase {
     $langcode = LANGUAGE_NONE;
 
     // Display creation form.
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget is displayed');
     $this->assertNoField("{$this->field_name}[$langcode][1][value]", 'No extraneous widget is displayed');
     // TODO : check that the widget is populated with default value ?
 
     // Submit with invalid value (field-level validation).
     $edit = array("{$this->field_name}[$langcode][0][value]" => -1);
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertRaw(t('%name does not accept the value -1.', array('%name' => $this->instance['label'])), 'Field validation fails with invalid input.');
     // TODO : check that the correct field is flagged for error.
 
     // Create an entity
     $value = mt_rand(1, 127);
     $edit = array("{$this->field_name}[$langcode][0][value]" => $value);
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), 'Entity was created');
@@ -1345,14 +1345,14 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertEqual($entity->{$this->field_name}[$langcode][0]['value'], $value, 'Field value was saved');
 
     // Display edit form.
-    $this->drupalGet('test-entity/manage/' . $id . '/edit');
+    $this->backdropGet('test-entity/manage/' . $id . '/edit');
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", $value, 'Widget is displayed with the correct default value');
     $this->assertNoField("{$this->field_name}[$langcode][1][value]", 'No extraneous widget is displayed');
 
     // Update the entity.
     $value = mt_rand(1, 127);
     $edit = array("{$this->field_name}[$langcode][0][value]" => $value);
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertRaw(t('test_entity @id has been updated.', array('@id' => $id)), 'Entity was updated');
     $entity = field_test_entity_test_load($id);
     $this->assertEqual($entity->{$this->field_name}[$langcode][0]['value'], $value, 'Field value was updated');
@@ -1360,7 +1360,7 @@ class FieldFormTestCase extends FieldTestCase {
     // Empty the field.
     $value = '';
     $edit = array("{$this->field_name}[$langcode][0][value]" => $value);
-    $this->drupalPost('test-entity/manage/' . $id . '/edit', $edit, t('Save'));
+    $this->backdropPost('test-entity/manage/' . $id . '/edit', $edit, t('Save'));
     $this->assertRaw(t('test_entity @id has been updated.', array('@id' => $id)), 'Entity was updated');
     $entity = field_test_entity_test_load($id);
     $this->assertIdentical($entity->{$this->field_name}, array(), 'Field was emptied');
@@ -1378,13 +1378,13 @@ class FieldFormTestCase extends FieldTestCase {
 
     // Submit with missing required value.
     $edit = array();
-    $this->drupalPost('test-entity/add/test-bundle', $edit, t('Save'));
+    $this->backdropPost('test-entity/add/test-bundle', $edit, t('Save'));
     $this->assertRaw(t('!name field is required.', array('!name' => $this->instance['label'])), 'Required field with no value fails validation');
 
     // Create an entity
     $value = mt_rand(1, 127);
     $edit = array("{$this->field_name}[$langcode][0][value]" => $value);
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), 'Entity was created');
@@ -1394,7 +1394,7 @@ class FieldFormTestCase extends FieldTestCase {
     // Edit with missing required value.
     $value = '';
     $edit = array("{$this->field_name}[$langcode][0][value]" => $value);
-    $this->drupalPost('test-entity/manage/' . $id . '/edit', $edit, t('Save'));
+    $this->backdropPost('test-entity/manage/' . $id . '/edit', $edit, t('Save'));
     $this->assertRaw(t('!name field is required.', array('!name' => $this->instance['label'])), 'Required field with no value fails validation');
   }
 
@@ -1415,19 +1415,19 @@ class FieldFormTestCase extends FieldTestCase {
     $langcode = LANGUAGE_NONE;
 
     // Display creation form -> 1 widget.
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget 1 is displayed');
     $this->assertNoField("{$this->field_name}[$langcode][1][value]", 'No extraneous widget is displayed');
 
     // Press 'add more' button -> 2 widgets.
-    $this->drupalPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another item'));
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget 1 is displayed');
     $this->assertFieldByName("{$this->field_name}[$langcode][1][value]", '', 'New widget is displayed');
     $this->assertNoField("{$this->field_name}[$langcode][2][value]", 'No extraneous widget is displayed');
     // TODO : check that non-field inpurs are preserved ('title')...
 
     // Yet another time so that we can play with more values -> 3 widgets.
-    $this->drupalPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another item'));
 
     // Prepare values and weights.
     $count = 3;
@@ -1451,7 +1451,7 @@ class FieldFormTestCase extends FieldTestCase {
     }
 
     // Press 'add more' button -> 4 widgets
-    $this->drupalPost(NULL, $edit, t('Add another item'));
+    $this->backdropPost(NULL, $edit, t('Add another item'));
     for ($delta = 0; $delta <= $delta_range; $delta++) {
       $this->assertFieldByName("$this->field_name[$langcode][$delta][value]", $values[$delta], "Widget $delta is displayed and has the right value");
       $this->assertFieldByName("$this->field_name[$langcode][$delta][_weight]", $weights[$delta], "Widget $delta has the right weight");
@@ -1464,7 +1464,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertNoField("$this->field_name[$langcode][" . ($delta + 1) . '][value]', 'No extraneous widget is displayed');
 
     // Submit the form and create the entity.
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), 'Entity was created');
@@ -1491,13 +1491,13 @@ class FieldFormTestCase extends FieldTestCase {
     $langcode = LANGUAGE_NONE;
 
     // Display creation form -> 1 widget.
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
 
     // Press 'add more' button a couple times -> 3 widgets.
-    // drupalPostAJAX() will not work iteratively, so we add those through
+    // backdropPostAJAX() will not work iteratively, so we add those through
     // non-JS submission.
-    $this->drupalPost(NULL, array(), t('Add another item'));
-    $this->drupalPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another item'));
 
     // Prepare values and weights.
     $count = 3;
@@ -1521,7 +1521,7 @@ class FieldFormTestCase extends FieldTestCase {
     }
     // Press 'add more' button through Ajax, and place the expected HTML result
     // as the tested content.
-    $commands = $this->drupalPostAJAX(NULL, $edit, $this->field_name . '_add_more');
+    $commands = $this->backdropPostAJAX(NULL, $edit, $this->field_name . '_add_more');
     $this->content = $commands[1]['data'];
 
     for ($delta = 0; $delta <= $delta_range; $delta++) {
@@ -1551,12 +1551,12 @@ class FieldFormTestCase extends FieldTestCase {
     $langcode = LANGUAGE_NONE;
 
     // Display creation form.
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertFieldByName("{$this->field_name}[$langcode]", '', t('Widget is displayed.'));
 
     // Create entity with three values.
     $edit = array("{$this->field_name}[$langcode]" => '1, 2, 3');
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
 
@@ -1565,12 +1565,12 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertFieldValues($entity_init, $this->field_name, $langcode, array(1, 2, 3));
 
     // Display the form, check that the values are correctly filled in.
-    $this->drupalGet('test-entity/manage/' . $id . '/edit');
+    $this->backdropGet('test-entity/manage/' . $id . '/edit');
     $this->assertFieldByName("{$this->field_name}[$langcode]", '1, 2, 3', t('Widget is displayed.'));
 
     // Submit the form with more values than the field accepts.
     $edit = array("{$this->field_name}[$langcode]" => '1, 2, 3, 4, 5');
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertRaw('this field cannot hold more than 4 values', t('Form validation failed.'));
     // Check that the field values were not submitted.
     $this->assertFieldValues($entity_init, $this->field_name, $langcode, array(1, 2, 3));
@@ -1606,12 +1606,12 @@ class FieldFormTestCase extends FieldTestCase {
     $langcode = LANGUAGE_NONE;
 
     // Display creation form.
-    $this->drupalGet('test-entity/add/test-bundle');
+    $this->backdropGet('test-entity/add/test-bundle');
     $this->assertNoFieldByName("{$field_name_no_access}[$langcode][0][value]", '', t('Widget is not displayed if field access is denied.'));
 
     // Create entity.
     $edit = array("{$field_name}[$langcode][0][value]" => 1);
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
 
@@ -1622,7 +1622,7 @@ class FieldFormTestCase extends FieldTestCase {
 
     // Create a new revision.
     $edit = array("{$field_name}[$langcode][0][value]" => 2, 'revision' => TRUE);
-    $this->drupalPost('test-entity/manage/' . $id . '/edit', $edit, t('Save'));
+    $this->backdropPost('test-entity/manage/' . $id . '/edit', $edit, t('Save'));
 
     // Check that the new revision has the expected values.
     $entity = field_test_entity_test_load($id);
@@ -1663,7 +1663,7 @@ class FieldFormTestCase extends FieldTestCase {
     field_test_entity_save($entity_2);
 
     // Display the 'combined form'.
-    $this->drupalGet('test-entity/nested/1/2');
+    $this->backdropGet('test-entity/nested/1/2');
     $this->assertFieldByName('field_single[und][0][value]', 0, t('Entity 1: field_single value appears correctly is the form.'));
     $this->assertFieldByName('field_unlimited[und][0][value]', 1, t('Entity 1: field_unlimited value 0 appears correctly is the form.'));
     $this->assertFieldByName('entity_2[field_single][und][0][value]', 10, t('Entity 2: field_single value appears correctly is the form.'));
@@ -1678,7 +1678,7 @@ class FieldFormTestCase extends FieldTestCase {
       'entity_2[field_unlimited][und][0][value]' => 12,
       'entity_2[field_unlimited][und][1][value]' => 13,
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     field_cache_clear();
     $entity_1 = field_test_create_stub_entity(1);
     $entity_2 = field_test_create_stub_entity(2);
@@ -1692,14 +1692,14 @@ class FieldFormTestCase extends FieldTestCase {
     $edit = array(
       'field_unlimited[und][1][value]' => -1,
     );
-    $this->drupalPost('test-entity/nested/1/2', $edit, t('Save'));
+    $this->backdropPost('test-entity/nested/1/2', $edit, t('Save'));
     $this->assertRaw(t('%label does not accept the value -1', array('%label' => 'Unlimited field')), t('Entity 1: the field validation error was reported.'));
     $error_field = $this->xpath('//input[@id=:id and contains(@class, "error")]', array(':id' => 'edit-field-unlimited-und-1-value'));
     $this->assertTrue($error_field, t('Entity 1: the error was flagged on the correct element.'));
     $edit = array(
       'entity_2[field_unlimited][und][1][value]' => -1,
     );
-    $this->drupalPost('test-entity/nested/1/2', $edit, t('Save'));
+    $this->backdropPost('test-entity/nested/1/2', $edit, t('Save'));
     $this->assertRaw(t('%label does not accept the value -1', array('%label' => 'Unlimited field')), t('Entity 2: the field validation error was reported.'));
     $error_field = $this->xpath('//input[@id=:id and contains(@class, "error")]', array(':id' => 'edit-entity-2-field-unlimited-und-1-value'));
     $this->assertTrue($error_field, t('Entity 2: the error was flagged on the correct element.'));
@@ -1711,17 +1711,17 @@ class FieldFormTestCase extends FieldTestCase {
       'entity_2[field_unlimited][und][0][_weight]' => 0,
       'entity_2[field_unlimited][und][1][_weight]' => -1,
     );
-    $this->drupalPost('test-entity/nested/1/2', $edit, t('Save'));
+    $this->backdropPost('test-entity/nested/1/2', $edit, t('Save'));
     field_cache_clear();
     $this->assertFieldValues($entity_1, 'field_unlimited', LANGUAGE_NONE, array(3, 2));
     $this->assertFieldValues($entity_2, 'field_unlimited', LANGUAGE_NONE, array(13, 12));
 
     // Test the 'add more' buttons. Only Ajax submission is tested, because
     // the two 'add more' buttons present in the form have the same #value,
-    // which confuses drupalPost().
+    // which confuses backdropPost().
     // 'Add more' button in the first entity:
-    $this->drupalGet('test-entity/nested/1/2');
-    $this->drupalPostAJAX(NULL, array(), 'field_unlimited_add_more');
+    $this->backdropGet('test-entity/nested/1/2');
+    $this->backdropPostAJAX(NULL, array(), 'field_unlimited_add_more');
     $this->assertFieldByName('field_unlimited[und][0][value]', 3, t('Entity 1: field_unlimited value 0 appears correctly is the form.'));
     $this->assertFieldByName('field_unlimited[und][1][value]', 2, t('Entity 1: field_unlimited value 1 appears correctly is the form.'));
     $this->assertFieldByName('field_unlimited[und][2][value]', '', t('Entity 1: field_unlimited value 2 appears correctly is the form.'));
@@ -1732,13 +1732,13 @@ class FieldFormTestCase extends FieldTestCase {
       'entity_2[field_unlimited][und][1][value]' => 14,
       'entity_2[field_unlimited][und][2][value]' => 15,
     );
-    $this->drupalPostAJAX(NULL, $edit, 'entity_2_field_unlimited_add_more');
+    $this->backdropPostAJAX(NULL, $edit, 'entity_2_field_unlimited_add_more');
     $this->assertFieldByName('entity_2[field_unlimited][und][0][value]', 13, t('Entity 2: field_unlimited value 0 appears correctly is the form.'));
     $this->assertFieldByName('entity_2[field_unlimited][und][1][value]', 14, t('Entity 2: field_unlimited value 1 appears correctly is the form.'));
     $this->assertFieldByName('entity_2[field_unlimited][und][2][value]', 15, t('Entity 2: field_unlimited value 2 appears correctly is the form.'));
     $this->assertFieldByName('entity_2[field_unlimited][und][3][value]', '', t('Entity 2: an empty widget was added for field_unlimited value 3.'));
     // Save the form and check values are saved correclty.
-    $this->drupalPost(NULL, array(), t('Save'));
+    $this->backdropPost(NULL, array(), t('Save'));
     field_cache_clear();
     $this->assertFieldValues($entity_1, 'field_unlimited', LANGUAGE_NONE, array(3, 2));
     $this->assertFieldValues($entity_2, 'field_unlimited', LANGUAGE_NONE, array(13, 14, 15));
@@ -1804,7 +1804,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
   function testFieldViewField() {
     // No display settings: check that default display settings are used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name);
-    $this->drupalSetContent(drupal_render($output));
+    $this->backdropSetContent(backdrop_render($output));
     $settings = field_info_formatter_settings('field_test_default');
     $setting = $settings['test_formatter_setting'];
     $this->assertText($this->label, t('Label was displayed.'));
@@ -1822,7 +1822,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       ),
     );
     $output = field_view_field('test_entity', $this->entity, $this->field_name, $display);
-    $this->drupalSetContent(drupal_render($output));
+    $this->backdropSetContent(backdrop_render($output));
     $setting = $display['settings']['test_formatter_setting_multiple'];
     $this->assertNoText($this->label, t('Label was not displayed.'));
     $this->assertText('field_test_field_attach_view_alter', t('Alter fired, display passed.'));
@@ -1841,8 +1841,8 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       ),
     );
     $output = field_view_field('test_entity', $this->entity, $this->field_name, $display);
-    $view = drupal_render($output);
-    $this->drupalSetContent($view);
+    $view = backdrop_render($output);
+    $this->backdropSetContent($view);
     $setting = $display['settings']['test_formatter_setting_additional'];
     $this->assertNoText($this->label, t('Label was not displayed.'));
     $this->assertNoText('field_test_field_attach_view_alter', t('Alter not fired.'));
@@ -1853,7 +1853,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     // View mode: check that display settings specified in the instance are
     // used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'teaser');
-    $this->drupalSetContent(drupal_render($output));
+    $this->backdropSetContent(backdrop_render($output));
     $setting = $this->instance['display']['teaser']['settings']['test_formatter_setting'];
     $this->assertText($this->label, t('Label was displayed.'));
     foreach ($this->values as $delta => $value) {
@@ -1863,7 +1863,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     // Unknown view mode: check that display settings for 'default' view mode
     // are used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'unknown_view_mode');
-    $this->drupalSetContent(drupal_render($output));
+    $this->backdropSetContent(backdrop_render($output));
     $setting = $this->instance['display']['default']['settings']['test_formatter_setting'];
     $this->assertText($this->label, t('Label was displayed.'));
     foreach ($this->values as $delta => $value) {
@@ -1881,7 +1881,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
       $output = field_view_value('test_entity', $this->entity, $this->field_name, $item);
-      $this->drupalSetContent(drupal_render($output));
+      $this->backdropSetContent(backdrop_render($output));
       $this->assertText($setting . '|' . $value['value'], t('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
@@ -1897,7 +1897,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
       $output = field_view_value('test_entity', $this->entity, $this->field_name, $item, $display);
-      $this->drupalSetContent(drupal_render($output));
+      $this->backdropSetContent(backdrop_render($output));
       $this->assertText($setting . '|0:' . $value['value'], t('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
@@ -1913,7 +1913,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
       $output = field_view_value('test_entity', $this->entity, $this->field_name, $item, $display);
-      $this->drupalSetContent(drupal_render($output));
+      $this->backdropSetContent(backdrop_render($output));
       $this->assertText($setting . '|' . $value['value'] . '|' . ($value['value'] + 1), t('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
@@ -1923,7 +1923,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
       $output = field_view_value('test_entity', $this->entity, $this->field_name, $item, 'teaser');
-      $this->drupalSetContent(drupal_render($output));
+      $this->backdropSetContent(backdrop_render($output));
       $this->assertText($setting . '|' . $value['value'], t('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
@@ -1933,7 +1933,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
       $output = field_view_value('test_entity', $this->entity, $this->field_name, $item, 'unknown_view_mode');
-      $this->drupalSetContent(drupal_render($output));
+      $this->backdropSetContent(backdrop_render($output));
       $this->assertText($setting . '|' . $value['value'], t('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
   }
@@ -2415,7 +2415,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     parent::setUp('field_test');
 
     $this->field = array(
-      'field_name' => drupal_strtolower($this->randomName()),
+      'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'test_field',
     );
     field_create_field($this->field);
@@ -2481,7 +2481,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
 
     // Create a field restricted to a specific entity type.
     $field_restricted = array(
-      'field_name' => drupal_strtolower($this->randomName()),
+      'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'test_field',
       'entity_types' => array('test_cacheable_entity'),
     );
@@ -2642,7 +2642,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   function setUp() {
     parent::setUp('locale', 'field_test');
 
-    $this->field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
 
     $this->entity_type = 'test_entity';
 
@@ -2856,7 +2856,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
    * Tests display language logic for translatable fields.
    */
   function testFieldDisplayLanguage() {
-    $field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $entity_type = 'test_entity';
 
     // We need an additional field here to properly test display language
@@ -2899,7 +2899,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
 
     // Test multiple-fields display languages for untranslatable entities.
     field_test_entity_info_translatable($entity_type, FALSE);
-    drupal_static_reset('field_language');
+    backdrop_static_reset('field_language');
     $requested_language = $enabled_languages[0];
     $display_language = field_language($entity_type, $entity, NULL, $requested_language);
     foreach ($instances as $instance) {
@@ -2909,7 +2909,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
 
     // Test multiple-fields display languages for translatable entities.
     field_test_entity_info_translatable($entity_type, TRUE);
-    drupal_static_reset('field_language');
+    backdrop_static_reset('field_language');
     $display_language = field_language($entity_type, $entity, NULL, $requested_language);
 
     foreach ($instances as $instance) {
@@ -2922,14 +2922,14 @@ class FieldTranslationsTestCase extends FieldTestCase {
     }
 
     // Test single-field display language.
-    drupal_static_reset('field_language');
+    backdrop_static_reset('field_language');
     $langcode = field_language($entity_type, $entity, $this->field_name, $requested_language);
     $this->assertTrue(isset($entity->{$this->field_name}[$langcode]) && $langcode != $requested_language, t('The display language for the (single) field %field_name is %language.', array('%field_name' => $field_name, '%language' => $langcode)));
 
     // Test field_language() basic behavior without language fallback.
     variable_set('field_test_language_fallback', FALSE);
     $entity->{$this->field_name}[$requested_language] = mt_rand(1, 127);
-    drupal_static_reset('field_language');
+    backdrop_static_reset('field_language');
     $display_language = field_language($entity_type, $entity, $this->field_name, $requested_language);
     $this->assertEqual($display_language, $requested_language, t('Display language behave correctly when language fallback is disabled'));
   }
@@ -2938,8 +2938,8 @@ class FieldTranslationsTestCase extends FieldTestCase {
    * Tests field translations when creating a new revision.
    */
   function testFieldFormTranslationRevisions() {
-    $web_user = $this->drupalCreateUser(array('access field_test content', 'administer field_test content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content'));
+    $this->backdropLogin($web_user);
 
     // Prepare the field translations.
     field_test_entity_info_translatable($this->entity_type, TRUE);
@@ -2959,7 +2959,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
     // Create a new revision.
     $langcode = field_valid_language(NULL);
     $edit = array("{$field_name}[$langcode][0][value]" => $entity->{$field_name}[$langcode][0]['value'], 'revision' => TRUE);
-    $this->drupalPost('test-entity/manage/' . $eid . '/edit', $edit, t('Save'));
+    $this->backdropPost('test-entity/manage/' . $eid . '/edit', $edit, t('Save'));
 
     // Check translation revisions.
     $this->checkTranslationRevisions($eid, $eid, $available_languages);

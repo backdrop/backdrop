@@ -88,7 +88,7 @@ function unicode_check() {
  * Perform checks about Unicode support in PHP, and set the right settings if
  * needed.
  *
- * Because Drupal needs to be able to handle text in various encodings, we do
+ * Because Backdrop needs to be able to handle text in various encodings, we do
  * not support mbstring function overloading. HTTP input/output conversion must
  * be disabled for similar reasons.
  *
@@ -177,7 +177,7 @@ function unicode_requirements() {
  *
  * @ingroup php_wrappers
  */
-function drupal_xml_parser_create(&$data) {
+function backdrop_xml_parser_create(&$data) {
   // Default XML encoding is UTF-8
   $encoding = 'utf-8';
   $bom = FALSE;
@@ -196,7 +196,7 @@ function drupal_xml_parser_create(&$data) {
   // Unsupported encodings are converted here into UTF-8.
   $php_supported = array('utf-8', 'iso-8859-1', 'us-ascii');
   if (!in_array(strtolower($encoding), $php_supported)) {
-    $out = drupal_convert_to_utf8($data, $encoding);
+    $out = backdrop_convert_to_utf8($data, $encoding);
     if ($out !== FALSE) {
       $encoding = 'utf-8';
       $data = preg_replace('/^(<\?xml[^>]+encoding)="(.+?)"/', '\\1="utf-8"', $out);
@@ -225,7 +225,7 @@ function drupal_xml_parser_create(&$data) {
  * @return
  *   Converted data or FALSE.
  */
-function drupal_convert_to_utf8($data, $encoding) {
+function backdrop_convert_to_utf8($data, $encoding) {
   if (function_exists('iconv')) {
     $out = @iconv($encoding, 'utf-8', $data);
   }
@@ -262,7 +262,7 @@ function drupal_convert_to_utf8($data, $encoding) {
  * @return
  *   The truncated string.
  */
-function drupal_truncate_bytes($string, $len) {
+function backdrop_truncate_bytes($string, $len) {
   if (strlen($string) <= $len) {
     return $string;
   }
@@ -314,15 +314,15 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
   $max_length = max($max_length, 0);
   $min_wordsafe_length = max($min_wordsafe_length, 0);
 
-  if (drupal_strlen($string) <= $max_length) {
+  if (backdrop_strlen($string) <= $max_length) {
     // No truncation needed, so don't add ellipsis, just return.
     return $string;
   }
 
   if ($add_ellipsis) {
     // Truncate ellipsis in case $max_length is small.
-    $ellipsis = drupal_substr(t('…'), 0, $max_length);
-    $max_length -= drupal_strlen($ellipsis);
+    $ellipsis = backdrop_substr(t('…'), 0, $max_length);
+    $max_length -= backdrop_strlen($ellipsis);
     $max_length = max($max_length, 0);
   }
 
@@ -341,11 +341,11 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
       $string = $matches[1];
     }
     else {
-      $string = drupal_substr($string, 0, $max_length);
+      $string = backdrop_substr($string, 0, $max_length);
     }
   }
   else {
-    $string = drupal_substr($string, 0, $max_length);
+    $string = backdrop_substr($string, 0, $max_length);
   }
 
   if ($add_ellipsis) {
@@ -379,7 +379,7 @@ function mime_header_encode($string) {
     $len = strlen($string);
     $output = '';
     while ($len > 0) {
-      $chunk = drupal_truncate_bytes($string, $chunk_size);
+      $chunk = backdrop_truncate_bytes($string, $chunk_size);
       $output .= ' =?UTF-8?B?' . base64_encode($chunk) . "?=\n";
       $c = strlen($chunk);
       $string = substr($string, $c);
@@ -410,7 +410,7 @@ function _mime_header_decode($matches) {
   // 3: Encoded data
   $data = ($matches[2] == 'B') ? base64_decode($matches[3]) : str_replace('_', ' ', quoted_printable_decode($matches[3]));
   if (strtolower($matches[1]) != 'utf-8') {
-    $data = drupal_convert_to_utf8($data, $matches[1]);
+    $data = backdrop_convert_to_utf8($data, $matches[1]);
   }
   return $data;
 }
@@ -438,7 +438,7 @@ function decode_entities($text) {
  *
  * @ingroup php_wrappers
  */
-function drupal_strlen($text) {
+function backdrop_strlen($text) {
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strlen($text);
@@ -454,7 +454,7 @@ function drupal_strlen($text) {
  *
  * @ingroup php_wrappers
  */
-function drupal_strtoupper($text) {
+function backdrop_strtoupper($text) {
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strtoupper($text);
@@ -473,7 +473,7 @@ function drupal_strtoupper($text) {
  *
  * @ingroup php_wrappers
  */
-function drupal_strtolower($text) {
+function backdrop_strtolower($text) {
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strtolower($text);
@@ -500,9 +500,9 @@ function _unicode_caseflip($matches) {
  *
  * @ingroup php_wrappers
  */
-function drupal_ucfirst($text) {
+function backdrop_ucfirst($text) {
   // Note: no mbstring equivalent!
-  return drupal_strtoupper(drupal_substr($text, 0, 1)) . drupal_substr($text, 1);
+  return backdrop_strtoupper(backdrop_substr($text, 0, 1)) . backdrop_substr($text, 1);
 }
 
 /**
@@ -515,7 +515,7 @@ function drupal_ucfirst($text) {
  *
  * @ingroup php_wrappers
  */
-function drupal_substr($text, $start, $length = NULL) {
+function backdrop_substr($text, $start, $length = NULL) {
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return $length === NULL ? mb_substr($text, $start) : mb_substr($text, $start, $length);

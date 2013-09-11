@@ -50,7 +50,7 @@ class ListFieldTestCase extends FieldTestCase {
 
     // All three options appear.
     $entity = field_test_create_stub_entity();
-    $form = drupal_get_form('field_test_entity_form', $entity);
+    $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(!empty($form[$this->field_name][$langcode][1]), t('Option 1 exists'));
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), t('Option 2 exists'));
     $this->assertTrue(!empty($form[$this->field_name][$langcode][3]), t('Option 3 exists'));
@@ -76,7 +76,7 @@ class ListFieldTestCase extends FieldTestCase {
     $this->field['settings']['allowed_values'] = array(2 => 'Two');
     field_update_field($this->field);
     $entity = field_test_create_stub_entity();
-    $form = drupal_get_form('field_test_entity_form', $entity);
+    $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(empty($form[$this->field_name][$langcode][1]), t('Option 1 does not exist'));
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), t('Option 2 exists'));
     $this->assertTrue(empty($form[$this->field_name][$langcode][3]), t('Option 3 does not exist'));
@@ -84,7 +84,7 @@ class ListFieldTestCase extends FieldTestCase {
     // Completely new options appear.
     $this->field['settings']['allowed_values'] = array(10 => 'Update', 20 => 'Twenty');
     field_update_field($this->field);
-    $form = drupal_get_form('field_test_entity_form', $entity);
+    $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(empty($form[$this->field_name][$langcode][1]), t('Option 1 does not exist'));
     $this->assertTrue(empty($form[$this->field_name][$langcode][2]), t('Option 2 does not exist'));
     $this->assertTrue(empty($form[$this->field_name][$langcode][3]), t('Option 3 does not exist'));
@@ -106,7 +106,7 @@ class ListFieldTestCase extends FieldTestCase {
     );
     $this->instance = field_create_instance($this->instance);
     $entity = field_test_create_stub_entity();
-    $form = drupal_get_form('field_test_entity_form', $entity);
+    $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(!empty($form[$this->field_name][$langcode][1]), t('Option 1 exists'));
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), t('Option 2 exists'));
     $this->assertTrue(!empty($form[$this->field_name][$langcode][3]), t('Option 3 exists'));
@@ -129,12 +129,12 @@ class ListFieldUITestCase extends FieldTestCase {
     parent::setUp('field_test', 'field_ui');
 
     // Create test user.
-    $admin_user = $this->drupalCreateUser(array('access content', 'administer content types', 'administer taxonomy'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy'));
+    $this->backdropLogin($admin_user);
 
     // Create content type, with underscores.
     $type_name = 'test_' . strtolower($this->randomName());
-    $type = $this->drupalCreateContentType(array('name' => $type_name, 'type' => $type_name));
+    $type = $this->backdropCreateContentType(array('name' => $type_name, 'type' => $type_name));
     $this->type = $type->type;
     // Store a valid URL name, with hyphens instead of underscores.
     $this->hyphen_type = str_replace('_', '-', $this->type);
@@ -170,7 +170,7 @@ class ListFieldUITestCase extends FieldTestCase {
       'type' => $this->type,
       $this->field_name => array(LANGUAGE_NONE => array(array('value' => 1))),
     );
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     // Check that a flat list of values is rejected once the field has data.
     $this->assertAllowedValuesInput( "Zero\nOne", 'invalid input', t('Unkeyed lists are rejected once the field has data.'));
@@ -220,7 +220,7 @@ class ListFieldUITestCase extends FieldTestCase {
       'type' => $this->type,
       $this->field_name => array(LANGUAGE_NONE => array(array('value' => .5))),
     );
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     // Check that a flat list of values is rejected once the field has data.
     $this->assertAllowedValuesInput("Zero\nOne", 'invalid input', t('Unkeyed lists are rejected once the field has data.'));
@@ -272,7 +272,7 @@ class ListFieldUITestCase extends FieldTestCase {
       'type' => $this->type,
       $this->field_name => array(LANGUAGE_NONE => array(array('value' => 'One'))),
     );
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     // Check that flat lists of values are still accepted once the field has
     // data.
@@ -311,10 +311,10 @@ class ListFieldUITestCase extends FieldTestCase {
       'on' => $on,
       'off' => $off,
     );
-    $this->drupalPost($this->admin_path, $edit, t('Save settings'));
+    $this->backdropPost($this->admin_path, $edit, t('Save settings'));
     $this->assertText("Saved field_list_boolean configuration.", t("The 'On' and 'Off' form fields work for boolean fields."));
     // Test the allowed_values on the field settings form.
-    $this->drupalGet($this->admin_path);
+    $this->backdropGet($this->admin_path);
     $this->assertFieldByName('on', $on, t("The 'On' value is stored correctly."));
     $this->assertFieldByName('off', $off, t("The 'Off' value is stored correctly."));
     $field = field_info_field($this->field_name);
@@ -360,7 +360,7 @@ class ListFieldUITestCase extends FieldTestCase {
    */
   function assertAllowedValuesInput($input_string, $result, $message) {
     $edit = array('field[settings][allowed_values]' => $input_string);
-    $this->drupalPost($this->admin_path, $edit, t('Save settings'));
+    $this->backdropPost($this->admin_path, $edit, t('Save settings'));
 
     if (is_string($result)) {
       $this->assertText($result, $message);

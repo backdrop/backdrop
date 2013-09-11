@@ -7,14 +7,14 @@
 function forum_form_main($type, $edit = array()) {
   $edit = (array) $edit;
   if ((isset($_POST['op']) && $_POST['op'] == t('Delete')) || !empty($_POST['confirm'])) {
-    return drupal_get_form('forum_confirm_delete', $edit['tid']);
+    return backdrop_get_form('forum_confirm_delete', $edit['tid']);
   }
   switch ($type) {
     case 'forum':
-      return drupal_get_form('forum_form_forum', $edit);
+      return backdrop_get_form('forum_form_forum', $edit);
       break;
     case 'container':
-      return drupal_get_form('forum_form_container', $edit);
+      return backdrop_get_form('forum_form_container', $edit);
       break;
   }
 }
@@ -89,10 +89,10 @@ function forum_form_submit($form, &$form_state) {
         variable_set('forum_containers', $containers);
       }
       $form_state['values']['tid'] = $term->tid;
-      drupal_set_message(t('Created new @type %term.', array('%term' => $form_state['values']['name'], '@type' => $type)));
+      backdrop_set_message(t('Created new @type %term.', array('%term' => $form_state['values']['name'], '@type' => $type)));
       break;
     case SAVED_UPDATED:
-      drupal_set_message(t('The @type %term has been updated.', array('%term' => $form_state['values']['name'], '@type' => $type)));
+      backdrop_set_message(t('The @type %term has been updated.', array('%term' => $form_state['values']['name'], '@type' => $type)));
       // Clear the page and block caches to avoid stale data.
       cache_clear_all();
       break;
@@ -114,7 +114,7 @@ function forum_form_submit($form, &$form_state) {
  * @ingroup themeable
  */
 function theme_forum_form($variables) {
-  return drupal_render_children($variables['form']);
+  return backdrop_render_children($variables['form']);
 }
 
 /**
@@ -194,7 +194,7 @@ function forum_confirm_delete($form, &$form_state, $tid) {
  */
 function forum_confirm_delete_submit($form, &$form_state) {
   taxonomy_term_delete($form_state['values']['tid']);
-  drupal_set_message(t('The forum %term and all sub-forums have been deleted.', array('%term' => $form_state['values']['name'])));
+  backdrop_set_message(t('The forum %term and all sub-forums have been deleted.', array('%term' => $form_state['values']['name'])));
   watchdog('content', 'forum: deleted %term and all its sub-forums.', array('%term' => $form_state['values']['name']));
 
   $form_state['redirect'] = 'admin/structure/forum';
@@ -207,14 +207,14 @@ function forum_confirm_delete_submit($form, &$form_state) {
  * @see system_settings_form()
  */
 function forum_admin_settings($form) {
-  $number = drupal_map_assoc(array(5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500));
+  $number = backdrop_map_assoc(array(5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500));
   $form['forum_hot_topic'] = array('#type' => 'select',
     '#title' => t('Hot topic threshold'),
     '#default_value' => variable_get('forum_hot_topic', 15),
     '#options' => $number,
     '#description' => t('The number of replies a topic must have to be considered "hot".'),
   );
-  $number = drupal_map_assoc(array(10, 25, 50, 75, 100));
+  $number = backdrop_map_assoc(array(10, 25, 50, 75, 100));
   $form['forum_per_page'] = array('#type' => 'select',
     '#title' => t('Topics per page'),
     '#default_value' => variable_get('forum_per_page', 25),

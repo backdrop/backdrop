@@ -19,7 +19,7 @@ function dblog_help($path, $arg) {
     case 'admin/help#dblog':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Database Logging module logs system events in the Drupal database. For more information, see the online handbook entry for the <a href="@dblog">Database Logging module</a>.', array('@dblog' => 'http://drupal.org/handbook/modules/dblog')) . '</p>';
+      $output .= '<p>' . t('The Database Logging module logs system events in the Backdrop database. For more information, see the online handbook entry for the <a href="@dblog">Database Logging module</a>.', array('@dblog' => 'http://backdrop.org/handbook/modules/dblog')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Monitoring your site') . '</dt>';
@@ -89,7 +89,7 @@ function dblog_menu() {
 function dblog_init() {
   if (arg(0) == 'admin' && arg(1) == 'reports') {
     // Add the CSS for this module
-    drupal_add_css(drupal_get_path('module', 'dblog') . '/dblog.css');
+    backdrop_add_css(backdrop_get_path('module', 'dblog') . '/dblog.css');
   }
 }
 
@@ -165,7 +165,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#type' => 'select',
     '#title' => t('Database log messages to keep'),
     '#default_value' => variable_get('dblog_row_limit', 1000),
-    '#options' => array(0 => t('All')) + drupal_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
+    '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
     '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
   );
   $form['actions']['#weight'] = 1;

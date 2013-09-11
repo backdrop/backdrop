@@ -22,8 +22,8 @@ function filter_admin_overview($form) {
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => drupal_placeholder($format->name));
-      $roles_markup = drupal_placeholder(t('All roles may use this format'));
+      $form['formats'][$id]['name'] = array('#markup' => backdrop_placeholder($format->name));
+      $roles_markup = backdrop_placeholder(t('All roles may use this format'));
     }
     else {
       $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
@@ -56,7 +56,7 @@ function filter_admin_overview_submit($form, &$form_state) {
     }
   }
   filter_formats_reset();
-  drupal_set_message(t('The text format ordering has been saved.'));
+  backdrop_set_message(t('The text format ordering has been saved.'));
 }
 
 /**
@@ -76,20 +76,20 @@ function theme_filter_admin_overview($variables) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
     $rows[] = array(
       'data' => array(
-        drupal_render($form['formats'][$id]['name']),
-        drupal_render($form['formats'][$id]['roles']),
-        drupal_render($form['formats'][$id]['weight']),
-        drupal_render($form['formats'][$id]['configure']),
-        drupal_render($form['formats'][$id]['disable']),
+        backdrop_render($form['formats'][$id]['name']),
+        backdrop_render($form['formats'][$id]['roles']),
+        backdrop_render($form['formats'][$id]['weight']),
+        backdrop_render($form['formats'][$id]['configure']),
+        backdrop_render($form['formats'][$id]['disable']),
       ),
       'class' => array('draggable'),
     );
   }
   $header = array(t('Name'), t('Roles'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
-  drupal_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
+  backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
 
   return $output;
 }
@@ -99,13 +99,13 @@ function theme_filter_admin_overview($variables) {
  */
 function filter_admin_format_page($format = NULL) {
   if (!isset($format->name)) {
-    drupal_set_title(t('Add text format'));
+    backdrop_set_title(t('Add text format'));
     $format = (object) array(
       'format' => NULL,
       'name' => '',
     );
   }
-  return drupal_get_form('filter_admin_format_form', $format);
+  return backdrop_get_form('filter_admin_format_form', $format);
 }
 
 /**
@@ -120,8 +120,8 @@ function filter_admin_format_form($form, &$form_state, $format) {
 
   $form['#format'] = $format;
   $form['#tree'] = TRUE;
-  $form['#attached']['js'][] = drupal_get_path('module', 'filter') . '/filter.admin.js';
-  $form['#attached']['css'][] = drupal_get_path('module', 'filter') . '/filter.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/filter.admin.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/filter.css';
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -273,15 +273,15 @@ function theme_filter_admin_format_filter_order($variables) {
     $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
     $rows[] = array(
       'data' => array(
-        drupal_render($element[$name]['filter']),
-        drupal_render($element[$name]['weight']),
+        backdrop_render($element[$name]['filter']),
+        backdrop_render($element[$name]['weight']),
       ),
       'class' => array('draggable'),
     );
   }
-  $output = drupal_render_children($element);
+  $output = backdrop_render_children($element);
   $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order')));
-  drupal_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
+  backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
   return $output;
 }
@@ -326,11 +326,11 @@ function filter_admin_format_form_submit($form, &$form_state) {
 
   switch ($status) {
     case SAVED_NEW:
-      drupal_set_message(t('Added text format %format.', array('%format' => $format->name)));
+      backdrop_set_message(t('Added text format %format.', array('%format' => $format->name)));
       break;
 
     case SAVED_UPDATED:
-      drupal_set_message(t('The text format %format has been updated.', array('%format' => $format->name)));
+      backdrop_set_message(t('The text format %format has been updated.', array('%format' => $format->name)));
       break;
   }
 }
@@ -358,7 +358,7 @@ function filter_admin_disable($form, &$form_state, $format) {
 function filter_admin_disable_submit($form, &$form_state) {
   $format = $form['#format'];
   filter_format_disable($format);
-  drupal_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
+  backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
 
   $form_state['redirect'] = 'admin/config/content/formats';
 }

@@ -8,12 +8,12 @@
 /**
  * Provides methods specifically for testing File module's field handling.
  */
-class FileFieldTestCase extends DrupalWebTestCase {
+class FileFieldTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
     // Since this is a base class for many test cases, support the same
-    // flexibility that DrupalWebTestCase::setUp() has for the modules to be
+    // flexibility that BackdropWebTestCase::setUp() has for the modules to be
     // passed in as either an array or a variable number of string arguments.
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
@@ -22,8 +22,8 @@ class FileFieldTestCase extends DrupalWebTestCase {
     $modules[] = 'file';
     $modules[] = 'file_module_test';
     parent::setUp($modules);
-    $this->admin_user = $this->drupalCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -31,7 +31,7 @@ class FileFieldTestCase extends DrupalWebTestCase {
    */
   function getTestFile($type_name, $size = NULL) {
     // Get a file to upload.
-    $file = current($this->drupalGetTestFiles($type_name, $size));
+    $file = current($this->backdropGetTestFiles($type_name, $size));
 
     // Add a filesize property to files as would be read by file_load().
     $file->filesize = filesize($file->uri);
@@ -134,17 +134,17 @@ class FileFieldTestCase extends DrupalWebTestCase {
     else {
       // Add a new node.
       $extras['type'] = $nid_or_type;
-      $node = $this->drupalCreateNode($extras);
+      $node = $this->backdropCreateNode($extras);
       $nid = $node->nid;
       // Save at least one revision to better simulate a real site.
-      $this->drupalCreateNode(get_object_vars($node));
+      $this->backdropCreateNode(get_object_vars($node));
       $node = node_load($nid, NULL, TRUE);
       $this->assertNotEqual($nid, $node->vid, t('Node revision exists.'));
     }
 
     // Attach a file to the node.
-    $edit['files[' . $field_name . '_' . $langcode . '_0]'] = drupal_realpath($file->uri);
-    $this->drupalPost("node/$nid/edit", $edit, t('Save'));
+    $edit['files[' . $field_name . '_' . $langcode . '_0]'] = backdrop_realpath($file->uri);
+    $this->backdropPost("node/$nid/edit", $edit, t('Save'));
 
     return $nid;
   }
@@ -159,8 +159,8 @@ class FileFieldTestCase extends DrupalWebTestCase {
       'revision' => (string) (int) $new_revision,
     );
 
-    $this->drupalPost('node/' . $nid . '/edit', array(), t('Remove'));
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost('node/' . $nid . '/edit', array(), t('Remove'));
+    $this->backdropPost(NULL, $edit, t('Save'));
   }
 
   /**
@@ -168,12 +168,12 @@ class FileFieldTestCase extends DrupalWebTestCase {
    */
   function replaceNodeFile($file, $field_name, $nid, $new_revision = TRUE) {
     $edit = array(
-      'files[' . $field_name . '_' . LANGUAGE_NONE . '_0]' => drupal_realpath($file->uri),
+      'files[' . $field_name . '_' . LANGUAGE_NONE . '_0]' => backdrop_realpath($file->uri),
       'revision' => (string) (int) $new_revision,
     );
 
-    $this->drupalPost('node/' . $nid . '/edit', array(), t('Remove'));
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost('node/' . $nid . '/edit', array(), t('Remove'));
+    $this->backdropPost(NULL, $edit, t('Save'));
   }
 
   /**
@@ -240,7 +240,7 @@ class FileManagedFileElementTestCase extends FileFieldTestCase {
    */
   function testManagedFile() {
     // Check that $element['#size'] is passed to the child upload element.
-    $this->drupalGet('file/test');
+    $this->backdropGet('file/test');
     $this->assertFieldByXpath('//input[@name="files[nested_file]" and @size="13"]', NULL, 'The custom #size attribute is passed to the child upload element.');
 
     // Perform the tests with all permutations of $form['#tree'] and
@@ -252,61 +252,61 @@ class FileManagedFileElementTestCase extends FileFieldTestCase {
         $input_base_name = $tree ? 'nested_file' : 'file';
 
         // Submit without a file.
-        $this->drupalPost($path, array(), t('Save'));
+        $this->backdropPost($path, array(), t('Save'));
         $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), t('Submitted without a file.'));
 
         // Submit a new file, without using the Upload button.
         $last_fid_prior = $this->getLastFileId();
-        $edit = array('files[' . $input_base_name . ']' => drupal_realpath($test_file->uri));
-        $this->drupalPost($path, $edit, t('Save'));
+        $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
+        $this->backdropPost($path, $edit, t('Save'));
         $last_fid = $this->getLastFileId();
         $this->assertTrue($last_fid > $last_fid_prior, t('New file got saved.'));
         $this->assertRaw(t('The file id is %fid.', array('%fid' => $last_fid)), t('Submit handler has correct file info.'));
 
         // Submit no new input, but with a default file.
-        $this->drupalPost($path . '/' . $last_fid, array(), t('Save'));
+        $this->backdropPost($path . '/' . $last_fid, array(), t('Save'));
         $this->assertRaw(t('The file id is %fid.', array('%fid' => $last_fid)), t('Empty submission did not change an existing file.'));
 
         // Now, test the Upload and Remove buttons, with and without Ajax.
         foreach (array(FALSE, TRUE) as $ajax) {
           // Upload, then Submit.
           $last_fid_prior = $this->getLastFileId();
-          $this->drupalGet($path);
-          $edit = array('files[' . $input_base_name . ']' => drupal_realpath($test_file->uri));
+          $this->backdropGet($path);
+          $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
           if ($ajax) {
-            $this->drupalPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
+            $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
           }
           else {
-            $this->drupalPost(NULL, $edit, t('Upload'));
+            $this->backdropPost(NULL, $edit, t('Upload'));
           }
           $last_fid = $this->getLastFileId();
           $this->assertTrue($last_fid > $last_fid_prior, t('New file got uploaded.'));
-          $this->drupalPost(NULL, array(), t('Save'));
+          $this->backdropPost(NULL, array(), t('Save'));
           $this->assertRaw(t('The file id is %fid.', array('%fid' => $last_fid)), t('Submit handler has correct file info.'));
 
           // Remove, then Submit.
-          $this->drupalGet($path . '/' . $last_fid);
+          $this->backdropGet($path . '/' . $last_fid);
           if ($ajax) {
-            $this->drupalPostAJAX(NULL, array(), $input_base_name . '_remove_button');
+            $this->backdropPostAJAX(NULL, array(), $input_base_name . '_remove_button');
           }
           else {
-            $this->drupalPost(NULL, array(), t('Remove'));
+            $this->backdropPost(NULL, array(), t('Remove'));
           }
-          $this->drupalPost(NULL, array(), t('Save'));
+          $this->backdropPost(NULL, array(), t('Save'));
           $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), t('Submission after file removal was successful.'));
 
           // Upload, then Remove, then Submit.
-          $this->drupalGet($path);
-          $edit = array('files[' . $input_base_name . ']' => drupal_realpath($test_file->uri));
+          $this->backdropGet($path);
+          $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
           if ($ajax) {
-            $this->drupalPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
-            $this->drupalPostAJAX(NULL, array(), $input_base_name . '_remove_button');
+            $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
+            $this->backdropPostAJAX(NULL, array(), $input_base_name . '_remove_button');
           }
           else {
-            $this->drupalPost(NULL, $edit, t('Upload'));
-            $this->drupalPost(NULL, array(), t('Remove'));
+            $this->backdropPost(NULL, $edit, t('Upload'));
+            $this->backdropPost(NULL, array(), t('Remove'));
           }
-          $this->drupalPost(NULL, array(), t('Save'));
+          $this->backdropPost(NULL, array(), t('Save'));
           $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), t('Submission after file upload and removal was successful.'));
         }
       }
@@ -345,7 +345,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
     foreach (array('nojs', 'js') as $type) {
       // Create a new node with the uploaded file and ensure it got uploaded
       // successfully.
-      // @todo This only tests a 'nojs' submission, because drupalPostAJAX()
+      // @todo This only tests a 'nojs' submission, because backdropPostAJAX()
       //   does not yet support file uploads.
       $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
       $node = node_load($nid, NULL, TRUE);
@@ -353,22 +353,22 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       $this->assertFileExists($node_file, t('New file saved to disk on node creation.'));
 
       // Ensure the file can be downloaded.
-      $this->drupalGet(file_create_url($node_file->uri));
+      $this->backdropGet(file_create_url($node_file->uri));
       $this->assertResponse(200, t('Confirmed that the generated URL is correct by downloading the shipped file.'));
 
       // Ensure the edit page has a remove button instead of an upload button.
-      $this->drupalGet("node/$nid/edit");
+      $this->backdropGet("node/$nid/edit");
       $this->assertNoFieldByXPath('//input[@type="submit"]', t('Upload'), t('Node with file does not display the "Upload" button.'));
       $this->assertFieldByXpath('//input[@type="submit"]', t('Remove'), t('Node with file displays the "Remove" button.'));
 
       // "Click" the remove button (emulating either a nojs or js submission).
       switch ($type) {
         case 'nojs':
-          $this->drupalPost(NULL, array(), t('Remove'));
+          $this->backdropPost(NULL, array(), t('Remove'));
           break;
         case 'js':
           $button = $this->xpath('//input[@type="submit" and @value="' . t('Remove') . '"]');
-          $this->drupalPostAJAX(NULL, array(), array((string) $button[0]['name'] => (string) $button[0]['value']));
+          $this->backdropPostAJAX(NULL, array(), array((string) $button[0]['name'] => (string) $button[0]['value']));
           break;
       }
 
@@ -377,7 +377,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       $this->assertFieldByXpath('//input[@type="submit"]', t('Upload'), t('After clicking the "Remove" button, the "Upload" button is displayed.'));
 
       // Save the node and ensure it does not have the file.
-      $this->drupalPost(NULL, array(), t('Save'));
+      $this->backdropPost(NULL, array(), t('Save'));
       $node = node_load($nid, NULL, TRUE);
       $this->assertTrue(empty($node->{$field_name}[LANGUAGE_NONE][0]['fid']), t('File was successfully removed from the node.'));
     }
@@ -411,16 +411,16 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       // until after the 3rd file, and after that, isn't displayed. Because
       // SimpleTest triggers the last button with a given name, so upload to the
       // second field first.
-      // @todo This is only testing a non-Ajax upload, because drupalPostAJAX()
+      // @todo This is only testing a non-Ajax upload, because backdropPostAJAX()
       //   does not yet emulate jQuery's file upload.
       //
-      $this->drupalGet("node/add/$type_name");
+      $this->backdropGet("node/add/$type_name");
       foreach (array($field_name2, $field_name) as $each_field_name) {
         for ($delta = 0; $delta < 3; $delta++) {
-          $edit = array('files[' . $each_field_name . '_' . LANGUAGE_NONE . '_' . $delta . ']' => drupal_realpath($test_file->uri));
-          // If the Upload button doesn't exist, drupalPost() will automatically
+          $edit = array('files[' . $each_field_name . '_' . LANGUAGE_NONE . '_' . $delta . ']' => backdrop_realpath($test_file->uri));
+          // If the Upload button doesn't exist, backdropPost() will automatically
           // fail with an assertion message.
-          $this->drupalPost(NULL, $edit, t('Upload'));
+          $this->backdropPost(NULL, $edit, t('Upload'));
         }
       }
       $this->assertNoFieldByXpath('//input[@type="submit"]', t('Upload'), t('After uploading 3 files for each field, the "Upload" button is no longer displayed.'));
@@ -455,24 +455,24 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
           $button_name = $current_field_name . '_' . LANGUAGE_NONE . '_' . $delta . '_remove_button';
           switch ($type) {
             case 'nojs':
-              // drupalPost() takes a $submit parameter that is the value of the
+              // backdropPost() takes a $submit parameter that is the value of the
               // button whose click we want to emulate. Since we have multiple
               // buttons with the value "Remove", and want to control which one we
               // use, we change the value of the other ones to something else.
               // Since non-clicked buttons aren't included in the submitted POST
-              // data, and since drupalPost() will result in $this being updated
+              // data, and since backdropPost() will result in $this being updated
               // with a newly rebuilt form, this doesn't cause problems.
               foreach ($buttons as $button) {
                 if ($button['name'] != $button_name) {
                   $button['value'] = 'DUMMY';
                 }
               }
-              $this->drupalPost(NULL, array(), t('Remove'));
+              $this->backdropPost(NULL, array(), t('Remove'));
               break;
             case 'js':
-              // drupalPostAJAX() lets us target the button precisely, so we don't
+              // backdropPostAJAX() lets us target the button precisely, so we don't
               // require the workaround used above for nojs.
-              $this->drupalPostAJAX(NULL, array(), array($button_name => t('Remove')));
+              $this->backdropPostAJAX(NULL, array(), array($button_name => t('Remove')));
               break;
           }
           $num_expected_remove_buttons--;
@@ -495,7 +495,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       $this->assertNoFieldByXPath('//input[@type="submit"]', t('Remove'), t('After removing all files, there is no "Remove" button displayed (JSMode=%type).', array('%type' => $type)));
 
       // Save the node and ensure it does not have any files.
-      $this->drupalPost(NULL, array('title' => $this->randomName()), t('Save'));
+      $this->backdropPost(NULL, array('title' => $this->randomName()), t('Save'));
       $matches = array();
       preg_match('/node\/([0-9]+)/', $this->getUrl(), $matches);
       $nid = $matches[1];
@@ -522,24 +522,24 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
 
     // Change the field setting to make its files private, and upload a file.
     $edit = array('field[settings][uri_scheme]' => 'private');
-    $this->drupalPost("admin/structure/types/manage/$type_name/fields/$field_name", $edit, t('Save settings'));
+    $this->backdropPost("admin/structure/types/manage/$type_name/fields/$field_name", $edit, t('Save settings'));
     $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
     $node = node_load($nid, NULL, TRUE);
     $node_file = (object) $node->{$field_name}[LANGUAGE_NONE][0];
     $this->assertFileExists($node_file, t('New file saved to disk on node creation.'));
 
     // Ensure the private file is available to the user who uploaded it.
-    $this->drupalGet(file_create_url($node_file->uri));
+    $this->backdropGet(file_create_url($node_file->uri));
     $this->assertResponse(200, t('Confirmed that the generated URL is correct by downloading the shipped file.'));
 
     // Ensure we can't change 'uri_scheme' field settings while there are some
     // entities with uploaded files.
-    $this->drupalGet("admin/structure/types/manage/$type_name/fields/$field_name");
+    $this->backdropGet("admin/structure/types/manage/$type_name/fields/$field_name");
     $this->assertFieldByXpath('//input[@id="edit-field-settings-uri-scheme-public" and @disabled="disabled"]', 'public', t('Upload destination setting disabled.'));
 
     // Delete node and confirm that setting could be changed.
     node_delete($nid);
-    $this->drupalGet("admin/structure/types/manage/$type_name/fields/$field_name");
+    $this->backdropGet("admin/structure/types/manage/$type_name/fields/$field_name");
     $this->assertFieldByXpath('//input[@id="edit-field-settings-uri-scheme-public" and not(@disabled)]', 'public', t('Upload destination setting enabled.'));
   }
 
@@ -547,13 +547,13 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
    * Tests that download restrictions on private files work on comments.
    */
   function testPrivateFileComment() {
-    $user = $this->drupalCreateUser(array('access comments'));
+    $user = $this->backdropCreateUser(array('access comments'));
 
     // Remove access comments permission from anon user.
     $edit = array(
       '1[access comments]' => FALSE,
     );
-    $this->drupalPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
 
     // Create a new field.
     $edit = array(
@@ -562,33 +562,33 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
       'fields[_add_new_field][type]' => 'file',
       'fields[_add_new_field][widget_type]' => 'file_generic',
     );
-    $this->drupalPost('admin/structure/types/manage/article/comment/fields', $edit, t('Save'));
+    $this->backdropPost('admin/structure/types/manage/article/comment/fields', $edit, t('Save'));
     $edit = array('field[settings][uri_scheme]' => 'private');
-    $this->drupalPost(NULL, $edit, t('Save field settings'));
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->backdropPost(NULL, $edit, t('Save field settings'));
+    $this->backdropPost(NULL, array(), t('Save settings'));
 
     // Create node.
     $text_file = $this->getTestFile('text');
     $edit = array(
       'title' => $this->randomName(),
     );
-    $this->drupalPost('node/add/article', $edit, t('Save'));
-    $node = $this->drupalGetNodeByTitle($edit['title']);
+    $this->backdropPost('node/add/article', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($edit['title']);
 
     // Add a comment with a file.
     $text_file = $this->getTestFile('text');
     $edit = array(
-      'files[field_' . $name . '_' . LANGUAGE_NONE . '_' . 0 . ']' => drupal_realpath($text_file->uri),
+      'files[field_' . $name . '_' . LANGUAGE_NONE . '_' . 0 . ']' => backdrop_realpath($text_file->uri),
       'comment_body[' . LANGUAGE_NONE . '][0][value]' => $comment_body = $this->randomName(),
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Get the comment ID.
     preg_match('/comment-([0-9]+)/', $this->getUrl(), $matches);
     $cid = $matches[1];
 
     // Log in as normal user.
-    $this->drupalLogin($user);
+    $this->backdropLogin($user);
 
     $comment = comment_load($cid);
     $comment_file = (object) $comment->{'field_' . $name}[LANGUAGE_NONE][0];
@@ -596,24 +596,24 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
     // Test authenticated file download.
     $url = file_create_url($comment_file->uri);
     $this->assertNotEqual($url, NULL, t('Confirmed that the URL is valid'));
-    $this->drupalGet(file_create_url($comment_file->uri));
+    $this->backdropGet(file_create_url($comment_file->uri));
     $this->assertResponse(200, t('Confirmed that the generated URL is correct by downloading the shipped file.'));
 
     // Test anonymous file download.
-    $this->drupalLogout();
-    $this->drupalGet(file_create_url($comment_file->uri));
+    $this->backdropLogout();
+    $this->backdropGet(file_create_url($comment_file->uri));
     $this->assertResponse(403, t('Confirmed that access is denied for the file without the needed permission.'));
 
     // Unpublishes node.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $edit = array(
       'status' => FALSE,
     );
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
     // Ensures normal user can no longer download the file.
-    $this->drupalLogin($user);
-    $this->drupalGet(file_create_url($comment_file->uri));
+    $this->backdropLogin($user);
+    $this->backdropGet(file_create_url($comment_file->uri));
     $this->assertResponse(403, t('Confirmed that access is denied for the file without the needed permission.'));
   }
 
@@ -683,7 +683,7 @@ class FileFieldRevisionTestCase extends FileFieldTestCase {
 
     // Save a new version of the node without any changes.
     // Check that the file is still the same as the previous revision.
-    $this->drupalPost('node/' . $nid . '/edit', array('revision' => '1'), t('Save'));
+    $this->backdropPost('node/' . $nid . '/edit', array('revision' => '1'), t('Save'));
     $node = node_load($nid, NULL, TRUE);
     $node_file_r3 = (object) $node->{$field_name}[LANGUAGE_NONE][0];
     $node_vid_r3 = $node->vid;
@@ -691,7 +691,7 @@ class FileFieldRevisionTestCase extends FileFieldTestCase {
     $this->assertFileIsPermanent($node_file_r3, t('New revision file is permanent.'));
 
     // Revert to the first revision and check that the original file is active.
-    $this->drupalPost('node/' . $nid . '/revisions/' . $node_vid_r1 . '/revert', array(), t('Revert'));
+    $this->backdropPost('node/' . $nid . '/revisions/' . $node_vid_r1 . '/revert', array(), t('Revert'));
     $node = node_load($nid, NULL, TRUE);
     $node_file_r4 = (object) $node->{$field_name}[LANGUAGE_NONE][0];
     $node_vid_r4 = $node->vid;
@@ -700,20 +700,20 @@ class FileFieldRevisionTestCase extends FileFieldTestCase {
 
     // Delete the second revision and check that the file is kept (since it is
     // still being used by the third revision).
-    $this->drupalPost('node/' . $nid . '/revisions/' . $node_vid_r2 . '/delete', array(), t('Delete'));
+    $this->backdropPost('node/' . $nid . '/revisions/' . $node_vid_r2 . '/delete', array(), t('Delete'));
     $this->assertFileExists($node_file_r3, t('Second file is still available after deleting second revision, since it is being used by the third revision.'));
     $this->assertFileEntryExists($node_file_r3, t('Second file entry is still available after deleting second revision, since it is being used by the third revision.'));
     $this->assertFileIsPermanent($node_file_r3, t('Second file entry is still permanent after deleting second revision, since it is being used by the third revision.'));
 
     // Attach the second file to a user.
-    $user = $this->drupalCreateUser();
+    $user = $this->backdropCreateUser();
     $edit = (array) $user;
     $edit[$field_name][LANGUAGE_NONE][0] = (array) $node_file_r3;
     user_save($user, $edit);
-    $this->drupalGet('user/' . $user->uid . '/edit');
+    $this->backdropGet('user/' . $user->uid . '/edit');
 
     // Delete the third revision and check that the file is not deleted yet.
-    $this->drupalPost('node/' . $nid . '/revisions/' . $node_vid_r3 . '/delete', array(), t('Delete'));
+    $this->backdropPost('node/' . $nid . '/revisions/' . $node_vid_r3 . '/delete', array(), t('Delete'));
     $this->assertFileExists($node_file_r3, t('Second file is still available after deleting third revision, since it is being used by the user.'));
     $this->assertFileEntryExists($node_file_r3, t('Second file entry is still available after deleting third revision, since it is being used by the user.'));
     $this->assertFileIsPermanent($node_file_r3, t('Second file entry is still permanent after deleting third revision, since it is being used by the user.'));
@@ -728,7 +728,7 @@ class FileFieldRevisionTestCase extends FileFieldTestCase {
     $this->assertFileEntryNotExists($node_file_r3, t('Second file entry is now deleted after deleting third revision, since it is no longer being used by any other nodes.'));
 
     // Delete the entire node and check that the original file is deleted.
-    $this->drupalPost('node/' . $nid . '/delete', array(), t('Delete'));
+    $this->backdropPost('node/' . $nid . '/delete', array(), t('Delete'));
     $this->assertFileNotExists($node_file_r1, t('Original file is deleted after deleting the entire node with two revisions remaining.'));
     $this->assertFileEntryNotExists($node_file_r1, t('Original file entry is deleted after deleting the entire node with two revisions remaining.'));
   }
@@ -766,14 +766,14 @@ class FileFieldDisplayTestCase extends FileFieldTestCase {
 
     // Create a new node *without* the file field set, and check that the field
     // is not shown for each node display.
-    $node = $this->drupalCreateNode(array('type' => $type_name));
+    $node = $this->backdropCreateNode(array('type' => $type_name));
     $file_formatters = array('file_default', 'file_table', 'file_url_plain', 'hidden');
     foreach ($file_formatters as $formatter) {
       $edit = array(
         "fields[$field_name][type]" => $formatter,
       );
-      $this->drupalPost("admin/structure/types/manage/$type_name/display", $edit, t('Save'));
-      $this->drupalGet('node/' . $node->nid);
+      $this->backdropPost("admin/structure/types/manage/$type_name/display", $edit, t('Save'));
+      $this->backdropGet('node/' . $node->nid);
       $this->assertNoText($field_name, t('Field label is hidden when no file attached for formatter %formatter', array('%formatter' => $formatter)));
     }
 
@@ -781,7 +781,7 @@ class FileFieldDisplayTestCase extends FileFieldTestCase {
 
     // Create a new node with the uploaded file.
     $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
-    $this->drupalGet('node/' . $nid . '/edit');
+    $this->backdropGet('node/' . $nid . '/edit');
 
     // Check that the default formatter is displaying with the file name.
     $node = node_load($nid, NULL, TRUE);
@@ -791,7 +791,7 @@ class FileFieldDisplayTestCase extends FileFieldTestCase {
 
     // Turn the "display" option off and check that the file is no longer displayed.
     $edit = array($field_name . '[' . LANGUAGE_NONE . '][0][display]' => FALSE);
-    $this->drupalPost('node/' . $nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $nid . '/edit', $edit, t('Save'));
 
     $this->assertNoRaw($default_output, t('Field is hidden when "display" option is unchecked.'));
 
@@ -828,7 +828,7 @@ class FileFieldValidateTestCase extends FileFieldTestCase {
     // Try to post a new node without uploading a file.
     $langcode = LANGUAGE_NONE;
     $edit = array("title" => $this->randomName());
-    $this->drupalPost('node/add/' . $type_name, $edit, t('Save'));
+    $this->backdropPost('node/add/' . $type_name, $edit, t('Save'));
     $this->assertRaw(t('!title field is required.', array('!title' => $instance['label'])), t('Node save failed when required file field was empty.'));
 
     // Create a new node with the uploaded file.
@@ -847,7 +847,7 @@ class FileFieldValidateTestCase extends FileFieldTestCase {
 
     // Try to post a new node without uploading a file in the multivalue field.
     $edit = array('title' => $this->randomName());
-    $this->drupalPost('node/add/' . $type_name, $edit, t('Save'));
+    $this->backdropPost('node/add/' . $type_name, $edit, t('Save'));
     $this->assertRaw(t('!title field is required.', array('!title' => $instance['label'])), t('Node save failed when required multiple value file field was empty.'));
 
     // Create a new node with the uploaded file into the multivalue field.
@@ -1070,7 +1070,7 @@ class FileTokenReplaceTestCase extends FileFieldTestCase {
 
     $test_file = $this->getTestFile('text');
     // Coping a file to test uploads with non-latin filenames.
-    $filename = drupal_dirname($test_file->uri) . '/текстовый файл.txt';
+    $filename = backdrop_dirname($test_file->uri) . '/текстовый файл.txt';
     $test_file = file_copy($test_file, $filename);
 
     // Create a new node with the uploaded file.
@@ -1149,10 +1149,10 @@ class FilePrivateTestCase extends FileFieldTestCase {
     $node = node_load($nid, NULL, TRUE);
     $node_file = (object) $node->{$field_name}[LANGUAGE_NONE][0];
     // Ensure the file can be downloaded.
-    $this->drupalGet(file_create_url($node_file->uri));
+    $this->backdropGet(file_create_url($node_file->uri));
     $this->assertResponse(200, t('Confirmed that the generated URL is correct by downloading the shipped file.'));
-    $this->drupalLogOut();
-    $this->drupalGet(file_create_url($node_file->uri));
+    $this->backdropLogOut();
+    $this->backdropGet(file_create_url($node_file->uri));
     $this->assertResponse(403, t('Confirmed that access is denied for the file without the needed permission.'));
   }
 }

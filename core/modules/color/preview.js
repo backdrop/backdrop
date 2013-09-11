@@ -4,7 +4,7 @@
  */
 
 (function ($) {
-  Drupal.color = {
+  Backdrop.color = {
     callback: function(context, settings, form, farb, height, width) {
       // Solid background.
       $('#preview', form).css('backgroundColor', $('#palette input[name="palette[base]"]', form).val());

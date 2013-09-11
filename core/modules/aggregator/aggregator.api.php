@@ -13,7 +13,7 @@
 /**
  * Create an alternative fetcher for aggregator.module.
  *
- * A fetcher downloads feed data to a Drupal site. The fetcher is called at the
+ * A fetcher downloads feed data to a Backdrop site. The fetcher is called at the
  * first of the three aggregation stages: first, data is downloaded by the
  * active fetcher; second, it is converted to a common format by the active
  * parser; and finally, it is passed to all active processors, which manipulate

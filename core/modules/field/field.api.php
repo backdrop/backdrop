@@ -400,7 +400,7 @@ function hook_field_prepare_view($entity_type, $entities, $field, $instances, $l
 function hook_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   foreach ($items as $delta => $item) {
     if (!empty($item['value'])) {
-      if (!empty($field['settings']['max_length']) && drupal_strlen($item['value']) > $field['settings']['max_length']) {
+      if (!empty($field['settings']['max_length']) && backdrop_strlen($item['value']) > $field['settings']['max_length']) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'text_max_length',
           'message' => t('%name: the value may not be longer than %max characters.', array('%name' => $instance['label'], '%max' => $field['settings']['max_length'])),
@@ -494,7 +494,7 @@ function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  */
 function hook_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if (variable_get('taxonomy_maintain_index_table', TRUE) && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node') {
-    $first_call = &drupal_static(__FUNCTION__, array());
+    $first_call = &backdrop_static(__FUNCTION__, array());
 
     // We don't maintain data for old revisions, so clear all previous values
     // from the table. Since this hook runs once per field, per object, make
@@ -552,7 +552,7 @@ function hook_field_storage_update_field($field, $prior_field, $has_data) {
     // an example of what to do to modify the schema in place, preserving the
     // old data as much as possible.
   }
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 }
 
 /**
@@ -1238,7 +1238,7 @@ function hook_field_attach_validate($entity_type, $entity, &$errors) {
 function hook_field_attach_submit($entity_type, $entity, $form, &$form_state) {
   // Sample case of an 'Empty the field' checkbox added on the form, allowing
   // a given field to be emptied.
-  $values = drupal_array_get_nested_value($form_state['values'], $form['#parents']);
+  $values = backdrop_array_get_nested_value($form_state['values'], $form['#parents']);
   if (!empty($values['empty_field_foo'])) {
     unset($entity->field_foo);
   }
@@ -1608,7 +1608,7 @@ function hook_field_storage_details_alter(&$details, $field) {
     foreach ((array) $field['columns'] as $column_name => $attributes) {
       $columns[$column_name] = $column_name;
     }
-    $details['drupal_variables'] = array(
+    $details['backdrop_variables'] = array(
       FIELD_LOAD_CURRENT => array(
         'moon' => $columns,
       ),
@@ -1978,7 +1978,7 @@ function hook_field_storage_create_field($field) {
   foreach ($schema as $name => $table) {
     db_create_table($name, $table);
   }
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 }
 
 /**
@@ -2005,7 +2005,7 @@ function hook_field_storage_delete_field($field) {
   $revision_new_table = _field_sql_storage_revision_tablename($field);
   db_rename_table($table, $new_table);
   db_rename_table($revision_table, $revision_new_table);
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 }
 
 /**
@@ -2125,7 +2125,7 @@ function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
  *   Saved field IDs are set set as keys in $skip_fields.
  */
 function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
-  $first_call = &drupal_static(__FUNCTION__, array());
+  $first_call = &backdrop_static(__FUNCTION__, array());
 
   if ($entity_type == 'node' && $entity->status && _forum_node_check_node_type($entity)) {
     // We don't maintain data for old revisions, so clear all previous values
@@ -2426,7 +2426,7 @@ function hook_field_update_forbid($field, $prior_field, $has_data) {
  */
 function hook_field_update_field($field, $prior_field, $has_data) {
   // Reset the static value that keeps track of allowed values for list fields.
-  drupal_static_reset('list_allowed_values');
+  backdrop_static_reset('list_allowed_values');
 }
 
 /**

@@ -60,7 +60,7 @@ function aggregator_aggregator_remove($feed) {
     ->condition('fid', $feed->fid)
     ->execute();
 
-  drupal_set_message(t('The news items from %site have been removed.', array('%site' => $feed->title)));
+  backdrop_set_message(t('The news items from %site have been removed.', array('%site' => $feed->title)));
 }
 
 /**
@@ -72,8 +72,8 @@ function aggregator_aggregator_remove($feed) {
 function aggregator_form_aggregator_admin_form_alter(&$form, $form_state) {
   if (in_array('aggregator', variable_get('aggregator_processors', array('aggregator')))) {
     $info = module_invoke('aggregator', 'aggregator_process', 'info');
-    $items = drupal_map_assoc(array(3, 5, 10, 15, 20, 25), '_aggregator_items');
-    $period = drupal_map_assoc(array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200, 4838400, 9676800), 'format_interval');
+    $items = backdrop_map_assoc(array(3, 5, 10, 15, 20, 25), '_aggregator_items');
+    $period = backdrop_map_assoc(array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200, 4838400, 9676800), 'format_interval');
     $period[AGGREGATOR_CLEAR_NEVER] = t('Never');
 
     // Only wrap into a collapsible fieldset if there is a basic configuration.
@@ -118,7 +118,7 @@ function aggregator_form_aggregator_admin_form_alter(&$form, $form_state) {
       '#type' => 'select',
       '#title' => t('Length of trimmed description'),
       '#default_value' => variable_get('aggregator_teaser_length', 600),
-      '#options' => drupal_map_assoc(array(0, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000), '_aggregator_characters'),
+      '#options' => backdrop_map_assoc(array(0, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000), '_aggregator_characters'),
       '#description' => t("The maximum number of characters used in the trimmed version of content.")
     );
 
@@ -128,7 +128,7 @@ function aggregator_form_aggregator_admin_form_alter(&$form, $form_state) {
 /**
  * Creates display text for teaser length option values.
  *
- * Callback for drupal_map_assoc() within
+ * Callback for backdrop_map_assoc() within
  * aggregator_form_aggregator_admin_form_alter().
  */
 function _aggregator_characters($length) {

@@ -34,7 +34,7 @@ function field_test_field_storage_details($field) {
     $columns[$column_name] = $column_name;
   }
   return array(
-    'drupal_variables' => array(
+    'backdrop_variables' => array(
       'field_test_storage_data[FIELD_LOAD_CURRENT]' => $columns,
       'field_test_storage_data[FIELD_LOAD_REVISION]' => $columns,
     ),
@@ -54,7 +54,7 @@ function field_test_field_storage_details_alter(&$details, $field) {
     foreach ((array) $field['columns'] as $column_name => $attributes) {
       $columns[$column_name] = $column_name;
     }
-    $details['drupal_variables'] = array(
+    $details['backdrop_variables'] = array(
       FIELD_LOAD_CURRENT => array(
         'moon' => $columns,
       ),

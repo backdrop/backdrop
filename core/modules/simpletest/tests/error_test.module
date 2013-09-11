@@ -37,14 +37,14 @@ function error_test_menu() {
  * Menu callback; generate warnings to test the error handler.
  */
 function error_test_generate_warnings($collect_errors = FALSE) {
-  // Tell Drupal error reporter to send errors to Simpletest or not.
+  // Tell Backdrop error reporter to send errors to Simpletest or not.
   define('SIMPLETEST_COLLECT_ERRORS', $collect_errors);
   // This will generate a notice.
   $monkey_love = $bananas;
   // This will generate a warning.
   $awesomely_big = 1/0;
   // This will generate a user error.
-  trigger_error("Drupal is awesome", E_USER_WARNING);
+  trigger_error("Backdrop is awesome", E_USER_WARNING);
   return "";
 }
 
@@ -53,7 +53,7 @@ function error_test_generate_warnings($collect_errors = FALSE) {
  */
 function error_test_trigger_exception() {
   define('SIMPLETEST_COLLECT_ERRORS', FALSE);
-  throw new Exception("Drupal is awesome");
+  throw new Exception("Backdrop is awesome");
 }
 
 /**

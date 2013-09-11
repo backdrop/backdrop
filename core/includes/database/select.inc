@@ -1230,7 +1230,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
       foreach ($this->alterTags as $tag => $value) {
         $hooks[] = 'query_' . $tag;
       }
-      drupal_alter($hooks, $query);
+      backdrop_alter($hooks, $query);
     }
 
     $this->prepared = TRUE;

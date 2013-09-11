@@ -69,7 +69,7 @@ function field_ui_inactive_message($entity_type, $bundle) {
       '%widget_module' => $instance['widget']['module'],
       ));
     }
-    drupal_set_message(t('Inactive fields are not shown unless their providing modules are enabled. The following fields are not enabled: !list', array('!list' => theme('item_list', array('items' => $list)))), 'error');
+    backdrop_set_message(t('Inactive fields are not shown unless their providing modules are enabled. The following fields are not enabled: !list', array('!list' => theme('item_list', array('items' => $list)))), 'error');
   }
 }
 
@@ -84,7 +84,7 @@ function _field_ui_reduce_order($array, $a) {
     $array[] = $a['name'];
   }
   if (!empty($a['children'])) {
-    uasort($a['children'], 'drupal_sort_weight');
+    uasort($a['children'], 'backdrop_sort_weight');
     $array = array_merge($array, array_reduce($a['children'], '_field_ui_reduce_order'));
   }
   return $array;
@@ -130,7 +130,7 @@ function field_ui_display_overview_row_region($row) {
  * This function is assigned as a #pre_render callback in
  * field_ui_element_info().
  *
- * @see drupal_render().
+ * @see backdrop_render().
  */
 function field_ui_table_pre_render($elements) {
   $js_settings = array();
@@ -143,7 +143,7 @@ function field_ui_table_pre_render($elements) {
   $trees = array_fill_keys(array_keys($regions), $tree);
 
   $parents = array();
-  $list = drupal_map_assoc(element_children($elements));
+  $list = backdrop_map_assoc(element_children($elements));
 
   // Iterate on rows until we can build a known tree path for all of them.
   while ($list) {
@@ -174,7 +174,7 @@ function field_ui_table_pre_render($elements) {
         }
 
         // Add row id and associate JS settings.
-        $id = drupal_html_class($name);
+        $id = backdrop_html_class($name);
         $row['#attributes']['id'] = $id;
         if (isset($row['#js_settings'])) {
           $row['#js_settings'] += array(
@@ -231,7 +231,7 @@ function theme_field_ui_table($variables) {
 
   // Render rows, region by region.
   foreach ($elements['#regions'] as $region_name => $region) {
-    $region_name_class = drupal_html_class($region_name);
+    $region_name_class = backdrop_html_class($region_name);
 
     // Add region rows.
     if (isset($region['title'])) {
@@ -268,7 +268,7 @@ function theme_field_ui_table($variables) {
         $child = &$element[$cell_key];
         // Do not render a cell for children of #type 'value'.
         if (!(isset($child['#type']) && $child['#type'] == 'value')) {
-          $cell = array('data' => drupal_render($child));
+          $cell = array('data' => backdrop_render($child));
           if (isset($child['#cell_attributes'])) {
             $cell += $child['#cell_attributes'];
           }
@@ -631,8 +631,8 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
-  $form['#attached']['css'][] = drupal_get_path('module', 'field_ui') . '/field_ui.css';
-  $form['#attached']['js'][] = drupal_get_path('module', 'field_ui') . '/field_ui.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/field_ui.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/field_ui.js';
 
   // Add settings for the update selects behavior.
   $js_fields = array();
@@ -646,8 +646,8 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
   );
 
   // Add tabledrag behavior.
-  $form['#attached']['drupal_add_tabledrag'][] = array('field-overview', 'order', 'sibling', 'field-weight');
-  $form['#attached']['drupal_add_tabledrag'][] = array('field-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
+  $form['#attached']['backdrop_add_tabledrag'][] = array('field-overview', 'order', 'sibling', 'field-weight');
+  $form['#attached']['backdrop_add_tabledrag'][] = array('field-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
 
   return $form;
 }
@@ -826,7 +826,7 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
       $form_state['fields_added']['_add_new_field'] = $field['field_name'];
     }
     catch (Exception $e) {
-      drupal_set_message(t('There was a problem creating field %label: !message', array('%label' => $instance['label'], '!message' => $e->getMessage())), 'error');
+      backdrop_set_message(t('There was a problem creating field %label: !message', array('%label' => $instance['label'], '!message' => $e->getMessage())), 'error');
     }
   }
 
@@ -835,7 +835,7 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
     $values = $form_values['_add_existing_field'];
     $field = field_info_field($values['field_name']);
     if (!empty($field['locked'])) {
-      drupal_set_message(t('The field %label cannot be added because it is locked.', array('%label' => $values['label'])), 'error');
+      backdrop_set_message(t('The field %label cannot be added because it is locked.', array('%label' => $values['label'])), 'error');
     }
     else {
       $instance = array(
@@ -856,19 +856,19 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
         $form_state['fields_added']['_add_existing_field'] = $instance['field_name'];
       }
       catch (Exception $e) {
-        drupal_set_message(t('There was a problem creating field instance %label: @message.', array('%label' => $instance['label'], '@message' => $e->getMessage())), 'error');
+        backdrop_set_message(t('There was a problem creating field instance %label: @message.', array('%label' => $instance['label'], '@message' => $e->getMessage())), 'error');
       }
     }
   }
 
   if ($destinations) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     $destinations[] = $destination['destination'];
     unset($_GET['destination']);
     $form_state['redirect'] = field_ui_get_destinations($destinations);
   }
   else {
-    drupal_set_message(t('Your settings have been saved.'));
+    backdrop_set_message(t('Your settings have been saved.'));
   }
 }
 
@@ -904,7 +904,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   );
 
   if (empty($instances) && empty($extra_fields)) {
-    drupal_set_message(t('There are no fields yet added. You can add new fields on the <a href="@link">Manage fields</a> page.', array('@link' => url($admin_path . '/fields'))), 'warning');
+    backdrop_set_message(t('There are no fields yet added. You can add new fields on the <a href="@link">Manage fields</a> page.', array('@link' => url($admin_path . '/fields'))), 'warning');
     return $form;
   }
 
@@ -1218,12 +1218,12 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
-  $form['#attached']['js'][] = drupal_get_path('module', 'field_ui') . '/field_ui.js';
-  $form['#attached']['css'][] = drupal_get_path('module', 'field_ui') . '/field_ui.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/field_ui.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/field_ui.css';
 
   // Add tabledrag behavior.
-  $form['#attached']['drupal_add_tabledrag'][] = array('field-display-overview', 'order', 'sibling', 'field-weight');
-  $form['#attached']['drupal_add_tabledrag'][] = array('field-display-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
+  $form['#attached']['backdrop_add_tabledrag'][] = array('field-display-overview', 'order', 'sibling', 'field-weight');
+  $form['#attached']['backdrop_add_tabledrag'][] = array('field-display-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
 
   return $form;
 }
@@ -1370,7 +1370,7 @@ function field_ui_display_overview_form_submit($form, &$form_state) {
       if (!empty($value) && empty($view_mode_settings[$view_mode_name]['custom_settings'])) {
         $view_mode_label = $entity_info['view modes'][$view_mode_name]['label'];
         $path = _field_ui_bundle_admin_path($entity_type, $bundle) . "/display/$view_mode_name";
-        drupal_set_message(t('The %view_mode mode now uses custom display settings. You might want to <a href="@url">configure them</a>.', array('%view_mode' => $view_mode_label, '@url' => url($path))));
+        backdrop_set_message(t('The %view_mode mode now uses custom display settings. You might want to <a href="@url">configure them</a>.', array('%view_mode' => $view_mode_label, '@url' => url($path))));
         // Initialize the newly customized view mode with the display settings
         // from the default view mode.
         _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_mode_name, $bundle_settings);
@@ -1382,7 +1382,7 @@ function field_ui_display_overview_form_submit($form, &$form_state) {
   // Save updated bundle settings.
   field_bundle_settings($entity_type, $bundle, $bundle_settings);
 
-  drupal_set_message(t('Your settings have been saved.'));
+  backdrop_set_message(t('Your settings have been saved.'));
 }
 
 /**
@@ -1434,7 +1434,7 @@ function _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_m
  * Returns an array of field_type options.
  */
 function field_ui_field_type_options() {
-  $options = &drupal_static(__FUNCTION__);
+  $options = &backdrop_static(__FUNCTION__);
 
   if (!isset($options)) {
     $options = array();
@@ -1459,7 +1459,7 @@ function field_ui_field_type_options() {
  * keyed by field type human name.
  */
 function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
-  $options = &drupal_static(__FUNCTION__);
+  $options = &backdrop_static(__FUNCTION__);
 
   if (!isset($options)) {
     $options = array();
@@ -1495,7 +1495,7 @@ function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
  * by field type.
  */
 function field_ui_formatter_options($field_type = NULL) {
-  $options = &drupal_static(__FUNCTION__);
+  $options = &backdrop_static(__FUNCTION__);
 
   if (!isset($options)) {
     $field_types = field_info_field_types();
@@ -1566,7 +1566,7 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   $entity_type = $instance['entity_type'];
   $field = field_info_field($instance['field_name']);
 
-  drupal_set_title($instance['label']);
+  backdrop_set_title($instance['label']);
 
   $description = '<p>' . t('These settings apply to the %field field everywhere it is used. These settings impact the way that data is stored in the database and cannot be changed once data has been created.', array('%field' => $instance['label'])) . '</p>';
 
@@ -1631,11 +1631,11 @@ function field_ui_field_settings_form_submit($form, &$form_state) {
 
   try {
     field_update_field($field);
-    drupal_set_message(t('Updated field %label field settings.', array('%label' => $instance['label'])));
+    backdrop_set_message(t('Updated field %label field settings.', array('%label' => $instance['label'])));
     $form_state['redirect'] = field_ui_next_destination($entity_type, $bundle);
   }
   catch (Exception $e) {
-    drupal_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
+    backdrop_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
   }
 }
 
@@ -1647,7 +1647,7 @@ function field_ui_field_settings_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function field_ui_widget_type_form($form, &$form_state, $instance) {
-  drupal_set_title($instance['label']);
+  backdrop_set_title($instance['label']);
 
   $bundle = $instance['bundle'];
   $entity_type = $instance['entity_type'];
@@ -1708,10 +1708,10 @@ function field_ui_widget_type_form_submit($form, &$form_state) {
 
   try {
     field_update_instance($instance);
-    drupal_set_message(t('Changed the widget for field %label.', array('%label' => $instance['label'])));
+    backdrop_set_message(t('Changed the widget for field %label.', array('%label' => $instance['label'])));
   }
   catch (Exception $e) {
-    drupal_set_message(t('There was a problem changing the widget for field %label.', array('%label' => $instance['label'])), 'error');
+    backdrop_set_message(t('There was a problem changing the widget for field %label.', array('%label' => $instance['label'])), 'error');
   }
 
   $form_state['redirect'] = field_ui_next_destination($entity_type, $bundle);
@@ -1770,10 +1770,10 @@ function field_ui_field_delete_form_submit($form, &$form_state) {
 
   if (!empty($bundle) && $field && !$field['locked'] && $form_values['confirm']) {
     field_delete_instance($instance);
-    drupal_set_message(t('The field %field has been deleted from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)));
+    backdrop_set_message(t('The field %field has been deleted from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)));
   }
   else {
-    drupal_set_message(t('There was a problem removing the %field from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)), 'error');
+    backdrop_set_message(t('There was a problem removing the %field from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)), 'error');
   }
 
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
@@ -1802,7 +1802,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   $entity_type = $instance['entity_type'];
   $field = field_info_field($instance['field_name']);
 
-  drupal_set_title($instance['label']);
+  backdrop_set_title($instance['label']);
 
   $form['#field'] = $field;
   $form['#instance'] = $instance;
@@ -1933,7 +1933,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   $form['field']['cardinality'] = array(
     '#type' => 'select',
     '#title' => t('Number of values'),
-    '#options' => array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + drupal_map_assoc(range(1, 10)),
+    '#options' => array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + backdrop_map_assoc(range(1, 10)),
     '#default_value' => $field['cardinality'],
     '#description' => $description,
   );
@@ -1965,7 +1965,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
 function field_ui_field_edit_form_delete_submit($form, &$form_state) {
   $destination = array();
   if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   $instance = $form['#instance'];
@@ -2084,7 +2084,7 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
     field_update_field($field);
   }
   catch (Exception $e) {
-    drupal_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
+    backdrop_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
     return;
   }
 
@@ -2105,7 +2105,7 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
   $instance = array_merge($instance_source, $instance);
   field_update_instance($instance);
 
-  drupal_set_message(t('Saved %label configuration.', array('%label' => $instance['label'])));
+  backdrop_set_message(t('Saved %label configuration.', array('%label' => $instance['label'])));
 
   $form_state['redirect'] = field_ui_next_destination($instance['entity_type'], $instance['bundle']);
 }
@@ -2117,7 +2117,7 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
  */
 function field_ui_get_destinations($destinations) {
   $path = array_shift($destinations);
-  $options = drupal_parse_url($path);
+  $options = backdrop_parse_url($path);
   if ($destinations) {
     $options['query']['destinations'] = $destinations;
   }

@@ -32,7 +32,7 @@ function translation_help($path, $arg) {
     case 'admin/help#translation':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Content Translation module allows content to be translated into different languages. Working with the <a href="@locale">Locale module</a> (which manages enabled languages and provides translation for the site interface), the Content Translation module is key to creating and maintaining translated site content. For more information, see the online handbook entry for <a href="@translation">Content Translation module</a>.', array('@locale' => url('admin/help/locale'), '@translation' => 'http://drupal.org/handbook/modules/translation/')) . '</p>';
+      $output .= '<p>' . t('The Content Translation module allows content to be translated into different languages. Working with the <a href="@locale">Locale module</a> (which manages enabled languages and provides translation for the site interface), the Content Translation module is key to creating and maintaining translated site content. For more information, see the online handbook entry for <a href="@translation">Content Translation module</a>.', array('@locale' => url('admin/help/locale'), '@translation' => 'http://backdrop.org/handbook/modules/translation/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Configuring content types for translation') . '</dt>';
@@ -297,7 +297,7 @@ function translation_node_prepare($node) {
     if (!empty($source_node->tnid)) {
       $translations = translation_node_get_translations($source_node->tnid);
       if (isset($translations[$langcode])) {
-        drupal_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array('%title' => $source_node->title, '%language' => $language_list[$langcode]->name, '%type' => $node->type)), 'error');
+        backdrop_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array('%title' => $source_node->title, '%language' => $language_list[$langcode]->name, '%type' => $node->type)), 'error');
         return;
       }
     }
@@ -451,7 +451,7 @@ function translation_remove_from_set($node) {
  */
 function translation_node_get_translations($tnid) {
   if (is_numeric($tnid) && $tnid) {
-    $translations = &drupal_static(__FUNCTION__, array());
+    $translations = &backdrop_static(__FUNCTION__, array());
 
     if (!isset($translations[$tnid])) {
       $translations[$tnid] = array();
@@ -481,10 +481,10 @@ function translation_supported_type($type) {
 
 /**
  * Return paths of all translations of a node, based on
- * its Drupal path.
+ * its Backdrop path.
  *
  * @param $path
- *   A Drupal path, for example node/432.
+ *   A Backdrop path, for example node/432.
  * @return
  *   An array of paths of translations of the node accessible
  *   to the current user keyed with language codes.

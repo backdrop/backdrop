@@ -6,17 +6,17 @@
 (function ($) {
 
 /**
- * Implements Drupal.behaviors for the Dashboard module.
+ * Implements Backdrop.behaviors for the Dashboard module.
  */
-Drupal.behaviors.dashboard = {
+Backdrop.behaviors.dashboard = {
     attach: function (context, settings) {
     $('#dashboard', context).once(function () {
-      $(this).prepend('<div class="customize clearfix"><ul class="action-links"><li><a href="#">' + Drupal.t('Customize dashboard') + '</a></li></ul><div class="canvas"></div></div>');
-      $('.customize .action-links a', this).click(Drupal.behaviors.dashboard.enterCustomizeMode);
+      $(this).prepend('<div class="customize clearfix"><ul class="action-links"><li><a href="#">' + Backdrop.t('Customize dashboard') + '</a></li></ul><div class="canvas"></div></div>');
+      $('.customize .action-links a', this).click(Backdrop.behaviors.dashboard.enterCustomizeMode);
     });
-    Drupal.behaviors.dashboard.addPlaceholders();
-    if (Drupal.settings.dashboard.launchCustomize) {
-      Drupal.behaviors.dashboard.enterCustomizeMode();
+    Backdrop.behaviors.dashboard.addPlaceholders();
+    if (Backdrop.settings.dashboard.launchCustomize) {
+      Backdrop.behaviors.dashboard.enterCustomizeMode();
     }
   },
 
@@ -27,9 +27,9 @@ Drupal.behaviors.dashboard = {
       if ($('.block', this).length == 0) {
         // Check if we are in customize mode and grab the correct empty text
         if ($('#dashboard').hasClass('customize-mode')) {
-          empty_text = Drupal.settings.dashboard.emptyRegionTextActive;
+          empty_text = Backdrop.settings.dashboard.emptyRegionTextActive;
         } else {
-          empty_text = Drupal.settings.dashboard.emptyRegionTextInactive;
+          empty_text = Backdrop.settings.dashboard.emptyRegionTextInactive;
         }
         // We need a placeholder.
         if ($('.placeholder', this).length == 0) {
@@ -48,11 +48,11 @@ Drupal.behaviors.dashboard = {
    */
   enterCustomizeMode: function () {
     $('#dashboard').addClass('customize-mode customize-inactive');
-    Drupal.behaviors.dashboard.addPlaceholders();
+    Backdrop.behaviors.dashboard.addPlaceholders();
     // Hide the customize link
     $('#dashboard .customize .action-links').hide();
     // Load up the disabled blocks
-    $('div.customize .canvas').load(Drupal.settings.dashboard.drawer, Drupal.behaviors.dashboard.setupDrawer);
+    $('div.customize .canvas').load(Backdrop.settings.dashboard.drawer, Backdrop.behaviors.dashboard.setupDrawer);
   },
 
   /**
@@ -60,16 +60,16 @@ Drupal.behaviors.dashboard = {
    */
   exitCustomizeMode: function () {
     $('#dashboard').removeClass('customize-mode customize-inactive');
-    Drupal.behaviors.dashboard.addPlaceholders();
-    location.href = Drupal.settings.dashboard.dashboard;
+    Backdrop.behaviors.dashboard.addPlaceholders();
+    location.href = Backdrop.settings.dashboard.dashboard;
   },
 
   /**
    * Sets up the drag-and-drop behavior and the 'close' button.
    */
   setupDrawer: function () {
-    $('div.customize .canvas-content input').click(Drupal.behaviors.dashboard.exitCustomizeMode);
-    $('div.customize .canvas-content').append('<a class="button" href="' + Drupal.settings.dashboard.dashboard + '">' + Drupal.t('Done') + '</a>');
+    $('div.customize .canvas-content input').click(Backdrop.behaviors.dashboard.exitCustomizeMode);
+    $('div.customize .canvas-content').append('<a class="button" href="' + Backdrop.settings.dashboard.dashboard + '">' + Backdrop.t('Done') + '</a>');
 
     // Initialize drag-and-drop.
     var regions = $('#dashboard div.region');
@@ -81,10 +81,10 @@ Drupal.behaviors.dashboard = {
       items: '> div.block, > div.disabled-block',
       placeholder: 'block-placeholder clearfix',
       tolerance: 'pointer',
-      start: Drupal.behaviors.dashboard.start,
-      over: Drupal.behaviors.dashboard.over,
-      sort: Drupal.behaviors.dashboard.sort,
-      update: Drupal.behaviors.dashboard.update
+      start: Backdrop.behaviors.dashboard.start,
+      over: Backdrop.behaviors.dashboard.over,
+      sort: Backdrop.behaviors.dashboard.sort,
+      update: Backdrop.behaviors.dashboard.update
     });
   },
 
@@ -171,17 +171,17 @@ Drupal.behaviors.dashboard = {
       delta = itemClass.match(/\bdelta-(\S+)\b/)[1];
 
       // Load the newly enabled block's content.
-      $.get(Drupal.settings.dashboard.blockContent + '/' + module + '/' + delta, {},
+      $.get(Backdrop.settings.dashboard.blockContent + '/' + module + '/' + delta, {},
         function (block) {
           if (block) {
             item.html(block);
           }
 
           if (item.find('div.content').is(':empty')) {
-            item.find('div.content').html(Drupal.settings.dashboard.emptyBlockText);
+            item.find('div.content').html(Backdrop.settings.dashboard.emptyBlockText);
           }
 
-          Drupal.attachBehaviors(item);
+          Backdrop.attachBehaviors(item);
         },
         'html'
       );
@@ -190,12 +190,12 @@ Drupal.behaviors.dashboard = {
       item.removeClass("disabled-block");
     }
 
-    Drupal.behaviors.dashboard.addPlaceholders();
+    Backdrop.behaviors.dashboard.addPlaceholders();
 
     // Let the server know what the new block order is.
-    $.post(Drupal.settings.dashboard.updatePath, {
-        'form_token': Drupal.settings.dashboard.formToken,
-        'regions': Drupal.behaviors.dashboard.getOrder
+    $.post(Backdrop.settings.dashboard.updatePath, {
+        'form_token': Backdrop.settings.dashboard.formToken,
+        'regions': Backdrop.behaviors.dashboard.getOrder
       }
     );
   },
