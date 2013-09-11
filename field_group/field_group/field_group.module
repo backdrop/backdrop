@@ -513,6 +513,7 @@ function field_group_field_group_format_settings($group) {
       );
       break;
     case 'div':
+      $form['label']['#description'] = t('Please enter a label for collapsible elements');
       $form['instance_settings']['show_label'] = array(
         '#title' => t('Show label'),
         '#type' => 'select',
@@ -551,6 +552,7 @@ function field_group_field_group_format_settings($group) {
       );
       break;
     case 'fieldset':
+      $form['label']['#description'] = t('Please enter a label for collapsible elements');
       break;
     case 'multipage-group':
       $form['instance_settings']['page_header'] = array(

@@ -425,7 +425,12 @@ function field_group_format_settings_form(&$group) {
     '#weight' => -5,
     '#element_validate' => array('field_group_format_settings_label_validate'),
   );
-  $form += module_invoke_all('field_group_format_settings', $group);
+  $addition = module_invoke_all('field_group_format_settings', $group);
+  $form += $addition;
+  // Give fieldgroup implementations the chance to alter the description.
+  if (!empty($addition['label']['#description'])) {
+    $form['label']['#description'] = $addition['label']['#description'];
+  }
   $form['#validate'] = array('field_group_format_settings_form_validate');
   return $form;
 }
