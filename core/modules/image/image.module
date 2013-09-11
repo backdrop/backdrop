@@ -690,18 +690,27 @@ function image_style_options($include_empty = TRUE) {
  * @param $style
  *   The image style
  */
-function image_style_deliver($style, $scheme) {
-  // Check that the style is defined and the scheme is valid.
-  if (!$style || !file_stream_wrapper_valid_scheme($scheme)) {
-    drupal_exit();
+function image_style_deliver($style) {
+  $args = func_get_args();
+
+  // Check that we have sufficient arguments and that the style is defined.
+  if (count($args) < 4 || !$style) {
+    return drupal_access_denied();
   }
 
-  $args = func_get_args();
-  array_shift($args);
-  array_shift($args);
+  // Extract the arguments and rebuild the image URI.
+  $style = array_shift($args);
+  $token = array_shift($args);
+  $scheme = array_shift($args);
   $target = implode('/', $args);
 
   $image_uri = $scheme . '://' . $target;
+
+  // Validate that the scheme and token are valid.
+  if (!file_stream_wrapper_valid_scheme($scheme) || $token != image_style_path_token($style['name'], $image_uri)) {
+    return drupal_access_denied();
+  }
+
   $derivative_uri = image_style_path($style['name'], $image_uri);
 
   // If using the private scheme, let other modules provide headers and
@@ -714,11 +723,6 @@ function image_style_deliver($style, $scheme) {
       $headers = module_invoke_all('file_download', $image_uri);
       if (in_array(-1, $headers) || empty($headers)) {
         return drupal_access_denied();
-      }
-      if (count($headers)) {
-        foreach ($headers as $name => $value) {
-          drupal_add_http_header($name, $value);
-        }
       }
     }
   }
@@ -921,7 +925,25 @@ function image_style_path($style_name, $uri) {
     $path = $uri;
     $scheme = file_default_scheme();
   }
-  return $scheme . '://styles/' . $style_name . '/' . $scheme . '/' . $path;
+  return $scheme . '://styles/' . $style_name . '/' . image_style_path_token($style_name, $uri) . '/' . $scheme . '/' . $path;
+}
+
+/**
+ * Generate a token to protect an image style derivative.
+ *
+ * This prevents unauthorized generation of an image style derivative,
+ * which can be costly both in CPU time and disk space.
+ */
+function image_style_path_token($style_name, $uri) {
+  $scheme = file_uri_scheme($uri);
+  if ($scheme) {
+    $path = file_uri_target($uri);
+  }
+  else {
+    $path = $uri;
+    $scheme = file_default_scheme();
+  }
+  return drupal_hmac_base64($style_name . '/' . $scheme . '/' . $path, drupal_get_private_key() . drupal_get_hash_salt());
 }
 
 /**
