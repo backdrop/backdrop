@@ -60,7 +60,7 @@ function number_field_settings_form($field, $instance, $has_data) {
     $form['precision'] = array(
       '#type' => 'select',
       '#title' => t('Precision'),
-      '#options' => drupal_map_assoc(range(10, 32)),
+      '#options' => backdrop_map_assoc(range(10, 32)),
       '#default_value' => $settings['precision'],
       '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
       '#disabled' => $has_data,
@@ -68,7 +68,7 @@ function number_field_settings_form($field, $instance, $has_data) {
     $form['scale'] = array(
       '#type' => 'select',
       '#title' => t('Scale'),
-      '#options' => drupal_map_assoc(range(0, 10)),
+      '#options' => backdrop_map_assoc(range(0, 10)),
       '#default_value' => $settings['scale'],
       '#description' => t('The number of digits to the right of the decimal.'),
       '#disabled' => $has_data,
@@ -246,7 +246,7 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
       $element['scale'] = array(
         '#type' => 'select',
         '#title' => t('Scale'),
-        '#options' => drupal_map_assoc(range(0, 10)),
+        '#options' => backdrop_map_assoc(range(0, 10)),
         '#default_value' => $settings['scale'],
         '#description' => t('The number of digits to the right of the decimal.'),
       );

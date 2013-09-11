@@ -3,50 +3,50 @@
 /**
  * Provide the summary information for the block settings vertical tabs.
  */
-Drupal.behaviors.blockSettingsSummary = {
+Backdrop.behaviors.blockSettingsSummary = {
   attach: function (context) {
-    // The drupalSetSummary method required for this behavior is not available
+    // The backdropSetSummary method required for this behavior is not available
     // on the Blocks administration page, so we need to make sure this
-    // behavior is processed only if drupalSetSummary is defined.
-    if (typeof jQuery.fn.drupalSetSummary == 'undefined') {
+    // behavior is processed only if backdropSetSummary is defined.
+    if (typeof jQuery.fn.backdropSetSummary == 'undefined') {
       return;
     }
 
-    $('fieldset#edit-path', context).drupalSetSummary(function (context) {
+    $('fieldset#edit-path', context).backdropSetSummary(function (context) {
       if (!$('textarea[name="pages"]', context).val()) {
-        return Drupal.t('Not restricted');
+        return Backdrop.t('Not restricted');
       }
       else {
-        return Drupal.t('Restricted to certain pages');
+        return Backdrop.t('Restricted to certain pages');
       }
     });
 
-    $('fieldset#edit-node-type', context).drupalSetSummary(function (context) {
+    $('fieldset#edit-node-type', context).backdropSetSummary(function (context) {
       var vals = [];
       $('input[type="checkbox"]:checked', context).each(function () {
         vals.push($.trim($(this).next('label').text()));
       });
       if (!vals.length) {
-        vals.push(Drupal.t('Not restricted'));
+        vals.push(Backdrop.t('Not restricted'));
       }
       return vals.join(', ');
     });
 
-    $('fieldset#edit-role', context).drupalSetSummary(function (context) {
+    $('fieldset#edit-role', context).backdropSetSummary(function (context) {
       var vals = [];
       $('input[type="checkbox"]:checked', context).each(function () {
         vals.push($.trim($(this).next('label').text()));
       });
       if (!vals.length) {
-        vals.push(Drupal.t('Not restricted'));
+        vals.push(Backdrop.t('Not restricted'));
       }
       return vals.join(', ');
     });
 
-    $('fieldset#edit-user', context).drupalSetSummary(function (context) {
+    $('fieldset#edit-user', context).backdropSetSummary(function (context) {
       var $radio = $('input[name="custom"]:checked', context);
       if ($radio.val() == 0) {
-        return Drupal.t('Not customizable');
+        return Backdrop.t('Not customizable');
       }
       else {
         return $radio.next('label').text();
@@ -61,15 +61,15 @@ Drupal.behaviors.blockSettingsSummary = {
  * This behavior is dependent on the tableDrag behavior, since it uses the
  * objects initialized in that behavior to update the row.
  */
-Drupal.behaviors.blockDrag = {
+Backdrop.behaviors.blockDrag = {
   attach: function (context, settings) {
     // tableDrag is required and we should be on the blocks admin page.
-    if (typeof Drupal.tableDrag == 'undefined' || typeof Drupal.tableDrag.blocks == 'undefined') {
+    if (typeof Backdrop.tableDrag == 'undefined' || typeof Backdrop.tableDrag.blocks == 'undefined') {
       return;
     }
 
     var table = $('table#blocks');
-    var tableDrag = Drupal.tableDrag.blocks; // Get the blocks tableDrag object.
+    var tableDrag = Backdrop.tableDrag.blocks; // Get the blocks tableDrag object.
 
     // Add a handler for when a row is swapped, update empty regions.
     tableDrag.row.prototype.onSwap = function (swappedRow) {
@@ -77,8 +77,8 @@ Drupal.behaviors.blockDrag = {
     };
 
     // A custom message for the blocks page specifically.
-    Drupal.theme.tableDragChangedWarning = function () {
-      return '<div class="messages warning">' + Drupal.theme('tableDragChangedMarker') + ' ' + Drupal.t('The changes to these blocks will not be saved until the <em>Save blocks</em> button is clicked.') + '</div>';
+    Backdrop.theme.tableDragChangedWarning = function () {
+      return '<div class="messages warning">' + Backdrop.theme('tableDragChangedMarker') + ' ' + Backdrop.t('The changes to these blocks will not be saved until the <em>Save blocks</em> button is clicked.') + '</div>';
     };
 
     // Add a handler so when a row is dropped, update fields dropped into new regions.
@@ -92,7 +92,7 @@ Drupal.behaviors.blockDrag = {
       // Check whether the newly picked region is available for this block.
       if ($('option[value=' + regionName + ']', regionField).length == 0) {
         // If not, alert the user and keep the block in its old region setting.
-        alert(Drupal.t('The block cannot be placed in this region.'));
+        alert(Backdrop.t('The block cannot be placed in this region.'));
         // Simulate that there was a selected element change, so the row is put
         // back to from where the user tried to drag it.
         regionField.change();

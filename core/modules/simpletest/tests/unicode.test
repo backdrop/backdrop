@@ -8,7 +8,7 @@
 /**
  * Test unicode handling features implemented in unicode.inc.
  */
-class UnicodeUnitTest extends DrupalUnitTestCase {
+class UnicodeUnitTest extends BackdropUnitTestCase {
 
   /**
    * Whether to run the extended version of the tests (including non latin1 characters).
@@ -20,7 +20,7 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Unicode handling',
-      'description' => 'Tests Drupal Unicode handling.',
+      'description' => 'Tests Backdrop Unicode handling.',
       'group' => 'System',
     );
   }
@@ -80,7 +80,7 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
     }
 
     foreach ($testcase as $input => $output) {
-      $this->assertEqual(drupal_strtolower($input), $output, t('%input is lowercased as %output', array('%input' => $input, '%output' => $output)));
+      $this->assertEqual(backdrop_strtolower($input), $output, t('%input is lowercased as %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
@@ -94,7 +94,7 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
     }
 
     foreach ($testcase as $input => $output) {
-      $this->assertEqual(drupal_strtoupper($input), $output, t('%input is uppercased as %output', array('%input' => $input, '%output' => $output)));
+      $this->assertEqual(backdrop_strtoupper($input), $output, t('%input is uppercased as %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
@@ -110,7 +110,7 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
     }
 
     foreach ($testcase as $input => $output) {
-      $this->assertEqual(drupal_ucfirst($input), $output, t('%input is ucfirst-ed as %output', array('%input' => $input, '%output' => $output)));
+      $this->assertEqual(backdrop_ucfirst($input), $output, t('%input is ucfirst-ed as %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
@@ -121,7 +121,7 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
     );
 
     foreach ($testcase as $input => $output) {
-      $this->assertEqual(drupal_strlen($input), $output, t('%input length is %output', array('%input' => $input, '%output' => $output)));
+      $this->assertEqual(backdrop_strlen($input), $output, t('%input length is %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
@@ -180,7 +180,7 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
 
     foreach ($testcase as $test) {
       list($input, $start, $length, $output) = $test;
-      $result = drupal_substr($input, $start, $length);
+      $result = backdrop_substr($input, $start, $length);
       $this->assertEqual($result, $output, t('%input substring at offset %offset for %length characters is %output (got %result)', array('%input' => $input, '%offset' => $start, '%length' => $length, '%output' => $output, '%result' => $result)));
     }
   }
@@ -190,7 +190,7 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
    */
   function testDecodeEntities() {
     $testcase = array(
-      'Drupal' => 'Drupal',
+      'Backdrop' => 'Backdrop',
       '<script>' => '<script>',
       '&lt;script&gt;' => '<script>',
       '&#60;script&#62;' => '<script>',

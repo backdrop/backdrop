@@ -11,7 +11,7 @@
  * @see block_menu()
  */
 function block_admin_demo($theme = NULL) {
-  drupal_add_css(drupal_get_path('module', 'block') . '/block.admin.css');
+  backdrop_add_css(backdrop_get_path('module', 'block') . '/block.admin.css');
   return '';
 }
 
@@ -27,7 +27,7 @@ function block_admin_demo($theme = NULL) {
 function block_admin_display($theme = NULL) {
   global $theme_key;
 
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
 
   if (!isset($theme)) {
     // If theme is not specifically set, rehash for the current theme.
@@ -37,7 +37,7 @@ function block_admin_display($theme = NULL) {
   // Fetch and sort blocks.
   $blocks = block_admin_display_prepare_blocks($theme);
 
-  return drupal_get_form('block_admin_display_form', $blocks, $theme);
+  return backdrop_get_form('block_admin_display_form', $blocks, $theme);
 }
 
 /**
@@ -54,7 +54,7 @@ function block_admin_display($theme = NULL) {
  */
 function block_admin_display_prepare_blocks($theme) {
   $blocks = _block_rehash($theme);
-  $compare_theme = &drupal_static('_block_compare:theme');
+  $compare_theme = &backdrop_static('_block_compare:theme');
   $compare_theme = $theme;
   usort($blocks, '_block_compare');
   return $blocks;
@@ -80,7 +80,7 @@ function block_admin_display_prepare_blocks($theme) {
  * @see block_admin_display_form_submit()
  */
 function block_admin_display_form($form, &$form_state, $blocks, $theme, $block_regions = NULL) {
-  $path = drupal_get_path('module', 'block');
+  $path = backdrop_get_path('module', 'block');
   $form['#attached']['css'][] = $path . '/block.admin.css';
   $form['#attached']['js'][] = 'core/misc/tableheader.js';
   $form['#attached']['js'][] = $path . '/block.js';
@@ -93,8 +93,8 @@ function block_admin_display_form($form, &$form_state, $blocks, $theme, $block_r
   $block_regions_with_disabled = $block_regions + array(BLOCK_REGION_NONE => BLOCK_REGION_NONE);
 
   foreach ($block_regions_with_disabled as $region => $title) {
-    $form['#attached']['drupal_add_tabledrag'][] = array('blocks', 'match', 'sibling', 'block-region-select', 'block-region-' . $region, NULL, FALSE);
-    $form['#attached']['drupal_add_tabledrag'][] = array('blocks', 'order', 'sibling', 'block-weight', 'block-weight-' . $region);
+    $form['#attached']['backdrop_add_tabledrag'][] = array('blocks', 'match', 'sibling', 'block-region-select', 'block-region-' . $region, NULL, FALSE);
+    $form['#attached']['backdrop_add_tabledrag'][] = array('blocks', 'order', 'sibling', 'block-weight', 'block-weight-' . $region);
   }
 
   // Weights range from -delta to +delta, so delta should be at least half
@@ -204,7 +204,7 @@ function block_admin_display_form_submit($form, &$form_state) {
     watchdog_exception('block', $e);
     throw $e;
   }
-  drupal_set_message(t('The block settings have been updated.'));
+  backdrop_set_message(t('The block settings have been updated.'));
   cache_clear_all();
 }
 
@@ -218,12 +218,12 @@ function _block_compare($a, $b) {
 
   // Theme should be set before calling this function, or the current theme
   // is being used.
-  $theme = &drupal_static(__FUNCTION__ . ':theme');
+  $theme = &backdrop_static(__FUNCTION__ . ':theme');
   if (!isset($theme)) {
     $theme = $theme_key;
   }
 
-  $regions = &drupal_static(__FUNCTION__ . ':regions');
+  $regions = &backdrop_static(__FUNCTION__ . ':regions');
   // We need the region list to correctly order by region.
   if (!isset($regions)) {
     $regions = array_flip(array_keys(system_region_list($theme)));
@@ -279,7 +279,7 @@ function block_admin_configure($form, &$form_state, $module, $delta) {
   // Get the block subject for the page title.
   $info = module_invoke($block->module, 'block_info');
   if (isset($info[$block->delta])) {
-    drupal_set_title(t("'%name' block", array('%name' => $info[$block->delta]['info'])), PASS_THROUGH);
+    backdrop_set_title(t("'%name' block", array('%name' => $info[$block->delta]['info'])), PASS_THROUGH);
   }
 
   $form['settings']['title'] = array(
@@ -346,7 +346,7 @@ function block_admin_configure($form, &$form_state, $module, $delta) {
   $form['visibility'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'block') . '/block.js'),
+      'js' => array(backdrop_get_path('module', 'block') . '/block.js'),
     ),
   );
 
@@ -381,7 +381,7 @@ function block_admin_configure($form, &$form_state, $module, $delta) {
     if (module_exists('php') && $access) {
       $options += array(BLOCK_VISIBILITY_PHP => t('Pages on which this PHP code returns <code>TRUE</code> (experts only)'));
       $title = t('Pages or PHP code');
-      $description .= ' ' . t('If the PHP option is chosen, enter PHP code between %php. Note that executing incorrect PHP code can break your Drupal site.', array('%php' => '<?php ?>'));
+      $description .= ' ' . t('If the PHP option is chosen, enter PHP code between %php. Note that executing incorrect PHP code can break your Backdrop site.', array('%php' => '<?php ?>'));
     }
     else {
       $title = t('Pages');
@@ -524,7 +524,7 @@ function block_admin_configure_submit($form, &$form_state) {
       watchdog_exception('block', $e);
       throw $e;
     }
-    drupal_set_message(t('The block configuration has been saved.'));
+    backdrop_set_message(t('The block configuration has been saved.'));
     cache_clear_all();
     $form_state['redirect'] = 'admin/structure/block';
   }
@@ -616,7 +616,7 @@ function block_add_block_form_submit($form, &$form_state) {
       ->execute();
   }
 
-  drupal_set_message(t('The block has been created.'));
+  backdrop_set_message(t('The block has been created.'));
   cache_clear_all();
   $form_state['redirect'] = 'admin/structure/block';
 }
@@ -659,7 +659,7 @@ function block_custom_block_delete_submit($form, &$form_state) {
     ->condition('module', 'block')
     ->condition('delta', $form_state['values']['bid'])
     ->execute();
-  drupal_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
+  backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
   cache_clear_all();
   $form_state['redirect'] = 'admin/structure/block';
   return;
@@ -702,14 +702,14 @@ function template_preprocess_block_admin_display_form(&$variables) {
     $variables['block_listing'][$region][$i] = new stdClass();
     $variables['block_listing'][$region][$i]->row_class = !empty($block['#attributes']['class']) ? implode(' ', $block['#attributes']['class']) : '';
     $variables['block_listing'][$region][$i]->block_modified = !empty($block['#attributes']['class']) && in_array('block-modified', $block['#attributes']['class']);
-    $variables['block_listing'][$region][$i]->block_title = drupal_render($block['info']);
-    $variables['block_listing'][$region][$i]->region_select = drupal_render($block['region']) . drupal_render($block['theme']);
-    $variables['block_listing'][$region][$i]->weight_select = drupal_render($block['weight']);
-    $variables['block_listing'][$region][$i]->configure_link = drupal_render($block['configure']);
-    $variables['block_listing'][$region][$i]->delete_link = !empty($block['delete']) ? drupal_render($block['delete']) : '';
+    $variables['block_listing'][$region][$i]->block_title = backdrop_render($block['info']);
+    $variables['block_listing'][$region][$i]->region_select = backdrop_render($block['region']) . backdrop_render($block['theme']);
+    $variables['block_listing'][$region][$i]->weight_select = backdrop_render($block['weight']);
+    $variables['block_listing'][$region][$i]->configure_link = backdrop_render($block['configure']);
+    $variables['block_listing'][$region][$i]->delete_link = !empty($block['delete']) ? backdrop_render($block['delete']) : '';
     $variables['block_listing'][$region][$i]->printed = FALSE;
   }
 
-  $variables['form_submit'] = drupal_render_children($variables['form']);
+  $variables['form_submit'] = backdrop_render_children($variables['form']);
 }
 

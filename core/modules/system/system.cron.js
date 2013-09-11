@@ -3,7 +3,7 @@
 /**
  * Checks to see if the cron should be automatically run.
  */
-Drupal.behaviors.cronCheck = {
+Backdrop.behaviors.cronCheck = {
   attach: function(context, settings) {
     if (settings.cronCheck || false) {
       $('body').once('cron-check', function() {

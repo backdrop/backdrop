@@ -14,26 +14,26 @@
  * The system tries to ensure that only one consumer can process an item.
  *
  * Before a queue can be used it needs to be created by
- * DrupalQueueInterface::createQueue().
+ * BackdropQueueInterface::createQueue().
  *
  * Items can be added to the queue by passing an arbitrary data object to
- * DrupalQueueInterface::createItem().
+ * BackdropQueueInterface::createItem().
  *
- * To process an item, call DrupalQueueInterface::claimItem() and specify how
+ * To process an item, call BackdropQueueInterface::claimItem() and specify how
  * long you want to have a lease for working on that item. When finished
  * processing, the item needs to be deleted by calling
- * DrupalQueueInterface::deleteItem(). If the consumer dies, the item will be
- * made available again by the DrupalQueueInterface implementation once the
+ * BackdropQueueInterface::deleteItem(). If the consumer dies, the item will be
+ * made available again by the BackdropQueueInterface implementation once the
  * lease expires. Another consumer will then be able to receive it when calling
- * DrupalQueueInterface::claimItem(). Due to this, the processing code should
+ * BackdropQueueInterface::claimItem(). Due to this, the processing code should
  * be aware that an item might be handed over for processing more than once.
  *
- * The $item object used by the DrupalQueueInterface can contain arbitrary
+ * The $item object used by the BackdropQueueInterface can contain arbitrary
  * metadata depending on the implementation. Systems using the interface should
  * only rely on the data property which will contain the information passed to
- * DrupalQueueInterface::createItem(). The full queue item returned by
- * DrupalQueueInterface::claimItem() needs to be passed to
- * DrupalQueueInterface::deleteItem() once processing is completed.
+ * BackdropQueueInterface::createItem(). The full queue item returned by
+ * BackdropQueueInterface::claimItem() needs to be passed to
+ * BackdropQueueInterface::deleteItem() once processing is completed.
  *
  * There are two kinds of queue backends available: reliable, which preserves
  * the order of messages and guarantees that every item will be executed at
@@ -57,7 +57,7 @@
 /**
  * Factory class for interacting with queues.
  */
-class DrupalQueue {
+class BackdropQueue {
   /**
    * Returns the queue object for a given name.
    *
@@ -86,7 +86,7 @@ class DrupalQueue {
         $class = variable_get('queue_default_class', 'SystemQueue');
       }
       $object = new $class($name);
-      if ($reliable && !$object instanceof DrupalReliableQueueInterface) {
+      if ($reliable && !$object instanceof BackdropReliableQueueInterface) {
         $class = variable_get('queue_default_reliable_class', 'SystemQueue');
         $object = new $class($name);
       }
@@ -96,7 +96,7 @@ class DrupalQueue {
   }
 }
 
-interface DrupalQueueInterface {
+interface BackdropQueueInterface {
   /**
    * Start working with a queue.
    *
@@ -158,7 +158,7 @@ interface DrupalQueueInterface {
    * Delete a finished item from the queue.
    *
    * @param $item
-   *   The item returned by DrupalQueueInterface::claimItem().
+   *   The item returned by BackdropQueueInterface::claimItem().
    */
   public function deleteItem($item);
 
@@ -196,13 +196,13 @@ interface DrupalQueueInterface {
  * Classes implementing this interface preserve the order of messages and
  * guarantee that every item will be executed at least once.
  */
-interface DrupalReliableQueueInterface extends DrupalQueueInterface {
+interface BackdropReliableQueueInterface extends BackdropQueueInterface {
 }
 
 /**
  * Default queue implementation.
  */
-class SystemQueue implements DrupalReliableQueueInterface {
+class SystemQueue implements BackdropReliableQueueInterface {
   /**
    * The name of the queue this instance is working with.
    *
@@ -215,8 +215,8 @@ class SystemQueue implements DrupalReliableQueueInterface {
   }
 
   public function createItem($data) {
-    // During a Drupal 6.x to 8.x update, drupal_get_schema() does not contain
-    // the queue table yet, so we cannot rely on drupal_write_record().
+    // During a Backdrop 6.x to 8.x update, backdrop_get_schema() does not contain
+    // the queue table yet, so we cannot rely on backdrop_write_record().
     $query = db_insert('queue')
       ->fields(array(
         'name' => $this->name,
@@ -282,7 +282,7 @@ class SystemQueue implements DrupalReliableQueueInterface {
 
   public function createQueue() {
     // All tasks are stored in a single database table (which is created when
-    // Drupal is first installed) so there is nothing we need to do to create
+    // Backdrop is first installed) so there is nothing we need to do to create
     // a new queue.
   }
 
@@ -300,7 +300,7 @@ class SystemQueue implements DrupalReliableQueueInterface {
  * interface. The queue data resides in memory. It should only be used for
  * items that will be queued and dequeued within a given page request.
  */
-class MemoryQueue implements DrupalQueueInterface {
+class MemoryQueue implements BackdropQueueInterface {
   /**
    * The queue data.
    *

@@ -14,7 +14,7 @@
  * In other cases, Bartik is used, but this can be overridden by setting a
  * "maintenance_theme" key in the $conf variable in settings.php.
  */
-function _drupal_maintenance_theme() {
+function _backdrop_maintenance_theme() {
   global $theme, $theme_key, $conf;
 
   // If $theme is already set, assume the others are set too, and do nothing.
@@ -37,7 +37,7 @@ function _drupal_maintenance_theme() {
   else {
     // The bootstrap was not complete. So we are operating in a crippled
     // environment, we need to bootstrap just enough to allow hook invocations
-    // to work. See _drupal_log_error().
+    // to work. See _backdrop_log_error().
     if (!class_exists('Database', FALSE)) {
       require_once DRUPAL_ROOT . '/core/includes/database/database.inc';
     }
@@ -57,12 +57,12 @@ function _drupal_maintenance_theme() {
   if (!function_exists('_system_rebuild_theme_data')) {
     $module_list['system']['filename'] = 'core/modules/system/system.module';
     module_list(TRUE, FALSE, FALSE, $module_list);
-    drupal_load('module', 'system');
+    backdrop_load('module', 'system');
   }
 
   $themes = list_themes();
 
-  // list_themes() triggers a drupal_alter() in maintenance mode, but we can't
+  // list_themes() triggers a backdrop_alter() in maintenance mode, but we can't
   // let themes alter the .info data until we know a theme's base themes. So
   // don't set global $theme until after list_themes() builds its cache.
   $theme = $custom_theme;
@@ -77,15 +77,15 @@ function _drupal_maintenance_theme() {
     $base_theme[] = $new_base_theme = $themes[$themes[$ancestor]->base_theme];
     $ancestor = $themes[$ancestor]->base_theme;
   }
-  _drupal_theme_initialize($themes[$theme], array_reverse($base_theme), '_theme_load_offline_registry');
+  _backdrop_theme_initialize($themes[$theme], array_reverse($base_theme), '_theme_load_offline_registry');
 
   // These are usually added from system_init() -except maintenance.css.
   // When the database is inactive it's not called so we add it here.
-  $path = drupal_get_path('module', 'system');
-  drupal_add_css($path . '/system.base.css');
-  drupal_add_css($path . '/system.admin.css');
-  drupal_add_css($path . '/system.theme.css');
-  drupal_add_css($path . '/system.maintenance.css');
+  $path = backdrop_get_path('module', 'system');
+  backdrop_add_css($path . '/system.base.css');
+  backdrop_add_css($path . '/system.admin.css');
+  backdrop_add_css($path . '/system.theme.css');
+  backdrop_add_css($path . '/system.maintenance.css');
 }
 
 /**
@@ -143,7 +143,7 @@ function theme_task_list($variables) {
  *   - content: The page content to show.
  */
 function theme_install_page($variables) {
-  drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+  backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
   return theme('maintenance_page', $variables);
 }
 
@@ -159,7 +159,7 @@ function theme_install_page($variables) {
  *     FALSE can be useful to postpone the messages to a subsequent page.
  */
 function theme_update_page($variables) {
-  drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+  backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
   return theme('maintenance_page', $variables);
 }
 

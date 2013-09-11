@@ -8,15 +8,15 @@
 /**
  * Defines a base PHP test case class.
  */
-class PHPTestCase extends DrupalWebTestCase {
+class PHPTestCase extends BackdropWebTestCase {
   protected $php_code_format;
 
   function setUp() {
     parent::setUp('php');
 
     // Create and login admin user.
-    $admin_user = $this->drupalCreateUser(array('administer filters'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer filters'));
+    $this->backdropLogin($admin_user);
 
     // Verify that the PHP code text format was inserted.
     $php_format_id = 'php_code';
@@ -28,11 +28,11 @@ class PHPTestCase extends DrupalWebTestCase {
     $this->assertTrue($filters['php_code']->status, t('PHP code filter is enabled.'));
 
     // Verify that the format exists on the administration page.
-    $this->drupalGet('admin/config/content/formats');
+    $this->backdropGet('admin/config/content/formats');
     $this->assertText('PHP code', t('PHP code text format was created.'));
 
     // Verify that anonymous and authenticated user roles do not have access.
-    $this->drupalGet('admin/config/content/formats/' . $php_format_id);
+    $this->backdropGet('admin/config/content/formats/' . $php_format_id);
     $this->assertFieldByName('roles[1]', FALSE, t('Anonymous users do not have access to PHP code format.'));
     $this->assertFieldByName('roles[2]', FALSE, t('Authenticated users do not have access to PHP code format.'));
   }
@@ -43,7 +43,7 @@ class PHPTestCase extends DrupalWebTestCase {
    * @return stdObject Node object.
    */
   function createNodeWithCode() {
-    return $this->drupalCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => '<?php print "SimpleTest PHP was executed!"; ?>')))));
+    return $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => '<?php print "SimpleTest PHP was executed!"; ?>')))));
   }
 }
 
@@ -65,21 +65,21 @@ class PHPFilterTestCase extends PHPTestCase {
   function testPHPFilter() {
     // Log in as a user with permission to use the PHP code text format.
     $php_code_permission = filter_permission_name(filter_format_load('php_code'));
-    $web_user = $this->drupalCreateUser(array('access content', 'create page content', 'edit own page content', $php_code_permission));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content', 'create page content', 'edit own page content', $php_code_permission));
+    $this->backdropLogin($web_user);
 
     // Create a node with PHP code in it.
     $node = $this->createNodeWithCode();
 
     // Make sure that the PHP code shows up as text.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText('print "SimpleTest PHP was executed!"', t('PHP code is displayed.'));
 
     // Change filter to PHP filter and see that PHP code is evaluated.
     $edit = array();
     $langcode = LANGUAGE_NONE;
     $edit["body[$langcode][0][format]"] = $this->php_code_format->format;
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertRaw(t('Basic page %title has been updated.', array('%title' => $node->title)), t('PHP code filter turned on.'));
 
     // Make sure that the PHP code shows up as text.
@@ -105,16 +105,16 @@ class PHPAccessTestCase extends PHPTestCase {
    */
   function testNoPrivileges() {
     // Create node with PHP filter enabled.
-    $web_user = $this->drupalCreateUser(array('access content', 'create page content', 'edit own page content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content', 'create page content', 'edit own page content'));
+    $this->backdropLogin($web_user);
     $node = $this->createNodeWithCode();
 
     // Make sure that the PHP code shows up as text.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText('print', t('PHP code was not evaluated.'));
 
     // Make sure that user doesn't have access to filter.
-    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertNoRaw('<option value="' . $this->php_code_format->format . '">', t('PHP code format not available.'));
   }
 }

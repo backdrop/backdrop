@@ -27,7 +27,7 @@
 function batch_load($id) {
   $batch = db_query("SELECT batch FROM {batch} WHERE bid = :bid AND token = :token", array(
     ':bid' => $id,
-    ':token' => drupal_get_token($id),
+    ':token' => backdrop_get_token($id),
   ))->fetchField();
   if ($batch) {
     return unserialize($batch);
@@ -51,19 +51,19 @@ function _batch_page() {
   if (!$batch) {
     $batch = batch_load($_REQUEST['id']);
     if (!$batch) {
-      drupal_set_message(t('No active batch.'), 'error');
-      drupal_goto();
+      backdrop_set_message(t('No active batch.'), 'error');
+      backdrop_goto();
     }
   }
 
   // Register database update for the end of processing.
-  drupal_register_shutdown_function('_batch_shutdown');
+  backdrop_register_shutdown_function('_batch_shutdown');
 
   // Add batch-specific CSS.
   foreach ($batch['sets'] as $batch_set) {
     if (isset($batch_set['css'])) {
       foreach ($batch_set['css'] as $css) {
-        drupal_add_css($css);
+        backdrop_add_css($css);
       }
     }
   }
@@ -97,7 +97,7 @@ function _batch_page() {
  * Initializes the batch processing.
  *
  * JavaScript-enabled clients are identified by the 'has_js' cookie set in
- * drupal.js. If no JavaScript-enabled page has been visited during the current
+ * backdrop.js. If no JavaScript-enabled page has been visited during the current
  * user's browser session, the non-JavaScript version is returned.
  */
 function _batch_start() {
@@ -124,7 +124,7 @@ function _batch_progress_page_js() {
   $batch = batch_get();
 
   $current_set = _batch_current_set();
-  drupal_set_title($current_set['title'], PASS_THROUGH);
+  backdrop_set_title($current_set['title'], PASS_THROUGH);
 
   // Merge required query parameters for batch processing into those provided by
   // batch_set() or hook_batch_alter().
@@ -137,8 +137,8 @@ function _batch_progress_page_js() {
       'uri' => url($batch['url'], $batch['url_options']),
     ),
   );
-  drupal_add_js($js_setting, 'setting');
-  drupal_add_library('system', 'drupal.batch');
+  backdrop_add_js($js_setting, 'setting');
+  backdrop_add_library('system', 'backdrop.batch');
 
   return '<div id="progress"></div>';
 }
@@ -152,15 +152,15 @@ function _batch_progress_page_js() {
 function _batch_do() {
   // HTTP POST required.
   if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    drupal_set_message(t('HTTP POST is required.'), 'error');
-    drupal_set_title(t('Error'));
+    backdrop_set_message(t('HTTP POST is required.'), 'error');
+    backdrop_set_title(t('Error'));
     return '';
   }
 
   // Perform actual processing.
   list($percentage, $message) = _batch_process();
 
-  drupal_json_output(array('status' => TRUE, 'percentage' => $percentage, 'message' => $message));
+  backdrop_json_output(array('status' => TRUE, 'percentage' => $percentage, 'message' => $message));
 }
 
 /**
@@ -172,7 +172,7 @@ function _batch_progress_page_nojs() {
   $batch = &batch_get();
 
   $current_set = _batch_current_set();
-  drupal_set_title($current_set['title'], PASS_THROUGH);
+  backdrop_set_title($current_set['title'], PASS_THROUGH);
 
   $new_op = 'do_nojs';
 
@@ -222,7 +222,7 @@ function _batch_progress_page_nojs() {
       'content' => '0; URL=' . $url,
     ),
   );
-  drupal_add_html_head($element, 'batch_progress_meta_refresh');
+  backdrop_add_html_head($element, 'batch_progress_meta_refresh');
 
   return theme('progress_bar', array('percent' => $percentage, 'message' => $message));
 }
@@ -245,7 +245,7 @@ function _batch_process() {
   $set_changed = TRUE;
 
   // If this batch was marked for progressive execution (e.g. forms submitted by
-  // drupal_form_submit()), initialize a timer to determine whether we need to
+  // backdrop_form_submit()), initialize a timer to determine whether we need to
   // proceed with the same batch phase when a processing time of 1 second has
   // been exceeded.
   if ($batch['progressive']) {
@@ -507,12 +507,12 @@ function _batch_finished() {
       }
     }
 
-    // Use drupal_redirect_form() to handle the redirection logic.
-    drupal_redirect_form($_batch['form_state']);
+    // Use backdrop_redirect_form() to handle the redirection logic.
+    backdrop_redirect_form($_batch['form_state']);
 
     // If no redirection happened, redirect to the originating page. In case the
     // form needs to be rebuilt, save the final $form_state for
-    // drupal_build_form().
+    // backdrop_build_form().
     if (!empty($_batch['form_state']['rebuild'])) {
       $_SESSION['batch_form_state'] = $_batch['form_state'];
     }
@@ -527,7 +527,7 @@ function _batch_finished() {
  * Shutdown function: Stores the current batch data for the next request.
  *
  * @see _batch_page()
- * @see drupal_register_shutdown_function()
+ * @see backdrop_register_shutdown_function()
  */
 function _batch_shutdown() {
   if ($batch = batch_get()) {

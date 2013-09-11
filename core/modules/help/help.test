@@ -8,7 +8,7 @@
 /**
  * Tests help display and user access for all modules implementing help.
  */
-class HelpTestCase extends DrupalWebTestCase {
+class HelpTestCase extends BackdropWebTestCase {
   /**
    * The admin user that will be created.
    */
@@ -33,8 +33,8 @@ class HelpTestCase extends DrupalWebTestCase {
     $this->getModuleList();
 
     // Create users.
-    $this->big_user = $this->drupalCreateUser(array('access administration pages', 'view the administration theme', 'administer permissions'));
-    $this->any_user = $this->drupalCreateUser(array());
+    $this->big_user = $this->backdropCreateUser(array('access administration pages', 'view the administration theme', 'administer permissions'));
+    $this->any_user = $this->backdropCreateUser(array());
   }
 
   /**
@@ -42,20 +42,20 @@ class HelpTestCase extends DrupalWebTestCase {
    */
   function testHelp() {
     // Login the admin user.
-    $this->drupalLogin($this->big_user);
+    $this->backdropLogin($this->big_user);
     $this->verifyHelp();
 
     // Login the regular user.
-    $this->drupalLogin($this->any_user);
+    $this->backdropLogin($this->any_user);
     $this->verifyHelp(403);
 
     // Check for css on admin/help.
-    $this->drupalLogin($this->big_user);
-    $this->drupalGet('admin/help');
-    $this->assertRaw(drupal_get_path('module', 'help') . '/help.css', t('The help.css file is present in the HTML.'));
+    $this->backdropLogin($this->big_user);
+    $this->backdropGet('admin/help');
+    $this->assertRaw(backdrop_get_path('module', 'help') . '/help.css', t('The help.css file is present in the HTML.'));
 
     // Verify that introductory help text exists, goes for 100% module coverage.
-    $this->assertRaw(t('For more information, refer to the specific topics listed in the next section or to the <a href="@drupal">online Drupal handbooks</a>.', array('@drupal' => 'http://drupal.org/handbooks')), 'Help intro text correctly appears.');
+    $this->assertRaw(t('For more information, refer to the specific topics listed in the next section or to the <a href="@backdrop">online Backdrop handbooks</a>.', array('@backdrop' => 'http://backdrop.org/handbooks')), 'Help intro text correctly appears.');
 
     // Verify that help topics text appears.
     $this->assertRaw('<h2>' . t('Help topics') . '</h2><p>' . t('Help is available on the following items:') . '</p>', t('Help topics text correctly appears.'));
@@ -75,10 +75,10 @@ class HelpTestCase extends DrupalWebTestCase {
   protected function verifyHelp($response = 200) {
     foreach ($this->modules as $module => $name) {
       // View module help node.
-      $this->drupalGet('admin/help/' . $module);
+      $this->backdropGet('admin/help/' . $module);
       $this->assertResponse($response);
       if ($response == 200) {
-        $this->assertTitle($name . ' | Drupal', t('[' . $module . '] Title was displayed'));
+        $this->assertTitle($name . ' | Backdrop', t('[' . $module . '] Title was displayed'));
         $this->assertRaw('<h1 class="page-title">' . t($name) . '</h1>', t('[' . $module . '] Heading was displayed'));
        }
     }
@@ -105,7 +105,7 @@ class HelpTestCase extends DrupalWebTestCase {
 /**
  * Tests a module without help to verify it is not listed in the help page.
  */
-class NoHelpTestCase extends DrupalWebTestCase {
+class NoHelpTestCase extends BackdropWebTestCase {
   /**
    * The user who will be created.
    */
@@ -122,16 +122,16 @@ class NoHelpTestCase extends DrupalWebTestCase {
   function setUp() {
     // Use one of the test modules that do not implement hook_help().
     parent::setUp('menu_test');
-    $this->big_user = $this->drupalCreateUser(array('access administration pages'));
+    $this->big_user = $this->backdropCreateUser(array('access administration pages'));
   }
 
   /**
    * Ensures modules not implementing help do not appear on admin/help.
    */
   function testMainPageNoHelp() {
-    $this->drupalLogin($this->big_user);
+    $this->backdropLogin($this->big_user);
 
-    $this->drupalGet('admin/help');
+    $this->backdropGet('admin/help');
     $this->assertNoText('Hook menu tests', t('Making sure the test module menu_test does not display a help link in admin/help'));
   }
 }

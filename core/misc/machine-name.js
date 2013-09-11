@@ -3,7 +3,7 @@
 /**
  * Attach the machine-readable name form element behavior.
  */
-Drupal.behaviors.machineName = {
+Backdrop.behaviors.machineName = {
   /**
    * Attaches the behavior.
    *
@@ -60,7 +60,7 @@ Drupal.behaviors.machineName = {
       }
 
       // If it is editable, append an edit link.
-      var $link = $('<span class="admin-link"><a href="#">' + Drupal.t('Edit') + '</a></span>')
+      var $link = $('<span class="admin-link"><a href="#">' + Backdrop.t('Edit') + '</a></span>')
         .click(function () {
           $wrapper.show();
           $target.focus();

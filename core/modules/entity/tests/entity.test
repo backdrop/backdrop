@@ -8,7 +8,7 @@
 /**
  * Tests the basic Entity API.
  */
-class EntityAPITestCase extends DrupalWebTestCase {
+class EntityAPITestCase extends BackdropWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -26,7 +26,7 @@ class EntityAPITestCase extends DrupalWebTestCase {
    * Tests basic CRUD functionality of the Entity API.
    */
   function testCRUD() {
-    $user1 = $this->drupalCreateUser();
+    $user1 = $this->backdropCreateUser();
 
     // Create some test entities.
     $entity = entity_create('entity_test', array('name' => 'test', 'uid' => $user1->uid));
@@ -70,7 +70,7 @@ class EntityAPITestCase extends DrupalWebTestCase {
 /**
  * Tests Entity API base functionality.
  */
-class EntityAPIInfoTestCase extends DrupalWebTestCase  {
+class EntityAPIInfoTestCase extends BackdropWebTestCase  {
 
   public static function getInfo() {
     return array(
@@ -91,7 +91,7 @@ class EntityAPIInfoTestCase extends DrupalWebTestCase  {
     // Change the label of the test entity type and make sure changes appear
     // after flushing caches.
     variable_set('entity_cache_test_label', 'New label.');
-    drupal_flush_all_caches();
+    backdrop_flush_all_caches();
     $info = entity_get_info('entity_cache_test');
     $this->assertEqual($info['label'], 'New label.', 'New label appears in entity info.');
 
@@ -110,6 +110,6 @@ class EntityAPIInfoTestCase extends DrupalWebTestCase  {
     module_enable(array('entity_cache_test'));
     $info = variable_get('entity_cache_test');
     $this->assertEqual($info['label'], 'Entity Cache Test', 'Entity info label is correct.');
-    $this->assertEqual($info['controller class'], 'DrupalDefaultEntityController', 'Entity controller class info is correct.');
+    $this->assertEqual($info['controller class'], 'BackdropDefaultEntityController', 'Entity controller class info is correct.');
   }
 }

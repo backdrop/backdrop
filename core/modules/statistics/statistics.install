@@ -48,7 +48,7 @@ function statistics_schema() {
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
-        'description' => 'Internal path to page visited (relative to Drupal root.)',
+        'description' => 'Internal path to page visited (relative to Backdrop root.)',
       ),
       'url' => array(
         'type' => 'text',

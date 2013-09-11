@@ -13,7 +13,7 @@ function contextual_help($path, $arg) {
     case 'admin/help#contextual':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Contextual Links module displays links related to regions of pages on your site to users with <em>access contextual links</em> permission. For more information, see the online handbook entry for <a href="@contextual">Contextual Links module</a>.', array('@contextual' => 'http://drupal.org/handbook/modules/contextual')) . '</p>';
+      $output .= '<p>' . t('The Contextual Links module displays links related to regions of pages on your site to users with <em>access contextual links</em> permission. For more information, see the online handbook entry for <a href="@contextual">Contextual Links module</a>.', array('@contextual' => 'http://backdrop.org/handbook/modules/contextual')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Displaying contextual links') . '</dt>';
@@ -39,10 +39,10 @@ function contextual_permission() {
  * Implements hook_library_info().
  */
 function contextual_library_info() {
-  $path = drupal_get_path('module', 'contextual');
+  $path = backdrop_get_path('module', 'contextual');
   $libraries['contextual-links'] = array(
     'title' => 'Contextual Links',
-    'website' => 'http://drupal.org/node/473268',
+    'website' => 'http://backdrop.org/node/473268',
     'version' => '1.0',
     'js' => array(
       $path . '/contextual.js' => array(),
@@ -144,22 +144,22 @@ function contextual_pre_render_links($element) {
   // Transform contextual links into parameters suitable for theme_link().
   $links = array();
   foreach ($items as $class => $item) {
-    $class = drupal_html_class($class);
+    $class = backdrop_html_class($class);
     $links[$class] = array(
       'title' => $item['title'],
       'href' => $item['href'],
     );
     // @todo theme_links() should *really* use the same parameters as l().
     $item['localized_options'] += array('query' => array());
-    $item['localized_options']['query'] += drupal_get_destination();
+    $item['localized_options']['query'] += backdrop_get_destination();
     $links[$class] += $item['localized_options'];
   }
   $element['#links'] = $links;
 
   // Allow modules to alter the renderable contextual links element.
-  drupal_alter('contextual_links_view', $element, $items);
+  backdrop_alter('contextual_links_view', $element, $items);
 
-  // If there are no links, tell drupal_render() to abort rendering.
+  // If there are no links, tell backdrop_render() to abort rendering.
   if (empty($element['#links'])) {
     $element['#printed'] = TRUE;
   }

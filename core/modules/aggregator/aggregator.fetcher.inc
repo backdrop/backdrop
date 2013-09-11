@@ -11,7 +11,7 @@
 function aggregator_aggregator_fetch_info() {
   return array(
     'title' => t('Default fetcher'),
-    'description' => t('Downloads data from a URL using Drupal\'s HTTP request handler.'),
+    'description' => t('Downloads data from a URL using Backdrop\'s HTTP request handler.'),
   );
 }
 
@@ -31,7 +31,7 @@ function aggregator_aggregator_fetch($feed) {
   }
 
   // Request feed.
-  $result = drupal_http_request($feed->url, array('headers' => $headers));
+  $result = backdrop_http_request($feed->url, array('headers' => $headers));
 
   // Process HTTP response code.
   switch ($result->code) {
@@ -54,7 +54,7 @@ function aggregator_aggregator_fetch($feed) {
       break;
     default:
       watchdog('aggregator', 'The feed from %site seems to be broken due to "%error".', array('%site' => $feed->title, '%error' => $result->code . ' ' . $result->error), WATCHDOG_WARNING);
-      drupal_set_message(t('The feed from %site seems to be broken because of error "%error".', array('%site' => $feed->title, '%error' => $result->code . ' ' . $result->error)));
+      backdrop_set_message(t('The feed from %site seems to be broken because of error "%error".', array('%site' => $feed->title, '%error' => $result->code . ' ' . $result->error)));
   }
 
   return $feed->source_string === FALSE ? FALSE : TRUE;

@@ -40,7 +40,7 @@ function search_view($module = NULL, $keys = '') {
     if ($keys) {
       $path .= '/' . $keys;
     }
-    drupal_goto($path);
+    backdrop_goto($path);
   }
 
   // Default results output is an empty string.
@@ -66,7 +66,7 @@ function search_view($module = NULL, $keys = '') {
     }
   }
   // The form may be altered based on whether the search was run.
-  $build['search_form'] = drupal_get_form('search_form', NULL, $keys, $info['module']);
+  $build['search_form'] = backdrop_get_form('search_form', NULL, $keys, $info['module']);
   $build['search_results'] = $results;
 
   return $build;

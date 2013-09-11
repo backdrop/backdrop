@@ -2,18 +2,18 @@
 
 /**
  * @file
- * Drupal stream wrapper interface.
+ * Backdrop stream wrapper interface.
  *
- * Provides a Drupal interface and classes to implement PHP stream wrappers for
+ * Provides a Backdrop interface and classes to implement PHP stream wrappers for
  * public, private, and temporary files.
  *
- * A stream wrapper is an abstraction of a file system that allows Drupal to
+ * A stream wrapper is an abstraction of a file system that allows Backdrop to
  * use the same set of methods to access both local files and remote resources.
  *
  * Note that PHP 5.2 fopen() only supports URIs of the form "scheme://target"
  * despite the fact that according to RFC 3986 a URI's scheme component
  * delimiter is in general just ":", not "://".  Because of this PHP limitation
- * and for consistency Drupal will only accept URIs of form "scheme://target".
+ * and for consistency Backdrop will only accept URIs of form "scheme://target".
  *
  * @see http://www.faqs.org/rfcs/rfc3986.html
  * @see http://bugs.php.net/bug.php?id=47070
@@ -118,12 +118,12 @@ interface StreamWrapperInterface {
 }
 
 /**
- * Drupal stream wrapper extension.
+ * Backdrop stream wrapper extension.
  *
- * Extend the StreamWrapperInterface with methods expected by Drupal stream
+ * Extend the StreamWrapperInterface with methods expected by Backdrop stream
  * wrapper classes.
  */
-interface DrupalStreamWrapperInterface extends StreamWrapperInterface {
+interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
   /**
    * Set the absolute stream resource URI.
    *
@@ -176,7 +176,7 @@ interface DrupalStreamWrapperInterface extends StreamWrapperInterface {
    * Changes permissions of the resource.
    *
    * PHP lacks this functionality and it is not part of the official stream
-   * wrapper interface. This is a custom implementation for Drupal.
+   * wrapper interface. This is a custom implementation for Backdrop.
    *
    * @param $mode
    *   Integer value for the permissions. Consult PHP chmod() documentation
@@ -204,7 +204,7 @@ interface DrupalStreamWrapperInterface extends StreamWrapperInterface {
   /**
    * Gets the name of the directory from a given path.
    *
-   * This method is usually accessed through drupal_dirname(), which wraps
+   * This method is usually accessed through backdrop_dirname(), which wraps
    * around the normal PHP dirname() function, which does not support stream
    * wrappers.
    *
@@ -214,24 +214,24 @@ interface DrupalStreamWrapperInterface extends StreamWrapperInterface {
    * @return
    *   A string containing the directory name, or FALSE if not applicable.
    *
-   * @see drupal_dirname()
+   * @see backdrop_dirname()
    */
   public function dirname($uri = NULL);
 }
 
 
 /**
- * Drupal stream wrapper base class for local files.
+ * Backdrop stream wrapper base class for local files.
  *
  * This class provides a complete stream wrapper implementation. URIs such as
  * "public://example.txt" are expanded to a normal filesystem path such as
  * "sites/default/files/example.txt" and then PHP filesystem functions are
  * invoked.
  *
- * DrupalLocalStreamWrapper implementations need to implement at least the
+ * BackdropLocalStreamWrapper implementations need to implement at least the
  * getDirectoryPath() and getExternalUrl() methods.
  */
-abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface {
+abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterface {
   /**
    * Stream context resource.
    *
@@ -257,7 +257,7 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
 
   /**
    * Gets the path that the wrapper is responsible for.
-   * @TODO: Review this method name in D8 per http://drupal.org/node/701358
+   * @TODO: Review this method name in D8 per http://backdrop.org/node/701358
    *
    * @return
    *   String specifying the path.
@@ -317,7 +317,7 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
     }
 
     $extension = '';
-    $file_parts = explode('.', drupal_basename($uri));
+    $file_parts = explode('.', backdrop_basename($uri));
 
     // Remove the first part: a full filename should not match an extension.
     array_shift($file_parts);
@@ -364,7 +364,7 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
    *
    * @return string|false
    *   If $uri is not set, returns the canonical absolute path of the URI
-   *   previously set by the DrupalStreamWrapperInterface::setUri() function.
+   *   previously set by the BackdropStreamWrapperInterface::setUri() function.
    *   If $uri is set and valid for this class, returns its canonical absolute
    *   path, as determined by the realpath() function. If $uri is set but not
    *   valid, returns FALSE.
@@ -377,7 +377,7 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
     $realpath = realpath($path);
     if (!$realpath) {
       // This file does not yet exist.
-      $realpath = realpath(dirname($path)) . '/' . drupal_basename($path);
+      $realpath = realpath(dirname($path)) . '/' . backdrop_basename($path);
     }
     $directory = realpath($this->getDirectoryPath());
     if (!$realpath || !$directory || strpos($realpath, $directory) !== 0) {
@@ -562,7 +562,7 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
    */
   public function unlink($uri) {
     $this->uri = $uri;
-    return drupal_unlink($this->getLocalPath());
+    return backdrop_unlink($this->getLocalPath());
   }
 
   /**
@@ -585,7 +585,7 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
   /**
    * Gets the name of the directory from a given path.
    *
-   * This method is usually accessed through drupal_dirname(), which wraps
+   * This method is usually accessed through backdrop_dirname(), which wraps
    * around the PHP dirname() function because it does not support stream
    * wrappers.
    *
@@ -595,7 +595,7 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
    * @return
    *   A string containing the directory name.
    *
-   * @see drupal_dirname()
+   * @see backdrop_dirname()
    */
   public function dirname($uri = NULL) {
     list($scheme, $target) = explode('://', $uri, 2);
@@ -659,10 +659,10 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
   public function rmdir($uri, $options) {
     $this->uri = $uri;
     if ($options & STREAM_REPORT_ERRORS) {
-      return drupal_rmdir($this->getLocalPath());
+      return backdrop_rmdir($this->getLocalPath());
     }
     else {
-      return @drupal_rmdir($this->getLocalPath());
+      return @backdrop_rmdir($this->getLocalPath());
     }
   }
 
@@ -758,12 +758,12 @@ abstract class DrupalLocalStreamWrapper implements DrupalStreamWrapperInterface 
 }
 
 /**
- * Drupal public (public://) stream wrapper class.
+ * Backdrop public (public://) stream wrapper class.
  *
- * Provides support for storing publicly accessible files with the Drupal file
+ * Provides support for storing publicly accessible files with the Backdrop file
  * interface.
  */
-class DrupalPublicStreamWrapper extends DrupalLocalStreamWrapper {
+class BackdropPublicStreamWrapper extends BackdropLocalStreamWrapper {
   /**
    * Implements abstract public function getDirectoryPath()
    */
@@ -778,20 +778,20 @@ class DrupalPublicStreamWrapper extends DrupalLocalStreamWrapper {
    */
   function getExternalUrl() {
     $path = str_replace('\\', '/', $this->getTarget());
-    return $GLOBALS['base_url'] . '/' . self::getDirectoryPath() . '/' . drupal_encode_path($path);
+    return $GLOBALS['base_url'] . '/' . self::getDirectoryPath() . '/' . backdrop_encode_path($path);
   }
 }
 
 
 /**
- * Drupal private (private://) stream wrapper class.
+ * Backdrop private (private://) stream wrapper class.
  *
- * Provides support for storing privately accessible files with the Drupal file
+ * Provides support for storing privately accessible files with the Backdrop file
  * interface.
  *
- * Extends DrupalPublicStreamWrapper.
+ * Extends BackdropPublicStreamWrapper.
  */
-class DrupalPrivateStreamWrapper extends DrupalLocalStreamWrapper {
+class BackdropPrivateStreamWrapper extends BackdropLocalStreamWrapper {
   /**
    * Implements abstract public function getDirectoryPath()
    */
@@ -811,14 +811,14 @@ class DrupalPrivateStreamWrapper extends DrupalLocalStreamWrapper {
 }
 
 /**
- * Drupal temporary (temporary://) stream wrapper class.
+ * Backdrop temporary (temporary://) stream wrapper class.
  *
- * Provides support for storing temporarily accessible files with the Drupal
+ * Provides support for storing temporarily accessible files with the Backdrop
  * file interface.
  *
- * Extends DrupalPublicStreamWrapper.
+ * Extends BackdropPublicStreamWrapper.
  */
-class DrupalTemporaryStreamWrapper extends DrupalLocalStreamWrapper {
+class BackdropTemporaryStreamWrapper extends BackdropLocalStreamWrapper {
   /**
    * Implements abstract public function getDirectoryPath()
    */

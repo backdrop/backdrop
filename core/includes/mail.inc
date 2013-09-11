@@ -20,7 +20,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || strpos($_SERVER['SERVER
  * appropriate places in the template. Processed e-mail templates are
  * requested from hook_mail() from the module sending the e-mail. Any module
  * can modify the composed e-mail message array using hook_mail_alter().
- * Finally drupal_mail_system()->mail() sends the e-mail, which can
+ * Finally backdrop_mail_system()->mail() sends the e-mail, which can
  * be reused if the exact same composed e-mail is to be sent to multiple
  * recipients.
  *
@@ -46,8 +46,8 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || strpos($_SERVER['SERVER
  *   function example_notify($accounts) {
  *     foreach ($accounts as $account) {
  *       $params['account'] = $account;
- *       // example_mail() will be called based on the first drupal_mail() parameter.
- *       drupal_mail('example', 'notice', $account->mail, user_preferred_language($account), $params);
+ *       // example_mail() will be called based on the first backdrop_mail() parameter.
+ *       backdrop_mail('example', 'notice', $account->mail, user_preferred_language($account), $params);
  *     }
  *   }
  *
@@ -71,13 +71,13 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || strpos($_SERVER['SERVER
  *   }
  * @endcode
  *
- * Another example, which uses drupal_mail() to format a message for sending
+ * Another example, which uses backdrop_mail() to format a message for sending
  * later:
  *
  * @code
  *   $params = array('current_conditions' => $data);
  *   $to = 'user@example.com';
- *   $message = drupal_mail('example', 'notice', $to, $language, $params, FALSE);
+ *   $message = backdrop_mail('example', 'notice', $to, $language, $params, FALSE);
  *   // Only add to the spool if sending was not canceled.
  *   if ($message['send']) {
  *     example_spool_message($message);
@@ -105,7 +105,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || strpos($_SERVER['SERVER
  * @param $from
  *   Sets From to this value, if given.
  * @param $send
- *   If TRUE, drupal_mail() will call drupal_mail_system()->mail() to deliver
+ *   If TRUE, backdrop_mail() will call backdrop_mail_system()->mail() to deliver
  *   the message, and store the result in $message['result']. Modules
  *   implementing hook_mail_alter() may cancel sending by setting
  *   $message['send'] to FALSE.
@@ -117,7 +117,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || strpos($_SERVER['SERVER
  *   written to the watchdog. (Success means nothing more than the message being
  *   accepted at php-level, which still doesn't guarantee it to be delivered.)
  */
-function drupal_mail($module, $key, $to, $language, $params = array(), $from = NULL, $send = TRUE) {
+function backdrop_mail($module, $key, $to, $language, $params = array(), $from = NULL, $send = TRUE) {
   $default_from = variable_get('site_mail', ini_get('sendmail_from'));
 
   // Bundle up the variables into a structured array for altering.
@@ -139,7 +139,7 @@ function drupal_mail($module, $key, $to, $language, $params = array(), $from = N
     'MIME-Version'              => '1.0',
     'Content-Type'              => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
     'Content-Transfer-Encoding' => '8Bit',
-    'X-Mailer'                  => 'Drupal'
+    'X-Mailer'                  => 'Backdrop'
   );
   if ($default_from) {
     // To prevent e-mail from looking like spam, the addresses in the Sender and
@@ -160,10 +160,10 @@ function drupal_mail($module, $key, $to, $language, $params = array(), $from = N
   }
 
   // Invoke hook_mail_alter() to allow all modules to alter the resulting e-mail.
-  drupal_alter('mail', $message);
+  backdrop_alter('mail', $message);
 
   // Retrieve the responsible implementation for this message.
-  $system = drupal_mail_system($module, $key);
+  $system = backdrop_mail_system($module, $key);
 
   // Format the message body.
   $message = $system->format($message);
@@ -182,7 +182,7 @@ function drupal_mail($module, $key, $to, $language, $params = array(), $from = N
       // Log errors.
       if (!$message['result']) {
         watchdog('mail', 'Error sending e-mail (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
-        drupal_set_message(t('Unable to send e-mail. Contact the site administrator if the problem persists.'), 'error');
+        backdrop_set_message(t('Unable to send e-mail. Contact the site administrator if the problem persists.'), 'error');
       }
     }
   }
@@ -194,7 +194,7 @@ function drupal_mail($module, $key, $to, $language, $params = array(), $from = N
  * Returns an object that implements the MailSystemInterface.
  *
  * Allows for one or more custom mail backends to format and send mail messages
- * composed using drupal_mail().
+ * composed using backdrop_mail().
  *
  * An implementation needs to implement the following methods:
  * - format: Allows to preprocess, format, and postprocess a mail
@@ -235,7 +235,7 @@ function drupal_mail($module, $key, $to, $language, $params = array(), $from = N
  * array(
  *   'default-system' => 'DefaultMailSystem',
  *   'user' => 'DevelMailLog',
- *   'contact_page_autoreply' => 'DrupalDevNullMailSend',
+ *   'contact_page_autoreply' => 'BackdropDevNullMailSend',
  * );
  * @endcode
  *
@@ -246,15 +246,15 @@ function drupal_mail($module, $key, $to, $language, $params = array(), $from = N
  * on the local server.
  *
  * @param $module
- *   The module name which was used by drupal_mail() to invoke hook_mail().
+ *   The module name which was used by backdrop_mail() to invoke hook_mail().
  * @param $key
  *   A key to identify the e-mail sent. The final e-mail ID for the e-mail
- *   alter hook in drupal_mail() would have been {$module}_{$key}.
+ *   alter hook in backdrop_mail() would have been {$module}_{$key}.
  *
  * @return MailSystemInterface
  */
-function drupal_mail_system($module, $key) {
-  $instances = &drupal_static(__FUNCTION__, array());
+function backdrop_mail_system($module, $key) {
+  $instances = &backdrop_static(__FUNCTION__, array());
 
   $id = $module . '_' . $key;
 
@@ -289,7 +289,7 @@ function drupal_mail_system($module, $key) {
  */
 interface MailSystemInterface {
   /**
-   * Format a message composed by drupal_mail() prior sending.
+   * Format a message composed by backdrop_mail() prior sending.
    *
    * @param $message
    *   A message array, as described in hook_mail_alter().
@@ -300,7 +300,7 @@ interface MailSystemInterface {
    public function format(array $message);
 
   /**
-   * Send a message composed by drupal_mail().
+   * Send a message composed by backdrop_mail().
    *
    * @param $message
    *   Message array with at least the following elements:
@@ -315,7 +315,7 @@ interface MailSystemInterface {
    *    - subject: Subject of the e-mail to be sent. This must not contain any
    *      newline characters, or the mail may not be sent properly.
    *    - body: Message to be sent. Accepts both CRLF and LF line-endings.
-   *      E-mail bodies must be wrapped. You can use drupal_wrap_mail() for
+   *      E-mail bodies must be wrapped. You can use backdrop_wrap_mail() for
    *      smart plain text wrapping.
    *    - headers: Associative array containing all additional mail headers not
    *      defined by one of the other parameters.  PHP's mail() looks for Cc
@@ -333,7 +333,7 @@ interface MailSystemInterface {
  * We use delsp=yes wrapping, but only break non-spaced languages when
  * absolutely necessary to avoid compatibility issues.
  *
- * We deliberately use LF rather than CRLF, see drupal_mail().
+ * We deliberately use LF rather than CRLF, see backdrop_mail().
  *
  * @param $text
  *   The plain text to process.
@@ -341,11 +341,11 @@ interface MailSystemInterface {
  *   A string to indent the text with. Only '>' characters are repeated on
  *   subsequent wrapped lines. Others are replaced by spaces.
  */
-function drupal_wrap_mail($text, $indent = '') {
+function backdrop_wrap_mail($text, $indent = '') {
   // Convert CRLF into LF.
   $text = str_replace("\r", '', $text);
   // See if soft-wrapping is allowed.
-  $clean_indent = _drupal_html_to_text_clean($indent);
+  $clean_indent = _backdrop_html_to_text_clean($indent);
   $soft = strpos($clean_indent, ' ') === FALSE;
   // Check if the string has line breaks.
   if (strpos($text, "\n") !== FALSE) {
@@ -353,12 +353,12 @@ function drupal_wrap_mail($text, $indent = '') {
     $text = preg_replace('/ +\n/m', "\n", $text);
     // Wrap each line at the needed width.
     $lines = explode("\n", $text);
-    array_walk($lines, '_drupal_wrap_mail_line', array('soft' => $soft, 'length' => strlen($indent)));
+    array_walk($lines, '_backdrop_wrap_mail_line', array('soft' => $soft, 'length' => strlen($indent)));
     $text = implode("\n", $lines);
   }
   else {
     // Wrap this line.
-    _drupal_wrap_mail_line($text, 0, array('soft' => $soft, 'length' => strlen($indent)));
+    _backdrop_wrap_mail_line($text, 0, array('soft' => $soft, 'length' => strlen($indent)));
   }
   // Empty lines with nothing but spaces.
   $text = preg_replace('/^ +\n/m', "\n", $text);
@@ -375,9 +375,9 @@ function drupal_wrap_mail($text, $indent = '') {
  * markup. Useful for preparing the body of a node to be sent by e-mail.
  *
  * The output will be suitable for use as 'format=flowed; delsp=yes' text
- * (RFC 3676) and can be passed directly to drupal_mail() for sending.
+ * (RFC 3676) and can be passed directly to backdrop_mail() for sending.
  *
- * We deliberately use LF rather than CRLF, see drupal_mail().
+ * We deliberately use LF rather than CRLF, see backdrop_mail().
  *
  * This function provides suitable alternatives for the following tags:
  * <a> <em> <i> <strong> <b> <br> <p> <blockquote> <ul> <ol> <li> <dl> <dt>
@@ -392,7 +392,7 @@ function drupal_wrap_mail($text, $indent = '') {
  * @return
  *   The transformed string.
  */
-function drupal_html_to_text($string, $allowed_tags = NULL) {
+function backdrop_html_to_text($string, $allowed_tags = NULL) {
   // Cache list of supported tags.
   static $supported_tags;
   if (empty($supported_tags)) {
@@ -410,12 +410,12 @@ function drupal_html_to_text($string, $allowed_tags = NULL) {
   $string = preg_replace('!</?(strong|b)((?> +)[^>]*)?>!i', '*', $string);
 
   // Replace inline <a> tags with the text of link and a footnote.
-  // 'See <a href="http://drupal.org">the Drupal site</a>' becomes
-  // 'See the Drupal site [1]' with the URL included as a footnote.
-  _drupal_html_to_mail_urls(NULL, TRUE);
+  // 'See <a href="http://backdrop.org">the Backdrop site</a>' becomes
+  // 'See the Backdrop site [1]' with the URL included as a footnote.
+  _backdrop_html_to_mail_urls(NULL, TRUE);
   $pattern = '@(<a[^>]+?href="([^"]*)"[^>]*?>(.+?)</a>)@i';
-  $string = preg_replace_callback($pattern, '_drupal_html_to_mail_urls', $string);
-  $urls = _drupal_html_to_mail_urls();
+  $string = preg_replace_callback($pattern, '_backdrop_html_to_mail_urls', $string);
+  $urls = _backdrop_html_to_mail_urls();
   $footnotes = '';
   if (count($urls)) {
     $footnotes .= "\n";
@@ -493,17 +493,17 @@ function drupal_html_to_text($string, $allowed_tags = NULL) {
         // Fancy headers
         case 'h1':
           $indent[] = '======== ';
-          $casing = 'drupal_strtoupper';
+          $casing = 'backdrop_strtoupper';
           break;
         case 'h2':
           $indent[] = '-------- ';
-          $casing = 'drupal_strtoupper';
+          $casing = 'backdrop_strtoupper';
           break;
         case '/h1':
         case '/h2':
           $casing = NULL;
           // Pad the line with dashes.
-          $output = _drupal_html_to_text_pad($output, ($tagname == '/h1') ? '=' : '-', ' ');
+          $output = _backdrop_html_to_text_pad($output, ($tagname == '/h1') ? '=' : '-', ' ');
           array_pop($indent);
           $chunk = ''; // Ensure blank new-line.
           break;
@@ -511,8 +511,8 @@ function drupal_html_to_text($string, $allowed_tags = NULL) {
         // Horizontal rulers
         case 'hr':
           // Insert immediately.
-          $output .= drupal_wrap_mail('', implode('', $indent)) . "\n";
-          $output = _drupal_html_to_text_pad($output, '-');
+          $output .= backdrop_wrap_mail('', implode('', $indent)) . "\n";
+          $output = _backdrop_html_to_text_pad($output, '-');
           break;
 
         // Paragraphs and definition lists
@@ -527,7 +527,7 @@ function drupal_html_to_text($string, $allowed_tags = NULL) {
       // Convert inline HTML text to plain text; not removing line-breaks or
       // white-space, since that breaks newlines when sanitizing plain-text.
       $value = trim(decode_entities($value));
-      if (drupal_strlen($value)) {
+      if (backdrop_strlen($value)) {
         $chunk = $value;
       }
     }
@@ -539,9 +539,9 @@ function drupal_html_to_text($string, $allowed_tags = NULL) {
         $chunk = $casing($chunk);
       }
       // Format it and apply the current indentation.
-      $output .= drupal_wrap_mail($chunk, implode('', $indent)) . MAIL_LINE_ENDINGS;
+      $output .= backdrop_wrap_mail($chunk, implode('', $indent)) . MAIL_LINE_ENDINGS;
       // Remove non-quotation markers from indentation.
-      $indent = array_map('_drupal_html_to_text_clean', $indent);
+      $indent = array_map('_backdrop_html_to_text_clean', $indent);
     }
 
     $tag = !$tag;
@@ -551,11 +551,11 @@ function drupal_html_to_text($string, $allowed_tags = NULL) {
 }
 
 /**
- * Helper function for array_walk in drupal_wrap_mail().
+ * Helper function for array_walk in backdrop_wrap_mail().
  *
  * Wraps words on a single line.
  */
-function _drupal_wrap_mail_line(&$line, $key, $values) {
+function _backdrop_wrap_mail_line(&$line, $key, $values) {
   // Use soft-breaks only for purely quoted or unindented text.
   $line = wordwrap($line, 77 - $values['length'], $values['soft'] ? "  \n" : "\n");
   // Break really long words at the maximum width allowed.
@@ -563,11 +563,11 @@ function _drupal_wrap_mail_line(&$line, $key, $values) {
 }
 
 /**
- * Helper function for drupal_html_to_text().
+ * Helper function for backdrop_html_to_text().
  *
  * Keeps track of URLs and replaces them with placeholder tokens.
  */
-function _drupal_html_to_mail_urls($match = NULL, $reset = FALSE) {
+function _backdrop_html_to_mail_urls($match = NULL, $reset = FALSE) {
   global $base_url, $base_path;
   static $urls = array(), $regexp;
 
@@ -590,20 +590,20 @@ function _drupal_html_to_mail_urls($match = NULL, $reset = FALSE) {
 }
 
 /**
- * Helper function for drupal_wrap_mail() and drupal_html_to_text().
+ * Helper function for backdrop_wrap_mail() and backdrop_html_to_text().
  *
  * Replace all non-quotation markers from a given piece of indentation with spaces.
  */
-function _drupal_html_to_text_clean($indent) {
+function _backdrop_html_to_text_clean($indent) {
   return preg_replace('/[^>]/', ' ', $indent);
 }
 
 /**
- * Helper function for drupal_html_to_text().
+ * Helper function for backdrop_html_to_text().
  *
  * Pad the last line with the given character.
  */
-function _drupal_html_to_text_pad($text, $pad, $prefix = '') {
+function _backdrop_html_to_text_pad($text, $pad, $prefix = '') {
   // Remove last line break.
   $text = substr($text, 0, -1);
   // Calculate needed padding space and add it.

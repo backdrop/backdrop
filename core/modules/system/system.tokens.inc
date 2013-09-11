@@ -90,7 +90,7 @@ function system_token_info() {
   );
   $file['path'] = array(
     'name' => t("Path"),
-    'description' => t("The location of the file relative to Drupal root."),
+    'description' => t("The location of the file relative to Backdrop root."),
   );
   $file['mime'] = array(
     'name' => t("MIME type"),
@@ -145,7 +145,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'name':
-          $site_name = variable_get('site_name', 'Drupal');
+          $site_name = variable_get('site_name', 'Backdrop');
           $replacements[$original] = $sanitize ? check_plain($site_name) : $site_name;
           break;
 

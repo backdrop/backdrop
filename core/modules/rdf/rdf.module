@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Enables semantically enriched output for Drupal sites in the form of RDFa.
+ * Enables semantically enriched output for Backdrop sites in the form of RDFa.
  */
 
 /**
@@ -13,7 +13,7 @@ function rdf_help($path, $arg) {
     case 'admin/help#rdf':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The RDF module enriches your content with metadata to let other applications (e.g., search engines, aggregators, and so on) better understand its relationships and attributes. This semantically enriched, machine-readable output for Drupal sites uses the <a href="@rdfa">RDFa specification</a> which allows RDF data to be embedded in HTML markup. Other modules can define mappings of their data to RDF terms, and the RDF module makes this RDF data available to the theme. The core Drupal modules define RDF mappings for their data model, and the core Drupal themes output this RDF metadata information along with the human-readable visual information. For more information, see the online handbook entry for <a href="@rdf">RDF module</a>.', array('@rdfa' => 'http://www.w3.org/TR/xhtml-rdfa-primer/', '@rdf' => 'http://drupal.org/handbook/modules/rdf')) . '</p>';
+      $output .= '<p>' . t('The RDF module enriches your content with metadata to let other applications (e.g., search engines, aggregators, and so on) better understand its relationships and attributes. This semantically enriched, machine-readable output for Backdrop sites uses the <a href="@rdfa">RDFa specification</a> which allows RDF data to be embedded in HTML markup. Other modules can define mappings of their data to RDF terms, and the RDF module makes this RDF data available to the theme. The core Backdrop modules define RDF mappings for their data model, and the core Backdrop themes output this RDF metadata information along with the human-readable visual information. For more information, see the online handbook entry for <a href="@rdf">RDF module</a>.', array('@rdfa' => 'http://www.w3.org/TR/xhtml-rdfa-primer/', '@rdf' => 'http://backdrop.org/handbook/modules/rdf')) . '</p>';
       return $output;
   }
 }
@@ -23,7 +23,7 @@ function rdf_help($path, $arg) {
  * @{
  * Functions to describe entities and bundles in RDF.
  *
- * The RDF module introduces RDF and RDFa to Drupal. RDF is a W3C standard to
+ * The RDF module introduces RDF and RDFa to Backdrop. RDF is a W3C standard to
  * describe structured data. RDF can be serialized as RDFa in XHTML attributes
  * to augment visual data with machine-readable hints.
  * @see http://www.w3.org/RDF/
@@ -31,7 +31,7 @@ function rdf_help($path, $arg) {
  *
  * Modules can provide mappings of their bundles' data and metadata to RDF
  * classes and properties. This module takes care of injecting these mappings
- * into variables available to theme functions and templates. All Drupal core
+ * into variables available to theme functions and templates. All Backdrop core
  * themes are coded to be RDFa compatible.
  *
  * Example mapping from node.module:
@@ -158,7 +158,7 @@ function rdf_mapping_load($type, $bundle = RDF_DEFAULT_BUNDLE) {
  *   type.
  */
 function _rdf_get_default_mapping($type) {
-  $default_mappings = &drupal_static(__FUNCTION__);
+  $default_mappings = &backdrop_static(__FUNCTION__);
 
   if (!isset($default_mappings)) {
     // Get all of the modules that implement hook_rdf_mapping().
@@ -265,7 +265,7 @@ function rdf_mapping_delete($type, $bundle) {
 
 /**
  * Builds an array of RDFa attributes for a given mapping. This array will
- * typically be passed through drupal_attributes() to create the attributes
+ * typically be passed through backdrop_attributes() to create the attributes
  * variables that are available to template files. These include $attributes,
  * $title_attributes, $content_attributes and the field-specific
  * $item_attributes variables. For more information, see
@@ -286,7 +286,7 @@ function rdf_mapping_delete($type, $bundle) {
  *   A value that needs to be converted by the provided callback function.
  *
  * @return
- *   An array containing RDFa attributes suitable for drupal_attributes().
+ *   An array containing RDFa attributes suitable for backdrop_attributes().
  */
 function rdf_rdfa_attributes($mapping, $data = NULL) {
   // The type of mapping defaults to 'property'.
@@ -503,7 +503,7 @@ function rdf_preprocess_node(&$variables) {
     if (!empty($variables['node']->rdf_mapping['title']['predicates'])) {
       $element['#attributes']['property'] = $variables['node']->rdf_mapping['title']['predicates'];
     }
-    drupal_add_html_head($element, 'rdf_node_title');
+    backdrop_add_html_head($element, 'rdf_node_title');
   }
 
   // Adds RDFa markup for the date.
@@ -550,7 +550,7 @@ function rdf_preprocess_node(&$variables) {
           'datatype' => $variables['node']->rdf_mapping['comment_count']['datatype'],
         ),
       );
-      drupal_add_html_head($element, 'rdf_node_comment_count');
+      backdrop_add_html_head($element, 'rdf_node_comment_count');
     }
   }
 }
@@ -616,8 +616,8 @@ function rdf_preprocess_user_profile(&$variables) {
       'content' => $account->name,
     )
   );
-  drupal_add_html_head($account_holder_meta, 'rdf_user_account_holder');
-  drupal_add_html_head($username_meta, 'rdf_user_username');
+  backdrop_add_html_head($account_holder_meta, 'rdf_user_account_holder');
+  backdrop_add_html_head($username_meta, 'rdf_user_username');
 }
 
 /**
@@ -748,7 +748,7 @@ function rdf_preprocess_taxonomy_term(&$variables) {
         'content' => $term->name,
       ),
     );
-  drupal_add_html_head($term_label_meta, 'rdf_term_label');
+  backdrop_add_html_head($term_label_meta, 'rdf_term_label');
 }
 
 /**
@@ -805,7 +805,7 @@ function rdf_preprocess_image(&$variables) {
  * an extra wrapper element, you can override this function to not wrap that
  * variable and instead print the following inside your template file:
  * @code
- *   drupal_attributes($rdf_template_variable_attributes_array[$variable_name])
+ *   backdrop_attributes($rdf_template_variable_attributes_array[$variable_name])
  * @endcode
  *
  * @param $variables
@@ -843,7 +843,7 @@ function rdf_preprocess_image(&$variables) {
 function theme_rdf_template_variable_wrapper($variables) {
   $output = $variables['content'];
   if (!empty($output) && !empty($variables['attributes'])) {
-    $attributes = drupal_attributes($variables['attributes']);
+    $attributes = backdrop_attributes($variables['attributes']);
     $output = $variables['inline'] ? "<span$attributes>$output</span>" : "<div$attributes>$output</div>";
   }
   return $output;
@@ -879,7 +879,7 @@ function theme_rdf_metadata($variables) {
     // be used, but for maximum browser compatibility, W3C recommends the
     // former when serving pages using the text/html media type, see
     // http://www.w3.org/TR/xhtml1/#C_3.
-    $output .= '<span' . drupal_attributes($attributes) . '></span>';
+    $output .= '<span' . backdrop_attributes($attributes) . '></span>';
   }
   return $output;
 }

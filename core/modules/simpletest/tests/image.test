@@ -8,7 +8,7 @@
 /**
  * Base class for image manipulation testing.
  */
-class ImageToolkitTestCase extends DrupalWebTestCase {
+class ImageToolkitTestCase extends BackdropWebTestCase {
   protected $toolkit;
   protected $file;
   protected $image;
@@ -20,7 +20,7 @@ class ImageToolkitTestCase extends DrupalWebTestCase {
     $this->toolkit = 'test';
 
     // Pick a file for testing.
-    $file = current($this->drupalGetTestFiles('image'));
+    $file = current($this->backdropGetTestFiles('image'));
     $this->file = $file->uri;
 
     // Setup a dummy image to work with, this replicate image_load() so we
@@ -194,7 +194,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
 /**
  * Test the core GD image manipulation functions.
  */
-class ImageToolkitGdTestCase extends DrupalWebTestCase {
+class ImageToolkitGdTestCase extends BackdropWebTestCase {
   // Colors that are used in testing.
   protected $black       = array(0, 0, 0, 0);
   protected $red         = array(255, 0, 0, 0);
@@ -386,7 +386,7 @@ class ImageToolkitGdTestCase extends DrupalWebTestCase {
     foreach ($files as $file) {
       foreach ($operations as $op => $values) {
         // Load up a fresh image.
-        $image = image_load(drupal_get_path('module', 'simpletest') . '/files/' . $file, 'gd');
+        $image = image_load(backdrop_get_path('module', 'simpletest') . '/files/' . $file, 'gd');
         if (!$image) {
           $this->fail(t('Could not load image %file.', array('%file' => $file)));
           continue 2;
@@ -480,7 +480,7 @@ class ImageFileMoveTest extends ImageToolkitTestCase {
    */
   function testNormal() {
     // Pick a file for testing.
-    $file = current($this->drupalGetTestFiles('image'));
+    $file = current($this->backdropGetTestFiles('image'));
 
     // Create derivative image.
     $style = image_style_load(key(image_styles()));

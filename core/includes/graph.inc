@@ -42,9 +42,9 @@
  *   - 'component': Vertices in the same component have the same component
  *     identifier.
  *
- * @see _drupal_depth_first_search()
+ * @see _backdrop_depth_first_search()
  */
-function drupal_depth_first_search(&$graph) {
+function backdrop_depth_first_search(&$graph) {
   $state = array(
     // The order of last visit of the depth first search. This is the reverse
     // of the topological order if the graph is acyclic.
@@ -54,7 +54,7 @@ function drupal_depth_first_search(&$graph) {
   );
   // Perform the actual sort.
   foreach ($graph as $start => $data) {
-    _drupal_depth_first_search($graph, $state, $start);
+    _backdrop_depth_first_search($graph, $state, $start);
   }
 
   // We do such a numbering that every component starts with 0. This is useful
@@ -85,9 +85,9 @@ function drupal_depth_first_search(&$graph) {
  * @param $component
  *   The component of the last vertex.
  *
- * @see drupal_depth_first_search()
+ * @see backdrop_depth_first_search()
  */
-function _drupal_depth_first_search(&$graph, &$state, $start, &$component = NULL) {
+function _backdrop_depth_first_search(&$graph, &$state, $start, &$component = NULL) {
   // Assign new component for each new vertex, i.e. when not called recursively.
   if (!isset($component)) {
     $component = $start;
@@ -123,7 +123,7 @@ function _drupal_depth_first_search(&$graph, &$state, $start, &$component = NULL
       // Only visit existing vertices.
       if (isset($graph[$end])) {
         // Visit the connected vertex.
-        _drupal_depth_first_search($graph, $state, $end, $component);
+        _backdrop_depth_first_search($graph, $state, $end, $component);
 
         // All vertices reachable by $end are also reachable by $start.
         $graph[$start]['paths'] += $graph[$end]['paths'];

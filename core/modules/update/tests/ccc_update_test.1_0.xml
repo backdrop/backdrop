@@ -2,7 +2,7 @@
 <project xmlns:dc="http://purl.org/dc/elements/1.1/">
 <title>CCC Update test</title>
 <short_name>ccc_update_test</short_name>
-<dc:creator>Drupal</dc:creator>
+<dc:creator>Backdrop</dc:creator>
 <api_version>8.x</api_version>
 <recommended_major>1</recommended_major>
 <supported_majors>1</supported_majors>

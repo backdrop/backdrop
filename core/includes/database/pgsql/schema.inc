@@ -107,7 +107,7 @@ class DatabaseSchema_pgsql extends DatabaseSchema {
   }
 
   /**
-   * Generate SQL to create a new table from a Drupal schema definition.
+   * Generate SQL to create a new table from a Backdrop schema definition.
    *
    * @param $name
    *   The name of the table to create.
@@ -222,7 +222,7 @@ class DatabaseSchema_pgsql extends DatabaseSchema {
     // Set the correct database-engine specific datatype.
     // In case one is already provided, force it to lowercase.
     if (isset($field['pgsql_type'])) {
-      $field['pgsql_type'] = drupal_strtolower($field['pgsql_type']);
+      $field['pgsql_type'] = backdrop_strtolower($field['pgsql_type']);
     }
     else {
       $map = $this->getFieldTypeMap();
@@ -233,7 +233,7 @@ class DatabaseSchema_pgsql extends DatabaseSchema {
       // Unsigned datatypes are not supported in PostgreSQL 8.3. In MySQL,
       // they are used to ensure a positive number is inserted and it also
       // doubles the maximum integer size that can be stored in a field.
-      // The PostgreSQL schema in Drupal creates a check constraint
+      // The PostgreSQL schema in Backdrop creates a check constraint
       // to ensure that a value inserted is >= 0. To provide the extra
       // integer capacity, here, we bump up the column field size.
       if (!isset($map)) {
@@ -262,7 +262,7 @@ class DatabaseSchema_pgsql extends DatabaseSchema {
     // Put :normal last so it gets preserved by array_flip. This makes
     // it much easier for modules (such as schema.module) to map
     // database types back into schema types.
-    // $map does not use drupal_static as its value never changes.
+    // $map does not use backdrop_static as its value never changes.
     static $map = array(
       'varchar:normal' => 'varchar',
       'char:normal' => 'character',

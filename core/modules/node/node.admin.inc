@@ -220,7 +220,7 @@ function node_filter_form() {
     $form['filters']['status']['actions']['reset'] = array('#type' => 'submit', '#value' => t('Reset'));
   }
 
-  drupal_add_js('core/misc/form.js');
+  backdrop_add_js('core/misc/form.js');
 
   return $form;
 }
@@ -288,7 +288,7 @@ function node_mass_update($nodes, $updates) {
       'error_message' => t('The update has encountered an error.'),
       // The operations do not live in the .module file, so we need to
       // tell the batch engine which file to load before calling them.
-      'file' => drupal_get_path('module', 'node') . '/node.admin.inc',
+      'file' => backdrop_get_path('module', 'node') . '/node.admin.inc',
     );
     batch_set($batch);
   }
@@ -296,7 +296,7 @@ function node_mass_update($nodes, $updates) {
     foreach ($nodes as $nid) {
       _node_mass_update_helper($nid, $updates);
     }
-    drupal_set_message(t('The update has been performed.'));
+    backdrop_set_message(t('The update has been performed.'));
   }
 }
 
@@ -357,13 +357,13 @@ function _node_mass_update_batch_process($nodes, $updates, &$context) {
  */
 function _node_mass_update_batch_finished($success, $results, $operations) {
   if ($success) {
-    drupal_set_message(t('The update has been performed.'));
+    backdrop_set_message(t('The update has been performed.'));
   }
   else {
-    drupal_set_message(t('An error occurred and processing did not complete.'), 'error');
+    backdrop_set_message(t('An error occurred and processing did not complete.'), 'error');
     $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
     $message .= theme('item_list', array('items' => $results));
-    drupal_set_message($message);
+    backdrop_set_message($message);
   }
 }
 
@@ -474,7 +474,7 @@ function node_admin_nodes() {
 
   // Prepare the list of nodes.
   $languages = language_list();
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
   $options = array();
   foreach ($nodes as $node) {
     $l_options = $node->langcode != LANGUAGE_NONE && isset($languages[$node->langcode]) ? array('language' => $languages[$node->langcode]) : array();
@@ -665,7 +665,7 @@ function node_multiple_delete_confirm_submit($form, &$form_state) {
     node_delete_multiple(array_keys($form_state['values']['nodes']));
     $count = count($form_state['values']['nodes']);
     watchdog('content', 'Deleted @count posts.', array('@count' => $count));
-    drupal_set_message(format_plural($count, 'Deleted 1 post.', 'Deleted @count posts.'));
+    backdrop_set_message(format_plural($count, 'Deleted 1 post.', 'Deleted @count posts.'));
   }
   $form_state['redirect'] = 'admin/content';
 }

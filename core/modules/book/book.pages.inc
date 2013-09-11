@@ -42,7 +42,7 @@ function book_render() {
  * @see book_menu()
  */
 function book_export($type, $nid) {
-  $type = drupal_strtolower($type);
+  $type = backdrop_strtolower($type);
 
   $export_function = 'book_export_' . $type;
 
@@ -50,8 +50,8 @@ function book_export($type, $nid) {
     print call_user_func($export_function, $nid);
   }
   else {
-    drupal_set_message(t('Unknown export format.'));
-    drupal_not_found();
+    backdrop_set_message(t('Unknown export format.'));
+    backdrop_not_found();
   }
 }
 
@@ -82,11 +82,11 @@ function book_export_html($nid) {
       return theme('book_export_html', array('title' => $node->title, 'contents' => $contents, 'depth' => $node->book['depth']));
     }
     else {
-      drupal_not_found();
+      backdrop_not_found();
     }
   }
   else {
-    drupal_access_denied();
+    backdrop_access_denied();
   }
 }
 
@@ -99,8 +99,8 @@ function book_export_html($nid) {
  * @see book_menu()
  */
 function book_outline($node) {
-  drupal_set_title($node->title);
-  return drupal_get_form('book_outline_form', $node);
+  backdrop_set_title($node->title);
+  return backdrop_get_form('book_outline_form', $node);
 }
 
 /**
@@ -172,7 +172,7 @@ function book_outline_form_submit($form, &$form_state) {
   $form_state['redirect'] = "node/" . $node->nid;
   $book_link = $form_state['values']['book'];
   if (!$book_link['bid']) {
-    drupal_set_message(t('No changes were made'));
+    backdrop_set_message(t('No changes were made'));
 
     return;
   }
@@ -182,15 +182,15 @@ function book_outline_form_submit($form, &$form_state) {
   if (_book_update_outline($node)) {
     if ($node->book['parent_mismatch']) {
       // This will usually only happen when JS is disabled.
-      drupal_set_message(t('The post has been added to the selected book. You may now position it relative to other pages.'));
+      backdrop_set_message(t('The post has been added to the selected book. You may now position it relative to other pages.'));
       $form_state['redirect'] = "node/" . $node->nid . "/outline";
     }
     else {
-      drupal_set_message(t('The book outline has been updated.'));
+      backdrop_set_message(t('The book outline has been updated.'));
     }
   }
   else {
-    drupal_set_message(t('There was an error adding the post to the book.'), 'error');
+    backdrop_set_message(t('There was an error adding the post to the book.'), 'error');
   }
 }
 
@@ -228,7 +228,7 @@ function book_remove_form_submit($form, &$form_state) {
     db_delete('book')
       ->condition('nid', $node->nid)
       ->execute();
-    drupal_set_message(t('The post has been removed from the book.'));
+    backdrop_set_message(t('The post has been removed from the book.'));
   }
   $form_state['redirect'] = 'node/' . $node->nid;
 }

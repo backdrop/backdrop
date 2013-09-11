@@ -5,7 +5,7 @@
  * Tests for forum.module.
  */
 
-class ForumTestCase extends DrupalWebTestCase {
+class ForumTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $edit_own_topics_user;
   protected $edit_any_topics_user;
@@ -29,7 +29,7 @@ class ForumTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('taxonomy', 'comment', 'forum');
     // Create users.
-    $this->admin_user = $this->drupalCreateUser(array(
+    $this->admin_user = $this->backdropCreateUser(array(
       'access administration pages',
       'administer modules',
       'administer blocks',
@@ -38,30 +38,30 @@ class ForumTestCase extends DrupalWebTestCase {
       'administer taxonomy',
       'create forum content',
     ));
-    $this->edit_any_topics_user = $this->drupalCreateUser(array(
+    $this->edit_any_topics_user = $this->backdropCreateUser(array(
       'access administration pages',
       'create forum content',
       'edit any forum content',
       'delete any forum content',
     ));
-    $this->edit_own_topics_user = $this->drupalCreateUser(array(
+    $this->edit_own_topics_user = $this->backdropCreateUser(array(
       'create forum content',
       'edit own forum content',
       'delete own forum content',
     ));
-    $this->web_user = $this->drupalCreateUser(array());
+    $this->web_user = $this->backdropCreateUser(array());
   }
 
   /**
    * Tests disabling and re-enabling forum.
    */
   function testEnableForumField() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Disable the forum module.
     $edit = array();
     $edit['modules[Core][forum][enable]'] = FALSE;
-    $this->drupalPost('admin/modules', $edit, t('Save configuration'));
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), t('Modules status has been updated.'));
     module_list(TRUE);
     $this->assertFalse(module_exists('forum'), t('Forum module is not enabled.'));
@@ -70,7 +70,7 @@ class ForumTestCase extends DrupalWebTestCase {
     // recreate the taxonomy_forums field.
     $edit = array();
     $edit['modules[Core][forum][enable]'] = 'forum';
-    $this->drupalPost('admin/modules', $edit, t('Save configuration'));
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), t('Modules status has been updated.'));
     module_list(TRUE);
     $this->assertTrue(module_exists('forum'), t('Forum module is enabled.'));
@@ -81,7 +81,7 @@ class ForumTestCase extends DrupalWebTestCase {
    */
   function testForum() {
     //Check that the basic forum install creates a default forum topic
-    $this->drupalGet("/forum");
+    $this->backdropGet("/forum");
     // Look for the "General discussion" default forum
     $this->assertText(t("General discussion"), "Found the default forum at the /forum listing");
 
@@ -92,9 +92,9 @@ class ForumTestCase extends DrupalWebTestCase {
 
     // Login an unprivileged user to view the forum topics and generate an
     // active forum topics list.
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
     // Verify that this user is shown a message that they may not post content.
-    $this->drupalGet('forum/' . $this->forum['tid']);
+    $this->backdropGet('forum/' . $this->forum['tid']);
     $this->assertText(t('You are not allowed to post new content in the forum'), "Authenticated user without permission to post forum content is shown message in local tasks to that effect.");
 
     $this->viewForumTopics($this->nids);
@@ -114,18 +114,18 @@ class ForumTestCase extends DrupalWebTestCase {
     $this->verifyForums($this->edit_any_topics_user, $any_topics_user_node, FALSE, 403);
 
     // Verify that this user is shown a local task to add new forum content.
-    $this->drupalGet('forum');
+    $this->backdropGet('forum');
     $this->assertLink(t('Add new Forum topic'));
-    $this->drupalGet('forum/' . $this->forum['tid']);
+    $this->backdropGet('forum/' . $this->forum['tid']);
     $this->assertLink(t('Add new Forum topic'));
 
     // Login a user with permission to edit any forum content.
-    $this->drupalLogin($this->edit_any_topics_user);
+    $this->backdropLogin($this->edit_any_topics_user);
     // Verify that this user can edit forum content authored by another user.
     $this->verifyForums($this->edit_own_topics_user, $own_topics_user_node, TRUE);
 
     // Verify the topic and post counts on the forum page.
-    $this->drupalGet('forum');
+    $this->backdropGet('forum');
 
     // Verify row for testing forum.
     $forum_arg = array(':forum' => 'forum-list-' . $this->forum['tid']);
@@ -147,23 +147,23 @@ class ForumTestCase extends DrupalWebTestCase {
     $this->assertFieldByXPath($xpath, '6', t('Number of posts found.'));
 
     // Test loading multiple forum nodes on the front page.
-    $this->drupalLogin($this->drupalCreateUser(array('administer content types', 'create forum content')));
-    $this->drupalPost('admin/structure/types/manage/forum', array('node_options[promote]' => 'promote'), t('Save content type'));
+    $this->backdropLogin($this->backdropCreateUser(array('administer content types', 'create forum content')));
+    $this->backdropPost('admin/structure/types/manage/forum', array('node_options[promote]' => 'promote'), t('Save content type'));
     $this->createForumTopic($this->forum, FALSE);
     $this->createForumTopic($this->forum, FALSE);
-    $this->drupalGet('node');
+    $this->backdropGet('node');
 
     // Test adding a comment to a forum topic.
     $node = $this->createForumTopic($this->forum, FALSE);
     $edit = array();
     $edit['comment_body[' . LANGUAGE_NONE . '][0][value]'] = $this->randomName();
-    $this->drupalPost("node/$node->nid", $edit, t('Save'));
+    $this->backdropPost("node/$node->nid", $edit, t('Save'));
     $this->assertResponse(200);
 
     // Test editing a forum topic that has a comment.
-    $this->drupalLogin($this->edit_any_topics_user);
-    $this->drupalGet('forum/' . $this->forum['tid']);
-    $this->drupalPost("node/$node->nid/edit", array(), t('Save'));
+    $this->backdropLogin($this->edit_any_topics_user);
+    $this->backdropGet('forum/' . $this->forum['tid']);
+    $this->backdropPost("node/$node->nid/edit", array(), t('Save'));
     $this->assertResponse(200);
   }
 
@@ -179,8 +179,8 @@ class ForumTestCase extends DrupalWebTestCase {
     }
 
     // Create an orphan forum item.
-    $this->drupalLogin($this->admin_user);
-    $this->drupalPost('node/add/forum', array('title' => $this->randomName(10), 'body[' . LANGUAGE_NONE .'][0][value]' => $this->randomName(120)), t('Save'));
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('node/add/forum', array('title' => $this->randomName(10), 'body[' . LANGUAGE_NONE .'][0][value]' => $this->randomName(120)), t('Save'));
 
     $nid_count = db_query('SELECT COUNT(nid) FROM {node}')->fetchField();
     $this->assertEqual(0, $nid_count, t('A forum node was not created when missing a forum vocabulary.'));
@@ -196,19 +196,19 @@ class ForumTestCase extends DrupalWebTestCase {
    */
   private function doAdminTests($user) {
     // Login the user.
-    $this->drupalLogin($user);
+    $this->backdropLogin($user);
 
     // Enable the active forum block.
     $edit = array();
     $edit['blocks[forum_active][region]'] = 'sidebar_second';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
     $this->assertResponse(200);
     $this->assertText(t('The block settings have been updated.'), t('Active forum topics forum block was enabled'));
 
     // Enable the new forum block.
     $edit = array();
     $edit['blocks[forum_new][region]'] = 'sidebar_second';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
     $this->assertResponse(200);
     $this->assertText(t('The block settings have been updated.'), t('[New forum topics] Forum block was enabled'));
 
@@ -217,7 +217,7 @@ class ForumTestCase extends DrupalWebTestCase {
 
     // Add forum to navigation menu.
     $edit = array();
-    $this->drupalPost('admin/structure/menu/manage/navigation', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/menu/manage/navigation', $edit, t('Save configuration'));
     $this->assertResponse(200);
 
     // Edit forum taxonomy.
@@ -226,21 +226,21 @@ class ForumTestCase extends DrupalWebTestCase {
     // Create forum container.
     $this->container = $this->createForum('container');
     // Verify "edit container" link exists and functions correctly.
-    $this->drupalGet('admin/structure/forum');
+    $this->backdropGet('admin/structure/forum');
     $this->clickLink('edit container');
     $this->assertRaw('Edit container', t('Followed the link to edit the container'));
     // Create forum inside the forum container.
     $this->forum = $this->createForum('forum', $this->container['tid']);
     // Verify the "edit forum" link exists and functions correctly.
-    $this->drupalGet('admin/structure/forum');
+    $this->backdropGet('admin/structure/forum');
     $this->clickLink('edit forum');
     $this->assertRaw('Edit forum', t('Followed the link to edit the forum'));
     // Navigate back to forum structure page.
-    $this->drupalGet('admin/structure/forum');
+    $this->backdropGet('admin/structure/forum');
     // Create second forum in container.
     $this->delete_forum = $this->createForum('forum', $this->container['tid']);
     // Save forum overview.
-    $this->drupalPost('admin/structure/forum/', array(), t('Save'));
+    $this->backdropPost('admin/structure/forum/', array(), t('Save'));
     $this->assertRaw(t('The configuration options have been saved.'));
     // Delete this second forum.
     $this->deleteForum($this->delete_forum['tid']);
@@ -263,11 +263,11 @@ class ForumTestCase extends DrupalWebTestCase {
     $edit = array(
       'name' => $title,
       'description' => $description,
-      'machine_name' => drupal_strtolower(drupal_substr($this->randomName(), 3, 9)),
+      'machine_name' => backdrop_strtolower(backdrop_substr($this->randomName(), 3, 9)),
     );
 
     // Edit the vocabulary.
-    $this->drupalPost('admin/structure/taxonomy/' . $original_settings->machine_name . '/edit', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/' . $original_settings->machine_name . '/edit', $edit, t('Save'));
     $this->assertResponse(200);
     $this->assertRaw(t('Updated vocabulary %name.', array('%name' => $title)), t('Vocabulary was edited'));
 
@@ -281,7 +281,7 @@ class ForumTestCase extends DrupalWebTestCase {
 
     // Restore the original vocabulary.
     taxonomy_vocabulary_save($original_settings);
-    drupal_static_reset('taxonomy_vocabulary_load');
+    backdrop_static_reset('taxonomy_vocabulary_load');
     $current_settings = taxonomy_vocabulary_load($vid);
     $this->assertEqual($current_settings->name, $original_settings->name, 'The original vocabulary settings were restored');
   }
@@ -310,7 +310,7 @@ class ForumTestCase extends DrupalWebTestCase {
     );
 
     // Create forum.
-    $this->drupalPost('admin/structure/forum/add/' . $type, $edit, t('Save'));
+    $this->backdropPost('admin/structure/forum/add/' . $type, $edit, t('Save'));
     $this->assertResponse(200);
     $type = ($type == 'container') ? 'forum container' : 'forum';
     $this->assertRaw(t('Created new @type %term.', array('%term' => $name, '@type' => t($type))), t(ucfirst($type) . ' was created'));
@@ -335,11 +335,11 @@ class ForumTestCase extends DrupalWebTestCase {
    */
   function deleteForum($tid) {
     // Delete the forum.
-    $this->drupalPost('admin/structure/forum/edit/forum/' . $tid, array(), t('Delete'));
-    $this->drupalPost(NULL, array(), t('Delete'));
+    $this->backdropPost('admin/structure/forum/edit/forum/' . $tid, array(), t('Delete'));
+    $this->backdropPost(NULL, array(), t('Delete'));
 
     // Assert that the forum no longer exists.
-    $this->drupalGet('forum/' . $tid);
+    $this->backdropGet('forum/' . $tid);
     $this->assertResponse(404, 'The forum was not found');
 
     // Assert that the associated term has been removed from the
@@ -358,7 +358,7 @@ class ForumTestCase extends DrupalWebTestCase {
    */
   private function doBasicTests($user, $admin) {
     // Login the user.
-    $this->drupalLogin($user);
+    $this->backdropLogin($user);
     // Attempt to create forum topic under a container.
     $this->createForumTopic($this->container, TRUE);
     // Create forum node.
@@ -391,7 +391,7 @@ class ForumTestCase extends DrupalWebTestCase {
     $tid = $forum['tid'];
 
     // Create the forum topic, preselecting the forum ID via a URL parameter.
-    $this->drupalPost('node/add/forum/' . $tid, $edit, t('Save'));
+    $this->backdropPost('node/add/forum/' . $tid, $edit, t('Save'));
 
     $type = t('Forum topic');
     if ($container) {
@@ -405,12 +405,12 @@ class ForumTestCase extends DrupalWebTestCase {
     }
 
     // Retrieve node object, ensure that the topic was created and in the proper forum.
-    $node = $this->drupalGetNodeByTitle($title);
+    $node = $this->backdropGetNodeByTitle($title);
     $this->assertTrue($node != NULL, t('Node @title was loaded', array('@title' => $title)));
     $this->assertEqual($node->taxonomy_forums[LANGUAGE_NONE][0]['tid'], $tid, 'Saved forum topic was in the expected forum');
 
     // View forum topic.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertRaw($title, t('Subject was found'));
     $this->assertRaw($body, t('Body was found'));
 
@@ -433,15 +433,15 @@ class ForumTestCase extends DrupalWebTestCase {
     $response2 = ($admin) ? 200 : 403;
 
     // View forum help node.
-    $this->drupalGet('admin/help/forum');
+    $this->backdropGet('admin/help/forum');
     $this->assertResponse($response2);
     if ($response2 == 200) {
-      $this->assertTitle(t('Forum | Drupal'), t('Forum help title was displayed'));
+      $this->assertTitle(t('Forum | Backdrop'), t('Forum help title was displayed'));
       $this->assertText(t('Forum'), t('Forum help node was displayed'));
     }
 
     // Verify the forum blocks were displayed.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertResponse(200);
     $this->assertText(t('New forum topics'), t('[New forum topics] Forum block was displayed'));
 
@@ -453,9 +453,9 @@ class ForumTestCase extends DrupalWebTestCase {
     $this->verifyForumView($this->root_forum);
 
     // View forum node.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertResponse(200);
-    $this->assertTitle($node->title . ' | Drupal', t('Forum node was displayed'));
+    $this->assertTitle($node->title . ' | Backdrop', t('Forum node was displayed'));
     $breadcrumb = array(
       l(t('Home'), NULL),
       l(t('Forums'), 'forum'),
@@ -465,10 +465,10 @@ class ForumTestCase extends DrupalWebTestCase {
     $this->assertRaw(theme('breadcrumb', array('breadcrumb' => $breadcrumb)), t('Breadcrumbs were displayed'));
 
     // View forum edit node.
-    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertResponse($response);
     if ($response == 200) {
-      $this->assertTitle('Edit Forum topic ' . $node->title . ' | Drupal', t('Forum edit node was displayed'));
+      $this->assertTitle('Edit Forum topic ' . $node->title . ' | Backdrop', t('Forum edit node was displayed'));
     }
 
     if ($response == 200) {
@@ -480,7 +480,7 @@ class ForumTestCase extends DrupalWebTestCase {
       // Assume the topic is initially associated with $forum.
       $edit["taxonomy_forums[$langcode]"] = $this->root_forum['tid'];
       $edit['shadow'] = TRUE;
-      $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+      $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
       $this->assertRaw(t('Forum topic %title has been updated.', array('%title' => $edit["title"])), t('Forum node was edited'));
 
       // Verify topic was moved to a different forum.
@@ -491,7 +491,7 @@ class ForumTestCase extends DrupalWebTestCase {
       $this->assertTrue($forum_tid == $this->root_forum['tid'], 'The forum topic is linked to a different forum');
 
       // Delete forum node.
-      $this->drupalPost('node/' . $node->nid . '/delete', array(), t('Delete'));
+      $this->backdropPost('node/' . $node->nid . '/delete', array(), t('Delete'));
       $this->assertResponse($response);
       $this->assertRaw(t('Forum topic %title has been deleted.', array('%title' => $edit['title'])), t('Forum node was deleted'));
     }
@@ -505,9 +505,9 @@ class ForumTestCase extends DrupalWebTestCase {
    */
   private function verifyForumView($forum, $parent = NULL) {
     // View forum page.
-    $this->drupalGet('forum/' . $forum['tid']);
+    $this->backdropGet('forum/' . $forum['tid']);
     $this->assertResponse(200);
-    $this->assertTitle($forum['name'] . ' | Drupal', t('Forum name was displayed'));
+    $this->assertTitle($forum['name'] . ' | Backdrop', t('Forum name was displayed'));
 
     $breadcrumb = array(
       l(t('Home'), NULL),
@@ -546,9 +546,9 @@ class ForumTestCase extends DrupalWebTestCase {
   private function viewForumTopics($nids) {
     for ($i = 0; $i < 2; $i++) {
       foreach ($nids as $nid) {
-        $this->drupalGet('node/' . $nid);
-        $this->drupalGet('node/' . $nid);
-        $this->drupalGet('node/' . $nid);
+        $this->backdropGet('node/' . $nid);
+        $this->backdropGet('node/' . $nid);
+        $this->backdropGet('node/' . $nid);
       }
     }
   }

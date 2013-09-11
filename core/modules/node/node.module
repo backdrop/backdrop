@@ -86,14 +86,14 @@ function node_help($path, $arg) {
     else {
       $message = t('The content access permissions need to be rebuilt. <a href="@node_access_rebuild">Rebuild permissions</a>.', array('@node_access_rebuild' => url('admin/reports/status/rebuild')));
     }
-    drupal_set_message($message, 'error');
+    backdrop_set_message($message, 'error');
   }
 
   switch ($path) {
     case 'admin/help#node':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Node module manages the creation, editing, deletion, settings, and display of the main site content. Content items managed by the Node module are typically displayed as pages on your site, and include a title, some meta-data (author, creation time, content type, etc.), and optional fields containing text or other data (fields are managed by the <a href="@field">Field module</a>). For more information, see the online handbook entry for <a href="@node">Node module</a>.', array('@node' => 'http://drupal.org/handbook/modules/node', '@field' => url('admin/help/field'))) . '</p>';
+      $output .= '<p>' . t('The Node module manages the creation, editing, deletion, settings, and display of the main site content. Content items managed by the Node module are typically displayed as pages on your site, and include a title, some meta-data (author, creation time, content type, etc.), and optional fields containing text or other data (fields are managed by the <a href="@field">Field module</a>). For more information, see the online handbook entry for <a href="@node">Node module</a>.', array('@node' => 'http://backdrop.org/handbook/modules/node', '@field' => url('admin/help/field'))) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Creating content') . '</dt>';
@@ -331,7 +331,7 @@ function node_tag_new($node) {
  */
 function node_last_viewed($nid) {
   global $user;
-  $history = &drupal_static(__FUNCTION__, array());
+  $history = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($history[$nid])) {
     $history[$nid] = db_query("SELECT timestamp FROM {history} WHERE uid = :uid AND nid = :nid", array(':uid' => $user->uid, ':nid' => $nid))->fetchObject();
@@ -353,7 +353,7 @@ function node_last_viewed($nid) {
  */
 function node_mark($nid, $timestamp) {
   global $user;
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if (!$user->uid) {
     return MARK_READ;
@@ -693,7 +693,7 @@ function _node_types_build($rebuild = FALSE) {
   $cid = 'node_types:' . $GLOBALS['language_interface']->langcode;
 
   if (!$rebuild) {
-    $_node_types = &drupal_static(__FUNCTION__);
+    $_node_types = &backdrop_static(__FUNCTION__);
     if (isset($_node_types)) {
       return $_node_types;
     }
@@ -729,7 +729,7 @@ function _node_types_build($rebuild = FALSE) {
     // Check for node types from disabled modules and mark their types for removal.
     // Types defined by the node module in the database (rather than by a separate
     // module using hook_node_info) have a base value of 'node_content'. The isset()
-    // check prevents errors on old (pre-Drupal 7) databases.
+    // check prevents errors on old (pre-Backdrop 7) databases.
     if (isset($type_object->base) && $type_object->base != 'node_content' && empty($_node_types->types[$type_db])) {
       $type_object->disabled = TRUE;
     }
@@ -769,7 +769,7 @@ function _node_types_build($rebuild = FALSE) {
  */
 function node_type_cache_reset() {
   cache()->deletePrefix('node_types:');
-  drupal_static_reset('_node_types_build');
+  backdrop_static_reset('_node_types_build');
 }
 
 /**
@@ -923,7 +923,7 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * @return
  *   An array of node objects indexed by nid.
  *
- * @todo Remove $conditions in Drupal 8.
+ * @todo Remove $conditions in Backdrop 8.
  *
  * @see entity_load()
  * @see EntityFieldQuery
@@ -1105,7 +1105,7 @@ function node_save($node) {
     elseif (!isset($node->log) || $node->log === '') {
       // If we are updating an existing node without adding a new revision, we
       // need to make sure $node->log is unset whenever it is empty. As long as
-      // $node->log is unset, drupal_write_record() will not attempt to update
+      // $node->log is unset, backdrop_write_record() will not attempt to update
       // the existing database column when re-saving the revision; therefore,
       // this code allows us to avoid clobbering an existing log entry with an
       // empty one.
@@ -1124,14 +1124,14 @@ function node_save($node) {
     if ($node->is_new) {
       // For new nodes, save new records for both the node itself and the node
       // revision.
-      drupal_write_record('node', $node);
+      backdrop_write_record('node', $node);
       _node_save_revision($node, $user->uid);
       $op = 'insert';
     }
     else {
       // For existing nodes, update the node record which matches the value of
       // $node->nid.
-      drupal_write_record('node', $node, 'nid');
+      backdrop_write_record('node', $node, 'nid');
       // Then, if a new node revision was requested, save a new record for
       // that; otherwise, update the node revision record which matches the
       // value of $node->vid.
@@ -1206,10 +1206,10 @@ function _node_save_revision($node, $uid, $update = NULL) {
   $temp_uid = $node->uid;
   $node->uid = $uid;
   if (isset($update)) {
-    drupal_write_record('node_revision', $node, $update);
+    backdrop_write_record('node_revision', $node, $update);
   }
   else {
-    drupal_write_record('node_revision', $node);
+    backdrop_write_record('node_revision', $node);
   }
   // Have node object still show node owner's uid, not revision author's.
   $node->uid = $temp_uid;
@@ -1330,7 +1330,7 @@ function node_revision_delete($revision_id) {
  *   content language of the current request.
  *
  * @return
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  */
 function node_view($node, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
@@ -1361,7 +1361,7 @@ function node_view($node, $view_mode = 'full', $langcode = NULL) {
 
   // Allow modules to modify the structured node.
   $type = 'node';
-  drupal_alter(array('node_view', 'entity_view'), $build, $type);
+  backdrop_alter(array('node_view', 'entity_view'), $build, $type);
 
   return $build;
 }
@@ -1372,7 +1372,7 @@ function node_view($node, $view_mode = 'full', $langcode = NULL) {
  * The content built for the node (field values, comments, file attachments or
  * other node components) will vary depending on the $view_mode parameter.
  *
- * Drupal core defines the following view modes for nodes, with the following
+ * Backdrop core defines the following view modes for nodes, with the following
  * default use cases:
  *   - full (default): node is being displayed on its own page (node/123)
  *   - teaser: node is being displayed on the default home page listing, or on
@@ -1421,7 +1421,7 @@ function node_build_content($node, $view_mode = 'full', $langcode = NULL) {
   $links = array();
   $node->content['links'] = array(
     '#theme' => 'links__node',
-    '#pre_render' => array('drupal_pre_render_links'),
+    '#pre_render' => array('backdrop_pre_render_links'),
     '#attributes' => array('class' => array('links', 'inline')),
   );
   if ($view_mode == 'teaser') {
@@ -1454,13 +1454,13 @@ function node_build_content($node, $view_mode = 'full', $langcode = NULL) {
  *   viewed.
  *
  * @return
- *   A $page element suitable for use by drupal_render().
+ *   A $page element suitable for use by backdrop_render().
  *
  * @see node_menu()
  */
 function node_show($node, $message = FALSE) {
   if ($message) {
-    drupal_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+    backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
   }
 
   // For markup consistency with other pages, use node_view_multiple() rather than node_view().
@@ -1563,7 +1563,7 @@ function template_preprocess_node(&$variables) {
   $variables['attributes_array']['role'] = 'article';
 
   // Gather node classes.
-  $variables['classes_array'][] = drupal_html_class('node-' . $node->type);
+  $variables['classes_array'][] = backdrop_html_class('node-' . $node->type);
   if ($variables['promote']) {
     $variables['classes_array'][] = 'promoted';
   }
@@ -1574,7 +1574,7 @@ function template_preprocess_node(&$variables) {
     $variables['classes_array'][] = 'unpublished';
   }
   if ($variables['view_mode']) {
-    $variables['classes_array'][] = drupal_html_class('view-mode-' . $variables['view_mode']);
+    $variables['classes_array'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
   }
   if (isset($variables['preview'])) {
     $variables['classes_array'][] = 'preview';
@@ -1704,7 +1704,7 @@ function node_search_admin() {
   );
 
   // Note: reversed to reflect that higher number = higher ranking.
-  $options = drupal_map_assoc(range(0, 10));
+  $options = backdrop_map_assoc(range(0, 10));
   foreach (module_invoke_all('ranking') as $var => $values) {
     $form['content_ranking']['factors']['node_rank_' . $var] = array(
       '#title' => $values['title'],
@@ -1752,7 +1752,7 @@ function node_search_execute($keys = NULL, $conditions = NULL) {
     $node = node_load($item->sid);
     $build = node_view($node, 'search_result');
     unset($build['#theme']);
-    $node->rendered = drupal_render($build);
+    $node->rendered = backdrop_render($build);
 
     // Fetch comments for snippet.
     $node->rendered .= ' ' . module_invoke('comment', 'node_update_index', $node);
@@ -1885,19 +1885,19 @@ function node_user_predelete($account) {
 function theme_node_search_admin($variables) {
   $form = $variables['form'];
 
-  $output = drupal_render($form['info']);
+  $output = backdrop_render($form['info']);
 
   $header = array(t('Factor'), t('Weight'));
   foreach (element_children($form['factors']) as $key) {
     $row = array();
     $row[] = $form['factors'][$key]['#title'];
     $form['factors'][$key]['#title_display'] = 'invisible';
-    $row[] = drupal_render($form['factors'][$key]);
+    $row[] = backdrop_render($form['factors'][$key]);
     $rows[] = $row;
   }
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
 
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
 
@@ -1915,7 +1915,7 @@ function theme_node_search_admin($variables) {
  * @see node_menu()
  */
 function _node_revision_access($node, $op = 'view') {
-  $access = &drupal_static(__FUNCTION__, array());
+  $access = &backdrop_static(__FUNCTION__, array());
   if (!isset($access[$node->vid])) {
     // To save additional calls to the database, return early if the user
     // doesn't have the required permissions.
@@ -1979,7 +1979,7 @@ function node_menu() {
   $items['admin/content'] = array(
     'title' => 'Content',
     'description' => 'Find and manage content.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_admin_content'),
     'access arguments' => array('access content overview'),
     'weight' => -10,
@@ -1993,7 +1993,7 @@ function node_menu() {
 
   $items['admin/reports/status/rebuild'] = array(
     'title' => 'Rebuild permissions',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_configure_rebuild_confirm'),
     // Any user than can potentially trigger a node_access_needs_rebuild(TRUE)
     // has to be allowed access to the 'node access rebuild' confirm form.
@@ -2016,7 +2016,7 @@ function node_menu() {
   );
   $items['admin/structure/types/add'] = array(
     'title' => 'Add content type',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_type_form'),
     'access arguments' => array('administer content types'),
     'type' => MENU_LOCAL_ACTION,
@@ -2026,7 +2026,7 @@ function node_menu() {
     'title' => 'Edit content type',
     'title callback' => 'node_type_page_title',
     'title arguments' => array(4),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_type_form', 4),
     'access arguments' => array('administer content types'),
     'file' => 'content_types.inc',
@@ -2080,7 +2080,7 @@ function node_menu() {
   $items['node/%node'] = array(
     'title callback' => 'node_page_title',
     'title arguments' => array(1),
-    // The page callback also invokes drupal_set_title() in case
+    // The page callback also invokes backdrop_set_title() in case
     // the menu router's title is overridden by a menu link.
     'page callback' => 'node_page_view',
     'page arguments' => array(1),
@@ -2105,7 +2105,7 @@ function node_menu() {
   );
   $items['node/%node/delete'] = array(
     'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_delete_confirm', 1),
     'access callback' => 'node_access',
     'access arguments' => array('delete', 1),
@@ -2135,7 +2135,7 @@ function node_menu() {
   $items['node/%node/revisions/%/revert'] = array(
     'title' => 'Revert to earlier revision',
     'load arguments' => array(3),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_revision_revert_confirm', 1),
     'access callback' => '_node_revision_access',
     'access arguments' => array(1, 'update'),
@@ -2144,7 +2144,7 @@ function node_menu() {
   $items['node/%node/revisions/%/delete'] = array(
     'title' => 'Delete earlier revision',
     'load arguments' => array(3),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_revision_delete_confirm', 1),
     'access callback' => '_node_revision_access',
     'access arguments' => array(1, 'delete'),
@@ -2276,7 +2276,7 @@ function node_block_configure($delta = '') {
       '#type' => 'select',
       '#title' => t('Number of recent content items to display'),
       '#default_value' => variable_get('node_recent_block_count', 10),
-      '#options' => drupal_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
+      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
     );
   }
   return $form;
@@ -2345,7 +2345,7 @@ function theme_node_recent_block($variables) {
   $rows = array();
   $output = '';
 
-  $l_options = array('query' => drupal_get_destination());
+  $l_options = array('query' => backdrop_get_destination());
   foreach ($variables['nodes'] as $node) {
     $row = array();
     $row[] = array(
@@ -2609,7 +2609,7 @@ function node_feed($nids = FALSE, $channel = array()) {
     if ($item_length != 'title') {
       // We render node contents and force links to be last.
       $build['links']['#weight'] = 1000;
-      $item_text .= drupal_render($build);
+      $item_text .= backdrop_render($build);
     }
 
     $items .= format_rss_item($node->title, $node->link, $item_text, $node->rss_elements);
@@ -2617,7 +2617,7 @@ function node_feed($nids = FALSE, $channel = array()) {
 
   $channel_defaults = array(
     'version'     => '2.0',
-    'title'       => variable_get('site_name', 'Drupal'),
+    'title'       => variable_get('site_name', 'Backdrop'),
     'link'        => $base_url,
     'description' => variable_get('feed_description', ''),
     'language'    => $language_content->langcode
@@ -2626,16 +2626,16 @@ function node_feed($nids = FALSE, $channel = array()) {
   $channel = array_merge($channel_defaults, $channel);
 
   $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-  $output .= "<rss version=\"" . $channel["version"] . "\" xml:base=\"" . $base_url . "\" " . drupal_attributes($namespaces) . ">\n";
+  $output .= "<rss version=\"" . $channel["version"] . "\" xml:base=\"" . $base_url . "\" " . backdrop_attributes($namespaces) . ">\n";
   $output .= format_rss_channel($channel['title'], $channel['link'], $channel['description'], $items, $channel['language'], $channel_extras);
   $output .= "</rss>\n";
 
-  drupal_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
+  backdrop_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
   print $output;
 }
 
 /**
- * Constructs a drupal_render() style array from an array of loaded nodes.
+ * Constructs a backdrop_render() style array from an array of loaded nodes.
  *
  * @param $nodes
  *   An array of nodes as returned by node_load_multiple().
@@ -2648,7 +2648,7 @@ function node_feed($nids = FALSE, $channel = array()) {
  *   content language of the current request.
  *
  * @return
- *   An array in the format expected by drupal_render().
+ *   An array in the format expected by backdrop_render().
  */
 function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcode = NULL) {
   field_attach_prepare_view('node', $nodes, $view_mode, $langcode);
@@ -2686,15 +2686,15 @@ function node_page_default() {
     $build = node_view_multiple($nodes);
 
     // 'rss.xml' is a path, not a file, registered in node_menu().
-    drupal_add_feed('rss.xml', variable_get('site_name', 'Drupal') . ' ' . t('RSS'));
+    backdrop_add_feed('rss.xml', variable_get('site_name', 'Backdrop') . ' ' . t('RSS'));
     $build['pager'] = array(
       '#theme' => 'pager',
       '#weight' => 5,
     );
-    drupal_set_title('');
+    backdrop_set_title('');
   }
   else {
-    drupal_set_title(t('Welcome to @site-name', array('@site-name' => variable_get('site_name', 'Drupal'))), PASS_THROUGH);
+    backdrop_set_title(t('Welcome to @site-name', array('@site-name' => variable_get('site_name', 'Backdrop'))), PASS_THROUGH);
 
     $default_message = '<p>' . t('No front page content has been created yet.') . '</p>';
 
@@ -2727,12 +2727,12 @@ function node_page_view($node) {
   // If there is a menu link to this node, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the node title.
-  drupal_set_title($node->title);
+  backdrop_set_title($node->title);
   $uri = entity_uri('node', $node);
   // Set the node path as the canonical URL to prevent duplicate content.
-  drupal_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
+  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
   // Set the non-aliased path as a default shortlink.
-  drupal_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
   return node_show($node);
 }
 
@@ -2765,7 +2765,7 @@ function _node_index_node($node) {
   // Render the node.
   $build = node_view($node, 'search_index');
   unset($build['#theme']);
-  $node->rendered = drupal_render($build);
+  $node->rendered = backdrop_render($build);
 
   $text = '<h1>' . check_plain($node->title) . '</h1>' . $node->rendered;
 
@@ -2987,7 +2987,7 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * @see node_menu()
  */
 function node_access($op, $node, $account = NULL) {
-  $rights = &drupal_static(__FUNCTION__, array());
+  $rights = &backdrop_static(__FUNCTION__, array());
 
   if (!$node || !in_array($op, array('view', 'update', 'delete', 'create'), TRUE)) {
     // If there was no node to check against, or the $op was not one of the
@@ -3201,7 +3201,7 @@ function node_access_grants($op, $account = NULL) {
   // Fetch node access grants from other modules.
   $grants = module_invoke_all('node_grants', $account, $op);
   // Allow modules to alter the assigned grants.
-  drupal_alter('node_grants', $grants, $account, $op);
+  backdrop_alter('node_grants', $grants, $account, $op);
 
   return array_merge(array('all' => array(0)), $grants);
 }
@@ -3235,7 +3235,7 @@ function node_access_view_all_nodes($account = NULL) {
   }
 
   // Statically cache results in an array keyed by $account->uid.
-  $access = &drupal_static(__FUNCTION__);
+  $access = &backdrop_static(__FUNCTION__);
   if (isset($access[$account->uid])) {
     return $access[$account->uid];
   }
@@ -3348,7 +3348,7 @@ function _node_query_node_access_alter($query, $type) {
         // can triumph that.
         if (!$base_table) {
           // The schema is cached.
-          $schema = drupal_get_schema($table);
+          $schema = backdrop_get_schema($table);
           if (isset($schema['fields']['nid'])) {
             if (isset($schema['foreign keys'])) {
               foreach ($schema['foreign keys'] as $relation) {
@@ -3482,7 +3482,7 @@ function _node_query_node_access_alter($query, $type) {
 function node_access_acquire_grants($node, $delete = TRUE) {
   $grants = module_invoke_all('node_access_records', $node);
   // Let modules alter the grants.
-  drupal_alter('node_access_records', $grants, $node);
+  backdrop_alter('node_access_records', $grants, $node);
   // If no grants are set and the node is published, then use the default grant.
   if (empty($grants) && !empty($node->status)) {
     $grants[] = array('realm' => 'all', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
@@ -3581,7 +3581,7 @@ function node_access_needs_rebuild($rebuild = NULL) {
  * of node_access_rebuild() lets the user perform his changes and actually
  * rebuild only once he is done.
  *
- * Note : As of Drupal 6, node access modules are not required to (and actually
+ * Note : As of Backdrop 6, node access modules are not required to (and actually
  * should not) call node_access_rebuild() in hook_enable/disable anymore.
  *
  * @param $batch_mode
@@ -3609,7 +3609,7 @@ function node_access_rebuild($batch_mode = FALSE) {
     }
     else {
       // Try to allocate enough time to rebuild node grants
-      drupal_set_time_limit(240);
+      backdrop_set_time_limit(240);
 
       $nids = db_query("SELECT nid FROM {node}")->fetchCol();
       foreach ($nids as $nid) {
@@ -3637,7 +3637,7 @@ function node_access_rebuild($batch_mode = FALSE) {
   }
 
   if (!isset($batch)) {
-    drupal_set_message(t('Content permissions have been rebuilt.'));
+    backdrop_set_message(t('Content permissions have been rebuilt.'));
     node_access_needs_rebuild(FALSE);
     cache_clear_all();
   }
@@ -3683,11 +3683,11 @@ function _node_access_rebuild_batch_operation(&$context) {
  */
 function _node_access_rebuild_batch_finished($success, $results, $operations) {
   if ($success) {
-    drupal_set_message(t('The content access permissions have been rebuilt.'));
+    backdrop_set_message(t('The content access permissions have been rebuilt.'));
     node_access_needs_rebuild(FALSE);
   }
   else {
-    drupal_set_message(t('The content access permissions have not been properly rebuilt.'), 'error');
+    backdrop_set_message(t('The content access permissions have not been properly rebuilt.'), 'error');
   }
   cache_clear_all();
 }
@@ -4024,7 +4024,7 @@ function node_unpublish_by_keyword_action_form($context) {
     '#title' => t('Keywords'),
     '#type' => 'textarea',
     '#description' => t('The content will be unpublished if it contains any of the phrases above. Use a case-sensitive, comma-separated list of phrases. Example: funny, bungee jumping, "Company, Inc."'),
-    '#default_value' => isset($context['keywords']) ? drupal_implode_tags($context['keywords']) : '',
+    '#default_value' => isset($context['keywords']) ? backdrop_implode_tags($context['keywords']) : '',
   );
   return $form;
 }
@@ -4033,7 +4033,7 @@ function node_unpublish_by_keyword_action_form($context) {
  * Form submission handler for node_unpublish_by_keyword_action().
  */
 function node_unpublish_by_keyword_action_submit($form, $form_state) {
-  return array('keywords' => drupal_explode_tags($form_state['values']['keywords']));
+  return array('keywords' => backdrop_explode_tags($form_state['values']['keywords']));
 }
 
 /**
@@ -4055,7 +4055,7 @@ function node_unpublish_by_keyword_action_submit($form, $form_state) {
 function node_unpublish_by_keyword_action($node, $context) {
   foreach ($context['keywords'] as $keyword) {
     $elements = node_view(clone $node);
-    if (strpos(drupal_render($elements), $keyword) !== FALSE || strpos($node->title, $keyword) !== FALSE) {
+    if (strpos(backdrop_render($elements), $keyword) !== FALSE || strpos($node->title, $keyword) !== FALSE) {
       $node->status = NODE_NOT_PUBLISHED;
       watchdog('action', 'Set @type %title to unpublished.', array('@type' => node_type_get_name($node), '%title' => $node->title));
       break;
@@ -4125,13 +4125,13 @@ function node_modules_disabled($modules) {
 /**
  * Controller class for nodes.
  *
- * This extends the DrupalDefaultEntityController class, adding required
+ * This extends the BackdropDefaultEntityController class, adding required
  * special handling for node objects.
  */
-class NodeController extends DrupalDefaultEntityController {
+class NodeController extends BackdropDefaultEntityController {
 
   /**
-   * Overrides DrupalDefaultEntityController::attachLoad().
+   * Overrides BackdropDefaultEntityController::attachLoad().
    */
   protected function attachLoad(&$nodes, $revision_id = FALSE) {
     // Create an array of nodes for each content type and pass this to the
@@ -4156,7 +4156,7 @@ class NodeController extends DrupalDefaultEntityController {
   }
 
   /**
-   * Overrides DrupalDefaultEntityController::buildQuery().
+   * Overrides BackdropDefaultEntityController::buildQuery().
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     // Ensure that uid is taken from the {node} table,

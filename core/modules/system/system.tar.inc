@@ -210,7 +210,7 @@ class Archive_Tar // extends PEAR
         $this->_close();
         // ----- Look for a local copy to delete
         if ($this->_temp_tarname != '')
-            @drupal_unlink($this->_temp_tarname);
+            @backdrop_unlink($this->_temp_tarname);
 //        $this->_PEAR();
     }
     // }}}
@@ -777,7 +777,7 @@ class Archive_Tar // extends PEAR
         // ----- Look if a local copy need to be erase
         // Note that it might be interesting to keep the url for a time : ToDo
         if ($this->_temp_tarname != '') {
-            @drupal_unlink($this->_temp_tarname);
+            @backdrop_unlink($this->_temp_tarname);
             $this->_temp_tarname = '';
         }
 
@@ -793,11 +793,11 @@ class Archive_Tar // extends PEAR
         // ----- Look for a local copy
         if ($this->_temp_tarname != '') {
             // ----- Remove the local copy but not the remote tarname
-            @drupal_unlink($this->_temp_tarname);
+            @backdrop_unlink($this->_temp_tarname);
             $this->_temp_tarname = '';
         } else {
             // ----- Remove the local tarname file
-            @drupal_unlink($this->_tarname);
+            @backdrop_unlink($this->_tarname);
         }
         $this->_tarname = '';
 
@@ -1593,9 +1593,9 @@ class Archive_Tar // extends PEAR
         if ($v_extract_file) {
           if ($v_header['typeflag'] == "5") {
             if (!@file_exists($v_header['filename'])) {
-                // Drupal integration.
-                // Changed the code to use drupal_mkdir() instead of mkdir().
-                if (!@drupal_mkdir($v_header['filename'], 0777)) {
+                // Backdrop integration.
+                // Changed the code to use backdrop_mkdir() instead of mkdir().
+                if (!@backdrop_mkdir($v_header['filename'], 0777)) {
                     $this->_error('Unable to create directory {'
 					              .$v_header['filename'].'}');
                     return false;
@@ -1603,7 +1603,7 @@ class Archive_Tar // extends PEAR
             }
           } elseif ($v_header['typeflag'] == "2") {
               if (@file_exists($v_header['filename'])) {
-                  @drupal_unlink($v_header['filename']);
+                  @backdrop_unlink($v_header['filename']);
               }
               if (!@symlink($v_header['link'], $v_header['filename'])) {
                   $this->_error('Unable to extract symbolic link {'
@@ -1740,7 +1740,7 @@ class Archive_Tar // extends PEAR
                 @bzclose($v_temp_tar);
             }
 
-            if (!@drupal_unlink($this->_tarname.".tmp")) {
+            if (!@backdrop_unlink($this->_tarname.".tmp")) {
                 $this->_error('Error while deleting temporary file \''
 				              .$this->_tarname.'.tmp\'');
             }
@@ -1808,9 +1808,9 @@ class Archive_Tar // extends PEAR
             (!$this->_dirCheck($p_parent_dir)))
              return false;
 
-        // Drupal integration.
-        // Changed the code to use drupal_mkdir() instead of mkdir().
-        if (!@drupal_mkdir($p_dir, 0777)) {
+        // Backdrop integration.
+        // Changed the code to use backdrop_mkdir() instead of mkdir().
+        if (!@backdrop_mkdir($p_dir, 0777)) {
             $this->_error("Unable to create directory '$p_dir'");
             return false;
         }

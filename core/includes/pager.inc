@@ -201,7 +201,7 @@ function pager_find_page($element = 0) {
  * items being displayed.
  *
  * If the items being displayed result from a database query performed using
- * Drupal's database API, and if you have control over the construction of the
+ * Backdrop's database API, and if you have control over the construction of the
  * database query, you do not need to call this function directly; instead, you
  * can simply extend the query object with the 'PagerDefault' extender before
  * executing it. For example:
@@ -292,9 +292,9 @@ function pager_default_initialize($total, $limit, $element = 0) {
  *   page request except for those pertaining to paging.
  */
 function pager_get_query_parameters() {
-  $query = &drupal_static(__FUNCTION__);
+  $query = &backdrop_static(__FUNCTION__);
   if (!isset($query)) {
-    $query = drupal_get_query_parameters($_GET, array('q', 'page'));
+    $query = backdrop_get_query_parameters($_GET, array('q', 'page'));
   }
   return $query;
 }
@@ -605,7 +605,7 @@ function theme_pager_link($variables) {
 
   $query = array();
   if (count($parameters)) {
-    $query = drupal_get_query_parameters($parameters, array());
+    $query = backdrop_get_query_parameters($parameters, array());
   }
   if ($query_pager = pager_get_query_parameters()) {
     $query = array_merge($query, $query_pager);
@@ -634,9 +634,9 @@ function theme_pager_link($variables) {
   //   path only (which is always the current path for pager links). Apparently,
   //   none of the pager links is active at any time - but it should still be
   //   possible to use l() here.
-  // @see http://drupal.org/node/1410574
+  // @see http://backdrop.org/node/1410574
   $attributes['href'] = url($_GET['q'], array('query' => $query));
-  return '<a' . drupal_attributes($attributes) . '>' . check_plain($text) . '</a>';
+  return '<a' . backdrop_attributes($attributes) . '>' . check_plain($text) . '</a>';
 }
 
 /**

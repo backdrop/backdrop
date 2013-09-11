@@ -16,14 +16,14 @@ function forum_help($path, $arg) {
       $output .= '<p>' . t('The Forum module lets you create threaded discussion forums with functionality similar to other message board systems. Forums are useful because they allow community members to discuss topics with one another while ensuring those conversations are archived for later reference. In a forum, users post topics and threads in nested hierarchies, allowing discussions to be categorized and grouped. The forum hierarchy consists of:') . '</p>';
       $output .= '<ul>';
       $output .= '<li>' . t('Optional containers (for example, <em>Support</em>), which can hold:') . '</li>';
-      $output .= '<ul><li>' . t('Forums (for example, <em>Installing Drupal</em>), which can hold:') . '</li>';
-      $output .= '<ul><li>' . t('Forum topics submitted by users (for example, <em>How to start a Drupal 6 Multisite</em>), which start discussions and are starting points for:') . '</li>';
+      $output .= '<ul><li>' . t('Forums (for example, <em>Installing Backdrop</em>), which can hold:') . '</li>';
+      $output .= '<ul><li>' . t('Forum topics submitted by users (for example, <em>How to start a Backdrop 6 Multisite</em>), which start discussions and are starting points for:') . '</li>';
       $output .= '<ul><li>' . t('Threaded comments submitted by users (for example, <em>You have these options...</em>).') . '</li>';
       $output .= '</ul>';
       $output .= '</ul>';
       $output .= '</ul>';
       $output .= '</ul>';
-      $output .= '<p>' . t('For more information, see the online handbook entry for <a href="@forum">Forum module</a>.', array('@forum' => 'http://drupal.org/handbook/modules/forum')) . '</p>';
+      $output .= '<p>' . t('For more information, see the online handbook entry for <a href="@forum">Forum module</a>.', array('@forum' => 'http://backdrop.org/handbook/modules/forum')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Setting up forum structure') . '</dt>';
@@ -103,7 +103,7 @@ function forum_menu() {
   $items['admin/structure/forum'] = array(
     'title' => 'Forums',
     'description' => 'Control forum hierarchy settings.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('forum_overview'),
     'access arguments' => array('administer forums'),
     'file' => 'forum.admin.inc',
@@ -133,7 +133,7 @@ function forum_menu() {
   );
   $items['admin/structure/forum/settings'] = array(
     'title' => 'Settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('forum_admin_settings'),
     'access arguments' => array('administer forums'),
     'weight' => 5,
@@ -199,7 +199,7 @@ function forum_menu_local_tasks_alter(&$data, $router_item, $root_path) {
             '#theme' => 'menu_local_action',
             '#link' => array(
               'title' => t('<a href="@login">Log in</a> to post new content in the forum.', array(
-                '@login' => url('user/login', array('query' => drupal_get_destination())),
+                '@login' => url('user/login', array('query' => backdrop_get_destination())),
               )),
               'localized_options' => array('html' => TRUE),
             ),
@@ -274,7 +274,7 @@ function forum_node_view($node, $view_mode) {
           $breadcrumb[] = l($parent->name, 'forum/' . $parent->tid);
         }
       }
-      drupal_set_breadcrumb($breadcrumb);
+      backdrop_set_breadcrumb($breadcrumb);
 
     }
   }
@@ -543,7 +543,7 @@ function forum_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
  * Implements hook_field_storage_pre_update().
  */
 function forum_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
-  $first_call = &drupal_static(__FUNCTION__, array());
+  $first_call = &backdrop_static(__FUNCTION__, array());
 
   if ($entity_type == 'node' && $entity->status && _forum_node_check_node_type($entity)) {
     // We don't maintain data for old revisions, so clear all previous values
@@ -636,7 +636,7 @@ function forum_block_info() {
  * Implements hook_block_configure().
  */
 function forum_block_configure($delta = '') {
-  $form['forum_block_num_' . $delta] = array('#type' => 'select', '#title' => t('Number of topics'), '#default_value' => variable_get('forum_block_num_' . $delta, '5'), '#options' => drupal_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)));
+  $form['forum_block_num_' . $delta] = array('#type' => 'select', '#title' => t('Number of topics'), '#default_value' => variable_get('forum_block_num_' . $delta, '5'), '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)));
   return $form;
 }
 
@@ -675,7 +675,7 @@ function forum_block_view($delta = '') {
 
   $block['subject'] = $title;
   // Cache based on the altered query. Enables us to cache with node access enabled.
-  $block['content'] = drupal_render_cache_by_query($query, 'forum_block_view');
+  $block['content'] = backdrop_render_cache_by_query($query, 'forum_block_view');
   $block['content']['#access'] = user_access('access content');
   return $block;
 }
@@ -733,7 +733,7 @@ function forum_form($node, $form_state) {
  *    - 'forums': An array of child forums
  */
 function forum_forum_load($tid = NULL) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   // Return a cached forum tree if available.
   if (!isset($tid)) {
@@ -1006,8 +1006,8 @@ function template_preprocess_forums(&$variables) {
       }
     }
   }
-  drupal_set_breadcrumb($breadcrumb);
-  drupal_set_title($title);
+  backdrop_set_breadcrumb($breadcrumb);
+  backdrop_set_title($title);
 
   if ($variables['forums_defined'] = count($variables['forums']) || count($variables['parents'])) {
     if (!empty($variables['forums'])) {
@@ -1019,7 +1019,7 @@ function template_preprocess_forums(&$variables) {
 
     if ($variables['tid'] && !in_array($variables['tid'], variable_get('forum_containers', array()))) {
       $variables['topics'] = theme('forum_topic_list', $variables);
-      drupal_add_feed('taxonomy/term/' . $variables['tid'] . '/feed', 'RSS - ' . $title);
+      backdrop_add_feed('taxonomy/term/' . $variables['tid'] . '/feed', 'RSS - ' . $title);
     }
     else {
       $variables['topics'] = '';
@@ -1043,7 +1043,7 @@ function template_preprocess_forums(&$variables) {
 
   }
   else {
-    drupal_set_title(t('No forums defined'));
+    backdrop_set_title(t('No forums defined'));
     $variables['forums'] = '';
     $variables['topics'] = '';
   }
@@ -1212,7 +1212,7 @@ function template_preprocess_forum_submitted(&$variables) {
 
 function _forum_user_last_visit($nid) {
   global $user;
-  $history = &drupal_static(__FUNCTION__, array());
+  $history = &backdrop_static(__FUNCTION__, array());
 
   if (empty($history)) {
     $result = db_query('SELECT nid, timestamp FROM {history} WHERE uid = :uid', array(':uid' => $user->uid));

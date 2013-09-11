@@ -82,7 +82,7 @@ function language_negotiation_configure_form_table(&$form, $type) {
 
       $table_form['weight'][$id] = array(
         '#type' => 'weight',
-        '#title' => t('Weight for !title language detection method', array('!title' => drupal_strtolower($provider_name))),
+        '#title' => t('Weight for !title language detection method', array('!title' => backdrop_strtolower($provider_name))),
         '#title_display' => 'invisible',
         '#default_value' => $weight,
         '#attributes' => array('class' => array("language-provider-weight-$type")),
@@ -92,7 +92,7 @@ function language_negotiation_configure_form_table(&$form, $type) {
 
       $table_form['enabled'][$id] = array(
         '#type' => 'checkbox',
-        '#title' => t('Enable !title language detection method', array('!title' => drupal_strtolower($provider_name))),
+        '#title' => t('Enable !title language detection method', array('!title' => backdrop_strtolower($provider_name))),
         '#title_display' => 'invisible',
         '#default_value' => $enabled,
       );
@@ -140,15 +140,15 @@ function theme_language_negotiation_configure_form($variables) {
       if (is_array($element) && element_child($id)) {
         $row = array(
           'data' => array(
-            '<strong>' . drupal_render($form[$type]['title'][$id]) . '</strong>',
-            drupal_render($form[$type]['description'][$id]),
-            drupal_render($form[$type]['enabled'][$id]),
-            drupal_render($form[$type]['weight'][$id]),
+            '<strong>' . backdrop_render($form[$type]['title'][$id]) . '</strong>',
+            backdrop_render($form[$type]['description'][$id]),
+            backdrop_render($form[$type]['enabled'][$id]),
+            backdrop_render($form[$type]['weight'][$id]),
           ),
           'class' => array('draggable'),
         );
         if ($form[$type]['#show_operations']) {
-          $row['data'][] = drupal_render($form[$type]['operation'][$id]);
+          $row['data'][] = backdrop_render($form[$type]['operation'][$id]);
         }
         $rows[] = $row;
       }
@@ -172,14 +172,14 @@ function theme_language_negotiation_configure_form($variables) {
       'attributes' => array('id' => "language-negotiation-providers-$type"),
     );
     $table  = theme('table', $variables);
-    $table .= drupal_render_children($form[$type]);
+    $table .= backdrop_render_children($form[$type]);
 
-    drupal_add_tabledrag("language-negotiation-providers-$type", 'order', 'sibling', "language-provider-weight-$type");
+    backdrop_add_tabledrag("language-negotiation-providers-$type", 'order', 'sibling', "language-provider-weight-$type");
 
     $output .= '<div class="form-item">' . $title . $description . $table . '</div>';
   }
 
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
 
@@ -212,7 +212,7 @@ function language_negotiation_configure_form_submit($form, &$form_state) {
   language_types_set();
 
   $form_state['redirect'] = 'admin/config/regional/language/detection';
-  drupal_set_message(t('Language negotiation configuration saved.'));
+  backdrop_set_message(t('Language negotiation configuration saved.'));
 }
 
 /**
@@ -344,7 +344,7 @@ function language_negotiation_configure_url_form_submit($form, &$form_state) {
   locale_language_negotiation_url_prefixes_save($form_state['values']['prefix']);
   locale_language_negotiation_url_domains_save($form_state['values']['domain']);
 
-  drupal_set_message(t('Configuration saved.'));
+  backdrop_set_message(t('Configuration saved.'));
 }
 
 /**
@@ -387,13 +387,13 @@ function theme_locale_date_format_form($variables) {
     $row = array();
     $row[] = $form['date_formats'][$key]['#title'];
     unset($form['date_formats'][$key]['#title']);
-    $row[] = array('data' => drupal_render($form['date_formats'][$key]));
+    $row[] = array('data' => backdrop_render($form['date_formats'][$key]));
     $rows[] = $row;
   }
 
-  $output = drupal_render($form['language']);
+  $output = backdrop_render($form['language']);
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return $output;
 }
@@ -496,7 +496,7 @@ function locale_date_format_form_submit($form, &$form_state) {
     }
     locale_date_format_save($langcode, $type, $format);
   }
-  drupal_set_message(t('Configuration saved.'));
+  backdrop_set_message(t('Configuration saved.'));
   $form_state['redirect'] = 'admin/config/regional/date-time/locale';
 }
 

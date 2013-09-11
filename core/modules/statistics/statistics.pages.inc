@@ -37,7 +37,7 @@ function statistics_node_tracker() {
       );
     }
 
-    drupal_set_title($node->title);
+    backdrop_set_title($node->title);
     $build['statistics_table'] = array(
       '#theme' => 'table',
       '#header' => $header,
@@ -48,7 +48,7 @@ function statistics_node_tracker() {
     return $build;
   }
   else {
-    drupal_not_found();
+    backdrop_not_found();
   }
 }
 
@@ -75,7 +75,7 @@ function statistics_user_tracker() {
         l(t('details'), "admin/reports/access/$log->aid"));
     }
 
-    drupal_set_title(user_format_name($account));
+    backdrop_set_title(user_format_name($account));
     $build['statistics_table'] = array(
       '#theme' => 'table',
       '#header' => $header,
@@ -86,6 +86,6 @@ function statistics_user_tracker() {
     return $build;
   }
   else {
-    drupal_not_found();
+    backdrop_not_found();
   }
 }

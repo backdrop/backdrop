@@ -7,10 +7,10 @@
 /**
  * Controller class for users.
  *
- * This extends the DrupalDefaultEntityController class, adding required
+ * This extends the BackdropDefaultEntityController class, adding required
  * special handling for user objects.
  */
-class UserController extends DrupalDefaultEntityController {
+class UserController extends BackdropDefaultEntityController {
 
   function attachLoad(&$queried_users, $revision_id = FALSE) {
     // Build an array of user picture IDs so that these can be fetched later.

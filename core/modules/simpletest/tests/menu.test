@@ -5,7 +5,7 @@
  * Provides SimpleTests for menu.inc.
  */
 
-class MenuWebTestCase extends DrupalWebTestCase {
+class MenuWebTestCase extends BackdropWebTestCase {
   function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
@@ -18,13 +18,13 @@ class MenuWebTestCase extends DrupalWebTestCase {
    * Assert that a given path shows certain breadcrumb links.
    *
    * @param string $goto
-   *   (optional) A system path to pass to DrupalWebTestCase::drupalGet().
+   *   (optional) A system path to pass to BackdropWebTestCase::backdropGet().
    * @param array $trail
    *   An associative array whose keys are expected breadcrumb link paths and
    *   whose values are expected breadcrumb link texts (not sanitized).
    * @param string $page_title
    *   (optional) A page title to additionally assert via
-   *   DrupalWebTestCase::assertTitle(). Without site name suffix.
+   *   BackdropWebTestCase::assertTitle(). Without site name suffix.
    * @param array $tree
    *   (optional) An associative array whose keys are link paths and whose
    *   values are link titles (not sanitized) of an expected active trail in a
@@ -35,7 +35,7 @@ class MenuWebTestCase extends DrupalWebTestCase {
    */
   protected function assertBreadcrumb($goto, array $trail, $page_title = NULL, array $tree = array(), $last_active = TRUE) {
     if (isset($goto)) {
-      $this->drupalGet($goto);
+      $this->backdropGet($goto);
     }
     // Compare paths with actual breadcrumb.
     $parts = $this->getParts();
@@ -55,7 +55,7 @@ class MenuWebTestCase extends DrupalWebTestCase {
 
     // Additionally assert page title, if given.
     if (isset($page_title)) {
-      $this->assertTitle(strtr('@title | Drupal', array('@title' => $page_title)));
+      $this->assertTitle(strtr('@title | Backdrop', array('@title' => $page_title)));
     }
 
     // Additionally assert active trail in a menu tree output, if given.
@@ -121,7 +121,7 @@ class MenuWebTestCase extends DrupalWebTestCase {
   }
 }
 
-class MenuRouterTestCase extends DrupalWebTestCase {
+class MenuRouterTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Menu router',
@@ -144,7 +144,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Test title callback set to FALSE.
    */
   function testTitleCallbackFalse() {
-    $this->drupalGet('node');
+    $this->backdropGet('node');
     $this->assertText('A title with @placeholder', t('Raw text found on the page'));
     $this->assertNoText(t('A title with @placeholder', array('@placeholder' => 'some other text')), t('Text with placeholder substitutions not found.'));
   }
@@ -154,10 +154,10 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    */
   function testTitleMenuCallback() {
     // Verify that the menu router item title is not visible.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertNoText(t('Menu Callback Title'));
     // Verify that the menu router item title is output as page title.
-    $this->drupalGet('menu_callback_title');
+    $this->backdropGet('menu_callback_title');
     $this->assertText(t('Menu Callback Title'));
   }
 
@@ -165,7 +165,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Test the theme callback when it is set to use an administrative theme.
    */
   function testThemeCallbackAdministrative() {
-    $this->drupalGet('menu-test/theme-callback/use-admin-theme');
+    $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', t('The administrative theme can be correctly set in a theme callback.'));
     $this->assertRaw('seven/style.css', t("The administrative theme's CSS appears on the page."));
   }
@@ -174,7 +174,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Test that the theme callback is properly inherited.
    */
   function testThemeCallbackInheritance() {
-    $this->drupalGet('menu-test/theme-callback/use-admin-theme/inheritance');
+    $this->backdropGet('menu-test/theme-callback/use-admin-theme/inheritance');
     $this->assertText('Custom theme: seven. Actual theme: seven. Theme callback inheritance is being tested.', t('Theme callback inheritance correctly uses the administrative theme.'));
     $this->assertRaw('seven/style.css', t("The administrative theme's CSS appears on the page."));
   }
@@ -184,7 +184,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * inherited from parent menu paths.
    */
   function testFileInheritance() {
-    $this->drupalGet('admin/config/development/file-inheritance');
+    $this->backdropGet('admin/config/development/file-inheritance');
     $this->assertText('File inheritance test description', t('File inheritance works.'));
   }
 
@@ -195,7 +195,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
     $path = "menu-test/ -._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
-    $this->drupalGet($path);
+    $this->backdropGet($path);
     $this->assertRaw('This is menu_test_callback().');
   }
 
@@ -207,13 +207,13 @@ class MenuRouterTestCase extends DrupalWebTestCase {
 
     // For a regular user, the fact that the site is in maintenance mode means
     // we expect the theme callback system to be bypassed entirely.
-    $this->drupalGet('menu-test/theme-callback/use-admin-theme');
+    $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertRaw('bartik/css/style.css', t("The maintenance theme's CSS appears on the page."));
 
     // An administrator, however, should continue to see the requested theme.
-    $admin_user = $this->drupalCreateUser(array('access site in maintenance mode'));
-    $this->drupalLogin($admin_user);
-    $this->drupalGet('menu-test/theme-callback/use-admin-theme');
+    $admin_user = $this->backdropCreateUser(array('access site in maintenance mode'));
+    $this->backdropLogin($admin_user);
+    $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', t('The theme callback system is correctly triggered for an administrator when the site is in maintenance mode.'));
     $this->assertRaw('seven/style.css', t("The administrative theme's CSS appears on the page."));
   }
@@ -226,11 +226,11 @@ class MenuRouterTestCase extends DrupalWebTestCase {
   function testMaintenanceModeLoginPaths() {
     variable_set('maintenance_mode', TRUE);
 
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')));
-    $this->drupalLogout();
-    $this->drupalGet('node');
+    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Backdrop')));
+    $this->backdropLogout();
+    $this->backdropGet('node');
     $this->assertText($offline_message);
-    $this->drupalGet('menu_login_callback');
+    $this->backdropGet('menu_login_callback');
     $this->assertText('This is menu_login_callback().', t('Maintenance mode can be bypassed through hook_login_paths().'));
   }
 
@@ -239,15 +239,15 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * 'user' and 'user/register' gets redirected to the user edit page.
    */
   function testAuthUserUserLogin() {
-    $loggedInUser = $this->drupalCreateUser(array());
-    $this->drupalLogin($loggedInUser);
+    $loggedInUser = $this->backdropCreateUser(array());
+    $this->backdropLogin($loggedInUser);
 
-    $this->DrupalGet('user/login');
+    $this->BackdropGet('user/login');
     // Check that we got to 'user'.
     $this->assertTrue($this->url == url('user', array('absolute' => TRUE)), t("Logged-in user redirected to q=user on accessing q=user/login"));
 
     // user/register should redirect to user/UID/edit.
-    $this->DrupalGet('user/register');
+    $this->BackdropGet('user/register');
     $this->assertTrue($this->url == url('user/' . $this->loggedInUser->uid . '/edit', array('absolute' => TRUE)), t("Logged-in user redirected to q=user/UID/edit on accessing q=user/register"));
   }
 
@@ -256,13 +256,13 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    */
   function testThemeCallbackOptionalTheme() {
     // Request a theme that is not enabled.
-    $this->drupalGet('menu-test/theme-callback/use-stark-theme');
+    $this->backdropGet('menu-test/theme-callback/use-stark-theme');
     $this->assertText('Custom theme: NONE. Actual theme: bartik.', t('The theme callback system falls back on the default theme when a theme that is not enabled is requested.'));
     $this->assertRaw('bartik/css/style.css', t("The default theme's CSS appears on the page."));
 
     // Now enable the theme and request it again.
     theme_enable(array('stark'));
-    $this->drupalGet('menu-test/theme-callback/use-stark-theme');
+    $this->backdropGet('menu-test/theme-callback/use-stark-theme');
     $this->assertText('Custom theme: stark. Actual theme: stark.', t('The theme callback system uses an optional theme once it has been enabled.'));
     $this->assertRaw('stark/layout.css', t("The optional theme's CSS appears on the page."));
   }
@@ -271,7 +271,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Test the theme callback when it is set to use a theme that does not exist.
    */
   function testThemeCallbackFakeTheme() {
-    $this->drupalGet('menu-test/theme-callback/use-fake-theme');
+    $this->backdropGet('menu-test/theme-callback/use-fake-theme');
     $this->assertText('Custom theme: NONE. Actual theme: bartik.', t('The theme callback system falls back on the default theme when a theme that does not exist is requested.'));
     $this->assertRaw('bartik/css/style.css', t("The default theme's CSS appears on the page."));
   }
@@ -280,7 +280,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Test the theme callback when no theme is requested.
    */
   function testThemeCallbackNoThemeRequested() {
-    $this->drupalGet('menu-test/theme-callback/no-theme-requested');
+    $this->backdropGet('menu-test/theme-callback/no-theme-requested');
     $this->assertText('Custom theme: NONE. Actual theme: bartik.', t('The theme callback system falls back on the default theme when no theme is requested.'));
     $this->assertRaw('bartik/css/style.css', t("The default theme's CSS appears on the page."));
   }
@@ -296,7 +296,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
 
     // Visit a page that does not implement a theme callback. The above request
     // should be honored.
-    $this->drupalGet('menu-test/no-theme-callback');
+    $this->backdropGet('menu-test/no-theme-callback');
     $this->assertText('Custom theme: stark. Actual theme: stark.', t('The result of hook_custom_theme() is used as the theme for the current page.'));
     $this->assertRaw('stark/layout.css', t("The Stark theme's CSS appears on the page."));
   }
@@ -312,7 +312,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
 
     // The menu "theme callback" should take precedence over a value set in
     // hook_custom_theme().
-    $this->drupalGet('menu-test/theme-callback/use-admin-theme');
+    $this->backdropGet('menu-test/theme-callback/use-admin-theme');
     $this->assertText('Custom theme: seven. Actual theme: seven.', t('The result of hook_custom_theme() does not override what was set in a theme callback.'));
     $this->assertRaw('seven/style.css', t("The Seven theme's CSS appears on the page."));
   }
@@ -321,8 +321,8 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Tests for menu_link_maintain().
    */
   function testMenuLinkMaintain() {
-    $admin_user = $this->drupalCreateUser(array('administer site configuration'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->backdropLogin($admin_user);
 
     // Create three menu items.
     menu_link_maintain('menu_test', 'insert', 'menu_test_maintain/1', 'Menu link #1');
@@ -339,7 +339,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
     menu_cache_clear('main-menu');
 
     // Load front page.
-    $this->drupalGet('node');
+    $this->backdropGet('node');
     $this->assertLink(t('Menu link #1'), 0, 'Found menu link #1');
     $this->assertLink(t('Menu link #1-1'), 0, 'Found menu link #1-1');
     $this->assertLink(t('Menu link #2'), 0, 'Found menu link #2');
@@ -347,7 +347,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
     // Rename all links for the given path.
     menu_link_maintain('menu_test', 'update', 'menu_test_maintain/1', 'Menu link updated');
     // Load a different page to be sure that we have up to date information.
-    $this->drupalGet('menu_test_maintain/1');
+    $this->backdropGet('menu_test_maintain/1');
     $this->assertLink(t('Menu link updated'), 0, t('Found updated menu link'));
     $this->assertNoLink(t('Menu link #1'), 0, t('Not found menu link #1'));
     $this->assertNoLink(t('Menu link #1'), 0, t('Not found menu link #1-1'));
@@ -356,7 +356,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
     // Delete all links for the given path.
     menu_link_maintain('menu_test', 'delete', 'menu_test_maintain/1', '');
     // Load a different page to be sure that we have up to date information.
-    $this->drupalGet('menu_test_maintain/2');
+    $this->backdropGet('menu_test_maintain/2');
     $this->assertNoLink(t('Menu link updated'), 0, t('Not found deleted menu link'));
     $this->assertNoLink(t('Menu link #1'), 0, t('Not found menu link #1'));
     $this->assertNoLink(t('Menu link #1'), 0, t('Not found menu link #1-1'));
@@ -367,8 +367,8 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Tests for menu_name parameter for hook_menu().
    */
   function testMenuName() {
-    $admin_user = $this->drupalCreateUser(array('administer site configuration'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->backdropLogin($admin_user);
 
     $sql = "SELECT menu_name FROM {menu_links} WHERE router_path = 'menu_name_test'";
     $name = db_query($sql)->fetchField();
@@ -490,7 +490,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    */
   function testMenuGetItemNoAncestors() {
     variable_set('menu_masks', array());
-    $this->drupalGet('');
+    $this->backdropGet('');
   }
 
   /**
@@ -546,7 +546,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
     menu_link_save($menu_link);
 
     // Load front page.
-    $this->drupalGet('node');
+    $this->backdropGet('node');
     $this->assertRaw('title="Test title attribute"', t('Title attribute of a menu link renders.'));
     $this->assertRaw('testparam=testvalue', t('Query parameter added to menu link.'));
   }
@@ -578,10 +578,10 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * the title is asserted to begin with "Alternative".
    */
   private function menuItemTitlesCasesHelper($case_no, $override = FALSE) {
-    $this->drupalGet('menu-title-test/case' . $case_no);
+    $this->backdropGet('menu-title-test/case' . $case_no);
     $this->assertResponse(200);
     $asserted_title = $override ? 'Alternative example title - Case ' . $case_no : 'Example title - Case ' . $case_no;
-    $this->assertTitle($asserted_title . ' | Drupal', t('Menu title is') . ': ' . $asserted_title, 'Menu');
+    $this->assertTitle($asserted_title . ' | Backdrop', t('Menu title is') . ': ' . $asserted_title, 'Menu');
   }
 
   /**
@@ -646,7 +646,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
 /**
  * Tests for menu links.
  */
-class MenuLinksUnitTestCase extends DrupalWebTestCase {
+class MenuLinksUnitTestCase extends BackdropWebTestCase {
   // Use the lightweight testing profile for this test.
   protected $profile = 'testing';
 
@@ -865,7 +865,7 @@ class MenuLinksUnitTestCase extends DrupalWebTestCase {
 /**
  * Tests rebuilding the menu by setting 'menu_rebuild_needed.'
  */
-class MenuRebuildTestCase extends DrupalWebTestCase {
+class MenuRebuildTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Menu rebuild test',
@@ -893,7 +893,7 @@ class MenuRebuildTestCase extends DrupalWebTestCase {
     // to rebuild the menu item. Now 'admin' should exist.
     variable_set('menu_rebuild_needed', TRUE);
     // menu_execute_active_handler() should trigger the rebuild.
-    $this->drupalGet('<front>');
+    $this->backdropGet('<front>');
     $admin_exists = db_query('SELECT path from {menu_router} WHERE path = :path', array(':path' => 'admin'))->fetchField();
     $this->assertEqual($admin_exists, 'admin', t("The menu has been rebuilt, the path 'admin' now exists again."));
   }
@@ -903,7 +903,7 @@ class MenuRebuildTestCase extends DrupalWebTestCase {
 /**
  * Menu tree data related tests.
  */
-class MenuTreeDataTestCase extends DrupalUnitTestCase {
+class MenuTreeDataTestCase extends BackdropUnitTestCase {
   /**
    * Dummy link structure acceptable for menu_tree_data().
    */
@@ -958,7 +958,7 @@ class MenuTreeDataTestCase extends DrupalUnitTestCase {
 /**
  * Menu tree output related tests.
  */
-class MenuTreeOutputTestCase extends DrupalWebTestCase {
+class MenuTreeOutputTestCase extends BackdropWebTestCase {
   /**
    * Dummy link structure acceptable for menu_tree_output().
    */
@@ -1033,8 +1033,8 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $modules[] = 'menu_test';
     parent::setUp($modules);
     $perms = array_keys(module_invoke_all('permission'));
-    $this->admin_user = $this->drupalCreateUser($perms);
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser($perms);
+    $this->backdropLogin($this->admin_user);
 
     // This test puts menu links in the Navigation menu and then tests for
     // their presence on the page, so we need to ensure that the Navigation
@@ -1164,7 +1164,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb("admin/config/content/formats/$format_id/disable", $trail);
 
     // Verify node breadcrumbs (without menu link).
-    $node1 = $this->drupalCreateNode();
+    $node1 = $this->backdropCreateNode();
     $nid1 = $node1->nid;
     $trail = $home;
     $this->assertBreadcrumb("node/$nid1", $trail);
@@ -1198,7 +1198,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     foreach ($menus as $menu) {
       // Create a parent node in the current menu.
       $title = $this->randomName();
-      $node2 = $this->drupalCreateNode(array(
+      $node2 = $this->backdropCreateNode(array(
         'type' => $type,
         'title' => $title,
         'menu' => array(
@@ -1226,7 +1226,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
       // Create a child node in the current menu.
       $title = $this->randomName();
-      $node3 = $this->drupalCreateNode(array(
+      $node3 = $this->backdropCreateNode(array(
         'type' => $type,
         'title' => $title,
         'menu' => array(
@@ -1268,13 +1268,13 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       'link_title' => 'Root',
       'link_path' => 'node',
     );
-    $this->drupalPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
+    $this->backdropPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
     $link = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', array(':title' => 'Root'))->fetchAssoc();
 
     $edit = array(
       'menu[parent]' => $link['menu_name'] . ':' . $link['mlid'],
     );
-    $this->drupalPost("node/{$parent->nid}/edit", $edit, t('Save'));
+    $this->backdropPost("node/{$parent->nid}/edit", $edit, t('Save'));
     $expected = array(
       "node" => $link['link_title'],
     );
@@ -1294,15 +1294,15 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     // Add a taxonomy term/tag to last node, and add a link for that term to the
     // Navigation menu.
     $tags = array(
-      'Drupal' => array(),
+      'Backdrop' => array(),
       'Breadcrumbs' => array(),
     );
     $edit = array(
       "field_tags[$langcode]" => implode(',', array_keys($tags)),
     );
-    $this->drupalPost("node/{$parent->nid}/edit", $edit, t('Save'));
+    $this->backdropPost("node/{$parent->nid}/edit", $edit, t('Save'));
 
-    // Put both terms into a hierarchy Drupal » Breadcrumbs. Required for both
+    // Put both terms into a hierarchy Backdrop » Breadcrumbs. Required for both
     // the menu links and the terms itself, since taxonomy_term_page() resets
     // the breadcrumb based on taxonomy term hierarchy.
     $parent_tid = 0;
@@ -1314,7 +1314,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
         $edit = array(
           'parent[]' => array($parent_tid),
         );
-        $this->drupalPost("taxonomy/term/{$term->tid}/edit", $edit, t('Save'));
+        $this->backdropPost("taxonomy/term/{$term->tid}/edit", $edit, t('Save'));
       }
       $parent_tid = $term->tid;
     }
@@ -1326,7 +1326,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
         'link_path' => "taxonomy/term/{$term->tid}",
         'parent' => "$menu:{$parent_mlid}",
       );
-      $this->drupalPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
+      $this->backdropPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
       $tags[$name]['link'] = db_query('SELECT * FROM {menu_links} WHERE link_title = :title AND link_path = :href', array(
         ':title' => $edit['link_title'],
         ':href' => $edit['link_path'],
@@ -1371,7 +1371,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array(
       'access user profiles',
     ));
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Verify breadcrumb on front page.
     $this->assertBreadcrumb('<front>', array());
@@ -1382,7 +1382,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
 
     // Verify breadcrumb on user pages (without menu link) for registered users.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $trail = $home;
     $this->assertBreadcrumb('user', $trail, $this->admin_user->name);
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
@@ -1392,11 +1392,11 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $this->admin_user->name);
 
     // Create a second user to verify breadcrumb on user pages again.
-    $this->web_user = $this->drupalCreateUser(array(
+    $this->web_user = $this->backdropCreateUser(array(
       'administer users',
       'access user profiles',
     ));
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
 
     // Verify correct breadcrumb and page title on another user's account pages
     // (without menu link).
@@ -1419,12 +1419,12 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     // Add a Navigation menu links for 'user' and $this->admin_user.
     // Although it may be faster to manage these links via low-level API
     // functions, there's a lot that can go wrong in doing so.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $edit = array(
       'link_title' => 'User',
       'link_path' => 'user',
     );
-    $this->drupalPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
+    $this->backdropPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
     $link_user = db_query('SELECT * FROM {menu_links} WHERE link_title = :title AND link_path = :href', array(
       ':title' => $edit['link_title'],
       ':href' => $edit['link_path'],
@@ -1434,14 +1434,14 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       'link_title' => $this->admin_user->name . ' link',
       'link_path' => 'user/' . $this->admin_user->uid,
     );
-    $this->drupalPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
+    $this->backdropPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
     $link_admin_user = db_query('SELECT * FROM {menu_links} WHERE link_title = :title AND link_path = :href', array(
       ':title' => $edit['link_title'],
       ':href' => $edit['link_path'],
     ))->fetchAssoc();
 
     // Verify expected breadcrumbs for the two separate links.
-    $this->drupalLogout();
+    $this->backdropLogout();
     $trail = $home;
     $tree = array(
       $link_user['link_path'] => $link_user['link_title'],
@@ -1452,7 +1452,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $link_admin_user['link_title'], $tree);
 
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $trail += array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
     );
@@ -1462,9 +1462,9 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $edit = array(
       'parent' => "$menu:{$link_user['mlid']}",
     );
-    $this->drupalPost("admin/structure/menu/item/{$link_admin_user['mlid']}/edit", $edit, t('Save'));
+    $this->backdropPost("admin/structure/menu/item/{$link_admin_user['mlid']}/edit", $edit, t('Save'));
 
-    $this->drupalLogout();
+    $this->backdropLogout();
     $trail = $home;
     $tree = array(
       $link_user['link_path'] => $link_user['link_title'],
@@ -1478,7 +1478,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $link_admin_user['link_title'], $tree);
 
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $trail += array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
     );
@@ -1486,10 +1486,10 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Create an only slightly privileged user being able to access site reports
     // but not administration pages.
-    $this->web_user = $this->drupalCreateUser(array(
+    $this->web_user = $this->backdropCreateUser(array(
       'access site reports',
     ));
-    $this->drupalLogin($this->web_user);
+    $this->backdropLogin($this->web_user);
 
     // Verify that we can access recent log entries, there is a corresponding
     // page title, and that the breadcrumb is empty (because the user is not
@@ -1526,8 +1526,8 @@ class MenuTrailTestCase extends MenuWebTestCase {
     }
     $modules[] = 'menu_test';
     parent::setUp($modules);
-    $this->admin_user = $this->drupalCreateUser(array('administer site configuration', 'access administration pages'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages'));
+    $this->backdropLogin($this->admin_user);
 
     // This test puts menu links in the Navigation menu and then tests for
     // their presence on the page, so we need to ensure that the Navigation

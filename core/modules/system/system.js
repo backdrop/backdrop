@@ -4,7 +4,7 @@
  * Show/hide the 'Email site administrator when updates are available' checkbox
  * on the install page.
  */
-Drupal.hideEmailAdministratorCheckbox = function () {
+Backdrop.hideEmailAdministratorCheckbox = function () {
   // Make sure the secondary box is shown / hidden as necessary on page load.
   if ($('#edit-update-status-module-1').is(':checked')) {
     $('.form-item-update-status-module-2').show();
@@ -26,10 +26,10 @@ Drupal.hideEmailAdministratorCheckbox = function () {
  * This function is not used to verify whether or not clean URLs
  * are currently enabled.
  */
-Drupal.behaviors.cleanURLsSettingsCheck = {
+Backdrop.behaviors.cleanURLsSettingsCheck = {
   attach: function (context, settings) {
     // This behavior attaches by ID, so is only valid once on a page.
-    // Also skip if we are on an install page, as Drupal.cleanURLsInstallCheck will handle
+    // Also skip if we are on an install page, as Backdrop.cleanURLsInstallCheck will handle
     // the processing.
     if (!($('#edit-clean-url').length) || $('#edit-clean-url.install').once('clean-url').length) {
       return;
@@ -53,8 +53,8 @@ Drupal.behaviors.cleanURLsSettingsCheck = {
  * This function is not used to verify whether or not clean URLs
  * are currently enabled.
  */
-Drupal.cleanURLsInstallCheck = function () {
-  var url = location.protocol + '//' + location.host + Drupal.settings.basePath + 'admin/config/search/clean-urls/check';
+Backdrop.cleanURLsInstallCheck = function () {
+  var url = location.protocol + '//' + location.host + Backdrop.settings.basePath + 'admin/config/search/clean-urls/check';
   // Submit a synchronous request to avoid database errors associated with
   // concurrent requests during install.
   $.ajax({
@@ -73,7 +73,7 @@ Drupal.cleanURLsInstallCheck = function () {
  * use the same value. In the installer this is used to populate the
  * administrator e-mail address with the same value as the site e-mail address.
  */
-Drupal.behaviors.copyFieldValue = {
+Backdrop.behaviors.copyFieldValue = {
   attach: function (context, settings) {
     for (var sourceId in settings.copyFieldValue) {
       $('#' + sourceId, context).once('copy-field-values').bind('blur', function () {
@@ -94,7 +94,7 @@ Drupal.behaviors.copyFieldValue = {
 /**
  * Show/hide custom format sections on the regional settings page.
  */
-Drupal.behaviors.dateTime = {
+Backdrop.behaviors.dateTime = {
   attach: function (context, settings) {
     for (var fieldName in settings.dateTime) {
       if (settings.dateTime.hasOwnProperty(fieldName)) {
@@ -120,7 +120,7 @@ Drupal.behaviors.dateTime = {
  * Show/hide settings for page caching depending on whether page caching is
  * enabled or not.
  */
-Drupal.behaviors.pageCache = {
+Backdrop.behaviors.pageCache = {
   attach: function (context, settings) {
     $('#edit-cache-0', context).change(function () {
       $('#page-compression-wrapper').hide();

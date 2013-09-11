@@ -2,13 +2,13 @@
 <?php
 
 /**
- * Drupal shell execution script
+ * Backdrop shell execution script
  *
  * Check for your PHP interpreter - on Windows you'll probably have to
  * replace line 1 with
  *   #!c:/program files/php/php.exe
  *
- * @param path  Drupal's absolute root directory in local file system (optional).
+ * @param path  Backdrop's absolute root directory in local file system (optional).
  * @param URI   A URI to execute, including HTTP protocol prefix.
  */
 $script = basename(array_shift($_SERVER['argv']));
@@ -16,7 +16,7 @@ $script = basename(array_shift($_SERVER['argv']));
 if (in_array('--help', $_SERVER['argv']) || empty($_SERVER['argv'])) {
   echo <<<EOF
 
-Execute a Drupal page from the shell.
+Execute a Backdrop page from the shell.
 
 Usage:        {$script} [OPTIONS] "<URI>"
 Example:      {$script} "http://mysite.org/node"
@@ -26,8 +26,8 @@ All arguments are long options.
   --help      This page.
 
   --root      Set the working directory for the script to the specified path.
-              To execute Drupal this has to be the root directory of your
-              Drupal installation, f.e. /home/www/foo/drupal (assuming Drupal
+              To execute Backdrop this has to be the root directory of your
+              Backdrop installation, f.e. /home/www/foo/backdrop (assuming Backdrop
               running on Unix). Current directory is not required.
               Use surrounding quotation marks on Windows.
 
@@ -38,17 +38,17 @@ All arguments are long options.
               the path '/foo/bar' in your site 'default'. URI has to be
               enclosed by quotation marks if there are ampersands in it
               (f.e. index.php?q=node&foo=bar). Prefix 'http://' is required,
-              and the domain must exist in Drupal's sites-directory.
+              and the domain must exist in Backdrop's sites-directory.
 
               If the given path and file exists it will be executed directly,
               i.e. if URI is set to http://default/bar/foo.php
               and bar/foo.php exists, this script will be executed without
-              bootstrapping Drupal. To execute Drupal's cron.php, specify
+              bootstrapping Backdrop. To execute Backdrop's cron.php, specify
               http://default/core/cron.php as the URI.
 
 
 To run this script without --root argument invoke it from the root directory
-of your Drupal installation with
+of your Backdrop installation with
 
   ./scripts/{$script}
 \n
@@ -113,7 +113,7 @@ while ($param = array_shift($_SERVER['argv'])) {
           $_REQUEST = $_GET;
         }
 
-        // set file to execute or Drupal path (clean urls enabled)
+        // set file to execute or Backdrop path (clean urls enabled)
         if (isset($path['path']) && file_exists(substr($path['path'], 1))) {
           $_SERVER['PHP_SELF'] = $_SERVER['REQUEST_URI'] = $path['path'];
           $cmd = substr($path['path'], 1);

@@ -6,13 +6,13 @@
  * This behavior is dependent on the tableDrag behavior, since it uses the
  * objects initialized in that behavior to update the row.
  */
-Drupal.behaviors.shortcutDrag = {
+Backdrop.behaviors.shortcutDrag = {
   attach: function (context, settings) {
-    if (Drupal.tableDrag) {
+    if (Backdrop.tableDrag) {
       var table = $('table#shortcuts'),
         visibleLength = 0,
         slots = 0,
-        tableDrag = Drupal.tableDrag.shortcuts;
+        tableDrag = Backdrop.tableDrag.shortcuts;
       $('> tbody > tr, > tr', table)
         .filter(':visible')
           .filter(':odd').filter('.odd')
@@ -103,7 +103,7 @@ Drupal.behaviors.shortcutDrag = {
  * Make it so when you enter text into the "New set" textfield, the
  * corresponding radio button gets selected.
  */
-Drupal.behaviors.newSet = {
+Backdrop.behaviors.newSet = {
   attach: function (context, settings) {
     var selectDefault = function() {
       $(this).closest('form').find('.form-item-set .form-type-radio:last input').attr('checked', 'checked');

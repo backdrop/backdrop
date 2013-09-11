@@ -15,7 +15,7 @@ class FakeRecord { }
  * Because all database tests share the same test data, we can centralize that
  * here.
  */
-class DatabaseTestCase extends DrupalWebTestCase {
+class DatabaseTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   function setUp() {
@@ -26,11 +26,11 @@ class DatabaseTestCase extends DrupalWebTestCase {
     $modules[] = 'database_test';
     parent::setUp($modules);
 
-    $schema['test'] = drupal_get_schema('test');
-    $schema['test_people'] = drupal_get_schema('test_people');
-    $schema['test_one_blob'] = drupal_get_schema('test_one_blob');
-    $schema['test_two_blobs'] = drupal_get_schema('test_two_blobs');
-    $schema['test_task'] = drupal_get_schema('test_task');
+    $schema['test'] = backdrop_get_schema('test');
+    $schema['test_people'] = backdrop_get_schema('test_people');
+    $schema['test_one_blob'] = backdrop_get_schema('test_one_blob');
+    $schema['test_two_blobs'] = backdrop_get_schema('test_two_blobs');
+    $schema['test_task'] = backdrop_get_schema('test_task');
 
     $this->installTables($schema);
 
@@ -61,7 +61,7 @@ class DatabaseTestCase extends DrupalWebTestCase {
    * Set up tables for NULL handling.
    */
   function ensureSampleDataNull() {
-    $schema['test_null'] = drupal_get_schema('test_null');
+    $schema['test_null'] = backdrop_get_schema('test_null');
     $this->installTables($schema);
 
     db_insert('test_null')
@@ -307,7 +307,7 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
   function testQueryFetchDefault() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25));
-    $this->assertTrue($result instanceof DatabaseStatementInterface, t('Result set is a Drupal statement object.'));
+    $this->assertTrue($result instanceof DatabaseStatementInterface, t('Result set is a Backdrop statement object.'));
     foreach ($result as $record) {
       $records[] = $record;
       $this->assertTrue(is_object($record), t('Record is an object.'));
@@ -652,7 +652,7 @@ class DatabaseInsertDefaultsTestCase extends DatabaseTestCase {
     $query = db_insert('test')->useDefaults(array('job'));
     $id = $query->execute();
 
-    $schema = drupal_get_schema('test');
+    $schema = backdrop_get_schema('test');
 
     $job = db_query('SELECT job FROM {test} WHERE id = :id', array(':id' => $id))->fetchField();
     $this->assertEqual($job, $schema['fields']['job']['default'], t('Default field value is set.'));
@@ -685,7 +685,7 @@ class DatabaseInsertDefaultsTestCase extends DatabaseTestCase {
       ->useDefaults(array('job'));
     $id = $query->execute();
 
-    $schema = drupal_get_schema('test');
+    $schema = backdrop_get_schema('test');
 
     $job = db_query('SELECT job FROM {test} WHERE id = :id', array(':id' => $id))->fetchField();
     $this->assertEqual($job, $schema['fields']['job']['default'], t('Default field value is set.'));
@@ -1551,7 +1551,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test that random ordering of queries works.
    *
-   * We take the approach of testing the Drupal layer only, rather than trying
+   * We take the approach of testing the Backdrop layer only, rather than trying
    * to test that the database's random number generator actually produces
    * random queries (which is very difficult to do without an unacceptable risk
    * of the test failing by accident).
@@ -1652,7 +1652,7 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
       $select->addField('t', 'name');
       if ($i) {
         // Use a different number of conditions here to confuse the subquery
-        // placeholder counter, testing http://drupal.org/node/1112854.
+        // placeholder counter, testing http://backdrop.org/node/1112854.
         $select->condition('name', 'John');
       }
       $select->condition('task', 'code');
@@ -2226,8 +2226,8 @@ class DatabaseSelectComplexTestCase2 extends DatabaseTestCase {
    * Test that we can join on a query.
    */
   function testJoinSubquery() {
-    $acct = $this->drupalCreateUser();
-    $this->drupalLogin($acct);
+    $acct = $this->backdropCreateUser();
+    $this->backdropLogin($acct);
 
     $query = db_select('test_task', 'tt', array('target' => 'slave'));
     $query->addExpression('tt.pid + 1', 'abc');
@@ -2292,8 +2292,8 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
     }
 
     for ($page = 0; $page <= $num_pages; ++$page) {
-      $this->drupalGet('database_test/pager_query_even/' . $limit, array('query' => array('page' => $page)));
-      $data = json_decode($this->drupalGetContent());
+      $this->backdropGet('database_test/pager_query_even/' . $limit, array('query' => array('page' => $page)));
+      $data = json_decode($this->backdropGetContent());
 
       if ($page == $num_pages) {
         $correct_number = $count - ($limit * $page);
@@ -2326,8 +2326,8 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
     }
 
     for ($page = 0; $page <= $num_pages; ++$page) {
-      $this->drupalGet('database_test/pager_query_odd/' . $limit, array('query' => array('page' => $page)));
-      $data = json_decode($this->drupalGetContent());
+      $this->backdropGet('database_test/pager_query_odd/' . $limit, array('query' => array('page' => $page)));
+      $data = json_decode($this->backdropGetContent());
 
       if ($page == $num_pages) {
         $correct_number = $count - ($limit * $page);
@@ -2444,8 +2444,8 @@ class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
     );
 
     foreach ($sorts as $sort) {
-      $this->drupalGet('database_test/tablesort/', array('query' => array('order' => $sort['field'], 'sort' => $sort['sort'])));
-      $data = json_decode($this->drupalGetContent());
+      $this->backdropGet('database_test/tablesort/', array('query' => array('order' => $sort['field'], 'sort' => $sort['sort'])));
+      $data = json_decode($this->backdropGetContent());
 
       $first = array_shift($data->tasks);
       $last = array_pop($data->tasks);
@@ -2470,8 +2470,8 @@ class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
     );
 
     foreach ($sorts as $sort) {
-      $this->drupalGet('database_test/tablesort_first/', array('query' => array('order' => $sort['field'], 'sort' => $sort['sort'])));
-      $data = json_decode($this->drupalGetContent());
+      $this->backdropGet('database_test/tablesort_first/', array('query' => array('order' => $sort['field'], 'sort' => $sort['sort'])));
+      $data = json_decode($this->backdropGetContent());
 
       $first = array_shift($data->tasks);
       $last = array_pop($data->tasks);
@@ -2485,7 +2485,7 @@ class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
    * Confirm that if a sort is not set in a tableselect form there is no error thrown when using the default.
    */
   function testTableSortDefaultSort() {
-    $this->drupalGet('database_test/tablesort_default_sort');
+    $this->backdropGet('database_test/tablesort_default_sort');
     // Any PHP errors or notices thrown would trigger a simpletest exception, so
     // no additional assertions are needed.
   }
@@ -2950,7 +2950,7 @@ class DatabaseSerializeQueryTestCase extends DatabaseTestCase {
 /**
  * Range query tests.
  */
-class DatabaseRangeQueryTestCase extends DrupalWebTestCase {
+class DatabaseRangeQueryTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Range query test',
@@ -2981,7 +2981,7 @@ class DatabaseRangeQueryTestCase extends DrupalWebTestCase {
 /**
  * Temporary query tests.
  */
-class DatabaseTemporaryQueryTestCase extends DrupalWebTestCase {
+class DatabaseTemporaryQueryTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Temporary query test',
@@ -3005,8 +3005,8 @@ class DatabaseTemporaryQueryTestCase extends DrupalWebTestCase {
    * Confirm that temporary tables work and are limited to one request.
    */
   function testTemporaryQuery() {
-    $this->drupalGet('database_test/db_query_temporary');
-    $data = json_decode($this->drupalGetContent());
+    $this->backdropGet('database_test/db_query_temporary');
+    $data = json_decode($this->backdropGetContent());
     if ($data) {
       $this->assertEqual($this->countTableRows("system"), $data->row_count, t('The temporary table contains the correct amount of rows.'));
       $this->assertFalse(db_table_exists($data->table_name), t('The temporary table is, indeed, temporary.'));
@@ -3027,7 +3027,7 @@ class DatabaseTemporaryQueryTestCase extends DrupalWebTestCase {
 /**
  * Test how the current database driver interprets the SQL syntax.
  *
- * In order to ensure consistent SQL handling throughout Drupal
+ * In order to ensure consistent SQL handling throughout Backdrop
  * across multiple kinds of database systems, we test that the
  * database system interprets SQL syntax in an expected fashion.
  */
@@ -3195,13 +3195,13 @@ class DatabaseInvalidDataTestCase extends DatabaseTestCase {
 }
 
 /**
- * Drupal-specific SQL syntax tests.
+ * Backdrop-specific SQL syntax tests.
  */
 class DatabaseQueryTestCase extends DatabaseTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Custom query syntax tests',
-      'description' => 'Test Drupal\'s extended prepared statement syntax..',
+      'description' => 'Test Backdrop\'s extended prepared statement syntax..',
       'group' => 'Database',
     );
   }
@@ -3706,7 +3706,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
 /**
  * Check the sequences API.
  */
-class DatabaseNextIdCase extends DrupalWebTestCase {
+class DatabaseNextIdCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Sequences API'),
@@ -3733,7 +3733,7 @@ class DatabaseNextIdCase extends DrupalWebTestCase {
 /**
  * Tests the empty pseudo-statement class.
  */
-class DatabaseEmptyStatementTestCase extends DrupalWebTestCase {
+class DatabaseEmptyStatementTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Empty statement'),

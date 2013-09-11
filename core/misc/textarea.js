@@ -1,6 +1,6 @@
 (function ($) {
 
-Drupal.behaviors.textarea = {
+Backdrop.behaviors.textarea = {
   attach: function (context, settings) {
     $('.form-textarea-wrapper.resizable', context).once('textarea', function () {
       var staticOffset = null;

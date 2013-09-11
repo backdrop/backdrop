@@ -12,7 +12,7 @@ function book_help($path, $arg) {
   switch ($path) {
     case 'admin/help#book':
       $output = '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Book module is used for creating structured, multi-page content, such as site resource guides, manuals, and wikis. It allows you to create content that has chapters, sections, subsections, or any similarly-tiered structure. For more information, see the online handbook entry for <a href="@book">Book module</a>.', array('@book' => 'http://drupal.org/handbook/modules/book/')) . '</p>';
+      $output .= '<p>' . t('The Book module is used for creating structured, multi-page content, such as site resource guides, manuals, and wikis. It allows you to create content that has chapters, sections, subsections, or any similarly-tiered structure. For more information, see the online handbook entry for <a href="@book">Book module</a>.', array('@book' => 'http://backdrop.org/handbook/modules/book/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Adding and managing book content') . '</dt>';
@@ -142,7 +142,7 @@ function book_menu() {
   );
   $items['admin/content/book/settings'] = array(
     'title' => 'Settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('book_admin_settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_TASK,
@@ -151,7 +151,7 @@ function book_menu() {
   );
   $items['admin/content/book/%node'] = array(
     'title' => 'Re-order book pages and change titles',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('book_admin_edit', 3),
     'access callback' => '_book_outline_access',
     'access arguments' => array(3),
@@ -184,7 +184,7 @@ function book_menu() {
   );
   $items['node/%node/outline/remove'] = array(
     'title' => 'Remove from outline',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('book_remove_form', 1),
     'access callback' => '_book_outline_remove_access',
     'access arguments' => array(1),
@@ -382,7 +382,7 @@ function theme_book_title_link($variables) {
  *   An array of all books.
  */
 function book_get_books() {
-  $all_books = &drupal_static(__FUNCTION__);
+  $all_books = &backdrop_static(__FUNCTION__);
 
   if (!isset($all_books)) {
     $all_books = array();
@@ -441,7 +441,7 @@ function book_form_node_form_alter(&$form, &$form_state, $form_id) {
       '#submit' => array('book_pick_book_nojs_submit'),
       '#weight' => 20,
       '#attached' => array(
-        'css' => array(drupal_get_path('module', 'book') . '/book.admin.css'),
+        'css' => array(backdrop_get_path('module', 'book') . '/book.admin.css'),
       ),
     );
   }
@@ -541,7 +541,7 @@ function _book_add_form_elements(&$form, &$form_state, $node) {
       'class' => array('book-form'),
     ),
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'book') . '/book.js'),
+      'js' => array(backdrop_get_path('module', 'book') . '/book.js'),
     ),
     '#tree' => TRUE,
     '#attributes' => array('class' => array('book-outline-form')),
@@ -671,7 +671,7 @@ function _book_update_outline($node) {
         ))
         ->execute();
       // Reset the cache of stored books.
-      drupal_static_reset('book_get_books');
+      backdrop_static_reset('book_get_books');
     }
     else {
       if ($node->book['bid'] != db_query("SELECT bid FROM {book} WHERE nid = :nid", array(
@@ -680,7 +680,7 @@ function _book_update_outline($node) {
         // Update the bid for this page and all children.
         book_update_bid($node->book);
         // Reset the cache of stored books.
-        drupal_static_reset('book_get_books');
+        backdrop_static_reset('book_get_books');
       }
     }
 
@@ -727,7 +727,7 @@ function book_update_bid($book_link) {
  *   be fetched as deep as one level deeper than $book_link.
  */
 function book_get_flat_menu($book_link) {
-  $flat = &drupal_static(__FUNCTION__, array());
+  $flat = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($flat[$book_link['mlid']])) {
     // Call menu_tree_all_data() to take advantage of the menu system's caching.
@@ -855,7 +855,7 @@ function book_children($book_link) {
 
   if ($children) {
     $elements = menu_tree_output($children);
-    return drupal_render($elements);
+    return backdrop_render($elements);
   }
   return '';
 }
@@ -986,7 +986,7 @@ function book_node_predelete($node) {
     db_delete('book')
       ->condition('mlid', $node->book['mlid'])
       ->execute();
-    drupal_static_reset('book_get_books');
+    backdrop_static_reset('book_get_books');
   }
 }
 
@@ -1119,21 +1119,21 @@ function template_preprocess_book_navigation(&$variables) {
 
     if ($prev = book_prev($book_link)) {
       $prev_href = url($prev['href']);
-      drupal_add_html_head_link(array('rel' => 'prev', 'href' => $prev_href));
+      backdrop_add_html_head_link(array('rel' => 'prev', 'href' => $prev_href));
       $variables['prev_url'] = $prev_href;
       $variables['prev_title'] = check_plain($prev['title']);
     }
 
     if ($book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
       $parent_href = url($parent['href']);
-      drupal_add_html_head_link(array('rel' => 'up', 'href' => $parent_href));
+      backdrop_add_html_head_link(array('rel' => 'up', 'href' => $parent_href));
       $variables['parent_url'] = $parent_href;
       $variables['parent_title'] = check_plain($parent['title']);
     }
 
     if ($next = book_next($book_link)) {
       $next_href = url($next['href']);
-      drupal_add_html_head_link(array('rel' => 'next', 'href' => $next_href));
+      backdrop_add_html_head_link(array('rel' => 'next', 'href' => $next_href));
       $variables['next_url'] = $next_href;
       $variables['next_title'] = check_plain($next['title']);
     }
@@ -1232,7 +1232,7 @@ function template_preprocess_book_export_html(&$variables) {
   $variables['base_url'] = $base_url;
   $variables['language'] = $language_interface;
   $variables['language_rtl'] = ($language_interface->direction == LANGUAGE_RTL);
-  $variables['head'] = drupal_get_html_head();
+  $variables['head'] = backdrop_get_html_head();
 
   // HTML element attributes.
   $variables['html_attributes_array']['lang'] = $language_interface->langcode;
@@ -1246,7 +1246,7 @@ function template_preprocess_book_export_html(&$variables) {
  */
 function template_process_book_export_html(&$variables) {
   // Flatten out html_attributes
-  $variables['html_attributes'] = drupal_attributes($variables['html_attributes_array']);
+  $variables['html_attributes'] = backdrop_attributes($variables['html_attributes_array']);
 }
 
 /**
@@ -1305,7 +1305,7 @@ function book_node_export($node, $children = '') {
   $build = node_view($node, 'print');
   unset($build['#theme']);
   // @todo Rendering should happen in the template using render().
-  $node->rendered = drupal_render($build);
+  $node->rendered = backdrop_render($build);
 
   return theme('book_node_export_html', array('node' => $node, 'children' => $children));
 }
@@ -1396,7 +1396,7 @@ function book_link_load($mlid) {
  *   An subtree of menu links in an array, in the order they should be rendered.
  */
 function book_menu_subtree_data($link) {
-  $tree = &drupal_static(__FUNCTION__, array());
+  $tree = &backdrop_static(__FUNCTION__, array());
 
   // Generate a cache ID (cid) specific for this $menu_name and $link.
   $cid = 'links:' . $link['menu_name'] . ':subtree-cid:' . $link['mlid'];

@@ -8,7 +8,7 @@
 /**
  * Tests installer language detection.
  */
-class InstallerLanguageTestCase extends DrupalWebTestCase {
+class InstallerLanguageTestCase extends BackdropWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -20,7 +20,7 @@ class InstallerLanguageTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp();
-    variable_set('locale_translate_file_directory', drupal_get_path('module', 'simpletest') . '/files/translations');
+    variable_set('locale_translate_file_directory', backdrop_get_path('module', 'simpletest') . '/files/translations');
   }
 
   /**

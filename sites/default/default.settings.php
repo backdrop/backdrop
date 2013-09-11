@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Drupal site-specific configuration file.
+ * Backdrop site-specific configuration file.
  *
  * IMPORTANT NOTE:
- * This file may have been set to read-only by the Drupal installation
+ * This file may have been set to read-only by the Backdrop installation
  * program. If you make changes to this file, be sure to protect it again
  * after making your modifications. Failure to remove write permissions
  * to this file is a security risk.
@@ -19,34 +19,34 @@
  * then the default configuration file at 'sites/default' will be used.
  *
  * For example, for a fictitious site installed at
- * http://www.drupal.org/mysite/test/, the 'settings.php'
+ * http://www.backdrop.org/mysite/test/, the 'settings.php'
  * is searched in the following directories:
  *
- * - sites/www.drupal.org.mysite.test
- * - sites/drupal.org.mysite.test
+ * - sites/www.backdrop.org.mysite.test
+ * - sites/backdrop.org.mysite.test
  * - sites/org.mysite.test
  *
- * - sites/www.drupal.org.mysite
- * - sites/drupal.org.mysite
+ * - sites/www.backdrop.org.mysite
+ * - sites/backdrop.org.mysite
  * - sites/org.mysite
  *
- * - sites/www.drupal.org
- * - sites/drupal.org
+ * - sites/www.backdrop.org
+ * - sites/backdrop.org
  * - sites/org
  *
  * - sites/default
  *
  * If you are installing on a non-standard port number, prefix the
  * hostname with that number. For example,
- * http://www.drupal.org:8080/mysite/test/ could be loaded from
- * sites/8080.www.drupal.org.mysite.test/.
+ * http://www.backdrop.org:8080/mysite/test/ could be loaded from
+ * sites/8080.www.backdrop.org.mysite.test/.
  */
 
 /**
  * Database settings:
  *
  * The $databases array specifies the database connection or
- * connections that Drupal may use.  Drupal is able to connect
+ * connections that Backdrop may use.  Backdrop is able to connect
  * to multiple databases, including multiple types of databases,
  * during the same request.
  *
@@ -65,7 +65,7 @@
  * );
  * @endcode
  *
- * The "driver" property indicates what Drupal database driver the
+ * The "driver" property indicates what Backdrop database driver the
  * connection should use.  This is usually the same as the name of the
  * database type, such as mysql or sqlite, but not always.  The other
  * properties will vary depending on the driver.  For SQLite, you must
@@ -82,9 +82,9 @@
  * key to FALSE.
  *
  * For each database, you may optionally specify multiple "target" databases.
- * A target database allows Drupal to try to send certain queries to a
+ * A target database allows Backdrop to try to send certain queries to a
  * different database if it can but fall back to the default connection if not.
- * That is useful for master/slave replication, as Drupal may try to connect
+ * That is useful for master/slave replication, as Backdrop may try to connect
  * to a slave server when appropriate and if one is not available will simply
  * fall back to the single master server.
  *
@@ -99,7 +99,7 @@
  * In the above example, $info_array is an array of settings described above.
  * The first line sets a "default" database that has one master database
  * (the second level default).  The second and third lines create an array
- * of potential slave databases.  Drupal will select one at random for a given
+ * of potential slave databases.  Backdrop will select one at random for a given
  * request as needed.  The fourth line creates a new database with a name of
  * "extra".
  *
@@ -140,7 +140,7 @@
  *   ),
  * @endcode
  * You can also use a reference to a schema/database as a prefix. This maybe
- * useful if your Drupal installation exists in a schema that is not the default
+ * useful if your Backdrop installation exists in a schema that is not the default
  * or you want to access several databases from the same code base at the same
  * time.
  * Example:
@@ -207,7 +207,7 @@ $databases = array();
 /**
  * Access control for update.php script.
  *
- * If you are updating your Drupal installation using the update.php script but
+ * If you are updating your Backdrop installation using the update.php script but
  * are not logged in using either an account with the "Administer software
  * updates" permission or the site maintenance account (the account that was
  * created during installation), you will need to modify the access check
@@ -228,21 +228,21 @@ $update_free_access = FALSE;
  *
  * For enhanced security, you may set this variable to a value using the
  * contents of a file outside your docroot that is never saved together
- * with any backups of your Drupal files and database.
+ * with any backups of your Backdrop files and database.
  *
  * Example:
- *   $drupal_hash_salt = file_get_contents('/home/example/salt.txt');
+ *   $backdrop_hash_salt = file_get_contents('/home/example/salt.txt');
  *
  */
-$drupal_hash_salt = '';
+$backdrop_hash_salt = '';
 
 /**
  * Base URL (optional).
  *
- * If Drupal is generating incorrect URLs on your site, which could
+ * If Backdrop is generating incorrect URLs on your site, which could
  * be in HTML headers (links to CSS and JS files) or visible links on pages
  * (such as in menus), uncomment the Base URL statement below (remove the
- * leading hash sign) and fill in the absolute URL to your Drupal installation.
+ * leading hash sign) and fill in the absolute URL to your Backdrop installation.
  *
  * You might also want to force users to use a given domain.
  * See the .htaccess file for more information.
@@ -250,10 +250,10 @@ $drupal_hash_salt = '';
  * Examples:
  *   $base_url = 'http://www.example.com';
  *   $base_url = 'http://www.example.com:8888';
- *   $base_url = 'http://www.example.com/drupal';
- *   $base_url = 'https://www.example.com:8888/drupal';
+ *   $base_url = 'http://www.example.com/backdrop';
+ *   $base_url = 'https://www.example.com:8888/backdrop';
  *
- * It is not allowed to have a trailing slash; Drupal will add it
+ * It is not allowed to have a trailing slash; Backdrop will add it
  * for you.
  */
 # $base_url = 'http://www.example.com';  // NO trailing slash!
@@ -264,14 +264,14 @@ $drupal_hash_salt = '';
  * To see what PHP settings are possible, including whether they can be set at
  * runtime (by using ini_set()), read the PHP documentation:
  * http://www.php.net/manual/en/ini.list.php
- * See drupal_initialize_variables() in includes/bootstrap.inc for required
+ * See backdrop_initialize_variables() in includes/bootstrap.inc for required
  * runtime settings and the .htaccess file for non-runtime settings. Settings
  * defined there should not be duplicated here so as to avoid conflict issues.
  */
 
 /**
  * Some distributions of Linux (most notably Debian) ship their PHP
- * installations with garbage collection (gc) disabled. Since Drupal depends on
+ * installations with garbage collection (gc) disabled. Since Backdrop depends on
  * PHP's garbage collection for clearing sessions, ensure that garbage
  * collection occurs by using the most common settings.
  */
@@ -295,7 +295,7 @@ ini_set('session.cookie_lifetime', 2000000);
 
 /**
  * If you encounter a situation where users post a large amount of text, and
- * the result is stripped out upon viewing but can still be edited, Drupal's
+ * the result is stripped out upon viewing but can still be edited, Backdrop's
  * output filter may not have sufficient memory to process it.  If you
  * experience this issue, you may wish to uncomment the following two lines
  * and increase the limits of these variables.  For more information, see
@@ -305,9 +305,9 @@ ini_set('session.cookie_lifetime', 2000000);
 # ini_set('pcre.recursion_limit', 200000);
 
 /**
- * Drupal automatically generates a unique session cookie name for each site
+ * Backdrop automatically generates a unique session cookie name for each site
  * based on its full domain name. If you have multiple domains pointing at the
- * same Drupal site, you can either redirect them all to a single domain (see
+ * same Backdrop site, you can either redirect them all to a single domain (see
  * comment in .htaccess), or uncomment the line below and specify their shared
  * base domain. Doing so assures that users remain logged in as they cross
  * between your various domains. Make sure to always start the $cookie_domain
@@ -323,7 +323,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * useful in a configuration file for a vhost or directory, rather than
  * the default settings.php. Any configuration setting from the 'variable'
  * table can be given a new value. Note that any values you provide in
- * these variable overrides will not be modifiable from the Drupal
+ * these variable overrides will not be modifiable from the Backdrop
  * administration interface.
  *
  * The following overrides are examples:
@@ -332,7 +332,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * - anonymous: Defines the human-readable name of anonymous users.
  * Remove the leading hash signs to enable.
  */
-# $conf['site_name'] = 'My Drupal site';
+# $conf['site_name'] = 'My Backdrop site';
 # $conf['theme_default'] = 'stark';
 # $conf['anonymous'] = 'Visitor';
 
@@ -351,22 +351,22 @@ ini_set('session.cookie_lifetime', 2000000);
  *
  * Reverse proxy servers are often used to enhance the performance
  * of heavily visited sites and may also provide other site caching,
- * security, or encryption benefits. In an environment where Drupal
+ * security, or encryption benefits. In an environment where Backdrop
  * is behind a reverse proxy, the real IP address of the client should
  * be determined such that the correct client IP address is available
- * to Drupal's logging, statistics, and access management systems. In
+ * to Backdrop's logging, statistics, and access management systems. In
  * the most simple scenario, the proxy server will add an
  * X-Forwarded-For header to the request that contains the client IP
  * address. However, HTTP headers are vulnerable to spoofing, where a
  * malicious client could bypass restrictions by setting the
- * X-Forwarded-For header directly. Therefore, Drupal's proxy
+ * X-Forwarded-For header directly. Therefore, Backdrop's proxy
  * configuration requires the IP addresses of all remote proxies to be
  * specified in $conf['reverse_proxy_addresses'] to work correctly.
  *
- * Enable this setting to get Drupal to determine the client IP from
+ * Enable this setting to get Backdrop to determine the client IP from
  * the X-Forwarded-For header (or $conf['reverse_proxy_header'] if set).
  * If you are unsure about this setting, do not have a reverse proxy,
- * or Drupal operates in a shared hosting environment, this setting
+ * or Backdrop operates in a shared hosting environment, this setting
  * should remain commented out.
  *
  * In order for this setting to be used you must specify every possible
@@ -394,7 +394,7 @@ ini_set('session.cookie_lifetime', 2000000);
 /**
  * Page caching:
  *
- * By default, Drupal sends a "Vary: Cookie" HTTP header for anonymous page
+ * By default, Backdrop sends a "Vary: Cookie" HTTP header for anonymous page
  * views. This tells a HTTP proxy that it may return a page from its local
  * cache without contacting the web server, if the user sends the same Cookie
  * header as the user who originally requested the cached page. Without "Vary:
@@ -412,7 +412,7 @@ ini_set('session.cookie_lifetime', 2000000);
 /**
  * CSS/JS aggregated file gzip compression:
  *
- * By default, when CSS or JS aggregation and clean URLs are enabled Drupal will
+ * By default, when CSS or JS aggregation and clean URLs are enabled Backdrop will
  * store a gzip compressed (.gz) copy of the aggregated files. If this file is
  * available then rewrite rules in the default .htaccess file will serve these
  * files to browsers that accept gzip encoded content. This allows pages to load
@@ -443,7 +443,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * IP blocking:
  *
  * To bypass database queries for denied IP addresses, use this setting.
- * Drupal queries the {blocked_ips} table by default on every page request
+ * Backdrop queries the {blocked_ips} table by default on every page request
  * for both authenticated and anonymous users. This allows the system to
  * block IP addresses from within the administrative interface and before any
  * modules are loaded. However on high traffic websites you may want to avoid
@@ -464,7 +464,7 @@ ini_set('session.cookie_lifetime', 2000000);
 /**
  * Fast 404 pages:
  *
- * Drupal can generate fully themed 404 pages. However, some of these responses
+ * Backdrop can generate fully themed 404 pages. However, some of these responses
  * are for images or other resource files that are not displayed to the user.
  * This can waste bandwidth, and also generate server load.
  *
@@ -487,24 +487,24 @@ $conf['404_fast_html'] = '<html xmlns="http://www.w3.org/1999/xhtml"><head><titl
 /**
  * By default, fast 404s are returned as part of the normal page request
  * process, which will properly serve valid pages that happen to match and will
- * also log actual 404s to the Drupal log. Alternatively you can choose to
+ * also log actual 404s to the Backdrop log. Alternatively you can choose to
  * return a 404 now by uncommenting the following line. This will reduce server
  * load, but will cause even valid pages that happen to match the pattern to
- * return 404s, rather than the actual page. It will also prevent the Drupal
+ * return 404s, rather than the actual page. It will also prevent the Backdrop
  * system log entry. Ensure you understand the effects of this before enabling.
  *
  * To enable this functionality, remove the leading hash sign below.
  */
-# drupal_fast_404();
+# backdrop_fast_404();
 
 /**
  * Authorized file system operations:
  *
- * The Update Manager module included with Drupal provides a mechanism for
+ * The Update Manager module included with Backdrop provides a mechanism for
  * site administrators to securely install missing updates for the site
  * directly through the web user interface by providing either SSH or FTP
  * credentials. This allows the site to update the new files as the user who
- * owns all the Drupal files, instead of as the user the webserver is running
+ * owns all the Backdrop files, instead of as the user the webserver is running
  * as. However, some sites might wish to disable this functionality, and only
  * update the code directly via SSH or FTP themselves. This setting completely
  * disables all functionality related to these authorized file operations.

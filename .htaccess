@@ -20,7 +20,7 @@ ErrorDocument 404 /index.php
 DirectoryIndex index.php index.html index.htm
 
 # Override PHP settings that cannot be changed at runtime. See
-# sites/default/default.settings.php and drupal_initialize_variables() in
+# sites/default/default.settings.php and backdrop_initialize_variables() in
 # includes/bootstrap.inc for settings that can be changed at runtime.
 
 # PHP 5, Apache 1 and 2.
@@ -89,9 +89,9 @@ DirectoryIndex index.php index.html index.htm
 
   # Modify the RewriteBase if you are using Drupal in a subdirectory or in a
   # VirtualDocumentRoot and the rewrite rules are not working properly.
-  # For example if your site is at http://example.com/drupal uncomment and
+  # For example if your site is at http://example.com/backdrop uncomment and
   # modify the following line:
-  # RewriteBase /drupal
+  # RewriteBase /backdrop
   #
   # If your site is running in a VirtualDocumentRoot at http://example.com/,
   # uncomment the following line:
@@ -105,7 +105,7 @@ DirectoryIndex index.php index.html index.htm
   RewriteRule ^ %1/core/%2 [L,QSA,R=301]
 
   # Pass all requests not referring directly to files in the filesystem to
-  # index.php. Clean URLs are handled in drupal_environment_initialize().
+  # index.php. Clean URLs are handled in backdrop_environment_initialize().
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico

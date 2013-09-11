@@ -78,7 +78,7 @@ function statistics_top_pages() {
     $rows[] = array($page->hits, _statistics_format_item($page->title, $page->path), t('%time ms', array('%time' => round($page->average_time))), format_interval(round($page->total_time / 1000)));
   }
 
-  drupal_set_title(t('Top pages in the past %interval', array('%interval' => format_interval(variable_get('statistics_flush_accesslog_timer', 259200)))), PASS_THROUGH);
+  backdrop_set_title(t('Top pages in the past %interval', array('%interval' => format_interval(variable_get('statistics_flush_accesslog_timer', 259200)))), PASS_THROUGH);
   $build['statistics_top_pages_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
@@ -125,13 +125,13 @@ function statistics_top_visitors() {
 
   $result = $query->execute();
   $rows = array();
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
   foreach ($result as $account) {
     $ban_link = $account->iid ? l(t('unblock IP address'), "admin/config/people/ip-blocking/delete/$account->iid", array('query' => $destination)) : l(t('block IP address'), "admin/config/people/ip-blocking/$account->hostname", array('query' => $destination));
     $rows[] = array($account->hits, ($account->uid ? theme('username', array('account' => $account)) : $account->hostname), format_interval(round($account->total / 1000)), (user_access('block IP addresses') && !$account->uid) ? $ban_link : '');
   }
 
-  drupal_set_title(t('Top visitors in the past %interval', array('%interval' => format_interval(variable_get('statistics_flush_accesslog_timer', 259200)))), PASS_THROUGH);
+  backdrop_set_title(t('Top visitors in the past %interval', array('%interval' => format_interval(variable_get('statistics_flush_accesslog_timer', 259200)))), PASS_THROUGH);
   $build['statistics_top_visitors_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
@@ -146,7 +146,7 @@ function statistics_top_visitors() {
  * Menu callback; presents the "referrer" page.
  */
 function statistics_top_referrers() {
-  drupal_set_title(t('Top referrers in the past %interval', array('%interval' => format_interval(variable_get('statistics_flush_accesslog_timer', 259200)))), PASS_THROUGH);
+  backdrop_set_title(t('Top referrers in the past %interval', array('%interval' => format_interval(variable_get('statistics_flush_accesslog_timer', 259200)))), PASS_THROUGH);
 
   $header = array(
     array('data' => t('Hits'), 'field' => 'hits', 'sort' => 'desc'),
@@ -199,7 +199,7 @@ function statistics_access_log($aid) {
       l(url($access->path, array('absolute' => TRUE)), $access->path)
     );
     // It is safe to avoid filtering $access->title through check_plain because
-    // it comes from drupal_get_title().
+    // it comes from backdrop_get_title().
     $rows[] = array(
       array('data' => t('Title'), 'header' => TRUE),
       $access->title
@@ -228,7 +228,7 @@ function statistics_access_log($aid) {
     return $build;
   }
   else {
-    drupal_not_found();
+    backdrop_not_found();
   }
 }
 
@@ -254,7 +254,7 @@ function statistics_settings_form() {
     '#type' => 'select',
     '#title' => t('Discard access logs older than'),
     '#default_value' => variable_get('statistics_flush_accesslog_timer', 259200),
-    '#options' => array(0 => t('Never')) + drupal_map_assoc(array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200, 4838400, 9676800), 'format_interval'),
+    '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200, 4838400, 9676800), 'format_interval'),
     '#description' => t('Older access log entries (including referrer statistics) will be automatically discarded. (Requires a correctly configured <a href="@cron">cron maintenance task</a>.)', array('@cron' => url('admin/reports/status'))),
   );
 

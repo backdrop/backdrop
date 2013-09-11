@@ -1,6 +1,6 @@
 <?php
 
-class RegistryParseFileTestCase extends DrupalWebTestCase {
+class RegistryParseFileTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Registry parse file test',
@@ -45,7 +45,7 @@ CONTENTS;
 
 }
 
-class RegistryParseFilesTestCase extends DrupalWebTestCase {
+class RegistryParseFilesTestCase extends BackdropWebTestCase {
   protected $fileTypes = array('new', 'existing_changed');
 
   public static function getInfo() {

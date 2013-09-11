@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Handles integration of PHP templates with the Drupal theme system.
+ * Handles integration of PHP templates with the Backdrop theme system.
  */
 
 /**
@@ -19,7 +19,7 @@ function phptemplate_init($template) {
  * Implements hook_theme().
  */
 function phptemplate_theme($existing, $type, $theme, $path) {
-  $templates = drupal_find_theme_functions($existing, array($theme));
-  $templates += drupal_find_theme_templates($existing, '.tpl.php', $path);
+  $templates = backdrop_find_theme_functions($existing, array($theme));
+  $templates += backdrop_find_theme_templates($existing, '.tpl.php', $path);
   return $templates;
 }

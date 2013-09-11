@@ -86,7 +86,7 @@ function hook_comment_view($comment, $view_mode, $langcode) {
  * If the module wishes to act on the rendered HTML of the comment rather than
  * the structured content array, it may use this hook to add a #post_render
  * callback. Alternatively, it could also implement hook_preprocess_comment().
- * See drupal_render() and theme() documentation respectively for details.
+ * See backdrop_render() and theme() documentation respectively for details.
  *
  * @param $build
  *   A renderable array representing the comment.
@@ -112,7 +112,7 @@ function hook_comment_view_alter(&$build) {
  *   The comment the action is being performed on.
  */
 function hook_comment_publish($comment) {
-  drupal_set_message(t('Comment: @subject has been published', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @subject has been published', array('@subject' => $comment->subject)));
 }
 
 /**
@@ -122,7 +122,7 @@ function hook_comment_publish($comment) {
  *   The comment the action is being performed on.
  */
 function hook_comment_unpublish($comment) {
-  drupal_set_message(t('Comment: @subject has been unpublished', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @subject has been unpublished', array('@subject' => $comment->subject)));
 }
 
 /**
@@ -161,7 +161,7 @@ function hook_comment_predelete($comment) {
  * @see entity_delete_multiple()
  */
 function hook_comment_delete($comment) {
-  drupal_set_message(t('Comment: @subject has been deleted', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @subject has been deleted', array('@subject' => $comment->subject)));
 }
 
 /**

@@ -11,7 +11,7 @@ const SEARCH_TYPE = '_test_';
 const SEARCH_TYPE_2 = '_test2_';
 const SEARCH_TYPE_JPN = '_test3_';
 
-class SearchMatchTestCase extends DrupalWebTestCase {
+class SearchMatchTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Search engine queries',
@@ -243,7 +243,7 @@ class SearchMatchTestCase extends DrupalWebTestCase {
 /**
  * Tests the bike shed text on no results page, and text on the search page.
  */
-class SearchPageText extends DrupalWebTestCase {
+class SearchPageText extends BackdropWebTestCase {
   protected $searching_user;
 
   public static function getInfo() {
@@ -258,36 +258,36 @@ class SearchPageText extends DrupalWebTestCase {
     parent::setUp('search');
 
     // Create user.
-    $this->searching_user = $this->drupalCreateUser(array('search content', 'access user profiles'));
+    $this->searching_user = $this->backdropCreateUser(array('search content', 'access user profiles'));
   }
 
   /**
    * Tests the failed search text, and various other text on the search page.
    */
   function testSearchText() {
-    $this->drupalLogin($this->searching_user);
-    $this->drupalGet('search/node');
+    $this->backdropLogin($this->searching_user);
+    $this->backdropGet('search/node');
     $this->assertText(t('Enter your keywords'));
     $this->assertText(t('Search'));
-    $title = t('Search') . ' | Drupal';
+    $title = t('Search') . ' | Backdrop';
     $this->assertTitle($title, 'Search page title is correct');
 
     $edit = array();
     $edit['keys'] = 'bike shed ' . $this->randomName();
-    $this->drupalPost('search/node', $edit, t('Search'));
+    $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertText(t('Consider loosening your query with OR. bike OR shed will often show more results than bike shed.'), t('Help text is displayed when search returns no results.'));
     $this->assertText(t('Search'));
     $this->assertTitle($title, 'Search page title is correct');
 
     $edit['keys'] = $this->searching_user->name;
-    $this->drupalPost('search/user', $edit, t('Search'));
+    $this->backdropPost('search/user', $edit, t('Search'));
     $this->assertText(t('Search'));
     $this->assertTitle($title, 'Search page title is correct');
 
     // Test that search keywords containing slashes are correctly loaded
     // from the path and displayed in the search form.
     $arg = $this->randomName() . '/' . $this->randomName();
-    $this->drupalGet('search/node/' . $arg);
+    $this->backdropGet('search/node/' . $arg);
     $input = $this->xpath("//input[@id='edit-keys' and @value='{$arg}']");
     $this->assertFalse(empty($input), 'Search keys with a / are correctly set as the default value in the search box.');
 
@@ -302,12 +302,12 @@ class SearchPageText extends DrupalWebTestCase {
       }
     }
     $edit['keys'] = implode(' ', $keys);
-    $this->drupalPost('search/node', $edit, t('Search'));
+    $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertRaw(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => $limit)));
   }
 }
 
-class SearchAdvancedSearchForm extends DrupalWebTestCase {
+class SearchAdvancedSearchForm extends BackdropWebTestCase {
   protected $node;
 
   public static function getInfo() {
@@ -321,12 +321,12 @@ class SearchAdvancedSearchForm extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('search');
     // Create and login user.
-    $test_user = $this->drupalCreateUser(array('access content', 'search content', 'use advanced search', 'administer nodes'));
-    $this->drupalLogin($test_user);
+    $test_user = $this->backdropCreateUser(array('access content', 'search content', 'use advanced search', 'administer nodes'));
+    $this->backdropLogin($test_user);
 
     // Create initial node.
-    $node = $this->drupalCreateNode();
-    $this->node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
+    $this->node = $this->backdropCreateNode();
 
     // First update the index. This does the initial processing.
     node_update_index();
@@ -349,28 +349,28 @@ class SearchAdvancedSearchForm extends DrupalWebTestCase {
     $this->assertNotEqual($dummy_title, $this->node->title, t("Dummy title doesn't equal node title"));
 
     // Search for the dummy title with a GET query.
-    $this->drupalGet('search/node/' . $dummy_title);
+    $this->backdropGet('search/node/' . $dummy_title);
     $this->assertNoText($this->node->title, t('Basic page node is not found with dummy title.'));
 
     // Search for the title of the node with a GET query.
-    $this->drupalGet('search/node/' . $this->node->title);
+    $this->backdropGet('search/node/' . $this->node->title);
     $this->assertText($this->node->title, t('Basic page node is found with GET query.'));
 
     // Search for the title of the node with a POST query.
     $edit = array('or' => $this->node->title);
-    $this->drupalPost('search/node', $edit, t('Advanced search'));
+    $this->backdropPost('search/node', $edit, t('Advanced search'));
     $this->assertText($this->node->title, t('Basic page node is found with POST query.'));
 
     // Advanced search type option.
-    $this->drupalPost('search/node', array_merge($edit, array('type[page]' => 'page')), t('Advanced search'));
+    $this->backdropPost('search/node', array_merge($edit, array('type[page]' => 'page')), t('Advanced search'));
     $this->assertText($this->node->title, t('Basic page node is found with POST query and type:page.'));
 
-    $this->drupalPost('search/node', array_merge($edit, array('type[article]' => 'article')), t('Advanced search'));
+    $this->backdropPost('search/node', array_merge($edit, array('type[article]' => 'article')), t('Advanced search'));
     $this->assertText('bike shed', t('Article node is not found with POST query and type:article.'));
   }
 }
 
-class SearchRankingTestCase extends DrupalWebTestCase {
+class SearchRankingTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Search engine ranking',
@@ -388,7 +388,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
 
   function testRankings() {
     // Login with sufficient privileges.
-    $this->drupalLogin($this->drupalCreateUser(array('skip comment approval', 'create page content')));
+    $this->backdropLogin($this->backdropCreateUser(array('skip comment approval', 'create page content')));
 
     // Build a list of the rankings to test.
     $node_ranks = array('sticky', 'promote', 'relevance', 'recent', 'comments', 'views');
@@ -397,8 +397,8 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     foreach ($node_ranks as $node_rank) {
       $settings = array(
         'type' => 'page',
-        'title' => 'Drupal rocks',
-        'body' => array(LANGUAGE_NONE => array(array('value' => "Drupal's search rocks"))),
+        'title' => 'Backdrop rocks',
+        'body' => array(LANGUAGE_NONE => array(array('value' => "Backdrop's search rocks"))),
       );
       foreach (array(0, 1) as $num) {
         if ($num == 1) {
@@ -418,7 +418,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
               break;
           }
         }
-        $nodes[$node_rank][$num] = $this->drupalCreateNode($settings);
+        $nodes[$node_rank][$num] = $this->backdropCreateNode($settings);
       }
     }
 
@@ -433,16 +433,16 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     $edit = array();
     $edit['subject'] = 'my comment title';
     $edit['comment_body[' . LANGUAGE_NONE . '][0][value]'] = 'some random comment';
-    $this->drupalGet('comment/reply/' . $nodes['comments'][1]->nid);
-    $this->drupalPost(NULL, $edit, t('Preview'));
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropGet('comment/reply/' . $nodes['comments'][1]->nid);
+    $this->backdropPost(NULL, $edit, t('Preview'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Enable counting of statistics.
     variable_set('statistics_count_content_views', 1);
 
     // Then View one of the nodes a bunch of times.
     for ($i = 0; $i < 5; $i ++) {
-      $this->drupalGet('node/' . $nodes['views'][1]->nid);
+      $this->backdropGet('node/' . $nodes['views'][1]->nid);
     }
 
     // Test each of the possible rankings.
@@ -463,7 +463,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
    */
   function testHTMLRankings() {
     // Login with sufficient privileges.
-    $this->drupalLogin($this->drupalCreateUser(array('create page content')));
+    $this->backdropLogin($this->backdropCreateUser(array('create page content')));
 
     // Test HTML tags with different weights.
     $sorted_tags = array('h1', 'h2', 'h3', 'h4', 'a', 'h5', 'h6', 'notag');
@@ -478,16 +478,16 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     foreach ($shuffled_tags as $tag) {
       switch ($tag) {
         case 'a':
-          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => l('Drupal Rocks', 'node'), 'format' => 'full_html')));
+          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => l('Backdrop Rocks', 'node'), 'format' => 'full_html')));
           break;
         case 'notag':
-          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => 'Drupal Rocks')));
+          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => 'Backdrop Rocks')));
           break;
         default:
-          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Drupal Rocks</$tag>", 'format' => 'full_html')));
+          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Backdrop Rocks</$tag>", 'format' => 'full_html')));
           break;
       }
-      $nodes[$tag] = $this->drupalCreateNode($settings);
+      $nodes[$tag] = $this->backdropCreateNode($settings);
     }
 
     // Update the search index.
@@ -517,8 +517,8 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     // Test tags with the same weight against the sorted tags.
     $unsorted_tags = array('u', 'b', 'i', 'strong', 'em');
     foreach ($unsorted_tags as $tag) {
-      $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Drupal Rocks</$tag>", 'format' => 'full_html')));
-      $node = $this->drupalCreateNode($settings);
+      $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Backdrop Rocks</$tag>", 'format' => 'full_html')));
+      $node = $this->backdropCreateNode($settings);
 
       // Update the search index.
       module_invoke_all('update_index');
@@ -543,21 +543,21 @@ class SearchRankingTestCase extends DrupalWebTestCase {
   /**
    * Verifies that if we combine two rankings, search still works.
    *
-   * See issue http://drupal.org/node/771596
+   * See issue http://backdrop.org/node/771596
    */
   function testDoubleRankings() {
     // Login with sufficient privileges.
-    $this->drupalLogin($this->drupalCreateUser(array('skip comment approval', 'create page content')));
+    $this->backdropLogin($this->backdropCreateUser(array('skip comment approval', 'create page content')));
 
     // See testRankings() above - build a node that will rank high for sticky.
     $settings = array(
       'type' => 'page',
-      'title' => 'Drupal rocks',
-      'body' => array(LANGUAGE_NONE => array(array('value' => "Drupal's search rocks"))),
+      'title' => 'Backdrop rocks',
+      'body' => array(LANGUAGE_NONE => array(array('value' => "Backdrop's search rocks"))),
       'sticky' => 1,
     );
 
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     // Update the search index.
     module_invoke_all('update_index');
@@ -580,7 +580,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
   }
 }
 
-class SearchBlockTestCase extends DrupalWebTestCase {
+class SearchBlockTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Block availability',
@@ -593,19 +593,19 @@ class SearchBlockTestCase extends DrupalWebTestCase {
     parent::setUp('search');
 
     // Create and login user
-    $admin_user = $this->drupalCreateUser(array('administer blocks', 'search content'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer blocks', 'search content'));
+    $this->backdropLogin($admin_user);
   }
 
   function testSearchFormBlock() {
     // Set block title to confirm that the interface is available.
-    $this->drupalPost('admin/structure/block/manage/search/form/configure', array('title' => $this->randomName(8)), t('Save block'));
+    $this->backdropPost('admin/structure/block/manage/search/form/configure', array('title' => $this->randomName(8)), t('Save block'));
     $this->assertText(t('The block configuration has been saved.'), t('Block configuration set.'));
 
     // Set the block to a region to confirm block is available.
     $edit = array();
     $edit['blocks[search_form][region]'] = 'footer';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
     $this->assertText(t('The block settings have been updated.'), t('Block successfully move to footer region.'));
   }
 
@@ -616,24 +616,24 @@ class SearchBlockTestCase extends DrupalWebTestCase {
     // Enable the block, and place it in the 'content' region so that it isn't
     // hidden on 404 pages.
     $edit = array('blocks[search_form][region]' => 'content');
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
 
     // Test a normal search via the block form, from the front page.
     $terms = array('search_block_form' => 'test');
-    $this->drupalPost('node', $terms, t('Search'));
+    $this->backdropPost('node', $terms, t('Search'));
     $this->assertText('Your search yielded no results');
 
     // Test a search from the block on a 404 page.
-    $this->drupalGet('foo');
+    $this->backdropGet('foo');
     $this->assertResponse(404);
-    $this->drupalPost(NULL, $terms, t('Search'));
+    $this->backdropPost(NULL, $terms, t('Search'));
     $this->assertResponse(200);
     $this->assertText('Your search yielded no results');
 
     // Test a search from the block when it doesn't appear on the search page.
     $edit = array('pages' => 'search');
-    $this->drupalPost('admin/structure/block/manage/search/form/configure', $edit, t('Save block'));
-    $this->drupalPost('node', $terms, t('Search'));
+    $this->backdropPost('admin/structure/block/manage/search/form/configure', $edit, t('Save block'));
+    $this->backdropPost('node', $terms, t('Search'));
     $this->assertText('Your search yielded no results');
 
     // Confirm that the user is redirected to the search page.
@@ -645,7 +645,7 @@ class SearchBlockTestCase extends DrupalWebTestCase {
 
     // Test an empty search via the block form, from the front page.
     $terms = array('search_block_form' => '');
-    $this->drupalPost('node', $terms, t('Search'));
+    $this->backdropPost('node', $terms, t('Search'));
     $this->assertText('Please enter some keywords');
 
     // Confirm that the user is redirected to the search page, when form is submitted empty.
@@ -660,7 +660,7 @@ class SearchBlockTestCase extends DrupalWebTestCase {
 /**
  * Tests that searching for a phrase gets the correct page count.
  */
-class SearchExactTestCase extends DrupalWebTestCase {
+class SearchExactTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Search engine phrase queries',
@@ -678,7 +678,7 @@ class SearchExactTestCase extends DrupalWebTestCase {
    */
   function testExactQuery() {
     // Login with sufficient privileges.
-    $this->drupalLogin($this->drupalCreateUser(array('create page content', 'search content')));
+    $this->backdropLogin($this->backdropCreateUser(array('create page content', 'search content')));
 
     $settings = array(
       'type' => 'page',
@@ -687,12 +687,12 @@ class SearchExactTestCase extends DrupalWebTestCase {
     // Create nodes with exact phrase.
     for ($i = 0; $i <= 17; $i++) {
       $settings['body'] = array(LANGUAGE_NONE => array(array('value' => 'love pizza')));
-      $this->drupalCreateNode($settings);
+      $this->backdropCreateNode($settings);
     }
     // Create nodes containing keywords.
     for ($i = 0; $i <= 17; $i++) {
       $settings['body'] = array(LANGUAGE_NONE => array(array('value' => 'love cheesy pizza')));
-      $this->drupalCreateNode($settings);
+      $this->backdropCreateNode($settings);
     }
 
     // Update the search index.
@@ -704,7 +704,7 @@ class SearchExactTestCase extends DrupalWebTestCase {
 
     // Test that the correct number of pager links are found for keyword search.
     $edit = array('keys' => 'love pizza');
-    $this->drupalPost('search/node', $edit, t('Search'));
+    $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertLinkByHref('page=1', 0, '2nd page link is found for keyword search.');
     $this->assertLinkByHref('page=2', 0, '3rd page link is found for keyword search.');
     $this->assertLinkByHref('page=3', 0, '4th page link is found for keyword search.');
@@ -712,7 +712,7 @@ class SearchExactTestCase extends DrupalWebTestCase {
 
     // Test that the correct number of pager links are found for exact phrase search.
     $edit = array('keys' => '"love pizza"');
-    $this->drupalPost('search/node', $edit, t('Search'));
+    $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertLinkByHref('page=1', 0, '2nd page link is found for exact phrase search.');
     $this->assertNoLinkByHref('page=2', '3rd page link is not found for exact phrase search.');
   }
@@ -721,7 +721,7 @@ class SearchExactTestCase extends DrupalWebTestCase {
 /**
  * Test integration searching comments.
  */
-class SearchCommentTestCase extends DrupalWebTestCase {
+class SearchCommentTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   public static function getInfo() {
@@ -746,8 +746,8 @@ class SearchCommentTestCase extends DrupalWebTestCase {
       'skip comment approval',
       'access comments',
     );
-    $this->admin_user = $this->drupalCreateUser($permissions);
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -762,34 +762,34 @@ class SearchCommentTestCase extends DrupalWebTestCase {
     $edit = array(
       'filters[filter_html_escape][status]' => TRUE,
     );
-    $this->drupalPost('admin/config/content/formats/' . $filtered_html_format_id, $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/' . $filtered_html_format_id, $edit, t('Save configuration'));
     // Allow anonymous users to search content.
     $edit = array(
       DRUPAL_ANONYMOUS_RID . '[search content]' => 1,
       DRUPAL_ANONYMOUS_RID . '[access comments]' => 1,
       DRUPAL_ANONYMOUS_RID . '[post comments]' => 1,
     );
-    $this->drupalPost('admin/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/people/permissions', $edit, t('Save permissions'));
 
     // Create a node.
-    $node = $this->drupalCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'article'));
     // Post a comment using 'Full HTML' text format.
     $edit_comment = array();
     $edit_comment['subject'] = 'Test comment subject';
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
     $full_html_format_id = 'full_html';
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][format]'] = $full_html_format_id;
-    $this->drupalPost('comment/reply/' . $node->nid, $edit_comment, t('Save'));
+    $this->backdropPost('comment/reply/' . $node->nid, $edit_comment, t('Save'));
 
     // Invoke search index update.
-    $this->drupalLogout();
+    $this->backdropLogout();
     $this->cronRun();
 
     // Search for the comment subject.
     $edit = array(
       'search_block_form' => "'" . $edit_comment['subject'] . "'",
     );
-    $this->drupalPost('', $edit, t('Search'));
+    $this->backdropPost('', $edit, t('Search'));
     $this->assertText($node->title, t('Node found in search results.'));
     $this->assertText($edit_comment['subject'], t('Comment subject found in search results.'));
 
@@ -797,7 +797,7 @@ class SearchCommentTestCase extends DrupalWebTestCase {
     $edit = array(
       'search_block_form' => "'" . $comment_body . "'",
     );
-    $this->drupalPost('', $edit, t('Search'));
+    $this->backdropPost('', $edit, t('Search'));
     $this->assertText($node->title, t('Node found in search results.'));
 
     // Verify that comment is rendered using proper format.
@@ -806,16 +806,16 @@ class SearchCommentTestCase extends DrupalWebTestCase {
     $this->assertNoRaw(check_plain($edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]']), t('HTML in comment body is not escaped.'));
 
     // Hide comments.
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $node->comment = 0;
     node_save($node);
 
     // Invoke search index update.
-    $this->drupalLogout();
+    $this->backdropLogout();
     $this->cronRun();
 
     // Search for $title.
-    $this->drupalPost('', $edit, t('Search'));
+    $this->backdropPost('', $edit, t('Search'));
     $this->assertNoText($comment_body, t('Comment body text not found in search results.'));
   }
 
@@ -831,23 +831,23 @@ class SearchCommentTestCase extends DrupalWebTestCase {
 
     // Create a node.
     variable_set('comment_preview_article', DRUPAL_OPTIONAL);
-    $this->node = $this->drupalCreateNode(array('type' => 'article'));
+    $this->node = $this->backdropCreateNode(array('type' => 'article'));
 
     // Post a comment using 'Full HTML' text format.
     $edit_comment = array();
     $edit_comment['subject'] = $this->comment_subject;
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
-    $this->drupalPost('comment/reply/' . $this->node->nid, $edit_comment, t('Save'));
+    $this->backdropPost('comment/reply/' . $this->node->nid, $edit_comment, t('Save'));
 
-    $this->drupalLogout();
+    $this->backdropLogout();
     $this->setRolePermissions(DRUPAL_ANONYMOUS_RID);
     $this->checkCommentAccess('Anon user has search permission but no access comments permission, comments should not be indexed');
 
     $this->setRolePermissions(DRUPAL_ANONYMOUS_RID, TRUE);
     $this->checkCommentAccess('Anon user has search permission and access comments permission, comments should be indexed', TRUE);
 
-    $this->drupalLogin($this->admin_user);
-    $this->drupalGet('admin/people/permissions');
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('admin/people/permissions');
 
     // Disable search access for authenticated user to test admin user.
     $this->setRolePermissions(DRUPAL_AUTHENTICATED_RID, FALSE, FALSE);
@@ -901,7 +901,7 @@ class SearchCommentTestCase extends DrupalWebTestCase {
     $edit = array(
       'search_block_form' => "'" . $this->comment_subject . "'",
     );
-    $this->drupalPost('', $edit, t('Search'));
+    $this->backdropPost('', $edit, t('Search'));
     $method = $assume_access ? 'assertText' : 'assertNoText';
     $verb = $assume_access ? 'found' : 'not found';
     $this->{$method}($this->node->title, "Node $verb in search results: " . $message);
@@ -919,27 +919,27 @@ class SearchCommentTestCase extends DrupalWebTestCase {
       'body' => array(LANGUAGE_NONE => array(array('value' => 'short body text'))),
     );
 
-    $user = $this->drupalCreateUser(array('search content', 'create article content', 'access content'));
-    $this->drupalLogin($user);
+    $user = $this->backdropCreateUser(array('search content', 'create article content', 'access content'));
+    $this->backdropLogin($user);
 
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
     // Verify that if you view the node on its own page, 'add new comment'
     // is there.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertText(t('Add new comment'), t('Add new comment appears on node page'));
 
     // Run cron to index this page.
-    $this->drupalLogout();
+    $this->backdropLogout();
     $this->cronRun();
 
     // Search for 'comment'. Should be no results.
-    $this->drupalLogin($user);
-    $this->drupalPost('search/node', array('keys' => 'comment'), t('Search'));
+    $this->backdropLogin($user);
+    $this->backdropPost('search/node', array('keys' => 'comment'), t('Search'));
     $this->assertText(t('Your search yielded no results'), t('No results searching for the word comment'));
 
     // Search for the node title. Should be found, and 'Add new comment' should
     // not be part of the search snippet.
-    $this->drupalPost('search/node', array('keys' => 'short'), t('Search'));
+    $this->backdropPost('search/node', array('keys' => 'short'), t('Search'));
     $this->assertText($node->title, t('Search for keyword worked'));
     $this->assertNoText(t('Add new comment'), t('Add new comment does not appear on search results page'));
   }
@@ -949,9 +949,9 @@ class SearchCommentTestCase extends DrupalWebTestCase {
 /**
  * Tests search_expression_insert() and search_expression_extract().
  *
- * @see http://drupal.org/node/419388 (issue)
+ * @see http://backdrop.org/node/419388 (issue)
  */
-class SearchExpressionInsertExtractTestCase extends DrupalUnitTestCase {
+class SearchExpressionInsertExtractTestCase extends BackdropUnitTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Search expression insert/extract',
@@ -961,7 +961,7 @@ class SearchExpressionInsertExtractTestCase extends DrupalUnitTestCase {
   }
 
   function setUp() {
-    drupal_load('module', 'search');
+    backdrop_load('module', 'search');
     parent::setUp();
   }
 
@@ -1017,7 +1017,7 @@ class SearchExpressionInsertExtractTestCase extends DrupalUnitTestCase {
  *     only when there are comments
  * - Nodes with comment status set to Hidden should never show comment counts
  */
-class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
+class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
   protected $searching_user;
   protected $searchable_nodes;
 
@@ -1033,16 +1033,16 @@ class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
     parent::setUp('search');
 
     // Create searching user.
-    $this->searching_user = $this->drupalCreateUser(array('search content', 'access content', 'access comments', 'skip comment approval'));
+    $this->searching_user = $this->backdropCreateUser(array('search content', 'access content', 'access comments', 'skip comment approval'));
 
     // Create initial nodes.
     $node_params = array('type' => 'article', 'body' => array(LANGUAGE_NONE => array(array('value' => 'SearchCommentToggleTestCase'))));
 
-    $this->searchable_nodes['1 comment'] = $this->drupalCreateNode($node_params);
-    $this->searchable_nodes['0 comments'] = $this->drupalCreateNode($node_params);
+    $this->searchable_nodes['1 comment'] = $this->backdropCreateNode($node_params);
+    $this->searchable_nodes['0 comments'] = $this->backdropCreateNode($node_params);
 
     // Login with sufficient privileges.
-    $this->drupalLogin($this->searching_user);
+    $this->backdropLogin($this->searching_user);
 
     // Create a comment array
     $edit_comment = array();
@@ -1052,7 +1052,7 @@ class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][format]'] = $filtered_html_format_id;
 
     // Post comment to the test node with comment
-    $this->drupalPost('comment/reply/' . $this->searchable_nodes['1 comment']->nid, $edit_comment, t('Save'));
+    $this->backdropPost('comment/reply/' . $this->searchable_nodes['1 comment']->nid, $edit_comment, t('Save'));
 
     // First update the index. This does the initial processing.
     node_update_index();
@@ -1073,7 +1073,7 @@ class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
     );
 
     // Test comment count display for nodes with comment status set to Open
-    $this->drupalPost('', $edit, t('Search'));
+    $this->backdropPost('', $edit, t('Search'));
     $this->assertText(t('0 comments'), t('Empty comment count displays for nodes with comment status set to Open'));
     $this->assertText(t('1 comment'), t('Non-empty comment count displays for nodes with comment status set to Open'));
 
@@ -1083,7 +1083,7 @@ class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
     $this->searchable_nodes['1 comment']->comment = COMMENT_NODE_CLOSED;
     node_save($this->searchable_nodes['1 comment']);
 
-    $this->drupalPost('', $edit, t('Search'));
+    $this->backdropPost('', $edit, t('Search'));
     $this->assertNoText(t('0 comments'), t('Empty comment count does not display for nodes with comment status set to Closed'));
     $this->assertText(t('1 comment'), t('Non-empty comment count displays for nodes with comment status set to Closed'));
 
@@ -1093,7 +1093,7 @@ class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
     $this->searchable_nodes['1 comment']->comment = COMMENT_NODE_HIDDEN;
     node_save($this->searchable_nodes['1 comment']);
 
-    $this->drupalPost('', $edit, t('Search'));
+    $this->backdropPost('', $edit, t('Search'));
     $this->assertNoText(t('0 comments'), t('Empty comment count does not display for nodes with comment status set to Hidden'));
     $this->assertNoText(t('1 comment'), t('Non-empty comment count does not display for nodes with comment status set to Hidden'));
   }
@@ -1102,7 +1102,7 @@ class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
 /**
  * Test search_simplify() on every Unicode character, and some other cases.
  */
-class SearchSimplifyTestCase extends DrupalWebTestCase {
+class SearchSimplifyTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Search simplify',
@@ -1136,8 +1136,8 @@ class SearchSimplifyTestCase extends DrupalWebTestCase {
         // Split this into 30-character chunks, so we don't run into limits
         // of truncation in search_simplify().
         $start = 0;
-        while ($start < drupal_strlen($string)) {
-          $newstr = drupal_substr($string, $start, 30);
+        while ($start < backdrop_strlen($string)) {
+          $newstr = backdrop_substr($string, $start, 30);
           // Special case: leading zeros are removed from numeric strings,
           // and there's one string in this file that is numbers starting with
           // zero, so prepend a 1 on that string.
@@ -1151,7 +1151,7 @@ class SearchSimplifyTestCase extends DrupalWebTestCase {
     }
     foreach ($strings as $key => $string) {
       $simplified = search_simplify($string);
-      $this->assertTrue(drupal_strlen($simplified) >= drupal_strlen($string), "Nothing is removed from string $key.");
+      $this->assertTrue(backdrop_strlen($simplified) >= backdrop_strlen($string), "Nothing is removed from string $key.");
     }
 
     // Test the low-numbered ASCII control characters separately. They are not
@@ -1169,8 +1169,8 @@ class SearchSimplifyTestCase extends DrupalWebTestCase {
   function testSearchSimplifyPunctuation() {
     $cases = array(
       array('20.03/94-28,876', '20039428876', 'Punctuation removed from numbers'),
-      array('great...drupal--module', 'great drupal module', 'Multiple dot and dashes are word boundaries'),
-      array('very_great-drupal.module', 'verygreatdrupalmodule', 'Single dot, dash, underscore are removed'),
+      array('great...backdrop--module', 'great backdrop module', 'Multiple dot and dashes are word boundaries'),
+      array('very_great-backdrop.module', 'verygreatbackdropmodule', 'Single dot, dash, underscore are removed'),
       array('regular,punctuation;word', 'regular punctuation word', 'Punctuation is a word boundary'),
     );
 
@@ -1185,7 +1185,7 @@ class SearchSimplifyTestCase extends DrupalWebTestCase {
 /**
  * Tests keywords and conditions.
  */
-class SearchKeywordsConditions extends DrupalWebTestCase {
+class SearchKeywordsConditions extends BackdropWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -1198,9 +1198,9 @@ class SearchKeywordsConditions extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('search', 'search_extra_type');
     // Create searching user.
-    $this->searching_user = $this->drupalCreateUser(array('search content', 'access content', 'access comments', 'skip comment approval'));
+    $this->searching_user = $this->backdropCreateUser(array('search content', 'access content', 'access comments', 'skip comment approval'));
     // Login with sufficient privileges.
-    $this->drupalLogin($this->searching_user);
+    $this->backdropLogin($this->searching_user);
     // Test with all search modules enabled.
     variable_set('search_active_modules', array('node' => 'node', 'user' => 'user', 'search_extra_type' => 'search_extra_type'));
     menu_rebuild();
@@ -1211,23 +1211,23 @@ class SearchKeywordsConditions extends DrupalWebTestCase {
    */
   function testSearchKeyswordsConditions() {
     // No keys, not conditions - no results.
-    $this->drupalGet('search/dummy_path');
+    $this->backdropGet('search/dummy_path');
     $this->assertNoText('Dummy search snippet to display');
     // With keys - get results.
     $keys = 'bike shed ' . $this->randomName();
-    $this->drupalGet("search/dummy_path/{$keys}");
+    $this->backdropGet("search/dummy_path/{$keys}");
     $this->assertText("Dummy search snippet to display. Keywords: {$keys}");
     $keys = 'blue drop ' . $this->randomName();
-    $this->drupalGet("search/dummy_path", array('query' => array('keys' => $keys)));
+    $this->backdropGet("search/dummy_path", array('query' => array('keys' => $keys)));
     $this->assertText("Dummy search snippet to display. Keywords: {$keys}");
     // Add some conditions and keys.
     $keys = 'moving drop ' . $this->randomName();
-    $this->drupalGet("search/dummy_path/bike", array('query' => array('search_conditions' => $keys)));
+    $this->backdropGet("search/dummy_path/bike", array('query' => array('search_conditions' => $keys)));
     $this->assertText("Dummy search snippet to display.");
     $this->assertRaw(print_r(array('search_conditions' => $keys), TRUE));
     // Add some conditions and no keys.
     $keys = 'drop kick ' . $this->randomName();
-    $this->drupalGet("search/dummy_path", array('query' => array('search_conditions' => $keys)));
+    $this->backdropGet("search/dummy_path", array('query' => array('search_conditions' => $keys)));
     $this->assertText("Dummy search snippet to display.");
     $this->assertRaw(print_r(array('search_conditions' => $keys), TRUE));
   }
@@ -1236,7 +1236,7 @@ class SearchKeywordsConditions extends DrupalWebTestCase {
 /**
  * Tests that numbers can be searched.
  */
-class SearchNumbersTestCase extends DrupalWebTestCase {
+class SearchNumbersTestCase extends BackdropWebTestCase {
   protected $test_user;
   protected $numbers;
   protected $nodes;
@@ -1252,8 +1252,8 @@ class SearchNumbersTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('search');
 
-    $this->test_user = $this->drupalCreateUser(array('search content', 'access content', 'administer nodes', 'access site reports'));
-    $this->drupalLogin($this->test_user);
+    $this->test_user = $this->backdropCreateUser(array('search content', 'access content', 'administer nodes', 'access site reports'));
+    $this->backdropLogin($this->test_user);
 
     // Create content with various numbers in it.
     // Note: 50 characters is the current limit of the search index's word
@@ -1282,12 +1282,12 @@ class SearchNumbersTestCase extends DrupalWebTestCase {
         'language' => LANGUAGE_NONE,
         'title' => $doc . ' number',
       );
-      $this->nodes[$doc] = $this->drupalCreateNode($info);
+      $this->nodes[$doc] = $this->backdropCreateNode($info);
     }
 
     // Run cron to ensure the content is indexed.
     $this->cronRun();
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
     $this->assertText(t('Cron run completed'), 'Log shows cron run completed');
   }
 
@@ -1306,14 +1306,14 @@ class SearchNumbersTestCase extends DrupalWebTestCase {
 
       // Verify that the node title does not appear on the search page
       // with a dummy search.
-      $this->drupalPost('search/node',
+      $this->backdropPost('search/node',
         array('keys' => 'foo'),
         t('Search'));
       $this->assertNoText($node->title, $type . ': node title not shown in dummy search');
 
       // Verify that the node title does appear as a link on the search page
       // when searching for the number.
-      $this->drupalPost('search/node',
+      $this->backdropPost('search/node',
         array('keys' => $number),
         t('Search'));
       $this->assertText($node->title, $type . ': node title shown (search found the node) in search for number ' . $number);
@@ -1324,7 +1324,7 @@ class SearchNumbersTestCase extends DrupalWebTestCase {
 /**
  * Tests that numbers can be searched, with more complex matching.
  */
-class SearchNumberMatchingTestCase extends DrupalWebTestCase {
+class SearchNumberMatchingTestCase extends BackdropWebTestCase {
   protected $test_user;
   protected $numbers;
   protected $nodes;
@@ -1340,8 +1340,8 @@ class SearchNumberMatchingTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('search');
 
-    $this->test_user = $this->drupalCreateUser(array('search content', 'access content', 'administer nodes', 'access site reports'));
-    $this->drupalLogin($this->test_user);
+    $this->test_user = $this->backdropCreateUser(array('search content', 'access content', 'administer nodes', 'access site reports'));
+    $this->backdropLogin($this->test_user);
 
     // Define a group of numbers that should all match each other --
     // numbers with internal punctuation should match each other, as well
@@ -1363,12 +1363,12 @@ class SearchNumberMatchingTestCase extends DrupalWebTestCase {
         'type' => 'page',
         'language' => LANGUAGE_NONE,
       );
-      $this->nodes[] = $this->drupalCreateNode($info);
+      $this->nodes[] = $this->backdropCreateNode($info);
     }
 
     // Run cron to ensure the content is indexed.
     $this->cronRun();
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
     $this->assertText(t('Cron run completed'), 'Log shows cron run completed');
   }
 
@@ -1381,7 +1381,7 @@ class SearchNumberMatchingTestCase extends DrupalWebTestCase {
 
       // Verify that the node title does not appear on the search page
       // with a dummy search.
-      $this->drupalPost('search/node',
+      $this->backdropPost('search/node',
         array('keys' => 'foo'),
         t('Search'));
       $this->assertNoText($node->title, $i . ': node title not shown in dummy search');
@@ -1394,7 +1394,7 @@ class SearchNumberMatchingTestCase extends DrupalWebTestCase {
         // "not keyword" when searching.
         $number = ltrim($number, '-');
 
-        $this->drupalPost('search/node',
+        $this->backdropPost('search/node',
           array('keys' => $number),
           t('Search'));
         $this->assertText($node->title, $i . ': node title shown (search found the node) in search for number ' . $number);
@@ -1407,7 +1407,7 @@ class SearchNumberMatchingTestCase extends DrupalWebTestCase {
 /**
  * Test config page.
  */
-class SearchConfigSettingsForm extends DrupalWebTestCase {
+class SearchConfigSettingsForm extends BackdropWebTestCase {
   public $search_user;
   public $search_node;
 
@@ -1423,18 +1423,18 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
-    $this->search_user = $this->drupalCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks'));
-    $this->drupalLogin($this->search_user);
+    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks'));
+    $this->backdropLogin($this->search_user);
 
     // Add a single piece of content and index it.
-    $node = $this->drupalCreateNode();
+    $node = $this->backdropCreateNode();
     $this->search_node = $node;
     // Link the node to itself to test that it's only indexed once. The content
     // also needs the word "pizza" so we can use it as the search keyword.
     $langcode = LANGUAGE_NONE;
     $body_key = "body[$langcode][0][value]";
     $edit[$body_key] = l($node->title, 'node/' . $node->nid) . ' pizza sandwich';
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
     node_update_index();
     search_update_totals();
@@ -1442,7 +1442,7 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
     // Enable the search block.
     $edit = array();
     $edit['blocks[search_form][region]'] = 'content';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
   }
 
   /**
@@ -1451,15 +1451,15 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
   function testSearchSettingsPage() {
 
     // Test that the settings form displays the correct count of items left to index.
-    $this->drupalGet('admin/config/search/settings');
+    $this->backdropGet('admin/config/search/settings');
     $this->assertText(t('There are @count items left to index.', array('@count' => 0)));
 
     // Test the re-index button.
-    $this->drupalPost('admin/config/search/settings', array(), t('Re-index site'));
+    $this->backdropPost('admin/config/search/settings', array(), t('Re-index site'));
     $this->assertText(t('Are you sure you want to re-index the site'));
-    $this->drupalPost('admin/config/search/settings/reindex', array(), t('Re-index site'));
+    $this->backdropPost('admin/config/search/settings/reindex', array(), t('Re-index site'));
     $this->assertText(t('The index will be rebuilt'));
-    $this->drupalGet('admin/config/search/settings');
+    $this->backdropGet('admin/config/search/settings');
     $this->assertText(t('There is 1 item left to index.'));
   }
 
@@ -1501,10 +1501,10 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
         $edit['search_active_modules[' . $other . ']'] = (($other == $module) ? $module : FALSE);
       }
       $edit['search_default_module'] = $module;
-      $this->drupalPost('admin/config/search/settings', $edit, t('Save configuration'));
+      $this->backdropPost('admin/config/search/settings', $edit, t('Save configuration'));
 
       // Run a search from the correct search URL.
-      $this->drupalGet('search/' . $info['path'] . '/' . $info['keys']);
+      $this->backdropGet('search/' . $info['path'] . '/' . $info['keys']);
       $this->assertNoText('no results', $info['title'] . ' search found results');
       $this->assertText($info['text'], 'Correct search text found');
 
@@ -1519,14 +1519,14 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
       // Run a search from the search block on the node page. Verify you get
       // to this module's search results page.
       $terms = array('search_block_form' => $info['keys']);
-      $this->drupalPost('node', $terms, t('Search'));
+      $this->backdropPost('node', $terms, t('Search'));
       $this->assertEqual(
         $this->getURL(),
         url('search/' . $info['path'] . '/' . $info['keys'], array('absolute' => TRUE)),
         'Block redirected to right search page');
 
       // Try an invalid search path. Should redirect to our active module.
-      $this->drupalGet('search/not_a_module_path');
+      $this->backdropGet('search/not_a_module_path');
       $this->assertEqual(
         $this->getURL(),
         url('search/' . $info['path'], array('absolute' => TRUE)),
@@ -1541,10 +1541,10 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
     }
     $edit['search_default_module'] = 'node';
 
-    $this->drupalPost('admin/config/search/settings', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/search/settings', $edit, t('Save configuration'));
 
     foreach (array('search/node/pizza', 'search/node') as $path) {
-      $this->drupalGet($path);
+      $this->backdropGet($path);
       foreach ($modules as $module) {
         $title = $module_info[$module]['title'];
         $this->assertText($title, $title . ' search tab is shown');
@@ -1556,7 +1556,7 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
 /**
  * Tests the search_excerpt() function.
  */
-class SearchExcerptTestCase extends DrupalUnitTestCase {
+class SearchExcerptTestCase extends BackdropUnitTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Search excerpt extraction',
@@ -1566,7 +1566,7 @@ class SearchExcerptTestCase extends DrupalUnitTestCase {
   }
 
   function setUp() {
-    drupal_load('module', 'search');
+    backdrop_load('module', 'search');
     parent::setUp();
   }
 
@@ -1615,7 +1615,7 @@ class SearchExcerptTestCase extends DrupalUnitTestCase {
    * and compares them with strings that contain the original unsimplified word.
    */
   function testSearchExcerptSimplified() {
-    $lorem1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. What is a Drupalism? Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero.';
+    $lorem1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. What is a Backdropism? Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero.';
     $lorem2 = 'Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci.';
 
     // Make some text with some keywords that will get simplified.
@@ -1645,7 +1645,7 @@ class SearchExcerptTestCase extends DrupalUnitTestCase {
 /**
  * Test the CJK tokenizer.
  */
-class SearchTokenizerTestCase extends DrupalWebTestCase {
+class SearchTokenizerTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'CJK tokenizer',
@@ -1740,7 +1740,7 @@ class SearchTokenizerTestCase extends DrupalWebTestCase {
     // Merge into a string and tokenize.
     $string = implode('', $chars);
     $out = trim(search_simplify($string));
-    $expected = drupal_strtolower(implode(' ', $chars));
+    $expected = backdrop_strtolower(implode(' ', $chars));
 
     // Verify that the output matches what we expect.
     $this->assertEqual($out, $expected, 'CJK tokenizer worked on all supplied CJK characters');
@@ -1796,7 +1796,7 @@ class SearchTokenizerTestCase extends DrupalWebTestCase {
 /**
  * Tests that we can embed a form in search results and submit it.
  */
-class SearchEmbedForm extends DrupalWebTestCase {
+class SearchEmbedForm extends BackdropWebTestCase {
   /**
    * Node used for testing.
    */
@@ -1819,10 +1819,10 @@ class SearchEmbedForm extends DrupalWebTestCase {
     parent::setUp('search', 'search_embedded_form');
 
     // Create a user and a node, and update the search index.
-    $test_user = $this->drupalCreateUser(array('access content', 'search content', 'administer nodes'));
-    $this->drupalLogin($test_user);
+    $test_user = $this->backdropCreateUser(array('access content', 'search content', 'administer nodes'));
+    $this->backdropLogin($test_user);
 
-    $this->node = $this->drupalCreateNode();
+    $this->node = $this->backdropCreateNode();
 
     node_update_index();
     search_update_totals();
@@ -1838,7 +1838,7 @@ class SearchEmbedForm extends DrupalWebTestCase {
    */
   function testEmbeddedForm() {
     // First verify we can submit the form from the module's page.
-    $this->drupalPost('search_embedded_form',
+    $this->backdropPost('search_embedded_form',
       array('name' => 'John'),
       t('Send away'));
     $this->assertText(t('Test form was submitted'), 'Form message appears');
@@ -1847,9 +1847,9 @@ class SearchEmbedForm extends DrupalWebTestCase {
     $this->submit_count = $count;
 
     // Now verify that we can see and submit the form from the search results.
-    $this->drupalGet('search/node/' . $this->node->title);
+    $this->backdropGet('search/node/' . $this->node->title);
     $this->assertText(t('Your name'), 'Form is visible');
-    $this->drupalPost('search/node/' . $this->node->title,
+    $this->backdropPost('search/node/' . $this->node->title,
       array('name' => 'John'),
       t('Send away'));
     $this->assertText(t('Test form was submitted'), 'Form message appears');
@@ -1859,7 +1859,7 @@ class SearchEmbedForm extends DrupalWebTestCase {
 
     // Now verify that if we submit the search form, it doesn't count as
     // our form being submitted.
-    $this->drupalPost('search',
+    $this->backdropPost('search',
       array('keys' => 'foo'),
       t('Search'));
     $this->assertNoText(t('Test form was submitted'), 'Form message does not appear');
@@ -1872,7 +1872,7 @@ class SearchEmbedForm extends DrupalWebTestCase {
 /**
  * Tests that hook_search_page runs.
  */
-class SearchPageOverride extends DrupalWebTestCase {
+class SearchPageOverride extends BackdropWebTestCase {
   public $search_user;
 
   public static function getInfo() {
@@ -1887,8 +1887,8 @@ class SearchPageOverride extends DrupalWebTestCase {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
-    $this->search_user = $this->drupalCreateUser(array('search content', 'administer search'));
-    $this->drupalLogin($this->search_user);
+    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search'));
+    $this->backdropLogin($this->search_user);
 
     // Enable the extra type module for searching.
     variable_set('search_active_modules', array('node' => 'node', 'user' => 'user', 'search_extra_type' => 'search_extra_type'));
@@ -1897,7 +1897,7 @@ class SearchPageOverride extends DrupalWebTestCase {
 
   function testSearchPageHook() {
     $keys = 'bike shed ' . $this->randomName();
-    $this->drupalGet("search/dummy_path/{$keys}");
+    $this->backdropGet("search/dummy_path/{$keys}");
     $this->assertText('Dummy search snippet', 'Dummy search snippet is shown');
     $this->assertText('Test page text is here', 'Page override is working');
   }
@@ -1906,7 +1906,7 @@ class SearchPageOverride extends DrupalWebTestCase {
 /**
  * Test node search with multiple languages.
  */
-class SearchLanguageTestCase extends DrupalWebTestCase {
+class SearchLanguageTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Search language selection',
@@ -1922,48 +1922,48 @@ class SearchLanguageTestCase extends DrupalWebTestCase {
     parent::setUp('search', 'locale');
 
     // Create and login user.
-    $test_user = $this->drupalCreateUser(array('access content', 'search content', 'use advanced search', 'administer nodes', 'administer languages', 'access administration pages'));
-    $this->drupalLogin($test_user);
+    $test_user = $this->backdropCreateUser(array('access content', 'search content', 'use advanced search', 'administer nodes', 'administer languages', 'access administration pages'));
+    $this->backdropLogin($test_user);
   }
 
   function testLanguages() {
     // Check that there are initially no languages displayed.
-    $this->drupalGet('search/node');
+    $this->backdropGet('search/node');
     $this->assertNoText(t('Languages'), t('No languages to choose from.'));
 
     // Add predefined language.
     $edit = array('predefined_langcode' => 'fr');
-    $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
+    $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
     $this->assertText('fr', t('Language added successfully.'));
 
     // Now we should have languages displayed.
-    $this->drupalGet('search/node');
+    $this->backdropGet('search/node');
     $this->assertText(t('Languages'), t('Languages displayed to choose from.'));
     $this->assertText(t('English'), t('English is a possible choice.'));
     $this->assertText(t('French'), t('French is a possible choice.'));
 
     // Ensure selecting no language does not make the query different.
-    $this->drupalPost('search/node', array(), t('Advanced search'));
+    $this->backdropPost('search/node', array(), t('Advanced search'));
     $this->assertEqual($this->getUrl(), url('search/node/', array('absolute' => TRUE)), t('Correct page redirection, no language filtering.'));
 
     // Pick French and ensure it is selected.
     $edit = array('language[fr]' => TRUE);
-    $this->drupalPost('search/node', $edit, t('Advanced search'));
+    $this->backdropPost('search/node', $edit, t('Advanced search'));
     $this->assertFieldByXPath('//input[@name="keys"]', 'language:fr', t('Language filter added to query.'));
 
     // Change the default language and disable English.
     $path = 'admin/config/regional/language';
-    $this->drupalGet($path);
+    $this->backdropGet($path);
     $this->assertFieldChecked('edit-site-default-en', t('English is the default language.'));
     $edit = array('site_default' => 'fr');
-    $this->drupalPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->assertNoFieldChecked('edit-site-default-en', t('Default language updated.'));
     $edit = array('languages[en][enabled]' => FALSE);
-    $this->drupalPost('admin/config/regional/language', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/regional/language', $edit, t('Save configuration'));
     $this->assertNoFieldChecked('edit-languages-en-enabled', t('Language disabled.'));
 
     // Check that there are again no languages displayed.
-    $this->drupalGet('search/node');
+    $this->backdropGet('search/node');
     $this->assertNoText(t('Languages'), t('No languages to choose from.'));
   }
 }
@@ -1971,7 +1971,7 @@ class SearchLanguageTestCase extends DrupalWebTestCase {
 /**
  * Tests node search with node access control.
  */
-class SearchNodeAccessTest extends DrupalWebTestCase {
+class SearchNodeAccessTest extends BackdropWebTestCase {
   public $test_user;
 
   public static function getInfo() {
@@ -1987,15 +1987,15 @@ class SearchNodeAccessTest extends DrupalWebTestCase {
     node_access_rebuild();
 
     // Create a test user and log in.
-    $this->test_user = $this->drupalCreateUser(array('access content', 'search content', 'use advanced search'));
-    $this->drupalLogin($this->test_user);
+    $this->test_user = $this->backdropCreateUser(array('access content', 'search content', 'use advanced search'));
+    $this->backdropLogin($this->test_user);
   }
 
   /**
    * Tests that search returns results with punctuation in the search phrase.
    */
   function testPhraseSearchPunctuation() {
-    $node = $this->drupalCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy.")))));
+    $node = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy.")))));
 
     // Update the search index.
     module_invoke_all('update_index');
@@ -2006,7 +2006,7 @@ class SearchNodeAccessTest extends DrupalWebTestCase {
 
     // Submit a phrase wrapped in double quotes to include the punctuation.
     $edit = array('keys' => '"bunny\'s"');
-    $this->drupalPost('search/node', $edit, t('Search'));
+    $this->backdropPost('search/node', $edit, t('Search'));
     $this->assertText($node->title);
   }
 }

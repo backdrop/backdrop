@@ -5,7 +5,7 @@
  * Tests for poll.module.
  */
 
-class PollTestCase extends DrupalWebTestCase {
+class PollTestCase extends BackdropWebTestCase {
 
   /**
    * Creates a poll.
@@ -24,12 +24,12 @@ class PollTestCase extends DrupalWebTestCase {
   function pollCreate($title, $choices, $preview = TRUE) {
     $this->assertTrue(TRUE, 'Create a poll');
 
-    $admin_user = $this->drupalCreateUser(array('create poll content', 'administer nodes'));
-    $web_user = $this->drupalCreateUser(array('create poll content', 'access content', 'edit own poll content'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('create poll content', 'administer nodes'));
+    $web_user = $this->backdropCreateUser(array('create poll content', 'access content', 'edit own poll content'));
+    $this->backdropLogin($admin_user);
 
     // Get the form first to initialize the state of the internal browser.
-    $this->drupalGet('node/add/poll');
+    $this->backdropGet('node/add/poll');
 
     // Prepare a form with two choices.
     list($edit, $index) = $this->_pollGenerateEdit($title, $choices);
@@ -37,32 +37,32 @@ class PollTestCase extends DrupalWebTestCase {
     // Verify that the vote count element only allows non-negative integers.
     $edit['choice[new:1][chvotes]'] = -1;
     $edit['choice[new:0][chvotes]'] = $this->randomString(7);
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertText(t('Negative values are not allowed.'));
     $this->assertText(t('Vote count for new choice must be an integer.'));
 
     // Repeat steps for initializing the state of the internal browser.
-    $this->drupalLogin($web_user);
-    $this->drupalGet('node/add/poll');
+    $this->backdropLogin($web_user);
+    $this->backdropGet('node/add/poll');
     list($edit, $index) = $this->_pollGenerateEdit($title, $choices);
 
     // Re-submit the form until all choices are filled in.
     if (count($choices) > 2) {
       while ($index < count($choices)) {
-        $this->drupalPost(NULL, $edit, t('Add another choice'));
+        $this->backdropPost(NULL, $edit, t('Add another choice'));
         $this->assertPollChoiceOrder($choices, $index);
         list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
       }
     }
 
     if ($preview) {
-      $this->drupalPost(NULL, $edit, t('Preview'));
+      $this->backdropPost(NULL, $edit, t('Preview'));
       $this->assertPollChoiceOrder($choices, $index, TRUE);
       list($edit, $index) = $this->_pollGenerateEdit($title, $choices, $index);
     }
 
-    $this->drupalPost(NULL, $edit, t('Save'));
-    $node = $this->drupalGetNodeByTitle($title);
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($title);
     $this->assertText(t('@type @title has been created.', array('@type' => node_type_get_name('poll'), '@title' => $title)), 'Poll has been created.');
     $this->assertTrue($node->nid, t('Poll has been found in the database.'));
 
@@ -84,7 +84,7 @@ class PollTestCase extends DrupalWebTestCase {
    * @return
    *   An indexed array containing:
    *   - The generated POST values, suitable for
-   *     DrupalWebTestCase::drupalPost().
+   *     BackdropWebTestCase::backdropPost().
    *   - The number of poll choices contained in 'edit', for potential re-usage
    *     in subsequent invocations of this function.
    */
@@ -176,7 +176,7 @@ class PollTestCase extends DrupalWebTestCase {
 
   function pollUpdate($nid, $title, $edit) {
     // Edit the poll node.
-    $this->drupalPost('node/' . $nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $nid . '/edit', $edit, t('Save'));
     $this->assertText(t('@type @title has been updated.', array('@type' => node_type_get_name('poll'), '@title' => $title)), 'Poll has been updated.');
   }
 }
@@ -200,7 +200,7 @@ class PollCreateTestCase extends PollTestCase {
     $poll_nid = $this->pollCreate($title, $choices, TRUE);
 
     // Verify poll appears on 'poll' page.
-    $this->drupalGet('poll');
+    $this->backdropGet('poll');
     $this->assertText($title, 'Poll appears in poll list.');
     $this->assertText('open', 'Poll is active.');
 
@@ -224,7 +224,7 @@ class PollCreateTestCase extends PollTestCase {
 
     node_save($node);
 
-    $this->drupalGet('poll');
+    $this->backdropGet('poll');
     $this->clickLink($title);
     $this->assertText($new_option, 'New option found.');
 
@@ -236,28 +236,28 @@ class PollCreateTestCase extends PollTestCase {
   }
 
   function testPollClose() {
-    $content_user = $this->drupalCreateUser(array('create poll content', 'edit any poll content', 'access content'));
-    $vote_user = $this->drupalCreateUser(array('cancel own vote', 'inspect all votes', 'vote on polls', 'access content'));
+    $content_user = $this->backdropCreateUser(array('create poll content', 'edit any poll content', 'access content'));
+    $vote_user = $this->backdropCreateUser(array('cancel own vote', 'inspect all votes', 'vote on polls', 'access content'));
 
     // Create poll.
     $title = $this->randomName();
     $choices = $this->_generateChoices(7);
     $poll_nid = $this->pollCreate($title, $choices, FALSE);
 
-    $this->drupalLogout();
-    $this->drupalLogin($content_user);
+    $this->backdropLogout();
+    $this->backdropLogin($content_user);
 
     // Edit the poll node and close the poll.
     $close_edit = array('active' => 0);
     $this->pollUpdate($poll_nid, $title, $close_edit);
 
     // Verify 'Vote' button no longer appears.
-    $this->drupalGet('node/' . $poll_nid);
+    $this->backdropGet('node/' . $poll_nid);
     $elements = $this->xpath('//input[@id="edit-vote"]');
     $this->assertTrue(empty($elements), t("Vote button doesn't appear."));
 
     // Verify status on 'poll' page is 'closed'.
-    $this->drupalGet('poll');
+    $this->backdropGet('poll');
     $this->assertText($title, 'Poll appears in poll list.');
     $this->assertText('closed', 'Poll is closed.');
 
@@ -266,22 +266,22 @@ class PollCreateTestCase extends PollTestCase {
     $this->pollUpdate($poll_nid, $title, $open_edit);
 
     // Vote on the poll.
-    $this->drupalLogout();
-    $this->drupalLogin($vote_user);
+    $this->backdropLogout();
+    $this->backdropLogin($vote_user);
     $vote_edit = array('choice' => '1');
-    $this->drupalPost('node/' . $poll_nid, $vote_edit, t('Vote'));
+    $this->backdropPost('node/' . $poll_nid, $vote_edit, t('Vote'));
     $this->assertText('Your vote was recorded.', 'Your vote was recorded.');
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(isset($elements[0]), t("'Cancel your vote' button appears."));
 
     // Edit the poll node and close the poll.
-    $this->drupalLogout();
-    $this->drupalLogin($content_user);
+    $this->backdropLogout();
+    $this->backdropLogin($content_user);
     $close_edit = array('active' => 0);
     $this->pollUpdate($poll_nid, $title, $close_edit);
 
     // Verify 'Cancel your vote' button no longer appears.
-    $this->drupalGet('node/' . $poll_nid);
+    $this->backdropGet('node/' . $poll_nid);
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(empty($elements), t("'Cancel your vote' button no longer appears."));
   }
@@ -308,54 +308,54 @@ class PollVoteTestCase extends PollTestCase {
     $title = $this->randomName();
     $choices = $this->_generateChoices(7);
     $poll_nid = $this->pollCreate($title, $choices, FALSE);
-    $this->drupalLogout();
+    $this->backdropLogout();
 
-    $vote_user = $this->drupalCreateUser(array('cancel own vote', 'inspect all votes', 'vote on polls', 'access content'));
-    $restricted_vote_user = $this->drupalCreateUser(array('vote on polls', 'access content'));
+    $vote_user = $this->backdropCreateUser(array('cancel own vote', 'inspect all votes', 'vote on polls', 'access content'));
+    $restricted_vote_user = $this->backdropCreateUser(array('vote on polls', 'access content'));
 
-    $this->drupalLogin($vote_user);
+    $this->backdropLogin($vote_user);
 
     // Record a vote for the first choice.
     $edit = array(
       'choice' => '1',
     );
-    $this->drupalPost('node/' . $poll_nid, $edit, t('Vote'));
+    $this->backdropPost('node/' . $poll_nid, $edit, t('Vote'));
     $this->assertText('Your vote was recorded.', 'Your vote was recorded.');
     $this->assertText('Total votes: 1', 'Vote count updated correctly.');
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(isset($elements[0]), t("'Cancel your vote' button appears."));
 
-    $this->drupalGet("node/$poll_nid/votes");
+    $this->backdropGet("node/$poll_nid/votes");
     $this->assertText(t('This table lists all the recorded votes for this poll. If anonymous users are allowed to vote, they will be identified by the IP address of the computer they used when they voted.'), 'Vote table text.');
     $this->assertText($choices[0], 'Vote recorded');
 
     // Ensure poll listing page has correct number of votes.
-    $this->drupalGet('poll');
+    $this->backdropGet('poll');
     $this->assertText($title, 'Poll appears in poll list.');
     $this->assertText('1 vote', 'Poll has 1 vote.');
 
     // Cancel a vote.
-    $this->drupalPost('node/' . $poll_nid, array(), t('Cancel your vote'));
+    $this->backdropPost('node/' . $poll_nid, array(), t('Cancel your vote'));
     $this->assertText('Your vote was cancelled.', 'Your vote was cancelled.');
     $this->assertNoText('Cancel your vote', "Cancel vote button doesn't appear.");
 
-    $this->drupalGet("node/$poll_nid/votes");
+    $this->backdropGet("node/$poll_nid/votes");
     $this->assertNoText($choices[0], 'Vote cancelled');
 
     // Ensure poll listing page has correct number of votes.
-    $this->drupalGet('poll');
+    $this->backdropGet('poll');
     $this->assertText($title, 'Poll appears in poll list.');
     $this->assertText('0 votes', 'Poll has 0 votes.');
 
     // Log in as a user who can only vote on polls.
-    $this->drupalLogout();
-    $this->drupalLogin($restricted_vote_user);
+    $this->backdropLogout();
+    $this->backdropLogin($restricted_vote_user);
 
     // Vote on a poll.
     $edit = array(
       'choice' => '1',
     );
-    $this->drupalPost('node/' . $poll_nid, $edit, t('Vote'));
+    $this->backdropPost('node/' . $poll_nid, $edit, t('Vote'));
     $this->assertText('Your vote was recorded.', 'Your vote was recorded.');
     $this->assertText('Total votes: 1', 'Vote count updated correctly.');
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
@@ -376,19 +376,19 @@ class PollBlockTestCase extends PollTestCase {
     parent::setUp('poll');
 
     // Create and login user
-    $admin_user = $this->drupalCreateUser(array('administer blocks'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('administer blocks'));
+    $this->backdropLogin($admin_user);
   }
 
   function testRecentBlock() {
     // Set block title to confirm that the interface is available.
-    $this->drupalPost('admin/structure/block/manage/poll/recent/configure', array('title' => $this->randomName(8)), t('Save block'));
+    $this->backdropPost('admin/structure/block/manage/poll/recent/configure', array('title' => $this->randomName(8)), t('Save block'));
     $this->assertText(t('The block configuration has been saved.'), t('Block configuration set.'));
 
     // Set the block to a region to confirm block is available.
     $edit = array();
     $edit['blocks[poll_recent][region]'] = 'footer';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+    $this->backdropPost('admin/structure/block', $edit, t('Save blocks'));
     $this->assertText(t('The block settings have been updated.'), t('Block successfully move to footer region.'));
 
     // Create a poll which should appear in recent polls block.
@@ -398,21 +398,21 @@ class PollBlockTestCase extends PollTestCase {
 
     // Verify poll appears in a block.
     // View user page so we're not matching the poll node on front page.
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     // If a 'block' view not generated, this title would not appear even though
     // the choices might.
     $this->assertText($title, 'Poll appears in block.');
 
     // Logout and login back in as a user who can vote.
-    $this->drupalLogout();
-    $vote_user = $this->drupalCreateUser(array('cancel own vote', 'inspect all votes', 'vote on polls', 'access content'));
-    $this->drupalLogin($vote_user);
+    $this->backdropLogout();
+    $vote_user = $this->backdropCreateUser(array('cancel own vote', 'inspect all votes', 'vote on polls', 'access content'));
+    $this->backdropLogin($vote_user);
 
     // Verify we can vote via the block.
     $edit = array(
       'choice' => '1',
     );
-    $this->drupalPost('user/' . $vote_user->uid, $edit, t('Vote'));
+    $this->backdropPost('user/' . $vote_user->uid, $edit, t('Vote'));
     $this->assertText('Your vote was recorded.', 'Your vote was recorded.');
     $this->assertText('Total votes: 1', 'Vote count updated correctly.');
     $this->assertText('Older polls', 'Link to older polls appears.');
@@ -420,12 +420,12 @@ class PollBlockTestCase extends PollTestCase {
     $this->assertText('1 vote - open', 'Link to poll listing correct.');
 
     // Close the poll and verify block doesn't appear.
-    $content_user = $this->drupalCreateUser(array('create poll content', 'edit any poll content', 'access content'));
-    $this->drupalLogout();
-    $this->drupalLogin($content_user);
+    $content_user = $this->backdropCreateUser(array('create poll content', 'edit any poll content', 'access content'));
+    $this->backdropLogout();
+    $this->backdropLogin($content_user);
     $close_edit = array('active' => 0);
     $this->pollUpdate($poll_nid, $title, $close_edit);
-    $this->drupalGet('user/' . $content_user->uid);
+    $this->backdropGet('user/' . $content_user->uid);
     $this->assertNoText($title, 'Poll no longer appears in block.');
   }
 }
@@ -433,7 +433,7 @@ class PollBlockTestCase extends PollTestCase {
 /**
  * Test adding new choices.
  */
-class PollJSAddChoice extends DrupalWebTestCase {
+class PollJSAddChoice extends BackdropWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -451,9 +451,9 @@ class PollJSAddChoice extends DrupalWebTestCase {
    * Test adding a new choice.
    */
   function testAddChoice() {
-    $web_user = $this->drupalCreateUser(array('create poll content', 'access content'));
-    $this->drupalLogin($web_user);
-    $this->drupalGet('node/add/poll');
+    $web_user = $this->backdropCreateUser(array('create poll content', 'access content'));
+    $this->backdropLogin($web_user);
+    $this->backdropGet('node/add/poll');
     $edit = array(
       "title" => $this->randomName(),
       'choice[new:0][chtext]' => $this->randomName(),
@@ -462,7 +462,7 @@ class PollJSAddChoice extends DrupalWebTestCase {
 
     // Press 'add choice' button through Ajax, and place the expected HTML result
     // as the tested content.
-    $commands = $this->drupalPostAJAX(NULL, $edit, array('op' => t('Add another choice')));
+    $commands = $this->backdropPostAJAX(NULL, $edit, array('op' => t('Add another choice')));
     $this->content = $commands[1]['data'];
 
     $this->assertFieldByName('choice[chid:0][chtext]', $edit['choice[new:0][chtext]'], t('Field !i found', array('!i' => 0)));
@@ -484,8 +484,8 @@ class PollVoteCheckHostname extends PollTestCase {
     parent::setUp('poll');
 
     // Create and login user.
-    $this->admin_user = $this->drupalCreateUser(array('administer permissions', 'create poll content'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'create poll content'));
+    $this->backdropLogin($this->admin_user);
 
     // Allow anonymous users to vote on polls.
     user_role_change_permissions(DRUPAL_ANONYMOUS_RID, array(
@@ -503,11 +503,11 @@ class PollVoteCheckHostname extends PollTestCase {
     $choices = $this->_generateChoices(3);
     $this->poll_nid = $this->pollCreate($title, $choices, FALSE);
 
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Create web users.
-    $this->web_user1 = $this->drupalCreateUser(array('access content', 'vote on polls', 'cancel own vote'));
-    $this->web_user2 = $this->drupalCreateUser(array('access content', 'vote on polls'));
+    $this->web_user1 = $this->backdropCreateUser(array('access content', 'vote on polls', 'cancel own vote'));
+    $this->web_user2 = $this->backdropCreateUser(array('access content', 'vote on polls'));
   }
 
   /**
@@ -516,60 +516,60 @@ class PollVoteCheckHostname extends PollTestCase {
    */
   function testHostnamePollVote() {
     // Login User1.
-    $this->drupalLogin($this->web_user1);
+    $this->backdropLogin($this->web_user1);
 
     $edit = array(
       'choice' => '1',
     );
 
     // User1 vote on Poll.
-    $this->drupalPost('node/' . $this->poll_nid, $edit, t('Vote'));
+    $this->backdropPost('node/' . $this->poll_nid, $edit, t('Vote'));
     $this->assertText(t('Your vote was recorded.'), t('%user vote was recorded.', array('%user' => $this->web_user1->name)));
     $this->assertText(t('Total votes: @votes', array('@votes' => 1)), t('Vote count updated correctly.'));
 
     // Check to make sure User1 cannot vote again.
-    $this->drupalGet('node/' . $this->poll_nid);
+    $this->backdropGet('node/' . $this->poll_nid);
     $elements = $this->xpath('//input[@value="Vote"]');
     $this->assertTrue(empty($elements), t("%user is not able to vote again.", array('%user' => $this->web_user1->name)));
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(!empty($elements), t("'Cancel your vote' button appears."));
 
     // Logout User1.
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Fill the page cache by requesting the poll.
-    $this->drupalGet('node/' . $this->poll_nid);
-    $this->assertEqual($this->drupalGetHeader('x-drupal-cache'), 'MISS', t('Page was cacheable but was not in the cache.'));
-    $this->drupalGet('node/' . $this->poll_nid);
-    $this->assertEqual($this->drupalGetHeader('x-drupal-cache'), 'HIT', t('Page was cached.'));
+    $this->backdropGet('node/' . $this->poll_nid);
+    $this->assertEqual($this->backdropGetHeader('x-backdrop-cache'), 'MISS', t('Page was cacheable but was not in the cache.'));
+    $this->backdropGet('node/' . $this->poll_nid);
+    $this->assertEqual($this->backdropGetHeader('x-backdrop-cache'), 'HIT', t('Page was cached.'));
 
     // Anonymous user vote on Poll.
-    $this->drupalPost(NULL, $edit, t('Vote'));
+    $this->backdropPost(NULL, $edit, t('Vote'));
     $this->assertText(t('Your vote was recorded.'), t('Anonymous vote was recorded.'));
     $this->assertText(t('Total votes: @votes', array('@votes' => 2)), t('Vote count updated correctly.'));
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(!empty($elements), t("'Cancel your vote' button appears."));
 
     // Check to make sure Anonymous user cannot vote again.
-    $this->drupalGet('node/' . $this->poll_nid);
-    $this->assertFalse($this->drupalGetHeader('x-drupal-cache'), t('Page was not cacheable.'));
+    $this->backdropGet('node/' . $this->poll_nid);
+    $this->assertFalse($this->backdropGetHeader('x-backdrop-cache'), t('Page was not cacheable.'));
     $elements = $this->xpath('//input[@value="Vote"]');
     $this->assertTrue(empty($elements), t("Anonymous is not able to vote again."));
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(!empty($elements), t("'Cancel your vote' button appears."));
 
     // Login User2.
-    $this->drupalLogin($this->web_user2);
+    $this->backdropLogin($this->web_user2);
 
     // User2 vote on poll.
-    $this->drupalPost('node/' . $this->poll_nid, $edit, t('Vote'));
+    $this->backdropPost('node/' . $this->poll_nid, $edit, t('Vote'));
     $this->assertText(t('Your vote was recorded.'), t('%user vote was recorded.', array('%user' => $this->web_user2->name)));
     $this->assertText(t('Total votes: @votes', array('@votes' => 3)), 'Vote count updated correctly.');
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(empty($elements), t("'Cancel your vote' button does not appear."));
 
     // Logout User2.
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Change host name for anonymous users.
     db_update('poll_vote')
@@ -581,9 +581,9 @@ class PollVoteCheckHostname extends PollTestCase {
 
     // Check to make sure Anonymous user can vote again with a new session after
     // a hostname change.
-    $this->drupalGet('node/' . $this->poll_nid);
-    $this->assertEqual($this->drupalGetHeader('x-drupal-cache'), 'MISS', t('Page was cacheable but was not in the cache.'));
-    $this->drupalPost(NULL, $edit, t('Vote'));
+    $this->backdropGet('node/' . $this->poll_nid);
+    $this->assertEqual($this->backdropGetHeader('x-backdrop-cache'), 'MISS', t('Page was cacheable but was not in the cache.'));
+    $this->backdropPost(NULL, $edit, t('Vote'));
     $this->assertText(t('Your vote was recorded.'), t('%user vote was recorded.', array('%user' => $this->web_user2->name)));
     $this->assertText(t('Total votes: @votes', array('@votes' => 4)), 'Vote count updated correctly.');
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
@@ -592,18 +592,18 @@ class PollVoteCheckHostname extends PollTestCase {
     // Check to make sure Anonymous user cannot vote again with a new session,
     // and that the vote from the previous session cannot be cancelledd.
     $this->curlClose();
-    $this->drupalGet('node/' . $this->poll_nid);
-    $this->assertEqual($this->drupalGetHeader('x-drupal-cache'), 'MISS', t('Page was cacheable but was not in the cache.'));
+    $this->backdropGet('node/' . $this->poll_nid);
+    $this->assertEqual($this->backdropGetHeader('x-backdrop-cache'), 'MISS', t('Page was cacheable but was not in the cache.'));
     $elements = $this->xpath('//input[@value="Vote"]');
     $this->assertTrue(empty($elements), t('Anonymous is not able to vote again.'));
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
     $this->assertTrue(empty($elements), t("'Cancel your vote' button does not appear."));
 
     // Login User1.
-    $this->drupalLogin($this->web_user1);
+    $this->backdropLogin($this->web_user1);
 
     // Check to make sure User1 still cannot vote even after hostname changed.
-    $this->drupalGet('node/' . $this->poll_nid);
+    $this->backdropGet('node/' . $this->poll_nid);
     $elements = $this->xpath('//input[@value="Vote"]');
     $this->assertTrue(empty($elements), t("%user is not able to vote again.", array('%user' => $this->web_user1->name)));
     $elements = $this->xpath('//input[@value="Cancel your vote"]');
@@ -637,40 +637,40 @@ class PollTokenReplaceTestCase extends PollTestCase {
     $title = $this->randomName();
     $choices = $this->_generateChoices(3);
     $poll_nid = $this->pollCreate($title, $choices, FALSE);
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Create four users and have each of them vote.
-    $vote_user1 = $this->drupalCreateUser(array('vote on polls', 'access content'));
-    $this->drupalLogin($vote_user1);
+    $vote_user1 = $this->backdropCreateUser(array('vote on polls', 'access content'));
+    $this->backdropLogin($vote_user1);
     $edit = array(
       'choice' => '1',
     );
-    $this->drupalPost('node/' . $poll_nid, $edit, t('Vote'));
-    $this->drupalLogout();
+    $this->backdropPost('node/' . $poll_nid, $edit, t('Vote'));
+    $this->backdropLogout();
 
-    $vote_user2 = $this->drupalCreateUser(array('vote on polls', 'access content'));
-    $this->drupalLogin($vote_user2);
+    $vote_user2 = $this->backdropCreateUser(array('vote on polls', 'access content'));
+    $this->backdropLogin($vote_user2);
     $edit = array(
       'choice' => '1',
     );
-    $this->drupalPost('node/' . $poll_nid, $edit, t('Vote'));
-    $this->drupalLogout();
+    $this->backdropPost('node/' . $poll_nid, $edit, t('Vote'));
+    $this->backdropLogout();
 
-    $vote_user3 = $this->drupalCreateUser(array('vote on polls', 'access content'));
-    $this->drupalLogin($vote_user3);
+    $vote_user3 = $this->backdropCreateUser(array('vote on polls', 'access content'));
+    $this->backdropLogin($vote_user3);
     $edit = array(
       'choice' => '2',
     );
-    $this->drupalPost('node/' . $poll_nid, $edit, t('Vote'));
-    $this->drupalLogout();
+    $this->backdropPost('node/' . $poll_nid, $edit, t('Vote'));
+    $this->backdropLogout();
 
-    $vote_user4 = $this->drupalCreateUser(array('vote on polls', 'access content'));
-    $this->drupalLogin($vote_user4);
+    $vote_user4 = $this->backdropCreateUser(array('vote on polls', 'access content'));
+    $this->backdropLogin($vote_user4);
     $edit = array(
       'choice' => '3',
     );
-    $this->drupalPost('node/' . $poll_nid, $edit, t('Vote'));
-    $this->drupalLogout();
+    $this->backdropPost('node/' . $poll_nid, $edit, t('Vote'));
+    $this->backdropLogout();
 
     $poll = node_load($poll_nid, NULL, TRUE);
 
@@ -722,7 +722,7 @@ class PollExpirationTestCase extends PollTestCase {
 
     // Visit the poll edit page and verify that by default, expiration
     // is set to unlimited.
-    $this->drupalGet("node/$poll_nid/edit");
+    $this->backdropGet("node/$poll_nid/edit");
     $this->assertField('runtime', t('Poll expiration setting found.'));
     $elements = $this->xpath('//select[@id="edit-runtime"]/option[@selected="selected"]');
     $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == 0, t('Poll expiration set to unlimited.'));
@@ -731,18 +731,18 @@ class PollExpirationTestCase extends PollTestCase {
     $edit = array();
     $poll_expiration = 604800; // One week.
     $edit['runtime'] = $poll_expiration;
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertRaw(t('Poll %title has been updated.', array('%title' => $title)), t('Poll expiration settings saved.'));
 
     // Make sure that the changed expiration settings is kept.
-    $this->drupalGet("node/$poll_nid/edit");
+    $this->backdropGet("node/$poll_nid/edit");
     $elements = $this->xpath('//select[@id="edit-runtime"]/option[@selected="selected"]');
     $this->assertTrue(isset($elements[0]['value']) && $elements[0]['value'] == $poll_expiration, t('Poll expiration set to unlimited.'));
 
     // Force a cron run. Since the expiration date has not yet been reached,
     // the poll should remain active.
-    drupal_cron_run();
-    $this->drupalGet("node/$poll_nid/edit");
+    backdrop_cron_run();
+    $this->backdropGet("node/$poll_nid/edit");
     $elements = $this->xpath('//input[@id="edit-active-1"]');
     $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), t('Poll is still active.'));
 
@@ -756,8 +756,8 @@ class PollExpirationTestCase extends PollTestCase {
       ->execute();
 
     // Run cron and verify that the poll is now marked as "closed".
-    drupal_cron_run();
-    $this->drupalGet("node/$poll_nid/edit");
+    backdrop_cron_run();
+    $this->backdropGet("node/$poll_nid/edit");
     $elements = $this->xpath('//input[@id="edit-active-0"]');
     $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), t('Poll has expired.'));
   }
@@ -784,12 +784,12 @@ class PollDeleteChoiceTestCase extends PollTestCase {
     $this->assertTrue($poll_nid, t('Poll for choice deletion logic test created.'));
 
     // Edit the poll, and try to delete first poll choice.
-    $this->drupalGet("node/$poll_nid/edit");
+    $this->backdropGet("node/$poll_nid/edit");
     $edit['choice[chid:1][chtext]'] = '';
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Click on the poll title to go to node page.
-    $this->drupalGet('poll');
+    $this->backdropGet('poll');
     $this->clickLink($title);
 
     // Check the first poll choice is deleted, while the others remain.
@@ -822,7 +822,7 @@ class PollTranslateTestCase extends PollTestCase {
    * the vote count values are set to 0.
    */
   function testPollTranslate() {
-    $admin_user = $this->drupalCreateUser(array('administer content types', 'administer languages', 'edit any poll content', 'create poll content', 'administer nodes', 'translate content'));
+    $admin_user = $this->backdropCreateUser(array('administer content types', 'administer languages', 'edit any poll content', 'create poll content', 'administer nodes', 'translate content'));
 
     // Set up a poll with two choices.
     $title = $this->randomName();
@@ -830,34 +830,34 @@ class PollTranslateTestCase extends PollTestCase {
     $poll_nid = $this->pollCreate($title, $choices, FALSE);
     $this->assertTrue($poll_nid, t('Poll for translation logic test created.'));
 
-    $this->drupalLogout();
-    $this->drupalLogin($admin_user);
+    $this->backdropLogout();
+    $this->backdropLogin($admin_user);
 
     // Enable a second language.
-    $this->drupalGet('admin/config/regional/language');
+    $this->backdropGet('admin/config/regional/language');
     $edit = array();
     $edit['predefined_langcode'] = 'nl';
-    $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
+    $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
     $this->assertRaw(t('The language %language has been created and can now be used.', array('%language' => 'Dutch')), t('Language Dutch has been created.'));
 
     // Set "Poll" content type to use multilingual support with translation.
-    $this->drupalGet('admin/structure/types/manage/poll');
+    $this->backdropGet('admin/structure/types/manage/poll');
     $edit = array();
     $edit['node_type_language'] = TRANSLATION_ENABLED;
-    $this->drupalPost('admin/structure/types/manage/poll', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/poll', $edit, t('Save content type'));
     $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Poll')), t('Poll content type has been updated.'));
 
     // Edit poll.
-    $this->drupalGet("node/$poll_nid/edit");
+    $this->backdropGet("node/$poll_nid/edit");
     $edit = array();
     // Set the poll's first choice count to 200.
     $edit['choice[chid:1][chvotes]'] = 200;
     // Set the language to Dutch.
     $edit['langcode'] = 'nl';
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save'));
 
     // Translate the Dutch poll.
-    $this->drupalGet('node/add/poll', array('query' => array('translation' => $poll_nid, 'target' => 'en')));
+    $this->backdropGet('node/add/poll', array('query' => array('translation' => $poll_nid, 'target' => 'en')));
 
     $dutch_poll = node_load($poll_nid);
 

@@ -7,7 +7,7 @@
  * A menu (in this context) is a hierarchical collection of links, generally
  * used for navigation. This is not to be confused with the
  * @link menu Menu system @endlink of menu.inc and hook_menu(), which defines
- * page routing requests for Drupal, and also allows the defined page routing
+ * page routing requests for Backdrop, and also allows the defined page routing
  * URLs to be added to the main site navigation menu.
  */
 
@@ -25,7 +25,7 @@ function menu_help($path, $arg) {
     case 'admin/help#menu':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Menu module provides an interface for managing menus. A menu is a hierarchical collection of links, which can be within or external to the site, generally used for navigation. Each menu is rendered in a block that can be enabled and positioned through the <a href="@blocks">Blocks administration page</a>. You can view and manage menus on the <a href="@menus">Menus administration page</a>. For more information, see the online handbook entry for the <a href="@menu">Menu module</a>.', array('@blocks' => url('admin/structure/block'), '@menus' => url('admin/structure/menu'), '@menu' => 'http://drupal.org/handbook/modules/menu/')) . '</p>';
+      $output .= '<p>' . t('The Menu module provides an interface for managing menus. A menu is a hierarchical collection of links, which can be within or external to the site, generally used for navigation. Each menu is rendered in a block that can be enabled and positioned through the <a href="@blocks">Blocks administration page</a>. You can view and manage menus on the <a href="@menus">Menus administration page</a>. For more information, see the online handbook entry for the <a href="@menu">Menu module</a>.', array('@blocks' => url('admin/structure/block'), '@menus' => url('admin/structure/menu'), '@menu' => 'http://backdrop.org/handbook/modules/menu/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing menus') . '</dt>';
@@ -78,7 +78,7 @@ function menu_menu() {
   );
   $items['admin/structure/menu/add'] = array(
     'title' => 'Add menu',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_menu', 'add'),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_ACTION,
@@ -86,7 +86,7 @@ function menu_menu() {
   );
   $items['admin/structure/menu/settings'] = array(
     'title' => 'Settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_configure'),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_TASK,
@@ -95,7 +95,7 @@ function menu_menu() {
   );
   $items['admin/structure/menu/manage/%menu'] = array(
     'title' => 'Customize menu',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_overview_form', 4),
     'title callback' => 'menu_overview_title',
     'title arguments' => array(4),
@@ -110,7 +110,7 @@ function menu_menu() {
   );
   $items['admin/structure/menu/manage/%menu/add'] = array(
     'title' => 'Add link',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_item', 'add', NULL, 4),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_ACTION,
@@ -118,7 +118,7 @@ function menu_menu() {
   );
   $items['admin/structure/menu/manage/%menu/edit'] = array(
     'title' => 'Edit menu',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_menu', 'edit', 4),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_TASK,
@@ -134,14 +134,14 @@ function menu_menu() {
   );
   $items['admin/structure/menu/item/%menu_link/edit'] = array(
     'title' => 'Edit menu link',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_item', 'edit', 4, NULL),
     'access arguments' => array('administer menu'),
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/item/%menu_link/reset'] = array(
     'title' => 'Reset menu link',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_reset_item_confirm', 4),
     'access arguments' => array('administer menu'),
     'file' => 'menu.admin.inc',
@@ -228,7 +228,7 @@ function menu_load($menu_name) {
  *   Array of custom menu data.
  */
 function menu_load_all() {
-  $custom_menus = &drupal_static(__FUNCTION__);
+  $custom_menus = &backdrop_static(__FUNCTION__);
   if (!isset($custom_menus)) {
     if ($cached = cache('menu')->get('menu_custom')) {
       $custom_menus = $cached->data;
@@ -394,7 +394,7 @@ function menu_parent_options_js() {
   }
   $options = _menu_get_options(menu_get_menus(), $available_menus, array('mlid' => 0));
 
-  drupal_json_output($options);
+  backdrop_json_output($options);
 }
 
 /**
@@ -543,7 +543,7 @@ function menu_node_save($node) {
         unset($link['options']['attributes']['title']);
       }
       if (!menu_link_save($link)) {
-        drupal_set_message(t('There was an error saving the menu link.'), 'error');
+        backdrop_set_message(t('There was an error saving the menu link.'), 'error');
       }
     }
   }
@@ -646,7 +646,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#collapsed' => !$link['link_title'],
     '#group' => 'additional_settings',
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'menu') . '/menu.js'),
+      'js' => array(backdrop_get_path('module', 'menu') . '/menu.js'),
     ),
     '#tree' => TRUE,
     '#weight' => -2,
@@ -738,7 +738,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'menu') . '/menu.admin.js'),
+      'js' => array(backdrop_get_path('module', 'menu') . '/menu.admin.js'),
     ),
     '#group' => 'additional_settings',
   );
@@ -763,10 +763,10 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#attributes' => array('class' => array('menu-title-select')),
   );
 
-  // Call Drupal.menu_update_parent_list() to filter the list of
+  // Call Backdrop.menu_update_parent_list() to filter the list of
   // available default parent menu items based on the selected menus.
-  drupal_add_js(
-    '(function ($) { Drupal.menu_update_parent_list(); })(jQuery);',
+  backdrop_add_js(
+    '(function ($) { Backdrop.menu_update_parent_list(); })(jQuery);',
     array('scope' => 'footer', 'type' => 'inline')
   );
 }

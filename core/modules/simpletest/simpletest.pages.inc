@@ -68,9 +68,9 @@ function simpletest_test_form($form) {
 function theme_simpletest_test_table($variables) {
   $table = $variables['table'];
 
-  drupal_add_css(drupal_get_path('module', 'simpletest') . '/simpletest.css');
-  drupal_add_js(drupal_get_path('module', 'simpletest') . '/simpletest.js');
-  drupal_add_js('core/misc/tableselect.js');
+  backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/simpletest.css');
+  backdrop_add_js(backdrop_get_path('module', 'simpletest') . '/simpletest.js');
+  backdrop_add_js('core/misc/tableselect.js');
 
   // Create header for test selection table.
   $header = array(
@@ -148,7 +148,7 @@ function theme_simpletest_test_table($variables) {
       $test['#name'] = $test_name;
 
       $row[] = array(
-        'data' => drupal_render($test),
+        'data' => backdrop_render($test),
         'class' => array('simpletest-test-select'),
       );
       $row[] = array(
@@ -167,7 +167,7 @@ function theme_simpletest_test_table($variables) {
   }
 
   // Add js array of settings.
-  drupal_add_js(array('simpleTest' => $js), 'setting');
+  backdrop_add_js(array('simpleTest' => $js), 'setting');
 
   if (empty($rows)) {
     return '<strong>' . t('No tests to display.') . '</strong>';
@@ -191,11 +191,11 @@ function simpletest_test_form_submit($form, &$form_state) {
     }
   }
   if (count($tests_list) > 0 ) {
-    $test_id = simpletest_run_tests($tests_list, 'drupal');
+    $test_id = simpletest_run_tests($tests_list, 'backdrop');
     $form_state['redirect'] = 'admin/config/development/testing/results/' . $test_id;
   }
   else {
-    drupal_set_message(t('No test(s) selected.'), 'error');
+    backdrop_set_message(t('No test(s) selected.'), 'error');
   }
 }
 
@@ -206,13 +206,13 @@ function simpletest_result_form($form, &$form_state, $test_id) {
   // Make sure there are test results to display and a re-run is not being performed.
   $results = array();
   if (is_numeric($test_id) && !$results = simpletest_result_get($test_id)) {
-    drupal_set_message(t('No test results to display.'), 'error');
-    drupal_goto('admin/config/development/testing');
+    backdrop_set_message(t('No test results to display.'), 'error');
+    backdrop_goto('admin/config/development/testing');
     return $form;
   }
 
   // Load all classes and include CSS.
-  drupal_add_css(drupal_get_path('module', 'simpletest') . '/simpletest.css');
+  backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/simpletest.css');
 
   // Keep track of which test cases passed or failed.
   $filter = array(
@@ -254,7 +254,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
       $row = array();
       $row[] = $assertion->message;
       $row[] = $assertion->message_group;
-      $row[] = drupal_basename($assertion->file);
+      $row[] = backdrop_basename($assertion->file);
       $row[] = $assertion->line;
       $row[] = $assertion->function;
       $row[] = simpletest_result_status_image($assertion->status);
@@ -409,7 +409,7 @@ function simpletest_result_get($test_id) {
  * @return HTML image or false.
  */
 function simpletest_result_status_image($status) {
-  // $map does not use drupal_static() as its value never changes.
+  // $map does not use backdrop_static() as its value never changes.
   static $map;
 
   if (!isset($map)) {

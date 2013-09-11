@@ -28,13 +28,13 @@
 /**
  * This class provides methods specifically for testing Image's field handling.
  */
-class ImageFieldTestCase extends DrupalWebTestCase {
+class ImageFieldTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
     parent::setUp('image');
-    $this->admin_user = $this->drupalCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer nodes', 'create article content', 'edit any article content', 'delete any article content', 'administer image styles'));
-    $this->drupalLogin($this->admin_user);
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer nodes', 'create article content', 'edit any article content', 'delete any article content', 'administer image styles'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
@@ -92,8 +92,8 @@ class ImageFieldTestCase extends DrupalWebTestCase {
     $edit = array(
       'title' => $this->randomName(),
     );
-    $edit['files[' . $field_name . '_' . LANGUAGE_NONE . '_0]'] = drupal_realpath($image->uri);
-    $this->drupalPost('node/add/' . $type, $edit, t('Save'));
+    $edit['files[' . $field_name . '_' . LANGUAGE_NONE . '_0]'] = backdrop_realpath($image->uri);
+    $this->backdropPost('node/add/' . $type, $edit, t('Save'));
 
     // Retrieve ID of the newly created node from the current URL.
     $matches = array();
@@ -105,7 +105,7 @@ class ImageFieldTestCase extends DrupalWebTestCase {
 /**
  * Tests the functions for generating paths and URLs for image styles.
  */
-class ImageStylesPathAndUrlUnitTest extends DrupalWebTestCase {
+class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   protected $style_name;
   protected $image_info;
   protected $image_filepath;
@@ -182,7 +182,7 @@ class ImageStylesPathAndUrlUnitTest extends DrupalWebTestCase {
     $this->assertNotIdentical(FALSE, $status, t('Created the directory for the generated images for the test style.'));
 
     // Create a working copy of the file.
-    $files = $this->drupalGetTestFiles('image');
+    $files = $this->backdropGetTestFiles('image');
     $file = reset($files);
     $image_info = image_get_info($file->uri);
     $original_uri = file_unmanaged_copy($file->uri, $scheme . '://', FILE_EXISTS_RENAME);
@@ -192,7 +192,7 @@ class ImageStylesPathAndUrlUnitTest extends DrupalWebTestCase {
     $this->assertNotIdentical(FALSE, $original_uri, t('Created the generated image file.'));
 
     // Get the URL of a file that has not been generated and try to create it.
-    $generated_uri = $scheme . '://styles/' . $this->style_name . '/' . $scheme . '/'. drupal_basename($original_uri);
+    $generated_uri = $scheme . '://styles/' . $this->style_name . '/' . $scheme . '/'. backdrop_basename($original_uri);
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
     $generate_url = image_style_url($this->style_name, $original_uri);
 
@@ -201,15 +201,15 @@ class ImageStylesPathAndUrlUnitTest extends DrupalWebTestCase {
     }
 
     // Fetch the URL that generates the file.
-    $this->drupalGet($generate_url);
+    $this->backdropGet($generate_url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
     $this->assertRaw(file_get_contents($generated_uri), t('URL returns expected file.'));
     $generated_image_info = image_get_info($generated_uri);
-    $this->assertEqual($this->drupalGetHeader('Content-Type'), $generated_image_info['mime_type'], t('Expected Content-Type was reported.'));
-    $this->assertEqual($this->drupalGetHeader('Content-Length'), $generated_image_info['file_size'], t('Expected Content-Length was reported.'));
+    $this->assertEqual($this->backdropGetHeader('Content-Type'), $generated_image_info['mime_type'], t('Expected Content-Type was reported.'));
+    $this->assertEqual($this->backdropGetHeader('Content-Length'), $generated_image_info['file_size'], t('Expected Content-Length was reported.'));
     if ($scheme == 'private') {
-      $this->assertEqual($this->drupalGetHeader('X-Image-Owned-By'), 'image_module_test', t('Expected custom header has been added.'));
+      $this->assertEqual($this->backdropGetHeader('X-Image-Owned-By'), 'image_module_test', t('Expected custom header has been added.'));
     }
   }
 }
@@ -339,7 +339,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // First, we need to make sure we have an image in our testing
     // file directory. Copy over an image on the first run.
     if (!isset($file_path)) {
-      $files = $this->drupalGetTestFiles('image');
+      $files = $this->backdropGetTestFiles('image');
       $file = reset($files);
       $file_path = file_unmanaged_copy($file->uri);
     }
@@ -395,7 +395,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $edit = array(
       'name' => $style_name,
     );
-    $this->drupalPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
     $this->assertRaw(t('Style %name was created.', array('%name' => $style_name)), t('Image style successfully created.'));
 
     // Add effect form.
@@ -403,20 +403,20 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Add each sample effect to the style.
     foreach ($effect_edits as $effect => $edit) {
       // Add the effect.
-      $this->drupalPost($style_path, array('new' => $effect), t('Add'));
+      $this->backdropPost($style_path, array('new' => $effect), t('Add'));
       if (!empty($edit)) {
-        $this->drupalPost(NULL, $edit, t('Add effect'));
+        $this->backdropPost(NULL, $edit, t('Add effect'));
       }
     }
 
     // Edit effect form.
 
     // Revisit each form to make sure the effect was saved.
-    drupal_static_reset('image_styles');
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
 
     foreach ($style['effects'] as $ieid => $effect) {
-      $this->drupalGet($style_path . '/effects/' . $ieid);
+      $this->backdropGet($style_path . '/effects/' . $ieid);
       foreach ($effect_edits[$effect['name']] as $field => $value) {
         $this->assertFieldByName($field, $value, t('The %field field in the %effect effect has the correct value of %value.', array('%field' => $field, '%effect' => $effect['name'], '%value' => $value)));
       }
@@ -452,13 +452,13 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $image_path = $this->createSampleImage($style);
     $this->assertEqual($this->getImageCount($style), 1, t('Image style %style image %file successfully generated.', array('%style' => $style['name'], '%file' => $image_path)));
 
-    $this->drupalPost($style_path, $edit, t('Update style'));
+    $this->backdropPost($style_path, $edit, t('Update style'));
 
     // Note that after changing the style name, the style path is changed.
     $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
 
     // Check that the URL was updated.
-    $this->drupalGet($style_path);
+    $this->backdropGet($style_path);
     $this->assertResponse(200, t('Image style %original renamed to %new', array('%original' => $style['name'], '%new' => $style_name)));
 
     // Check that the image was flushed after updating the style.
@@ -467,7 +467,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $this->assertEqual($this->getImageCount($style), 0, t('Image style %style was flushed after renaming the style and updating the order of effects.', array('%style' => $style['name'])));
 
     // Load the style by the new name with the new weights.
-    drupal_static_reset('image_styles');
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name, NULL);
 
     // Confirm the new style order was saved.
@@ -489,19 +489,19 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
 
     // Test effect deletion form.
     $effect = array_pop($style['effects']);
-    $this->drupalPost($style_path . '/effects/' . $effect['ieid'] . '/delete', array(), t('Delete'));
+    $this->backdropPost($style_path . '/effects/' . $effect['ieid'] . '/delete', array(), t('Delete'));
     $this->assertRaw(t('The image effect %name has been deleted.', array('%name' => $effect['label'])), t('Image effect deleted.'));
 
     // Style deletion form.
 
     // Delete the style.
-    $this->drupalPost('admin/config/media/image-styles/delete/' . $style_name, array(), t('Delete'));
+    $this->backdropPost('admin/config/media/image-styles/delete/' . $style_name, array(), t('Delete'));
 
     // Confirm the style directory has been removed.
     $directory = file_default_scheme() . '://styles/' . $style_name;
     $this->assertFalse(is_dir($directory), t('Image style %style directory removed on style deletion.', array('%style' => $style['name'])));
 
-    drupal_static_reset('image_styles');
+    backdrop_static_reset('image_styles');
     $this->assertFalse(image_style_load($style_name), t('Image style %style successfully deleted.', array('%style' => $style['name'])));
 
   }
@@ -517,17 +517,17 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $revert_path = 'admin/config/media/image-styles/revert/' . $style_name;
 
     // Ensure deleting a default is not possible.
-    $this->drupalGet($delete_path);
+    $this->backdropGet($delete_path);
     $this->assertText(t('Page not found'), t('Default styles may not be deleted.'));
 
     // Ensure that editing a default is not possible (without overriding).
-    $this->drupalGet($edit_path);
+    $this->backdropGet($edit_path);
     $this->assertNoField('edit-name', t('Default styles may not be renamed.'));
     $this->assertNoField('edit-submit', t('Default styles may not be edited.'));
     $this->assertNoField('edit-add', t('Default styles may not have new effects added.'));
 
     // Create an image to make sure the default works before overriding.
-    drupal_static_reset('image_styles');
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
     $image_path = $this->createSampleImage($style);
     $this->assertEqual($this->getImageCount($style), 1, t('Image style %style image %file successfully generated.', array('%style' => $style['name'], '%file' => $image_path)));
@@ -538,12 +538,12 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     }
 
     // Override the default.
-    $this->drupalPost($edit_path, array(), t('Override defaults'));
+    $this->backdropPost($edit_path, array(), t('Override defaults'));
     $this->assertRaw(t('The %style style has been overridden, allowing you to change its settings.', array('%style' => $style_name)), t('Default image style may be overridden.'));
 
     // Add sample effect to the overridden style.
-    $this->drupalPost($edit_path, array('new' => 'image_desaturate'), t('Add'));
-    drupal_static_reset('image_styles');
+    $this->backdropPost($edit_path, array('new' => 'image_desaturate'), t('Add'));
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
 
     // Verify that effects attached to the style have an ieid now.
@@ -558,7 +558,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $this->assertEqual($effects[1]['name'], 'image_desaturate', t('The added effect exists in the overridden style.'));
 
     // Check that we are unable to rename an overridden style.
-    $this->drupalGet($edit_path);
+    $this->backdropGet($edit_path);
     $this->assertNoField('edit-name', t('Overridden styles may not be renamed.'));
 
     // Create an image to ensure the override works properly.
@@ -566,8 +566,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $this->assertEqual($this->getImageCount($style), 1, t('Image style %style image %file successfully generated.', array('%style' => $style['name'], '%file' => $image_path)));
 
     // Revert the image style.
-    $this->drupalPost($revert_path, array(), t('Revert'));
-    drupal_static_reset('image_styles');
+    $this->backdropPost($revert_path, array(), t('Revert'));
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
 
     // The style should now have the single effect for scale.
@@ -593,12 +593,12 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     field_update_instance($instance);
 
     // Create a new node with an image attached.
-    $test_image = current($this->drupalGetTestFiles('image'));
+    $test_image = current($this->backdropGetTestFiles('image'));
     $nid = $this->uploadNodeImage($test_image, $field_name, 'article');
     $node = node_load($nid);
 
     // Test that image is displayed using newly created style.
-    $this->drupalGet('node/' . $nid);
+    $this->backdropGet('node/' . $nid);
     $this->assertRaw(image_style_url($style_name, $node->{$field_name}[LANGUAGE_NONE][0]['uri']), t('Image displayed using style @style.', array('@style' => $style_name)));
 
     // Rename the style and make sure the image field is updated.
@@ -606,20 +606,20 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $edit = array(
       'name' => $new_style_name,
     );
-    $this->drupalPost('admin/config/media/image-styles/edit/' . $style_name, $edit, t('Update style'));
+    $this->backdropPost('admin/config/media/image-styles/edit/' . $style_name, $edit, t('Update style'));
     $this->assertText(t('Changes to the style have been saved.'), t('Style %name was renamed to %new_name.', array('%name' => $style_name, '%new_name' => $new_style_name)));
-    $this->drupalGet('node/' . $nid);
+    $this->backdropGet('node/' . $nid);
     $this->assertRaw(image_style_url($new_style_name, $node->{$field_name}[LANGUAGE_NONE][0]['uri']), t('Image displayed using style replacement style.'));
 
     // Delete the style and choose a replacement style.
     $edit = array(
       'replacement' => 'thumbnail',
     );
-    $this->drupalPost('admin/config/media/image-styles/delete/' . $new_style_name, $edit, t('Delete'));
+    $this->backdropPost('admin/config/media/image-styles/delete/' . $new_style_name, $edit, t('Delete'));
     $message = t('Style %name was deleted.', array('%name' => $new_style_name));
     $this->assertRaw($message, $message);
 
-    $this->drupalGet('node/' . $nid);
+    $this->backdropGet('node/' . $nid);
     $this->assertRaw(image_style_url('thumbnail', $node->{$field_name}[LANGUAGE_NONE][0]['uri']), t('Image displayed using style replacement style.'));
   }
 }
@@ -659,7 +659,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $field_name = strtolower($this->randomName());
     $this->createImageField($field_name, 'article', array('uri_scheme' => $scheme));
     // Create a new node with an image attached.
-    $test_image = current($this->drupalGetTestFiles('image'));
+    $test_image = current($this->backdropGetTestFiles('image'));
     $nid = $this->uploadNodeImage($test_image, $field_name, 'article');
     $node = node_load($nid, NULL, TRUE);
 
@@ -679,31 +679,31 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $instance['display']['default']['settings']['image_link'] = 'file';
     field_update_instance($instance);
     $default_output = l(theme('image', $image_info), file_create_url($image_uri), array('html' => TRUE));
-    $this->drupalGet('node/' . $nid);
+    $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image linked to file formatter displaying correctly on full node view.'));
     // Verify that the image can be downloaded.
-    $this->assertEqual(file_get_contents($test_image->uri), $this->drupalGet(file_create_url($image_uri)), t('File was downloaded successfully.'));
+    $this->assertEqual(file_get_contents($test_image->uri), $this->backdropGet(file_create_url($image_uri)), t('File was downloaded successfully.'));
     if ($scheme == 'private') {
       // Only verify HTTP headers when using private scheme and the headers are
-      // sent by Drupal.
-      $this->assertEqual($this->drupalGetHeader('Content-Type'), 'image/png; name="' . $test_image->filename . '"', t('Content-Type header was sent.'));
-      $this->assertEqual($this->drupalGetHeader('Content-Disposition'), 'inline; filename="' . $test_image->filename . '"', t('Content-Disposition header was sent.'));
-      $this->assertEqual($this->drupalGetHeader('Cache-Control'), 'private', t('Cache-Control header was sent.'));
+      // sent by Backdrop.
+      $this->assertEqual($this->backdropGetHeader('Content-Type'), 'image/png; name="' . $test_image->filename . '"', t('Content-Type header was sent.'));
+      $this->assertEqual($this->backdropGetHeader('Content-Disposition'), 'inline; filename="' . $test_image->filename . '"', t('Content-Disposition header was sent.'));
+      $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'private', t('Cache-Control header was sent.'));
 
       // Log out and try to access the file.
-      $this->drupalLogout();
-      $this->drupalGet(file_create_url($image_uri));
+      $this->backdropLogout();
+      $this->backdropGet(file_create_url($image_uri));
       $this->assertResponse('403', t('Access denied to original image as anonymous user.'));
 
       // Log in again.
-      $this->drupalLogin($this->admin_user);
+      $this->backdropLogin($this->admin_user);
     }
 
     // Test the image linked to content formatter.
     $instance['display']['default']['settings']['image_link'] = 'content';
     field_update_instance($instance);
     $default_output = l(theme('image', $image_info), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'active')));
-    $this->drupalGet('node/' . $nid);
+    $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image linked to content formatter displaying correctly on full node view.'));
 
     // Test the image style 'thumbnail' formatter.
@@ -712,18 +712,18 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     field_update_instance($instance);
     // Ensure the derivative image is generated so we do not have to deal with
     // image style callback paths.
-    $this->drupalGet(image_style_url('thumbnail', $image_uri));
+    $this->backdropGet(image_style_url('thumbnail', $image_uri));
     $image_info['uri'] = image_style_path('thumbnail', $image_uri);
     $image_info['width'] = 100;
     $image_info['height'] = 50;
     $default_output = theme('image', $image_info);
-    $this->drupalGet('node/' . $nid);
+    $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image style thumbnail formatter displaying correctly on full node view.'));
 
     if ($scheme == 'private') {
       // Log out and try to access the file.
-      $this->drupalLogout();
-      $this->drupalGet(image_style_url('thumbnail', $image_uri));
+      $this->backdropLogout();
+      $this->backdropGet(image_style_url('thumbnail', $image_uri));
       $this->assertResponse('403', t('Access denied to image style thumbnail as anonymous user.'));
     }
   }
@@ -732,7 +732,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
    * Tests for image field settings.
    */
   function testImageFieldSettings() {
-    $test_image = current($this->drupalGetTestFiles('image'));
+    $test_image = current($this->backdropGetTestFiles('image'));
     list(, $test_image_extension) = explode('.', $test_image->filename);
     $field_name = strtolower($this->randomName());
     $instance_settings = array(
@@ -749,10 +749,10 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $field = $this->createImageField($field_name, 'article', array(), $instance_settings, $widget_settings);
     $field['deleted'] = 0;
     $table = _field_sql_storage_tablename($field);
-    $schema = drupal_get_schema($table, TRUE);
+    $schema = backdrop_get_schema($table, TRUE);
     $instance = field_info_instance('node', $field_name, 'article');
 
-    $this->drupalGet('node/add/article');
+    $this->backdropGet('node/add/article');
     $this->assertText(t('Files must be less than 50 KB.'), t('Image widget max file size is displayed on article form.'));
     $this->assertText(t('Allowed file types: ' . $test_image_extension . '.'), t('Image widget allowed file types displayed on article form.'));
     $this->assertText(t('Images must be between 10x10 and 100x100 pixels.'), t('Image widget allowed resolution displayed on article form.'));
@@ -760,7 +760,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // We have to create the article first and then edit it because the alt
     // and title fields do not display until the image has been attached.
     $nid = $this->uploadNodeImage($test_image, $field_name, 'article');
-    $this->drupalGet('node/' . $nid . '/edit');
+    $this->backdropGet('node/' . $nid . '/edit');
     $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][alt]', '', t('Alt field displayed on article form.'));
     $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][title]', '', t('Title field displayed on article form.'));
     // Verify that the attached image is being previewed using the 'medium'
@@ -786,7 +786,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       $field_name . '[' . LANGUAGE_NONE . '][0][alt]' => $image_info['alt'],
       $field_name . '[' . LANGUAGE_NONE . '][0][title]' => $image_info['title'],
     );
-    $this->drupalPost('node/' . $nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $nid . '/edit', $edit, t('Save'));
     $default_output = theme('image', $image_info);
     $this->assertRaw($default_output, t('Image displayed using user supplied alt and title attributes.'));
 
@@ -796,7 +796,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       $field_name . '[' . LANGUAGE_NONE . '][0][alt]' => $this->randomName($test_size),
       $field_name . '[' . LANGUAGE_NONE . '][0][title]' => $this->randomName($test_size),
     );
-    $this->drupalPost('node/' . $nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $nid . '/edit', $edit, t('Save'));
     $this->assertRaw(t('Alternate text cannot be longer than %max characters but is currently %length characters long.', array(
       '%max' => $schema['fields'][$field_name .'_alt']['length'],
       '%length' => $test_size,
@@ -817,25 +817,25 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
 
     // Create a new node, with no images and verify that no images are
     // displayed.
-    $node = $this->drupalCreateNode(array('type' => 'article'));
-    $this->drupalGet('node/' . $node->nid);
+    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $this->backdropGet('node/' . $node->nid);
     // Verify that no image is displayed on the page by checking for the class
     // that would be used on the image field.
     $this->assertNoPattern('<div class="(.*?)field-name-' . strtr($field_name, '_', '-') . '(.*?)">', t('No image displayed when no image is attached and no default image specified.'));
 
     // Add a default image to the public imagefield instance.
-    $images = $this->drupalGetTestFiles('image');
+    $images = $this->backdropGetTestFiles('image');
     $edit = array(
-      'files[field_settings_default_image]' => drupal_realpath($images[0]->uri),
+      'files[field_settings_default_image]' => backdrop_realpath($images[0]->uri),
     );
-    $this->drupalPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
     // Clear field info cache so the new default image is detected.
     field_info_cache_clear();
     $field = field_info_field($field_name);
     $image = file_load($field['settings']['default_image']);
     $this->assertTrue($image->status == FILE_STATUS_PERMANENT, t('The default image status is permanent.'));
     $default_output = theme('image', array('uri' => $image->uri));
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertRaw($default_output, t('Default image displayed when no user supplied image is present.'));
 
     // Create a node with an image attached and ensure that the default image
@@ -848,7 +848,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       'height' => 20,
     );
     $image_output = theme('image', $image_info);
-    $this->drupalGet('node/' . $nid);
+    $this->backdropGet('node/' . $nid);
     $this->assertNoRaw($default_output, t('Default image is not displayed when user supplied image is present.'));
     $this->assertRaw($image_output, t('User supplied image is displayed.'));
 
@@ -856,7 +856,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $edit = array(
       'field[settings][default_image][fid]' => 0,
     );
-    $this->drupalPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
     // Clear field info cache so the new default image is detected.
     field_info_cache_clear();
     $field = field_info_field($field_name);
@@ -867,18 +867,18 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->createImageField($private_field_name, 'article', array('uri_scheme' => 'private'));
     // Add a default image to the new field.
     $edit = array(
-      'files[field_settings_default_image]' => drupal_realpath($images[1]->uri),
+      'files[field_settings_default_image]' => backdrop_realpath($images[1]->uri),
     );
-    $this->drupalPost('admin/structure/types/manage/article/fields/' . $private_field_name, $edit, t('Save settings'));
+    $this->backdropPost('admin/structure/types/manage/article/fields/' . $private_field_name, $edit, t('Save settings'));
     $private_field = field_info_field($private_field_name);
     $image = file_load($private_field['settings']['default_image']);
     $this->assertEqual('private', file_uri_scheme($image->uri), t('Default image uses private:// scheme.'));
     $this->assertTrue($image->status == FILE_STATUS_PERMANENT, t('The default image status is permanent.'));
     // Create a new node with no image attached and ensure that default private
     // image is displayed.
-    $node = $this->drupalCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'article'));
     $default_output = theme('image', array('uri' => $image->uri));
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertRaw($default_output, t('Default private image displayed when no user supplied image is present.'));
   }
 }
@@ -912,7 +912,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     // big, so cycle through test image files until we have what we need.
     $image_that_is_too_big = FALSE;
     $image_that_is_too_small = FALSE;
-    foreach ($this->drupalGetTestFiles('image') as $image) {
+    foreach ($this->backdropGetTestFiles('image') as $image) {
       $info = image_get_info($image->uri);
       if ($info['width'] > $max_resolution) {
         $image_that_is_too_big = $image;
@@ -934,7 +934,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
 /**
  * Tests that images have correct dimensions when styled.
  */
-class ImageDimensionsUnitTest extends DrupalWebTestCase {
+class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -953,13 +953,13 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
    */
   function testImageDimensions() {
     // Create a working copy of the file.
-    $files = $this->drupalGetTestFiles('image');
+    $files = $this->backdropGetTestFiles('image');
     $file = reset($files);
     $original_uri = file_unmanaged_copy($file->uri, 'public://', FILE_EXISTS_RENAME);
 
     // Create a style.
     $style = image_style_save(array('name' => 'test'));
-    $generated_uri = 'public://styles/test/public/'. drupal_basename($original_uri);
+    $generated_uri = 'public://styles/test/public/'. backdrop_basename($original_uri);
     $url = image_style_url('test', $original_uri);
 
     $variables = array(
@@ -984,7 +984,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" width="120" height="60" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
     $image_info = image_get_info($generated_uri);
@@ -1005,7 +1005,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" width="60" height="120" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
     $image_info = image_get_info($generated_uri);
@@ -1027,7 +1027,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" width="45" height="90" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
     $image_info = image_get_info($generated_uri);
@@ -1049,7 +1049,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" width="45" height="90" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
     $image_info = image_get_info($generated_uri);
@@ -1067,7 +1067,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" width="45" height="90" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
     $image_info = image_get_info($generated_uri);
@@ -1088,7 +1088,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
 
@@ -1108,7 +1108,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" width="30" height="30" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
     $image_info = image_get_info($generated_uri);
@@ -1129,7 +1129,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
     $img_tag = theme_image_style($variables);
     $this->assertEqual($img_tag, '<img typeof="foaf:Image" src="' . $url . '" alt="" />', t('Expected img tag was found.'));
     $this->assertFalse(file_exists($generated_uri), t('Generated file does not exist.'));
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse(200, t('Image was generated at the URL.'));
     $this->assertTrue(file_exists($generated_uri), t('Generated file does exist after we accessed it.'));
 
@@ -1152,7 +1152,7 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
 /**
  * Tests image_dimensions_scale().
  */
-class ImageDimensionsScaleTestCase extends DrupalUnitTestCase {
+class ImageDimensionsScaleTestCase extends BackdropUnitTestCase {
   public static function getInfo() {
     return array(
       'name' => 'image_dimensions_scale()',

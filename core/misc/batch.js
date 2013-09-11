@@ -3,7 +3,7 @@
 /**
  * Attaches the batch behavior to progress bars.
  */
-Drupal.behaviors.batch = {
+Backdrop.behaviors.batch = {
   attach: function (context, settings) {
     $('#progress', context).once('batch', function () {
       var holder = $(this);
@@ -21,7 +21,7 @@ Drupal.behaviors.batch = {
         $('#wait').hide();
       };
 
-      var progress = new Drupal.progressBar('updateprogress', updateCallback, 'POST', errorCallback);
+      var progress = new Backdrop.progressBar('updateprogress', updateCallback, 'POST', errorCallback);
       progress.setProgress(-1, settings.batch.initMessage);
       holder.append(progress.element);
       progress.startMonitoring(settings.batch.uri + '&op=do', 10);

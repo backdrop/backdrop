@@ -227,7 +227,7 @@ function user_schema() {
         'not null' => FALSE,
         'size' => 'big',
         'serialize' => TRUE,
-        'description' => 'A serialized array of name value pairs that are related to the user. Any form values posted during user edit are stored and are loaded into the $user object during user_load(). Use of this field is discouraged and it will likely disappear in a future version of Drupal.',
+        'description' => 'A serialized array of name value pairs that are related to the user. Any form values posted during user edit are stored and are loaded into the $user object during user_load(). Use of this field is discouraged and it will likely disappear in a future version of Backdrop.',
       ),
     ),
     'indexes' => array(
@@ -320,7 +320,7 @@ function user_install() {
     ->execute();
 
   // Sanity check to ensure the anonymous and authenticated role IDs are the
-  // same as the drupal defined constants. In certain situations, this will
+  // same as the backdrop defined constants. In certain situations, this will
   // not be true.
   if ($rid_anonymous != DRUPAL_ANONYMOUS_RID) {
     db_update('role')

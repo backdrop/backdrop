@@ -382,7 +382,7 @@ function menu_test_menu_trail_callback() {
 function menu_test_theme_page_callback($inherited = FALSE) {
   global $theme_key;
   // Initialize the theme system so that $theme_key will be populated.
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   // Now check both the requested custom theme and the actual theme being used.
   $custom_theme = menu_get_custom_theme();
   $requested_theme = empty($custom_theme) ? 'NONE' : $custom_theme;

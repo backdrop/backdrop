@@ -29,5 +29,5 @@
   <?php print $pager; ?>
 <?php else : ?>
   <h2><?php print t('Your search yielded no results');?></h2>
-  <?php print search_help('search#noresults', drupal_help_arg()); ?>
+  <?php print search_help('search#noresults', backdrop_help_arg()); ?>
 <?php endif; ?>

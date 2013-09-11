@@ -22,18 +22,18 @@
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.
  *   - controller class: The name of the class that is used to load the objects.
- *     The class has to implement the DrupalEntityControllerInterface interface.
- *     Leave blank to use the DrupalDefaultEntityController implementation.
- *   - base table: (used by DrupalDefaultEntityController) The name of the
+ *     The class has to implement the BackdropEntityControllerInterface interface.
+ *     Leave blank to use the BackdropDefaultEntityController implementation.
+ *   - base table: (used by BackdropDefaultEntityController) The name of the
  *     entity type's base table.
- *   - static cache: (used by DrupalDefaultEntityController) FALSE to disable
+ *   - static cache: (used by BackdropDefaultEntityController) FALSE to disable
  *     static caching of entities during a page request. Defaults to TRUE.
  *   - field cache: (used by Field API loading and saving of field data) FALSE
  *     to disable Field API's persistent cache of field data. Only recommended
  *     if a higher level persistent cache is available for the entity type.
  *     Defaults to TRUE.
  *   - load hook: The name of the hook which should be invoked by
- *     DrupalDefaultEntityController:attachLoad(), for example 'node_load'.
+ *     BackdropDefaultEntityController:attachLoad(), for example 'node_load'.
  *   - uri callback: A function taking an entity as argument and returning the
  *     uri elements of the entity, e.g. 'path' and 'options'. The actual entity
  *     uri can be constructed by passing these elements to url().
@@ -209,7 +209,7 @@ function hook_entity_info() {
  */
 function hook_entity_info_alter(&$entity_info) {
   // Set the controller class for nodes to an alternate implementation of the
-  // DrupalEntityController interface.
+  // BackdropEntityController interface.
   $entity_info['node']['controller class'] = 'MyCustomNodeController';
 }
 
@@ -312,7 +312,7 @@ function hook_entity_predelete($entity, $type) {
     'type' => $type,
     'id' => $id,
   );
-  drupal_write_record('example_deleted_entity_statistics', $ref_count_record);
+  backdrop_write_record('example_deleted_entity_statistics', $ref_count_record);
 }
 
 /**
@@ -375,7 +375,7 @@ function hook_entity_query_alter($query) {
  *
  * The module may add elements to $entity->content prior to rendering. The
  * structure of $entity->content is a renderable array as expected by
- * drupal_render().
+ * backdrop_render().
  *
  * @see hook_entity_view_alter()
  * @see hook_comment_view()
@@ -400,7 +400,7 @@ function hook_entity_view($entity, $type, $view_mode, $langcode) {
  * If a module wishes to act on the rendered HTML of the entity rather than the
  * structured content array, it may use this hook to add a #post_render
  * callback. Alternatively, it could also implement hook_preprocess_ENTITY().
- * See drupal_render() and theme() for details.
+ * See backdrop_render() and theme() for details.
  *
  * @param $build
  *   A renderable array representing the entity content.

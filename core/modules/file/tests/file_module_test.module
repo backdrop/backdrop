@@ -13,7 +13,7 @@ function file_module_test_menu() {
 
   $items['file/test'] = array(
     'title' => 'Managed file test',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('file_module_test_form'),
     'access arguments' => array('access content'),
   );
@@ -66,7 +66,7 @@ function file_module_test_form_submit($form, &$form_state) {
   else {
     $fid = $form['nested']['file']['#extended'] ? $form_state['values']['file']['fid'] : $form_state['values']['file'];
   }
-  drupal_set_message(t('The file id is %fid.', array('%fid' => $fid)));
+  backdrop_set_message(t('The file id is %fid.', array('%fid' => $fid)));
 }
 
 /**

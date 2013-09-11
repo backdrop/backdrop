@@ -15,7 +15,7 @@ class DatabaseTasks_sqlite extends DatabaseTasks {
   /**
    * Minimum engine version.
    *
-   * @todo: consider upping to 3.6.8 in Drupal 8 to get SAVEPOINT support.
+   * @todo: consider upping to 3.6.8 in Backdrop 8 to get SAVEPOINT support.
    */
   public function minimumVersion() {
     return '3.3.7';
@@ -29,7 +29,7 @@ class DatabaseTasks_sqlite extends DatabaseTasks {
 
     // Make the text more accurate for SQLite.
     $form['database']['#title'] = st('Database file');
-    $form['database']['#description'] = st('The absolute path to the file where @drupal data will be stored. This must be writable by the web server and should exist outside of the web root.', array('@drupal' => drupal_install_profile_distribution_name()));
+    $form['database']['#description'] = st('The absolute path to the file where @backdrop data will be stored. This must be writable by the web server and should exist outside of the web root.', array('@backdrop' => backdrop_install_profile_distribution_name()));
     $default_database = conf_path(FALSE, TRUE) . '/files/.ht.sqlite';
     $form['database']['#default_value'] = empty($database['database']) ? $default_database : $database['database'];
     return $form;

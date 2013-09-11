@@ -179,7 +179,7 @@ function list_allowed_values_setting_validate($element, &$form_state) {
         form_error($element, t('Allowed values list: each key must be a valid integer or decimal.'));
         break;
       }
-      elseif ($field_type == 'list_text' && drupal_strlen($key) > 255) {
+      elseif ($field_type == 'list_text' && backdrop_strlen($key) > 255) {
         form_error($element, t('Allowed values list: each key must be a string at most 255 characters long.'));
         break;
       }
@@ -201,8 +201,8 @@ function list_allowed_values_setting_validate($element, &$form_state) {
 * Form element #value_callback: assembles the allowed values for 'boolean' fields.
 */
 function list_boolean_allowed_values_callback($element, $input, $form_state) {
-  $on = drupal_array_get_nested_value($form_state['input'], $element['#on_parents']);
-  $off = drupal_array_get_nested_value($form_state['input'], $element['#off_parents']);
+  $on = backdrop_array_get_nested_value($form_state['input'], $element['#on_parents']);
+  $off = backdrop_array_get_nested_value($form_state['input'], $element['#off_parents']);
   return array($off, $on);
 }
 
@@ -210,7 +210,7 @@ function list_boolean_allowed_values_callback($element, $input, $form_state) {
  * Implements hook_field_update_field().
  */
 function list_field_update_field($field, $prior_field, $has_data) {
-  drupal_static_reset('list_allowed_values');
+  backdrop_static_reset('list_allowed_values');
 }
 
 /**
@@ -227,7 +227,7 @@ function list_field_update_field($field, $prior_field, $has_data) {
  *   (number or text), values of the array are the display labels.
  */
 function list_allowed_values($field) {
-  $allowed_values = &drupal_static(__FUNCTION__, array());
+  $allowed_values = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($allowed_values[$field['id']])) {
     $function = $field['settings']['allowed_values_function'];

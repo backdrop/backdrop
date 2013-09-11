@@ -374,7 +374,7 @@ function locale_language_switcher_url($type, $path) {
  * Return the session language switcher block.
  */
 function locale_language_switcher_session($type, $path) {
-  drupal_add_css(drupal_get_path('module', 'locale') . '/locale.css');
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/locale.css');
 
   $param = variable_get('locale_language_negotiation_session_param', 'language');
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;
@@ -409,11 +409,11 @@ function locale_language_switcher_session($type, $path) {
  * Rewrite URLs for the URL language provider.
  */
 function locale_language_url_rewrite_url(&$path, &$options) {
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['languages'] = &drupal_static(__FUNCTION__);
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['languages'] = &backdrop_static(__FUNCTION__);
   }
-  $languages = &$drupal_static_fast['languages'];
+  $languages = &$backdrop_static_fast['languages'];
 
   if (!isset($languages)) {
     // Get the enabled languages only.
@@ -518,7 +518,7 @@ function locale_language_url_rewrite_session(&$path, &$options) {
   // language preference even with cookies disabled.
   if ($query_rewrite) {
     if (is_string($options['query'])) {
-      $options['query'] = drupal_get_query_array($options['query']);
+      $options['query'] = backdrop_get_query_array($options['query']);
     }
     if (!isset($options['query'][$query_param])) {
       $options['query'][$query_param] = $query_value;
@@ -549,21 +549,21 @@ function locale_string_is_safe($string) {
 }
 
 /**
- * Parses a JavaScript file, extracts strings wrapped in Drupal.t() and
- * Drupal.formatPlural() and inserts them into the database.
+ * Parses a JavaScript file, extracts strings wrapped in Backdrop.t() and
+ * Backdrop.formatPlural() and inserts them into the database.
  */
 function _locale_parse_js_file($filepath) {
   // The file path might contain a query string, so make sure we only use the
   // actual file.
-  $parsed_url = drupal_parse_url($filepath);
+  $parsed_url = backdrop_parse_url($filepath);
   $filepath = $parsed_url['path'];
   // Load the JavaScript file.
   $file = file_get_contents($filepath);
 
-  // Match all calls to Drupal.t() in an array.
+  // Match all calls to Backdrop.t() in an array.
   // Note: \s also matches newlines with the 's' modifier.
   preg_match_all('~
-    [^\w]Drupal\s*\.\s*t\s*                       # match "Drupal.t" with whitespace
+    [^\w]Backdrop\s*\.\s*t\s*                       # match "Backdrop.t" with whitespace
     \(\s*                                         # match "(" argument list start
     (' . LOCALE_JS_STRING . ')\s*                 # capture string argument
     (?:,\s*' . LOCALE_JS_OBJECT . '\s*            # optionally capture str args
@@ -572,9 +572,9 @@ function _locale_parse_js_file($filepath) {
     [,\)]                                         # match ")" or "," to finish
     ~sx', $file, $t_matches);
 
-  // Match all Drupal.formatPlural() calls in another array.
+  // Match all Backdrop.formatPlural() calls in another array.
   preg_match_all('~
-    [^\w]Drupal\s*\.\s*formatPlural\s*  # match "Drupal.formatPlural" with whitespace
+    [^\w]Backdrop\s*\.\s*formatPlural\s*  # match "Backdrop.formatPlural" with whitespace
     \(                                  # match "(" argument list start
     \s*.+?\s*,\s*                       # match count argument
     (' . LOCALE_JS_STRING . ')\s*,\s*   # match singular string argument
@@ -604,7 +604,7 @@ function _locale_parse_js_file($filepath) {
 
   $matches = array();
 
-  // Add strings from Drupal.t().
+  // Add strings from Backdrop.t().
   foreach ($t_matches[1] as $key => $string) {
     $matches[] = array(
       'string'  => $string,
@@ -612,7 +612,7 @@ function _locale_parse_js_file($filepath) {
     );
   }
 
-  // Add string from Drupal.formatPlural().
+  // Add string from Backdrop.formatPlural().
   foreach ($plural_matches[1] as $key => $string) {
     $matches[] = array(
       'string'  => $string,
@@ -734,15 +734,15 @@ function _locale_rebuild_js($langcode = NULL) {
   $data = $status = '';
   if (!empty($translations)) {
 
-    $data = "Drupal.locale = { ";
+    $data = "Backdrop.locale = { ";
 
     $locale_plurals = variable_get('locale_translation_plurals', array());
     if (!empty($locale_plurals[$language->langcode])) {
       $data .= "'pluralFormula': function (\$n) { return Number({$locale_plurals[$language->langcode]['formula']}); }, ";
     }
 
-    $data .= "'strings': " . drupal_json_encode($translations) . " };";
-    $data_hash = drupal_hash_base64($data);
+    $data .= "'strings': " . backdrop_json_encode($translations) . " };";
+    $data_hash = backdrop_hash_base64($data);
   }
 
   // Construct the filepath where JS translation files are stored.
@@ -831,7 +831,7 @@ function country_get_list() {
   include_once DRUPAL_ROOT . '/core/includes/standard.inc';
   $countries = standard_country_list();
   // Allow other modules to modify the country list.
-  drupal_alter('countries', $countries);
+  backdrop_alter('countries', $countries);
   return $countries;
 }
 
@@ -855,10 +855,10 @@ function locale_date_format_save($langcode, $type, $format) {
   $is_existing = (bool) db_query_range('SELECT 1 FROM {date_format_locale} WHERE language = :langcode AND type = :type', 0, 1, array(':langcode' => $langcode, ':type' => $type))->fetchField();
   if ($is_existing) {
     $keys = array('type', 'language');
-    drupal_write_record('date_format_locale', $locale_format, $keys);
+    backdrop_write_record('date_format_locale', $locale_format, $keys);
   }
   else {
-    drupal_write_record('date_format_locale', $locale_format);
+    backdrop_write_record('date_format_locale', $locale_format);
   }
 }
 

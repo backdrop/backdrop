@@ -42,7 +42,7 @@ class FieldValidationException extends FieldException {
  * the data in SQL differently or use a completely different storage mechanism
  * such as a cloud-based database.
  *
- * Each field defines which storage backend it uses. The Drupal system variable
+ * Each field defines which storage backend it uses. The Backdrop system variable
  * 'field_storage_default' identifies the storage backend used by default.
  *
  * See @link field Field API @endlink for information about the other parts of
@@ -71,7 +71,7 @@ const FIELD_STORAGE_INSERT = 'insert';
 /**
  * @defgroup field_attach Field Attach API
  * @{
- * Operate on Field API data attached to Drupal entities.
+ * Operate on Field API data attached to Backdrop entities.
  *
  * Field Attach API functions load, store, display, generate Form API
  * structures, and perform a variety of other functions for field data attached
@@ -1194,7 +1194,7 @@ function field_attach_view($entity_type, $entity, $view_mode, $langcode = NULL) 
     'display' => $view_mode,
     'language' => $langcode,
   );
-  drupal_alter('field_attach_view', $output, $context);
+  backdrop_alter('field_attach_view', $output, $context);
 
   // Reset the _field_view_prepared flag set in field_attach_prepare_view(),
   // in case the same entity is displayed with different settings later in
@@ -1239,7 +1239,7 @@ function field_attach_preprocess($entity_type, $entity, $element, &$variables) {
     'entity' => $entity,
     'element' => $element,
   );
-  drupal_alter('field_attach_preprocess', $variables, $context);
+  backdrop_alter('field_attach_preprocess', $variables, $context);
 }
 
 /**
@@ -1278,7 +1278,7 @@ function field_attach_prepare_translation($entity_type, $entity, $langcode, $sou
     'source_entity' => $source_entity,
     'source_langcode' => $source_langcode,
   );
-  drupal_alter('field_attach_prepare_translation', $entity, $context);
+  backdrop_alter('field_attach_prepare_translation', $entity, $context);
 }
 
 /**

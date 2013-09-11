@@ -2,12 +2,12 @@
 <?php
 
 /**
- * Generate content for a Drupal 7 database to test the upgrade process.
+ * Generate content for a Backdrop 7 database to test the upgrade process.
  *
- * Run this script at the root of an existing Drupal 6 installation.
+ * Run this script at the root of an existing Backdrop 6 installation.
  * Steps to use this generation script:
- * - Install drupal 7.
- * - Run this script from your Drupal ROOT directory.
+ * - Install backdrop 7.
+ * - Run this script from your Backdrop ROOT directory.
  * - Use the dump-database-d7.sh to generate the D7 file
  *   modules/simpletest/tests/upgrade/database.filled.php
  */
@@ -25,9 +25,9 @@ $_SERVER['PHP_SELF']        = $_SERVER['REQUEST_URI'] = '/';
 $_SERVER['HTTP_USER_AGENT'] = 'console';
 $modules_to_enable          = array('path', 'poll', 'taxonomy');
 
-// Bootstrap Drupal.
+// Bootstrap Backdrop.
 include_once './includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+backdrop_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 // Enable requested modules
 require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
@@ -41,7 +41,7 @@ system_modules_submit(NULL, $form_state);
 unset($form_state);
 
 // Run cron after installing
-drupal_cron_run();
+backdrop_cron_run();
 
 // Create six users
 $query = db_insert('users')->fields(array('uid', 'name', 'pass', 'mail', 'status', 'created', 'access'));
@@ -249,14 +249,14 @@ for ($i = 0; $i < 12; $i++) {
   $choices = array_keys($node->choice);
   $original_user = $GLOBALS['user'];
   for ($v = 0; $v < ($i % 4); $v++) {
-    drupal_static_reset('ip_address');
+    backdrop_static_reset('ip_address');
     $_SERVER['REMOTE_ADDR'] = "127.0.$v.1";
-    $GLOBALS['user'] = drupal_anonymous_user();// We should have already allowed anon to vote.
+    $GLOBALS['user'] = backdrop_anonymous_user();// We should have already allowed anon to vote.
     $c = $v % $nbchoices;
     $form_state = array();
     $form_state['values']['choice'] = $choices[$c];
     $form_state['values']['op'] = t('Vote');
-    drupal_form_submit('poll_view_voting', $form_state, $node);
+    backdrop_form_submit('poll_view_voting', $form_state, $node);
   }
 }
 

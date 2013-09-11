@@ -76,17 +76,17 @@ function system_help($path, $arg) {
     case 'admin/help#system':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The System module is integral to the site, and provides basic but extensible functionality for use by other modules and themes. Some integral elements of Drupal are contained in and managed by the System module, including caching, enabling and disabling modules and themes, preparing and displaying the administrative page, and configuring fundamental site settings. A number of key system maintenance operations are also part of the System module. For more information, see the online handbook entry for <a href="@system">System module</a>.', array('@system' => 'http://drupal.org/handbook/modules/system')) . '</p>';
+      $output .= '<p>' . t('The System module is integral to the site, and provides basic but extensible functionality for use by other modules and themes. Some integral elements of Backdrop are contained in and managed by the System module, including caching, enabling and disabling modules and themes, preparing and displaying the administrative page, and configuring fundamental site settings. A number of key system maintenance operations are also part of the System module. For more information, see the online handbook entry for <a href="@system">System module</a>.', array('@system' => 'http://backdrop.org/handbook/modules/system')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing modules') . '</dt>';
-      $output .= '<dd>' . t('The System module allows users with the appropriate permissions to enable and disable modules on the <a href="@modules">Modules administration page</a>. Drupal comes with a number of core modules, and each module provides a discrete set of features and may be enabled or disabled depending on the needs of the site. Many additional modules contributed by members of the Drupal community are available for download at the <a href="@drupal-modules">Drupal.org module page</a>.', array('@modules' => url('admin/modules'), '@drupal-modules' => 'http://drupal.org/project/modules')) . '</dd>';
+      $output .= '<dd>' . t('The System module allows users with the appropriate permissions to enable and disable modules on the <a href="@modules">Modules administration page</a>. Backdrop comes with a number of core modules, and each module provides a discrete set of features and may be enabled or disabled depending on the needs of the site. Many additional modules contributed by members of the Backdrop community are available for download at the <a href="@backdrop-modules">Backdrop.org module page</a>.', array('@modules' => url('admin/modules'), '@backdrop-modules' => 'http://backdrop.org/project/modules')) . '</dd>';
       $output .= '<dt>' . t('Managing themes') . '</dt>';
-      $output .= '<dd>' . t('The System module allows users with the appropriate permissions to enable and disable themes on the <a href="@themes">Appearance administration page</a>. Themes determine the design and presentation of your site. Drupal comes packaged with several core themes, and additional contributed themes are available at the <a href="@drupal-themes">Drupal.org theme page</a>.', array('@themes' => url('admin/appearance'), '@drupal-themes' => 'http://drupal.org/project/themes')) . '</dd>';
+      $output .= '<dd>' . t('The System module allows users with the appropriate permissions to enable and disable themes on the <a href="@themes">Appearance administration page</a>. Themes determine the design and presentation of your site. Backdrop comes packaged with several core themes, and additional contributed themes are available at the <a href="@backdrop-themes">Backdrop.org theme page</a>.', array('@themes' => url('admin/appearance'), '@backdrop-themes' => 'http://backdrop.org/project/themes')) . '</dd>';
       $output .= '<dt>' . t('Managing caching') . '</dt>';
-      $output .= '<dd>' . t("The System module allows users with the appropriate permissions to manage caching on the <a href='@cache-settings'>Performance settings page</a>. Drupal has a robust caching system that allows the efficient re-use of previously-constructed web pages and web page components. Pages requested by anonymous users are stored in a compressed format; depending on your site configuration and the amount of your web traffic tied to anonymous visitors, the caching system may significantly increase the speed of your site.", array('@cache-settings' => url('admin/config/development/performance'))) . '</dd>';
+      $output .= '<dd>' . t("The System module allows users with the appropriate permissions to manage caching on the <a href='@cache-settings'>Performance settings page</a>. Backdrop has a robust caching system that allows the efficient re-use of previously-constructed web pages and web page components. Pages requested by anonymous users are stored in a compressed format; depending on your site configuration and the amount of your web traffic tied to anonymous visitors, the caching system may significantly increase the speed of your site.", array('@cache-settings' => url('admin/config/development/performance'))) . '</dd>';
       $output .= '<dt>' . t('Performing system maintenance') . '</dt>';
-      $output .= '<dd>' . t('In order for the site and its modules to continue to operate well, a set of routine administrative operations must run on a regular basis. The System module manages this task by making use of a system cron job. You can verify the status of cron tasks by visiting the <a href="@status">Status report page</a>. For more information, see the online handbook entry for <a href="@handbook">configuring cron jobs</a>. You can set up cron job by visiting <a href="@cron">Cron configuration</a> page', array('@status' => url('admin/reports/status'), '@handbook' => 'http://drupal.org/cron', '@cron' => url('admin/config/system/cron'))) . '</dd>';
+      $output .= '<dd>' . t('In order for the site and its modules to continue to operate well, a set of routine administrative operations must run on a regular basis. The System module manages this task by making use of a system cron job. You can verify the status of cron tasks by visiting the <a href="@status">Status report page</a>. For more information, see the online handbook entry for <a href="@handbook">configuring cron jobs</a>. You can set up cron job by visiting <a href="@cron">Cron configuration</a> page', array('@status' => url('admin/reports/status'), '@handbook' => 'http://backdrop.org/cron', '@cron' => url('admin/config/system/cron'))) . '</dd>';
       $output .= '<dt>' . t('Configuring basic site settings') . '</dt>';
       $output .= '<dd>' . t('The System module also handles basic configuration options for your site, including <a href="@date-time-settings">Date and time settings</a>, <a href="@file-system">File system settings</a>, <a href="@clean-url">Clean URL support</a>, <a href="@site-info">Site name and other information</a>, and a <a href="@maintenance-mode">Maintenance mode</a> for taking your site temporarily offline.', array('@date-time-settings' => url('admin/config/regional/date-time'), '@file-system' => url('admin/config/media/file-system'), '@clean-url' => url('admin/config/search/clean-urls'), '@site-info' => url('admin/config/system/site-information'), '@maintenance-mode' => url('admin/config/development/maintenance'))) . '</dd>';
       $output .= '<dt>' . t('Configuring actions') . '</dt>';
@@ -96,7 +96,7 @@ function system_help($path, $arg) {
     case 'admin/index':
       return '<p>' . t('This page shows you all available administration tasks for each module.') . '</p>';
     case 'admin/appearance':
-      $output = '<p>' . t('Set and configure the default theme for your website.  Alternative <a href="@themes">themes</a> are available.', array('@themes' => 'http://drupal.org/project/themes')) . '</p>';
+      $output = '<p>' . t('Set and configure the default theme for your website.  Alternative <a href="@themes">themes</a> are available.', array('@themes' => 'http://backdrop.org/project/themes')) . '</p>';
       return $output;
     case 'admin/appearance/settings/' . $arg[3]:
       $theme_list = list_themes();
@@ -105,7 +105,7 @@ function system_help($path, $arg) {
     case 'admin/appearance/settings':
       return '<p>' . t('These options control the default display settings for your entire site, across all themes. Unless they have been overridden by a specific theme, these settings will be used.') . '</p>';
     case 'admin/modules':
-      $output = '<p>' . t('Download additional <a href="@modules">contributed modules</a> to extend Drupal\'s functionality.', array('@modules' => 'http://drupal.org/project/modules')) . '</p>';
+      $output = '<p>' . t('Download additional <a href="@modules">contributed modules</a> to extend Backdrop\'s functionality.', array('@modules' => 'http://backdrop.org/project/modules')) . '</p>';
       if (module_exists('update')) {
         if (update_manager_access()) {
           $output .= '<p>' . t('Regularly review and install <a href="@updates">available updates</a> to maintain a secure and current site. Always run the <a href="@update-php">update script</a> each time a module is updated.', array('@update-php' => $base_url . '/core/update.php', '@updates' => url('admin/reports/updates'))) . '</p>';
@@ -122,7 +122,7 @@ function system_help($path, $arg) {
       return '<p>' . t('The uninstall process removes all data related to a module. To uninstall a module, you must first disable it on the main <a href="@modules">Modules page</a>.', array('@modules' => url('admin/modules'))) . '</p>';
     case 'admin/structure/block/manage':
       if ($arg[4] == 'system' && $arg[5] == 'powered-by') {
-        return '<p>' . t('The <em>Powered by Drupal</em> block is an optional link to the home page of the Drupal project. While there is absolutely no requirement that sites feature this link, it may be used to show support for Drupal.') . '</p>';
+        return '<p>' . t('The <em>Powered by Backdrop</em> block is an optional link to the home page of the Backdrop project. While there is absolutely no requirement that sites feature this link, it may be used to show support for Backdrop.') . '</p>';
       }
       break;
     case 'admin/config/development/maintenance':
@@ -141,7 +141,7 @@ function system_help($path, $arg) {
     case 'admin/config/people/ip-blocking':
       return '<p>' . t('IP addresses listed here are blocked from your site. Blocked addresses are completely forbidden from accessing the site and instead see a brief message explaining the situation.') . '</p>';
     case 'admin/reports/status':
-      return '<p>' . t("Here you can find a short overview of your site's parameters as well as any problems detected with your installation. It may be useful to copy and paste this information into support requests filed on drupal.org's support forums and project issue queues.") . '</p>';
+      return '<p>' . t("Here you can find a short overview of your site's parameters as well as any problems detected with your installation. It may be useful to copy and paste this information into support requests filed on backdrop.org's support forums and project issue queues.") . '</p>';
   }
 }
 
@@ -149,7 +149,7 @@ function system_help($path, $arg) {
  * Implements hook_theme().
  */
 function system_theme() {
-  return array_merge(drupal_common_theme(), array(
+  return array_merge(backdrop_common_theme(), array(
     'system_themes_page' => array(
       'variables' => array('theme_groups' => NULL),
       'file' => 'system.admin.inc',
@@ -309,21 +309,21 @@ function system_element_info() {
   );
   $types['html_tag'] = array(
     '#theme' => 'html_tag',
-    '#pre_render' => array('drupal_pre_render_conditional_comments'),
+    '#pre_render' => array('backdrop_pre_render_conditional_comments'),
     '#attributes' => array(),
     '#value' => NULL,
   );
   $types['styles'] = array(
     '#items' => array(),
-    '#pre_render' => array('drupal_pre_render_styles'),
-    '#group_callback' => 'drupal_group_css',
-    '#aggregate_callback' => 'drupal_aggregate_css',
+    '#pre_render' => array('backdrop_pre_render_styles'),
+    '#group_callback' => 'backdrop_group_css',
+    '#aggregate_callback' => 'backdrop_aggregate_css',
   );
   $types['scripts'] = array(
     '#items' => array(),
-    '#pre_render' => array('drupal_pre_render_scripts'),
-    '#group_callback' => 'drupal_group_js',
-    '#aggregate_callback' => 'drupal_aggregate_js',
+    '#pre_render' => array('backdrop_pre_render_scripts'),
+    '#group_callback' => 'backdrop_group_js',
+    '#aggregate_callback' => 'backdrop_aggregate_js',
   );
 
   // Input elements.
@@ -475,7 +475,7 @@ function system_element_info() {
   // Form structure.
   $types['item'] = array(
     '#markup' => '',
-    '#pre_render' => array('drupal_pre_render_markup'),
+    '#pre_render' => array('backdrop_pre_render_markup'),
     '#theme_wrappers' => array('form_element'),
   );
   $types['hidden'] = array(
@@ -488,10 +488,10 @@ function system_element_info() {
   );
   $types['markup'] = array(
     '#markup' => '',
-    '#pre_render' => array('drupal_pre_render_markup'),
+    '#pre_render' => array('backdrop_pre_render_markup'),
   );
   $types['link'] = array(
-    '#pre_render' => array('drupal_pre_render_link', 'drupal_pre_render_markup'),
+    '#pre_render' => array('backdrop_pre_render_link', 'backdrop_pre_render_markup'),
   );
   $types['fieldset'] = array(
     '#collapsible' => FALSE,
@@ -640,7 +640,7 @@ function system_menu() {
   $items['admin/appearance/settings'] = array(
     'title' => 'Settings',
     'description' => 'Configure default and theme specific settings.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_theme_settings'),
     'access arguments' => array('administer themes'),
     'type' => MENU_LOCAL_TASK,
@@ -669,7 +669,7 @@ function system_menu() {
   $items['admin/modules'] = array(
     'title' => 'Modules',
     'description' => 'Extend site functionality.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
     'access arguments' => array('administer modules'),
     'file' => 'system.admin.inc',
@@ -719,7 +719,7 @@ function system_menu() {
   );
   $items['admin/config/people/ip-blocking/delete/%blocked_ip'] = array(
     'title' => 'Delete IP address',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_ip_blocking_delete', 5),
     'access arguments' => array('block IP addresses'),
     'file' => 'system.admin.inc',
@@ -737,8 +737,8 @@ function system_menu() {
   );
   $items['admin/config/media/file-system'] = array(
     'title' => 'File system',
-    'description' => 'Tell Drupal where to store uploaded files and how they are accessed.',
-    'page callback' => 'drupal_get_form',
+    'description' => 'Tell Backdrop where to store uploaded files and how they are accessed.',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_file_system_settings'),
     'access arguments' => array('administer site configuration'),
     'weight' => -10,
@@ -747,7 +747,7 @@ function system_menu() {
   $items['admin/config/media/image-toolkit'] = array(
     'title' => 'Image toolkit',
     'description' => 'Choose which image toolkit to use if you have installed optional toolkits.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_image_toolkit_settings'),
     'access arguments' => array('administer site configuration'),
     'weight' => 20,
@@ -767,7 +767,7 @@ function system_menu() {
   $items['admin/config/services/rss-publishing'] = array(
     'title' => 'RSS publishing',
     'description' => 'Configure the site description, the number of items per feed and whether feeds should be titles/teasers/full-text.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_rss_feeds_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -786,7 +786,7 @@ function system_menu() {
   $items['admin/config/development/maintenance'] = array(
     'title' => 'Maintenance mode',
     'description' => 'Take the site offline for maintenance or bring it back online.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_maintenance_mode'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -795,7 +795,7 @@ function system_menu() {
   $items['admin/config/development/performance'] = array(
     'title' => 'Performance',
     'description' => 'Enable or disable page caching for anonymous users and set CSS and JS bandwidth optimization options.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_performance_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -803,8 +803,8 @@ function system_menu() {
   );
   $items['admin/config/development/logging'] = array(
     'title' => 'Logging and errors',
-    'description' => "Settings for logging and alerts modules. Various modules can route Drupal's system events to different destinations, such as syslog, database, email, etc.",
-    'page callback' => 'drupal_get_form',
+    'description' => "Settings for logging and alerts modules. Various modules can route Backdrop's system events to different destinations, such as syslog, database, email, etc.",
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_logging_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -824,7 +824,7 @@ function system_menu() {
   $items['admin/config/regional/settings'] = array(
     'title' => 'Regional settings',
     'description' => "Settings for the site's default time zone and country.",
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_regional_settings'),
     'access arguments' => array('administer site configuration'),
     'weight' => -20,
@@ -833,7 +833,7 @@ function system_menu() {
   $items['admin/config/regional/date-time'] = array(
     'title' => 'Date and time',
     'description' => 'Configure display formats for date and time.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_date_time_settings'),
     'access arguments' => array('administer site configuration'),
     'weight' => -15,
@@ -842,7 +842,7 @@ function system_menu() {
   $items['admin/config/regional/date-time/types'] = array(
     'title' => 'Types',
     'description' => 'Configure display formats for date and time.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_date_time_settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -852,7 +852,7 @@ function system_menu() {
   $items['admin/config/regional/date-time/types/add'] = array(
     'title' => 'Add date type',
     'description' => 'Add new date type.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_add_date_format_type_form'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_ACTION,
@@ -862,7 +862,7 @@ function system_menu() {
   $items['admin/config/regional/date-time/types/%/delete'] = array(
     'title' => 'Delete date type',
     'description' => 'Allow users to delete a configured date type.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_delete_date_format_type_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -880,7 +880,7 @@ function system_menu() {
     'title' => 'Add format',
     'description' => 'Allow users to add additional date formats.',
     'type' => MENU_LOCAL_ACTION,
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_configure_date_formats_form'),
     'access arguments' => array('administer site configuration'),
     'weight' => -10,
@@ -889,7 +889,7 @@ function system_menu() {
   $items['admin/config/regional/date-time/formats/%/edit'] = array(
     'title' => 'Edit date format',
     'description' => 'Allow users to edit a configured date format.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_configure_date_formats_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -897,7 +897,7 @@ function system_menu() {
   $items['admin/config/regional/date-time/formats/%/delete'] = array(
     'title' => 'Delete date format',
     'description' => 'Allow users to delete a configured date format.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_date_delete_format_form', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -923,7 +923,7 @@ function system_menu() {
   $items['admin/config/search/clean-urls'] = array(
     'title' => 'Clean URLs',
     'description' => 'Enable or disable clean URLs for your site.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_clean_url_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -931,7 +931,7 @@ function system_menu() {
   );
   $items['admin/config/search/clean-urls/check'] = array(
     'title' => 'Clean URL check',
-    'page callback' => 'drupal_json_output',
+    'page callback' => 'backdrop_json_output',
     'page arguments' => array(array('status' => TRUE)),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -965,7 +965,7 @@ function system_menu() {
   );
   $items['admin/config/system/actions/configure'] = array(
     'title' => 'Configure an advanced action',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_actions_configure'),
     'access arguments' => array('administer actions'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
@@ -974,7 +974,7 @@ function system_menu() {
   $items['admin/config/system/actions/delete/%actions'] = array(
     'title' => 'Delete action',
     'description' => 'Delete an action.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_actions_delete_form', 5),
     'access arguments' => array('administer actions'),
     'file' => 'system.admin.inc',
@@ -989,7 +989,7 @@ function system_menu() {
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
     'description' => 'Change site name, e-mail address, slogan, default front page, and number of posts per page, error pages.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -998,7 +998,7 @@ function system_menu() {
   $items['admin/config/system/cron'] = array(
     'title' => 'Cron',
     'description' => 'Manage automatic site maintenance tasks.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_cron_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
@@ -1097,83 +1097,83 @@ function _system_batch_theme() {
  * Implements hook_library_info().
  */
 function system_library_info() {
-  // Drupal's Ajax framework.
-  $libraries['drupal.ajax'] = array(
-    'title' => 'Drupal AJAX',
-    'website' => 'http://api.drupal.org/api/drupal/includes--ajax.inc/group/ajax/7',
+  // Backdrop's Ajax framework.
+  $libraries['backdrop.ajax'] = array(
+    'title' => 'Backdrop AJAX',
+    'website' => 'http://api.backdrop.org/api/backdrop/includes--ajax.inc/group/ajax/7',
     'version' => VERSION,
     'js' => array(
       'core/misc/ajax.js' => array('group' => JS_LIBRARY, 'weight' => 2),
     ),
     'dependencies' => array(
-      array('system', 'drupal.progress'),
+      array('system', 'backdrop.progress'),
     ),
   );
 
-  // Drupal's batch API.
-  $libraries['drupal.batch'] = array(
-    'title' => 'Drupal batch API',
+  // Backdrop's batch API.
+  $libraries['backdrop.batch'] = array(
+    'title' => 'Backdrop batch API',
     'version' => VERSION,
     'js' => array(
       'core/misc/batch.js' => array('group' => JS_DEFAULT, 'cache' => FALSE),
     ),
     'dependencies' => array(
-      array('system', 'drupal.progress'),
+      array('system', 'backdrop.progress'),
     ),
   );
 
-  // Drupal's progress indicator.
-  $libraries['drupal.progress'] = array(
-    'title' => 'Drupal progress indicator',
+  // Backdrop's progress indicator.
+  $libraries['backdrop.progress'] = array(
+    'title' => 'Backdrop progress indicator',
     'version' => VERSION,
     'js' => array(
       'core/misc/progress.js' => array('group' => JS_DEFAULT),
     ),
   );
 
-  // Drupal's form library.
-  $libraries['drupal.form'] = array(
-    'title' => 'Drupal form library',
+  // Backdrop's form library.
+  $libraries['backdrop.form'] = array(
+    'title' => 'Backdrop form library',
     'version' => VERSION,
     'js' => array(
       'core/misc/form.js' => array('group' => JS_LIBRARY, 'weight' => 1),
     ),
   );
 
-  // Drupal's states library.
-  $libraries['drupal.states'] = array(
-    'title' => 'Drupal states',
+  // Backdrop's states library.
+  $libraries['backdrop.states'] = array(
+    'title' => 'Backdrop states',
     'version' => VERSION,
     'js' => array(
       'core/misc/states.js' => array('group' => JS_LIBRARY, 'weight' => 1),
     ),
   );
 
-  // Drupal's collapsible fieldset.
-  $libraries['drupal.collapse'] = array(
-    'title' => 'Drupal collapsible fieldset',
+  // Backdrop's collapsible fieldset.
+  $libraries['backdrop.collapse'] = array(
+    'title' => 'Backdrop collapsible fieldset',
     'version' => VERSION,
     'js' => array(
       'core/misc/collapse.js' => array('group' => JS_DEFAULT),
     ),
     'dependencies' => array(
-      // collapse.js relies on drupalGetSummary in form.js
-      array('system', 'drupal.form'),
+      // collapse.js relies on backdropGetSummary in form.js
+      array('system', 'backdrop.form'),
     ),
   );
 
-  // Drupal's resizable textarea.
-  $libraries['drupal.textarea'] = array(
-    'title' => 'Drupal resizable textarea',
+  // Backdrop's resizable textarea.
+  $libraries['backdrop.textarea'] = array(
+    'title' => 'Backdrop resizable textarea',
     'version' => VERSION,
     'js' => array(
       'core/misc/textarea.js' => array('group' => JS_DEFAULT),
     ),
   );
 
-  // Drupal's autocomplete widget.
-  $libraries['drupal.autocomplete'] = array(
-    'title' => 'Drupal autocomplete',
+  // Backdrop's autocomplete widget.
+  $libraries['backdrop.autocomplete'] = array(
+    'title' => 'Backdrop autocomplete',
     'version' => VERSION,
     'js' => array(
       'core/misc/autocomplete.js' => array('group' => JS_DEFAULT),
@@ -1224,9 +1224,9 @@ function system_library_info() {
   );
 
   // Vertical Tabs.
-  $libraries['drupal.vertical-tabs'] = array(
+  $libraries['backdrop.vertical-tabs'] = array(
     'title' => 'Vertical Tabs',
-    'website' => 'http://drupal.org/node/323112',
+    'website' => 'http://backdrop.org/node/323112',
     'version' => '1.0',
     'js' => array(
       'core/misc/vertical-tabs.js' => array(),
@@ -1235,8 +1235,8 @@ function system_library_info() {
       'core/misc/vertical-tabs.css' => array(),
     ),
     'dependencies' => array(
-      // Vertical tabs relies on drupalGetSummary in form.js
-      array('system', 'drupal.form'),
+      // Vertical tabs relies on backdropGetSummary in form.js
+      array('system', 'backdrop.form'),
     ),
   );
 
@@ -1668,13 +1668,13 @@ function system_stream_wrappers() {
   $wrappers = array(
     'public' => array(
       'name' => t('Public files'),
-      'class' => 'DrupalPublicStreamWrapper',
+      'class' => 'BackdropPublicStreamWrapper',
       'description' => t('Public local files served by the webserver.'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     ),
     'temporary' => array(
       'name' => t('Temporary files'),
-      'class' => 'DrupalTemporaryStreamWrapper',
+      'class' => 'BackdropTemporaryStreamWrapper',
       'description' => t('Temporary local files for upload and previews.'),
       'type' => STREAM_WRAPPERS_LOCAL_HIDDEN,
     ),
@@ -1684,8 +1684,8 @@ function system_stream_wrappers() {
   if (variable_get('file_private_path', FALSE)) {
     $wrappers['private'] = array(
       'name' => t('Private files'),
-      'class' => 'DrupalPrivateStreamWrapper',
-      'description' => t('Private local files served by Drupal.'),
+      'class' => 'BackdropPrivateStreamWrapper',
+      'description' => t('Private local files served by Backdrop.'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     );
   }
@@ -1710,7 +1710,7 @@ function blocked_ip_load($iid) {
  * Menu item access callback - only admin or enabled themes can be accessed.
  */
 function _system_themes_access($theme) {
-  return user_access('administer themes') && drupal_theme_access($theme);
+  return user_access('administer themes') && backdrop_theme_access($theme);
 }
 
 /**
@@ -1718,9 +1718,9 @@ function _system_themes_access($theme) {
  * @{
  * Functions to run operations with elevated privileges via authorize.php.
  *
- * Because of the Update manager functionality included in Drupal core, there
+ * Because of the Update manager functionality included in Backdrop core, there
  * is a mechanism for running operations with elevated file system privileges,
- * the top-level authorize.php script. This script runs at a reduced Drupal
+ * the top-level authorize.php script. This script runs at a reduced Backdrop
  * bootstrap level so that it is not reliant on the entire site being
  * functional. The operations use a FileTransfer class to manipulate code
  * installed on the system as the user that owns the files, not the user that
@@ -1738,7 +1738,7 @@ function _system_themes_access($theme) {
  * or to call system_authorized_init() and then redirect to authorize.php,
  * using the URL from system_authorized_get_url(). Redirecting yourself is
  * necessary when your authorized operation is being triggered by a form
- * submit handler, since calling drupal_goto() in a submit handler is a bad
+ * submit handler, since calling backdrop_goto() in a submit handler is a bad
  * idea, and you should instead set $form_state['redirect'].
  *
  * Once the SESSION is setup for the operation and the user is redirected to
@@ -1782,7 +1782,7 @@ function system_authorized_init($callback, $file, $arguments = array(), $page_ti
   // First, figure out what file transfer backends the site supports, and put
   // all of those in the SESSION so that authorize.php has access to all of
   // them via the class autoloader, even without a full bootstrap.
-  $_SESSION['authorize_filetransfer_info'] = drupal_get_filetransfer_info();
+  $_SESSION['authorize_filetransfer_info'] = backdrop_get_filetransfer_info();
 
   // Now, define the callback to invoke.
   $_SESSION['authorize_operation'] = array(
@@ -1827,7 +1827,7 @@ function system_authorized_batch_processing_url() {
  */
 function system_authorized_run($callback, $file, $arguments = array(), $page_title = NULL) {
   system_authorized_init($callback, $file, $arguments, $page_title);
-  drupal_goto(system_authorized_get_url());
+  backdrop_goto(system_authorized_get_url());
 }
 
 /**
@@ -1898,18 +1898,18 @@ function system_filetransfer_info() {
  * Implements hook_init().
  */
 function system_init() {
-  $path = drupal_get_path('module', 'system');
+  $path = backdrop_get_path('module', 'system');
   // Add the CSS for this module. These aren't in system.info, because they
   // need to be in the CSS_SYSTEM group rather than the CSS_DEFAULT group.
-  drupal_add_css($path . '/system.base.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css($path . '/system.base.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   if (path_is_admin(current_path())) {
-    drupal_add_css($path . '/system.admin.css', array('group' => CSS_SYSTEM));
+    backdrop_add_css($path . '/system.admin.css', array('group' => CSS_SYSTEM));
   }
-  drupal_add_css($path . '/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css($path . '/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
   // Ignore slave database servers for this request.
   //
-  // In Drupal's distributed database structure, new data is written to the master
+  // In Backdrop's distributed database structure, new data is written to the master
   // and then propagated to the slave servers.  This means there is a lag
   // between when data is written to the master and when it is available on the slave.
   // At these times, we will want to avoid using a slave server temporarily.
@@ -1941,13 +1941,13 @@ function system_add_module_assets() {
     if (!empty($info['stylesheets'])) {
       foreach ($info['stylesheets'] as $media => $stylesheets) {
         foreach ($stylesheets as $stylesheet) {
-          drupal_add_css($stylesheet, array('every_page' => TRUE, 'media' => $media));
+          backdrop_add_css($stylesheet, array('every_page' => TRUE, 'media' => $media));
         }
       }
     }
     if (!empty($info['scripts'])) {
       foreach ($info['scripts'] as $script) {
-        drupal_add_js($script, array('every_page' => TRUE));
+        backdrop_add_js($script, array('every_page' => TRUE));
       }
     }
   }
@@ -1998,7 +1998,7 @@ function system_user_presave(&$edit, $account) {
 function system_user_login(&$edit, $account) {
   // If the user has a NULL time zone, notify them to set a time zone.
   if (!$account->timezone && variable_get('configurable_timezones', 1) && variable_get('empty_timezone_message', 0)) {
-    drupal_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => drupal_get_destination(), 'fragment' => 'edit-timezone')))));
+    backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
   }
 }
 
@@ -2025,7 +2025,7 @@ function system_user_timezone(&$form, &$form_state) {
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
     $form['timezone']['#description'] = t('Your time zone setting will be automatically detected if possible. Confirm the selection and click save.');
     $form['timezone']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
-    drupal_add_js('core/misc/timezone.js');
+    backdrop_add_js('core/misc/timezone.js');
   }
 }
 
@@ -2038,12 +2038,12 @@ function system_block_info() {
     // Cached elsewhere.
     'cache' => DRUPAL_NO_CACHE,
     // Auto-enable in 'content' region by default, which always exists.
-    // @see system_themes_page(), drupal_render_page()
+    // @see system_themes_page(), backdrop_render_page()
     'region' => 'content',
     'status' => 1,
   );
   $blocks['powered-by'] = array(
-    'info' => t('Powered by Drupal'),
+    'info' => t('Powered by Backdrop'),
     'weight' => '10',
     'cache' => DRUPAL_NO_CACHE,
   );
@@ -2068,7 +2068,7 @@ function system_block_info() {
 /**
  * Implements hook_block_view().
  *
- * Generate a block with a promotional link to Drupal.org and
+ * Generate a block with a promotional link to Backdrop.org and
  * all system menu blocks.
  */
 function system_block_view($delta = '') {
@@ -2076,7 +2076,7 @@ function system_block_view($delta = '') {
   switch ($delta) {
     case 'main':
       $block['subject'] = NULL;
-      $block['content'] = drupal_set_page_content();
+      $block['content'] = backdrop_set_page_content();
       return $block;
     case 'powered-by':
       $block['subject'] = NULL;
@@ -2129,7 +2129,7 @@ function system_preprocess_block(&$variables) {
  *   The menu item to be displayed.
  */
 function system_admin_menu_block($item) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
   // If we are calling this function for a menu item that corresponds to a
   // local task (for example, admin/tasks), then we want to retrieve the
   // parent item's child links, not this item's (since this item won't have
@@ -2152,7 +2152,7 @@ function system_admin_menu_block($item) {
   $query
     ->fields('ml')
     // Weight should be taken from {menu_links}, not {menu_router}.
-    ->fields('m', array_diff(drupal_schema_fields_sql('menu_router'), array('weight')))
+    ->fields('m', array_diff(backdrop_schema_fields_sql('menu_router'), array('weight')))
     ->condition('ml.plid', $item['mlid'])
     ->condition('ml.menu_name', $item['menu_name'])
     ->condition('ml.hidden', 0);
@@ -2168,7 +2168,7 @@ function system_admin_menu_block($item) {
       }
       // Prepare for sorting as in function _menu_tree_check_access().
       // The weight is offset so it is always positive, with a uniform 5-digits.
-      $key = (50000 + $link['weight']) . ' ' . drupal_strtolower($link['title']) . ' ' . $link['mlid'];
+      $key = (50000 + $link['weight']) . ' ' . backdrop_strtolower($link['title']) . ' ' . $link['mlid'];
       $content[$key] = $link;
     }
   }
@@ -2192,13 +2192,13 @@ function system_check_directory($form_element) {
     return $form_element;
   }
 
-  if (!is_dir($directory) && !drupal_mkdir($directory, NULL, TRUE)) {
+  if (!is_dir($directory) && !backdrop_mkdir($directory, NULL, TRUE)) {
     // If the directory does not exists and cannot be created.
     form_set_error($form_element['#parents'][0], t('The directory %directory does not exist and could not be created.', array('%directory' => $directory)));
     watchdog('file system', 'The directory %directory does not exist and could not be created.', array('%directory' => $directory), WATCHDOG_ERROR);
   }
 
-  if (is_dir($directory) && !is_writable($directory) && !drupal_chmod($directory)) {
+  if (is_dir($directory) && !is_writable($directory) && !backdrop_chmod($directory)) {
     // If the directory is not writable and cannot be made so.
     form_set_error($form_element['#parents'][0], t('The directory %directory exists but is not writable and could not be made writable.', array('%directory' => $directory)));
     watchdog('file system', 'The directory %directory exists but is not writable and could not be made writable.', array('%directory' => $directory), WATCHDOG_ERROR);
@@ -2374,10 +2374,10 @@ function system_get_info($type, $name = NULL) {
  */
 function _system_rebuild_module_data() {
   // Find modules
-  $modules = drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
+  $modules = backdrop_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
 
   // Include the install profile in modules that are loaded.
-  $profile = drupal_get_profile();
+  $profile = backdrop_get_profile();
   $modules[$profile] = new stdClass();
   $modules[$profile]->name = $profile;
   $modules[$profile]->uri = 'profiles/' . $profile . '/' . $profile . '.profile';
@@ -2404,7 +2404,7 @@ function _system_rebuild_module_data() {
     $modules[$key]->filename = $module->uri;
 
     // Look for the info file.
-    $module->info = drupal_parse_info_file(dirname($module->uri) . '/' . $module->name . '.info');
+    $module->info = backdrop_parse_info_file(dirname($module->uri) . '/' . $module->name . '.info');
 
     // Skip modules that don't provide info.
     if (empty($module->info)) {
@@ -2433,7 +2433,7 @@ function _system_rebuild_module_data() {
     // Invoke hook_system_info_alter() to give installed modules a chance to
     // modify the data in the .info files if necessary.
     $type = 'module';
-    drupal_alter('system_info', $modules[$key]->info, $modules[$key], $type);
+    backdrop_alter('system_info', $modules[$key]->info, $modules[$key], $type);
   }
 
   if (isset($modules[$profile])) {
@@ -2442,7 +2442,7 @@ function _system_rebuild_module_data() {
     // Add a default distribution name if the profile did not provide one. This
     // matches the default value used in install_profile_info().
     if (!isset($modules[$profile]->info['distribution_name'])) {
-      $modules[$profile]->info['distribution_name'] = 'Drupal';
+      $modules[$profile]->info['distribution_name'] = 'Backdrop';
     }
   }
 
@@ -2456,7 +2456,7 @@ function _system_rebuild_module_data() {
  *   Array of all available modules and their data.
  */
 function system_rebuild_module_data() {
-  $modules_cache = &drupal_static(__FUNCTION__);
+  $modules_cache = &backdrop_static(__FUNCTION__);
   // Only rebuild once per request. $modules and $modules_cache cannot be
   // combined into one variable, because the $modules_cache variable is reset by
   // reference from system_list_reset() during the rebuild.
@@ -2506,7 +2506,7 @@ function _system_update_bootstrap_status() {
  */
 function _system_rebuild_theme_data() {
   // Find themes
-  $themes = drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.info$/', 'themes');
+  $themes = backdrop_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.info$/', 'themes');
   // Allow modules to add further themes.
   if ($module_themes = module_invoke_all('system_theme_info')) {
     foreach ($module_themes as $name => $uri) {
@@ -2520,7 +2520,7 @@ function _system_rebuild_theme_data() {
   }
 
   // Find theme engines
-  $engines = drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.engine$/', 'themes/engines');
+  $engines = backdrop_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.engine$/', 'themes/engines');
 
   // Set defaults for theme info.
   $defaults = array(
@@ -2548,12 +2548,12 @@ function _system_rebuild_theme_data() {
   // Read info files for each theme
   foreach ($themes as $key => $theme) {
     $themes[$key]->filename = $theme->uri;
-    $themes[$key]->info = drupal_parse_info_file($theme->uri) + $defaults;
+    $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
 
     // Invoke hook_system_info_alter() to give installed modules a chance to
     // modify the data in the .info files if necessary.
     $type = 'theme';
-    drupal_alter('system_info', $themes[$key]->info, $themes[$key], $type);
+    backdrop_alter('system_info', $themes[$key]->info, $themes[$key], $type);
 
     if (!empty($themes[$key]->info['base theme'])) {
       $sub_themes[] = $key;
@@ -2588,7 +2588,7 @@ function _system_rebuild_theme_data() {
   // Now that we've established all our master themes, go back and fill in data
   // for subthemes.
   foreach ($sub_themes as $key) {
-    $themes[$key]->base_themes = drupal_find_base_themes($themes, $key);
+    $themes[$key]->base_themes = backdrop_find_base_themes($themes, $key);
     // Don't proceed if there was a problem with the root base theme.
     if (!current($themes[$key]->base_themes)) {
       continue;
@@ -2751,7 +2751,7 @@ function system_settings_form($form) {
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
 
   if (!empty($_POST) && form_get_errors()) {
-    drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
+    backdrop_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
   $form['#submit'][] = 'system_settings_form_submit';
   // By default, render the form using theme_system_settings_form().
@@ -2778,7 +2778,7 @@ function system_settings_form_submit($form, &$form_state) {
     variable_set($key, $value);
   }
 
-  drupal_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -2819,7 +2819,7 @@ function _system_sort_requirements($a, $b) {
  *   block <em>foo</em>?"). The page title will be set to this value.
  * @param $path
  *   The page to go to if the user cancels the action. This can be either:
- *   - A string containing a Drupal path.
+ *   - A string containing a Backdrop path.
  *   - An associative array with a 'path' key. Additional array values are
  *     passed as the $options parameter to l().
  *   If the 'destination' query parameter is set in the URL when viewing a
@@ -2843,7 +2843,7 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
-    $options = drupal_parse_url(urldecode($_GET['destination']));
+    $options = backdrop_parse_url(urldecode($_GET['destination']));
   }
   elseif (is_array($path)) {
     $options = $path;
@@ -2852,7 +2852,7 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
     $options = array('path' => $path);
   }
 
-  drupal_set_title($question, PASS_THROUGH);
+  backdrop_set_title($question, PASS_THROUGH);
 
   $form['#attributes']['class'][] = 'confirmation';
   $form['description'] = array('#markup' => $description);
@@ -2896,7 +2896,7 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
 function system_admin_compact_mode() {
   // PHP converts dots into underscores in cookie names to avoid problems with
   // its parser, so we use a converted cookie name.
-  return isset($_COOKIE['Drupal_visitor_admin_compact_mode']) ? $_COOKIE['Drupal_visitor_admin_compact_mode'] : variable_get('admin_compact_mode', FALSE);
+  return isset($_COOKIE['Backdrop_visitor_admin_compact_mode']) ? $_COOKIE['Backdrop_visitor_admin_compact_mode'] : variable_get('admin_compact_mode', FALSE);
 }
 
 /**
@@ -2907,7 +2907,7 @@ function system_admin_compact_mode() {
  */
 function system_admin_compact_page($mode = 'off') {
   user_cookie_save(array('admin_compact_mode' => ($mode == 'on')));
-  drupal_goto();
+  backdrop_goto();
 }
 
 /**
@@ -2922,7 +2922,7 @@ function system_admin_compact_page($mode = 'off') {
  *   An array of task links.
  */
 function system_get_module_admin_tasks($module, $info) {
-  $links = &drupal_static(__FUNCTION__);
+  $links = &backdrop_static(__FUNCTION__);
 
   if (!isset($links)) {
     $links = array();
@@ -2931,7 +2931,7 @@ function system_get_module_admin_tasks($module, $info) {
     $query
       ->fields('ml')
       // Weight should be taken from {menu_links}, not {menu_router}.
-      ->fields('m', array_diff(drupal_schema_fields_sql('menu_router'), array('weight')))
+      ->fields('m', array_diff(backdrop_schema_fields_sql('menu_router'), array('weight')))
       ->condition('ml.link_path', 'admin/%', 'LIKE')
       ->condition('ml.hidden', 0, '>=')
       ->condition('ml.module', 'system')
@@ -3009,7 +3009,7 @@ function system_cron() {
 
   // Remove temporary files that are older than DRUPAL_MAXIMUM_TEMP_FILE_AGE.
   // Use separate placeholders for the status to avoid a bug in some versions
-  // of PHP. See http://drupal.org/node/352956.
+  // of PHP. See http://backdrop.org/node/352956.
   $result = db_query('SELECT fid FROM {file_managed} WHERE status <> :permanent AND timestamp < :timestamp', array(
     ':permanent' => FILE_STATUS_PERMANENT,
     ':timestamp' => REQUEST_TIME - DRUPAL_MAXIMUM_TEMP_FILE_AGE
@@ -3040,7 +3040,7 @@ function system_cron() {
     ->execute();
   db_delete('queue')
     ->condition('created', REQUEST_TIME - 864000, '<')
-    ->condition('name', 'drupal_batch:%', 'LIKE')
+    ->condition('name', 'backdrop_batch:%', 'LIKE')
     ->execute();
 
   // Reset expired items in the default queue implementation table. If that's
@@ -3209,7 +3209,7 @@ function system_send_email_action($entity, $context) {
   }
   $params = array('context' => $context);
 
-  if (drupal_mail('system', 'action_send_email', $recipient, $language, $params)) {
+  if (backdrop_mail('system', 'action_send_email', $recipient, $language, $params)) {
     watchdog('action', 'Sent email to %recipient', array('%recipient' => $recipient));
   }
   else {
@@ -3267,7 +3267,7 @@ function system_message_action(&$entity, $context = array()) {
   }
 
   $context['message'] = token_replace(filter_xss_admin($context['message']), $context);
-  drupal_set_message($context['message']);
+  backdrop_set_message($context['message']);
 }
 
 /**
@@ -3277,7 +3277,7 @@ function system_goto_action_form($context) {
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => t('URL'),
-    '#description' => t('The URL to which the user should be redirected. This can be an internal URL like node/1234 or an external URL like http://drupal.org.'),
+    '#description' => t('The URL to which the user should be redirected. This can be an internal URL like node/1234 or an external URL like http://backdrop.org.'),
     '#default_value' => isset($context['url']) ? $context['url'] : '',
     '#required' => TRUE,
   );
@@ -3304,7 +3304,7 @@ function system_goto_action_submit($form, $form_state) {
  * @ingroup actions
  */
 function system_goto_action($entity, $context) {
-  drupal_goto(token_replace($context['url'], $context));
+  backdrop_goto(token_replace($context['url'], $context));
 }
 
 /**
@@ -3345,20 +3345,20 @@ function system_time_zones($blank = NULL) {
 /**
  * Checks whether the server is capable of issuing HTTP requests.
  *
- * The function sets the drupal_http_request_fail system variable to TRUE if
- * drupal_http_request() does not work and then the system status report page
+ * The function sets the backdrop_http_request_fail system variable to TRUE if
+ * backdrop_http_request() does not work and then the system status report page
  * will contain an error.
  *
  * @return
  *  TRUE if this installation can issue HTTP requests.
  */
 function system_check_http_request() {
-  // Try to get the content of the front page via drupal_http_request().
-  $result = drupal_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0));
-  // We only care that we get a http response - this means that Drupal
+  // Try to get the content of the front page via backdrop_http_request().
+  $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0));
+  // We only care that we get a http response - this means that Backdrop
   // can make a http request.
   $works = isset($result->code) && ($result->code >= 100) && ($result->code < 600);
-  variable_set('drupal_http_request_fails', !$works);
+  variable_set('backdrop_http_request_fails', !$works);
   return $works;
 }
 
@@ -3370,16 +3370,16 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
   // interpreted as the empty string.
   $abbreviation = $abbreviation ? $abbreviation : '';
   $timezone = timezone_name_from_abbr($abbreviation, intval($offset), $is_daylight_saving_time);
-  drupal_json_output($timezone);
+  backdrop_json_output($timezone);
 }
 
 /**
- * Returns HTML for the Powered by Drupal text.
+ * Returns HTML for the Powered by Backdrop text.
  *
  * @ingroup themeable
  */
 function theme_system_powered_by() {
-  return '<span>' . t('Powered by <a href="@poweredby">Drupal</a>', array('@poweredby' => 'http://drupal.org')) . '</span>';
+  return '<span>' . t('Powered by <a href="@poweredby">Backdrop</a>', array('@poweredby' => 'http://backdrop.org')) . '</span>';
 }
 
 /**
@@ -3390,10 +3390,10 @@ function theme_system_powered_by() {
 function theme_system_compact_link() {
   $output = '<div class="compact-link">';
   if (system_admin_compact_mode()) {
-    $output .= l(t('Show descriptions'), 'admin/compact/off', array('attributes' => array('title' => t('Expand layout to include descriptions.')), 'query' => drupal_get_destination()));
+    $output .= l(t('Show descriptions'), 'admin/compact/off', array('attributes' => array('title' => t('Expand layout to include descriptions.')), 'query' => backdrop_get_destination()));
   }
   else {
-    $output .= l(t('Hide descriptions'), 'admin/compact/on', array('attributes' => array('title' => t('Compress layout by hiding descriptions.')), 'query' => drupal_get_destination()));
+    $output .= l(t('Hide descriptions'), 'admin/compact/on', array('attributes' => array('title' => t('Compress layout by hiding descriptions.')), 'query' => backdrop_get_destination()));
   }
   $output .= '</div>';
 
@@ -3404,7 +3404,7 @@ function theme_system_compact_link() {
  * Implements hook_image_toolkits().
  */
 function system_image_toolkits() {
-  include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'system') . '/' . 'image.gd.inc';
+  include_once DRUPAL_ROOT . '/' . backdrop_get_path('module', 'system') . '/' . 'image.gd.inc';
   return array(
     'gd' => array(
       'title' => t('GD2 image manipulation toolkit'),
@@ -3414,7 +3414,7 @@ function system_image_toolkits() {
 }
 
 /**
- * Attempts to get a file using drupal_http_request and to store it locally.
+ * Attempts to get a file using backdrop_http_request and to store it locally.
  *
  * @param $url
  *   The URL of the file to grab.
@@ -3444,25 +3444,25 @@ function system_image_toolkits() {
 function system_retrieve_file($url, $destination = NULL, $managed = FALSE, $replace = FILE_EXISTS_RENAME) {
   $parsed_url = parse_url($url);
   if (!isset($destination)) {
-    $path = file_build_uri(drupal_basename($parsed_url['path']));
+    $path = file_build_uri(backdrop_basename($parsed_url['path']));
   }
   else {
-    if (is_dir(drupal_realpath($destination))) {
+    if (is_dir(backdrop_realpath($destination))) {
       // Prevent URIs with triple slashes when glueing parts together.
-      $path = str_replace('///', '//', "$destination/") . drupal_basename($parsed_url['path']);
+      $path = str_replace('///', '//', "$destination/") . backdrop_basename($parsed_url['path']);
     }
     else {
       $path = $destination;
     }
   }
-  $result = drupal_http_request($url);
+  $result = backdrop_http_request($url);
   if ($result->code != 200) {
-    drupal_set_message(t('HTTP error @errorcode occurred when trying to fetch @remote.', array('@errorcode' => $result->code, '@remote' => $url)), 'error');
+    backdrop_set_message(t('HTTP error @errorcode occurred when trying to fetch @remote.', array('@errorcode' => $result->code, '@remote' => $url)), 'error');
     return FALSE;
   }
   $local = $managed ? file_save_data($result->data, $path, $replace) : file_unmanaged_save_data($result->data, $path, $replace);
   if (!$local) {
-    drupal_set_message(t('@remote could not be saved to @path.', array('@remote' => $url, '@path' => $path)), 'error');
+    backdrop_set_message(t('@remote could not be saved to @path.', array('@remote' => $url, '@path' => $path)), 'error');
   }
 
   return $local;
@@ -3493,7 +3493,7 @@ function system_run_automated_cron() {
   if (($threshold = variable_get('cron_safe_threshold', DRUPAL_CRON_DEFAULT_THRESHOLD)) > 0 && variable_get('install_task') == 'done') {
     $cron_last = variable_get('cron_last', NULL);
     if (!isset($cron_last) || (REQUEST_TIME - $cron_last > $threshold)) {
-      drupal_cron_run();
+      backdrop_cron_run();
     }
   }
 }
@@ -3520,7 +3520,7 @@ function system_run_automated_cron() {
  *   elements is returned.
  */
 function system_get_date_types($type = NULL) {
-  $types = &drupal_static(__FUNCTION__);
+  $types = &backdrop_static(__FUNCTION__);
 
   if (!isset($types)) {
     $types = _system_date_format_types_build();
@@ -3574,7 +3574,7 @@ function system_date_formats() {
  *   type are returned, in a single associative array keyed by format string.
  */
 function system_get_date_formats($type = NULL) {
-  $date_formats = &drupal_static(__FUNCTION__);
+  $date_formats = &backdrop_static(__FUNCTION__);
 
   if (!isset($date_formats)) {
     $date_formats = _system_date_formats_build();
@@ -3604,7 +3604,7 @@ function system_get_date_format($dfid) {
  * Resets the database cache of date formats and saves all new date formats.
  */
 function system_date_formats_rebuild() {
-  drupal_static_reset('system_get_date_formats');
+  backdrop_static_reset('system_get_date_formats');
   $date_formats = system_get_date_formats(NULL);
 
   foreach ($date_formats as $type => $formats) {
@@ -3614,7 +3614,7 @@ function system_date_formats_rebuild() {
   }
 
   // Rebuild configured date formats locale list.
-  drupal_static_reset('system_date_format_locale');
+  backdrop_static_reset('system_date_format_locale');
   system_date_format_locale();
 
   _system_date_formats_build();
@@ -3637,7 +3637,7 @@ function system_date_formats_rebuild() {
  *   specified, or if no matching formats are found, returns FALSE.
  */
 function system_date_format_locale($langcode = NULL, $type = NULL) {
-  $formats = &drupal_static(__FUNCTION__);
+  $formats = &backdrop_static(__FUNCTION__);
 
   if (empty($formats)) {
     $formats = array();
@@ -3715,7 +3715,7 @@ function _system_date_format_types_build() {
   }
 
   // Allow other modules to modify these date types.
-  drupal_alter('date_format_types', $types);
+  backdrop_alter('date_format_types', $types);
 
   return $types;
 }
@@ -3802,7 +3802,7 @@ function _system_date_formats_build() {
   }
 
   // Allow other modules to modify these formats.
-  drupal_alter('date_formats', $date_formats);
+  backdrop_alter('date_formats', $date_formats);
 
   return $date_formats;
 }
@@ -3827,10 +3827,10 @@ function system_date_format_type_save($type) {
 
   // Update date_format table.
   if (!empty($type['is_new'])) {
-    drupal_write_record('date_format_type', $info);
+    backdrop_write_record('date_format_type', $info);
   }
   else {
-    drupal_write_record('date_format_type', $info, 'type');
+    backdrop_write_record('date_format_type', $info, 'type');
   }
 }
 
@@ -3877,11 +3877,11 @@ function system_date_format_save($date_format, $dfid = 0) {
 
   // Update date_format table.
   if (!empty($date_format['is_new'])) {
-    drupal_write_record('date_formats', $info);
+    backdrop_write_record('date_formats', $info);
   }
   else {
     $keys = ($dfid ? array('dfid') : array('format', 'type'));
-    drupal_write_record('date_formats', $info, $keys);
+    backdrop_write_record('date_formats', $info, $keys);
   }
 
   // Retrieve an array of language objects for enabled languages.
@@ -3899,7 +3899,7 @@ function system_date_format_save($date_format, $dfid = 0) {
         $is_existing = (bool) db_query_range('SELECT 1 FROM {date_format_locale} WHERE type = :type AND language = :language', 0, 1, array(':type' => $date_format['type'], ':language' => $langcode))->fetchField();
         if (!$is_existing) {
           $locale_format['language'] = $langcode;
-          drupal_write_record('date_format_locale', $locale_format);
+          backdrop_write_record('date_format_locale', $locale_format);
         }
       }
     }
@@ -3948,7 +3948,7 @@ function system_archiver_info() {
  * @ingroup themeable
  */
 function theme_confirm_form($variables) {
-  return drupal_render_children($variables['form']);
+  return backdrop_render_children($variables['form']);
 }
 
 /**
@@ -3964,7 +3964,7 @@ function theme_confirm_form($variables) {
  * @ingroup themeable
  */
 function theme_system_settings_form($variables) {
-  return drupal_render_children($variables['form']);
+  return backdrop_render_children($variables['form']);
 }
 
 /**
@@ -3986,12 +3986,12 @@ function theme_exposed_filters($variables) {
   if (isset($form['current'])) {
     $items = array();
     foreach (element_children($form['current']) as $key) {
-      $items[] = drupal_render($form['current'][$key]);
+      $items[] = backdrop_render($form['current'][$key]);
     }
     $output .= theme('item_list', array('items' => $items, 'attributes' => array('class' => array('clearfix', 'current-filters'))));
   }
 
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return '<div class="exposed-filters">' . $output . '</div>';
 }

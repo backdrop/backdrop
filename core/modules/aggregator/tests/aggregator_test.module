@@ -24,7 +24,7 @@ function aggregator_test_menu() {
  */
 function aggregator_test_feed($use_last_modified = FALSE, $use_etag = FALSE) {
   $last_modified = strtotime('Sun, 19 Nov 1978 05:00:00 GMT');
-  $etag = drupal_hash_base64($last_modified);
+  $etag = backdrop_hash_base64($last_modified);
 
   $if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
   $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
@@ -32,24 +32,24 @@ function aggregator_test_feed($use_last_modified = FALSE, $use_etag = FALSE) {
   // Send appropriate response. We respond with a 304 not modified on either
   // etag or on last modified.
   if ($use_last_modified) {
-    drupal_add_http_header('Last-Modified', gmdate(DATE_RFC1123, $last_modified));
+    backdrop_add_http_header('Last-Modified', gmdate(DATE_RFC1123, $last_modified));
   }
   if ($use_etag) {
-    drupal_add_http_header('ETag', $etag);
+    backdrop_add_http_header('ETag', $etag);
   }
   // Return 304 not modified if either last modified or etag match.
   if ($last_modified == $if_modified_since || $etag == $if_none_match) {
-    drupal_add_http_header('Status', '304 Not Modified');
+    backdrop_add_http_header('Status', '304 Not Modified');
     return;
   }
 
   // The following headers force validation of cache:
-  drupal_add_http_header('Expires', 'Sun, 19 Nov 1978 05:00:00 GMT');
-  drupal_add_http_header('Cache-Control', 'must-revalidate');
-  drupal_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
+  backdrop_add_http_header('Expires', 'Sun, 19 Nov 1978 05:00:00 GMT');
+  backdrop_add_http_header('Cache-Control', 'must-revalidate');
+  backdrop_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
 
   // Read actual feed from file.
-  $file_name = DRUPAL_ROOT . '/' . drupal_get_path('module', 'aggregator') . '/tests/aggregator_test_rss091.xml';
+  $file_name = DRUPAL_ROOT . '/' . backdrop_get_path('module', 'aggregator') . '/tests/aggregator_test_rss091.xml';
   $handle = fopen($file_name, 'r');
   $feed = fread($handle, filesize($file_name));
   fclose($handle);

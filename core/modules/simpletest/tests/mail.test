@@ -2,9 +2,9 @@
 
 /**
  * @file
- * Test the Drupal mailing system.
+ * Test the Backdrop mailing system.
  */
-class MailTestCase extends DrupalWebTestCase implements MailSystemInterface {
+class MailTestCase extends BackdropWebTestCase implements MailSystemInterface {
   /**
    * The most recent message that was sent through the test case.
    *
@@ -35,7 +35,7 @@ class MailTestCase extends DrupalWebTestCase implements MailSystemInterface {
     global $language_interface;
 
     // Use MailTestCase for sending a message.
-    $message = drupal_mail('simpletest', 'mail_test', 'testing@example.com', $language_interface);
+    $message = backdrop_mail('simpletest', 'mail_test', 'testing@example.com', $language_interface);
 
     // Assert whether the message was sent through the send function.
     $this->assertEqual(self::$sent_message['to'], 'testing@example.com', t('Pluggable mail system is extendable.'));
@@ -53,7 +53,7 @@ class MailTestCase extends DrupalWebTestCase implements MailSystemInterface {
     self::$sent_message = NULL;
 
     // Send a test message that simpletest_mail_alter should cancel.
-    $message = drupal_mail('simpletest', 'cancel_test', 'cancel@example.com', $language);
+    $message = backdrop_mail('simpletest', 'cancel_test', 'cancel@example.com', $language);
 
     // Assert that the message was not actually sent.
     $this->assertNull(self::$sent_message, 'Message was canceled.');
@@ -68,9 +68,9 @@ class MailTestCase extends DrupalWebTestCase implements MailSystemInterface {
     // Join the body array into one string.
     $message['body'] = implode("\n\n", $message['body']);
     // Convert any HTML to plain-text.
-    $message['body'] = drupal_html_to_text($message['body']);
+    $message['body'] = backdrop_html_to_text($message['body']);
     // Wrap the mail body for sending.
-    $message['body'] = drupal_wrap_mail($message['body']);
+    $message['body'] = backdrop_wrap_mail($message['body']);
     return $message;
   }
 
@@ -83,13 +83,13 @@ class MailTestCase extends DrupalWebTestCase implements MailSystemInterface {
 }
 
 /**
- * Unit tests for drupal_html_to_text().
+ * Unit tests for backdrop_html_to_text().
  */
-class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
+class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name'  => 'HTML to text conversion',
-      'description' => 'Tests drupal_html_to_text().',
+      'description' => 'Tests backdrop_html_to_text().',
       'group' => 'Mail',
     );
   }
@@ -114,7 +114,7 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Helper function for testing drupal_html_to_text().
+   * Helper function for testing backdrop_html_to_text().
    *
    * @param $html
    *   The source HTML string to be converted.
@@ -124,13 +124,13 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
    *   A text message to display in the assertion message.
    * @param $allowed_tags
    *   (optional) An array of allowed tags, or NULL to default to the full
-   *   set of tags supported by drupal_html_to_text().
+   *   set of tags supported by backdrop_html_to_text().
    */
   function assertHtmlToText($html, $text, $message, $allowed_tags = NULL) {
-    preg_match_all('/<([a-z0-6]+)/', drupal_strtolower($html), $matches);
+    preg_match_all('/<([a-z0-6]+)/', backdrop_strtolower($html), $matches);
     $tested_tags = implode(', ', array_unique($matches[1]));
     $message .= ' (' . $tested_tags . ')';
-    $result = drupal_html_to_text($html, $allowed_tags);
+    $result = backdrop_html_to_text($html, $allowed_tags);
     $pass = $this->assertEqual($result, $text, check_plain($message));
     $verbose = 'html = <pre>' . $this->stringToHtml($html)
       . '</pre><br />' . 'result = <pre>' . $this->stringToHtml($result)
@@ -143,90 +143,90 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test all supported tags of drupal_html_to_text().
+   * Test all supported tags of backdrop_html_to_text().
    */
   function testTags() {
     global $base_path, $base_url;
     $tests = array(
       // @todo Trailing linefeeds should be trimmed.
-      '<a href = "http://drupal.org">Drupal.org</a>' => "Drupal.org [1]\n\n[1] http://drupal.org\n",
+      '<a href = "http://backdrop.org">Backdrop.org</a>' => "Backdrop.org [1]\n\n[1] http://backdrop.org\n",
       // @todo Footer urls should be absolute.
       "<a href = \"$base_path\">Homepage</a>" => "Homepage [1]\n\n[1] $base_url/\n",
-      '<address>Drupal</address>' => "Drupal\n",
+      '<address>Backdrop</address>' => "Backdrop\n",
       // @todo The <address> tag is currently not supported.
-      '<address>Drupal</address><address>Drupal</address>' => "DrupalDrupal\n",
-      '<b>Drupal</b>' => "*Drupal*\n",
+      '<address>Backdrop</address><address>Backdrop</address>' => "BackdropBackdrop\n",
+      '<b>Backdrop</b>' => "*Backdrop*\n",
       // @todo There should be a space between the '>' and the text.
-      '<blockquote>Drupal</blockquote>' => ">Drupal\n",
-      '<blockquote>Drupal</blockquote><blockquote>Drupal</blockquote>' => ">Drupal\n>Drupal\n",
-      '<br />Drupal<br />Drupal<br /><br />Drupal' => "Drupal\nDrupal\nDrupal\n",
-      '<br/>Drupal<br/>Drupal<br/><br/>Drupal' => "Drupal\nDrupal\nDrupal\n",
+      '<blockquote>Backdrop</blockquote>' => ">Backdrop\n",
+      '<blockquote>Backdrop</blockquote><blockquote>Backdrop</blockquote>' => ">Backdrop\n>Backdrop\n",
+      '<br />Backdrop<br />Backdrop<br /><br />Backdrop' => "Backdrop\nBackdrop\nBackdrop\n",
+      '<br/>Backdrop<br/>Backdrop<br/><br/>Backdrop' => "Backdrop\nBackdrop\nBackdrop\n",
       // @todo There should be two line breaks before the paragraph.
-      '<br/>Drupal<br/>Drupal<br/><br/>Drupal<p>Drupal</p>' => "Drupal\nDrupal\nDrupal\nDrupal\n\n",
-      '<div>Drupal</div>' => "Drupal\n",
+      '<br/>Backdrop<br/>Backdrop<br/><br/>Backdrop<p>Backdrop</p>' => "Backdrop\nBackdrop\nBackdrop\nBackdrop\n\n",
+      '<div>Backdrop</div>' => "Backdrop\n",
       // @todo The <div> tag is currently not supported.
-      '<div>Drupal</div><div>Drupal</div>' => "DrupalDrupal\n",
-      '<em>Drupal</em>' => "/Drupal/\n",
-      '<h1>Drupal</h1>' => "======== DRUPAL ==============================================================\n\n",
-      '<h1>Drupal</h1><p>Drupal</p>' => "======== DRUPAL ==============================================================\n\nDrupal\n\n",
-      '<h2>Drupal</h2>' => "-------- DRUPAL --------------------------------------------------------------\n\n",
-      '<h2>Drupal</h2><p>Drupal</p>' => "-------- DRUPAL --------------------------------------------------------------\n\nDrupal\n\n",
-      '<h3>Drupal</h3>' => ".... Drupal\n\n",
-      '<h3>Drupal</h3><p>Drupal</p>' => ".... Drupal\n\nDrupal\n\n",
-      '<h4>Drupal</h4>' => ".. Drupal\n\n",
-      '<h4>Drupal</h4><p>Drupal</p>' => ".. Drupal\n\nDrupal\n\n",
-      '<h5>Drupal</h5>' => "Drupal\n\n",
-      '<h5>Drupal</h5><p>Drupal</p>' => "Drupal\n\nDrupal\n\n",
-      '<h6>Drupal</h6>' => "Drupal\n\n",
-      '<h6>Drupal</h6><p>Drupal</p>' => "Drupal\n\nDrupal\n\n",
-      '<hr />Drupal<hr />' => "------------------------------------------------------------------------------\nDrupal\n------------------------------------------------------------------------------\n",
-      '<hr/>Drupal<hr/>' => "------------------------------------------------------------------------------\nDrupal\n------------------------------------------------------------------------------\n",
-      '<hr/>Drupal<hr/><p>Drupal</p>' => "------------------------------------------------------------------------------\nDrupal\n------------------------------------------------------------------------------\nDrupal\n\n",
-      '<i>Drupal</i>' => "/Drupal/\n",
-      '<p>Drupal</p>' => "Drupal\n\n",
-      '<p>Drupal</p><p>Drupal</p>' => "Drupal\n\nDrupal\n\n",
-      '<strong>Drupal</strong>' => "*Drupal*\n",
+      '<div>Backdrop</div><div>Backdrop</div>' => "BackdropBackdrop\n",
+      '<em>Backdrop</em>' => "/Backdrop/\n",
+      '<h1>Backdrop</h1>' => "======== DRUPAL ==============================================================\n\n",
+      '<h1>Backdrop</h1><p>Backdrop</p>' => "======== DRUPAL ==============================================================\n\nBackdrop\n\n",
+      '<h2>Backdrop</h2>' => "-------- DRUPAL --------------------------------------------------------------\n\n",
+      '<h2>Backdrop</h2><p>Backdrop</p>' => "-------- DRUPAL --------------------------------------------------------------\n\nBackdrop\n\n",
+      '<h3>Backdrop</h3>' => ".... Backdrop\n\n",
+      '<h3>Backdrop</h3><p>Backdrop</p>' => ".... Backdrop\n\nBackdrop\n\n",
+      '<h4>Backdrop</h4>' => ".. Backdrop\n\n",
+      '<h4>Backdrop</h4><p>Backdrop</p>' => ".. Backdrop\n\nBackdrop\n\n",
+      '<h5>Backdrop</h5>' => "Backdrop\n\n",
+      '<h5>Backdrop</h5><p>Backdrop</p>' => "Backdrop\n\nBackdrop\n\n",
+      '<h6>Backdrop</h6>' => "Backdrop\n\n",
+      '<h6>Backdrop</h6><p>Backdrop</p>' => "Backdrop\n\nBackdrop\n\n",
+      '<hr />Backdrop<hr />' => "------------------------------------------------------------------------------\nBackdrop\n------------------------------------------------------------------------------\n",
+      '<hr/>Backdrop<hr/>' => "------------------------------------------------------------------------------\nBackdrop\n------------------------------------------------------------------------------\n",
+      '<hr/>Backdrop<hr/><p>Backdrop</p>' => "------------------------------------------------------------------------------\nBackdrop\n------------------------------------------------------------------------------\nBackdrop\n\n",
+      '<i>Backdrop</i>' => "/Backdrop/\n",
+      '<p>Backdrop</p>' => "Backdrop\n\n",
+      '<p>Backdrop</p><p>Backdrop</p>' => "Backdrop\n\nBackdrop\n\n",
+      '<strong>Backdrop</strong>' => "*Backdrop*\n",
       // @todo Tables are currently not supported.
-      '<table><tr><td>Drupal</td><td>Drupal</td></tr><tr><td>Drupal</td><td>Drupal</td></tr></table>' => "DrupalDrupalDrupalDrupal\n",
-      '<table><tr><td>Drupal</td></tr></table><p>Drupal</p>' => "Drupal\nDrupal\n\n",
+      '<table><tr><td>Backdrop</td><td>Backdrop</td></tr><tr><td>Backdrop</td><td>Backdrop</td></tr></table>' => "BackdropBackdropBackdropBackdrop\n",
+      '<table><tr><td>Backdrop</td></tr></table><p>Backdrop</p>' => "Backdrop\nBackdrop\n\n",
       // @todo The <u> tag is currently not supported.
-      '<u>Drupal</u>' => "Drupal\n",
-      '<ul><li>Drupal</li></ul>' => " * Drupal\n\n",
-      '<ul><li>Drupal <em>Drupal</em> Drupal</li></ul>' => " * Drupal /Drupal/ Drupal\n\n",
+      '<u>Backdrop</u>' => "Backdrop\n",
+      '<ul><li>Backdrop</li></ul>' => " * Backdrop\n\n",
+      '<ul><li>Backdrop <em>Backdrop</em> Backdrop</li></ul>' => " * Backdrop /Backdrop/ Backdrop\n\n",
       // @todo Lines containing nothing but spaces should be trimmed.
-      '<ul><li>Drupal</li><li><ol><li>Drupal</li><li>Drupal</li></ol></li></ul>' => " * Drupal\n *  1) Drupal\n    2) Drupal\n   \n\n",
-      '<ul><li>Drupal</li><li><ol><li>Drupal</li></ol></li><li>Drupal</li></ul>' => " * Drupal\n *  1) Drupal\n   \n * Drupal\n\n",
-      '<ul><li>Drupal</li><li>Drupal</li></ul>' => " * Drupal\n * Drupal\n\n",
-      '<ul><li>Drupal</li></ul><p>Drupal</p>' => " * Drupal\n\nDrupal\n\n",
-      '<ol><li>Drupal</li></ol>' => " 1) Drupal\n\n",
-      '<ol><li>Drupal</li><li><ul><li>Drupal</li><li>Drupal</li></ul></li></ol>' => " 1) Drupal\n 2)  * Drupal\n     * Drupal\n    \n\n",
-      '<ol><li>Drupal</li><li>Drupal</li></ol>' => " 1) Drupal\n 2) Drupal\n\n",
-      '<ol>Drupal</ol>' => "Drupal\n\n",
-      '<ol><li>Drupal</li></ol><p>Drupal</p>' => " 1) Drupal\n\nDrupal\n\n",
-      '<dl><dt>Drupal</dt></dl>' => "Drupal\n\n",
-      '<dl><dt>Drupal</dt><dd>Drupal</dd></dl>' => "Drupal\n    Drupal\n\n",
-      '<dl><dt>Drupal</dt><dd>Drupal</dd><dt>Drupal</dt><dd>Drupal</dd></dl>' => "Drupal\n    Drupal\nDrupal\n    Drupal\n\n",
-      '<dl><dt>Drupal</dt><dd>Drupal</dd></dl><p>Drupal</p>' => "Drupal\n    Drupal\n\nDrupal\n\n",
-      '<dl><dt>Drupal<dd>Drupal</dl>' => "Drupal\n    Drupal\n\n",
-      '<dl><dt>Drupal</dt></dl><p>Drupal</p>' => "Drupal\n\nDrupal\n\n",
+      '<ul><li>Backdrop</li><li><ol><li>Backdrop</li><li>Backdrop</li></ol></li></ul>' => " * Backdrop\n *  1) Backdrop\n    2) Backdrop\n   \n\n",
+      '<ul><li>Backdrop</li><li><ol><li>Backdrop</li></ol></li><li>Backdrop</li></ul>' => " * Backdrop\n *  1) Backdrop\n   \n * Backdrop\n\n",
+      '<ul><li>Backdrop</li><li>Backdrop</li></ul>' => " * Backdrop\n * Backdrop\n\n",
+      '<ul><li>Backdrop</li></ul><p>Backdrop</p>' => " * Backdrop\n\nBackdrop\n\n",
+      '<ol><li>Backdrop</li></ol>' => " 1) Backdrop\n\n",
+      '<ol><li>Backdrop</li><li><ul><li>Backdrop</li><li>Backdrop</li></ul></li></ol>' => " 1) Backdrop\n 2)  * Backdrop\n     * Backdrop\n    \n\n",
+      '<ol><li>Backdrop</li><li>Backdrop</li></ol>' => " 1) Backdrop\n 2) Backdrop\n\n",
+      '<ol>Backdrop</ol>' => "Backdrop\n\n",
+      '<ol><li>Backdrop</li></ol><p>Backdrop</p>' => " 1) Backdrop\n\nBackdrop\n\n",
+      '<dl><dt>Backdrop</dt></dl>' => "Backdrop\n\n",
+      '<dl><dt>Backdrop</dt><dd>Backdrop</dd></dl>' => "Backdrop\n    Backdrop\n\n",
+      '<dl><dt>Backdrop</dt><dd>Backdrop</dd><dt>Backdrop</dt><dd>Backdrop</dd></dl>' => "Backdrop\n    Backdrop\nBackdrop\n    Backdrop\n\n",
+      '<dl><dt>Backdrop</dt><dd>Backdrop</dd></dl><p>Backdrop</p>' => "Backdrop\n    Backdrop\n\nBackdrop\n\n",
+      '<dl><dt>Backdrop<dd>Backdrop</dl>' => "Backdrop\n    Backdrop\n\n",
+      '<dl><dt>Backdrop</dt></dl><p>Backdrop</p>' => "Backdrop\n\nBackdrop\n\n",
       // @todo Again, lines containing only spaces should be trimmed.
-      '<ul><li>Drupal</li><li><dl><dt>Drupal</dt><dd>Drupal</dd><dt>Drupal</dt><dd>Drupal</dd></dl></li><li>Drupal</li></ul>' => " * Drupal\n * Drupal\n       Drupal\n   Drupal\n       Drupal\n   \n * Drupal\n\n",
+      '<ul><li>Backdrop</li><li><dl><dt>Backdrop</dt><dd>Backdrop</dd><dt>Backdrop</dt><dd>Backdrop</dd></dl></li><li>Backdrop</li></ul>' => " * Backdrop\n * Backdrop\n       Backdrop\n   Backdrop\n       Backdrop\n   \n * Backdrop\n\n",
       // Tests malformed HTML tags.
-      '<br>Drupal<br>Drupal' => "Drupal\nDrupal\n",
-      '<hr>Drupal<hr>Drupal' => "------------------------------------------------------------------------------\nDrupal\n------------------------------------------------------------------------------\nDrupal\n",
-      '<ol><li>Drupal<li>Drupal</ol>' => " 1) Drupal\n 2) Drupal\n\n",
-      '<ul><li>Drupal <em>Drupal</em> Drupal</ul></ul>' => " * Drupal /Drupal/ Drupal\n\n",
-      '<ul><li>Drupal<li>Drupal</ol>' => " * Drupal\n * Drupal\n\n",
-      '<ul><li>Drupal<li>Drupal</ul>' => " * Drupal\n * Drupal\n\n",
-      '<ul>Drupal</ul>' => "Drupal\n\n",
-      'Drupal</ul></ol></dl><li>Drupal' => "Drupal\n * Drupal\n",
-      '<dl>Drupal</dl>' => "Drupal\n\n",
-      '<dl>Drupal</dl><p>Drupal</p>' => "Drupal\n\nDrupal\n\n",
-      '<dt>Drupal</dt>' => "Drupal\n",
+      '<br>Backdrop<br>Backdrop' => "Backdrop\nBackdrop\n",
+      '<hr>Backdrop<hr>Backdrop' => "------------------------------------------------------------------------------\nBackdrop\n------------------------------------------------------------------------------\nBackdrop\n",
+      '<ol><li>Backdrop<li>Backdrop</ol>' => " 1) Backdrop\n 2) Backdrop\n\n",
+      '<ul><li>Backdrop <em>Backdrop</em> Backdrop</ul></ul>' => " * Backdrop /Backdrop/ Backdrop\n\n",
+      '<ul><li>Backdrop<li>Backdrop</ol>' => " * Backdrop\n * Backdrop\n\n",
+      '<ul><li>Backdrop<li>Backdrop</ul>' => " * Backdrop\n * Backdrop\n\n",
+      '<ul>Backdrop</ul>' => "Backdrop\n\n",
+      'Backdrop</ul></ol></dl><li>Backdrop' => "Backdrop\n * Backdrop\n",
+      '<dl>Backdrop</dl>' => "Backdrop\n\n",
+      '<dl>Backdrop</dl><p>Backdrop</p>' => "Backdrop\n\nBackdrop\n\n",
+      '<dt>Backdrop</dt>' => "Backdrop\n",
       // Tests some unsupported HTML tags.
-      '<html>Drupal</html>' => "Drupal\n",
+      '<html>Backdrop</html>' => "Backdrop\n",
       // @todo Perhaps the contents of <script> tags should be dropped.
-      '<script type="text/javascript">Drupal</script>' => "Drupal\n",
+      '<script type="text/javascript">Backdrop</script>' => "Backdrop\n",
       // A couple of tests for Unicode characters.
       '<q>I <em>will</em> be back…</q>' => "I /will/ be back…\n",
       'FrançAIS is ÜBER-åwesome' => "FrançAIS is ÜBER-åwesome\n",
@@ -238,33 +238,33 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test $allowed_tags argument of drupal_html_to_text().
+   * Test $allowed_tags argument of backdrop_html_to_text().
    */
-  function testDrupalHtmlToTextArgs() {
-    // The second parameter of drupal_html_to_text() overrules the allowed tags.
+  function testBackdropHtmlToTextArgs() {
+    // The second parameter of backdrop_html_to_text() overrules the allowed tags.
     $this->assertHtmlToText(
-      'Drupal <b>Drupal</b> Drupal',
-      "Drupal *Drupal* Drupal\n",
+      'Backdrop <b>Backdrop</b> Backdrop',
+      "Backdrop *Backdrop* Backdrop\n",
       'Allowed <b> tag found',
       array('b')
     );
     $this->assertHtmlToText(
-      'Drupal <h1>Drupal</h1> Drupal',
-      "Drupal Drupal Drupal\n",
+      'Backdrop <h1>Backdrop</h1> Backdrop',
+      "Backdrop Backdrop Backdrop\n",
       'Disallowed <h1> tag not found',
       array('b')
     );
 
     $this->assertHtmlToText(
-      'Drupal <p><em><b>Drupal</b></em><p> Drupal',
-      "Drupal Drupal Drupal\n",
+      'Backdrop <p><em><b>Backdrop</b></em><p> Backdrop',
+      "Backdrop Backdrop Backdrop\n",
       'Disallowed <p>, <em>, and <b> tags not found',
       array('a', 'br', 'h1')
     );
 
     $this->assertHtmlToText(
-      '<html><body>Drupal</body></html>',
-      "Drupal\n",
+      '<html><body>Backdrop</body></html>',
+      "Backdrop\n",
       'Unsupported <html> and <body> tags not found',
       array('html', 'body')
     );
@@ -273,10 +273,10 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
   /**
    * Test that whitespace is collapsed.
    */
-  function testDrupalHtmltoTextCollapsesWhitespace() {
-    $input = "<p>Drupal  Drupal\n\nDrupal<pre>Drupal  Drupal\n\nDrupal</pre>Drupal  Drupal\n\nDrupal</p>";
+  function testBackdropHtmltoTextCollapsesWhitespace() {
+    $input = "<p>Backdrop  Backdrop\n\nBackdrop<pre>Backdrop  Backdrop\n\nBackdrop</pre>Backdrop  Backdrop\n\nBackdrop</p>";
     // @todo The whitespace should be collapsed.
-    $collapsed = "Drupal  Drupal\n\nDrupalDrupal  Drupal\n\nDrupalDrupal  Drupal\n\nDrupal\n\n";
+    $collapsed = "Backdrop  Backdrop\n\nBackdropBackdrop  Backdrop\n\nBackdropBackdrop  Backdrop\n\nBackdrop\n\n";
     $this->assertHtmlToText(
       $input,
       $collapsed,
@@ -289,7 +289,7 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
    * Test that text separated by block-level tags in HTML get separated by
    * (at least) a newline in the plaintext version.
    */
-  function testDrupalHtmlToTextBlockTagToNewline() {
+  function testBackdropHtmlToTextBlockTagToNewline() {
     $input = '[text]'
       . '<blockquote>[blockquote]</blockquote>'
       . '<br />[br]'
@@ -311,7 +311,7 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
       . '<ul><li>[ul-li]</li>'
       . '<li>[li-ul]</li></ul>'
       . '[text]';
-    $output = drupal_html_to_text($input);
+    $output = backdrop_html_to_text($input);
     $pass = $this->assertFalse(
       preg_match('/\][^\n]*\[/s', $output),
       'Block-level HTML tags should force newlines'
@@ -319,9 +319,9 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
     if (!$pass) {
       $this->verbose($this->stringToHtml($output));
     }
-    $output_upper = drupal_strtoupper($output);
-    $upper_input = drupal_strtoupper($input);
-    $upper_output = drupal_html_to_text($upper_input);
+    $output_upper = backdrop_strtoupper($output);
+    $upper_input = backdrop_strtoupper($input);
+    $upper_output = backdrop_html_to_text($upper_input);
     $pass = $this->assertEqual(
       $upper_output,
       $output_upper,
@@ -340,23 +340,23 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
    * Test that headers are properly separated from surrounding text.
    */
   function testHeaderSeparation() {
-    $html = 'Drupal<h1>Drupal</h1>Drupal';
+    $html = 'Backdrop<h1>Backdrop</h1>Backdrop';
     // @todo There should be more space above the header than below it.
-    $text = "Drupal\n======== DRUPAL ==============================================================\n\nDrupal\n";
+    $text = "Backdrop\n======== DRUPAL ==============================================================\n\nBackdrop\n";
     $this->assertHtmlToText($html, $text,
       'Text before and after <h1> tag');
-    $html = '<p>Drupal</p><h1>Drupal</h1>Drupal';
+    $html = '<p>Backdrop</p><h1>Backdrop</h1>Backdrop';
     // @todo There should be more space above the header than below it.
-    $text = "Drupal\n\n======== DRUPAL ==============================================================\n\nDrupal\n";
+    $text = "Backdrop\n\n======== DRUPAL ==============================================================\n\nBackdrop\n";
     $this->assertHtmlToText($html, $text,
       'Paragraph before and text after <h1> tag');
-    $html = 'Drupal<h1>Drupal</h1><p>Drupal</p>';
+    $html = 'Backdrop<h1>Backdrop</h1><p>Backdrop</p>';
     // @todo There should be more space above the header than below it.
-    $text = "Drupal\n======== DRUPAL ==============================================================\n\nDrupal\n\n";
+    $text = "Backdrop\n======== DRUPAL ==============================================================\n\nBackdrop\n\n";
     $this->assertHtmlToText($html, $text,
       'Text before and paragraph after <h1> tag');
-    $html = '<p>Drupal</p><h1>Drupal</h1><p>Drupal</p>';
-    $text = "Drupal\n\n======== DRUPAL ==============================================================\n\nDrupal\n\n";
+    $html = '<p>Backdrop</p><h1>Backdrop</h1><p>Backdrop</p>';
+    $text = "Backdrop\n\n======== DRUPAL ==============================================================\n\nBackdrop\n\n";
     $this->assertHtmlToText($html, $text,
       'Paragraph before and after <h1> tag');
   }
@@ -389,7 +389,7 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
    * Test that combinations of paragraph breaks, line breaks, linefeeds,
    * and spaces are properly handled.
    */
-  function testDrupalHtmlToTextParagraphs() {
+  function testBackdropHtmlToTextParagraphs() {
     $tests = array();
     $tests[] = array(
         'html' => "<p>line 1<br />\nline 2<br />line 3\n<br />line 4</p><p>paragraph</p>",
@@ -407,7 +407,7 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Tests that drupal_html_to_text() wraps before 1000 characters.
+   * Tests that backdrop_html_to_text() wraps before 1000 characters.
    *
    * RFC 3676 says, "The Text/Plain media type is the lowest common
    * denominator of Internet email, with lines of no more than 998 characters."
@@ -419,16 +419,16 @@ class DrupalHtmlToTextTestCase extends DrupalWebTestCase {
    * <CRLF> is 1000 characters."
    */
   function testVeryLongLineWrap() {
-    $input = 'Drupal<br /><p>' . str_repeat('x', 2100) . '</><br />Drupal';
-    $output = drupal_html_to_text($input);
+    $input = 'Backdrop<br /><p>' . str_repeat('x', 2100) . '</><br />Backdrop';
+    $output = backdrop_html_to_text($input);
     // This awkward construct comes from includes/mail.inc lines 8-13.
     $eol = variable_get('mail_line_endings', MAIL_LINE_ENDINGS);
-    // We must use strlen() rather than drupal_strlen() in order to count
+    // We must use strlen() rather than backdrop_strlen() in order to count
     // octets rather than characters.
-    $line_length_limit = 1000 - drupal_strlen($eol);
+    $line_length_limit = 1000 - backdrop_strlen($eol);
     $maximum_line_length = 0;
     foreach (explode($eol, $output) as $line) {
-      // We must use strlen() rather than drupal_strlen() in order to count
+      // We must use strlen() rather than backdrop_strlen() in order to count
       // octets rather than characters.
       $maximum_line_length = max($maximum_line_length, strlen($line . $eol));
     }

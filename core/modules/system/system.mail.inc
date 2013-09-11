@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Drupal core implementations of MailSystemInterface.
+ * Backdrop core implementations of MailSystemInterface.
  */
 
 /**
- * The default Drupal mail backend using PHP's mail function.
+ * The default Backdrop mail backend using PHP's mail function.
  */
 class DefaultMailSystem implements MailSystemInterface {
   /**
@@ -22,17 +22,17 @@ class DefaultMailSystem implements MailSystemInterface {
     // Join the body array into one string.
     $message['body'] = implode("\n\n", $message['body']);
     // Convert any HTML to plain-text.
-    $message['body'] = drupal_html_to_text($message['body']);
+    $message['body'] = backdrop_html_to_text($message['body']);
     // Wrap the mail body for sending.
-    $message['body'] = drupal_wrap_mail($message['body']);
+    $message['body'] = backdrop_wrap_mail($message['body']);
     return $message;
   }
 
   /**
-   * Send an e-mail message, using Drupal variables and default settings.
+   * Send an e-mail message, using Backdrop variables and default settings.
    *
    * @see http://php.net/manual/en/function.mail.php
-   * @see drupal_mail()
+   * @see backdrop_mail()
    *
    * @param $message
    *   A message array, as described in hook_mail_alter().
@@ -58,7 +58,7 @@ class DefaultMailSystem implements MailSystemInterface {
     // Prepare mail commands.
     $mail_subject = mime_header_encode($message['subject']);
     // Note: e-mail uses CRLF for line-endings. PHP's API requires LF
-    // on Unix and CRLF on Windows. Drupal automatically guesses the
+    // on Unix and CRLF on Windows. Backdrop automatically guesses the
     // line-ending format appropriate for your system. If you need to
     // override this, adjust $conf['mail_line_endings'] in settings.php.
     $mail_body = preg_replace('@\r?\n@', $line_endings, $message['body']);
@@ -124,9 +124,9 @@ class TestingMailSystem extends DefaultMailSystem implements MailSystemInterface
    *   An e-mail message.
    */
   public function mail(array $message) {
-    $captured_emails = variable_get('drupal_test_email_collector', array());
+    $captured_emails = variable_get('backdrop_test_email_collector', array());
     $captured_emails[] = $message;
-    variable_set('drupal_test_email_collector', $captured_emails);
+    variable_set('backdrop_test_email_collector', $captured_emails);
     return TRUE;
   }
 }

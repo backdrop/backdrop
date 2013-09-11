@@ -16,11 +16,11 @@
  * The parent window is initialized when a page is displayed in which the
  * overlay might be required to be displayed, so modules can act here if they
  * need to take action to accommodate the possibility of the overlay appearing
- * within a Drupal page.
+ * within a Backdrop page.
  */
 function hook_overlay_parent_initialize() {
   // Add our custom JavaScript.
-  drupal_add_js(drupal_get_path('module', 'hook') . '/hook-overlay.js');
+  backdrop_add_js(backdrop_get_path('module', 'hook') . '/hook-overlay.js');
 }
 
 /**
@@ -32,7 +32,7 @@ function hook_overlay_parent_initialize() {
  */
 function hook_overlay_child_initialize() {
   // Add our custom JavaScript.
-  drupal_add_js(drupal_get_path('module', 'hook') . '/hook-overlay-child.js');
+  backdrop_add_js(backdrop_get_path('module', 'hook') . '/hook-overlay-child.js');
 }
 
 /**

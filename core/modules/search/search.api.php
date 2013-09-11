@@ -142,7 +142,7 @@ function hook_search_admin() {
   );
 
   // Note: reversed to reflect that higher number = higher ranking.
-  $options = drupal_map_assoc(range(0, 10));
+  $options = backdrop_map_assoc(range(0, 10));
   foreach (module_invoke_all('ranking') as $var => $values) {
     $form['content_ranking']['factors']['node_rank_' . $var] = array(
       '#title' => $values['title'],
@@ -225,7 +225,7 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
     // Build the node body.
     $node = node_load($item->sid);
     node_build_content($node, 'search_result');
-    $node->body = drupal_render($node->content);
+    $node->body = backdrop_render($node->content);
 
     // Fetch comments for snippet.
     $node->rendered .= ' ' . module_invoke('comment', 'node_update_index', $node);
@@ -347,7 +347,7 @@ function hook_update_index() {
 
     // Render the node.
     node_build_content($node, 'search_index');
-    $node->rendered = drupal_render($node->content);
+    $node->rendered = backdrop_render($node->content);
 
     $text = '<h1>' . check_plain($node->title) . '</h1>' . $node->rendered;
 

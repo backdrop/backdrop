@@ -12,7 +12,7 @@ function toolbar_help($path, $arg) {
   switch ($path) {
     case 'admin/help#toolbar':
       $output = '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Toolbar module displays links to top-level administration menu items and links from other modules at the top of the screen. For more information, see the online handbook entry for <a href="@toolbar">Toolbar module</a>.', array('@toolbar' => 'http://drupal.org/handbook/modules/toolbar/')) . '</p>';
+      $output .= '<p>' . t('The Toolbar module displays links to top-level administration menu items and links from other modules at the top of the screen. For more information, see the online handbook entry for <a href="@toolbar">Toolbar module</a>.', array('@toolbar' => 'http://backdrop.org/handbook/modules/toolbar/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Displaying administrative links') . '</dt>';
@@ -40,7 +40,7 @@ function toolbar_theme($existing, $type, $theme, $path) {
   $items['toolbar'] = array(
     'render element' => 'toolbar',
     'template' => 'toolbar',
-    'path' => drupal_get_path('module', 'toolbar'),
+    'path' => backdrop_get_path('module', 'toolbar'),
   );
   $items['toolbar_toggle'] = array(
     'variables' => array(
@@ -72,9 +72,9 @@ function toolbar_menu() {
 function toolbar_toggle_page() {
   global $base_path;
   // Toggle the value in the cookie.
-  setcookie('Drupal.toolbar.collapsed', !_toolbar_is_collapsed(), NULL, $base_path);
+  setcookie('Backdrop.toolbar.collapsed', !_toolbar_is_collapsed(), NULL, $base_path);
   // Redirect the user from where he used the toggle element.
-  drupal_goto();
+  backdrop_goto();
 }
 
 /**
@@ -98,7 +98,7 @@ function theme_toolbar_toggle($variables) {
     $toggle_text = t('Hide shortcuts');
     $variables['attributes']['class'][] = 'toggle-active';
   }
-  return l($toggle_text, 'toolbar/toggle', array('query' => drupal_get_destination(), 'attributes' => array('title' => $toggle_text) + $variables['attributes']));
+  return l($toggle_text, 'toolbar/toggle', array('query' => backdrop_get_destination(), 'attributes' => array('title' => $toggle_text) + $variables['attributes']));
 }
 
 /**
@@ -110,7 +110,7 @@ function theme_toolbar_toggle($variables) {
 function _toolbar_is_collapsed() {
   // PHP converts dots into underscores in cookie names to avoid problems with
   // its parser, so we use a converted cookie name.
-  return isset($_COOKIE['Drupal_toolbar_collapsed']) ? $_COOKIE['Drupal_toolbar_collapsed'] : 0;
+  return isset($_COOKIE['Backdrop_toolbar_collapsed']) ? $_COOKIE['Backdrop_toolbar_collapsed'] : 0;
 }
 
 /**
@@ -180,7 +180,7 @@ function toolbar_system_info_alter(&$info, $file, $type) {
 }
 
 /**
- * Builds the admin menu as a structured array ready for drupal_render().
+ * Builds the admin menu as a structured array ready for backdrop_render().
  *
  * @return
  *   Array of links and settings relating to the admin menu.
@@ -188,14 +188,14 @@ function toolbar_system_info_alter(&$info, $file, $type) {
 function toolbar_view() {
   global $user;
 
-  $module_path = drupal_get_path('module', 'toolbar');
+  $module_path = backdrop_get_path('module', 'toolbar');
   $build = array(
     '#theme' => 'toolbar',
     '#attached'=> array(
       'js' => array(
         $module_path . '/toolbar.js',
         array(
-          'data' => array('tableHeaderOffset' => 'Drupal.toolbar.height'),
+          'data' => array('tableHeaderOffset' => 'Backdrop.toolbar.height'),
           'type' => 'setting'
         ),
       ),
@@ -352,7 +352,7 @@ function toolbar_menu_navigation_links($tree) {
  *   Look at migrating to a menu system level function.
  */
 function toolbar_in_active_trail($path) {
-  $active_paths = &drupal_static(__FUNCTION__);
+  $active_paths = &backdrop_static(__FUNCTION__);
 
   // Gather active paths.
   if (!isset($active_paths)) {

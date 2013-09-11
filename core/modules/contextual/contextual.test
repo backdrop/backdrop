@@ -8,7 +8,7 @@
 /**
  * Tests accessible links after inaccessible links on dynamic context.
  */
-class ContextualDynamicContextTestCase extends DrupalWebTestCase {
+class ContextualDynamicContextTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   public static function getInfo() {
@@ -21,10 +21,10 @@ class ContextualDynamicContextTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp(array('contextual', 'node'));
-    $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
-    $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
-    $web_user = $this->drupalCreateUser(array('access content', 'access contextual links', 'edit any article content'));
-    $this->drupalLogin($web_user);
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+    $this->backdropCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    $web_user = $this->backdropCreateUser(array('access content', 'access contextual links', 'edit any article content'));
+    $this->backdropLogin($web_user);
   }
 
   /**
@@ -33,13 +33,13 @@ class ContextualDynamicContextTestCase extends DrupalWebTestCase {
   function testNodeLinks() {
     // Promote nodes to the front page. One article node the user can edit, one
     // page node he can not edit and another article node he can edit.
-    $node1 = $this->drupalCreateNode(array('type' => 'article', 'promote' => 1));
-    $node2 = $this->drupalCreateNode(array('type' => 'page', 'promote' => 1));
-    $node3 = $this->drupalCreateNode(array('type' => 'article', 'promote' => 1));
+    $node1 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
+    $node2 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 1));
+    $node3 = $this->backdropCreateNode(array('type' => 'article', 'promote' => 1));
 
     // Now, on the front page, all article nodes should have contextual edit
     // links. The page node in between should not.
-    $this->drupalGet('node');
+    $this->backdropGet('node');
     $this->assertRaw('node/' . $node1->nid . '/edit', 'Edit link for oldest article node showing.');
     $this->assertNoRaw('node/' . $node2->nid . '/edit', 'No edit link for page nodes.');
     $this->assertRaw('node/' . $node3->nid . '/edit', 'Edit link for most recent article node showing.');

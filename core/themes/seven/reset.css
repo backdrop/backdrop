@@ -71,15 +71,15 @@ thead,
 tr,
 th,
 td,
-/* Drupal: system-menus.css */
+/* Backdrop: system-menus.css */
 td.menu-disabled,
 ul.links,
 ul.links.inline,
 ul.links li,
 .block ul,
-/* Drupal: admin.css */
+/* Backdrop: admin.css */
 div.admin,
-/* Drupal: system.css */
+/* Backdrop: system.css */
 tr.even,
 tr.odd,
 tr.drag,
@@ -125,7 +125,7 @@ ul.secondary a.active,
   border: 0;
   vertical-align: baseline;
 }
-/* Drupal: system-menus.css */
+/* Backdrop: system-menus.css */
 ul.links,
 ul.links.inline,
 ul.links li,
@@ -181,7 +181,7 @@ textarea {
  * Markup free clearing.
  *
  * Consider adding your own selectors to this instead of finding ways
- * to sneak the clearfix class into Drupal's markup.
+ * to sneak the clearfix class into Backdrop's markup.
  * From http://perishablepress.com/press/2009/12/06/new-clearfix-hack
  */
 ul.links:after,

@@ -8,7 +8,7 @@
 /**
  * Tests the Dashboard module blocks.
  */
-class DashboardBlocksTestCase extends DrupalWebTestCase {
+class DashboardBlocksTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Dashboard blocks',
@@ -21,8 +21,8 @@ class DashboardBlocksTestCase extends DrupalWebTestCase {
     parent::setUp('dashboard');
 
     // Create and log in an administrative user having access to the dashboard.
-    $admin_user = $this->drupalCreateUser(array('access dashboard', 'administer blocks', 'access administration pages', 'administer modules'));
-    $this->drupalLogin($admin_user);
+    $admin_user = $this->backdropCreateUser(array('access dashboard', 'administer blocks', 'access administration pages', 'administer modules'));
+    $this->backdropLogin($admin_user);
 
     // Make sure that the dashboard is using the same theme as the rest of the
     // site (and in particular, the same theme used on 403 pages). This forces
@@ -45,17 +45,17 @@ class DashboardBlocksTestCase extends DrupalWebTestCase {
     $custom_block['title'] = $this->randomName(8);
     $custom_block['body[value]'] = $this->randomName(32);
     $custom_block['regions[stark]'] = 'dashboard_main';
-    $this->drupalPost('admin/structure/block/add', $custom_block, t('Save block'));
+    $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
 
     // Ensure admin access.
-    $this->drupalGet('admin/dashboard');
+    $this->backdropGet('admin/dashboard');
     $this->assertResponse(200, t('Admin has access to the dashboard.'));
     $this->assertRaw($custom_block['title'], t('Admin has access to a dashboard block.'));
 
     // Ensure non-admin access is denied.
-    $normal_user = $this->drupalCreateUser();
-    $this->drupalLogin($normal_user);
-    $this->drupalGet('admin/dashboard');
+    $normal_user = $this->backdropCreateUser();
+    $this->backdropLogin($normal_user);
+    $this->backdropGet('admin/dashboard');
     $this->assertResponse(403, t('Non-admin has no access to the dashboard.'));
     $this->assertNoText($custom_block['title'], t('Non-admin has no access to a dashboard block.'));
   }
@@ -67,7 +67,7 @@ class DashboardBlocksTestCase extends DrupalWebTestCase {
     $dashboard_regions = dashboard_region_descriptions();
 
     // Ensure blocks can be placed in dashboard regions.
-    $this->drupalGet('admin/dashboard/configure');
+    $this->backdropGet('admin/dashboard/configure');
     foreach ($dashboard_regions as $region => $description) {
       $elements = $this->xpath('//option[@value=:region]', array(':region' => $region));
       $this->assertTrue(!empty($elements), t('%region is an available choice on the dashboard block configuration page.', array('%region' => $region)));
@@ -75,7 +75,7 @@ class DashboardBlocksTestCase extends DrupalWebTestCase {
 
     // Ensure blocks cannot be placed in dashboard regions on the standard
     // blocks configuration page.
-    $this->drupalGet('admin/structure/block');
+    $this->backdropGet('admin/structure/block');
     foreach ($dashboard_regions as $region => $description) {
       $elements = $this->xpath('//option[@value=:region]', array(':region' => $region));
       $this->assertTrue(empty($elements), t('%region is not an available choice on the block configuration page.', array('%region' => $region)));
@@ -92,25 +92,25 @@ class DashboardBlocksTestCase extends DrupalWebTestCase {
     $custom_block['title'] = $this->randomName(8);
     $custom_block['body[value]'] = $this->randomName(32);
     $custom_block['regions[stark]'] = 'dashboard_main';
-    $this->drupalPost('admin/structure/block/add', $custom_block, t('Save block'));
-    $this->drupalGet('admin/dashboard');
+    $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
+    $this->backdropGet('admin/dashboard');
     $this->assertRaw($custom_block['title'], t('Block appears on the dashboard.'));
 
     $edit = array();
     $edit['modules[Core][dashboard][enable]'] = FALSE;
-    $this->drupalPost('admin/modules', $edit, t('Save configuration'));
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), t('Modules status has been updated.'));
     $this->assertNoRaw('assigned to the invalid region', t('Dashboard blocks gracefully disabled.'));
     module_list(TRUE);
     $this->assertFalse(module_exists('dashboard'), t('Dashboard disabled.'));
 
     $edit['modules[Core][dashboard][enable]'] = 'dashboard';
-    $this->drupalPost('admin/modules', $edit, t('Save configuration'));
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), t('Modules status has been updated.'));
     module_list(TRUE);
     $this->assertTrue(module_exists('dashboard'), t('Dashboard enabled.'));
 
-    $this->drupalGet('admin/dashboard');
+    $this->backdropGet('admin/dashboard');
     $this->assertRaw($custom_block['title'], t('Block still appears on the dashboard.'));
   }
 
@@ -120,22 +120,22 @@ class DashboardBlocksTestCase extends DrupalWebTestCase {
   function testBlockAvailability() {
     // Test "Recent comments", which should be available (defined as
     // "administrative") but not enabled.
-    $this->drupalGet('admin/dashboard');
+    $this->backdropGet('admin/dashboard');
     $this->assertNoText(t('Recent comments'), t('"Recent comments" not on dashboard.'));
-    $this->drupalGet('admin/dashboard/drawer');
+    $this->backdropGet('admin/dashboard/drawer');
     $this->assertText(t('Recent comments'), t('Drawer of disabled blocks includes a block defined as "administrative".'));
     $this->assertNoText(t('Syndicate'), t('Drawer of disabled blocks excludes a block not defined as "administrative".'));
-    $this->drupalGet('admin/dashboard/configure');
+    $this->backdropGet('admin/dashboard/configure');
     $elements = $this->xpath('//select[@id=:id]//option[@selected="selected"]', array(':id' => 'edit-blocks-comment-recent-region'));
     $this->assertTrue($elements[0]['value'] == 'dashboard_inactive', t('A block defined as "administrative" defaults to dashboard_inactive.'));
 
     // Now enable the block on the dashboard.
     $values = array();
     $values['blocks[comment_recent][region]'] = 'dashboard_main';
-    $this->drupalPost('admin/dashboard/configure', $values, t('Save blocks'));
-    $this->drupalGet('admin/dashboard');
+    $this->backdropPost('admin/dashboard/configure', $values, t('Save blocks'));
+    $this->backdropGet('admin/dashboard');
     $this->assertText(t('Recent comments'), t('"Recent comments" was placed on dashboard.'));
-    $this->drupalGet('admin/dashboard/drawer');
+    $this->backdropGet('admin/dashboard/drawer');
     $this->assertNoText(t('Recent comments'), t('Drawer of disabled blocks excludes enabled blocks.'));
   }
 }

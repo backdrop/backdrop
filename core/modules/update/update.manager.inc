@@ -72,7 +72,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
     return $form;
   }
 
-  $form['#attached']['css'][] = drupal_get_path('module', 'update') . '/update.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'update') . '/update.css';
 
   // This will be a nested array. The first key is the kind of project, which
   // can be either 'enabled', 'disabled', 'manual' (projects which require
@@ -158,7 +158,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
 
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
-    // Drupal core needs to be upgraded manually.
+    // Backdrop core needs to be upgraded manually.
     $needs_manual = $project['project_type'] == 'core';
 
     if ($needs_manual) {
@@ -250,7 +250,7 @@ function update_manager_update_form($form, $form_state = array(), $context) {
 
   if (!empty($projects['manual'])) {
     $prefix = '<h2>' . t('Manual updates required') . '</h2>';
-    $prefix .= '<p>' . t('Updates of Drupal core are not supported at this time.') . '</p>';
+    $prefix .= '<p>' . t('Updates of Backdrop core are not supported at this time.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',
       '#markup' => theme('table', array('header' => $headers, 'rows' => $projects['manual'])),
@@ -275,7 +275,7 @@ function theme_update_manager_update_form($variables) {
   $form = $variables['form'];
   $last = variable_get('update_last_check', 0);
   $output = theme('update_last_check', array('last' => $last));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
 
@@ -323,7 +323,7 @@ function update_manager_update_form_submit($form, &$form_state) {
     'init_message' => t('Preparing to download selected updates'),
     'operations' => $operations,
     'finished' => 'update_manager_download_batch_finished',
-    'file' => drupal_get_path('module', 'update') . '/update.manager.inc',
+    'file' => backdrop_get_path('module', 'update') . '/update.manager.inc',
   );
   batch_set($batch);
 }
@@ -337,17 +337,17 @@ function update_manager_download_batch_finished($success, $results) {
       'title' => t('Downloading updates failed:'),
       'items' => $results['errors'],
     );
-    drupal_set_message(theme('item_list', $error_list), 'error');
+    backdrop_set_message(theme('item_list', $error_list), 'error');
   }
   elseif ($success) {
-    drupal_set_message(t('Updates downloaded successfully.'));
+    backdrop_set_message(t('Updates downloaded successfully.'));
     $_SESSION['update_manager_update_projects'] = $results['projects'];
-    drupal_goto('admin/update/ready');
+    backdrop_goto('admin/update/ready');
   }
   else {
     // Ideally we're catching all Exceptions, so they should never see this,
     // but just in case, we have to tell them something.
-    drupal_set_message(t('Fatal error trying to download.'), 'error');
+    backdrop_set_message(t('Fatal error trying to download.'), 'error');
   }
 }
 
@@ -369,7 +369,7 @@ function update_manager_update_ready_form($form, &$form_state) {
 
   $form['backup'] = array(
     '#prefix' => '<strong>',
-    '#markup' => t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('http://drupal.org/node/22281'))),
+    '#markup' => t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('http://backdrop.org/node/22281'))),
     '#suffix' => '</strong>',
   );
 
@@ -410,7 +410,7 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
 
   if (!empty($_SESSION['update_manager_update_projects'])) {
     // Make sure the Updater registry is loaded.
-    drupal_get_updaters();
+    backdrop_get_updaters();
 
     $updates = array();
     $directory = _update_manager_extract_directory();
@@ -421,7 +421,7 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
     foreach ($projects as $project => $url) {
       $project_location = $directory . '/' . $project;
       $updater = Updater::factory($project_location);
-      $project_real_location = drupal_realpath($project_location);
+      $project_real_location = backdrop_realpath($project_location);
       $updates[] = array(
         'project' => $project,
         'updater_name' => get_class($updater),
@@ -443,7 +443,7 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
     // credentials and invoke update_authorize_run_update() indirectly with
     // whatever FileTransfer object authorize.php creates for us.
     else {
-      system_authorized_init('update_authorize_run_update', drupal_get_path('module', 'update') . '/update.authorize.inc', array($updates), t('Update manager'));
+      system_authorized_init('update_authorize_run_update', backdrop_get_path('module', 'update') . '/update.authorize.inc', array($updates), t('Update manager'));
       $form_state['redirect'] = system_authorized_get_url();
     }
   }
@@ -482,10 +482,10 @@ function update_manager_install_form($form, &$form_state, $context) {
 
   $form['help_text'] = array(
     '#prefix' => '<p>',
-    '#markup' => t('You can find <a href="@module_url">modules</a> and <a href="@theme_url">themes</a> on <a href="@drupal_org_url">drupal.org</a>. The following file extensions are supported: %extensions.', array(
-      '@module_url' => 'http://drupal.org/project/modules',
-      '@theme_url' => 'http://drupal.org/project/themes',
-      '@drupal_org_url' => 'http://drupal.org',
+    '#markup' => t('You can find <a href="@module_url">modules</a> and <a href="@theme_url">themes</a> on <a href="@backdrop_org_url">backdrop.org</a>. The following file extensions are supported: %extensions.', array(
+      '@module_url' => 'http://backdrop.org/project/modules',
+      '@theme_url' => 'http://backdrop.org/project/themes',
+      '@backdrop_org_url' => 'http://backdrop.org',
       '%extensions' => archiver_get_extensions(),
     )),
     '#suffix' => '</p>',
@@ -494,7 +494,7 @@ function update_manager_install_form($form, &$form_state, $context) {
   $form['project_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Install from a URL'),
-    '#description' => t('For example: %url', array('%url' => 'http://ftp.drupal.org/files/projects/name.tar.gz')),
+    '#description' => t('For example: %url', array('%url' => 'http://ftp.backdrop.org/files/projects/name.tar.gz')),
   );
 
   $form['information'] = array(
@@ -547,13 +547,13 @@ function _update_manager_check_backends(&$form, $operation) {
     '#suffix' => '</p>',
   );
 
-  $available_backends = drupal_get_filetransfer_info();
+  $available_backends = backdrop_get_filetransfer_info();
   if (empty($available_backends)) {
     if ($operation == 'update') {
-      $form['available_backends']['#markup'] = t('Your server does not support updating modules and themes from this interface. Instead, update modules and themes by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://drupal.org/getting-started/install-contrib'));
+      $form['available_backends']['#markup'] = t('Your server does not support updating modules and themes from this interface. Instead, update modules and themes by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdrop.org/getting-started/install-contrib'));
     }
     else {
-      $form['available_backends']['#markup'] = t('Your server does not support installing modules and themes from this interface. Instead, install modules and themes by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://drupal.org/getting-started/install-contrib'));
+      $form['available_backends']['#markup'] = t('Your server does not support installing modules and themes from this interface. Instead, install modules and themes by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'http://backdrop.org/getting-started/install-contrib'));
     }
     return FALSE;
   }
@@ -569,7 +569,7 @@ function _update_manager_check_backends(&$form, $operation) {
       'Updating modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other update methods.',
       array(
         '@backends' => implode(', ', $backend_names),
-        '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',
+        '@handbook_url' => 'http://backdrop.org/getting-started/install-contrib',
       ));
   }
   else {
@@ -579,7 +579,7 @@ function _update_manager_check_backends(&$form, $operation) {
       'Installing modules and themes requires access to your server via one of the following methods: <strong>@backends</strong>. See the <a href="@handbook_url">handbook</a> for other installation methods.',
       array(
         '@backends' => implode(', ', $backend_names),
-        '@handbook_url' => 'http://drupal.org/getting-started/install-contrib',
+        '@handbook_url' => 'http://backdrop.org/getting-started/install-contrib',
       ));
   }
   return TRUE;
@@ -620,7 +620,7 @@ function update_manager_install_form_submit($form, &$form_state) {
     $field = 'project_url';
     $local_cache = update_manager_file_get($form_state['values']['project_url']);
     if (!$local_cache) {
-      form_set_error($field, t('Unable to retrieve Drupal project from %url.', array('%url' => $form_state['values']['project_url'])));
+      form_set_error($field, t('Unable to retrieve Backdrop project from %url.', array('%url' => $form_state['values']['project_url'])));
       return;
     }
   }
@@ -662,14 +662,14 @@ function update_manager_install_form_submit($form, &$form_state) {
     // form element and have all of them appear!
     if (!empty($archive_errors)) {
       foreach ($archive_errors as $error) {
-        drupal_set_message($error, 'error');
+        backdrop_set_message($error, 'error');
       }
     }
     return;
   }
 
   // Make sure the Updater registry is loaded.
-  drupal_get_updaters();
+  backdrop_get_updaters();
 
   $project_location = $directory . '/' . $project;
   try {
@@ -697,7 +697,7 @@ function update_manager_install_form_submit($form, &$form_state) {
     return;
   }
 
-  $project_real_location = drupal_realpath($project_location);
+  $project_real_location = backdrop_realpath($project_location);
   $arguments = array(
     'project' => $project,
     'updater_name' => get_class($updater),
@@ -718,7 +718,7 @@ function update_manager_install_form_submit($form, &$form_state) {
   // credentials and invoke update_authorize_run_install() indirectly with
   // whatever FileTransfer object authorize.php creates for us.
   else {
-    system_authorized_init('update_authorize_run_install', drupal_get_path('module', 'update') . '/update.authorize.inc', $arguments, t('Update manager'));
+    system_authorized_init('update_authorize_run_install', backdrop_get_path('module', 'update') . '/update.authorize.inc', $arguments, t('Update manager'));
     $form_state['redirect'] = system_authorized_get_url();
   }
 }
@@ -811,12 +811,12 @@ function update_manager_file_get($url) {
   $remote_schemes = array('http', 'https', 'ftp', 'ftps', 'smb', 'nfs');
   if (!in_array($parsed_url['scheme'], $remote_schemes)) {
     // This is a local file, just return the path.
-    return drupal_realpath($url);
+    return backdrop_realpath($url);
   }
 
   // Check the cache and download the file if needed.
   $cache_directory = _update_manager_cache_directory();
-  $local = $cache_directory . '/' . drupal_basename($parsed_url['path']);
+  $local = $cache_directory . '/' . backdrop_basename($parsed_url['path']);
 
   if (!file_exists($local) || update_delete_file_if_stale($local)) {
     return system_retrieve_file($url, $local, FALSE, FILE_EXISTS_REPLACE);
@@ -895,7 +895,7 @@ function update_manager_batch_project_get($project, $url, &$context) {
  * This server configuration is an inherent security weakness because it allows
  * a malicious webserver process to append arbitrary PHP code and then execute
  * it. However, it is supported here because it is a common configuration on
- * shared hosting, and there is nothing Drupal can do to prevent it.
+ * shared hosting, and there is nothing Backdrop can do to prevent it.
  *
  * @return
  *   TRUE if local file transfers are allowed on this server, or FALSE if not.
@@ -908,12 +908,12 @@ function update_manager_local_transfers_allowed() {
   // Compare the owner of a webserver-created temporary file to the owner of
   // the configuration directory to determine if local transfers will be
   // allowed.
-  $temporary_file = drupal_tempnam('temporary://', 'update_');
+  $temporary_file = backdrop_tempnam('temporary://', 'update_');
   $local_transfers_allowed = fileowner($temporary_file) === fileowner(conf_path());
 
   // Clean up. If this fails, we can ignore it (since this is just a temporary
   // file anyway).
-  @drupal_unlink($temporary_file);
+  @backdrop_unlink($temporary_file);
 
   return $local_transfers_allowed;
 }

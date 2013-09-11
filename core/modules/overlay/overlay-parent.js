@@ -4,10 +4,10 @@
 /**
  * Open the overlay, or load content into it, when an admin link is clicked.
  */
-Drupal.behaviors.overlayParent = {
+Backdrop.behaviors.overlayParent = {
   attach: function (context, settings) {
-    if (Drupal.overlay.isOpen) {
-      Drupal.overlay.makeDocumentUntabbable(context);
+    if (Backdrop.overlay.isOpen) {
+      Backdrop.overlay.makeDocumentUntabbable(context);
     }
 
     if (this.processed) {
@@ -17,17 +17,17 @@ Drupal.behaviors.overlayParent = {
 
     $(window)
       // When the hash (URL fragment) changes, open the overlay if needed.
-      .bind('hashchange.drupal-overlay', $.proxy(Drupal.overlay, 'eventhandlerOperateByURLFragment'))
+      .bind('hashchange.backdrop-overlay', $.proxy(Backdrop.overlay, 'eventhandlerOperateByURLFragment'))
       // Trigger the hashchange handler once, after the page is loaded, so that
       // permalinks open the overlay.
-      .triggerHandler('hashchange.drupal-overlay');
+      .triggerHandler('hashchange.backdrop-overlay');
 
     $(document)
       // Instead of binding a click event handler to every link we bind one to
       // the document and only handle events that bubble up. This allows other
       // scripts to bind their own handlers to links and also to prevent
       // overlay's handling.
-      .bind('click.drupal-overlay mouseup.drupal-overlay', $.proxy(Drupal.overlay, 'eventhandlerOverrideLink'));
+      .bind('click.backdrop-overlay mouseup.backdrop-overlay', $.proxy(Backdrop.overlay, 'eventhandlerOverrideLink'));
   }
 };
 
@@ -36,27 +36,27 @@ Drupal.behaviors.overlayParent = {
  *
  * Events
  * Overlay triggers a number of events that can be used by other scripts.
- * - drupalOverlayOpen: This event is triggered when the overlay is opened.
- * - drupalOverlayBeforeClose: This event is triggered when the overlay attempts
+ * - backdropOverlayOpen: This event is triggered when the overlay is opened.
+ * - backdropOverlayBeforeClose: This event is triggered when the overlay attempts
  *   to close. If an event handler returns false, the close will be prevented.
- * - drupalOverlayClose: This event is triggered when the overlay is closed.
- * - drupalOverlayBeforeLoad: This event is triggered right before a new URL
+ * - backdropOverlayClose: This event is triggered when the overlay is closed.
+ * - backdropOverlayBeforeLoad: This event is triggered right before a new URL
  *   is loaded into the overlay.
- * - drupalOverlayReady: This event is triggered when the DOM of the overlay
+ * - backdropOverlayReady: This event is triggered when the DOM of the overlay
  *   child document is fully loaded.
- * - drupalOverlayLoad: This event is triggered when the overlay is finished
+ * - backdropOverlayLoad: This event is triggered when the overlay is finished
  *   loading.
- * - drupalOverlayResize: This event is triggered when the overlay is being
+ * - backdropOverlayResize: This event is triggered when the overlay is being
  *   resized to match the parent window.
  */
-Drupal.overlay = Drupal.overlay || {
+Backdrop.overlay = Backdrop.overlay || {
   isOpen: false,
   isOpening: false,
   isClosing: false,
   isLoading: false
 };
 
-Drupal.overlay.prototype = {};
+Backdrop.overlay.prototype = {};
 
 /**
  * Open the overlay.
@@ -67,7 +67,7 @@ Drupal.overlay.prototype = {};
  * @return
  *   TRUE if the overlay was opened, FALSE otherwise.
  */
-Drupal.overlay.open = function (url) {
+Backdrop.overlay.open = function (url) {
   // Just one overlay is allowed.
   if (this.isOpen || this.isOpening) {
     return this.load(url);
@@ -85,7 +85,7 @@ Drupal.overlay.open = function (url) {
   this.makeDocumentUntabbable();
 
   // Allow other scripts to respond to this event.
-  $(document).trigger('drupalOverlayOpen');
+  $(document).trigger('backdropOverlayOpen');
 
   return this.load(url);
 };
@@ -93,8 +93,8 @@ Drupal.overlay.open = function (url) {
 /**
  * Create the underlying markup and behaviors for the overlay.
  */
-Drupal.overlay.create = function () {
-  this.$container = $(Drupal.theme('overlayContainer'))
+Backdrop.overlay.create = function () {
+  this.$container = $(Backdrop.theme('overlayContainer'))
     .appendTo(document.body);
 
   // Overlay uses transparent iframes that cover the full parent window.
@@ -104,33 +104,33 @@ Drupal.overlay.create = function () {
   // the page in a hidden (inactive) iframe the user doesn't see the white
   // background. When the page is loaded the active and inactive iframes
   // are switched.
-  this.activeFrame = this.$iframeA = $(Drupal.theme('overlayElement'))
+  this.activeFrame = this.$iframeA = $(Backdrop.theme('overlayElement'))
     .appendTo(this.$container);
 
-  this.inactiveFrame = this.$iframeB = $(Drupal.theme('overlayElement'))
+  this.inactiveFrame = this.$iframeB = $(Backdrop.theme('overlayElement'))
     .appendTo(this.$container);
 
-  this.$iframeA.bind('load.drupal-overlay', { self: this.$iframeA[0], sibling: this.$iframeB }, $.proxy(this, 'loadChild'));
-  this.$iframeB.bind('load.drupal-overlay', { self: this.$iframeB[0], sibling: this.$iframeA }, $.proxy(this, 'loadChild'));
+  this.$iframeA.bind('load.backdrop-overlay', { self: this.$iframeA[0], sibling: this.$iframeB }, $.proxy(this, 'loadChild'));
+  this.$iframeB.bind('load.backdrop-overlay', { self: this.$iframeB[0], sibling: this.$iframeA }, $.proxy(this, 'loadChild'));
 
-  // Add a second class "drupal-overlay-open" to indicate these event handlers
+  // Add a second class "backdrop-overlay-open" to indicate these event handlers
   // should only be bound when the overlay is open.
-  var eventClass = '.drupal-overlay.drupal-overlay-open';
+  var eventClass = '.backdrop-overlay.backdrop-overlay-open';
   $(window)
     .bind('resize' + eventClass, $.proxy(this, 'eventhandlerOuterResize'));
   $(document)
-    .bind('drupalOverlayLoad' + eventClass, $.proxy(this, 'eventhandlerOuterResize'))
-    .bind('drupalOverlayReady' + eventClass +
-          ' drupalOverlayClose' + eventClass, $.proxy(this, 'eventhandlerSyncURLFragment'))
-    .bind('drupalOverlayClose' + eventClass, $.proxy(this, 'eventhandlerRefreshPage'))
-    .bind('drupalOverlayBeforeClose' + eventClass +
-          ' drupalOverlayBeforeLoad' + eventClass +
-          ' drupalOverlayResize' + eventClass, $.proxy(this, 'eventhandlerDispatchEvent'));
+    .bind('backdropOverlayLoad' + eventClass, $.proxy(this, 'eventhandlerOuterResize'))
+    .bind('backdropOverlayReady' + eventClass +
+          ' backdropOverlayClose' + eventClass, $.proxy(this, 'eventhandlerSyncURLFragment'))
+    .bind('backdropOverlayClose' + eventClass, $.proxy(this, 'eventhandlerRefreshPage'))
+    .bind('backdropOverlayBeforeClose' + eventClass +
+          ' backdropOverlayBeforeLoad' + eventClass +
+          ' backdropOverlayResize' + eventClass, $.proxy(this, 'eventhandlerDispatchEvent'));
 
   if ($('.overlay-displace-top, .overlay-displace-bottom').length) {
     $(document)
-      .bind('drupalOverlayResize' + eventClass, $.proxy(this, 'eventhandlerAlterDisplacedElements'))
-      .bind('drupalOverlayClose' + eventClass, $.proxy(this, 'eventhandlerRestoreDisplacedElements'));
+      .bind('backdropOverlayResize' + eventClass, $.proxy(this, 'eventhandlerAlterDisplacedElements'))
+      .bind('backdropOverlayClose' + eventClass, $.proxy(this, 'eventhandlerRestoreDisplacedElements'));
   }
 };
 
@@ -143,13 +143,13 @@ Drupal.overlay.create = function () {
  * @return
  *   TRUE if URL is loaded into the overlay, FALSE otherwise.
  */
-Drupal.overlay.load = function (url) {
+Backdrop.overlay.load = function (url) {
   if (!this.isOpen) {
     return false;
   }
 
   // Allow other scripts to respond to this event.
-  $(document).trigger('drupalOverlayBeforeLoad');
+  $(document).trigger('backdropOverlayBeforeLoad');
 
   $(document.documentElement).addClass('overlay-loading');
 
@@ -170,14 +170,14 @@ Drupal.overlay.load = function (url) {
  * @return
  *   TRUE if the overlay was closed, FALSE otherwise.
  */
-Drupal.overlay.close = function () {
+Backdrop.overlay.close = function () {
   // Prevent double execution when close is requested more than once.
   if (!this.isOpen || this.isClosing) {
     return false;
   }
 
   // Allow other scripts to respond to this event.
-  var event = $.Event('drupalOverlayBeforeClose');
+  var event = $.Event('backdropOverlayBeforeClose');
   $(document).trigger(event);
   // If a handler returned false, the close will be prevented.
   if (event.isDefaultPrevented()) {
@@ -192,10 +192,10 @@ Drupal.overlay.close = function () {
   this.makeDocumentTabbable();
 
   // Allow other scripts to respond to this event.
-  $(document).trigger('drupalOverlayClose');
+  $(document).trigger('backdropOverlayClose');
 
   // When the iframe is still loading don't destroy it immediately but after
-  // the content is loaded (see Drupal.overlay.loadChild).
+  // the content is loaded (see Backdrop.overlay.loadChild).
   if (!this.isLoading) {
     this.destroy();
     this.isClosing = false;
@@ -206,8 +206,8 @@ Drupal.overlay.close = function () {
 /**
  * Destroy the overlay.
  */
-Drupal.overlay.destroy = function () {
-  $([document, window]).unbind('.drupal-overlay-open');
+Backdrop.overlay.destroy = function () {
+  $([document, window]).unbind('.backdrop-overlay-open');
   this.$container.remove();
 
   this.$container = null;
@@ -223,13 +223,13 @@ Drupal.overlay.destroy = function () {
  * @param url
  *   Can be an absolute URL or a relative link to the domain root.
  */
-Drupal.overlay.redirect = function (url) {
+Backdrop.overlay.redirect = function (url) {
   // Create a native Link object, so we can use its object methods.
   var link = $(url.link(url)).get(0);
 
   // If the link is already open, force the hashchange event to simulate reload.
   if (window.location.href == link.href) {
-    $(window).triggerHandler('hashchange.drupal-overlay');
+    $(window).triggerHandler('hashchange.backdrop-overlay');
   }
 
   window.location.href = link.href;
@@ -239,9 +239,9 @@ Drupal.overlay.redirect = function (url) {
 /**
  * Bind the child window.
  *
- * Note that this function is fired earlier than Drupal.overlay.loadChild.
+ * Note that this function is fired earlier than Backdrop.overlay.loadChild.
  */
-Drupal.overlay.bindChild = function (iframeWindow, isClosing) {
+Backdrop.overlay.bindChild = function (iframeWindow, isClosing) {
   this.iframeWindow = iframeWindow;
 
   // We are done if the child window is closing.
@@ -250,7 +250,7 @@ Drupal.overlay.bindChild = function (iframeWindow, isClosing) {
   }
 
   // Allow other scripts to respond to this event.
-  $(document).trigger('drupalOverlayReady');
+  $(document).trigger('backdropOverlayReady');
 };
 
 /**
@@ -261,7 +261,7 @@ Drupal.overlay.bindChild = function (iframeWindow, isClosing) {
  *   - event.type: load
  *   - event.currentTarget: iframe
  */
-Drupal.overlay.loadChild = function (event) {
+Backdrop.overlay.loadChild = function (event) {
   var iframe = event.data.self;
   var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
   var iframeWindow = iframeDocument.defaultView || iframeDocument.parentWindow;
@@ -276,14 +276,14 @@ Drupal.overlay.loadChild = function (event) {
   // Only continue when overlay is still open and not closing.
   if (this.isOpen && !this.isClosing) {
     // And child document is an actual overlayChild.
-    if (iframeWindow.Drupal && iframeWindow.Drupal.overlayChild) {
+    if (iframeWindow.Backdrop && iframeWindow.Backdrop.overlayChild) {
       // Replace the document title with title of iframe.
       document.title = iframeWindow.document.title;
 
       this.activeFrame = $(iframe)
         .addClass('overlay-active')
         // Add a title attribute to the iframe for accessibility.
-        .attr('title', Drupal.t('@title dialog', { '@title': iframeWindow.jQuery('#overlay-title').text() })).removeAttr('tabindex');
+        .attr('title', Backdrop.t('@title dialog', { '@title': iframeWindow.jQuery('#overlay-title').text() })).removeAttr('tabindex');
       this.inactiveFrame = event.data.sibling;
 
       // Load an empty document into the inactive iframe.
@@ -293,10 +293,10 @@ Drupal.overlay.loadChild = function (event) {
       // the overlay.
       this.activeFrame.focus();
       var skipLink = iframeWindow.jQuery('a:first');
-      Drupal.overlay.setFocusBefore(skipLink, iframeWindow.document);
+      Backdrop.overlay.setFocusBefore(skipLink, iframeWindow.document);
 
       // Allow other scripts to respond to this event.
-      $(document).trigger('drupalOverlayLoad');
+      $(document).trigger('backdropOverlayLoad');
     }
     else {
       window.location = iframeWindow.location.href.replace(/([?&]?)render=overlay&?/g, '$1').replace(/\?$/, '');
@@ -322,7 +322,7 @@ Drupal.overlay.loadChild = function (event) {
  *   placeholder element has to be created inside the same iframe as the element
  *   it precedes, to keep IE happy. (http://bugs.jquery.com/ticket/4059)
  */
-Drupal.overlay.setFocusBefore = function ($element, document) {
+Backdrop.overlay.setFocusBefore = function ($element, document) {
   // Create an anchor inside the placeholder document.
   var placeholder = document.createElement('a');
   var $placeholder = $(placeholder).addClass('element-invisible').attr('href', '#');
@@ -345,8 +345,8 @@ Drupal.overlay.setFocusBefore = function ($element, document) {
  * @return boolean
  *   TRUE if the URL represents an administrative link, FALSE otherwise.
  */
-Drupal.overlay.isAdminLink = function (url) {
-  if (Drupal.overlay.isExternalLink(url)) {
+Backdrop.overlay.isAdminLink = function (url) {
+  if (Backdrop.overlay.isExternalLink(url)) {
     return false;
   }
 
@@ -354,9 +354,9 @@ Drupal.overlay.isAdminLink = function (url) {
 
   // Turn the list of administrative paths into a regular expression.
   if (!this.adminPathRegExp) {
-    var regExpPrefix = '' + Drupal.settings.pathPrefix + '(';
-    var adminPaths = regExpPrefix + Drupal.settings.overlay.paths.admin.replace(/\s+/g, ')$|' + regExpPrefix) + ')$';
-    var nonAdminPaths = regExpPrefix + Drupal.settings.overlay.paths.non_admin.replace(/\s+/g, ')$|'+ regExpPrefix) + ')$';
+    var regExpPrefix = '' + Backdrop.settings.pathPrefix + '(';
+    var adminPaths = regExpPrefix + Backdrop.settings.overlay.paths.admin.replace(/\s+/g, ')$|' + regExpPrefix) + ')$';
+    var nonAdminPaths = regExpPrefix + Backdrop.settings.overlay.paths.non_admin.replace(/\s+/g, ')$|'+ regExpPrefix) + ')$';
     adminPaths = adminPaths.replace(/\*/g, '.*');
     nonAdminPaths = nonAdminPaths.replace(/\*/g, '.*');
     this.adminPathRegExp = new RegExp(adminPaths);
@@ -375,7 +375,7 @@ Drupal.overlay.isAdminLink = function (url) {
  * @return boolean
  *   TRUE if the URL is external to the site, FALSE otherwise.
  */
-Drupal.overlay.isExternalLink = function (url) {
+Backdrop.overlay.isExternalLink = function (url) {
   var re = RegExp('^((f|ht)tps?:)?//(?!' + window.location.host + ')');
   return re.test(url);
 };
@@ -388,7 +388,7 @@ Drupal.overlay.isExternalLink = function (url) {
  *   - event.type: any
  *   - event.currentTarget: any
  */
-Drupal.overlay.eventhandlerOuterResize = function (event) {
+Backdrop.overlay.eventhandlerOuterResize = function (event) {
   // Proceed only if the overlay still exists.
   if (!(this.isOpen || this.isOpening) || this.isClosing || !this.iframeWindow) {
     return;
@@ -400,7 +400,7 @@ Drupal.overlay.eventhandlerOuterResize = function (event) {
   }
 
   // Allow other scripts to respond to this event.
-  $(document).trigger('drupalOverlayResize');
+  $(document).trigger('backdropOverlayResize');
 };
 
 /**
@@ -412,15 +412,15 @@ Drupal.overlay.eventhandlerOuterResize = function (event) {
  *   - event.type: any
  *   - event.currentTarget: any
  */
-Drupal.overlay.eventhandlerAlterDisplacedElements = function (event) {
+Backdrop.overlay.eventhandlerAlterDisplacedElements = function (event) {
   // Proceed only if the overlay still exists.
   if (!(this.isOpen || this.isOpening) || this.isClosing || !this.iframeWindow) {
     return;
   }
 
   $(this.iframeWindow.document.body).css({
-    marginTop: Drupal.overlay.getDisplacement('top'),
-    marginBottom: Drupal.overlay.getDisplacement('bottom')
+    marginTop: Backdrop.overlay.getDisplacement('top'),
+    marginBottom: Backdrop.overlay.getDisplacement('bottom')
   });
 
   var documentHeight = this.iframeWindow.document.body.clientHeight;
@@ -428,7 +428,7 @@ Drupal.overlay.eventhandlerAlterDisplacedElements = function (event) {
   // IE6 doesn't support maxWidth, use width instead.
   var maxWidthName = 'maxWidth';
 
-  if (Drupal.overlay.leftSidedScrollbarOffset === undefined && $(document.documentElement).attr('dir') === 'rtl') {
+  if (Backdrop.overlay.leftSidedScrollbarOffset === undefined && $(document.documentElement).attr('dir') === 'rtl') {
     // We can't use element.clientLeft to detect whether scrollbars are placed
     // on the left side of the element when direction is set to "rtl" as most
     // browsers dont't support it correctly.
@@ -436,15 +436,15 @@ Drupal.overlay.eventhandlerAlterDisplacedElements = function (event) {
     // There seems to be absolutely no way to detect whether the scrollbar
     // is on the left side in Opera; always expect scrollbar to be on the left.
     if ($.browser.opera) {
-      Drupal.overlay.leftSidedScrollbarOffset = document.documentElement.clientWidth - this.iframeWindow.document.documentElement.clientWidth + this.iframeWindow.document.documentElement.clientLeft;
+      Backdrop.overlay.leftSidedScrollbarOffset = document.documentElement.clientWidth - this.iframeWindow.document.documentElement.clientWidth + this.iframeWindow.document.documentElement.clientLeft;
     }
     else if (this.iframeWindow.document.documentElement.clientLeft) {
-      Drupal.overlay.leftSidedScrollbarOffset = this.iframeWindow.document.documentElement.clientLeft;
+      Backdrop.overlay.leftSidedScrollbarOffset = this.iframeWindow.document.documentElement.clientLeft;
     }
     else {
       var el1 = $('<div style="direction: rtl; overflow: scroll;"></div>').appendTo(document.body);
       var el2 = $('<div></div>').appendTo(el1);
-      Drupal.overlay.leftSidedScrollbarOffset = parseInt(el2[0].offsetLeft - el1[0].offsetLeft);
+      Backdrop.overlay.leftSidedScrollbarOffset = parseInt(el2[0].offsetLeft - el1[0].offsetLeft);
       el1.remove();
     }
   }
@@ -459,29 +459,29 @@ Drupal.overlay.eventhandlerAlterDisplacedElements = function (event) {
       maxWidth -= 1;
     }
 
-    if (Drupal.overlay.leftSidedScrollbarOffset) {
-      $(this).css('left', Drupal.overlay.leftSidedScrollbarOffset);
+    if (Backdrop.overlay.leftSidedScrollbarOffset) {
+      $(this).css('left', Backdrop.overlay.leftSidedScrollbarOffset);
     }
 
     // Prevent displaced elements overlapping window's scrollbar.
     var currentMaxWidth = parseInt($(this).css(maxWidthName));
-    if ((data.drupalOverlay && data.drupalOverlay.maxWidth) || isNaN(currentMaxWidth) || currentMaxWidth > maxWidth || currentMaxWidth <= 0) {
+    if ((data.backdropOverlay && data.backdropOverlay.maxWidth) || isNaN(currentMaxWidth) || currentMaxWidth > maxWidth || currentMaxWidth <= 0) {
       $(this).css(maxWidthName, maxWidth);
-      (data.drupalOverlay = data.drupalOverlay || {}).maxWidth = true;
+      (data.backdropOverlay = data.backdropOverlay || {}).maxWidth = true;
     }
 
     // Use a more rigorous approach if the displaced element still overlaps
     // window's scrollbar; clip the element on the right.
     var offset = $(this).offset();
     var offsetRight = offset.left + $(this).outerWidth();
-    if ((data.drupalOverlay && data.drupalOverlay.clip) || offsetRight > maxWidth) {
-      if (Drupal.overlay.leftSidedScrollbarOffset) {
-        $(this).css('clip', 'rect(auto, auto, ' + (documentHeight - offset.top) + 'px, ' + (Drupal.overlay.leftSidedScrollbarOffset + 2) + 'px)');
+    if ((data.backdropOverlay && data.backdropOverlay.clip) || offsetRight > maxWidth) {
+      if (Backdrop.overlay.leftSidedScrollbarOffset) {
+        $(this).css('clip', 'rect(auto, auto, ' + (documentHeight - offset.top) + 'px, ' + (Backdrop.overlay.leftSidedScrollbarOffset + 2) + 'px)');
       }
       else {
         $(this).css('clip', 'rect(auto, ' + (maxWidth - offset.left) + 'px, ' + (documentHeight - offset.top) + 'px, auto)');
       }
-      (data.drupalOverlay = data.drupalOverlay || {}).clip = true;
+      (data.backdropOverlay = data.backdropOverlay || {}).clip = true;
     }
   });
 };
@@ -495,7 +495,7 @@ Drupal.overlay.eventhandlerAlterDisplacedElements = function (event) {
  *   - event.type: any
  *   - event.currentTarget: any
  */
-Drupal.overlay.eventhandlerRestoreDisplacedElements = function (event) {
+Backdrop.overlay.eventhandlerRestoreDisplacedElements = function (event) {
   var $displacedElements = $('.overlay-displace-top, .overlay-displace-bottom');
   try {
     $displacedElements.css({ maxWidth: '', clip: '' });
@@ -520,9 +520,9 @@ Drupal.overlay.eventhandlerRestoreDisplacedElements = function (event) {
  *   - event.type: click, mouseup
  *   - event.currentTarget: document
  *
- * @see Drupal.overlayChild.behaviors.addClickHandler
+ * @see Backdrop.overlayChild.behaviors.addClickHandler
  */
-Drupal.overlay.eventhandlerOverrideLink = function (event) {
+Backdrop.overlay.eventhandlerOverrideLink = function (event) {
   // In some browsers the click event isn't fired for right-clicks. Use the
   // mouseup event for right-clicks and the click event for everything else.
   if ((event.type == 'click' && event.button == 2) || (event.type == 'mouseup' && event.button != 2)) {
@@ -565,7 +565,7 @@ Drupal.overlay.eventhandlerOverrideLink = function (event) {
       // If the link contains the overlay-restore class and the overlay-context
       // state is set, also update the parent window's location.
       var parentLocation = ($target.hasClass('overlay-restore') && typeof $.bbq.getState('overlay-context') == 'string')
-        ? Drupal.settings.basePath + $.bbq.getState('overlay-context')
+        ? Backdrop.settings.basePath + $.bbq.getState('overlay-context')
         : null;
       href = this.fragmentizeLink($target.get(0), parentLocation);
       // Only override default behavior when left-clicking and user is not
@@ -636,7 +636,7 @@ Drupal.overlay.eventhandlerOverrideLink = function (event) {
  *   - event.type: hashchange
  *   - event.currentTarget: document
  */
-Drupal.overlay.eventhandlerOperateByURLFragment = function (event) {
+Backdrop.overlay.eventhandlerOperateByURLFragment = function (event) {
   // If we changed the hash to reflect an internal redirect in the overlay,
   // its location has already been changed, so don't do anything.
   if ($.data(window.location, window.location.href) === 'redirect') {
@@ -649,10 +649,10 @@ Drupal.overlay.eventhandlerOperateByURLFragment = function (event) {
   if (state) {
     // Append render variable, so the server side can choose the right
     // rendering and add child frame code to the page if needed.
-    var url = $.param.querystring(Drupal.settings.basePath + state, { render: 'overlay' });
+    var url = $.param.querystring(Backdrop.settings.basePath + state, { render: 'overlay' });
 
     this.open(url);
-    this.resetActiveClass(this.getPath(Drupal.settings.basePath + state));
+    this.resetActiveClass(this.getPath(Backdrop.settings.basePath + state));
   }
   // If there is no overlay URL in the fragment and the overlay is (still)
   // open, close the overlay.
@@ -677,17 +677,17 @@ Drupal.overlay.eventhandlerOperateByURLFragment = function (event) {
  *
  * @param event
  *   Event being triggered, with the following restrictions:
- *   - event.type: drupalOverlayReady, drupalOverlayClose
+ *   - event.type: backdropOverlayReady, backdropOverlayClose
  *   - event.currentTarget: document
  */
-Drupal.overlay.eventhandlerSyncURLFragment = function (event) {
+Backdrop.overlay.eventhandlerSyncURLFragment = function (event) {
   if (this.isOpen) {
     var expected = $.bbq.getState('overlay');
     // This is just a sanity check, so we're comparing paths, not query strings.
-    if (this.getPath(Drupal.settings.basePath + expected) != this.getPath(this.iframeWindow.document.location)) {
+    if (this.getPath(Backdrop.settings.basePath + expected) != this.getPath(this.iframeWindow.document.location)) {
       // There may have been a redirect inside the child overlay window that the
       // parent wasn't aware of. Update the parent URL fragment appropriately.
-      var newLocation = Drupal.overlay.fragmentizeLink(this.iframeWindow.document.location);
+      var newLocation = Backdrop.overlay.fragmentizeLink(this.iframeWindow.document.location);
       // Set a 'redirect' flag on the new location so the hashchange event handler
       // knows not to change the overlay's content.
       $.data(window.location, newLocation, 'redirect');
@@ -706,11 +706,11 @@ Drupal.overlay.eventhandlerSyncURLFragment = function (event) {
  *
  * @param event
  *   Event being triggered, with the following restrictions:
- *   - event.type: drupalOverlayClose
+ *   - event.type: backdropOverlayClose
  *   - event.currentTarget: document
  */
-Drupal.overlay.eventhandlerRefreshPage = function (event) {
-  if (Drupal.overlay.refreshPage) {
+Backdrop.overlay.eventhandlerRefreshPage = function (event) {
+  if (Backdrop.overlay.refreshPage) {
     window.location.reload(true);
   }
 };
@@ -723,7 +723,7 @@ Drupal.overlay.eventhandlerRefreshPage = function (event) {
  *   - event.type: any
  *   - event.currentTarget: any
  */
-Drupal.overlay.eventhandlerDispatchEvent = function (event) {
+Backdrop.overlay.eventhandlerDispatchEvent = function (event) {
   if (this.iframeWindow && this.iframeWindow.document) {
     this.iframeWindow.jQuery(this.iframeWindow.document).trigger(event);
   }
@@ -741,7 +741,7 @@ Drupal.overlay.eventhandlerDispatchEvent = function (event) {
  *   A URL that will trigger the overlay (in the form
  *   /node/1#overlay=admin/config).
  */
-Drupal.overlay.fragmentizeLink = function (link, parentLocation) {
+Backdrop.overlay.fragmentizeLink = function (link, parentLocation) {
   // Don't operate on links that are already overlay-ready.
   var params = $.deparam.fragment(link.href);
   if (params.overlay) {
@@ -753,7 +753,7 @@ Drupal.overlay.fragmentizeLink = function (link, parentLocation) {
   // may be disabled.
   var path = this.getPath(link, true);
   // Preserve existing query and fragment parameters in the URL, except for
-  // "render=overlay" which is re-added in Drupal.overlay.eventhandlerOperateByURLFragment.
+  // "render=overlay" which is re-added in Backdrop.overlay.eventhandlerOperateByURLFragment.
   var destination = path + link.search.replace(/&?render=overlay/, '').replace(/\?$/, '') + link.hash;
 
   // Assemble and return the overlay-ready link.
@@ -766,20 +766,20 @@ Drupal.overlay.fragmentizeLink = function (link, parentLocation) {
  * @param data
  *   An array of objects with information on the page regions to be refreshed.
  *   For each object, the key is a CSS class identifying the region to be
- *   refreshed, and the value represents the section of the Drupal $page array
+ *   refreshed, and the value represents the section of the Backdrop $page array
  *   corresponding to this region.
  */
-Drupal.overlay.refreshRegions = function (data) {
+Backdrop.overlay.refreshRegions = function (data) {
   $.each(data, function () {
     var region_info = this;
     $.each(region_info, function (regionClass) {
       var regionName = region_info[regionClass];
       var regionSelector = '.' + regionClass;
       // Allow special behaviors to detach.
-      Drupal.detachBehaviors($(regionSelector));
-      $.get(Drupal.settings.basePath + Drupal.settings.overlay.ajaxCallback + '/' + regionName, function (newElement) {
+      Backdrop.detachBehaviors($(regionSelector));
+      $.get(Backdrop.settings.basePath + Backdrop.settings.overlay.ajaxCallback + '/' + regionName, function (newElement) {
         $(regionSelector).replaceWith($(newElement));
-        Drupal.attachBehaviors($(regionSelector), Drupal.settings);
+        Backdrop.attachBehaviors($(regionSelector), Backdrop.settings);
       });
     });
   });
@@ -792,7 +792,7 @@ Drupal.overlay.refreshRegions = function (data) {
  * @param activePath
  *   Path to match links against.
  */
-Drupal.overlay.resetActiveClass = function(activePath) {
+Backdrop.overlay.resetActiveClass = function(activePath) {
   var self = this;
   var windowDomain = window.location.protocol + window.location.hostname;
 
@@ -814,17 +814,17 @@ Drupal.overlay.resetActiveClass = function(activePath) {
 };
 
 /**
- * Helper function to get the (corrected) Drupal path of a link.
+ * Helper function to get the (corrected) Backdrop path of a link.
  *
  * @param link
- *   Link object or string to get the Drupal path from.
+ *   Link object or string to get the Backdrop path from.
  * @param ignorePathFromQueryString
  *   Boolean whether to ignore path from query string if path appears empty.
  *
  * @return
- *   The Drupal path.
+ *   The Backdrop path.
  */
-Drupal.overlay.getPath = function (link, ignorePathFromQueryString) {
+Backdrop.overlay.getPath = function (link, ignorePathFromQueryString) {
   if (typeof link == 'string') {
     // Create a native Link object, so we can use its object methods.
     link = $(link.link(link)).get(0);
@@ -835,7 +835,7 @@ Drupal.overlay.getPath = function (link, ignorePathFromQueryString) {
   if (path.charAt(0) != '/') {
     path = '/' + path;
   }
-  path = path.replace(new RegExp(Drupal.settings.basePath + '(?:index.php)?'), '');
+  path = path.replace(new RegExp(Backdrop.settings.basePath + '(?:index.php)?'), '');
   if (path == '' && !ignorePathFromQueryString) {
     // If the path appears empty, it might mean the path is represented in the
     // query string (clean URLs are not used).
@@ -857,7 +857,7 @@ Drupal.overlay.getPath = function (link, ignorePathFromQueryString) {
  * @return
  *   The total displacement of given region in pixels.
  */
-Drupal.overlay.getDisplacement = function (region) {
+Backdrop.overlay.getDisplacement = function (region) {
   var displacement = 0;
   var lastDisplaced = $('.overlay-displace-' + region + ':last');
   if (lastDisplaced.length) {
@@ -879,17 +879,17 @@ Drupal.overlay.getDisplacement = function (region) {
  *   The part of the DOM that should have its tabindexes changed. Defaults to
  *   the entire page.
  */
-Drupal.overlay.makeDocumentUntabbable = function (context) {
+Backdrop.overlay.makeDocumentUntabbable = function (context) {
   context = context || document.body;
   var $overlay, $tabbable, $hasTabindex;
 
   // Determine which elements on the page already have a tabindex.
   $hasTabindex = $('[tabindex] :not(.overlay-element)', context);
   // Record the tabindex for each element, so we can restore it later.
-  $hasTabindex.each(Drupal.overlay._recordTabindex);
+  $hasTabindex.each(Backdrop.overlay._recordTabindex);
   // Add the tabbable elements from the current context to any that we might
   // have previously recorded.
-  Drupal.overlay._hasTabindex = $hasTabindex.add(Drupal.overlay._hasTabindex);
+  Backdrop.overlay._hasTabindex = $hasTabindex.add(Backdrop.overlay._hasTabindex);
 
   // Set tabindex to -1 on everything outside the overlay and toolbars, so that
   // the underlying page is unreachable.
@@ -914,7 +914,7 @@ Drupal.overlay.makeDocumentUntabbable = function (context) {
  *   The part of the DOM that should have its tabindexes restored. Defaults to
  *   the entire page.
  */
-Drupal.overlay.makeDocumentTabbable = function (context) {
+Backdrop.overlay.makeDocumentTabbable = function (context) {
   var $needsTabindex;
   context = context || document.body;
 
@@ -923,9 +923,9 @@ Drupal.overlay.makeDocumentTabbable = function (context) {
   $('[tabindex]', context).removeAttr('tabindex');
 
   // Restore the tabindex attributes that existed before the overlay was opened.
-  $needsTabindex = $(Drupal.overlay._hasTabindex, context);
-  $needsTabindex.each(Drupal.overlay._restoreTabindex);
-  Drupal.overlay._hasTabindex = Drupal.overlay._hasTabindex.not($needsTabindex);
+  $needsTabindex = $(Backdrop.overlay._hasTabindex, context);
+  $needsTabindex.each(Backdrop.overlay._restoreTabindex);
+  Backdrop.overlay._hasTabindex = Backdrop.overlay._hasTabindex.not($needsTabindex);
 };
 
 /**
@@ -933,10 +933,10 @@ Drupal.overlay.makeDocumentTabbable = function (context) {
  *
  * Meant to be used as a jQuery.fn.each callback.
  */
-Drupal.overlay._recordTabindex = function () {
+Backdrop.overlay._recordTabindex = function () {
   var $element = $(this);
   var tabindex = $(this).attr('tabindex');
-  $element.data('drupalOverlayOriginalTabIndex', tabindex);
+  $element.data('backdropOverlayOriginalTabIndex', tabindex);
 };
 
 /**
@@ -944,23 +944,23 @@ Drupal.overlay._recordTabindex = function () {
  *
  * Meant to be used as a jQuery.fn.each callback.
  */
-Drupal.overlay._restoreTabindex = function () {
+Backdrop.overlay._restoreTabindex = function () {
   var $element = $(this);
-  var tabindex = $element.data('drupalOverlayOriginalTabIndex');
+  var tabindex = $element.data('backdropOverlayOriginalTabIndex');
   $element.attr('tabindex', tabindex);
 };
 
 /**
  * Theme function to create the overlay iframe element.
  */
-Drupal.theme.prototype.overlayContainer = function () {
+Backdrop.theme.prototype.overlayContainer = function () {
   return '<div id="overlay-container"><div class="overlay-modal-background"></div></div>';
 };
 
 /**
  * Theme function to create an overlay iframe element.
  */
-Drupal.theme.prototype.overlayElement = function (url) {
+Backdrop.theme.prototype.overlayElement = function (url) {
   return '<iframe class="overlay-element" frameborder="0" scrolling="auto" allowtransparency="true"></iframe>';
 };
 

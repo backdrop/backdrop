@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * This script runs Drupal tests from command line.
+ * This script runs Backdrop tests from command line.
  */
 
 const SIMPLETEST_SCRIPT_COLOR_PASS = 32; // Green.
@@ -27,7 +27,7 @@ else {
 }
 
 // Bootstrap to perform initial validation or other operations.
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+backdrop_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 if (!module_exists('simpletest')) {
   simpletest_script_print_error("The simpletest module must be enabled before this script can run.");
   exit(1);
@@ -39,7 +39,7 @@ if ($args['clean']) {
   echo "\nEnvironment cleaned.\n";
 
   // Get the status messages and print them.
-  $messages = array_pop(drupal_get_messages('status'));
+  $messages = array_pop(backdrop_get_messages('status'));
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
@@ -70,7 +70,7 @@ if ($args['list']) {
 $test_list = simpletest_script_get_test_list();
 
 // Try to allocate unlimited time to run the tests.
-drupal_set_time_limit(0);
+backdrop_set_time_limit(0);
 
 simpletest_script_reporter_init();
 
@@ -113,7 +113,7 @@ function simpletest_script_help() {
 
   echo <<<EOF
 
-Run Drupal tests from the shell.
+Run Backdrop tests from the shell.
 
 Usage:        {$args['script']} [OPTIONS] <tests>
 Example:      {$args['script']} Profile
@@ -128,7 +128,7 @@ All arguments are long options.
               tests and then exits (no tests are run).
 
   --url       Immediately precedes a URL to set the host and path. You will
-              need this parameter if Drupal is in a subdirectory on your
+              need this parameter if Backdrop is in a subdirectory on your
               localhost and you have not set \$base_url in settings.php. Tests
               can be run under SSL by including https:// in the URL.
 
@@ -166,7 +166,7 @@ All arguments are long options.
               be separated by commas. Ignored if --all is specified.
 
 To run this script you will normally invoke it from the root directory of your
-Drupal installation as the webserver user (differs per configuration), or root:
+Backdrop installation as the webserver user (differs per configuration), or root:
 
 sudo -u [wwwrun|www-data|etc] php ./core/scripts/{$args['script']}
   --url http://example.com/ --all
@@ -294,7 +294,7 @@ function simpletest_script_init($server_software) {
   $_SERVER['REQUEST_METHOD'] = 'GET';
   $_SERVER['SCRIPT_NAME'] = $path .'/index.php';
   $_SERVER['PHP_SELF'] = $path .'/index.php';
-  $_SERVER['HTTP_USER_AGENT'] = 'Drupal command line';
+  $_SERVER['HTTP_USER_AGENT'] = 'Backdrop command line';
 
   if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
     // Ensure that any and all environment variables are changed to https://.
@@ -359,12 +359,12 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
 }
 
 /**
- * Bootstrap Drupal and run a single test.
+ * Bootstrap Backdrop and run a single test.
  */
 function simpletest_script_run_one_test($test_id, $test_class) {
   try {
-    // Bootstrap Drupal.
-    drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+    // Bootstrap Backdrop.
+    backdrop_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
     $test = new $test_class($test_id);
     $test->run();
@@ -430,7 +430,7 @@ function simpletest_script_get_test_list() {
     elseif ($args['file']) {
       $files = array();
       foreach ($args['test_names'] as $file) {
-        $files[drupal_realpath($file)] = 1;
+        $files[backdrop_realpath($file)] = 1;
       }
 
       // Check for valid class names.
@@ -474,7 +474,7 @@ function simpletest_script_reporter_init() {
   );
 
   echo "\n";
-  echo "Drupal test run\n";
+  echo "Backdrop test run\n";
   echo "---------------\n";
   echo "\n";
 

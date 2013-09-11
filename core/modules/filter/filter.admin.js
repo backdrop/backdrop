@@ -1,6 +1,6 @@
 (function ($) {
 
-Drupal.behaviors.filterStatus = {
+Backdrop.behaviors.filterStatus = {
   attach: function (context, settings) {
     $('#filters-status-wrapper input.form-checkbox', context).once('filter-status', function () {
       var $checkbox = $(this);
@@ -25,13 +25,13 @@ Drupal.behaviors.filterStatus = {
           }
         }
         // Restripe table after toggling visibility of table row.
-        Drupal.tableDrag['filter-order'].restripeTable();
+        Backdrop.tableDrag['filter-order'].restripeTable();
       });
 
       // Attach summary for configurable filters (only for screen-readers).
       if (tab) {
-        tab.fieldset.drupalSetSummary(function (tabContext) {
-          return $checkbox.is(':checked') ? Drupal.t('Enabled') : Drupal.t('Disabled');
+        tab.fieldset.backdropSetSummary(function (tabContext) {
+          return $checkbox.is(':checked') ? Backdrop.t('Enabled') : Backdrop.t('Disabled');
         });
       }
 

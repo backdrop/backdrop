@@ -55,7 +55,7 @@ function hook_update_projects_alter(&$projects) {
       '_info_file_ctime' => 1243888165,
     ),
     // The date stamp when the project was released, if known. If the disabled
-    // project was an officially packaged release from drupal.org, this will
+    // project was an officially packaged release from backdrop.org, this will
     // be included in the .info file as the 'datestamp' field. This only
     // really matters for development snapshot releases that are regenerated,
     // so it can be left undefined or set to 0 in most cases.

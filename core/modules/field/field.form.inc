@@ -33,7 +33,7 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
     'field' => $field,
     'instance' => $instance,
   );
-  drupal_alter(array('field_widget_properties', 'field_widget_properties_' . $entity_type), $instance['widget'], $context);
+  backdrop_alter(array('field_widget_properties', 'field_widget_properties_' . $entity_type), $instance['widget'], $context);
 
   // Collect widget elements.
   $elements = array();
@@ -85,7 +85,7 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
             'items' => $items,
             'delta' => $delta,
           );
-          drupal_alter(array('field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'), $element, $form_state, $context);
+          backdrop_alter(array('field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'), $element, $form_state, $context);
 
           // If we're processing a specific delta value for a field where the
           // field module handles multiples, set the delta in the result.
@@ -110,9 +110,9 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
       '#type' => 'container',
       '#attributes' => array(
         'class' => array(
-          'field-type-' . drupal_html_class($field['type']),
-          'field-name-' . drupal_html_class($field_name),
-          'field-widget-' . drupal_html_class($instance['widget']['type']),
+          'field-type-' . backdrop_html_class($field['type']),
+          'field-name-' . backdrop_html_class($field_name),
+          'field-widget-' . backdrop_html_class($instance['widget']['type']),
         ),
       ),
       '#weight' => $instance['widget']['weight'],
@@ -166,7 +166,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
   $description = field_filter_xss($instance['description']);
 
   $id_prefix = implode('-', array_merge($parents, array($field_name)));
-  $wrapper_id = drupal_html_id($id_prefix . '-add-more-wrapper');
+  $wrapper_id = backdrop_html_id($id_prefix . '-add-more-wrapper');
 
   $field_elements = array();
 
@@ -214,7 +214,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
           'items' => $items,
           'delta' => $delta,
         );
-        drupal_alter(array('field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'), $element, $form_state, $context);
+        backdrop_alter(array('field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'), $element, $form_state, $context);
 
         $field_elements[$delta] = $element;
       }
@@ -271,7 +271,7 @@ function theme_field_multiple_value_form($variables) {
   $output = '';
 
   if ($element['#cardinality'] > 1 || $element['#cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-    $table_id = drupal_html_id($element['#field_name'] . '_values');
+    $table_id = backdrop_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
 
@@ -301,10 +301,10 @@ function theme_field_multiple_value_form($variables) {
     // Add the items as table rows.
     foreach ($items as $key => $item) {
       $item['_weight']['#attributes']['class'] = array($order_class);
-      $delta_element = drupal_render($item['_weight']);
+      $delta_element = backdrop_render($item['_weight']);
       $cells = array(
         array('data' => '', 'class' => array('field-multiple-drag')),
-        drupal_render($item),
+        backdrop_render($item),
         array('data' => $delta_element, 'class' => array('delta-order')),
       );
       $rows[] = array(
@@ -316,14 +316,14 @@ function theme_field_multiple_value_form($variables) {
     $output = '<div class="form-item">';
     $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
     $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
-    $output .= '<div class="clearfix">' . drupal_render($add_more_button) . '</div>';
+    $output .= '<div class="clearfix">' . backdrop_render($add_more_button) . '</div>';
     $output .= '</div>';
 
-    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+    backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
   }
   else {
     foreach (element_children($element) as $key) {
-      $output .= drupal_render($element[$key]);
+      $output .= backdrop_render($element[$key]);
     }
   }
 
@@ -362,7 +362,7 @@ function field_default_form_errors($entity_type, $entity, $field, $instance, $la
     $function_exists = function_exists($function);
 
     // Locate the correct element in the the form.
-    $element = drupal_array_get_nested_value($form_state['complete_form'], $field_state['array_parents']);
+    $element = backdrop_array_get_nested_value($form_state['complete_form'], $field_state['array_parents']);
 
     $multiple_widget = field_behaviors_widget('multiple values', $instance) != FIELD_BEHAVIOR_DEFAULT;
     foreach ($field_state['errors'] as $delta => $delta_errors) {
@@ -399,7 +399,7 @@ function field_add_more_submit($form, &$form_state) {
   $button = $form_state['triggering_element'];
 
   // Go one level up in the form, to the widgets container.
-  $element = drupal_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
+  $element = backdrop_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
   $field_name = $element['#field_name'];
   $langcode = $element['#language'];
   $parents = $element['#field_parents'];
@@ -424,7 +424,7 @@ function field_add_more_js($form, $form_state) {
   $button = $form_state['triggering_element'];
 
   // Go one level up in the form, to the widgets container.
-  $element = drupal_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
+  $element = backdrop_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
   $field_name = $element['#field_name'];
   $langcode = $element['#language'];
   $parents = $element['#field_parents'];
@@ -470,7 +470,7 @@ function field_add_more_js($form, $form_state) {
  */
 function field_form_get_state($parents, $field_name, $langcode, &$form_state) {
   $form_state_parents = _field_form_state_parents($parents, $field_name, $langcode);
-  return drupal_array_get_nested_value($form_state, $form_state_parents);
+  return backdrop_array_get_nested_value($form_state, $form_state_parents);
 }
 
 /**
@@ -492,7 +492,7 @@ function field_form_get_state($parents, $field_name, $langcode, &$form_state) {
  */
 function field_form_set_state($parents, $field_name, $langcode, &$form_state, $field_state) {
   $form_state_parents = _field_form_state_parents($parents, $field_name, $langcode);
-  drupal_array_set_nested_value($form_state, $form_state_parents, $field_state);
+  backdrop_array_set_nested_value($form_state, $form_state_parents, $field_state);
 }
 
 /**
@@ -506,7 +506,7 @@ function _field_form_state_parents($parents, $field_name, $langcode) {
   // - Other fields are placed under
   //   $form_state['field']['#parents'][...$parents...]['#fields'][$field_name]
   //   to avoid clashes between field names and $parents parts.
-  // @todo Remove backwards compatibility in Drupal 8, and use a unique
+  // @todo Remove backwards compatibility in Backdrop 8, and use a unique
   // $form_state['field'][...$parents...]['#fields'][$field_name] structure.
   if (!empty($parents)) {
     $form_state_parents = array_merge(array('#parents'), $parents, array('#fields'));

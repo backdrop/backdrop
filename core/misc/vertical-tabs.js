@@ -12,7 +12,7 @@
  * which is called every time the user performs an update to a form
  * element inside the tab pane.
  */
-Drupal.behaviors.verticalTabs = {
+Backdrop.behaviors.verticalTabs = {
   attach: function (context) {
     $('.vertical-tabs-panes', context).once('vertical-tabs', function () {
       var focusID = $(':hidden.vertical-tabs-active-tab', this).val();
@@ -30,7 +30,7 @@ Drupal.behaviors.verticalTabs = {
 
       // Transform each fieldset into a tab.
       $fieldsets.each(function () {
-        var vertical_tab = new Drupal.verticalTab({
+        var vertical_tab = new Backdrop.verticalTab({
           title: $('> legend', this).text(),
           fieldset: $(this)
         });
@@ -72,9 +72,9 @@ Drupal.behaviors.verticalTabs = {
  *   - title: The name of the tab.
  *   - fieldset: The jQuery object of the fieldset that is the tab pane.
  */
-Drupal.verticalTab = function (settings) {
+Backdrop.verticalTab = function (settings) {
   var self = this;
-  $.extend(this, settings, Drupal.theme('verticalTab', settings));
+  $.extend(this, settings, Backdrop.theme('verticalTab', settings));
 
   this.link.click(function () {
     self.focus();
@@ -109,7 +109,7 @@ Drupal.verticalTab = function (settings) {
     .trigger('summaryUpdated');
 };
 
-Drupal.verticalTab.prototype = {
+Backdrop.verticalTab.prototype = {
   /**
    * Displays the tab's content pane.
    */
@@ -128,14 +128,14 @@ Drupal.verticalTab.prototype = {
     this.item.addClass('selected');
     // Mark the active tab for screen readers.
     $('#active-vertical-tab').remove();
-    this.link.append('<span id="active-vertical-tab" class="element-invisible">' + Drupal.t('(active tab)') + '</span>');
+    this.link.append('<span id="active-vertical-tab" class="element-invisible">' + Backdrop.t('(active tab)') + '</span>');
   },
 
   /**
    * Updates the tab's summary.
    */
   updateSummary: function () {
-    this.summary.html(this.fieldset.drupalGetSummary());
+    this.summary.html(this.fieldset.backdropGetSummary());
   },
 
   /**
@@ -191,7 +191,7 @@ Drupal.verticalTab.prototype = {
  *       (jQuery version)
  *   - summary: The jQuery element that contains the tab summary
  */
-Drupal.theme.prototype.verticalTab = function (settings) {
+Backdrop.theme.prototype.verticalTab = function (settings) {
   var tab = {};
   tab.item = $('<li class="vertical-tab-button" tabindex="-1"></li>')
     .append(tab.link = $('<a href="#"></a>')

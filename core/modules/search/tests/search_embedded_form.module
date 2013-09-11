@@ -15,7 +15,7 @@
 function search_embedded_form_menu() {
   $items['search_embedded_form'] = array(
     'title' => 'Search_Embed_Form',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_embedded_form_form'),
     'access arguments' => array('search content'),
     'type' => MENU_CALLBACK,
@@ -58,13 +58,13 @@ function search_embedded_form_form($form, &$form_state) {
 function search_embedded_form_form_submit($form, &$form_state) {
   $count = variable_get('search_embedded_form_submitted', 0) + 1;
   variable_set('search_embedded_form_submitted', $count);
-  drupal_set_message(t('Test form was submitted'));
+  backdrop_set_message(t('Test form was submitted'));
 }
 
 /**
  * Adds the test form to search results.
  */
 function search_embedded_form_preprocess_search_result(&$variables) {
-  $form = drupal_get_form('search_embedded_form_form');
-  $variables['snippet'] .= drupal_render($form);
+  $form = backdrop_get_form('search_embedded_form_form');
+  $variables['snippet'] .= backdrop_render($form);
 }

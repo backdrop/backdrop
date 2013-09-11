@@ -1,69 +1,69 @@
 (function ($) {
 
-$.datepicker.regional['drupal-locale'] = {
-  closeText: Drupal.t('Done'),
-  prevText: Drupal.t('Prev'),
-  nextText: Drupal.t('Next'),
-  currentText: Drupal.t('Today'),
+$.datepicker.regional['backdrop-locale'] = {
+  closeText: Backdrop.t('Done'),
+  prevText: Backdrop.t('Prev'),
+  nextText: Backdrop.t('Next'),
+  currentText: Backdrop.t('Today'),
   monthNames: [
-    Drupal.t('January'),
-    Drupal.t('February'),
-    Drupal.t('March'),
-    Drupal.t('April'),
-    Drupal.t('May'),
-    Drupal.t('June'),
-    Drupal.t('July'),
-    Drupal.t('August'),
-    Drupal.t('September'),
-    Drupal.t('October'),
-    Drupal.t('November'),
-    Drupal.t('December')
+    Backdrop.t('January'),
+    Backdrop.t('February'),
+    Backdrop.t('March'),
+    Backdrop.t('April'),
+    Backdrop.t('May'),
+    Backdrop.t('June'),
+    Backdrop.t('July'),
+    Backdrop.t('August'),
+    Backdrop.t('September'),
+    Backdrop.t('October'),
+    Backdrop.t('November'),
+    Backdrop.t('December')
   ],
   monthNamesShort: [
-    Drupal.t('Jan'),
-    Drupal.t('Feb'),
-    Drupal.t('Mar'),
-    Drupal.t('Apr'),
-    Drupal.t('May'),
-    Drupal.t('Jun'),
-    Drupal.t('Jul'),
-    Drupal.t('Aug'),
-    Drupal.t('Sep'),
-    Drupal.t('Oct'),
-    Drupal.t('Nov'),
-    Drupal.t('Dec')
+    Backdrop.t('Jan'),
+    Backdrop.t('Feb'),
+    Backdrop.t('Mar'),
+    Backdrop.t('Apr'),
+    Backdrop.t('May'),
+    Backdrop.t('Jun'),
+    Backdrop.t('Jul'),
+    Backdrop.t('Aug'),
+    Backdrop.t('Sep'),
+    Backdrop.t('Oct'),
+    Backdrop.t('Nov'),
+    Backdrop.t('Dec')
   ],
   dayNames: [
-    Drupal.t('Sunday'),
-    Drupal.t('Monday'),
-    Drupal.t('Tuesday'),
-    Drupal.t('Wednesday'),
-    Drupal.t('Thursday'),
-    Drupal.t('Friday'),
-    Drupal.t('Saturday')
+    Backdrop.t('Sunday'),
+    Backdrop.t('Monday'),
+    Backdrop.t('Tuesday'),
+    Backdrop.t('Wednesday'),
+    Backdrop.t('Thursday'),
+    Backdrop.t('Friday'),
+    Backdrop.t('Saturday')
   ],
   dayNamesShort: [
-    Drupal.t('Sun'),
-    Drupal.t('Mon'),
-    Drupal.t('Tue'),
-    Drupal.t('Wed'),
-    Drupal.t('Thu'),
-    Drupal.t('Fri'),
-    Drupal.t('Sat')
+    Backdrop.t('Sun'),
+    Backdrop.t('Mon'),
+    Backdrop.t('Tue'),
+    Backdrop.t('Wed'),
+    Backdrop.t('Thu'),
+    Backdrop.t('Fri'),
+    Backdrop.t('Sat')
   ],
   dayNamesMin: [
-    Drupal.t('Su'),
-    Drupal.t('Mo'),
-    Drupal.t('Tu'),
-    Drupal.t('We'),
-    Drupal.t('Th'),
-    Drupal.t('Fr'),
-    Drupal.t('Sa')
+    Backdrop.t('Su'),
+    Backdrop.t('Mo'),
+    Backdrop.t('Tu'),
+    Backdrop.t('We'),
+    Backdrop.t('Th'),
+    Backdrop.t('Fr'),
+    Backdrop.t('Sa')
   ],
-  dateFormat: Drupal.t('mm/dd/yy'),
-  firstDay: Drupal.settings.jqueryuidatepicker.firstDay,
-  isRTL: Drupal.settings.jqueryuidatepicker.rtl
+  dateFormat: Backdrop.t('mm/dd/yy'),
+  firstDay: Backdrop.settings.jqueryuidatepicker.firstDay,
+  isRTL: Backdrop.settings.jqueryuidatepicker.rtl
 };
-$.datepicker.setDefaults($.datepicker.regional['drupal-locale']);
+$.datepicker.setDefaults($.datepicker.regional['backdrop-locale']);
 
 })(jQuery);

@@ -3,7 +3,7 @@
 /**
  * Automatically display the guidelines of the selected text format.
  */
-Drupal.behaviors.filterGuidelines = {
+Backdrop.behaviors.filterGuidelines = {
   attach: function (context) {
     $('.filter-guidelines', context).once('filter-guidelines')
       .find(':header').hide()

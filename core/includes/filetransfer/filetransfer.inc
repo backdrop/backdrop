@@ -8,7 +8,7 @@
  * writable by the webserver. To achieve this, the class should connect back
  * to the server using some backend (for example FTP or SSH). To keep security,
  * the password should always be asked from the user and never stored. For
- * safety, all methods operate only inside a "jail", by default the Drupal root.
+ * safety, all methods operate only inside a "jail", by default the Backdrop root.
  */
 abstract class FileTransfer {
   protected $username;
@@ -157,7 +157,7 @@ abstract class FileTransfer {
    */
   protected final function checkPath($path) {
     $full_jail = $this->chroot . $this->jail;
-    $full_path = drupal_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
+    $full_path = backdrop_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
     $full_path = $this->fixRemotePath($full_path, FALSE);
     if ($full_jail !== $full_path) {
       throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
@@ -212,7 +212,7 @@ abstract class FileTransfer {
    */
   protected function copyDirectoryJailed($source, $destination) {
     if ($this->isDirectory($destination)) {
-      $destination = $destination . '/' . drupal_basename($source);
+      $destination = $destination . '/' . backdrop_basename($source);
     }
     $this->createDirectory($destination);
     foreach (new RecursiveIteratorIterator(new SkipDotsRecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST) as $filename => $file) {
@@ -303,7 +303,7 @@ abstract class FileTransfer {
     $chroot = '';
     while (count($parts)) {
       $check = implode($parts, '/');
-      if ($this->isFile($check . '/' . drupal_basename(__FILE__))) {
+      if ($this->isFile($check . '/' . backdrop_basename(__FILE__))) {
         // Remove the trailing slash.
         return substr($chroot, 0, -1);
       }

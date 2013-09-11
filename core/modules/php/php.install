@@ -33,7 +33,7 @@ function php_enable() {
     $php_format = (object) $php_format;
     filter_format_save($php_format);
 
-    drupal_set_message(t('A <a href="@php-code">PHP code</a> text format has been created.', array('@php-code' => url('admin/config/content/formats/' . $php_format->format))));
+    backdrop_set_message(t('A <a href="@php-code">PHP code</a> text format has been created.', array('@php-code' => url('admin/config/content/formats/' . $php_format->format))));
   }
 }
 
@@ -41,5 +41,5 @@ function php_enable() {
  * Implements hook_disable().
  */
 function php_disable() {
-  drupal_set_message(t('The PHP module has been disabled. Any existing content that was using the PHP filter will now be visible in plain text. This might pose a security risk by exposing sensitive information, if any, used in the PHP code.'));
+  backdrop_set_message(t('The PHP module has been disabled. Any existing content that was using the PHP filter will now be visible in plain text. This might pose a security risk by exposing sensitive information, if any, used in the PHP code.'));
 }

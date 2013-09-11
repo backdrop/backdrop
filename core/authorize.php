@@ -10,7 +10,7 @@
  * themes. Users should not visit this page directly, but instead use an
  * administrative user interface which knows how to redirect the user to this
  * script as part of a multistep process. This script actually performs the
- * selected operations without loading all of Drupal, to be able to more
+ * selected operations without loading all of Backdrop, to be able to more
  * gracefully recover from errors. Access to the script is controlled by a
  * global killswitch in settings.php ('allow_authorize_operations') and via
  * the 'administer software updates' permission.
@@ -20,11 +20,11 @@
  * @link authorize Authorized operation helper functions @endlink
  */
 
-// Change the directory to the Drupal root.
+// Change the directory to the Backdrop root.
 chdir('..');
 
 /**
- * Root directory of Drupal installation.
+ * Root directory of Backdrop installation.
  */
 define('DRUPAL_ROOT', getcwd());
 
@@ -33,7 +33,7 @@ define('DRUPAL_ROOT', getcwd());
  * avoid various unwanted operations, such as hook_init() and
  * hook_exit() invokes, css/js preprocessing and translation, and
  * solve some theming issues. This flag is checked on several places
- * in Drupal code (not just authorize.php).
+ * in Backdrop code (not just authorize.php).
  */
 const MAINTENANCE_MODE = 'update';
 
@@ -41,9 +41,9 @@ const MAINTENANCE_MODE = 'update';
  * Renders a 403 access denied page for authorize.php.
  */
 function authorize_access_denied_page() {
-  drupal_add_http_header('Status', '403 Forbidden');
+  backdrop_add_http_header('Status', '403 Forbidden');
   watchdog('access denied', 'authorize.php', NULL, WATCHDOG_WARNING);
-  drupal_set_title('Access denied');
+  backdrop_set_title('Access denied');
   return t('You are not allowed to access this page.');
 }
 
@@ -71,9 +71,9 @@ require_once DRUPAL_ROOT . '/core/includes/ajax.inc';
 
 // We prepare only a minimal bootstrap. This includes the database and
 // variables, however, so we have access to the class autoloader registry.
-drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+backdrop_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
 
-// This must go after drupal_bootstrap(), which unsets globals!
+// This must go after backdrop_bootstrap(), which unsets globals!
 global $conf;
 
 // We have to enable the user and system modules, even to check access and
@@ -81,17 +81,17 @@ global $conf;
 $module_list['system']['filename'] = 'core/modules/system/system.module';
 $module_list['user']['filename'] = 'core/modules/user/user.module';
 module_list(TRUE, FALSE, FALSE, $module_list);
-drupal_load('module', 'system');
-drupal_load('module', 'user');
+backdrop_load('module', 'system');
+backdrop_load('module', 'user');
 
 // We also want to have the language system available, but we do *NOT* want to
-// actually call drupal_bootstrap(DRUPAL_BOOTSTRAP_LANGUAGE), since that would
+// actually call backdrop_bootstrap(DRUPAL_BOOTSTRAP_LANGUAGE), since that would
 // also force us through the DRUPAL_BOOTSTRAP_PAGE_HEADER phase, which loads
 // all the modules, and that's exactly what we're trying to avoid.
-drupal_language_initialize();
+backdrop_language_initialize();
 
 // Initialize the maintenance theme for this administrative script.
-drupal_maintenance_theme();
+backdrop_maintenance_theme();
 
 $output = '';
 $show_messages = TRUE;
@@ -105,7 +105,7 @@ if (authorize_access_allowed()) {
 
   // For the sake of Batch API and a few other low-level functions, we need to
   // initialize the URL path into $_GET['q']. However, we do not want to raise
-  // our bootstrap level, nor do we want to call drupal_initialize_path(),
+  // our bootstrap level, nor do we want to call backdrop_initialize_path(),
   // since that is assuming that modules are loaded and invoking hooks.
   // However, all we really care is if we're in the middle of a batch, in which
   // case $_GET['q'] will already be set, we just initialize it to an empty
@@ -115,10 +115,10 @@ if (authorize_access_allowed()) {
   }
 
   if (isset($_SESSION['authorize_operation']['page_title'])) {
-    drupal_set_title($_SESSION['authorize_operation']['page_title']);
+    backdrop_set_title($_SESSION['authorize_operation']['page_title']);
   }
   else {
-    drupal_set_title(t('Authorize file system changes'));
+    backdrop_set_title(t('Authorize file system changes'));
   }
 
   // See if we've run the operation and need to display a report.
@@ -130,10 +130,10 @@ if (authorize_access_allowed()) {
     unset($_SESSION['authorize_filetransfer_info']);
 
     if (!empty($results['page_title'])) {
-      drupal_set_title($results['page_title']);
+      backdrop_set_title($results['page_title']);
     }
     if (!empty($results['page_message'])) {
-      drupal_set_message($results['page_message']['message'], $results['page_message']['type']);
+      backdrop_set_message($results['page_message']['message'], $results['page_message']['type']);
     }
 
     $output = theme('authorize_report', array('messages' => $results['messages']));
@@ -161,8 +161,8 @@ if (authorize_access_allowed()) {
     }
     elseif (!$batch = batch_get()) {
       // We have a batch to process, show the filetransfer form.
-      $elements = drupal_get_form('authorize_filetransfer_form');
-      $output = drupal_render($elements);
+      $elements = backdrop_get_form('authorize_filetransfer_form');
+      $output = backdrop_render($elements);
     }
   }
   // We defer the display of messages until all operations are done.

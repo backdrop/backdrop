@@ -5,7 +5,7 @@
  * Tests for dblog.module.
  */
 
-class DBLogTestCase extends DrupalWebTestCase {
+class DBLogTestCase extends BackdropWebTestCase {
   protected $big_user;
   protected $any_user;
 
@@ -23,8 +23,8 @@ class DBLogTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('dblog', 'poll');
     // Create users.
-    $this->big_user = $this->drupalCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'administer users'));
-    $this->any_user = $this->drupalCreateUser(array());
+    $this->big_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'administer users'));
+    $this->any_user = $this->backdropCreateUser(array());
   }
 
   /**
@@ -32,7 +32,7 @@ class DBLogTestCase extends DrupalWebTestCase {
    */
   function testDBLog() {
     // Login the admin user.
-    $this->drupalLogin($this->big_user);
+    $this->backdropLogin($this->big_user);
 
     $row_limit = 100;
     $this->verifyRowLimit($row_limit);
@@ -41,7 +41,7 @@ class DBLogTestCase extends DrupalWebTestCase {
     $this->verifyReports();
 
     // Login the regular user.
-    $this->drupalLogin($this->any_user);
+    $this->backdropLogin($this->any_user);
     $this->verifyReports(403);
   }
 
@@ -54,7 +54,7 @@ class DBLogTestCase extends DrupalWebTestCase {
     // Change the dblog row limit.
     $edit = array();
     $edit['dblog_row_limit'] = $row_limit;
-    $this->drupalPost('admin/config/development/logging', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/development/logging', $edit, t('Save configuration'));
     $this->assertResponse(200);
 
     // Check row limit variable.
@@ -126,35 +126,35 @@ class DBLogTestCase extends DrupalWebTestCase {
     $quote = '&#039;';
 
     // View dblog help node.
-    $this->drupalGet('admin/help/dblog');
+    $this->backdropGet('admin/help/dblog');
     $this->assertResponse($response);
     if ($response == 200) {
       $this->assertText(t('Database Logging'), t('DBLog help was displayed'));
     }
 
     // View dblog report node.
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
     $this->assertResponse($response);
     if ($response == 200) {
       $this->assertText(t('Recent log messages'), t('DBLog report was displayed'));
     }
 
     // View dblog page-not-found report node.
-    $this->drupalGet('admin/reports/page-not-found');
+    $this->backdropGet('admin/reports/page-not-found');
     $this->assertResponse($response);
     if ($response == 200) {
       $this->assertText(t('Top ' . $quote . 'page not found' . $quote . ' errors'), t('DBLog page-not-found report was displayed'));
     }
 
     // View dblog access-denied report node.
-    $this->drupalGet('admin/reports/access-denied');
+    $this->backdropGet('admin/reports/access-denied');
     $this->assertResponse($response);
     if ($response == 200) {
       $this->assertText(t('Top ' . $quote . 'access denied' . $quote . ' errors'), t('DBLog access-denied report was displayed'));
     }
 
     // View dblog event node.
-    $this->drupalGet('admin/reports/event/1');
+    $this->backdropGet('admin/reports/event/1');
     $this->assertResponse($response);
     if ($response == 200) {
       $this->assertText(t('Details'), t('DBLog event node was displayed'));
@@ -184,23 +184,23 @@ class DBLogTestCase extends DrupalWebTestCase {
     // Set user variables.
     $name = $this->randomName();
     $pass = user_password();
-    // Add user using form to generate add user event (which is not triggered by drupalCreateUser).
+    // Add user using form to generate add user event (which is not triggered by backdropCreateUser).
     $edit = array();
     $edit['name'] = $name;
     $edit['mail'] = $name . '@example.com';
     $edit['pass[pass1]'] = $pass;
     $edit['pass[pass2]'] = $pass;
     $edit['status'] = 1;
-    $this->drupalPost('admin/people/create', $edit, t('Create new account'));
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertResponse(200);
     // Retrieve user object.
     $user = user_load_by_name($name);
     $this->assertTrue($user != NULL, t('User @name was loaded', array('@name' => $name)));
-    $user->pass_raw = $pass; // Needed by drupalLogin.
+    $user->pass_raw = $pass; // Needed by backdropLogin.
     // Login user.
-    $this->drupalLogin($user);
+    $this->backdropLogin($user);
     // Logout user.
-    $this->drupalLogout();
+    $this->backdropLogout();
     // Fetch row ids in watchdog that relate to the user.
     $result = db_query('SELECT wid FROM {watchdog} WHERE uid = :uid', array(':uid' => $user->uid));
     foreach ($result as $row) {
@@ -210,13 +210,13 @@ class DBLogTestCase extends DrupalWebTestCase {
     $this->assertTrue($count_before > 0, t('DBLog contains @count records for @name', array('@count' => $count_before, '@name' => $user->name)));
 
     // Login the admin user.
-    $this->drupalLogin($this->big_user);
+    $this->backdropLogin($this->big_user);
     // Delete user.
     // We need to POST here to invoke batch_process() in the internal browser.
-    $this->drupalPost('user/' . $user->uid . '/cancel', array('user_cancel_method' => 'user_cancel_reassign'), t('Cancel account'));
+    $this->backdropPost('user/' . $user->uid . '/cancel', array('user_cancel_method' => 'user_cancel_reassign'), t('Cancel account'));
 
     // View the dblog report.
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
     $this->assertResponse(200);
 
     // Verify events were recorded.
@@ -238,8 +238,8 @@ class DBLogTestCase extends DrupalWebTestCase {
       foreach ($links->attributes() as $attr => $value) {
         if ($attr == 'href') {
           // Extract link to details page.
-          $link = drupal_substr($value, strpos($value, 'admin/reports/event/'));
-          $this->drupalGet($link);
+          $link = backdrop_substr($value, strpos($value, 'admin/reports/event/'));
+          $this->backdropGet($link);
           // Check for full message text on the details page.
           $this->assertRaw($message, t('DBLog event details was found: [delete user]'));
           break;
@@ -249,10 +249,10 @@ class DBLogTestCase extends DrupalWebTestCase {
     $this->assertTrue($link, t('DBLog event was recorded: [delete user]'));
     // Visit random URL (to generate page not found event).
     $not_found_url = $this->randomName(60);
-    $this->drupalGet($not_found_url);
+    $this->backdropGet($not_found_url);
     $this->assertResponse(404);
     // View dblog page-not-found report page.
-    $this->drupalGet('admin/reports/page-not-found');
+    $this->backdropGet('admin/reports/page-not-found');
     $this->assertResponse(200);
     // Check that full-length url displayed.
     $this->assertText($not_found_url, t('DBLog event was recorded: [page not found]'));
@@ -266,37 +266,37 @@ class DBLogTestCase extends DrupalWebTestCase {
   private function doNode($type) {
     // Create user.
     $perm = array('create ' . $type . ' content', 'edit own ' . $type . ' content', 'delete own ' . $type . ' content');
-    $user = $this->drupalCreateUser($perm);
+    $user = $this->backdropCreateUser($perm);
     // Login user.
-    $this->drupalLogin($user);
+    $this->backdropLogin($user);
 
-    // Create node using form to generate add content event (which is not triggered by drupalCreateNode).
+    // Create node using form to generate add content event (which is not triggered by backdropCreateNode).
     $edit = $this->getContent($type);
     $langcode = LANGUAGE_NONE;
     $title = $edit["title"];
-    $this->drupalPost('node/add/' . $type, $edit, t('Save'));
+    $this->backdropPost('node/add/' . $type, $edit, t('Save'));
     $this->assertResponse(200);
     // Retrieve node object.
-    $node = $this->drupalGetNodeByTitle($title);
+    $node = $this->backdropGetNodeByTitle($title);
     $this->assertTrue($node != NULL, t('Node @title was loaded', array('@title' => $title)));
     // Edit node.
     $edit = $this->getContentUpdate($type);
-    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $this->assertResponse(200);
     // Delete node.
-    $this->drupalPost('node/' . $node->nid . '/delete', array(), t('Delete'));
+    $this->backdropPost('node/' . $node->nid . '/delete', array(), t('Delete'));
     $this->assertResponse(200);
     // View node (to generate page not found event).
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertResponse(404);
     // View the dblog report (to generate access denied event).
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
     $this->assertResponse(403);
 
     // Login the admin user.
-    $this->drupalLogin($this->big_user);
+    $this->backdropLogin($this->big_user);
     // View the dblog report.
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
     $this->assertResponse(200);
 
     // Verify events were recorded.
@@ -308,13 +308,13 @@ class DBLogTestCase extends DrupalWebTestCase {
     $this->assertLogMessage(t('@type: deleted %title.', array('@type' => $type, '%title' => $title)), t('DBLog event was recorded: [content deleted]'));
 
     // View dblog access-denied report node.
-    $this->drupalGet('admin/reports/access-denied');
+    $this->backdropGet('admin/reports/access-denied');
     $this->assertResponse(200);
     // Access denied.
     $this->assertText(t('admin/reports/dblog'), t('DBLog event was recorded: [access denied]'));
 
     // View dblog page-not-found report node.
-    $this->drupalGet('admin/reports/page-not-found');
+    $this->backdropGet('admin/reports/page-not-found');
     $this->assertResponse(200);
     // Page not found.
     $this->assertText(t('node/@nid', array('@nid' => $node->nid)), t('DBLog event was recorded: [page not found]'));
@@ -396,9 +396,9 @@ class DBLogTestCase extends DrupalWebTestCase {
     // Make sure the table count has actually incremented.
     $this->assertEqual($count + 1, db_query('SELECT COUNT(*) FROM {watchdog}')->fetchField(), t('dblog_watchdog() added an entry to the dblog :count', array(':count' => $count)));
     // Login the admin user.
-    $this->drupalLogin($this->big_user);
+    $this->backdropLogin($this->big_user);
     // Now post to clear the db table.
-    $this->drupalPost('admin/reports/dblog', array(), t('Clear log messages'));
+    $this->backdropPost('admin/reports/dblog', array(), t('Clear log messages'));
     // Count rows in watchdog that previously related to the deleted user.
     $count = db_query('SELECT COUNT(*) FROM {watchdog}')->fetchField();
     $this->assertEqual($count, 0, t('DBLog contains :count records after a clear.', array(':count' => $count)));
@@ -408,7 +408,7 @@ class DBLogTestCase extends DrupalWebTestCase {
    * Test the dblog filter on admin/reports/dblog.
    */
   protected function testFilter() {
-    $this->drupalLogin($this->big_user);
+    $this->backdropLogin($this->big_user);
 
     // Clear log to ensure that only generated entries are found.
     db_delete('watchdog')->execute();
@@ -430,7 +430,7 @@ class DBLogTestCase extends DrupalWebTestCase {
     }
 
     // View the dblog.
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
 
     // Confirm all the entries are displayed.
     $count = $this->getTypeCount($types);
@@ -444,7 +444,7 @@ class DBLogTestCase extends DrupalWebTestCase {
       $edit = array(
         'type[]' => array($type_name),
       );
-      $this->drupalPost(NULL, $edit, t('Filter'));
+      $this->backdropPost(NULL, $edit, t('Filter'));
 
       // Count the number of entries of this type.
       $type_count = 0;
@@ -465,14 +465,14 @@ class DBLogTestCase extends DrupalWebTestCase {
         'type[]' => array($type['type']),
         'severity[]' => array($type['severity']),
       );
-      $this->drupalPost(NULL, $edit, t('Filter'));
+      $this->backdropPost(NULL, $edit, t('Filter'));
 
       $count = $this->getTypeCount($types);
       $this->assertEqual(array_sum($count), $type['count'], 'Count matched');
     }
     
     // Clear all logs and make sure the confirmation message is found.
-    $this->drupalPost('admin/reports/dblog', array(), t('Clear log messages'));
+    $this->backdropPost('admin/reports/dblog', array(), t('Clear log messages'));
     $this->assertText(t('Database log cleared.'), t('Confirmation message found'));
   }
 

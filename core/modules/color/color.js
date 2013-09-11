@@ -5,7 +5,7 @@
 
 (function ($) {
 
-Drupal.behaviors.color = {
+Backdrop.behaviors.color = {
   attach: function (context, settings) {
     var i, j, colors, field_name;
     // This behavior attaches by ID, so is only valid once on a page.
@@ -65,7 +65,7 @@ Drupal.behaviors.color = {
      * Renders the preview.
      */
     function preview() {
-      Drupal.color.callback(context, settings, form, farb, height, width);
+      Backdrop.color.callback(context, settings, form, farb, height, width);
     }
 
     /**

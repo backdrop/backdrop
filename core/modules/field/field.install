@@ -161,7 +161,7 @@ function field_schema() {
       'deleted' => array('deleted'),
     ),
   );
-  $schema['cache_field'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_field'] = backdrop_get_schema_unprocessed('system', 'cache');
 
   return $schema;
 }
@@ -227,7 +227,7 @@ function _update_7000_field_create_field(&$field) {
     'translatable' => (int) $field['translatable'],
     'deleted' => (int) $field['deleted'],
   );
-  // We don't use drupal_write_record() here because it depends on the schema.
+  // We don't use backdrop_write_record() here because it depends on the schema.
   $field['id'] = db_insert('field_config')
     ->fields($record)
     ->execute();

@@ -25,8 +25,8 @@ function dblog_overview() {
     WATCHDOG_EMERGENCY     => 'dblog-emerg',
   );
 
-  $build['dblog_filter_form'] = drupal_get_form('dblog_filter_form');
-  $build['dblog_clear_log_form'] = drupal_get_form('dblog_clear_log_form');
+  $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
+  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
 
   $header = array(
     '', // Icon column.
@@ -62,7 +62,7 @@ function dblog_overview() {
         filter_xss($dblog->link),
       ),
       // Attributes for tr
-      'class' => array(drupal_html_class('dblog-' . $dblog->type), $classes[$dblog->severity]),
+      'class' => array(backdrop_html_class('dblog-' . $dblog->type), $classes[$dblog->severity]),
     );
   }
 
@@ -377,5 +377,5 @@ function dblog_clear_log_form($form) {
 function dblog_clear_log_submit() {
   $_SESSION['dblog_overview_filter'] = array();
   db_delete('watchdog')->execute();
-  drupal_set_message(t('Database log cleared.'));
+  backdrop_set_message(t('Database log cleared.'));
 }

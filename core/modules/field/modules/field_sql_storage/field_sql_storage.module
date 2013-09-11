@@ -215,7 +215,7 @@ function field_sql_storage_field_storage_create_field($field) {
   foreach ($schema as $name => $table) {
     db_create_table($name, $table);
   }
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 }
 
 /**
@@ -296,7 +296,7 @@ function field_sql_storage_field_storage_update_field($field, $prior_field, $has
       }
     }
   }
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 }
 
 /**
@@ -317,7 +317,7 @@ function field_sql_storage_field_storage_delete_field($field) {
   $revision_new_table = _field_sql_storage_revision_tablename($field);
   db_rename_table($table, $new_table);
   db_rename_table($revision_table, $revision_new_table);
-  drupal_get_schema(NULL, TRUE);
+  backdrop_get_schema(NULL, TRUE);
 }
 
 /**
@@ -523,7 +523,7 @@ function field_sql_storage_field_storage_query(EntityFieldQuery $query) {
   }
 
   // Add field conditions. We need a fresh grouping cache.
-  drupal_static_reset('_field_sql_storage_query_field_conditions');
+  backdrop_static_reset('_field_sql_storage_query_field_conditions');
   _field_sql_storage_query_field_conditions($query, $select_query, $query->fieldConditions, $table_aliases, '_field_sql_storage_columnname');
 
   // Add field meta conditions.
@@ -616,7 +616,7 @@ function _field_sql_storage_query_join_entity(SelectQuery $select_query, $entity
  *   conditions. Accepts a field name and a field column name as parameters.
  */
 function _field_sql_storage_query_field_conditions(EntityFieldQuery $query, SelectQuery $select_query, $conditions, $table_aliases, $column_callback) {
-  $groups = &drupal_static(__FUNCTION__, array());
+  $groups = &backdrop_static(__FUNCTION__, array());
   foreach ($conditions as $key => $condition) {
     $table_alias = $table_aliases[$key];
     $field = $condition['field'];

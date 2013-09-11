@@ -19,7 +19,7 @@ const FILE_URL_TEST_CDN_2 = 'http://cdn2.example.com';
 function file_test_menu() {
   $items['file-test/upload'] = array(
     'title' => 'Upload test',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('_file_test_form'),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -34,12 +34,12 @@ function file_test_stream_wrappers() {
   return array(
     'dummy' => array(
       'name' => t('Dummy files'),
-      'class' => 'DrupalDummyStreamWrapper',
+      'class' => 'BackdropDummyStreamWrapper',
       'description' => t('Dummy wrapper for simpletest.'),
     ),
     'dummy-remote' => array(
       'name' => t('Dummy files (remote)'),
-      'class' => 'DrupalDummyRemoteStreamWrapper',
+      'class' => 'BackdropDummyRemoteStreamWrapper',
       'description' => t('Dummy wrapper for simpletest (remote).'),
     ),
   );
@@ -124,13 +124,13 @@ function _file_test_form_submit(&$form, &$form_state) {
   $file = file_save_upload('file_test_upload', $validators, $destination, $form_state['values']['file_test_replace']);
   if ($file) {
     $form_state['values']['file_test_upload'] = $file;
-    drupal_set_message(t('File @filepath was uploaded.', array('@filepath' => $file->uri)));
-    drupal_set_message(t('File name is @filename.', array('@filename' => $file->filename)));
-    drupal_set_message(t('File MIME type is @mimetype.', array('@mimetype' => $file->filemime)));
-    drupal_set_message(t('You WIN!'));
+    backdrop_set_message(t('File @filepath was uploaded.', array('@filepath' => $file->uri)));
+    backdrop_set_message(t('File name is @filename.', array('@filename' => $file->filename)));
+    backdrop_set_message(t('File MIME type is @mimetype.', array('@mimetype' => $file->filemime)));
+    backdrop_set_message(t('You WIN!'));
   }
   elseif ($file === FALSE) {
-    drupal_set_message(t('Epic upload FAIL!'), 'error');
+    backdrop_set_message(t('Epic upload FAIL!'), 'error');
   }
 }
 
@@ -423,7 +423,7 @@ function file_test_file_mimetype_mapping_alter(&$mapping) {
  *
  * Dummy stream wrapper implementation (dummy://).
  */
-class DrupalDummyStreamWrapper extends DrupalLocalStreamWrapper {
+class BackdropDummyStreamWrapper extends BackdropLocalStreamWrapper {
   function getDirectoryPath() {
     return variable_get('stream_public_path', 'sites/default/files');
   }
@@ -454,7 +454,7 @@ class DrupalDummyStreamWrapper extends DrupalLocalStreamWrapper {
  *
  * Basically just the public scheme but not returning a local file for realpath.
  */
-class DrupalDummyRemoteStreamWrapper extends DrupalPublicStreamWrapper {
+class BackdropDummyRemoteStreamWrapper extends BackdropPublicStreamWrapper {
   function realpath() {
     return FALSE;
   }

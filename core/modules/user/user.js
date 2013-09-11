@@ -4,7 +4,7 @@
  * Attach handlers to evaluate the strength of any password fields and to check
  * that its confirmation is correct.
  */
-Drupal.behaviors.password = {
+Backdrop.behaviors.password = {
   attach: function (context, settings) {
     var translate = settings.password;
     $('input.password-field', context).once('password', function () {
@@ -31,7 +31,7 @@ Drupal.behaviors.password = {
       var passwordCheck = function () {
 
         // Evaluate the password strength.
-        var result = Drupal.evaluatePasswordStrength(passwordInput.val(), settings.password);
+        var result = Backdrop.evaluatePasswordStrength(passwordInput.val(), settings.password);
 
         // Update the suggestions for how to improve the password.
         if (passwordDescription.html() != result.message) {
@@ -92,7 +92,7 @@ Drupal.behaviors.password = {
  *
  * Returns the estimated strength and the relevant output message.
  */
-Drupal.evaluatePasswordStrength = function (password, translate) {
+Backdrop.evaluatePasswordStrength = function (password, translate) {
   var weaknesses = 0, strength = 100, msg = [];
 
   var hasLowercase = password.match(/[a-z]+/);
@@ -176,7 +176,7 @@ Drupal.evaluatePasswordStrength = function (password, translate) {
  * Field instance settings screen: force the 'Display on registration form'
  * checkbox checked whenever 'Required' is checked.
  */
-Drupal.behaviors.fieldUserRegistration = {
+Backdrop.behaviors.fieldUserRegistration = {
   attach: function (context, settings) {
     var $checkbox = $('form#field-ui-field-edit-form input#edit-instance-settings-user-register-form');
 

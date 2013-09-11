@@ -32,23 +32,23 @@ class FileTransferLocal extends FileTransfer implements FileTransferChmodInterfa
     }
     foreach (new RecursiveIteratorIterator(new SkipDotsRecursiveDirectoryIterator($directory), RecursiveIteratorIterator::CHILD_FIRST) as $filename => $file) {
       if ($file->isDir()) {
-        if (@!drupal_rmdir($filename)) {
+        if (@!backdrop_rmdir($filename)) {
           throw new FileTransferException('Cannot remove directory %directory.', NULL, array('%directory' => $filename));
         }
       }
       elseif ($file->isFile()) {
-        if (@!drupal_unlink($filename)) {
+        if (@!backdrop_unlink($filename)) {
           throw new FileTransferException('Cannot remove file %file.', NULL, array('%file' => $filename));
         }
       }
     }
-    if (@!drupal_rmdir($directory)) {
+    if (@!backdrop_rmdir($directory)) {
       throw new FileTransferException('Cannot remove directory %directory.', NULL, array('%directory' => $directory));
     }
   }
 
   protected function removeFileJailed($file) {
-    if (@!drupal_unlink($file)) {
+    if (@!backdrop_unlink($file)) {
       throw new FileTransferException('Cannot remove file %file.', NULL, array('%file' => $file));
     }
   }

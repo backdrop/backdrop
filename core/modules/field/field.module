@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Attach custom data fields to Drupal entities.
+ * Attach custom data fields to Backdrop entities.
  */
 
 /**
@@ -13,7 +13,7 @@
 class FieldException extends Exception {}
 
 /*
- * Load all public Field API functions. Drupal currently has no
+ * Load all public Field API functions. Backdrop currently has no
  * mechanism for auto-loading core APIs, so we have to load them on
  * every page request.
  */
@@ -27,9 +27,9 @@ require_once DRUPAL_ROOT . '/core/modules/field/field.form.inc';
 /**
  * @defgroup field Field API
  * @{
- * Attach custom data fields to Drupal entities.
+ * Attach custom data fields to Backdrop entities.
  *
- * The Field API allows custom data fields to be attached to Drupal
+ * The Field API allows custom data fields to be attached to Backdrop
  * entities and takes care of storing, loading, editing, and rendering
  * field data. Any entity type (node, user, etc.) can use the Field
  * API to make itself "fieldable" and thus allow fields to be attached
@@ -316,11 +316,11 @@ function field_help($path, $arg) {
     case 'admin/help#field':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Field module allows custom data fields to be defined for <em>entity</em> types (entities include content items, comments, user accounts, and taxonomy terms). The Field module takes care of storing, loading, editing, and rendering field data. Most users will not interact with the Field module directly, but will instead use the <a href="@field-ui-help">Field UI module</a> user interface. Module developers can use the Field API to make new entity types "fieldable" and thus allow fields to be attached to them. For more information, see the online handbook entry for <a href="@field">Field module</a>.', array('@field-ui-help' => url('admin/help/field_ui'), '@field' => 'http://drupal.org/handbook/modules/field')) . '</p>';
+      $output .= '<p>' . t('The Field module allows custom data fields to be defined for <em>entity</em> types (entities include content items, comments, user accounts, and taxonomy terms). The Field module takes care of storing, loading, editing, and rendering field data. Most users will not interact with the Field module directly, but will instead use the <a href="@field-ui-help">Field UI module</a> user interface. Module developers can use the Field API to make new entity types "fieldable" and thus allow fields to be attached to them. For more information, see the online handbook entry for <a href="@field">Field module</a>.', array('@field-ui-help' => url('admin/help/field_ui'), '@field' => 'http://backdrop.org/handbook/modules/field')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Enabling field types') . '</dt>';
-      $output .= '<dd>' . t('The Field module provides the infrastructure for fields and field attachment; the field types and input widgets themselves are provided by additional modules. Some of the modules are required; the optional modules can be enabled from the <a href="@modules">Modules administration page</a>. Drupal core includes the following field type modules: Number (required), Text (required), List (required), Taxonomy (optional), Image (optional), and File (optional); the required Options module provides input widgets for other field modules. Additional fields and widgets may be provided by contributed modules, which you can find in the <a href="@contrib">contributed module section of Drupal.org</a>. Currently enabled field and input widget modules:', array('@modules' => url('admin/modules'), '@contrib' => 'http://drupal.org/project/modules', '@options' => url('admin/help/options')));
+      $output .= '<dd>' . t('The Field module provides the infrastructure for fields and field attachment; the field types and input widgets themselves are provided by additional modules. Some of the modules are required; the optional modules can be enabled from the <a href="@modules">Modules administration page</a>. Backdrop core includes the following field type modules: Number (required), Text (required), List (required), Taxonomy (optional), Image (optional), and File (optional); the required Options module provides input widgets for other field modules. Additional fields and widgets may be provided by contributed modules, which you can find in the <a href="@contrib">contributed module section of Backdrop.org</a>. Currently enabled field and input widget modules:', array('@modules' => url('admin/modules'), '@contrib' => 'http://backdrop.org/project/modules', '@options' => url('admin/help/options')));
 
       // Make a list of all widget and field modules currently enabled, in
       // order by displayed module name (module names are not translated).
@@ -340,7 +340,7 @@ function field_help($path, $arg) {
       }
       $output .= theme('item_list', $items) . '</dd>';
       $output .= '<dt>' . t('Managing field data storage') . '</dt>';
-      $output .= '<dd>' . t('Developers of field modules can either use the default <a href="@sql-store">Field SQL Storage module</a> to store data for their fields, or a contributed or custom module developed using the <a href="@storage-api">field storage API</a>.', array('@storage-api' => 'http://api.drupal.org/api/group/field_storage/7', '@sql-store' => url('admin/help/field_sql_storage'))) . '</dd>';
+      $output .= '<dd>' . t('Developers of field modules can either use the default <a href="@sql-store">Field SQL Storage module</a> to store data for their fields, or a contributed or custom module developed using the <a href="@storage-api">field storage API</a>.', array('@storage-api' => 'http://api.backdrop.org/api/group/field_storage/7', '@sql-store' => url('admin/help/field_sql_storage'))) . '</dd>';
       $output .= '</dl>';
       return $output;
   }
@@ -654,7 +654,7 @@ function field_bundle_settings($entity_type, $bundle, $settings = NULL) {
  *     (FALSE). Defaults to FALSE.
  */
 function field_view_mode_settings($entity_type, $bundle) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($cache[$entity_type][$bundle])) {
     $bundle_settings = field_bundle_settings($entity_type, $bundle);
@@ -702,7 +702,7 @@ function field_get_display($instance, $view_mode, $entity) {
     'entity' => $entity,
     'view_mode' => $view_mode,
   );
-  drupal_alter(array('field_display', 'field_display_' . $instance['entity_type']), $display, $context);
+  backdrop_alter(array('field_display', 'field_display_' . $instance['entity_type']), $display, $context);
 
   return $display;
 }
@@ -738,7 +738,7 @@ function field_extra_fields_get_display($entity_type, $bundle, $view_mode) {
     'bundle' => $bundle,
     'view_mode' => $view_mode,
   );
-  drupal_alter('field_extra_fields_display', $displays, $context);
+  backdrop_alter('field_extra_fields_display', $displays, $context);
 
   return $displays;
 }
@@ -944,7 +944,7 @@ function field_view_field($entity_type, $entity, $field_name, $display = array()
       'view_mode' => '_custom',
       'display' => $display,
     );
-    drupal_alter('field_attach_view', $result, $context);
+    backdrop_alter('field_attach_view', $result, $context);
 
     if (isset($result[$field_name])) {
       $output = $result[$field_name];
@@ -1084,7 +1084,7 @@ function template_preprocess_field(&$variables, $hook) {
 
   // Add default CSS classes. Since there can be many fields rendered on a page,
   // save some overhead by calling strtr() directly instead of
-  // drupal_html_class().
+  // backdrop_html_class().
   $variables['field_name_css'] = strtr($element['#field_name'], '_', '-');
   $variables['field_type_css'] = strtr($element['#field_type'], '_', '-');
   $variables['classes_array'] = array(
@@ -1117,15 +1117,15 @@ function template_preprocess_field(&$variables, $hook) {
 function template_process_field(&$variables, $hook) {
   // The default theme implementation is a function, so template_process() does
   // not automatically run, so we need to flatten the classes and attributes
-  // here. For best performance, only call drupal_attributes() when needed, and
+  // here. For best performance, only call backdrop_attributes() when needed, and
   // note that template_preprocess_field() does not initialize the
   // *_attributes_array variables.
   $variables['classes'] = implode(' ', $variables['classes_array']);
-  $variables['attributes'] = empty($variables['attributes_array']) ? '' : drupal_attributes($variables['attributes_array']);
-  $variables['title_attributes'] = empty($variables['title_attributes_array']) ? '' : drupal_attributes($variables['title_attributes_array']);
-  $variables['content_attributes'] = empty($variables['content_attributes_array']) ? '' : drupal_attributes($variables['content_attributes_array']);
+  $variables['attributes'] = empty($variables['attributes_array']) ? '' : backdrop_attributes($variables['attributes_array']);
+  $variables['title_attributes'] = empty($variables['title_attributes_array']) ? '' : backdrop_attributes($variables['title_attributes_array']);
+  $variables['content_attributes'] = empty($variables['content_attributes_array']) ? '' : backdrop_attributes($variables['content_attributes_array']);
   foreach ($variables['items'] as $delta => $item) {
-    $variables['item_attributes'][$delta] = empty($variables['item_attributes_array'][$delta]) ? '' : drupal_attributes($variables['item_attributes_array'][$delta]);
+    $variables['item_attributes'][$delta] = empty($variables['item_attributes_array'][$delta]) ? '' : backdrop_attributes($variables['item_attributes_array'][$delta]);
   }
 }
 /**
@@ -1149,8 +1149,8 @@ function template_process_field(&$variables, $hook) {
  *
  * Theme developers who prefer to customize templates instead of overriding
  * functions may copy the "field.tpl.php" from the "modules/field/theme" folder
- * of the Drupal installation to somewhere within the theme's folder and
- * customize it, just like customizing other Drupal templates such as
+ * of the Backdrop installation to somewhere within the theme's folder and
+ * customize it, just like customizing other Backdrop templates such as
  * page.tpl.php or node.tpl.php. However, it takes longer for the server to
  * process templates than to call a function, so for websites with many fields
  * displayed on a page, this can result in a noticeable slowdown of the website.
@@ -1204,7 +1204,7 @@ function theme_field($variables) {
   $output .= '<div class="field-items"' . $variables['content_attributes'] . '>';
   foreach ($variables['items'] as $delta => $item) {
     $classes = 'field-item ' . ($delta % 2 ? 'odd' : 'even');
-    $output .= '<div class="' . $classes . '"' . $variables['item_attributes'][$delta] . '>' . drupal_render($item) . '</div>';
+    $output .= '<div class="' . $classes . '"' . $variables['item_attributes'][$delta] . '>' . backdrop_render($item) . '</div>';
   }
   $output .= '</div>';
 

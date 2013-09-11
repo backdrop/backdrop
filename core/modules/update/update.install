@@ -33,9 +33,9 @@ function update_requirements($phase) {
       module_load_include('inc', 'update', 'update.compare');
       $data = update_calculate_project_data($available);
       // First, populate the requirements for core:
-      $requirements['update_core'] = _update_requirement_check($data['drupal'], 'core');
-      // We don't want to check drupal a second time.
-      unset($data['drupal']);
+      $requirements['update_core'] = _update_requirement_check($data['backdrop'], 'core');
+      // We don't want to check backdrop a second time.
+      unset($data['backdrop']);
       if (!empty($data)) {
         // Now, sort our $data array based on each project's status. The
         // status constants are numbered in the right order of precedence, so
@@ -47,7 +47,7 @@ function update_requirements($phase) {
       }
     }
     else {
-      $requirements['update_core']['title'] = t('Drupal core update status');
+      $requirements['update_core']['title'] = t('Backdrop core update status');
       $requirements['update_core']['value'] = t('No update data available');
       $requirements['update_core']['severity'] = REQUIREMENT_WARNING;
       $requirements['update_core']['reason'] = UPDATE_UNKNOWN;
@@ -61,7 +61,7 @@ function update_requirements($phase) {
  * Implements hook_schema().
  */
 function update_schema() {
-  $schema['cache_update'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_update'] = backdrop_get_schema_unprocessed('system', 'cache');
   $schema['cache_update']['description'] = 'Cache table for the Update module to store information about available releases, fetched from central server.';
   return $schema;
 }
@@ -70,7 +70,7 @@ function update_schema() {
  * Implements hook_install().
  */
 function update_install() {
-  $queue = DrupalQueue::get('update_fetch_tasks', TRUE);
+  $queue = BackdropQueue::get('update_fetch_tasks', TRUE);
   $queue->createQueue();
 }
 
@@ -91,7 +91,7 @@ function update_uninstall() {
   foreach ($variables as $variable) {
     variable_del($variable);
   }
-  $queue = DrupalQueue::get('update_fetch_tasks');
+  $queue = BackdropQueue::get('update_fetch_tasks');
   $queue->deleteQueue();
 }
 
@@ -117,7 +117,7 @@ function update_uninstall() {
 function _update_requirement_check($project, $type) {
   $requirement = array();
   if ($type == 'core') {
-    $requirement['title'] = t('Drupal core update status');
+    $requirement['title'] = t('Backdrop core update status');
   }
   else {
     $requirement['title'] = t('Module and theme update status');

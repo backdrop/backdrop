@@ -22,7 +22,7 @@ function shortcut_help($path, $arg) {
   switch ($path) {
     case 'admin/help#shortcut':
       $output = '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Shortcut module allows users to create sets of <em>shortcut</em> links to commonly-visited pages of the site. Shortcuts are contained within <em>sets</em>. Each user with <em>Select any shortcut set</em> permission can select a shortcut set created by anyone at the site. For more information, see the online handbook entry for <a href="@shortcut">Shortcut module</a>.', array('@shortcut' => 'http://drupal.org/handbook/modules/shortcut/')) . '</p>';
+      $output .= '<p>' . t('The Shortcut module allows users to create sets of <em>shortcut</em> links to commonly-visited pages of the site. Shortcuts are contained within <em>sets</em>. Each user with <em>Select any shortcut set</em> permission can select a shortcut set created by anyone at the site. For more information, see the online handbook entry for <a href="@shortcut">Shortcut module</a>.', array('@shortcut' => 'http://backdrop.org/handbook/modules/shortcut/')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl><dt>' . t('Administering shortcuts') . '</dt>';
       $output .= '<dd>' . t('Users with the <em>Administer shortcuts</em> permission can manage shortcut sets and edit the shortcuts within sets from the <a href="@shortcuts">Shortcuts administration page</a>.', array('@shortcuts' => url('admin/config/user-interface/shortcut'))) . '</dd>';
@@ -76,7 +76,7 @@ function shortcut_menu() {
   );
   $items['admin/config/user-interface/shortcut/add-set'] = array(
     'title' => 'Add shortcut set',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_set_add_form'),
     'access arguments' => array('administer shortcuts'),
     'type' => MENU_LOCAL_ACTION,
@@ -84,7 +84,7 @@ function shortcut_menu() {
   );
   $items['admin/config/user-interface/shortcut/%shortcut_set'] = array(
     'title' => 'Edit shortcuts',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_set_customize', 4),
     'title callback' => 'shortcut_set_title',
     'title arguments' => array(4),
@@ -98,7 +98,7 @@ function shortcut_menu() {
   );
   $items['admin/config/user-interface/shortcut/%shortcut_set/edit'] = array(
     'title' => 'Edit set name',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_set_edit_form', 4),
     'access callback' => 'shortcut_set_edit_access',
     'access arguments' => array(4),
@@ -108,7 +108,7 @@ function shortcut_menu() {
   );
   $items['admin/config/user-interface/shortcut/%shortcut_set/delete'] = array(
     'title' => 'Delete shortcut set',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_set_delete_form', 4),
     'access callback' => 'shortcut_set_delete_access',
     'access arguments' => array(4),
@@ -116,7 +116,7 @@ function shortcut_menu() {
   );
   $items['admin/config/user-interface/shortcut/%shortcut_set/add-link'] = array(
     'title' => 'Add shortcut',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_link_add', 4),
     'access callback' => 'shortcut_set_edit_access',
     'access arguments' => array(4),
@@ -134,7 +134,7 @@ function shortcut_menu() {
   );
   $items['admin/config/user-interface/shortcut/link/%menu_link'] = array(
     'title' => 'Edit shortcut',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_link_edit', 5),
     'access callback' => 'shortcut_link_access',
     'access arguments' => array(5),
@@ -142,7 +142,7 @@ function shortcut_menu() {
   );
   $items['admin/config/user-interface/shortcut/link/%menu_link/delete'] = array(
     'title' => 'Delete shortcut',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_link_delete', 5),
     'access callback' => 'shortcut_link_access',
     'access arguments' => array(5),
@@ -150,7 +150,7 @@ function shortcut_menu() {
   );
   $items['user/%user/shortcuts'] = array(
     'title' => 'Shortcuts',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('shortcut_set_switch', 1),
     'access callback' => 'shortcut_set_switch_access',
     'access arguments' => array(1),
@@ -338,7 +338,7 @@ function shortcut_set_load($set_name) {
  *     Each link is an array containing at least the following keys (which will
  *     be expanded to fill in other default values after the shortcut set is
  *     saved):
- *     - 'link_path': The Drupal path or external path that the link points to.
+ *     - 'link_path': The Backdrop path or external path that the link points to.
  *     - 'link_title': The title of the link.
  *     Any other keys accepted by menu_link_save() may also be provided.
  *
@@ -351,11 +351,11 @@ function shortcut_set_load($set_name) {
 function shortcut_set_save(&$shortcut_set) {
   // First save the shortcut set itself.
   if (isset($shortcut_set->set_name)) {
-    $return = drupal_write_record('shortcut_set', $shortcut_set, 'set_name');
+    $return = backdrop_write_record('shortcut_set', $shortcut_set, 'set_name');
   }
   else {
     $shortcut_set->set_name = shortcut_set_get_unique_name();
-    $return = drupal_write_record('shortcut_set', $shortcut_set);
+    $return = backdrop_write_record('shortcut_set', $shortcut_set);
   }
   // If links were provided for the set, save them.
   if (isset($shortcut_set->links)) {
@@ -368,7 +368,7 @@ function shortcut_set_save(&$shortcut_set) {
       menu_link_save($link);
     }
     // Make sure that we have a return value, since if the links were updated
-    // but the shortcut set was not, the call to drupal_write_record() above
+    // but the shortcut set was not, the call to backdrop_write_record() above
     // would not return an indication that anything had changed.
     if (empty($return)) {
       $return = SAVED_UPDATED;
@@ -443,7 +443,7 @@ function shortcut_set_assign_user($shortcut_set, $account) {
     ->key(array('uid' => $account->uid))
     ->fields(array('set_name' => $shortcut_set->set_name))
     ->execute();
-  drupal_static_reset('shortcut_current_displayed_set');
+  backdrop_static_reset('shortcut_current_displayed_set');
 }
 
 /**
@@ -479,7 +479,7 @@ function shortcut_set_unassign_user($account) {
  *   the default set is returned.
  */
 function shortcut_current_displayed_set($account = NULL) {
-  $shortcut_sets = &drupal_static(__FUNCTION__, array());
+  $shortcut_sets = &backdrop_static(__FUNCTION__, array());
   global $user;
   if (!isset($account)) {
     $account = $user;
@@ -613,7 +613,7 @@ function shortcut_set_title_exists($title) {
  */
 function shortcut_valid_link($path) {
   // Do not use URL aliases.
-  $normal_path = drupal_get_normal_path($path);
+  $normal_path = backdrop_get_normal_path($path);
   if ($path != $normal_path) {
     $path = $normal_path;
   }
@@ -658,15 +658,15 @@ function shortcut_preprocess_page(&$variables) {
   // pages).
   if (shortcut_set_edit_access() && ($item = menu_get_item()) && $item['access']) {
     $link = $_GET['q'];
-    $query_parameters = drupal_get_query_parameters();
+    $query_parameters = backdrop_get_query_parameters();
     if (!empty($query_parameters)) {
-     $link .= '?' . drupal_http_build_query($query_parameters);
+     $link .= '?' . backdrop_http_build_query($query_parameters);
     }
     $query = array(
      'link' => $link,
-     'name' => drupal_get_title(),
+     'name' => backdrop_get_title(),
     );
-    $query += drupal_get_destination();
+    $query += backdrop_get_destination();
 
     $shortcut_set = shortcut_current_displayed_set();
 
@@ -680,7 +680,7 @@ function shortcut_preprocess_page(&$variables) {
     $link_mode = isset($mlid) ? "remove" : "add";
 
     if ($link_mode == "add") {
-      $query['token'] = drupal_get_token('shortcut-add-link');
+      $query['token'] = backdrop_get_token('shortcut-add-link');
       $link_text = shortcut_set_switch_access() ? t('Add to %shortcut_set shortcuts', array('%shortcut_set' => $shortcut_set->title)) : t('Add to shortcuts');
       $link_path = 'admin/config/user-interface/shortcut/' . $shortcut_set->set_name . '/add-link-inline';
     }
@@ -692,7 +692,7 @@ function shortcut_preprocess_page(&$variables) {
 
     if (theme_get_setting('shortcut_module_link')) {
       $variables['title_suffix']['add_or_remove_shortcut'] = array(
-        '#attached' => array('css' => array(drupal_get_path('module', 'shortcut') . '/shortcut.css')),
+        '#attached' => array('css' => array(backdrop_get_path('module', 'shortcut') . '/shortcut.css')),
         '#prefix' => '<div class="add-or-remove-shortcuts ' . $link_mode . '-shortcut">',
         '#type' => 'link',
         '#title' => '<span class="icon"></span><span class="text">' . $link_text . '</span>',
@@ -720,7 +720,7 @@ function shortcut_page_alter(&$page) {
  */
 function shortcut_toolbar_pre_render($toolbar) {
   $links = shortcut_renderable_links();
-  $links['#attached'] = array('css' => array(drupal_get_path('module', 'shortcut') . '/shortcut.css'));
+  $links['#attached'] = array('css' => array(backdrop_get_path('module', 'shortcut') . '/shortcut.css'));
   $links['#prefix'] = '<div class="toolbar-shortcuts">';
   $links['#suffix'] = '</div>';
   $shortcut_set = shortcut_current_displayed_set();

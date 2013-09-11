@@ -28,7 +28,7 @@ const ERROR_REPORTING_DISPLAY_ALL = 2;
  *
  * @ingroup logging_severity_levels
  */
-function drupal_error_levels() {
+function backdrop_error_levels() {
   $types = array(
     E_ERROR => array('Error', WATCHDOG_ERROR),
     E_WARNING => array('Warning', WATCHDOG_WARNING),
@@ -65,18 +65,18 @@ function drupal_error_levels() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _drupal_error_handler_real($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler_real($error_level, $message, $filename, $line, $context) {
   if ($error_level & error_reporting()) {
-    $types = drupal_error_levels();
+    $types = backdrop_error_levels();
     list($severity_msg, $severity_level) = $types[$error_level];
-    $caller = _drupal_get_last_caller(debug_backtrace());
+    $caller = _backdrop_get_last_caller(debug_backtrace());
 
     if (!function_exists('filter_xss_admin')) {
       require_once DRUPAL_ROOT . '/core/includes/common.inc';
     }
 
     // We treat recoverable errors as fatal.
-    _drupal_log_error(array(
+    _backdrop_log_error(array(
       '%type' => isset($types[$error_level]) ? $severity_msg : 'Unknown error',
       // The standard PHP error handler considers that the error messages
       // are HTML. We mimick this behavior here.
@@ -96,9 +96,9 @@ function _drupal_error_handler_real($error_level, $message, $filename, $line, $c
  *   The exception object that was thrown.
  *
  * @return
- *   An error in the format expected by _drupal_log_error().
+ *   An error in the format expected by _backdrop_log_error().
  */
-function _drupal_decode_exception($exception) {
+function _backdrop_decode_exception($exception) {
   $message = $exception->getMessage();
 
   $backtrace = $exception->getTrace();
@@ -122,7 +122,7 @@ function _drupal_decode_exception($exception) {
       $message .= ": " . $exception->query_string . "; " . print_r($exception->args, TRUE);
     }
   }
-  $caller = _drupal_get_last_caller($backtrace);
+  $caller = _backdrop_get_last_caller($backtrace);
 
   return array(
     '%type' => get_class($exception),
@@ -145,8 +145,8 @@ function _drupal_decode_exception($exception) {
  * @return
  *   An error message.
  */
-function _drupal_render_exception_safe($exception) {
-  return check_plain(strtr('%type: !message in %function (line %line of %file).', _drupal_decode_exception($exception)));
+function _backdrop_render_exception_safe($exception) {
+  return check_plain(strtr('%type: !message in %function (line %line of %file).', _backdrop_decode_exception($exception)));
 }
 
 /**
@@ -182,22 +182,22 @@ function error_displayable($error = NULL) {
  * @param $fatal
  *   TRUE if the error is fatal.
  */
-function _drupal_log_error($error, $fatal = FALSE) {
+function _backdrop_log_error($error, $fatal = FALSE) {
   // Initialize a maintenance theme if the boostrap was not complete.
-  // Do it early because drupal_set_message() triggers a drupal_theme_initialize().
-  if ($fatal && (drupal_get_bootstrap_phase() != DRUPAL_BOOTSTRAP_FULL)) {
+  // Do it early because backdrop_set_message() triggers a backdrop_theme_initialize().
+  if ($fatal && (backdrop_get_bootstrap_phase() != DRUPAL_BOOTSTRAP_FULL)) {
     unset($GLOBALS['theme']);
     if (!defined('MAINTENANCE_MODE')) {
       define('MAINTENANCE_MODE', 'error');
     }
-    drupal_maintenance_theme();
+    backdrop_maintenance_theme();
   }
 
   // When running inside the testing framework, we relay the errors
   // to the tested site by the way of HTTP headers.
-  $test_info = &$GLOBALS['drupal_test_info'];
+  $test_info = &$GLOBALS['backdrop_test_info'];
   if (!empty($test_info['in_child_site']) && !headers_sent() && (!defined('SIMPLETEST_COLLECT_ERRORS') || SIMPLETEST_COLLECT_ERRORS)) {
-    // $number does not use drupal_static as it should not be reset
+    // $number does not use backdrop_static as it should not be reset
     // as it uniquely identifies each PHP error.
     static $number = 0;
     $assertion = array(
@@ -209,17 +209,17 @@ function _drupal_log_error($error, $fatal = FALSE) {
         'line' => $error['%line'],
       ),
     );
-    header('X-Drupal-Assertion-' . $number . ': ' . rawurlencode(serialize($assertion)));
+    header('X-Backdrop-Assertion-' . $number . ': ' . rawurlencode(serialize($assertion)));
     $number++;
   }
 
   watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
 
   if ($fatal) {
-    drupal_add_http_header('Status', '500 Service unavailable (with message)');
+    backdrop_add_http_header('Status', '500 Service unavailable (with message)');
   }
 
-  if (drupal_is_cli()) {
+  if (backdrop_is_cli()) {
     if ($fatal) {
       // When called from CLI, simply output a plain text message.
       print html_entity_decode(strip_tags(t('%type: !message in %function (line %line of %file).', $error))). "\n";
@@ -247,11 +247,11 @@ function _drupal_log_error($error, $fatal = FALSE) {
         $class = 'status';
       }
 
-      drupal_set_message(t('%type: !message in %function (line %line of %file).', $error), $class);
+      backdrop_set_message(t('%type: !message in %function (line %line of %file).', $error), $class);
     }
 
     if ($fatal) {
-      drupal_set_title(t('Error'));
+      backdrop_set_title(t('Error'));
       // We fallback to a maintenance page at this point, because the page generation
       // itself can generate errors.
       print theme('maintenance_page', array('content' => t('The website encountered an unexpected error. Please try again later.')));
@@ -269,10 +269,10 @@ function _drupal_log_error($error, $fatal = FALSE) {
  * @return
  *   An associative array with keys 'file', 'line' and 'function'.
  */
-function _drupal_get_last_caller($backtrace) {
+function _backdrop_get_last_caller($backtrace) {
   // Errors that occur inside PHP internal functions do not generate
   // information about file and line. Ignore black listed functions.
-  $blacklist = array('debug', '_drupal_error_handler', '_drupal_exception_handler');
+  $blacklist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
   while (($backtrace && !isset($backtrace[0]['line'])) ||
          (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $blacklist))) {
     array_shift($backtrace);

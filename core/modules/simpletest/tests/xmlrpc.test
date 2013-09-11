@@ -3,7 +3,7 @@
 /**
  * Perform basic XML-RPC tests that do not require addition callbacks.
  */
-class XMLRPCBasicTestCase extends DrupalWebTestCase {
+class XMLRPCBasicTestCase extends BackdropWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -80,7 +80,7 @@ class XMLRPCBasicTestCase extends DrupalWebTestCase {
   }
 }
 
-class XMLRPCValidator1IncTestCase extends DrupalWebTestCase {
+class XMLRPCValidator1IncTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'XML-RPC validator',
@@ -138,7 +138,7 @@ class XMLRPCValidator1IncTestCase extends DrupalWebTestCase {
     $time_5    = REQUEST_TIME;
     $base64_5  = $this->randomName(100);
     $l_res_5 = xmlrpc_test_manyTypesTest($int_5, $bool_5, $string_5, $double_5, xmlrpc_date($time_5), $base64_5);
-    // See http://drupal.org/node/37766 why this currently fails
+    // See http://backdrop.org/node/37766 why this currently fails
     $l_res_5[5] = $l_res_5[5]->data;
     $r_res_5 = xmlrpc($xml_url, array('validator1.manyTypesTest' => array($int_5, $bool_5, $string_5, $double_5, xmlrpc_date($time_5), xmlrpc_base64($base64_5))));
     // @todo Contains objects, objects are not equal.
@@ -194,7 +194,7 @@ class XMLRPCValidator1IncTestCase extends DrupalWebTestCase {
   }
 }
 
-class XMLRPCMessagesTestCase extends DrupalWebTestCase {
+class XMLRPCMessagesTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name'  => 'XML-RPC message and alteration',

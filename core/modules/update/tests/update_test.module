@@ -4,8 +4,8 @@
  * Implements hook_system_theme_info().
  */
 function update_test_system_theme_info() {
-  $themes['update_test_basetheme'] = drupal_get_path('module', 'update_test') . '/themes/update_test_basetheme/update_test_basetheme.info';
-  $themes['update_test_subtheme'] = drupal_get_path('module', 'update_test') . '/themes/update_test_subtheme/update_test_subtheme.info';
+  $themes['update_test_basetheme'] = backdrop_get_path('module', 'update_test') . '/themes/update_test_basetheme/update_test_basetheme.info';
+  $themes['update_test_subtheme'] = backdrop_get_path('module', 'update_test') . '/themes/update_test_subtheme/update_test_subtheme.info';
   return $themes;
 }
 
@@ -106,11 +106,11 @@ function update_test_mock_page($project_name) {
     // themes installed but they're disabled by the version of the site
     // running the test. So, we default to a file we know won't exist, so at
     // least we'll get an empty page from readfile instead of a bunch of
-    // Drupal page output.
+    // Backdrop page output.
     $availability_scenario = '#broken#';
   }
 
-  $path = drupal_get_path('module', 'update_test');
+  $path = backdrop_get_path('module', 'update_test');
   readfile("$path/$project_name.$availability_scenario.xml");
 }
 
@@ -168,6 +168,6 @@ class UpdateTestFileTransfer {
  * Return an Error 503 (Service unavailable) page.
  */
 function update_callback_service_unavailable() {
-  drupal_add_http_header('Status', '503 Service unavailable');
+  backdrop_add_http_header('Status', '503 Service unavailable');
   print "503 Service Temporarily Unavailable";
 }

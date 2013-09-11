@@ -5,11 +5,11 @@
  * Provides SimpleTests for core session handling functionality.
  */
 
-class SessionTestCase extends DrupalWebTestCase {
+class SessionTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Session tests',
-      'description' => 'Drupal session handling tests.',
+      'description' => 'Backdrop session handling tests.',
       'group' => 'Session'
     );
   }
@@ -19,78 +19,78 @@ class SessionTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Tests for drupal_save_session() and drupal_session_regenerate().
+   * Tests for backdrop_save_session() and backdrop_session_regenerate().
    */
   function testSessionSaveRegenerate() {
-    $this->assertFalse(drupal_save_session(), t('drupal_save_session() correctly returns FALSE (inside of testing framework) when initially called with no arguments.'), t('Session'));
-    $this->assertFalse(drupal_save_session(FALSE), t('drupal_save_session() correctly returns FALSE when called with FALSE.'), t('Session'));
-    $this->assertFalse(drupal_save_session(), t('drupal_save_session() correctly returns FALSE when saving has been disabled.'), t('Session'));
-    $this->assertTrue(drupal_save_session(TRUE), t('drupal_save_session() correctly returns TRUE when called with TRUE.'), t('Session'));
-    $this->assertTrue(drupal_save_session(), t('drupal_save_session() correctly returns TRUE when saving has been enabled.'), t('Session'));
+    $this->assertFalse(backdrop_save_session(), t('backdrop_save_session() correctly returns FALSE (inside of testing framework) when initially called with no arguments.'), t('Session'));
+    $this->assertFalse(backdrop_save_session(FALSE), t('backdrop_save_session() correctly returns FALSE when called with FALSE.'), t('Session'));
+    $this->assertFalse(backdrop_save_session(), t('backdrop_save_session() correctly returns FALSE when saving has been disabled.'), t('Session'));
+    $this->assertTrue(backdrop_save_session(TRUE), t('backdrop_save_session() correctly returns TRUE when called with TRUE.'), t('Session'));
+    $this->assertTrue(backdrop_save_session(), t('backdrop_save_session() correctly returns TRUE when saving has been enabled.'), t('Session'));
 
     // Test session hardening code from SA-2008-044.
-    $user = $this->drupalCreateUser(array('access content'));
+    $user = $this->backdropCreateUser(array('access content'));
 
     // Enable sessions.
     $this->sessionReset($user->uid);
 
     // Make sure the session cookie is set as HttpOnly.
-    $this->drupalLogin($user);
-    $this->assertTrue(preg_match('/HttpOnly/i', $this->drupalGetHeader('Set-Cookie', TRUE)), t('Session cookie is set as HttpOnly.'));
-    $this->drupalLogout();
+    $this->backdropLogin($user);
+    $this->assertTrue(preg_match('/HttpOnly/i', $this->backdropGetHeader('Set-Cookie', TRUE)), t('Session cookie is set as HttpOnly.'));
+    $this->backdropLogout();
 
     // Verify that the session is regenerated if a module calls exit
     // in hook_user_login().
     user_save($user, array('name' => 'session_test_user'));
     $user->name = 'session_test_user';
-    $this->drupalGet('session-test/id');
+    $this->backdropGet('session-test/id');
     $matches = array();
-    preg_match('/\s*session_id:(.*)\n/', $this->drupalGetContent(), $matches);
+    preg_match('/\s*session_id:(.*)\n/', $this->backdropGetContent(), $matches);
     $this->assertTrue(!empty($matches[1]) , t('Found session ID before logging in.'));
     $original_session = $matches[1];
 
-    // We cannot use $this->drupalLogin($user); because we exit in
+    // We cannot use $this->backdropLogin($user); because we exit in
     // session_test_user_login() which breaks a normal assertion.
     $edit = array(
       'name' => $user->name,
       'pass' => $user->pass_raw
     );
-    $this->drupalPost('user', $edit, t('Log in'));
-    $this->drupalGet('user');
+    $this->backdropPost('user', $edit, t('Log in'));
+    $this->backdropGet('user');
     $pass = $this->assertText($user->name, t('Found name: %name', array('%name' => $user->name)), t('User login'));
     $this->_logged_in = $pass;
 
-    $this->drupalGet('session-test/id');
+    $this->backdropGet('session-test/id');
     $matches = array();
-    preg_match('/\s*session_id:(.*)\n/', $this->drupalGetContent(), $matches);
+    preg_match('/\s*session_id:(.*)\n/', $this->backdropGetContent(), $matches);
     $this->assertTrue(!empty($matches[1]) , t('Found session ID after logging in.'));
     $this->assertTrue($matches[1] != $original_session, t('Session ID changed after login.'));
   }
 
   /**
    * Test data persistence via the session_test module callbacks. Also tests
-   * drupal_session_count() since session data is already generated here.
+   * backdrop_session_count() since session data is already generated here.
    */
   function testDataPersistence() {
-    $user = $this->drupalCreateUser(array('access content'));
+    $user = $this->backdropCreateUser(array('access content'));
     // Enable sessions.
     $this->sessionReset($user->uid);
 
-    $this->drupalLogin($user);
+    $this->backdropLogin($user);
 
     $value_1 = $this->randomName();
-    $this->drupalGet('session-test/set/' . $value_1);
+    $this->backdropGet('session-test/set/' . $value_1);
     $this->assertText($value_1, t('The session value was stored.'), t('Session'));
-    $this->drupalGet('session-test/get');
+    $this->backdropGet('session-test/get');
     $this->assertText($value_1, t('Session correctly returned the stored data for an authenticated user.'), t('Session'));
 
-    // Attempt to write over val_1. If drupal_save_session(FALSE) is working.
+    // Attempt to write over val_1. If backdrop_save_session(FALSE) is working.
     // properly, val_1 will still be set.
     $value_2 = $this->randomName();
-    $this->drupalGet('session-test/no-set/' . $value_2);
+    $this->backdropGet('session-test/no-set/' . $value_2);
     $this->assertText($value_2, t('The session value was correctly passed to session-test/no-set.'), t('Session'));
-    $this->drupalGet('session-test/get');
-    $this->assertText($value_1, t('Session data is not saved for drupal_save_session(FALSE).'), t('Session'));
+    $this->backdropGet('session-test/get');
+    $this->assertText($value_1, t('Session data is not saved for backdrop_save_session(FALSE).'), t('Session'));
 
     // Switch browser cookie to anonymous user, then back to user 1.
     $this->sessionReset();
@@ -98,35 +98,35 @@ class SessionTestCase extends DrupalWebTestCase {
     $this->assertText($value_1, t('Session data persists through browser close.'), t('Session'));
 
     // Logout the user and make sure the stored value no longer persists.
-    $this->drupalLogout();
+    $this->backdropLogout();
     $this->sessionReset();
-    $this->drupalGet('session-test/get');
+    $this->backdropGet('session-test/get');
     $this->assertNoText($value_1, t("After logout, previous user's session data is not available."), t('Session'));
 
     // Now try to store some data as an anonymous user.
     $value_3 = $this->randomName();
-    $this->drupalGet('session-test/set/' . $value_3);
+    $this->backdropGet('session-test/set/' . $value_3);
     $this->assertText($value_3, t('Session data stored for anonymous user.'), t('Session'));
-    $this->drupalGet('session-test/get');
+    $this->backdropGet('session-test/get');
     $this->assertText($value_3, t('Session correctly returned the stored data for an anonymous user.'), t('Session'));
 
-    // Try to store data when drupal_save_session(FALSE).
+    // Try to store data when backdrop_save_session(FALSE).
     $value_4 = $this->randomName();
-    $this->drupalGet('session-test/no-set/' . $value_4);
+    $this->backdropGet('session-test/no-set/' . $value_4);
     $this->assertText($value_4, t('The session value was correctly passed to session-test/no-set.'), t('Session'));
-    $this->drupalGet('session-test/get');
-    $this->assertText($value_3, t('Session data is not saved for drupal_save_session(FALSE).'), t('Session'));
+    $this->backdropGet('session-test/get');
+    $this->assertText($value_3, t('Session data is not saved for backdrop_save_session(FALSE).'), t('Session'));
 
     // Login, the data should persist.
-    $this->drupalLogin($user);
+    $this->backdropLogin($user);
     $this->sessionReset($user->uid);
-    $this->drupalGet('session-test/get');
+    $this->backdropGet('session-test/get');
     $this->assertNoText($value_1, t('Session has persisted for an authenticated user after logging out and then back in.'), t('Session'));
 
     // Change session and create another user.
-    $user2 = $this->drupalCreateUser(array('access content'));
+    $user2 = $this->backdropCreateUser(array('access content'));
     $this->sessionReset($user2->uid);
-    $this->drupalLogin($user2);
+    $this->backdropLogin($user2);
   }
 
   /**
@@ -134,46 +134,46 @@ class SessionTestCase extends DrupalWebTestCase {
    */
   function testEmptyAnonymousSession() {
     // Verify that no session is automatically created for anonymous user.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);
 
     // The same behavior is expected when caching is enabled.
     variable_set('cache', 1);
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);
-    $this->assertEqual($this->drupalGetHeader('X-Drupal-Cache'), 'MISS', t('Page was not cached.'));
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', t('Page was not cached.'));
 
     // Start a new session by setting a message.
-    $this->drupalGet('session-test/set-message');
+    $this->backdropGet('session-test/set-message');
     $this->assertSessionCookie(TRUE);
-    $this->assertTrue($this->drupalGetHeader('Set-Cookie'), t('New session was started.'));
+    $this->assertTrue($this->backdropGetHeader('Set-Cookie'), t('New session was started.'));
 
     // Display the message, during the same request the session is destroyed
     // and the session cookie is unset.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(FALSE);
-    $this->assertFalse($this->drupalGetHeader('X-Drupal-Cache'), t('Caching was bypassed.'));
+    $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), t('Caching was bypassed.'));
     $this->assertText(t('This is a dummy message.'), t('Message was displayed.'));
-    $this->assertTrue(preg_match('/SESS\w+=deleted/', $this->drupalGetHeader('Set-Cookie')), t('Session cookie was deleted.'));
+    $this->assertTrue(preg_match('/SESS\w+=deleted/', $this->backdropGetHeader('Set-Cookie')), t('Session cookie was deleted.'));
 
     // Verify that session was destroyed.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);
     $this->assertNoText(t('This is a dummy message.'), t('Message was not cached.'));
-    $this->assertEqual($this->drupalGetHeader('X-Drupal-Cache'), 'HIT', t('Page was cached.'));
-    $this->assertFalse($this->drupalGetHeader('Set-Cookie'), t('New session was not started.'));
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', t('Page was cached.'));
+    $this->assertFalse($this->backdropGetHeader('Set-Cookie'), t('New session was not started.'));
 
-    // Verify that no session is created if drupal_save_session(FALSE) is called.
-    $this->drupalGet('session-test/set-message-but-dont-save');
+    // Verify that no session is created if backdrop_save_session(FALSE) is called.
+    $this->backdropGet('session-test/set-message-but-dont-save');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);
 
     // Verify that no message is displayed.
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);
     $this->assertNoText(t('This is a dummy message.'), t('The message was not saved.'));
@@ -183,8 +183,8 @@ class SessionTestCase extends DrupalWebTestCase {
    * Test that sessions are only saved when necessary.
    */
   function testSessionWrite() {
-    $user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($user);
+    $user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($user);
 
     $sql = 'SELECT u.access, s.timestamp FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE u.uid = :uid';
     $times1 = db_query($sql, array(':uid' => $user->uid))->fetchObject();
@@ -194,28 +194,28 @@ class SessionTestCase extends DrupalWebTestCase {
 
     // Modify the session.
     sleep(1);
-    $this->drupalGet('session-test/set/foo');
+    $this->backdropGet('session-test/set/foo');
     $times2 = db_query($sql, array(':uid' => $user->uid))->fetchObject();
     $this->assertEqual($times2->access, $times1->access, t('Users table was not updated.'));
     $this->assertNotEqual($times2->timestamp, $times1->timestamp, t('Sessions table was updated.'));
 
     // Write the same value again, i.e. do not modify the session.
     sleep(1);
-    $this->drupalGet('session-test/set/foo');
+    $this->backdropGet('session-test/set/foo');
     $times3 = db_query($sql, array(':uid' => $user->uid))->fetchObject();
     $this->assertEqual($times3->access, $times1->access, t('Users table was not updated.'));
     $this->assertEqual($times3->timestamp, $times2->timestamp, t('Sessions table was not updated.'));
 
     // Do not change the session.
     sleep(1);
-    $this->drupalGet('');
+    $this->backdropGet('');
     $times4 = db_query($sql, array(':uid' => $user->uid))->fetchObject();
     $this->assertEqual($times4->access, $times3->access, t('Users table was not updated.'));
     $this->assertEqual($times4->timestamp, $times3->timestamp, t('Sessions table was not updated.'));
 
     // Force updating of users and sessions table once per second.
     variable_set('session_write_interval', 0);
-    $this->drupalGet('');
+    $this->backdropGet('');
     $times5 = db_query($sql, array(':uid' => $user->uid))->fetchObject();
     $this->assertNotEqual($times5->access, $times4->access, t('Users table was updated.'));
     $this->assertNotEqual($times5->timestamp, $times4->timestamp, t('Sessions table was updated.'));
@@ -225,9 +225,9 @@ class SessionTestCase extends DrupalWebTestCase {
    * Test that empty session IDs are not allowed.
    */
   function testEmptySessionID() {
-    $user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($user);
-    $this->drupalGet('session-test/is-logged-in');
+    $user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($user);
+    $this->backdropGet('session-test/is-logged-in');
     $this->assertResponse(200, t('User is logged in.'));
 
     // Reset the sid in {sessions} to a blank string. This may exist in the
@@ -238,10 +238,10 @@ class SessionTestCase extends DrupalWebTestCase {
     // from persisting.
     $this->curlClose();
     $this->additionalCurlOptions[CURLOPT_COOKIE] = rawurlencode($this->session_name) . '=;';
-    $this->drupalGet('session-test/id-from-cookie');
+    $this->backdropGet('session-test/id-from-cookie');
     $this->assertRaw("session_id:\n", t('Session ID is blank as sent from cookie header.'));
     // Assert that we have an anonymous session now.
-    $this->drupalGet('session-test/is-logged-in');
+    $this->backdropGet('session-test/is-logged-in');
     $this->assertResponse(403, t('An empty session ID is not allowed.'));
   }
 
@@ -259,7 +259,7 @@ class SessionTestCase extends DrupalWebTestCase {
     $this->cookieFile = file_stream_wrapper_get_instance_by_scheme('temporary')->getDirectoryPath() . '/cookie.' . $uid . '.txt';
     $this->additionalCurlOptions[CURLOPT_COOKIEFILE] = $this->cookieFile;
     $this->additionalCurlOptions[CURLOPT_COOKIESESSION] = TRUE;
-    $this->drupalGet('session-test/get');
+    $this->backdropGet('session-test/get');
     $this->assertResponse(200, t('Session test module is correctly enabled.'), t('Session'));
   }
 
@@ -280,10 +280,10 @@ class SessionTestCase extends DrupalWebTestCase {
    */
   function assertSessionEmpty($empty) {
     if ($empty) {
-      $this->assertIdentical($this->drupalGetHeader('X-Session-Empty'), '1', t('Session was empty.'));
+      $this->assertIdentical($this->backdropGetHeader('X-Session-Empty'), '1', t('Session was empty.'));
     }
     else {
-      $this->assertIdentical($this->drupalGetHeader('X-Session-Empty'), '0', t('Session was not empty.'));
+      $this->assertIdentical($this->backdropGetHeader('X-Session-Empty'), '0', t('Session was not empty.'));
     }
   }
 }
@@ -291,7 +291,7 @@ class SessionTestCase extends DrupalWebTestCase {
 /**
  * Ensure that when running under https two session cookies are generated.
  */
-class SessionHttpsTestCase extends DrupalWebTestCase {
+class SessionHttpsTestCase extends BackdropWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -317,22 +317,22 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
       $insecure_session_name = session_name();
     }
 
-    $user = $this->drupalCreateUser(array('access administration pages'));
+    $user = $this->backdropCreateUser(array('access administration pages'));
 
     // Test HTTPS session handling by altering the form action to submit the
     // login form through https.php, which creates a mock HTTPS request.
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     $form = $this->xpath('//form[@id="user-login"]');
     $form[0]['action'] = $this->httpsUrl('user');
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
-    $this->drupalPost(NULL, $edit, t('Log in'));
+    $this->backdropPost(NULL, $edit, t('Log in'));
 
     // Test a second concurrent session.
     $this->curlClose();
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     $form = $this->xpath('//form[@id="user-login"]');
     $form[0]['action'] = $this->httpsUrl('user');
-    $this->drupalPost(NULL, $edit, t('Log in'));
+    $this->backdropPost(NULL, $edit, t('Log in'));
 
     // Check secure cookie on secure page.
     $this->assertTrue($this->cookies[$secure_session_name]['secure'], 'The secure cookie has the secure attribute');
@@ -344,32 +344,32 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
 
     // Verify that user is logged in on secure URL.
     $this->curlClose();
-    $this->drupalGet($this->httpsUrl('admin/config'), array(), array('Cookie: ' . $cookie));
+    $this->backdropGet($this->httpsUrl('admin/config'), array(), array('Cookie: ' . $cookie));
     $this->assertText(t('Configuration'));
     $this->assertResponse(200);
 
     // Verify that user is not logged in on non-secure URL.
     $this->curlClose();
-    $this->drupalGet($this->httpUrl('admin/config'), array(), array('Cookie: ' . $cookie));
+    $this->backdropGet($this->httpUrl('admin/config'), array(), array('Cookie: ' . $cookie));
     $this->assertNoText(t('Configuration'));
     $this->assertResponse(403);
 
     // Verify that empty SID cannot be used on the non-secure site.
     $this->curlClose();
     $cookie = $insecure_session_name . '=';
-    $this->drupalGet($this->httpUrl('admin/config'), array(), array('Cookie: ' . $cookie));
+    $this->backdropGet($this->httpUrl('admin/config'), array(), array('Cookie: ' . $cookie));
     $this->assertResponse(403);
 
     // Test HTTP session handling by altering the form action to submit the
     // login form through http.php, which creates a mock HTTP request on HTTPS
     // test environments.
     $this->curlClose();
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     $form = $this->xpath('//form[@id="user-login"]');
     $form[0]['action'] = $this->httpUrl('user');
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
-    $this->drupalPost(NULL, $edit, t('Log in'));
-    $this->drupalGet($this->httpUrl('admin/config'));
+    $this->backdropPost(NULL, $edit, t('Log in'));
+    $this->backdropGet($this->httpUrl('admin/config'));
     $this->assertResponse(200);
     $sid = $this->cookies[$insecure_session_name]['value'];
     $this->assertSessionIds($sid, '', 'Session has the correct SID and an empty secure SID.');
@@ -377,7 +377,7 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
     // Verify that empty secure SID cannot be used on the secure site.
     $this->curlClose();
     $cookie = $secure_session_name . '=';
-    $this->drupalGet($this->httpsUrl('admin/config'), array(), array('Cookie: ' . $cookie));
+    $this->backdropGet($this->httpsUrl('admin/config'), array(), array('Cookie: ' . $cookie));
     $this->assertResponse(403);
 
     // Clear browser cookie jar.
@@ -394,7 +394,7 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
     $this->curlClose();
     // Start an anonymous session on the insecure site.
     $session_data = $this->randomName();
-    $this->drupalGet('session-test/set/' . $session_data);
+    $this->backdropGet('session-test/set/' . $session_data);
     // Check secure cookie on insecure page.
     $this->assertFalse(isset($this->cookies[$secure_session_name]), 'The secure cookie is not sent on insecure pages.');
     // Check insecure cookie on insecure page.
@@ -405,13 +405,13 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
     $anonymous_cookie = $insecure_session_name . '=' . $this->cookies[$insecure_session_name]['value'];
 
     // Check that password request form action is not secure.
-    $this->drupalGet('user/password');
+    $this->backdropGet('user/password');
     $form = $this->xpath('//form[@id="user-pass"]');
     $this->assertNotEqual(substr($form[0]['action'], 0, 6), 'https:', 'Password request form action is not secure');
     $form[0]['action'] = $this->httpsUrl('user');
 
     // Check that user login form action is secure.
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     $form = $this->xpath('//form[@id="user-login"]');
     $this->assertEqual(substr($form[0]['action'], 0, 6), 'https:', 'Login form action is secure');
     $form[0]['action'] = $this->httpsUrl('user');
@@ -420,7 +420,7 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
       'name' => $user->name,
       'pass' => $user->pass_raw,
     );
-    $this->drupalPost(NULL, $edit, t('Log in'));
+    $this->backdropPost(NULL, $edit, t('Log in'));
     // Check secure cookie on secure page.
     $this->assertTrue($this->cookies[$secure_session_name]['secure'], 'The secure cookie has the secure attribute');
     // Check insecure cookie on secure page.
@@ -436,14 +436,14 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
 
     // Test that session data saved before login is still available on the
     // authenticated session.
-    $this->drupalGet('session-test/get');
+    $this->backdropGet('session-test/get');
     $this->assertText($session_data, 'Session correctly returned the stored data set by the anonymous session.');
 
     foreach ($cookies as $cookie_key => $cookie) {
       foreach (array('admin/config', $this->httpsUrl('admin/config')) as $url_key => $url) {
         $this->curlClose();
 
-        $this->drupalGet($url, array(), array('Cookie: ' . $cookie));
+        $this->backdropGet($url, array(), array('Cookie: ' . $cookie));
         if ($cookie_key == $url_key) {
           $this->assertText(t('Configuration'));
           $this->assertResponse(200);
@@ -458,23 +458,23 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
     // Test that session data saved before login is not available using the
     // pre-login anonymous cookie.
     $this->cookies = array();
-    $this->drupalGet('session-test/get', array('Cookie: ' . $anonymous_cookie));
+    $this->backdropGet('session-test/get', array('Cookie: ' . $anonymous_cookie));
     $this->assertNoText($session_data, 'Initial anonymous session is inactive after login.');
 
     // Clear browser cookie jar.
     $this->cookies = array();
 
     // Start an anonymous session on the secure site.
-    $this->drupalGet($this->httpsUrl('session-test/set/1'));
+    $this->backdropGet($this->httpsUrl('session-test/set/1'));
 
     // Mock a login to the secure site using the secure session cookie.
-    $this->drupalGet('user');
+    $this->backdropGet('user');
     $form = $this->xpath('//form[@id="user-login"]');
     $form[0]['action'] = $this->httpsUrl('user');
-    $this->drupalPost(NULL, $edit, t('Log in'));
+    $this->backdropPost(NULL, $edit, t('Log in'));
 
     // Test that the user is also authenticated on the insecure site.
-    $this->drupalGet("user/{$user->uid}/edit");
+    $this->backdropGet("user/{$user->uid}/edit");
     $this->assertResponse(200);
   }
 
@@ -504,7 +504,7 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
    * Builds a URL for submitting a mock HTTPS request to HTTP test environments.
    *
    * @param $url
-   *   A Drupal path such as 'user'.
+   *   A Backdrop path such as 'user'.
    *
    * @return
    *   An absolute URL.
@@ -518,7 +518,7 @@ class SessionHttpsTestCase extends DrupalWebTestCase {
    * Builds a URL for submitting a mock HTTP request to HTTPS test environments.
    *
    * @param $url
-   *   A Drupal path such as 'user'.
+   *   A Backdrop path such as 'user'.
    *
    * @return
    *   An absolute URL.

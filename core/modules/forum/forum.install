@@ -104,7 +104,7 @@ function forum_enable() {
  */
 function forum_uninstall() {
   // Load the dependent Taxonomy module, in case it has been disabled.
-  drupal_load('module', 'taxonomy');
+  backdrop_load('module', 'taxonomy');
 
   variable_del('forum_containers');
   variable_del('forum_hot_topic');

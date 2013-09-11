@@ -35,7 +35,7 @@ function aggregator_view() {
       ($feed->checked && $feed->refresh ? t('%time left', array('%time' => format_interval($feed->checked + $feed->refresh - REQUEST_TIME))) : t('never')),
       l(t('edit'), "admin/config/services/aggregator/edit/feed/$feed->fid"),
       l(t('remove items'), "admin/config/services/aggregator/remove/$feed->fid"),
-      l(t('update items'), "admin/config/services/aggregator/update/$feed->fid", array('query' => array('token' => drupal_get_token("aggregator/update/$feed->fid")))),
+      l(t('update items'), "admin/config/services/aggregator/update/$feed->fid", array('query' => array('token' => backdrop_get_token("aggregator/update/$feed->fid")))),
     );
   }
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No feeds available. <a href="@link">Add feed</a>.', array('@link' => url('admin/config/services/aggregator/add/feed')))));
@@ -67,7 +67,7 @@ function aggregator_view() {
  * @see aggregator_form_feed_submit()
  */
 function aggregator_form_feed($form, &$form_state, stdClass $feed = NULL) {
-  $period = drupal_map_assoc(array(900, 1800, 3600, 7200, 10800, 21600, 32400, 43200, 64800, 86400, 172800, 259200, 604800, 1209600, 2419200), 'format_interval');
+  $period = backdrop_map_assoc(array(900, 1800, 3600, 7200, 10800, 21600, 32400, 43200, 64800, 86400, 172800, 259200, 604800, 1209600, 2419200), 'format_interval');
   $period[AGGREGATOR_CLEAR_NEVER] = t('Never');
 
   $form['title'] = array('#type' => 'textfield',
@@ -93,8 +93,8 @@ function aggregator_form_feed($form, &$form_state, stdClass $feed = NULL) {
   $form['block'] = array('#type' => 'select',
     '#title' => t('News items in block'),
     '#default_value' => isset($feed->block) ? $feed->block : 5,
-    '#options' => drupal_map_assoc(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)),
-    '#description' => t("Drupal can make a block with the most recent news items of this feed. You can <a href=\"@block-admin\">configure blocks</a> to be displayed in the sidebar of your page. This setting lets you configure the number of news items to show in this feed's block. If you choose '0' this feed's block will be disabled.", array('@block-admin' => url('admin/structure/block'))),
+    '#options' => backdrop_map_assoc(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)),
+    '#description' => t("Backdrop can make a block with the most recent news items of this feed. You can <a href=\"@block-admin\">configure blocks</a> to be displayed in the sidebar of your page. This setting lets you configure the number of news items to show in this feed's block. If you choose '0' this feed's block will be disabled.", array('@block-admin' => url('admin/structure/block'))),
   );
 
   // Handling of categories.
@@ -179,7 +179,7 @@ function aggregator_form_feed_submit($form, &$form_state) {
   aggregator_save_feed($form_state['values']);
   if (isset($form_state['values']['fid'])) {
     if (isset($form_state['values']['title'])) {
-      drupal_set_message(t('The feed %feed has been updated.', array('%feed' => $form_state['values']['title'])));
+      backdrop_set_message(t('The feed %feed has been updated.', array('%feed' => $form_state['values']['title'])));
       if (arg(0) == 'admin') {
         $form_state['redirect'] = 'admin/config/services/aggregator/';
         return;
@@ -191,7 +191,7 @@ function aggregator_form_feed_submit($form, &$form_state) {
     }
     else {
       watchdog('aggregator', 'Feed %feed deleted.', array('%feed' => $title));
-      drupal_set_message(t('The feed %feed has been deleted.', array('%feed' => $title)));
+      backdrop_set_message(t('The feed %feed has been deleted.', array('%feed' => $title)));
       if (arg(0) == 'admin') {
         $form_state['redirect'] = 'admin/config/services/aggregator/';
         return;
@@ -204,7 +204,7 @@ function aggregator_form_feed_submit($form, &$form_state) {
   }
   else {
     watchdog('aggregator', 'Feed %feed added.', array('%feed' => $form_state['values']['title']), WATCHDOG_NOTICE, l(t('view'), 'admin/config/services/aggregator'));
-    drupal_set_message(t('The feed %feed has been added.', array('%feed' => $form_state['values']['title'])));
+    backdrop_set_message(t('The feed %feed has been added.', array('%feed' => $form_state['values']['title'])));
   }
 }
 
@@ -252,7 +252,7 @@ function aggregator_admin_remove_feed_submit($form, &$form_state) {
  * @see aggregator_form_opml_submit()
  */
 function aggregator_form_opml($form, &$form_state) {
-  $period = drupal_map_assoc(array(900, 1800, 3600, 7200, 10800, 21600, 32400, 43200, 64800, 86400, 172800, 259200, 604800, 1209600, 2419200), 'format_interval');
+  $period = backdrop_map_assoc(array(900, 1800, 3600, 7200, 10800, 21600, 32400, 43200, 64800, 86400, 172800, 259200, 604800, 1209600, 2419200), 'format_interval');
 
   $form['upload'] = array(
     '#type' => 'file',
@@ -275,8 +275,8 @@ function aggregator_form_opml($form, &$form_state) {
   $form['block'] = array('#type' => 'select',
     '#title' => t('News items in block'),
     '#default_value' => 5,
-    '#options' => drupal_map_assoc(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)),
-    '#description' => t("Drupal can make a block with the most recent news items of a feed. You can <a href=\"@block-admin\">configure blocks</a> to be displayed in the sidebar of your page. This setting lets you configure the number of news items to show in a feed's block. If you choose '0' these feeds' blocks will be disabled.", array('@block-admin' => url('admin/structure/block'))),
+    '#options' => backdrop_map_assoc(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)),
+    '#description' => t("Backdrop can make a block with the most recent news items of a feed. You can <a href=\"@block-admin\">configure blocks</a> to be displayed in the sidebar of your page. This setting lets you configure the number of news items to show in a feed's block. If you choose '0' these feeds' blocks will be disabled.", array('@block-admin' => url('admin/structure/block'))),
   );
 
   // Handling of categories.
@@ -327,7 +327,7 @@ function aggregator_form_opml_submit($form, &$form_state) {
     $data = file_get_contents($file->uri);
   }
   else {
-    $response = drupal_http_request($form_state['values']['remote']);
+    $response = backdrop_http_request($form_state['values']['remote']);
     if (!isset($response->error)) {
       $data = $response->data;
     }
@@ -335,7 +335,7 @@ function aggregator_form_opml_submit($form, &$form_state) {
 
   $feeds = _aggregator_parse_opml($data);
   if (empty($feeds)) {
-    drupal_set_message(t('No new feed has been added.'));
+    backdrop_set_message(t('No new feed has been added.'));
     return;
   }
 
@@ -344,7 +344,7 @@ function aggregator_form_opml_submit($form, &$form_state) {
   foreach ($feeds as $feed) {
     // Ensure URL is valid.
     if (!valid_url($feed['url'], TRUE)) {
-      drupal_set_message(t('The URL %url is invalid.', array('%url' => $feed['url'])), 'warning');
+      backdrop_set_message(t('The URL %url is invalid.', array('%url' => $feed['url'])), 'warning');
       continue;
     }
 
@@ -352,18 +352,18 @@ function aggregator_form_opml_submit($form, &$form_state) {
     $result = db_query("SELECT title, url FROM {aggregator_feed} WHERE title = :title OR url = :url", array(':title' => $feed['title'], ':url' => $feed['url']));
     foreach ($result as $old) {
       if (strcasecmp($old->title, $feed['title']) == 0) {
-        drupal_set_message(t('A feed named %title already exists.', array('%title' => $old->title)), 'warning');
+        backdrop_set_message(t('A feed named %title already exists.', array('%title' => $old->title)), 'warning');
         continue 2;
       }
       if (strcasecmp($old->url, $feed['url']) == 0) {
-        drupal_set_message(t('A feed with the URL %url already exists.', array('%url' => $old->url)), 'warning');
+        backdrop_set_message(t('A feed with the URL %url already exists.', array('%url' => $old->url)), 'warning');
         continue 2;
       }
     }
 
     $form_state['values']['title'] = $feed['title'];
     $form_state['values']['url'] = $feed['url'];
-    drupal_form_submit('aggregator_form_feed', $form_state);
+    backdrop_form_submit('aggregator_form_feed', $form_state);
   }
 
   $form_state['redirect'] = 'admin/config/services/aggregator';
@@ -386,7 +386,7 @@ function aggregator_form_opml_submit($form, &$form_state) {
  */
 function _aggregator_parse_opml($opml) {
   $feeds = array();
-  $xml_parser = drupal_xml_parser_create($opml);
+  $xml_parser = backdrop_xml_parser_create($opml);
   if (xml_parse_into_struct($xml_parser, $opml, $values)) {
     foreach ($values as $entry) {
       if ($entry['tag'] == 'OUTLINE' && isset($entry['attributes'])) {
@@ -411,11 +411,11 @@ function _aggregator_parse_opml($opml) {
  * @see aggregator_menu()
  */
 function aggregator_admin_refresh_feed($feed) {
-  if (!isset($_GET['token']) || !drupal_valid_token($_GET['token'], 'aggregator/update/' . $feed->fid)) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'aggregator/update/' . $feed->fid)) {
     return MENU_ACCESS_DENIED;
   }
   aggregator_refresh($feed);
-  drupal_goto('admin/config/services/aggregator');
+  backdrop_goto('admin/config/services/aggregator');
 }
 
 /**
@@ -610,7 +610,7 @@ function aggregator_form_category_submit($form, &$form_state) {
   aggregator_save_category($form_state['values']);
   if (isset($form_state['values']['cid'])) {
     if (isset($form_state['values']['title'])) {
-      drupal_set_message(t('The category %category has been updated.', array('%category' => $form_state['values']['title'])));
+      backdrop_set_message(t('The category %category has been updated.', array('%category' => $form_state['values']['title'])));
       if (arg(0) == 'admin') {
         $form_state['redirect'] = 'admin/config/services/aggregator/';
         return;
@@ -622,7 +622,7 @@ function aggregator_form_category_submit($form, &$form_state) {
     }
     else {
       watchdog('aggregator', 'Category %category deleted.', array('%category' => $title));
-      drupal_set_message(t('The category %category has been deleted.', array('%category' => $title)));
+      backdrop_set_message(t('The category %category has been deleted.', array('%category' => $title)));
       if (arg(0) == 'admin') {
         $form_state['redirect'] = 'admin/config/services/aggregator/';
         return;
@@ -635,6 +635,6 @@ function aggregator_form_category_submit($form, &$form_state) {
   }
   else {
     watchdog('aggregator', 'Category %category added.', array('%category' => $form_state['values']['title']), WATCHDOG_NOTICE, l(t('view'), 'admin/config/services/aggregator'));
-    drupal_set_message(t('The category %category has been added.', array('%category' => $form_state['values']['title'])));
+    backdrop_set_message(t('The category %category has been added.', array('%category' => $form_state['values']['title'])));
   }
 }

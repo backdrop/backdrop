@@ -1915,7 +1915,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    *   The extra handling directives for the specified operator, or NULL.
    */
   protected function mapConditionOperator($operator) {
-    // $specials does not use drupal_static as its value never changes.
+    // $specials does not use backdrop_static as its value never changes.
     static $specials = array(
       'BETWEEN' => array('delimiter' => ' AND '),
       'IN' => array('delimiter' => ', ', 'prefix' => ' (', 'postfix' => ')'),
@@ -1939,7 +1939,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
     }
     else {
       // We need to upper case because PHP index matches are case sensitive but
-      // do not need the more expensive drupal_strtoupper because SQL statements are ASCII.
+      // do not need the more expensive backdrop_strtoupper because SQL statements are ASCII.
       $operator = strtoupper($operator);
       $return = isset($specials[$operator]) ? $specials[$operator] : array();
     }

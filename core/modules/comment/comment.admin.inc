@@ -19,10 +19,10 @@ function comment_admin($type = 'new') {
   $edit = $_POST;
 
   if (isset($edit['operation']) && ($edit['operation'] == 'delete') && isset($edit['comments']) && $edit['comments']) {
-    return drupal_get_form('comment_multiple_delete_confirm');
+    return backdrop_get_form('comment_multiple_delete_confirm');
   }
   else {
-    return drupal_get_form('comment_admin_overview', $type);
+    return backdrop_get_form('comment_admin_overview', $type);
   }
 }
 
@@ -99,7 +99,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
 
   // Build a table listing the appropriate comments.
   $options = array();
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
 
   foreach ($comments as $comment) {
     // Remove the first node title from the node_titles array and attach to
@@ -187,7 +187,7 @@ function comment_admin_overview_submit($form, &$form_state) {
       comment_save($comment);
     }
   }
-  drupal_set_message(t('The update has been performed.'));
+  backdrop_set_message(t('The update has been performed.'));
   $form_state['redirect'] = 'admin/content/comment';
   cache_clear_all();
 }
@@ -220,8 +220,8 @@ function comment_multiple_delete_confirm($form, &$form_state) {
   $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
 
   if (!$comment_counter) {
-    drupal_set_message(t('There do not appear to be any comments to delete, or your selected comment was deleted by another administrator.'));
-    drupal_goto('admin/content/comment');
+    backdrop_set_message(t('There do not appear to be any comments to delete, or your selected comment was deleted by another administrator.'));
+    backdrop_goto('admin/content/comment');
   }
   else {
     return confirm_form($form,
@@ -240,7 +240,7 @@ function comment_multiple_delete_confirm_submit($form, &$form_state) {
     cache_clear_all();
     $count = count($form_state['values']['comments']);
     watchdog('content', 'Deleted @count comments.', array('@count' => $count));
-    drupal_set_message(format_plural($count, 'Deleted 1 comment.', 'Deleted @count comments.'));
+    backdrop_set_message(format_plural($count, 'Deleted 1 comment.', 'Deleted @count comments.'));
   }
   $form_state['redirect'] = 'admin/content/comment';
 }
@@ -256,7 +256,7 @@ function comment_multiple_delete_confirm_submit($form, &$form_state) {
  */
 function comment_confirm_delete_page($cid) {
   if ($comment = comment_load($cid)) {
-    return drupal_get_form('comment_confirm_delete', $comment);
+    return backdrop_get_form('comment_confirm_delete', $comment);
   }
   return MENU_NOT_FOUND;
 }
@@ -293,7 +293,7 @@ function comment_confirm_delete_submit($form, &$form_state) {
   $comment = $form['#comment'];
   // Delete the comment and its replies.
   comment_delete($comment->cid);
-  drupal_set_message(t('The comment and all its replies have been deleted.'));
+  backdrop_set_message(t('The comment and all its replies have been deleted.'));
   watchdog('content', 'Deleted comment @cid and its replies.', array('@cid' => $comment->cid));
   // Clear the cache so an anonymous user sees that his comment was deleted.
   cache_clear_all();

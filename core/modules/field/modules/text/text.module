@@ -13,7 +13,7 @@ function text_help($path, $arg) {
     case 'admin/help#text':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t("The Text module defines various text field types for the Field module. A text field may contain plain text only, or optionally, may use Drupal's <a href='@filter-help'>text filters</a> to securely manage HTML output. Text input fields may be either a single line (text field), multiple lines (text area), or for greater input control, a select box, checkbox, or radio buttons. If desired, the field can be validated, so that it is limited to a set of allowed values. See the <a href='@field-help'>Field module help page</a> for more information about fields.", array('@field-help' => url('admin/help/field'), '@filter-help' => url('admin/help/filter'))) . '</p>';
+      $output .= '<p>' . t("The Text module defines various text field types for the Field module. A text field may contain plain text only, or optionally, may use Backdrop's <a href='@filter-help'>text filters</a> to securely manage HTML output. Text input fields may be either a single line (text field), multiple lines (text area), or for greater input control, a select box, checkbox, or radio buttons. If desired, the field can be validated, so that it is limited to a set of allowed values. See the <a href='@field-help'>Field module help page</a> for more information about fields.", array('@field-help' => url('admin/help/field'), '@filter-help' => url('admin/help/filter'))) . '</p>';
       return $output;
   }
 }
@@ -121,7 +121,7 @@ function text_field_validate($entity_type, $entity, $field, $instance, $langcode
     //   length can be exceeded very easily.
     foreach (array('value', 'summary') as $column) {
       if (!empty($item[$column])) {
-        if (!empty($field['settings']['max_length']) && drupal_strlen($item[$column]) > $field['settings']['max_length']) {
+        if (!empty($field['settings']['max_length']) && backdrop_strlen($item[$column]) > $field['settings']['max_length']) {
           switch ($column) {
             case 'value':
               $message = t('%name: the text may not be longer than %max characters.', array('%name' => $instance['label'], '%max' => $field['settings']['max_length']));
@@ -376,7 +376,7 @@ function text_summary($text, $format = NULL, $size = NULL) {
   }
 
   // If we have a short body, the entire body is the summary.
-  if (drupal_strlen($text) <= $size) {
+  if (backdrop_strlen($text) <= $size) {
     return $text;
   }
 
@@ -523,7 +523,7 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
         '#rows' => $instance['widget']['settings']['summary_rows'],
         '#description' => t('Leave blank to use trimmed value of full text as the summary.'),
         '#attached' => array(
-          'js' => array(drupal_get_path('module', 'text') . '/text.js'),
+          'js' => array(backdrop_get_path('module', 'text') . '/text.js'),
         ),
         '#attributes' => array('class' => array('text-summary')),
         '#prefix' => '<div class="text-summary-wrapper">',

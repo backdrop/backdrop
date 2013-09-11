@@ -2,14 +2,14 @@
 
 /**
  * @file
- * Drupal placeholder/token replacement system.
+ * Backdrop placeholder/token replacement system.
  *
  * API functions for replacing placeholders in text with meaningful values.
  *
  * For example: When configuring automated emails, an administrator enters
  * standard text for the email. Variables like the title of a node and the date
  * the email was sent can be entered as placeholders like [node:title] and
- * [date:short]. When a Drupal module prepares to send the email, it can call
+ * [date:short]. When a Backdrop module prepares to send the email, it can call
  * the token_replace() function, passing in the text. The token system will
  * scan the text for placeholder tokens, give other modules an opportunity to
  * replace them with meaningful text, then return the final product to the
@@ -184,7 +184,7 @@ function token_generate($type, array $tokens, array $data = array(), array $opti
     'data' => $data,
     'options' => $options,
   );
-  drupal_alter('tokens', $replacements, $context);
+  backdrop_alter('tokens', $replacements, $context);
 
   return $replacements;
 }
@@ -253,10 +253,10 @@ function token_find_with_prefix(array $tokens, $prefix, $delimiter = ':') {
  *   An associative array of token information, grouped by token type.
  */
 function token_info() {
-  $data = &drupal_static(__FUNCTION__);
+  $data = &backdrop_static(__FUNCTION__);
   if (!isset($data)) {
     $data = module_invoke_all('token_info');
-    drupal_alter('token_info', $data);
+    backdrop_alter('token_info', $data);
   }
   return $data;
 }

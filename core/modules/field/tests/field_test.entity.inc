@@ -138,8 +138,8 @@ function field_test_entity_info_alter(&$entity_info) {
  * Helper function to enable entity translations.
  */
 function field_test_entity_info_translatable($entity_type = NULL, $translatable = NULL) {
-  drupal_static_reset('field_has_translation_handler');
-  $stored_value = &drupal_static(__FUNCTION__, array());
+  backdrop_static_reset('field_has_translation_handler');
+  $stored_value = &backdrop_static(__FUNCTION__, array());
   if (isset($entity_type)) {
     $stored_value[$entity_type] = $translatable;
     entity_info_cache_clear();
@@ -287,17 +287,17 @@ function field_test_entity_save(&$entity) {
 
   $update_entity = TRUE;
   if ($entity->is_new) {
-    drupal_write_record('test_entity', $entity);
-    drupal_write_record('test_entity_revision', $entity);
+    backdrop_write_record('test_entity', $entity);
+    backdrop_write_record('test_entity_revision', $entity);
     $op = 'insert';
   }
   else {
-    drupal_write_record('test_entity', $entity, 'ftid');
+    backdrop_write_record('test_entity', $entity, 'ftid');
     if (!empty($entity->revision)) {
-      drupal_write_record('test_entity_revision', $entity);
+      backdrop_write_record('test_entity_revision', $entity);
     }
     else {
-      drupal_write_record('test_entity_revision', $entity, 'ftvid');
+      backdrop_write_record('test_entity_revision', $entity, 'ftvid');
       $update_entity = FALSE;
     }
     $op = 'update';
@@ -320,16 +320,16 @@ function field_test_entity_save(&$entity) {
 function field_test_entity_add($fttype) {
   $fttype = str_replace('-', '_', $fttype);
   $entity = (object)array('fttype' => $fttype);
-  drupal_set_title(t('Create test_entity @bundle', array('@bundle' => $fttype)), PASS_THROUGH);
-  return drupal_get_form('field_test_entity_form', $entity, TRUE);
+  backdrop_set_title(t('Create test_entity @bundle', array('@bundle' => $fttype)), PASS_THROUGH);
+  return backdrop_get_form('field_test_entity_form', $entity, TRUE);
 }
 
 /**
  * Menu callback: displays the 'Edit exiisting test_entity' form.
  */
 function field_test_entity_edit($entity) {
-  drupal_set_title(t('test_entity @ftid revision @ftvid', array('@ftid' => $entity->ftid, '@ftvid' => $entity->ftvid)), PASS_THROUGH);
-  return drupal_get_form('field_test_entity_form', $entity);
+  backdrop_set_title(t('test_entity @ftid revision @ftvid', array('@ftid' => $entity->ftid, '@ftvid' => $entity->ftvid)), PASS_THROUGH);
+  return backdrop_get_form('field_test_entity_form', $entity);
 }
 
 /**
@@ -390,14 +390,14 @@ function field_test_entity_form_submit($form, &$form_state) {
   field_test_entity_save($entity);
 
   $message = $insert ? t('test_entity @id has been created.', array('@id' => $entity->ftid)) : t('test_entity @id has been updated.', array('@id' => $entity->ftid));
-  drupal_set_message($message);
+  backdrop_set_message($message);
 
   if ($entity->ftid) {
     $form_state['redirect'] = 'test-entity/manage/' . $entity->ftid . '/edit';
   }
   else {
     // Error on save.
-    drupal_set_message(t('The entity could not be saved.'), 'error');
+    backdrop_set_message(t('The entity could not be saved.'), 'error');
     $form_state['rebuild'] = TRUE;
   }
 }
@@ -472,16 +472,16 @@ function field_test_entity_nested_form_submit($form, &$form_state) {
   field_attach_submit('test_entity', $entity_2, $form['entity_2'], $form_state);
   field_test_entity_save($entity_2);
 
-  drupal_set_message(t('test_entities @id_1 and @id_2 have been updated.', array('@id_1' => $entity_1->ftid, '@id_2' => $entity_2->ftid)));
+  backdrop_set_message(t('test_entities @id_1 and @id_2 have been updated.', array('@id_1' => $entity_1->ftid, '@id_2' => $entity_2->ftid)));
 }
 
 /**
  * Controller class for the test_entity_bundle entity type.
  *
- * This extends the DrupalDefaultEntityController class, adding required
+ * This extends the BackdropDefaultEntityController class, adding required
  * special handling for bundles (since they are not stored in the database).
  */
-class TestEntityBundleController extends DrupalDefaultEntityController {
+class TestEntityBundleController extends BackdropDefaultEntityController {
 
   protected function attachLoad(&$entities, $revision_id = FALSE) {
     // Add bundle information.

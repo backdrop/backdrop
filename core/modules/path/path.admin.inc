@@ -13,7 +13,7 @@
  */
 function path_admin_overview($keys = NULL) {
   // Add the filter form above the overview table.
-  $build['path_admin_filter_form'] = drupal_get_form('path_admin_filter_form', $keys);
+  $build['path_admin_filter_form'] = backdrop_get_form('path_admin_filter_form', $keys);
   // Enable language column if language.module is enabled or if we have any
   // alias with a language.
   $alias_exists = (bool) db_query_range('SELECT 1 FROM {url_alias} WHERE langcode <> :langcode', 0, 1, array(':langcode' => LANGUAGE_NONE))->fetchField();
@@ -39,7 +39,7 @@ function path_admin_overview($keys = NULL) {
     ->execute();
 
   $rows = array();
-  $destination = drupal_get_destination();
+  $destination = backdrop_get_destination();
   foreach ($result as $data) {
     $row = array();
     $row['data']['alias'] = l($data->alias, $data->source);
@@ -69,7 +69,7 @@ function path_admin_overview($keys = NULL) {
 
     // If the system path maps to a different URL alias, highlight this table
     // row to let the user know of old aliases.
-    if ($data->alias != drupal_get_path_alias($data->source, $data->langcode)) {
+    if ($data->alias != backdrop_get_path_alias($data->source, $data->langcode)) {
       $row['class'] = array('warning');
     }
 
@@ -92,11 +92,11 @@ function path_admin_overview($keys = NULL) {
  */
 function path_admin_edit($path = array()) {
   if ($path) {
-    drupal_set_title($path['alias']);
-    $output = drupal_get_form('path_admin_form', $path);
+    backdrop_set_title($path['alias']);
+    $output = backdrop_get_form('path_admin_form', $path);
   }
   else {
-    $output = drupal_get_form('path_admin_form');
+    $output = backdrop_get_form('path_admin_form');
   }
 
   return $output;
@@ -182,7 +182,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
 function path_admin_form_delete_submit($form, &$form_state) {
   $destination = array();
   if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
+    $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   $form_state['redirect'] = array('admin/config/search/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
@@ -193,7 +193,7 @@ function path_admin_form_delete_submit($form, &$form_state) {
  */
 function path_admin_form_validate($form, &$form_state) {
   $source = &$form_state['values']['source'];
-  $source = drupal_get_normal_path($source);
+  $source = backdrop_get_normal_path($source);
   $alias = $form_state['values']['alias'];
   $pid = isset($form_state['values']['pid']) ? $form_state['values']['pid'] : 0;
   // Language is only set if language.module is enabled, otherwise save for all
@@ -210,7 +210,7 @@ function path_admin_form_validate($form, &$form_state) {
   if ($has_alias) {
     form_set_error('alias', t('The alias %alias is already in use in this language.', array('%alias' => $alias)));
   }
-  if (!drupal_valid_path($source)) {
+  if (!backdrop_valid_path($source)) {
     form_set_error('source', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $source)));
   }
 }
@@ -224,7 +224,7 @@ function path_admin_form_submit($form, &$form_state) {
 
   path_save($form_state['values']);
 
-  drupal_set_message(t('The alias has been saved.'));
+  backdrop_set_message(t('The alias has been saved.'));
   $form_state['redirect'] = 'admin/config/search/path';
 }
 

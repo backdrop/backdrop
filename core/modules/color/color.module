@@ -11,11 +11,11 @@ function color_help($path, $arg) {
   switch ($path) {
     case 'admin/help#color':
       $output = '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Color module allows users with the <em>Administer site configuration</em> permission to quickly and easily change the color scheme of themes that have been built to be compatible with it. For more information, see the online handbook entry for <a href="@color">Color module</a>.', array('@color' => 'http://drupal.org/handbook/modules/color')) . '</p>';
+      $output .= '<p>' . t('The Color module allows users with the <em>Administer site configuration</em> permission to quickly and easily change the color scheme of themes that have been built to be compatible with it. For more information, see the online handbook entry for <a href="@color">Color module</a>.', array('@color' => 'http://backdrop.org/handbook/modules/color')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Changing colors') . '</dt>';
-      $output .= '<dd>' . t("Using the Color module allows you to easily change the color of links, backgrounds, text, and other theme elements. To change the color settings for a compatible theme, select the <em>Settings</em> link for your theme on the <a href='@configure'>Themes administration page</a>. If you don't see a color picker on that page, then your theme is not compatible with the color module. If you are sure that the theme does indeed support the color module, but the color picker does not appear, then <a href='@troubleshoot'>follow these troubleshooting procedures</a>.", array('@configure' => url('admin/appearance'), '@troubleshoot' => 'http://drupal.org/node/109457')) . '</dd>';
+      $output .= '<dd>' . t("Using the Color module allows you to easily change the color of links, backgrounds, text, and other theme elements. To change the color settings for a compatible theme, select the <em>Settings</em> link for your theme on the <a href='@configure'>Themes administration page</a>. If you don't see a color picker on that page, then your theme is not compatible with the color module. If you are sure that the theme does indeed support the color module, but the color picker does not appear, then <a href='@troubleshoot'>follow these troubleshooting procedures</a>.", array('@configure' => url('admin/appearance'), '@troubleshoot' => 'http://backdrop.org/node/109457')) . '</dd>';
       $output .= '<dd>' . t("The Color module saves a modified copy of the theme's specified stylesheets in the files directory. This means that if you make any manual changes to your theme's stylesheet, <em>you must save your color settings again, even if they haven't changed</em>. This step is required because the module stylesheets (in the files directory) need to be recreated to include your changes.") . '</dd>';
       $output .= '</dl>';
       return $output;
@@ -74,7 +74,7 @@ function _color_html_alter(&$vars) {
       foreach ($color_paths as $color_path) {
         // Color module currently requires unique file names to be used,
         // which allows us to compare different file paths.
-        if (drupal_basename($old_path) == drupal_basename($color_path)) {
+        if (backdrop_basename($old_path) == backdrop_basename($color_path)) {
           // Replace the path to the new css file.
           // This keeps the order of the stylesheets intact.
           $vars['css'][$old_path]['data'] = $color_path;
@@ -82,7 +82,7 @@ function _color_html_alter(&$vars) {
       }
     }
 
-    $vars['styles'] = drupal_get_css($vars['css']);
+    $vars['styles'] = backdrop_get_css($vars['css']);
   }
 }
 
@@ -115,7 +115,7 @@ function color_get_info($theme) {
     return $theme_info[$theme];
   }
 
-  $path = drupal_get_path('theme', $theme);
+  $path = backdrop_get_path('theme', $theme);
   $file = DRUPAL_ROOT . '/' . $path . '/color/color.inc';
   if ($path && file_exists($file)) {
     include $file;
@@ -147,7 +147,7 @@ function color_get_palette($theme, $default = FALSE) {
  * @ingroup forms
  */
 function color_scheme_form($complete_form, &$form_state, $theme) {
-  $base = drupal_get_path('module', 'color');
+  $base = backdrop_get_path('module', 'color');
   $info = color_get_info($theme);
 
   $info['schemes'][''] = array('title' => t('Custom'), 'colors' => array());
@@ -243,28 +243,28 @@ function theme_color_scheme_form($variables) {
 
   $theme = $form['theme']['#value'];
   $info = $form['info']['#value'];
-  $path = drupal_get_path('theme', $theme) . '/';
-  drupal_add_css($path . $info['preview_css']);
+  $path = backdrop_get_path('theme', $theme) . '/';
+  backdrop_add_css($path . $info['preview_css']);
 
-  $preview_js_path = isset($info['preview_js']) ? $path . $info['preview_js'] : drupal_get_path('module', 'color') . '/' . 'preview.js';
+  $preview_js_path = isset($info['preview_js']) ? $path . $info['preview_js'] : backdrop_get_path('module', 'color') . '/' . 'preview.js';
   // Add the JS at a weight below color.js.
-  drupal_add_js($preview_js_path, array('weight' => -1));
+  backdrop_add_js($preview_js_path, array('weight' => -1));
 
   $output  = '';
   $output .= '<div class="color-form clearfix">';
   // Color schemes
-  $output .= drupal_render($form['scheme']);
+  $output .= backdrop_render($form['scheme']);
   // Palette
   $output .= '<div id="palette" class="clearfix">';
   foreach (element_children($form['palette']) as $name) {
-    $output .= drupal_render($form['palette'][$name]);
+    $output .= backdrop_render($form['palette'][$name]);
   }
   $output .= '</div>';
   // Preview
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   $output .= '<h2>' . t('Preview') . '</h2>';
   // Attempt to load preview HTML if the theme provides it.
-  $preview_html_path = DRUPAL_ROOT . '/' . (isset($info['preview_html']) ? drupal_get_path('theme', $theme) . '/' . $info['preview_html'] : drupal_get_path('module', 'color') . '/preview.html');
+  $preview_html_path = DRUPAL_ROOT . '/' . (isset($info['preview_html']) ? backdrop_get_path('theme', $theme) . '/' . $info['preview_html'] : backdrop_get_path('module', 'color') . '/preview.html');
   $output .= file_get_contents($preview_html_path);
   // Close the wrapper div.
   $output .= '</div>';
@@ -313,7 +313,7 @@ function color_scheme_form_submit($form, &$form_state) {
   // Make sure enough memory is available, if PHP's memory limit is compiled in.
   if (function_exists('memory_get_usage')) {
     // Fetch source image dimensions.
-    $source = drupal_get_path('theme', $theme) . '/' . $info['base_image'];
+    $source = backdrop_get_path('theme', $theme) . '/' . $info['base_image'];
     list($width, $height) = getimagesize($source);
 
     // We need at least a copy of the source and a target buffer of the same
@@ -326,17 +326,17 @@ function color_scheme_form_submit($form, &$form_state) {
     $usage = memory_get_usage(TRUE);
     $limit = parse_size(ini_get('memory_limit'));
     if ($usage + $required > $limit) {
-      drupal_set_message(t('There is not enough memory available to PHP to change this theme\'s color scheme. You need at least %size more. Check the <a href="@url">PHP documentation</a> for more information.', array('%size' => format_size($usage + $required - $limit), '@url' => 'http://www.php.net/manual/ini.core.php#ini.sect.resource-limits')), 'error');
+      backdrop_set_message(t('There is not enough memory available to PHP to change this theme\'s color scheme. You need at least %size more. Check the <a href="@url">PHP documentation</a> for more information.', array('%size' => format_size($usage + $required - $limit), '@url' => 'http://www.php.net/manual/ini.core.php#ini.sect.resource-limits')), 'error');
       return;
     }
   }
 
   // Delete old files.
   foreach (variable_get('color_' . $theme . '_files', array()) as $file) {
-    @drupal_unlink($file);
+    @backdrop_unlink($file);
   }
   if (isset($file) && $file = dirname($file)) {
-    @drupal_rmdir($file);
+    @backdrop_rmdir($file);
   }
 
   // Don't render the default colorscheme, use the standard theme instead.
@@ -358,7 +358,7 @@ function color_scheme_form_submit($form, &$form_state) {
   }
   $paths['target'] = $paths['target'] . '/';
   $paths['id'] = $id;
-  $paths['source'] = drupal_get_path('theme', $theme) . '/';
+  $paths['source'] = backdrop_get_path('theme', $theme) . '/';
   $paths['files'] = $paths['map'] = array();
 
   // Save palette and logo location.
@@ -367,7 +367,7 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // Copy over neutral images.
   foreach ($info['copy'] as $file) {
-    $base = drupal_basename($file);
+    $base = backdrop_basename($file);
     $source = $paths['source'] . $file;
     $filepath = file_unmanaged_copy($source, $paths['target'] . $base);
     $paths['map'][$file] = $base;
@@ -396,20 +396,20 @@ function color_scheme_form_submit($form, &$form_state) {
     foreach ($files as $file) {
       // Aggregate @imports recursively for each configured top level CSS file
       // without optimization. Aggregation and optimization will be
-      // handled by drupal_build_css_cache() only.
-      $style = drupal_load_stylesheet($paths['source'] . $file, FALSE);
+      // handled by backdrop_build_css_cache() only.
+      $style = backdrop_load_stylesheet($paths['source'] . $file, FALSE);
 
       // Return the path to where this CSS file originated from, stripping
       // off the name of the file at the end of the path.
       $base = base_path() . dirname($paths['source'] . $file) . '/';
-      _drupal_build_css_path(NULL, $base);
+      _backdrop_build_css_path(NULL, $base);
 
       // Prefix all paths within this CSS file, ignoring absolute paths.
-      $style = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_drupal_build_css_path', $style);
+      $style = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $style);
 
       // Rewrite stylesheet with new colors.
       $style = _color_rewrite_stylesheet($theme, $info, $paths, $palette, $style);
-      $base_file = drupal_basename($file);
+      $base_file = backdrop_basename($file);
       $css[] = $paths['target'] . $base_file;
       _color_save_stylesheet($paths['target'] . $base_file, $style, $paths);
     }
@@ -428,7 +428,7 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
   // Prepare color conversion table.
   $conversion = $palette;
   foreach ($conversion as $k => $v) {
-    $conversion[$k] = drupal_strtolower($v);
+    $conversion[$k] = backdrop_strtolower($v);
   }
   $default = color_get_palette($theme, TRUE);
 
@@ -447,7 +447,7 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
   // Iterate over all the parts.
   foreach ($style as $chunk) {
     if ($is_color) {
-      $chunk = drupal_strtolower($chunk);
+      $chunk = backdrop_strtolower($chunk);
       // Check if this is one of the colors in the default palette.
       if ($key = array_search($chunk, $default)) {
         $chunk = $conversion[$key];
@@ -499,7 +499,7 @@ function _color_save_stylesheet($file, $style, &$paths) {
   $paths['files'][] = $filepath;
 
   // Set standard file permissions for webserver-generated files.
-  drupal_chmod($file);
+  backdrop_chmod($file);
 }
 
 /**
@@ -549,8 +549,8 @@ function _color_render_images($theme, &$info, &$paths, $palette) {
   // Cut out slices.
   foreach ($info['slices'] as $file => $coord) {
     list($x, $y, $width, $height) = $coord;
-    $base = drupal_basename($file);
-    $image = drupal_realpath($paths['target'] . $base);
+    $base = backdrop_basename($file);
+    $image = backdrop_realpath($paths['target'] . $base);
 
     // Cut out slice.
     if ($file == 'screenshot.png') {
@@ -569,7 +569,7 @@ function _color_render_images($theme, &$info, &$paths, $palette) {
     $paths['files'][] = $image;
 
     // Set standard file permissions for webserver-generated files
-    drupal_chmod($image);
+    backdrop_chmod($image);
 
     // Build before/after map of image paths.
     $paths['map'][$file] = $base;

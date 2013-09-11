@@ -286,7 +286,7 @@ class Entity implements EntityInterface {
     unset($vars['entityInfo'], $vars['idKey'], $vars['bundleKey']);
     // Also key the returned array with the variable names so the method may
     // be easily overridden and customized.
-    return drupal_map_assoc(array_keys($vars));
+    return backdrop_map_assoc(array_keys($vars));
   }
 
   /**

@@ -74,13 +74,13 @@ function aggregator_parse_feed(&$data, $feed) {
   $channel = array();
 
   // Parse the data.
-  $xml_parser = drupal_xml_parser_create($data);
+  $xml_parser = backdrop_xml_parser_create($data);
   xml_set_element_handler($xml_parser, 'aggregator_element_start', 'aggregator_element_end');
   xml_set_character_data_handler($xml_parser, 'aggregator_element_data');
 
   if (!xml_parse($xml_parser, $data, 1)) {
     watchdog('aggregator', 'The feed from %site seems to be broken due to an error "%error" on line %line.', array('%site' => $feed->title, '%error' => xml_error_string(xml_get_error_code($xml_parser)), '%line' => xml_get_current_line_number($xml_parser)), WATCHDOG_WARNING);
-    drupal_set_message(t('The feed from %site seems to be broken because of error "%error" on line %line.', array('%site' => $feed->title, '%error' => xml_error_string(xml_get_error_code($xml_parser)), '%line' => xml_get_current_line_number($xml_parser))), 'error');
+    backdrop_set_message(t('The feed from %site seems to be broken because of error "%error" on line %line.', array('%site' => $feed->title, '%error' => xml_error_string(xml_get_error_code($xml_parser)), '%line' => xml_get_current_line_number($xml_parser))), 'error');
     return FALSE;
   }
   xml_parser_free($xml_parser);

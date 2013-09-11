@@ -8,7 +8,7 @@
 /**
  * Unit tests for the module API.
  */
-class ModuleUnitTest extends DrupalWebTestCase {
+class ModuleUnitTest extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Module API',
@@ -56,8 +56,8 @@ class ModuleUnitTest extends DrupalWebTestCase {
 
     // Test the fixed list feature.
     $fixed_list = array(
-      'system' => array('filename' => drupal_get_path('module', 'system')),
-      'menu' => array('filename' => drupal_get_path('module', 'menu')),
+      'system' => array('filename' => backdrop_get_path('module', 'system')),
+      'menu' => array('filename' => backdrop_get_path('module', 'menu')),
     );
     module_list(FALSE, FALSE, FALSE, $fixed_list);
     $new_module_list = array_combine(array_keys($fixed_list), array_keys($fixed_list));
@@ -88,14 +88,14 @@ class ModuleUnitTest extends DrupalWebTestCase {
     // Clear the cache.
     cache('bootstrap')->delete('module_implements');
     $this->assertFalse(cache('bootstrap')->get('module_implements'), t('The module implements cache is empty.'));
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertTrue(cache('bootstrap')->get('module_implements'), t('The module implements cache is populated after requesting a page.'));
 
     // Test again with an authenticated user.
-    $this->user = $this->drupalCreateUser();
-    $this->drupalLogin($this->user);
+    $this->user = $this->backdropCreateUser();
+    $this->backdropLogin($this->user);
     cache('bootstrap')->delete('module_implements');
-    $this->drupalGet('');
+    $this->backdropGet('');
     $this->assertTrue(cache('bootstrap')->get('module_implements'), t('The module implements cache is populated after requesting a page.'));
 
     // Make sure group include files are detected properly even when the file is
@@ -105,7 +105,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
 
     module_load_include('inc', 'module_test', 'module_test.file');
     $modules = module_implements('test_hook');
-    $static = drupal_static('module_implements');
+    $static = backdrop_static('module_implements');
     $this->assertTrue(in_array('module_test', $modules), 'Hook found.');
     $this->assertEqual($static['test_hook']['module_test'], 'file', 'Include file detected.');
   }
@@ -116,7 +116,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
   function testModuleInvoke() {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
-    $this->drupalGet('module-test/hook-dynamic-loading-invoke');
+    $this->backdropGet('module-test/hook-dynamic-loading-invoke');
     $this->assertText('success!', t('module_invoke() dynamically loads a hook defined in hook_hook_info().'));
   }
 
@@ -126,7 +126,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
   function testModuleInvokeAll() {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
-    $this->drupalGet('module-test/hook-dynamic-loading-invoke-all');
+    $this->backdropGet('module-test/hook-dynamic-loading-invoke-all');
     $this->assertText('success!', t('module_invoke_all() dynamically loads a hook defined in hook_hook_info().'));
   }
 
@@ -146,7 +146,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
     // First, create a fake missing dependency. Forum depends on poll, which
     // depends on a made-up module, foo. Nothing should be installed.
     variable_set('dependency_test', 'missing dependency');
-    drupal_static_reset('system_rebuild_module_data');
+    backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('forum'));
     $this->assertFalse($result, t('module_enable() returns FALSE if dependencies are missing.'));
     $this->assertFalse(module_exists('forum'), t('module_enable() aborts if dependencies are missing.'));
@@ -154,7 +154,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
     // Now, fix the missing dependency. Forum module depends on poll, but poll
     // depends on the PHP module. module_enable() should work.
     variable_set('dependency_test', 'dependency');
-    drupal_static_reset('system_rebuild_module_data');
+    backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('forum'));
     $this->assertTrue($result, t('module_enable() returns the correct value.'));
     // Verify that the fake dependency chain was installed.
@@ -174,7 +174,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
     // Disable a module that is listed as a dependency by the install profile.
     // Make sure that the profile itself is not on the list of dependent
     // modules to be disabled.
-    $profile = drupal_get_profile();
+    $profile = backdrop_get_profile();
     $info = install_profile_info($profile);
     $this->assertTrue(in_array('comment', $info['dependencies']), t('Comment module is listed as a dependency of the install profile.'));
     $this->assertTrue(module_exists('comment'), t('Comment module is enabled.'));
@@ -187,27 +187,27 @@ class ModuleUnitTest extends DrupalWebTestCase {
     // Try to uninstall the PHP module by itself. This should be rejected,
     // since the modules which it depends on need to be uninstalled first, and
     // that is too destructive to perform automatically.
-    $result = drupal_uninstall_modules(array('php'));
-    $this->assertFalse($result, t('Calling drupal_uninstall_modules() on a module whose dependents are not uninstalled fails.'));
+    $result = backdrop_uninstall_modules(array('php'));
+    $this->assertFalse($result, t('Calling backdrop_uninstall_modules() on a module whose dependents are not uninstalled fails.'));
     foreach (array('forum', 'poll', 'php') as $module) {
-      $this->assertNotEqual(drupal_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was not uninstalled.', array('@module' => $module)));
+      $this->assertNotEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was not uninstalled.', array('@module' => $module)));
     }
 
     // Now uninstall all three modules explicitly, but in the incorrect order,
-    // and make sure that drupal_uninstal_modules() uninstalled them in the
+    // and make sure that backdrop_uninstal_modules() uninstalled them in the
     // correct sequence.
-    $result = drupal_uninstall_modules(array('poll', 'php', 'forum'));
-    $this->assertTrue($result, t('drupal_uninstall_modules() returns the correct value.'));
+    $result = backdrop_uninstall_modules(array('poll', 'php', 'forum'));
+    $this->assertTrue($result, t('backdrop_uninstall_modules() returns the correct value.'));
     foreach (array('forum', 'poll', 'php') as $module) {
-      $this->assertEqual(drupal_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was uninstalled.', array('@module' => $module)));
+      $this->assertEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was uninstalled.', array('@module' => $module)));
     }
-    $this->assertEqual(variable_get('test_module_uninstall_order', array()), array('forum', 'poll', 'php'), t('Modules were uninstalled in the correct order by drupal_uninstall_modules().'));
+    $this->assertEqual(variable_get('test_module_uninstall_order', array()), array('forum', 'poll', 'php'), t('Modules were uninstalled in the correct order by backdrop_uninstall_modules().'));
 
     // Uninstall the profile module from above, and make sure that the profile
     // itself is not on the list of dependent modules to be uninstalled.
-    $result = drupal_uninstall_modules(array('comment'));
-    $this->assertTrue($result, t('drupal_uninstall_modules() returns the correct value.'));
-    $this->assertEqual(drupal_get_installed_schema_version('comment'), SCHEMA_UNINSTALLED, t('Comment module was uninstalled.'));
+    $result = backdrop_uninstall_modules(array('comment'));
+    $this->assertTrue($result, t('backdrop_uninstall_modules() returns the correct value.'));
+    $this->assertEqual(backdrop_get_installed_schema_version('comment'), SCHEMA_UNINSTALLED, t('Comment module was uninstalled.'));
     $uninstalled_modules = variable_get('test_module_uninstall_order', array());
     $this->assertTrue(in_array('comment', $uninstalled_modules), t('Comment module is in the list of uninstalled modules.'));
     $this->assertFalse(in_array($profile, $uninstalled_modules), t('The installation profile is not in the list of uninstalled modules.'));
@@ -217,7 +217,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
     // on a specific version of php module in its info file. Make sure that
     // module_enable() still works.
     variable_set('dependency_test', 'version dependency');
-    drupal_static_reset('system_rebuild_module_data');
+    backdrop_static_reset('system_rebuild_module_data');
     $result = module_enable(array('forum'));
     $this->assertTrue($result, t('module_enable() returns the correct value.'));
     // Verify that the fake dependency chain was installed.
@@ -238,7 +238,7 @@ class ModuleUnitTest extends DrupalWebTestCase {
 /**
  * Unit tests for module installation.
  */
-class ModuleInstallTestCase extends DrupalWebTestCase {
+class ModuleInstallTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Module installation',
@@ -252,30 +252,30 @@ class ModuleInstallTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test that calls to drupal_write_record() work during module installation.
+   * Test that calls to backdrop_write_record() work during module installation.
    *
    * This is a useful function to test because modules often use it to insert
    * initial data in their database tables when they are being installed or
-   * enabled. Furthermore, drupal_write_record() relies on the module schema
+   * enabled. Furthermore, backdrop_write_record() relies on the module schema
    * information being available, so this also checks that the data from one of
    * the module's hook implementations, in particular hook_schema(), is
    * properly available during this time. Therefore, this test helps ensure
-   * that modules are fully functional while Drupal is installing and enabling
+   * that modules are fully functional while Backdrop is installing and enabling
    * them.
    */
-  function testDrupalWriteRecord() {
-    // Check for data that was inserted using drupal_write_record() while the
+  function testBackdropWriteRecord() {
+    // Check for data that was inserted using backdrop_write_record() while the
     // 'module_test' module was being installed and enabled.
     $data = db_query("SELECT data FROM {module_test}")->fetchCol();
-    $this->assertTrue(in_array('Data inserted in hook_install()', $data), t('Data inserted using drupal_write_record() in hook_install() is correctly saved.'));
-    $this->assertTrue(in_array('Data inserted in hook_enable()', $data), t('Data inserted using drupal_write_record() in hook_enable() is correctly saved.'));
+    $this->assertTrue(in_array('Data inserted in hook_install()', $data), t('Data inserted using backdrop_write_record() in hook_install() is correctly saved.'));
+    $this->assertTrue(in_array('Data inserted in hook_enable()', $data), t('Data inserted using backdrop_write_record() in hook_enable() is correctly saved.'));
   }
 }
 
 /**
  * Unit tests for module uninstallation and related hooks.
  */
-class ModuleUninstallTestCase extends DrupalWebTestCase {
+class ModuleUninstallTestCase extends BackdropWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Module uninstallation',
@@ -295,7 +295,7 @@ class ModuleUninstallTestCase extends DrupalWebTestCase {
     // Uninstalls the module_test module, so hook_modules_uninstalled()
     // is executed.
     module_disable(array('module_test'));
-    drupal_uninstall_modules(array('module_test'));
+    backdrop_uninstall_modules(array('module_test'));
 
     // Are the perms defined by module_test removed from {role_permission}.
     $count = db_query("SELECT COUNT(rid) FROM {role_permission} WHERE permission = :perm", array(':perm' => 'module_test perm'))->fetchField();
