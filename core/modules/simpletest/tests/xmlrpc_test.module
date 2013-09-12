@@ -46,6 +46,13 @@ function xmlrpc_test_simpleStructReturnTest($number) {
 }
 
 /**
+ * Echos http headers to XML-RPC clients.
+ */
+function xmlrpc_test_header_echo() {
+  return getallheaders();
+}
+
+/**
  * Implements hook_xmlrpc().
  */
 function xmlrpc_test_xmlrpc() {
@@ -59,6 +66,7 @@ function xmlrpc_test_xmlrpc() {
     'validator1.nestedStructTest' => 'xmlrpc_test_nestedStructTest',
     'validator1.simpleStructReturnTest' => 'xmlrpc_test_simpleStructReturnTest',
     'messages.messageSizedInKB' => 'xmlrpc_test_message_sized_in_kb',
+    'test.headerEcho' => 'xmlrpc_test_header_echo',
   );
 }
 
