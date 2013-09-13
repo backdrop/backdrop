@@ -256,7 +256,7 @@ $drupal_hash_salt = '';
  * It is not allowed to have a trailing slash; Drupal will add it
  * for you.
  */
-# $base_url = 'http://www.example.com';  // NO trailing slash!
+ // $base_url = 'http://www.example.com';  // NO trailing slash!
 
 /**
  * PHP settings:
@@ -301,8 +301,8 @@ ini_set('session.cookie_lifetime', 2000000);
  * and increase the limits of these variables.  For more information, see
  * http://php.net/manual/en/pcre.configuration.php.
  */
-# ini_set('pcre.backtrack_limit', 200000);
-# ini_set('pcre.recursion_limit', 200000);
+ // ini_set('pcre.backtrack_limit', 200000);
+ // ini_set('pcre.recursion_limit', 200000);
 
 /**
  * Drupal automatically generates a unique session cookie name for each site
@@ -313,7 +313,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * between your various domains. Make sure to always start the $cookie_domain
  * with a leading dot, as per RFC 2109.
  */
-# $cookie_domain = '.example.com';
+ // $cookie_domain = '.example.com';
 
 /**
  * Variable overrides:
@@ -332,9 +332,9 @@ ini_set('session.cookie_lifetime', 2000000);
  * - anonymous: Defines the human-readable name of anonymous users.
  * Remove the leading hash signs to enable.
  */
-# $conf['site_name'] = 'My Drupal site';
-# $conf['theme_default'] = 'stark';
-# $conf['anonymous'] = 'Visitor';
+ // $conf['site_name'] = 'My Drupal site';
+ // $conf['theme_default'] = 'stark';
+ // $conf['anonymous'] = 'Visitor';
 
 /**
  * A custom theme can be set for the offline page. This applies when the site
@@ -344,7 +344,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * theme. It is located inside 'core/modules/system/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
-# $conf['maintenance_theme'] = 'bartik';
+ // $conf['maintenance_theme'] = 'bartik';
 
 /**
  * Reverse Proxy Configuration:
@@ -377,19 +377,19 @@ ini_set('session.cookie_lifetime', 2000000);
  * Be aware, however, that it is likely that this would allow IP
  * address spoofing unless more advanced precautions are taken.
  */
-# $conf['reverse_proxy'] = TRUE;
+ // $conf['reverse_proxy'] = TRUE;
 
 /**
  * Specify every reverse proxy IP address in your environment.
  * This setting is required if $conf['reverse_proxy'] is TRUE.
  */
-# $conf['reverse_proxy_addresses'] = array('a.b.c.d', ...);
+ // $conf['reverse_proxy_addresses'] = array('a.b.c.d', ...);
 
 /**
  * Set this value if your proxy server sends the client IP in a header
  * other than X-Forwarded-For.
  */
-# $conf['reverse_proxy_header'] = 'HTTP_X_CLUSTER_CLIENT_IP';
+ // $conf['reverse_proxy_header'] = 'HTTP_X_CLUSTER_CLIENT_IP';
 
 /**
  * Page caching:
@@ -407,7 +407,7 @@ ini_set('session.cookie_lifetime', 2000000);
  * HTTP proxy, and bypass the reverse proxy if one is used) in order to avoid
  * getting cached pages from the proxy.
  */
-# $conf['omit_vary_cookie'] = TRUE;
+ // $conf['omit_vary_cookie'] = TRUE;
 
 /**
  * CSS/JS aggregated file gzip compression:
@@ -421,8 +421,8 @@ ini_set('session.cookie_lifetime', 2000000);
  * configured to cache and compress these files itself you may want to uncomment
  * one or both of the below lines, which will prevent gzip files being stored.
  */
-# $conf['css_gzip_compression'] = FALSE;
-# $conf['js_gzip_compression'] = FALSE;
+ // $conf['css_gzip_compression'] = FALSE;
+ // $conf['js_gzip_compression'] = FALSE;
 
 /**
  * String overrides:
@@ -433,10 +433,12 @@ ini_set('session.cookie_lifetime', 2000000);
  *
  * Remove the leading hash signs to enable.
  */
-# $conf['locale_custom_strings_en'][''] = array(
-#   'forum'      => 'Discussion board',
-#   '@count min' => '@count minutes',
-# );
+ /*
+ $conf['locale_custom_strings_en'][''] = array(
+   'forum'      => 'Discussion board',
+   '@count min' => '@count minutes',
+ );
+ */
 
 /**
  * Fast 404 pages:
@@ -472,7 +474,7 @@ $conf['404_fast_html'] = '<html xmlns="http://www.w3.org/1999/xhtml"><head><titl
  *
  * To enable this functionality, remove the leading hash sign below.
  */
-# drupal_fast_404();
+ // drupal_fast_404();
 
 /**
  * Authorized file system operations:
@@ -488,4 +490,4 @@ $conf['404_fast_html'] = '<html xmlns="http://www.w3.org/1999/xhtml"><head><titl
  *
  * Remove the leading hash signs to disable.
  */
-# $conf['allow_authorize_operations'] = FALSE;
+ // $conf['allow_authorize_operations'] = FALSE;
