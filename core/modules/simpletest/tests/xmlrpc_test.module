@@ -46,6 +46,25 @@ function xmlrpc_test_simpleStructReturnTest($number) {
 }
 
 /**
+ * Echos http headers to XML-RPC clients.
+ */
+function xmlrpc_test_header_echo() {
+  if (function_exists('getallheaders')) {
+    $headers = getallheaders();
+    if ($headers) {
+      return $headers;
+    }
+  }
+
+  // Function getallheaders does not exist in command line php
+  // or return FALSE before PHP 5.4.0 if the webserver is not Apache.
+  // In this case we fake the response to let the tests succeed.
+  return array(
+    'Content-Type' => 'text/xml; charset=utf-8',
+  );
+}
+
+/**
  * Implements hook_xmlrpc().
  */
 function xmlrpc_test_xmlrpc() {
@@ -59,6 +78,7 @@ function xmlrpc_test_xmlrpc() {
     'validator1.nestedStructTest' => 'xmlrpc_test_nestedStructTest',
     'validator1.simpleStructReturnTest' => 'xmlrpc_test_simpleStructReturnTest',
     'messages.messageSizedInKB' => 'xmlrpc_test_message_sized_in_kb',
+    'test.headerEcho' => 'xmlrpc_test_header_echo',
   );
 }
 

@@ -371,7 +371,7 @@ function xmlrpc_request($method, $args) {
   $xmlrpc_request->method = $method;
   $xmlrpc_request->args = $args;
   $xmlrpc_request->xml = <<<EOD
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <methodCall>
 <methodName>{$xmlrpc_request->method}</methodName>
 <params>
@@ -560,7 +560,7 @@ function _xmlrpc($url, $args, $options = array()) {
   $xmlrpc_request = xmlrpc_request($method, $args);
   // Required options which will replace any that are passed in.
   $options['method'] = 'POST';
-  $options['headers']['Content-Type'] = 'text/xml';
+  $options['headers']['Content-Type'] = 'text/xml; charset=utf-8';
   $options['data'] = $xmlrpc_request->xml;
   $result = drupal_http_request($url, $options);
   if ($result->code != 200) {
