@@ -241,4 +241,34 @@ class XMLRPCMessagesTestCase extends DrupalWebTestCase {
     $this->assertEqual($removed, 'system.methodSignature', t('Hiding builting system.methodSignature with hook_xmlrpc_alter works'));
   }
 
+  /**
+   * Ensure that XML-RPC client sets correct encoding in request http headers.
+   */
+  function testRequestContentTypeDefinition() {
+    $url = url(NULL, array('absolute' => TRUE)) . 'core/xmlrpc.php';
+    $headers = xmlrpc($url, array('test.headerEcho' => array()));
+    $this->assertIdentical($headers['Content-Type'], 'text/xml; charset=utf-8');
+  }
+
+  /**
+   * Ensure that XML-RPC client sets correct processing instructions for
+   * XML documents.
+   * Ensure that XML-RPC server sets correct encoding in response http headers
+   * and processing instructions for XML documents.
+   */
+  function testRequestAndResponseEncodingDefinitions() {
+    $url = url(NULL, array('absolute' => TRUE)) . 'core/xmlrpc.php';    // We can't use the xmlrpc() function here,
+    // because we have to access the full response of drupal_http_request().
+    $xmlrpc_request = xmlrpc_request('system.listMethods', array());
+    $options['method'] = 'POST';
+    $options['headers']['Content-Type'] = 'text/xml; charset=utf-8';
+    $options['data'] = $xmlrpc_request->xml;
+    $result = drupal_http_request($url, $options);
+    // The string $result->request contains some header data before
+    // the xml itself starts with the processing instruction.
+    $this->assertTrue(strpos($result->request, '<?xml version="1.0" encoding="utf-8" ?>'), 'Request Processing Instruction is "&lt;?xml version="1.0" encoding="utf-8" ?&gt;"');
+    // The string $result->data has to start with the xml processing instruction.
+    $this->assertIdentical(strpos($result->data, '<?xml version="1.0" encoding="utf-8" ?>'), 0, 'Response Processing Instruction is "&lt;?xml version="1.0" encoding="utf-8" ?&gt;"');
+    $this->assertIdentical($result->headers['content-type'], 'text/xml; charset=utf-8');
+  }
 }
