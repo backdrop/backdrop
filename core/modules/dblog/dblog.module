@@ -133,6 +133,32 @@ function _dblog_get_message_types() {
 }
 
 /**
+ * If a watchdog entry should be written during a different MySQL table is
+ * locked it will fail with MySQL error "Table 'watchdog' was not locked
+ * with LOCK TABLES".
+ * If a watchdog entry should be written during an open transaction and the
+ * transaction will be rolled back, the watchdog entry will be removed as
+ * well.
+ * Both cases could be avoided if we use a dedicated database connection
+ * for writing watchdog entries. Therefor we declare such a dedicated
+ * connection here which will not be established until required.
+ *
+ * If a watchdog entry should be written as part of a transaction it should
+ * probably be rolled back with that transaction. But for entries of severity
+ * WATCHDOG_ERROR or above we assume that they should be always written.
+ * This behavior could be overridden in settings.php using
+ * $conf['dedicated_watchdog_connection_severity_level'].
+ */
+function dblog_register_dedicated_watchdog_connection() {
+  global $databases;
+
+  if (!isset($databases['default']['dedicated_watchdog_connection'])) {
+    $databases['default']['dedicated_watchdog_connection'] = $databases['default']['default'];
+    Database::parseConnectionInfo();
+  }
+}
+
+/**
  * Implements hook_watchdog().
  *
  * Note some values may be truncated for database column size restrictions.
@@ -141,7 +167,8 @@ function dblog_watchdog(array $log_entry) {
   // The user object may not exist in all conditions, so 0 is substituted if needed.
   $user_uid = isset($log_entry['user']->uid) ? $log_entry['user']->uid : 0;
 
-  Database::getConnection('default', 'default')->insert('watchdog')
+  $connection = ($log_entry['severity'] >= variable_get('dedicated_watchdog_connection_severity_level', WATCHDOG_ERROR)) ? 'dedicated_watchdog_connection' : 'default';
+  Database::getConnection($connection, 'default')->insert('watchdog')
     ->fields(array(
       'uid' => $user_uid,
       'type' => substr($log_entry['type'], 0, 64),
