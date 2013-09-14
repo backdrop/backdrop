@@ -216,6 +216,8 @@ function field_group_update_7001() {
       'default' => '',
       'description' => 'The unique string identifier for a group.',
     ));
+    // Force drupal's schema to be rebuilt
+    drupal_get_schema('field_group', TRUE);
 
     module_load_include('module', 'field_group');
     _field_group_recreate_identifiers();
