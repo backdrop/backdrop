@@ -1,5 +1,4 @@
-
-/* ------------------ Reset Styles ------------------ */
+/* ------------------- Reset Styles ----------------------- */
 
 caption,
 th,
@@ -20,7 +19,7 @@ tr td,
 tr th {
   text-align: right;
 }
-/* ------------------ List Styles ------------------ */
+/* ------------------- List Styles ------------------------ */
 
 .region-content ul,
 .region-content ol {
@@ -37,10 +36,10 @@ ul.tips {
   padding: 0 1em 0.25em 0;
 }
 
-/* ------------------ Header ------------------ */
+/* ------------------- Header ----------------------------- */
 
 #logo {
-  padding: 15px 10px 15px 15px;
+  padding-right: 5px;
 }
 #logo,
 #name-and-slogan,
@@ -50,40 +49,51 @@ ul.tips {
   float: right;
 }
 #name-and-slogan {
-  margin: 0 15px 30px 0;
+  margin: 0;
+  padding: 5px 10px 8px;
 }
 .region-header .form-text {
-  margin-left: 2px;
-  margin-right: 0;
+  margin-left: 0;
+  margin-right: 2px;
 }
 .region-header #block-user-login .item-list li.last {
+  padding-left: 05em;
+  padding-right: 0;
+}
+.region-header #block-user-login ul.openid-links li.last {
+  padding-right: 0;
+}
+.region-header #user-login-form li.openid-link a,
+.region-header #user-login li.openid-link a {
+  background-position: right -3px;
   padding-left: 0;
-  padding-right: 0.5em;
+  padding-right: 20px;
 }
 
-/* --------------- Main Menu ------------ */
+/* ------------------- Main Menu -------------------------- */
 
-#main-menu ul.links li,
-#main-menu ul.links li a {
-  float: right;
+#main-menu-links {
+  text-align: right;
+}
+#main-menu-links a {
+  padding: 0.9em 10px 0.9em 0;
 }
 
-/* --------------- Secondary Menu ------------ */
+/* ------------------- Secondary Menu --------------------- */
 
 #secondary-menu-links {
   float: left;
 }
 
-/* ----------------- Content ------------------ */
+/* ------------------- Content ---------------------------- */
 
 .submitted .user-picture img {
   float: right;
-  margin-left: 5px;
-  margin-right: 0;
+  margin: 1px 0 0 5px;
 }
 .field-type-taxonomy-term-reference .field-label {
-  padding-left: 5px;
   padding-right: 0;
+  padding-left: 5px;
 }
 .field-type-taxonomy-term-reference ul.links li {
   padding: 0 0 0 1em;
@@ -91,11 +101,9 @@ ul.tips {
 }
 .link-wrapper {
   text-align: left;
-  margin-right: 236px;
-  margin-left: 0;
 }
 
-/* ----------------- Comments ----------------- */
+/* ------------------- Comments --------------------------- */
 
 .comment .user-picture img {
   margin-right: 0;
@@ -116,13 +124,13 @@ ul.tips {
 .comment ul.links li {
   padding: 0 0 0.5em;
 }
-.comment-unpublished {
+.comment.unpublished {
   margin-left: 5px;
   margin-right: 0;
   padding: 5px 5px 5px 2px;
 }
 
-/* -------------- Password Meter  ------------- */
+/* ------------------- Password Meter --------------------- */
 
 #password-strength {
   left: auto;
@@ -137,7 +145,7 @@ ul.tips {
   clear: right;
 }
 
-/* ----------------- Buttons ------------------ */
+/* ------------------- Buttons ---------------------------- */
 
 input.form-submit,
 a.button {
@@ -145,7 +153,7 @@ a.button {
   margin-left: 0.6em;
 }
 
-/* --------------- Search Form ---------------- */
+/* ------------------- Search Form ------------------------ */
 
 #search-form input#edit-keys,
 #block-search-form .form-item-search-block-form input {
@@ -154,12 +162,12 @@ a.button {
   margin-right: 0;
 }
 
-/* ------------------ Footer ------------------ */
+/* ------------------- Footer ----------------------------- */
 
-#footer-columns ul {
+#footer-columns .content ul {
   padding-right: 0;
 }
-#footer-columns li a {
+#footer-columns .content li a {
   padding: 0.8em 20px 0.8em 2px;
 }
 #footer li a {
@@ -178,7 +186,7 @@ a.button {
   border-left: none;
 }
 
-/* --------------- System Tabs  --------------- */
+/* ------------------- System Tabs ------------------------ */
 
 .tabs ul.primary li {
   margin: 0 0 0 5px;
@@ -200,7 +208,7 @@ ul.action-links li a {
   padding-right: 15px;
 }
 
-/* -------------- Form Elements   ------------- */
+/* ------------------- Form Elements ---------------------- */
 
 .fieldset-legend span.summary {
   margin-left: 0;
@@ -236,13 +244,13 @@ ul.action-links li a {
   margin-right: 0;
 }
 
-/* -------------- Shortcut Links ------------- */
+/* ------------------- Shortcut Links --------------------- */
 
 .shortcut-wrapper h1#page-title {
   float: right;
 }
 
-/* ---------- Poll ----------- */
+/* ------------------- Poll ------------------------------- */
 
 .poll .vote-form {
   text-align: right;
@@ -250,8 +258,15 @@ ul.action-links li a {
 .poll .total {
   text-align: left;
 }
+.poll .choice-title {
+  clear: left;
+}
+.poll .percent {
+  float: left;
+  text-align: left;
+}
 
-/* ---------- Color Form ----------- */
+/* ------------------- Color Form ------------------------- */
 
 .color-form #palette {
   margin-left: 0;
@@ -263,4 +278,45 @@ ul.action-links li a {
 .color-form #palette .lock {
   right: -20px;
   left: 0;
+}
+
+/* ------------------- Menu Toggle Link ------------------- */
+a#menu-toggle {
+  text-align: left;
+}
+
+/* ------------------- Media Queries ---------------------- */
+
+@media all and (min-width: 461px) and (max-width: 900px) {
+ /* ------------------ Header and Menus ------------------- */
+
+  #logo {
+    padding: 5px 5px 0 0;
+  }
+  #main-menu-links li {
+    float: right;
+    margin-left: 5px;
+    margin-right: 0;
+  }
+  #main-menu-links li:nth-child(3n) {
+    margin-left: -5px;
+    margin-right: 0;
+  }
+}
+
+@media all and (min-width: 901px) {
+ /* ------------------ Header and Menus ------------------- */
+  #logo {
+    padding: 15px 10px 15px 15px;
+  }
+  #name-and-slogan {
+    margin: 0 15px 30px 0;
+  }
+  #main-menu-links li {
+    float: right;
+  }
+  #main-menu-links a {
+    float: right;
+    padding: 0.7em 0.8em;
+  }
 }

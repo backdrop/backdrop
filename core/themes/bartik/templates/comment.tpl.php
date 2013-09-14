@@ -57,11 +57,11 @@
  * @see theme_comment()
  */
 ?>
-<div class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
+<article class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
 
-  <div class="attribution">
+  <footer class="attribution">
 
-    <?php print $user_picture; ?>
+    <?php print $picture; ?>
 
     <div class="submitted">
       <p class="commenter-name">
@@ -74,7 +74,7 @@
         <?php print $permalink; ?>
       </p>
     </div>
-  </div>
+  </footer>
 
   <div class="comment-text">
     <div class="comment-arrow"></div>
@@ -94,12 +94,12 @@
         print render($content);
       ?>
       <?php if ($signature): ?>
-      <div class="user-signature clearfix">
+      <footer class="user-signature clearfix">
         <?php print $signature; ?>
-      </div>
+      </footer>
       <?php endif; ?>
     </div> <!-- /.content -->
 
     <?php print render($content['links']); ?>
   </div> <!-- /.comment-text -->
-</div>
+</article>
