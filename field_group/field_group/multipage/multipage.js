@@ -54,7 +54,7 @@ Drupal.behaviors.MultiPage = {
       if (paneWithFocus === undefined) {
         // If the current URL has a fragment and one of the tabs contains an
         // element that matches the URL fragment, activate that tab.
-        if (window.location.hash && $(window.location.hash, this).length) {
+        if (window.location.hash && window.location.hash !== '#' && $(window.location.hash, this).length) {
           paneWithFocus = $(window.location.hash, this).closest('.multipage-pane');
         }
         else {
