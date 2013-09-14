@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * @file
+ * Test file for fieldgroup UI.
+ */
+
+/**
+ * Group UI tests.
+ */
+class GroupUITestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'UI tests',
+      'description' => 'Test the field group UI.',
+      'group' => 'Field group',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('field_test', 'field_group', 'field_group_test');
+
+    // Create test user.
+    $admin_user = $this->drupalCreateUser(array('administer content types', 'administer nodes', 'access administration pages', 'bypass node access'));
+    $this->drupalLogin($admin_user);
+  }
+
+  /**
+   * Test the creation a group on the article content type.
+   */
+  function createGroup() {
+
+    // Create random group name.
+    $this->group_label = $this->randomName(8);
+    $this->group_name_input = drupal_strtolower($this->randomName(8));
+    $this->group_name = 'group_' . $this->group_name_input;
+
+    // Setup new group.
+    $group = array(
+      'fields[_add_new_group][label]' => $this->group_label,
+      'fields[_add_new_group][group_name]' => $this->group_name_input,
+    );
+
+    // Add new group on the 'Manage fields' page.
+    $this->drupalPost('admin/structure/types/manage/article/fields', $group, t('Save'));
+
+    $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
+
+    // Test if group is in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
+
+    // Add new group on the 'Manage display' page.
+    $this->drupalPost('admin/structure/types/manage/article/display', $group, t('Save'));
+    $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
+
+    // Test if group is in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
+  }
+
+  /**
+   * Delete a group.
+   */
+  function deleteGroup() {
+
+    $this->drupalPost('admin/structure/types/manage/article/groups/' . $this->group_name . '/delete/form', array(), t('Delete'));
+    $this->assertRaw(t('The group %label has been deleted from the %article content type.', array('%label' => $this->group_label, '%article' => 'Article')), t('Group removal message displayed on screen.'));
+
+    // Test that group is not in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array while deleting'));
+
+    $this->drupalPost('admin/structure/types/manage/article/groups/' . $this->group_name . '/delete/default', array(), t('Delete'));
+    $this->assertRaw(t('The group %label has been deleted from the %article content type.', array('%label' => $this->group_label, '%article' => 'Article')), t('Group removal message displayed on screen.'));
+
+    // Test that group is not in the $groups array.
+    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array while deleting'));
+  }
+
+  /**
+   * General CRUD.
+   */
+  function testCRUDGroup() {
+    $this->createGroup();
+    $this->deleteGroup();
+  }
+
+  /**
+   * Nest a field underneath a group.
+   */
+  function testNestField() {
+
+    $this->createGroup();
+
+    $edit = array(
+      'fields[field_image][parent]' => $this->group_name,
+    );
+    $this->drupalPost('admin/structure/types/manage/article/fields', $edit, t('Save'));
+    $this->assertRaw(t('Your settings have been saved.'), t('Settings saved'));
+
+    $groups = field_group_info_groups('node', 'article', 'form', TRUE);
+    $this->assertTrue(in_array('field_image', $groups[$this->group_name]->children), t('Image is a child of %group', array('%group' => $this->group_name)));
+  }
+
+}
+

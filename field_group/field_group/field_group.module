@@ -1158,8 +1158,8 @@ function field_group_remove_empty_display_groups(& $element, $groups) {
         $empty_group = FALSE;
       }
     }
-    // Child is a field, the element is not empty.
-    elseif (!empty($element[$name])) {
+    // Child is a field, the element is not empty and access is set to true (or empty).
+    elseif (!empty($element[$name]) && (!isset($element[$name]['#access']) || $element[$name]['#access'])) {
       $empty_group = FALSE;
     }
 

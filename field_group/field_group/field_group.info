@@ -9,4 +9,5 @@ files[] = field_group.module
 files[] = field_group.field_ui.inc
 files[] = field_group.form.inc
 files[] = field_group.features.inc
-files[] = field_group.test
+files[] = tests/field_group.ui.test
+files[] = tests/field_group.display.test

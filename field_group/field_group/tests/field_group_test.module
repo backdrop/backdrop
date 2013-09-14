@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Fieldgroup test module.
+ */
+
+/**
+ * Implements hook_field_access().
+ */
+function field_group_test_field_access($op, $field, $entity_type, $entity, $account) {
+  // Set access to false for field_no_access.
+  if ($op == 'view' && $field['field_name'] == 'field_no_access') {
+    return FALSE;
+  }
+}
+
