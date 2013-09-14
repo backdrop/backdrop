@@ -138,7 +138,7 @@ function dblog_event($id) {
   $result = db_query('SELECT w.*, u.name, w.uid FROM {watchdog} w LEFT JOIN {users} u ON w.uid = u.uid WHERE w.wid = :id', array(':id' => $id))->fetchObject();
   if ($dblog = $result) {
     if (!empty($dblog->uid) && empty($dblog->name)) {
-      $user_label = t('User Id(deleted)');
+      $user_label = t('User ID (deleted)');
       $user_info = $dblog->uid;
     }
     else {
