@@ -54,3 +54,10 @@ License
 Backdrop is GPL v2 software. See the LICENSE.txt file in the core directory
 for more information.
 
+All Backdrop code is Copyright 2001 - 2013 by the original authors.
+
+Backdrop includes works under other copyright notices and distributed
+according to the terms of the GNU General Public License or a compatible
+license. Individual works may have specific copyright information noted within
+their their source code files or directories.
+
