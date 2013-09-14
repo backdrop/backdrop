@@ -11,7 +11,8 @@
   width: 195px;
   height: 195px;
 }
-.farbtastic .color {
+.farbtastic .color,
+.farbtastic .overlay {
   top: 47px;
   left: 47px;
   width: 101px;
@@ -22,6 +23,9 @@
   width: 195px;
   height: 195px;
 }
+.farbtastic .overlay {
+  background: url(mask.png) no-repeat;
+}
 .farbtastic .marker {
   width: 17px;
   height: 17px;
@@ -29,3 +33,4 @@
   overflow: hidden;
   background: url(marker.png) no-repeat;
 }
+
