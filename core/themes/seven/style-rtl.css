@@ -204,14 +204,6 @@ ol.task-list li.active {
   padding: 0.5em 20px 0.5em 1em;
 }
 
-/* Overlay theming */
-.overlay #branding div.breadcrumb {
-  float: right;
-}
-.overlay ul.secondary {
-  margin: -1.4em 0 0.3em 0;
-}
-
 /* Shortcut theming */
 div.add-or-remove-shortcuts {
   float: none;
