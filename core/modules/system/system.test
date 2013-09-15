@@ -470,9 +470,9 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $this->resetAll();
     $this->assertModules(array('module_test'), TRUE);
     variable_set('dependency_test', 'dependency');
-    // module_test creates a dependency chain: contact depends on poll, which
-    // depends on php. The correct enable order is, php, poll, contact.
-    $expected_order = array('php', 'poll', 'contact');
+    // module_test creates a dependency chain: contact depends on syslog, which
+    // depends on php. The correct enable order is, php, syslog, contact.
+    $expected_order = array('php', 'syslog', 'contact');
 
     // Enable the modules through the UI, verifying that the dependency chain
     // is correct.
@@ -480,11 +480,11 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $edit['modules[Core][contact][enable]'] = 'contact';
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('contact'), FALSE);
-    $this->assertText(t('You must enable the Poll, PHP Filter modules to install Contact.'), t('Dependency chain created.'));
-    $edit['modules[Core][poll][enable]'] = 'poll';
+    $this->assertText(t('You must enable the Syslog, PHP Filter modules to install Contact.'), t('Dependency chain created.'));
+    $edit['modules[Core][syslog][enable]'] = 'syslog';
     $edit['modules[Core][php][enable]'] = 'php';
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('contact', 'poll', 'php'), TRUE);
+    $this->assertModules(array('contact', 'syslog', 'php'), TRUE);
 
     // Check the actual order which is saved by module_test_modules_enabled().
     $this->assertIdentical(variable_get('test_module_enable_order', FALSE), $expected_order, t('Modules enabled in the correct order.'));

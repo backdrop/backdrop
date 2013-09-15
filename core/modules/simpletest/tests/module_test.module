@@ -17,31 +17,31 @@ function module_test_permission() {
 function module_test_system_info_alter(&$info, $file, $type) {
   if (variable_get('dependency_test', FALSE) == 'missing dependency') {
     if ($file->name == 'contact') {
-      // Make contact module depend on poll.
-      $info['dependencies'][] = 'poll';
+      // Make contact module depend on syslog.
+      $info['dependencies'][] = 'syslog';
     }
-    elseif ($file->name == 'poll') {
-      // Make poll depend on a made-up module.
+    elseif ($file->name == 'syslog') {
+      // Make syslog depend on a made-up, missing module.
       $info['dependencies'][] = 'foo';
     }
   }
   elseif (variable_get('dependency_test', FALSE) == 'dependency') {
     if ($file->name == 'contact') {
-      // Make the contact module depend on poll.
-      $info['dependencies'][] = 'poll';
+      // Make the contact module depend on syslog.
+      $info['dependencies'][] = 'syslog';
     }
-    elseif ($file->name == 'poll') {
-      // Make poll depend on php module.
+    elseif ($file->name == 'syslog') {
+      // Make syslog depend on php module.
       $info['dependencies'][] = 'php';
     }
   }
   elseif (variable_get('dependency_test', FALSE) == 'version dependency') {
     if ($file->name == 'contact') {
-      // Make the contact module depend on poll.
-      $info['dependencies'][] = 'poll';
+      // Make the contact module depend on syslog.
+      $info['dependencies'][] = 'syslog';
     }
-    elseif ($file->name == 'poll') {
-      // Make poll depend on a specific version of php module.
+    elseif ($file->name == 'syslog') {
+      // Make syslog depend on a specific version of php module.
       $info['dependencies'][] = 'php (1.x)';
     }
     elseif ($file->name == 'php') {
