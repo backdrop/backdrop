@@ -943,8 +943,8 @@ function _menu_link_translate(&$item, $translate = FALSE) {
  * @param $type
  *   Type of the object. These appear in hook_menu definitions as %type. Core
  *   provides aggregator_feed, aggregator_category, contact, filter_format,
- *   forum_term, menu, menu_link, node, taxonomy_vocabulary, user. See the
- *   relevant {$type}_load function for more on each. Defaults to node.
+ *   menu, menu_link, node, taxonomy_vocabulary, user. See the relevant
+ *   {$type}_load function for more on each. Defaults to node.
  * @param $position
  *   The position of the object in the path, where the first path segment is 0.
  *   For node/%node, the position of %node is 1, but for comment/reply/%node,

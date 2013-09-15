@@ -139,7 +139,7 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('path', 'forum', 'url_alter_test');
+    parent::setUp('path', 'url_alter_test');
   }
 
   /**
@@ -175,20 +175,6 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
     $uid++;
     $this->assertUrlInboundAlter("user/$uid", "user/$uid");
     $this->assertUrlOutboundAlter("user/$uid", "user/$uid");
-
-    // Test that 'forum' is altered to 'community' correctly, both at the root
-    // level and for a specific existing forum.
-    $this->assertUrlInboundAlter('community', 'forum');
-    $this->assertUrlOutboundAlter('forum', 'community');
-    $forum_vid = variable_get('forum_nav_vocabulary');
-    $tid = db_insert('taxonomy_term_data')
-      ->fields(array(
-        'name' => $this->randomName(),
-        'vid' => $forum_vid,
-      ))
-      ->execute();
-    $this->assertUrlInboundAlter("community/$tid", "forum/$tid");
-    $this->assertUrlOutboundAlter("forum/$tid", "community/$tid");
   }
 
   /**

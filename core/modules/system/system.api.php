@@ -101,8 +101,8 @@ function hook_admin_paths_alter(&$paths) {
   // Treat all user pages as administrative.
   $paths['user'] = TRUE;
   $paths['user/*'] = TRUE;
-  // Treat the forum topic node form as a non-administrative page.
-  $paths['node/add/forum'] = FALSE;
+  // Treat the article node form as a non-administrative page.
+  $paths['node/add/article'] = FALSE;
 }
 
 /**
@@ -1719,10 +1719,10 @@ function hook_permission() {
  *   - pattern: A regular expression pattern to be used to allow this theme
  *     implementation to have a dynamic name. The convention is to use __ to
  *     differentiate the dynamic portion of the theme. For example, to allow
- *     forums to be themed individually, the pattern might be: 'forum__'. Then,
- *     when the forum is themed, call:
+ *     users to be themed by role, the pattern might be: 'user__'. Then,
+ *     when the user is themed, call:
  *     @code
- *     theme(array('forum__' . $tid, 'forum'), $forum)
+ *     theme(array('user__' . $rid, 'user'), $user)
  *     @endcode
  *   - preprocess functions: A list of functions used to preprocess this data.
  *     Ordinarily this won't be used; it's automatically filled in. By default,
@@ -1744,17 +1744,8 @@ function hook_permission() {
  */
 function hook_theme($existing, $type, $theme, $path) {
   return array(
-    'forum_display' => array(
-      'variables' => array('forums' => NULL, 'topics' => NULL, 'parents' => NULL, 'tid' => NULL, 'sortby' => NULL, 'forum_per_page' => NULL),
-    ),
-    'forum_list' => array(
-      'variables' => array('forums' => NULL, 'parents' => NULL, 'tid' => NULL),
-    ),
-    'forum_topic_list' => array(
-      'variables' => array('tid' => NULL, 'topics' => NULL, 'sortby' => NULL, 'forum_per_page' => NULL),
-    ),
-    'forum_icon' => array(
-      'variables' => array('new_posts' => NULL, 'num_posts' => 0, 'comment_mode' => 0, 'sticky' => 0),
+    'feed_icon' => array(
+      'variables' => array('url' => NULL, 'title' => NULL),
     ),
     'status_report' => array(
       'render element' => 'requirements',
@@ -1805,10 +1796,10 @@ function hook_theme($existing, $type, $theme, $path) {
  * @see _theme_process_registry()
  */
 function hook_theme_registry_alter(&$theme_registry) {
-  // Kill the next/previous forum topic navigation links.
-  foreach ($theme_registry['forum_topic_navigation']['preprocess functions'] as $key => $value) {
-    if ($value == 'template_preprocess_forum_topic_navigation') {
-      unset($theme_registry['forum_topic_navigation']['preprocess functions'][$key]);
+  // Remove the base preprocess function for nodes.
+  foreach ($theme_registry['node']['preprocess functions'] as $key => $value) {
+    if ($value == 'template_preprocess_node') {
+      unset($theme_registry['node']['preprocess functions'][$key]);
     }
   }
 }

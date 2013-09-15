@@ -2088,9 +2088,9 @@ function hook_field_storage_pre_load($entity_type, $entities, $age, &$skip_field
  *   Saved field IDs are set set as keys in $skip_fields.
  */
 function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
-  if ($entity_type == 'node' && $entity->status && _forum_node_check_node_type($entity)) {
-    $query = db_insert('forum_index')->fields(array('nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp'));
-    foreach ($entity->taxonomy_forums as $language) {
+  if ($entity_type == 'node' && $entity->status) {
+    $query = db_insert('custom_index')->fields(array('nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp'));
+    foreach ($entity->custom as $language) {
       foreach ($language as $delta) {
         $query->values(array(
           'nid' => $entity->nid,
@@ -2127,18 +2127,18 @@ function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
 function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
   $first_call = &drupal_static(__FUNCTION__, array());
 
-  if ($entity_type == 'node' && $entity->status && _forum_node_check_node_type($entity)) {
+  if ($entity_type == 'node' && $entity->status) {
     // We don't maintain data for old revisions, so clear all previous values
     // from the table. Since this hook runs once per field, per entity, make
     // sure we only wipe values once.
     if (!isset($first_call[$entity->nid])) {
       $first_call[$entity->nid] = FALSE;
-      db_delete('forum_index')->condition('nid', $entity->nid)->execute();
+      db_delete('custom_index')->condition('nid', $entity->nid)->execute();
     }
     // Only save data to the table if the node is published.
     if ($entity->status) {
-      $query = db_insert('forum_index')->fields(array('nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp'));
-      foreach ($entity->taxonomy_forums as $language) {
+      $query = db_insert('custom_index')->fields(array('nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp'));
+      foreach ($entity->custom as $language) {
         foreach ($language as $delta) {
           $query->values(array(
             'nid' => $entity->nid,
@@ -2152,9 +2152,6 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
         }
       }
       $query->execute();
-      // The logic for determining last_comment_count is fairly complex, so
-      // call _forum_update_forum_index() too.
-      _forum_update_forum_index($entity->nid);
     }
   }
 }

@@ -7278,8 +7278,6 @@ function drupal_write_record($table, &$record, $primary_keys = array()) {
  * - dependencies: An array of shortnames of other modules this module requires.
  * - package: The name of the package of modules this module belongs to.
  *
- * See forum.info for an example of a module .info file.
- *
  * Information stored in a theme .info file:
  * - name: The real name of the theme for display purposes.
  * - description: Brief description.

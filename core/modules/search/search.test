@@ -383,7 +383,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
    * Implementation setUp().
    */
   function setUp() {
-    parent::setUp('search', 'statistics', 'comment');
+    parent::setUp('search', 'comment');
   }
 
   function testRankings() {
@@ -391,7 +391,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     $this->drupalLogin($this->drupalCreateUser(array('skip comment approval', 'create page content')));
 
     // Build a list of the rankings to test.
-    $node_ranks = array('sticky', 'promote', 'relevance', 'recent', 'comments', 'views');
+    $node_ranks = array('sticky', 'promote', 'relevance', 'recent', 'comments');
 
     // Create nodes for testing.
     foreach ($node_ranks as $node_rank) {
@@ -436,14 +436,6 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     $this->drupalGet('comment/reply/' . $nodes['comments'][1]->nid);
     $this->drupalPost(NULL, $edit, t('Preview'));
     $this->drupalPost(NULL, $edit, t('Save'));
-
-    // Enable counting of statistics.
-    variable_set('statistics_count_content_views', 1);
-
-    // Then View one of the nodes a bunch of times.
-    for ($i = 0; $i < 5; $i ++) {
-      $this->drupalGet('node/' . $nodes['views'][1]->nid);
-    }
 
     // Test each of the possible rankings.
     foreach ($node_ranks as $node_rank) {
@@ -498,7 +490,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
     $this->refreshVariables();
 
     // Disable all other rankings.
-    $node_ranks = array('sticky', 'promote', 'recent', 'comments', 'views');
+    $node_ranks = array('sticky', 'promote', 'recent', 'comments');
     foreach ($node_ranks as $node_rank) {
       variable_set('node_rank_' . $node_rank, 0);
     }
@@ -568,7 +560,7 @@ class SearchRankingTestCase extends DrupalWebTestCase {
 
     // Set up for ranking sticky and lots of comments; make sure others are
     // disabled.
-    $node_ranks = array('sticky', 'promote', 'relevance', 'recent', 'comments', 'views');
+    $node_ranks = array('sticky', 'promote', 'relevance', 'recent', 'comments');
     foreach ($node_ranks as $var) {
       $value = ($var == 'sticky' || $var == 'comments') ? 10 : 0;
       variable_set('node_rank_' . $var, $value);
