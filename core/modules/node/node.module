@@ -2976,7 +2976,7 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  *   - "create"
  * @param $node
  *   The node object on which the operation is to be performed, or the node type
- *   (e.g., 'forum') for the 'create' operation.
+ *   (e.g., 'article') for the 'create' operation.
  * @param $account
  *   (optional) A user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
