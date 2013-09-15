@@ -342,7 +342,7 @@ class BootstrapGetFilenameTestCase extends DrupalUnitTestCase {
     drupal_static_reset('drupal_get_filename');
 
     // Retrieving the location of a module.
-    $this->assertIdentical(drupal_get_filename('module', 'php'), 'core/modules/php/php.module', t('Retrieve module location.'));
+    $this->assertIdentical(drupal_get_filename('module', 'block'), 'core/modules/block/block.module', t('Retrieve module location.'));
 
     // Retrieving the location of a theme.
     $this->assertIdentical(drupal_get_filename('theme', 'stark'), 'core/themes/stark/stark.info', t('Retrieve theme location.'));
