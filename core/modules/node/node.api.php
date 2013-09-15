@@ -811,7 +811,6 @@ function hook_node_submit($node, $form, &$form_state) {
  * @param $langcode
  *   The language code used for rendering.
  *
- * @see forum_node_view()
  * @see comment_node_view()
  * @see hook_entity_view()
  *
@@ -858,10 +857,9 @@ function hook_node_view_alter(&$build) {
 /**
  * Define module-provided node types.
  *
- * This hook allows a module to define one or more of its own node types. For
- * example, the forum module uses it to define a forum node-type named "Forum
- * topic." The name and attributes of each desired node type are specified in
- * an array returned by the hook.
+ * This hook allows a module to define one or more of its own node types. The
+ * name and attributes of each desired node type are specified in an array
+ * returned by the hook.
  *
  * Only module-provided node types should be defined through this hook. User-
  * provided (or 'custom') node types should be defined only in the 'node_type'
@@ -902,10 +900,10 @@ function hook_node_view_alter(&$build) {
  */
 function hook_node_info() {
   return array(
-    'forum' => array(
-      'name' => t('Forum topic'),
-      'base' => 'forum',
-      'description' => t('A <em>forum topic</em> starts a new discussion thread within a forum.'),
+    'blog' => array(
+      'name' => t('Blog post'),
+      'base' => 'blog',
+      'description' => t('A <em>Blog post</em> is a discussion starter.'),
       'title_label' => t('Subject'),
     )
   );
