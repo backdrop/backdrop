@@ -51,8 +51,11 @@ then reference it in the title of the pull request.
 
 License
 -------
-Backdrop is GPL v2 software. See the LICENSE.txt file in the core directory
-for more information.
+Backdrop is GPL v2 (or higher) software. See the LICENSE.txt file in the
+core directory or visit http://www.gnu.org/licenses/gpl-2.0.html for
+complete text. Distributions of this software must retain this license
+and copyright notice. Distributions of this software may relicense it
+as any later version of the GPL.
 
 All Backdrop code is Copyright 2001 - 2013 by the original authors.
 
