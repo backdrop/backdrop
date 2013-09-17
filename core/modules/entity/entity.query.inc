@@ -915,11 +915,12 @@ class EntityFieldQuery {
       return $select_query->countQuery()->execute()->fetchField();
     }
     $return = array();
+    $this->orderedResults = array();
     foreach ($select_query->execute() as $partial_entity) {
       $bundle = isset($partial_entity->bundle) ? $partial_entity->bundle : NULL;
       $entity = entity_create_stub_entity($partial_entity->entity_type, array($partial_entity->entity_id, $partial_entity->revision_id, $bundle));
       $return[$partial_entity->entity_type][$partial_entity->$id_key] = $entity;
-      $this->ordered_results[] = $partial_entity;
+      $this->orderedResults[] = $partial_entity;
     }
     return $return;
   }
