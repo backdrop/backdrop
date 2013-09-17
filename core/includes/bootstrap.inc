@@ -771,6 +771,30 @@ function drupal_settings_initialize() {
   }
   $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
 
+  // Load Drupal settings specified by the server, if present
+  if (isset($_SERVER['DRUPAL_SETTINGS'])) {
+    $drupal_settings = json_decode($_SERVER['DRUPAL_SETTINGS'], TRUE);
+    foreach ($server_drupal_settings as $key => $value) {
+      // One level of depth should be enough for $conf and $databases.
+      if ($key == 'conf') {
+        foreach($value as $conf_key => $conf_value) {
+          $conf[$conf_key] = $conf_value;
+        }
+      }
+      elseif ($key == 'databases') {
+        // Protect default configuration but allow the specification of
+        // additional databases. 
+        if (!isset($databases) || !is_array($databases)) {
+          $databases = array();
+        }
+        $databases = array_replace_recursive($databases, $value);
+      }
+      else {
+        $$key = $value;
+      }
+    }
+  }
+
   if (isset($base_url)) {
     // Parse fixed base URL from settings.php.
     $parts = parse_url($base_url);
