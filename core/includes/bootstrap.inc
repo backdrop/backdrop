@@ -1114,7 +1114,7 @@ function drupal_page_is_cacheable($allow_caching = NULL) {
   }
 
   return $allow_caching_static && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'HEAD')
-    && !drupal_is_cli();
+    && !drupal_is_cli() && !variable_get('maintenance_mode', 0);
 }
 
 /**
