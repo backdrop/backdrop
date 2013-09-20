@@ -1973,10 +1973,6 @@ function system_block_view($delta = '') {
       $block['subject'] = NULL;
       $block['content'] = theme('system_powered_by');
       return $block;
-    case 'help':
-      $block['subject'] = NULL;
-      $block['content'] = menu_get_active_help();
-      return $block;
     default:
       // All system menu blocks.
       $system_menus = menu_list_system_menus();
