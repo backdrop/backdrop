@@ -1549,7 +1549,7 @@ function form_test_clicked_button($form, &$form_state) {
       );
       // Image buttons need a #src; the others need a #value.
       if ($type == 'image_button') {
-        $form[$name]['#src'] = 'core/misc/druplicon.png';
+        $form[$name]['#src'] = 'core/misc/backdrop-logo.png';
       }
       else {
         $form[$name]['#value'] = $name;
