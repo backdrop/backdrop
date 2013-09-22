@@ -838,17 +838,7 @@ function system_modules($form, $form_state = array()) {
         }
       }
     }
-    // Generate link for module's help page, if there is one.
-    if ($help_arg && $module->status && in_array($filename, module_implements('help'))) {
-      if (module_invoke($filename, 'help', "admin/help#$filename", $help_arg)) {
-        $extra['links']['help'] = array(
-          '#type' => 'link',
-          '#title' => t('Help'),
-          '#href' => "admin/help/$filename",
-          '#options' => array('attributes' => array('class' =>  array('module-link', 'module-link-help'), 'title' => t('Help'))),
-        );
-      }
-    }
+
     // Generate link for module's permission, if the user has access to it.
     if ($module->status && user_access('administer permissions') && in_array($filename, module_implements('permission'))) {
       $extra['links']['permissions'] = array(
