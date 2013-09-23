@@ -41,7 +41,7 @@
  * @see template_process()
  */
 ?><!DOCTYPE html>
-<html lang="<?php print $language->language; ?>" dir="<?php print $language->dir; ?>"
+<html lang="<?php print $language->langcode; ?>" dir="<?php print $language->dir; ?>"
 <?php print $rdf_namespaces; ?>>
 
 <head profile="<?php print $grddl_profile; ?>">
