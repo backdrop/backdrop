@@ -1,4 +1,4 @@
-name = Responsive Bartik
+name = Bartik
 description = A flexible, recolorable theme with many regions and a responsive, mobile-first layout.
 version = VERSION
 core = 8.x

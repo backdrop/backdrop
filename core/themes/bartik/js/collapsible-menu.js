@@ -31,11 +31,13 @@
       // Restore visibility settings of menu on increasing of windows width over 445px.
       // Media query works with width up to 460px. But I guess we should take into account some padding.
       $(window).resize(function(){
-        var w = $(window).width();
-        // Remove all styles if window size more than maxWidth and menu is hidden.
-        if(w > maxWidth && $('#main-menu-links').is(':hidden')) {
-          $('#main-menu-links').removeAttr('style');
-        }
+        setTimeout(function() {
+          var w = $(window).width();
+          // Remove all styles if window size more than maxWidth and menu is hidden.
+          if(w > maxWidth && $('#main-menu-links').is(':hidden')) {
+            $('#main-menu-links').removeAttr('style');
+          }
+        }, 250);
       });
     }
   }
