@@ -51,6 +51,12 @@ function dblog_overview() {
     ->execute();
 
   foreach ($result as $dblog) {
+    if (!empty($dblog->uid) && empty($dblog->name)) {
+      $user_info = t('Deleted User');
+    }
+    else {
+      $user_info = theme('username', array('account' => $dblog));
+    }
     $rows[] = array('data' =>
       array(
         // Cells
@@ -58,7 +64,7 @@ function dblog_overview() {
         t($dblog->type),
         format_date($dblog->timestamp, 'short'),
         theme('dblog_message', array('event' => $dblog, 'link' => TRUE)),
-        theme('username', array('account' => $dblog)),
+        $user_info,
         filter_xss($dblog->link),
       ),
       // Attributes for tr
@@ -129,8 +135,16 @@ function dblog_top($type) {
  */
 function dblog_event($id) {
   $severity = watchdog_severity_levels();
-  $result = db_query('SELECT w.*, u.name, u.uid FROM {watchdog} w INNER JOIN {users} u ON w.uid = u.uid WHERE w.wid = :id', array(':id' => $id))->fetchObject();
+  $result = db_query('SELECT w.*, u.name, w.uid FROM {watchdog} w LEFT JOIN {users} u ON w.uid = u.uid WHERE w.wid = :id', array(':id' => $id))->fetchObject();
   if ($dblog = $result) {
+    if (!empty($dblog->uid) && empty($dblog->name)) {
+      $user_label = t('User ID (deleted)');
+      $user_info = $dblog->uid;
+    }
+    else {
+      $user_label = t('User');
+      $user_info = theme('username', array('account' => $dblog));
+    }
     $rows = array(
       array(
         array('data' => t('Type'), 'header' => TRUE),
@@ -141,8 +155,8 @@ function dblog_event($id) {
         format_date($dblog->timestamp, 'long'),
       ),
       array(
-        array('data' => t('User'), 'header' => TRUE),
-        theme('username', array('account' => $dblog)),
+        array('data' => $user_label, 'header' => TRUE),
+        $user_info,
       ),
       array(
         array('data' => t('Location'), 'header' => TRUE),

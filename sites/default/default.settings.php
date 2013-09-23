@@ -136,7 +136,6 @@
  *     'users'     => 'shared_',
  *     'sessions'  => 'shared_',
  *     'role'      => 'shared_',
- *     'authmap'   => 'shared_',
  *   ),
  * @endcode
  * You can also use a reference to a schema/database as a prefix. This maybe
@@ -150,7 +149,6 @@
  *     'users'     => 'shared.',
  *     'sessions'  => 'shared.',
  *     'role'      => 'shared.',
- *     'authmap'   => 'shared.',
  *   );
  * @endcode
  * NOTE: MySQL and SQLite's definition of a schema is a database.

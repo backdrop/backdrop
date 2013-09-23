@@ -5,8 +5,7 @@
  * Enables users to comment on published content.
  *
  * When enabled, the Comment module creates a discussion board for each Drupal
- * node. Users can post comments to discuss a forum topic, story, collaborative
- * book page, etc.
+ * node. Users can post comments to discuss a blog post, article, etc.
  */
 
 /**
