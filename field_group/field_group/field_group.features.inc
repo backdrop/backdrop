@@ -13,14 +13,26 @@ function field_group_features_export_alter(&$export, $module_name) {
   ctools_include('export');
   $field_groups = ctools_export_load_object('field_group');
 
+  // Support the separate field base -vs- field instance structure that was
+  // added in Features v7.x-2.0-beta2.
+  if (function_exists('field_instance_features_export')) {
+    $export_var = 'field_instance';
+  }
+  else {
+    $export_var = 'field';
+  }
+
   // Add fieldgroups based on the fields that are present.
-  if (!empty($export['features']['field'])) {
-    foreach ($export['features']['field'] as $field) {
+  if (!empty($export['features'][$export_var])) {
+    if (!isset($export['features']['field_group'])) {
+      $export['features']['field_group'] = array();
+    }
+    foreach ($export['features'][$export_var] as $field) {
       list($entity_type, $bundle, $field_name) = explode('-', $field);
 
       foreach ($field_groups as $group_id => $group) {
-        if ($group->entity_type == $entity_type && $group->bundle == $bundle
-          && in_array($field_name, $group->data['children']) && in_array($group->identifier, $export['features']['field_group'])) {
+
+        if ($group->entity_type == $entity_type && $group->bundle == $bundle && in_array($field_name, $group->data['children']) && !in_array($group->identifier, $export['features']['field_group'])) {
           if (isset($group->export_module) && $group->export_module != $module_name) {
             $export['dependencies'][$group->export_module] = $group->export_module;
           }
