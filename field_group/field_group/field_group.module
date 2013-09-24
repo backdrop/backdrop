@@ -1919,7 +1919,7 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
   $group_references = array();
   foreach ($element['#fieldgroups'] as $group_name => $group) {
     // Construct own weight, as some fields (for example preprocess fields) don't have weight set.
-    $element[$group_name] = array('#child_weight' => -20);
+    $element[$group_name] = array();
     $group_references[$group_name] = &$element[$group_name];
   }
 
@@ -1976,9 +1976,6 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
       unset($element[$child_name]);
     }
 
-    // Set correct weight.
-    //$group_references[$parent_name][$child_name]['#weight'] = $group_references[$parent_name]['#child_weight'];
-    //$group_references[$parent_name]['#child_weight']++;
   }
 
   // Bring extra element wrappers to achieve a grouping of fields.
