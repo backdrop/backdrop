@@ -936,7 +936,7 @@ div.add-or-remove-shortcuts {
 }
 
 /* Recent content block */
-#dashboard div#block-node-recent div.content {
+#block-node-recent div.content {
   padding: 0;
 }
 #block-node-recent table,
