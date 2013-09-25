@@ -676,7 +676,9 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
     '#description' => $group->description,
   );
 
-  $element['#attached']['library'][] = array('system', 'drupal.collapse');
+  if ($group->collapsible || $group->collapsed) {
+    $element['#attached']['library'][] = array('system', 'drupal.collapse');
+  }
 }
 
 /**
@@ -815,7 +817,6 @@ function field_group_pre_render_accordion_item(&$element, $group, &$form) {
     $element['#prefix'] .= '<div class="description">' . $group->description . '</div>';
   }
 
-  $element['#attached']['library'][] = array('system', 'ui.accordion');
 }
 
 /**
@@ -845,6 +846,8 @@ function field_group_pre_render_htabs(&$element, $group, &$form) {
   if (!empty($form['#type']) && $form['#type'] == 'form') {
     $element['#attached']['js'][] = 'misc/form.js';
   }
+
+  $element['#attached']['library'][] = array('field_group', 'horizontal-tabs');
 }
 
 /**
