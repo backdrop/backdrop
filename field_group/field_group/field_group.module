@@ -638,8 +638,6 @@ function field_group_field_group_pre_render(& $element, &$group, & $form) {
     'data' => array('field_group' => array($group->format_type => $view_mode)),
     'type' => 'setting',
   );
-  $form['#attached']['js'][] = 'misc/form.js';
-  $form['#attached']['js'][] = 'misc/collapse.js';
 
   if (isset($group->format_settings['instance_settings']['id']) && !empty($group->format_settings['instance_settings']['id'])) {
     $element['#id'] = $group->format_settings['instance_settings']['id'];
@@ -677,6 +675,7 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
     '#attributes' => array('class' => explode(' ', $group->classes)),
     '#description' => $group->description,
   );
+
   $element['#attached']['js'][] = 'misc/form.js';
   $element['#attached']['js'][] = 'misc/collapse.js';
 
@@ -844,6 +843,10 @@ function field_group_pre_render_htabs(&$element, $group, &$form) {
     $element['#title'] = check_plain($group->label);
   }
 
+  // Only add form.js on forms.
+  if (!empty($form['#type']) && $form['#type'] == 'form') {
+    $element['#attached']['js'][] = 'misc/form.js';
+  }
 }
 
 /**
@@ -955,9 +958,9 @@ function field_group_pre_render_tabs(&$element, $group, &$form) {
     '#default_value' => '',
     '#attributes' => array('class' => array('vertical-tabs-active-tab')),
   );
-  $form['#attached']['library'][] = array('system', 'drupal.form');
-  $form['#attached']['library'][] = array('system', 'drupal.collapse');
 
+  $element['#attached']['library'][] = array('system', 'drupal.form');
+  $element['#attached']['library'][] = array('system', 'drupal.collapse');
 }
 
 /**

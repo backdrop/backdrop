@@ -92,11 +92,13 @@ Drupal.horizontalTab = function (settings) {
     }
   });
 
-  this.fieldset
-    .bind('summaryUpdated', function () {
+  // Only bind update summary on forms.
+  if (this.fieldset.drupalGetSummary) {
+    this.fieldset.bind('summaryUpdated', function() {
       self.updateSummary();
-    })
-    .trigger('summaryUpdated');
+    }).trigger('summaryUpdated');
+  }
+
 };
 
 Drupal.horizontalTab.prototype = {
@@ -187,10 +189,14 @@ Drupal.theme.prototype.horizontalTab = function (settings) {
 
   tab.item = $('<li class="horizontal-tab-button" tabindex="-1"></li>')
     .append(tab.link = $('<a href="#' + idAttr + '"></a>')
-      .append(tab.title = $('<strong></strong>').text(settings.title))
-      .append(tab.summary = $('<span class="summary"></span>')
-    )
-  );
+    .append(tab.title = $('<strong></strong>').text(settings.title))
+    );
+
+  // No need to add summary on frontend.
+  if (settings.fieldset.drupalGetSummary) {
+    tab.link.append(tab.summary = $('<span class="summary"></span>'))
+    }
+
   return tab;
 };
 
