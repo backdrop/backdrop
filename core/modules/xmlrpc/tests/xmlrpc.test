@@ -5,6 +5,10 @@
  */
 class XMLRPCBasicTestCase extends DrupalWebTestCase {
 
+  function setUp() {
+    parent::setUp(array('xmlrpc'));
+  }
+
   public static function getInfo() {
     return array(
       'name'  => 'XML-RPC basic',
@@ -90,7 +94,7 @@ class XMLRPCValidator1IncTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('xmlrpc_test');
+    parent::setUp(array('xmlrpc','xmlrpc_test'));
   }
 
   /**
