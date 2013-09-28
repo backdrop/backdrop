@@ -26,13 +26,13 @@
  *   - node-[type]: The current node type. For example, if the node is a
  *     "Article" it would result in "node-article". Note that the machine
  *     name will often be in a short form of the human readable label.
- *   - view-mode-[view_mode]: The View Mode of the node e.g. teaser or full.
- *   - preview: Nodes in preview mode.
+ *   - node-teaser: Nodes in teaser form.
+ *   - node-preview: Nodes in preview mode.
  *   The following are controlled through the node publishing options.
- *   - promoted: Nodes promoted to the front page.
- *   - sticky: Nodes ordered above other non-sticky nodes in teaser
+ *   - node-promoted: Nodes promoted to the front page.
+ *   - node-sticky: Nodes ordered above other non-sticky nodes in teaser
  *     listings.
- *   - unpublished: Unpublished nodes visible only to administrators.
+ *   - node-unpublished: Unpublished nodes visible only to administrators.
  * - $title_prefix (array): An array containing additional output populated by
  *   modules, intended to be displayed in front of the main title tag that
  *   appears in the template.
@@ -78,7 +78,7 @@
  * @see template_process()
  */
 ?>
-<div id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
+<article id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?> role="article">
 
   <?php print render($title_prefix); ?>
   <?php if (!$page): ?>
@@ -89,10 +89,10 @@
   <?php print render($title_suffix); ?>
 
   <?php if ($display_submitted): ?>
-    <div class="meta submitted">
+    <footer class="meta submitted">
       <?php print $user_picture; ?>
       <?php print $submitted; ?>
-    </div>
+    </footer>
   <?php endif; ?>
 
   <div class="content clearfix"<?php print $content_attributes; ?>>
@@ -121,4 +121,4 @@
 
   <?php print render($content['comments']); ?>
 
-</div>
+</article>

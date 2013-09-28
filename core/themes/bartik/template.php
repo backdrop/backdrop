@@ -1,9 +1,11 @@
 <?php
 
-/**
- * Add body classes if certain regions have content.
- */
 function bartik_preprocess_html(&$variables) {
+  // Add variables for path to theme.
+  $variables['base_path'] = base_path();
+  $variables['path_to_resbartik'] = drupal_get_path('theme', 'bartik');
+
+  // Add body classes if certain regions have content.
   if (!empty($variables['page']['featured'])) {
     $variables['classes_array'][] = 'featured';
   }
@@ -102,6 +104,15 @@ function bartik_process_maintenance_page(&$variables) {
 }
 
 /**
+ * Override or insert variables into the node template.
+ */
+function bartik_preprocess_node(&$variables) {
+  if ($variables['view_mode'] == 'full' && node_is_page($variables['node'])) {
+    $variables['classes_array'][] = 'node-full';
+  }
+}
+
+/**
  * Override or insert variables into the block template.
  */
 function bartik_preprocess_block(&$variables) {
@@ -137,7 +148,7 @@ function bartik_field__taxonomy_term_reference($variables) {
   $output .= '</ul>';
 
   // Render the top-level DIV.
-  $output = '<div class="' . $variables['classes'] . (!in_array('clearfix', $variables['classes_array']) ? ' clearfix' : '') . '">' . $output . '</div>';
+  $output = '<div class="' . $variables['classes'] . (!in_array('clearfix', $variables['classes_array']) ? ' clearfix' : '') . '"' . $variables['attributes'] .'>' . $output . '</div>';
 
   return $output;
 }
