@@ -1766,17 +1766,6 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#collapsible' => FALSE,
   );
 
-  $countries = country_get_list();
-  $form['server_settings']['site_default_country'] = array(
-    '#type' => 'select',
-    '#title' => st('Default country'),
-    '#empty_value' => '',
-    '#default_value' => variable_get('site_default_country', NULL),
-    '#options' => $countries,
-    '#description' => st('Select the default country for the site.'),
-    '#weight' => 0,
-  );
-
   $form['server_settings']['date_default_timezone'] = array(
     '#type' => 'select',
     '#title' => st('Default time zone'),
@@ -1843,7 +1832,6 @@ function install_configure_form_submit($form, &$form_state) {
   variable_set('site_name', $form_state['values']['site_name']);
   variable_set('site_mail', $form_state['values']['site_mail']);
   variable_set('date_default_timezone', $form_state['values']['date_default_timezone']);
-  variable_set('site_default_country', $form_state['values']['site_default_country']);
 
   // Enable update.module if this option was selected.
   if ($form_state['values']['update_status_module'][1]) {
