@@ -799,14 +799,14 @@ function system_modules($form, $form_state = array()) {
   // Used when displaying modules that are required by the install profile.
   require_once DRUPAL_ROOT . '/core/includes/install.inc';
   $distribution_name = check_plain(drupal_install_profile_distribution_name());
-  
+
   // Iterate through each of the modules.
   foreach ($visible_files as $filename => $module) {
     $extra = array();
     $extra['enabled'] = (bool) $module->status;
     if (!empty($module->info['required'] )) {
       $extra['disabled'] = TRUE;
-      $extra['required_by'][] = $distribution_name . (!empty($module->info['explanation']) ? ' ('. $module->info['explanation'] .')' : ''); 
+      $extra['required_by'][] = $distribution_name . (!empty($module->info['explanation']) ? ' ('. $module->info['explanation'] .')' : '');
     }
 
     // If this module requires other modules, add them to the array.
