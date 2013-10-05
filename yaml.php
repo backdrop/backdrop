@@ -1,6 +1,5 @@
 <?php
 
-
 define('DRUPAL_ROOT', getcwd());
 require_once DRUPAL_ROOT . '/core/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
