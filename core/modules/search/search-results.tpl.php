@@ -29,5 +29,9 @@
   <?php print $pager; ?>
 <?php else : ?>
   <h2><?php print t('Your search yielded no results');?></h2>
-  <?php print search_help('search#noresults', drupal_help_arg()); ?>
+  <ul>
+    <li><?php print t('Check if your spelling is correct.'); ?></li>
+    <li><?php print t('Remove quotes around phrases to search for each word individually. <em>bike shed</em> will often show more results than <em>&quot;bike shed&quot;</em>.'); ?></li>
+    <li><?php print t('Consider loosening your query with <em>OR</em>. <em>bike OR shed</em> will often show more results than <em>bike shed</em>.'); ?></li>
+  </ul>
 <?php endif; ?>

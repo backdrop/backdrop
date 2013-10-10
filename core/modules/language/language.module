@@ -6,30 +6,6 @@
  */
 
 /**
- * Implements hook_help().
- */
-function language_help($path, $arg) {
-  switch ($path) {
-    case 'admin/help#language':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Language module allows you to maintain a list of languages used on your Drupal site for providing language information for content and for interface translation (using the Locale module). For more information, see the online handbook entry for <a href="@language">Language module</a>.', array('@language' => 'http://drupal.org/handbook/modules/language/')) . '</p>';
-      $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<dl>';
-      $output .= '<dt>' . t('Configuring the list of languages') . '</dt>';
-      $output .= '<dd>' . t('<a href="@configure-languages">Configure the list of languages</a> either using the built-in language list or providing any custom languages you wish.', array('@configure-languages' => url('admin/config/regional/language'))) . '</dd>';
-      $output .= '</dl>';
-      return $output;
-
-    case 'admin/config/regional/language':
-      return '<p>' . t('With multiple languages enabled, registered users may select their preferred language and authors can assign a specific language to content.') . '</p>';
-
-    case 'admin/config/regional/language/add':
-      return '<p>' . t('Add a language to be supported by your site. If your desired language is not available, pick <em>Custom language...</em> at the end and provide a language code and other details manually.') . '</p>';
-  }
-}
-
-/**
  * Implements hook_menu().
  */
 function language_menu() {

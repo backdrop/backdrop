@@ -2251,6 +2251,7 @@ class DrupalWebTestCase extends DrupalTestCase {
           case 'textarea':
           case 'hidden':
           case 'password':
+          case 'email':
             $post[$name] = $edit[$name];
             unset($edit[$name]);
             break;

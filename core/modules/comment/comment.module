@@ -69,25 +69,6 @@ const COMMENT_NODE_CLOSED = 1;
 const COMMENT_NODE_OPEN = 2;
 
 /**
- * Implements hook_help().
- */
-function comment_help($path, $arg) {
-  switch ($path) {
-    case 'admin/help#comment':
-      $output = '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Comment module allows users to comment on site content, set commenting defaults and permissions, and moderate comments. For more information, see the online handbook entry for <a href="@comment">Comment module</a>.', array('@comment' => 'http://drupal.org/handbook/modules/comment/')) . '</p>';
-      $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<dl>';
-      $output .= '<dt>' . t('Default and custom settings') . '</dt>';
-      $output .= '<dd>' . t("Each <a href='@content-type'>content type</a> can have its own default comment settings configured as: <em>Open</em> to allow new comments, <em>Hidden</em> to hide existing comments and prevent new comments, or <em>Closed</em> to view existing comments, but prevent new comments. These defaults will apply to all new content created (changes to the settings on existing content must be done manually). Other comment settings can also be customized per content type, and can be overridden for any given item of content. When a comment has no replies, it remains editable by its author, as long as the author has a user account and is logged in.", array('@content-type' => url('admin/structure/types'))) . '</dd>';
-      $output .= '<dt>' . t('Comment approval') . '</dt>';
-      $output .= '<dd>' . t("Comments from users who have the <em>Skip comment approval</em> permission are published immediately. All other comments are placed in the <a href='@comment-approval'>Unapproved comments</a> queue, until a user who has permission to <em>Administer comments</em> publishes or deletes them. Published comments can be bulk managed on the <a href='@admin-comment'>Published comments</a> administration page.", array('@comment-approval' => url('admin/content/comment/approval'), '@admin-comment' => url('admin/content/comment'))) . '</dd>';
-      $output .= '</dl>';
-      return $output;
-  }
-}
-
-/**
  * Implements hook_entity_info().
  */
 function comment_entity_info() {
@@ -1780,7 +1761,7 @@ function comment_form($form, &$form_state, $comment) {
 
   // Add author e-mail and homepage fields depending on the current user.
   $form['author']['mail'] = array(
-    '#type' => 'textfield',
+    '#type' => 'email',
     '#title' => t('E-mail'),
     '#default_value' => $comment->mail,
     '#required' => (!$user->uid && $anonymous_contact == COMMENT_ANONYMOUS_MUST_CONTACT),
@@ -1979,9 +1960,6 @@ function comment_form_validate($form, &$form_state) {
         form_set_error('name', t('The name you used belongs to a registered user.'));
       }
     }
-  }
-  if ($form_state['values']['mail'] && !valid_email_address($form_state['values']['mail'])) {
-    form_set_error('mail', t('The e-mail address you specified is not valid.'));
   }
   if ($form_state['values']['homepage'] && !valid_url($form_state['values']['homepage'], TRUE)) {
     form_set_error('homepage', t('The URL of your homepage is not valid. Remember that it must be fully qualified, i.e. of the form <code>http://example.com/directory</code>.'));
