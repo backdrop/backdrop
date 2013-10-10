@@ -125,13 +125,6 @@ class DBLogTestCase extends DrupalWebTestCase {
   private function verifyReports($response = 200) {
     $quote = '&#039;';
 
-    // View dblog help node.
-    $this->drupalGet('admin/help/dblog');
-    $this->assertResponse($response);
-    if ($response == 200) {
-      $this->assertText(t('Database Logging'), t('DBLog help was displayed'));
-    }
-
     // View dblog report node.
     $this->drupalGet('admin/reports/dblog');
     $this->assertResponse($response);
