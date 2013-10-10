@@ -6,19 +6,6 @@
  */
 
 /**
- * Implements hook_help().
- */
-function field_sql_storage_help($path, $arg) {
-  switch ($path) {
-    case 'admin/help#field_sql_storage':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Field SQL Storage module stores field data in the database. It is the default field storage module; other field storage mechanisms may be available as contributed modules. See the <a href="@field-help">Field module help page</a> for more information about fields.', array('@field-help' => url('admin/help/field'))) . '</p>';
-      return $output;
-  }
-}
-
-/**
  * Implements hook_field_storage_info().
  */
 function field_sql_storage_field_storage_info() {
