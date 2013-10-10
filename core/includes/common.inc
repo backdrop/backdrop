@@ -7293,13 +7293,15 @@ function drupal_write_record($table, &$record, $primary_keys = array()) {
  *
  * @param $filename
  *   The file we are parsing. Accepts file with relative or absolute path.
+ * @param bool $process_sections
+ *   Flag indicating if sections should be parsed.
  *
  * @return
  *   The info array.
  *
  * @see drupal_parse_info_format()
  */
-function drupal_parse_info_file($filename) {
+function drupal_parse_info_file($filename, $process_sections = FALSE) {
   $info = &drupal_static(__FUNCTION__, array());
 
   if (!isset($info[$filename])) {
@@ -7308,7 +7310,7 @@ function drupal_parse_info_file($filename) {
     }
     else {
       $data = file_get_contents($filename);
-      $info[$filename] = drupal_parse_info_format($data);
+      $info[$filename] = drupal_parse_info_format($data, $process_sections);
     }
   }
   return $info[$filename];
@@ -7343,17 +7345,32 @@ function drupal_parse_info_file($filename) {
  * PHP constants are substituted in, but only when used as the entire value.
  * Comments should start with a semi-colon at the beginning of a line.
  *
- * @param $data
+ * @param string $data
  *   A string to parse.
+ * @param bool $process_sections
+ *   Flag indicating if sections should be parsed.
  *
  * @return
  *   The info array.
  *
  * @see drupal_parse_info_file()
  */
-function drupal_parse_info_format($data) {
+function drupal_parse_info_format($data, $process_sections = FALSE) {
   $info = array();
   $constants = get_defined_constants();
+
+  // Separate by sections and parse individually if requested.
+  if ($process_sections) {
+    $split = preg_split('@^\[(.*)\]\s*$@m', $data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    $split_count = count($split);
+    if ($split_count > 1) {
+      $info_groups = array();
+      for ($n = 0; $n < $split_count; $n = $n + 2) {
+        $info_groups[$split[$n]] = drupal_parse_info_format($split[$n + 1], FALSE);
+      }
+      return $info_groups;
+    }
+  }
 
   if (preg_match_all('
     @^\s*                           # Start at the beginning of a line, ignoring leading whitespace
