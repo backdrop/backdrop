@@ -44,8 +44,14 @@ Backdrop is a fork of Drupal. It is an experiment in preserving the legacy
 audience of developers who value ease of use and ease of learning over
 architectural flexibility. You can join Backdrop's developer community by
 forking Backdrop from https://github.com/backdrop/backdrop. If submitting
-a pull request, please open an issue using the issue tracker first and
-then reference it in the title of the pull request.
+a pull request, please open an issue using the [issue tracker](https://github.com/backdrop/backdrop-issues/issues) 
+first and then reference it in the title of the pull request.
+
+Documentation
+-------------
+The [Backdrop Handbook](http://backdropcms.org/handbook) is where 
+documentation is being worked on. You can contribute to the handbook by
+sending a pull request to [the handbook repository](https://github.com/backdrop/handbook).
 
 [![Build Status](https://travis-ci.org/backdrop/backdrop.png)](https://travis-ci.org/backdrop/backdrop)
 
