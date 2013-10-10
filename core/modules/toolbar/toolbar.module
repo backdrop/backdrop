@@ -25,75 +25,8 @@ function toolbar_theme($existing, $type, $theme, $path) {
     'template' => 'toolbar',
     'path' => drupal_get_path('module', 'toolbar'),
   );
-  $items['toolbar_toggle'] = array(
-    'variables' => array(
-      'collapsed' => NULL,
-      'attributes' => array(),
-    ),
-  );
+ 
   return $items;
-}
-
-/**
- * Implements hook_menu().
- */
-function toolbar_menu() {
-  $items['toolbar/toggle'] = array(
-    'title' => 'Toggle drawer visibility',
-    'type' => MENU_CALLBACK,
-    'page callback' => 'toolbar_toggle_page',
-    'access arguments' => array('access toolbar'),
-  );
-  return $items;
-}
-
-/**
- * Page callback: Toggles the visibility of the toolbar drawer.
- *
- * @see toolbar_menu().
- */
-function toolbar_toggle_page() {
-  global $base_path;
-  // Toggle the value in the cookie.
-  setcookie('Drupal.toolbar.collapsed', !_toolbar_is_collapsed(), NULL, $base_path);
-  // Redirect the user from where he used the toggle element.
-  drupal_goto();
-}
-
-/**
- * Formats an element used to toggle the toolbar drawer's visibility.
- *
- * @param $variables
- *   An associative array containing:
- *   - collapsed: A boolean value representing the toolbar drawer's visibility.
- *   - attributes: An associative array of HTML attributes.
- *
- * @return
- *   An HTML string representing the element for toggling.
- *
- * @ingroup themable
- */
-function theme_toolbar_toggle($variables) {
-  if ($variables['collapsed']) {
-    $toggle_text = t('Show shortcuts');
-  }
-  else {
-    $toggle_text = t('Hide shortcuts');
-    $variables['attributes']['class'][] = 'toggle-active';
-  }
-  return l($toggle_text, 'toolbar/toggle', array('query' => drupal_get_destination(), 'attributes' => array('title' => $toggle_text) + $variables['attributes']));
-}
-
-/**
- * Determines the current state of the toolbar drawer's visibility.
- *
- * @return
- *   TRUE when drawer is collapsed, FALSE when it is expanded.
- */
-function _toolbar_is_collapsed() {
-  // PHP converts dots into underscores in cookie names to avoid problems with
-  // its parser, so we use a converted cookie name.
-  return isset($_COOKIE['Drupal_toolbar_collapsed']) ? $_COOKIE['Drupal_toolbar_collapsed'] : 0;
 }
 
 /**
@@ -105,7 +38,6 @@ function toolbar_page_build(&$page) {
   $page['page_top']['toolbar'] = array(
     '#pre_render' => array('toolbar_pre_render'),
     '#access' => user_access('access toolbar'),
-    'toolbar_drawer' => array(),
   );
 }
 
@@ -130,9 +62,6 @@ function toolbar_pre_render($toolbar) {
 function toolbar_preprocess_html(&$vars) {
   if (isset($vars['page']['page_top']['toolbar']) && user_access('access toolbar')) {
     $vars['classes_array'][] = 'toolbar';
-    if (!_toolbar_is_collapsed()) {
-      $vars['classes_array'][] = 'toolbar-drawer';
-    }
   }
 }
 
@@ -175,13 +104,6 @@ function toolbar_view() {
   $build = array(
     '#theme' => 'toolbar',
     '#attached'=> array(
-      'js' => array(
-        $module_path . '/toolbar.js',
-        array(
-          'data' => array('tableHeaderOffset' => 'Drupal.toolbar.height'),
-          'type' => 'setting'
-        ),
-      ),
       'css' => array(
         $module_path . '/toolbar.css',
       ),
@@ -241,24 +163,6 @@ function toolbar_view() {
     '#links' => $link,
     '#attributes' => array('id' => 'toolbar-home'),
   );
-
-  // Add an anchor to be able to toggle the visibility of the drawer.
-  $build['toolbar_toggle'] = array(
-    '#theme' => 'toolbar_toggle',
-    '#collapsed' => _toolbar_is_collapsed(),
-    '#attributes' => array('class' => array('toggle')),
-  );
-
-  // Prepare the drawer links CSS classes.
-  $toolbar_drawer_classes = array(
-    'toolbar-drawer',
-    'clearfix',
-  );
-  if (_toolbar_is_collapsed()) {
-    $toolbar_drawer_classes[] = 'collapsed';
-  }
-  $build['toolbar_drawer']['#type'] = 'container';
-  $build['toolbar_drawer']['#attributes']['class'] = $toolbar_drawer_classes;
 
   return $build;
 }
