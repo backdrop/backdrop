@@ -2631,10 +2631,10 @@ class LocaleMultilingualFieldsFunctionalTest extends DrupalWebTestCase {
     $node = $this->drupalGetNodeByTitle($edit[$title_key]);
     $this->assertTrue($node, t('Node found in database.'));
 
-    // Check if node body is showed.
+    // Check if node body is shown.
     $this->drupalGet("node/$node->nid");
-    $body = $this->xpath('//div[@id=:id]//div[@property="content:encoded"]/p', array(':id' => 'node-' . $node->nid));
-    $this->assertEqual(current($body), $node->body['en'][0]['value'], 'Node body is correctly showed.');
+    $body = $this->xpath('//div[@id=:id]//p', array(':id' => 'node-' . $node->nid));
+    $this->assertEqual(current($body), $node->body['en'][0]['value'], 'Node body is correctly shown.');
   }
 }
 
