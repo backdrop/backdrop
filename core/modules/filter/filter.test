@@ -739,7 +739,7 @@ class FilterSecurityTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('php', 'filter_test');
+    parent::setUp('filter_test');
     $this->admin_user = $this->drupalCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
     $this->drupalLogin($this->admin_user);
   }
