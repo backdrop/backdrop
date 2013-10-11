@@ -64,8 +64,7 @@ function hook_hook_info_alter(&$hooks) {
  *
  * Modules may specify whether or not the paths they define in hook_menu() are
  * to be considered administrative. Other modules may use this information to
- * display those pages differently (e.g. in a modal overlay, or in a different
- * theme).
+ * display those pages differently (e.g. in a different theme).
  *
  * To change the administrative status of menu items defined in another module's
  * hook_menu(), modules should implement hook_admin_paths_alter().
@@ -3934,15 +3933,9 @@ function hook_token_info_alter(&$data) {
  * @ingroup batch
  */
 function hook_batch_alter(&$batch) {
-  // If the current page request is inside the overlay, add ?render=overlay to
-  // the success callback URL, so that it appears correctly within the overlay.
-  if (overlay_get_mode() == 'child') {
-    if (isset($batch['url_options']['query'])) {
-      $batch['url_options']['query']['render'] = 'overlay';
-    }
-    else {
-      $batch['url_options']['query'] = array('render' => 'overlay');
-    }
+  // Add a query string to the completion page URL.
+  if (isset($batch['url_options']['query'])) {
+    $batch['url_options']['query']['foo'] = 'bar';
   }
 }
 
