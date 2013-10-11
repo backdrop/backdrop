@@ -326,15 +326,6 @@
 }
 
 /**
- * Overlays
- */
-.ui-widget-overlay {
-  background: #000;
-  opacity: .70;
-  filter: Alpha(Opacity=70);
-}
-
-/**
  * Dialogs
  */
 .ui-dialog {
@@ -370,12 +361,6 @@
   color: #fff;
   border-color: #555;
   text-shadow: #222 0px -1px 0px;
-}
-.overlay {
-  padding-right: 26px;
-}
-.overlay .ui-dialog-titlebar {
-  background: transparent;
 }
 
 /**
