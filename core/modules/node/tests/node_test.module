@@ -7,6 +7,20 @@
  */
 
 /**
+ * Implements hook_node_info().
+ */
+function node_test_node_info() {
+  return array(
+    'test' => array(
+      'name' => t('Test type'),
+      'base' => 'test',
+      'description' => t('A <em>test page</em> is here for testing purposes.'),
+      'title_label' => t('Test name'),
+    )
+  );
+}
+
+/**
  * Implements hook_node_load().
  */
 function node_test_node_load($nodes, $types) {

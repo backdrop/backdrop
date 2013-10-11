@@ -36,22 +36,22 @@ class ModuleUnitTest extends DrupalWebTestCase {
     $this->assertModuleList($module_list, t('Standard profile'));
 
     // Try to install a new module.
-    module_enable(array('contact'));
-    $module_list[] = 'contact';
+    module_enable(array('dependency_test3'));
+    $module_list[] = 'dependency_test3';
     sort($module_list);
     $this->assertModuleList($module_list, t('After adding a module'));
 
     // Try to mess with the module weights.
     db_update('system')
       ->fields(array('weight' => 20))
-      ->condition('name', 'contact')
+      ->condition('name', 'dependency_test3')
       ->condition('type', 'module')
       ->execute();
     // Reset the module list.
     module_list(TRUE);
-    // Move contact to the end of the array.
-    unset($module_list[array_search('contact', $module_list)]);
-    $module_list[] = 'contact';
+    // Move test3 to the end of the array.
+    unset($module_list[array_search('dependency_test3', $module_list)]);
+    $module_list[] = 'dependency_test3';
     $this->assertModuleList($module_list, t('After changing weights'));
 
     // Test the fixed list feature.
@@ -134,42 +134,44 @@ class ModuleUnitTest extends DrupalWebTestCase {
    * Test dependency resolution.
    */
   function testDependencyResolution() {
-    // Enable the test module, and make sure that other modules we are testing
-    // are not already enabled. (If they were, the tests below would not work
-    // correctly.)
+    // Enable the test module, disable the second module, and make sure that
+    // other modules we are testing are not already enabled. (If they were, the
+    // tests below would not work correctly.)
     module_enable(array('module_test'), FALSE);
+    module_disable(array('dependency_test2'), FALSE);
     $this->assertTrue(module_exists('module_test'), t('Test module is enabled.'));
-    $this->assertFalse(module_exists('contact'), t('Contact module is disabled.'));
-    $this->assertFalse(module_exists('poll'), t('Poll module is disabled.'));
-    $this->assertFalse(module_exists('php'), t('PHP module is disabled.'));
+    $this->assertFalse(module_exists('dependency_test3'), t('Third module is disabled.'));
+    $this->assertFalse(module_exists('dependency_test2'), t('Second module is disabled.'));
+    $this->assertFalse(module_exists('dependency_test1'), t('First module is disabled.'));
 
-    // First, create a fake missing dependency. Contact depends on poll, which
-    // depends on a made-up module, foo. Nothing should be installed.
+    // First, create a fake missing dependency. Test3 depends on the test2
+    // module, which depends on a made-up module, foo. Nothing should be
+    // installed.
     variable_set('dependency_test', 'missing dependency');
     drupal_static_reset('system_rebuild_module_data');
-    $result = module_enable(array('contact'));
+    $result = module_enable(array('dependency_test3'));
     $this->assertFalse($result, t('module_enable() returns FALSE if dependencies are missing.'));
-    $this->assertFalse(module_exists('contact'), t('module_enable() aborts if dependencies are missing.'));
+    $this->assertFalse(module_exists('dependency_test3'), t('module_enable() aborts if dependencies are missing.'));
 
-    // Now, fix the missing dependency. Contact module depends on poll, but poll
-    // depends on the PHP module. module_enable() should work.
+    // Now, fix the missing dependency. Test3 module depends on test2, but test2
+    // depends on test1 module. module_enable() should work.
     variable_set('dependency_test', 'dependency');
     drupal_static_reset('system_rebuild_module_data');
-    $result = module_enable(array('contact'));
+    $result = module_enable(array('dependency_test3'));
     $this->assertTrue($result, t('module_enable() returns the correct value.'));
     // Verify that the fake dependency chain was installed.
-    $this->assertTrue(module_exists('poll') && module_exists('php'), t('Dependency chain was installed by module_enable().'));
+    $this->assertTrue(module_exists('dependency_test2') && module_exists('dependency_test1'), t('Dependency chain was installed by module_enable().'));
     // Verify that the original module was installed.
-    $this->assertTrue(module_exists('contact'), t('Module installation with unlisted dependencies succeeded.'));
+    $this->assertTrue(module_exists('dependency_test3'), t('Module installation with unlisted dependencies succeeded.'));
     // Finally, verify that the modules were enabled in the correct order.
-    $this->assertEqual(variable_get('test_module_enable_order', array()), array('php', 'poll', 'contact'), t('Modules were enabled in the correct order by module_enable().'));
+    $this->assertEqual(variable_get('test_module_enable_order', array()), array('dependency_test1', 'dependency_test2', 'dependency_test3'), t('Modules were enabled in the correct order by module_enable().'));
 
-    // Now, disable the PHP module. Both contact and poll should be disabled as
-    // well, in the correct order.
-    module_disable(array('php'));
-    $this->assertTrue(!module_exists('contact') && !module_exists('poll'), t('Depedency chain was disabled by module_disable().'));
-    $this->assertFalse(module_exists('php'), t('Disabling a module with unlisted dependents succeeded.'));
-    $this->assertEqual(variable_get('test_module_disable_order', array()), array('contact', 'poll', 'php'), t('Modules were disabled in the correct order by module_disable().'));
+    // Now, disable the test1 module. Both test3 and test2 should be disabled
+    // as well, in the correct order.
+    module_disable(array('dependency_test1'));
+    $this->assertTrue(!module_exists('dependency_test3') && !module_exists('dependency_test2'), t('Depedency chain was disabled by module_disable().'));
+    $this->assertFalse(module_exists('dependency_test1'), t('Disabling a module with unlisted dependents succeeded.'));
+    $this->assertEqual(variable_get('test_module_disable_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), t('Modules were disabled in the correct order by module_disable().'));
 
     // Disable a module that is listed as a dependency by the install profile.
     // Make sure that the profile itself is not on the list of dependent
@@ -184,24 +186,24 @@ class ModuleUnitTest extends DrupalWebTestCase {
     $this->assertTrue(in_array('comment', $disabled_modules), t('Comment module is in the list of disabled modules.'));
     $this->assertFalse(in_array($profile, $disabled_modules), t('The installation profile is not in the list of disabled modules.'));
 
-    // Try to uninstall the PHP module by itself. This should be rejected,
+    // Try to uninstall the test1 module by itself. This should be rejected,
     // since the modules which it depends on need to be uninstalled first, and
     // that is too destructive to perform automatically.
-    $result = drupal_uninstall_modules(array('php'));
+    $result = drupal_uninstall_modules(array('dependency_test1'));
     $this->assertFalse($result, t('Calling drupal_uninstall_modules() on a module whose dependents are not uninstalled fails.'));
-    foreach (array('contact', 'poll', 'php') as $module) {
+    foreach (array('dependency_test3', 'dependency_test2', 'dependency_test1') as $module) {
       $this->assertNotEqual(drupal_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was not uninstalled.', array('@module' => $module)));
     }
 
     // Now uninstall all three modules explicitly, but in the incorrect order,
-    // and make sure that drupal_uninstal_modules() uninstalled them in the
+    // and make sure that drupal_uninstall_modules() uninstalled them in the
     // correct sequence.
-    $result = drupal_uninstall_modules(array('poll', 'php', 'contact'));
+    $result = drupal_uninstall_modules(array('dependency_test2', 'dependency_test1', 'dependency_test3'));
     $this->assertTrue($result, t('drupal_uninstall_modules() returns the correct value.'));
-    foreach (array('contact', 'poll', 'php') as $module) {
+    foreach (array('dependency_test3', 'dependency_test2', 'dependency_test1') as $module) {
       $this->assertEqual(drupal_get_installed_schema_version($module), SCHEMA_UNINSTALLED, t('The @module module was uninstalled.', array('@module' => $module)));
     }
-    $this->assertEqual(variable_get('test_module_uninstall_order', array()), array('contact', 'poll', 'php'), t('Modules were uninstalled in the correct order by drupal_uninstall_modules().'));
+    $this->assertEqual(variable_get('test_module_uninstall_order', array()), array('dependency_test3', 'dependency_test2', 'dependency_test1'), t('Modules were uninstalled in the correct order by drupal_uninstall_modules().'));
 
     // Uninstall the profile module from above, and make sure that the profile
     // itself is not on the list of dependent modules to be uninstalled.
@@ -212,26 +214,26 @@ class ModuleUnitTest extends DrupalWebTestCase {
     $this->assertTrue(in_array('comment', $uninstalled_modules), t('Comment module is in the list of uninstalled modules.'));
     $this->assertFalse(in_array($profile, $uninstalled_modules), t('The installation profile is not in the list of uninstalled modules.'));
 
-    // Enable contact module again, which should enable both the poll module and
-    // php module. But, this time do it with poll module declaring a dependency
-    // on a specific version of php module in its info file. Make sure that
-    // module_enable() still works.
+    // Enable test3 module again, which should enable both the test2 module
+    // and test1 module. But, this time do it with test2 module declaring a
+    // dependency on a specific version of test1 module in its info file. Make
+    // sure that module_enable() still works.
     variable_set('dependency_test', 'version dependency');
     drupal_static_reset('system_rebuild_module_data');
-    $result = module_enable(array('contact'));
+    $result = module_enable(array('dependency_test3'));
     $this->assertTrue($result, t('module_enable() returns the correct value.'));
     // Verify that the fake dependency chain was installed.
-    $this->assertTrue(module_exists('poll') && module_exists('php'), t('Dependency chain was installed by module_enable().'));
+    $this->assertTrue(module_exists('dependency_test2') && module_exists('dependency_test1'), t('Dependency chain was installed by module_enable().'));
     // Verify that the original module was installed.
-    $this->assertTrue(module_exists('contact'), t('Module installation with version dependencies succeeded.'));
+    $this->assertTrue(module_exists('dependency_test3'), t('Module installation with version dependencies succeeded.'));
     // Finally, verify that the modules were enabled in the correct order.
     $enable_order = variable_get('test_module_enable_order', array());
-    $php_position = array_search('php', $enable_order);
-    $poll_position = array_search('poll', $enable_order);
-    $contact_position = array_search('contact', $enable_order);
-    $php_before_poll = $php_position !== FALSE && $poll_position !== FALSE && $php_position < $poll_position;
-    $poll_before_contact = $poll_position !== FALSE && $contact_position !== FALSE && $poll_position < $contact_position;
-    $this->assertTrue($php_before_poll && $poll_before_contact, t('Modules were enabled in the correct order by module_enable().'));
+    $first_position = array_search('dependency_test1', $enable_order);
+    $second_position = array_search('dependency_test2', $enable_order);
+    $third_position = array_search('dependency_test3', $enable_order);
+    $first_before_second = $first_position !== FALSE && $second_position !== FALSE && $first_position < $second_position;
+    $second_before_third = $second_position !== FALSE && $third_position !== FALSE && $second_position < $third_position;
+    $this->assertTrue($first_before_second && $second_before_third, t('Modules were enabled in the correct order by module_enable().'));
   }
 }
 

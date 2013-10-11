@@ -470,21 +470,21 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $this->resetAll();
     $this->assertModules(array('module_test'), TRUE);
     variable_set('dependency_test', 'dependency');
-    // module_test creates a dependency chain: contact depends on poll, which
-    // depends on php. The correct enable order is, php, poll, contact.
-    $expected_order = array('php', 'poll', 'contact');
+    // module_test creates a dependency chain: test3 depends on test2, which
+    // depends on test1. The correct enable order is, test1, test2, test3.
+    $expected_order = array('dependency_test1', 'dependency_test2', 'dependency_test3');
 
     // Enable the modules through the UI, verifying that the dependency chain
     // is correct.
     $edit = array();
-    $edit['modules[Core][contact][enable]'] = 'contact';
+    $edit['modules[Testing][dependency_test3][enable]'] = 'dependency_test3';
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('contact'), FALSE);
-    $this->assertText(t('You must enable the Poll, PHP Filter modules to install Contact.'), t('Dependency chain created.'));
-    $edit['modules[Core][poll][enable]'] = 'poll';
-    $edit['modules[Core][php][enable]'] = 'php';
+    $this->assertModules(array('dependency_test3'), FALSE);
+    $this->assertText(t('You must enable the Dependency test 2, Dependency test 1 modules to install Dependency test 3.'), t('Dependency chain created.'));
+    $edit['modules[Testing][dependency_test2][enable]'] = 'dependency_test2';
+    $edit['modules[Testing][dependency_test1][enable]'] = 'dependency_test1';
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('contact', 'poll', 'php'), TRUE);
+    $this->assertModules(array('dependency_test3', 'dependency_test2', 'dependency_test1'), TRUE);
 
     // Check the actual order which is saved by module_test_modules_enabled().
     $this->assertIdentical(variable_get('test_module_enable_order', FALSE), $expected_order, t('Modules enabled in the correct order.'));
