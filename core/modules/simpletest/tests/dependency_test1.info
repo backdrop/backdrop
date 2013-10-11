@@ -1,0 +1,6 @@
+name = "Dependency test 1"
+description = "Test module for checking dependencies."
+package = Testing
+version = VERSION
+core = 8.x
+hidden = TRUE
