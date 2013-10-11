@@ -602,7 +602,7 @@ function simpletest_script_reporter_display_results() {
     echo "Detailed test results\n";
     echo "---------------------\n";
 
-    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id ORDER BY test_class, message_id", array(':test_id' => $test_id));
+    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id ORDER BY test_class, message_id" AND status = 'fail', array(':test_id' => $test_id));
     $test_class = '';
     foreach ($results as $result) {
       if (isset($results_map[$result->status])) {
