@@ -677,7 +677,6 @@ class ImportOPMLTestCase extends AggregatorTestCase {
       ->execute();
 
     $this->drupalGet('admin/config/services/aggregator/add/opml');
-    $this->assertText('A single OPML document may contain a collection of many feeds.', t('Found OPML help text.'));
     $this->assertField('files[upload]', t('Found file upload field.'));
     $this->assertField('remote', t('Found Remote URL field.'));
     $this->assertField('refresh', '', t('Found Refresh field.'));

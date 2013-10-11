@@ -1926,7 +1926,7 @@ class SearchLanguageTestCase extends DrupalWebTestCase {
     // Add predefined language.
     $edit = array('predefined_langcode' => 'fr');
     $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
-    $this->assertText('fr', t('Language added successfully.'));
+    $this->assertText('French', t('Language added successfully.'));
 
     // Now we should have languages displayed.
     $this->drupalGet('search/node');

@@ -1974,23 +1974,6 @@ function format_date($timestamp, $type = 'medium', $format = '', $timezone = NUL
 }
 
 /**
- * Returns an ISO8601 formatted date based on the given date.
- *
- * Callback for use within hook_rdf_mapping() implementations.
- *
- * @param $date
- *   A UNIX timestamp.
- *
- * @return string
- *   An ISO8601 formatted date.
- */
-function date_iso8601($date) {
-  // The DATE_ISO8601 constant cannot be used here because it does not match
-  // date('c') and produces invalid RDF markup.
-  return date('c', $date);
-}
-
-/**
  * Translates a formatted date string.
  *
  * Callback for preg_replace_callback() within format_date().
@@ -6919,6 +6902,9 @@ function drupal_common_theme() {
     'tel' => array(
       'render element' => 'element',
     ),
+    'email' => array(
+      'render element' => 'element',
+    ),
     'form' => array(
       'render element' => 'element',
     ),
@@ -7636,39 +7622,6 @@ function drupal_check_incompatibility($v, $current_version) {
       }
     }
   }
-}
-
-/**
- * Performs one or more XML-RPC request(s).
- *
- * Usage example:
- * @code
- * $result = xmlrpc('http://example.com/xmlrpc.php', array(
- *   'service.methodName' => array($parameter, $second, $third),
- * ));
- * @endcode
- *
- * @param $url
- *   An absolute URL of the XML-RPC endpoint.
- * @param $args
- *   An associative array whose keys are the methods to call and whose values
- *   are the arguments to pass to the respective method. If multiple methods
- *   are specified, a system.multicall is performed.
- * @param $options
- *   (optional) An array of options to pass along to drupal_http_request().
- *
- * @return
- *   For one request:
- *     Either the return value of the method on success, or FALSE.
- *     If FALSE is returned, see xmlrpc_errno() and xmlrpc_error_msg().
- *   For multiple requests:
- *     An array of results. Each result will either be the result
- *     returned by the method called, or an xmlrpc_error object if the call
- *     failed. See xmlrpc_error().
- */
-function xmlrpc($url, $args, $options = array()) {
-  require_once DRUPAL_ROOT . '/core/includes/xmlrpc.inc';
-  return _xmlrpc($url, $args, $options);
 }
 
 /**
