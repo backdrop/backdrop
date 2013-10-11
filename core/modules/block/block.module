@@ -276,9 +276,7 @@ function block_page_build(&$page) {
         '#type' => 'link',
         '#title' => t('Exit block region demonstration'),
         '#href' => 'admin/structure/block' . (variable_get('theme_default', 'stark') == $theme ? '' : '/list/' . $theme),
-        // Add the "overlay-restore" class to indicate this link should restore
-        // the context in which the region demonstration page was opened.
-        '#options' => array('attributes' => array('class' => array('block-demo-backlink', 'overlay-restore'))),
+        '#options' => array('attributes' => array('class' => array('block-demo-backlink'))),
         '#weight' => -10,
       );
     }
@@ -980,8 +978,7 @@ function block_menu_delete($menu) {
  */
 function block_admin_paths() {
   $paths = array(
-    // Exclude the block demonstration page from admin (overlay) treatment.
-    // This allows us to present this page in its true form, full page.
+    // Exclude the block demonstration page from admin treatment.
     'admin/structure/block/demo/*' => FALSE,
   );
   return $paths;

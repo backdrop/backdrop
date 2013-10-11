@@ -1422,22 +1422,6 @@ ol.search-results {
   padding-left: 0;
 }
 
-/* -------------- Shortcut Links -------------- */
-
-.shortcut-wrapper {
-  margin: 2.2em 0 1.1em 0; /* Same as usual h1#page-title margin. */
-}
-.shortcut-wrapper h1#page-title {
-  float: left; /* LTR */
-  margin: 0;
-}
-div.add-or-remove-shortcuts {
-  padding-top: 0.9em;
-}
-.overlay div.add-or-remove-shortcuts {
-  padding-top: 0.8em;
-}
-
 /* ---------- Admin-specific Theming ---------- */
 
 .page-admin #content img {

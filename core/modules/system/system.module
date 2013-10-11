@@ -1127,16 +1127,6 @@ function system_library_info() {
     ),
   );
 
-  // jQuery BBQ plugin.
-  $libraries['jquery.bbq'] = array(
-    'title' => 'jQuery BBQ',
-    'website' => 'http://benalman.com/projects/jquery-bbq-plugin/',
-    'version' => '1.2.1',
-    'js' => array(
-      'core/misc/jquery.ba-bbq.js' => array(),
-    ),
-  );
-
   // Vertical Tabs.
   $libraries['drupal.vertical-tabs'] = array(
     'title' => 'Vertical Tabs',
