@@ -66,7 +66,6 @@
  * - $page['header']: Items for the header region.
  * - $page['featured']: Items for the featured region.
  * - $page['highlighted']: Items for the highlighted content region.
- * - $page['help']: Dynamic help text, mostly for admin pages.
  * - $page['content']: The main content of the current page.
  * - $page['sidebar_first']: Items for the first sidebar.
  * - $page['triptych_first']: Items for the first triptych.
@@ -195,7 +194,6 @@
           <?php print render($tabs); ?>
         </div>
       <?php endif; ?>
-      <?php print render($page['help']); ?>
       <?php if ($action_links): ?>
         <ul class="action-links">
           <?php print render($action_links); ?>

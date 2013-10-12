@@ -1679,37 +1679,6 @@ function theme_menu_local_action($variables) {
 }
 
 /**
- * Generates elements for the $arg array in the help hook.
- */
-function drupal_help_arg($arg = array()) {
-  // Note - the number of empty elements should be > MENU_MAX_PARTS.
-  return $arg + array('', '', '', '', '', '', '', '', '', '', '', '');
-}
-
-/**
- * Returns the help associated with the active menu item.
- */
-function menu_get_active_help() {
-  $output = '';
-  $router_path = menu_tab_root_path();
-  // We will always have a path unless we are on a 403 or 404.
-  if (!$router_path) {
-    return '';
-  }
-
-  $arg = drupal_help_arg(arg(NULL));
-
-  foreach (module_implements('help') as $module) {
-    $function = $module . '_help';
-    // Lookup help for this path.
-    if ($help = $function($router_path, $arg)) {
-      $output .= $help . "\n";
-    }
-  }
-  return $output;
-}
-
-/**
  * Gets the custom theme for the current page, if there is one.
  *
  * @param $initialize
