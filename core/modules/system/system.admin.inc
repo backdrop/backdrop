@@ -789,9 +789,6 @@ function system_modules($form, $form_state = array()) {
   $modules = array();
   $form['modules'] = array('#tree' => TRUE);
 
-  // Used when checking if module implements a help page.
-  $help_arg = module_exists('help') ? drupal_help_arg() : FALSE;
-
   // Used when displaying modules that are required by the install profile.
   require_once DRUPAL_ROOT . '/core/includes/install.inc';
   $distribution_name = check_plain(drupal_install_profile_distribution_name());
@@ -836,17 +833,6 @@ function system_modules($form, $form_state = array()) {
         else {
           $extra['requires'][$requires] = t('@module (<span class="admin-disabled">disabled</span>)', array('@module' => $requires_name));
         }
-      }
-    }
-    // Generate link for module's help page, if there is one.
-    if ($help_arg && $module->status && in_array($filename, module_implements('help'))) {
-      if (module_invoke($filename, 'help', "admin/help#$filename", $help_arg)) {
-        $extra['links']['help'] = array(
-          '#type' => 'link',
-          '#title' => t('Help'),
-          '#href' => "admin/help/$filename",
-          '#options' => array('attributes' => array('class' =>  array('module-link', 'module-link-help'), 'title' => t('Help'))),
-        );
       }
     }
     // Generate link for module's permission, if the user has access to it.
