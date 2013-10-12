@@ -153,8 +153,7 @@ function hook_preprocess(&$variables, $hook) {
  *   The variables array (modify in place).
  */
 function hook_preprocess_HOOK(&$variables) {
-  // This example is from rdf_preprocess_image(). It adds an RDF attribute
-  // to the image hook's variables.
+  // This example adds an RDF attribute to the image hook's variables.
   $variables['attributes']['typeof'] = array('foaf:Image');
 }
 
@@ -173,17 +172,8 @@ function hook_preprocess_HOOK(&$variables) {
  *   The name of the theme hook.
  */
 function hook_process(&$variables, $hook) {
-  // Wraps variables in RDF wrappers.
-  if (!empty($variables['rdf_template_variable_attributes_array'])) {
-    foreach ($variables['rdf_template_variable_attributes_array'] as $variable_name => $attributes) {
-      $context = array(
-        'hook' => $hook,
-        'variable_name' => $variable_name,
-        'variables' => $variables,
-      );
-      $variables[$variable_name] = theme('rdf_template_variable_wrapper', array('content' => $variables[$variable_name], 'attributes' => $attributes, 'context' => $context));
-    }
-  }
+  global $user;
+  $variables['is_anonymous'] = ($user->uid === 0) ? TRUE : FALSE ;
 }
 
 /**

@@ -124,11 +124,3 @@ body.toolbar-drawer {
   background: url(toolbar.png) 0 0 repeat-x;
   text-shadow: #333 0 1px 0;
 }
-
-/**
- * Collapsed drawer of additional toolbar content.
- */
-#toolbar div.toolbar-drawer {
-  position: relative;
-  padding: 0 10px;
-}

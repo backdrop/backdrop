@@ -1724,7 +1724,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#weight' => -20,
   );
   $form['site_information']['site_mail'] = array(
-    '#type' => 'textfield',
+    '#type' => 'email',
     '#title' => st('Site e-mail address'),
     '#default_value' => ini_get('sendmail_from'),
     '#description' => st("Automated e-mails, such as registration information, will be sent from this address. Use an address ending in your site's domain to help prevent these e-mails from being flagged as spam."),
@@ -1747,9 +1747,9 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#attributes' => array('class' => array('username')),
   );
 
-  $form['admin_account']['account']['mail'] = array('#type' => 'textfield',
+  $form['admin_account']['account']['mail'] = array(
+    '#type' => 'email',
     '#title' => st('E-mail address'),
-    '#maxlength' => EMAIL_MAX_LENGTH,
     '#required' => TRUE,
     '#weight' => -5,
   );
@@ -1764,17 +1764,6 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#type' => 'fieldset',
     '#title' => st('Server settings'),
     '#collapsible' => FALSE,
-  );
-
-  $countries = country_get_list();
-  $form['server_settings']['site_default_country'] = array(
-    '#type' => 'select',
-    '#title' => st('Default country'),
-    '#empty_value' => '',
-    '#default_value' => variable_get('site_default_country', NULL),
-    '#options' => $countries,
-    '#description' => st('Select the default country for the site.'),
-    '#weight' => 0,
   );
 
   $form['server_settings']['date_default_timezone'] = array(
@@ -1826,12 +1815,6 @@ function install_configure_form_validate($form, &$form_state) {
   if ($error = user_validate_name($form_state['values']['account']['name'])) {
     form_error($form['admin_account']['account']['name'], $error);
   }
-  if ($error = user_validate_mail($form_state['values']['account']['mail'])) {
-    form_error($form['admin_account']['account']['mail'], $error);
-  }
-  if ($error = user_validate_mail($form_state['values']['site_mail'])) {
-    form_error($form['site_information']['site_mail'], $error);
-  }
 }
 
 /**
@@ -1843,7 +1826,6 @@ function install_configure_form_submit($form, &$form_state) {
   variable_set('site_name', $form_state['values']['site_name']);
   variable_set('site_mail', $form_state['values']['site_mail']);
   variable_set('date_default_timezone', $form_state['values']['date_default_timezone']);
-  variable_set('site_default_country', $form_state['values']['site_default_country']);
 
   // Enable update.module if this option was selected.
   if ($form_state['values']['update_status_module'][1]) {

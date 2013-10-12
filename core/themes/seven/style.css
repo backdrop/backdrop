@@ -602,6 +602,7 @@ div.teaser-checkbox .form-item,
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
 .form-disabled input.form-tel,
+.form-disabled input.form-email,
 .form-disabled input.form-file,
 .form-disabled textarea.form-textarea,
 .form-disabled select.form-select {
@@ -689,6 +690,7 @@ input.form-button-disabled:active {
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-email,
 input.form-file,
 textarea.form-textarea,
 select.form-select {
@@ -703,6 +705,7 @@ select.form-select {
 }
 input.form-text:focus,
 input.form-tel:focus,
+input.form-email:focus,
 input.form-file:focus,
 textarea.form-textarea:focus,
 select.form-select:focus {
@@ -866,70 +869,11 @@ ol.task-list li.done {
   color: green;
 }
 
-/* Overlay theming */
-.overlay #branding {
-  background-color: #fff;
-  padding-top: 15px;
-}
-.overlay #branding h1.page-title,
-.overlay #left,
-.overlay #footer {
-  display: none;
-}
-.overlay #page {
-  margin: 0;
-  padding: 0 20px;
-}
-.overlay #branding div.breadcrumb {
-  float: left; /* LTR */
-  position: relative;
-  z-index: 10;
-}
-#overlay-tabs {
-  bottom: -1px;
-  font-size: 1.54em;
-  line-height: 1.54em;
-  margin: 0;
-}
-#overlay-tabs li {
-  margin: 0 -2px;
-}
-.overlay ul.secondary {
-  background: transparent none;
-  margin: -1.4em 0 0.3em 0; /* LTR */
-  overflow: visible;
-}
-.overlay #content {
-  padding: 0;
-}
-h1#overlay-title {
-  font-weight: normal;
-}
-
 /* Shortcut theming */
 div.add-or-remove-shortcuts {
   float: left; /* LTR */
   padding-top: 6px;
   padding-left: 6px; /* LTR */
-}
-
-/* Dashboard */
-#dashboard .dashboard-region div.block h2 {
-  background: #E0E0D8;
-}
-#dashboard div.block h2 {
-  margin: 0;
-  font-size: 1em;
-  padding: 3px 10px;
-}
-#dashboard div.block div.content {
-  padding: 10px 5px 5px 5px; /* LTR */
-}
-#dashboard div.block div.content ul.menu {
-  margin-left: 20px; /* LTR */
-}
-#dashboard .dashboard-region .block {
-  border: #ccc 1px solid;
 }
 
 /* Field UI */
@@ -966,25 +910,3 @@ div.add-or-remove-shortcuts {
   padding: 0 5px 5px 0; /* LTR */
 }
 
-/* Disable overlay message */
-#overlay-disable-message {
-  background-color: #addafc;
-}
-#overlay-disable-message a,
-#overlay-disable-message a:visited {
-  color: #000;
-}
-#overlay-disable-message a:focus,
-#overlay-disable-message a:active {
-  outline: none;
-  text-decoration: underline;
-}
-.overlay-disable-message-focused a {
-  padding: 0.4em 0.6em;
-}
-.overlay-disable-message-focused #overlay-dismiss-message {
-  background-color: #59a0d8;
-  color: #fff;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
-}

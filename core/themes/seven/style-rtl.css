@@ -49,13 +49,6 @@ ol {
 }
 
 /**
- * Help.
- */
-#help div.more-help-link {
-  text-align: left;
-}
-
-/**
  * Page title.
  */
 #branding h1.page-title {
@@ -204,27 +197,11 @@ ol.task-list li.active {
   padding: 0.5em 20px 0.5em 1em;
 }
 
-/* Overlay theming */
-.overlay #branding div.breadcrumb {
-  float: right;
-}
-.overlay ul.secondary {
-  margin: -1.4em 0 0.3em 0;
-}
-
 /* Shortcut theming */
 div.add-or-remove-shortcuts {
   float: none;
   padding-left: 0;
   padding-right: 6px;
-}
-
-/* Dashboard */
-#dashboard div.block div.content {
-  padding: 10px 5px 5px 5px;
-}
-#dashboard div.block div.content ul.menu {
-  margin-right: 20px;
 }
 
 /* Recent content block */

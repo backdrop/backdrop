@@ -1679,37 +1679,6 @@ function theme_menu_local_action($variables) {
 }
 
 /**
- * Generates elements for the $arg array in the help hook.
- */
-function drupal_help_arg($arg = array()) {
-  // Note - the number of empty elements should be > MENU_MAX_PARTS.
-  return $arg + array('', '', '', '', '', '', '', '', '', '', '', '');
-}
-
-/**
- * Returns the help associated with the active menu item.
- */
-function menu_get_active_help() {
-  $output = '';
-  $router_path = menu_tab_root_path();
-  // We will always have a path unless we are on a 403 or 404.
-  if (!$router_path) {
-    return '';
-  }
-
-  $arg = drupal_help_arg(arg(NULL));
-
-  foreach (module_implements('help') as $module) {
-    $function = $module . '_help';
-    // Lookup help for this path.
-    if ($help = $function($router_path, $arg)) {
-      $output .= $help . "\n";
-    }
-  }
-  return $output;
-}
-
-/**
  * Gets the custom theme for the current page, if there is one.
  *
  * @param $initialize
@@ -3102,10 +3071,10 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
   }
   // If every value in $existing_item is the same in the $item, there is no
   // reason to run the update queries or clear the caches. We use
-  // array_intersect_assoc() with the $item as the first parameter because
+  // array_intersect_key() with the $item as the first parameter because
   // $item may have additional keys left over from building a router entry.
   // The intersect removes the extra keys, allowing a meaningful comparison.
-  if (!$existing_item || (array_intersect_assoc($item, $existing_item)) != $existing_item) {
+  if (!$existing_item || (array_intersect_key($item, $existing_item)) != $existing_item) {
     db_update('menu_links')
       ->fields(array(
         'menu_name' => $item['menu_name'],

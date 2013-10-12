@@ -594,7 +594,7 @@ class CommonCascadingStylesheetsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('php', 'language', 'common_test');
+    parent::setUp('language', 'common_test');
     // Reset drupal_add_css() before each test.
     drupal_static_reset('drupal_add_css');
   }
@@ -698,31 +698,16 @@ class CommonCascadingStylesheetsTestCase extends DrupalWebTestCase {
 
   /**
    * Tests rendering inline stylesheets through a full page request.
+   *
+   * @see common_test_render_inline_full_page()
    */
   function testRenderInlineFullPage() {
-    $css = 'body { font-size: 254px; }';
     // Inline CSS is minified unless 'preprocess' => FALSE is passed as a
     // drupal_add_css() option.
     $expected = 'body{font-size:254px;}';
 
-    // Create a node, using the PHP filter that tests drupal_add_css().
-    $php_format_id = 'php_code';
-    $settings = array(
-      'type' => 'page',
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => t('This tests the inline CSS!') . "<?php drupal_add_css('$css', 'inline'); ?>",
-            'format' => $php_format_id,
-          ),
-        ),
-      ),
-      'promote' => 1,
-    );
-    $node = $this->drupalCreateNode($settings);
-
     // Fetch the page.
-    $this->drupalGet('node/' . $node->nid);
+    $this->drupalGet('common-test/css-render-inline-full-page');
     $this->assertRaw($expected, t('Inline stylesheets appear in the full page rendering.'));
   }
 

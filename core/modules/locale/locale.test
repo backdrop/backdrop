@@ -56,7 +56,7 @@ class LocaleConfigurationTest extends DrupalWebTestCase {
       'predefined_langcode' => 'fr',
     );
     $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
-    $this->assertText('fr', t('Language added successfully.'));
+    $this->assertText('French', t('Language added successfully.'));
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), t('Correct page redirection.'));
 
     // Check if the Default English language has no path prefix.
@@ -1689,7 +1689,7 @@ class LocaleUserCreationTest extends DrupalWebTestCase {
       'predefined_langcode' => 'fr',
     );
     $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
-    $this->assertText($langcode, t('Language added successfully.'));
+    $this->assertText('French', t('Language added successfully.'));
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), t('Correct page redirection.'));
 
     // Set language negotiation.
@@ -2631,10 +2631,10 @@ class LocaleMultilingualFieldsFunctionalTest extends DrupalWebTestCase {
     $node = $this->drupalGetNodeByTitle($edit[$title_key]);
     $this->assertTrue($node, t('Node found in database.'));
 
-    // Check if node body is showed.
+    // Check if node body is shown.
     $this->drupalGet("node/$node->nid");
-    $body = $this->xpath('//div[@id=:id]//div[@property="content:encoded"]/p', array(':id' => 'node-' . $node->nid));
-    $this->assertEqual(current($body), $node->body['en'][0]['value'], 'Node body is correctly showed.');
+    $body = $this->xpath('//div[@id=:id]//p', array(':id' => 'node-' . $node->nid));
+    $this->assertEqual(current($body), $node->body['en'][0]['value'], 'Node body is correctly shown.');
   }
 }
 
