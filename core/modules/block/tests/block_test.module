@@ -32,5 +32,5 @@ function block_test_block_info() {
  * Implements hook_block_view().
  */
 function block_test_block_view($delta = 0) {
-  return array('content' => variable_get('block_test_content', 'dfd'));
+  return array('content' => variable_get('block_test_content', ''));
 }
