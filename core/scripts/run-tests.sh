@@ -91,7 +91,6 @@ simpletest_script_reporter_timer_stop();
 
 $status_code = simpletest_script_result_status_code();
 
-
 // Display results before database is cleared.
 simpletest_script_reporter_display_results();
 
@@ -585,9 +584,8 @@ function simpletest_script_reporter_timer_stop() {
  * Check if this test run had any failures.
  */
 function simpletest_script_result_status_code() {
-  global $args, $test_id, $results_map;
-
-  $errorCount = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND (status = :exception OR status = :error)", array(':test_id' => $test_id, ':exception' => 'exception', ':error' => 'error'))->fetchField();
+  global $test_id;
+  $errorCount = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND (status = 'exception' OR status = 'fail')", array(':test_id' => $test_id))->fetchField();
   return $errorCount > 0 ? 1 : 0;
 }
 
