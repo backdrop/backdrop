@@ -1407,18 +1407,6 @@ class SystemBlockTestCase extends DrupalWebTestCase {
     $edit['blocks[system_powered-by][region]'] = 'footer';
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
     $this->drupalPost('admin/structure/block/manage/system/powered-by/configure', array('title' => ''), t('Save block'));
-
-    // Set the help block to the help region.
-    $edit = array();
-    $edit['blocks[system_help][region]'] = 'help';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
-
-    // Test displaying the help block with block caching enabled.
-    variable_set('block_cache', TRUE);
-    $this->drupalGet('admin/structure/block/add');
-    $this->assertRaw(t('Use this page to create a new custom block.'));
-    $this->drupalGet('admin/index');
-    $this->assertRaw(t('This page shows you all available administration tasks for each module.'));
   }
 }
 
