@@ -1,14 +1,6 @@
 <?php
 
 class RegistryParseFileTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Registry parse file test',
-      'description' => 'Parse a simple file and check that its resources are saved to the database.',
-      'group' => 'System'
-    );
-  }
-
   function setUp() {
     $chrs = hash('sha256', microtime() . mt_rand());
     $this->fileName = 'registry_test_' . substr($chrs, 0, 16);
@@ -47,14 +39,6 @@ CONTENTS;
 
 class RegistryParseFilesTestCase extends DrupalWebTestCase {
   protected $fileTypes = array('new', 'existing_changed');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Registry parse files test',
-      'description' => 'Read two a simple files from disc, and check that their resources are saved to the database.',
-      'group' => 'System'
-    );
-  }
 
   function setUp() {
     parent::setUp();

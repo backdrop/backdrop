@@ -53,15 +53,6 @@ class UpdateTestHelper extends DrupalWebTestCase {
 }
 
 class UpdateCoreTestCase extends UpdateTestHelper {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Update core functionality',
-      'description' => 'Tests the update module through a series of functional tests using mock XML data.',
-      'group' => 'Update',
-    );
-  }
-
   function setUp() {
     parent::setUp('update_test', 'update');
     $admin_user = $this->drupalCreateUser(array('administer site configuration', 'administer modules'));
@@ -237,15 +228,6 @@ class UpdateCoreTestCase extends UpdateTestHelper {
 }
 
 class UpdateTestContribCase extends UpdateTestHelper {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Update contrib functionality',
-      'description' => 'Tests how the update module handles contributed modules and themes in a series of functional tests using mock XML data.',
-      'group' => 'Update',
-    );
-  }
-
   function setUp() {
     parent::setUp('update_test', 'update', 'aaa_update_test', 'bbb_update_test', 'ccc_update_test');
     $admin_user = $this->drupalCreateUser(array('administer site configuration'));
@@ -602,14 +584,6 @@ class UpdateTestContribCase extends UpdateTestHelper {
 }
 
 class UpdateTestUploadCase extends UpdateTestHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Upload and extract module functionality',
-      'description' => 'Tests the update module\'s upload and extraction functionality.',
-      'group' => 'Update',
-    );
-  }
-
   public function setUp() {
     parent::setUp('update', 'update_test');
     variable_set('allow_authorize_operations', TRUE);

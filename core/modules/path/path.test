@@ -6,14 +6,6 @@
  */
 
 class PathTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Path alias functionality',
-      'description' => 'Add, edit, delete, and change alias and verify its consistency in the database.',
-      'group' => 'Path',
-    );
-  }
-
   function setUp() {
     parent::setUp('path');
 
@@ -168,14 +160,6 @@ class PathTestCase extends DrupalWebTestCase {
  * Test URL aliases for taxonomy terms.
  */
 class PathTaxonomyTermTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy term URL aliases',
-      'description' => 'Tests URL aliases for taxonomy terms.',
-      'group' => 'Path',
-    );
-  }
-
   function setUp() {
     parent::setUp('path', 'taxonomy');
 
@@ -229,14 +213,6 @@ class PathTaxonomyTermTestCase extends DrupalWebTestCase {
 }
 
 class PathLanguageTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Path aliases with translated nodes',
-      'description' => 'Confirm that paths work with translated nodes',
-      'group' => 'Path',
-    );
-  }
-
   function setUp() {
     parent::setUp('path', 'locale', 'translation');
 
@@ -372,14 +348,6 @@ class PathLanguageTestCase extends DrupalWebTestCase {
  * Tests the user interface for creating path aliases, with languages.
  */
 class PathLanguageUITestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Path aliases with languages',
-      'description' => 'Confirm that the Path module user interface works with languages.',
-      'group' => 'Path',
-    );
-  }
-
   function setUp() {
     parent::setUp('path', 'locale');
 
@@ -448,14 +416,6 @@ class PathLanguageUITestCase extends DrupalWebTestCase {
  * Tests that paths are not prefixed on a monolingual site.
  */
 class PathMonolingualTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Paths on non-English monolingual sites',
-      'description' => 'Confirm that paths are not changed on monolingual non-English sites',
-      'group' => 'Path',
-    );
-  }
-
   function setUp() {
     parent::setUp('path', 'locale', 'translation');
 

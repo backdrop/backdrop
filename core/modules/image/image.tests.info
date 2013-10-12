@@ -1,0 +1,41 @@
+[ImageStylesPathAndUrlUnitTest]
+name = Image styles path and URL functions
+description = Tests functions for generating paths and URLs to image styles.
+group = Image
+file = image.test
+
+[ImageEffectsUnitTest]
+name = Image effects
+description = Test that the image effects pass parameters to the toolkit correctly.
+group = Image
+file = image.test
+
+[ImageAdminStylesUnitTest]
+name = Image styles and effects UI configuration
+description = Tests creation, deletion, and editing of image styles and effects at the UI level.
+group = Image
+file = image.test
+
+[ImageFieldDisplayTestCase]
+name = Image field display tests
+description = Test the display of image fields.
+group = Image
+file = image.test
+
+[ImageFieldValidateTestCase]
+name = Image field validation tests
+description = Tests validation functions such as min/max resolution.
+group = Image
+file = image.test
+
+[ImageDimensionsUnitTest]
+name = Image dimensions
+description = Tests that images have correct dimensions when styled.
+group = Image
+file = image.test
+
+[ImageDimensionsScaleTestCase]
+name = image_dimensions_scale()
+description = Tests all control flow branches in image_dimensions_scale().
+group = Image
+file = image.test

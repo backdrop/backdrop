@@ -1,0 +1,71 @@
+[AggregatorConfigurationTestCase]
+name = Aggregator configuration
+description = Test aggregator settings page.
+group = Aggregator
+file = aggregator.test
+
+[AddFeedTestCase]
+name = Add feed functionality
+description = Add feed test.
+group = Aggregator
+file = aggregator.test
+
+[CategorizeFeedTestCase]
+name = Categorize feed functionality
+description = Categorize feed test.
+group = Aggregator
+file = aggregator.test
+
+[UpdateFeedTestCase]
+name = Update feed functionality
+description = Update feed test.
+group = Aggregator
+file = aggregator.test
+
+[RemoveFeedTestCase]
+name = Remove feed functionality
+description = Remove feed test.
+group = Aggregator
+file = aggregator.test
+
+[UpdateFeedItemTestCase]
+name = Update feed item functionality
+description = Update feed items from a feed.
+group = Aggregator
+file = aggregator.test
+
+[RemoveFeedItemTestCase]
+name = Remove feed item functionality
+description = Remove feed items from a feed.
+group = Aggregator
+file = aggregator.test
+
+[CategorizeFeedItemTestCase]
+name = Categorize feed item functionality
+description = Test feed item categorization.
+group = Aggregator
+file = aggregator.test
+
+[ImportOPMLTestCase]
+name = Import feeds from OPML functionality
+description = Test OPML import.
+group = Aggregator
+file = aggregator.test
+
+[AggregatorCronTestCase]
+name = Update on cron functionality
+description = Update feeds on cron.
+group = Aggregator
+file = aggregator.test
+
+[AggregatorRenderingTestCase]
+name = Checks display of aggregator items
+description = Checks display of aggregator items on the page.
+group = Aggregator
+file = aggregator.test
+
+[FeedParserTestCase]
+name = Feed parser functionality
+description = Test the built-in feed parser with valid feed samples.
+group = Aggregator
+file = aggregator.test

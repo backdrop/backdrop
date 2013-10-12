@@ -9,14 +9,6 @@
  * Tests for text format and filter CRUD operations.
  */
 class FilterCRUDTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter CRUD operations',
-      'description' => 'Test creation, loading, updating, deleting of text formats and filters.',
-      'group' => 'Filter',
-    );
-  }
-
   function setUp() {
     parent::setUp('filter_test');
   }
@@ -161,14 +153,6 @@ class FilterCRUDTestCase extends DrupalWebTestCase {
 }
 
 class FilterAdminTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter administration functionality',
-      'description' => 'Thoroughly test the administrative interface of the filter module.',
-      'group' => 'Filter',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -408,14 +392,6 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
   protected $allowed_format;
   protected $disallowed_format;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter format access',
-      'description' => 'Tests access to text formats.',
-      'group' => 'Filter',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -647,14 +623,6 @@ class FilterFormatAccessTestCase extends DrupalWebTestCase {
 }
 
 class FilterDefaultFormatTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Default text format functionality',
-      'description' => 'Test the default text formats for different users.',
-      'group' => 'Filter',
-    );
-  }
-
   function testDefaultTextFormats() {
     // Create two text formats, and two users. The first user has access to
     // both formats, but the second user only has access to the second one.
@@ -707,14 +675,6 @@ class FilterDefaultFormatTestCase extends DrupalWebTestCase {
 }
 
 class FilterNoFormatTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Unassigned text format functionality',
-      'description' => 'Test the behavior of check_markup() when it is called without a text format.',
-      'group' => 'Filter',
-    );
-  }
-
   function testCheckMarkupNoFormat() {
     // Create some text. Include some HTML and line breaks, so we get a good
     // test of the filtering that is applied to it.
@@ -730,14 +690,6 @@ class FilterNoFormatTestCase extends DrupalWebTestCase {
  * Security tests for missing/vanished text formats or filters.
  */
 class FilterSecurityTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Security',
-      'description' => 'Test the behavior of check_markup() when a filter or text format vanishes.',
-      'group' => 'Filter',
-    );
-  }
-
   function setUp() {
     parent::setUp('filter_test');
     $this->admin_user = $this->drupalCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
@@ -779,14 +731,6 @@ class FilterSecurityTestCase extends DrupalWebTestCase {
  * Unit tests for core filters.
  */
 class FilterUnitTestCase extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter module filters',
-      'description' => 'Tests Filter module filters individually.',
-      'group' => 'Filter',
-    );
-  }
-
   /**
    * Test the line break filter.
    */
@@ -1765,14 +1709,6 @@ body {color:red}
  * Tests for filter hook invocation.
  */
 class FilterHooksTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter format hooks',
-      'description' => 'Test hooks for text formats insert/update/disable.',
-      'group' => 'Filter',
-    );
-  }
-
   function setUp() {
     parent::setUp('block', 'filter_test');
     $admin_user = $this->drupalCreateUser(array('administer filters', 'administer blocks'));

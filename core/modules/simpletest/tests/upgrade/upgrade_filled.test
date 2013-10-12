@@ -1,19 +1,13 @@
 <?php
 
+require_once DRUPAL_ROOT . '/core/modules/simpletest/tests/upgrade/upgrade.test';
+
 /**
  * Upgrade test for the filled database..
  *
  * Load a filled installation of Drupal 7 and run the upgrade process on it.
  */
 class FilledUpgradePathTestCase extends UpgradePathTestCase {
-  public static function getInfo() {
-    return array(
-      'name'  => 'Filled upgrade test',
-      'description'  => 'Filled upgrade test.',
-      'group' => 'Upgrade path',
-    );
-  }
-
   public function setUp() {
     // Path to the database dump.
     $this->databaseDumpFiles = array(

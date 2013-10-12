@@ -17,14 +17,6 @@ class TableSortTest extends DrupalUnitTestCase {
    */
   protected $GET = array();
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Tablesort',
-      'description' => 'Tests table sorting.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     // Save the original $_GET to be restored later.
     $this->GET = $_GET;

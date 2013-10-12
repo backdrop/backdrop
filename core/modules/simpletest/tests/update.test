@@ -9,14 +9,6 @@
  * Tests for the update dependency ordering system.
  */
 class UpdateDependencyOrderingTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Update dependency ordering',
-      'description' => 'Test that update functions are run in the proper order.',
-      'group' => 'Update API',
-    );
-  }
-
   function setUp() {
     parent::setUp('update_test_1', 'update_test_2', 'update_test_3');
     require_once DRUPAL_ROOT . '/core/includes/update.inc';
@@ -59,14 +51,6 @@ class UpdateDependencyOrderingTestCase extends DrupalWebTestCase {
  * Tests for missing update dependencies.
  */
 class UpdateDependencyMissingTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Missing update dependencies',
-      'description' => 'Test that missing update dependencies are correctly flagged.',
-      'group' => 'Update API',
-    );
-  }
-
   function setUp() {
     // Only install update_test_2.module, even though its updates have a
     // dependency on update_test_3.module.
@@ -89,14 +73,6 @@ class UpdateDependencyMissingTestCase extends DrupalWebTestCase {
  * Tests for the invocation of hook_update_dependencies().
  */
 class UpdateDependencyHookInvocationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Update dependency hook invocation',
-      'description' => 'Test that the hook invocation for determining update dependencies works correctly.',
-      'group' => 'Update API',
-    );
-  }
-
   function setUp() {
     parent::setUp('update_test_1', 'update_test_2');
     require_once DRUPAL_ROOT . '/core/includes/update.inc';

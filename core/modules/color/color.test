@@ -13,14 +13,6 @@ class ColorTestCase extends DrupalWebTestCase {
   protected $themes;
   protected $colorTests;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Color functionality',
-      'description' => 'Modify the Bartik theme colors and make sure the changes are reflected on the frontend.',
-      'group' => 'Color',
-    );
-  }
-
   function setUp() {
     parent::setUp('color');
 

@@ -1,0 +1,17 @@
+[UpdateCoreTestCase]
+name = Update core functionality
+description = Tests the update module through a series of functional tests using mock XML data.
+group = Update
+file = update.test
+
+[UpdateTestContribCase]
+name = Update contrib functionality
+description = Tests how the update module handles contributed modules and themes in a series of functional tests using mock XML data.
+group = Update
+file = update.test
+
+[UpdateTestUploadCase]
+name = Upload and extract module functionality
+description = Tests the update module's upload and extraction functionality.
+group = Update
+file = update.test

@@ -1,0 +1,5 @@
+[OptionsWidgetsTestCase]
+name = Options widgets
+description = Test the Options widgets.
+group = Field types
+file = options.test
