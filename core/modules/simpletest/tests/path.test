@@ -13,14 +13,6 @@
 class DrupalMatchPathTestCase extends DrupalWebTestCase {
   protected $front;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Drupal match path',
-      'description' => 'Tests the drupal_match_path() function to make sure it works properly.',
-      'group' => 'Path API',
-    );
-  }
-
   function setUp() {
     // Set up the database and testing environment.
     parent::setUp();
@@ -130,14 +122,6 @@ class DrupalMatchPathTestCase extends DrupalWebTestCase {
  * Tests hook_url_alter functions.
  */
 class UrlAlterFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => t('URL altering'),
-      'description' => t('Tests hook_url_inbound_alter() and hook_url_outbound_alter().'),
-      'group' => t('Path API'),
-    );
-  }
-
   function setUp() {
     parent::setUp('path', 'url_alter_test');
   }
@@ -234,14 +218,6 @@ class UrlAlterFunctionalTest extends DrupalWebTestCase {
  * Unit test for drupal_lookup_path().
  */
 class PathLookupTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => t('Path lookup'),
-      'description' => t('Tests that drupal_lookup_path() returns correct paths.'),
-      'group' => t('Path API'),
-    );
-  }
-
   /**
    * Test that drupal_lookup_path() returns the correct path.
    */
@@ -324,14 +300,6 @@ class PathLookupTest extends DrupalWebTestCase {
  * Tests the path_save() function.
  */
 class PathSaveTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => t('Path save'),
-      'description' => t('Tests that path_save() exposes the previous alias value.'),
-      'group' => t('Path API'),
-    );
-  }
-
   function setUp() {
     // Enable a helper module that implements hook_path_update().
     parent::setUp('path_test');

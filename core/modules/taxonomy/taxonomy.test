@@ -45,15 +45,6 @@ class TaxonomyWebTestCase extends DrupalWebTestCase {
 * Tests for the taxonomy vocabulary interface.
 */
 class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy vocabulary interface',
-      'description' => 'Test the taxonomy vocabulary interface.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->drupalCreateUser(array('administer taxonomy'));
@@ -181,15 +172,6 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
  * Tests for taxonomy vocabulary functions.
  */
 class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy vocabularies',
-      'description' => 'Test loading, saving and deleting vocabularies.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp('taxonomy', 'field_test');
     $admin_user = $this->drupalCreateUser(array('create article content', 'administer taxonomy'));
@@ -395,15 +377,6 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
  * Unit tests for taxonomy term functions.
  */
 class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy term unit tests',
-      'description' => 'Unit tests for taxonomy term functions.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function testTermDelete() {
     $vocabulary = $this->createVocabulary();
     $valid_term = $this->createTerm($vocabulary);
@@ -475,15 +448,6 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
  * Test for legacy node bug.
  */
 class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Test for legacy node bug.',
-      'description' => 'Posts an article with a taxonomy term and a date prior to 1970.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'administer nodes', 'bypass node access'));
@@ -512,15 +476,6 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
  * Tests for taxonomy term functions.
  */
 class TaxonomyTermTestCase extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy term functions and forms',
-      'description' => 'Test load, save and delete for taxonomy terms.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access'));
@@ -940,15 +895,6 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
  * Tests the rendering of term reference fields in RSS feeds.
  */
 class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy RSS Content.',
-      'description' => 'Ensure that data added as terms appears in RSS feeds if "RSS Category" format is selected.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types'));
@@ -1033,15 +979,6 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
  * Tests the hook implementations that maintain the taxonomy index.
  */
 class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy term index',
-      'description' => 'Tests the hook implementations that maintain the taxonomy index.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp('taxonomy');
 
@@ -1250,15 +1187,6 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
  * Test the taxonomy_term_load_multiple() function.
  */
 class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy term multiple loading',
-      'description' => 'Test the loading of multiple taxonomy terms at once',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->taxonomy_admin = $this->drupalCreateUser(array('administer taxonomy'));
@@ -1317,14 +1245,6 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
  * Tests for taxonomy hook invocation.
  */
 class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy term hooks',
-      'description' => 'Hooks for taxonomy term load/save/delete.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp('taxonomy', 'taxonomy_test');
     $taxonomy_admin = $this->drupalCreateUser(array('administer taxonomy'));
@@ -1370,14 +1290,6 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
 class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
   protected $instance;
   protected $vocabulary;
-
-  public static function getInfo() {
-    return array(
-      'name'  => 'Taxonomy term reference field',
-      'description'  => 'Test the creation of term fields.',
-      'group' => 'Taxonomy',
-    );
-  }
 
   function setUp() {
     parent::setUp('field_test');
@@ -1524,14 +1436,6 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
   protected $vocabulary1;
   protected $vocabulary2;
 
-  public static function getInfo() {
-    return array(
-      'name'  => 'Multiple vocabulary term reference field',
-      'description'  => 'Tests term reference fields that allow multiple vocabularies.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -1641,14 +1545,6 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
  * Test taxonomy token replacement in strings.
  */
 class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy token replacement',
-      'description' => 'Generates text using placeholders for dummy content to check taxonomy token replacement.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access'));
@@ -1786,14 +1682,6 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
  * Tests for verifying that taxonomy pages use the correct theme.
  */
 class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Taxonomy theme switching',
-      'description' => 'Verifies that various taxonomy pages use the expected theme.',
-      'group' => 'Taxonomy',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 

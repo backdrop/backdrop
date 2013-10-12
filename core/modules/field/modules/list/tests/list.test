@@ -5,18 +5,12 @@
  * Tests for list.module.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/field/tests/field.test';
+
 /**
  * Tests for the 'List' field types.
  */
 class ListFieldTestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'List field',
-      'description' => 'Test the List field type.',
-      'group' => 'Field types',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -117,14 +111,6 @@ class ListFieldTestCase extends FieldTestCase {
  * List module UI tests.
  */
 class ListFieldUITestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'List field UI',
-      'description' => 'Test the List field UI functionality.',
-      'group' => 'Field types',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test', 'field_ui');
 

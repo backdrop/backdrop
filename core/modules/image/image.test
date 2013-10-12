@@ -5,6 +5,8 @@
  * Tests for image.module.
  */
 
+require DRUPAL_ROOT . '/core/modules/simpletest/tests/image.test';
+
 /**
  * TODO: Test the following functions.
  *
@@ -110,14 +112,6 @@ class ImageStylesPathAndUrlUnitTest extends DrupalWebTestCase {
   protected $image_info;
   protected $image_filepath;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Image styles path and URL functions',
-      'description' => 'Tests functions for generating paths and URLs to image styles.',
-      'group' => 'Image',
-    );
-  }
-
   function setUp() {
     parent::setUp('image_module_test');
 
@@ -219,14 +213,6 @@ class ImageStylesPathAndUrlUnitTest extends DrupalWebTestCase {
  * properly passing parameters to the image toolkit.
  */
 class ImageEffectsUnitTest extends ImageToolkitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Image effects',
-      'description' => 'Test that the image effects pass parameters to the toolkit correctly.',
-      'group' => 'Image',
-    );
-  }
-
   function setUp() {
     parent::setUp('image_test');
     module_load_include('inc', 'image', 'image.effects');
@@ -321,15 +307,6 @@ class ImageEffectsUnitTest extends ImageToolkitTestCase {
  * Tests creation, deletion, and editing of image styles and effects.
  */
 class ImageAdminStylesUnitTest extends ImageFieldTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Image styles and effects UI configuration',
-      'description' => 'Tests creation, deletion, and editing of image styles and effects at the UI level.',
-      'group' => 'Image',
-    );
-  }
-
   /**
    * Given an image style, generate an image.
    */
@@ -628,14 +605,6 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
  * Test class to check that formatters and display settings are working.
  */
 class ImageFieldDisplayTestCase extends ImageFieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Image field display tests',
-      'description' => 'Test the display of image fields.',
-      'group' => 'Image',
-    );
-  }
-
   /**
    * Test image formatters on node display for public files.
    */
@@ -887,14 +856,6 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
  * Test class to check for various validations.
  */
 class ImageFieldValidateTestCase extends ImageFieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Image field validation tests',
-      'description' => 'Tests validation functions such as min/max resolution.',
-      'group' => 'Image',
-    );
-  }
-
   /**
    * Test min/max resolution settings.
    */
@@ -935,15 +896,6 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
  * Tests that images have correct dimensions when styled.
  */
 class ImageDimensionsUnitTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Image dimensions',
-      'description' => 'Tests that images have correct dimensions when styled.',
-      'group' => 'Image',
-    );
-  }
-
   function setUp() {
     parent::setUp('image_module_test');
   }
@@ -1153,14 +1105,6 @@ class ImageDimensionsUnitTest extends DrupalWebTestCase {
  * Tests image_dimensions_scale().
  */
 class ImageDimensionsScaleTestCase extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'image_dimensions_scale()',
-      'description' => 'Tests all control flow branches in image_dimensions_scale().',
-      'group' => 'Image',
-    );
-  }
-
   /**
    * Tests all control flow branches in image_dimensions_scale().
    */

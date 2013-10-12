@@ -122,14 +122,6 @@ class MenuWebTestCase extends DrupalWebTestCase {
 }
 
 class MenuRouterTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu router',
-      'description' => 'Tests menu router and hook_menu() functionality.',
-      'group' => 'Menu',
-    );
-  }
-
   function setUp() {
     // Enable dummy module that implements hook_menu.
     parent::setUp('menu_test');
@@ -650,14 +642,6 @@ class MenuLinksUnitTestCase extends DrupalWebTestCase {
   // Use the lightweight testing profile for this test.
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu links',
-      'description' => 'Test handling of menu links hierarchies.',
-      'group' => 'Menu',
-    );
-  }
-
   /**
    * Create a simple hierarchy of links.
    */
@@ -866,14 +850,6 @@ class MenuLinksUnitTestCase extends DrupalWebTestCase {
  * Tests rebuilding the menu by setting 'menu_rebuild_needed.'
  */
 class MenuRebuildTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu rebuild test',
-      'description' => 'Test rebuilding of menu.',
-      'group' => 'Menu',
-    );
-  }
-
   /**
    * Test if the 'menu_rebuild_needed' variable triggers a menu_rebuild() call.
    */
@@ -914,14 +890,6 @@ class MenuTreeDataTestCase extends DrupalUnitTestCase {
     4 => array('mlid' => 4, 'depth' => 3),
     5 => array('mlid' => 5, 'depth' => 1),
   );
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu tree generation',
-      'description' => 'Tests recursive menu tree generation functions.',
-      'group' => 'Menu',
-    );
-  }
 
   /**
    * Validate the generation of a proper menu tree hierarchy.
@@ -981,14 +949,6 @@ class MenuTreeOutputTestCase extends DrupalWebTestCase {
     '7' => array('link' => array( 'menu_name' => 'main-menu', 'mlid' => 7, 'hidden'=>0, 'has_children' => 0, 'title' => 'Item 7', 'in_active_trail' => 0, 'access'=>1, 'href' => 'g', 'localized_options' => array('attributes' => array('title' =>'')) ), 'below' => array( ) )
   );
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu tree output',
-      'description' => 'Tests menu tree output functions.',
-      'group' => 'Menu',
-    );
-  }
-
   function setUp() {
     parent::setUp();
   }
@@ -1017,14 +977,6 @@ class MenuTreeOutputTestCase extends DrupalWebTestCase {
  * Menu breadcrumbs related tests.
  */
 class MenuBreadcrumbTestCase extends MenuWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Breadcrumbs',
-      'description' => 'Tests breadcrumbs functionality.',
-      'group' => 'Menu',
-    );
-  }
-
   function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
@@ -1511,14 +1463,6 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
  * Tests active menu trails.
  */
 class MenuTrailTestCase extends MenuWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Active trail',
-      'description' => 'Tests active menu trails and alteration functionality.',
-      'group' => 'Menu',
-    );
-  }
-
   function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {

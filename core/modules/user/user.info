@@ -4,7 +4,6 @@ package = Core
 version = VERSION
 core = 8.x
 files[] = user.entity.inc
-files[] = user.test
 required = TRUE
 configure = admin/config/people
 stylesheets[all][] = user.css

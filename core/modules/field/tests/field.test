@@ -118,14 +118,6 @@ class FieldAttachTestCase extends FieldTestCase {
  * all hook_field_attach_pre_{load,insert,update}() hooks.
  */
 class FieldAttachStorageTestCase extends FieldAttachTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field attach tests (storage-related)',
-      'description' => 'Test storage-related Field Attach API functions.',
-      'group' => 'Field API',
-    );
-  }
-
   /**
    * Check field values insert, update and load.
    *
@@ -629,14 +621,6 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
  * Unit test class for non-storage related field_attach_* functions.
  */
 class FieldAttachOtherTestCase extends FieldAttachTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field attach tests (other)',
-      'description' => 'Test other Field Attach API functions.',
-      'group' => 'Field API',
-    );
-  }
-
   /**
    * Test field_attach_view() and field_attach_prepare_view().
    */
@@ -1019,15 +1003,6 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
 }
 
 class FieldInfoTestCase extends FieldTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Field info tests',
-      'description' => 'Get information about existing fields, instances and bundles.',
-      'group' => 'Field API',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
   }
@@ -1277,14 +1252,6 @@ class FieldInfoTestCase extends FieldTestCase {
 }
 
 class FieldFormTestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field form tests',
-      'description' => 'Test Field form handling.',
-      'group' => 'Field API',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -1746,14 +1713,6 @@ class FieldFormTestCase extends FieldTestCase {
 }
 
 class FieldDisplayAPITestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field Display API tests',
-      'description' => 'Test the display API.',
-      'group' => 'Field API',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -1940,14 +1899,6 @@ class FieldDisplayAPITestCase extends FieldTestCase {
 }
 
 class FieldCrudTestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field CRUD tests',
-      'description' => 'Test field create, read, update, and delete.',
-      'group' => 'Field API',
-    );
-  }
-
   function setUp() {
     // field_update_field() tests use number.module
     parent::setUp('field_test', 'number');
@@ -2403,14 +2354,6 @@ class FieldCrudTestCase extends FieldTestCase {
 class FieldInstanceCrudTestCase extends FieldTestCase {
   protected $field;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Field instance CRUD tests',
-      'description' => 'Create field entities by attaching fields to entities.',
-      'group' => 'Field API',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -2631,14 +2574,6 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
  * that only the correct values are returned by field_available_languages().
  */
 class FieldTranslationsTestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field translations tests',
-      'description' => 'Test multilanguage fields logic.',
-      'group' => 'Field API',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale', 'field_test');
 
@@ -2986,14 +2921,6 @@ class FieldTranslationsTestCase extends FieldTestCase {
 class FieldBulkDeleteTestCase extends FieldTestCase {
   protected $field;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Field bulk delete tests',
-      'description' => 'Bulk delete fields and instances, and clean up afterwards.',
-      'group' => 'Field API',
-    );
-  }
-
   /**
    * Convenience function for Field API tests.
    *
@@ -3308,14 +3235,6 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
  * Tests entity properties.
  */
 class EntityPropertiesTestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Entity properties',
-      'description' => 'Tests entity properties.',
-      'group' => 'Entity API',
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
   }

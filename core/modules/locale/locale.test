@@ -25,14 +25,6 @@
  * Functional tests for language configuration's effect on negotiation setup.
  */
 class LocaleConfigurationTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Language negotiation autoconfiguration',
-      'description' => 'Adds and configures languages to check negotiation changes.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
   }
@@ -91,14 +83,6 @@ class LocaleConfigurationTest extends DrupalWebTestCase {
  * Functional tests for JavaScript parsing for translatable strings.
  */
 class LocaleJavascriptTranslationTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Javascript translation',
-      'description' => 'Tests parsing js files for translatable strings',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale', 'locale_test');
   }
@@ -180,14 +164,6 @@ class LocaleJavascriptTranslationTest extends DrupalWebTestCase {
  * Functional test for string translation and validation.
  */
 class LocaleTranslationFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'String translate, search and validate',
-      'description' => 'Adds a new locale and translates its name. Checks the validation of translation strings and search results.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
   }
@@ -589,14 +565,6 @@ class LocaleTranslationFunctionalTest extends DrupalWebTestCase {
  * Tests plural index computation functionality.
  */
 class LocalePluralFormatTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Plural formula evaluation',
-      'description' => 'Tests plural formula evaluation for various languages.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale', 'locale_test');
 
@@ -757,14 +725,6 @@ EOF;
  * Functional tests for the import of translation files.
  */
 class LocaleImportFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Translation import',
-      'description' => 'Tests the import of locale files.',
-      'group' => 'Locale',
-    );
-  }
-
   /**
    * A user able to create languages and import translations.
    */
@@ -1122,14 +1082,6 @@ EOF;
  * Functional tests for the export of translation files.
  */
 class LocaleExportFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Translation export',
-      'description' => 'Tests the exportation of locale files.',
-      'group' => 'Locale',
-    );
-  }
-
   /**
    * A user able to create languages and export translations.
    */
@@ -1204,14 +1156,6 @@ EOF;
  * Tests for the st() function.
  */
 class LocaleInstallTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'String translation using st()',
-      'description' => 'Tests that st() works like t().',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
 
@@ -1233,14 +1177,6 @@ class LocaleInstallTest extends DrupalWebTestCase {
  * Locale uninstall with English UI functional test.
  */
 class LocaleUninstallFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Locale uninstall (EN)',
-      'description' => 'Tests the uninstall process using the built-in UI language.',
-      'group' => 'Locale',
-    );
-  }
-
   /**
    * The default language set for the UI before uninstall.
    */
@@ -1360,14 +1296,6 @@ class LocaleUninstallFunctionalTest extends DrupalWebTestCase {
  * to test with this new language.
  */
 class LocaleUninstallFrenchFunctionalTest extends LocaleUninstallFunctionalTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Locale uninstall (FR)',
-      'description' => 'Tests the uninstall process using French as interface language.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->langcode = 'fr';
@@ -1379,15 +1307,6 @@ class LocaleUninstallFrenchFunctionalTest extends LocaleUninstallFunctionalTest 
  * Functional tests for the language switching feature.
  */
 class LocaleLanguageSwitchingFunctionalTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Language switching',
-      'description' => 'Tests for the language switching feature.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
 
@@ -1457,15 +1376,6 @@ class LocaleLanguageSwitchingFunctionalTest extends DrupalWebTestCase {
  * Test browser language detection.
  */
 class LocaleBrowserDetectionTest extends DrupalUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Browser language detection',
-      'description' => 'Tests for the browser language detection.',
-      'group' => 'Locale',
-    );
-  }
-
   /**
    * Unit tests for the locale_language_from_browser() function.
    */
@@ -1576,14 +1486,6 @@ class LocaleBrowserDetectionTest extends DrupalUnitTestCase {
  * Functional tests for a user's ability to change their default language.
  */
 class LocaleUserLanguageFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User language settings',
-      'description' => "Tests user's ability to change their default language.",
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
   }
@@ -1661,15 +1563,6 @@ class LocaleUserLanguageFunctionalTest extends DrupalWebTestCase {
  * Functional test for language handling during user creation.
  */
 class LocaleUserCreationTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'User creation',
-      'description' => 'Tests whether proper language is stored for new users and access to language selector.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
     variable_set('user_register', USER_REGISTER_VISITORS);
@@ -1763,14 +1656,6 @@ class LocaleUserCreationTest extends DrupalWebTestCase {
  * Functional tests for configuring a different path alias per language.
  */
 class LocalePathFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Path language settings',
-      'description' => 'Checks you can configure a language for individual url aliases.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale', 'path');
   }
@@ -1899,14 +1784,6 @@ class LocalePathFunctionalTest extends DrupalWebTestCase {
  * Functional tests for multilingual support on nodes.
  */
 class LocaleContentFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Content language settings',
-      'description' => 'Checks you can enable multilingual support on content types and configure a language for a node.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
   }
@@ -2141,14 +2018,6 @@ class LocaleContentFunctionalTest extends DrupalWebTestCase {
  *          UI language in Chinese
  */
 class LocaleUILanguageNegotiationTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'UI language negotiation',
-      'description' => 'Test UI language switching by url path prefix and domain.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale', 'locale_test');
     require_once DRUPAL_ROOT . '/core/includes/language.inc';
@@ -2436,14 +2305,6 @@ class LocaleUILanguageNegotiationTest extends DrupalWebTestCase {
  * Test that URL rewriting works as expected.
  */
 class LocaleUrlRewritingTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'URL rewriting',
-      'description' => 'Test that URL rewriting works as expected.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
 
@@ -2521,14 +2382,6 @@ class LocaleUrlRewritingTest extends DrupalWebTestCase {
  * Functional test for multilingual fields.
  */
 class LocaleMultilingualFieldsFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Multilingual fields',
-      'description' => 'Test multilingual support for fields.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
     // Setup users.
@@ -2642,15 +2495,6 @@ class LocaleMultilingualFieldsFunctionalTest extends DrupalWebTestCase {
  * Functional tests for comment language.
  */
 class LocaleCommentLanguageFunctionalTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment language',
-      'description' => 'Tests for comment language.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale', 'locale_test');
 
@@ -2736,15 +2580,6 @@ class LocaleCommentLanguageFunctionalTest extends DrupalWebTestCase {
  * Functional tests for localizing date formats.
  */
 class LocaleDateFormatsFunctionalTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Localize date formats',
-      'description' => 'Tests for the localization of date formats.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
 
@@ -2805,15 +2640,6 @@ class LocaleDateFormatsFunctionalTest extends DrupalWebTestCase {
  * Functional test for language types/negotiation info.
  */
 class LocaleLanguageNegotiationInfoFunctionalTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Language negotiation info',
-      'description' => 'Tests alterations to language types/negotiation info.',
-      'group' => 'Locale',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale');
     require_once DRUPAL_ROOT .'/core/includes/language.inc';

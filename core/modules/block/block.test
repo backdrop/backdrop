@@ -9,14 +9,6 @@ class BlockTestCase extends DrupalWebTestCase {
   protected $regions;
   protected $admin_user;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Block functionality',
-      'description' => 'Add, edit and delete custom block. Configure and move a module-defined block.',
-      'group' => 'Block',
-    );
-  }
-
   function setUp() {
     parent::setUp('block_test');
 
@@ -389,14 +381,6 @@ class BlockTestCase extends DrupalWebTestCase {
 }
 
 class NonDefaultBlockAdmin extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Non default theme admin',
-      'description' => 'Check the administer page for non default theme.',
-      'group' => 'Block',
-    );
-  }
-
   /**
    * Test non-default theme admin.
    */
@@ -412,14 +396,6 @@ class NonDefaultBlockAdmin extends DrupalWebTestCase {
  * Test blocks correctly initialized when picking a new default theme.
  */
 class NewDefaultThemeBlocks extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'New default theme blocks',
-      'description' => 'Checks that the new default theme gets blocks.',
-      'group' => 'Block',
-    );
-  }
-
   /**
    * Check the enabled Bartik blocks are correctly copied over.
    */
@@ -462,14 +438,6 @@ class NewDefaultThemeBlocks extends DrupalWebTestCase {
  * Test the block system with admin themes.
  */
 class BlockAdminThemeTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Admin theme block admin accessibility',
-      'description' => "Check whether the block administer page for a disabled theme accessible if and only if it's the admin theme.",
-      'group' => 'Block',
-    );
-  }
-
   /**
    * Check for the accessibility of the admin theme on the  block admin page.
    */
@@ -497,14 +465,6 @@ class BlockCacheTestCase extends DrupalWebTestCase {
   protected $admin_user;
   protected $normal_user;
   protected $normal_user_alt;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Block caching',
-      'description' => 'Test block caching.',
-      'group' => 'Block',
-    );
-  }
 
   function setUp() {
     parent::setUp('block_test');
@@ -681,15 +641,6 @@ class BlockCacheTestCase extends DrupalWebTestCase {
  * Test block HTML id validity.
  */
 class BlockHTMLIdTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Block HTML id',
-      'description' => 'Test block HTML id validity.',
-      'group' => 'Block',
-    );
-  }
-
   function setUp() {
     parent::setUp('block_test');
 
@@ -720,14 +671,6 @@ class BlockHTMLIdTestCase extends DrupalWebTestCase {
  * Unit tests for template_preprocess_block().
  */
 class BlockTemplateSuggestionsUnitTest extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Block template suggestions',
-      'description' => 'Test the template_preprocess_block() function.',
-      'group' => 'Block',
-    );
-  }
-
   /**
    * Test if template_preprocess_block() handles the suggestions right.
    */
@@ -765,14 +708,6 @@ class BlockTemplateSuggestionsUnitTest extends DrupalUnitTestCase {
  * Tests that hidden regions do not inherit blocks when a theme is enabled.
  */
 class BlockHiddenRegionTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Blocks not in hidden region',
-      'description' => 'Checks that a newly enabled theme does not inherit blocks to its hidden regions.',
-      'group' => 'Block',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('block_test'));
   }

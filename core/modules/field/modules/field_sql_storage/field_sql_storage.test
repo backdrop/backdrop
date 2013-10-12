@@ -12,14 +12,6 @@
  * Tests field storage.
  */
 class FieldSqlStorageTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name'  => 'Field SQL Storage tests',
-      'description'  => "Test Field SQL Storage module.",
-      'group' => 'Field API'
-    );
-  }
-
   function setUp() {
     parent::setUp('field_sql_storage', 'field', 'field_test', 'text');
     $this->field_name = strtolower($this->randomName());

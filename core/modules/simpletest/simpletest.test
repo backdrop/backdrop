@@ -17,14 +17,6 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
    */
   protected $test_ids = array();
 
-  public static function getInfo() {
-    return array(
-      'name' => 'SimpleTest functionality',
-      'description' => "Test SimpleTest's web interface: check that the intended tests were run and ensure that test reports display the intended results. Also test SimpleTest's internal browser and APIs both explicitly and implicitly.",
-      'group' => 'SimpleTest'
-    );
-  }
-
   function setUp() {
     if (!$this->inCURL()) {
       parent::setUp('simpletest');
@@ -137,7 +129,7 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
         $this->drupalGet('admin/config/development/testing');
 
         $edit = array();
-        $edit['SimpleTestFunctionalTest'] = TRUE;
+        $edit['tests[SimpleTestFunctionalTest]'] = TRUE;
         $this->drupalPost(NULL, $edit, t('Run tests'));
 
         // Parse results and confirm that they are correct.
@@ -286,7 +278,7 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
    */
   function getResultFieldSet() {
     $fieldsets = $this->xpath('//fieldset');
-    $info = $this->getInfo();
+    $info = simpletest_test_get_by_class(get_class($this));
     foreach ($fieldsets as $fieldset) {
       if ($this->asText($fieldset->legend) == $info['name']) {
         return $fieldset;
@@ -322,14 +314,6 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
  * Test internal testing framework browser.
  */
 class SimpleTestBrowserTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'SimpleTest browser',
-      'description' => 'Test the internal browser of the testing framework.',
-      'group' => 'SimpleTest',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     variable_set('user_register', USER_REGISTER_VISITORS);
@@ -383,17 +367,6 @@ EOF;
 }
 
 class SimpleTestMailCaptureTestCase extends DrupalWebTestCase {
-  /**
-   * Implement getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'SimpleTest e-mail capturing',
-      'description' => 'Test the SimpleTest e-mail capturing logic, the assertMail assertion and the drupalGetMails function.',
-      'group' => 'SimpleTest',
-    );
-  }
-
   /**
    * Test to see if the wrapper function is executed correctly.
    */
@@ -462,14 +435,6 @@ class SimpleTestMailCaptureTestCase extends DrupalWebTestCase {
  * Test Folder creation
  */
 class SimpleTestFolderTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Testing SimpleTest setUp',
-      'description' => "This test will check SimpleTest's treatment of hook_install during setUp.  Image module is used for test.",
-      'group' => 'SimpleTest',
-    );
-  }
-
   function setUp() {
     return parent::setUp('image');
   }
@@ -484,15 +449,6 @@ class SimpleTestFolderTestCase extends DrupalWebTestCase {
  * Test required modules for tests.
  */
 class SimpleTestMissingDependentModuleUnitTest extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Testing dependent module test',
-      'description' => 'This test should not load since it requires a module that is not found.',
-      'group' => 'SimpleTest',
-      'dependencies' => array('simpletest_missing_module'),
-    );
-  }
-
   /**
    * Ensure that this test will not be loaded despite its dependency.
    */
@@ -511,14 +467,6 @@ class SimpleTestMissingDependentModuleUnitTest extends DrupalUnitTestCase {
  * @see DrupalTestCase
  */
 class SimpleTestBrokenSetUp extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Broken SimpleTest method',
-      'description' => 'Tests a test case that does not call parent::setUp().',
-      'group' => 'SimpleTest'
-    );
-  }
-
   function setUp() {
     // If the test is being run from the main site, set up normally.
     if (!drupal_valid_test_ua()) {
@@ -552,7 +500,7 @@ class SimpleTestBrokenSetUp extends DrupalWebTestCase {
     // If the test is being run from the main site, run it again from the web
     // interface within the simpletest child site.
     if (!drupal_valid_test_ua()) {
-      $edit['SimpleTestBrokenSetUp'] = TRUE;
+      $edit['tests[SimpleTestBrokenSetUp]'] = TRUE;
       $this->drupalPost('admin/config/development/testing', $edit, t('Run tests'));
 
       // Verify that the broken test and its tearDown() method are skipped.
@@ -572,14 +520,6 @@ class SimpleTestBrokenSetUp extends DrupalWebTestCase {
  * Tests missing requirements to run test.
  */
 class SimpleTestMissingCheckedRequirements extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Broken requirements test',
-      'description' => 'Tests a test case with missing requirements.',
-      'group' => 'SimpleTest',
-    );
-  }
-
   function setUp() {
     parent::setUp('simpletest');
     $admin_user = $this->drupalCreateUser(array('administer unit tests'));
@@ -606,7 +546,7 @@ class SimpleTestMissingCheckedRequirements extends DrupalWebTestCase {
     // that the child tests did not run.
     if (!drupal_valid_test_ua()) {
       // Run this test from web interface.
-      $edit['SimpleTestMissingCheckedRequirements'] = TRUE;
+      $edit['tests[SimpleTestMissingCheckedRequirements]'] = TRUE;
       $this->drupalPost('admin/config/development/testing', $edit, t('Run tests'));
       $this->assertRaw('Test is not allowed to run.', 'Test check for requirements came up.');
       $this->assertNoText('Test ran when it failed requirements check.', 'Test requirements stopped test from running.');
@@ -635,14 +575,6 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends DrupalWebTestCase
    */
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Installation profile module tests',
-      'description' => 'Verifies that tests bundled with installation profile modules are found.',
-      'group' => 'SimpleTest',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('simpletest'));
 
@@ -657,7 +589,7 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends DrupalWebTestCase
     $this->drupalGet('admin/config/development/testing');
     $this->assertText('Installation profile module tests helper');
     $edit = array(
-      'DrupalSystemListingCompatibleTestCase' => TRUE,
+      'tests[DrupalSystemListingCompatibleTestCase]' => TRUE,
     );
     $this->drupalPost(NULL, $edit, t('Run tests'));
     $this->assertText('DrupalSystemListingCompatibleTestCase test executed.');
@@ -680,14 +612,6 @@ class SimpleTestOtherInstallationProfileModuleTestsTestCase extends DrupalWebTes
    * @see DrupalSystemListingCompatibleTestCase
    */
   protected $profile = 'minimal';
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Other Installation profiles',
-      'description' => 'Verifies that tests in other installation profiles are not found.',
-      'group' => 'SimpleTest',
-    );
-  }
 
   function setUp() {
     parent::setUp(array('simpletest'));

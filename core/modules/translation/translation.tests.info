@@ -1,0 +1,5 @@
+[TranslationTestCase]
+name = Translation functionality
+description = Create a basic page with translation, modify the page outdating translation, and update translation.
+group = Translation
+file = translation.test

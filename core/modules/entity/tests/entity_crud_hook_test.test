@@ -21,14 +21,6 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
 
   protected $ids = array();
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Entity CRUD hooks',
-      'description' => 'Tests the invocation of hooks when inserting, loading, updating or deleting an entity.',
-      'group' => 'Entity API',
-    );
-  }
-
   public function setUp() {
     parent::setUp('entity_crud_hook_test', 'taxonomy', 'comment');
   }

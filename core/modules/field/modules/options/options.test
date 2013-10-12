@@ -5,15 +5,9 @@
  * Tests for options.module.
  */
 
-class OptionsWidgetsTestCase extends FieldTestCase {
-  public static function getInfo() {
-    return array(
-      'name'  => 'Options widgets',
-      'description'  => "Test the Options widgets.",
-      'group' => 'Field types'
-    );
-  }
+require_once DRUPAL_ROOT . '/core/modules/field/tests/field.test';
 
+class OptionsWidgetsTestCase extends FieldTestCase {
   function setUp() {
     parent::setUp('field_test', 'list_test');
 

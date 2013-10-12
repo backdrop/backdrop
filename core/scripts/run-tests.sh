@@ -364,10 +364,10 @@ function simpletest_script_run_one_test($test_id, $test_class) {
   try {
     // Bootstrap Drupal.
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-
+    $info = simpletest_test_get_by_class($test_class);
+    include_once DRUPAL_ROOT . '/' . $info['file path'] . '/' . $info['file'];
     $test = new $test_class($test_id);
     $test->run();
-    $info = $test->getInfo();
 
     $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
     $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
@@ -484,7 +484,7 @@ function simpletest_script_reporter_init() {
   else {
     echo "Tests to be run:\n";
     foreach ($test_list as $class_name) {
-      $info = call_user_func(array($class_name, 'getInfo'));
+      $info = simpletest_test_get_by_class($class_name);
       echo " - " . $info['name'] . ' (' . $class_name . ')' . "\n";
     }
     echo "\n";

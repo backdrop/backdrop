@@ -7344,14 +7344,20 @@ function drupal_parse_info_format($data, $process_sections = FALSE) {
 
   // Separate by sections and parse individually if requested.
   if ($process_sections) {
-    $split = preg_split('@^\[(.*)\]\s*$@m', $data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    // Remove leading a trailing comments before groups.
+    $data = trim(preg_replace('/;.*$/m', '', $data));
+
+    // Split the content by the groups present.
+    $split = preg_split('/^\[(.*)\]\s*$/m', $data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
     $split_count = count($split);
+
+    // If sections are found, parse each individually and add to the result.
     if ($split_count > 1) {
-      $info_groups = array();
+      $info_sections = array();
       for ($n = 0; $n < $split_count; $n = $n + 2) {
-        $info_groups[$split[$n]] = drupal_parse_info_format($split[$n + 1], FALSE);
+        $info_sections[$split[$n]] = drupal_parse_info_format($split[$n + 1], FALSE);
       }
-      return $info_groups;
+      return $info_sections;
     }
   }
 

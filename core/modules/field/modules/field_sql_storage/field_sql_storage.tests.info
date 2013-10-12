@@ -1,0 +1,5 @@
+[FieldSqlStorageTestCase]
+name = Field SQL Storage tests
+description = Test Field SQL Storage module.
+group = Field API
+file = field_sql_storage.test
