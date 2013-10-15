@@ -797,9 +797,11 @@ function system_modules($form, $form_state = array()) {
   foreach ($visible_files as $filename => $module) {
     $extra = array();
     $extra['enabled'] = (bool) $module->status;
+    $extra['core_hide'] = FALSE;
     if (!empty($module->info['required'] )) {
       $extra['disabled'] = TRUE;
       $extra['required_by'][] = $distribution_name . (!empty($module->info['explanation']) ? ' ('. $module->info['explanation'] .')' : '');
+      $extra['core_hide'] = TRUE;
     }
 
     // If this module requires other modules, add them to the array.
@@ -954,6 +956,7 @@ function _system_modules_build_row($info, $extra) {
   );
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
+  $form['#core_hide'] = $extra['core_hide'];
 
   // Check the compatibilities.
   $compatible = TRUE;
@@ -2484,7 +2487,9 @@ function theme_system_modules_fieldset($variables) {
     foreach (array('help', 'permissions', 'configure') as $key) {
       $row[] = array('data' => drupal_render($module['links'][$key]), 'class' => array($key));
     }
-    $rows[] = $row;
+    if (!$module["#core_hide"]) {
+      $rows[] = $row;
+    }
   }
 
   return theme('table', array('header' => $form['#header'], 'rows' => $rows));
