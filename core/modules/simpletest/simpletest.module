@@ -113,9 +113,11 @@ function simpletest_run_tests($test_list, $reporter = 'drupal') {
 
   // Get the info for the first test being run.
   $first_test = array_shift($test_list);
+  $test_info = simpletest_test_get_by_class($first_test);
+  include_once DRUPAL_ROOT . '/' .  $test_info['file path'] . '/' . $test_info['file'];
   $first_instance = new $first_test();
   array_unshift($test_list, $first_test);
-  $info = $first_instance->getInfo();
+  $info = simpletest_test_get_by_class(get_class($first_instance));
 
   $batch = array(
     'title' => t('Running tests'),
@@ -154,10 +156,12 @@ function _simpletest_batch_operation($test_list_init, $test_id, &$context) {
 
   // Perform the next test.
   $test_class = array_shift($test_list);
+  $test_info = simpletest_test_get_by_class($test_class);
+  include_once DRUPAL_ROOT . '/' . $test_info['file path'] . '/' . $test_info['file'];
   $test = new $test_class($test_id);
   $test->run();
   $size = count($test_list);
-  $info = $test->getInfo();
+  $info = simpletest_test_get_by_class(get_class($test));
 
   module_invoke_all('test_finished', $test->results);
 
@@ -271,8 +275,8 @@ function simpletest_log_read($test_id, $prefix, $test_class, $during_test = FALS
  * hook_registry_files_alter() is used to forcefully add them to the registry.
  *
  * @return
- *   An array of tests keyed with the groups specified in each of the tests
- *   getInfo() method and then keyed by the test class. An example of the array
+ *   An array of tests keyed with the groups specified by each owning module's
+ *   .tests.info file and then keyed by the test class. An example of the array
  *   structure is provided below.
  *
  *   @code
@@ -281,6 +285,8 @@ function simpletest_log_read($test_id, $prefix, $test_class, $during_test = FALS
  *         'name' => 'Block functionality',
  *         'description' => 'Add, edit and delete custom block...',
  *         'group' => 'Block',
+ *         'file' => block.test,
+ *         'file path' => 'core/modules/block',
  *       ),
  *     );
  *   @endcode
@@ -296,17 +302,12 @@ function simpletest_test_get_all() {
       $groups = $cache->data;
     }
     else {
-      // Select all clases in files ending with .test.
-      $classes = db_query("SELECT name FROM {registry} WHERE type = :type AND filename LIKE :name", array(':type' => 'class', ':name' => '%.test'))->fetchCol();
-
-      // Check that each class has a getInfo() method and store the information
-      // in an array keyed with the group specified in the test information.
+      $files = drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.tests\.info$/', 'modules', 'name', 0);
       $groups = array();
-      foreach ($classes as $class) {
-        // Test classes need to implement getInfo() to be valid.
-        if (class_exists($class) && method_exists($class, 'getInfo')) {
-          $info = call_user_func(array($class, 'getInfo'));
-
+      foreach ($files as $file) {
+        $classes = drupal_parse_info_file($file->uri, TRUE);
+        foreach ($classes as $class => $info) {
+          $info['file path'] = dirname($file->uri);
           // If this test class requires a non-existing module, skip it.
           if (!empty($info['dependencies'])) {
             foreach ($info['dependencies'] as $module) {
@@ -322,7 +323,7 @@ function simpletest_test_get_all() {
 
       // Sort the groups and tests within the groups by name.
       uksort($groups, 'strnatcasecmp');
-      foreach ($groups as $group => &$tests) {
+      foreach ($groups as &$tests) {
         uksort($tests, 'strnatcasecmp');
       }
 
@@ -332,6 +333,19 @@ function simpletest_test_get_all() {
     }
   }
   return $groups;
+}
+
+/**
+ * Get information about a test by its class name.
+ */
+function simpletest_test_get_by_class($class) {
+  $groups = simpletest_test_get_all();
+  foreach ($groups as $classes) {
+    if (array_key_exists($class, $classes)) {
+      return $classes[$class];
+    }
+  }
+  return FALSE;
 }
 
 /**

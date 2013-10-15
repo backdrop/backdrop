@@ -60,14 +60,6 @@ class AJAXTestCase extends DrupalWebTestCase {
 class AJAXFrameworkTestCase extends AJAXTestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'AJAX framework',
-      'description' => 'Performs tests on AJAX framework functions.',
-      'group' => 'AJAX',
-    );
-  }
-
   /**
    * Test that ajax_render() returns JavaScript settings generated during the page request.
    *
@@ -222,14 +214,6 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
  * Tests Ajax framework commands.
  */
 class AJAXCommandsTestCase extends AJAXTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'AJAX commands',
-      'description' => 'Performs tests on AJAX framework commands.',
-      'group' => 'AJAX',
-    );
-  }
-
   /**
    * Test the various Ajax Commands.
    */
@@ -375,14 +359,6 @@ class AJAXCommandsTestCase extends AJAXTestCase {
  * Test that $form_state['values'] is properly delivered to $ajax['callback'].
  */
 class AJAXFormValuesTestCase extends AJAXTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'AJAX command form values',
-      'description' => 'Tests that form values are properly delivered to AJAX callbacks.',
-      'group' => 'AJAX',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -426,14 +402,6 @@ class AJAXFormValuesTestCase extends AJAXTestCase {
  * Tests that Ajax-enabled forms work when multiple instances of the same form are on a page.
  */
 class AJAXMultiFormTestCase extends AJAXTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'AJAX multi form',
-      'description' => 'Tests that AJAX-enabled forms work when multiple instances of the same form are on a page.',
-      'group' => 'AJAX',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('form_test'));
 
@@ -501,14 +469,6 @@ class AJAXMultiFormTestCase extends AJAXTestCase {
  * Miscellaneous Ajax tests using ajax_test module.
  */
 class AJAXElementValidation extends AJAXTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Miscellaneous AJAX tests',
-      'description' => 'Various tests of AJAX behavior',
-      'group' => 'AJAX',
-    );
-  }
-
   /**
    * Try to post an Ajax change to a form that has a validated element.
    *

@@ -31,6 +31,7 @@ function simpletest_test_form($form) {
         '#type' => 'checkbox',
         '#title' => $info['name'],
         '#description' => $info['description'],
+        '#parents' => array('tests', $class),
       );
     }
   }
@@ -144,9 +145,6 @@ function theme_simpletest_test_table($variables) {
       $test['#title_display'] = 'invisible';
       unset($test['#description']);
 
-      // Test name is used to determine what tests to run.
-      $test['#name'] = $test_name;
-
       $row[] = array(
         'data' => drupal_render($test),
         'class' => array('simpletest-test-select'),
@@ -181,15 +179,7 @@ function theme_simpletest_test_table($variables) {
  * Run selected tests.
  */
 function simpletest_test_form_submit($form, &$form_state) {
-  // Get list of tests.
-  $tests_list = array();
-  foreach ($form_state['values'] as $class_name => $value) {
-    // Since class_exists() will likely trigger an autoload lookup,
-    // we do the fast check first.
-    if ($value === 1 && class_exists($class_name)) {
-      $tests_list[] = $class_name;
-    }
-  }
+  $tests_list = array_keys(array_filter($form_state['values']['tests']));
   if (count($tests_list) > 0 ) {
     $test_id = simpletest_run_tests($tests_list, 'drupal');
     $form_state['redirect'] = 'admin/config/development/testing/results/' . $test_id;
@@ -238,7 +228,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
   $form['result']['results'] = array();
   foreach ($results as $group => $assertions) {
     // Create group fieldset with summary information.
-    $info = call_user_func(array($group, 'getInfo'));
+    $info = simpletest_test_get_by_class($group);
     $form['result']['results'][$group] = array(
       '#type' => 'fieldset',
       '#title' => $info['name'],
@@ -357,7 +347,7 @@ function simpletest_result_form_submit($form, &$form_state) {
 
   $form_state_execute = array('values' => array());
   foreach ($classes as $class) {
-    $form_state_execute['values'][$class] = 1;
+    $form_state_execute['values']['tests'][$class] = 1;
   }
 
   simpletest_test_form_submit(array(), $form_state_execute);

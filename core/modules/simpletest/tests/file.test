@@ -306,14 +306,6 @@ class FileHookTestCase extends FileTestCase {
  *  This will run tests against the file_space_used() function.
  */
 class FileSpaceUsedTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File space used tests',
-      'description' => 'Tests the file_space_used() function.',
-      'group' => 'File API',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -361,14 +353,6 @@ class FileSpaceUsedTest extends FileTestCase {
  *  This will run tests against the file validation functions (file_validate_*).
  */
 class FileValidatorTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File validator tests',
-      'description' => 'Tests the functions used to validate uploaded files.',
-      'group' => 'File API',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -518,14 +502,6 @@ class FileValidatorTest extends DrupalWebTestCase {
  *  Tests the file_unmanaged_save_data() function.
  */
 class FileUnmanagedSaveDataTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Unmanaged file save data',
-      'description' => 'Tests the unmanaged file save data function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Test the file_unmanaged_save_data() function.
    */
@@ -551,12 +527,6 @@ class FileUnmanagedSaveDataTest extends FileTestCase {
  *  Tests the file_unmanaged_save_data() function on remote filesystems.
  */
 class RemoteFileUnmanagedSaveDataTest extends FileUnmanagedSaveDataTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -581,14 +551,6 @@ class FileSaveUploadTest extends FileHookTestCase {
    * The largest file id when the test starts.
    */
   protected $maxFidBefore;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'File uploading',
-      'description' => 'Tests the file uploading functions.',
-      'group' => 'File API',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -887,12 +849,6 @@ class FileSaveUploadTest extends FileHookTestCase {
  * Test the file_save_upload() function on remote filesystems.
  */
 class RemoteFileSaveUploadTest extends FileSaveUploadTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -903,14 +859,6 @@ class RemoteFileSaveUploadTest extends FileSaveUploadTest {
  * Directory related tests.
  */
 class FileDirectoryTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File paths and directories',
-      'description' => 'Tests operations dealing with directories.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Test directory handling functions.
    */
@@ -1026,12 +974,6 @@ class FileDirectoryTest extends FileTestCase {
  * Directory related tests.
  */
 class RemoteFileDirectoryTest extends FileDirectoryTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -1042,14 +984,6 @@ class RemoteFileDirectoryTest extends FileDirectoryTest {
  * Tests the file_scan_directory() function.
  */
 class FileScanDirectoryTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File scan directory',
-      'description' => 'Tests the file_scan_directory() function.',
-      'group' => 'File API',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->path = drupal_get_path('module', 'simpletest') . '/files';
@@ -1171,12 +1105,6 @@ class FileScanDirectoryTest extends FileTestCase {
  * Tests the file_scan_directory() function on remote filesystems.
  */
 class RemoteFileScanDirectoryTest extends FileScanDirectoryTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -1187,14 +1115,6 @@ class RemoteFileScanDirectoryTest extends FileScanDirectoryTest {
  * Deletion related tests.
  */
 class FileUnmanagedDeleteTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Unmanaged file delete',
-      'description' => 'Tests the unmanaged file delete function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Delete a normal file.
    */
@@ -1232,12 +1152,6 @@ class FileUnmanagedDeleteTest extends FileTestCase {
  * Deletion related tests on remote filesystems.
  */
 class RemoteFileUnmanagedDeleteTest extends FileUnmanagedDeleteTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -1248,14 +1162,6 @@ class RemoteFileUnmanagedDeleteTest extends FileUnmanagedDeleteTest {
  * Deletion related tests.
  */
 class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Unmanaged recursive file delete',
-      'description' => 'Tests the unmanaged file delete recursive function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Delete a normal file.
    */
@@ -1324,12 +1230,6 @@ class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
  * Deletion related tests on remote filesystems.
  */
 class RemoteFileUnmanagedDeleteRecursiveTest extends FileUnmanagedDeleteRecursiveTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -1340,14 +1240,6 @@ class RemoteFileUnmanagedDeleteRecursiveTest extends FileUnmanagedDeleteRecursiv
  * Unmanaged move related tests.
  */
 class FileUnmanagedMoveTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Unmanaged file moving',
-      'description' => 'Tests the unmanaged file move function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Move a normal file.
    */
@@ -1412,12 +1304,6 @@ class FileUnmanagedMoveTest extends FileTestCase {
  * Unmanaged move related tests on remote filesystems.
  */
 class RemoteFileUnmanagedMoveTest extends FileUnmanagedMoveTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -1428,14 +1314,6 @@ class RemoteFileUnmanagedMoveTest extends FileUnmanagedMoveTest {
  * Unmanaged copy related tests.
  */
 class FileUnmanagedCopyTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Unmanaged file copying',
-      'description' => 'Tests the unmanaged file copy function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Copy a normal file.
    */
@@ -1516,12 +1394,6 @@ class FileUnmanagedCopyTest extends FileTestCase {
  * Unmanaged copy related tests on remote filesystems.
  */
 class RemoteFileUnmanagedCopyTest extends FileUnmanagedCopyTest {
-  public static function getInfo() {
-    $info = parent::getInfo();
-    $info['group'] = 'File API (remote)';
-    return $info;
-  }
-
   function setUp() {
     parent::setUp('file_test');
     variable_set('file_default_scheme', 'dummy-remote');
@@ -1532,14 +1404,6 @@ class RemoteFileUnmanagedCopyTest extends FileUnmanagedCopyTest {
  * Deletion related tests.
  */
 class FileDeleteTest extends FileHookTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File delete',
-      'description' => 'Tests the file delete function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Tries deleting a normal file (as opposed to a directory, symlink, etc).
    */
@@ -1587,14 +1451,6 @@ class FileDeleteTest extends FileHookTestCase {
  * Move related tests
  */
 class FileMoveTest extends FileHookTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File moving',
-      'description' => 'Tests the file move function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Move a normal file.
    */
@@ -1748,14 +1604,6 @@ class FileMoveTest extends FileHookTestCase {
  * Copy related tests.
  */
 class FileCopyTest extends FileHookTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File copying',
-      'description' => 'Tests the file copy function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Test file copying in the normal, base case.
    */
@@ -1894,14 +1742,6 @@ class FileCopyTest extends FileHookTestCase {
  * Tests the file_load() function.
  */
 class FileLoadTest extends FileHookTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File loading',
-      'description' => 'Tests the file_load() function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Try to load a non-existent file by fid.
    */
@@ -1977,14 +1817,6 @@ class FileLoadTest extends FileHookTestCase {
  * Tests the file_save() function.
  */
 class FileSaveTest extends FileHookTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File saving',
-      'description' => 'Tests the file_save() function.',
-      'group' => 'File API',
-    );
-  }
-
   function testFileSave() {
     // Create a new file object.
     $file = array(
@@ -2033,14 +1865,6 @@ class FileSaveTest extends FileHookTestCase {
  * Tests file usage functions.
  */
 class FileUsageTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File usage',
-      'description' => 'Tests the file usage functions.',
-      'group' => 'File',
-    );
-  }
-
   /**
    * Tests file_usage_list().
    */
@@ -2147,14 +1971,6 @@ class FileUsageTest extends FileTestCase {
  * Tests the file_validate() function..
  */
 class FileValidateTest extends FileHookTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File validate',
-      'description' => 'Tests the file_validate() function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Test that the validators passed into are checked.
    */
@@ -2186,14 +2002,6 @@ class FileValidateTest extends FileHookTestCase {
  *  Tests the file_save_data() function.
  */
 class FileSaveDataTest extends FileHookTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File save data',
-      'description' => 'Tests the file save data function.',
-      'group' => 'File API',
-    );
-  }
-
   /**
    * Test the file_save_data() function when no filename is provided.
    */
@@ -2320,14 +2128,6 @@ class FileSaveDataTest extends FileHookTestCase {
  * Tests for download/file transfer functions.
  */
 class FileDownloadTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File download',
-      'description' => 'Tests for file download/transfer functions.',
-      'group' => 'File API',
-    );
-  }
-
   function setUp() {
     parent::setUp('file_test');
     // Clear out any hook calls.
@@ -2461,14 +2261,6 @@ class FileDownloadTest extends FileTestCase {
  * Tests for file URL rewriting.
  */
 class FileURLRewritingTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File URL rewriting',
-      'description' => 'Tests for file URL rewriting.',
-      'group' => 'File',
-    );
-  }
-
   function setUp() {
     parent::setUp('file_test');
   }
@@ -2539,14 +2331,6 @@ class FileURLRewritingTest extends FileTestCase {
  * Tests for file_munge_filename() and file_unmunge_filename().
  */
 class FileNameMungingTest extends FileTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File naming',
-      'description' => 'Test filename munging and unmunging.',
-      'group' => 'File API',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->bad_extension = 'php';
@@ -2600,14 +2384,6 @@ class FileNameMungingTest extends FileTestCase {
 class FileMimeTypeTest extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('file_test');
-  }
-
-  public static function getInfo() {
-    return array(
-      'name' => 'File mimetypes',
-      'description' => 'Test filename mimetype detection.',
-      'group' => 'File API',
-    );
   }
 
   /**
@@ -2686,14 +2462,6 @@ class StreamWrapperTest extends DrupalWebTestCase {
 
   protected $scheme = 'dummy';
   protected $classname = 'DrupalDummyStreamWrapper';
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Stream wrappers',
-      'description' => 'Tests stream wrapper functions.',
-      'group' => 'File API',
-    );
-  }
 
   function setUp() {
     parent::setUp('file_test');

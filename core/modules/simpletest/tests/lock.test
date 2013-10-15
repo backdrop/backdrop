@@ -4,15 +4,6 @@
  * Tests for the lock system.
  */
 class LockFunctionalTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Locking framework tests',
-      'description' => 'Confirm locking works between two separate requests.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp('system_test');
   }

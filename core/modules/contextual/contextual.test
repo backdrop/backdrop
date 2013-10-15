@@ -11,14 +11,6 @@
 class ContextualDynamicContextTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Contextual links on node lists',
-      'description' => 'Tests if contextual links are showing on the front page depending on permissions.',
-      'group' => 'Contextual',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('contextual', 'node'));
     $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));

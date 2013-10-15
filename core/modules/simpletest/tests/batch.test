@@ -9,14 +9,6 @@
  * Tests for the Batch API.
  */
 class BatchProcessingTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Batch processing',
-      'description' => 'Test batch processing in form and non-form workflow.',
-      'group' => 'Batch API',
-    );
-  }
-
   function setUp() {
     parent::setUp('batch_test');
   }
@@ -278,14 +270,6 @@ class BatchProcessingTestCase extends DrupalWebTestCase {
  * Tests for the Batch API Progress page.
  */
 class BatchPageTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Batch progress page',
-      'description' => 'Test the content of the progress page.',
-      'group' => 'Batch API',
-    );
-  }
-
   function setUp() {
     parent::setUp('batch_test');
   }
@@ -318,14 +302,6 @@ class BatchPageTestCase extends DrupalWebTestCase {
  */
 class BatchPercentagesUnitTestCase extends DrupalUnitTestCase {
   protected $testCases = array();
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Batch percentages',
-      'description' => 'Unit tests of progress percentage rounding.',
-      'group' => 'Batch API',
-    );
-  }
 
   function setUp() {
     // Set up an array of test cases, where the expected values are the keys,

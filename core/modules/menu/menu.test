@@ -11,14 +11,6 @@ class MenuTestCase extends DrupalWebTestCase {
   protected $menu;
   protected $items;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu link creation/deletion',
-      'description' => 'Add a custom menu, add menu links to the custom menu and Navigation menu, check their data, and delete them using the menu module UI.',
-      'group' => 'Menu'
-    );
-  }
-
   function setUp() {
     parent::setUp('menu');
     // Create users.
@@ -582,14 +574,6 @@ class MenuTestCase extends DrupalWebTestCase {
  * Test menu settings for nodes.
  */
 class MenuNodeTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu settings for nodes',
-      'description' => 'Add, edit, and delete a node with menu link.',
-      'group' => 'Menu',
-    );
-  }
-
   function setUp() {
     parent::setUp('menu');
 

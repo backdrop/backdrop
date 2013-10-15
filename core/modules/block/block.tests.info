@@ -1,0 +1,47 @@
+[BlockTestCase]
+name = Block functionality
+description = Add, edit and delete custom block. Configure and move a module-defined block.
+group = Block
+file = block.test
+
+[NonDefaultBlockAdmin]
+name = Non default theme admin
+description = Check the administer page for non default theme.
+group = Block
+file = block.test
+
+[NewDefaultThemeBlocks]
+name = New default theme blocks
+description = Checks that the new default theme gets blocks.
+group = Block
+file = block.test
+
+[BlockAdminThemeTestCase]
+name = Admin theme block admin accessibility
+description = Check whether the block administer page for a disabled theme accessible if and only if it's the admin theme.
+group = Block
+file = block.test
+
+[BlockCacheTestCase]
+name = Block caching
+description = Test block caching.
+group = Block
+file = block.test
+
+[BlockHTMLIdTestCase]
+name = Block HTML id
+description = Test block HTML id validity.
+group = Block
+file = block.test
+
+[BlockTemplateSuggestionsUnitTest]
+name = Block template suggestions
+description = Test the template_preprocess_block() function.
+group = Block
+file = block.test
+
+[BlockHiddenRegionTestCase]
+name = Blocks not in hidden region
+description = Checks that a newly enabled theme does not inherit blocks to its hidden regions.
+group = Block
+file = block.test
