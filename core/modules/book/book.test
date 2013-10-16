@@ -15,14 +15,6 @@ class BookTestCase extends DrupalWebTestCase {
   // $admin_user is a user with permission to create and edit books and to administer blocks.
   protected $admin_user;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Book functionality',
-      'description' => 'Create a book, add pages, and test book interface.',
-      'group' => 'Book',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('book', 'node_access_test'));
 

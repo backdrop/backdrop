@@ -297,14 +297,6 @@ EOF;
  * Tests aggregator configuration settings.
  */
 class AggregatorConfigurationTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Aggregator configuration',
-      'description' => 'Test aggregator settings page.',
-      'group' => 'Aggregator',
-    );
-  }
-
   /**
    * Tests the settings form to ensure the correct default values are used.
    */
@@ -326,14 +318,6 @@ class AggregatorConfigurationTestCase extends AggregatorTestCase {
 }
 
 class AddFeedTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Add feed functionality',
-      'description' => 'Add feed test.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Create a feed, ensure that it is unique, check the source, and delete the feed.
    */
@@ -386,14 +370,6 @@ class AddFeedTestCase extends AggregatorTestCase {
 }
 
 class CategorizeFeedTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Categorize feed functionality',
-      'description' => 'Categorize feed test.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Create a feed and make sure you can add more than one category to it.
    */
@@ -429,14 +405,6 @@ class CategorizeFeedTestCase extends AggregatorTestCase {
 }
 
 class UpdateFeedTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Update feed functionality',
-      'description' => 'Update feed test.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Create a feed and attempt to update it.
    */
@@ -471,14 +439,6 @@ class UpdateFeedTestCase extends AggregatorTestCase {
 }
 
 class RemoveFeedTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Remove feed functionality',
-      'description' => 'Remove feed test.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Remove a feed and ensure that all it services are removed.
    */
@@ -499,14 +459,6 @@ class RemoveFeedTestCase extends AggregatorTestCase {
 }
 
 class UpdateFeedItemTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Update feed item functionality',
-      'description' => 'Update feed items from a feed.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Test running "update items" from the 'admin/config/services/aggregator' page.
    */
@@ -559,14 +511,6 @@ class UpdateFeedItemTestCase extends AggregatorTestCase {
 }
 
 class RemoveFeedItemTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Remove feed item functionality',
-      'description' => 'Remove feed items from a feed.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Test running "remove items" from the 'admin/config/services/aggregator' page.
    */
@@ -597,14 +541,6 @@ class RemoveFeedItemTestCase extends AggregatorTestCase {
 }
 
 class CategorizeFeedItemTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Categorize feed item functionality',
-      'description' => 'Test feed item categorization.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * If a feed has a category, make sure that the children inherit that
    * categorization.
@@ -654,14 +590,6 @@ class CategorizeFeedItemTestCase extends AggregatorTestCase {
 }
 
 class ImportOPMLTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Import feeds from OPML functionality',
-      'description' => 'Test OPML import.',
-      'group' => 'Aggregator',
-    );
-  }
-
   /**
    * Open OPML import form.
    */
@@ -777,14 +705,6 @@ class ImportOPMLTestCase extends AggregatorTestCase {
 }
 
 class AggregatorCronTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Update on cron functionality',
-      'description' => 'Update feeds on cron.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Add feeds update them on cron.
    */
@@ -823,14 +743,6 @@ class AggregatorCronTestCase extends AggregatorTestCase {
 }
 
 class AggregatorRenderingTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Checks display of aggregator items',
-      'description' => 'Checks display of aggregator items on the page.',
-      'group' => 'Aggregator'
-    );
-  }
-
   /**
    * Add a feed block to the page and checks its links.
    *
@@ -909,14 +821,6 @@ class AggregatorRenderingTestCase extends AggregatorTestCase {
  * Tests for feed parsing.
  */
 class FeedParserTestCase extends AggregatorTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Feed parser functionality',
-      'description' => 'Test the built-in feed parser with valid feed samples.',
-      'group' => 'Aggregator',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     // Do not remove old aggregator items during these tests, since our sample

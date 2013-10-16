@@ -1,0 +1,11 @@
+[ListFieldTestCase]
+name = List field
+description = Test the List field type.
+group = Field types
+file = tests/list.test
+
+[ListFieldUITestCase]
+name = List field UI
+description = Test the List field UI functionality.
+group = Field types
+file = tests/list.test

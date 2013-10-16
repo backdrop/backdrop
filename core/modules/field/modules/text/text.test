@@ -10,14 +10,6 @@ class TextFieldTestCase extends DrupalWebTestCase {
   protected $admin_user;
   protected $web_user;
 
-  public static function getInfo() {
-    return array(
-      'name'  => 'Text field',
-      'description'  => "Test the creation of text fields.",
-      'group' => 'Field types'
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -238,14 +230,6 @@ class TextFieldTestCase extends DrupalWebTestCase {
 }
 
 class TextSummaryTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Text summary',
-      'description' => 'Test text_summary() with different strings and lengths.',
-      'group' => 'Field types',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->article_creator = $this->drupalCreateUser(array('create article content', 'edit own article content'));
@@ -406,14 +390,6 @@ class TextSummaryTestCase extends DrupalWebTestCase {
 }
 
 class TextTranslationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Text translation',
-      'description' => 'Check if the text field is correctly prepared for translation.',
-      'group' => 'Field types',
-    );
-  }
-
   function setUp() {
     parent::setUp('locale', 'translation');
 

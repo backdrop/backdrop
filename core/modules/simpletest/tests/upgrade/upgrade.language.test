@@ -4,6 +4,8 @@
  * Upgrade tests for the Language module.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/simpletest/tests/upgrade/upgrade.test';
+
 /**
  * Tests upgrading a filled database with language data.
  *
@@ -11,14 +13,6 @@
  * upgrade process on it.
  */
 class LanguageUpgradePathTestCase extends UpgradePathTestCase {
-  public static function getInfo() {
-    return array(
-      'name'  => 'Language upgrade test',
-      'description'  => 'Upgrade tests with language data.',
-      'group' => 'Upgrade path',
-    );
-  }
-
   public function setUp() {
     // Path to the database dump files.
     $this->databaseDumpFiles = array(

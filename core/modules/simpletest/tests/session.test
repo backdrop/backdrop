@@ -6,14 +6,6 @@
  */
 
 class SessionTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Session tests',
-      'description' => 'Drupal session handling tests.',
-      'group' => 'Session'
-    );
-  }
-
   function setUp() {
     parent::setUp('session_test');
   }
@@ -292,15 +284,6 @@ class SessionTestCase extends DrupalWebTestCase {
  * Ensure that when running under https two session cookies are generated.
  */
 class SessionHttpsTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Session https handling',
-      'description' => 'Ensure that when running under https two session cookies are generated.',
-      'group' => 'Session'
-    );
-  }
-
   public function setUp() {
     parent::setUp('session_test');
   }

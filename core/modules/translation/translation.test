@@ -8,14 +8,6 @@
 class TranslationTestCase extends DrupalWebTestCase {
   protected $book;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Translation functionality',
-      'description' => 'Create a basic page with translation, modify the page outdating translation, and update translation.',
-      'group' => 'Translation'
-    );
-  }
-
   function setUp() {
     parent::setUp('language', 'locale', 'translation', 'translation_test');
 

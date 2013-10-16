@@ -174,15 +174,6 @@ class DatabaseTestCase extends DrupalWebTestCase {
  * Test connection management.
  */
 class DatabaseConnectionTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Connection tests',
-      'description' => 'Tests of the core database system.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that connections return appropriate connection objects.
    */
@@ -292,15 +283,6 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
  * We get timeout errors if we try to run too many tests at once.
  */
 class DatabaseFetchTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Fetch tests',
-      'description' => 'Test the Database system\'s various fetch capabilities.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that we can fetch a record properly in default object mode.
    */
@@ -373,15 +355,6 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
  * We get timeout errors if we try to run too many tests at once.
  */
 class DatabaseFetch2TestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Fetch tests, part 2',
-      'description' => 'Test the Database system\'s various fetch capabilities.',
-      'group' => 'Database',
-    );
-  }
-
   // Confirm that we can fetch a record into an indexed array explicitly.
   function testQueryFetchNum() {
     $records = array();
@@ -434,15 +407,6 @@ class DatabaseFetch2TestCase extends DatabaseTestCase {
  * Test the insert builder.
  */
 class DatabaseInsertTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Insert tests',
-      'description' => 'Test the Insert query builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test the very basic insert functionality.
    */
@@ -595,15 +559,6 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
  * Insert tests using LOB fields, which are weird on some databases.
  */
 class DatabaseInsertLOBTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Insert tests, LOB fields',
-      'description' => 'Test the Insert query builder with LOB fields.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that we can insert a single blob field successfully.
    */
@@ -636,15 +591,6 @@ class DatabaseInsertLOBTestCase extends DatabaseTestCase {
  * Insert tests for "database default" values.
  */
 class DatabaseInsertDefaultsTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Insert tests, default fields',
-      'description' => 'Test the Insert query builder with default values.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that we can run a query that is "default values for everything".
    */
@@ -696,15 +642,6 @@ class DatabaseInsertDefaultsTestCase extends DatabaseTestCase {
  * Update builder tests.
  */
 class DatabaseUpdateTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Update tests',
-      'description' => 'Test the Update query builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that we can update a single record successfully.
    */
@@ -816,15 +753,6 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
  * Tests for more complex update statements.
  */
 class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Update tests, Complex',
-      'description' => 'Test the Update query builder, complex queries.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test updates with OR conditionals.
    */
@@ -943,15 +871,6 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
  * Test update queries involving LOB values.
  */
 class DatabaseUpdateLOBTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Update tests, LOB',
-      'description' => 'Test the Update query builder with LOB fields.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that we can update a blob column.
    */
@@ -1005,15 +924,6 @@ class DatabaseUpdateLOBTestCase extends DatabaseTestCase {
  * that a TRUNCATE query actually deletes all rows from the target table.
  */
 class DatabaseDeleteTruncateTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Delete/Truncate tests',
-      'description' => 'Test the Delete and Truncate query builders.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that we can use a subselect in a delete successfully.
    */
@@ -1067,15 +977,6 @@ class DatabaseDeleteTruncateTestCase extends DatabaseTestCase {
  * Test the MERGE query builder.
  */
 class DatabaseMergeTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Merge tests',
-      'description' => 'Test the Merge query builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that we can merge-insert a record successfully.
    */
@@ -1278,15 +1179,6 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
  * Test the SELECT builder.
  */
 class DatabaseSelectTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Select tests',
-      'description' => 'Test the Select query builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test rudimentary SELECT statements.
    */
@@ -1625,15 +1517,6 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
  * Test case for subselects in a dynamic SELECT query.
  */
 class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Select tests, subqueries',
-      'description' => 'Test the Select query builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that we can use a subquery in a FROM clause.
    */
@@ -1806,15 +1689,6 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
  * Test select with order by clauses.
  */
 class DatabaseSelectOrderedTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Select tests, ordered',
-      'description' => 'Test the Select query builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test basic order by.
    */
@@ -1893,15 +1767,6 @@ class DatabaseSelectOrderedTestCase extends DatabaseTestCase {
  * Test more complex select statements.
  */
 class DatabaseSelectComplexTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Select tests, complex',
-      'description' => 'Test the Select query builder with more complex queries.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test simple JOIN statements.
    */
@@ -2209,15 +2074,6 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
  * Test more complex select statements, part 2.
  */
 class DatabaseSelectComplexTestCase2 extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Select tests, complex 2',
-      'description' => 'Test the Select query builder with even more complex queries.',
-      'group' => 'Database',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('node_access_test'));
   }
@@ -2260,15 +2116,6 @@ class DatabaseSelectComplexTestCase2 extends DatabaseTestCase {
 }
 
 class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Pager query tests',
-      'description' => 'Test the pager query extender.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that a pager query returns the correct results.
    *
@@ -2418,15 +2265,6 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
 
 
 class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Tablesort query tests',
-      'description' => 'Test the tablesort query extender.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that a tablesort query returns the correct results.
    *
@@ -2498,15 +2336,6 @@ class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
  * what type of query it is, such as "node_access".
  */
 class DatabaseTaggingTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Query tagging tests',
-      'description' => 'Test the tagging capabilities of the Select builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that a query has a "tag" added to it.
    */
@@ -2581,15 +2410,6 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
  * @see database_test_query_alter()
  */
 class DatabaseAlterTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Query altering tests',
-      'description' => 'Test the hook_query_alter capabilities of the Select builder.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that we can do basic alters.
    */
@@ -2736,15 +2556,6 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
  * Regression tests.
  */
 class DatabaseRegressionTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Regression tests',
-      'description' => 'Regression tests cases for the database layer.',
-      'group' => 'Database',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('node'));
   }
@@ -2798,15 +2609,6 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
  * Query logging tests.
  */
 class DatabaseLoggingTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Query logging',
-      'description' => 'Test the query logging facility.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that we can log the existence of a query.
    */
@@ -2924,14 +2726,6 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
  * Query serialization tests.
  */
 class DatabaseSerializeQueryTestCase extends DatabaseTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Serialize query',
-      'description' => 'Test serializing and unserializing a query.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Confirm that a query can be serialized and unserialized.
    */
@@ -2951,14 +2745,6 @@ class DatabaseSerializeQueryTestCase extends DatabaseTestCase {
  * Range query tests.
  */
 class DatabaseRangeQueryTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Range query test',
-      'description' => 'Test the Range query functionality.',
-      'group' => 'Database',
-    );
-  }
-
   function setUp() {
     parent::setUp('database_test');
   }
@@ -2982,14 +2768,6 @@ class DatabaseRangeQueryTestCase extends DrupalWebTestCase {
  * Temporary query tests.
  */
 class DatabaseTemporaryQueryTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Temporary query test',
-      'description' => 'Test the temporary query functionality.',
-      'group' => 'Database',
-    );
-  }
-
   function setUp() {
     parent::setUp('database_test');
   }
@@ -3032,14 +2810,6 @@ class DatabaseTemporaryQueryTestCase extends DrupalWebTestCase {
  * database system interprets SQL syntax in an expected fashion.
  */
 class DatabaseBasicSyntaxTestCase extends DatabaseTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Basic SQL syntax tests',
-      'description' => 'Test SQL syntax interpretation.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test for string concatenation.
    */
@@ -3129,14 +2899,6 @@ class DatabaseBasicSyntaxTestCase extends DatabaseTestCase {
  * Test invalid data handling.
  */
 class DatabaseInvalidDataTestCase extends DatabaseTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Invalid data',
-      'description' => 'Test handling of some invalid data.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Traditional SQL database systems abort inserts when invalid data is encountered.
    */
@@ -3198,14 +2960,6 @@ class DatabaseInvalidDataTestCase extends DatabaseTestCase {
  * Drupal-specific SQL syntax tests.
  */
 class DatabaseQueryTestCase extends DatabaseTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Custom query syntax tests',
-      'description' => 'Test Drupal\'s extended prepared statement syntax..',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that we can specify an array of values in the query by simply passing in an array.
    */
@@ -3237,15 +2991,6 @@ class DatabaseQueryTestCase extends DatabaseTestCase {
  *
  */
 class DatabaseTransactionTestCase extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Transaction tests',
-      'description' => 'Test the transaction abstraction system.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Helper method for transaction unit test. This "outer layer" transaction
    * starts and then encapsulates the "inner layer" transaction. This nesting
@@ -3707,14 +3452,6 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
  * Check the sequences API.
  */
 class DatabaseNextIdCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => t('Sequences API'),
-      'description' => t('Test the secondary sequences API.'),
-      'group' => t('Database'),
-    );
-  }
-
   /**
    * Test that the sequences API work.
    */
@@ -3734,14 +3471,6 @@ class DatabaseNextIdCase extends DrupalWebTestCase {
  * Tests the empty pseudo-statement class.
  */
 class DatabaseEmptyStatementTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => t('Empty statement'),
-      'description' => t('Test the empty pseudo-statement class.'),
-      'group' => t('Database'),
-    );
-  }
-
   /**
    * Test that the empty result set behaves as empty.
    */

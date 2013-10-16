@@ -30,11 +30,6 @@
       <?php if ($messages): ?>
         <div id="console"><?php print $messages; ?></div>
       <?php endif; ?>
-      <?php if ($help): ?>
-        <div id="help">
-          <?php print $help; ?>
-        </div>
-      <?php endif; ?>
       <?php print $content; ?>
     </div>
 

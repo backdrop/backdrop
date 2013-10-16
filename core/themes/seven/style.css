@@ -869,46 +869,6 @@ ol.task-list li.done {
   color: green;
 }
 
-/* Overlay theming */
-.overlay #branding {
-  background-color: #fff;
-  padding-top: 15px;
-}
-.overlay #branding h1.page-title,
-.overlay #left,
-.overlay #footer {
-  display: none;
-}
-.overlay #page {
-  margin: 0;
-  padding: 0 20px;
-}
-.overlay #branding div.breadcrumb {
-  float: left; /* LTR */
-  position: relative;
-  z-index: 10;
-}
-#overlay-tabs {
-  bottom: -1px;
-  font-size: 1.54em;
-  line-height: 1.54em;
-  margin: 0;
-}
-#overlay-tabs li {
-  margin: 0 -2px;
-}
-.overlay ul.secondary {
-  background: transparent none;
-  margin: -1.4em 0 0.3em 0; /* LTR */
-  overflow: visible;
-}
-.overlay #content {
-  padding: 0;
-}
-h1#overlay-title {
-  font-weight: normal;
-}
-
 /* Shortcut theming */
 div.add-or-remove-shortcuts {
   float: left; /* LTR */
@@ -950,25 +910,3 @@ div.add-or-remove-shortcuts {
   padding: 0 5px 5px 0; /* LTR */
 }
 
-/* Disable overlay message */
-#overlay-disable-message {
-  background-color: #addafc;
-}
-#overlay-disable-message a,
-#overlay-disable-message a:visited {
-  color: #000;
-}
-#overlay-disable-message a:focus,
-#overlay-disable-message a:active {
-  outline: none;
-  text-decoration: underline;
-}
-.overlay-disable-message-focused a {
-  padding: 0.4em 0.6em;
-}
-.overlay-disable-message-focused #overlay-dismiss-message {
-  background-color: #59a0d8;
-  color: #fff;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
-}

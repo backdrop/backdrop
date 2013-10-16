@@ -91,7 +91,6 @@ simpletest_script_reporter_timer_stop();
 
 $status_code = simpletest_script_result_status_code();
 
-
 // Display results before database is cleared.
 simpletest_script_reporter_display_results();
 
@@ -365,10 +364,10 @@ function simpletest_script_run_one_test($test_id, $test_class) {
   try {
     // Bootstrap Drupal.
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-
+    $info = simpletest_test_get_by_class($test_class);
+    include_once DRUPAL_ROOT . '/' . $info['file path'] . '/' . $info['file'];
     $test = new $test_class($test_id);
     $test->run();
-    $info = $test->getInfo();
 
     $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
     $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
@@ -485,7 +484,7 @@ function simpletest_script_reporter_init() {
   else {
     echo "Tests to be run:\n";
     foreach ($test_list as $class_name) {
-      $info = call_user_func(array($class_name, 'getInfo'));
+      $info = simpletest_test_get_by_class($class_name);
       echo " - " . $info['name'] . ' (' . $class_name . ')' . "\n";
     }
     echo "\n";
@@ -585,9 +584,8 @@ function simpletest_script_reporter_timer_stop() {
  * Check if this test run had any failures.
  */
 function simpletest_script_result_status_code() {
-  global $args, $test_id, $results_map;
-
-  $errorCount = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND (status = :exception OR status = :error)", array(':test_id' => $test_id, ':exception' => 'exception', ':error' => 'error'))->fetchField();
+  global $test_id;
+  $errorCount = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND (status = 'exception' OR status = 'fail')", array(':test_id' => $test_id))->fetchField();
   return $errorCount > 0 ? 1 : 0;
 }
 
@@ -602,7 +600,7 @@ function simpletest_script_reporter_display_results() {
     echo "Detailed test results\n";
     echo "---------------------\n";
 
-    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id ORDER BY test_class, message_id", array(':test_id' => $test_id));
+    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id AND status = 'fail' ORDER BY test_class, message_id", array(':test_id' => $test_id));
     $test_class = '';
     foreach ($results as $result) {
       if (isset($results_map[$result->status])) {

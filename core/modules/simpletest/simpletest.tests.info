@@ -1,0 +1,1097 @@
+; This info file contains an enourmous number of tests. They are ordered by:
+; 1) The main SimpleTest tests from the simpletest.test file.
+; 2) The list of all *.test files in the /tests directory, alphabetically.
+; 3) Within each *.test file, matching the declaration order of each class.
+
+[SimpleTestFunctionalTest]
+name = SimpleTest functionality
+description = Test SimpleTest's web interface: check that the intended tests were run and ensure that test reports display the intended results. Also test SimpleTest's internal browser and APIs both explicitly and implicitly.
+group = SimpleTest
+file = simpletest.test
+
+[SimpleTestBrowserTestCase]
+name = SimpleTest browser
+description = Test the internal browser of the testing framework.
+group = SimpleTest
+file = simpletest.test
+
+[SimpleTestMailCaptureTestCase]
+name = SimpleTest e-mail capturing
+description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the drupalGetMails function.
+group = SimpleTest
+file = simpletest.test
+
+[SimpleTestFolderTestCase]
+name = Testing SimpleTest setUp
+description = This test will check SimpleTest's treatment of hook_install during setUp.  Image module is used for test.
+group = SimpleTest
+file = simpletest.test
+
+[SimpleTestMissingDependentModuleUnitTest]
+name = Testing dependent module test
+description = This test should not load since it requires a module that is not found.
+group = SimpleTest
+dependencies[] = simpletest_missing_module
+file = simpletest.test
+
+[SimpleTestBrokenSetUp]
+name = Broken SimpleTest method
+description = Tests a test case that does not call parent::setUp().
+group = SimpleTest
+file = simpletest.test
+
+[SimpleTestMissingCheckedRequirements]
+name = Broken requirements test
+description = Tests a test case with missing requirements.
+group = SimpleTest
+file = simpletest.test
+
+[SimpleTestInstallationProfileModuleTestsTestCase]
+name = Installation profile module tests
+description = Verifies that tests bundled with installation profile modules are found.
+group = SimpleTest
+file = simpletest.test
+
+[SimpleTestOtherInstallationProfileModuleTestsTestCase]
+name = Other Installation profiles
+description = Verifies that tests in other installation profiles are not found.
+group = SimpleTest
+file = simpletest.test
+
+[ActionsConfigurationTestCase]
+name = Actions configuration
+description = Tests complex actions configuration by adding, editing, and deleting a complex action.
+group = Actions
+file = tests/actions.test
+
+[ActionLoopTestCase]
+name = Actions executing in a potentially infinite loop
+description = Tests actions executing in a loop, and makes sure they abort properly.
+group = Actions
+file = tests/actions.test
+
+[AJAXFrameworkTestCase]
+name = AJAX framework
+description = Performs tests on AJAX framework functions.
+group = AJAX
+file = tests/ajax.test
+
+[AJAXCommandsTestCase]
+name = AJAX commands
+description = Performs tests on AJAX framework commands.
+group = AJAX
+file = tests/ajax.test
+
+[AJAXFormValuesTestCase]
+name = AJAX command form values
+description = Tests that form values are properly delivered to AJAX callbacks.
+group = AJAX
+file = tests/ajax.test
+
+[AJAXMultiFormTestCase]
+name = AJAX multi form
+description = Tests that AJAX-enabled forms work when multiple instances of the same form are on a page.
+group = AJAX
+file = tests/ajax.test
+
+[AJAXElementValidation]
+name = Miscellaneous AJAX tests
+description = Various tests of AJAX behavior
+group = AJAX
+file = tests/ajax.test
+
+[BatchProcessingTestCase]
+name = Batch processing
+description = Test batch processing in form and non-form workflow.
+group = Batch API
+file = tests/batch.test
+
+[BatchPageTestCase]
+name = Batch progress page
+description = Test the content of the progress page.
+group = Batch API
+file = tests/batch.test
+
+[BatchPercentagesUnitTestCase]
+name = Batch percentages
+description = Unit tests of progress percentage rounding.
+group = Batch API
+file = tests/batch.test
+
+[BootstrapIPAddressTestCase]
+name = IP address and HTTP_HOST test
+description = Get the IP address from the current visitor from the server variables, check hostname validation.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[BootstrapPageCacheTestCase]
+name = Page cache test
+description = Enable the page cache and test it with various HTTP requests.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[BootstrapVariableTestCase]
+name = Variable test
+description = Make sure the variable system functions correctly.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[HookBootExitTestCase]
+name = Boot and exit hook invocation
+description = Test that hook_boot() and hook_exit() are called correctly.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[BootstrapGetFilenameTestCase]
+name = Get filename test
+description = Test that drupal_get_filename() works correctly when the file is not found in the database.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[BootstrapTimerTestCase]
+name = Timer test
+description = Test that timer_read() works both when a timer is running and when a timer is stopped.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[BootstrapResettableStaticTestCase]
+name = Resettable static variables test
+description = Test that drupal_static() and drupal_static_reset() work.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[BootstrapMiscTestCase]
+name = Miscellaneous bootstrap unit tests
+description = Test miscellaneous functions in bootstrap.inc.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[BootstrapOverrideServerVariablesTestCase]
+name = Overriding server variables
+description = Test that drupal_override_server_variables() works correctly.
+group = Bootstrap
+file = tests/bootstrap.test
+
+[CacheSavingCase]
+name = Cache saving test
+description = Check our variables are saved and restored the right way.
+group = Cache
+file = tests/cache.test
+
+[CacheGetMultipleUnitTest]
+name = Fetching multiple cache items
+description = Confirm that multiple records are fetched correctly.
+group = Cache
+file = tests/cache.test
+
+[CacheClearCase]
+name = Cache clear test
+description = Check our clearing is done the proper way.
+group = Cache
+file = tests/cache.test
+
+[CacheIsEmptyCase]
+name = Cache emptiness test
+description = Check if a cache bin is empty after performing clear operations.
+group = Cache
+file = tests/cache.test
+
+[CommonDrupalAlterTestCase]
+name = Alter hook functionality
+description = Tests alteration of arguments passed to drupal_alter().
+group = Common
+file = tests/common.test
+
+[CommonURLUnitTestCase]
+name = URL generation tests
+description = Confirm that url(), drupal_get_query_parameters(), drupal_http_build_query(), and l() work correctly with various input.
+group = Common
+file = tests/common.test
+
+[CommonXssUnitTestCase]
+name = String filtering tests
+description = Confirm that check_plain(), filter_xss(), format_string() and check_url() work correctly, including invalid multi-byte sequences.
+group = Common
+file = tests/common.test
+
+[CommonSizeUnitTestCase]
+name = Size parsing test
+description = Parse a predefined amount of bytes and compare the output with the expected value.
+group = Common
+file = tests/common.test
+
+[CommonAutocompleteTagsTestCase]
+name = Autocomplete tags
+description = Tests explosion and implosion of autocomplete tags.
+group = Common
+file = tests/common.test
+
+[CommonCascadingStylesheetsTestCase]
+name = Cascading stylesheets
+description = Tests adding various cascading stylesheets to the page.
+group = Common
+file = tests/common.test
+
+[CommonHTMLIdentifierTestCase]
+name = HTML identifiers
+description = Test the functions drupal_html_class(), drupal_html_id() and drupal_clean_css_identifier() for expected behavior
+group = Common
+file = tests/common.test
+
+[CommonCascadingStylesheetsUnitTestCase]
+name = CSS Unit Tests
+description = Unit tests on CSS functions like aggregation.
+group = Common
+file = tests/common.test
+
+[CommonDrupalHTTPRequestTestCase]
+name = Drupal HTTP request
+description = Performs tests on Drupal's HTTP request mechanism.
+group = Common
+file = tests/common.test
+
+[CommonRegionContentTestCase]
+name = Region content
+description = Tests setting and retrieving content from theme regions.
+group = Common
+file = tests/common.test
+
+[CommonDrupalGotoTestCase]
+name = Redirect functionality
+description = Tests the drupal_goto() and hook_drupal_goto_alter() functionality.
+group = Common
+file = tests/common.test
+
+[CommonJavaScriptTestCase]
+name = JavaScript
+description = Tests the JavaScript system.
+group = Common
+file = tests/common.test
+
+[CommonDrupalRenderTestCase]
+name = drupal_render()
+description = Performs functional tests on drupal_render().
+group = Common
+file = tests/common.test
+
+[CommonValidUrlUnitTestCase]
+name = URL validation
+description = Tests URL validation by valid_url()
+group = Common
+file = tests/common.test
+
+[CommonDrupalWriteRecordTestCase]
+name = Data record write functionality
+description = Tests writing of data records with drupal_write_record().
+group = Common
+file = tests/common.test
+
+[CommonSimpleTestErrorCollectorTestCase]
+name = SimpleTest error collector
+description = Performs tests on the Simpletest error and exception collector.
+group = Common
+file = tests/common.test
+
+[CommonDrupalParseInfoFileTestCase]
+name = Parsing .info files
+description = Tests the drupal_parse_info_file() API function.
+group = Common
+file = tests/common.test
+
+[CommonDrupalSystemListingTestCase]
+name = Drupal system listing
+description = Tests scanning system directories in drupal_system_listing().
+group = Common
+file = tests/common.test
+
+[CommonFormatDateTestCase]
+name = Format date
+description = Test the format_date() function.
+group = Common
+file = tests/common.test
+
+[CommonDrupalAttributesUnitTestCase]
+name = HTML Attributes
+description = Tests the drupal_attributes() functionality.
+group = Common
+file = tests/common.test
+
+[CommonDrupalArrayUnitTest]
+name = drupal_array_*() tests
+description = Tests the various drupal_array_* helper functions.
+group = System
+file = tests/common.test
+
+[CommonJSONUnitTestCase]
+name = JSON
+description = Tests the drupal_json_encode() and drupal_json_decode() functions to convert PHP variables to JSON strings and back.
+group = Common
+file = tests/common.test
+
+[CommonDrupalAddFeedTestCase]
+name = drupal_add_feed() tests
+description = Make sure that drupal_add_feed() works correctly with various constructs.
+group = Common
+file = tests/common.test
+
+[DatabaseConnectionTestCase]
+name = Connection tests
+description = Tests of the core database system.
+group = Database
+file = tests/database_test.test
+
+[DatabaseFetchTestCase]
+name = Fetch tests
+description = Test the Database system\s various fetch capabilities.',
+group = Database
+file = tests/database_test.test
+
+[DatabaseFetch2TestCase]
+name = Fetch tests, part 2
+description = Test the Database system\s various fetch capabilities.',
+group = Database
+file = tests/database_test.test
+
+[DatabaseInsertTestCase]
+name = Insert tests
+description = Test the Insert query builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseInsertLOBTestCase]
+name = Insert tests, LOB fields
+description = Test the Insert query builder with LOB fields.
+group = Database
+file = tests/database_test.test
+
+[DatabaseInsertDefaultsTestCase]
+name = Insert tests, default fields
+description = Test the Insert query builder with default values.
+group = Database
+file = tests/database_test.test
+
+[DatabaseUpdateTestCase]
+name = Update tests
+description = Test the Update query builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseUpdateComplexTestCase]
+name = Update tests, Complex
+description = Test the Update query builder, complex queries.
+group = Database
+file = tests/database_test.test
+
+[DatabaseUpdateLOBTestCase]
+name = Update tests, LOB
+description = Test the Update query builder with LOB fields.
+group = Database
+file = tests/database_test.test
+
+[DatabaseDeleteTruncateTestCase]
+name = Delete/Truncate tests
+description = Test the Delete and Truncate query builders.
+group = Database
+file = tests/database_test.test
+
+[DatabaseMergeTestCase]
+name = Merge tests
+description = Test the Merge query builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectTestCase]
+name = Select tests
+description = Test the Select query builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectSubqueryTestCase]
+name = Select tests, subqueries
+description = Test the Select query builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectOrderedTestCase]
+name = Select tests, ordered
+description = Test the Select query builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectComplexTestCase]
+name = Select tests, complex
+description = Test the Select query builder with more complex queries.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectComplexTestCase2]
+name = Select tests, complex 2
+description = Test the Select query builder with even more complex queries.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectPagerDefaultTestCase]
+name = Pager query tests
+description = Test the pager query extender.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectTableSortDefaultTestCase]
+name = Tablesort query tests
+description = Test the tablesort query extender.
+group = Database
+file = tests/database_test.test
+
+[DatabaseTaggingTestCase]
+name = Query tagging tests
+description = Test the tagging capabilities of the Select builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseAlterTestCase]
+name = Query altering tests
+description = Test the hook_query_alter capabilities of the Select builder.
+group = Database
+file = tests/database_test.test
+
+[DatabaseRegressionTestCase]
+name = Regression tests
+description = Regression tests cases for the database layer.
+group = Database
+file = tests/database_test.test
+
+[DatabaseLoggingTestCase]
+name = Query logging
+description = Test the query logging facility.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSerializeQueryTestCase]
+name = Serialize query
+description = Test serializing and unserializing a query.
+group = Database
+file = tests/database_test.test
+
+[DatabaseRangeQueryTestCase]
+name = Range query test
+description = Test the Range query functionality.
+group = Database
+file = tests/database_test.test
+
+[DatabaseTemporaryQueryTestCase]
+name = Temporary query test
+description = Test the temporary query functionality.
+group = Database
+file = tests/database_test.test
+
+[DatabaseBasicSyntaxTestCase]
+name = Basic SQL syntax tests
+description = Test SQL syntax interpretation.
+group = Database
+file = tests/database_test.test
+
+[DatabaseInvalidDataTestCase]
+name = Invalid data
+description = Test handling of some invalid data.
+group = Database
+file = tests/database_test.test
+
+[DatabaseQueryTestCase]
+name = Custom query syntax tests
+description = Test Drupal\s extended prepared statement syntax..',
+group = Database
+file = tests/database_test.test
+
+[DatabaseTransactionTestCase]
+name = Transaction tests
+description = Test the transaction abstraction system.
+group = Database
+file = tests/database_test.test
+
+[DatabaseNextIdCase]
+name = Sequences API
+description = Test the secondary sequences API.
+group = Database
+file = tests/database_test.test
+
+[DatabaseEmptyStatementTestCase]
+name = Empty statement
+description = Test the empty pseudo-statement class.
+group = Database
+file = tests/database_test.test
+
+[DrupalErrorHandlerUnitTest]
+name = Drupal error handlers
+description = Performs tests on the Drupal error and exception handler.
+group = System
+file = tests/error.test
+
+[FileSpaceUsedTest]
+name = File space used tests
+description = Tests the file_space_used() function.
+group = File API
+file = tests/file.test
+
+[FileValidatorTest]
+name = File validator tests
+description = Tests the functions used to validate uploaded files.
+group = File API
+file = tests/file.test
+
+[FileUnmanagedSaveDataTest]
+name = Unmanaged file save data
+description = Tests the unmanaged file save data function.
+group = File API
+file = tests/file.test
+
+[RemoteFileUnmanagedSaveDataTest]
+name = Unmanaged file save data
+description = Tests the unmanaged file save data function.
+group = File API (remote)
+file = tests/file.test
+
+[FileSaveUploadTest]
+name = File uploading
+description = Tests the file uploading functions.
+group = File API
+file = tests/file.test
+
+[RemoteFileSaveUploadTest]
+name = File uploading
+description = Tests the file uploading functions.
+group = File API (remote)
+file = tests/file.test
+
+[FileDirectoryTest]
+name = File paths and directories
+description = Tests operations dealing with directories.
+group = File API
+file = tests/file.test
+
+[RemoteFileDirectoryTest]
+name = File paths and directories
+description = Tests operations dealing with directories.
+group = File API (remote)
+file = tests/file.test
+
+[FileScanDirectoryTest]
+name = File scan directory
+description = Tests the file_scan_directory() function.
+group = File API
+file = tests/file.test
+
+[RemoteFileScanDirectoryTest]
+name = File scan directory
+description = Tests the file_scan_directory() function.
+group = File API (remote)
+file = tests/file.test
+
+[FileUnmanagedDeleteTest]
+name = Unmanaged file delete
+description = Tests the unmanaged file delete function.
+group = File API
+file = tests/file.test
+
+[RemoteFileUnmanagedDeleteTest]
+name = Unmanaged file delete
+description = Tests the unmanaged file delete function.
+group = File API (remote)
+file = tests/file.test
+
+[FileUnmanagedDeleteRecursiveTest]
+name = Unmanaged recursive file delete
+description = Tests the unmanaged file delete recursive function.
+group = File API
+file = tests/file.test
+
+[RemoteFileUnmanagedDeleteRecursiveTest]
+name = Unmanaged recursive file delete
+description = Tests the unmanaged file delete recursive function.
+group = File API (remote)
+file = tests/file.test
+
+[FileUnmanagedMoveTest]
+name = Unmanaged file moving
+description = Tests the unmanaged file move function.
+group = File API
+file = tests/file.test
+
+[RemoteFileUnmanagedMoveTest]
+name = Unmanaged file moving
+description = Tests the unmanaged file move function.
+group = File API (remote)
+file = tests/file.test
+
+[FileUnmanagedCopyTest]
+name = Unmanaged file copying
+description = Tests the unmanaged file copy function.
+group = File API
+file = tests/file.test
+
+[RemoteFileUnmanagedCopyTest]
+name = Unmanaged file copying
+description = Tests the unmanaged file copy function.
+group = File API (remote)
+file = tests/file.test
+
+[FileDeleteTest]
+name = File delete
+description = Tests the file delete function.
+group = File API
+file = tests/file.test
+
+[FileMoveTest]
+name = File moving
+description = Tests the file move function.
+group = File API
+file = tests/file.test
+
+[FileCopyTest]
+name = File copying
+description = Tests the file copy function.
+group = File API
+file = tests/file.test
+
+[FileLoadTest]
+name = File loading
+description = Tests the file_load() function.
+group = File API
+file = tests/file.test
+
+[FileSaveTest]
+name = File saving
+description = Tests the file_save() function.
+group = File API
+file = tests/file.test
+
+[FileUsageTest]
+name = File usage
+description = Tests the file usage functions.
+group = File
+file = tests/file.test
+
+[FileValidateTest]
+name = File validate
+description = Tests the file_validate() function.
+group = File API
+file = tests/file.test
+
+[FileSaveDataTest]
+name = File save data
+description = Tests the file save data function.
+group = File API
+file = tests/file.test
+
+[FileDownloadTest]
+name = File download
+description = Tests for file download/transfer functions.
+group = File API
+file = tests/file.test
+
+[FileURLRewritingTest]
+name = File URL rewriting
+description = Tests for file URL rewriting.
+group = File
+file = tests/file.test
+
+[FileNameMungingTest]
+name = File naming
+description = Test filename munging and unmunging.
+group = File API
+file = tests/file.test
+
+[FileMimeTypeTest]
+name = File mimetypes
+description = Test filename mimetype detection.
+group = File API
+file = tests/file.test
+
+[StreamWrapperTest]
+name = Stream wrappers
+description = Tests stream wrapper functions.
+group = File API
+file = tests/file.test
+
+[FileTranferTest]
+name = FileTransfer unit tests
+description = Test that the jail is respected and that protocols using recursive file move operations work.
+group = System
+file = tests/filetransfer.test
+
+[FormsTestCase]
+name = Form element validation
+description = Tests various form element validation mechanisms.
+group = Form API
+file = tests/form.test
+
+[FormElementTestCase]
+name = Element processing
+description = Tests building and processing of core form elements.
+group = Form API
+file = tests/form.test
+
+[FormAlterTestCase]
+name = Form alter hooks
+description = Tests hook_form_alter() and hook_form_FORM_ID_alter().
+group = Form API
+file = tests/form.test
+
+[FormValidationTestCase]
+name = Form validation handlers
+description = Tests form processing and alteration via form validation handlers.
+group = Form API
+file = tests/form.test
+
+[FormsElementsLabelsTestCase]
+name = Form element and label output test
+description = Test form element labels, required markers and associated output.
+group = Form API
+file = tests/form.test
+
+[FormsElementsTableSelectFunctionalTest]
+name = Tableselect form element type test
+description = Test the tableselect element for expected behavior
+group = Form API
+file = tests/form.test
+
+[FormsElementsVerticalTabsFunctionalTest]
+name = Vertical tabs form element type test
+description = Test the vertical_tabs element for expected behavior
+group = Form API
+file = tests/form.test
+
+[FormsFormStorageTestCase]
+name = Multistep form using form storage
+description = Tests a multistep form using form storage and makes sure validation and caching works right.
+group = Form API
+file = tests/form.test
+
+[FormsFormWrapperTestCase]
+name = Form wrapper callback
+description = Tests form wrapper callbacks to pass a prebuilt form to form builder functions.
+group = Form API
+file = tests/form.test
+
+[FormStateValuesCleanTestCase]
+name = Form state values clearance
+description = Test proper removal of submitted form values using form_state_values_clean().
+group = Form API
+file = tests/form.test
+
+[FormStateValuesCleanAdvancedTestCase]
+name = Form state values clearance (advanced)
+description = Test proper removal of submitted form values using form_state_values_clean() when having forms with elements containing buttons like "managed_file".
+group = Form API
+file = tests/form.test
+
+[FormsRebuildTestCase]
+name = Form rebuilding
+description = Tests functionality of drupal_rebuild_form().
+group = Form API
+file = tests/form.test
+
+[FormsProgrammaticTestCase]
+name = Programmatic form submissions
+description = Test the programmatic form submission behavior.
+group = Form API
+file = tests/form.test
+
+[FormsTriggeringElementTestCase]
+name = Form triggering element determination
+description = Test the determination of $form_state[\triggering_element\'].',
+group = Form API
+file = tests/form.test
+
+[FormsArbitraryRebuildTestCase]
+name = Rebuild arbitrary forms
+description = Tests altering forms to be rebuilt so there are multiple steps.
+group = Form API
+file = tests/form.test
+
+[FormsFileInclusionTestCase]
+name = Form API file inclusion
+description = Tests form API file inclusion.
+group = Form API
+file = tests/form.test
+
+[FormCheckboxTestCase]
+name = Form API checkbox
+description = Tests form API checkbox handling of various combinations of #default_value and #return_value.
+group = Form API
+file = tests/form.test
+
+[FormEmailTestCase]
+name = Form API email
+description = Tests the form API email element.
+group = Form API
+file = tests/form.test
+
+[GraphUnitTest]
+name = Graph
+description = Graph handling unit tests.
+group = System
+file = tests/graph.test
+
+[ImageToolkitUnitTest]
+name = Image toolkit tests
+description = Check image toolkit functions.
+group = Image
+file = tests/image.test
+
+[ImageToolkitGdTestCase]
+name = Image GD manipulation tests
+description = Check that core image manipulations work properly: scale, resize, rotate, crop, scale and crop, and desaturate.
+group = Image
+file = tests/image.test
+
+[ImageFileMoveTest]
+name = Image moving
+description = Tests the file move function for managed files.
+group = Image
+file = tests/image.test
+
+[InstallerLanguageTestCase]
+name = Installer language tests
+description = Tests for installer language support.
+group = Installer
+file = tests/installer.test
+
+[LockFunctionalTest]
+name = Locking framework tests
+description = Confirm locking works between two separate requests.
+group = System
+file = tests/lock.test
+
+[MailTestCase]
+name = Mail system
+description = Performs tests on the pluggable mailing framework.
+group = System
+file = tests/mail.test
+
+[DrupalHtmlToTextTestCase]
+name = HTML to text conversion
+description = Tests drupal_html_to_text().
+group = Mail
+file = tests/mail.test
+
+[MenuRouterTestCase]
+name = Menu router
+description = Tests menu router and hook_menu() functionality.
+group = Menu
+file = tests/menu.test
+
+[MenuLinksUnitTestCase]
+name = Menu links
+description = Test handling of menu links hierarchies.
+group = Menu
+file = tests/menu.test
+
+[MenuRebuildTestCase]
+name = Menu rebuild test
+description = Test rebuilding of menu.
+group = Menu
+file = tests/menu.test
+
+[MenuTreeDataTestCase]
+name = Menu tree generation
+description = Tests recursive menu tree generation functions.
+group = Menu
+file = tests/menu.test
+
+[MenuTreeOutputTestCase]
+name = Menu tree output
+description = Tests menu tree output functions.
+group = Menu
+file = tests/menu.test
+
+[MenuBreadcrumbTestCase]
+name = Breadcrumbs
+description = Tests breadcrumbs functionality.
+group = Menu
+file = tests/menu.test
+
+[MenuTrailTestCase]
+name = Active trail
+description = Tests active menu trails and alteration functionality.
+group = Menu
+file = tests/menu.test
+
+[ModuleUnitTest]
+name = Module API
+description = Test low-level module functions.
+group = Module
+file = tests/module.test
+
+[ModuleInstallTestCase]
+name = Module installation
+description = Tests the installation of modules.
+group = Module
+file = tests/module.test
+
+[ModuleUninstallTestCase]
+name = Module uninstallation
+description = Tests the uninstallation of modules.
+group = Module
+file = tests/module.test
+
+[PasswordHashingTest]
+name = Password hashing
+description = Password hashing unit tests.
+group = System
+file = tests/password.test
+
+[DrupalMatchPathTestCase]
+name = Drupal match path
+description = Tests the drupal_match_path() function to make sure it works properly.
+group = Path API
+file = tests/path.test
+
+[UrlAlterFunctionalTest]
+name = URL altering
+description = Tests hook_url_inbound_alter() and hook_url_outbound_alter().
+group = Path API
+file = tests/path.test
+
+[PathLookupTest]
+name = Path lookup
+description = Tests that drupal_lookup_path() returns correct paths.
+group = Path API
+file = tests/path.test
+
+[PathSaveTest]
+name = Path save
+description = Tests that path_save() exposes the previous alias value.
+group = Path API
+file = tests/path.test
+
+[RegistryParseFilesTestCase]
+name = Registry parse files test
+description = Read two a simple files from disc, and check that their resources are saved to the database.
+group = System
+file = tests/registry.test
+
+[RegistryParseFileTestCase]
+name = Registry parse file test
+description = Parse a simple file and check that its resources are saved to the database.
+group = System
+file = tests/registry.test
+
+[SchemaTestCase]
+name = Schema API
+description = Tests table creation and modification via the schema API.
+group = Database
+file = tests/schema.test
+
+[SessionTestCase]
+name = Session tests
+description = Drupal session handling tests.
+group = Session
+file = tests/session.test
+
+[SessionHttpsTestCase]
+name = Session https handling
+description = Ensure that when running under https two session cookies are generated.
+group = Session
+file = tests/session.test
+
+[TableSortTest]
+name = Tablesort
+description = Tests table sorting.
+group = System
+file = tests/tablesort.test
+
+[ThemeUnitTest]
+name = Theme API
+description = Test low-level theme functions.
+group = Theme
+file = tests/theme.test
+
+[ThemeTableUnitTest]
+name = Theme Table
+description = Tests built-in theme functions.
+group = Theme
+file = tests/theme.test
+
+[ThemeFunctionsTestCase]
+name = Theme functions
+description = Tests common theme functions.
+group = Theme
+file = tests/theme.test
+
+[ThemeHookInitUnitTest]
+name = Theme initialization in hook_init()
+description = Tests that the theme system can be correctly initialized in hook_init().
+group = Theme
+file = tests/theme.test
+
+[ThemeFastTestCase]
+name = Theme fast initialization
+description = Test that autocompletion does not load the registry.
+group = Theme
+file = tests/theme.test
+
+[ThemeHtmlTag]
+name = Theme HTML Tag
+description = Tests theme_html_tag() built-in theme functions.
+group = Theme
+file = tests/theme.test
+
+[ThemeHtmlTplPhpAttributesTestCase]
+name = html.tpl.php html and body attributes
+description = Tests attributes inserted in the html and body elements of html.tpl.php.
+group = Theme
+file = tests/theme.test
+
+[ThemeRegistryTestCase]
+name = ThemeRegistry
+description = Tests the behavior of the ThemeRegistry class
+group = Theme
+file = tests/theme.test
+
+[ThemeDatetime]
+name = Theme Datetime
+description = Test the theme_datetime() function.
+group = Theme
+file = tests/theme.test
+
+[UnicodeUnitTest]
+name = Unicode handling
+description = Tests Drupal Unicode handling.
+group = System
+file = tests/unicode.test
+
+[UpdateDependencyOrderingTestCase]
+name = Update dependency ordering
+description = Test that update functions are run in the proper order.
+group = Update API
+file = tests/update.test
+
+[UpdateDependencyMissingTestCase]
+name = Missing update dependencies
+description = Test that missing update dependencies are correctly flagged.
+group = Update API
+file = tests/update.test
+
+[UpdateDependencyHookInvocationTestCase]
+name = Update dependency hook invocation
+description = Test that the hook invocation for determining update dependencies works correctly.
+group = Update API
+file = tests/update.test
+
+[BareUpgradePathTestCase]
+name = Bare upgrade test
+description = Bare upgrade test.
+group = Upgrade path
+file = tests/upgrade/upgrade_bare.test
+
+[FilledUpgradePathTestCase]
+name = Filled upgrade test
+description = Filled upgrade test.
+group = Upgrade path
+file = tests/upgrade/upgrade_filled.test
+
+[LanguageUpgradePathTestCase]
+name = Language upgrade test
+description => Upgrade tests with language data.
+group = Upgrade path
+file = tests/upgrade/upgrade.language.test

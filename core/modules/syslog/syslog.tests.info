@@ -1,0 +1,5 @@
+[SyslogTestCase]
+name = Syslog functionality
+description = Test syslog settings.
+group = Syslog
+file = syslog.test

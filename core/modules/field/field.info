@@ -5,7 +5,6 @@ version = VERSION
 core = 8.x
 files[] = field.module
 files[] = field.attach.inc
-files[] = tests/field.test
 dependencies[] = field_sql_storage
 dependencies[] = entity
 required = TRUE

@@ -6,15 +6,6 @@
  */
 
 class FormsTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Form element validation',
-      'description' => 'Tests various form element validation mechanisms.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -377,14 +368,6 @@ class FormsTestCase extends DrupalWebTestCase {
 class FormElementTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Element processing',
-      'description' => 'Tests building and processing of core form elements.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('form_test'));
   }
@@ -458,14 +441,6 @@ class FormElementTestCase extends DrupalWebTestCase {
  * Test form alter hooks.
  */
 class FormAlterTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Form alter hooks',
-      'description' => 'Tests hook_form_alter() and hook_form_FORM_ID_alter().',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -492,14 +467,6 @@ class FormAlterTestCase extends DrupalWebTestCase {
  * Test form validation handlers.
  */
 class FormValidationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Form validation handlers',
-      'description' => 'Tests form processing and alteration via form validation handlers.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -589,15 +556,6 @@ class FormValidationTestCase extends DrupalWebTestCase {
  * Test form element labels, required markers and associated output.
  */
 class FormsElementsLabelsTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Form element and label output test',
-      'description' => 'Test form element labels, required markers and associated output.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -670,15 +628,6 @@ class FormsElementsLabelsTestCase extends DrupalWebTestCase {
  * Test the tableselect form element for expected behavior.
  */
 class FormsElementsTableSelectFunctionalTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Tableselect form element type test',
-      'description' => 'Test the tableselect element for expected behavior',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -871,15 +820,6 @@ class FormsElementsTableSelectFunctionalTest extends DrupalWebTestCase {
  * Test the vertical_tabs form element for expected behavior.
  */
 class FormsElementsVerticalTabsFunctionalTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Vertical tabs form element type test',
-      'description' => 'Test the vertical_tabs element for expected behavior',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -907,15 +847,6 @@ class FormsElementsVerticalTabsFunctionalTest extends DrupalWebTestCase {
  * values aren't lost due to a wrong form rebuild.
  */
 class FormsFormStorageTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name'  => 'Multistep form using form storage',
-      'description'  => 'Tests a multistep form using form storage and makes sure validation and caching works right.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
 
@@ -1051,14 +982,6 @@ class FormsFormStorageTestCase extends DrupalWebTestCase {
  * Test wrapper form callbacks.
  */
 class FormsFormWrapperTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Form wrapper callback',
-      'description' => 'Tests form wrapper callbacks to pass a prebuilt form to form builder functions.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1077,14 +1000,6 @@ class FormsFormWrapperTestCase extends DrupalWebTestCase {
  * Test $form_state clearance.
  */
 class FormStateValuesCleanTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Form state values clearance',
-      'description' => 'Test proper removal of submitted form values using form_state_values_clean().',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1130,14 +1045,6 @@ class FormStateValuesCleanAdvancedTestCase extends DrupalWebTestCase {
    */
   protected $image;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Form state values clearance (advanced)',
-      'description' => 'Test proper removal of submitted form values using form_state_values_clean() when having forms with elements containing buttons like "managed_file".',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1172,14 +1079,6 @@ class FormStateValuesCleanAdvancedTestCase extends DrupalWebTestCase {
  * @todo Add tests for other aspects of form rebuilding.
  */
 class FormsRebuildTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Form rebuilding',
-      'description' => 'Tests functionality of drupal_rebuild_form().',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
 
@@ -1264,15 +1163,6 @@ class FormsRebuildTestCase extends DrupalWebTestCase {
  * Test the programmatic form submission behavior.
  */
 class FormsProgrammaticTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Programmatic form submissions',
-      'description' => 'Test the programmatic form submission behavior.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1353,15 +1243,6 @@ class FormsProgrammaticTestCase extends DrupalWebTestCase {
  * Test that FAPI correctly determines $form_state['triggering_element'].
  */
 class FormsTriggeringElementTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Form triggering element determination',
-      'description' => 'Test the determination of $form_state[\'triggering_element\'].',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1451,14 +1332,6 @@ class FormsTriggeringElementTestCase extends DrupalWebTestCase {
  * Tests rebuilding of arbitrary forms by altering them.
  */
 class FormsArbitraryRebuildTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Rebuild arbitrary forms',
-      'description' => 'Tests altering forms to be rebuilt so there are multiple steps.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
     // Auto-create a field for testing.
@@ -1517,15 +1390,6 @@ class FormsArbitraryRebuildTestCase extends DrupalWebTestCase {
  * Tests form API file inclusion.
  */
 class FormsFileInclusionTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Form API file inclusion',
-      'description' => 'Tests form API file inclusion.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1551,15 +1415,6 @@ class FormsFileInclusionTestCase extends DrupalWebTestCase {
  * Tests checkbox element.
  */
 class FormCheckboxTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Form API checkbox',
-      'description' => 'Tests form API checkbox handling of various combinations of #default_value and #return_value.',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }
@@ -1633,14 +1488,6 @@ class FormCheckboxTestCase extends DrupalWebTestCase {
  */
 class FormEmailTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Form API email',
-      'description' => 'Tests the form API email element.',
-      'group' => 'Form API',
-    );
-  }
 
   function setUp() {
     parent::setUp('form_test');

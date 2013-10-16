@@ -9,14 +9,6 @@
  * Unit tests for the module API.
  */
 class ModuleUnitTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Module API',
-      'description' => 'Test low-level module functions.',
-      'group' => 'Module',
-    );
-  }
-
   /**
    * The basic functionality of module_list().
    */
@@ -241,14 +233,6 @@ class ModuleUnitTest extends DrupalWebTestCase {
  * Unit tests for module installation.
  */
 class ModuleInstallTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Module installation',
-      'description' => 'Tests the installation of modules.',
-      'group' => 'Module',
-    );
-  }
-
   function setUp() {
     parent::setUp('module_test');
   }
@@ -278,14 +262,6 @@ class ModuleInstallTestCase extends DrupalWebTestCase {
  * Unit tests for module uninstallation and related hooks.
  */
 class ModuleUninstallTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Module uninstallation',
-      'description' => 'Tests the uninstallation of modules.',
-      'group' => 'Module',
-    );
-  }
-
   function setUp() {
     parent::setUp('module_test', 'user');
   }

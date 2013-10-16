@@ -311,14 +311,6 @@ db_insert('locales_source')->fields(array(
 ))
 ->values(array(
   'lid' => '9',
-  'location' => 'modules/overlay/overlay-parent.js',
-  'textgroup' => 'default',
-  'source' => '@title dialog',
-  'context' => '',
-  'version' => 'none',
-))
-->values(array(
-  'lid' => '10',
   'location' => 'modules/contextual/contextual.js',
   'textgroup' => 'default',
   'source' => 'Configure',
@@ -326,7 +318,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '11',
+  'lid' => '10',
   'location' => 'modules/toolbar/toolbar.js',
   'textgroup' => 'default',
   'source' => 'Show shortcuts',
@@ -334,7 +326,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '12',
+  'lid' => '11',
   'location' => 'modules/toolbar/toolbar.js',
   'textgroup' => 'default',
   'source' => 'Hide shortcuts',
@@ -342,23 +334,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '13',
-  'location' => 'modules/overlay/overlay-child.js',
-  'textgroup' => 'default',
-  'source' => 'Loading',
-  'context' => '',
-  'version' => 'none',
-))
-->values(array(
-  'lid' => '14',
-  'location' => 'modules/overlay/overlay-child.js',
-  'textgroup' => 'default',
-  'source' => '(active tab)',
-  'context' => '',
-  'version' => 'none',
-))
-->values(array(
-  'lid' => '15',
+  'lid' => '12',
   'location' => 'misc/tabledrag.js',
   'textgroup' => 'default',
   'source' => 'Re-order rows by numerical weight instead of dragging.',
@@ -366,7 +342,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '16',
+  'lid' => '13',
   'location' => 'misc/tabledrag.js',
   'textgroup' => 'default',
   'source' => 'Show row weights',
@@ -374,7 +350,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '17',
+  'lid' => '14',
   'location' => 'misc/tabledrag.js',
   'textgroup' => 'default',
   'source' => 'Hide row weights',
@@ -382,7 +358,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '18',
+  'lid' => '15',
   'location' => 'misc/tabledrag.js',
   'textgroup' => 'default',
   'source' => 'Drag to re-order',
@@ -390,7 +366,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '19',
+  'lid' => '16',
   'location' => 'misc/tabledrag.js',
   'textgroup' => 'default',
   'source' => 'Changes made in this table will not be saved until the form is submitted.',
@@ -398,7 +374,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '20',
+  'lid' => '17',
   'location' => 'misc/collapse.js',
   'textgroup' => 'default',
   'source' => 'Hide',
@@ -406,7 +382,7 @@ db_insert('locales_source')->fields(array(
   'version' => 'none',
 ))
 ->values(array(
-  'lid' => '21',
+  'lid' => '18',
   'location' => 'misc/collapse.js',
   'textgroup' => 'default',
   'source' => 'Show',
@@ -480,7 +456,7 @@ db_insert('variable')->fields(array(
 ))
 ->values(array(
   'name' => 'javascript_parsed',
-  'value' => 'a:16:{i:0;s:14:"misc/drupal.js";i:1;s:14:"misc/jquery.js";i:2;s:19:"misc/jquery.once.js";s:10:"refresh:ca";s:7:"waiting";i:3;s:29:"misc/ui/jquery.ui.core.min.js";i:4;s:21:"misc/jquery.ba-bbq.js";i:5;s:33:"modules/overlay/overlay-parent.js";i:6;s:32:"modules/contextual/contextual.js";i:7;s:21:"misc/jquery.cookie.js";i:8;s:26:"modules/toolbar/toolbar.js";i:9;s:32:"modules/overlay/overlay-child.js";i:10;s:19:"misc/tableheader.js";i:11;s:17:"misc/tabledrag.js";i:12;s:12:"misc/form.js";i:13;s:16:"misc/collapse.js";s:10:"refresh:cv";s:7:"waiting";}',
+  'value' => 'a:13:{i:0;s:14:"misc/drupal.js";i:1;s:14:"misc/jquery.js";i:2;s:19:"misc/jquery.once.js";i:3;s:7:"waiting";i:4;s:29:"misc/ui/jquery.ui.core.min.js";i:5;s:32:"modules/contextual/contextual.js";i:6;s:21:"misc/jquery.cookie.js";i:7;s:26:"modules/toolbar/toolbar.js";i:8;s:19:"misc/tableheader.js";i:9;s:17:"misc/tabledrag.js";i:10;s:12:"misc/form.js";i:11;s:16:"misc/collapse.js";i:12;s:7:"waiting";}',
 ))
 ->values(array(
   'name' => 'language_count',

@@ -132,14 +132,6 @@ class ModuleTestCase extends DrupalWebTestCase {
 class EnableDisableTestCase extends ModuleTestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Enable/disable modules',
-      'description' => 'Enable/disable core module and confirm table creation/deletion.',
-      'group' => 'Module',
-    );
-  }
-
   /**
    * Test that all core modules can be enabled, disabled and uninstalled.
    */
@@ -319,14 +311,6 @@ class EnableDisableTestCase extends ModuleTestCase {
  * Tests failure of hook_requirements('install').
  */
 class HookRequirementsTestCase extends ModuleTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Requirements hook failure',
-      'description' => "Attempts enabling a module that fails hook_requirements('install').",
-      'group' => 'Module',
-    );
-  }
-
   /**
    * Assert that a module cannot be installed if it fails hook_requirements().
    */
@@ -348,14 +332,6 @@ class HookRequirementsTestCase extends ModuleTestCase {
  * Test module dependency functionality.
  */
 class ModuleDependencyTestCase extends ModuleTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Module dependencies',
-      'description' => 'Enable module without dependency enabled.',
-      'group' => 'Module',
-    );
-  }
-
   /**
    * Attempt to enable translation module without locale enabled.
    */
@@ -531,14 +507,6 @@ class ModuleDependencyTestCase extends ModuleTestCase {
  * Test module dependency on specific versions.
  */
 class ModuleVersionTestCase extends ModuleTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Module versions',
-      'description' => 'Check module version dependencies.',
-      'group' => 'Module',
-    );
-  }
-
   function setUp() {
     parent::setUp('module_test');
   }
@@ -592,14 +560,6 @@ class ModuleVersionTestCase extends ModuleTestCase {
  * Test required modules functionality.
  */
 class ModuleRequiredTestCase extends ModuleTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Required modules',
-      'description' => 'Attempt disabling of required modules.',
-      'group' => 'Module',
-    );
-  }
-
   /**
    * Assert that core required modules cannot be disabled.
    */
@@ -623,17 +583,6 @@ class ModuleRequiredTestCase extends ModuleTestCase {
 }
 
 class CronRunTestCase extends DrupalWebTestCase {
-  /**
-   * Implement getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'Cron run',
-      'description' => 'Test cron run.',
-      'group' => 'System'
-    );
-  }
-
   function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper'));
   }
@@ -759,17 +708,6 @@ class CronRunTestCase extends DrupalWebTestCase {
 
 class AdminMetaTagTestCase extends DrupalWebTestCase {
   /**
-   * Implement getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'Fingerprinting meta tag',
-      'description' => 'Confirm that the fingerprinting meta tag appears as expected.',
-      'group' => 'System'
-    );
-  }
-
-  /**
    * Verify that the meta tag HTML is generated correctly.
    */
   public function testMetaTag() {
@@ -785,14 +723,6 @@ class AdminMetaTagTestCase extends DrupalWebTestCase {
  */
 class AccessDeniedTestCase extends DrupalWebTestCase {
   protected $admin_user;
-
-  public static function getInfo() {
-    return array(
-      'name' => '403 functionality',
-      'description' => 'Tests page access denied functionality, including custom 403 pages.',
-      'group' => 'System'
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -861,17 +791,6 @@ class PageNotFoundTestCase extends DrupalWebTestCase {
   protected $admin_user;
 
   /**
-   * Implement getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => '404 functionality',
-      'description' => "Tests page not found functionality, including custom 404 pages.",
-      'group' => 'System'
-    );
-  }
-
-  /**
    * Implement setUp().
    */
   function setUp() {
@@ -905,14 +824,6 @@ class PageNotFoundTestCase extends DrupalWebTestCase {
  */
 class SiteMaintenanceTestCase extends DrupalWebTestCase {
   protected $admin_user;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Site maintenance mode functionality',
-      'description' => 'Test access to site while in maintenance mode.',
-      'group' => 'System',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -1005,14 +916,6 @@ class SiteMaintenanceTestCase extends DrupalWebTestCase {
  * Tests generic date and time handling capabilities of Drupal.
  */
 class DateTimeFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Date and time',
-      'description' => 'Configure date and time settings. Test date formatting and time zone handling, including daylight saving time.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('locale'));
 
@@ -1202,17 +1105,6 @@ class PageTitleFiltering extends DrupalWebTestCase {
   protected $saved_title;
 
   /**
-   * Implement getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'HTML in page titles',
-      'description' => 'Tests correct handling or conversion by drupal_set_title() and drupal_get_title() and checks the correct escaping of site name and slogan.',
-      'group' => 'System'
-    );
-  }
-
-  /**
    * Implement setUp().
    */
   function setUp() {
@@ -1305,15 +1197,6 @@ class PageTitleFiltering extends DrupalWebTestCase {
  * Test front page functionality and administration.
  */
 class FrontPageTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Front page',
-      'description' => 'Tests front page functionality and administration.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp('system_test');
 
@@ -1359,14 +1242,6 @@ class FrontPageTestCase extends DrupalWebTestCase {
 class SystemBlockTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Block functionality',
-      'description' => 'Configure and move powered-by block.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp('block');
 
@@ -1407,18 +1282,6 @@ class SystemBlockTestCase extends DrupalWebTestCase {
     $edit['blocks[system_powered-by][region]'] = 'footer';
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
     $this->drupalPost('admin/structure/block/manage/system/powered-by/configure', array('title' => ''), t('Save block'));
-
-    // Set the help block to the help region.
-    $edit = array();
-    $edit['blocks[system_help][region]'] = 'help';
-    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
-
-    // Test displaying the help block with block caching enabled.
-    variable_set('block_cache', TRUE);
-    $this->drupalGet('admin/structure/block/add');
-    $this->assertRaw(t('Use this page to create a new custom block.'));
-    $this->drupalGet('admin/index');
-    $this->assertRaw(t('This page shows you all available administration tasks for each module.'));
   }
 }
 
@@ -1428,14 +1291,6 @@ class SystemBlockTestCase extends DrupalWebTestCase {
 class SystemMainContentFallback extends DrupalWebTestCase {
   protected $admin_user;
   protected $web_user;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Main content rendering fallback',
-      'description' => ' Test system module main content rendering fallback.',
-      'group' => 'System',
-    );
-  }
 
   function setUp() {
     parent::setUp('system_test');
@@ -1507,14 +1362,6 @@ class SystemMainContentFallback extends DrupalWebTestCase {
  */
 class SystemThemeFunctionalTest extends DrupalWebTestCase {
   protected $profile = 'testing';
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme interface functionality',
-      'description' => 'Tests the theme interface functionality by enabling and switching themes, and using an administration theme.',
-      'group' => 'System',
-    );
-  }
 
   function setUp() {
     parent::setUp(array('node', 'block'));
@@ -1733,14 +1580,6 @@ class SystemThemeFunctionalTest extends DrupalWebTestCase {
  * Test the basic queue functionality.
  */
 class QueueTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Queue functionality',
-      'description' => 'Queues and dequeues a set of items to check the basic queue functionality.',
-      'group' => 'System',
-    );
-  }
-
   /**
    * Queues and dequeues a set of items to check the basic queue functionality.
    */
@@ -1824,14 +1663,6 @@ class QueueTestCase extends DrupalWebTestCase {
  * Test token replacement in strings.
  */
 class TokenReplaceTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Token replacement',
-      'description' => 'Generates text using placeholders for dummy content to check token replacement.',
-      'group' => 'System',
-    );
-  }
-
   /**
    * Creates a user and a node, then tests the tokens generated from them.
    */
@@ -1980,14 +1811,6 @@ class TokenReplaceTestCase extends DrupalWebTestCase {
 }
 
 class InfoFileParserTestCase extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Info file format parser',
-      'description' => 'Tests proper parsing of a .info file formatted string.',
-      'group' => 'System',
-    );
-  }
-
   /**
    * Test drupal_parse_info_format().
    */
@@ -2054,14 +1877,6 @@ array_space[a b] = Value';
  * Tests the effectiveness of hook_system_info_alter().
  */
 class SystemInfoAlterTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'System info alter',
-      'description' => 'Tests the effectiveness of hook_system_info_alter().',
-      'group' => 'System',
-    );
-  }
-
   /**
    * Tests that {system}.info is rebuilt after a module that implements
    * hook_system_info_alter() is enabled. Also tests if core *_list() functions
@@ -2123,14 +1938,6 @@ class SystemInfoAlterTestCase extends DrupalWebTestCase {
 class UpdateScriptFunctionalTest extends DrupalWebTestCase {
   private $update_url;
   private $update_user;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Update functionality',
-      'description' => 'Tests the update script access and functionality.',
-      'group' => 'System',
-    );
-  }
 
   function setUp() {
     parent::setUp(array('update_script_test', 'dblog'));
@@ -2290,14 +2097,6 @@ class UpdateScriptFunctionalTest extends DrupalWebTestCase {
  * Functional tests for the flood control mechanism.
  */
 class FloodFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Flood control mechanism',
-      'description' => 'Functional tests for the flood control mechanism.',
-      'group' => 'System',
-    );
-  }
-
   /**
    * Test flood control mechanism clean-up.
    */
@@ -2328,14 +2127,6 @@ class FloodFunctionalTest extends DrupalWebTestCase {
  * Test HTTP file downloading capability.
  */
 class RetrieveFileTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'HTTP file retrieval',
-      'description' => 'Checks HTTP file fetching and error handling.',
-      'group' => 'System',
-    );
-  }
-
   /**
    * Invokes system_retrieve_file() in several scenarios.
    */
@@ -2377,14 +2168,6 @@ class RetrieveFileTestCase extends DrupalWebTestCase {
  * Functional tests shutdown functions.
  */
 class ShutdownFunctionsTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Shutdown functions',
-      'description' => 'Functional tests for shutdown functions',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp('system_test');
   }
@@ -2409,14 +2192,6 @@ class ShutdownFunctionsTest extends DrupalWebTestCase {
  * Tests administrative overview pages.
  */
 class SystemAdminTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Administrative pages',
-      'description' => 'Tests output on administrative pages and compact mode functionality.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     // testAdminPages() requires Locale module.
     parent::setUp(array('locale'));
@@ -2522,14 +2297,6 @@ class SystemAdminTestCase extends DrupalWebTestCase {
  * Tests authorize.php and related hooks.
  */
 class SystemAuthorizeCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Authorize API',
-      'description' => 'Tests the authorize.php script and related API.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('system_test'));
 
@@ -2575,14 +2342,6 @@ class SystemAuthorizeCase extends DrupalWebTestCase {
  * Test the handling of requests containing 'index.php'.
  */
 class SystemIndexPhpTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Index.php handling',
-      'description' => "Test the handling of requests containing 'index.php'.",
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp();
   }
@@ -2614,14 +2373,6 @@ class UuidUnitTestCase extends DrupalUnitTestCase {
    * @var Uuid
    */
   protected $uuid;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'UUID handling',
-      'description' => "Test the handling of Universally Unique IDentifiers (UUIDs).",
-      'group' => 'System',
-    );
-  }
 
   public function setUp() {
     // Initiate the generator. This will lazy-load uuid.inc.

@@ -149,7 +149,7 @@ function system_permission() {
       'title' => t('Administer actions'),
     ),
     'access administration pages' => array(
-      'title' => t('Use the administration pages and help'),
+      'title' => t('Use the administration pages'),
     ),
     'access site in maintenance mode' => array(
       'title' => t('Use the site in maintenance mode'),
@@ -1127,16 +1127,6 @@ function system_library_info() {
     ),
   );
 
-  // jQuery BBQ plugin.
-  $libraries['jquery.bbq'] = array(
-    'title' => 'jQuery BBQ',
-    'website' => 'http://benalman.com/projects/jquery-bbq-plugin/',
-    'version' => '1.2.1',
-    'js' => array(
-      'core/misc/jquery.ba-bbq.js' => array(),
-    ),
-  );
-
   // Vertical Tabs.
   $libraries['drupal.vertical-tabs'] = array(
     'title' => 'Vertical Tabs',
@@ -1948,14 +1938,6 @@ function system_block_info() {
     'weight' => '10',
     'cache' => DRUPAL_NO_CACHE,
   );
-  $blocks['help'] = array(
-    'info' => t('System help'),
-    'weight' => '5',
-    'cache' => DRUPAL_NO_CACHE,
-    // Auto-enable in 'help' region by default, if the theme defines one.
-    'region' => 'help',
-    'status' => 1,
-  );
   // System-defined menu blocks.
   foreach (menu_list_system_menus() as $menu_name => $title) {
     $blocks[$menu_name]['info'] = t($title);
@@ -1983,10 +1965,6 @@ function system_block_view($delta = '') {
       $block['subject'] = NULL;
       $block['content'] = theme('system_powered_by');
       return $block;
-    case 'help':
-      $block['subject'] = NULL;
-      $block['content'] = menu_get_active_help();
-      return $block;
     default:
       // All system menu blocks.
       $system_menus = menu_list_system_menus();
@@ -2007,9 +1985,6 @@ function system_preprocess_block(&$variables) {
 
     switch ($variables['block']->delta) {
       case 'powered-by':
-        $variables['attributes_array']['role'] = 'complementary';
-        break;
-      case 'help':
         $variables['attributes_array']['role'] = 'complementary';
         break;
 
@@ -2433,7 +2408,6 @@ function _system_rebuild_theme_data() {
       'header' => 'Header',
       'footer' => 'Footer',
       'highlighted' => 'Highlighted',
-      'help' => 'Help',
       'page_top' => 'Page top',
       'page_bottom' => 'Page bottom',
     ),

@@ -17,14 +17,6 @@ class UnicodeUnitTest extends DrupalUnitTestCase {
    */
   protected $extendedMode = FALSE;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Unicode handling',
-      'description' => 'Tests Drupal Unicode handling.',
-      'group' => 'System',
-    );
-  }
-
   /**
    * Test full unicode features implemented using the mbstring extension.
    */
