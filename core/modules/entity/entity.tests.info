@@ -1,0 +1,23 @@
+[EntityAPITestCase]
+name = Entity CRUD
+description = Tests basic CRUD functionality.
+group = Entity API
+file = tests/entity.test
+
+[EntityAPIInfoTestCase]
+name = Entity info
+description = Makes sure entity info is accurately cached.
+group = Entity API
+file = tests/entity.test
+
+[EntityFieldQueryTestCase]
+name = Entity query
+description = Test the EntityFieldQuery class.
+group = Entity API
+file = tests/entity_query.test
+
+[EntityCrudHookTestCase]
+name = Entity CRUD hooks
+description = Tests the invocation of hooks when inserting, loading, updating or deleting an entity.
+group = Entity API
+file = tests/entity_crud_hook_test.test

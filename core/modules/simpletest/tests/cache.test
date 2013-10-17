@@ -101,14 +101,6 @@ class CacheTestCase extends DrupalWebTestCase {
 }
 
 class CacheSavingCase extends CacheTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Cache saving test',
-      'description' => 'Check our variables are saved and restored the right way.',
-      'group' => 'Cache'
-    );
-  }
-
   /**
    * Test the saving and restoring of a string.
    */
@@ -174,15 +166,6 @@ class CacheSavingCase extends CacheTestCase {
  * Test getMultiple().
  */
 class CacheGetMultipleUnitTest extends CacheTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Fetching multiple cache items',
-      'description' => 'Confirm that multiple records are fetched correctly.',
-      'group' => 'Cache',
-    );
-  }
-
   function setUp() {
     $this->default_bin = 'page';
     parent::setUp();
@@ -222,14 +205,6 @@ class CacheGetMultipleUnitTest extends CacheTestCase {
  * Test cache clearing methods.
  */
 class CacheClearCase extends CacheTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Cache clear test',
-      'description' => 'Check our clearing is done the proper way.',
-      'group' => 'Cache'
-    );
-  }
-
   function setUp() {
     $this->default_bin = 'page';
     $this->default_value = $this->randomName(10);
@@ -340,14 +315,6 @@ class CacheClearCase extends CacheTestCase {
  * Test isEmpty() method.
  */
 class CacheIsEmptyCase extends CacheTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Cache emptiness test',
-      'description' => 'Check if a cache bin is empty after performing clear operations.',
-      'group' => 'Cache'
-    );
-  }
-
   function setUp() {
     $this->default_bin = 'page';
     $this->default_value = $this->randomName(10);

@@ -70,14 +70,6 @@ class ImageToolkitTestCase extends DrupalWebTestCase {
  * Test that the functions in image.inc correctly pass data to the toolkit.
  */
 class ImageToolkitUnitTest extends ImageToolkitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Image toolkit tests',
-      'description' => 'Check image toolkit functions.',
-      'group' => 'Image',
-    );
-  }
-
   /**
    * Check that hook_image_toolkits() is called and only available toolkits are
    * returned.
@@ -207,14 +199,6 @@ class ImageToolkitGdTestCase extends DrupalWebTestCase {
 
   protected $width = 40;
   protected $height = 20;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Image GD manipulation tests',
-      'description' => 'Check that core image manipulations work properly: scale, resize, rotate, crop, scale and crop, and desaturate.',
-      'group' => 'Image',
-    );
-  }
 
   protected function checkRequirements() {
     image_get_available_toolkits();
@@ -467,14 +451,6 @@ class ImageToolkitGdTestCase extends DrupalWebTestCase {
  * Tests the file move function for managed files.
  */
 class ImageFileMoveTest extends ImageToolkitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Image moving',
-      'description' => 'Tests the file move function for managed files.',
-      'group' => 'Image',
-    );
-  }
-
   /**
    * Tests moving a randomly generated image.
    */

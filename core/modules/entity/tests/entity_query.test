@@ -9,15 +9,6 @@
  * Tests EntityFieldQuery.
  */
 class EntityFieldQueryTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Entity query',
-      'description' => 'Test the EntityFieldQuery class.',
-      'group' => 'Entity API',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('field_test'));
 

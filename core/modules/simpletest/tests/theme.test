@@ -11,14 +11,6 @@
 class ThemeUnitTest extends DrupalWebTestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme API',
-      'description' => 'Test low-level theme functions.',
-      'group' => 'Theme',
-    );
-  }
-
   function setUp() {
     parent::setUp('theme_test');
     theme_enable(array('test_theme'));
@@ -158,14 +150,6 @@ class ThemeUnitTest extends DrupalWebTestCase {
  * Unit tests for theme_table().
  */
 class ThemeTableUnitTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme Table',
-      'description' => 'Tests built-in theme functions.',
-      'group' => 'Theme',
-    );
-  }
-
   /**
    * Tableheader.js provides 'sticky' table headers, and is included by default.
    */
@@ -219,14 +203,6 @@ class ThemeTableUnitTest extends DrupalWebTestCase {
  */
 class ThemeFunctionsTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme functions',
-      'description' => 'Tests common theme functions.',
-      'group' => 'Theme',
-    );
-  }
 
   /**
    * Tests theme_item_list().
@@ -478,14 +454,6 @@ class ThemeFunctionsTestCase extends DrupalWebTestCase {
  * Functional test for initialization of the theme system in hook_init().
  */
 class ThemeHookInitUnitTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme initialization in hook_init()',
-      'description' => 'Tests that the theme system can be correctly initialized in hook_init().',
-      'group' => 'Theme',
-    );
-  }
-
   function setUp() {
     parent::setUp('theme_test');
   }
@@ -504,14 +472,6 @@ class ThemeHookInitUnitTest extends DrupalWebTestCase {
  * Tests autocompletion not loading registry.
  */
 class ThemeFastTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme fast initialization',
-      'description' => 'Test that autocompletion does not load the registry.',
-      'group' => 'Theme'
-    );
-  }
-
   function setUp() {
     parent::setUp('theme_test');
     $this->account = $this->drupalCreateUser(array('access user profiles'));
@@ -531,14 +491,6 @@ class ThemeFastTestCase extends DrupalWebTestCase {
  * Unit tests for theme_html_tag().
  */
 class ThemeHtmlTag extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme HTML Tag',
-      'description' => 'Tests theme_html_tag() built-in theme functions.',
-      'group' => 'Theme',
-    );
-  }
-
   /**
    * Test function theme_html_tag()
    */
@@ -557,14 +509,6 @@ class ThemeHtmlTag extends DrupalUnitTestCase {
  * Functional test for attributes of html.tpl.php.
  */
 class ThemeHtmlTplPhpAttributesTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'html.tpl.php html and body attributes',
-      'description' => 'Tests attributes inserted in the html and body elements of html.tpl.php.',
-      'group' => 'Theme',
-    );
-  }
-
   function setUp() {
     parent::setUp('theme_test');
   }
@@ -586,13 +530,6 @@ class ThemeHtmlTplPhpAttributesTestCase extends DrupalWebTestCase {
  */
 class ThemeRegistryTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
-  public static function getInfo() {
-    return array(
-      'name' => 'ThemeRegistry',
-      'description' => 'Tests the behavior of the ThemeRegistry class',
-      'group' => 'Theme',
-    );
-  }
   function setUp() {
     parent::setUp('theme_test');
   }
@@ -637,14 +574,6 @@ class ThemeRegistryTestCase extends DrupalWebTestCase {
  */
 class ThemeDatetime extends DrupalWebTestCase {
   protected $profile = 'testing';
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Theme Datetime',
-      'description' => 'Test the theme_datetime() function.',
-      'group' => 'Theme',
-    );
-  }
 
   /**
    * Test function theme_datetime().

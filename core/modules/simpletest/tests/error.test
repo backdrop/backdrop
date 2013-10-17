@@ -4,14 +4,6 @@
  * Tests Drupal error and exception handlers.
  */
 class DrupalErrorHandlerUnitTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Drupal error handlers',
-      'description' => 'Performs tests on the Drupal error and exception handler.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     parent::setUp('error_test');
   }

@@ -139,14 +139,6 @@ class FieldUITestCase extends DrupalWebTestCase {
 class FieldUIManageFieldsTestCase extends FieldUITestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Manage fields',
-      'description' => 'Test the Field UI "Manage fields" screen.',
-      'group' => 'Field UI',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -462,14 +454,6 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
  * Tests the functionality of the 'Manage display' screens.
  */
 class FieldUIManageDisplayTestCase extends FieldUITestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Manage display',
-      'description' => 'Test the Field UI "Manage display" screens.',
-      'group' => 'Field UI',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('search'));
   }
@@ -681,14 +665,6 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
  * Tests custom widget hooks and callbacks on the field administration pages.
  */
 class FieldUIAlterTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Widget customization',
-      'description' => 'Test custom field widget hooks and callbacks on field administration pages.',
-      'group' => 'Field UI',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('field_test'));
 

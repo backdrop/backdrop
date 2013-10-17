@@ -6,14 +6,6 @@
  */
 
 class SyslogTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Syslog functionality',
-      'description' => 'Test syslog settings.',
-      'group' => 'Syslog'
-    );
-  }
-
   function setUp() {
     parent::setUp('syslog');
   }

@@ -1,14 +1,6 @@
 <?php
 
 class ActionsConfigurationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Actions configuration',
-      'description' => 'Tests complex actions configuration by adding, editing, and deleting a complex action.',
-      'group' => 'Actions',
-    );
-  }
-
   /**
    * Test the configuration of advanced actions through the administration
    * interface.
@@ -68,14 +60,6 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
  */
 class ActionLoopTestCase extends DrupalWebTestCase {
   protected $aid;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Actions executing in a potentially infinite loop',
-      'description' => 'Tests actions executing in a loop, and makes sure they abort properly.',
-      'group' => 'Actions',
-    );
-  }
 
   function setUp() {
     parent::setUp('dblog', 'actions_loop_test');

@@ -15,8 +15,8 @@
  *
  * @param $groups
  *   A two dimension array, the first key is the test group (as defined in
- *   getInfo) the second is the name of the class and the value is the return
- *   value of the getInfo method.
+ *   the .test.info file) the second is the name of the class and the value is
+ *   the content of each class's info.
  */
 function hook_simpletest_alter(&$groups) {
   // An alternative session handler module would not want to run the original

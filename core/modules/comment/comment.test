@@ -264,14 +264,6 @@ class CommentHelperCase extends DrupalWebTestCase {
 }
 
 class CommentInterfaceTest extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment interface',
-      'description' => 'Test comment user interfaces.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests the comment interface.
    */
@@ -953,14 +945,6 @@ class CommentInterfaceTest extends CommentHelperCase {
  * Tests previewing comments.
  */
 class CommentPreviewTest extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment preview',
-      'description' => 'Test comment preview.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests comment preview.
    */
@@ -1071,14 +1055,6 @@ class CommentPreviewTest extends CommentHelperCase {
  * Tests anonymous commenting.
  */
 class CommentAnonymous extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Anonymous comments',
-      'description' => 'Test anonymous comments.',
-      'group' => 'Comment',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     variable_set('user_register', USER_REGISTER_VISITORS);
@@ -1224,15 +1200,6 @@ class CommentAnonymous extends CommentHelperCase {
  * Verifies pagination of comments.
  */
 class CommentPagerTest extends CommentHelperCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment paging settings',
-      'description' => 'Test paging of comments and their settings.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Confirms comment paging works correctly with flat and threaded comments.
    */
@@ -1494,14 +1461,6 @@ class CommentPagerTest extends CommentHelperCase {
  * access module is in use.
  */
 class CommentNodeAccessTest extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment node access',
-      'description' => 'Test comment viewing with node access.',
-      'group' => 'Comment',
-    );
-  }
-
   function setUp() {
     DrupalWebTestCase::setUp('comment', 'search', 'node_access_test');
     node_access_rebuild();
@@ -1558,14 +1517,6 @@ class CommentNodeAccessTest extends CommentHelperCase {
  * Tests comment approval functionality.
  */
 class CommentApprovalTest extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment approval',
-      'description' => 'Test comment approval functionality.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Test comment approval functionality through admin/content/comment.
    */
@@ -1682,14 +1633,6 @@ class CommentApprovalTest extends CommentHelperCase {
  * Tests the Comment module blocks.
  */
 class CommentBlockFunctionalTest extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment blocks',
-      'description' => 'Test comment block functionality.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests the recent comments block.
    */
@@ -1777,14 +1720,6 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
  * Unit tests for Comment module integration with RSS feeds.
  */
 class CommentRSSUnitTest extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment RSS',
-      'description' => 'Test comments as part of an RSS feed.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests comments as part of an RSS feed.
    */
@@ -1809,14 +1744,6 @@ class CommentRSSUnitTest extends CommentHelperCase {
  * Tests comment content rebuilding.
  */
 class CommentContentRebuild extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment Rebuild',
-      'description' => 'Test to make sure the comment content is rebuilt.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests the rebuilding of comment's content arrays on calling comment_view().
    */
@@ -1848,14 +1775,6 @@ class CommentContentRebuild extends CommentHelperCase {
  * Tests comment token replacement in strings.
  */
 class CommentTokenReplaceTestCase extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment token replacement',
-      'description' => 'Generates text using placeholders for dummy content to check comment token replacement.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Creates a comment, then tests the tokens generated from it.
    */
@@ -1948,14 +1867,6 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
  * Tests actions provided by the Comment module.
  */
 class CommentActionsTestCase extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment actions',
-      'description' => 'Test actions provided by the comment module.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests comment publish and unpublish actions.
    */
@@ -2017,14 +1928,6 @@ class CommentActionsTestCase extends CommentHelperCase {
  * Tests fields on comments.
  */
 class CommentFieldsTest extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment fields',
-      'description' => 'Tests fields on comments.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests that the default 'comment_body' field is correctly added.
    */
@@ -2112,5 +2015,100 @@ class CommentFieldsTest extends CommentHelperCase {
     $this->drupalLogin($this->web_user);
     $edit = array('comment_body[und][0][value]' => $this->randomName(8));
     $this->drupalPost('node/' . $this->node->nid, $edit, t('Save'));
+  }
+}
+
+/**
+ * Tests comment threading.
+ */
+class CommentThreadingTestCase extends CommentHelperCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Comment Threading',
+      'description' => 'Test to make sure the comment number increments properly.',
+      'group' => 'Comment',
+    );
+  }
+
+  /**
+   * Tests the comment threading.
+   */
+  function testCommentThreading() {
+    $langcode = LANGUAGE_NONE;
+    // Set comments to have a subject with preview disabled.
+    $this->drupalLogin($this->admin_user);
+    $this->setCommentPreview(DRUPAL_DISABLED);
+    $this->setCommentForm(TRUE);
+    $this->setCommentSubject(TRUE);
+    $this->setCommentSettings('comment_default_mode', COMMENT_MODE_THREADED, t('Comment paging changed.'));
+    $this->drupalLogout();
+
+    // Create a node.
+    $this->drupalLogin($this->web_user);
+    $this->node = $this->drupalCreateNode(array('type' => 'article', 'promote' => 1, 'uid' => $this->web_user->uid));
+
+    // Post comment #1.
+    $this->drupalLogin($this->web_user);
+    $subject_text = $this->randomName();
+    $comment_text = $this->randomName();
+    $comment = $this->postComment($this->node, $comment_text, $subject_text, TRUE);
+    $comment_loaded = comment_load($comment->id);
+    $this->assertTrue($this->commentExists($comment), 'Comment #1. Comment found.');
+    $this->assertEqual($comment_loaded->thread, '01/');
+
+    // Reply to comment #1 creating comment #2.
+    $this->drupalLogin($this->web_user);
+    $this->drupalGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
+    $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
+    $reply_loaded = comment_load($reply->id);
+    $this->assertTrue($this->commentExists($reply, TRUE), 'Comment #2. Reply found.');
+    $this->assertEqual($reply_loaded->thread, '01.00/');
+
+    // Reply to comment #2 creating comment #3.
+    $this->drupalGet('comment/reply/' . $this->node->nid . '/' . $reply->id);
+    $reply = $this->postComment(NULL, $this->randomName(), $this->randomName(), TRUE);
+    $reply_loaded = comment_load($reply->id);
+    $this->assertTrue($this->commentExists($reply, TRUE), 'Comment #3. Second reply found.');
+    $this->assertEqual($reply_loaded->thread, '01.00.00/');
+
+    // Reply to comment #1 creating comment #4.
+    $this->drupalLogin($this->web_user);
+    $this->drupalGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
+    $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
+    $reply_loaded = comment_load($reply->id);
+    $this->assertTrue($this->commentExists($comment), 'Comment #4. Third reply found.');
+    $this->assertEqual($reply_loaded->thread, '01.01/');
+
+    // Post comment #2 overall comment #5.
+    $this->drupalLogin($this->web_user);
+    $subject_text = $this->randomName();
+    $comment_text = $this->randomName();
+    $comment = $this->postComment($this->node, $comment_text, $subject_text, TRUE);
+    $comment_loaded = comment_load($comment->id);
+    $this->assertTrue($this->commentExists($comment), 'Comment #5. Second comment found.');
+    $this->assertEqual($comment_loaded->thread, '02/');
+
+    // Reply to comment #5 creating comment #6.
+    $this->drupalLogin($this->web_user);
+    $this->drupalGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
+    $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
+    $reply_loaded = comment_load($reply->id);
+    $this->assertTrue($this->commentExists($reply, TRUE), 'Comment #6. Reply found.');
+    $this->assertEqual($reply_loaded->thread, '02.00/');
+
+    // Reply to comment #6 creating comment #7.
+    $this->drupalGet('comment/reply/' . $this->node->nid . '/' . $reply->id);
+    $reply = $this->postComment(NULL, $this->randomName(), $this->randomName(), TRUE);
+    $reply_loaded = comment_load($reply->id);
+    $this->assertTrue($this->commentExists($reply, TRUE), 'Comment #7. Second reply found.');
+    $this->assertEqual($reply_loaded->thread, '02.00.00/');
+
+    // Reply to comment #5 creating comment #8.
+    $this->drupalLogin($this->web_user);
+    $this->drupalGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
+    $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
+    $reply_loaded = comment_load($reply->id);
+    $this->assertTrue($this->commentExists($comment), 'Comment #8. Third reply found.');
+    $this->assertEqual($reply_loaded->thread, '02.01/');
   }
 }

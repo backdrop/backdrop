@@ -6,14 +6,6 @@
  */
 
 class UserRegistrationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User registration',
-      'description' => 'Test registration of user under different configurations.',
-      'group' => 'User'
-    );
-  }
-
   function setUp() {
     parent::setUp('field_test');
   }
@@ -258,14 +250,6 @@ class UserRegistrationTestCase extends DrupalWebTestCase {
 }
 
 class UserValidationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Username/e-mail validation',
-      'description' => 'Verify that username/email validity checks behave as designed.',
-      'group' => 'User'
-    );
-  }
-
   // Username validation.
   function testUsernames() {
     $test_cases = array( // '<username>' => array('<description>', 'assert<testName>'),
@@ -298,14 +282,6 @@ class UserValidationTestCase extends DrupalWebTestCase {
  * Functional tests for user logins, including rate limiting of login attempts.
  */
 class UserLoginTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User login',
-      'description' => 'Ensure that login works as expected.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * Test the global login flood control.
    */
@@ -441,14 +417,6 @@ class UserLoginTestCase extends DrupalWebTestCase {
  * Test cancelling a user.
  */
 class UserCancelTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Cancel account',
-      'description' => 'Ensure that account cancellation methods work as expected.',
-      'group' => 'User',
-    );
-  }
-
   function setUp() {
     parent::setUp('comment');
   }
@@ -839,14 +807,6 @@ class UserPictureTestCase extends DrupalWebTestCase {
   protected $user;
   protected $_directory_test;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Upload user picture',
-      'description' => 'Assure that dimension check, extension check and image scaling work as designed.',
-      'group' => 'User'
-    );
-  }
-
   function setUp() {
     parent::setUp();
     // Enable user pictures.
@@ -1081,14 +1041,6 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
   protected $admin_user;
   protected $rid;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Role permissions',
-      'description' => 'Verify that role permissions can be added and removed via the permissions page.',
-      'group' => 'User'
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -1176,14 +1128,6 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
 }
 
 class UserAdminTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User administration',
-      'description' => 'Test user administration page functionality.',
-      'group' => 'User'
-    );
-  }
-
   /**
    * Registers a user and deletes it.
    */
@@ -1261,14 +1205,6 @@ class UserAdminTestCase extends DrupalWebTestCase {
  * Tests for user-configurable time zones.
  */
 class UserTimeZoneFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User time zones',
-      'description' => 'Set a user time zone and verify that dates are displayed in local time.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * Tests the display of dates and time when user-configurable time zones are set.
    */
@@ -1321,14 +1257,6 @@ class UserTimeZoneFunctionalTest extends DrupalWebTestCase {
  * Test user autocompletion.
  */
 class UserAutocompleteTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User autocompletion',
-      'description' => 'Test user autocompletion functionality.',
-      'group' => 'User'
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -1362,14 +1290,6 @@ class UserAutocompleteTestCase extends DrupalWebTestCase {
  * Test user-links in secondary menu.
  */
 class UserAccountLinksUnitTests extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User account links',
-      'description' => 'Test user-account links.',
-      'group' => 'User'
-    );
-  }
-
   /**
    * Test the user login block.
    */
@@ -1411,14 +1331,6 @@ class UserAccountLinksUnitTests extends DrupalWebTestCase {
  * Test user blocks.
  */
 class UserBlocksUnitTests extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User blocks',
-      'description' => 'Test user blocks.',
-      'group' => 'User'
-    );
-  }
-
   /**
    * Test the user login block.
    */
@@ -1499,15 +1411,6 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
  * Test case to test user_save() behaviour.
  */
 class UserSaveTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'User save test',
-      'description' => 'Test user_save() for arbitrary new uid.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * Test creating a user with arbitrary uid.
    */
@@ -1542,15 +1445,6 @@ class UserSaveTestCase extends DrupalWebTestCase {
  * Test the create user administration page.
  */
 class UserCreateTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'User create',
-      'description' => 'Test the create user administration page.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * Create a user through the administration interface and ensure that it
    * displays in the user list.
@@ -1588,15 +1482,6 @@ class UserCreateTestCase extends DrupalWebTestCase {
  * Test case to test user_save() behaviour.
  */
 class UserEditTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'User edit',
-      'description' => 'Test user edit page.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * Test user edit page.
    */
@@ -1664,14 +1549,6 @@ class UserEditTestCase extends DrupalWebTestCase {
  * Test case for user signatures.
  */
 class UserSignatureTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User signatures',
-      'description' => 'Test user signatures.',
-      'group' => 'User',
-    );
-  }
-
   function setUp() {
     parent::setUp('comment');
 
@@ -1748,15 +1625,6 @@ class UserSignatureTestCase extends DrupalWebTestCase {
  * Test that a user, having editing their own account, can still log in.
  */
 class UserEditedOwnAccountTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'User edited own account',
-      'description' => 'Test user edited own account can still log in.',
-      'group' => 'User',
-    );
-  }
-
   function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
     // only.
@@ -1784,15 +1652,6 @@ class UserEditedOwnAccountTestCase extends DrupalWebTestCase {
  * Test case to test adding, editing and deleting roles.
  */
 class UserRoleAdminTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'User role administration',
-      'description' => 'Test adding, editing and deleting user roles and changing role weights.',
-      'group' => 'User',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->drupalCreateUser(array('administer permissions', 'administer users'));
@@ -1869,14 +1728,6 @@ class UserRoleAdminTestCase extends DrupalWebTestCase {
  * Test user token replacement in strings.
  */
 class UserTokenReplaceTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User token replacement',
-      'description' => 'Generates text using placeholders for dummy content to check user token replacement.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * Creates a user, then tests the tokens generated from it.
    */
@@ -1934,14 +1785,6 @@ class UserTokenReplaceTestCase extends DrupalWebTestCase {
  * Test user search.
  */
 class UserUserSearchTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User search',
-      'description' => 'Testing that only user with the right permission can see the email address in the user search.',
-      'group' => 'User',
-    );
-  }
-
   function testUserSearch() {
     $user1 = $this->drupalCreateUser(array('access user profiles', 'search content', 'use advanced search'));
     $this->drupalLogin($user1);
@@ -1967,14 +1810,6 @@ class UserUserSearchTestCase extends DrupalWebTestCase {
  */
 class UserRolesAssignmentTestCase extends DrupalWebTestCase {
   protected $admin_user;
-
-  public static function getInfo() {
-    return array(
-      'name' => t('Role assignment'),
-      'description' => t('Tests that users can be assigned and unassigned roles.'),
-      'group' => t('User')
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -2055,15 +1890,6 @@ class UserRolesAssignmentTestCase extends DrupalWebTestCase {
  * Tests user_validate_current_pass on a custom form.
  */
 class UserValidateCurrentPassCustomForm extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'User validate current pass custom form',
-      'description' => 'Test that user_validate_current_pass is usable on a custom form.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * User with permission to view content.
    */
@@ -2100,14 +1926,6 @@ class UserValidateCurrentPassCustomForm extends DrupalWebTestCase {
  * Test user entity callbacks.
  */
 class UserEntityCallbacksTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'User entity callback tests',
-      'description' => 'Tests specific parts of the user entity like the URI callback and the label callback.',
-      'group' => 'User'
-    );
-  }
-
   function setUp() {
     parent::setUp('user');
 

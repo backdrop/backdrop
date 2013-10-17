@@ -5,6 +5,8 @@
  * Tests for number.module.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/field/tests/field.test';
+
 /**
  * Tests for number field types.
  */
@@ -12,14 +14,6 @@ class NumberFieldTestCase extends DrupalWebTestCase {
   protected $field;
   protected $instance;
   protected $web_user;
-
-  public static function getInfo() {
-    return array(
-      'name'  => 'Number field',
-      'description'  => 'Test the creation of number fields.',
-      'group' => 'Field types'
-    );
-  }
 
   function setUp() {
     parent::setUp('field_test');

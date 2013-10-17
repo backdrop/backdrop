@@ -9,15 +9,6 @@
  * Tests the node_load_multiple() function.
  */
 class NodeLoadMultipleUnitTest extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Load multiple nodes',
-      'description' => 'Test the loading of multiple nodes.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $web_user = $this->drupalCreateUser(array('create article content', 'create page content'));
@@ -89,14 +80,6 @@ class NodeLoadMultipleUnitTest extends DrupalWebTestCase {
  * Tests for the hooks invoked during node_load().
  */
 class NodeLoadHooksTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node load hooks',
-      'description' => 'Test the hooks invoked when a node is being loaded.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp('node_test');
   }
@@ -132,14 +115,6 @@ class NodeLoadHooksTestCase extends DrupalWebTestCase {
 class NodeRevisionsTestCase extends DrupalWebTestCase {
   protected $nodes;
   protected $logs;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Node revisions',
-      'description' => 'Create a node with revisions and test viewing, saving, reverting, and deleting revisions.',
-      'group' => 'Node',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -266,14 +241,6 @@ class PageEditTestCase extends DrupalWebTestCase {
   protected $web_user;
   protected $admin_user;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Node edit',
-      'description' => 'Create a node and test node edit functionality.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -395,14 +362,6 @@ class PageEditTestCase extends DrupalWebTestCase {
 }
 
 class PagePreviewTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node preview',
-      'description' => 'Test node preview functionality.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -466,14 +425,6 @@ class PagePreviewTestCase extends DrupalWebTestCase {
 }
 
 class NodeCreationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node creation',
-      'description' => 'Create a node and test saving it.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     // Enable dummy module that implements hook_node_insert for exceptions.
     parent::setUp('node_test_exception');
@@ -544,14 +495,6 @@ class NodeCreationTestCase extends DrupalWebTestCase {
 }
 
 class PageViewTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node edit permissions',
-      'description' => 'Create a node and test edit permissions.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * Creates a node and then an anonymous and unpermissioned user attempt to edit the node.
    */
@@ -583,14 +526,6 @@ class PageViewTestCase extends DrupalWebTestCase {
 }
 
 class SummaryLengthTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Summary length',
-      'description' => 'Test summary length.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * Creates a node and then an anonymous and unpermissioned user attempt to edit the node.
    */
@@ -625,14 +560,6 @@ class SummaryLengthTestCase extends DrupalWebTestCase {
 }
 
 class NodeTitleXSSTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node title XSS filtering',
-      'description' => 'Create a node with dangerous tags in its title and test that they are escaped.',
-      'group' => 'Node',
-    );
-  }
-
   function testNodeTitleXSS() {
     // Prepare a user to do the stuff.
     $web_user = $this->drupalCreateUser(array('create page content', 'edit any page content'));
@@ -659,14 +586,6 @@ class NodeTitleXSSTestCase extends DrupalWebTestCase {
 }
 
 class NodeBlockTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Block availability',
-      'description' => 'Check if the syndicate block is available.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -692,14 +611,6 @@ class NodeBlockTestCase extends DrupalWebTestCase {
  * Check that the post information displays when enabled for a content type.
  */
 class NodePostSettingsTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node post information display',
-      'description' => 'Check that the post information (submitted by Username on date) text displays appropriately.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -761,14 +672,6 @@ class NodePostSettingsTestCase extends DrupalWebTestCase {
  * sitewide RSS feed at rss.xml.
  */
 class NodeRSSContentTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node RSS Content',
-      'description' => 'Ensure that data added to nodes by other modules appears in RSS feeds.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     // Enable dummy module that implements hook_node_view.
     parent::setUp('node_test');
@@ -822,14 +725,6 @@ class NodeRSSContentTestCase extends DrupalWebTestCase {
  * hook_node_access_records is covered in another test class.
  */
 class NodeAccessUnitTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node access',
-      'description' => 'Test node_access function',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * Asserts node_access correctly grants or denies access.
    */
@@ -889,14 +784,6 @@ class NodeAccessUnitTest extends DrupalWebTestCase {
  * Test case to verify hook_node_access_records functionality.
  */
 class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node access records',
-      'description' => 'Test hook_node_access_records when acquiring grants.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     // Enable dummy module that implements hook_node_grants(),
     // hook_node_access_records(), hook_node_grants_alter() and
@@ -972,15 +859,6 @@ class NodeAccessRecordsUnitTest extends DrupalWebTestCase {
  * Tests for Node Access with a non-node base table.
  */
 class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Node Access on any table',
-      'description' => 'Checks behavior of the node access subsystem if the base table is not node.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * Enable modules and create user with specific permissions.
    */
@@ -1131,15 +1009,6 @@ class NodeAccessBaseTableTestCase extends DrupalWebTestCase {
  * Test case to check node save related functionality, including import-save
  */
 class NodeSaveTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Node save',
-      'description' => 'Test node_save() for saving content.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp('node_test');
     // Create a user that is allowed to post; we'll use this to test the submission.
@@ -1274,14 +1143,6 @@ class NodeSaveTestCase extends DrupalWebTestCase {
  * Tests related to node types.
  */
 class NodeTypeTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node types',
-      'description' => 'Ensures that node type functions work correctly.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * Ensure that node type functions (node_type_get_*) work correctly.
    *
@@ -1421,14 +1282,6 @@ class NodeTypeTestCase extends DrupalWebTestCase {
  * Test node type customizations persistence.
  */
 class NodeTypePersistenceTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node type persist',
-      'description' => 'Ensures that node type customization survives module enabling and disabling.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * Test node type customizations persist through disable and uninstall.
    */
@@ -1496,14 +1349,6 @@ class NodeTypePersistenceTestCase extends DrupalWebTestCase {
  * Rebuild the node_access table.
  */
 class NodeAccessRebuildTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node access rebuild',
-      'description' => 'Ensures that node access rebuild functions work correctly.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -1524,14 +1369,6 @@ class NodeAccessRebuildTestCase extends DrupalWebTestCase {
  * Test node administration page functionality.
  */
 class NodeAdminTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node administration',
-      'description' => 'Test node administration page functionality.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
@@ -1691,14 +1528,6 @@ class NodeAdminTestCase extends DrupalWebTestCase {
 class NodeTitleTestCase extends DrupalWebTestCase {
   protected $admin_user;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Node title',
-      'description' => 'Test node title.',
-      'group' => 'Node'
-    );
-  }
-
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->drupalCreateUser(array('administer nodes', 'create article content', 'create page content'));
@@ -1740,14 +1569,6 @@ class NodeTitleTestCase extends DrupalWebTestCase {
  * Test the node_feed() functionality.
  */
 class NodeFeedTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node feed',
-      'description' => 'Ensures that node_feed() functions correctly.',
-      'group' => 'Node',
-   );
-  }
-
   /**
    * Ensure that node_feed accepts and prints extra channel elements.
    */
@@ -1764,14 +1585,6 @@ class NodeFeedTestCase extends DrupalWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node blocks',
-      'description' => 'Test node block functionality.',
-      'group' => 'Node',
-    );
-  }
-
   function setUp() {
     parent::setUp('node', 'block');
 
@@ -1901,15 +1714,6 @@ class NodeBlockFunctionalTest extends DrupalWebTestCase {
  * Test to ensure that a node's content is always rebuilt.
  */
 class NodeBuildContent extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Rebuild content',
-      'description' => 'Test the rebuilding of content for different build modes.',
-      'group' => 'Node',
-    );
-  }
-
  /**
   * Test to ensure that a node's content array is rebuilt on every call to node_build_content().
   */
@@ -1929,15 +1733,6 @@ class NodeBuildContent extends DrupalWebTestCase {
  * Tests node_query_node_access_alter().
  */
 class NodeQueryAlter extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Node query alter',
-      'description' => 'Test that node access queries are properly altered by the node module.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * User with permission to view content.
    */
@@ -2120,15 +1915,6 @@ class NodeQueryAlter extends DrupalWebTestCase {
  * Tests node_query_entity_field_access_alter().
  */
 class NodeEntityFieldQueryAlter extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Node entity query alter',
-      'description' => 'Test that node access entity queries are properly altered by the node module.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * User with permission to view content.
    */
@@ -2184,14 +1970,6 @@ class NodeEntityFieldQueryAlter extends DrupalWebTestCase {
  * Test node token replacement in strings.
  */
 class NodeTokenReplaceTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Node token replacement',
-      'description' => 'Generates text using placeholders for dummy content to check node token replacement.',
-      'group' => 'Node',
-    );
-  }
-
   /**
    * Creates a node, then tests the tokens generated from it.
    */
@@ -2270,14 +2048,6 @@ class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
     'update' => 'revert revisions',
     'delete' => 'delete revisions',
   );
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Node revision permissions',
-      'description' => 'Tests user permissions for node revision operations.',
-      'group' => 'Node',
-    );
-  }
 
   function setUp() {
     parent::setUp();

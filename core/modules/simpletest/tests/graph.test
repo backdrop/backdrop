@@ -9,14 +9,6 @@
  * Unit tests for the graph handling features.
  */
 class GraphUnitTest extends DrupalUnitTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Graph',
-      'description' => 'Graph handling unit tests.',
-      'group' => 'System',
-    );
-  }
-
   function setUp() {
     require_once DRUPAL_ROOT . '/core/includes/graph.inc';
     parent::setUp();
