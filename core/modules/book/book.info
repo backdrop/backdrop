@@ -1,8 +1,8 @@
 name = Book
 description = Allows users to create and organize related content in an outline.
 package = Core
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 dependencies[] = node
 configure = admin/content/book/settings
 stylesheets[all][] = book.theme.css

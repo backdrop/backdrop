@@ -1,6 +1,6 @@
 name = "List test"
 description = "Support module for the List module tests."
-core = 8.x
+backdrop = 1.x
 package = Testing
-version = VERSION
+version = BACKDROP_VERSION
 hidden = TRUE

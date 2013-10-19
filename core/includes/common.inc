@@ -320,7 +320,7 @@ function _drupal_default_html_head() {
   );
   // Show Drupal and the major version number in the META GENERATOR tag.
   // Get the major version.
-  list($version, ) = explode('.', VERSION);
+  list($version, ) = explode('.', BACKDROP_VERSION);
   $elements['system_meta_generator'] = array(
     '#type' => 'html_tag',
     '#tag' => 'meta',
@@ -5692,7 +5692,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
         // If the module or theme is incompatible with Drupal core, remove it
         // from the array for the current search directory, so it is not
         // overwritten when merged with the $files array.
-        if (isset($info['core']) && $info['core'] != DRUPAL_CORE_COMPATIBILITY) {
+        if (isset($info['backdrop']) && $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
           unset($files_to_add[$file_key]);
         }
       }
@@ -7982,7 +7982,7 @@ function drupal_parse_dependency($dependency) {
   // supports. Also, op is optional and defaults to equals.
   $p_op = '(?P<operation>!=|==|=|<|<=|>|>=|<>)?';
   // Core version is always optional: 8.x-2.x and 2.x is treated the same.
-  $p_core = '(?:' . preg_quote(DRUPAL_CORE_COMPATIBILITY) . '-)?';
+  $p_core = '(?:' . preg_quote(BACKDROP_CORE_COMPATIBILITY) . '-)?';
   $p_major = '(?P<major>\d+)';
   // By setting the minor version to x, branches can be matched.
   $p_minor = '(?P<minor>(?:\d+|x)(?:-[A-Za-z]+\d+)?)';

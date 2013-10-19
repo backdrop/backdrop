@@ -1,6 +1,6 @@
 name = "Database Test"
 description = "Support module for Database layer tests."
-core = 8.x
+backdrop = 1.x
 package = Testing
-version = VERSION
+version = BACKDROP_VERSION
 hidden = TRUE

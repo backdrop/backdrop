@@ -1,6 +1,6 @@
 name = "Node module exception tests"
 description = "Support module for node related exception testing."
 package = Testing
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 hidden = TRUE

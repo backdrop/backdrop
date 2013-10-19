@@ -2558,11 +2558,11 @@ function hook_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Drupal version
+  // Report Backdrop version
   if ($phase == 'runtime') {
-    $requirements['drupal'] = array(
-      'title' => $t('Drupal'),
-      'value' => VERSION,
+    $requirements['backdrop'] = array(
+      'title' => $t('Backdrop'),
+      'value' => BACKDROP_VERSION,
       'severity' => REQUIREMENT_INFO
     );
   }
