@@ -17,13 +17,6 @@ before_script:
   - sudo cp $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
   - $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/sbin/php-fpm
 
-  # Install Drush. Newer drush versions won't run site-install because Backdrop
-  # doesn't match expectations about Drupal 7/8 versions. Drush 5.7 doesn't
-  # check the version at all, so it works for now.
-  - pear channel-discover pear.drush.org
-  - pear install drush/drush-5.7.0
-  - phpenv rehash
-
   # Import the PHP configuration.
   - phpenv config-add core/misc/travis-ci/php.ini
 
@@ -33,10 +26,9 @@ before_script:
 
   # Install Backdrop with Drush.
   - chmod a+w sites/default
-  - drush si --db-url=mysql://travis:@localhost/backdrop -y
+  - ./core/scripts/install.sh --db-url=mysql://travis:@localhost/backdrop
   - chmod go-w sites/default
-  - drush en simpletest -y
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --all --verbose
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --verbose --force --all
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - sudo cat /var/log/apache2/error.log
