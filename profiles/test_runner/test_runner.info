@@ -1,7 +1,0 @@
-name = Test runner
-description = Minimal profile for executing tests. Includes absolutely required modules only.
-version = VERSION
-core = 8.x
-hidden = TRUE
-dependencies[] = node
-dependencies[] = simpletest

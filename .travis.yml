@@ -26,9 +26,9 @@ before_script:
 
   # Install Backdrop with Drush.
   - chmod a+w sites/default
-  - ./core/scripts/install.sh --db-url=mysql://travis:@localhost/backdrop test_runner
+  - ./core/scripts/install.sh --db-url=mysql://travis:@localhost/backdrop
   - chmod go-w sites/default
-script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --all --verbose
+script: php -d display_errors="stderr" ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url 'http://localhost' --color --verbose --force --all
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - sudo cat /var/log/apache2/error.log
