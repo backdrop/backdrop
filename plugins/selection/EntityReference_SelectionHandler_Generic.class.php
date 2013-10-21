@@ -340,7 +340,7 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     $entity_info = entity_get_info($target_type);
     $id = $entity_info['entity keys']['id'];
     // Return the alias of the table.
-    return $query->innerJoin($target_type, NULL, "$target_type.$id = $alias.entity_id");
+    return $query->innerJoin($target_type, NULL, "%alias.$id = $alias.entity_id");
   }
 }
 
