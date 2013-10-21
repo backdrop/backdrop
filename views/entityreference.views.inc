@@ -80,6 +80,17 @@ function entityreference_field_views_data_views_data_alter(&$data, $field) {
         'group' => t('Entity Reference'),
         'title' => t('Referencing entity'),
         'help' => t('A bridge to the @entity entity that is referencing @target_entity via !field_name', $replacements),
+        'join_extra' => array(
+          0 => array(
+            'field' => 'entity_type',
+            'value' => $entity_type,
+          ),
+          1 => array(
+            'field' => 'deleted',
+            'value' => 0,
+            'numeric' => TRUE,
+          ),
+        ),
       );
     }
   }
