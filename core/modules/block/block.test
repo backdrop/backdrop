@@ -675,6 +675,8 @@ class BlockTemplateSuggestionsUnitTest extends DrupalUnitTestCase {
    * Test if template_preprocess_block() handles the suggestions right.
    */
   function testBlockThemeHookSuggestions() {
+    drupal_load('module', 'block');
+
     // Define block delta with underscore to be preprocessed
     $block1 = new stdClass();
     $block1->module = 'block';
