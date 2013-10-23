@@ -820,7 +820,10 @@ class views_handler_field_field extends views_handler_field {
    * Return an array of items for the field.
    */
   function set_items($values, $row_id) {
-    if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity'])) {
+    // In some cases the instance on the entity might be easy, see
+    // https://drupal.org/node/1161708 and https://drupal.org/node/1461536 for
+    // more information.
+    if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity']) || !isset($values->_field_data[$this->field_alias]['entity']->{$this->definition['field_name']})) {
       return array();
     }
 
