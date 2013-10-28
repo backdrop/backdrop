@@ -1,0 +1,115 @@
+<?php
+
+/**
+ * Test for Entity Reference taxonomy integration.
+ */
+class EntityReferenceTaxonomyTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Entity Reference Taxonomy',
+      'description' => 'Tests nodes with reference to terms as indexed.',
+      'group' => 'Entity Reference',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('entityreference', 'taxonomy');
+
+    // Create an entity reference field.
+    $field = array(
+      'entity_types' => array('node'),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'taxonomy_term',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
+      ),
+      'field_name' => 'field_entityreference_term',
+      'type' => 'entityreference',
+    );
+    $field = field_create_field($field);
+    $instance = array(
+      'field_name' => 'field_entityreference_term',
+      'bundle' => 'article',
+      'entity_type' => 'node',
+    );
+
+    // Enable the taxonomy-index behavior.
+    $instance['settings']['behaviors']['taxonomy-index']['status'] = TRUE;
+    field_create_instance($instance);
+
+    // Create a term reference field.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array('node'),
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => 'terms',
+            'parent' => 0,
+          ),
+        ),
+      ),
+      'field_name' => 'field_taxonomy_term',
+      'type' => 'taxonomy_term_reference',
+    );
+    $field = field_create_field($field);
+    $instance = array(
+      'field_name' => 'field_taxonomy_term',
+      'bundle' => 'article',
+      'entity_type' => 'node',
+    );
+    field_create_instance($instance);
+
+    // Create a terms vocobulary.
+    $vocabulary = new stdClass();
+    $vocabulary->name = 'Terms';
+    $vocabulary->machine_name = 'terms';
+    taxonomy_vocabulary_save($vocabulary);
+
+    // Create term.
+    for ($i = 1; $i <= 2; $i++) {
+      $term = new stdClass();
+      $term->name = "term $i";
+      $term->vid = 1;
+      taxonomy_term_save($term);
+    }
+  }
+
+  /**
+   * Test referencing a term using entity reference field.
+   */
+  public function testNodeIndex() {
+    // Asert node insert with reference to term.
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings['field_entityreference_term'][LANGUAGE_NONE][0]['target_id'] = 1;
+    $node = $this->drupalCreateNode($settings);
+
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+
+    // Asert node update with reference to term.
+    node_save($node);
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+
+    // Assert node update with reference to term and taxonomy reference to
+    // another term.
+    $wrapper = entity_metadata_wrapper('node', $node);
+    $wrapper->field_taxonomy_term->set(2);
+    $wrapper->save();
+
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+    $this->assertEqual(taxonomy_select_nodes(2), array($node->nid));
+
+    // Assert node update with reference to term and taxonomy reference to
+    // same term.
+    $wrapper->field_taxonomy_term->set(1);
+    $wrapper->save();
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+
+    $wrapper->delete();
+    $this->assertFalse(taxonomy_select_nodes(1));
+  }
+
+}

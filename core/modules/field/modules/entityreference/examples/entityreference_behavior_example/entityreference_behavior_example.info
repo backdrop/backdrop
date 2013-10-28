@@ -1,0 +1,12 @@
+name = Entity Reference Behavior Example
+description = Provides some example code for implementing Entity Reference behaviors.
+core = 7.x
+package = Fields
+dependencies[] = entityreference
+
+; Information added by drupal.org packaging script on 2012-11-18
+version = "7.x-1.0"
+core = "7.x"
+project = "entityreference"
+datestamp = "1353230808"
+

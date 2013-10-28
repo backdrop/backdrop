@@ -1,0 +1,164 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function entityreference_uninstall() {
+  variable_del('entityreference:base-tables');
+}
+
+/**
+ * Implements hook_field_schema().
+ */
+function entityreference_field_schema($field) {
+  if ($field['type'] == 'entityreference') {
+    // Load the base table configuration from the cache.
+    $base_tables = variable_get('entityreference:base-tables', array());
+
+    $schema = array(
+      'columns' => array(
+        'target_id' => array(
+          'description' => 'The id of the target entity.',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+      ),
+      'indexes' => array(
+        'target_id' => array('target_id'),
+      ),
+      'foreign keys' => array(),
+    );
+
+    // Create a foreign key to the target entity type base type, if available.
+    $entity_type = $field['settings']['target_type'];
+    if (isset($base_tables[$entity_type])) {
+      list($base_table, $id_column) = $base_tables[$entity_type];
+      $schema['foreign keys'][$base_table] = array(
+        'table' => $base_table,
+        'columns' => array('target_id' => $id_column),
+      );
+    }
+
+    // Invoke the behaviors to allow them to change the schema.
+    foreach (entityreference_get_behavior_handlers($field) as $handler) {
+      $handler->schema_alter($schema, $field);
+    }
+
+    return $schema;
+  }
+}
+
+/**
+ * Update the field configuration to the new plugin structure.
+ */
+function entityreference_update_7000() {
+  // Enable ctools.
+  if (!module_enable(array('ctools'))) {
+    throw new DrupalUpdateException('This version of Entity Reference requires ctools, but it could not be enabled.');
+  }
+
+  // Get the list of fields of type 'entityreference'.
+  $fields = array();
+  foreach (field_info_fields() as $field_name => $field) {
+    // Update the field configuration.
+    if ($field['type'] == 'entityreference') {
+      $settings = &$field['settings'];
+      if (!isset($settings['handler'])) {
+        $settings['handler'] = 'base';
+        $settings['handler_settings']['target_bundles'] = $settings['target_bundles'];
+        unset($settings['target_bundles']);
+        field_update_field($field);
+      }
+    }
+
+    // Update the instance configurations.
+    foreach ($field['bundles'] as $entity_type => $bundles) {
+      foreach ($bundles as $bundle) {
+        $instance = field_info_instance($entity_type, $field_name, $bundle);
+        $save = FALSE;
+        if ($instance['widget']['type'] == 'entityreference_autocomplete') {
+          $instance['widget']['type'] = 'entityreference_autocomplete_tags';
+          $save = TRUE;
+        }
+        // When the autocomplete path is the default value, remove it from
+        // the configuration.
+        if (isset($instance['widget']['settings']['path']) && $instance['widget']['settings']['path'] == 'entityreference/autocomplete') {
+          unset($instance['widget']['settings']['path']);
+          $save = TRUE;
+        }
+        if ($save) {
+          field_update_instance($instance);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Drop "target_type" from the field schema.
+ */
+function entityreference_update_7001() {
+  if (!module_exists('field_sql_storage')) {
+    return;
+  }
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] != 'entityreference') {
+      // Not an entity reference field.
+      continue;
+    }
+
+    // Update the field settings.
+    $field = field_info_field($field_name);
+    unset($field['indexes']['target_entity']);
+    $field['indexes']['target_id'] = array('target_id');
+    field_update_field($field);
+
+    if ($field['storage']['type'] !== 'field_sql_storage') {
+      // Field doesn't use SQL storage, we cannot modify the schema.
+      continue;
+    }
+    $table_name = _field_sql_storage_tablename($field);
+    $revision_name = _field_sql_storage_revision_tablename($field);
+
+    db_drop_index($table_name, $field_name . '_target_entity');
+    db_drop_index($table_name, $field_name . '_target_id');
+    db_drop_field($table_name, $field_name . '_target_type');
+    db_add_index($table_name, $field_name . '_target_id', array($field_name . '_target_id'));
+
+    db_drop_index($revision_name, $field_name . '_target_entity');
+    db_drop_index($revision_name, $field_name . '_target_id');
+    db_drop_field($revision_name, $field_name . '_target_type');
+    db_add_index($revision_name, $field_name . '_target_id', array($field_name . '_target_id'));
+  }
+}
+
+/**
+ * Make the target_id column NOT NULL.
+ */
+function entityreference_update_7002() {
+  if (!module_exists('field_sql_storage')) {
+    return;
+  }
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] != 'entityreference') {
+      // Not an entity reference field.
+      continue;
+    }
+
+    if ($field['storage']['type'] !== 'field_sql_storage') {
+      // Field doesn't use SQL storage, we cannot modify the schema.
+      continue;
+    }
+
+    $table_name = _field_sql_storage_tablename($field);
+    $revision_name = _field_sql_storage_revision_tablename($field);
+
+    db_change_field($table_name, $field_name . '_target_id', $field_name . '_target_id', array(
+      'description' => 'The id of the target entity.',
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+    ));
+  }
+}
