@@ -1,0 +1,17 @@
+name = Entity cache
+description = Provides caching for core entities including nodes and taxonomy terms.
+
+core = 7.x
+package = Performance and scalability
+
+files[] = entitycache.module
+files[] = entitycache.comment.inc
+files[] = entitycache.taxonomy.inc
+files[] = entitycache.test
+
+; Information added by drupal.org packaging script on 2011-09-13
+version = "7.x-1.1"
+core = "7.x"
+project = "entitycache"
+datestamp = "1315901203"
+

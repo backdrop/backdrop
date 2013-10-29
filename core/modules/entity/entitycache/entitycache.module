@@ -1,0 +1,394 @@
+<?php
+
+/**
+ * @file
+ * Allows for caching of core entities.
+ */
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function entitycache_entity_info_alter(&$entity_info) {
+  foreach (entitycache_supported_core_entities(TRUE) as $type => $controller) {
+    $entity_info[$type]['field cache'] = FALSE;
+    $entity_info[$type]['entity cache'] = TRUE;
+    $entity_info[$type]['controller class'] = $controller;
+  }
+}
+
+/**
+ * Entity cache helper.
+ *
+ * Note: while this class is not a real entity controller it needs to extend
+ * DrupalDefaultEntityController to get access to protected properties.
+ */
+class EntityCacheControllerHelper extends DrupalDefaultEntityController {
+
+  public static function resetEntityCache($controller, array $ids = NULL) {
+    // Reset the persistent cache.
+    if (isset($ids)) {
+      cache_clear_all($ids, 'cache_entity_' . $controller->entityType);
+    }
+    // Give modules the chance to act on any entity.
+    foreach (module_implements('entitycache_reset') as $module) {
+      $function = $module . '_entitycache_reset';
+      $function($ids, $controller->entityType);
+    }
+    // Give modules the chance to act on a specific entity type.
+    foreach (module_implements('entitycache_' . $controller->entityType . '_reset') as $module) {
+      $function = $module . '_entitycache_' . $controller->entityType . '_reset';
+      $function($ids);
+    }
+  }
+
+  public static function entityCacheLoad($controller, $ids = array(), $conditions = array()) {
+    $entities = array();
+    $cached_entities = array();
+    $queried_entities = array();
+
+    // Revisions are not statically cached, and require a different query to
+    // other conditions, so separate the revision id into its own variable.
+    if ($controller->revisionKey && isset($conditions[$controller->revisionKey])) {
+      $revision_id = $conditions[$controller->revisionKey];
+      unset($conditions[$controller->revisionKey]);
+    }
+    else {
+      $revision_id = FALSE;
+    }
+
+    // Create a new variable which is either a prepared version of the $ids
+    // array for later comparison with the entity cache, or FALSE if no $ids
+    // were passed. The $ids array is reduced as items are loaded from cache,
+    // and we need to know if it's empty for this reason to avoid querying the
+    // database when all requested entities are loaded from cache.
+    $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
+    // Try to load entities from the static cache, if the entity type supports
+    // static caching.
+    if ($controller->cache && !$revision_id) {
+      $entities += $controller->cacheGet($ids, $conditions);
+      // If any entities were loaded, remove them from the ids still to load.
+      if ($passed_ids) {
+        $ids = array_keys(array_diff_key($passed_ids, $entities));
+      }
+    }
+
+    if (!empty($controller->entityInfo['entity cache']) && !$revision_id && $ids && !$conditions) {
+      $entities += $cached_entities = self::entityCacheGet($controller, $ids, $conditions);
+      // If any entities were loaded, remove them from the ids still to load.
+      $ids = array_diff($ids, array_keys($cached_entities));
+
+      if ($controller->cache) {
+        // Add entities to the cache if we are not loading a revision.
+        if (!empty($cached_entities) && !$revision_id) {
+          $controller->cacheSet($cached_entities);
+        }
+      }
+    }
+
+    // Load any remaining entities from the database. This is the case if $ids
+    // is set to FALSE (so we load all entities), if there are any ids left to
+    // load, if loading a revision, or if $conditions was passed without $ids.
+    if ($ids === FALSE || $ids || $revision_id || ($conditions && !$passed_ids)) {
+      // Build the query.
+      $query = $controller->buildQuery($ids, $conditions, $revision_id);
+      $queried_entities = $query
+        ->execute()
+        ->fetchAllAssoc($controller->idKey);
+    }
+
+    // Pass all entities loaded from the database through $controller->attachLoad(),
+    // which attaches fields (if supported by the entity type) and calls the
+    // entity type specific load callback, for example hook_node_load().
+    if (!empty($queried_entities)) {
+      $controller->attachLoad($queried_entities, $revision_id);
+      $entities += $queried_entities;
+    }
+
+    if (!empty($controller->entityInfo['entity cache'])) {
+      // Add entities to the entity cache if we are not loading a revision.
+      if (!empty($queried_entities) && !$revision_id) {
+        self::entityCacheSet($controller, $queried_entities);
+      }
+    }
+
+    if ($controller->cache) {
+      // Add entities to the cache if we are not loading a revision.
+      if (!empty($queried_entities) && !$revision_id) {
+        $controller->cacheSet($queried_entities);
+      }
+    }
+
+    // Ensure that the returned array is ordered the same as the original
+    // $ids array if this was passed in and remove any invalid ids.
+    if ($passed_ids) {
+      // Remove any invalid ids from the array.
+      $passed_ids = array_intersect_key($passed_ids, $entities);
+      foreach ($entities as $entity) {
+        $passed_ids[$entity->{$controller->idKey}] = $entity;
+      }
+      $entities = $passed_ids;
+    }
+
+    return $entities;
+  }
+
+  public static function entityCacheGet($controller, $ids, $conditions = array()) {
+    $cached_entities = array();
+    if ($ids && !$conditions) {
+      $cached = cache_get_multiple($ids, 'cache_entity_' . $controller->entityType);
+      if ($cached) {
+        foreach ($cached as $item) {
+          $cached_entities[$item->cid] = $item->data;
+        }
+        self::entityCacheAttachLoad($controller, $cached_entities);
+      }
+    }
+    return $cached_entities;
+  }
+
+  public static function entityCacheSet($controller, $entities) {
+    foreach ($entities as $item) {
+      cache_set($item->{$controller->idKey}, $item, 'cache_entity_' . $controller->entityType);
+    }
+  }
+
+  /**
+   * Allow modules to implement uncached entity hooks.
+   *
+   * Perform two additional hook invocations for modules needing to add
+   * uncacheable data to objects while serving the request.
+   *
+   * @see entitycache_entitycache_node_load()
+   */
+  public static function entityCacheAttachLoad($controller, $entities) {
+    // Give modules the chance to act on any entity.
+    foreach (module_implements('entitycache_load') as $module) {
+      $function = $module . '_entitycache_load';
+      $function($entities, $controller->entityType);
+    }
+    // Give modules the chance to act on a specific entity type.
+    foreach (module_implements('entitycache_' . $controller->entityType . '_load') as $module) {
+      $function = $module . '_entitycache_' . $controller->entityType . '_load';
+      $function($entities);
+    }
+  }
+}
+
+/**
+ * Default entity controller with persistent cache.
+ */
+class EntityCacheDefaultEntityController extends DrupalDefaultEntityController {
+  public function resetCache(array $ids = NULL) {
+    EntityCacheControllerHelper::resetEntityCache($this, $ids);
+    parent::resetCache($ids);
+  }
+  public function load($ids = array(), $conditions = array()) {
+    return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
+  }
+}
+
+/**
+ * Node entity controller with persistent cache.
+ */
+class EntityCacheNodeController extends NodeController {
+  public function resetCache(array $ids = NULL) {
+    EntityCacheControllerHelper::resetEntityCache($this, $ids);
+    parent::resetCache($ids);
+  }
+  public function load($ids = array(), $conditions = array()) {
+    return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
+  }
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function entitycache_flush_caches() {
+  $bins = array();
+  $entities = entitycache_supported_core_entities(TRUE);
+  foreach (array_keys($entities) as $type) {
+    $bins[] = 'cache_entity_' . $type;
+  }
+  return $bins;
+}
+
+/**
+ * User entity controller with persistent cache.
+ */
+class EntityCacheUserController extends UserController {
+  public function resetCache(array $ids = NULL) {
+    EntityCacheControllerHelper::resetEntityCache($this, $ids);
+    parent::resetCache($ids);
+  }
+  public function load($ids = array(), $conditions = array()) {
+    return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
+  }
+}
+
+/**
+ * Helper function to list all supported core entities.
+ *
+ * @param $enabled
+ *   If set, only return enabled modules.
+ *
+ * @return
+ *   An array of core entities.
+ */
+function entitycache_supported_core_entities($enabled = FALSE) {
+  $return = array(
+    'comment' => 'EntityCacheCommentController',
+    'file' => 'EntityCacheDefaultEntityController',
+    'node' => 'EntityCacheNodeController',
+    'taxonomy_term' => 'EntityCacheTaxonomyTermController',
+    'taxonomy_vocabulary' => 'EntityCacheTaxonomyVocabularyController',
+    'user' => 'EntityCacheUserController',
+  );
+  // If the $enabled param is past, remove modules from the array if they're
+  // not enabled.
+  if ($enabled) {
+    if (!module_exists('comment')) {
+      unset($return['comment']);
+    }
+    if (!module_exists('taxonomy')) {
+      unset($return['taxonomy_term']);
+      unset($return['taxonomy_vocabulary']);
+    }
+  }
+  return $return;
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function entitycache_entity_insert($entity, $type) {
+  // It is possible for other _insert() hooks to load an entity before it has
+  // been properly saved, for example file_field_insert(). This may cause
+  // an incomplete entity to be cached, since hooks which run after the one
+  // loading the entity do not have a chance to run. Therefore ensure the cache
+  // is always cleared when inserting new entities.
+  // Since hook_entity_insert() runs last, there's a good chance of acting
+  // after other modules are finished loading.
+  $info = entity_get_info($type);
+  list($id) = entity_extract_ids($type, $entity);
+  if (!empty($info['entity cache']) && empty($entity->migrate)) {
+    // file_field_insert() no longer exists. Don't take this out
+    // just yet though because other modules might also misbehave.
+    // cache_clear_all($id, 'cache_entity_' . $type);
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function entitycache_entity_delete($entity, $type) {
+  $info = entity_get_info($type);
+  list($id) = entity_extract_ids($type, $entity);
+  if (!empty($info['entity cache'])) {
+    cache_clear_all($id, 'cache_entity_' . $type);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function entitycache_entity_update($entity, $type) {
+  // It is possible for other _update() hooks to load an entity before it has
+  // been properly saved, for example file_field_update(). This may cause
+  // an incomplete entity to be cached, since hooks which run after the one
+  // loading the entity do not have a chance to run. Therefore ensure the cache
+  // is always cleared when updating entities.
+  // Since hook_entity_insert() runs last, there's a good chance of acting
+  // after other modules are finished loading.
+  $info = entity_get_info($type);
+  list($id) = entity_extract_ids($type, $entity);
+  if (!empty($info['entity cache']) && empty($entity->migrate)) {
+    cache_clear_all($id, 'cache_entity_' . $type);
+  }
+}
+
+/**
+ * Implements hook_entitycache_node_load().
+ *
+ * This forces book information to be added on each request, to avoid expensive
+ * cache clears.
+ */
+function book_entitycache_node_load($nodes) {
+  book_node_load($nodes, array());
+}
+
+/**
+ * Implements hook_entitycache_node_load().
+ *
+ * This forces poll information to be loaded on each request, since it loads
+ * user-specific information during the request.
+ */
+function poll_entitycache_node_load($nodes) {
+  $polls = array();
+  foreach ($nodes as $node) {
+    if ($node->type == 'poll') {
+      $polls[$node->nid] = $node;
+    }
+  }
+  if (!empty($polls)) {
+    poll_load($polls);
+  }
+}
+
+/**
+ * Implements hook_comment_publish().
+ *
+ * @todo: core should not call this hook outside of a comment_save().
+ */
+function entitycache_comment_publish($comment) {
+  if (empty($comment->migrate)) {
+    cache_clear_all($comment->cid, 'cache_entity_comment');
+    cache_clear_all($comment->nid, 'cache_entity_node');
+  }
+}
+
+/**
+ * Implements hook_comment_unpublish().
+ *
+ * @todo: core should not call this hook outside of a comment_save().
+ */
+function entitycache_comment_unpublish($comment) {
+  if (empty($comment->migrate)) {
+    cache_clear_all($comment->cid, 'cache_entity_comment');
+    cache_clear_all($comment->nid, 'cache_entity_node');
+  }
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function entitycache_comment_insert($comment) {
+  cache_clear_all($comment->nid, 'cache_entity_node');
+}
+
+/**
+ * Implements hook_comment_update().
+ */
+function entitycache_comment_update($comment) {
+  cache_clear_all($comment->nid, 'cache_entity_node');
+}
+
+/**
+ * Implements hook_user_cancel().
+ */
+function entitycache_user_cancel($edit, $account, $method) {
+  cache_clear_all($account->uid, 'cache_entity_user');
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+function entitycache_user_logout($account) {
+  cache_clear_all($account->uid, 'cache_entity_user');
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function entitycache_user_login(&$edit, $account) {
+  cache_clear_all($account->uid, 'cache_entity_user');
+}

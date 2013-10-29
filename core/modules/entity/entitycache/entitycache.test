@@ -1,0 +1,1379 @@
+<?php
+
+/**
+ * Copy of BlogTestCase.
+ */
+class EntityCacheBlogTestCase extends BlogTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of BlogTestCase',
+      'description' => 'Copy of BlogTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of BookTestCase.
+ */
+class EntityCacheBookTestCase extends BookTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of BookTestCase',
+      'description' => 'Copy of BookTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentAnonymous.
+ */
+class EntityCacheCommentAnonymous extends CommentAnonymous {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentAnonymous',
+      'description' => 'Copy of CommentAnonymous',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentApprovalTest.
+ */
+class EntityCacheCommentApprovalTest extends CommentApprovalTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentApprovalTest',
+      'description' => 'Copy of CommentApprovalTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentBlockFunctionalTest.
+ */
+class EntityCacheCommentBlockFunctionalTest extends CommentBlockFunctionalTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentBlockFunctionalTest',
+      'description' => 'Copy of CommentBlockFunctionalTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentContentRebuild.
+ */
+class EntityCacheCommentContentRebuild extends CommentContentRebuild {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentContentRebuild',
+      'description' => 'Copy of CommentContentRebuild',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentFieldsTest.
+ */
+class EntityCacheCommentFieldsTest extends CommentFieldsTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentFieldsTest',
+      'description' => 'Copy of CommentFieldsTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentHelperCase.
+ */
+class EntityCacheCommentHelperCase extends CommentHelperCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentHelperCase',
+      'description' => 'Copy of CommentHelperCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentNodeAccessTest.
+ */
+class EntityCacheCommentNodeAccessTest extends CommentNodeAccessTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentNodeAccessTest',
+      'description' => 'Copy of CommentNodeAccessTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentPagerTest.
+ */
+class EntityCacheCommentPagerTest extends CommentPagerTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentPagerTest',
+      'description' => 'Copy of CommentPagerTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentPreviewTest.
+ */
+class EntityCacheCommentPreviewTest extends CommentPreviewTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentPreviewTest',
+      'description' => 'Copy of CommentPreviewTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentRSSUnitTest.
+ */
+class EntityCacheCommentRSSUnitTest extends CommentRSSUnitTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentRSSUnitTest',
+      'description' => 'Copy of CommentRSSUnitTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of CommentTokenReplaceTestCase.
+ */
+class EntityCacheCommentTokenReplaceTestCase extends CommentTokenReplaceTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of CommentTokenReplaceTestCase',
+      'description' => 'Copy of CommentTokenReplaceTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of MultiStepNodeFormBasicOptionsTest.
+ */
+class EntityCacheMultiStepNodeFormBasicOptionsTest extends MultiStepNodeFormBasicOptionsTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of MultiStepNodeFormBasicOptionsTest',
+      'description' => 'Copy of MultiStepNodeFormBasicOptionsTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeAccessRebuildTestCase.
+ */
+class EntityCacheNodeAccessRebuildTestCase extends NodeAccessRebuildTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeAccessRebuildTestCase',
+      'description' => 'Copy of NodeAccessRebuildTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeAccessRecordsUnitTest.
+ */
+class EntityCacheNodeAccessRecordsUnitTest extends NodeAccessRecordsUnitTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeAccessRecordsUnitTest',
+      'description' => 'Copy of NodeAccessRecordsUnitTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeAccessUnitTest.
+ */
+class EntityCacheNodeAccessUnitTest extends NodeAccessUnitTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeAccessUnitTest',
+      'description' => 'Copy of NodeAccessUnitTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeAdminTestCase.
+ */
+class EntityCacheNodeAdminTestCase extends NodeAdminTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeAdminTestCase',
+      'description' => 'Copy of NodeAdminTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeBlockFunctionalTest.
+ */
+class EntityCacheNodeBlockFunctionalTest extends NodeBlockFunctionalTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeBlockFunctionalTest',
+      'description' => 'Copy of NodeBlockFunctionalTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeBlockTestCase.
+ */
+class EntityCacheNodeBlockTestCase extends NodeBlockTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeBlockTestCase',
+      'description' => 'Copy of NodeBlockTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeBuildContent.
+ */
+class EntityCacheNodeBuildContent extends NodeBuildContent {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeBuildContent',
+      'description' => 'Copy of NodeBuildContent',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeCreationTestCase.
+ */
+class EntityCacheNodeCreationTestCase extends NodeCreationTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeCreationTestCase',
+      'description' => 'Copy of NodeCreationTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeEntityFieldQueryAlter.
+ */
+class EntityCacheNodeEntityFieldQueryAlter extends NodeEntityFieldQueryAlter {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeEntityFieldQueryAlter',
+      'description' => 'Copy of NodeEntityFieldQueryAlter',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeFeedTestCase.
+ */
+class EntityCacheNodeFeedTestCase extends NodeFeedTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeFeedTestCase',
+      'description' => 'Copy of NodeFeedTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeLoadHooksTestCase.
+ */
+class EntityCacheNodeLoadHooksTestCase extends NodeLoadHooksTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeLoadHooksTestCase',
+      'description' => 'Copy of NodeLoadHooksTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeLoadMultipleUnitTest.
+ */
+class EntityCacheNodeLoadMultipleUnitTest extends NodeLoadMultipleUnitTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeLoadMultipleUnitTest',
+      'description' => 'Copy of NodeLoadMultipleUnitTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodePostSettingsTestCase.
+ */
+class EntityCacheNodePostSettingsTestCase extends NodePostSettingsTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodePostSettingsTestCase',
+      'description' => 'Copy of NodePostSettingsTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeQueryAlter.
+ */
+class EntityCacheNodeQueryAlter extends NodeQueryAlter {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeQueryAlter',
+      'description' => 'Copy of NodeQueryAlter',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeRevisionsTestCase.
+ */
+class EntityCacheNodeRevisionsTestCase extends NodeRevisionsTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeRevisionsTestCase',
+      'description' => 'Copy of NodeRevisionsTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeRSSContentTestCase.
+ */
+class EntityCacheNodeRSSContentTestCase extends NodeRSSContentTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeRSSContentTestCase',
+      'description' => 'Copy of NodeRSSContentTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeSaveTestCase.
+ */
+class EntityCacheNodeSaveTestCase extends NodeSaveTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeSaveTestCase',
+      'description' => 'Copy of NodeSaveTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeTitleTestCase.
+ */
+class EntityCacheNodeTitleTestCase extends NodeTitleTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeTitleTestCase',
+      'description' => 'Copy of NodeTitleTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeTitleXSSTestCase.
+ */
+class EntityCacheNodeTitleXSSTestCase extends NodeTitleXSSTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeTitleXSSTestCase',
+      'description' => 'Copy of NodeTitleXSSTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeTokenReplaceTestCase.
+ */
+class EntityCacheNodeTokenReplaceTestCase extends NodeTokenReplaceTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeTokenReplaceTestCase',
+      'description' => 'Copy of NodeTokenReplaceTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeTypePersistenceTestCase.
+ */
+class EntityCacheNodeTypePersistenceTestCase extends NodeTypePersistenceTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeTypePersistenceTestCase',
+      'description' => 'Copy of NodeTypePersistenceTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of NodeTypeTestCase.
+ */
+class EntityCacheNodeTypeTestCase extends NodeTypeTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of NodeTypeTestCase',
+      'description' => 'Copy of NodeTypeTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PageEditTestCase.
+ */
+class EntityCachePageEditTestCase extends PageEditTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PageEditTestCase',
+      'description' => 'Copy of PageEditTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PagePreviewTestCase.
+ */
+class EntityCachePagePreviewTestCase extends PagePreviewTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PagePreviewTestCase',
+      'description' => 'Copy of PagePreviewTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PageViewTestCase.
+ */
+class EntityCachePageViewTestCase extends PageViewTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PageViewTestCase',
+      'description' => 'Copy of PageViewTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of SummaryLengthTestCase.
+ */
+class EntityCacheSummaryLengthTestCase extends SummaryLengthTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of SummaryLengthTestCase',
+      'description' => 'Copy of SummaryLengthTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollBlockTestCase.
+ */
+class EntityCachePollBlockTestCase extends PollBlockTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollBlockTestCase',
+      'description' => 'Copy of PollBlockTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollCreateTestCase.
+ */
+class EntityCachePollCreateTestCase extends PollCreateTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollCreateTestCase',
+      'description' => 'Copy of PollCreateTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollExpirationTestCase.
+ */
+class EntityCachePollExpirationTestCase extends PollExpirationTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollExpirationTestCase',
+      'description' => 'Copy of PollExpirationTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollJSAddChoice.
+ */
+class EntityCachePollJSAddChoice extends PollJSAddChoice {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollJSAddChoice',
+      'description' => 'Copy of PollJSAddChoice',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollTestCase.
+ */
+class EntityCachePollTestCase extends PollTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollTestCase',
+      'description' => 'Copy of PollTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollTokenReplaceTestCase.
+ */
+class EntityCachePollTokenReplaceTestCase extends PollTokenReplaceTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollTokenReplaceTestCase',
+      'description' => 'Copy of PollTokenReplaceTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollVoteCheckHostname.
+ */
+class EntityCachePollVoteCheckHostname extends PollVoteCheckHostname {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollVoteCheckHostname',
+      'description' => 'Copy of PollVoteCheckHostname',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of PollVoteTestCase.
+ */
+class EntityCachePollVoteTestCase extends PollVoteTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of PollVoteTestCase',
+      'description' => 'Copy of PollVoteTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyHooksTestCase.
+ */
+class EntityCacheTaxonomyHooksTestCase extends TaxonomyHooksTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyHooksTestCase',
+      'description' => 'Copy of TaxonomyHooksTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyLegacyTestCase.
+ */
+class EntityCacheTaxonomyLegacyTestCase extends TaxonomyLegacyTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyLegacyTestCase',
+      'description' => 'Copy of TaxonomyLegacyTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyLoadMultipleUnitTest.
+ */
+class EntityCacheTaxonomyLoadMultipleUnitTest extends TaxonomyLoadMultipleUnitTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyLoadMultipleUnitTest',
+      'description' => 'Copy of TaxonomyLoadMultipleUnitTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyTermFieldTestCase.
+ */
+class EntityCacheTaxonomyTermFieldTestCase extends TaxonomyTermFieldTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyTermFieldTestCase',
+      'description' => 'Copy of TaxonomyTermFieldTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyTermTestCase.
+ */
+class EntityCacheTaxonomyTermTestCase extends TaxonomyTermTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyTermTestCase',
+      'description' => 'Copy of TaxonomyTermTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyTermUnitTest.
+ */
+class EntityCacheTaxonomyTermUnitTest extends TaxonomyTermUnitTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyTermUnitTest',
+      'description' => 'Copy of TaxonomyTermUnitTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyThemeTestCase.
+ */
+class EntityCacheTaxonomyThemeTestCase extends TaxonomyThemeTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyThemeTestCase',
+      'description' => 'Copy of TaxonomyThemeTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyTokenReplaceTestCase.
+ */
+class EntityCacheTaxonomyTokenReplaceTestCase extends TaxonomyTokenReplaceTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyTokenReplaceTestCase',
+      'description' => 'Copy of TaxonomyTokenReplaceTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyVocabularyFunctionalTest.
+ */
+class EntityCacheTaxonomyVocabularyFunctionalTest extends TaxonomyVocabularyFunctionalTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyVocabularyFunctionalTest',
+      'description' => 'Copy of TaxonomyVocabularyFunctionalTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyVocabularyUnitTest.
+ */
+class EntityCacheTaxonomyVocabularyUnitTest extends TaxonomyVocabularyUnitTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyVocabularyUnitTest',
+      'description' => 'Copy of TaxonomyVocabularyUnitTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of TaxonomyWebTestCase.
+ */
+class EntityCacheTaxonomyWebTestCase extends TaxonomyWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of TaxonomyWebTestCase',
+      'description' => 'Copy of TaxonomyWebTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserAccountLinksUnitTests.
+ */
+class EntityCacheUserAccountLinksUnitTests extends UserAccountLinksUnitTests {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserAccountLinksUnitTests',
+      'description' => 'Copy of UserAccountLinksUnitTests',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserAdminTestCase.
+ */
+class EntityCacheUserAdminTestCase extends UserAdminTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserAdminTestCase',
+      'description' => 'Copy of UserAdminTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserAuthmapAssignmentTestCase.
+ */
+class EntityCacheUserAuthmapAssignmentTestCase extends UserAuthmapAssignmentTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserAuthmapAssignmentTestCase',
+      'description' => 'Copy of UserAuthmapAssignmentTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserAutocompleteTestCase.
+ */
+class EntityCacheUserAutocompleteTestCase extends UserAutocompleteTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserAutocompleteTestCase',
+      'description' => 'Copy of UserAutocompleteTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserBlocksUnitTests.
+ */
+class EntityCacheUserBlocksUnitTests extends UserBlocksUnitTests {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserBlocksUnitTests',
+      'description' => 'Copy of UserBlocksUnitTests',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserCancelTestCase.
+ */
+class EntityCacheUserCancelTestCase extends UserCancelTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserCancelTestCase',
+      'description' => 'Copy of UserCancelTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserCreateTestCase.
+ */
+class EntityCacheUserCreateTestCase extends UserCreateTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserCreateTestCase',
+      'description' => 'Copy of UserCreateTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserEditedOwnAccountTestCase.
+ */
+class EntityCacheUserEditedOwnAccountTestCase extends UserEditedOwnAccountTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserEditedOwnAccountTestCase',
+      'description' => 'Copy of UserEditedOwnAccountTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserEditTestCase.
+ */
+class EntityCacheUserEditTestCase extends UserEditTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserEditTestCase',
+      'description' => 'Copy of UserEditTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserLoginTestCase.
+ */
+class EntityCacheUserLoginTestCase extends UserLoginTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserLoginTestCase',
+      'description' => 'Copy of UserLoginTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserPermissionsTestCase.
+ */
+class EntityCacheUserPermissionsTestCase extends UserPermissionsTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserPermissionsTestCase',
+      'description' => 'Copy of UserPermissionsTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserPictureTestCase.
+ */
+class EntityCacheUserPictureTestCase extends UserPictureTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserPictureTestCase',
+      'description' => 'Copy of UserPictureTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserRegistrationTestCase.
+ */
+class EntityCacheUserRegistrationTestCase extends UserRegistrationTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserRegistrationTestCase',
+      'description' => 'Copy of UserRegistrationTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserRoleAdminTestCase.
+ */
+class EntityCacheUserRoleAdminTestCase extends UserRoleAdminTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserRoleAdminTestCase',
+      'description' => 'Copy of UserRoleAdminTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserRolesAssignmentTestCase.
+ */
+class EntityCacheUserRolesAssignmentTestCase extends UserRolesAssignmentTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserRolesAssignmentTestCase',
+      'description' => 'Copy of UserRolesAssignmentTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserSaveTestCase.
+ */
+class EntityCacheUserSaveTestCase extends UserSaveTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserSaveTestCase',
+      'description' => 'Copy of UserSaveTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserSignatureTestCase.
+ */
+class EntityCacheUserSignatureTestCase extends UserSignatureTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserSignatureTestCase',
+      'description' => 'Copy of UserSignatureTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserTimeZoneFunctionalTest.
+ */
+class EntityCacheUserTimeZoneFunctionalTest extends UserTimeZoneFunctionalTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserTimeZoneFunctionalTest',
+      'description' => 'Copy of UserTimeZoneFunctionalTest',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserTokenReplaceTestCase.
+ */
+class EntityCacheUserTokenReplaceTestCase extends UserTokenReplaceTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserTokenReplaceTestCase',
+      'description' => 'Copy of UserTokenReplaceTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserUserSearchTestCase.
+ */
+class EntityCacheUserUserSearchTestCase extends UserUserSearchTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserUserSearchTestCase',
+      'description' => 'Copy of UserUserSearchTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserValidateCurrentPassCustomForm.
+ */
+class EntityCacheUserValidateCurrentPassCustomForm extends UserValidateCurrentPassCustomForm {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserValidateCurrentPassCustomForm',
+      'description' => 'Copy of UserValidateCurrentPassCustomForm',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
+/**
+ * Copy of UserValidationTestCase.
+ */
+class EntityCacheUserValidationTestCase extends UserValidationTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Copy of UserValidationTestCase',
+      'description' => 'Copy of UserValidationTestCase',
+      'group' => 'Entity cache',
+    );
+  }
+  function setUp() {
+    parent::setup();
+    module_enable(array('entitycache'));
+  }
+}
+
