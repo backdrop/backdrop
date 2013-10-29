@@ -27,7 +27,7 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
   public static function resetEntityCache($controller, array $ids = NULL) {
     // Reset the persistent cache.
     if (isset($ids)) {
-      cache_clear_all($ids, 'cache_entity_' . $controller->entityType);
+      cache('cache_entity_' . $controller->entityType)->deleteMultiple($ids);
     }
     // Give modules the chance to act on any entity.
     foreach (module_implements('entitycache_reset') as $module) {
@@ -135,7 +135,7 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
   public static function entityCacheGet($controller, $ids, $conditions = array()) {
     $cached_entities = array();
     if ($ids && !$conditions) {
-      $cached = cache_get_multiple($ids, 'cache_entity_' . $controller->entityType);
+      $cached = cache('cache_entity_' . $controller->entityType)->getMultiple($ids);
       if ($cached) {
         foreach ($cached as $item) {
           $cached_entities[$item->cid] = $item->data;
@@ -148,7 +148,7 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
 
   public static function entityCacheSet($controller, $entities) {
     foreach ($entities as $item) {
-      cache_set($item->{$controller->idKey}, $item, 'cache_entity_' . $controller->entityType);
+      cache('cache_entity_' . $controller->entityType)->set($item->{$controller->idKey}, $item);
     }
   }
 
@@ -257,25 +257,6 @@ function entitycache_supported_core_entities($enabled = FALSE) {
   return $return;
 }
 
-/**
- * Implements hook_entity_insert().
- */
-function entitycache_entity_insert($entity, $type) {
-  // It is possible for other _insert() hooks to load an entity before it has
-  // been properly saved, for example file_field_insert(). This may cause
-  // an incomplete entity to be cached, since hooks which run after the one
-  // loading the entity do not have a chance to run. Therefore ensure the cache
-  // is always cleared when inserting new entities.
-  // Since hook_entity_insert() runs last, there's a good chance of acting
-  // after other modules are finished loading.
-  $info = entity_get_info($type);
-  list($id) = entity_extract_ids($type, $entity);
-  if (!empty($info['entity cache']) && empty($entity->migrate)) {
-    // file_field_insert() no longer exists. Don't take this out
-    // just yet though because other modules might also misbehave.
-    // cache_clear_all($id, 'cache_entity_' . $type);
-  }
-}
 
 /**
  * Implements hook_entity_delete().
@@ -284,7 +265,7 @@ function entitycache_entity_delete($entity, $type) {
   $info = entity_get_info($type);
   list($id) = entity_extract_ids($type, $entity);
   if (!empty($info['entity cache'])) {
-    cache_clear_all($id, 'cache_entity_' . $type);
+    cache('cache_entity_' . $type)->delete($id);
   }
 }
 
@@ -302,7 +283,7 @@ function entitycache_entity_update($entity, $type) {
   $info = entity_get_info($type);
   list($id) = entity_extract_ids($type, $entity);
   if (!empty($info['entity cache']) && empty($entity->migrate)) {
-    cache_clear_all($id, 'cache_entity_' . $type);
+    cache('cache_entity_' . $type)->delete($id);
   }
 }
 
@@ -341,8 +322,8 @@ function poll_entitycache_node_load($nodes) {
  */
 function entitycache_comment_publish($comment) {
   if (empty($comment->migrate)) {
-    cache_clear_all($comment->cid, 'cache_entity_comment');
-    cache_clear_all($comment->nid, 'cache_entity_node');
+    cache('cache_entity_comment')->delete($comment->cid);
+    cache('cache_entity_node')->delete($comment->nid);
   }
 }
 
@@ -353,8 +334,8 @@ function entitycache_comment_publish($comment) {
  */
 function entitycache_comment_unpublish($comment) {
   if (empty($comment->migrate)) {
-    cache_clear_all($comment->cid, 'cache_entity_comment');
-    cache_clear_all($comment->nid, 'cache_entity_node');
+    cache('cache_entity_comment')->delete($comment->cid);
+    cache('cache_entity_node')->delete($comment->nid);
   }
 }
 
@@ -362,33 +343,33 @@ function entitycache_comment_unpublish($comment) {
  * Implements hook_comment_insert().
  */
 function entitycache_comment_insert($comment) {
-  cache_clear_all($comment->nid, 'cache_entity_node');
+  cache('cache_entity_node')->delete($comment->nid);
 }
 
 /**
  * Implements hook_comment_update().
  */
 function entitycache_comment_update($comment) {
-  cache_clear_all($comment->nid, 'cache_entity_node');
+  cache('cache_entity_node')->delete($comment->nid);
 }
 
 /**
  * Implements hook_user_cancel().
  */
 function entitycache_user_cancel($edit, $account, $method) {
-  cache_clear_all($account->uid, 'cache_entity_user');
+  cache('cache_entity_user')->delete($account->uid);
 }
 
 /**
  * Implements hook_user_logout().
  */
 function entitycache_user_logout($account) {
-  cache_clear_all($account->uid, 'cache_entity_user');
+  cache('cache_entity_user')->delete($account->uid);
 }
 
 /**
  * Implements hook_user_login().
  */
 function entitycache_user_login(&$edit, $account) {
-  cache_clear_all($account->uid, 'cache_entity_user');
+  cache('cache_entity_user')->delete($account->uid);
 }
