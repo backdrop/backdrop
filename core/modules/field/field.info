@@ -7,5 +7,10 @@ files[] = field.module
 files[] = field.attach.inc
 dependencies[] = field_sql_storage
 dependencies[] = entity
+dependencies[] = list
+dependencies[] = number
+dependencies[] = options
+dependencies[] = text
+
 required = TRUE
 stylesheets[all][] = theme/field.css
