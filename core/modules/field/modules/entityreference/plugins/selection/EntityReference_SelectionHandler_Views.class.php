@@ -1,4 +1,5 @@
 <?php
+module_load_include('inc', 'entityreference', 'plugins/selection/abstract');
 
 /**
  * Entity handler for Views.

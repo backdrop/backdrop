@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function entityreference_behavior_example_enable() {
+  $alters = variable_get('drupal_alter_allowed', array());
+  if (!in_array('entityreference_plugin_info', $alters)) {
+    $alters[] = 'entityreference_plugin_info';
+    variable_set('drupal_alter_allowed', $alters);
+  }
+}

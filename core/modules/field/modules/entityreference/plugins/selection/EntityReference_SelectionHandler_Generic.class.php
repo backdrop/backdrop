@@ -1,4 +1,5 @@
 <?php
+module_load_include('inc', 'entityreference', 'plugins/selection/abstract');
 
 /**
  * A generic Entity handler.
@@ -411,7 +412,7 @@ class EntityReference_SelectionHandler_Generic_user extends EntityReference_Sele
           $value_part->condition('anonymous_name', $condition['value'], $condition['operator']);
           $value_part->compile(Database::getConnection(), $query);
           $or->condition(db_and()
-            ->where(str_replace('anonymous_name', ':anonymous_name', (string) $value_part), $value_part->arguments() + array(':anonymous_name' => format_username(user_load(0))))
+            ->where(str_replace('anonymous_name', ':anonymous_name', (string) $value_part), $value_part->arguments() + array(':anonymous_name' => user_format_name(user_load(0))))
             ->condition('users.uid', 0)
           );
           $query->condition($or);

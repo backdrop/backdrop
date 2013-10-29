@@ -2,9 +2,10 @@
 
 /**
  * @file
- * CTools plugin class for the taxonomy-index behavior.
+ * Plugin class for the taxonomy-index behavior.
  */
-
+module_load_include('inc', 'entityreference', 'plugins/behaviors/abstract');
+ 
 /**
  * Extends an entityreference field to maintain its references to taxonomy terms
  * in the {taxonomy_index} table.

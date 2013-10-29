@@ -157,9 +157,9 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
   public function __construct($behavior) {
     $this->behavior = $behavior;
 
-    ctools_include('plugins');
-    $plugin = ctools_get_plugins('entityreference', 'behavior', $behavior);
-    $this->plugin = $plugin;
+    module_load_include('plugins.inc', 'entityreference');
+    $plugins = entityreference_plugin_info('behavior');
+    $this->plugin = $plugins[$behavior];
   }
 
   public function schema_alter(&$schema, $field) {}

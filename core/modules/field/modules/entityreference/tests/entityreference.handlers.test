@@ -345,7 +345,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
     }
 
     $comments = array(
-      'published_published' => (object) array(
+      'published_published' => array(
         'nid' => $nodes['published']->nid,
         'uid' => 1,
         'cid' => NULL,
@@ -355,7 +355,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         'hostname' => ip_address(),
         'language' => LANGUAGE_NONE,
       ),
-      'published_unpublished' => (object) array(
+      'published_unpublished' => array(
         'nid' => $nodes['published']->nid,
         'uid' => 1,
         'cid' => NULL,
@@ -365,7 +365,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         'hostname' => ip_address(),
         'language' => LANGUAGE_NONE,
       ),
-      'unpublished_published' => (object) array(
+      'unpublished_published' => array(
         'nid' => $nodes['unpublished']->nid,
         'uid' => 1,
         'cid' => NULL,
@@ -379,7 +379,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
 
     $comment_labels = array();
     foreach ($comments as $key => $comment) {
-      comment_save($comment);
+      entity_create('comment', $comment);
       $comment_labels[$key] = check_plain($comment->subject);
     }
 

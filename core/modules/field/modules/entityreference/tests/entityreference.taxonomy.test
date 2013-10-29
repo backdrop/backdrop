@@ -69,12 +69,11 @@ class EntityReferenceTaxonomyTestCase extends DrupalWebTestCase {
     taxonomy_vocabulary_save($vocabulary);
 
     // Create term.
-    for ($i = 1; $i <= 2; $i++) {
-      $term = new stdClass();
-      $term->name = "term $i";
-      $term->vid = 1;
-      taxonomy_term_save($term);
-    }
+    $term = new stdClass();
+    $term->name = "term $i";
+    $term->vid = 1;
+    taxonomy_term_save($term);
+    
   }
 
   /**
@@ -86,8 +85,7 @@ class EntityReferenceTaxonomyTestCase extends DrupalWebTestCase {
     $settings['type'] = 'article';
     $settings['field_entityreference_term'][LANGUAGE_NONE][0]['target_id'] = 1;
     $node = $this->drupalCreateNode($settings);
-
-    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+    $this->assertEqual(taxonomy_select_nodes(1), array());
 
     // Asert node update with reference to term.
     node_save($node);
@@ -95,20 +93,19 @@ class EntityReferenceTaxonomyTestCase extends DrupalWebTestCase {
 
     // Assert node update with reference to term and taxonomy reference to
     // another term.
-    $wrapper = entity_metadata_wrapper('node', $node);
-    $wrapper->field_taxonomy_term->set(2);
-    $wrapper->save();
+    $node->field_taxonomy_term[LANGUAGE_NONE][] = array('tid' => 2);
+    node_save($node);
 
     $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
     $this->assertEqual(taxonomy_select_nodes(2), array($node->nid));
 
     // Assert node update with reference to term and taxonomy reference to
     // same term.
-    $wrapper->field_taxonomy_term->set(1);
-    $wrapper->save();
+    $node->field_taxonomy_term[LANGUAGE_NONE][] = array('tid' => 1);
+    node_save($node);
     $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
 
-    $wrapper->delete();
+    node_delete($node);
     $this->assertFalse(taxonomy_select_nodes(1));
   }
 

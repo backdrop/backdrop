@@ -1,4 +1,5 @@
 <?php
+module_load_include('inc', 'entityreference', 'plugins/behaviors/abstract');
 
 class EntityReferenceBehavior_ViewsFilterSelect extends EntityReference_BehaviorHandler_Abstract {
 

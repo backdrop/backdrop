@@ -1,15 +1,6 @@
 <?php
 
 /**
- * Implements hook_ctools_plugin_directory().
- */
-function entityreference_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'entityreference') {
-    return 'plugins/' . $plugin;
-  }
-}
-
-/**
  * Implements hook_init().
  */
 function entityreference_init() {
@@ -17,32 +8,6 @@ function entityreference_init() {
   if (module_exists('feeds')) {
     module_load_include('inc', 'entityreference', 'entityreference.feeds');
   }
-}
-
-/**
- * Implements hook_ctools_plugin_type().
- */
-function entityreference_ctools_plugin_type() {
-  $plugins['selection'] = array(
-    'classes' => array('class'),
-  );
-  $plugins['behavior'] = array(
-    'classes' => array('class'),
-    'process' => 'entityreference_behavior_plugin_process',
-  );
-  return $plugins;
-}
-
-/**
- * CTools callback; Process the behavoir plugins.
- */
-function entityreference_behavior_plugin_process(&$plugin, $info) {
-  $plugin += array(
-    'description' => '',
-    'behavior type' => 'field',
-    'access callback' => FALSE,
-    'force enabled' => FALSE,
-  );
 }
 
 /**
@@ -170,10 +135,9 @@ function _entityreference_get_behavior_handler($behavior) {
   $object_cache = drupal_static(__FUNCTION__);
 
   if (!isset($object_cache[$behavior])) {
-    ctools_include('plugins');
-    $class = ctools_plugin_load_class('entityreference', 'behavior', $behavior, 'class');
-
-    $class = class_exists($class) ? $class : 'EntityReference_BehaviorHandler_Broken';
+    module_load_include('plugins.inc', 'entityreference');
+    $plugins = entityreference_plugin_info('behavior');
+    $class = entityreference_load_plugin('behavior', $behavior, 'EntityReference_BehaviorHandler_Broken');
     $object_cache[$behavior] = new $class($behavior);
   }
 
@@ -184,16 +148,11 @@ function _entityreference_get_behavior_handler($behavior) {
  * Get the selection handler for a given entityreference field.
  */
 function entityreference_get_selection_handler($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
-  ctools_include('plugins');
+  module_load_include('plugins.inc', 'entityreference');
   $handler = $field['settings']['handler'];
-  $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
+  $class = entityreference_load_plugin('selection', $handler, 'EntityReference_SelectionHandler_Broken');
 
-  if (class_exists($class)) {
-    return call_user_func(array($class, 'getInstance'), $field, $instance, $entity_type, $entity);
-  }
-  else {
-    return EntityReference_SelectionHandler_Broken::getInstance($field, $instance, $entity_type, $entity);
-  }
+  return call_user_func(array($class, 'getInstance'), $field, $instance, $entity_type, $entity);  
 }
 
 /**
@@ -425,9 +384,9 @@ function _entityreference_field_settings_process($form, $form_state) {
     '#limit_validation_errors' => array(),
   );
 
-  ctools_include('plugins');
-  $handlers = ctools_get_plugins('entityreference', 'selection');
-  uasort($handlers, 'ctools_plugin_sort');
+  module_load_include('plugins.inc', 'entityreference');
+  $handlers = entityreference_plugin_info('selection');
+  
   $handlers_options = array();
   foreach ($handlers as $handler => $handler_info) {
     $handlers_options[$handler] = check_plain($handler_info['title']);
@@ -465,6 +424,10 @@ function _entityreference_field_settings_process($form, $form_state) {
   );
 
   $handler = entityreference_get_selection_handler($field, $instance);
+  //print_r($field);
+  //print_r($instance);
+  //exit;
+  
   $form['handler']['handler_settings'] += $handler->settingsForm($field, $instance);
 
   _entityreference_get_behavior_elements($form, $field, $instance, 'field');
@@ -631,9 +594,9 @@ function _entityreference_get_behavior_elements(&$element, $field, $instance, $l
  * Get all accessible behavior plugins.
  */
 function entityreference_get_accessible_behavior_plugins($field, $instance) {
-  ctools_include('plugins');
+  module_load_include('plugins.inc', 'entityreference');
   $plugins = array('field' => array(), 'instance' => array());
-  foreach (ctools_get_plugins('entityreference', 'behavior') as $name => $plugin) {
+  foreach (entityreference_plugin_info('behavior') as $name => $plugin) {
     $handler = _entityreference_get_behavior_handler($name);
     $level = $plugin['behavior type'];
     if ($handler->access($field, $instance)) {
@@ -747,10 +710,9 @@ function entityreference_field_widget_settings_form($field, $instance) {
       '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
     );
     $form['size'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Size of textfield'),
       '#default_value' => $settings['size'],
-      '#element_validate' => array('_element_validate_integer_positive'),
       '#required' => TRUE,
     );
   }
