@@ -852,14 +852,21 @@ class SiteMaintenanceTestCase extends DrupalWebTestCase {
     $this->drupalGet('');
     $this->assertRaw($admin_message, t('Found the site maintenance mode message.'));
 
-    // Logout and verify that offline message is displayed.
+    // Logout and verify that offline message is displayed and maintenance page
+    // will not be cached by external caches like varnish.
     $this->drupalLogout();
     $this->drupalGet('');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical(strpos($this->drupalGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
     $this->drupalGet('node');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical(strpos($this->drupalGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
     $this->drupalGet('user/register');
+    $this->assertResponse(503);
     $this->assertText($offline_message);
+    $this->assertIdentical(strpos($this->drupalGetHeader('Cache-Control'), 'no-cache, must-revalidate'), 0);
 
     // Verify that user is able to log in.
     $this->drupalGet('user');

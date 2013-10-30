@@ -5157,6 +5157,11 @@ function drupal_page_set_cache() {
       }
     }
 
+    if (variable_get('maintenance_mode', 0)) {
+      // Cache maintenance pages for 10 seconds.
+      $cache->expire = time() + 10;
+    }
+
     if ($cache->data['body']) {
       if (variable_get('page_compression', TRUE) && extension_loaded('zlib')) {
         $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
