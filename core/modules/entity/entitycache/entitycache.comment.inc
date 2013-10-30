@@ -7,7 +7,7 @@
 /**
  * Comment entity controller with persistent cache.
  */
-class EntityCacheCommentController extends CommentController {
+class EntityCacheCommentController extends CommentStorageController {
   public function resetCache(array $ids = NULL) {
     EntityCacheControllerHelper::resetEntityCache($this, $ids);
     parent::resetCache($ids);
