@@ -1,21 +1,5 @@
 <?php
-
-/**
- * Copy of BlogTestCase.
- */
-class EntityCacheBlogTestCase extends BlogTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of BlogTestCase',
-      'description' => 'Copy of BlogTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
+module_load_include('test', 'book');
 
 /**
  * Copy of BookTestCase.
@@ -34,6 +18,7 @@ class EntityCacheBookTestCase extends BookTestCase {
   }
 }
 
+module_load_include('test', 'comment');
 /**
  * Copy of CommentAnonymous.
  */
@@ -221,9 +206,19 @@ class EntityCacheCommentTokenReplaceTestCase extends CommentTokenReplaceTestCase
   }
 }
 
+module_load_include('test', 'node');
+
 /**
  * Copy of MultiStepNodeFormBasicOptionsTest.
- */
+ *
+ * Removed & then re-added to Drupal 8, but not currently present in Backdrop.
+
+[EntityCacheMultiStepNodeFormBasicOptionsTest]
+name = Copy of MultiStepNodeFormBasicOptionsTest
+description = Copy of MultiStepNodeFormBasicOptionsTest
+group = Entity cache
+file = entitycache.test
+ 
 class EntityCacheMultiStepNodeFormBasicOptionsTest extends MultiStepNodeFormBasicOptionsTest {
   public static function getInfo() {
     return array(
@@ -237,6 +232,8 @@ class EntityCacheMultiStepNodeFormBasicOptionsTest extends MultiStepNodeFormBasi
     module_enable(array('entitycache'));
   }
 }
+/**/
+
 
 /**
  * Copy of NodeAccessRebuildTestCase.
@@ -680,141 +677,7 @@ class EntityCacheSummaryLengthTestCase extends SummaryLengthTestCase {
   }
 }
 
-/**
- * Copy of PollBlockTestCase.
- */
-class EntityCachePollBlockTestCase extends PollBlockTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollBlockTestCase',
-      'description' => 'Copy of PollBlockTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of PollCreateTestCase.
- */
-class EntityCachePollCreateTestCase extends PollCreateTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollCreateTestCase',
-      'description' => 'Copy of PollCreateTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of PollExpirationTestCase.
- */
-class EntityCachePollExpirationTestCase extends PollExpirationTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollExpirationTestCase',
-      'description' => 'Copy of PollExpirationTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of PollJSAddChoice.
- */
-class EntityCachePollJSAddChoice extends PollJSAddChoice {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollJSAddChoice',
-      'description' => 'Copy of PollJSAddChoice',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of PollTestCase.
- */
-class EntityCachePollTestCase extends PollTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollTestCase',
-      'description' => 'Copy of PollTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of PollTokenReplaceTestCase.
- */
-class EntityCachePollTokenReplaceTestCase extends PollTokenReplaceTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollTokenReplaceTestCase',
-      'description' => 'Copy of PollTokenReplaceTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of PollVoteCheckHostname.
- */
-class EntityCachePollVoteCheckHostname extends PollVoteCheckHostname {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollVoteCheckHostname',
-      'description' => 'Copy of PollVoteCheckHostname',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of PollVoteTestCase.
- */
-class EntityCachePollVoteTestCase extends PollVoteTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of PollVoteTestCase',
-      'description' => 'Copy of PollVoteTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
+module_load_include('test', 'taxonomy');
 
 /**
  * Copy of TaxonomyHooksTestCase.
@@ -1003,6 +866,7 @@ class EntityCacheTaxonomyWebTestCase extends TaxonomyWebTestCase {
   }
 }
 
+module_load_include('test', 'user');
 /**
  * Copy of UserAccountLinksUnitTests.
  */
@@ -1039,7 +903,15 @@ class EntityCacheUserAdminTestCase extends UserAdminTestCase {
 
 /**
  * Copy of UserAuthmapAssignmentTestCase.
- */
+ *
+ *
+
+[EntityCacheUserAuthmapAssignmentTestCase]
+name = Copy of UserAuthmapAssignmentTestCase
+description = Copy of UserAuthmapAssignmentTestCase
+group = Entity cache
+file = entitycache.test
+
 class EntityCacheUserAuthmapAssignmentTestCase extends UserAuthmapAssignmentTestCase {
   public static function getInfo() {
     return array(
@@ -1053,6 +925,8 @@ class EntityCacheUserAuthmapAssignmentTestCase extends UserAuthmapAssignmentTest
     module_enable(array('entitycache'));
   }
 }
+/**/
+
 
 /**
  * Copy of UserAutocompleteTestCase.
