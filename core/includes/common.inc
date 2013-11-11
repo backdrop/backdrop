@@ -5319,7 +5319,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
   // Search for the directory in core.
   $searchdir = array('core/' . $directory);
 
-  // The 'core/pFor the case of searching for profiles, scan top-level directories.
+  // For the case of searching for profiles, scan top-level directories.
   // Always search for contributed and custom extensions in top-level
   // directories as well as sites/all/* directories. If the same extension is
   // located in both directories, then the latter wins for legacy/historical
@@ -5344,7 +5344,6 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
     }
   }
 
-  // $searchdir[] = 'sites/all/' . $directory;
   $searchdir[] = $directory;
   if (file_exists("$config/$directory")) {
     $searchdir[] = "$config/$directory";
