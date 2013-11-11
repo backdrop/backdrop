@@ -862,7 +862,7 @@ function drupal_settings_initialize() {
  * in any of these three places:
  *
  * modules/foo/foo.module
- * sites/all/modules/foo/foo.module
+ * /modules/foo/foo.module
  * sites/example.com/modules/foo/foo.module
  *
  * Calling drupal_get_filename('module', 'foo') will give you one of
