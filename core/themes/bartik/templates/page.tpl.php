@@ -4,9 +4,9 @@
  * @file
  * Bartik's theme implementation to display a single Drupal page.
  *
- * The doctype, html, head and body tags are not in this template. Instead they
- * can be found in the html.tpl.php template normally located in the
- * modules/system folder.
+ * The doctype, html, head, and body tags are not in this template. Instead
+ * they can be found in the html.tpl.php template normally located in the
+ * core/modules/system directory.
  *
  * Available variables:
  *
@@ -54,10 +54,10 @@
  *   prominently.
  * - $tabs (array): Tabs linking to any sub-pages beneath the current page
  *   (e.g., the view and edit tabs when displaying a node).
- * - $action_links (array): Actions local to the page, such as 'Add menu' on the
- *   menu administration interface.
+ * - $action_links (array): Actions local to the page, such as 'Add menu' on
+ *   the menu administration interface.
  * - $feed_icons: A string of all feed icons for the current page.
- * - $node: The node object, if there is an automatically-loaded node
+ * - $node: The node entity, if there is an automatically-loaded node
  *   associated with the page, and the node ID is the second argument
  *   in the page's path (e.g. node/12345 and node/12345/revisions, but not
  *   comment/reply/12345).
@@ -81,12 +81,32 @@
  * @see template_preprocess_page()
  * @see template_process()
  * @see bartik_process_page()
+ * @see html.tpl.php
+ *
+ * @ingroup themeable
  */
 ?>
 <div id="page-wrapper"><div id="page">
 
-  <div id="header" class="<?php print $secondary_menu ? 'with-secondary-menu': 'without-secondary-menu'; ?>"><div class="section clearfix">
-
+  <header id="header" role="banner" class="<?php print $secondary_menu ? 'with-secondary-menu': 'without-secondary-menu'; ?>"><div class="section clearfix">
+    <?php if ($secondary_menu): ?>
+      <nav id="secondary-menu" role="navigation" class="navigation">
+        <?php print theme('links__system_secondary_menu', array(
+          'links' => $secondary_menu,
+          'attributes' => array(
+            'id' => 'secondary-menu-links',
+            'class' => array('links', 'inline', 'clearfix'),
+          ),
+          'heading' => array(
+            'text' => t('Secondary menu'),
+            'level' => 'h2',
+            'class' => array('element-invisible'),
+          ),
+        )); ?>
+      </nav> <!-- /#secondary-menu -->
+    <?php endif; ?>
+    
+    
     <?php if ($logo): ?>
       <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" id="logo">
         <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
@@ -122,7 +142,7 @@
     <?php print render($page['header']); ?>
 
     <?php if ($main_menu): ?>
-      <div id="main-menu" class="navigation">
+      <nav id="main-menu" role="navigation" class="navigation">
         <?php print theme('links__system_main_menu', array(
           'links' => $main_menu,
           'attributes' => array(
@@ -135,27 +155,9 @@
             'class' => array('element-invisible'),
           ),
         )); ?>
-      </div> <!-- /#main-menu -->
+      </nav> <!-- /#main-menu -->
     <?php endif; ?>
-
-    <?php if ($secondary_menu): ?>
-      <div id="secondary-menu" class="navigation">
-        <?php print theme('links__system_secondary_menu', array(
-          'links' => $secondary_menu,
-          'attributes' => array(
-            'id' => 'secondary-menu-links',
-            'class' => array('links', 'inline', 'clearfix'),
-          ),
-          'heading' => array(
-            'text' => t('Secondary menu'),
-            'level' => 'h2',
-            'class' => array('element-invisible'),
-          ),
-        )); ?>
-      </div> <!-- /#secondary-menu -->
-    <?php endif; ?>
-
-  </div></div> <!-- /.section, /#header -->
+  </div></header> <!-- /.section, /#header -->
 
   <?php if ($messages): ?>
     <div id="messages"><div class="section clearfix">
@@ -169,15 +171,9 @@
     </div></div> <!-- /.section, /#featured -->
   <?php endif; ?>
 
-  <div id="main-wrapper" class="clearfix"><div id="main" class="clearfix">
+  <div id="main-wrapper" class="clearfix"><div id="main" role="main" class="clearfix">
 
     <?php print $breadcrumb; ?>
-
-    <?php if ($page['sidebar_first']): ?>
-      <div id="sidebar-first" class="column sidebar"><div class="section">
-        <?php print render($page['sidebar_first']); ?>
-      </div></div> <!-- /.section, /#sidebar-first -->
-    <?php endif; ?>
 
     <div id="content" class="column"><div class="section">
       <?php if ($page['highlighted']): ?><div id="highlighted"><?php print render($page['highlighted']); ?></div><?php endif; ?>
@@ -204,6 +200,12 @@
 
     </div></div> <!-- /.section, /#content -->
 
+    <?php if ($page['sidebar_first']): ?>
+      <div id="sidebar-first" class="column sidebar"><div class="section">
+        <?php print render($page['sidebar_first']); ?>
+      </div></div> <!-- /.section, /#sidebar-first -->
+    <?php endif; ?>
+    
     <?php if ($page['sidebar_second']): ?>
       <div id="sidebar-second" class="column sidebar"><div class="section">
         <?php print render($page['sidebar_second']); ?>
@@ -232,9 +234,9 @@
     <?php endif; ?>
 
     <?php if ($page['footer']): ?>
-      <div id="footer" class="clearfix">
+      <footer id="footer" role="contentinfo" class="clearfix">
         <?php print render($page['footer']); ?>
-      </div> <!-- /#footer -->
+      </footer> <!-- /#footer -->
     <?php endif; ?>
 
   </div></div> <!-- /.section, /#footer-wrapper -->
