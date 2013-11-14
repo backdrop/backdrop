@@ -41,6 +41,6 @@ body {
 
 #comments .title,
 #comments form,
-.comment-forbidden {
+.comment_forbidden {
   display: none;
 }
