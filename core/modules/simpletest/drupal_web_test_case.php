@@ -40,6 +40,13 @@ abstract class DrupalTestCase {
   protected $originalFileDirectory = NULL;
 
   /**
+   * The original config directory array, before changing for testing purposes.
+   *
+   * @var string
+   */
+  protected $originalConfigDirectories = NULL;
+
+  /**
    * Time limit for the test.
    */
   protected $timeLimit = 500;
@@ -1288,7 +1295,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   either a single array or a variable number of string arguments.
    */
   protected function setUp() {
-    global $user, $language_interface, $conf;
+    global $user, $language_interface, $conf, $config_directories;
 
     // Generate a temporary prefixed database to ensure that tests have a clean starting point.
     $this->databasePrefix = 'simpletest' . mt_rand(1000, 1000000);
@@ -1314,6 +1321,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language_interface;
     $this->originalLanguageDefault = variable_get('language_default');
+    $this->originalConfigDirectories = $config_directories;
     $this->originalFileDirectory = variable_get('file_public_path', conf_path() . '/files');
     $this->originalProfile = drupal_get_profile();
     $clean_url_original = variable_get('clean_url', 0);
@@ -1344,11 +1352,29 @@ class DrupalWebTestCase extends DrupalTestCase {
     $private_files_directory = $public_files_directory . '/private';
     $temp_files_directory    = $private_files_directory . '/temp';
 
-    // Create the directories
+    // Create the directories.
     file_prepare_directory($public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     file_prepare_directory($private_files_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($temp_files_directory, FILE_CREATE_DIRECTORY);
     $this->generatedTestFiles = FALSE;
+
+    // Set the new config directories. During test execution, these values are
+    // manually set directly in config_get_config_directory().
+    $config_base_path = conf_path() . '/files/simpletest/' . substr($this->databasePrefix, 10) . '/config_';
+    $config_directories = array(
+      'active' => array(
+        'path' => $config_base_path . 'active',
+        'absolute' => TRUE,
+      ),
+      'staging' => array(
+        'path' => $config_base_path . 'staging',
+        'absolute' => TRUE,
+      ),
+    );
+    $active_directory = config_get_config_directory('active');
+    $staging_directory = config_get_config_directory('staging');
+    file_prepare_directory($active_directory, FILE_CREATE_DIRECTORY);
+    file_prepare_directory($staging_directory, FILE_CREATE_DIRECTORY);
 
     // Log fatal errors.
     ini_set('log_errors', 1);
@@ -1523,7 +1549,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * and reset the database prefix.
    */
   protected function tearDown() {
-    global $user, $language_interface;
+    global $user, $language_interface, $config_directories;
 
     // In case a fatal error occurred that was not in the test process read the
     // log to pick up any fatal errors.
@@ -1547,6 +1573,9 @@ class DrupalWebTestCase extends DrupalTestCase {
     // Get back to the original connection.
     Database::removeConnection('default');
     Database::renameConnection('simpletest_original_default', 'default');
+
+    // Set the configuration direcotires back to the originals.
+    $config_directories = $this->originalConfigDirectories;
 
     // Restore original shutdown callbacks array to prevent original
     // environment of calling handlers from test run.

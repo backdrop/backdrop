@@ -1,0 +1,17 @@
+{
+  "_config_name": "image.styles.thumbnail.json",
+  "overridden": false,
+  "module": "image",
+  "name": "thumbnail",
+  "effects": [
+    {
+      "name": "image_scale",
+      "data": {
+        "width": "100",
+        "height": "100",
+        "upscale": 1
+      },
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[ConfigurationTest]
+name = Configuration basic tests
+description = Tests writing and reading configuration files.
+group = Configuration
+file = tests/config.test
+
+[ConfigurationHooksTest]
+name = Configuration hooks
+description = Tests hooks for validation, creating, updating, and deleting configurations.
+group = Configuration
+file = tests/config.test
+
+[ConfigurationUITest]
+name = Configuration UI
+description = Tests the UI for syncing, diffing, importing, and exporting configuration.
+group = Configuration
+file = tests/config.test
