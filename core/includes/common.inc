@@ -4967,12 +4967,33 @@ function drupal_clear_js_cache() {
  *
  * We use HTML-safe strings, with several characters escaped.
  *
+ * @param $var
+ *   The variablel to be encoded as JSON.
+ * @param $pretty_print
+ *   Backwards-compatible pretty printing of the JSON string. This uses the
+ *   JSON_PRETTY_PRINT and JSON_UNESCAPED_UNICODE options to make the JSON more
+ *   readable by humans, or emulates this functionality if running an older
+ *   version of PHP.
+ *
  * @see drupal_json_decode()
  * @ingroup php_wrappers
  */
-function drupal_json_encode($var) {
-  // Encode <, >, ', &, and " using the json_encode() options parameter.
-  return json_encode($var, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+function drupal_json_encode($var, $pretty_print = FALSE) {
+  if ($pretty_print) {
+    if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
+      return json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+    else {
+      $string = json_encode($var);
+      $string = backdrop_json_format($string);
+      $string = backdrop_json_decode_unicode($string);
+      return $string;
+    }
+  }
+  // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
+  else {
+    return json_encode($var, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+  }
 }
 
 /**
@@ -4983,6 +5004,82 @@ function drupal_json_encode($var) {
  */
 function drupal_json_decode($var) {
   return json_decode($var, TRUE);
+}
+
+/**
+ * Format a string of JSON for older versions of PHP.
+ *
+ * @param $json
+ *   A string of JSON text.
+ * @return
+ *   A formatted string of JSON text.
+ */
+function backdrop_json_format($json) {
+  // This code adopted from
+  // https://github.com/GerHobbelt/nicejson-php/blob/master/nicejson.php.
+
+  $result = '';
+  $pos = 0; // Indentation level.
+  $strlen = strlen($json);
+  $indent = "  ";
+  $new_line = "\n";
+  $prev_char = '';
+  $out_of_quotes = TRUE;
+
+  for ($i = 0; $i < $strlen; $i++) {
+    // Grab the next character in the string.
+    $char = substr($json, $i, 1);
+
+    // Are we inside a quoted string?
+    if ($char == '"' && $prev_char != '\\') {
+      $out_of_quotes = !$out_of_quotes;
+    }
+    // If this character is the end of an element, output a new line and indent
+    // the next line.
+    else if (($char == '}' || $char == ']') && $out_of_quotes) {
+      $result .= $new_line;
+      $pos--;
+      for ($j = 0; $j < $pos; $j++) {
+        $result .= $indent;
+      }
+    }
+    // Eat all non-essential whitespace in the input as we do our own here and
+    // it would only mess up our process.
+    else if ($out_of_quotes && false !== strpos(" \t\r\n", $char)) {
+      continue;
+    }
+
+    // Add the character to the result string.
+    $result .= $char;
+    // Always add a space after a field colon:
+    if ($char == ':' && $out_of_quotes) {
+      $result .= ' ';
+    }
+
+    // If the last character was the beginning of an element, output a new line
+    // and indent the next line.
+    if (($char == ',' || $char == '{' || $char == '[') && $out_of_quotes) {
+      $result .= $new_line;
+      if ($char == '{' || $char == '[') {
+        $pos++;
+      }
+      for ($j = 0; $j < $pos; $j++) {
+        $result .= $indent;
+      }
+    }
+    $prev_char = $char;
+  }
+
+  return $result;
+}
+
+/**
+ * Decode Unicode characters in JSON strings.
+ */
+function backdrop_json_decode_unicode($json) {
+  return preg_replace_callback('/\\\\u([0-9a-f]{4})/i', function ($match) {
+    return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
+  }, $json);
 }
 
 /**

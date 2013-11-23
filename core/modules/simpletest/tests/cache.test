@@ -95,7 +95,7 @@ class CacheTestCase extends DrupalWebTestCase {
    *   The time in seconds the cache should minimal live.
    */
   protected function setupLifetime($time) {
-    variable_set('cache_lifetime', $time);
+    config_set('system.performance', 'cache_lifetime', $time);
     variable_set('cache_flush', 0);
   }
 }
