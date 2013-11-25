@@ -1,0 +1,7 @@
+name = Configuration manager
+description = Import, export, and synchronize your configuration changes between different installations of your site, such as in development, staging, and production environments.
+version = VERSION
+core = 8.x
+files[] = config.test
+configure = admin/config/development/configuration
+package = Core

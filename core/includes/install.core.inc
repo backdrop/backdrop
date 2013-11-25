@@ -148,6 +148,8 @@ function install_state_defaults() {
     // Whether or not this installation is interactive. By default this will
     // be set to FALSE if settings are passed in to install_drupal().
     'interactive' => TRUE,
+    // The mode for directories that are created during install.
+    'mode' => NULL,
     // An array of available translation files for the installation.
     'translations' => array(),
     // An array of parameters for the installation, pre-populated by the URL
@@ -993,25 +995,11 @@ function install_settings_form_submit($form, &$form_state) {
     'required' => TRUE,
   );
 
-  // This duplicates drupal_get_token() because that function can't work yet.
-  // Wondering if it makes sense to move this later in the process, but its
-  // nice having all the settings stuff here.
-  //
-  // @todo This is actually causing a bug right now, because you can install
-  // without hitting install_settings_form_submit() if your settings.php
-  // already has the db stuff in it, and right now in that case your
-  // config directory never gets created. So this needs to be moved elsewhere.
-  $settings['config_directory_name'] = array(
-    'value'     => 'config_' . drupal_hmac_base64('', session_id() . $settings['config_signature_key']['value'] . $settings['drupal_hash_salt']['value']),
-    'required'  => TRUE,
-  );
-
   drupal_rewrite_settings($settings);
-  // Actually create the config directory named above.
-  $config_path = conf_path() . '/files/' . $settings['config_directory_name']['value'];
-  if (!file_prepare_directory($config_path, FILE_CREATE_DIRECTORY)) {
-    // How best to handle errors here?
-  };
+
+  // Add the config directories to settings.php.
+  drupal_install_config_directories($install_state['mode']);
+
   // Indicate that the settings file has been verified, and check the database
   // for the last completed task, now that we have a valid connection. This
   // last step is important since we want to trigger an error if the new

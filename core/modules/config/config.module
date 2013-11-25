@@ -1,0 +1,111 @@
+<?php
+/**
+ * @file
+ * Allows site administrators to modify configuration.
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function config_menu() {
+  $items['admin/config/development/configuration'] = array(
+    'title' => 'Configuration management',
+    'description' => 'Import, export, and synchronize your configuration changes between different installations of your site, such as in development, staging, and production environments.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('config_sync_form'),
+    'access arguments' => array('synchronize configuration'),
+    'file' => 'includes/config.admin.inc',
+  );
+  $items['admin/config/development/configuration/sync'] = array(
+    'title' => 'Synchronize',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+  $items['admin/config/development/configuration/diff/%'] = array(
+    'page callback' => 'config_diff_page',
+    'page arguments' => array(5),
+    'access arguments' => array('synchronize configuration'),
+    'file' => 'includes/config.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/development/configuration/single'] = array(
+    'title' => 'Single Import/Export',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('config_import_single_form'),
+    'access arguments' => array('import configuration'),
+    'file' => 'includes/config.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+  $items['admin/config/development/configuration/single/import'] = array(
+    'title' => 'Import',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/development/configuration/single/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('config_export_single_form'),
+    'access arguments' => array('export configuration'),
+    'file' => 'includes/config.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/development/configuration/full'] = array(
+    'title' => 'Full Import/Export',
+    'page callback' => 'config_import_full_form',
+    'access arguments' => array('import configuration'),
+    'file' => 'includes/config.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+  $items['admin/config/development/configuration/full/import'] = array(
+    'title' => 'Import',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/development/configuration/full/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'config_download_full_form',
+    'access arguments' => array('export configuration'),
+    'file' => 'includes/config.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/development/configuration/full/export-download'] = array(
+    'page callback' => 'config_download_full_export',
+    'access arguments' => array('export configuration'),
+    'file' => 'includes/config.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function config_permission() {
+  $permissions['synchronize configuration'] = array(
+    'title' => t('Synchronize configuration'),
+    'restrict access' => TRUE,
+  );
+  $permissions['export configuration'] = array(
+    'title' => t('Export configuration'),
+    'restrict access' => TRUE,
+  );
+  $permissions['import configuration'] = array(
+    'title' => t('Import configuration'),
+    'restrict access' => TRUE,
+  );
+  return $permissions;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function config_file_download($uri) {
+  $scheme = file_uri_scheme($uri);
+  $target = file_uri_target($uri);
+  if ($scheme == 'temporary' && $target == 'config.tar.gz') {
+    return array(
+      'Content-disposition' => 'attachment; filename="config.tar.gz"',
+    );
+  }
+}

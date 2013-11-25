@@ -83,6 +83,37 @@ function update_prepare_d8_bootstrap() {
   // created yet.
   include_once DRUPAL_ROOT . '/core/includes/install.inc';
   include_once DRUPAL_ROOT . '/core/modules/entity/entity.controller.inc';
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+
+  // Check whether settings.php needs to be rewritten.
+  $settings_exist = !empty($GLOBALS['config_directories']);
+
+  if (!$settings_exist || !is_dir(config_get_config_directory('active')) || !is_dir(config_get_config_directory('staging'))) {
+    drupal_install_config_directories();
+  }
+
+  // If any of the required settings needs to be written, then settings.php
+  // needs to be writable.
+  if (!$settings_exist) {
+    $settings_file = conf_path() . '/settings.php';
+    $writable = drupal_verify_install_file($settings_file, FILE_EXIST | FILE_READABLE | FILE_WRITABLE);
+    $requirements['settings file']['title'] = 'Settings file';
+    if ($writable) {
+      $requirements['settings file'] += array(
+        'value' => 'settings.php is writable.',
+      );
+    }
+    else {
+      $requirements['settings file'] += array(
+        'value' => 'settings.php is not writable.',
+        'severity' => REQUIREMENT_ERROR,
+        'description' => 'Drupal requires write permissions to <em>' . $settings_file . '</em> during the update process. If you are unsure how to grant file permissions, consult the <a href="http://drupal.org/server-permissions">online handbook</a>.',
+      );
+    }
+    update_extra_requirements($requirements);
+  }
+
+  // Bootstrap the database.
   drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
 
   // If the site has not updated to Drupal 8 yet, check to make sure that it is
