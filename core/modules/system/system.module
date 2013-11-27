@@ -3872,3 +3872,19 @@ function system_admin_paths() {
   );
   return $paths;
 }
+
+/**
+ * PHP 5.3 Namespaced auto-loading.
+ *
+ * This allows to autoload classes by namespace by assuming namespace matches
+ * directory structure, include the moduel name as the first prefix.
+ *
+ * If a module does not wish to use such directory
+ * structure for classes, it may use plugin module to register classes via hook_plugin_info.
+ */
+spl_autoload_register(function($class) {
+  $components = explode('\\', $class);
+  $module = array_shift($components);
+  $location = implode('/', $components);
+  module_load_include('php', $module, $location);
+});

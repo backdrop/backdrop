@@ -1,0 +1,8 @@
+name = Plugin
+description = Provides a common API for modules to offer plugins.
+package = Core
+core = 8.x
+php = 5.3
+hidden = TRUE
+
+files[]=plugin.inc

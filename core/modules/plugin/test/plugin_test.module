@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * Implements hook_plugin_info.
+ */
+function plugin_test_plugin_info() {
+  return array('test' => array(
+    'plugin_test\PSR\WTF\PluginTest' => array(
+      'name' => 'Test Plugin',
+      'path' => 'lib'
+    )
+  ));
+}

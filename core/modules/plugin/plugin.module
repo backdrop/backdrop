@@ -1,0 +1,21 @@
+<?php
+
+spl_autoload_register(function($class) {
+  $components = explode('\\', $class);
+  $module = array_shift($components);
+  $location = '';
+
+  module_load_include('inc', 'plugin');
+  $plugins = plugin_info();
+  foreach ($plugins AS $type => $group) {
+    if (array_key_exists($class, $group)) {
+      if (array_key_exists('path', $group[$class])) {
+        $location = $group[$class]['path'] . '/';
+      }
+      break;
+    }
+  }
+
+  $location .= array_pop($components);
+  module_load_include('php', $module, $location);
+}, true, true);
