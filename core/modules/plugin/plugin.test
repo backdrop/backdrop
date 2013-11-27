@@ -1,0 +1,21 @@
+<?php
+
+module_load_include('test', 'system');
+
+/**
+ * Ensure plugins can be autoloaded with arbitrary namespace & filepath via hook_pluign_info.
+ *
+ * Extend SystemAutoloadtestCase to ensure that Plugin module doesn't override the default autloading.
+ */
+class PluginAutoloadTestCase extends SystemAutoloadTestCase{
+  protected $profile = 'minimal';
+
+  public function setUp() {
+    DrupalWebTestCase::setUp(array('plugin', 'plugin_test', 'autoload_test'));
+  }
+
+  public function testPluginAutoload() {
+    $this->assertEqual('Hello plugins!', plugin_test\PSR\WTF\PluginTest::HELLO, 'Autoloaded namespaced class in custom directory.');
+  }
+
+}

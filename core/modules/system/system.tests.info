@@ -165,3 +165,9 @@ name = UUID handling
 description = Test the handling of Universally Unique IDentifiers (UUIDs).
 group = System
 file = system.test
+
+[SystemAutoloadTestCase]
+name = Class Autoloading
+description = Test that classes are autoloaded by namespace.
+group = System
+file = system.test

@@ -2419,3 +2419,20 @@ class UuidUnitTestCase extends DrupalUnitTestCase {
 
   }
 }
+
+/**
+ * Class autoloading.
+ */
+class SystemAutoloadTestCase extends DrupalWebTestCase{
+  protected $profile = 'minimal';
+
+  public function setUp() {
+    parent::setUp('autoload_test');
+  }
+
+  public function testAutoload() {
+    $this->assertEqual('Hello namespaces!', autoload_test\AutoloadNamespace::HELLO, 'Autoloaded namespaced class in module root.');
+    $this->assertEqual('Hello sub-directory!', autoload_test\classes\Autoloadable::HELLO, 'Autoloaded namespaced class in sub-directory');
+  }
+
+}

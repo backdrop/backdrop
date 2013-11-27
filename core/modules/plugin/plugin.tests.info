@@ -1,0 +1,5 @@
+[PluginAutoloadTestCase]
+name = Plugin Autoloading
+description = Test that Plugins are autoloaded by namespace.
+group = Plugin
+file = plugin.test
