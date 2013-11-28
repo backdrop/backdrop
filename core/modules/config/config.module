@@ -49,10 +49,12 @@ function config_menu() {
     'access arguments' => array('export configuration'),
     'file' => 'includes/config.admin.inc',
     'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
   );
   $items['admin/config/development/configuration/full'] = array(
     'title' => 'Full Import/Export',
-    'page callback' => 'config_import_full_form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('config_import_full_form'),
     'access arguments' => array('import configuration'),
     'file' => 'includes/config.admin.inc',
     'type' => MENU_LOCAL_TASK,
@@ -64,10 +66,12 @@ function config_menu() {
   );
   $items['admin/config/development/configuration/full/export'] = array(
     'title' => 'Export',
-    'page callback' => 'config_download_full_form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('config_export_full_form'),
     'access arguments' => array('export configuration'),
     'file' => 'includes/config.admin.inc',
     'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
   );
   $items['admin/config/development/configuration/full/export-download'] = array(
     'page callback' => 'config_download_full_export',

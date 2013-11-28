@@ -8,9 +8,9 @@
  * Form callback; Build the form for syncing all staged configuration.
  */
 function config_sync_form(array $form, array &$form_state) {
-  $config_statuses = config_get_statuses();
-
-  if (empty($config_statuses)) {
+  $form_state['config_statuses'] = config_get_statuses();
+  $changed_config_count = count(array_filter($form_state['config_statuses']));
+  if ($changed_config_count === 0) {
     $form['no_changes'] = array(
       '#theme' => 'table',
       '#header' => array('Name', 'Operations'),
@@ -24,36 +24,8 @@ function config_sync_form(array $form, array &$form_state) {
   // Add the AJAX library to the form for dialog support.
   $form['#attached']['library'][] = array('system', 'drupal.ajax');
 
-  foreach ($config_statuses as $config_change_type => $config_files) {
-    if (empty($config_files)) {
-      continue;
-    }
-
-    // @todo A table caption would be more appropriate, but does not have the
-    //   visual importance of a heading.
-    $form[$config_change_type]['heading'] = array(
-      '#type' => 'html_tag',
-      '#tag' => 'h3',
-    );
-    switch ($config_change_type) {
-      case 'create':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($config_files), '@count new', '@count new');
-        break;
-
-      case 'update':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($config_files), '@count changed', '@count changed');
-        break;
-
-      case 'delete':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($config_files), '@count removed', '@count removed');
-        break;
-    }
-    $form[$config_change_type]['list'] = array(
-      '#theme' => 'table',
-      '#header' => array('Name', 'Operations'),
-    );
-
-    foreach ($config_files as $config_file) {
+  foreach ($form_state['config_statuses'] as $config_file => $config_change_type) {
+    if ($config_change_type) {
       $links['view_diff'] = array(
         '#type' => 'link',
         '#title' => t('View differences'),
@@ -68,13 +40,42 @@ function config_sync_form(array $form, array &$form_state) {
     }
   }
 
+  foreach (array('create', 'delete', 'update') as $config_change_type) {
+    if (!isset($form[$config_change_type])) {
+      continue;
+    }
+
+    $form[$config_change_type]['heading'] = array(
+      '#type' => 'html_tag',
+      '#tag' => 'h3',
+      '#weight' => -1,
+    );
+    switch ($config_change_type) {
+      case 'create':
+        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count new', '@count new');
+        break;
+
+      case 'update':
+        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count changed', '@count changed');
+        break;
+
+      case 'delete':
+        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count removed', '@count removed');
+        break;
+    }
+    $form[$config_change_type]['list'] += array(
+      '#theme' => 'table',
+      '#header' => array('Name', 'Operations'),
+    );
+  }
+
   $form['actions'] = array(
     '#type' => 'actions'
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Import all'),
-    '#access' => count($config_statuses) > 0,
+    '#access' => $changed_config_count > 0,
   );
 
   return $form;
@@ -84,32 +85,14 @@ function config_sync_form(array $form, array &$form_state) {
  * Submit handler for config_sync_form().
  */
 function config_sync_form_submit(array &$form, array &$form_state) {
-  $config_importer = new ConfigImporter(
-    $form_state['storage_comparer'],
-    $this->eventDispatcher,
-    $this->configFactory,
-    $this->entity_manager,
-    $this->lock,
-    $this->uuidService
-  );
-  if ($config_importer->alreadyImporting()) {
-    drupal_set_message(t('Another request may be synchronizing configuration already.'));
+  $last_sync_time = variable_get('config_sync');
+  if ($last_sync_time == NULL || $last_sync_time < REQUEST_TIME - 120) {
+    module_load_include('inc', 'config', 'includes/config.sync');
+    $config_sync_batch = config_sync_batch($form_state['config_statuses']);
+    batch_set($config_sync_batch);
   }
-  else{
-    try {
-      $config_importer->import();
-      drupal_flush_all_caches();
-      drupal_set_message(t('The configuration was imported successfully.'));
-    }
-    catch (ConfigException $e) {
-      // Return a negative result for UI purposes. We do not differentiate
-      // between an actual synchronization error and a failed lock, because
-      // concurrent synchronizations are an edge-case happening only when
-      // multiple developers or site builders attempt to do it without
-      // coordinating.
-      watchdog_exception('config_import', $e);
-      drupal_set_message(t('The import failed due to an error. Any errors have been logged.'), 'error');
-    }
+  else {
+    drupal_set_message(t('Another request may be synchronizing configuration already or a sync failed unexpectedly. Please wait a minute and try again.'), 'error');
   }
 
   return $form;
@@ -161,7 +144,7 @@ function config_diff_page($config_file) {
  */
 function config_export_full_form(array $form, array $form_state) {
   $form['description'] = array(
-    '#markup' => '<p>' . t('Use the export button below to download your site configuration.') . '</p>',
+    '#markup' => '<p>' . t('This form may be used to generate a full export of your entire site\'s configuration. This configuration file should remain compressed when you upload it to the destination site.') . '</p>',
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -175,15 +158,15 @@ function config_export_full_form(array $form, array $form_state) {
  * Submit handler for config_export_full_form().
  */
 function config_export_full_form_submit(array $form, array &$form_state) {
-  $form_state['redirect'] = 'admin/development/config/export';
+  $form_state['redirect'] = 'admin/config/development/configuration/full/export-download';
 }
 
 /**
  * Downloads a tarball of the site configuration.
  */
-function config_download_export() {
-  $filename = file_create_filename('config.tar.gz', file_directory_temp());
-  $archiver = new ArchiverTar('temporary://' . $filename, 'gz');
+function config_download_full_export() {
+  $file_path = file_create_filename('config.tar.gz', file_directory_temp());
+  $archiver = new ArchiverTar($file_path);
   $config_dir = config_get_config_directory();
   $config_storage = new ConfigFileStorage($config_dir);
   $config_files = array();
@@ -192,67 +175,70 @@ function config_download_export() {
   }
   $archiver->getArchive()->createModify($config_files, '', config_get_config_directory());
 
-  file_download('temporary', 'config.tar.gz');
-  file_unmanaged_delete('temporary://config.tar.gz');
+  $filename = str_replace(file_directory_temp() . '/', '', $file_path);
+  $headers = array(
+    'Content-Disposition' => 'attachment; filename=config.tar.gz',
+    'Content-type' => 'application/x-gzip',
+  );
+  file_transfer('temporary://' . $filename, $headers);
+  file_unmanaged_delete($file_path);
 }
 
 /**
  * Form callback; Provide a form for importing a full set of configuration.
  */
-function config_import_full_form(array &$form, array &$form_state) {
+function config_import_full_form(array $form, array &$form_state) {
   $form['description'] = array(
-    '#markup' => '<p>' . t('Use the upload button below.') . '</p>',
+    '#markup' => '<p>' . t('This form imports a site configuration archive from another site. Upload an export file below to stage the changes (you\'ll have a chance to review and confirm the changes first). To generate an export file, visit the <a href="!export">export</a> page.', array('!export' => url('admin/config/development/configuration/full/export'))) . '</p>',
   );
   $form['import_tarball'] = array(
-    '#type' => 'file',
-    '#title' => t('Select your configuration export file'),
-    '#description' => t('This form will redirect you to the import configuration screen.'),
+    '#type' => 'managed_file',
+    '#title' => t('Select your configuration export archive'),
+    '#description' => t('This file should be a compressed archive with the extension "tar.gz".'),
+    '#upload_validators' => array(
+      'file_validate_extensions' => array('tar gz'),
+    ),
+    '#progress_indicator' => 'bar',
+    '#upload_location' => 'temporary://',
   );
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Upload'),
+    '#value' => t('Stage import'),
   );
   return $form;
-}
-
-/**
- * Validate handler for config_import_full_form().
- */
-function config_import_full_form_validate(array &$form, array &$form_state) {
-  if (!empty($_FILES['files']['error']['import_tarball'])) {
-    form_set_error('import_tarball', t('The import tarball could not be uploaded.'));
-  }
-  else {
-    $form_state['values']['import_tarball'] = $_FILES['files']['tmp_name']['import_tarball'];
-  }
 }
 
 /**
  * Submit handler for config_import_full_form().
  */
 function config_import_full_form_submit(array &$form, array &$form_state) {
-  if ($path = $form_state['values']['import_tarball']) {
-    $this->configStorage->deleteAll();
+  if ($fid = $form_state['values']['import_tarball']) {
+    $file = file_load($fid);
+    $config_dir = config_get_config_directory();
+    $config_storage = new ConfigFileStorage($config_dir);
+    $config_storage->deleteAll();
+
+    // Convert the file URI to a file path that is readable by ArchiverTar.
+    $stream_wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
+    $directory = $stream_wrapper->getDirectoryPath();
+    $file_path = str_replace('temporary://', $directory . '/', $file->uri);
+
     try {
-      $archiver = new ArchiveTar($path, 'gz');
-      $files = array();
-      foreach ($archiver->listContent() as $file) {
-        $files[] = $file['filename'];
-      }
-      $archiver->extractList($files, config_get_config_directory(CONFIG_STAGING_DIRECTORY));
-      drupal_set_message(t('Your configuration files were successfully uploaded, ready for import.'));
-      $form_state['redirect_route']['route_name'] = 'config.sync';
+      $archiver = new ArchiverTar($file_path);
+      $archiver->extract(config_get_config_directory('staging'), $archiver->listContents());
+      drupal_set_message(t('Your configuration files were successfully uploaded. You may view the differences below and import using the "Import all" button.'));
+      $form_state['redirect'] = 'admin/config/development/configuration';
     }
     catch (\Exception $e) {
       form_set_error('import_tarball', t('Could not extract the contents of the tar file. The error message is <em>@message</em>', array('@message' => $e->getMessage())));
     }
-    drupal_unlink($path);
+    file_delete($file, TRUE);
   }
 }
 
 /**
- * Form callback; Builds teh form for exporting a single configuration file.
+ * Form callback; Builds the form for exporting a single configuration file.
  */
 function config_export_single_form(array $form, array &$form_state, $config_type = NULL, $config_name = NULL) {
   foreach ($this->entityManager->getDefinitions() as $entity_type => $definition) {
@@ -511,24 +497,31 @@ function config_get_statuses() {
   $active_files = $active_storage->listAll();
   $staging_files = $staging_storage->listAll();
 
-  $config_statuses = array();
+  $all_files = array_unique(array_merge($active_files, $staging_files));
+  $all_files = array_combine($all_files, array_fill(0, count($all_files), NULL));
+  $config_statuses = $all_files;
   if ($staging_files) {
     if ($delete_diffs = array_diff($active_files, $staging_files)) {
-      $config_statuses['delete'] = $delete_diffs;
+      foreach ($delete_diffs as $filename) {
+        $config_statuses[$filename] = 'delete';
+      }
     }
     if ($create_diffs = array_diff($staging_files, $active_files)) {
-      $config_statuses['create'] = $create_diffs;
+      foreach ($create_diffs as $filename) {
+        $config_statuses[$filename] = 'create';
+      }
     }
     if ($remaining_diffs = array_diff($active_files, $delete_diffs)) {
-      foreach ($remaining_diffs as $file) {
-        $active_config = $active_storage->read($file);
-        $staging_config = $staging_storage->read($file);
+      foreach ($remaining_diffs as $filename) {
+        $active_config = $active_storage->read($filename);
+        $staging_config = $staging_storage->read($filename);
         if ($active_config != $staging_config) {
-          $config_statuses['update'][] = $file;
+          $config_statuses[$filename] = 'update';
         }
       }
     }
   }
+  ksort($config_statuses);
 
   return $config_statuses;
 }
