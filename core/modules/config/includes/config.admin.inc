@@ -10,12 +10,19 @@
 function config_sync_form(array $form, array &$form_state) {
   $form_state['config_statuses'] = config_get_statuses();
   $changed_config_count = count(array_filter($form_state['config_statuses']));
+  $modified_times = config_get_modified_times();
+  $config_file_errors = array();
+
+  $form['description'] = array(
+    '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p>',
+  );
+
   if ($changed_config_count === 0) {
     $form['no_changes'] = array(
       '#theme' => 'table',
       '#header' => array('Name', 'Operations'),
       '#rows' => array(),
-      '#empty' => t('There are no configuration changes.'),
+      '#empty' => t('There are no configuration changes currently staged. You may <a href="!export">export this site\'s configuration</a> or <a href="!import">import to stage new changes</a>.', array('!export' => url('admin/config/development/configuration/full/export'), '!import' => url('admin/config/development/configuration/full/import'))),
     );
     $form['actions']['#access'] = FALSE;
     return $form;
@@ -25,18 +32,25 @@ function config_sync_form(array $form, array &$form_state) {
   $form['#attached']['library'][] = array('system', 'drupal.ajax');
 
   foreach ($form_state['config_statuses'] as $config_file => $config_change_type) {
-    if ($config_change_type) {
+    if ($config_change_type === 'error') {
+      $config_file_errors[] = $config_file;
+    }
+    elseif (!is_null($config_change_type)) {
       $links['view_diff'] = array(
         '#type' => 'link',
         '#title' => t('View differences'),
         '#href' => 'admin/config/development/configuration/diff/' . $config_file,
       );
-      $form[$config_change_type]['list']['#rows'][] = array(
+      $row = array(
         'name' => $config_file,
-        'operations' => array(
-          'data' => $links,
-        ),
       );
+      if ($config_change_type !== 'delete') {
+        $row['date'] = isset($modified_times[$config_file]) ? format_date($modified_times[$config_file], 'short') : '';
+      }
+      $row['operations'] = array(
+        'data' => $links,
+      );
+      $form[$config_change_type]['list']['#rows'][] = $row;
     }
   }
 
@@ -52,21 +66,26 @@ function config_sync_form(array $form, array &$form_state) {
     );
     switch ($config_change_type) {
       case 'create':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count new', '@count new');
+        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count new configuration', '@count new configuration');
         break;
 
       case 'update':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count changed', '@count changed');
+        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count configuration changed', '@count configurations changed');
         break;
 
       case 'delete':
-        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count removed', '@count removed');
+        $form[$config_change_type]['heading']['#value'] = format_plural(count($form[$config_change_type]['list']['#rows']), '@count configuration removed', '@count configurations removed');
         break;
     }
+    $header = ($config_change_type === 'delete') ? array(t('Name'), t('Operations')) : array(t('Name'), t('Modified time'), t('Operations'));
     $form[$config_change_type]['list'] += array(
       '#theme' => 'table',
-      '#header' => array('Name', 'Operations'),
+      '#header' => $header,
     );
+  }
+
+  if ($config_file_errors) {
+    drupal_set_message(t('The following configuration files could not be parsed, synchronization cannot proceed.') . theme('item_list', array('items' => $config_file_errors)), 'error');
   }
 
   $form['actions'] = array(
@@ -75,7 +94,7 @@ function config_sync_form(array $form, array &$form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Import all'),
-    '#access' => $changed_config_count > 0,
+    '#access' => $changed_config_count > 0 && empty($config_file_errors),
   );
 
   return $form;
@@ -214,61 +233,66 @@ function config_import_full_form(array $form, array &$form_state) {
  */
 function config_import_full_form_submit(array &$form, array &$form_state) {
   if ($fid = $form_state['values']['import_tarball']) {
-    $file = file_load($fid);
-    $config_dir = config_get_config_directory();
+    // Empty out the existing staging directory.
+    $config_dir = config_get_config_directory('staging');
     $config_storage = new ConfigFileStorage($config_dir);
     $config_storage->deleteAll();
 
     // Convert the file URI to a file path that is readable by ArchiverTar.
+    $file = file_load($fid);
     $stream_wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
     $directory = $stream_wrapper->getDirectoryPath();
     $file_path = str_replace('temporary://', $directory . '/', $file->uri);
 
     try {
       $archiver = new ArchiverTar($file_path);
-      $archiver->extract(config_get_config_directory('staging'), $archiver->listContents());
+      $archiver->extract($config_dir, $archiver->listContents());
+    }
+    catch (\Exception $e) {
+      form_set_error('import_tarball', t('Could not extract the contents of the tar file. The error message is "@message".', array('@message' => $e->getMessage())));
+    }
+    file_delete($file, TRUE);
+
+    // Compare the files to see if any config actually differs.
+    $config_statuses = array_filter(config_get_statuses());
+    if (empty($config_statuses)) {
+      $config_storage->deleteAll();
+      drupal_set_message(t('The uploaded configuration matches the current site configuration exactly. No changes were made.'), 'warning');
+    }
+    else {
       drupal_set_message(t('Your configuration files were successfully uploaded. You may view the differences below and import using the "Import all" button.'));
       $form_state['redirect'] = 'admin/config/development/configuration';
     }
-    catch (\Exception $e) {
-      form_set_error('import_tarball', t('Could not extract the contents of the tar file. The error message is <em>@message</em>', array('@message' => $e->getMessage())));
-    }
-    file_delete($file, TRUE);
   }
 }
 
 /**
  * Form callback; Builds the form for exporting a single configuration file.
  */
-function config_export_single_form(array $form, array &$form_state, $config_type = NULL, $config_name = NULL) {
-  foreach ($this->entityManager->getDefinitions() as $entity_type => $definition) {
-    if (isset($definition['config_prefix']) && isset($definition['entity_keys']['uuid'])) {
-      $this->definitions[$entity_type] = $definition;
-    }
-  }
-  $entity_types = array_map(function ($definition) {
-    return $definition['label'];
-  }, $this->definitions);
-  // Sort the entity types by label, then add the simple config to the top.
-  uasort($entity_types, 'strnatcasecmp');
-  $config_types = array(
-      'system.simple' => t('Simple configuration'),
-    ) + $entity_types;
-  $form['config_type'] = array(
-    '#title' => t('Configuration type'),
+function config_export_single_form(array $form, array &$form_state, $config_group = NULL, $config_name = NULL) {
+  $form_state['config_groups'] = config_get_prefix_groups();
+
+  $form['description'] = array(
+    '#markup' => '<p>' . t('This form may be used to export a single configuration so that it may be imported on a different site. Select a configuration group and name to generate configuration for copy/paste.') . '</p>',
+  );
+
+  $form['config_group'] = array(
+    '#title' => t('Configuration group'),
     '#type' => 'select',
-    '#options' => $config_types,
-    '#default_value' => $config_type,
+    '#options' => drupal_map_assoc(array_keys($form_state['config_groups'])),
+    '#default_value' => $config_group,
+    '#required' => TRUE,
     '#ajax' => array(
+      // The content wrapper to replace is specified in this AJAX callback.
       'callback' => 'config_export_single_form_update_type',
-      'wrapper' => 'edit-config-type-wrapper',
     ),
   );
-  $default_type = isset($form_state['values']['config_type']) ? $form_state['values']['config_type'] : $config_type;
+
+  $default_type = isset($form_state['values']['config_group']) ? $form_state['values']['config_group'] : $config_group;
   $form['config_name'] = array(
     '#title' => t('Configuration name'),
     '#type' => 'select',
-    '#options' => $this->findConfiguration($default_type),
+    '#options' => $default_type ? $form_state['config_groups'][$default_type] : array(),
     '#default_value' => $config_name,
     '#required' => TRUE,
     '#prefix' => '<div id="edit-config-type-wrapper">',
@@ -280,20 +304,12 @@ function config_export_single_form(array $form, array &$form_state, $config_type
   );
 
   $form['export'] = array(
-    '#title' => t('Here is your configuration:'),
+    '#title' => t('Exported configuration'),
     '#type' => 'textarea',
-    '#rows' => 24,
-    '#required' => TRUE,
+    '#rows' => 12,
     '#prefix' => '<div id="edit-export-wrapper">',
     '#suffix' => '</div>',
   );
-  if ($config_type && $config_name) {
-    $fake_form_state = array('values' => array(
-      'config_type' => $config_type,
-      'config_name' => $config_name,
-    ));
-    $form['export'] = $this->updateExport($form, $fake_form_state);
-  }
   return $form;
 }
 
@@ -301,8 +317,20 @@ function config_export_single_form(array $form, array &$form_state, $config_type
  * Handles switching the configuration type selector.
  */
 function config_export_single_form_update_type($form, &$form_state) {
-  $form['config_name']['#options'] = $this->findConfiguration($form_state['values']['config_type']);
-  return $form['config_name'];
+  // Empty out the configuration value field.
+  $form['export']['#value'] = '';
+  $form['export']['#rows'] = 12;
+
+  // Because we need to replace both the configation name select and the
+  // textarea, this requires using AJAX commands instead of a simple return.
+  $commands = array();
+  $commands[] = ajax_command_replace('#edit-config-type-wrapper', drupal_render($form['config_name']));
+  $commands[] = ajax_command_replace('#edit-export-wrapper', drupal_render($form['export']));
+  $commands[] = ajax_command_prepend(NULL, theme('status_messages'));
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**
@@ -311,102 +339,36 @@ function config_export_single_form_update_type($form, &$form_state) {
  * Handles switching the export textarea.
  */
 function config_export_single_form_update_export($form, &$form_state) {
-  // Determine the full config name for the selected config entity.
-  if ($form_state['values']['config_type'] !== 'system.simple') {
-    $definition = $this->entityManager->getDefinition($form_state['values']['config_type']);
-    $name = $definition['config_prefix'] . '.' . $form_state['values']['config_name'];
+  if ($form_state['values']['config_name']) {
+    $directory = config_get_config_directory('active');
+    $storage = new ConfigFileStorage($directory);
+    $config = new Config($form_state['values']['config_name'], $storage);
+    $value = $storage->encode($config->get());
+    $row_count = substr_count($value, "\n");
+    $form['export']['#value'] = $value;
+    $form['export']['#rows'] = $row_count > 12 ? $row_count : 12;
   }
-  // The config name is used directly for simple configuration.
   else {
-    $name = $form_state['values']['config_name'];
+    $form['export']['#value'] = '';
+    $form['export']['#rows'] = 12;
   }
-  // Read the raw data for this config name, encode it, and display it.
-  $data = $this->configStorage->read($name);
-  $form['export']['#value'] = $this->configStorage->encode($data);
-  $form['export']['#description'] = t('The filename is %name.', array('%name' => $name . '.yml'));
   return $form['export'];
-}
-
-/**
- * Handles switching the configuration type selector.
- */
-function _config_export_single_form_switch($config_type) {
-  $names = array(
-    '' => t('- Select -'),
-  );
-  // For a given entity type, load all entities.
-  if ($config_type && $config_type !== 'system.simple') {
-    $entity_storage = $this->entityManager->getStorageController($config_type);
-    foreach ($entity_storage->loadMultiple() as $entity) {
-      $entity_id = $entity->id();
-      $label = $entity->label() ?: $entity_id;
-      $names[$entity_id] = $label;
-    }
-  }
-  // Handle simple configuration.
-  else {
-    // Gather the config entity prefixes.
-    $config_prefixes = array_map(function ($definition) {
-      return $definition['config_prefix'] . '.';
-    }, $this->definitions);
-
-    // Find all config, and then filter our anything matching a config prefix.
-    $names = MapArray::copyValuesToKeys($this->configStorage->listAll());
-    foreach ($names as $config_name) {
-      foreach ($config_prefixes as $config_prefix) {
-        if (strpos($config_name, $config_prefix) === 0) {
-          unset($names[$config_name]);
-        }
-      }
-    }
-  }
-  return $names;
 }
 
 /**
  * Form callback; Build the form to import a single configuration file.
  */
 function config_import_single_form(array $form, array &$form_state) {
-  $entity_types = array();
-  foreach ($this->entityManager->getDefinitions() as $entity_type => $definition) {
-    if (isset($definition['config_prefix']) && isset($definition['entity_keys']['uuid'])) {
-      $entity_types[$entity_type] = $definition['label'];
-    }
-  }
-  // Sort the entity types by label, then add the simple config to the top.
-  uasort($entity_types, 'strnatcasecmp');
-  $config_types = array(
-      'system.simple' => t('Simple configuration'),
-    ) + $entity_types;
-  $form['config_type'] = array(
-    '#title' => t('Configuration type'),
-    '#type' => 'select',
-    '#options' => $config_types,
-    '#required' => TRUE,
-  );
-  $form['config_name'] = array(
-    '#title' => t('Configuration name'),
-    '#type' => 'textfield',
-    '#states' => array(
-      'required' => array(
-        ':input[name="config_type"]' => array('value' => 'system.simple'),
-      ),
-      'visible' => array(
-        ':input[name="config_type"]' => array('value' => 'system.simple'),
-      ),
-    ),
-  );
   $form['import'] = array(
     '#title' => t('Paste your configuration here'),
     '#type' => 'textarea',
-    '#rows' => 24,
+    '#rows' => 12,
     '#required' => TRUE,
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Import'),
-    '#button_type' => 'primary',
   );
   return $form;
 }
@@ -416,39 +378,35 @@ function config_import_single_form(array $form, array &$form_state) {
  */
 function config_import_single_form_validate(array &$form, array &$form_state) {
   // Decode the submitted import.
-  $data = $this->configStorage->decode($form_state['values']['import']);
+  $active_directory = config_get_config_directory('active');
+  $active_storage = new ConfigFileStorage($active_directory);
+  try {
+    $data = $active_storage->decode($form_state['values']['import']);
+  }
+  catch (ConfigStorageException $e) {
+    $data = FALSE;
+  }
 
-  // Validate for config entities.
-  if ($form_state['values']['config_type'] !== 'system.simple') {
-    $definition = $this->entityManager->getDefinition($form_state['values']['config_type']);
-    $id_key = $definition['entity_keys']['id'];
-    $entity_storage = $this->entityManager->getStorageController($form_state['values']['config_type']);
-    // If an entity ID was not specified, set an error.
-    if (!isset($data[$id_key])) {
-      form_set_error('import', t('Missing ID key "@id_key" for this @entity_type import.', array('@id_key' => $id_key, '@entity_type' => $definition['label'])));
-      return;
-    }
-    $uuid_key = $definition['entity_keys']['uuid'];
-    // If there is an existing entity, ensure matching ID and UUID.
-    if ($entity = $entity_storage->load($data[$id_key])) {
-      $this->configExists = $entity;
-      if (!isset($data[$uuid_key])) {
-        form_set_error('import', t('An entity with this machine name already exists but the import did not specify a UUID.'));
-        return;
-      }
-      if ($data[$uuid_key] !== $entity->uuid()) {
-        form_set_error('import', t('An entity with this machine name already exists but the UUID does not match.'));
-        return;
-      }
-    }
-    // If there is no entity with a matching ID, check for a UUID match.
-    elseif (isset($data[$uuid_key]) && $entity_storage->loadByProperties(array($uuid_key => $data[$uuid_key]))) {
-      form_set_error('import', t('An entity with this UUID already exists but the machine name does not match.'));
-    }
+  // Determine the matching config prefix.
+  $config_info = FALSE;
+  if ($data === FALSE) {
+    form_error($form['import'], t('The configuration provided could not be parsed.'));
+  }
+  elseif (empty($data['_config_name'])) {
+    form_error($form['import'], t('The configuration could not be imported because the "_config_name" value is missing.'));
   }
   else {
-    $config = $this->config($form_state['values']['config_name']);
-    $this->configExists = $config->isNew() ? $config : FALSE;
+    $config_name = $data['_config_name'];
+    $config_info_all = config_get_info();
+    foreach ($config_info_all as $prefix => $this_config_info) {
+      if (strpos($config_name, $prefix) === 0) {
+        $config_info = $this_config_info;
+        break;
+      }
+    }
+    if ($config_info === FALSE) {
+      form_error($form['import'], t('The configuration could not be imported because no module could recognize the "@name" configuration name.', array('@name' => $config_name)));
+    }
   }
 
   // Store the decoded version of the submitted import.
@@ -459,31 +417,9 @@ function config_import_single_form_validate(array &$form, array &$form_state) {
  * Submit handler for config_import_single_form().
  */
 function config_import_single_form_submit(array &$form, array &$form_state) {
-  // If this form has not yet been confirmed, store the values and rebuild.
-  if (!$this->data) {
-    $form_state['rebuild'] = TRUE;
-    $this->data = $form_state['values'];
-    return;
-  }
-
-  // If a simple configuration file was added, set the data and save.
-  if ($this->data['config_type'] === 'system.simple') {
-    $this->config($this->data['config_name'])->setData($this->data['import'])->save();
-    drupal_set_message(t('The %name configuration was imported.', array('%name' => $this->data['config_name'])));
-  }
-  // For a config entity, create a new entity and save it.
-  else {
-    try {
-      $entity = $this->entityManager
-        ->getStorageController($this->data['config_type'])
-        ->create($this->data['import']);
-      $entity->save();
-      drupal_set_message(t('The @entity_type %label was imported.', array('@entity_type' => $entity->entityType(), '%label' => $entity->label())));
-    }
-    catch (\Exception $e) {
-      drupal_set_message($e->getMessage(), 'error');
-    }
-  }
+  $data = $form_state['values']['import'];
+  config($data['_config_name'])->setData($data)->save();
+  drupal_set_message(t('The %name configuration was imported.', array('%name' => $data['_config_name'])));
 }
 
 /**
@@ -513,10 +449,15 @@ function config_get_statuses() {
     }
     if ($remaining_diffs = array_diff($active_files, $delete_diffs)) {
       foreach ($remaining_diffs as $filename) {
-        $active_config = $active_storage->read($filename);
-        $staging_config = $staging_storage->read($filename);
-        if ($active_config != $staging_config) {
-          $config_statuses[$filename] = 'update';
+        try {
+          $active_config = $active_storage->read($filename);
+          $staging_config = $staging_storage->read($filename);
+          if ($active_config != $staging_config) {
+            $config_statuses[$filename] = 'update';
+          }
+        }
+        catch (ConfigStorageReadException $e) {
+          $config_statuses[$filename] = 'error';
         }
       }
     }
@@ -524,6 +465,20 @@ function config_get_statuses() {
   ksort($config_statuses);
 
   return $config_statuses;
+}
+
+/**
+ * Utility function to get the current diffs between active and staging.
+ */
+function config_get_modified_times() {
+  $staging_directory = config_get_config_directory('staging');
+  $staging_storage = new ConfigFileStorage($staging_directory);
+  $staging_files = $staging_storage->listAll();
+  $modified_times = array();
+  foreach ($staging_files as $file) {
+    $modified_times[$file] = $staging_storage->getModifiedTime($file);
+  }
+  return $modified_times;
 }
 
 /**

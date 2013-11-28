@@ -113,3 +113,49 @@ function config_file_download($uri) {
     );
   }
 }
+
+/**
+ * Retrieves all configuration information provided by modules.
+ *
+ * @return array
+ *   An array of all configuration information.
+ *
+ * @see hook_config_info()
+ * @see hook_config_info_alter()
+ */
+function config_get_info() {
+  $config_info = &drupal_static(__FUNCTION__, array());
+  if (empty($config_info)) {
+    $config_info = module_invoke_all('config_info');
+    drupal_alter('config_info', $config_info);
+  }
+  return $config_info;
+}
+
+/**
+ * Get a list of all configuration prefixes and groups.
+ *
+ * This list provided by hook_config_info().
+ */
+function config_get_prefix_groups($type = 'active') {
+  $config_info_all = config_get_info();
+  $groups = array();
+  $ungrouped = t('Ungrouped');
+
+  $config_dir = config_get_config_directory($type);
+  $config_storage = new ConfigFileStorage($config_dir);
+  foreach ($config_info_all as $prefix => $config_info) {
+    $group = isset($config_info['group']) ? $config_info['group'] : $ungrouped;
+    if (isset($config_info['label_key'])) {
+      $config_list = $config_storage->listAll($prefix);
+      foreach ($config_list as $config_name) {
+        $config = $config_storage->read($config_name);
+        $groups[$group][$config_name] = isset($config[$config_info['label_key']]) ? $config[$config_info['label_key']] : $config_name;
+      }
+    }
+    elseif (isset($config_info['label'])) {
+      $groups[$group][$prefix] = $config_info['label'];
+    }
+  }
+  return $groups;
+}

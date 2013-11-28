@@ -28,7 +28,7 @@ function config_get_config_directory($type = 'active') {
     }
   }
   else {
-    throw new Exception(format_string('The configuration directory type %type does not exist.', array('%type' => $type)));
+    throw new Exception(format_string('The configuration directory type "@type" does not exist.', array('@type' => $type)));
   }
   return $path;
 }
@@ -44,7 +44,7 @@ function config_install_default_config($module) {
   $storage = new ConfigFileStorage($module_config_dir);
   if (is_dir(drupal_get_path('module', $module) . '/config')) {
     $files = glob($module_config_dir . '/' . '*.json');
-    foreach ($files as $key => $file) {
+    foreach ($files as $file) {
       // Load config data into the active store and write it out to the
       // file system in the drupal config directory. Note the config name
       // needs to be the same as the file name WITHOUT the extension.
@@ -194,12 +194,12 @@ class ConfigNameException extends ConfigException {}
 /**
  * @todo
  */
-class ConfigFileStorageException extends ConfigException {}
+class ConfigStorageException extends ConfigException {}
 
 /**
  * @todo
  */
-class ConfigFileStorageReadException extends ConfigFileStorageException {}
+class ConfigStorageReadException extends ConfigStorageException {}
 
 /**
  * Defines the default configuration object.
@@ -557,6 +557,8 @@ class Config {
     if (!$this->isLoaded) {
       $this->load();
     }
+    // Ensure config name is saved in the result.
+    $this->data = array_merge(array('_config_name' => $this->name), $this->data);
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
     $this->notify('save');
@@ -625,6 +627,8 @@ interface ConfigStorageInterface {
    * @param string $name
    *   The name of a configuration object to load.
    *
+   * @throws ConfigStorageReadException
+   *
    * @return array|bool
    *   The configuration data stored for the configuration object name. If no
    *   configuration data exists for the given name, FALSE is returned.
@@ -636,6 +640,8 @@ interface ConfigStorageInterface {
    *
    * @param array $name
    *   List of names of the configuration objects to load.
+   *
+   * @throws ConfigStorageException
    *
    * @return array
    *   A list of the configuration data stored for the configuration object name
@@ -679,6 +685,18 @@ interface ConfigStorageInterface {
    *   TRUE on success, FALSE otherwise.
    */
   public function rename($name, $new_name);
+
+
+  /**
+   * Returns a timestamp indicating the last time a configuration was modified.
+   *
+   * @param string $name
+   *   The name of a configuration object on which the time will be checked.
+   *
+   * @return int
+   *   A timestamp indicating the last time the configuration was modified.
+   */
+  public function getModifiedTime($name);
 
   /**
    * Encodes configuration data into the storage-specific format.
@@ -795,7 +813,14 @@ class ConfigFileStorage implements ConfigStorageInterface {
       return FALSE;
     }
     $data = file_get_contents($this->getFilePath($name));
-    $data = $this->decode($data);
+    try {
+      // Ensure config name is loaded the result.
+      $data = array_merge(array('_config_name' => $name), $this->decode($data));
+    }
+    // If an error occurs, catch and rethrow with the file name in the message.
+    catch (ConfigStorageException $e) {
+      throw new ConfigStorageReadException(format_string('The configuration file "@filename" could not be read.', array('@filename' => $name)));
+    }
     return $data;
   }
 
@@ -819,7 +844,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
     $data = $this->encode($data);
     $status = @file_put_contents($this->getFilePath($name), $data);
     if ($status === FALSE) {
-      throw new StorageException('Failed to write configuration file: ' . $this->getFilePath($name));
+      throw new ConfigStorageException('Failed to write configuration file: ' . $this->getFilePath($name));
     }
     return TRUE;
   }
@@ -830,7 +855,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
   public function delete($name) {
     if (!$this->exists($name)) {
       if (!file_exists($this->directory)) {
-        throw new StorageException($this->directory . '/ not found.');
+        throw new ConfigStorageException($this->directory . '/ not found.');
       }
       return FALSE;
     }
@@ -843,7 +868,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
   public function rename($name, $new_name) {
     $status = @rename($this->getFilePath($name), $this->getFilePath($new_name));
     if ($status === FALSE) {
-      throw new StorageException('Failed to rename configuration file from: ' . $this->getFilePath($name) . ' to: ' . $this->getFilePath($new_name));
+      throw new ConfigStorageException('Failed to rename configuration file from: ' . $this->getFilePath($name) . ' to: ' . $this->getFilePath($new_name));
     }
     return TRUE;
   }
@@ -851,15 +876,30 @@ class ConfigFileStorage implements ConfigStorageInterface {
   /**
    * {@inheritdoc}
    */
+  public function getModifiedTime($name) {
+    return filectime($this->getFilePath($name));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function encode($data) {
-    return drupal_json_encode($data, TRUE);
+    $contents = drupal_json_encode($data, TRUE);
+    if ($contents === FALSE) {
+      throw new ConfigStorageException(t('The configuration string could not be parsed.'));
+    }
+    return $contents;
   }
 
   /**
    * {@inheritdoc}
    */
   public function decode($raw) {
-    return drupal_json_decode($raw);
+    $contents = drupal_json_decode($raw);
+    if (is_null($contents)) {
+      throw new ConfigStorageException('The configuration string could not be parsed.');
+    }
+    return $contents;
   }
 
   /**
@@ -869,7 +909,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
     // glob() silently ignores the error of a non-existing search directory,
     // even with the GLOB_ERR flag.
     if (!file_exists($this->directory)) {
-      throw new StorageException($this->directory . '/ not found.');
+      throw new ConfigStorageException($this->directory . '/ not found.');
     }
     $extension = '.json';
     $files = glob($this->directory . '/' . $prefix . '*' . $extension);
