@@ -310,8 +310,14 @@ function field_group_update_7006() {
 
     // Only update feature field_groups this time.
     // Don't touch the fieldgroups in db.
+
     if ($row->export_type == EXPORT_IN_CODE) {
-      $classes = explode(" ", $row->data['format_settings']['instance_settings']['classes']);
+      $classes = array();
+
+      if (isset($row->data['format_settings'], $row->data['format_settings']['instance_settings'], $row->data['format_settings']['instance_settings']['classes'])) {
+        $classes = explode(" ", $row->data['format_settings']['instance_settings']['classes']);
+      }
+
       $optional_classes = array(str_replace("_", "-", $row->group_name), 'field-group-' . $row->data['format_type']);
       foreach ($optional_classes as $optional_class) {
         if (!in_array($optional_class, $classes)) {
