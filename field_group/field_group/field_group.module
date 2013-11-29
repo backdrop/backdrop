@@ -642,9 +642,6 @@ function field_group_field_group_pre_render(& $element, &$group, & $form) {
   if (isset($group->format_settings['instance_settings']['id']) && !empty($group->format_settings['instance_settings']['id'])) {
     $element['#id'] = $group->format_settings['instance_settings']['id'];
   }
-  else {
-    $element['#id'] = $form['#entity_type'] . '_' . $form['#bundle'] . '_' . $view_mode . '_' . $group->group_name;
-  }
 
   $element['#weight'] = $group->weight;
 
@@ -733,8 +730,11 @@ function field_group_pre_render_div(&$element, $group, &$form) {
   $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
 
   $element['#type'] = 'markup';
+  $id = isset($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
+
   if ($group->format_settings['formatter'] != 'open') {
-    $element['#prefix'] = '<div id="' . $element['#id'] . '" class="' . $group->classes . '">
+
+    $element['#prefix'] = $element['#prefix'] = '<div' . $id . ' class="' . $group->classes . '">
       <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
       <div class="field-group-format-wrapper" style="display: ' . (!empty($group->collapsed) ? 'none' : 'block') . ';">';
     $element['#suffix'] = '</div></div>';
@@ -744,7 +744,7 @@ function field_group_pre_render_div(&$element, $group, &$form) {
     if (!empty($group->classes)) {
       $class_attribute = ' class = "' . $group->classes . '"';
     }
-    $element['#prefix'] = '<div id="' . $element['#id'] . '"' . $class_attribute . '>';
+    $element['#prefix'] = '<div' . $id . $class_attribute . '>';
     if ($show_label) {
       $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
     }
@@ -769,9 +769,10 @@ function field_group_pre_render_div(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_html5(&$element, $group, &$form) {
+  $id = isset($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
   $element += array(
     '#type' => 'markup',
-    '#prefix' => '<' . $group->format_settings['instance_settings']['wrapper'] . ' id="' . $element['#id'] . '" class="' . $group->classes . '">',
+    '#prefix' => '<' . $group->format_settings['instance_settings']['wrapper'] . $id . ' class="' . $group->classes . '">',
     '#suffix' => '</' . $group->format_settings['instance_settings']['wrapper'] . '>',
   );
 }
