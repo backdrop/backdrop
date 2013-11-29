@@ -2,4 +2,5 @@ name = "Fieldgroup Test"
 description = "Test module for fieldgroup"
 core = "7.x"
 package = "Fieldgroup"
+hidden = TRUE
 
