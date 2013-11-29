@@ -742,7 +742,7 @@ function field_group_pre_render_div(&$element, $group, &$form) {
   else {
     $class_attribute = '';
     if (!empty($group->classes)) {
-      $class_attribute = 'class = "' . $group->classes . '"';
+      $class_attribute = ' class = "' . $group->classes . '"';
     }
     $element['#prefix'] = '<div id="' . $element['#id'] . '"' . $class_attribute . '>';
     if ($show_label) {
@@ -1443,7 +1443,7 @@ function form_process_multipage($element, &$form_state) {
     '#default_value' => $element['#default_control'],
     '#attributes' => array('class' => array('multipage-active-control')),
   );
-  
+
   return $element;
 }
 
