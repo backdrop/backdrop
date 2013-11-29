@@ -1890,9 +1890,9 @@ function field_group_build_entity_groups(&$vars, $type) {
   if ($type == 'form') {
     return $element;
   }
-
+  
   // Put groups inside content if we are rendering an entity_view.
-  foreach ($element['#groups'] as $group) {
+  foreach ($element['#fieldgroups'] as $group) {
     if (!empty($element[$group->group_name]) && $type != 'user_profile') {
       $vars['content'][$group->group_name] = $element[$group->group_name];
     }
@@ -1948,11 +1948,11 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
     // Entity being viewed
     if ($vars) {
       // If not a group, check vars['content'] for empty field.
-      if (!isset($element['#groups'][$child_name]) && isset($vars['content'][$child_name])) {
+      if (!isset($element['#fieldgroups'][$child_name]) && isset($vars['content'][$child_name])) {
         $group_references[$parent_name][$child_name] = $vars['content'][$child_name];
         unset($vars['content'][$child_name]);
       }
-      elseif (!isset($element['#groups'][$child_name]) && isset($vars['user_profile'][$child_name])) {
+      elseif (!isset($element['#fieldgroups'][$child_name]) && isset($vars['user_profile'][$child_name])) {
         $group_references[$parent_name][$child_name] = $vars['user_profile'][$child_name];
         unset($vars['user_profile'][$child_name]);
       }
