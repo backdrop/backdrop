@@ -427,7 +427,7 @@ function image_styles() {
       $styles = array();
 
       // Select the styles we have configured.
-      foreach (config_get_signed_file_storage_names_with_prefix('image.styles') as $config_name) {
+      foreach (config_get_names_with_prefix('image.styles') as $config_name) {
         $style = array();
         $config = config($config_name);
         $style['name'] = $config->get('name');

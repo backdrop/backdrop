@@ -109,6 +109,23 @@ function config_get_config_directory($type = 'active') {
 }
 
 /**
+ * Retrieves all configurations starting with a particular prefix.
+ *
+ * @param string $prefix
+ *   The prefix of the configuration names to retrieve.
+ * @param string $type
+ *   The configuration type, either "staging" or "active".
+ *
+ * @return array
+ *   An array containing matching configuration object names.
+ */
+function config_get_names_with_prefix($prefix, $type = 'active') {
+  $directory = config_get_config_directory($type);
+  $storage = new ConfigFileStorage($directory);
+  return $storage->listAll($prefix);
+}
+
+/**
  * Moves the default config supplied by a module to the live config directory.
  *
  * @param
