@@ -6,108 +6,6 @@
  */
 
 /**
- * Returns the path of a configuration directory.
- *
- * @param string $type
- *   (optional) The type of config directory to return. Drupal core provides
- *   'active' and 'staging'. Defaults to 'active'.
- *
- * @return string
- *   The configuration directory path.
- */
-function config_get_config_directory($type = 'active') {
-  global $config_directories;
-
-  if (!empty($config_directories[$type])) {
-    // Allow a configuration directory path to be outside of webroot.
-    if (empty($config_directories[$type]['absolute'])) {
-      $path = conf_path() . '/files/' . $config_directories[$type]['path'];
-    }
-    else {
-      $path = $config_directories[$type]['path'];
-    }
-  }
-  else {
-    throw new Exception(format_string('The configuration directory type "@type" does not exist.', array('@type' => $type)));
-  }
-  return $path;
-}
-
-/**
- * Moves the default config supplied by a module to the live config directory.
- *
- * @param
- *   The name of the module we are installing.
- */
-function config_install_default_config($module) {
-  $module_config_dir = drupal_get_path('module', $module) . '/config';
-  $storage = new ConfigFileStorage($module_config_dir);
-  if (is_dir(drupal_get_path('module', $module) . '/config')) {
-    $files = glob($module_config_dir . '/' . '*.json');
-    foreach ($files as $file) {
-      // Load config data into the active store and write it out to the
-      // file system in the drupal config directory. Note the config name
-      // needs to be the same as the file name WITHOUT the extension.
-      $parts = explode('/', $file);
-      $file = array_pop($parts);
-      $config_name = str_replace('.json', '', $file);
-
-      $data = $storage->read($config_name);
-      $config = config($config_name);
-      $config->setData($data);
-      $config->save();
-    }
-  }
-}
-
-/**
- * Retrieves an iterable array which lists the children under a config 'branch'.
- *
- * Given the following configuration files:
- * - core.entity.node_type.article.json
- * - core.entity.node_type.page.json
- *
- * You can pass a prefix 'core.entity.node_type' and get back an array of the
- * filenames that match. This allows you to iterate through all files in a
- * branch. Note that this will only work on the level above the tips, so
- * a prefix of 'core.entity' would return an empty array.
- *
- * @param string $prefix
- *   The prefix of the files we are searching for.
- * @param string $type
- *   (optional) The type of config directory to return. Drupal core provides
- *   'active' and 'staging'. Defaults to 'active'.
- *
- * @return
- *   An array of file names under a branch.
- */
-function config_get_signed_file_storage_names_with_prefix($prefix = '', $type = 'active') {
-  $files = glob(config_get_config_directory($type) . '/' . $prefix . '*.json');
-  $clean_name = function ($value) {
-    return basename($value, '.json');
-  };
-  return array_map($clean_name, $files);
-}
-
-/**
- * Generates a hash of a config file's contents using our encryption key.
- *
- * @param $data
- *   The contents of a configuration file.
- *
- * @return
- *   A hash of the data.
- */
-function config_sign_data($data) {
-  // The configuration key is loaded from settings.php and imported into the global namespace
-  global $config_signature_key;
-
-  // SHA-512 is both secure and very fast on 64 bit CPUs.
-  // @todo What about 32-bit CPUs?
-  return hash_hmac('sha512', $data, $config_signature_key);
-}
-
-/**
  * Retrieves a configuration object.
  *
  * This is the main entry point to the configuration API. Calling
@@ -181,6 +79,62 @@ function config_set($config_file, $option, $value) {
   $config->save();
 }
 
+
+/**
+ * Returns the path of a configuration directory.
+ *
+ * @param string $type
+ *   (optional) The type of config directory to return. Drupal core provides
+ *   'active' and 'staging'. Defaults to 'active'.
+ *
+ * @return string
+ *   The configuration directory path.
+ */
+function config_get_config_directory($type = 'active') {
+  global $config_directories;
+
+  if (!empty($config_directories[$type])) {
+    // Allow a configuration directory path to be outside of webroot.
+    if (empty($config_directories[$type]['absolute'])) {
+      $path = conf_path() . '/files/' . $config_directories[$type]['path'];
+    }
+    else {
+      $path = $config_directories[$type]['path'];
+    }
+  }
+  else {
+    throw new Exception(format_string('The configuration directory type "@type" does not exist.', array('@type' => $type)));
+  }
+  return $path;
+}
+
+/**
+ * Moves the default config supplied by a module to the live config directory.
+ *
+ * @param
+ *   The name of the module we are installing.
+ */
+function config_install_default_config($module) {
+  $module_config_dir = drupal_get_path('module', $module) . '/config';
+  $storage = new ConfigFileStorage($module_config_dir);
+  if (is_dir(drupal_get_path('module', $module) . '/config')) {
+    $files = glob($module_config_dir . '/' . '*.json');
+    foreach ($files as $file) {
+      // Load config data into the active store and write it out to the
+      // file system in the drupal config directory. Note the config name
+      // needs to be the same as the file name WITHOUT the extension.
+      $parts = explode('/', $file);
+      $file = array_pop($parts);
+      $config_name = str_replace('.json', '', $file);
+
+      $data = $storage->read($config_name);
+      $config = config($config_name);
+      $config->setData($data);
+      $config->save();
+    }
+  }
+}
+
 /**
  * A base exception thrown in any configuration system operations.
  */
@@ -190,6 +144,12 @@ class ConfigException extends Exception {}
  * Exception thrown when a config object name is invalid.
  */
 class ConfigNameException extends ConfigException {}
+
+
+/**
+ * Exception thrown when a config object has a validation error before saving.
+ */
+class ConfigValidateException extends ConfigException {}
 
 /**
  * @todo

@@ -548,6 +548,8 @@ function install_tasks($install_state) {
     'install_verify_requirements' => array(
       'display_name' => st('Verify requirements'),
     ),
+    'install_config_directories' => array(
+    ),
     'install_settings_form' => array(
       'display_name' => st('Set up database'),
       'type' => 'form',
@@ -848,6 +850,13 @@ function install_verify_pdo() {
 }
 
 /**
+ * Installation task; Rewrite settings.php to include config directories.
+ */
+function install_config_directories(&$install_state) {
+  drupal_install_config_directories($install_state['mode']);
+}
+
+/**
  * Installation task; define a form to configure and rewrite settings.php.
  *
  * @param $form_state
@@ -989,16 +998,12 @@ function install_settings_form_submit($form, &$form_state) {
     'value'    => drupal_hash_base64(drupal_random_bytes(55)),
     'required' => TRUE,
   );
-
   $settings['config_signature_key'] = array(
     'value'    => drupal_hash_base64(drupal_random_bytes(55)),
     'required' => TRUE,
   );
 
   drupal_rewrite_settings($settings);
-
-  // Add the config directories to settings.php.
-  drupal_install_config_directories($install_state['mode']);
 
   // Indicate that the settings file has been verified, and check the database
   // for the last completed task, now that we have a valid connection. This

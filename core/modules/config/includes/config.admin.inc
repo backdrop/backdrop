@@ -359,6 +359,8 @@ function config_export_single_form_update_export($form, &$form_state) {
  * Form callback; Build the form to import a single configuration file.
  */
 function config_import_single_form(array $form, array &$form_state) {
+  form_load_include($form_state, 'inc', 'config', 'includes/config.sync');
+
   $form['import'] = array(
     '#title' => t('Paste your configuration here'),
     '#type' => 'textarea',
@@ -409,17 +411,37 @@ function config_import_single_form_validate(array &$form, array &$form_state) {
     }
   }
 
+  // Determine the type of change this is and then validate it. Deletes are
+  // not currently supported through the single sync form.
+  $config_change_type = NULL;
+  if ($data && $config_info) {
+    $active_config_exists = $active_storage->read($config_name) !== FALSE;
+    if ($active_config_exists) {
+      $config_change_type = 'update';
+    }
+    else {
+      $config_change_type = 'create';
+    }
+    try {
+      config_sync_validate_file($config_name, $config_change_type, NULL, $data);
+    }
+    catch (ConfigValidateException $e) {
+      form_error($form['import'], $e->getMessage());
+    }
+  }
+
   // Store the decoded version of the submitted import.
-  form_set_value($form['import'], $data, $form_state);
+  $form_state['config_data'] = $data;
+  $form_state['config_change_type'] = $config_change_type;
 }
 
 /**
  * Submit handler for config_import_single_form().
  */
 function config_import_single_form_submit(array &$form, array &$form_state) {
-  $data = $form_state['values']['import'];
-  config($data['_config_name'])->setData($data)->save();
-  drupal_set_message(t('The %name configuration was imported.', array('%name' => $data['_config_name'])));
+  $data = $form_state['config_data'];
+  config_sync_file($data['_config_name'], $form_state['config_change_type'], $data);
+  drupal_set_message(t('The %name configuration was imported successfully.', array('%name' => $data['_config_name'])));
 }
 
 /**

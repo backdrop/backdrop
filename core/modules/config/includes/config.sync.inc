@@ -49,25 +49,11 @@ function _config_sync_validate(&$context) {
   $config_files = array_slice($context['results']['pending_changes'], $context['sandbox']['current_index'], $context['sandbox']['batch_size']);
   try {
     foreach ($config_files as $config_file => $config_change_type) {
-      switch ($config_change_type) {
-        case 'create':
-          $staging_config = config($config_file, 'staging')->load();
-          module_invoke_all('config_create_validate', $staging_config, $context['results']['all_configs']);
-          break;
-        case 'update':
-          $staging_config = config($config_file, 'staging')->load();
-          $active_config = config($config_file, 'active')->load();
-          module_invoke_all('config_update_validate', $staging_config, $active_config, $context['results']['all_configs']);
-          break;
-        case 'delete':
-          $active_config = config($config_file, 'active')->load();
-          module_invoke_all('config_delete_validate', $active_config, $context['results']['all_configs']);
-          break;
-      }
+      config_sync_validate_file($config_file, $config_change_type, $context['results']['all_configs']);
       $context['sandbox']['current_index']++;
     }
   }
-  catch (ConfigException $e) {
+  catch (ConfigValidateException $e) {
     $context['results']['errors'][] = $e->getMessage();
     $context['finished'] = 1;
     return;
@@ -94,25 +80,7 @@ function _config_sync_import(&$context) {
 
   $config_files = array_slice($context['results']['pending_changes'], $context['sandbox']['current_index'], $context['sandbox']['batch_size']);
   foreach ($config_files as $config_file => $config_change_type) {
-    switch ($config_change_type) {
-      case 'create':
-        $staging_config = config($config_file, 'staging')->load();
-        $active_config = config($config_file, 'active')->setData($staging_config->get());
-        module_invoke_all('config_create', $active_config);
-        $active_config->save();
-        break;
-      case 'update':
-        $staging_config = config($config_file, 'staging')->load();
-        $active_config = config($config_file, 'active')->load();
-        module_invoke_all('config_update', $staging_config, $active_config);
-        $active_config->setData($staging_config->get())->save();
-        break;
-      case 'delete':
-        $active_config = config($config_file, 'active')->load();
-        module_invoke_all('config_delete', $active_config);
-        $active_config->delete();
-        break;
-    }
+    config_sync_file($config_file, $config_change_type);
     unset($context['results']['pending_changes'][$config_file]);
     $context['results']['completed_changes'][$config_file] = $config_change_type;
     $context['sandbox']['current_index']++;
@@ -140,4 +108,110 @@ function _config_sync_finished($status, $results, &$context) {
     $config_storage->deleteAll();
   }
   variable_del('config_sync');
+}
+
+/**
+ * Validate an individual configuration to ensure it's safe to import.
+ *
+ * Calls all the necessary hooks to allow modules to validate a set of
+ * configuration changes. If any module encounters a validation problem, it
+ * should throw a ConfigValidateException exception.
+ *
+ * @param string $config_file
+ *   The name of the config file being synced.
+ * @param string $config_change_type
+ *   The type of change occurring to this config file. Must be one of the
+ *   following values: "create", "update", or "delete".
+ * @param array|NULL $all_changes
+ *   If this file is being changed with a group of other configuration files,
+ *   pass in the complete set of files that are anticipated to be changed during
+ *   the sync. If doing a typical sync between staging and live directories,
+ *   this value can be retrieved from config_get_statuses(). If syncing a single
+ *   configuration file, this value should be NULL.
+ * @param array $data
+ *   The configuration data to be validated if the data is coming from a source
+ *   other than the staging configuration storage.
+ *
+ * @throws ConfigValidateException
+ *
+ * @see hook_config_create_validate().
+ * @see hook_config_update_validate().
+ * @see hook_config_delete_validate().
+ */
+function config_sync_validate_file($config_file, $config_change_type, $all_changes = NULL, $config_data = NULL) {
+  // Read the config data from staging if contents are not provided.
+  if (is_null($config_data)) {
+    $staging_config = config($config_file, 'staging')->load();
+  }
+  // If contents are provided, create a staging config object. This object is
+  // not actually written to disk, so it should not affect any existing staged
+  // configuration files when performing a single import.
+  else {
+    $staging_config = config($config_file, 'staging')->setData($config_data);
+  }
+
+  switch ($config_change_type) {
+    case 'create':
+      module_invoke_all('config_create_validate', $staging_config, $all_changes);
+      break;
+    case 'update':
+      $active_config = config($config_file, 'active')->load();
+      module_invoke_all('config_update_validate', $staging_config, $active_config, $all_changes);
+      break;
+    case 'delete':
+      $active_config = config($config_file, 'active')->load();
+      module_invoke_all('config_delete_validate', $active_config, $all_changes);
+      break;
+  }
+}
+
+/**
+ * Save an individual configuration.
+ *
+ * Calls all the necessary hooks to allow modules to modify any configuration
+ * changes before they are saved.
+ *
+ * @param string $config_file
+ *   The name of the config file being synced.
+ * @param string $config_change_type
+ *   The type of change occurring to this config file. Must be one of the
+ *   following values: "create", "update", or "delete".
+ * @param string $config_contents
+ *
+ *
+ * @see hook_config_create().
+ * @see hook_config_update().
+ * @see hook_config_delete().
+ */
+function config_sync_file($config_file, $config_change_type, $config_contents = NULL) {
+  $active_config = config($config_file, 'active');
+
+  // Read the config data from staging if contents are not provided.
+  if (is_null($config_contents)) {
+    $staging_config = config($config_file, 'staging')->load();
+  }
+  // If contents are provided, create a staging config object. This object is
+  // not actually written to disk, so it should not affect any existing staged
+  // configuration files when performing a single import.
+  else {
+    $staging_config = config($config_file, 'staging')->setData($config_contents);
+  }
+
+  switch ($config_change_type) {
+    case 'create':
+      $active_config->setData($staging_config->get());
+      module_invoke_all('config_create', $active_config);
+      $active_config->save();
+      break;
+    case 'update':
+      $active_config->load();
+      module_invoke_all('config_update', $staging_config, $active_config);
+      $active_config->setData($staging_config->get())->save();
+      break;
+    case 'delete':
+      $active_config->load();
+      module_invoke_all('config_delete', $active_config);
+      $active_config->delete();
+      break;
+  }
 }
