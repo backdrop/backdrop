@@ -2246,6 +2246,14 @@ function _drupal_bootstrap_configuration() {
   timer_start('page');
   // Initialize the configuration, including variables from settings.php.
   drupal_settings_initialize();
+
+  // Redirect the user to the installation script if Drupal has not been
+  // installed yet (i.e., if no $databases array has been defined in the
+  // settings.php file) and we are not already installing.
+  if (empty($GLOBALS['databases']) && !drupal_installation_attempted()) {
+    include_once DRUPAL_ROOT . '/core/includes/install.inc';
+    install_goto('core/install.php');
+  }
 }
 
 /**
@@ -2307,14 +2315,6 @@ function _drupal_bootstrap_page_cache() {
  * Initializes the database system and registers autoload functions.
  */
 function _drupal_bootstrap_database() {
-  // Redirect the user to the installation script if Drupal has not been
-  // installed yet (i.e., if no $databases array has been defined in the
-  // settings.php file) and we are not already installing.
-  if (empty($GLOBALS['databases']) && !drupal_installation_attempted()) {
-    include_once DRUPAL_ROOT . '/core/includes/install.inc';
-    install_goto('core/install.php');
-  }
-
   // The user agent header is used to pass a database prefix in the request when
   // running tests. However, for security reasons, it is imperative that we
   // validate we ourselves made the request.

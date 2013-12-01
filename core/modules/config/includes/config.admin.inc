@@ -208,7 +208,7 @@ function config_download_full_export() {
  */
 function config_import_full_form(array $form, array &$form_state) {
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form imports a site configuration archive from another site. Upload an export file below to stage the changes (you\'ll have a chance to review and confirm the changes first). To generate an export file, visit the <a href="!export">export</a> page.', array('!export' => url('admin/config/development/configuration/full/export'))) . '</p>',
+    '#markup' => '<p>' . t('This form imports a site configuration archive from another site. Upload an export file below to stage the changes (you\'ll have a chance to review and confirm the changes first). To generate an export file, visit the <a href="!export">full export</a> page.', array('!export' => url('admin/config/development/configuration/full/export'))) . '</p>',
   );
   $form['import_tarball'] = array(
     '#type' => 'managed_file',
@@ -361,6 +361,9 @@ function config_export_single_form_update_export($form, &$form_state) {
 function config_import_single_form(array $form, array &$form_state) {
   form_load_include($form_state, 'inc', 'config', 'includes/config.sync');
 
+  $form['description'] = array(
+    '#markup' => '<p>' . t('This form imports a single configuration file from another site. To generate an export, visit the <a href="!export">single export</a> page.', array('!export' => 'admin/config/development/configuration/single/export')) . '</p>',
+  );
   $form['import'] = array(
     '#title' => t('Paste your configuration here'),
     '#type' => 'textarea',

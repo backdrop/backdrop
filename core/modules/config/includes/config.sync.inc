@@ -214,4 +214,5 @@ function config_sync_file($config_file, $config_change_type, $config_contents = 
       $active_config->delete();
       break;
   }
+  drupal_flush_all_caches();
 }

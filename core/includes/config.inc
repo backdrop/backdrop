@@ -103,7 +103,7 @@ function config_get_config_directory($type = 'active') {
     }
   }
   else {
-    throw new Exception(format_string('The configuration directory type "@type" does not exist.', array('@type' => $type)));
+    throw new ConfigException(format_string('The configuration directory type "@type" does not exist.', array('@type' => $type)));
   }
   return $path;
 }
