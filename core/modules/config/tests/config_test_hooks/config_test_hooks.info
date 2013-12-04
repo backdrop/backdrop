@@ -1,0 +1,6 @@
+name = Configuration test hooks
+description = Tests the hooks provided by Configuration management module.
+version = VERSION
+core = 8.x
+package = Testing
+hidden = TRUE

@@ -152,9 +152,11 @@ function config_sync_validate_file($config_file, $config_change_type, $all_chang
 
   switch ($config_change_type) {
     case 'create':
+      $staging_config->validateData();
       module_invoke_all('config_create_validate', $staging_config, $all_changes);
       break;
     case 'update':
+      $staging_config->validateData();
       $active_config = config($config_file, 'active')->load();
       module_invoke_all('config_update_validate', $staging_config, $active_config, $all_changes);
       break;

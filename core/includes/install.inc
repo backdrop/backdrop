@@ -686,10 +686,13 @@ function drupal_install_config_directories($mode = NULL) {
       ),
       'required' => TRUE,
     );
-
-    // Rewrite settings.php, which also sets the value as global variable.
-    drupal_rewrite_settings($settings);
   }
+  else {
+    $settings['config_directories'] = $config_directories;
+  }
+
+  // Rewrite settings.php, which also sets the value as global variable.
+  drupal_rewrite_settings($settings);
 
   // Ensure the config directories exist or can be created, and are writable.
   foreach (array('active', 'staging') as $config_type) {

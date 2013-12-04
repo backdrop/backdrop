@@ -22,12 +22,12 @@ function config_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
   );
-  $items['admin/config/development/configuration/diff/%'] = array(
+  $items['admin/config/development/configuration/sync/diff'] = array(
+    'title' => 'Configuration diff',
     'page callback' => 'config_diff_page',
-    'page arguments' => array(5),
     'access arguments' => array('synchronize configuration'),
     'file' => 'includes/config.admin.inc',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_TASK,
   );
   $items['admin/config/development/configuration/single'] = array(
     'title' => 'Single Import/Export',
@@ -115,21 +115,40 @@ function config_file_download($uri) {
 }
 
 /**
- * Retrieves all configuration information provided by modules.
+ * Retrieves configuration information provided by modules.
  *
+ * @param string $config_name
+ *   Optional. The name of the config file whose information should be
+ *   retrieved. If not specified, information for all configuration prefixes is
+ *   returned.
  * @return array
- *   An array of all configuration information.
+ *   An array of all configuration information, either for the single
+ *   configuration file based on its prefix, or configuration information for
+ *   all installed modules if no $config_name is specified.
  *
  * @see hook_config_info()
  * @see hook_config_info_alter()
  */
-function config_get_info() {
+function config_get_info($config_name = NULL) {
   $config_info = &drupal_static(__FUNCTION__, array());
   if (empty($config_info)) {
     $config_info = module_invoke_all('config_info');
     drupal_alter('config_info', $config_info);
   }
-  return $config_info;
+
+  if ($config_name) {
+    $return_config_info = FALSE;
+    foreach ($config_info as $prefix => $this_config_info) {
+      if (strpos($config_name, $prefix) === 0) {
+        $return_config_info = $this_config_info;
+        break;
+      }
+    }
+    return $return_config_info;
+  }
+  else {
+    return $config_info;
+  }
 }
 
 /**
@@ -158,4 +177,34 @@ function config_get_prefix_groups($type = 'active') {
     }
   }
   return $groups;
+}
+
+/**
+ * Implements hook_config_data_validate().
+ */
+function config_config_data_validate(Config $config, $config_info) {
+  // This validation only applies to configs that have module-provided info.
+  if (empty($config_info)) {
+    return;
+  }
+
+  // First check that the provided name matches the filename.
+  $config_name = $config->getName();
+  if (isset($config_info['name_key'])) {
+    $data = $config->get();
+    $name_key = $config_info['name_key'];
+    if (empty($data[$name_key])) {
+      throw new ConfigValidateException(t('The configuration "@file" must have a "@key" attribute specified.', array('@file' => $config_name, '@key' => $name_key)));
+    }
+    elseif (strpos($config_name, '.' . $data[$name_key]) === FALSE) {
+      throw new ConfigValidateException(t('The "@name_key" attribute has the value "@value", which does not match the file name "@file".', array('@file' => $config_name, '@name_key' => $name_key, '@value' => $data[$name_key])));
+    }
+  }
+  // Check that a label key is provided (if applicable).
+  if (isset($config_info['label_key'])) {
+    $label_key = $config_info['label_key'];
+    if (empty($data[$label_key])) {
+      throw new ConfigValidateException(t('The configuration "@file" must have a "@key" attribute specified.', array('@file' => $config_name, '@key' => $label_key)));
+    }
+  }
 }

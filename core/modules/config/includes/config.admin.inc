@@ -39,7 +39,7 @@ function config_sync_form(array $form, array &$form_state) {
       $links['view_diff'] = array(
         '#type' => 'link',
         '#title' => t('View differences'),
-        '#href' => 'admin/config/development/configuration/diff/' . $config_file,
+        '#href' => 'admin/config/development/configuration/sync/diff/' . $config_file,
       );
       $row = array(
         'name' => $config_file,
@@ -340,10 +340,14 @@ function config_export_single_form_update_type($form, &$form_state) {
  */
 function config_export_single_form_update_export($form, &$form_state) {
   if ($form_state['values']['config_name']) {
+    $config_name = $form_state['values']['config_name'];
     $directory = config_get_config_directory('active');
     $storage = new ConfigFileStorage($directory);
-    $config = new Config($form_state['values']['config_name'], $storage);
-    $value = $storage->encode($config->get());
+    $config = new Config($config_name, $storage);
+
+    // Re-add the config name property so it shows up in the export.
+    $data = array_merge(array('_config_name' => $config_name), $config->get());
+    $value = $storage->encode($data);
     $row_count = substr_count($value, "\n");
     $form['export']['#value'] = $value;
     $form['export']['#rows'] = $row_count > 12 ? $row_count : 12;
@@ -402,13 +406,7 @@ function config_import_single_form_validate(array &$form, array &$form_state) {
   }
   else {
     $config_name = $data['_config_name'];
-    $config_info_all = config_get_info();
-    foreach ($config_info_all as $prefix => $this_config_info) {
-      if (strpos($config_name, $prefix) === 0) {
-        $config_info = $this_config_info;
-        break;
-      }
-    }
+    $config_info = config_get_info($config_name);
     if ($config_info === FALSE) {
       form_error($form['import'], t('The configuration could not be imported because no module could recognize the "@name" configuration name.', array('@name' => $config_name)));
     }
@@ -455,12 +453,14 @@ function config_get_statuses() {
   $staging_directory = config_get_config_directory('staging');
   $active_storage = new ConfigFileStorage($active_directory);
   $staging_storage = new ConfigFileStorage($staging_directory);
+
+  // Create full list of all files from both active and staging.
   $active_files = $active_storage->listAll();
   $staging_files = $staging_storage->listAll();
-
   $all_files = array_unique(array_merge($active_files, $staging_files));
   $all_files = array_combine($all_files, array_fill(0, count($all_files), NULL));
   $config_statuses = $all_files;
+
   if ($staging_files) {
     if ($delete_diffs = array_diff($active_files, $staging_files)) {
       foreach ($delete_diffs as $filename) {

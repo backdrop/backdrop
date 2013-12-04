@@ -39,13 +39,14 @@ function config($config_file, $type = 'active') {
  *   config object returned will contain the contents of book.admin.json.
  * @param string $option
  *   The name of the config option within the file to read. The config option
- *   may contain periods to indicate levels within the config file.
+ *   may contain periods to indicate levels within the config file. If NULL is
+ *   passed in, the entire contents of the config file will be returned.
  *
  * @return mixed
  *   The contents of the requested config option. Returns NULL if the specified
  *   option was not found in the file at all.
  */
-function config_get($config_file, $option) {
+function config_get($config_file, $option = NULL) {
   $config = config($config_file);
   return $config->get($option);
 }
@@ -74,7 +75,7 @@ function config_get($config_file, $option) {
  *   option was not found in the file at all.
  */
 function config_set($config_file, $option, $value) {
-  $config = new config($config_file);
+  $config = config($config_file);
   $config->set($option, $value);
   $config->save();
 }
@@ -93,7 +94,11 @@ function config_set($config_file, $option, $value) {
 function config_get_config_directory($type = 'active') {
   global $config_directories;
 
-  if (!empty($config_directories[$type])) {
+  if ($test_prefix = drupal_valid_test_ua()) {
+    // See Drupal\simpletest\WebTestBase::setUp().
+    $path = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/config_' . $type;
+  }
+  elseif (!empty($config_directories[$type])) {
     // Allow a configuration directory path to be outside of webroot.
     if (empty($config_directories[$type]['absolute'])) {
       $path = conf_path() . '/files/' . $config_directories[$type]['path'];
@@ -165,16 +170,19 @@ class ConfigNameException extends ConfigException {}
 
 /**
  * Exception thrown when a config object has a validation error before saving.
+ *
+ * Messages thrown using ConfigValidateException should be translated, as they
+ * are passed directly to end-users during form validations.
  */
 class ConfigValidateException extends ConfigException {}
 
 /**
- * @todo
+ * Exception thrown by classes implementing ConfigStorageInterface.
  */
 class ConfigStorageException extends ConfigException {}
 
 /**
- * @todo
+ * Exception thrown when attempting to read a config file fails.
  */
 class ConfigStorageReadException extends ConfigStorageException {}
 
@@ -215,6 +223,14 @@ class Config {
    * @var array
    */
   protected $data;
+
+  /**
+   * The state of validation on this object.
+   *
+   * This value is set to TRUE by Config::validate() and is reset to FALSE after
+   * any change to the $data variable.
+   */
+  protected $validated = FALSE;
 
   /**
    * The storage used to load and save this configuration object.
@@ -259,7 +275,6 @@ class Config {
    */
   public function init() {
     $this->isLoaded = FALSE;
-    $this->notify('init');
     return $this;
   }
 
@@ -275,9 +290,7 @@ class Config {
   public function initWithData(array $data) {
     $this->isLoaded = TRUE;
     $this->isNew = FALSE;
-    $this->notify('init');
     $this->replaceData($data);
-    $this->notify('load');
     return $this;
   }
 
@@ -336,6 +349,24 @@ class Config {
       throw new ConfigNameException(format_string('Invalid character in Config object name @name.', array(
         '@name' => $name,
       )));
+    }
+  }
+
+  /**
+   * Validate the full contents of the configuration data.
+   *
+   * This method is not automatically called when Config::setData() is called.
+   * Because validation is a potentially expensive operation, you should call
+   * this only when expecting potential problems in the provided data, such as
+   * when validating user-provided imports.
+   *
+   * @throws ConfigValidateException
+   */
+  public function validateData() {
+    if (!$this->validated) {
+      $config_info = config_get_info($this->getName());
+      module_invoke_all('config_data_validate', $this, $config_info);
+      $this->validated = TRUE;
     }
   }
 
@@ -433,11 +464,15 @@ class Config {
    */
   protected function replaceData(array $data) {
     $this->data = $data;
+    $this->validated = FALSE;
     return $this;
   }
 
   /**
    * Sets a value in this configuration object.
+   *
+   * Note that this will save a NULL value. If wanting to unset a key from the
+   * configuration, use Config::clear($key).
    *
    * @param string $key
    *   Identifier to store value in configuration.
@@ -469,6 +504,8 @@ class Config {
       }
       $data[$last_key] = $value;
     }
+    $this->validated = FALSE;
+
     return $this;
   }
 
@@ -497,6 +534,7 @@ class Config {
       }
       unset($data[$last_key]);
     }
+    $this->validated = FALSE;
     return $this;
   }
 
@@ -517,7 +555,6 @@ class Config {
       $this->isNew = FALSE;
       $this->replaceData($data);
     }
-    $this->notify('load');
     $this->isLoaded = TRUE;
     return $this;
   }
@@ -538,7 +575,6 @@ class Config {
     $this->data = array_merge(array('_config_name' => $this->name), $this->data);
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
-    $this->notify('save');
     return $this;
   }
 
@@ -549,11 +585,9 @@ class Config {
    *   The configuration object.
    */
   public function delete() {
-    // @todo Consider to remove the pruning of data for Config::delete().
     $this->data = array();
     $this->storage->delete($this->name);
     $this->isNew = TRUE;
-    $this->notify('delete');
     return $this;
   }
 
@@ -565,17 +599,6 @@ class Config {
    */
   public function getStorage() {
     return $this->storage;
-  }
-
-  /**
-   * Dispatches a configuration event.
-   *
-   * @param string $config_event_name
-   *   The configuration event name.
-   */
-  protected function notify($config_event_name) {
-    // @todo: Add a drupal_alter() or hook here?
-    //$this->context->notify($config_event_name, $this);
   }
 }
 
@@ -791,8 +814,11 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
     $data = file_get_contents($this->getFilePath($name));
     try {
-      // Ensure config name is loaded the result.
-      $data = array_merge(array('_config_name' => $name), $this->decode($data));
+      $data = $this->decode($data);
+      // Remove the config name from the read configuration.
+      if (isset($data['_config_name'])) {
+        unset($data['_config_name']);
+      }
     }
     // If an error occurs, catch and rethrow with the file name in the message.
     catch (ConfigStorageException $e) {
@@ -818,6 +844,8 @@ class ConfigFileStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function write($name, array $data) {
+    // Ensure that the config name is included in the written file.
+    $data = array_merge(array('_config_name' => $name), $data);
     $data = $this->encode($data);
     $status = @file_put_contents($this->getFilePath($name), $data);
     if ($status === FALSE) {

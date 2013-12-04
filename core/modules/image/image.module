@@ -206,8 +206,8 @@ function image_permission() {
  */
 function image_config_info() {
   $prefixes['image.styles'] = array(
+    'name_key' => 'name',
     'label_key' => 'name',
-    'uuid_key' => 'uuid',
     'group' => t('Image styles'),
   );
   return $prefixes;
