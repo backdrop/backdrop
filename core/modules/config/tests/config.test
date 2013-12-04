@@ -284,8 +284,12 @@ class ConfigurationUITest extends DrupalWebTestCase {
     // Extract the archive and verify it's not empty.
     $file_path = file_directory_temp() . '/' . file_uri_target($uri);
     $archiver = new Archive_Tar($file_path);
-    $archive_contents = $archiver->listContents();
-    $this->assert(!empty($archive_contents), 'Downloaded archive file is not empty.');
+    $archive_contents = $archiver->listContent();
+    $archive_files = array();
+    foreach ($archive_contents as $file) {
+      $archive_files[] = $file['filename'];
+    }
+    $this->assert(!empty($archive_files), 'Downloaded archive file is not empty.');
 
     // Prepare the list of config files from active storage.
     $storage_active = new ConfigFileStorage(config_get_config_directory('active'));
@@ -295,7 +299,7 @@ class ConfigurationUITest extends DrupalWebTestCase {
     }
     // Assert that the downloaded archive file contents are the same as the test
     // site active store.
-    $this->assertIdentical($archive_contents, $config_files);
+    $this->assertIdentical($archive_files, $config_files, 'Downloaded archive contains all active configuration files.');
   }
 
   /**

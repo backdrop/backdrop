@@ -480,14 +480,12 @@ function image_style_load($name = NULL) {
  *   An image style array. In the case of a new style, 'isid' will be populated.
  */
 function image_style_save($style) {
+  // Add in the effect key if missing.
+  $style += array('effects' => array());
+
   $config = config('image.styles.' . $style['name']);
   $config->set('name', $style['name']);
-  if ($style['effects']) {
-    $config->set('effects', $style['effects']);
-  }
-  else {
-    $config->set('effects', array());
-  }
+  $config->set('effects', $style['effects']);
   $config->save();
   $style['is_new'] = TRUE;
 
@@ -762,15 +760,15 @@ function image_style_flush($style) {
  *
  * @param $style_name
  *   The name of the style to be used with this image.
- * @param $path
+ * @param $uri
  *   The path to the image.
  * @return
  *   The absolute URL where a style image can be downloaded, suitable for use
  *   in an <img> tag. Requesting the URL will cause the image to be created.
  * @see image_style_deliver()
  */
-function image_style_url($style_name, $path) {
-  $uri = image_style_path($style_name, $path);
+function image_style_url($style_name, $uri) {
+  $uri = image_style_path($style_name, $uri);
 
   // If not using clean URLs, the image derivative callback is only available
   // with the query string. If the file does not exist, use url() to ensure
@@ -1042,7 +1040,7 @@ function theme_image_style($variables) {
   $variables['height'] = $dimensions['height'];
 
   // Determine the url for the styled image.
-  $variables['path'] = image_style_url($variables['style_name'], $variables['path']);
+  $variables['uri'] = image_style_url($variables['style_name'], $variables['uri']);
   return theme('image', $variables);
 }
 

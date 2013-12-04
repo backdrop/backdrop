@@ -20,8 +20,8 @@
  *   (optional) The type of config directory to return. Drupal core provides
  *   'active' and 'staging'. Defaults to 'active'.
  *
- * @return
- *   An instance of the class specified in the $class parameter.
+ * @return Config
+ *   A Config object containing the specified configuration settings.
  *
  */
 function config($config_file, $type = 'active') {
@@ -900,7 +900,8 @@ class ConfigFileStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function decode($raw) {
-    $contents = drupal_json_decode($raw);
+    // Use json_decode() directly for efficiency.
+    $contents = json_decode($raw, TRUE);
     if (is_null($contents)) {
       throw new ConfigStorageException('The configuration string could not be parsed.');
     }

@@ -1,8 +1,9 @@
 {
+  "_config_name": "system.performance",
   "cache": 0,
   "cache_lifetime": "0",
   "page_cache_maximum_age": "0",
-  "page_compression": 0,
+  "page_compression": 1,
   "preprocess_css": 0,
   "preprocess_js": 0
 }

@@ -1369,7 +1369,7 @@ function drupal_serve_page_from_cache(stdClass $cache) {
   // max-age > 0, allowing the page to be cached by external proxies, when a
   // session cookie is present unless the Vary header has been replaced or
   // unset in hook_boot().
-  $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? $config->get('page_cache_maximum_age') : 0;
+  $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? config_get('system.performance', 'page_cache_maximum_age') : 0;
   $default_headers['Cache-Control'] = 'public, max-age=' . $max_age;
 
   // Entity tag should change if the output changes.
@@ -2273,7 +2273,7 @@ function _drupal_bootstrap_page_cache() {
     $cache_enabled = TRUE;
   }
   else {
-    require_once DRUPAL_ROOT . '/core/includes/common.inc';
+    drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES, FALSE);
     $cache_enabled = config_get('system.performance', 'cache');
   }
   // If there is no session cookie and cache is enabled (or forced), try
