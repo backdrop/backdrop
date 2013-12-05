@@ -110,7 +110,7 @@ function config_file_download($uri) {
  * Retrieves configuration information provided by modules.
  *
  * @param string $config_name
- *   Optional. The name of the config file whose information should be
+ *   (optional) The name of the config file whose information should be
  *   retrieved. If not specified, information for all configuration prefixes is
  *   returned.
  * @return array

@@ -915,7 +915,7 @@ function image_effect_definition_load($effect) {
 /**
  * Load a single image effect.
  *
- * * @param $ieid
+ * @param $ieid
  *   The image effect ID.
  * @param $style_name
  *   The image style name.
@@ -934,8 +934,8 @@ function image_effect_definition_load($effect) {
  * @see image_style_load()
  * @see image_effect_definition_load()
  */
-function image_effect_load($ieid, $style_name) {
-  if (($style = image_style_load($style_name)) && isset($style['effects'][$ieid])) {
+function image_effect_load($ieid, $style_name, $include = NULL) {
+  if (($style = image_style_load($style_name, $include)) && isset($style['effects'][$ieid])) {
     return $style['effects'][$ieid];
   }
   return FALSE;
@@ -1019,7 +1019,7 @@ function image_effect_apply($image, $effect) {
  * @param $variables
  *   An associative array containing:
  *   - style_name: The name of the style to be used to alter the original image.
- *   - path: The path of the image file relative to the Drupal files directory.
+ *   - uri: The path of the image file relative to the Drupal files directory.
  *     This function does not work with images outside the files directory nor
  *     with remotely hosted images.
  *   - width: The width of the source image (if known).

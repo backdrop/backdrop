@@ -1523,6 +1523,14 @@ function system_logging_settings() {
  */
 function system_performance_settings($form, &$form_state) {
   drupal_add_js(drupal_get_path('module', 'system') . '/system.js');
+  $form_state['config'] = array(
+    'cache' => 'system.performance',
+    'page_compression' => 'system.performance',
+    'page_cache_maximum_age' => 'system.performance',
+    'preprocess_css' => 'system.performance',
+    'preprocess_js' => 'system.performance',
+  );
+
   $config = config('system.performance');
 
   $form['clear_cache'] = array(

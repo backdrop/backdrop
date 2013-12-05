@@ -136,7 +136,7 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
  * @param string $module
  *   The name of the module we are installing.
  * @param string|NULL $config_name
- *   Optional. If wanting to copy just a single configuration file from the
+ *   (optional) If wanting to copy just a single configuration file from the
  *   module, specify the configuration file name without the extension.
  */
 function config_install_default_config($module, $config_name = NULL) {
@@ -170,7 +170,6 @@ class ConfigException extends Exception {}
  * Exception thrown when a config object name is invalid.
  */
 class ConfigNameException extends ConfigException {}
-
 
 /**
  * Exception thrown when a config object has a validation error before saving.

@@ -671,6 +671,7 @@ function theme_image_style_list($variables) {
  */
 function theme_image_style_effects($variables) {
   $form = $variables['form'];
+
   $rows = array();
 
   foreach (element_children($form) as $key) {
@@ -704,7 +705,7 @@ function theme_image_style_effects($variables) {
     array('data' => t('Operations'), 'colspan' => 2),
   );
 
-  if (count($rows) == 1 && (!isset($form['new']['#access']) || $form['new']['#access'])) {
+  if (count($rows) == 1) {
     array_unshift($rows, array(array(
       'data' => t('There are currently no effects in this style. Add one by selecting an option below.'),
       'colspan' => 4,

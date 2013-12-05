@@ -148,8 +148,6 @@ function install_state_defaults() {
     // Whether or not this installation is interactive. By default this will
     // be set to FALSE if settings are passed in to install_drupal().
     'interactive' => TRUE,
-    // The mode for directories that are created during install.
-    'mode' => NULL,
     // An array of available translation files for the installation.
     'translations' => array(),
     // An array of parameters for the installation, pre-populated by the URL
@@ -1019,9 +1017,7 @@ function install_settings_form_submit($form, &$form_state) {
     'value'    => drupal_hash_base64(drupal_random_bytes(55)),
     'required' => TRUE,
   );
-
   drupal_rewrite_settings($settings);
-
   // Indicate that the settings file has been verified, and check the database
   // for the last completed task, now that we have a valid connection. This
   // last step is important since we want to trigger an error if the new

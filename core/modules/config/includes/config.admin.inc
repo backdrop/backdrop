@@ -28,9 +28,6 @@ function config_sync_form(array $form, array &$form_state) {
     return $form;
   }
 
-  // Add the AJAX library to the form for dialog support.
-  $form['#attached']['library'][] = array('system', 'drupal.ajax');
-
   foreach ($form_state['config_statuses'] as $config_file => $config_change_type) {
     if ($config_change_type === 'error') {
       $config_file_errors[] = $config_file;

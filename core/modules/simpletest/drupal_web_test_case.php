@@ -40,7 +40,7 @@ abstract class DrupalTestCase {
   protected $originalFileDirectory = NULL;
 
   /**
-   * The original config director array, before changing for testing purposes.
+   * The original config directory array, before changing for testing purposes.
    *
    * @var string
    */
@@ -1352,14 +1352,14 @@ class DrupalWebTestCase extends DrupalTestCase {
     $private_files_directory = $public_files_directory . '/private';
     $temp_files_directory    = $private_files_directory . '/temp';
 
-    // Create the file directories.
+    // Create the directories.
     file_prepare_directory($public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     file_prepare_directory($private_files_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($temp_files_directory, FILE_CREATE_DIRECTORY);
     $this->generatedTestFiles = FALSE;
 
-    // Set the new config directories. Note that during test execution, these
-    // values are manually recreated in config_get_config_directory().
+    // Set the new config directories. During test execution, these values are
+    // manually set directly in config_get_config_directory().
     $config_base_path = conf_path() . '/files/simpletest/' . substr($this->databasePrefix, 10) . '/config_';
     $config_directories = array(
       'active' => array(
