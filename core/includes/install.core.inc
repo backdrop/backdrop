@@ -285,6 +285,7 @@ function install_begin_request(&$install_state) {
   drupal_maintenance_theme();
 
   // Check existing settings.php.
+  $install_state['config_verified'] = install_verify_config();
   $install_state['settings_verified'] = install_verify_settings();
 
   if ($install_state['settings_verified']) {
@@ -549,6 +550,7 @@ function install_tasks($install_state) {
       'display_name' => st('Verify requirements'),
     ),
     'install_config_directories' => array(
+      'run' => $install_state['config_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_settings_form' => array(
       'display_name' => st('Set up database'),
@@ -821,6 +823,24 @@ function install_verify_completed_task() {
 /**
  * Verifies the existing settings in settings.php.
  */
+function install_verify_config() {
+  global $config_directories;
+
+  // Verify existing settings (if any).
+  if (!empty($config_directories)) {
+    try {
+     if (is_dir(config_get_config_directory('active')) && is_dir(config_get_config_directory('staging'))) {
+       return TRUE;
+     }
+    }
+    catch (ConfigException $e) {}
+  }
+  return FALSE;
+}
+
+/**
+ * Verifies the existing settings in settings.php.
+ */
 function install_verify_settings() {
   global $databases;
 
@@ -853,7 +873,8 @@ function install_verify_pdo() {
  * Installation task; Rewrite settings.php to include config directories.
  */
 function install_config_directories(&$install_state) {
-  drupal_install_config_directories($install_state['mode']);
+  backdrop_install_config_directories();
+  $install_state['config_verified'] = TRUE;
 }
 
 /**
@@ -995,10 +1016,6 @@ function install_settings_form_submit($form, &$form_state) {
     'required' => TRUE,
   );
   $settings['drupal_hash_salt'] = array(
-    'value'    => drupal_hash_base64(drupal_random_bytes(55)),
-    'required' => TRUE,
-  );
-  $settings['config_signature_key'] = array(
     'value'    => drupal_hash_base64(drupal_random_bytes(55)),
     'required' => TRUE,
   );

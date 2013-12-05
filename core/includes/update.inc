@@ -89,7 +89,7 @@ function update_prepare_d8_bootstrap() {
   $settings_exist = !empty($GLOBALS['config_directories']);
 
   if (!$settings_exist || !is_dir(config_get_config_directory('active')) || !is_dir(config_get_config_directory('staging'))) {
-    drupal_install_config_directories();
+    backdrop_install_config_directories();
   }
 
   // If any of the required settings needs to be written, then settings.php
