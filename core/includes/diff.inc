@@ -1250,9 +1250,6 @@ class BackdropDiffFormatter extends DiffFormatter {
   protected function lines($lines, $prefix = ' ', $color = 'white') {
   }
 
-  /**
-   * Note: you should HTML-escape parameter before calling this.
-   */
   protected function addedLine($line) {
     return array(
       array(
@@ -1266,9 +1263,6 @@ class BackdropDiffFormatter extends DiffFormatter {
     );
   }
 
-  /**
-   * Note: you should HTML-escape parameter before calling this.
-   */
   protected function deletedLine($line) {
     return array(
       array(
@@ -1282,9 +1276,6 @@ class BackdropDiffFormatter extends DiffFormatter {
     );
   }
 
-  /**
-   * Note: you should HTML-escape parameter before calling this.
-   */
   protected function contextLine($line) {
     return array(
       '&nbsp;',
@@ -1332,7 +1323,8 @@ class BackdropDiffFormatter extends DiffFormatter {
       $aline = array_shift( $add );
       $this->rows[] = array_merge($this->deletedLine($line), isset($aline) ? $this->addedLine($aline) : $this->emptyLine());
     }
-    foreach ($add as $line) {  // If any leftovers
+    // If any leftovers.
+    foreach ($add as $line) {
       $this->rows[] = array_merge($this->emptyLine(), $this->addedLine($line));
     }
   }
