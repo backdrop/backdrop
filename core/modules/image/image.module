@@ -6,7 +6,7 @@
  */
 
 /**
- * Image style constant for user presets in the database.
+ * Image style constant for user presets.
  */
 const IMAGE_STORAGE_NORMAL = 1;
 
@@ -16,14 +16,9 @@ const IMAGE_STORAGE_NORMAL = 1;
 const IMAGE_STORAGE_OVERRIDE = 2;
 
 /**
- * Image style constant for module-defined presets in code.
+ * Image style constant for module-defined presets.
  */
 const IMAGE_STORAGE_DEFAULT = 4;
-
-/**
- * Image style constant to represent an editable preset.
- */
-define('IMAGE_STORAGE_EDITABLE', IMAGE_STORAGE_NORMAL | IMAGE_STORAGE_OVERRIDE);
 
 /**
  * Image style constant to represent any module-based preset.
@@ -98,16 +93,25 @@ function image_menu() {
   $items['admin/config/media/image-styles/delete/%image_style'] = array(
     'title' => 'Delete style',
     'description' => 'Delete an image style.',
-    'load arguments' => array(NULL, (string) IMAGE_STORAGE_NORMAL),
+    'load arguments' => array((string) IMAGE_STORAGE_NORMAL),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('image_style_delete_form', 5),
+    'access arguments' => array('administer image styles'),
+    'file' => 'image.admin.inc',
+  );
+  $items['admin/config/media/image-styles/revert/%image_style'] = array(
+    'title' => 'Revert style',
+    'description' => 'Revert an image style.',
+    'load arguments' => array((string) IMAGE_STORAGE_MODULE),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('image_style_revert_form', 5),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
   );
   $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect'] = array(
     'title' => 'Edit image effect',
     'description' => 'Edit an existing effect within a style.',
-    'load arguments' => array(5, (string) IMAGE_STORAGE_EDITABLE),
+    'load arguments' => array(5),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('image_effect_form', 5, 7),
     'access arguments' => array('administer image styles'),
@@ -116,7 +120,7 @@ function image_menu() {
   $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect/delete'] = array(
     'title' => 'Delete image effect',
     'description' => 'Delete an existing effect from a style.',
-    'load arguments' => array(5, (string) IMAGE_STORAGE_EDITABLE),
+    'load arguments' => array(5),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('image_effect_delete_form', 5, 7),
     'access arguments' => array('administer image styles'),
@@ -432,11 +436,26 @@ function image_styles() {
         $config = config($config_name);
         $style['name'] = $config->get('name');
         $style['effects'] = array();
+        if ($module = $config->get('module')) {
+          $style['module'] = $module;
+          $style['storage'] = $config->get('overridden') ? IMAGE_STORAGE_OVERRIDE : IMAGE_STORAGE_DEFAULT;
+        }
+        else {
+          $style['storage'] = IMAGE_STORAGE_NORMAL;
+        }
         foreach ($config->get('effects') as $key => $effect) {
           $definition = image_effect_definition_load($effect['name']);
           $effect = array_merge($definition, $effect);
+          $effect['ieid'] = $key;
           $style['effects'][$key] = $effect;
         }
+        // Sort the effects by weight.
+        uasort($style['effects'], function ($a, $b) {
+          if ($a['weight'] == $b['weight']) {
+            return $a['ieid'] < $b['ieid'] ? -1 : 1;
+          }
+          return $a['weight'] < $b['weight'] ? -1 : 1;
+        });
         $styles[$style['name']] = $style;
       }
       drupal_alter('image_styles', $styles);
@@ -452,6 +471,9 @@ function image_styles() {
  *
  * @param $name
  *   The name of the style.
+ * @param $include
+ *   If set, this loader will restrict to a specific type of image style, may be
+ *   one of the defined Image style storage constants.
  * @return
  *   An image style array containing the following keys:
  *   - "name": The unique image style name.
@@ -459,12 +481,18 @@ function image_styles() {
  *   If the image style name is not valid, an empty array is returned.
  * @see image_effect_load()
  */
-function image_style_load($name = NULL) {
+function image_style_load($name = NULL, $include = NULL) {
   $styles = image_styles();
 
   // If retrieving by name.
   if (isset($name) && isset($styles[$name])) {
-    return $styles[$name];
+    $style = $styles[$name];
+  }
+
+  // Restrict to the specific type of flag. This bitwise operation basically
+  // states "if the storage is X, then allow".
+  if (isset($style) && (!is_numeric($include) || ($style['storage'] & (int) $include))) {
+    return $style;
   }
 
   // Otherwise the style was not found.
@@ -480,14 +508,29 @@ function image_style_load($name = NULL) {
  *   An image style array. In the case of a new style, 'isid' will be populated.
  */
 function image_style_save($style) {
-  // Add in the effect key if missing.
+  // Add in the effects key if missing.
   $style += array('effects' => array());
 
   $config = config('image.styles.' . $style['name']);
+  if (is_null($config->get('name'))) {
+    $style['is_new'] = TRUE;
+  }
   $config->set('name', $style['name']);
   $config->set('effects', $style['effects']);
+  // Only write storage settings for default and overridden styles.
+  if (isset($style['module'])) {
+    $config->set('module', $style['module']);
+    $config->set('overridden', TRUE);
+  }
   $config->save();
-  $style['is_new'] = TRUE;
+
+  // Delete the previous configuration file if any.
+  if (isset($style['old_name']) && $style['old_name'] !== $style['name']) {
+    if ($old_style = image_style_load($style['old_name'])) {
+      image_style_flush($old_style);
+      config('image.styles.' . $old_style['name'])->delete();
+    }
+  }
 
   // Let other modules update as necessary on save.
   module_invoke_all('image_style_save', $style);
@@ -521,28 +564,6 @@ function image_style_delete($style, $replacement_style_name = '') {
   module_invoke_all('image_style_delete', $style);
 
   return TRUE;
-}
-
-/**
- * Load all the effects for an image style.
- *
- * @param $style
- *   An image style array.
- * @return
- *   An array of image effects associated with specified image style in the
- *   format array('isid' => array()), or an empty array if the specified style
- *   has no effects.
- */
-function image_style_effects($style) {
-  $effects = image_effects();
-  $style_effects = array();
-  foreach ($effects as $effect) {
-    if ($style['isid'] == $effect['isid']) {
-      $style_effects[$effect['ieid']] = $effect;
-    }
-  }
-
-  return $style_effects;
 }
 
 /**
@@ -809,6 +830,20 @@ function image_style_path($style_name, $uri) {
 }
 
 /**
+ * Revert the changes made by users to a default image style.
+ *
+ * @param style
+ *   An image style array.
+ * @return
+ *   Boolean TRUE if the operation succeeded.
+ */
+function image_default_style_revert($style) {
+  image_style_flush($style);
+  config_install_default_config($style['module'], 'image.styles.' . $style['name']);
+  return TRUE;
+}
+
+/**
  * Pull in image effects exposed by modules implementing hook_image_effect_info().
  *
  * @return
@@ -826,7 +861,7 @@ function image_effect_definitions() {
   $effects = &drupal_static(__FUNCTION__);
 
   if (!isset($effects)) {
-    if ($cache = cache()->get("image_effects:$langcode") && !empty($cache->data)) {
+    if ($cache = cache()->get("image_effect_definitions:$langcode") && !empty($cache->data)) {
       $effects = $cache->data;
     }
     else {
@@ -843,7 +878,7 @@ function image_effect_definitions() {
       }
       uasort($effects, '_image_effect_definitions_sort');
       drupal_alter('image_effect_info', $effects);
-      cache()->set("image_effects:$langcode", $effects);
+      cache()->set("image_effect_definitions:$langcode", $effects);
     }
   }
 
@@ -878,42 +913,10 @@ function image_effect_definition_load($effect) {
 }
 
 /**
- * Load all image effects from the database.
- *
- * @return
- *   An array of all image effects.
- * @see image_effect_load()
- */
-function image_effects() {
-  $effects = &drupal_static(__FUNCTION__);
-
-  if (!isset($effects)) {
-    $effects = array();
-
-    // Add database image effects.
-    $result = db_select('image_effects', NULL, array('fetch' => PDO::FETCH_ASSOC))
-      ->fields('image_effects')
-      ->orderBy('image_effects.weight', 'ASC')
-      ->execute();
-    foreach ($result as $effect) {
-      $effect['data'] = unserialize($effect['data']);
-      $definition = image_effect_definition_load($effect['name']);
-      // Do not load image effects whose definition cannot be found.
-      if ($definition) {
-        $effect = array_merge($definition, $effect);
-        $effects[$effect['ieid']] = $effect;
-      }
-    }
-  }
-
-  return $effects;
-}
-
-/**
  * Load a single image effect.
  *
- * @param $name
- *   The image effect name.
+ * * @param $ieid
+ *   The image effect ID.
  * @param $style_name
  *   The image style name.
  * @param $include
@@ -922,7 +925,6 @@ function image_effects() {
  * @return
  *   An image effect array, consisting of the following keys:
  *   - "ieid": The unique image effect ID.
- *   - "isid": The unique image style ID that contains this image effect.
  *   - "weight": The weight of this image effect within the image style.
  *   - "name": The name of the effect definition that powers this image effect.
  *   - "data": An array of configuration options for this image effect.
@@ -932,9 +934,9 @@ function image_effects() {
  * @see image_style_load()
  * @see image_effect_definition_load()
  */
-function image_effect_load($name, $style_name) {
-  if (($style = image_style_load($style_name)) && isset($style['effects'][$name])) {
-    return $style['effects'][$name];
+function image_effect_load($ieid, $style_name) {
+  if (($style = image_style_load($style_name)) && isset($style['effects'][$ieid])) {
+    return $style['effects'][$ieid];
   }
   return FALSE;
 }
@@ -952,25 +954,27 @@ function image_effect_load($name, $style_name) {
 function image_effect_save($style_name, $effect) {
   $config = config('image.styles.' . $style_name);
 
-  if (!empty($effect['ieid'])) {
-    $old_effect = $config->get('effects.' . $effect['ieid']);
-    foreach ($old_effect as $key => $value) {
-      $old_effect[$key] = $effect[$key];
-      $config->set('effects.' . $effect['ieid'], $old_effect);
-    }
+  $effects = $config->get('effects');
+  $filtered_effect = array(
+    'name' => $effect['name'],
+    'data' => isset($effect['data']) ? $effect['data'] : array(),
+    'weight' => isset($effect['weight']) ? $effect['weight'] : 0,
+  );
+  if (isset($effect['ieid'])) {
+    $effects[$effect['ieid']] = $filtered_effect;
   }
   else {
-    // We need to generate the ieid and save the new effect.
-    // The machine name is all the elements of the data array concatenated
-    // together, delimited by underscores.
-    $machine_name = $effect['name'];
-
-    foreach ($effect['data'] as $key => $value) {
-      $machine_name .= '_' . $value;
-    }
-    $effect['ieid'] = $machine_name;
-    $config->set('effects.' . $machine_name, $effect);
+    $effects[] = $filtered_effect;
+    end($effects);
+    $effect['ieid'] = key($effects);
   }
+  $config->set('effects', $effects);
+
+  // Set default styles to overridden.
+  if ($config->get('module')) {
+    $config->set('overridden', TRUE);
+  }
+
   $config->save();
   $style = image_style_load(NULL, $style_name);
   image_style_flush($style);

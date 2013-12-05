@@ -49,15 +49,27 @@ function image_style_form($form, &$form_state, $style) {
     '#markup' => theme('image_style_preview', array('style' => $style)),
   );
 
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#size' => '64',
-    '#title' => t('Image style name'),
-    '#default_value' => $style['name'],
-    '#description' => t('The name is used in URLs for generated images. Use only lowercase alphanumeric characters, underscores (_), and hyphens (-).'),
-    '#element_validate' => array('image_style_name_validate'),
-    '#required' => TRUE,
-  );
+  // Allow the name of the style to be changed, unless this style is
+  // provided by a module's hook_default_image_styles().
+  if ($style['storage'] & IMAGE_STORAGE_MODULE) {
+    $form['name'] = array(
+      '#type' => 'item',
+      '#title' => t('Image style name'),
+      '#markup' => $style['name'],
+      '#description' => t('This image style is being provided by %module module and may not be renamed.', array('%module' => $style['module'])),
+    );
+  }
+  else {
+    $form['name'] = array(
+      '#type' => 'textfield',
+      '#size' => '64',
+      '#title' => t('Image style name'),
+      '#default_value' => $style['name'],
+      '#description' => t('The name is used in URLs for generated images. Use only lowercase alphanumeric characters, underscores (_), and hyphens (-).'),
+      '#element_validate' => array('image_style_name_validate'),
+      '#required' => TRUE,
+    );
+  }
 
   // Build the list of existing image effects for this image style.
   $form['effects'] = array(
@@ -120,7 +132,6 @@ function image_style_form($form, &$form_state, $style) {
     '#submit' => array('image_style_form_submit', 'image_style_form_add_submit'),
   );
 
-  // Show the Override or Submit button for this style.
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -168,6 +179,7 @@ function image_style_form_add_submit($form, &$form_state) {
  * Submit handler for saving an image style.
  */
 function image_style_form_submit($form, &$form_state) {
+  // Update the image style name if it has changed.
   $style = $form_state['image_style'];
 
   // Update image effect weights.
@@ -184,11 +196,9 @@ function image_style_form_submit($form, &$form_state) {
     }
   }
 
-  // Update the image style name if it has changed. We also need to delete the
-  // old style, because there is no concept of rename at the moment, just
-  // create and delete.
+  // Update the image style name if it has changed.
   if (isset($form_state['values']['name']) && $style['name'] != $form_state['values']['name']) {
-    image_style_delete($style);
+    $style['old_name'] = $style['name'];
     $style['name'] = $form_state['values']['name'];
   }
 
@@ -292,6 +302,30 @@ function image_style_delete_form_submit($form, &$form_state) {
 }
 
 /**
+ * Confirmation form to revert a database style to its default.
+ */
+function image_style_revert_form($form, $form_state, $style) {
+  $form_state['image_style'] = $style;
+
+  return confirm_form(
+    $form,
+    t('Revert the %style style?', array('%style' => $style['name'])),
+    'admin/config/media/image-styles',
+    t('Reverting this style will delete the customized settings and restore the defaults provided by the @module module.', array('@module' => $style['module'])),
+    t('Revert'),  t('Cancel')
+  );
+}
+
+/**
+ * Submit handler to convert an overridden style to its default.
+ */
+function image_style_revert_form_submit($form, &$form_state) {
+  drupal_set_message(t('The %style style has been reverted to its defaults.', array('%style' => $form_state['image_style']['name'])));
+  image_default_style_revert($form_state['image_style']);
+  $form_state['redirect'] = 'admin/config/media/image-styles';
+}
+
+/**
  * Form builder; Form for adding and editing image effects.
  *
  * This form is used universally for editing all image effects. Each effect adds
@@ -307,7 +341,6 @@ function image_style_delete_form_submit($form, &$form_state) {
  *
  * @ingroup forms
  * @see hook_image_effects()
- * @see image_effects()
  * @see image_resize_form()
  * @see image_scale_form()
  * @see image_rotate_form()
@@ -360,11 +393,7 @@ function image_effect_form($form, &$form_state, $style, $effect) {
  * Submit handler for updating an image effect.
  */
 function image_effect_form_submit($form, &$form_state) {
-  $effect = array(
-    'name' => $form_state['image_effect']['name'],
-    'data' => $form_state['values']['data'],
-    'weight' => $form_state['values']['weight'],
-  );
+  $effect = array_merge($form_state['image_effect'], $form_state['values']);
   image_effect_save($form_state['image_style']['name'], $effect);
   drupal_set_message(t('The image effect was successfully applied.'));
   $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $form_state['image_style']['name'];
@@ -583,15 +612,15 @@ function image_rotate_form($data) {
  *
  * @param $variables
  *   An associative array containing:
- *   - styles: An array of all the image styles returned by image_get_styles().
+ *   - styles: An array of all the image styles returned by image_styles().
  *
- * @see image_get_styles()
+ * @see image_styles()
  * @ingroup themeable
  */
 function theme_image_style_list($variables) {
   $styles = $variables['styles'];
 
-  $header = array(t('Style name'), array('data' => t('Operations'), 'colspan' => 3));
+  $header = array(t('Style name'), t('Settings'), array('data' => t('Operations'), 'colspan' => 3));
   $rows = array();
   $link_attributes = array(
     'attributes' => array(
@@ -602,8 +631,22 @@ function theme_image_style_list($variables) {
   foreach ($styles as $style) {
     $row = array();
     $row[] = l($style['name'], 'admin/config/media/image-styles/edit/' . $style['name']);
-    $row[] = l(t('edit'), 'admin/config/media/image-styles/edit/' . $style['name'], $link_attributes);
-    $row[] = l(t('delete'), 'admin/config/media/image-styles/delete/' . $style['name'], $link_attributes);
+
+    if ($style['storage'] == IMAGE_STORAGE_NORMAL) {
+      $row[] = t('Custom');
+      $row[] = l(t('edit'), 'admin/config/media/image-styles/edit/' . $style['name'], $link_attributes);
+      $row[] = l(t('delete'), 'admin/config/media/image-styles/delete/' . $style['name'], $link_attributes);
+    }
+    elseif ($style['storage'] == IMAGE_STORAGE_OVERRIDE) {
+      $row[] = t('Overridden');
+      $row[] = l(t('edit'), 'admin/config/media/image-styles/edit/' . $style['name'], $link_attributes);
+      $row[] = l(t('revert'), 'admin/config/media/image-styles/revert/' . $style['name'], $link_attributes);
+    }
+    else {
+      $row[] = t('Default');
+      $row[] = l(t('edit'), 'admin/config/media/image-styles/edit/' . $style['name'], $link_attributes);
+      $row[] = '';
+    }
     $rows[] = $row;
   }
 
@@ -633,7 +676,7 @@ function theme_image_style_effects($variables) {
   foreach (element_children($form) as $key) {
     $row = array();
     $form[$key]['weight']['#attributes']['class'] = array('image-effect-order-weight');
-    if ($key != 'new') {
+    if (is_numeric($key)) {
       $summary = drupal_render($form[$key]['summary']);
       $row[] = drupal_render($form[$key]['label']) . (empty($summary) ? '' : ' ' . $summary);
       $row[] = drupal_render($form[$key]['weight']);
@@ -650,7 +693,7 @@ function theme_image_style_effects($variables) {
     if (!isset($form[$key]['#access']) || $form[$key]['#access']) {
       $rows[] = array(
         'data' => $row,
-        'class' => !empty($form[$key]['weight']['#access']) || $key == 'new' ? array('draggable') : array(),
+        'class' => array('draggable'),
       );
     }
   }

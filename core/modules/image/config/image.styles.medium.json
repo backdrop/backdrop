@@ -1,15 +1,17 @@
 {
+  "_config_name": "image.styles.medium.json",
+  "overridden": false,
+  "module": "image",
   "name": "medium",
-  "effects": {
-    "image_scale_220_220_1": {
+  "effects": [
+    {
       "name": "image_scale",
       "data": {
         "width": "220",
         "height": "220",
         "upscale": 1
       },
-      "weight": 1,
-      "ieid": "image_scale_220_220_1"
+      "weight": 1
     }
-  }
+  ]
 }

@@ -133,10 +133,13 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
 /**
  * Moves the default config supplied by a module to the live config directory.
  *
- * @param
+ * @param string $module
  *   The name of the module we are installing.
+ * @param string|NULL $config_name
+ *   Optional. If wanting to copy just a single configuration file from the
+ *   module, specify the configuration file name without the extension.
  */
-function config_install_default_config($module) {
+function config_install_default_config($module, $config_name = NULL) {
   $module_config_dir = drupal_get_path('module', $module) . '/config';
   $storage = new ConfigFileStorage($module_config_dir);
   if (is_dir(drupal_get_path('module', $module) . '/config')) {
@@ -147,12 +150,13 @@ function config_install_default_config($module) {
       // needs to be the same as the file name WITHOUT the extension.
       $parts = explode('/', $file);
       $file = array_pop($parts);
-      $config_name = str_replace('.json', '', $file);
-
-      $data = $storage->read($config_name);
-      $config = config($config_name);
-      $config->setData($data);
-      $config->save();
+      $file_config_name = str_replace('.json', '', $file);
+      if (is_null($config_name) || $file_config_name === $config_name) {
+        $data = $storage->read($file_config_name);
+        $config = config($file_config_name);
+        $config->setData($data);
+        $config->save();
+      }
     }
   }
 }
