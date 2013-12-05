@@ -1,0 +1,17 @@
+{
+  "_config_name": "image.styles.medium.json",
+  "overridden": false,
+  "module": "image",
+  "name": "medium",
+  "effects": [
+    {
+      "name": "image_scale",
+      "data": {
+        "width": "220",
+        "height": "220",
+        "upscale": 1
+      },
+      "weight": 1
+    }
+  ]
+}

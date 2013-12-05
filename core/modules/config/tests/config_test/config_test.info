@@ -1,0 +1,6 @@
+name = Configuration test
+description = Provides sample configuration files for testing.
+version = VERSION
+core = 8.x
+package = Testing
+hidden = TRUE
