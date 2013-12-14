@@ -444,10 +444,12 @@ function image_styles() {
           $style['storage'] = IMAGE_STORAGE_NORMAL;
         }
         foreach ($config->get('effects') as $key => $effect) {
-          $definition = image_effect_definition_load($effect['name']);
-          $effect = array_merge($definition, $effect);
-          $effect['ieid'] = $key;
-          $style['effects'][$key] = $effect;
+          // Do not include effects for definitions that are missing.
+          if ($definition = image_effect_definition_load($effect['name'])) {
+            $effect = array_merge($definition, $effect);
+            $effect['ieid'] = $key;
+            $style['effects'][$key] = $effect;
+          }
         }
         // Sort the effects by weight.
         uasort($style['effects'], function ($a, $b) {
