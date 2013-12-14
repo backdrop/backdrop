@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @ingroup hooks
+ * @addtogroup hooks
  * @{
  */
 
@@ -73,35 +73,19 @@ function hook_field_extra_fields_alter(&$info) {
 /**
  * @defgroup field_types Field Types API
  * @{
- * Define field types, widget types, display formatter types, storage types.
+ * Define field types.
  *
- * The bulk of the Field Types API are related to field types. A field type
- * represents a particular type of data (integer, string, date, etc.) that
- * can be attached to a fieldable entity. hook_field_info() defines the basic
- * properties of a field type, and a variety of other field hooks are called by
- * the Field Attach API to perform field-type-specific actions.
- *
- * @see hook_field_info()
- * @see hook_field_info_alter()
- * @see hook_field_schema()
- * @see hook_field_load()
- * @see hook_field_validate()
- * @see hook_field_presave()
- * @see hook_field_insert()
- * @see hook_field_update()
- * @see hook_field_delete()
- * @see hook_field_delete_revision()
- * @see hook_field_prepare_view()
- * @see hook_field_is_empty()
+ * In the Field API, each field has a type, which determines what kind of data
+ * (integer, string, date, etc.) the field can hold, which settings it provides,
+ * and so on. The data type(s) accepted by a field are defined in
+ * hook_field_schema(); other basic properties of a field are defined in
+ * hook_field_info(). The other hooks below are called by the Field Attach API
+ * to perform field-type-specific actions.
  *
  * The Field Types API also defines two kinds of pluggable handlers: widgets
- * and formatters, which specify how the field appears in edit forms and in
- * displayed entities. Widgets and formatters can be implemented by a field-type
- * module for its own field types, or by a third-party module to extend the
- * behavior of existing field types.
- *
- * @see hook_field_widget_info()
- * @see hook_field_formatter_info()
+ * and formatters. @link field_widget Widgets @endlink specify how the field
+ * appears in edit forms, while @link field_formatter formatters @endlink
+ * specify how the field appears in displayed entities.
  *
  * A third kind of pluggable handlers, storage backends, is defined by the
  * @link field_storage Field Storage API @endlink.
@@ -432,9 +416,14 @@ function hook_field_presave($entity_type, $entity, $field, $instance, $langcode,
 }
 
 /**
- * Define custom insert behavior for this module's field types.
+ * Define custom insert behavior for this module's field data.
  *
- * Invoked from field_attach_insert().
+ * This hook is invoked from field_attach_insert() on the module that defines a
+ * field, during the process of inserting an entity object (node, taxonomy term,
+ * etc.). It is invoked just before the data for this field on the particular
+ * entity object is inserted into field storage. Only field modules that are
+ * storing or tracking information outside the standard field storage mechanism
+ * need to implement this hook.
  *
  * @param $entity_type
  *   The type of $entity.
@@ -448,6 +437,9 @@ function hook_field_presave($entity_type, $entity, $field, $instance, $langcode,
  *   The language associated with $items.
  * @param $items
  *   $entity->{$field['field_name']}[$langcode], or an empty array if unset.
+ *
+ * @see hook_field_update()
+ * @see hook_field_delete()
  */
 function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if (variable_get('taxonomy_maintain_index_table', TRUE) && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node' && $entity->status) {
@@ -465,9 +457,14 @@ function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, 
 }
 
 /**
- * Define custom update behavior for this module's field types.
+ * Define custom update behavior for this module's field data.
  *
- * Invoked from field_attach_update().
+ * This hook is invoked from field_attach_update() on the module that defines a
+ * field, during the process of updating an entity object (node, taxonomy term,
+ * etc.). It is invoked just before the data for this field on the particular
+ * entity object is updated into field storage. Only field modules that are
+ * storing or tracking information outside the standard field storage mechanism
+ * need to implement this hook.
  *
  * @param $entity_type
  *   The type of $entity.
@@ -481,6 +478,9 @@ function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  *   The language associated with $items.
  * @param $items
  *   $entity->{$field['field_name']}[$langcode], or an empty array if unset.
+ *
+ * @see hook_field_insert()
+ * @see hook_field_delete()
  */
 function hook_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if (variable_get('taxonomy_maintain_index_table', TRUE) && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node') {
@@ -546,10 +546,14 @@ function hook_field_storage_update_field($field, $prior_field, $has_data) {
 }
 
 /**
- * Define custom delete behavior for this module's field types.
+ * Define custom delete behavior for this module's field data.
  *
- * This hook is invoked just before the data is deleted from field storage
- * in field_attach_delete().
+ * This hook is invoked from field_attach_delete() on the module that defines a
+ * field, during the process of deleting an entity object (node, taxonomy term,
+ * etc.). It is invoked just before the data for this field on the particular
+ * entity object is deleted from field storage. Only field modules that are
+ * storing or tracking information outside the standard field storage mechanism
+ * need to implement this hook.
  *
  * @param $entity_type
  *   The type of $entity.
@@ -563,6 +567,9 @@ function hook_field_storage_update_field($field, $prior_field, $has_data) {
  *   The language associated with $items.
  * @param $items
  *   $entity->{$field['field_name']}[$langcode], or an empty array if unset.
+ *
+ * @see hook_field_insert()
+ * @see hook_field_update()
  */
 function hook_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
@@ -573,7 +580,7 @@ function hook_field_delete($entity_type, $entity, $field, $instance, $langcode, 
     // be counted in hook_file_references().
     $item['file_field_type'] = $entity_type;
     $item['file_field_id'] = $id;
-    file_field_delete_file($item, $field);
+    file_field_delete_file($item, $field, $entity_type, $id);
   }
 }
 
@@ -598,10 +605,11 @@ function hook_field_delete($entity_type, $entity, $field, $instance, $langcode, 
  *   $entity->{$field['field_name']}[$langcode], or an empty array if unset.
  */
 function hook_field_delete_revision($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
   foreach ($items as $delta => $item) {
     // For hook_file_references, remember that this file is being deleted.
     $item['file_field_name'] = $field['field_name'];
-    if (file_field_delete_file($item, $field)) {
+    if (file_field_delete_file($item, $field, $entity_type, $id)) {
       $items[$delta] = NULL;
     }
   }
@@ -658,11 +666,33 @@ function hook_field_is_empty($item, $field) {
 }
 
 /**
- * Expose Field API widget types.
+ * @} End of "defgroup field_types"
+ */
+
+/**
+ * @defgroup field_widget Field Widget API
+ * @{
+ * Define Field API widget types.
  *
- * Widgets are Form API elements with additional processing capabilities.
- * Widget hooks are typically called by the Field Attach API during the
- * creation of the field form structure with field_attach_form().
+ * Field API widgets specify how fields are displayed in edit forms. Fields of a
+ * given @link field_types field type @endlink may be edited using more than one
+ * widget. In this case, the Field UI module allows the site builder to choose
+ * which widget to use. Widget types are defined by implementing
+ * hook_field_widget_info().
+ *
+ * Widgets are
+ * @link http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html Form API @endlink
+ * elements with additional processing capabilities. Widget hooks are typically
+ * called by the Field Attach API during the creation of the field form
+ * structure with field_attach_form().
+ *
+ * @see field
+ * @see field_types
+ * @see field_formatter
+ */
+
+/**
+ * Expose Field API widget types.
  *
  * @return
  *   An array describing the widget types implemented by the module.
@@ -842,17 +872,16 @@ function hook_field_widget_form(&$form, &$form_state, $field, $instance, $langco
  * @param $context
  *   An associative array containing the following key-value pairs, matching the
  *   arguments received by hook_field_widget_form():
- *   - "form": The form structure where widgets are being attached to. This
- *     might be a full form structure, or a sub-element of a larger form.
- *   - "field": The field structure.
- *   - "instance": The field instance structure.
- *   - "langcode": The language associated with $items.
- *   - "items": Array of default values for this field.
- *   - "delta": The order of this item in the array of subelements (0, 1, 2,
- *     etc).
+ *   - form: The form structure to which widgets are being attached. This may be
+ *     a full form structure, or a sub-element of a larger form.
+ *   - field: The field structure.
+ *   - instance: The field instance structure.
+ *   - langcode: The language associated with $items.
+ *   - items: Array of default values for this field.
+ *   - delta: The order of this item in the array of subelements (0, 1, 2, etc).
  *
  * @see hook_field_widget_form()
- * @see hook_field_widget_WIDGET_TYPE_form_alter
+ * @see hook_field_widget_WIDGET_TYPE_form_alter()
  */
 function hook_field_widget_form_alter(&$element, &$form_state, $context) {
   // Add a css class to widget form elements for all fields of type mytype.
@@ -917,6 +946,29 @@ function hook_field_widget_WIDGET_TYPE_form_alter(&$element, &$form_state, $cont
 function hook_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element['value'], $error['message']);
 }
+
+
+/**
+ * @} End of "defgroup field_widget"
+ */
+
+
+/**
+ * @defgroup field_formatter Field Formatter API
+ * @{
+ * Define Field API formatter types.
+ *
+ * Field API formatters specify how fields are displayed when the entity to
+ * which the field is attached is displayed. Fields of a given
+ * @link field_types field type @endlink may be displayed using more than one
+ * formatter. In this case, the Field UI module allows the site builder to
+ * choose which formatter to use. Field formatters are defined by implementing
+ * hook_field_formatter_info().
+ *
+ * @see field
+ * @see field_types
+ * @see field_widget
+ */
 
 /**
  * Expose Field API formatter types.
@@ -1136,7 +1188,7 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
 }
 
 /**
- * @} End of "ingroup field_type"
+ * @} End of "defgroup field_formatter"
  */
 
 /**
@@ -1486,7 +1538,7 @@ function hook_field_attach_delete_bundle($entity_type, $bundle, $instances) {
 }
 
 /**
- * @} End of "ingroup field_attach"
+ * @} End of "defgroup field_attach"
  */
 
 /**
@@ -2604,5 +2656,5 @@ function hook_field_access($op, $field, $entity_type, $entity, $account) {
 }
 
 /**
- * @} End of "ingroup hooks"
+ * @} End of "addtogroup hooks"
  */

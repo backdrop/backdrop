@@ -380,7 +380,7 @@ function hook_node_grants_alter(&$grants, $account, $op) {
   if ($op != 'view' && !empty($restricted)) {
     // Now check the roles for this account against the restrictions.
     foreach ($restricted as $role_id) {
-      if (isset($user->roles[$role_id])) {
+      if (isset($account->roles[$role_id])) {
         $grants = array();
       }
     }
@@ -715,8 +715,8 @@ function hook_node_update($node) {
  * @param $node
  *   The node being indexed.
  *
- * @return
- *   Array of additional information to be indexed.
+ * @return string
+ *   Additional node information to be indexed.
  *
  * @ingroup node_api_hooks
  */

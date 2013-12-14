@@ -962,7 +962,7 @@ function hook_menu_link_delete($link) {
  * - #link: An associative array containing:
  *   - title: The localized title of the link.
  *   - href: The system path to link to.
- *   - localized_options: An array of options to pass to url().
+ *   - localized_options: An array of options to pass to l().
  * - #active: Whether the link should be marked as 'active'.
  *
  * @param $data
@@ -1809,6 +1809,10 @@ function hook_theme_registry_alter(&$theme_registry) {
  * be used on all pages except those which have a valid per-page or per-section
  * theme set via a theme callback function in hook_menu(); the themes on those
  * pages can only be overridden using hook_menu_alter().
+ *
+ * Note that returning different themes for the same path may not work with page
+ * caching. This is most likely to be a problem if an anonymous user on a given
+ * path could have different themes returned under different conditions.
  *
  * Since only one theme can be used at a time, the last (i.e., highest
  * weighted) module which returns a valid theme name from this hook will
@@ -3092,6 +3096,9 @@ function hook_registry_files_alter(&$files, $modules) {
  * inspect later. It is important to remove any temporary variables using
  * variable_del() before your last task has completed and control is handed
  * back to the installer.
+ * 
+ * @param array $install_state
+ *   An array of information about the current installation state.
  *
  * @return
  *   A keyed array of tasks the profile will perform during the final stage of
@@ -3150,7 +3157,7 @@ function hook_registry_files_alter(&$files, $modules) {
  * @see install_state_defaults()
  * @see batch_set()
  */
-function hook_install_tasks() {
+function hook_install_tasks(&$install_state) {
   // Here, we define a variable to allow tasks to indicate that a particular,
   // processor-intensive batch process needs to be triggered later on in the
   // installation.
