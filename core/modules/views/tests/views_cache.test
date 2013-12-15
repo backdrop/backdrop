@@ -1,0 +1,244 @@
+<?php
+
+/**
+ * @file
+ * Definition of ViewsCacheTest.
+ */
+
+/**
+ * Basic test for pluggable caching.
+ *
+ * @see views_plugin_cache
+ */
+class ViewsCacheTest extends ViewsSqlTest {
+  public static function getInfo() {
+    return array(
+      'name' => 'Cache',
+      'description' => 'Tests pluggable caching for views.',
+      'group' => 'Views Plugins'
+    );
+  }
+
+  /**
+   * Build and return a basic view of the views_test table.
+   *
+   * @return view
+   */
+  protected function getBasicView() {
+    views_include('view');
+
+    // Create the basic view.
+    $view = new view();
+    $view->name = 'test_view';
+    $view->add_display('default');
+    $view->base_table = 'views_test';
+
+    // Set up the fields we need.
+    $display = $view->new_display('default', 'Master', 'default');
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Set up the sort order.
+    $display->override_option('sorts', array(
+      'id' => array(
+        'order' => 'ASC',
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+    ));
+
+    return $view;
+  }
+
+  /**
+   * Tests time based caching.
+   *
+   * @see views_plugin_cache_time
+   */
+  function testTimeCaching() {
+    // Create a basic result which just 2 results.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'time',
+      'results_lifespan' => '3600',
+      'output_lifespan' => '3600',
+    ));
+
+    $this->executeView($view);
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+
+    // Add another man to the beatles.
+    $record = array(
+      'name' => 'Rod Davis',
+      'age' => 29,
+      'job' => 'Banjo',
+    );
+    drupal_write_record('views_test', $record);
+
+    // The Result should be the same as before, because of the caching.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'time',
+      'results_lifespan' => '3600',
+      'output_lifespan' => '3600',
+    ));
+
+    $this->executeView($view);
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+  }
+
+  /**
+   * Tests no caching.
+   *
+   * @see views_plugin_cache_time
+   */
+  function testNoneCaching() {
+    // Create a basic result which just 2 results.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'none',
+    ));
+
+    $this->executeView($view);
+    // Verify the result.
+    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+
+    // Add another man to the beatles.
+    $record = array(
+      'name' => 'Rod Davis',
+      'age' => 29,
+      'job' => 'Banjo',
+    );
+
+    drupal_write_record('views_test', $record);
+
+    // The Result changes, because the view is not cached.
+    $view = $this->getBasicView();
+    $view->set_display();
+    $view->display_handler->override_option('cache', array(
+      'type' => 'none',
+    ));
+
+    $this->executeView($view);
+    // Verify the result.
+    $this->assertEqual(6, count($view->result), t('The number of returned rows match.'));
+  }
+
+  /**
+   * Tests css/js storage and restoring mechanism.
+   */
+  function testHeaderStorage() {
+    // Create a view with output caching enabled.
+    // Some hook_views_pre_render in views_test.module adds the test css/js file.
+    // so they should be added to the css/js storage.
+    $view = $this->getBasicView();
+    $view->init_display();
+    $view->name = 'test_cache_header_storage';
+    $view->display_handler->override_option('cache', array(
+      'type' => 'time',
+      'output_lifespan' => '3600',
+    ));
+
+    $view->preview();
+    $view->destroy();
+    unset($view->pre_render_called);
+    drupal_static_reset('drupal_add_css');
+    drupal_static_reset('drupal_add_js');
+
+    $view->init_display();
+    $view->preview();
+    $css = drupal_add_css();
+    $css_path = drupal_get_path('module', 'views_test') . '/views_cache.test.css';
+    $js_path = drupal_get_path('module', 'views_test') . '/views_cache.test.js';
+    $js = drupal_add_js();
+
+    $this->assertTrue(isset($css[$css_path]), 'Make sure the css is added for cached views.');
+    $this->assertTrue(isset($js[$js_path]), 'Make sure the js is added for cached views.');
+    $this->assertFalse(!empty($view->pre_render_called), 'Make sure hook_views_pre_render is not called for the cached view.');
+    $view->destroy();
+
+    // Now add some css/jss before running the view.
+    // Make sure that this css is not added when running the cached view.
+    $view->name = 'test_cache_header_storage_2';
+
+    $system_css_path = drupal_get_path('module', 'system') . '/system.maintenance.css';
+    drupal_add_css($system_css_path);
+    $system_js_path = drupal_get_path('module', 'system') . '/system.cron.js';
+    drupal_add_js($system_js_path);
+
+    $view->init_display();
+    $view->preview();
+    $view->destroy();
+    drupal_static_reset('drupal_add_css');
+    drupal_static_reset('drupal_add_js');
+
+    $view->init_display();
+    $view->preview();
+
+    $css = drupal_add_css();
+    $js = drupal_add_js();
+
+    $this->assertFalse(isset($css[$system_css_path]), 'Make sure that unrelated css is not added.');
+    $this->assertFalse(isset($js[$system_js_path]), 'Make sure that unrelated js is not added.');
+
+  }
+
+  /**
+   * Check that HTTP headers are cached for views.
+   */
+  function testHttpHeadersCaching() {
+    // Create a few nodes to appear in RSS feed.
+    for ($i = 0; $i < 5; $i++) {
+      $this->drupalCreateNode();
+    }
+
+    // Make the first request and check returned content type.
+    $this->drupalGet('test_feed_http_headers_caching');
+    $first_content = $this->drupalGetContent();
+    $first_content_type = $this->drupalGetHeader('content-type');
+    $expected_type = 'application/rss+xml';
+    $this->assertIdentical(0, strpos(trim($first_content_type), $expected_type), t('Expected content type returned.'));
+
+    // Check that we have 5 items in RSS feed returned by the first request.
+    $xml = simplexml_load_string($first_content);
+    $items = $xml->xpath('/rss/channel/item');
+    $this->assertEqual(5, count($items), t('The number of RSS feed items matched.'));
+
+    // Create another node to be sure we get cached results on the second
+    // request.
+    $this->drupalCreateNode();
+
+    // Make the second request, check content type and content matching.
+    $this->drupalGet('test_feed_http_headers_caching');
+    $second_content = $this->drupalGetContent();
+    $this->assertEqual($first_content, $second_content, t('The second result fetched from cache.'));
+    $second_content_type = $this->drupalGetHeader('content-type');
+    $this->assertEqual($first_content_type, $second_content_type, t('Content types of responses are equal.'));
+  }
+
+}
