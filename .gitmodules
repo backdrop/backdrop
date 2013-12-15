@@ -1,0 +1,3 @@
+[submodule "core/modules/views"]
+	path = core/modules/views
+	url = http://git.drupal.org/project/views.git
