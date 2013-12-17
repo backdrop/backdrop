@@ -84,16 +84,6 @@ fieldset.fieldset-no-legend {
   margin-right: 1em;
 }
 
-/* Override for filter button on the views list screen */
-#ctools-export-ui-list-form .form-submit {
-  margin-bottom: 0;
-}
-
-#ctools-export-ui-list-form .ctools-export-ui-first-row .form-item {
-  margin-top: 3px;
-  margin-right: 5px; /* LTR */
-}
-
 .form-item,
 .form-item .form-item {
   margin-bottom: 0;
@@ -115,44 +105,6 @@ fieldset.fieldset-no-legend {
 .form-radios > .form-item {
   margin-top: 3px;
 }
-
-/* @group Dependent options
- *
- * Dependent options are identified in CTools dependent.js
- */
-
-/* The .dependent-options.form-item is necessary to supercede the Seven .form-item
- * reset declaration that sets the margin to zero.
- */
-.dependent-options,
-.dependent-options.form-item,
-.form-item-options-expose-required,
-.form-item-options-expose-label,
-.form-item-options-expose-description {
-  margin-left: 1.5em;
-}
-
-.views-admin-dependent .form-item .form-item,
-.views-admin-dependent .form-type-checkboxes,
-.views-admin-dependent .form-type-radios,
-.views-admin-dependent .dependent-options,
-.views-admin-dependent .form-item .form-item,
-.views-admin-dependent .dependent-options .form-type-select,
-.views-admin-dependent .dependent-options .form-type-textfield,
-.form-item-options-expose-required,
-.form-item-options-expose-label,
-.form-item-options-expose-description {
-  margin-bottom: 6px;
-  margin-top: 6px;
-}
-
-.views-admin-dependent .form-type-radio,
-.views-admin-dependent .form-radios .form-item {
-  margin-bottom: 2px;
-  margin-top: 2px;
-}
-
-/* @end */
 
 /* @end */
 

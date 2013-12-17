@@ -68,7 +68,8 @@ class view {
   /**
    * Is the view disabled.
    *
-   * This value is used for exported view, to provide some default views which aren't enabled.
+   * This value is used for exported view, to provide some module-provided
+   * views which aren't enabled out-of-the-box.
    *
    * @var bool
    */
@@ -468,7 +469,6 @@ class view {
       }
       $this->display[$id]->handler = views_get_plugin('display', $this->display[$id]->display_plugin);
       if (!empty($this->display[$id]->handler)) {
-        $this->display[$id]->handler->localization_keys = array($id);
         // Initialize the new display handler with data.
         $this->display[$id]->handler->init($this, $this->display[$id]);
         // If this is NOT the default display handler, let it know which is
@@ -1780,7 +1780,6 @@ class view {
       $config_data['display'][$display->id] = $display_config_data;
     }
     config('views.view.' . $this->name)->setData($config_data)->save();
-    $this->save_locale_strings();
 
     // Clear caches.
     views_invalidate_cache();
@@ -1800,55 +1799,6 @@ class view {
   }
 
   /**
-   * Export a view as PHP code.
-   */
-  function export($indent = '') {
-    $this->init_display();
-    $this->init_query();
-    $output = '';
-    $output .= $this->export_row('view', $indent);
-    // Set the API version
-    $output .= $indent . '$view->api_version = \'' . views_api_version() . "';\n";
-    $output .= $indent . '$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */' . "\n";
-
-    foreach ($this->display as $id => $display) {
-      $output .= "\n" . $indent . "/* Display: $display->display_title */\n";
-      $output .= $indent . '$handler = $view->new_display(' . ctools_var_export($display->display_plugin, $indent) . ', ' . ctools_var_export($display->display_title, $indent) . ', \'' . $id . "');\n";
-      if (empty($display->handler)) {
-        // @todo -- probably need a method of exporting broken displays as
-        // they may simply be broken because a module is not installed. That
-        // does not invalidate the display.
-        continue;
-      }
-
-      $output .= $display->handler->export_options($indent, '$handler->options');
-    }
-
-    // Give the localization system a chance to export translatables to code.
-    if ($this->init_localization()) {
-      $this->export_locale_strings('export');
-      $translatables = $this->localization_plugin->export_render($indent);
-      if (!empty($translatables)) {
-        $output .= $translatables;
-      }
-    }
-
-    return $output;
-  }
-
-  /**
-   * Make a copy of this view that has been sanitized of all database IDs
-   * and handlers and other stuff.
-   *
-   * I'd call this clone() but it's reserved.
-   */
-  function copy() {
-    $code = $this->export();
-    eval($code);
-    return $view;
-  }
-
-  /**
    * Safely clone a view.
    *
    * Because views are complicated objects within objects, and PHP loves to
@@ -1863,7 +1813,7 @@ class view {
    *    The cloned view.
    */
   function clone_view() {
-    $clone = version_compare(phpversion(), '5.0') < 0 ? $this : clone($this);
+    $clone = clone($this);
 
     $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'exposed_widgets', 'many_to_one_tables', 'feed_icon');
     foreach ($keys as $key) {
@@ -1986,68 +1936,12 @@ class view {
   }
 
   /**
-   * Find and initialize the localizer plugin.
-   */
-  function init_localization() {
-    if (isset($this->localization_plugin) && is_object($this->localization_plugin)) {
-      return TRUE;
-    }
-
-    $this->localization_plugin = views_get_plugin('localization', views_get_localization_plugin());
-
-    if (empty($this->localization_plugin)) {
-      $this->localization_plugin = views_get_plugin('localization', 'none');
-      return FALSE;
-    }
-
-    /**
-    * Figure out whether there should be options.
-    */
-    $this->localization_plugin->init($this);
-
-    return $this->localization_plugin->translate;
-  }
-
-  /**
    * Determine whether a view supports admin string translation.
    */
   function is_translatable() {
     // If the view is normal or overridden, use admin string translation.
     // A newly created view won't have a type. Accept this.
     return (!isset($this->type) || in_array($this->type, array(t('Normal'), t('Overridden')))) ? TRUE : FALSE;
-  }
-
-  /**
-   * Send strings for localization.
-   */
-  function save_locale_strings() {
-    $this->process_locale_strings('save');
-  }
-
-  /**
-   * Delete localized strings.
-   */
-  function delete_locale_strings() {
-    $this->process_locale_strings('delete');
-  }
-
-  /**
-   * Export localized strings.
-   */
-  function export_locale_strings() {
-    $this->process_locale_strings('export');
-  }
-
-  /**
-   * Process strings for localization, deletion or export to code.
-   */
-  function process_locale_strings($op) {
-    // Ensure this view supports translation, we have a display, and we
-    // have a localization plugin.
-    // @fixme Export does not init every handler.
-    if (($this->is_translatable() || $op == 'export') && $this->init_display() && $this->init_localization()) {
-      $this->localization_plugin->process_locale_strings($op);
-    }
   }
 
   /**

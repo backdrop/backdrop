@@ -179,9 +179,6 @@
  * - Exposed form plugins: Exposed form plugins are responsible for building,
  *   rendering and controlling exposed forms. They can expose new parts of the
  *   view to the user and more.
- * - Localization plugins: Localization plugins take care how the view options
- *   are translated. There are example implementations for t(), 'no
- *   translation' and i18n.
  * - Display extenders: Display extender plugins allow scaling of views options
  *   horizontally. This means that you can add options and do stuff on all
  *   views displays. One theoretical example is metatags for views.
@@ -217,18 +214,15 @@
  *    ),
  *    'query' => array(
  *      // ... list of query plugins,
- *     ),,
+ *     ),
  *    'cache' => array(
  *      // ... list of cache plugins,
- *     ),,
+ *     ),
  *    'pager' => array(
  *      // ... list of pager plugins,
- *     ),,
+ *     ),
  *    'exposed_form' => array(
  *      // ... list of exposed_form plugins,
- *     ),,
- *    'localization' => array(
- *      // ... list of localization plugins,
  *     ),
  *    'display_extender' => array(
  *      // ... list of display extender plugins,
@@ -662,123 +656,6 @@ function hook_views_api() {
 }
 
 /**
- * This hook allows modules to provide their own views which can either be used
- * as-is or as a "starter" for users to build from.
- *
- * This hook should be placed in MODULENAME.views_default.inc and it will be
- * auto-loaded. MODULENAME.views_default.inc must be in the directory specified
- * by the 'path' key returned by MODULENAME_views_api(), or the same directory
- * as the .module file, if 'path' is unspecified.
- *
- * The $view->disabled boolean flag indicates whether the View should be
- * enabled (FALSE) or disabled (TRUE) by default.
- *
- * @return
- *   An associative array containing the structures of views, as generated from
- *   the Export tab, keyed by the view name. A best practice is to go through
- *   and add t() to all title and label strings, with the exception of menu
- *   strings.
- */
-function hook_views_default_views() {
-  // Begin copy and paste of output from the Export tab of a view.
-  $view = new view;
-  $view->name = 'frontpage';
-  $view->description = 'Emulates the default Drupal front page; you may set the default home page path to this view to make it your front page.';
-  $view->tag = 'default';
-  $view->base_table = 'node';
-  $view->human_name = 'Front page';
-  $view->core = 0;
-  $view->api_version = '3.0';
-  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
-
-  /* Display: Master */
-  $handler = $view->new_display('default', 'Master', 'default');
-  $handler->display->display_options['access']['type'] = 'none';
-  $handler->display->display_options['cache']['type'] = 'none';
-  $handler->display->display_options['query']['type'] = 'views_query';
-  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
-  $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['pager']['type'] = 'full';
-  $handler->display->display_options['style_plugin'] = 'default';
-  $handler->display->display_options['row_plugin'] = 'node';
-  /* Sort criterion: Content: Sticky */
-  $handler->display->display_options['sorts']['sticky']['id'] = 'sticky';
-  $handler->display->display_options['sorts']['sticky']['table'] = 'node';
-  $handler->display->display_options['sorts']['sticky']['field'] = 'sticky';
-  $handler->display->display_options['sorts']['sticky']['order'] = 'DESC';
-  /* Sort criterion: Content: Post date */
-  $handler->display->display_options['sorts']['created']['id'] = 'created';
-  $handler->display->display_options['sorts']['created']['table'] = 'node';
-  $handler->display->display_options['sorts']['created']['field'] = 'created';
-  $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Filter criterion: Content: Promoted to front page */
-  $handler->display->display_options['filters']['promote']['id'] = 'promote';
-  $handler->display->display_options['filters']['promote']['table'] = 'node';
-  $handler->display->display_options['filters']['promote']['field'] = 'promote';
-  $handler->display->display_options['filters']['promote']['value'] = '1';
-  $handler->display->display_options['filters']['promote']['group'] = 0;
-  $handler->display->display_options['filters']['promote']['expose']['operator'] = FALSE;
-  /* Filter criterion: Content: Published */
-  $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'node';
-  $handler->display->display_options['filters']['status']['field'] = 'status';
-  $handler->display->display_options['filters']['status']['value'] = '1';
-  $handler->display->display_options['filters']['status']['group'] = 0;
-  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-
-  /* Display: Page */
-  $handler = $view->new_display('page', 'Page', 'page');
-  $handler->display->display_options['path'] = 'frontpage';
-
-  /* Display: Feed */
-  $handler = $view->new_display('feed', 'Feed', 'feed');
-  $handler->display->display_options['defaults']['title'] = FALSE;
-  $handler->display->display_options['title'] = 'Front page feed';
-  $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['style_plugin'] = 'rss';
-  $handler->display->display_options['row_plugin'] = 'node_rss';
-  $handler->display->display_options['path'] = 'rss.xml';
-  $handler->display->display_options['displays'] = array(
-    'default' => 'default',
-    'page' => 'page',
-  );
-  $handler->display->display_options['sitename_title'] = '1';
-
-  // (Export ends here.)
-
-  // Add view to list of views to provide.
-  $views[$view->name] = $view;
-
-  // ...Repeat all of the above for each view the module should provide.
-
-  // At the end, return array of default views.
-  return $views;
-}
-
-/**
- * Alter default views defined by other modules.
- *
- * This hook is called right before all default views are cached to the
- * database. It takes a keyed array of views by reference.
- *
- * Example usage to add a field to a view:
- * @code
- *   $handler =& $view->display['DISPLAY_ID']->handler;
- *   // Add the user name field to the view.
- *   $handler->display->display_options['fields']['name']['id'] = 'name';
- *   $handler->display->display_options['fields']['name']['table'] = 'users';
- *   $handler->display->display_options['fields']['name']['field'] = 'name';
- *   $handler->display->display_options['fields']['name']['label'] = 'Author';
- *   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
- * @endcode
- */
-function hook_views_default_views_alter(&$views) {
-  if (isset($views['taxonomy_term'])) {
-    $views['taxonomy_term']->display['default']->display_options['title'] = 'Categories';
-  }
-}
-
-/**
  * Performs replacements in the query before being performed.
  *
  * @param $view
@@ -1060,9 +937,9 @@ function hook_views_preview_info_alter(&$rows, $view) {
  *   'page_1'.
  */
 function hook_views_ui_display_top_links_alter(&$links, $view, $display_id) {
-  // Put the export link first in the list.
-  if (isset($links['export'])) {
-    $links = array('export' => $links['export']) + $links;
+  // Put the clone link first in the list.
+  if (isset($links['clone'])) {
+    $links = array('clone' => $links['clone']) + $links;
   }
 }
 

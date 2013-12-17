@@ -424,7 +424,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
       }
     }
     elseif (!empty($this->value) && ($this->operator == 'in' || $this->operator == 'not in')) {
-      $errors[] = t('The value @value is not an array for @operator on filter: @filter', array('@value' => views_var_export($this->value), '@operator' => $this->operator, '@filter' => $this->ui_name(TRUE)));
+      $errors[] = t('The value @value is not an array for @operator on filter: @filter', array('@value' => print_r($this->value, 1), '@operator' => $this->operator, '@filter' => $this->ui_name(TRUE)));
     }
     return $errors;
   }

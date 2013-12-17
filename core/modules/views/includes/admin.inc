@@ -291,7 +291,6 @@ function views_ui_preview($view, $display_id, $args = array()) {
 function view_ui_list_page() {
   views_include('admin');
   views_ui_add_admin_css();
-  views_add_js('views-list');
 
   $header = array(
     array('data' => t('View name'), 'class' => array('views-ui-name')),
@@ -346,7 +345,7 @@ function view_ui_list_page() {
     'header' => $header,
     'rows' => $rows,
     'empty' => t('No views match the search criteria.'),
-    'attributes' => array('id' => 'ctools-export-ui-list-items'),
+    'attributes' => array('id' => 'views-list'),
   );
   return theme('table', $table);
 }
@@ -1321,10 +1320,6 @@ function views_ui_render_display_top($view, $display_id) {
       'clone' => array(
         'title' => t('clone view'),
         'href' => "admin/structure/views/view/$view->name/clone",
-      ),
-      'export' => array(
-        'title' => t('export view'),
-        'href' => "admin/structure/views/view/$view->name/export",
       ),
       'reorder' => array(
         'title' => t('reorder displays'),
@@ -5030,19 +5025,6 @@ function views_ui_admin_settings_advanced() {
     '#title' => t('Enable views performance statistics/debug messages via the Devel module'),
     '#description' => t("Check this to enable some Views query and performance statistics/debug messages <em>if Devel is installed</em>."),
     '#default_value' => variable_get('views_devel_output', FALSE),
-  );
-
-  $form['locale'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Localization'),
-  );
-
-  $form['locale']['views_localization_plugin'] =  array(
-    '#type' => 'radios',
-    '#title' => t('Translation method'),
-    '#options' => views_fetch_plugin_names('localization', NULL, array()),
-    '#default_value' => views_get_localization_plugin(),
-    '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
   );
 
   $regions = array();

@@ -47,10 +47,6 @@
   margin-right: 2px;
 }
 
-.ctools-export-ui-row label {
-  float: right;
-}
-
 .views-display-column > .ctools-toggle {
   margin-left: 3px;
   margin-right: 6px;
@@ -58,25 +54,6 @@
 .views-display-column > .ctools-toggle.ctools-toggle-collapsed {
   margin-left: 5px;
   margin-right: 9px;
-}
-
-/* @end */
-
-/* @group Dependent */
-
-.dependent-options {
-  margin-left: 0;
-  margin-right: 18px;
-}
-
-/* @end */
-
-/* @group Export */
-
-/* Override for filter button on the views list screen */
-#ctools-export-ui-list-form .form-submit {
-  margin-left: 0em;
-  margin-right: auto;
 }
 
 /* @end */

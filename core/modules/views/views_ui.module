@@ -538,18 +538,6 @@ function views_ui_view_preview_section_rows_links($view) {
   return $links;
 }
 
-
-/**
- * Implments hook_ctools_plugin_directory().
- *
- * Views UI provides wizard plugins on behalf of core base tables.
- */
-function views_ui_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'views_ui' || ($module == 'ctools' && $plugin == 'export_ui')) {
-    return 'plugins/' . $plugin;
-  }
-}
-
 /**
  * Fetch metadata on a specific views ui wizard plugin.
  *
