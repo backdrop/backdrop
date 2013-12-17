@@ -72,8 +72,10 @@ class views_plugin_exposed_form extends views_plugin {
       '#description' => t('Text to display in the reset button of the exposed form.'),
       '#default_value' => $this->options['reset_button_label'],
       '#required' => TRUE,
-      '#dependency' => array(
-        'edit-exposed-form-options-reset-button' => array(1)
+      '#states' => array(
+        'invisible' => array(
+          'input[name="exposed_form_options[reset_button]"]' => array('checked' => FALSE),
+        ),
       ),
     );
 
@@ -98,7 +100,11 @@ class views_plugin_exposed_form extends views_plugin {
       '#description' => t('Text to use when exposed sort is ordered ascending.'),
       '#default_value' => $this->options['sort_asc_label'],
       '#required' => TRUE,
-      '#dependency' => array('edit-exposed-form-options-expose-sort-order' => array(TRUE)),
+      '#states' => array(
+        'visible' => array(
+          'input[name="exposed_form_options[expose_sort_order]"]' => array('checked' => TRUE),
+        ),
+      ),
     );
 
     $form['sort_desc_label'] = array(
@@ -107,7 +113,11 @@ class views_plugin_exposed_form extends views_plugin {
       '#description' => t('Text to use when exposed sort is ordered descending.'),
       '#default_value' => $this->options['sort_desc_label'],
       '#required' => TRUE,
-      '#dependency' => array('edit-exposed-form-options-expose-sort-order' => array(TRUE)),
+      '#states' => array(
+        'visible' => array(
+          'input[name="exposed_form_options[expose_sort_order]"]' => array('checked' => TRUE),
+        ),
+      ),
     );
 
     $form['autosubmit'] = array(
@@ -122,8 +132,10 @@ class views_plugin_exposed_form extends views_plugin {
       '#title' => t('Hide submit button'),
       '#description' => t('Hide submit button if javascript is enabled.'),
       '#default_value' => $this->options['autosubmit_hide'],
-      '#dependency' => array(
-        'edit-exposed-form-options-autosubmit' => array(1),
+      '#states' => array(
+        'invisible' => array(
+          'input[name="exposed_form_options[autosubmit]"]' => array('checked' => FALSE),
+        ),
       ),
     );
   }

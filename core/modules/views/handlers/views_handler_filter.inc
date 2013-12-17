@@ -516,8 +516,10 @@ class views_handler_filter extends views_handler {
         '#title' => t('Operator identifier'),
         '#size' => 40,
         '#description' => t('This will appear in the URL after the ? to identify this operator.'),
-        '#dependency' => array(
-          'edit-options-expose-use-operator' => array(1)
+        '#states' => array(
+          'visible' => array(
+            ':input[name="options[expose][use_operator]"]' => array('checked' => TRUE),
+          ),
         ),
         '#fieldset' => 'more',
       );
@@ -551,8 +553,10 @@ class views_handler_filter extends views_handler {
       '#description' => t('Remember exposed selection only for the selected user role(s). If you select no roles, the exposed data will never be stored.'),
       '#default_value' => $this->options['expose']['remember_roles'],
       '#options' => $role_options,
-      '#dependency' =>  array(
-        'edit-options-expose-remember' => array(1),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="options[expose][remember]"]' => array('checked' => FALSE),
+        ),
       ),
     );
 
@@ -942,9 +946,22 @@ class views_handler_filter extends views_handler {
       // are displayed.
       $without_children = TRUE;
       foreach (element_children($row['value']) as $children) {
-        if (isset($row['value'][$children]['#dependency']['edit-options-operator'])) {
-          $row['value'][$children]['#dependency']["edit-options-group-info-group-items-$item_id-operator"] = $row['value'][$children]['#dependency']['edit-options-operator'];
-          unset($row['value'][$children]['#dependency']['edit-options-operator']);
+        $has_state = FALSE;
+        $states = array();
+        foreach ($row['value'][$children]['#states']['visible'] as $key => $state) {
+          if (isset($state[':input[name="options[operator]"]'])) {
+            $has_state = TRUE;
+            $states[$key] = $state[':input[name="options[operator]"]']['value'];
+          }
+        }
+        if ($has_state) {
+          foreach ($states as $key => $state) {
+            $row['value'][$children]['#states']['visible'][] = array(
+              ':input[name="options[group_info][group_items][' . $item_id . '][operator]"]' => array('value' => $state),
+            );
+            unset($row['value'][$children]['#states']['visible'][$key]);
+          }
+
           $row['value'][$children]['#title'] = '';
 
           if (!empty($this->options['group_info']['group_items'][$item_id]['value'][$children])) {

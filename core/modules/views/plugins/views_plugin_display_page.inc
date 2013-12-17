@@ -342,20 +342,45 @@ class views_plugin_display_page extends views_plugin_display {
           ),
           '#default_value' => $menu['type'],
         );
+
         $form['menu']['title'] = array(
           '#prefix' => '<div class="views-left-50">',
           '#title' => t('Title'),
           '#type' => 'textfield',
           '#default_value' => $menu['title'],
           '#description' => t('If set to normal or tab, enter the text to use for the menu item.'),
-          '#dependency' => array('radio:menu[type]' => array('normal', 'tab', 'default tab')),
+          '#states' => array(
+            'visible' => array(
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'normal'),
+              ),
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'tab'),
+              ),
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'default tab'),
+              ),
+            ),
+          ),
         );
         $form['menu']['description'] = array(
           '#title' => t('Description'),
           '#type' => 'textfield',
           '#default_value' => $menu['description'],
           '#description' => t("If set to normal or tab, enter the text to use for the menu item's description."),
-          '#dependency' => array('radio:menu[type]' => array('normal', 'tab', 'default tab')),
+          '#states' => array(
+            'visible' => array(
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'normal'),
+              ),
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'tab'),
+              ),
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'default tab'),
+              ),
+            ),
+          ),
         );
 
         // Only display the menu selector if menu module is enabled.
@@ -366,7 +391,16 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $menu['name'],
             '#description' => t('Insert item into an available menu.'),
-            '#dependency' => array('radio:menu[type]' => array('normal', 'tab')),
+            '#states' => array(
+              'visible' => array(
+                array(
+                  ':input[name="menu[type]"]' => array('value' => 'normal'),
+                ),
+                array(
+                  ':input[name="menu[type]"]' => array('value' => 'tab'),
+                ),
+              ),
+            ),
           );
         }
         else {
@@ -383,14 +417,30 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
           '#description' => t('The lower the weight the higher/further left it will appear.'),
-          '#dependency' => array('radio:menu[type]' => array('normal', 'tab', 'default tab')),
+          '#states' => array(
+            'visible' => array(
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'normal'),
+              ),
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'tab'),
+              ),
+              array(
+                ':input[name="menu[type]"]' => array('value' => 'default tab'),
+              ),
+            ),
+          ),
         );
         $form['menu']['context'] = array(
           '#title' => t('Context'),
           '#type' => 'checkbox',
           '#default_value' => !empty($menu['context']),
           '#description' => t('Displays the link in contextual links'),
-          '#dependency' => array('radio:menu[type]' => array('tab')),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="menu[type]"]' => array('value' => 'tab'),
+            ),
+          ),
         );
         $form['menu']['context_only_inline'] = array(
           '#title' => t('Hide menu tab'),
@@ -398,11 +448,12 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'checkbox',
           '#default_value' => !empty($menu['context_only_inline']),
           '#description' => t('Only display menu item entry in contextual links. Menu tab should not be displayed.'),
-          '#dependency' => array(
-            'radio:menu[type]' => array('tab'),
-            'edit-menu-context' => array(1),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="menu[type]"]' => array('value' => 'tab'),
+              ':input[name="menu[context]"]' => array('checked' => TRUE),
+            ),
           ),
-          '#dependency_count' => 2,
         );
         break;
       case 'tab_options':
@@ -435,14 +486,32 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#default_value' => $tab_options['title'],
           '#description' => t('If creating a parent menu item, enter the title of the item.'),
-          '#dependency' => array('radio:tab_options[type]' => array('normal', 'tab')),
+          '#states' => array(
+            'visible' => array(
+              array(
+                ':input[name="tab_options[type]"]' => array('value' => 'normal'),
+              ),
+              array(
+                ':input[name="tab_options[type]"]' => array('value' => 'tab'),
+              ),
+            ),
+          ),
         );
         $form['tab_options']['description'] = array(
           '#title' => t('Description'),
           '#type' => 'textfield',
           '#default_value' => $tab_options['description'],
           '#description' => t('If creating a parent menu item, enter the description of the item.'),
-          '#dependency' => array('radio:tab_options[type]' => array('normal', 'tab')),
+          '#states' => array(
+            'visible' => array(
+              array(
+                ':input[name="tab_options[type]"]' => array('value' => 'normal'),
+              ),
+              array(
+                ':input[name="tab_options[type]"]' => array('value' => 'tab'),
+              ),
+            ),
+          ),
         );
         // Only display the menu selector if menu module is enabled.
         if (module_exists('menu')) {
@@ -452,7 +521,11 @@ class views_plugin_display_page extends views_plugin_display {
             '#options' => menu_get_menus(),
             '#default_value' => $tab_options['name'],
             '#description' => t('Insert item into an available menu.'),
-            '#dependency' => array('radio:tab_options[type]' => array('normal')),
+            '#states' => array(
+              'visible' => array(
+                ':input[name="tab_options[type]"]' => array('value' => 'normal'),
+              ),
+            ),
           );
         }
         else {
@@ -471,7 +544,11 @@ class views_plugin_display_page extends views_plugin_display {
           '#default_value' => $tab_options['weight'],
           '#size' => 5,
           '#description' => t('If the parent menu item is a tab, enter the weight of the tab. The lower the number, the more to the left it will be.'),
-          '#dependency' => array('radio:tab_options[type]' => array('tab')),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="tab_options[type]"]' => array('value' => 'tab'),
+            ),
+          ),
         );
         break;
     }

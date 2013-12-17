@@ -49,7 +49,6 @@ class views_handler_field_date extends views_handler_field {
       '#title' => t('Custom date format'),
       '#description' => t('If "Custom", see the <a href="@url" target="_blank">PHP manual</a> for date formats. Otherwise, enter the number of different time units to display, which defaults to 2.', array('@url' => 'http://php.net/manual/function.date.php')),
       '#default_value' => isset($this->options['custom_date_format']) ? $this->options['custom_date_format'] : '',
-      '#dependency' => array('edit-options-date-format' => array('custom', 'raw time ago', 'time ago', 'raw time hence', 'time hence', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span')),
     );
     $form['timezone'] = array(
       '#type' => 'select',
@@ -57,9 +56,13 @@ class views_handler_field_date extends views_handler_field {
       '#description' => t('Timezone to be used for date output.'),
       '#options' => array('' => t('- Default site/user timezone -')) + system_time_zones(FALSE),
       '#default_value' => $this->options['timezone'],
-      '#dependency' => array('edit-options-date-format' => array_merge(array('custom'), array_keys($date_formats))),
     );
-
+    // Setup #states for all possible date_formats on the custom_date_format form element.
+    foreach (array('custom', 'raw time ago', 'time ago', 'raw time hence', 'time hence', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span') as $custom_date_possible) {
+      $form['custom_date_format']['#states']['visible'][] = array(
+        ':input[name="options[date_format]"]' => array('value' => $custom_date_possible),
+      );
+    }
     parent::options_form($form, $form_state);
   }
 
