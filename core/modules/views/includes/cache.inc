@@ -166,16 +166,14 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) 
  *   If TRUE, the data will be cached specific to the currently active language.
  */
 function views_cache_set($cid, $data, $use_language = FALSE) {
-  global $language;
-
   if (variable_get('views_skip_cache', FALSE)) {
     return;
   }
   if ($use_language) {
-    $cid .= ':' . $language->language;
+    $cid .= ':' . $GLOBALS[LANGUAGE_TYPE_INTERFACE]->langcode;
   }
 
-  cache_set($cid, $data, 'cache_views');
+  cache('views')->set($cid, $data);
 }
 
 /**
@@ -192,14 +190,12 @@ function views_cache_set($cid, $data, $use_language = FALSE) {
  *   The cache or FALSE on failure.
  */
 function views_cache_get($cid, $use_language = FALSE) {
-  global $language;
-
   if (variable_get('views_skip_cache', FALSE)) {
     return FALSE;
   }
   if ($use_language) {
-    $cid .= ':' . $language->language;
+    $cid .= ':' . $GLOBALS[LANGUAGE_TYPE_INTERFACE]->langcode;
   }
 
-  return cache_get($cid, 'cache_views');
+  return cache('views')->get($cid);
 }

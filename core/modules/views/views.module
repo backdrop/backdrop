@@ -10,6 +10,21 @@
  */
 
 /**
+ * Views constant for user-defined views.
+ */
+const VIEWS_STORAGE_NORMAL = 1;
+
+/**
+ * Views constant for views that override module-defined presets.
+ */
+const VIEWS_STORAGE_OVERRIDE = 2;
+
+/**
+ * Views constant for module-defined views.
+ */
+const VIEWS_STORAGE_DEFAULT = 4;
+
+/**
  * Advertise the current views api version
  */
 function views_api_version() {
@@ -59,7 +74,7 @@ function views_api_minimum_version() {
  */
 function views_theme($existing, $type, $theme, $path) {
   $path = drupal_get_path('module', 'views');
-  ctools_include('theme', 'views', 'theme');
+  module_load_include('inc', 'views', 'theme/theme');
 
   // Some quasi clever array merging here.
   $base = array(
@@ -897,24 +912,24 @@ function views_flush_caches() {
  * Implements hook_field_create_instance.
  */
 function views_field_create_instance($instance) {
-  cache_clear_all('*', 'cache_views', TRUE);
-  cache_clear_all('*', 'cache_views_data', TRUE);
+  cache('views')->flush();
+  cache('views_data')->flush();
 }
 
 /**
  * Implements hook_field_update_instance.
  */
 function views_field_update_instance($instance, $prior_instance) {
-  cache_clear_all('*', 'cache_views', TRUE);
-  cache_clear_all('*', 'cache_views_data', TRUE);
+  cache('views')->flush();
+  cache('views_data')->flush();
 }
 
 /**
  * Implements hook_field_delete_instance.
  */
 function views_field_delete_instance($instance) {
-  cache_clear_all('*', 'cache_views', TRUE);
-  cache_clear_all('*', 'cache_views_data', TRUE);
+  cache('views')->flush();
+  cache('views_data')->flush();
 }
 
 /**
@@ -922,7 +937,7 @@ function views_field_delete_instance($instance) {
  */
 function views_invalidate_cache() {
   // Clear the views cache.
-  cache_clear_all('*', 'cache_views', TRUE);
+  cache('views')->flush();
 
   // Clear the page and block cache.
   cache_clear_all();
@@ -1066,35 +1081,49 @@ function &views_get_current_view() {
  * Include views .inc files as necessary.
  */
 function views_include($file) {
-  ctools_include($file, 'views');
+  module_load_include('inc', 'views', 'includes/' . $file);
 }
 
 /**
  * Load views files on behalf of modules.
+ *
+ * @todo: Remove in favor of locating includes directly within core modules.
  */
 function views_module_include($api, $reset = FALSE) {
-  if ($reset) {
-    $cache = &drupal_static('ctools_plugin_api_info');
-    if (isset($cache['views']['views'])) {
-      unset($cache['views']['views']);
+  $api_cache = views_get_module_apis($reset);
+  $included_modules = array();
+  foreach ($api_cache as $module => $api_info) {
+    $path = './' . $api_info['path'] . '/' . $api_info['module'] . '.' . $api . '.inc';
+    if (is_file($path)) {
+      $included_modules[$module] = $api_info;
+      include_once($path);
     }
   }
-  ctools_include('plugins');
-  return ctools_plugin_api_include('views', $api, views_api_minimum_version(), views_api_version());
+  return $included_modules;
 }
 
 /**
  * Get a list of modules that support the current views API.
  */
-function views_get_module_apis($api = 'views', $reset = FALSE) {
+function views_get_module_apis($reset = FALSE) {
+  $api_cache = &drupal_static(__FUNCTION__, array());
   if ($reset) {
-    $cache = &drupal_static('ctools_plugin_api_info');
-    if (isset($cache['views']['views'])) {
-      unset($cache['views']['views']);
+    $api_cache = array();
+  }
+
+  if (empty($api_cache)) {
+    $current_version = views_api_version();
+    $minimum_version = views_api_minimum_version();
+    foreach (module_implements('views_api') as $module) {
+      $api_info = module_invoke($module, 'views_api');
+      if (version_compare($api_info['api'], $minimum_version, '>=') && version_compare($api_info['api'], $current_version, '<=')) {
+        $api_info['module'] = $module;
+        $api_cache[$module] = $api_info;
+      }
     }
   }
-  ctools_include('plugins');
-  return ctools_plugin_api_info('views', $api, views_api_minimum_version(), views_api_version());
+
+  return $api_cache;
 }
 
 /**
@@ -1126,7 +1155,7 @@ function views_add_js($file) {
     drupal_add_library('system', 'jquery.form');
     $ajax = FALSE;
   }
-  ctools_add_js($file, 'views');
+  drupal_add_js(drupal_get_path('module', 'views') . "/js/$file.js");
 }
 
 /**
@@ -1366,7 +1395,6 @@ function views_get_all_templates() {
 function views_new_view() {
   views_include('view');
   $view = new view();
-  $view->vid = 'new';
   $view->add_display('default');
 
   return $view;
@@ -1430,8 +1458,16 @@ function views_get_applicable_views($type) {
  *   If TRUE, reset the static cache forcing views to be reloaded.
  */
 function views_get_all_views($reset = FALSE) {
-  ctools_include('export');
-  return ctools_export_crud_load_all('views_view', $reset);
+  $views = &drupal_static(__FUNCTION__, array());
+  if ($reset || empty($views)) {
+    $configs = config_get_names_with_prefix('views.view.');
+    foreach ($configs as $config_file) {
+      $config = config($config_file);
+      $name = str_replace('views.view.', '', $config_file);
+      $views[$name] = new view($config->get());
+    }
+  }
+  return $views;
 }
 
 /**
@@ -1558,19 +1594,18 @@ function views_view_is_disabled($view) {
  *   a fresh one.
  */
 function views_get_view($name, $reset = FALSE) {
-  if ($reset) {
-    $cache = &drupal_static('ctools_export_load_object');
-    if (isset($cache['views_view'][$name])) {
-      unset($cache['views_view'][$name]);
+  $cache = &drupal_static(__FUNCTION__, array());
+
+  if ($reset || !isset($cache[$name])) {
+    if ($view_data = config('views.view.' . $name)->get()) {
+      $cache[$name] = new view($view_data);
+    }
+    else {
+      $cache[$name] = FALSE;
     }
   }
 
-  ctools_include('export');
-  $view = ctools_export_crud_load('views_view', $name);
-  if ($view) {
-    $view->update();
-    return $view->clone_view();
-  }
+  return $cache[$name];
 }
 
 /**
@@ -1998,13 +2033,12 @@ function views_exposed_form($form, &$form_state) {
   $form['#action'] = url($view->display_handler->get_url());
   $form['#theme'] = views_theme_functions('views_exposed_form', $view, $display);
   $form['#id'] = drupal_clean_css_identifier('views_exposed_form-' . check_plain($view->name) . '-' . check_plain($display->id));
-//  $form['#attributes']['class'] = array('views-exposed-form');
 
   // If using AJAX, we need the form plugin.
   if ($view->use_ajax) {
     drupal_add_library('system', 'jquery.form');
   }
-  ctools_include('dependent');
+  //ctools_include('dependent');
 
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
   $exposed_form_plugin->exposed_form_alter($form, $form_state);
@@ -2112,8 +2146,8 @@ function views_views_query_substitutions($view) {
   return array(
     '***CURRENT_VERSION***' => VERSION,
     '***CURRENT_TIME***' => REQUEST_TIME,
-    '***CURRENT_LANGUAGE***' => $language_content->language,
-    '***DEFAULT_LANGUAGE***' => language_default('language'),
+    '***CURRENT_LANGUAGE***' => $language_content->langcode,
+    '***DEFAULT_LANGUAGE***' => language_default('language')->langcode,
   );
 }
 

@@ -23,9 +23,9 @@ class views_plugin_cache extends views_plugin {
   var $storage = array();
 
   /**
-   * What table to store data in.
+   * What bin to store data in.
    */
-  var $table = 'cache_views_data';
+  var $bin = 'views_data';
 
   /**
    * Initialize the plugin.
@@ -94,12 +94,12 @@ class views_plugin_cache extends views_plugin {
           'total_rows' => isset($this->view->total_rows) ? $this->view->total_rows : 0,
           'current_page' => $this->view->get_current_page(),
         );
-        cache_set($this->get_results_key(), $data, $this->table, $this->cache_set_expire($type));
+        cache($this->bin)->set($this->get_results_key(), $data, $this->cache_set_expire($type));
         break;
       case 'output':
         $this->gather_headers();
         $this->storage['output'] = $this->view->display_handler->output;
-        cache_set($this->get_output_key(), $this->storage, $this->table, $this->cache_set_expire($type));
+        cache($this->bin)->set($this->get_output_key(), $this->storage, $this->cache_set_expire($type));
         break;
     }
   }
@@ -149,7 +149,7 @@ class views_plugin_cache extends views_plugin {
    * to be sure that we catch everything. Maybe that's a bad idea.
    */
   function cache_flush() {
-    cache_clear_all($this->view->name . ':', $this->table, TRUE);
+    cache($this->bin)->deletePrefix($this->view->name . ':');
   }
 
   /**

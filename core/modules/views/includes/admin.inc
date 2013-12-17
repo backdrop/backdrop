@@ -286,6 +286,72 @@ function views_ui_preview($view, $display_id, $args = array()) {
 }
 
 /**
+ * Page callback at admin/build/views to list all available views.
+ */
+function view_ui_list_page() {
+  views_include('admin');
+  views_ui_add_admin_css();
+  views_add_js('views-list');
+
+  $header = array(
+    array('data' => t('View name'), 'class' => array('views-ui-name')),
+    array('data' => t('Description'), 'class' => array('views-ui-description')),
+    array('data' => t('Tag'), 'class' => array('views-ui-tag')),
+    array('data' => t('Path'), 'class' => array('views-ui-path')),
+    array('data' => t('Operations'), 'class' => array('views-ui-operations')),
+  );
+
+  $views = views_get_all_views();
+  $rows = array();
+  foreach ($views as $view) {
+    $paths = _views_ui_get_paths($view);
+    $paths = implode(", ", $paths);
+
+    // @todo: Port operations list from ctools.
+    // $operations = _views_ui_get_operations($view);
+    $operations = array();
+    $ops = theme('links__ctools_dropbutton', array(
+      'links' => $operations,
+      'attributes' => array('class' => array('links', 'inline')))
+    );
+
+    $row = array();
+    $row[] = array(
+      'data' => theme('views_ui_view_info', array('view' => $view)),
+      'class' => array('views-ui-name'),
+    );
+    $row[] = array(
+      'data' => check_plain($view->description),
+      'class' => array('views-ui-description'),
+    );
+    $row[] = array(
+      'data' => check_plain($view->tag),
+      'class' => array('views-ui-tag'),
+    );
+    $row[] = array(
+      'data' => $paths,
+      'class' => array('views-ui-path'),
+    );
+    $row[] = array(
+      'data' => $ops,
+      'class' => array('views-ui-operations'),
+    );
+    $rows[] = array(
+      'data' => $row,
+      'class' => array(!empty($view->disabled) ? 'enabled' : 'disabled'),
+    );
+  }
+
+  $table = array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No views match the search criteria.'),
+    'attributes' => array('id' => 'ctools-export-ui-list-items'),
+  );
+  return theme('table', $table);
+}
+
+/**
  * Page callback to add a new view.
  */
 function views_ui_add_page() {
@@ -298,7 +364,8 @@ function views_ui_add_page() {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-  ctools_include('dependent');
+  // @todo: Convert ctools dependent FAPI property or use #states.
+  //ctools_include('dependent');
   $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
   $form['#attributes']['class'] = array('views-admin');
 
@@ -610,7 +677,7 @@ function views_ui_add_limited_validation($element, &$form_state) {
   $array_parents = $element['#array_parents'];
   array_pop($array_parents);
   $array_parents[] = $element['#views_ui_ajax_data']['trigger_key'];
-  $ajax_triggering_element = drupal_array_get_nested_value($form_state['complete form'], $array_parents);
+  $ajax_triggering_element = drupal_array_get_nested_value($form_state['complete_form'], $array_parents);
 
   // Limit this button's validation to the AJAX triggering element, so it can
   // update the form for that change without requiring that the rest of the
@@ -646,7 +713,7 @@ function views_ui_add_ajax_wrapper($element, &$form_state) {
   if (empty($element['#views_ui_ajax_data']['duplicate_wrapper'])) {
     // Find the region of the complete form that needs to be refreshed by AJAX.
     // This was earlier stored in a property on the element.
-    $complete_form = &$form_state['complete form'];
+    $complete_form = &$form_state['complete_form'];
     $refresh_parents = $element['#views_ui_ajax_data']['refresh_parents'];
     $refresh_element = drupal_array_get_nested_value($complete_form, $refresh_parents);
 
@@ -823,15 +890,15 @@ function theme_views_ui_view_info($variables) {
   switch ($view->type) {
     case t('Default'):
     default:
-      $type = t('In code');
+      $type = t('Module-provided default');
       break;
 
     case t('Normal'):
-      $type = t('In database');
+      $type = t('User-created');
       break;
 
     case t('Overridden'):
-      $type = t('Database overriding code');
+      $type = t('User overriding default');
   }
 
   $output = '';
@@ -873,7 +940,7 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
  * Submit handler to break_lock a view.
  */
 function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
-  ctools_object_cache_clear_all('view', $form_state['view']->name);
+  views_object_cache_clear_all('view', $form_state['view']->name);
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
   drupal_set_message(t('The lock has been broken and you may now edit this view.'));
 }
@@ -989,9 +1056,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $view->fix_missing_relationships();
   }
 
-  ctools_include('dependent');
-  $form['#attached']['js'][] = ctools_attach_js('dependent');
-  $form['#attached']['js'][] = ctools_attach_js('collapsible-div');
+  //ctools_include('dependent');
+  //$form['#attached']['js'][] = ctools_attach_js('dependent');
+  //$form['#attached']['js'][] = ctools_attach_js('collapsible-div');
 
   $form['#tree'] = TRUE;
   // @todo When more functionality is added to this form, cloning here may be
@@ -1199,7 +1266,6 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
     '#type' => 'submit',
     '#value' => t('Update preview'),
     '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
-    '#pre_render' => array('ctools_dependent_pre_render'),
     '#prefix' => '<div id="preview-submit-wrapper">',
     '#suffix' => '</div>',
     '#id' => 'preview-submit',
@@ -2166,7 +2232,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
   drupal_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->get_human_name())));
 
   // Remove this view from cache so we can edit it properly.
-  ctools_object_cache_clear('view', $form_state['view']->name);
+  views_object_cache_clear('view', $form_state['view']->name);
 }
 
 /**
@@ -2174,7 +2240,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
  */
 function views_ui_edit_view_form_cancel($form, &$form_state) {
   // Remove this view from cache so edits will be lost.
-  ctools_object_cache_clear('view', $form_state['view']->name);
+  views_object_cache_clear('view', $form_state['view']->name);
   if (empty($form['view']->vid)) {
     // I seem to have to drupal_goto here because I can't get fapi to
     // honor the redirect target. Not sure what I screwed up here.
@@ -4038,7 +4104,7 @@ function views_ui_add_item_form($form, &$form_state) {
     ),
   );
 
-  ctools_add_js('dependent');
+  //ctools_add_js('dependent');
 
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
@@ -4148,7 +4214,7 @@ function views_ui_add_item_form($form, &$form_state) {
     '#theme_wrappers' => array('form_element', 'views_container'),
     '#attributes' => array('class' => array('container-inline', 'views-add-form-selected')),
   );
-  ctools_include('dependent');
+  //ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $ltitle)));
 
   // Remove the default submit function.

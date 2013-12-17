@@ -794,8 +794,8 @@ function hook_views_query_substitutions($view) {
   return array(
     '***CURRENT_VERSION***' => VERSION,
     '***CURRENT_TIME***' => REQUEST_TIME,
-    '***CURRENT_LANGUAGE***' => $language_content->language,
-    '***DEFAULT_LANGUAGE***' => language_default('language'),
+    '***CURRENT_LANGUAGE***' => $language_content->langcode,
+    '***DEFAULT_LANGUAGE***' => language_default('language')->langcode,
   );
 }
 
@@ -1094,7 +1094,7 @@ function hook_views_ajax_data_alter(&$commands, $view) {
  * @see views_invalidate_cache()
  */
 function hook_views_invalidate_cache() {
-  cache_clear_all('views:*', 'cache_mymodule', TRUE);
+  cache('mymodule')->deletePrefix('views:');
 }
 
 /**

@@ -218,8 +218,8 @@ function views_revert_view($view) {
     // Revert the view.
     $view->delete();
     // Clear its cache.
-    ctools_include('object-cache');
-    ctools_object_cache_clear('view', $view->name);
+    views_include('object-cache');
+    views_object_cache_clear('view', $view->name);
     // Give feedback.
     $message = dt("Reverted the view '@viewname'", array('@viewname' => $view->name));
     drush_log($message, 'success');

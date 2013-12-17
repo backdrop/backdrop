@@ -16,8 +16,7 @@
  * An object to contain all of the data to generate a view, plus the member
  * functions to build the view query, execute the query and render the output.
  */
-class view extends views_db_object {
-  var $db_table = 'views_view';
+class view {
   var $base_table = 'node';
   var $base_field = 'nid';
 
@@ -27,13 +26,6 @@ class view extends views_db_object {
    * @var string
    */
   var $name = "";
-
-  /**
-   * The id of the view, which is used only for views in the database.
-   *
-   * @var number
-   */
-  var $vid;
 
   /**
    * The description of the view, which is used only in the interface.
@@ -81,6 +73,16 @@ class view extends views_db_object {
    * @var bool
    */
   var $disabled;
+
+  /**
+   * The translated state of the view.
+   *
+   * This state will be "Default", "Normal", or "Overridden". It is determined
+   * at the time the view is loaded from its configuration file.
+   *
+   * @var string
+   */
+  var $type;
 
   // State variables
   var $built = FALSE;
@@ -256,11 +258,24 @@ class view extends views_db_object {
   /**
    * Constructor
    */
-  function __construct() {
-    parent::init();
-    // Make sure all of our sub objects are arrays.
-    foreach ($this->db_objects() as $object) {
-      $this->$object = array();
+  function __construct($view_data = NULL) {
+    $this->display = array();
+    if ($view_data) {
+      foreach ($view_data as $key => $value) {
+        $this->$key = $value;
+      }
+      // Set the view "type".
+      if (isset($view_data['module'])) {
+        $this->type = empty($view_data['storage']) || $view_data['storage'] == VIEWS_STORAGE_DEFAULT ? t('Default') : t('Overridden');
+      }
+      else {
+        $this->type = t('Normal');
+      }
+
+      // Convert all stored displays into display objects.
+      foreach ($this->display as $display_id => $display) {
+        $this->display[$display_id] = new views_display($display['display_plugin'], $display_id, $display['display_title'], $display['display_options']);
+      }
     }
   }
 
@@ -284,14 +299,6 @@ class view extends views_db_object {
    */
   function display_objects() {
     return array('argument', 'field', 'sort', 'filter', 'relationship', 'header', 'footer', 'empty');
-  }
-
-  /**
-   * Returns the complete list of dependent objects in a view, for the purpose
-   * of initialization and loading/saving to/from the database.
-   */
-  static function db_objects() {
-    return array('display');
   }
 
   /**
@@ -1752,98 +1759,27 @@ class view extends views_db_object {
   }
 
   /**
-   * Static factory method to load a list of views based upon a $where clause.
-   *
-   * Although this method could be implemented to simply iterate over views::load(),
-   * that would be very slow.  Buiding the views externally from unified queries is
-   * much faster.
-   */
-  static function load_views() {
-    $result = db_query("SELECT DISTINCT v.* FROM {views_view} v");
-    $views = array();
-
-    // Load all the views.
-    foreach ($result as $data) {
-      $view = new view;
-      $view->load_row($data);
-      $view->loaded = TRUE;
-      $view->type = t('Normal');
-      $views[$view->name] = $view;
-      $names[$view->vid] = $view->name;
-    }
-
-    // Stop if we didn't get any views.
-    if (!$views) {
-      return array();
-    }
-
-    // Now load all the subtables:
-    foreach (view::db_objects() as $key) {
-      $object_name = "views_$key";
-      $result = db_query("SELECT * FROM {{$object_name}} WHERE vid IN (:vids) ORDER BY vid, position",
-        array(':vids' => array_keys($names)));
-
-      foreach ($result as $data) {
-        $object = new $object_name(FALSE);
-        $object->load_row($data);
-
-        // Because it can get complicated with this much indirection,
-        // make a shortcut reference.
-        $location = &$views[$names[$object->vid]]->$key;
-
-        // If we have a basic id field, load the item onto the view based on
-        // this ID, otherwise push it on.
-        if (!empty($object->id)) {
-          $location[$object->id] = $object;
-        }
-        else {
-          $location[] = $object;
-        }
-      }
-    }
-    return $views;
-  }
-
-  /**
-   * Save the view to the database. If the view does not already exist,
-   * A vid will be assigned to the view and also returned from this function.
+   * Save the view to a configuration file.
    */
   function save() {
-    if ($this->vid == 'new') {
-      $this->vid = NULL;
+    $config_data = array(
+      'name' => $this->name,
+      'description' => $this->description,
+      'tag' => $this->tag,
+      'base_table' => $this->base_table,
+      'human_name' => $this->human_name,
+      'core' => $this->core,
+      'display' => array(),
+    );
+    foreach ($this->display as $display) {
+      $display_config_data = array(
+        'display_title' => $display->display_title,
+        'display_plugin' => $display->display_plugin,
+        'display_options' => $display->display_options,
+      );
+      $config_data['display'][$display->id] = $display_config_data;
     }
-    // If there is no vid, check if a view with this machine name already exists.
-    elseif (empty($this->vid)) {
-      $vid = db_query("SELECT vid from {views_view} WHERE name = :name", array(':name' => $this->name))->fetchField();
-      $this->vid = $vid ? $vid : NULL;
-    }
-
-    $transaction = db_transaction();
-
-    try {
-      // If we have no vid or our vid is a string, this is a new view.
-      if (!empty($this->vid)) {
-        // remove existing table entries
-        foreach ($this->db_objects() as $key) {
-          db_delete('views_' . $key)
-            ->condition('vid', $this->vid)
-            ->execute();
-        }
-      }
-
-      $this->save_row(!empty($this->vid) ? 'vid' : FALSE);
-
-      // Save all of our subtables.
-      foreach ($this->db_objects() as $key) {
-        $this->_save_rows($key);
-      }
-    }
-    catch (Exception $e) {
-      $transaction->rollback();
-      watchdog_exception('views', $e);
-      throw $e;
-    }
-
+    config('views.view.' . $this->name)->setData($config_data)->save();
     $this->save_locale_strings();
 
     // Clear caches.
@@ -1851,37 +1787,11 @@ class view extends views_db_object {
   }
 
   /**
-   * Save a row to the database for the given key, which is one of the
-   * keys from view::db_objects()
-   */
-  function _save_rows($key) {
-    $count = 0;
-    foreach ($this->$key as $position => $object) {
-      $object->position = ++$count;
-      $object->vid = $this->vid;
-      $object->save_row();
-    }
-  }
-
-  /**
    * Delete the view from the database.
    */
   function delete($clear = TRUE) {
-    if (empty($this->vid)) {
-      return;
-    }
-
-    db_delete('views_view')
-      ->condition('vid', $this->vid)
-      ->execute();
-    // Delete from all of our subtables as well.
-    foreach ($this->db_objects() as $key) {
-      db_delete('views_'. $key)
-        ->condition('vid', $this->vid)
-        ->execute();
-    }
-
-    cache_clear_all('views_query:' . $this->name, 'cache_views');
+    config('views.view.' . $this->name)->delete();
+    cache('views')->deletePrefix('views_query:' . $this->name);
 
     if ($clear) {
       // Clear caches.
@@ -2140,168 +2050,6 @@ class view extends views_db_object {
     }
   }
 
-}
-
-/**
- * Base class for views' database objects.
- */
-class views_db_object {
-  public $db_table;
-
-  /**
-   * Initialize this object, setting values from schema defaults.
-   *
-   * @param $init
-   *   If an array, this is a set of values from db_fetch_object to
-   *   load. Otherwse, if TRUE values will be filled in from schema
-   *   defaults.
-   */
-  function init($init = TRUE) {
-    if (is_array($init)) {
-      return $this->load_row($init);
-    }
-
-    if (!$init) {
-      return;
-    }
-
-    $schema = drupal_get_schema($this->db_table);
-
-    if (!$schema) {
-      return;
-    }
-
-    // Go through our schema and build correlations.
-    foreach ($schema['fields'] as $field => $info) {
-      if ($info['type'] == 'serial') {
-        $this->$field = NULL;
-      }
-      if (!isset($this->$field)) {
-        if (!empty($info['serialize']) && isset($info['serialized default'])) {
-          $this->$field = unserialize($info['serialized default']);
-        }
-        elseif (isset($info['default'])) {
-          $this->$field = $info['default'];
-        }
-        else {
-          $this->$field = '';
-        }
-      }
-    }
-  }
-
-  /**
-   * Write the row to the database.
-   *
-   * @param $update
-   *   If true this will be an UPDATE query. Otherwise it will be an INSERT.
-   */
-  function save_row($update = NULL) {
-    $fields = $defs = $values = $serials = array();
-    $schema = drupal_get_schema($this->db_table);
-
-    // Go through our schema and build correlations.
-    foreach ($schema['fields'] as $field => $info) {
-      // special case -- skip serial types if we are updating.
-      if ($info['type'] == 'serial') {
-        $serials[] = $field;
-        continue;
-      }
-      elseif ($info['type'] == 'int') {
-        $this->$field = (int) $this->$field;
-      }
-      $fields[$field] = empty($info['serialize']) ? $this->$field : serialize($this->$field);
-    }
-    if (!$update) {
-      $query = db_insert($this->db_table);
-    }
-    else {
-      $query = db_update($this->db_table)
-        ->condition($update, $this->$update);
-    }
-    $return = $query
-      ->fields($fields)
-      ->execute();
-
-    if ($serials && !$update) {
-      // get last insert ids and fill them in.
-      // Well, one ID.
-      foreach ($serials as $field) {
-        $this->$field = $return;
-      }
-    }
-  }
-
-  /**
-   * Load the object with a row from the database.
-   *
-   * This method is separate from the constructor in order to give us
-   * more flexibility in terms of how the view object is built in different
-   * contexts.
-   *
-   * @param $data
-   *   An object from db_fetch_object. It should contain all of the fields
-   *   that are in the schema.
-   */
-  function load_row($data) {
-    $schema = drupal_get_schema($this->db_table);
-
-    // Go through our schema and build correlations.
-    foreach ($schema['fields'] as $field => $info) {
-      $this->$field = empty($info['serialize']) ? $data->$field : unserialize($data->$field);
-    }
-  }
-
-  /**
-   * Export a loaded row, such as an argument, field or the view itself to PHP code.
-   *
-   * @param $identifier
-   *   The variable to assign the PHP code for this object to.
-   * @param $indent
-   *   An optional indentation for prettifying nested code.
-   */
-  function export_row($identifier = NULL, $indent = '') {
-    ctools_include('export');
-
-    if (!$identifier) {
-      $identifier = $this->db_table;
-    }
-    $schema = drupal_get_schema($this->db_table);
-
-    $output = $indent . '$' . $identifier . ' = new ' . get_class($this) . "();\n";
-    // Go through our schema and build correlations.
-    foreach ($schema['fields'] as $field => $info) {
-      if (!empty($info['no export'])) {
-        continue;
-      }
-      if (!isset($this->$field)) {
-        if (isset($info['default'])) {
-          $this->$field = $info['default'];
-        }
-        else {
-          $this->$field = '';
-        }
-
-        // serialized defaults must be set as serialized.
-        if (isset($info['serialize'])) {
-          $this->$field = unserialize($this->$field);
-        }
-      }
-      $value = $this->$field;
-      if ($info['type'] == 'int') {
-        if (isset($info['size']) && $info['size'] == 'tiny') {
-          $value = (bool) $value;
-        }
-        else {
-          $value = (int) $value;
-        }
-      }
-
-      $output .= $indent . '$' . $identifier . '->' . $field . ' = ' . ctools_var_export($value, $indent) . ";\n";
-    }
-    return $output;
-  }
-
   /**
    * Add a new display handler to the view, automatically creating an id.
    *
@@ -2347,8 +2095,7 @@ class views_db_object {
     }
 
     // Create the new display object
-    $display = new views_display;
-    $display->options($type, $id, $title);
+    $display = new views_display($type, $id, $title);
 
     // Add the new display object to the view.
     $this->display[$id] = $display;
@@ -2454,10 +2201,10 @@ class views_db_object {
     }
 
     $new_item = array(
-      'id' => $id,
-      'table' => $table,
-      'field' => $field,
-    ) + $options;
+        'id' => $id,
+        'table' => $table,
+        'field' => $field,
+      ) + $options;
 
     if (!empty($types[$type]['type'])) {
       $handler_type = $types[$type]['type'];
@@ -2546,17 +2293,29 @@ class views_db_object {
 
 /**
  * A display type in a view.
- *
- * This is just the database storage mechanism, and isn't terribly important
- * to the behavior of the display at all.
  */
-class views_display extends views_db_object {
+class views_display {
+
   /**
-   * The display handler itself, which has all the methods.
+   * The name of the plugin that provides the functionality of this display.
    *
-   * @var views_plugin_display
+   * @var string
    */
-  var $handler;
+  var $display_plugin;
+
+  /**
+   * The machine name of this display.
+   *
+   * @var string
+   */
+  var $id;
+
+  /**
+   * The human-readable title of this display.
+   *
+   * @var string
+   */
+  var $title;
 
   /**
    * Stores all options of the display, like fields, filters etc.
@@ -2565,15 +2324,11 @@ class views_display extends views_db_object {
    */
   var $display_options;
 
-  var $db_table = 'views_display';
-  function views_display($init = TRUE) {
-    parent::init($init);
-  }
-
-  function options($type, $id, $title) {
+  function __construct($type, $id, $title, $display_options = array()) {
     $this->display_plugin = $type;
     $this->id = $id;
     $this->display_title = $title;
+    $this->display_options = $display_options;
   }
 }
 

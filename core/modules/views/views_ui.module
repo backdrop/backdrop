@@ -19,13 +19,19 @@ function views_ui_menu() {
   );
 
   // Top-level Views module pages (not tied to a particular View).
+  $items['admin/structure/views'] = array(
+    'title' => 'Views',
+    'description' => 'Manage customized lists of content.',
+    'page callback' => 'view_ui_list_page',
+    'type' => MENU_NORMAL_ITEM,
+  ) + $base;
+
   $items['admin/structure/views/add'] = array(
     'title' => 'Add new view',
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
 
-  // Top-level Views module pages (not tied to a particular View).
   $items['admin/structure/views/add-template'] = array(
     'title' => 'Add view from template',
     'page callback' => 'views_ui_add_template_page',
@@ -287,16 +293,16 @@ function views_ui_edit_page_title($view) {
  *   someone else is already editing the view.
  */
 function views_ui_cache_load($name) {
-  ctools_include('object-cache');
+  views_include('object-cache');
   views_include('view');
-  $view = ctools_object_cache_get('view', $name);
+  $view = views_object_cache_get('view', $name);
   $original_view = views_get_view($name);
 
   if (empty($view)) {
     $view = $original_view;
     if (!empty($view)) {
       // Check to see if someone else is already editing this view.
-      $view->locked = ctools_object_cache_test('view', $view->name);
+      $view->locked = views_object_cache_test('view', $view->name);
       // Set a flag to indicate that this view is being edited.
       // This flag will be used e.g. to determine whether strings
       // should be localized.
@@ -328,7 +334,7 @@ function views_ui_cache_set(&$view) {
     drupal_set_message(t('Changes cannot be made to a locked view.'), 'error');
     return;
   }
-  ctools_include('object-cache');
+  views_include('object-cache');
   $view->changed = TRUE; // let any future object know that this view has changed.
 
   if (isset($view->current_display)) {
@@ -345,7 +351,7 @@ function views_ui_cache_set(&$view) {
     unset($view->display[$id]->handler);
     unset($view->display[$id]->default_display);
   }
-  ctools_object_cache_set('view', $view->name, $view);
+  views_object_cache_set('view', $view->name, $view);
 }
 
 
@@ -554,8 +560,8 @@ function views_ui_ctools_plugin_directory($module, $plugin) {
  *   An array with information about the requested wizard type.
  */
 function views_ui_get_wizard($wizard_type) {
-  ctools_include('plugins');
-  $wizard = ctools_get_plugins('views_ui', 'views_wizard', $wizard_type);
+  $wizards = views_ui_get_wizards();
+  $wizard = isset($wizards[$wizard_type]) ? $wizards[$wizard_type] : NULL;
   // @todo - handle this via an alter hook instead.
   if (!$wizard) {
     // Must be a base table using the default wizard plugin.
@@ -580,25 +586,203 @@ function views_ui_get_wizard($wizard_type) {
  *   An array of arrays with information about all available views wizards.
  */
 function views_ui_get_wizards() {
-  ctools_include('plugins');
-  $wizard_plugins = ctools_get_plugins('views_ui', 'views_wizard');
+  $wizard_plugins = module_invoke_all('views_ui_wizards');
+  $defaults = views_ui_views_wizard_defaults();
+  foreach ($wizard_plugins as $key => $plugin) {
+    $wizard_plugins[$key] += $defaults;
+  }
   $wizard_tables = array();
   foreach ($wizard_plugins as $name => $info) {
     $wizard_tables[$info['base_table']] = TRUE;
   }
   $base_tables = views_fetch_base_tables();
-  $default_wizard = views_ui_views_wizard_defaults();
   // Find base tables with no wizard.
   // @todo - handle this via an alter hook for plugins?
   foreach ($base_tables as $table => $info) {
     if (!isset($wizard_tables[$table])) {
-      $wizard = $default_wizard;
+      $wizard = $defaults;
       $wizard['title'] = $info['title'];
       $wizard['base_table'] = $table;
       $wizard_plugins[$table] = $wizard;
     }
   }
   return $wizard_plugins;
+}
+
+/**
+ * Implements hook_views_ui_wizards().
+ */
+function views_ui_views_ui_wizards() {
+  $plugins['comment'] = array(
+    'name' => 'comment',
+    'base_table' => 'comment',
+    'created_column' => 'created',
+    'form_wizard_class' => array(
+      'file' => 'views_ui_comment_views_wizard.class.php',
+      'class' => 'ViewsUiCommentViewsWizard',
+    ),
+    'title' => t('Comments'),
+    'filters' => array(
+      'status' => array(
+        'value' => COMMENT_PUBLISHED,
+        'table' => 'comment',
+        'field' => 'status',
+      ),
+      'status_node' => array(
+        'value' => NODE_PUBLISHED,
+        'table' => 'node',
+        'field' => 'status',
+        'relationship' => 'nid',
+      ),
+    ),
+    'path_field' => array(
+      'id' => 'cid',
+      'table' => 'comment',
+      'field' => 'cid',
+      'exclude' => TRUE,
+      'link_to_comment' => FALSE,
+      'alter' => array(
+        'alter_text' => 1,
+        'text' => 'comment/[cid]#comment-[cid]',
+      ),
+    ),
+  );
+  $plugins['file_managed'] = array(
+    'name' => 'file_managed',
+    'base_table' => 'file_managed',
+    'created_column' => 'timestamp',
+    'form_wizard_class' => array(
+      'file' => 'views_ui_file_managed_views_wizard.class.php',
+      'class' => 'ViewsUiFileManagedViewsWizard',
+    ),
+    'title' => t('Files'),
+    'filters' => array(
+    ),
+    'path_field' => array(
+      'id' => 'uri',
+      'table' => 'file_managed',
+      'field' => 'uri',
+      'exclude' => TRUE,
+      'file_download_path' => TRUE,
+    ),
+  );
+  $plugins['node'] = array(
+    'name' => 'node',
+    'base_table' => 'node',
+    'created_column' => 'created',
+    'available_sorts' => array(
+      'title:DESC' => t('Title')
+    ),
+    'form_wizard_class' => array(
+      'file' => 'views_ui_node_views_wizard.class.php',
+      'class' => 'ViewsUiNodeViewsWizard',
+    ),
+    'title' => t('Content'),
+    'filters' => array(
+      'status' => array(
+        'value' => NODE_PUBLISHED,
+        'table' => 'node',
+        'field' => 'status',
+      ),
+    ),
+    'path_field' => array(
+      'id' => 'nid',
+      'table' => 'node',
+      'field' => 'nid',
+      'exclude' => TRUE,
+      'link_to_node' => FALSE,
+      'alter' => array(
+        'alter_text' => 1,
+        'text' => 'node/[nid]',
+      ),
+    ),
+  );
+  $plugins['node_revision'] = array(
+    'name' => 'node_revision',
+    'base_table' => 'node_revision',
+    'created_column' => 'timestamp',
+    'form_wizard_class' => array(
+      'file' => 'views_ui_node_revision_views_wizard.class.php',
+      'class' => 'ViewsUiNodeRevisionViewsWizard',
+    ),
+    'title' => t('Content revisions'),
+    'filters' => array(
+      'status' => array(
+        'value' => '1',
+        'table' => 'node', // @todo - unclear if this should be node or node_revision
+        'field' => 'status',
+      ),
+    ),
+    'path_field' => array(
+      'id' => 'vid',
+      'table' => 'node_revision',
+      'field' => 'vid',
+      'exclude' => TRUE,
+      'alter' => array(
+        'alter_text' => 1,
+        'text' => 'node/[nid]/revisions/[vid]/view',
+      ),
+    ),
+    'path_fields_supplemental' => array(
+      array(
+        'id' => 'nid',
+        'table' => 'node',
+        'field' => 'nid',
+        'exclude' => TRUE,
+        'link_to_node' => FALSE,
+      ),
+    ),
+  );
+  $plugins['taxonomy_term'] = array(
+    'name' => 'taxonomy_term',
+    'base_table' => 'taxonomy_term_data',
+    'form_wizard_class' => array(
+      'file' => 'views_ui_taxonomy_term_views_wizard.class.php',
+      'class' => 'ViewsUiTaxonomyTermViewsWizard',
+    ),
+    'title' => t('Taxonomy terms'),
+    'filters' => array(
+    ),
+    'path_field' => array(
+      'id' => 'tid',
+      'table' => 'taxonomy_term_data',
+      'field' => 'tid',
+      'exclude' => TRUE,
+      'alter' => array(
+        'alter_text' => 1,
+        'text' => 'taxonomy/term/[tid]',
+      ),
+    ),
+  );
+  $plugins['users'] = array(
+    'name' => 'users',
+    'base_table' => 'users',
+    'created_column' => 'created',
+    'form_wizard_class' => array(
+      'file' => 'views_ui_users_views_wizard.class.php',
+      'class' => 'ViewsUiUsersViewsWizard',
+    ),
+    'title' => t('Users'),
+    'filters' => array(
+      'status' => array(
+        'value' => '1',
+        'table' => 'users',
+        'field' => 'status',
+      ),
+    ),
+    'path_field' => array(
+      'id' => 'uid',
+      'table' => 'users',
+      'field' => 'uid',
+      'exclude' => TRUE,
+      'link_to_user' => FALSE,
+      'alter' => array(
+        'alter_text' => 1,
+        'text' => 'user/[uid]',
+      ),
+    ),
+  );
+  return $plugins;
 }
 
 /**

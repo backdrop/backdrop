@@ -106,7 +106,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#dependency' => array(
         'edit-page-create' => array(1),
       ),
-      '#pre_render' => array('ctools_dependent_pre_render'),
+      //'#pre_render' => array('ctools_dependent_pre_render'),
       '#prefix' => '<div><div id="edit-page-wrapper">',
       '#suffix' => '</div></div>',
       '#parents' => array('page'),
@@ -162,7 +162,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#dependency' => array(
         'edit-page-link' => array(1),
       ),
-      '#pre_render' => array('ctools_dependent_pre_render'),
+      //'#pre_render' => array('ctools_dependent_pre_render'),
       '#prefix' => '<div id="edit-page-link-properties-wrapper">',
       '#suffix' => '</div>',
     );
@@ -197,7 +197,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#dependency' => array(
           'edit-page-feed' => array(1),
         ),
-        '#pre_render' => array('ctools_dependent_pre_render'),
+        //'#pre_render' => array('ctools_dependent_pre_render'),
         '#prefix' => '<div id="edit-page-feed-properties-wrapper">',
         '#suffix' => '</div>',
       );
@@ -216,7 +216,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         '#dependency' => array(
           'edit-page-feed' => array(1),
         ),
-        '#pre_render' => array('ctools_dependent_pre_render'),
+        //'#pre_render' => array('ctools_dependent_pre_render'),
         '#prefix' => '<div id="edit-page-feed-properties-row-plugin-wrapper">',
         '#suffix' => '</div>',
       );
@@ -242,7 +242,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#dependency' => array(
         'edit-block-create' => array(1),
       ),
-      '#pre_render' => array('ctools_dependent_pre_render'),
+      //'#pre_render' => array('ctools_dependent_pre_render'),
       '#prefix' => '<div id="edit-block-wrapper">',
       '#suffix' => '</div>',
       '#parents' => array('block'),

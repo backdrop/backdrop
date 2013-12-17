@@ -461,8 +461,36 @@ class views_handler_field_field extends views_handler_field {
     $settings = $this->options['settings'] + field_info_formatter_settings($format);
 
     // Provide an instance array for hook_field_formatter_settings_form().
-    ctools_include('fields');
-    $this->instance = ctools_fields_fake_field_instance($this->definition['field_name'], '_custom', $formatter, $settings);
+    $field = field_read_field($this->definition['field_name']);
+    $field_type = field_info_field_types($field['type']);
+    $this->instance = array(
+      // Build a fake entity type and bundle.
+      'field_name' => $this->definition['field_name'],
+      'entity_type' => 'views',
+      'bundle' => 'view',
+
+      // Use the default field settings for settings and widget.
+      'settings' => field_info_instance_settings($field['type']),
+      'widget' => array(
+        'type' => $field_type['default_widget'],
+        'settings' => array(),
+      ),
+
+      // Build a dummy display mode.
+      'display' => array(
+        '_custom' => array(
+          'type' => $formatter,
+          'settings' => $settings,
+        ),
+      ),
+
+      // Set the other fields to their default values.
+      // @see _field_write_instance().
+      'required' => FALSE,
+      'label' => $field_name,
+      'description' => '',
+      'deleted' => 0,
+    );
 
     // Store the settings in a '_custom' view mode.
     $this->instance['display']['_custom'] = array(
@@ -680,7 +708,7 @@ class views_handler_field_field extends views_handler_field {
 
       // Now, transfer the data back into the resultset so it can be easily used.
       foreach ($values as $row_id => &$value) {
-        $value->{'field_' . $this->options['id']} = $this->set_items($value, $row_id);
+        $value->{'field_' . $this->options['id']} = $this->view->set_items($value, $row_id);
       }
     }
   }

@@ -158,7 +158,7 @@ class ViewsModuleTest extends ViewsSqlTest {
 
     // Make sure we start with a empty cache.
     $this->resetStaticViewsDataCache();
-    cache_clear_all('*', 'cache_views', TRUE);
+    cache('views')->flush();
     variable_set('views_test_views_data_count', 0);
 
     // Request info about an existing table.
