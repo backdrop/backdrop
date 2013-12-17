@@ -20,7 +20,7 @@ function filter_admin_overview($form) {
   foreach ($formats as $id => $format) {
     $links = array();
     $links['configure'] = array(
-      'title' => t('configure'),
+      'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
     );
     // Check whether this is the fallback text format. This format is available
@@ -35,7 +35,7 @@ function filter_admin_overview($form) {
       $roles = array_map('check_plain', filter_get_roles_by_format($format));
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
       $links['disable'] = array(
-        'title' => t('disable'),
+        'title' => t('Disable'),
         'href' => "admin/config/content/formats/$id/disable",
       );
     }

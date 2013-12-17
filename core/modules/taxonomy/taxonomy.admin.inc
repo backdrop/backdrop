@@ -27,15 +27,15 @@ function taxonomy_overview_vocabularies($form) {
     );
     $links = array();
     $links['edit'] = array(
-      'title' => t('edit vocabulary'),
+      'title' => t('Edit vocabulary'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/edit",
     );
     $links['list'] = array(
-      'title' => t('list terms'),
+      'title' => t('List terms'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name",
     );
     $links['add'] = array(
-      'title' => t('add terms'),
+      'title' => t('Add terms'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/add",
     );
     $form[$vocabulary->vid]['operations'] = array(

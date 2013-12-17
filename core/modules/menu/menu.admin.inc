@@ -17,15 +17,15 @@ function menu_overview_page() {
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
     $links = array();
     $links['list'] = array(
-      'title' => t('list links'),
+      'title' => t('List links'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
     );
     $links['edit'] = array(
-      'title' => t('edit menu'),
+      'title' => t('Edit menu'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/edit',
     );
     $links['add'] = array(
-      'title' => t('add link'),
+      'title' => t('Add link'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/add',
     );
     $row[] = array(
