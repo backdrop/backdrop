@@ -5658,6 +5658,26 @@ function drupal_pre_render_markup($elements) {
 }
 
 /**
+ * Pre-render callback: Attaches the dropbutton library and required markup.
+ */
+function drupal_pre_render_dropbutton($element) {
+  $element['#attached']['library'][] = array('system', 'drupal.dropbutton');
+  $element['#attributes']['class'][] = 'dropbutton';
+  if (!isset($element['#theme_wrappers'])) {
+    $element['#theme_wrappers'] = array();
+  }
+  array_unshift($element['#theme_wrappers'], 'dropbutton_wrapper');
+
+  // Enable targeted theming of specific dropbuttons (e.g., 'operations' or
+  // 'operations__node').
+  if (isset($element['#subtype'])) {
+    $element['#theme'] .= '__' . $element['#subtype'];
+  }
+
+  return $element;
+}
+
+/**
  * Renders the page, including all theming.
  *
  * @param $page
@@ -6754,6 +6774,9 @@ function drupal_common_theme() {
     ),
     'links' => array(
       'variables' => array('links' => array(), 'attributes' => array('class' => array('links')), 'heading' => array()),
+    ),
+    'dropbutton_wrapper' => array(
+      'variables' => array('children' => NULL),
     ),
     'image' => array(
       // HTML 4 and XHTML 1.0 always require an alt attribute. The HTML 5 draft

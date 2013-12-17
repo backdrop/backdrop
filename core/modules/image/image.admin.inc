@@ -97,21 +97,23 @@ function image_style_form($form, &$form_state, $style) {
       '#default_value' => $effect['weight'],
       '#access' => $editable,
     );
-
     // Only attempt to display these fields for editable styles as the 'ieid'
     // key is not set for styles defined in code.
     if ($editable) {
-      $form['effects'][$key]['configure'] = array(
-        '#type' => 'link',
-        '#title' => t('edit'),
-        '#href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $effect['ieid'],
-        '#access' => $editable && isset($effect['form callback']),
+      $links = array();
+      if (isset($effect['form callback'])) {
+        $links['edit'] = array(
+          'title' => t('Edit'),
+          'href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key,
+        );
+      }
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key . '/delete',
       );
-      $form['effects'][$key]['remove'] = array(
-        '#type' => 'link',
-        '#title' => t('delete'),
-        '#href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $effect['ieid'] . '/delete',
-        '#access' => $editable,
+      $form['effects'][$key]['operations'] = array(
+        '#type' => 'operations',
+        '#links' => $links,
       );
     }
   }
