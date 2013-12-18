@@ -2829,7 +2829,7 @@ function system_actions_manage() {
   $header = array(
     array('data' => t('Action type'), 'field' => 'type'),
     array('data' => t('Label'), 'field' => 'label'),
-    array('data' => $instances_present ? t('Operations') : '', 'colspan' => '2')
+    array('data' => $instances_present ? t('Operations') : ''),
   );
   $query = db_select('actions')->extend('PagerDefault')->extend('TableSort');
   $result = $query
@@ -2839,11 +2839,28 @@ function system_actions_manage() {
     ->execute();
 
   foreach ($result as $action) {
+    if ($action->parameters) {
+      $links = array();
+      $links['configure'] = array(
+        'title' => t('Configure'),
+        'href' => "admin/config/system/actions/configure/$action->aid",
+      );
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => "admin/config/system/actions/delete/$action->aid",
+      );
+      $operations = array(
+        '#type' => 'operations',
+        '#links' => $links,
+      );
+    }
+    else {
+      $operations = '';
+    }
     $row[] = array(
       array('data' => $action->type),
       array('data' => check_plain($action->label)),
-      array('data' => $action->parameters ? l(t('configure'), "admin/config/system/actions/configure/$action->aid") : ''),
-      array('data' => $action->parameters ? l(t('delete'), "admin/config/system/actions/delete/$action->aid") : '')
+      array('data' => $operations),
     );
   }
 

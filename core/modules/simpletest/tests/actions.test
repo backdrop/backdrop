@@ -27,7 +27,7 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
     $this->assertText($action_label, t("Make sure the action label appears on the configuration page after we've saved the complex action."));
 
     // Make another POST request to the action edit page.
-    $this->clickLink(t('configure'));
+    $this->clickLink(t('Configure'));
     preg_match('|admin/config/system/actions/configure/(\d+)|', $this->getUrl(), $matches);
     $aid = $matches[1];
     $edit = array();

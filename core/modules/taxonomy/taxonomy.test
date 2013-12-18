@@ -72,7 +72,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     // Edit the vocabulary.
     $this->drupalGet('admin/structure/taxonomy');
     $this->assertText($edit['name'], t('Vocabulary found in the vocabulary overview listing.'));
-    $this->clickLink(t('edit vocabulary'));
+    $this->clickLink(t('Edit vocabulary'));
     $edit = array();
     $edit['name'] = $this->randomName();
     $this->drupalPost(NULL, $edit, t('Save'));

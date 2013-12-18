@@ -2079,7 +2079,7 @@ class LocaleUILanguageNegotiationTest extends DrupalWebTestCase {
     $edit = array( 'string' => $default_string);
     $this->drupalPost('admin/config/regional/translate/translate', $edit, t('Filter'));
     // Should find the string and now click edit to post translated string.
-    $this->clickLink('edit');
+    $this->clickLink('Edit');
     $edit = array(
       "translations[$langcode_browser_fallback]" => $language_browser_fallback_string,
       "translations[$langcode]" => $language_string,
