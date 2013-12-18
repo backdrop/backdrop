@@ -418,7 +418,6 @@ function taxonomy_overview_terms($form, &$form_state, $vocabulary) {
     $form[$key]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
-      '#attributes' => array('class' => array('links', 'inline')),
     );
   }
 

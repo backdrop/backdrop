@@ -696,7 +696,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     // Test edit link as accessed from Taxonomy administration pages.
     // Because Simpletest creates its own database when running tests, we know
     // the first edit link found on the listing page is to our term.
-    $this->clickLink(t('Edit'));
+    $this->clickLink(t('Edit'), 1);
 
     $this->assertRaw($edit['name'], t('The randomly generated term name is present.'));
     $this->assertText($edit['description[value]'], t('The randomly generated term description is present.'));
