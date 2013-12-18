@@ -93,7 +93,7 @@ class BlockTestCase extends DrupalWebTestCase {
     $this->drupalPost('admin/structure/block/manage/block/' . $bid . '/configure', $edit, t('Save block'));
 
     // Delete the created custom block & verify that it's been deleted and no longer appearing on the page.
-    $this->clickLink(t('delete'));
+    $this->clickLink(t('Delete'));
     $this->drupalPost('admin/structure/block/manage/block/' . $bid . '/delete', array(), t('Delete'));
     $this->assertRaw(t('The block %title has been removed.', array('%title' => $custom_block['info'])), t('Custom block successfully deleted.'));
     $this->assertNoText(t($custom_block['title']), t('Custom block no longer appears on page.'));

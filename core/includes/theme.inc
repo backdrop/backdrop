@@ -1765,6 +1765,23 @@ function theme_links($variables) {
 }
 
 /**
+ * Provide wrapper HTML around dropbutton lists.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *     - children: Contains the rendered childen of the dropbutton menu.
+ */
+function theme_dropbutton_wrapper($variables) {
+  $output = '';
+  $output .= '<div class="dropbutton-wrapper">';
+  $output .= '<div class="dropbutton-widget">';
+  $output .= $variables['children'];
+  $output .= '</div>';
+  $output .= '</div>';
+  return $output;
+}
+
+/**
  * Returns HTML for an image.
  *
  * @param $variables

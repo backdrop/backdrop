@@ -89,17 +89,20 @@ function image_style_form($form, &$form_state, $style) {
       '#title_display' => 'invisible',
       '#default_value' => $effect['weight'],
     );
-
-    $form['effects'][$key]['configure'] = array(
-      '#type' => 'link',
-      '#title' => t('edit'),
-      '#href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key,
-      '#access' => isset($effect['form callback']),
+    $links = array();
+    if (isset($effect['form callback'])) {
+      $links['edit'] = array(
+        'title' => t('Edit'),
+        'href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key,
+      );
+    }
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key . '/delete',
     );
-    $form['effects'][$key]['remove'] = array(
-      '#type' => 'link',
-      '#title' => t('delete'),
-      '#href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key . '/delete',
+    $form['effects'][$key]['operations'] = array(
+      '#type' => 'operations',
+      '#links' => $links,
     );
   }
 
@@ -622,31 +625,39 @@ function theme_image_style_list($variables) {
 
   $header = array(t('Style name'), t('Settings'), array('data' => t('Operations'), 'colspan' => 3));
   $rows = array();
-  $link_attributes = array(
-    'attributes' => array(
-      'class' => array('image-style-link'),
-    ),
-  );
-
   foreach ($styles as $style) {
     $row = array();
     $row[] = l($style['name'], 'admin/config/media/image-styles/edit/' . $style['name']);
 
+    $links = array();
+    $links['edit'] = array(
+      'title' => t('Edit'),
+      'href' => 'admin/config/media/image-styles/edit/' . $style['name'],
+    );
+
     if ($style['storage'] == IMAGE_STORAGE_NORMAL) {
       $row[] = t('Custom');
-      $row[] = l(t('edit'), 'admin/config/media/image-styles/edit/' . $style['name'], $link_attributes);
-      $row[] = l(t('delete'), 'admin/config/media/image-styles/delete/' . $style['name'], $link_attributes);
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/config/media/image-styles/delete/' . $style['name'],
+      );
     }
     elseif ($style['storage'] == IMAGE_STORAGE_OVERRIDE) {
       $row[] = t('Overridden');
-      $row[] = l(t('edit'), 'admin/config/media/image-styles/edit/' . $style['name'], $link_attributes);
-      $row[] = l(t('revert'), 'admin/config/media/image-styles/revert/' . $style['name'], $link_attributes);
+      $links['delete'] = array(
+        'title' => t('Revert'),
+        'href' => 'admin/config/media/image-styles/revert/' . $style['name'],
+      );
     }
     else {
       $row[] = t('Default');
-      $row[] = l(t('edit'), 'admin/config/media/image-styles/edit/' . $style['name'], $link_attributes);
-      $row[] = '';
     }
+    $row[] = array(
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => $links,
+      ),
+    );
     $rows[] = $row;
   }
 
@@ -681,14 +692,13 @@ function theme_image_style_effects($variables) {
       $summary = drupal_render($form[$key]['summary']);
       $row[] = drupal_render($form[$key]['label']) . (empty($summary) ? '' : ' ' . $summary);
       $row[] = drupal_render($form[$key]['weight']);
-      $row[] = drupal_render($form[$key]['configure']);
-      $row[] = drupal_render($form[$key]['remove']);
+      $row[] = drupal_render($form[$key]['operations']);
     }
     else {
       // Add the row for adding a new image effect.
       $row[] = '<div class="image-style-new">' . drupal_render($form['new']['new']) . drupal_render($form['new']['add']) . '</div>';
       $row[] = drupal_render($form['new']['weight']);
-      $row[] = array('data' => '', 'colspan' => 2);
+      $row[] = '';
     }
 
     if (!isset($form[$key]['#access']) || $form[$key]['#access']) {
@@ -702,13 +712,13 @@ function theme_image_style_effects($variables) {
   $header = array(
     t('Effect'),
     t('Weight'),
-    array('data' => t('Operations'), 'colspan' => 2),
+    t('Operations'),
   );
 
   if (count($rows) == 1) {
     array_unshift($rows, array(array(
       'data' => t('There are currently no effects in this style. Add one by selecting an option below.'),
-      'colspan' => 4,
+      'colspan' => 3,
     )));
   }
 

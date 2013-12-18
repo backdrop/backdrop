@@ -91,12 +91,24 @@ function _locale_translate_seek() {
 
   $rows = array();
   foreach ($strings as $lid => $string) {
+    $links = array();
+    $links['edit'] = array(
+      'title' => t('Edit'),
+      'href' => "admin/config/regional/translate/edit/$lid",
+      'query' => drupal_get_destination(),
+      'class' => array('nowrap'),
+    );
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => "admin/config/regional/translate/delete/$lid",
+      'query' => drupal_get_destination(),
+      'class' => array('nowrap'),
+    );
     $rows[] = array(
       array('data' => check_plain(truncate_utf8($string['source'], 150, FALSE, TRUE)) . '<br /><small>' . $string['location'] . '</small>'),
       $string['context'],
       array('data' => _locale_translate_language_list($string['languages'], $limit_language), 'align' => 'center'),
-      array('data' => l(t('edit'), "admin/config/regional/translate/edit/$lid", array('query' => drupal_get_destination())), 'class' => array('nowrap')),
-      array('data' => l(t('delete'), "admin/config/regional/translate/delete/$lid", array('query' => drupal_get_destination())), 'class' => array('nowrap')),
+      array('data' => array('#type' => 'operations', '#links' => $links)),
     );
   }
 

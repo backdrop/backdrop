@@ -404,7 +404,7 @@ function theme_locale_date_format_form($variables) {
 function locale_date_format_language_overview_page() {
   $header = array(
     t('Language'),
-    array('data' => t('Operations'), 'colspan' => '2'),
+    t('Operations'),
   );
 
   // Get the enabled languages only.
@@ -413,8 +413,21 @@ function locale_date_format_language_overview_page() {
   foreach ($languages as $langcode => $language) {
     $row = array();
     $row[] = $language->name;
-    $row[] = l(t('edit'), 'admin/config/regional/date-time/locale/' . $langcode . '/edit');
-    $row[] = l(t('reset'), 'admin/config/regional/date-time/locale/' . $langcode . '/reset');
+    $links = array();
+    $links['edit'] = array(
+      'title' => t('Edit'),
+      'href' => 'admin/config/regional/date-time/locale/' . $langcode . '/edit',
+    );
+    $links['reset'] = array(
+      'title' => t('Reset'),
+      'href' => 'admin/config/regional/date-time/locale/' . $langcode . '/reset',
+    );
+    $row[] = array(
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => $links,
+      ),
+    );
     $rows[] = $row;
   }
 
