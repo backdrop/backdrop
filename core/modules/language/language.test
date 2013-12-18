@@ -81,7 +81,7 @@ class LanguageListTest extends DrupalWebTestCase {
     $this->assertFieldChecked('edit-languages-en-enabled', t('Default language re-enabled.'));
 
     // Ensure 'edit' link works.
-    $this->clickLink(t('edit'));
+    $this->clickLink(t('Edit'));
     $this->assertTitle(t('Edit language | Drupal'), t('Page title is "Edit language".'));
     // Edit a language.
     $name = $this->randomName(16);
@@ -94,7 +94,7 @@ class LanguageListTest extends DrupalWebTestCase {
 
     // Ensure 'delete' link works.
     $this->drupalGet('admin/config/regional/language');
-    $this->clickLink(t('delete'));
+    $this->clickLink(t('Delete'));
     $this->assertText(t('Are you sure you want to delete the language'), t('"delete" link is correct.'));
     // Delete an enabled language.
     $this->drupalGet('admin/config/regional/language/delete/' . $langcode);

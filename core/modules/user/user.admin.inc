@@ -148,7 +148,7 @@ function user_admin_account() {
     'roles' => array('data' => t('Roles')),
     'member_for' => array('data' => t('Member for'), 'field' => 'u.created', 'sort' => 'desc'),
     'access' => array('data' => t('Last access'), 'field' => 'u.access'),
-    'operations' => array('data' => t('Operations')),
+    'operations' => t('Operations'),
   );
 
   $query = db_select('users', 'u');
@@ -207,7 +207,16 @@ function user_admin_account() {
       'roles' => theme('item_list', array('items' => $users_roles)),
       'member_for' => format_interval(REQUEST_TIME - $account->created),
       'access' =>  $account->access ? t('@time ago', array('@time' => format_interval(REQUEST_TIME - $account->access))) : t('never'),
-      'operations' => array('data' => array('#type' => 'link', '#title' => t('edit'), '#href' => "user/$account->uid/edit", '#options' => array('query' => $destination))),
+    );
+    $links = array();
+    $links['edit'] = array(
+      'title' => t('Edit'),
+      'href' => "user/$account->uid/edit",
+      'query' => $destination,
+    );
+    $options[$account->uid]['operations']['data'] = array(
+      '#type' => 'operations',
+      '#links' => $links,
     );
   }
 
@@ -842,6 +851,23 @@ function user_admin_roles($form, $form_state) {
       '#default_value' => $order,
       '#attributes' => array('class' => array('role-weight')),
     );
+    $links = array();
+    if (!in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
+      $links['edit'] = array(
+        'title' => t('Edit role'),
+        'href' => 'admin/people/permissions/roles/edit/' . $rid,
+        'weight' => 0,
+      );
+    }
+    $links['permissions'] = array(
+      'title' => t('Edit permissions'),
+      'href' => 'admin/people/permissions/' . $rid,
+      'weight' => 5,
+    );
+    $form['roles'][$rid]['operations'] = array(
+      '#type' => 'operations',
+      '#links' => $links,
+    );
     $order++;
   }
 
@@ -892,22 +918,18 @@ function user_admin_roles_order_submit($form, &$form_state) {
 function theme_user_admin_roles($variables) {
   $form = $variables['form'];
 
-  $header = array(t('Name'), t('Weight'), array('data' => t('Operations'), 'colspan' => 2));
+  $header = array(t('Name'), t('Weight'), t('Operations'));
   foreach (element_children($form['roles']) as $rid) {
     $name = $form['roles'][$rid]['#role']->name;
     $row = array();
     if (in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
       $row[] = t('@name <em>(locked)</em>', array('@name' => $name));
-      $row[] = drupal_render($form['roles'][$rid]['weight']);
-      $row[] = '';
-      $row[] = l(t('edit permissions'), 'admin/people/permissions/' . $rid);
     }
     else {
       $row[] = check_plain($name);
-      $row[] = drupal_render($form['roles'][$rid]['weight']);
-      $row[] = l(t('edit role'), 'admin/people/permissions/roles/edit/' . $rid);
-      $row[] = l(t('edit permissions'), 'admin/people/permissions/' . $rid);
     }
+    $row[] = drupal_render($form['roles'][$rid]['weight']);
+    $row[] = drupal_render($form['roles'][$rid]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
   $rows[] = array(array('data' => drupal_render($form['name']) . drupal_render($form['add']), 'colspan' => 4, 'class' => 'edit-name'));

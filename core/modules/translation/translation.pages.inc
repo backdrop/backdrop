@@ -39,10 +39,13 @@ function translation_node_overview($node) {
       $links = language_negotiation_get_switch_links($type, $path);
       $title = empty($links->links[$langcode]['href']) ? l($translation_node->title, $path) : l($translation_node->title, $links->links[$langcode]['href'], $links->links[$langcode]);
       if (node_access('update', $translation_node)) {
-        $text = t('edit');
         $path = 'node/' . $translation_node->nid . '/edit';
         $links = language_negotiation_get_switch_links($type, $path);
-        $options[] = empty($links->links[$langcode]['href']) ? l($text, $path) : l($text, $links->links[$langcode]['href'], $links->links[$langcode]);
+        if (!empty($links->links[$langcode]['href'])) {
+          $options['edit'] = array(
+            'title' => t('Edit'),
+          ) + $links->links[$langcode];
+        }
       }
       $status = $translation_node->status ? t('Published') : t('Not published');
       $status .= $translation_node->translate ? ' - <span class="marker">' . t('outdated') . '</span>' : '';
@@ -52,17 +55,31 @@ function translation_node_overview($node) {
     }
     else {
       // No such translation in the set yet: help user to create it.
-      $title = t('n/a');
+      $title = t('N/A');
       if (node_access('create', $node)) {
-        $text = t('add translation');
         $path = 'node/add/' . str_replace('_', '-', $node->type);
         $links = language_negotiation_get_switch_links($type, $path);
         $query = array('query' => array('translation' => $node->nid, 'target' => $langcode));
-        $options[] = empty($links->links[$langcode]['href']) ? l($text, $path, $query) : l($text, $links->links[$langcode]['href'], array_merge_recursive($links->links[$langcode], $query));
+        if (!empty($links->links[$langcode]['href'])) {
+          $options['add'] = array(
+            'title' => t('Add translation'),
+          ) + $links->links[$langcode];
+          $options['add'] = array_merge_recursive($options['add'], $query);
+        }
       }
       $status = t('Not translated');
     }
-    $rows[] = array($language_name, $title, $status, implode(" | ", $options));
+    $row = array();
+    $row[] = $language_name;
+    $row[] = $title;
+    $row[] = $status;
+    $row[] = array(
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => $options,
+      ),
+    );
+    $rows[] = $row;
   }
 
   drupal_set_title(t('Translations of %title', array('%title' => $node->title)), PASS_THROUGH);

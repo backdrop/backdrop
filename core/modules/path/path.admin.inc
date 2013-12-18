@@ -25,7 +25,7 @@ function path_admin_overview($keys = NULL) {
   if ($multilanguage) {
     $header[] = array('data' => t('Language'), 'field' => 'langcode');
   }
-  $header[] = array('data' => t('Operations'));
+  $header[] = t('Operations');
 
   $query = db_select('url_alias')->extend('PagerDefault')->extend('TableSort');
   if ($keys) {
@@ -50,18 +50,18 @@ function path_admin_overview($keys = NULL) {
 
     $operations = array();
     $operations['edit'] = array(
-      'title' => t('edit'),
+      'title' => t('Edit'),
       'href' => "admin/config/search/path/edit/$data->pid",
       'query' => $destination,
     );
     $operations['delete'] = array(
-      'title' => t('delete'),
+      'title' => t('Delete'),
       'href' => "admin/config/search/path/delete/$data->pid",
       'query' => $destination,
     );
     $row['data']['operations'] = array(
       'data' => array(
-        '#theme' => 'links',
+        '#type' => 'operations',
         '#links' => $operations,
         '#attributes' => array('class' => array('links', 'inline', 'nowrap')),
       ),
