@@ -27,7 +27,7 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
     $this->assertText($action_label, t("Make sure the action label appears on the configuration page after we've saved the complex action."));
 
     // Make another POST request to the action edit page.
-    $this->clickLink(t('configure'));
+    $this->clickLink(t('Configure'));
     preg_match('|admin/config/system/actions/configure/(\d+)|', $this->getUrl(), $matches);
     $aid = $matches[1];
     $edit = array();
@@ -42,7 +42,7 @@ class ActionsConfigurationTestCase extends DrupalWebTestCase {
     $this->assertText($new_action_label, t("Make sure the action label appears on the configuration page after we've updated the complex action."));
 
     // Make sure that deletions work properly.
-    $this->clickLink(t('delete'));
+    $this->clickLink(t('Delete'));
     $edit = array();
     $this->drupalPost("admin/config/system/actions/delete/$aid", $edit, t('Delete'));
 

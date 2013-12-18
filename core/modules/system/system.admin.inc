@@ -1892,15 +1892,19 @@ function system_date_time_settings() {
         '#options' => $choices,
       );
 
+      $links = array();
       // If this isn't a system provided type, allow the user to remove it from
       // the system.
       if ($type_info['locked'] == 0) {
-        $form['formats']['delete']['date_format_' . $type . '_delete'] = array(
-          '#type' => 'link',
-          '#title' => t('delete'),
-          '#href' => 'admin/config/regional/date-time/types/' . $type . '/delete',
+        $links['delete'] = array(
+          'title' => t('Delete'),
+          'href' => "admin/config/regional/date-time/types/$type/delete",
         );
       }
+      $form['formats']['operations']["date_format_$type"] = array(
+        '#type' => 'operations',
+        '#links' => $links,
+      );
     }
   }
 
@@ -1928,12 +1932,11 @@ function theme_system_date_time_settings($variables) {
   );
 
   foreach (element_children($form['format']) as $key) {
-    $delete_key = $key . '_delete';
     $row = array();
     $row[] = $form['format'][$key]['#title'];
     $form['format'][$key]['#title_display'] = 'invisible';
     $row[] = array('data' => drupal_render($form['format'][$key]));
-    $row[] = array('data' => drupal_render($form['delete'][$delete_key]));
+    $row[] = drupal_render($form['operations'][$key]);
     $rows[] = $row;
   }
 
@@ -2681,7 +2684,7 @@ function system_delete_date_format_type_form_submit($form, &$form_state) {
  * Displays the date format strings overview page.
  */
 function system_date_time_formats() {
-  $header = array(t('Format'), array('data' => t('Operations'), 'colspan' => '2'));
+  $header = array(t('Format'), t('Operations'));
   $rows = array();
 
   drupal_static_reset('system_get_date_formats');
@@ -2690,8 +2693,21 @@ function system_date_time_formats() {
     foreach ($formats as $format) {
       $row = array();
       $row[] = array('data' => format_date(REQUEST_TIME, 'custom', $format['format']));
-      $row[] = array('data' => l(t('edit'), 'admin/config/regional/date-time/formats/' . $format['dfid'] . '/edit'));
-      $row[] = array('data' => l(t('delete'), 'admin/config/regional/date-time/formats/' . $format['dfid'] . '/delete'));
+      $links = array();
+      $links['edit'] = array(
+        'title' => t('Edit'),
+        'href' => 'admin/config/regional/date-time/formats/' . $format['dfid'] . '/edit',
+      );
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/config/regional/date-time/formats/' . $format['dfid'] . '/delete',
+      );
+      $row[] = array(
+        'data' => array(
+          '#type' => 'operations',
+          '#links' => $links,
+        ),
+      );
       $rows[] = $row;
     }
   }
@@ -2813,7 +2829,7 @@ function system_actions_manage() {
   $header = array(
     array('data' => t('Action type'), 'field' => 'type'),
     array('data' => t('Label'), 'field' => 'label'),
-    array('data' => $instances_present ? t('Operations') : '', 'colspan' => '2')
+    array('data' => $instances_present ? t('Operations') : ''),
   );
   $query = db_select('actions')->extend('PagerDefault')->extend('TableSort');
   $result = $query
@@ -2823,11 +2839,28 @@ function system_actions_manage() {
     ->execute();
 
   foreach ($result as $action) {
+    if ($action->parameters) {
+      $links = array();
+      $links['configure'] = array(
+        'title' => t('Configure'),
+        'href' => "admin/config/system/actions/configure/$action->aid",
+      );
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => "admin/config/system/actions/delete/$action->aid",
+      );
+      $operations = array(
+        '#type' => 'operations',
+        '#links' => $links,
+      );
+    }
+    else {
+      $operations = '';
+    }
     $row[] = array(
       array('data' => $action->type),
       array('data' => check_plain($action->label)),
-      array('data' => $action->parameters ? l(t('configure'), "admin/config/system/actions/configure/$action->aid") : ''),
-      array('data' => $action->parameters ? l(t('delete'), "admin/config/system/actions/delete/$action->aid") : '')
+      array('data' => $operations),
     );
   }
 

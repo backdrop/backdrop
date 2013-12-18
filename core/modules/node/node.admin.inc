@@ -500,14 +500,14 @@ function node_admin_nodes() {
     $operations = array();
     if (node_access('update', $node)) {
       $operations['edit'] = array(
-        'title' => t('edit'),
+        'title' => t('Edit'),
         'href' => 'node/' . $node->nid . '/edit',
         'query' => $destination,
       );
     }
     if (node_access('delete', $node)) {
       $operations['delete'] = array(
-        'title' => t('delete'),
+        'title' => t('Delete'),
         'href' => 'node/' . $node->nid . '/delete',
         'query' => $destination,
       );
@@ -517,9 +517,8 @@ function node_admin_nodes() {
       // Render an unordered list of operations links.
       $options[$node->nid]['operations'] = array(
         'data' => array(
-          '#theme' => 'links__node_operations',
+          '#type' => 'operations',
           '#links' => $operations,
-          '#attributes' => array('class' => array('links', 'inline')),
         ),
       );
     }
