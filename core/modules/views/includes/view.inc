@@ -538,7 +538,7 @@ class view {
     if (empty($this->display[$display_id])) {
       $display_id = 'default';
       if (empty($this->display[$display_id])) {
-        vpr('set_display() called with invalid display id @display.', array('@display' => $display_id));
+        watchdog('views', 'set_display() called with invalid display id @display.', array('@display' => $display_id));
         return FALSE;
       }
     }
@@ -1161,7 +1161,6 @@ class view {
         $this->query->pager->total_items = $this->total_rows;
         $this->query->pager->update_page_info();
       }
-      vpr('Used cached results');
     }
     else {
       $this->query->execute($this);

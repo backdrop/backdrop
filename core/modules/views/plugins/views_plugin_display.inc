@@ -53,7 +53,7 @@ class views_plugin_display extends views_plugin {
           $this->extender[$extender] = $plugin;
         }
         else {
-          vpr('Invalid display extender @extender', array('@handler' => $extender));
+          watchdog('views', 'Invalid display extender @extender', array('@handler' => $extender));
         }
       }
     }
@@ -1262,9 +1262,8 @@ class views_plugin_display extends views_plugin {
         LANGUAGE_NONE => t('Language neutral'),
     );
     if (module_exists('locale')) {
-      $languages = array_merge($languages, locale_language_list());
+      $languages = array_merge($languages, views_language_list());
     }
-    $field_language = array();
     $options['field_language'] = array(
       'category' => 'other',
       'title' => t('Field Language'),

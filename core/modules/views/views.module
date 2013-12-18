@@ -876,7 +876,8 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
 /**
  * Returns an array of language names.
  *
- * This is a one to one copy of locale_language_list because we can't rely on enabled locale module.
+ * This is a one to one copy of language_list because we can't rely on enabled
+ * Locale module.
  *
  * @param $field
  *   'name' => names in current language, localized
@@ -884,7 +885,7 @@ function views_add_contextual_links(&$render_element, $location, $view, $display
  * @param $all
  *   Boolean to return all languages or only enabled ones
  *
- * @see locale_language_list()
+ * @see language_list()
  */
 function views_language_list($field = 'name', $all = FALSE) {
   if ($all) {
@@ -892,11 +893,10 @@ function views_language_list($field = 'name', $all = FALSE) {
   }
   else {
     $languages = language_list('enabled');
-    $languages = $languages[1];
   }
   $list = array();
   foreach ($languages as $language) {
-    $list[$language->language] = ($field == 'name') ? t($language->name) : $language->$field;
+    $list[$language->langcode] = ($field == 'name') ? t($language->name) : $language->$field;
   }
   return $list;
 }
@@ -1341,29 +1341,6 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
 
 // -----------------------------------------------------------------------
 // Views database functions
-
-/**
- * Get all view templates.
- *
- * Templates are special in-code views that are never active, but exist only
- * to be cloned into real views as though they were templates.
- */
-function views_get_all_templates() {
-  $templates = array();
-  $modules = views_module_include('views_template');
-
-  foreach ($modules as $module => $info) {
-    $function = $module . '_views_templates';
-    if (function_exists($function)) {
-      $new = $function();
-      if ($new && is_array($new)) {
-        $templates = array_merge($new, $templates);
-      }
-    }
-  }
-
-  return $templates;
-}
 
 /**
  * Create an empty view to work with.

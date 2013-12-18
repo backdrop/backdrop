@@ -30,7 +30,7 @@ class views_handler_relationship_translation extends views_handler_relationship 
       'current' => t('Current language'),
       'default' => t('Default language'),
     );
-    $options = array_merge($options, locale_language_list());
+    $options = array_merge($options, views_language_list());
     $form['language'] = array(
       '#type' => 'select',
       '#options' => $options,

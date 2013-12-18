@@ -306,14 +306,6 @@ function view_ui_list_page() {
     $paths = _views_ui_get_paths($view);
     $paths = implode(", ", $paths);
 
-    // @todo: Port operations list from ctools.
-    // $operations = _views_ui_get_operations($view);
-    $operations = array();
-    $ops = theme('links__ctools_dropbutton', array(
-      'links' => $operations,
-      'attributes' => array('class' => array('links', 'inline')))
-    );
-
     $row = array();
     $row[] = array(
       'data' => theme('views_ui_view_info', array('view' => $view)),
@@ -332,7 +324,10 @@ function view_ui_list_page() {
       'class' => array('views-ui-path'),
     );
     $row[] = array(
-      'data' => $ops,
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => _views_ui_get_operations($view),
+      ),
       'class' => array('views-ui-operations'),
     );
     $rows[] = array(
@@ -348,6 +343,40 @@ function view_ui_list_page() {
     'attributes' => array('id' => 'views-list'),
   );
   return theme('table', $table);
+}
+
+/**
+ * Given a view, return a list of operations that can be performed on it.
+ */
+function _views_ui_get_operations(view $view) {
+  $links = array();
+  if ($view->disabled) {
+    $links['enable'] = array(
+      'title' => t('Enable'),
+      'href' => 'admin/structure/views/view/' . $view->name . '/enable',
+      'query' => array('token' => drupal_get_token($view->name)),
+    );
+  }
+  $links['edit'] = array(
+    'title' => t('Edit'),
+    'href' => 'admin/structure/views/view/' . $view->name,
+  );
+  $links['clone'] = array(
+    'title' => t('Clone'),
+    'href' => 'admin/structure/views/view/' . $view->name . '/clone',
+  );
+  if (!$view->disabled) {
+    $links['disable'] = array(
+      'title' => t('Disable'),
+      'href' => 'admin/structure/views/view/' . $view->name . '/disable',
+      'query' => array('token' => drupal_get_token($view->name)),
+    );
+  }
+  $links['delete'] = array(
+    'title' => t('Delete'),
+    'href' => 'admin/structure/views/view/' . $view->name . '/delete',
+  );
+  return $links;
 }
 
 /**
@@ -1299,13 +1328,7 @@ function views_ui_render_display_top($view, $display_id) {
 
   // Extra actions for the display
   $element['extra_actions'] = array(
-    '#theme' => 'links__ctools_dropbutton',
-    '#attributes' => array(
-        'id' => 'views-display-extra-actions',
-        'class' => array(
-          'horizontal', 'right', 'links', 'actions',
-        ),
-      ),
+    '#type' => 'dropbutton',
     '#links' => array(
       'edit-details' => array(
         'title' => t('edit view name/description'),
@@ -1625,23 +1648,12 @@ function views_ui_get_display_tab_details($view, $display) {
   // The following is for display purposes only. We need to determine if there is more than one button and wrap
   // the buttons in a .ctools-dropbutton class if more than one is present.  Otherwise, we'll just wrap the
   // actions in the .ctools-button class.
-  $isDisplayDeleted = !empty($display->deleted);
-  $isDeletable = empty($plugin['no remove']);
+  $is_display_deleted = !empty($display->deleted);
+  $is_deletable = empty($plugin['no remove']);
   // The master display cannot be cloned.
-  $isDefault = $display->id == 'default';
+  $is_default = $display->id == 'default';
   // @todo: Figure out why get_option doesn't work here.
-  $isEnabled = $display->handler->get_option('enabled');
-
-  if (!$isDisplayDeleted && $isDeletable && !$isDefault) {
-    $prefix = '<div class="ctools-no-js ctools-button ctools-dropbutton"><div class="ctools-link"><a href="#" class="ctools-twisty ctools-text">open</a></div><div class="ctools-content"><ul class="horizontal right actions">';
-    $suffix = '</ul></div></div>';
-    $itemElement = 'li';
-  }
-  else {
-    $prefix = '<div class="ctools-button"><div class="ctools-content"><ul class="horizontal right actions">';
-    $suffix = '</ul></div></div>';
-    $itemElement = 'li';
-  }
+  $is_enabled = $display->handler->get_option('enabled');
 
   if ($display->id != 'default') {
     $build['top']['#theme_wrappers'] = array('container');
@@ -1650,19 +1662,22 @@ function views_ui_get_display_tab_details($view, $display) {
 
     // The Delete, Duplicate and Undo Delete buttons.
     $build['top']['actions'] = array(
-      '#prefix' => $prefix,
-      '#suffix' => $suffix,
+      '#theme_wrappers' => array('dropbutton_wrapper'),
     );
 
-    if (!$isDisplayDeleted) {
-      if (!$isEnabled) {
+    // Because some of the 'links' are actually submit buttons, we have to
+    // manually wrap each item in <li> and the whole list in <ul>.
+    $build['top']['actions']['prefix']['#markup'] = '<ul class="dropbutton">';
+
+    if (!$is_display_deleted) {
+      if (!$is_enabled) {
         $build['top']['actions']['enable'] = array(
           '#type' => 'submit',
           '#value' => t('enable @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_enable_display', 'views_ui_edit_form_submit_delay_destination'),
-          '#prefix' => '<' . $itemElement . ' class="enable">',
-          "#suffix" => '</' . $itemElement . '>',
+          '#prefix' => '<li class="enable">',
+          "#suffix" => '</li>',
         );
       }
       // Add a link to view the page.
@@ -1674,39 +1689,39 @@ function views_ui_get_display_tab_details($view, $display) {
             '#title' => t('view @display', array('@display' => $display->display_title)),
             '#options' => array('alt' => array(t("Go to the real page for this display"))),
             '#href' => $path,
-            '#prefix' => '<' . $itemElement . ' class="view">',
-            "#suffix" => '</' . $itemElement . '>',
+            '#prefix' => '<li class="view">',
+            "#suffix" => '</li>',
           );
         }
       }
-      if (!$isDefault) {
+      if (!$is_default) {
         $build['top']['actions']['duplicate'] = array(
           '#type' => 'submit',
           '#value' => t('clone @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
-          '#prefix' => '<' . $itemElement . ' class="duplicate">',
-          "#suffix" => '</' . $itemElement . '>',
+          '#prefix' => '<li class="duplicate">',
+          "#suffix" => '</li>',
         );
       }
-      if ($isDeletable) {
+      if ($is_deletable) {
         $build['top']['actions']['delete'] = array(
           '#type' => 'submit',
           '#value' => t('delete @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
-          '#prefix' => '<' . $itemElement . ' class="delete">',
-          "#suffix" => '</' . $itemElement . '>',
+          '#prefix' => '<li class="delete">',
+          "#suffix" => '</li>',
         );
       }
-      if ($isEnabled) {
+      if ($is_enabled) {
         $build['top']['actions']['disable'] = array(
           '#type' => 'submit',
           '#value' => t('disable @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_disable_display', 'views_ui_edit_form_submit_delay_destination'),
-          '#prefix' => '<' . $itemElement . ' class="disable">',
-          "#suffix" => '</' . $itemElement . '>',
+          '#prefix' => '<li class="disable">',
+          '#suffix' => '</li>',
         );
       }
     }
@@ -1716,10 +1731,11 @@ function views_ui_get_display_tab_details($view, $display) {
         '#value' => t('undo delete of @display_title', array('@display_title' => $display_title)),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
-        '#prefix' => '<' . $itemElement . ' class="undo-delete">',
-        "#suffix" => '</' . $itemElement . '>',
+        '#prefix' => '<li class="undo-delete">',
+        "#suffix" => '</li>',
       );
     }
+    $build['top']['actions']['suffix']['#markup'] = '</ul>';
 
     // The area above the three columns.
     $build['top']['display_title'] = array(
@@ -1898,7 +1914,7 @@ function template_preprocess_views_ui_display_tab_bucket(&$variables) {
 
   $variables['content'] = $element['#children'];
   $variables['title'] = $element['#title'];
-  $variables['actions'] = !empty($element['#actions']) ? $element['#actions'] : '';
+  $variables['actions'] = !empty($element['actions']) ? drupal_render($element['actions']) : '';
 }
 
 function template_preprocess_views_ui_display_tab_column(&$variables) {
@@ -2319,14 +2335,9 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   }
 
   // Render the array of links
-  $build['#actions'] = theme('links__ctools_dropbutton',
-    array(
-      'links' => $actions,
-      'attributes' => array(
-        'class' => array('inline', 'links', 'actions', 'horizontal', 'right')
-      ),
-      'class' => array('views-ui-settings-bucket-operations'),
-    )
+  $build['actions'] = array(
+    '#type' => 'operations',
+    '#links' => $actions,
   );
 
   if (!$display->handler->is_default_display()) {
@@ -5387,32 +5398,6 @@ function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   }
 
   return $title;
-}
-
-function views_ui_add_template_page() {
-  $templates = views_get_all_templates();
-
-  if (empty($templates)) {
-    return t('There are no templates available.');
-  }
-
-  $header = array(
-    t('Name'),
-    t('Description'),
-    t('Operation'),
-  );
-
-  $rows = array();
-  foreach ($templates as $name => $template) {
-    $rows[] = array(
-      array('data' => check_plain($template->get_human_name())),
-      array('data' => check_plain($template->description)),
-      array('data' => l('add', 'admin/structure/views/template/' . $template->name . '/add')),
-    );
-  }
-
-  $output = theme('table', array('header' => $header, 'rows' => $rows));
-  return $output;
 }
 
 /**

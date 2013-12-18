@@ -32,13 +32,6 @@ function views_ui_menu() {
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
 
-  $items['admin/structure/views/add-template'] = array(
-    'title' => 'Add view from template',
-    'page callback' => 'views_ui_add_template_page',
-    // Don't show a local action link if there aren't any templates.
-    'type' => views_get_all_templates() ? MENU_LOCAL_ACTION : MENU_VISIBLE_IN_BREADCRUMB,
-  ) + $base;
-
   $items['admin/structure/views/import'] = array(
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
@@ -561,7 +554,7 @@ function views_ui_get_wizard($wizard_type) {
     }
     // The plugin is neither a base table nor an existing wizard.
     else {
-      vpr('Views Wizard: @wizard does not exist. Be sure to implement hook_ctools_plugin_directory.', array('@wizard' => $wizard_type));
+      watchdog('Views Wizard: @wizard does not exist. Be sure to implement hook_ctools_plugin_directory.', array('@wizard' => $wizard_type));
     }
   }
   return $wizard;

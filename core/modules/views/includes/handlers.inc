@@ -11,7 +11,7 @@
 function _views_create_handler($definition, $type = 'handler', $handler_type = NULL) {
 //  debug('Instantiating handler ' . $definition['handler']);
   if (empty($definition['handler'])) {
-    vpr('_views_create_handler - type: @type - failed: handler has not been provided.',
+    watchdog('views', '_views_create_handler - type: @type - failed: handler has not been provided.',
       array('@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type)
     );
     return;
@@ -20,7 +20,7 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
   // class_exists will automatically load the code file.
   if (!empty($definition['override handler']) &&
       !class_exists($definition['override handler'])) {
-    vpr(
+    watchdog('views',
       '_views_create_handler - loading override handler @type failed: class @override_handler could not be loaded. ' .
       'Verify the class file has been registered in the corresponding .info-file (files[]).',
       array(
@@ -32,7 +32,7 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
   }
 
   if (!class_exists($definition['handler'])) {
-    vpr(
+    watchdog('views',
       '_views_create_handler - loading handler @type failed: class @handler could not be loaded. ' .
       'Verify the class file has been registered in the corresponding .info-file (files[]).',
       array(
@@ -122,7 +122,7 @@ function views_get_table_join($table, $base_table) {
   }
 
   // DEBUG -- identify missing handlers
-  vpr("Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
+  wathdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
 }
 
 /**
@@ -641,7 +641,7 @@ class views_handler extends views_object {
   function ensure_my_table() {
     if (!isset($this->table_alias)) {
       if (!method_exists($this->query, 'ensure_table')) {
-        vpr(t('Ensure my table called but query has no ensure_table method.'));
+        watchdog('views', t('Ensure my table called but query has no ensure_table method.'));
         return;
       }
       $this->table_alias = $this->query->ensure_table($this->table, $this->relationship);
