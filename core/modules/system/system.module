@@ -3823,6 +3823,17 @@ function system_archiver_info() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function system_config_info() {
+  $prefixes['system.performance'] = array(
+    'label' => t('System performance'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Returns HTML for a confirmation form.
  *
  * By default this does not alter the appearance of a form at all,

@@ -586,6 +586,11 @@ function drupal_rewrite_settings($settings = array()) {
   drupal_static_reset('conf_path');
   $settings_file = conf_path(FALSE) . '/settings.php';
 
+  // If an existing settings file exists, update it instead of using defaults.
+  if (file_exists($settings_file)) {
+    $default_settings = $settings_file;
+  }
+
   // Build list of setting names and insert the values into the global namespace.
   $keys = array();
   foreach ($settings as $setting => $data) {
@@ -650,6 +655,83 @@ function drupal_rewrite_settings($settings = array()) {
   }
   else {
     throw new Exception(st('Failed to open %settings. Verify the file permissions.', array('%settings' => $default_settings)));
+  }
+}
+
+/**
+ * Creates the config directory and ensures it is operational.
+ *
+ * @see install_config_directories()
+ * @see update_prepare_d8_bootstrap()
+ */
+function backdrop_install_config_directories() {
+  global $config_directories;
+
+  // Add a randomized config directory name to settings.php, unless it was
+  // manually defined in the existing already.
+  if (empty($config_directories)) {
+    $config_directories_hash = drupal_hash_base64(drupal_random_bytes(55));
+    $settings['config_directories'] = array(
+      'value' => array(
+        'active' => array(
+          'path' => 'config_' . $config_directories_hash . '/active',
+        ),
+        'staging' => array(
+          'path' => 'config_' . $config_directories_hash . '/staging',
+        ),
+      ),
+      'required' => TRUE,
+    );
+
+    // Rewrite settings.php, which also sets the value as global variable.
+    drupal_rewrite_settings($settings);
+  }
+
+  // Ensure the config directories exist or can be created, and are writable.
+  foreach (array('active', 'staging') as $config_type) {
+    // This should never fail, since if the config directory was specified in
+    // settings.php it will have already been created and verified earlier, and
+    // if it wasn't specified in settings.php, it is created here inside the
+    // public files directory, which has already been verified to be writable
+    // itself. But if it somehow fails anyway, the installation cannot proceed.
+    // Bail out using a similar error message as in system_requirements().
+    $config_directory = config_get_config_directory($config_type);
+    if (!file_prepare_directory($config_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">online handbook</a>.', array(
+        '%directory' => config_get_config_directory($config_type),
+        '@handbook_url' => 'http://drupal.org/server-permissions',
+      )));
+    }
+
+    // Put a README.txt into each config directory. This is required so that
+    // they can later be added to git. Since these directories are auto-
+    // created, we have to write out the README rather than just adding it
+    // to the Backdrop core repository. These strings are formatted to wrap at
+    // 80 characters.
+    switch ($config_type) {
+      case 'active':
+        $text = ltrim('
+This directory contains the active configuration for your Drupal site. To move
+this configuration between environments, contents from this directory should be
+placed in the staging directory on the target server. To make this configuration
+active, see admin/config/development/configuration/sync on the target server.
+
+');
+        break;
+      case 'staging':
+        $text = ltrim('
+This directory contains configuration to be imported into your Drupal site. To
+make this configuration active, see admin/config/development/configuration/sync.
+
+');
+        break;
+    }
+    $text .= ltrim('
+For information about deploying configuration between servers, see
+http://drupal.org/documentation/administer/config
+');
+
+    file_put_contents(config_get_config_directory($config_type) . '/README.txt', $text);
   }
 }
 
@@ -729,6 +811,7 @@ function drupal_install_system() {
       ))
     ->execute();
   system_rebuild_module_data();
+  config_install_default_config('system');
 }
 
 /**

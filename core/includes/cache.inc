@@ -445,7 +445,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
    * Implements DrupalCacheInterface::expire().
    */
   function expire() {
-    if (variable_get('cache_lifetime', 0)) {
+    if (config_get('system.performance', 'cache_lifetime')) {
       // We store the time in the current user's $user->cache variable which
       // will be saved into the sessions bin by _drupal_session_write(). We then
       // simulate that the cache was flushed for this user by not returning
@@ -457,7 +457,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
         // This is the first request to clear the cache; start a timer.
         variable_set('cache_flush_' . $this->bin, REQUEST_TIME);
       }
-      elseif (REQUEST_TIME > ($cache_flush + variable_get('cache_lifetime', 0))) {
+      elseif (REQUEST_TIME > ($cache_flush + config_get('system.performance', 'cache_lifetime'))) {
         // Clear the cache for everyone; cache_lifetime seconds have passed
         // since the first request to clear the cache.
         db_delete($this->bin)
@@ -485,7 +485,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
     // When cache lifetime is in force, avoid running garbage collection too
     // often since this will remove temporary cache items indiscriminately.
     $cache_flush = variable_get('cache_flush_' . $this->bin, 0);
-    if ($cache_flush && ($cache_flush + variable_get('cache_lifetime', 0) <= REQUEST_TIME)) {
+    if ($cache_flush && ($cache_flush + config_get('system.performance', 'cache_lifetime') <= REQUEST_TIME)) {
       // Reset the variable immediately to prevent a meltdown in heavy load
       // situations.
       variable_set('cache_flush_' . $this->bin, 0);
