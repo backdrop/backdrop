@@ -1785,7 +1785,7 @@ class view {
   }
 
   /**
-   * Delete the view from the database.
+   * Delete the view entirely from the system.
    */
   function delete($clear = TRUE) {
     config('views.view.' . $this->name)->delete();

@@ -108,7 +108,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           ':input[name="page[create]"]' => array('checked' => TRUE),
         ),
       ),
-      //'#pre_render' => array('ctools_dependent_pre_render'),
       '#prefix' => '<div><div id="edit-page-wrapper">',
       '#suffix' => '</div></div>',
       '#parents' => array('page'),
@@ -166,7 +165,6 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
           ':input[name="page[link]"]' => array('checked' => TRUE),
         ),
       ),
-      //'#pre_render' => array('ctools_dependent_pre_render'),
       '#prefix' => '<div id="edit-page-link-properties-wrapper">',
       '#suffix' => '</div>',
     );
@@ -784,7 +782,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     if (empty($page['items_per_page'])) {
       $display_options['pager']['type'] = 'none';
     }
-    elseif ($page['pager']) {
+    elseif (!empty($page['pager'])) {
       $display_options['pager']['type'] = 'full';
     }
     else {

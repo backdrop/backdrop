@@ -21,7 +21,7 @@ class views_handler_field_node_revision extends views_handler_field_node {
       $this->additional_fields['vid'] = 'vid';
       $this->additional_fields['nid'] = 'nid';
       if (module_exists('translation')) {
-        $this->additional_fields['language'] = array('table' => 'node', 'field' => 'language');
+        $this->additional_fields['langcode'] = array('table' => 'node', 'field' => 'langcode');
       }
     }
   }
@@ -59,10 +59,10 @@ class views_handler_field_node_revision extends views_handler_field_node {
         $this->options['alter']['path'] .= "/revisions/$vid/view";
       }
       if (module_exists('translation')) {
-        $language = $this->get_value($values, 'language');
+        $language = $this->get_value($values, 'langcode');
         $languages = language_list();
         if (isset($languages[$language])) {
-          $this->options['alter']['language'] = $languages[$language];
+          $this->options['alter']['langcode'] = $languages[$language];
         }
       }
     }

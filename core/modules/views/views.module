@@ -384,8 +384,8 @@ function views_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
-  // Path is not admin/structure/views due to menu complications with the wildcards from
-  // the generic ajax callback.
+  // Path is not admin/structure/views due to menu complications with the
+  // wildcards from the generic ajax callback.
   $items['admin/views/ajax/autocomplete/user'] = array(
     'page callback' => 'views_ajax_autocomplete_user',
     'theme callback' => 'ajax_base_page_theme',
@@ -1848,7 +1848,6 @@ function views_exposed_form($form, &$form_state) {
   if ($view->use_ajax) {
     drupal_add_library('system', 'jquery.form');
   }
-  //ctools_include('dependent');
 
   $exposed_form_plugin = $form_state['exposed_form_plugin'];
   $exposed_form_plugin->exposed_form_alter($form, $form_state);
@@ -2155,7 +2154,6 @@ function views_process_check_options($element, &$form_state) {
 function views_trim_text($alter, $value) {
   if (drupal_strlen($value) > $alter['max_length']) {
     $value = drupal_substr($value, 0, $alter['max_length']);
-    // TODO: replace this with cleanstring of ctools
     if (!empty($alter['word_boundary'])) {
       $regex = "(.*)\b.+";
       if (function_exists('mb_ereg')) {
@@ -2197,13 +2195,6 @@ function views_array_key_plus($array) {
   }
   asort($array);
   return $array;
-}
-
-/**
- * Report to CTools that we use hook_views_api instead of hook_ctools_plugin_api()
- */
-function views_ctools_plugin_api_hook_name() {
-  return 'views_api';
 }
 
 // Declare API compatibility on behalf of core modules:

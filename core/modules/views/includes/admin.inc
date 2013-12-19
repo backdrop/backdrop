@@ -54,12 +54,9 @@ function views_ui_get_admin_css() {
     }
     $theme_key = isset($themes[$theme_key]->base_theme) ? $themes[$theme_key]->base_theme : '';
   }
-  // Views contains style overrides for the following modules
-  $module_list = array('contextual', 'advanced_help', 'ctools');
-  foreach ($module_list as $module) {
-    if (module_exists($module)) {
-      $list[$module_path . '/css/views-admin.' . $module . '.css'] = array();
-    }
+  // Views contains style overrides for the following modules:
+  if (module_exists('contextual')) {
+    $list[$module_path . '/css/views-admin.contextual.css'] = array();
   }
 
 
@@ -392,8 +389,6 @@ function views_ui_add_page() {
  * Form builder for the "add new view" page.
  */
 function views_ui_add_form($form, &$form_state) {
-  // @todo: Convert ctools dependent FAPI property or use #states.
-  //ctools_include('dependent');
   $form['#attached']['js'][] = drupal_get_path('module', 'views_ui') . '/js/views-admin.js';
   $form['#attributes']['class'] = array('views-admin');
 
@@ -1057,12 +1052,6 @@ function views_ui_build_preview($view, $display_id, $render = TRUE) {
 /**
  * Form builder callback for editing a View.
  *
- * @todo Remove as many #prefix/#suffix lines as possible. Use #theme_wrappers
- *   instead.
- *
- * @todo Rename to views_ui_edit_view_form(). See that function for the "old"
- *   version.
- *
  * @see views_ui_ajax_get_form()
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
@@ -1073,8 +1062,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   //   - Change $form_state['view'] to $form_state['temporary']['view'].
   //   - Add a #process function to initialize $form_state['temporary']['view']
   //     on cached form submissions.
-  //   - Update ctools_include() to support cached forms, or else use
-  //     form_load_include().
   $form_state['no_cache'] = TRUE;
 
   if ($display_id) {
@@ -1085,10 +1072,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
     $view->fix_missing_relationships();
   }
-
-  //ctools_include('dependent');
-  //$form['#attached']['js'][] = ctools_attach_js('dependent');
-  //$form['#attached']['js'][] = ctools_attach_js('collapsible-div');
 
   $form['#tree'] = TRUE;
   // @todo When more functionality is added to this form, cloning here may be
@@ -1102,7 +1085,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#attached']['library'][] = array('system', 'jquery.form');
   // TODO: This should be getting added to the page when an ajax popup calls
   // for it, instead of having to add it manually here.
-  $form['#attached']['js'][] = 'misc/tabledrag.js';
+  $form['#attached']['js'][] = 'core/misc/tabledrag.js';
 
   $form['#attached']['css'] = views_ui_get_admin_css();
   $module_path = drupal_get_path('module', 'views_ui');
@@ -1194,21 +1177,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form_state['display_id'] = $display_id;
 
     // The part of the page where editing will take place.
-    // This element is the ctools collapsible-div container for the display edit elements.
     $form['displays']['settings'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array(
-        'class' => array(
-          'views-display-settings',
-          'box-margin',
-          'ctools-collapsible-container',
-        ),
-      ),
       '#id' => 'edit-display-settings',
     );
-    $display_title = views_ui_get_display_label($view, $display_id, FALSE);
-    // Add a handle for the ctools collapsible-div. The handle is the title of the display
-    $form['displays']['settings']['tab_title']['#markup'] = '<h2 id="edit-display-settings-title" class="ctools-collapsible-handle">' . t('@display_title details', array('@display_title' => ucwords($display_title))) . '</h2>';
+
     // Add a text that the display is disabled.
     if (!empty($view->display[$display_id]->handler)) {
       $enabled = $view->display[$display_id]->handler->get_option('enabled');
@@ -1216,15 +1189,9 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
         $form['displays']['settings']['disabled']['#markup'] = t('This display is disabled.');
       }
     }
-    // The ctools collapsible-div content
     $form['displays']['settings']['settings_content']= array(
       '#theme_wrappers' => array('container'),
       '#id' => 'edit-display-settings-content',
-      '#attributes' => array(
-        'class' => array(
-          'ctools-collapsible-content',
-        ),
-      ),
     );
     // Add the edit display content
     $form['displays']['settings']['settings_content']['tab_content'] = views_ui_get_display_tab($view, $display_id);
@@ -1288,14 +1255,13 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
     '#title' => t('Preview with contextual filters:'),
     '#description' => t('Separate contextual filter values with a "/". For example, %example.', array('%example' => '40/12/10')),
     '#id' => 'preview-args',
-//      '#attributes' => array('class' => array('ctools-auto-submit')),
   );
 
   // Add the preview button
   $form['button'] = array(
     '#type' => 'submit',
     '#value' => t('Update preview'),
-    '#attributes' => array('class' => array('arguments-preview', 'ctools-auto-submit-click')),
+    '#attributes' => array('class' => array('arguments-preview')),
     '#prefix' => '<div id="preview-submit-wrapper">',
     '#suffix' => '</div>',
     '#id' => 'preview-submit',
@@ -1515,7 +1481,7 @@ function views_ui_edit_form_submit_preview($form, &$form_state) {
  * Submit handler for form buttons that do not complete a form workflow.
  *
  * The Edit View form is a multistep form workflow, but with state managed by
- * the CTools object cache rather than $form_state['rebuild']. Without this
+ * the Views object cache rather than $form_state['rebuild']. Without this
  * submit handler, buttons that add or remove displays would redirect to the
  * destination parameter (e.g., when the Edit View form is linked to from a
  * contextual link). This handler can be added to buttons whose form submission
@@ -1645,9 +1611,6 @@ function views_ui_get_display_tab_details($view, $display) {
   );
 
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
-  // The following is for display purposes only. We need to determine if there is more than one button and wrap
-  // the buttons in a .ctools-dropbutton class if more than one is present.  Otherwise, we'll just wrap the
-  // actions in the .ctools-button class.
   $is_display_deleted = !empty($display->deleted);
   $is_deletable = empty($plugin['no remove']);
   // The master display cannot be cloned.
@@ -1760,21 +1723,16 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['columns']['second']['footer'] = array();
   $build['columns']['second']['pager'] = array();
 
-  // The third column buckets are wrapped in a CTools collapsible div
+  // The third column buckets are wrapped in a container.
+  // @todo: Convert this to #type = details when available.
   $build['columns']['third']['#theme_wrappers'] = array('container');
-  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third', 'ctools-collapsible-container', 'ctools-collapsible-remember'));
-  // Specify an id that won't change after AJAX requests, so ctools can keep
-  // track of the user's preferred collapsible state. Use the same id across
+  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third'));
+  // Specify an id that won't change after AJAX requests. Use the same ID across
   // different displays of the same view, so changing displays doesn't
-  // recollapse the column.
+  // affect the column display.
   $build['columns']['third']['#attributes']['id'] = 'views-ui-advanced-column-' . $view->name;
-  // Collapse the div by default.
-  if (!variable_get('views_ui_show_advanced_column', FALSE)) {
-    $build['columns']['third']['#attributes']['class'][] = 'ctools-collapsed';
-  }
-  $build['columns']['third']['advanced'] = array('#markup' => '<h3 class="ctools-collapsible-handle"><a href="">' . t('Advanced') . '</a></h3>',);
+  //$build['columns']['third']['advanced'] = array('#markup' => '<h3 class="ctools-collapsible-handle"><a href="">' . t('Advanced') . '</a></h3>',);
   $build['columns']['third']['collapse']['#theme_wrappers'] = array('container');
-  $build['columns']['third']['collapse']['#attributes'] = array('class' => array('ctools-collapsible-content',),);
 
   // Each option (e.g. title, access, display as grid/table/list) fits into one
   // of several "buckets," or boxes (Format, Fields, Sort, and so on).
@@ -1802,7 +1760,7 @@ function views_ui_get_display_tab_details($view, $display) {
       $column = 'third';
     }
     if (isset($bucket['build']) && is_array($bucket['build'])) {
-      // The third column is a CTools collapsible div, so
+      // The third column is a collapsible div, so
       // the structure of the form is a little different for this column
       if ($column === 'third') {
         $build['columns'][$column]['collapse'][$id] = $bucket['build'];
@@ -2035,6 +1993,70 @@ function views_ui_process_container_radios($element) {
     }
   }
   return $element;
+}
+
+/**
+ * Form callback; Clone a view.
+ */
+function views_ui_clone_form($form, &$form_state, view $view) {
+  drupal_set_title(t('Clone the view @name?', array('@name' => $view->get_human_name())));
+  $form_state['view'] = $view;
+
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('View name'),
+    '#required' => TRUE,
+    '#size' => 32,
+    '#maxlength' => 255,
+    '#default_value' => $this->t('Clone of @label', array('@label' => $this->entity->label())),
+  );
+  $form['id'] = array(
+    '#type' => 'machine_name',
+    '#maxlength' => 128,
+    '#machine_name' => array(
+      'exists' => 'views_get_view',
+      'source' => array('label'),
+    ),
+    '#default_value' => '',
+    '#description' => $this->t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clone'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for views_ui_clone_form().
+ */
+function views_ui_clone_form_submit($form, &$form_state) {
+  $new_view = $form_state['view']->clone();
+
+}
+
+/**
+ * Form callback; Delete a view.
+ */
+function views_ui_delete_form($form, &$form_state, view $view) {
+  $form_state['view'] = $view;
+  $question = t('Delete the view @name?', array('@name' => $view->get_human_name()));
+  $path = 'admin/structure/views';
+  $description = t('Deleting the view %name will remove all pages, blocks, and other displays provided by this view.', array('%name' => $view->get_human_name()));
+  return confirm_form($form, $question, $path, $description, t('Delete'));
+}
+
+/**
+ * Submit handler for views_ui_delete_form().
+ */
+function views_ui_delete_form_submit($form, &$form_state) {
+  $name = $form_state['view']->get_human_name();
+  $form_state['view']->delete();
+  $form_state['redirect'] = 'admin/structure/views';
+  drupal_set_message(t('The view %name has been deleted.', array('%name' => $name)));
 }
 
 /**
@@ -4112,8 +4134,6 @@ function views_ui_add_item_form($form, &$form_state) {
     ),
   );
 
-  //ctools_add_js('dependent');
-
   if (!$view->set_display($display_id)) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
@@ -4154,7 +4174,6 @@ function views_ui_add_item_form($form, &$form_state) {
       '#type' => 'select',
       '#title' => t('Filter'),
       '#options' => array(),
-      '#attributes' => array('class' => array('ctools-master-dependent')),
     );
 
     $form['options']['name'] = array(
@@ -4190,7 +4209,6 @@ function views_ui_add_item_form($form, &$form_state) {
     }
 
     foreach ($grouped_options as $group => $group_options) {
-      $form['options']['name'][$group . '_start']['#markup'] = '<div class="ctools-dependent-all ctools-dependent-' . $group . '">';
       $zebra = 0;
       foreach ($group_options as $key => $option) {
         $zebra_class = ($zebra % 2) ? 'odd' : 'even';
@@ -4204,7 +4222,6 @@ function views_ui_add_item_form($form, &$form_state) {
         );
         $zebra++;
       }
-      $form['options']['name'][$group . '_end']['#markup'] = '</div>';
     }
 
     $form['options']['controls']['group']['#options'] = $groups;
@@ -4222,7 +4239,6 @@ function views_ui_add_item_form($form, &$form_state) {
     '#theme_wrappers' => array('form_element', 'views_container'),
     '#attributes' => array('class' => array('container-inline', 'views-add-form-selected')),
   );
-  //ctools_include('dependent');
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $ltitle)));
 
   // Remove the default submit function.
@@ -4869,24 +4885,12 @@ function views_ui_admin_settings_basic() {
     '#title' => t('Show filters on the list of views'),
     '#default_value' => variable_get('views_ui_show_listing_filters', FALSE),
   );
-  $form['basic']['views_ui_show_advanced_help_warning'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show advanced help warning'),
-    '#default_value' => variable_get('views_ui_show_advanced_help_warning', TRUE),
-  );
 
   $form['basic']['views_ui_show_master_display'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show the master display'),
     '#description' => t('Advanced users of views may choose to see the master (i.e. default) display.'),
     '#default_value' => variable_get('views_ui_show_master_display', FALSE),
-  );
-
-  $form['basic']['views_ui_show_advanced_column'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Always show advanced display settings'),
-    '#description' => t('Default to showing advanced display settings, such as relationships and contextual filters.'),
-    '#default_value' => variable_get('views_ui_show_advanced_column', FALSE),
   );
 
   $form['basic']['views_ui_display_embed'] = array(

@@ -10,7 +10,7 @@
  */
 
 /**
- * Get an object from the non-volatile ctools cache.
+ * Get an object from the non-volatile Views cache.
  *
  * This function caches in memory as well, so that multiple calls to this
  * will not result in multiple database reads.
@@ -52,7 +52,7 @@ function views_object_cache_get($obj, $name, $skip_cache = FALSE, $sid = NULL) {
 }
 
 /**
- * Store an object in the non-volatile ctools cache.
+ * Store an object in the non-volatile Views cache.
  *
  * @param $obj
  *   A 128 character or less string to define what kind of object is being
@@ -66,11 +66,11 @@ function views_object_cache_get($obj, $name, $skip_cache = FALSE, $sid = NULL) {
  *   defaults to session_id().
  */
 function views_object_cache_set($obj, $name, $cache, $sid = NULL) {
-  // Store the CTools session id in the user session to force a
+  // Store the Views session id in the user session to force a
   // session for anonymous users in Drupal 7 and Drupal 6 Pressflow.
   // see http://drupal.org/node/562374, http://drupal.org/node/861778
-  if (empty($GLOBALS['user']->uid) && empty($_SESSION['ctools_session_id'])) {
-    $_SESSION['ctools_hold_session'] = TRUE;
+  if (empty($GLOBALS['user']->uid) && empty($_SESSION['views_session_id'])) {
+    $_SESSION['views_hold_session'] = TRUE;
   }
 
   views_object_cache_clear($obj, $name, $sid);
@@ -91,7 +91,7 @@ function views_object_cache_set($obj, $name, $cache, $sid = NULL) {
 }
 
 /**
- * Remove an object from the non-volatile ctools cache
+ * Remove an object from the non-volatile Views cache
  *
  * @param $obj
  *   A 128 character or less string to define what kind of object is being
@@ -167,7 +167,7 @@ function views_object_cache_test_objects($obj, $names) {
 }
 
 /**
- * Remove an object from the non-volatile ctools cache for all session IDs.
+ * Remove an object from the non-volatile Views cache for all session IDs.
  *
  * This is useful for clearing a lock.
  *

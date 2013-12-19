@@ -95,7 +95,30 @@ function views_ui_menu() {
   ) + $base;
 
   // Additional pages for acting on a View.
-
+  $items['admin/structure/views/view/%views_ui_cache/clone'] = array(
+    'title' => 'Clone view',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_ui_clone_form', 4),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/delete'] = array(
+    'title' => 'Delete view',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_ui_delete_form', 4),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/disable'] = array(
+    'title' => 'Disable view',
+    'page callback' => 'views_ui_disable_page',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/enable'] = array(
+    'title' => 'Enable view',
+    'page callback' => 'views_ui_enable_page',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
     'title' => 'Break lock',
     'page callback' => 'drupal_get_form',
@@ -554,7 +577,7 @@ function views_ui_get_wizard($wizard_type) {
     }
     // The plugin is neither a base table nor an existing wizard.
     else {
-      watchdog('Views Wizard: @wizard does not exist. Be sure to implement hook_ctools_plugin_directory.', array('@wizard' => $wizard_type));
+      watchdog('Views Wizard: @wizard does not exist.', array('@wizard' => $wizard_type));
     }
   }
   return $wizard;
@@ -787,21 +810,6 @@ function views_ui_views_wizard_defaults() {
     'form_wizard_class' => array(
       'file' => 'views_ui_base_views_wizard',
       'class' => 'ViewsUiBaseViewsWizard',
-    ),
-  );
-}
-
-/**
- * Inform CTools that the Views wizard plugin can have child plugins.
- */
-function views_ui_ctools_plugin_type() {
-  return array(
-    'views_wizard' => array(
-      'child plugins' => TRUE,
-      'classes' => array(
-        'form_wizard_class',
-      ),
-      'defaults' => views_ui_views_wizard_defaults(),
     ),
   );
 }
