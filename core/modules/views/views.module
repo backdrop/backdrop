@@ -1707,8 +1707,7 @@ function views_form_views_form($form, &$form_state, $view, $output) {
     '#value' => $substitutions,
   );
   $form['actions'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('form-actions')),
+    '#type' => 'actions',
     '#weight' => 100,
   );
   $form['actions']['submit'] = array(

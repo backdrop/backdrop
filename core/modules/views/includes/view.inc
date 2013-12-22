@@ -1765,6 +1765,7 @@ class view {
       'name' => $this->name,
       'description' => $this->description,
       'tag' => $this->tag,
+      'disabled' => (boolean) $this->disabled,
       'base_table' => $this->base_table,
       'human_name' => $this->human_name,
       'core' => $this->core,

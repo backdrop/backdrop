@@ -22,7 +22,7 @@ function views_ui_menu() {
   $items['admin/structure/views'] = array(
     'title' => 'Views',
     'description' => 'Manage customized lists of content.',
-    'page callback' => 'view_ui_list_page',
+    'page callback' => 'views_ui_list_page',
     'type' => MENU_NORMAL_ITEM,
   ) + $base;
 
@@ -109,14 +109,16 @@ function views_ui_menu() {
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/enable'] = array(
+      'title' => 'Enable view',
+      'page callback' => 'views_ui_toggle_enable_page',
+      'page arguments' => array(4, '1'),
+      'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/disable'] = array(
     'title' => 'Disable view',
-    'page callback' => 'views_ui_disable_page',
-    'type' => MENU_VISIBLE_IN_BREADCRUMB,
-  ) + $base;
-  $items['admin/structure/views/view/%views_ui_cache/enable'] = array(
-    'title' => 'Enable view',
-    'page callback' => 'views_ui_enable_page',
+    'page callback' => 'views_ui_toggle_enable_page',
+    'page arguments' => array(4, '0'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
