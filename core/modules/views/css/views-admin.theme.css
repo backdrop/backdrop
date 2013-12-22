@@ -446,7 +446,11 @@ td.group-title {
  */
 
 ul#views-display-menu-tabs {
-  margin-right: 200px;
+  margin-right: 200px; /* RTL */
+}
+[dir="rtl"] ul#views-display-menu-tabs {
+  margin-right: auto;
+  margin-left: 200px;
 }
 
 ul#views-display-menu-tabs li {
@@ -1104,8 +1108,12 @@ div.messages {
 
 .views-display-top .dropbutton-wrapper {
   position: absolute;
-  right: 12px;
+  right: 12px; /* RTL */
   top: 7px;
+}
+[dir="rtl"] .views-display-top .dropbutton-wrapper {
+  left: 12px;
+  right: auto;
 }
 .views-display-top .dropbutton-wrapper a {
   font-size: 12px;
@@ -1113,8 +1121,12 @@ div.messages {
 
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
-  right: 5px;
+  right: 5px; /* RTL */
   top: 4px;
+}
+[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
+  right: auto;
+  left: 5px;
 }
 
 .views-ui-display-tab-actions .dropbutton-wrapper li a,
@@ -1130,6 +1142,50 @@ div.messages {
 .views-ui-display-tab-actions .dropbutton-wrapper input:hover {
   background: none;
   border: none;
+}
+
+/* @end */
+
+/* @group Contextual */
+
+#views-live-preview .contextual-links-region-active {
+  outline: medium none;
+}
+
+#views-live-preview div.contextual-links-wrapper {
+  right: auto;
+  top: auto;
+}
+
+html.js #views-live-preview div.contextual-links-wrapper {
+  display: inline;
+  right: auto;
+  left: auto;
+}
+
+#views-live-preview a.contextual-links-trigger {
+  /* Always show contextual links in Views previews. */
+  display: block;
+}
+
+#views-live-preview div.contextual-links-wrapper ul.contextual-links {
+  min-width: 10em;
+  right: auto;
+  border-radius: 0 4px 4px 4px;
+}
+[dir="rtl"] #views-live-preview div.contextual-links-wrapper ul.contextual-links {
+  left: auto;
+  right: 0;
+  border-radius: 4px 0 4px 4px;
+}
+
+#views-live-preview ul.contextual-links li span {
+  font-weight: bold;
+  margin: 0.25em 0;
+  padding: 0.5em 1em 0.25em 0.5em;
+  color: #333;
+  display: block;
+  border-bottom: 1px dashed #CCC;
 }
 
 /* @end */

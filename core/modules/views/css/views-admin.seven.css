@@ -146,12 +146,6 @@ fieldset.fieldset-no-legend {
 
 .views-display-top ul.secondary {
   background-color: transparent;
-  float: left
-}
-
-.views-display-top .secondary .action-list li {
-  float: none;
-  margin: 0;
 }
 
 /* @end */
@@ -177,14 +171,6 @@ table th {
  *
  * The tabs that switch between sections
  */
-
-.views-displays .secondary {
- text-align: left; /* LTR */
-}
-
-.views-displays .secondary > li:first-child {
- padding-left: 0;
-}
 
 .views-admin .icon.add {
   background-position: center 3px;

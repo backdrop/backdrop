@@ -319,6 +319,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       // add anything here, but child classes can.
       $style_form['row_options'] = array(
         '#theme_wrappers' => array('container'),
+        '#attributes' => array(),
       );
     }
     elseif ($style_plugin->uses_fields()) {

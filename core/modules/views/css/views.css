@@ -2,6 +2,10 @@
   float: left; /* LTR */
   padding: .5em 1em 0 0; /* LTR */
 }
+[dir="rtl"] .views-exposed-form .views-exposed-widget {
+  float: right;
+  padding: 0 1em .5em 0;
+}
 
 .views-exposed-form .views-exposed-widget .form-submit {
   margin-top: 1.6em;

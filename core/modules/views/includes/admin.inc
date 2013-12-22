@@ -17,15 +17,6 @@ function views_ui_get_admin_css() {
   $module_path = drupal_get_path('module', 'views_ui');
   $list = array();
   $list[$module_path . '/css/views-admin.css'] = array();
-
-  $list[$module_path . '/css/ie/views-admin.ie7.css'] = array(
-    'browsers' => array(
-      'IE' => 'lte IE 7',
-      '!IE' => FALSE
-    ),
-    'preprocess' => FALSE,
-  );
-
   $list[$module_path . '/css/views-admin.theme.css'] = array();
 
   // Add in any theme specific CSS files we have
@@ -54,11 +45,6 @@ function views_ui_get_admin_css() {
     }
     $theme_key = isset($themes[$theme_key]->base_theme) ? $themes[$theme_key]->base_theme : '';
   }
-  // Views contains style overrides for the following modules:
-  if (module_exists('contextual')) {
-    $list[$module_path . '/css/views-admin.contextual.css'] = array();
-  }
-
 
   return $list;
 }
@@ -285,7 +271,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
 /**
  * Page callback at admin/build/views to list all available views.
  */
-function view_ui_list_page() {
+function views_ui_list_page() {
   views_include('admin');
   views_ui_add_admin_css();
 
@@ -297,7 +283,7 @@ function view_ui_list_page() {
     array('data' => t('Operations'), 'class' => array('views-ui-operations')),
   );
 
-  $views = views_get_all_views();
+  $views = views_get_enabled_views() + views_get_disabled_views();
   $rows = array();
   foreach ($views as $view) {
     $paths = _views_ui_get_paths($view);
@@ -329,7 +315,7 @@ function view_ui_list_page() {
     );
     $rows[] = array(
       'data' => $row,
-      'class' => array(!empty($view->disabled) ? 'enabled' : 'disabled'),
+      'class' => array(empty($view->disabled) ? 'enabled' : 'disabled'),
     );
   }
 
@@ -901,9 +887,7 @@ function views_ui_taxonomy_autocomplete_validate($element, &$form_state) {
 }
 
 /**
- * Theme function; returns basic administrative information about a view.
- *
- * TODO: template + preprocess
+ * Display basic administrative information about a view.
  */
 function theme_views_ui_view_info($variables) {
   $view = $variables['view'];
@@ -930,7 +914,7 @@ function theme_views_ui_view_info($variables) {
   $output .= '<div class="views-ui-view-title">' . check_plain($title) . "</div>\n";
   $output .= '<div class="views-ui-view-displays">' . $displays . "</div>\n";
   $output .= '<div class="views-ui-view-storage">' . $type . "</div>\n";
-  $output .= '<div class="views-ui-view-base">' . t('Type') . ': ' . check_plain($variables['base']). "</div>\n";
+  $output .= '<div class="views-ui-view-base">' . t('Type') . ': ' . check_plain($view->base_table). "</div>\n";
   return $output;
 }
 
@@ -1134,7 +1118,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   }
 
   $form['help_text'] = array(
-    '#prefix' => '<div>',
+    '#prefix' => '<div class="views-display-help">',
     '#suffix' => '</div>',
     '#markup' => t('Modify the display(s) of your view below or add new displays.'),
   );
@@ -1180,6 +1164,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['settings'] = array(
       '#theme_wrappers' => array('container'),
       '#id' => 'edit-display-settings',
+      '#attributes' => array(),
     );
 
     // Add a text that the display is disabled.
@@ -1192,6 +1177,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['displays']['settings']['settings_content']= array(
       '#theme_wrappers' => array('container'),
       '#id' => 'edit-display-settings-content',
+      '#attributes' => array(),
     );
     // Add the edit display content
     $form['displays']['settings']['settings_content']['tab_content'] = views_ui_get_display_tab($view, $display_id);
@@ -1211,6 +1197,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['ajax-area'] = array(
       '#theme_wrappers' => array('container'),
       '#id' => 'views-ajax-popup',
+      '#attributes' => array(),
     );
     $form['ajax-area']['ajax-title'] = array(
       '#markup' => '<h2 id="views-ajax-title"></h2>',
@@ -1218,6 +1205,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['ajax-area']['ajax-body'] = array(
       '#theme_wrappers' => array('container'),
       '#id' => 'views-ajax-body',
+      '#attributes' => array(),
       '#markup' => views_ui_get_default_ajax_message(),
     );
   }
@@ -1607,7 +1595,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
     '#theme_wrappers' => array('container'),
-    '#attributes' => array('id' => 'edit-display-settings-details',),
+    '#attributes' => array('id' => 'edit-display-settings-details'),
   );
 
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
@@ -1710,7 +1698,7 @@ function views_ui_get_display_tab_details($view, $display) {
 
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
-  $build['columns']['#attributes'] = array('id' => 'edit-display-settings-main', 'class' => array('clearfix', 'views-display-columns'),);
+  $build['columns']['#attributes'] = array('id' => 'edit-display-settings-main', 'class' => array('clearfix', 'views-display-columns'));
 
   $build['columns']['first']['#theme_wrappers'] = array('container');
   $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first'));
@@ -1733,6 +1721,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['columns']['third']['#attributes']['id'] = 'views-ui-advanced-column-' . $view->name;
   //$build['columns']['third']['advanced'] = array('#markup' => '<h3 class="ctools-collapsible-handle"><a href="">' . t('Advanced') . '</a></h3>',);
   $build['columns']['third']['collapse']['#theme_wrappers'] = array('container');
+  $build['columns']['third']['collapse']['#attributes'] = array();
 
   // Each option (e.g. title, access, display as grid/table/list) fits into one
   // of several "buckets," or boxes (Format, Fields, Sort, and so on).
@@ -2008,9 +1997,9 @@ function views_ui_clone_form($form, &$form_state, view $view) {
     '#required' => TRUE,
     '#size' => 32,
     '#maxlength' => 255,
-    '#default_value' => $this->t('Clone of @label', array('@label' => $this->entity->label())),
+    '#default_value' => t('Clone of @label', array('@label' => $view->get_human_name())),
   );
-  $form['id'] = array(
+  $form['name'] = array(
     '#type' => 'machine_name',
     '#maxlength' => 128,
     '#machine_name' => array(
@@ -2018,7 +2007,7 @@ function views_ui_clone_form($form, &$form_state, view $view) {
       'source' => array('label'),
     ),
     '#default_value' => '',
-    '#description' => $this->t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
+    '#description' => t('A unique machine-readable name for this View. It must only contain lowercase letters, numbers, and underscores.'),
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -2034,8 +2023,12 @@ function views_ui_clone_form($form, &$form_state, view $view) {
  * Submit handler for views_ui_clone_form().
  */
 function views_ui_clone_form_submit($form, &$form_state) {
-  $new_view = $form_state['view']->clone();
-
+  $new_view = $form_state['view']->clone_view();
+  $new_view->name = $form_state['values']['name'];
+  $new_view->human_name = $form_state['values']['label'];
+  $new_view->save();
+  drupal_set_message(t('The view %old_name as been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
+  $form_state['redirect'] = 'admin/structure/views/view/' . $new_view->name;
 }
 
 /**
@@ -2057,6 +2050,26 @@ function views_ui_delete_form_submit($form, &$form_state) {
   $form_state['view']->delete();
   $form_state['redirect'] = 'admin/structure/views';
   drupal_set_message(t('The view %name has been deleted.', array('%name' => $name)));
+}
+
+/**
+ * Menu callback; Enable a view and return to the view listing page.
+ */
+function views_ui_toggle_enable_page(view $view, $status) {
+  // Validate the token for this page.
+  if (empty($_GET['token']) || $_GET['token'] !== drupal_get_token($view->name)) {
+    return MENU_ACCESS_DENIED;
+  }
+  $view->disabled = !$status;
+  $view->save();
+  if ($status) {
+    $message = t('The view %name has been enabled.', array('%name' => $view->get_human_name()));
+  }
+  else {
+    $message = t('The view %name has been disabled.', array('%name' => $view->get_human_name()));
+  }
+  drupal_set_message($message);
+  drupal_goto('admin/structure/views');
 }
 
 /**

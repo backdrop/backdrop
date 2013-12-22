@@ -8,11 +8,8 @@
 .views-admin ul,
 .views-admin menu,
 .views-admin dir {
-  padding-left: 0; /* LTR for IE */
-  /* padding-start is used so that RTL works out of the box */
-  -moz-padding-start: 0;
-  -webkit-padding-start: 0;
-  padding-start: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .views-admin pre {
@@ -23,27 +20,10 @@
 
 /* @end */
 
-/* @group Inline lists */
+/* @group Views listing page */
 
-.horizontal > * {
-  clear: none;
-  float: left; /* LTR */
-}
-
-.horizontal.right {
-  float: right;
-}
-
-.horizontal label {
-  position: absolute;
-}
-
-.horizontal .form-item > [class] {
-  margin-top: 25px;
-}
-
-.horizontal .form-item > [class] + [class] {
-  margin-top: 0;
+#views-list tr.disabled td {
+  color: #999;
 }
 
 /* @end */
@@ -106,6 +86,9 @@
 .form-edit .form-actions {
   float: right; /* LTR */
 }
+[dir="rtl"] .form-edit .form-actions {
+  float: left;
+}
 
 .views-displays {
   clear: both;
@@ -129,6 +112,9 @@
   display: inline-block;
   float: left; /* LTR */
   padding: 0;
+}
+[dir="rtl"] .views-displays .secondary > li {
+  float: right;
 }
 
 .views-displays .secondary .open > a {
@@ -159,6 +145,25 @@
 
 /* @group Attachment details new section button */
 
+.views-displays .secondary {
+  text-align: left; /* LTR */
+  float: left; /* LTR */
+}
+
+[dir="rtl"] .views-displays .secondary {
+  text-align: right;
+  float: right;
+}
+
+.views-display-top .secondary .action-list li {
+  float: none;
+  margin: 0;
+}
+
+.views-displays .secondary > li:first-child {
+  padding-left: 0;
+}
+
 .views-displays .secondary li.add {
   position: relative;
 }
@@ -169,6 +174,10 @@
   position: absolute;
   top: 23px;
   z-index: 50;
+}
+[dir="rtl"] .views-displays .secondary .action-list {
+  left: auto;
+  right: 0;
 }
 
 .views-displays .secondary .action-list  li {
@@ -182,6 +191,10 @@
 .views-display-tab .fieldset-legend {
   left: -5px; /* LTR */
   position: relative;
+}
+[dir="rtl"] .views-display-tab .fieldset-legend {
+  left: auto;
+  right: -5px;
 }
 
 .views-display-tab .fieldset-wrapper {
@@ -199,6 +212,10 @@
   right: 0; /* LTR */
   top: -5px;
 }
+[dir="rtl"] .views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
+  left: 0;
+  right: auto;
+}
 
 /* @end */
 
@@ -210,10 +227,23 @@
   padding-left: 1%; /* LTR */
   width: 32%;
 }
+[dir="rtl"] .views-display-columns > * {
+  float: right;
+  margin-left: 0;
+  margin-right: 1%;
+  padding-left: 0;
+  padding-right: 1%;
+}
 
 .views-display-columns > *:first-child {
   margin-left: 0; /* LTR */
   padding-left: 0; /* LTR */
+}
+[dir="rtl"] .views-display-columns > *:first-child {
+  margin-left: inherit;
+  margin-right: 0;
+  padding-left: inherit;
+  padding-right: 0;
 }
 
 /* @end */
@@ -290,6 +320,10 @@
   display: inline-block;
   float: left; /* LTR */
 }
+[dir="rtl"] .views-display-setting .label,
+[dir="rtl"] .views-display-setting .views-ajax-link {
+  float: right;
+}
 
 /* @end */
 
@@ -360,9 +394,12 @@ html.js span.js-only {
 
 /* @end */
 
+/* @group Dropbuttons */
 .js .views-edit-view .dropbutton-widget {
   position: static;
 }
 .js .views-edit-view .dropbutton-wrapper {
   width: auto;
 }
+
+/* @end */
