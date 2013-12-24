@@ -19,7 +19,7 @@
  *   An array of analyze results organized into arrays keyed by 'ok',
  *   'warning' and 'error'.
  */
-function views_analyze_view(&$view) {
+function views_ui_analyze_view(&$view) {
   $view->init_display();
   $messages = module_invoke_all('views_analyze', $view);
 
@@ -32,7 +32,7 @@ function views_analyze_view(&$view) {
  * This is based upon the format of drupal_set_message which uses separate
  * boxes for "ok", "warning" and "error".
  */
-function views_analyze_format_result($view, $messages) {
+function views_ui_analyze_format_result($view, $messages) {
   if (empty($messages)) {
     $messages = array(views_ui_analysis(t('View analysis can find nothing to report.'), 'ok'));
   }
@@ -85,6 +85,8 @@ function views_analyze_format_result($view, $messages) {
  *   The type of message. This should be "ok", "warning" or "error". Other
  *   values can be used but how they are treated by the output routine
  *   is undefined.
+ * @return array
+ *   An array containing the message.
  */
 function views_ui_analysis($message, $type = 'error') {
   return array('message' => $message, 'type' => $type);
@@ -106,7 +108,7 @@ function views_ui_views_analyze($view) {
   // You can give a page display the same path as an alias existing in the
   // system, so the alias will not work anymore. Report this to the user,
   // because he probably wanted something else.
-  foreach ($view->display as $id => $display) {
+  foreach ($view->display as $display) {
     if (empty($display->handler)) {
       continue;
     }

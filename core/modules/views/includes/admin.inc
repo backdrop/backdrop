@@ -59,30 +59,6 @@ function views_ui_add_admin_css() {
 }
 
 /**
- * Check to see if the advanced help module is installed, and if not put up
- * a message.
- *
- * Only call this function if the user is already in a position for this to
- * be useful.
- */
-function views_ui_check_advanced_help() {
-  if (!variable_get('views_ui_show_advanced_help_warning', TRUE)) {
-    return;
-  }
-
-  if (!module_exists('advanced_help')) {
-    $filename = db_query_range("SELECT filename FROM {system} WHERE type = 'module' AND name = 'advanced_help'", 0, 1)
-      ->fetchField();
-    if ($filename && file_exists($filename)) {
-      drupal_set_message(t('If you <a href="@modules">enable the advanced help module</a>, Views will provide more and better help. <a href="@hide">You can disable this message at the Views settings page.</a>', array('@modules' => url('admin/modules'),'@hide' => url('admin/structure/views/settings'))));
-    }
-    else {
-      drupal_set_message(t('If you install the advanced help module from !href, Views will provide more and better help. <a href="@hide">You can disable this message at the Views settings page.</a>', array('!href' => l('http://drupal.org/project/advanced_help', 'http://drupal.org/project/advanced_help'), '@hide' => url('admin/structure/views/settings'))));
-    }
-  }
-}
-
-/**
  * Returns the results of the live preview.
  */
 function views_ui_preview($view, $display_id, $args = array()) {
@@ -96,13 +72,13 @@ function views_ui_preview($view, $display_id, $args = array()) {
   $q = $_GET['q'];
 
   // Determine where the query and performance statistics should be output.
-  $show_query = variable_get('views_ui_show_sql_query', FALSE);
-  $show_info = variable_get('views_ui_show_preview_information', FALSE);
-  $show_location = variable_get('views_ui_show_sql_query_where', 'above');
+  $show_query = config_get('views_ui', 'show_sql_query');
+  $show_info = config_get('views_ui', 'show_preview_information');
+  $show_location = config_get('views_ui', 'show_sql_query_where');
 
-  $show_stats = variable_get('views_ui_show_performance_statistics', FALSE);
+  $show_stats = config_get('views_ui', 'show_performance_statistics');
   if ($show_stats) {
-    $show_stats = variable_get('views_ui_show_sql_query_where', 'above');
+    $show_stats = config_get('views_ui', 'show_sql_query_where');
   }
 
   $combined = $show_query && $show_stats;
@@ -1234,7 +1210,7 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
     '#type' => 'checkbox',
     '#id' => 'edit-displays-live-preview',
     '#title' => t('Auto preview'),
-    '#default_value' => variable_get('views_ui_always_live_preview', TRUE),
+    '#default_value' => config_get('views_ui', 'always_live_preview'),
   );
 
   // Add the arguments textfield
@@ -1551,7 +1527,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
  */
 function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
-  $advanced_mode = variable_get('views_ui_show_master_display', FALSE);
+  $advanced_mode = config_get('views_ui', 'show_master_display');
   // For other users, show the default display only if there are no others, and
   // hide it if there's at least one "real" display.
   $additional_displays = (count($view->display) == 1);
@@ -3110,13 +3086,13 @@ function views_ui_analyze_view_form($form, &$form_state) {
   $form['#title'] = t('View analysis');
   $form['#section'] = 'analyze';
 
-  views_include('analyze');
-  $messages = views_analyze_view($view);
+  module_load_include('inc', 'views_ui', 'includes/analyze');
+  $messages = views_ui_analyze_view($view);
 
   $form['analysis'] = array(
     '#prefix' => '<div class="form-item">',
     '#suffix' => '</div>',
-    '#markup' => views_analyze_format_result($view, $messages),
+    '#markup' => views_ui_analyze_format_result($view, $messages),
   );
 
   // Inform the standard button function that we want an OK button.
@@ -3698,7 +3674,7 @@ function theme_views_ui_build_group_filter_form($variables) {
     drupal_render($form['default_group']['All']),
     '',
     array(
-      'data' => variable_get('views_exposed_filter_any_label', 'new_any') == 'old_any' ? t('&lt;Any&gt;') : t('- Any -'),
+      'data' => config_get('views', 'exposed_filter_any_label') == 'old_any' ? t('&lt;Any&gt;') : t('- Any -'),
       'colspan' => 4,
       'class' => array('class' => 'any-default-radios-row'),
     ),
@@ -4893,31 +4869,25 @@ function views_ui_admin_settings_basic() {
   // so this will make it easier to change if we do.
   $form['basic'] = array();
 
-  $form['basic']['views_ui_show_listing_filters'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show filters on the list of views'),
-    '#default_value' => variable_get('views_ui_show_listing_filters', FALSE),
-  );
-
   $form['basic']['views_ui_show_master_display'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show the master display'),
     '#description' => t('Advanced users of views may choose to see the master (i.e. default) display.'),
-    '#default_value' => variable_get('views_ui_show_master_display', FALSE),
+    '#default_value' => config_get('views_ui', 'show_master_display'),
   );
 
   $form['basic']['views_ui_display_embed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show the embed display in the ui.'),
     '#description' => t('Allow advanced user to use the embed view display. The plugin itself works if it\'s not visible in the ui'),
-    '#default_value' => variable_get('views_ui_display_embed', FALSE),
+    '#default_value' => config_get('views_ui', 'display_embed'),
   );
 
   $form['basic']['views_ui_custom_theme'] = array(
     '#type' => 'select',
     '#title' => t('Custom admin theme for the Views UI'),
     '#options' => array('_default' => t('- Use default -')) + $options,
-    '#default_value' => variable_get('views_ui_custom_theme', '_default'),
+    '#default_value' => config_get('views_ui', 'custom_theme'),
     '#description' => t('In some cases you might want to select a different admin theme for the Views UI.')
   );
 
@@ -4925,7 +4895,7 @@ function views_ui_admin_settings_basic() {
     '#type' => 'select',
     '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
     '#options' => array('old_any' => '<Any>', 'new_any' => t('- Any -')),
-    '#default_value' => variable_get('views_exposed_filter_any_label', 'new_any'),
+    '#default_value' => config_get('views', 'exposed_filter_any_label'),
   );
 
   $form['live_preview'] = array(
@@ -4936,19 +4906,13 @@ function views_ui_admin_settings_basic() {
   $form['live_preview']['views_ui_always_live_preview'] = array(
     '#type' => 'checkbox',
     '#title' => t('Automatically update preview on changes'),
-    '#default_value' => variable_get('views_ui_always_live_preview', TRUE),
+    '#default_value' => config_get('views_ui', 'always_live_preview'),
   );
-
-//  $form['live_preview']['views_ui_always_live_preview_button'] = array(
-//    '#type' => 'checkbox',
-//    '#title' => t('Always show the preview button, even when the automatically update option is checked'),
-//    '#default_value' => variable_get('views_ui_always_live_preview_button', FALSE),
-//  );
 
   $form['live_preview']['views_ui_show_preview_information'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show information and statistics about the view during live preview'),
-    '#default_value' => variable_get('views_ui_show_preview_information', TRUE),
+    '#default_value' => config_get('views_ui', 'show_preview_information'),
   );
 
   $form['live_preview']['views_ui_show_sql_query_where'] = array(
@@ -4957,7 +4921,7 @@ function views_ui_admin_settings_basic() {
       'above' => t('Above the preview'),
       'below' => t('Below the preview'),
     ),
-    '#default_value' => variable_get('views_ui_show_sql_query_where', 'above'),
+    '#default_value' => config_get('views_ui', 'show_sql_query_where'),
     '#states' => array(
       'visible' => array(
         ':input[name="views_ui_show_preview_information"]' => array('checked' => TRUE),
@@ -4968,7 +4932,7 @@ function views_ui_admin_settings_basic() {
   $form['live_preview']['views_ui_show_sql_query'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show the SQL query'),
-    '#default_value' => variable_get('views_ui_show_sql_query', FALSE),
+    '#default_value' => config_get('views_ui', 'show_sql_query'),
     '#states' => array(
       'visible' => array(
         ':input[name="views_ui_show_preview_information"]' => array('checked' => TRUE),
@@ -4978,7 +4942,7 @@ function views_ui_admin_settings_basic() {
   $form['live_preview']['views_ui_show_performance_statistics'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show performance statistics'),
-    '#default_value' => variable_get('views_ui_show_performance_statistics', FALSE),
+    '#default_value' => config_get('views_ui', 'show_performance_statistics'),
     '#states' => array(
       'visible' => array(
         ':input[name="views_ui_show_preview_information"]' => array('checked' => TRUE),
@@ -4990,7 +4954,7 @@ function views_ui_admin_settings_basic() {
     '#type' => 'checkbox',
     '#title' => t('Show other queries run during render during live preview'),
     '#description' => t("Drupal has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."),
-    '#default_value' => variable_get('views_show_additional_queries', FALSE),
+    '#default_value' => config_get('views', 'show_additional_queries'),
     '#states' => array(
       'visible' => array(
         ':input[name="views_ui_show_preview_information"]' => array('checked' => TRUE),
@@ -5015,13 +4979,6 @@ function views_ui_admin_settings_advanced() {
     '#title' => t('Caching'),
   );
 
-  $form['cache']['views_skip_cache'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Disable views data caching'),
-    '#description' => t("Views caches data about tables, modules and views available, to increase performance. By checking this box, Views will skip this cache and always rebuild this data when needed. This can have a serious performance impact on your site."),
-    '#default_value' => variable_get('views_skip_cache', FALSE),
-  );
-
   $form['cache']['clear_cache'] = array(
     '#type' => 'submit',
     '#value' => t("Clear Views' cache"),
@@ -5038,21 +4995,21 @@ function views_ui_admin_settings_advanced() {
     '#title' => t('Add Views signature to all SQL queries'),
     '#description' => t("All Views-generated queries will include the name of the views and display 'view-name:display-name' as a string  at the end of the SELECT clause. This makes identifying Views queries in database server logs simpler, but should only be used when troubleshooting."),
 
-    '#default_value' => variable_get('views_sql_signature', FALSE),
+    '#default_value' => config_get('views', 'sql_signature'),
   );
 
   $form['debug']['views_no_javascript'] = array(
     '#type' => 'checkbox',
     '#title' => t('Disable JavaScript with Views'),
     '#description' => t("If you are having problems with the JavaScript, you can disable it here. The Views UI should degrade and still be usable without javascript; it's just not as good."),
-    '#default_value' => variable_get('views_no_javascript', FALSE),
+    '#default_value' => config_get('views', 'no_javascript'),
   );
 
   $form['debug']['views_devel_output'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable views performance statistics/debug messages via the Devel module'),
     '#description' => t("Check this to enable some Views query and performance statistics/debug messages <em>if Devel is installed</em>."),
-    '#default_value' => variable_get('views_devel_output', FALSE),
+    '#default_value' => config_get('views', 'devel_output'),
   );
 
   $regions = array();
@@ -5065,7 +5022,7 @@ function views_ui_admin_settings_advanced() {
   $form['debug']['views_devel_region'] = array(
     '#type' => 'select',
     '#title' => t('Page region to output performance statistics/debug messages'),
-    '#default_value' => variable_get('views_devel_region', 'footer'),
+    '#default_value' => config_get('views', 'devel_region'),
     '#options' => $regions,
     '#states' => array(
       'visible' => array(

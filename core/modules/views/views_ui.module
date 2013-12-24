@@ -25,6 +25,11 @@ function views_ui_menu() {
     'page callback' => 'views_ui_list_page',
     'type' => MENU_NORMAL_ITEM,
   ) + $base;
+  $items['admin/structure/views/list'] = array(
+      'title' => 'List',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -1,
+    );
 
   $items['admin/structure/views/add'] = array(
     'title' => 'Add new view',
@@ -275,7 +280,7 @@ function views_ui_theme() {
  * Impements hook_custom_theme()
  */
 function views_ui_custom_theme() {
-  $theme = variable_get('views_ui_custom_theme', '_default');
+  $theme = config_get('views_ui', 'custom_theme');
 
   if ($theme != '_default') {
     $available = list_themes();

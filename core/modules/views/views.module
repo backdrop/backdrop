@@ -660,6 +660,8 @@ function views_block_info() {
   }
 
   // Only save hashes if they have changed.
+  // @todo: Convert to state system when available.
+  // https://github.com/backdrop/backdrop-issues/issues/141
   $old_hashes = variable_get('views_block_hashes', array());
   if ($hashes != $old_hashes) {
     variable_set('views_block_hashes', $hashes);
@@ -1142,7 +1144,7 @@ function views_add_css($file) {
  */
 function views_add_js($file) {
   // If javascript has been disabled by the user, never add js files.
-  if (variable_get('views_no_javascript', FALSE)) {
+  if (config_get('views', 'no_javascript')) {
     return;
   }
   static $base = TRUE, $ajax = TRUE;
@@ -1257,8 +1259,8 @@ function views_get_handler($table, $field, $key, $override = NULL) {
     return $handler;
   }
 
-  // DEBUG -- identify missing handlers
-  debug("Missing handler: @table @field @key", array('@table' => $table, '@field' => $field, '@key' => $key));
+  // Identify missing handlers
+  drupal_set_message(t("Missing handler: @table @field @key", array('@table' => $table, '@field' => $field, '@key' => $key)), 'error');
   $broken = array(
     'title' => t('Broken handler @table.@field', array('@table' => $table, '@field' => $field)),
     'handler' => 'views_handler_' . $key . '_broken',

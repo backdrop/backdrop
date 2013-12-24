@@ -266,21 +266,7 @@ class views_handler_field extends views_handler {
   function get_elements() {
     static $elements = NULL;
     if (!isset($elements)) {
-      $elements = variable_get('views_field_rewrite_elements', array(
-        '' => t('- Use default -'),
-        '0' => t('- None -'),
-        'div' => 'DIV',
-        'span' => 'SPAN',
-        'h1' => 'H1',
-        'h2' => 'H2',
-        'h3' => 'H3',
-        'h4' => 'H4',
-        'h5' => 'H5',
-        'h6' => 'H6',
-        'p' => 'P',
-        'strong' => 'STRONG',
-        'em' => 'EM',
-      ));
+      $elements = config_get('views', 'field_rewrite_elements');
     }
 
     return $elements;

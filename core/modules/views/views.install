@@ -19,20 +19,8 @@ function views_install() {
 
 /**
  * Implements hook_schema().
- *
- * Generate the current version of the database schema from
- * the sequence of schema update functions. Uses a similar
- * method to install.inc's drupal_get_schema_versions() to
- * establish the update sequence.
- *
- * To change the schema, add a new views_schema_N()
- * function to match the associated views_update_N()
- *
- * @param $caller_function
- *   The name of the function that called us.
- *   Used internally, if requesting a specific schema version.
  */
-function views_schema($caller_function = FALSE) {
+function views_schema() {
   $schema['cache_views'] = drupal_get_schema_unprocessed('system', 'cache');
   $schema['cache_views']['description'] = 'Cache table for Views to store loaded view configurations.';
 
@@ -84,48 +72,140 @@ function views_schema($caller_function = FALSE) {
 }
 
 /**
- * Rename some system variables.
+ * @addtogroup updates-7.x-to-8.x
+ * @{
  */
-function views_update_7000() {
-  // Views now lets users turn off query details on live preview.
-  $query_on_top = variable_get('views_ui_query_on_top');
-  if (isset($query_on_top)) {
-    variable_set('views_ui_show_sql_query', TRUE);
-    if ($query_on_top) {
-      variable_set('views_ui_show_sql_query_where', 'above');
-    }
-    else {
-      variable_set('views_ui_show_sql_query_where', 'below');
-    }
-    variable_del('views_ui_query_on_top');
-  }
 
-  // Rename the views_hide_help_message variable from negative to positive.
-  $hide_help = variable_get('views_hide_help_message');
-  if (isset($hide_help)) {
-    variable_set('views_ui_show_advanced_help_warning', !$hide_help);
-    variable_del('views_hide_help_message');
-  }
-
-  // Rename the unused views_no_hover_links variable.
-  variable_del('views_no_hover_links');
+/**
+ * Convert database-based views to configuration files.
+ */
+function views_update_8000() {
+  // Install default views.
+  config_install_default_config('views', 'views.view.comments_recent');
+  config_install_default_config('views', 'views.view.frontpage');
+  config_install_default_config('views', 'views.view.taxonomy_term');
 }
 
 /**
- * Fix missing items from Views administrative breadcrumb
+ * Convert available database image styles to configuration files.
  */
-function views_update_7001() {
-  $depth = db_select('menu_links')
-    ->fields('menu_links', array('depth'))
-    ->condition('link_path', 'admin/structure/views/view/%')
-    ->execute()
-    ->fetchField();
-
-  if ($depth == 3) {
-    db_delete('menu_links')
-      ->condition('link_path', 'admin/structure/views/%', 'LIKE')
-      ->execute();
-    cache('menu')->flush();
-    menu_rebuild();
+function views_update_8001() {
+  if (db_table_exists('views_view')) {
+    $views = db_query("SELECT * FROM {views_view}");
+    foreach ($views as $view) {
+      $view = (array) $view;
+      $view['display'] = array();
+      if (empty($view['human_name'])) {
+        $view['human_name'] = $view['name'];
+      }
+      $displays = db_query("SELECT * FROM {views_display} WHERE vid = :vid ORDER BY position ASC", array(':vid' => $view['vid']));
+      foreach ($displays as $display) {
+        $display = (array) $display;
+        $display['display_options'] = unserialize($display['display_options']);
+        $id = $display['id'];
+        unset($display['id']);
+        unset($display['vid']);
+        unset($display['position']);
+        $view['display'][$id] = $display;
+      }
+      unset($view['vid']);
+      $config = config('views.view.' . $view['name']);
+      $config->setData($view);
+      $config->save();
+    }
   }
 }
+
+/**
+ * Drop Views tables that were converted to configuration files.
+ *
+ * This update is separate from views_update_8001 so that other modules may read
+ * the views_view and views_display tables before they are dropped using
+ * hook_update_dependencies() to come between these two updates.
+ */
+function views_update_8002() {
+  if (db_table_exists('views_view')) {
+    db_drop_table('views_view');
+    db_drop_table('views_display');
+  }
+}
+
+/**
+ * Update Views variables to use configuration files.
+ */
+function views_update_8003() {
+  $update_ui_variables = array(
+    'views_ui_show_master_display' => FALSE,
+    'views_ui_show_sql_query' => FALSE,
+    'views_ui_show_preview_information' => FALSE,
+    'views_ui_show_sql_query_where' => 'above',
+    'views_ui_show_performance_statistics' => FALSE,
+    'views_ui_always_live_preview' => TRUE,
+    'views_ui_display_embed' => FALSE,
+    'views_ui_custom_theme' => '_default',
+  );
+  $update_variables = array(
+    'views_no_javascript' => FALSE,
+    'views_exposed_filter_any_label' => 'new_any',
+    'views_show_additional_queries' => FALSE,
+    'views_sql_signature' => FALSE,
+    'views_devel_output' => FALSE,
+    'views_devel_region' => 'footer',
+    'views_display_extenders' => array(),
+    'views_field_rewrite_elements' => array(
+      '' => t('- Use default -'),
+      '0' => t('- None -'),
+      'div' => 'DIV',
+      'span' => 'SPAN',
+      'h1' => 'H1',
+      'h2' => 'H2',
+      'h3' => 'H3',
+      'h4' => 'H4',
+      'h5' => 'H5',
+      'h6' => 'H6',
+      'p' => 'P',
+      'strong' => 'STRONG',
+      'em' => 'EM',
+    ),
+  );
+  $delete_variables = array(
+    'views_ui_show_listing_filters',
+    'views_skip_cache',
+  );
+
+  // Update the UI variables.
+  $config = config('views_ui.settings');
+  $current_ui_variables = db_select('variable')
+    ->fields('variable')
+    ->condition('name', array_keys($update_ui_variables), 'IN')
+    ->execute()
+    ->fetchAllAssoc('name');
+  $current_ui_variables = array_map('unserialize', $current_ui_variables);
+  foreach ($update_ui_variables as $name => $default) {
+    $value = isset($current_ui_variables[$name]) ? $current_ui_variables[$name] : $default;
+    $config->set($name, $value);
+  }
+  $config->save();
+
+  // Update the main views module variables.
+  $config = config('views.settings');
+  $current_variables = db_select('variable')
+    ->fields('variable')
+    ->condition('name', array_keys($update_variables), 'IN')
+    ->execute()
+    ->fetchAllAssoc('name');
+  $current_variables = array_map('unserialize', $current_variables);
+  foreach ($update_variables as $name => $default) {
+    $value = isset($current_variables[$name]) ? $current_variables[$name] : $default;
+    $config->set($name, $value);
+  }
+  $config->save();
+
+  // Delete the removed variables.
+  db_delete('variable')->condition('name', $delete_variables, 'IN');
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-8.x"
+ * The next series of updates should start at 9000.
+ */
