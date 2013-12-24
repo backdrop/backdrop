@@ -171,6 +171,10 @@ function views_theme($existing, $type, $theme, $path) {
     'pattern' => 'views_more__',
     'variables' => array('more_url' => NULL, 'link_text' => 'more', 'view' => NULL),
   );
+  $hooks['views_container'] = array(
+    'render element' => 'element',
+    'file' => 'theme/theme.inc',
+  );
 
   // Add theme suggestions which are part of modules.
   foreach (views_get_module_apis() as $info) {
@@ -1144,7 +1148,7 @@ function views_add_css($file) {
  */
 function views_add_js($file) {
   // If javascript has been disabled by the user, never add js files.
-  if (config_get('views', 'no_javascript')) {
+  if (config_get('views.settings', 'no_javascript')) {
     return;
   }
   static $base = TRUE, $ajax = TRUE;

@@ -91,7 +91,7 @@ function views_views_plugins() {
         'use pager' => TRUE,
         'accept attachments' => FALSE,
         'admin' => t('Embed'),
-        'no ui' => !config_get('views_ui', 'display_embed'),
+        'no ui' => !config_get('views_ui.settings', 'display_embed'),
       ),
     ),
     'display_extender' => array(
@@ -550,7 +550,7 @@ class views_plugin extends views_object {
  * Get enabled display extenders.
  */
 function views_get_enabled_display_extenders() {
-  $enabled = array_filter(config_get('views', 'display_extenders'));
+  $enabled = array_filter(config_get('views.settings', 'display_extenders'));
   $options = views_fetch_plugin_names('display_extender');
   foreach ($options as $name => $plugin) {
     $enabled[$name] = $name;

@@ -200,28 +200,25 @@ function views_ui_menu() {
  * Implements hook_theme().
  */
 function views_ui_theme() {
-  $path = drupal_get_path('module', 'views');
-  require_once DRUPAL_ROOT . "/$path/includes/admin.inc";
-
   return array(
-    // edit a view
     'views_ui_display_tab_setting' => array(
       'variables' => array('description' => '', 'link' => '', 'settings_links' => array(), 'overridden' => FALSE, 'defaulted' => FALSE, 'description_separator' => TRUE, 'class' => array()),
-      'template' => 'views-ui-display-tab-setting',
-      'path' => "$path/theme",
+      'template' => 'templates/views-ui-display-tab-setting',
+      'file' => 'includes/admin.inc',
     ),
     'views_ui_display_tab_bucket' => array(
       'render element' => 'element',
-      'template' => 'views-ui-display-tab-bucket',
-      'path' => "$path/theme",
+      'template' => 'templates/views-ui-display-tab-bucket',
+      'file' => 'includes/admin.inc',
     ),
     'views_ui_edit_item' => array(
       'variables' => array('type' => NULL, 'view' => NULL, 'display' => NULL, 'no_fields' => FALSE),
-      'template' => 'views-ui-edit-item',
-      'path' => "$path/theme",
+      'template' => 'templates/views-ui-edit-item',
+      'file' => 'includes/admin.inc',
     ),
     'views_ui_rearrange_form' => array(
       'render element' => 'form',
+      'file' => 'includes/admin.inc',
     ),
     'views_ui_rearrange_filter_form' => array(
       'render element' => 'form',
@@ -231,47 +228,25 @@ function views_ui_theme() {
       'render element' => 'form',
       'file' => 'includes/admin.inc',
     ),
-
-    // list views
     'views_ui_view_info' => array(
       'variables' => array('view' => NULL, 'base' => NULL),
-      'file' => "includes/admin.inc",
+      'file' => 'includes/admin.inc',
     ),
-
-    // Group of filters.
     'views_ui_build_group_filter_form' => array(
       'render element' => 'form',
       'file' => 'includes/admin.inc',
-    ),
-
-    // tab themes
-    'views_tabset' => array(
-      'variables' => array('tabs' => NULL),
-    ),
-    'views_tab' => array(
-      'variables' => array('body' => NULL),
     ),
     'views_ui_reorder_displays_form' => array(
       'render element' => 'form',
       'file' => 'includes/admin.inc',
     ),
-
-
-    // On behalf of a plugin
     'views_ui_style_plugin_table' => array(
       'render element' => 'form',
+      'file' => 'includes/admin.inc',
     ),
-
-    // When previewing a view.
     'views_ui_view_preview_section' => array(
       'variables' => array('view' => NULL, 'section' => NULL, 'content' => NULL, 'links' => ''),
-    ),
-
-    // Generic container wrapper, to use instead of theme_container when an id
-    // is not desired.
-    'views_container' => array(
-      'render element' => 'element',
-      'file' => 'theme/theme.inc',
+      'file' => 'includes/admin.inc',
     ),
   );
 }
@@ -280,7 +255,7 @@ function views_ui_theme() {
  * Impements hook_custom_theme()
  */
 function views_ui_custom_theme() {
-  $theme = config_get('views_ui', 'custom_theme');
+  $theme = config_get('views_ui.settings', 'custom_theme');
 
   if ($theme != '_default') {
     $available = list_themes();
@@ -629,7 +604,7 @@ function views_ui_views_ui_wizards() {
     'base_table' => 'comment',
     'created_column' => 'created',
     'form_wizard_class' => array(
-      'file' => 'views_ui_comment_views_wizard.class.php',
+      'file' => 'views_ui_comment_views_wizard.php',
       'class' => 'ViewsUiCommentViewsWizard',
     ),
     'title' => t('Comments'),
@@ -663,7 +638,7 @@ function views_ui_views_ui_wizards() {
     'base_table' => 'file_managed',
     'created_column' => 'timestamp',
     'form_wizard_class' => array(
-      'file' => 'views_ui_file_managed_views_wizard.class.php',
+      'file' => 'views_ui_file_managed_views_wizard.php',
       'class' => 'ViewsUiFileManagedViewsWizard',
     ),
     'title' => t('Files'),
@@ -685,7 +660,7 @@ function views_ui_views_ui_wizards() {
       'title:DESC' => t('Title')
     ),
     'form_wizard_class' => array(
-      'file' => 'views_ui_node_views_wizard.class.php',
+      'file' => 'views_ui_node_views_wizard.php',
       'class' => 'ViewsUiNodeViewsWizard',
     ),
     'title' => t('Content'),
@@ -713,7 +688,7 @@ function views_ui_views_ui_wizards() {
     'base_table' => 'node_revision',
     'created_column' => 'timestamp',
     'form_wizard_class' => array(
-      'file' => 'views_ui_node_revision_views_wizard.class.php',
+      'file' => 'views_ui_node_revision_views_wizard.php',
       'class' => 'ViewsUiNodeRevisionViewsWizard',
     ),
     'title' => t('Content revisions'),
@@ -748,7 +723,7 @@ function views_ui_views_ui_wizards() {
     'name' => 'taxonomy_term',
     'base_table' => 'taxonomy_term_data',
     'form_wizard_class' => array(
-      'file' => 'views_ui_taxonomy_term_views_wizard.class.php',
+      'file' => 'views_ui_taxonomy_term_views_wizard.php',
       'class' => 'ViewsUiTaxonomyTermViewsWizard',
     ),
     'title' => t('Taxonomy terms'),
@@ -770,7 +745,7 @@ function views_ui_views_ui_wizards() {
     'base_table' => 'users',
     'created_column' => 'created',
     'form_wizard_class' => array(
-      'file' => 'views_ui_users_views_wizard.class.php',
+      'file' => 'views_ui_users_views_wizard.php',
       'class' => 'ViewsUiUsersViewsWizard',
     ),
     'title' => t('Users'),
@@ -1027,7 +1002,7 @@ function views_ui_library_alter(&$libraries, $module) {
   if ($module == 'system' && isset($libraries['ui.dialog'])) {
     // Only apply the fix, if we don't have an up to date jQueryUI version.
     if (version_compare($libraries['ui.dialog']['version'], '1.7.2', '>=') && version_compare($libraries['ui.dialog']['version'], '1.10.0', '<')) {
-      $libraries['ui.dialog']['js'][drupal_get_path('module', 'views') . '/js/jquery.ui.dialog.patch.js'] = array();
+      $libraries['ui.dialog']['js'][drupal_get_path('module', 'views_ui') . '/js/jquery.ui.dialog.patch.js'] = array();
     }
   }
 }

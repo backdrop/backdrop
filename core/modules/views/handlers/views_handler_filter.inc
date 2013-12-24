@@ -706,7 +706,7 @@ class views_handler_filter extends views_handler {
     if (!empty($this->options['group_info']['optional']) && !$this->multiple_exposed_input()) {
 
       $old_any = $this->options['group_info']['widget'] == 'select' ? '<Any>' : '&lt;Any&gt;';
-      $any_label = config_get('views', 'exposed_filter_any_label') == 'old_any' ? $old_any : t('- Any -');
+      $any_label = config_get('views.settings', 'exposed_filter_any_label') == 'old_any' ? $old_any : t('- Any -');
       $groups = array('All' => $any_label);
     }
     foreach ($this->options['group_info']['group_items'] as $id => $group) {
@@ -1087,7 +1087,7 @@ class views_handler_filter extends views_handler {
     }
 
     if ($type == 'value' && empty($this->always_required) && empty($this->options['expose']['required']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
-      $any_label = config_get('views', 'exposed_filter_any_label') == 'old_any' ? t('<Any>') : t('- Any -');
+      $any_label = config_get('views.settings', 'exposed_filter_any_label') == 'old_any' ? t('<Any>') : t('- Any -');
       $form['#options'] = array('All' => $any_label) + $form['#options'];
       $form['#default_value'] = 'All';
     }
