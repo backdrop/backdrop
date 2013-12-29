@@ -130,7 +130,6 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       }
     }
 
-    ctools_include('jump-menu');
     $settings = array(
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
@@ -140,7 +139,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       'default_value' => $default_value,
     );
 
-    $form = drupal_get_form('ctools_jump_menu', $options, $settings);
+    $form = drupal_get_form('system_jump_menu', $options, $settings);
     return drupal_render($form);
   }
 }
