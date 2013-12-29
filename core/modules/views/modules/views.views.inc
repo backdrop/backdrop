@@ -99,16 +99,14 @@ function views_views_data() {
     ),
   );
 
-  if (module_invoke('ctools', 'api_version', '1.7.1')) {
-    $data['views']['expression'] = array(
-      'title' => t('Math expression'),
-      'help' => t('Evaluates a mathematical expression and displays it.'),
-      'field' => array(
-        'handler' => 'views_handler_field_math',
-        'float' => TRUE,
-      ),
-    );
-  }
+  $data['views']['expression'] = array(
+    'title' => t('Math expression'),
+    'help' => t('Evaluates a mathematical expression and displays it.'),
+    'field' => array(
+      'handler' => 'views_handler_field_math',
+      'float' => TRUE,
+    ),
+  );
 
   $data['views']['fields_compare'] = array(
     'title' => t('Fields comparison'),
