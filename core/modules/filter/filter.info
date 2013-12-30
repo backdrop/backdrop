@@ -5,3 +5,6 @@ version = VERSION
 core = 8.x
 required = TRUE
 configure = admin/config/content/formats
+
+; Views handlers.
+files[] = views/views_handler_field_filter_format_name.inc

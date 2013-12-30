@@ -168,6 +168,16 @@ function system_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function system_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'system') . '/views',
+  );
+}
+
+/**
  * Implements hook_hook_info().
  */
 function system_hook_info() {

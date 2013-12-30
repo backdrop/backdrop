@@ -57,6 +57,16 @@ function book_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function book_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'book') . '/views',
+  );
+}
+
+/**
  * Adds relevant book links to the node's links.
  *
  * @param $node

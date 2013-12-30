@@ -4,3 +4,15 @@ package = Core
 version = VERSION
 core = 8.x
 dependencies[] = language
+
+; Views handlers.
+files[] = views/views_handler_field_node_language.inc
+files[] = views/views_handler_filter_node_language.inc
+files[] = views/views_handler_argument_locale_group.inc
+files[] = views/views_handler_argument_locale_language.inc
+files[] = views/views_handler_field_locale_group.inc
+files[] = views/views_handler_field_locale_language.inc
+files[] = views/views_handler_field_locale_link_edit.inc
+files[] = views/views_handler_filter_locale_group.inc
+files[] = views/views_handler_filter_locale_language.inc
+files[] = views/views_handler_filter_locale_version.inc

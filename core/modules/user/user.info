@@ -7,3 +7,25 @@ files[] = user.entity.inc
 required = TRUE
 configure = admin/config/people
 stylesheets[all][] = user.css
+
+; Views handlers.
+files[] = views/views_handler_argument_user_uid.inc
+files[] = views/views_handler_argument_users_roles_rid.inc
+files[] = views/views_handler_field_user.inc
+files[] = views/views_handler_field_user_language.inc
+files[] = views/views_handler_field_user_link.inc
+files[] = views/views_handler_field_user_link_cancel.inc
+files[] = views/views_handler_field_user_link_edit.inc
+files[] = views/views_handler_field_user_mail.inc
+files[] = views/views_handler_field_user_name.inc
+files[] = views/views_handler_field_user_permissions.inc
+files[] = views/views_handler_field_user_picture.inc
+files[] = views/views_handler_field_user_roles.inc
+files[] = views/views_handler_filter_user_current.inc
+files[] = views/views_handler_filter_user_name.inc
+files[] = views/views_handler_filter_user_permissions.inc
+files[] = views/views_handler_filter_user_roles.inc
+files[] = views/views_plugin_argument_default_current_user.inc
+files[] = views/views_plugin_argument_default_user.inc
+files[] = views/views_plugin_argument_validate_user.inc
+files[] = views/views_plugin_row_user_view.inc
