@@ -1102,6 +1102,15 @@ function system_library_info() {
     ),
   );
 
+  // Autosubmit for forms.
+  $libraries['drupal.autosubmit'] = array(
+    'title' => 'Drupal autosubmit',
+    'version' => VERSION,
+    'js' => array(
+      'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   // jQuery.
   $libraries['jquery'] = array(
     'title' => 'jQuery',

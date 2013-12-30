@@ -1695,7 +1695,6 @@ function views_ui_get_display_tab_details($view, $display) {
   // different displays of the same view, so changing displays doesn't
   // affect the column display.
   $build['columns']['third']['#attributes']['id'] = 'views-ui-advanced-column-' . $view->name;
-  //$build['columns']['third']['advanced'] = array('#markup' => '<h3 class="ctools-collapsible-handle"><a href="">' . t('Advanced') . '</a></h3>',);
   $build['columns']['third']['collapse']['#theme_wrappers'] = array('container');
   $build['columns']['third']['collapse']['#attributes'] = array();
 

@@ -276,9 +276,9 @@ class views_plugin_exposed_form extends views_plugin {
 
     // Apply autosubmit values.
     if (!empty($this->options['autosubmit'])) {
-      $form['submit']['#attributes']['class'][] = 'ctools-use-ajax';
-      $form['submit']['#attributes']['class'][] = 'ctools-auto-submit-click';
-      $form['#attached']['js'][] = drupal_get_path('module', 'ctools') . '/js/auto-submit.js';
+      $form['#attributes']['class'][] = 'autosubmit-full-form';
+      $form['submit']['#attributes']['class'][] = 'autosubmit-click';
+      $form['#attached']['library'][] = array('system', 'drupal.autosubmit');
 
       if (!empty($this->options['autosubmit_hide'])) {
         $form['submit']['#attributes']['class'][] = 'js-hide';
