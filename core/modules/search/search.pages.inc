@@ -153,5 +153,4 @@ function search_form_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = $form_state['action'] . '/' . $keys;
-  return;
 }
