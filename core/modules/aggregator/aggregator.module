@@ -270,6 +270,16 @@ function aggregator_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function aggregator_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'aggregator') . '/views',
+  );
+}
+
+/**
  * Implements hook_cron().
  *
  * Queues news feeds for updates once their refresh interval has elapsed.

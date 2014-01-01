@@ -6,3 +6,6 @@ core = 8.x
 dependencies[] = node
 configure = admin/content/book/settings
 stylesheets[all][] = book.theme.css
+
+; Views handlers.
+files[] = views/views_plugin_argument_default_book_root.inc

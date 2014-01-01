@@ -7,3 +7,21 @@ dependencies[] = options
 dependencies[] = entity
 files[] = taxonomy.module
 configure = admin/structure/taxonomy
+
+; Views handlers.
+files[] = views/views_handler_argument_taxonomy.inc
+files[] = views/views_handler_argument_term_node_tid.inc
+files[] = views/views_handler_argument_term_node_tid_depth.inc
+files[] = views/views_handler_argument_term_node_tid_depth_modifier.inc
+files[] = views/views_handler_argument_vocabulary_vid.inc
+files[] = views/views_handler_argument_vocabulary_machine_name.inc
+files[] = views/views_handler_field_taxonomy.inc
+files[] = views/views_handler_field_term_node_tid.inc
+files[] = views/views_handler_field_term_link_edit.inc
+files[] = views/views_handler_filter_term_node_tid.inc
+files[] = views/views_handler_filter_term_node_tid_depth.inc
+files[] = views/views_handler_filter_vocabulary_vid.inc
+files[] = views/views_handler_filter_vocabulary_machine_name.inc
+files[] = views/views_handler_relationship_node_term_data.inc
+files[] = views/views_plugin_argument_validate_taxonomy_term.inc
+files[] = views/views_plugin_argument_default_taxonomy_tid.inc

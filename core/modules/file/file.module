@@ -93,6 +93,16 @@ function file_theme() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function file_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'file') . '/views',
+  );
+}
+
+/**
  * Implements hook_file_download().
  *
  * This function takes an extra parameter $field_type so that it may

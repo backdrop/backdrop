@@ -159,6 +159,16 @@ function locale_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function locale_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'locale') . '/views',
+  );
+}
+
+/**
  * Form builder callback to display language selection widget.
  *
  * @ingroup forms

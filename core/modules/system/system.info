@@ -10,3 +10,13 @@ files[] = system.tar.inc
 files[] = system.updater.inc
 required = TRUE
 configure = admin/config/system
+
+; Views handlers.
+files[] = views/views_handler_argument_file_fid.inc
+files[] = views/views_handler_field_file.inc
+files[] = views/views_handler_field_file_extension.inc
+files[] = views/views_handler_field_file_filemime.inc
+files[] = views/views_handler_field_file_uri.inc
+files[] = views/views_handler_field_file_status.inc
+files[] = views/views_handler_filter_file_status.inc
+files[] = views/views_handler_filter_system_type.inc
