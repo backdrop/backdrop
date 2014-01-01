@@ -5,20 +5,14 @@
  * Definition of ViewsHandlerAreaTextTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the text area handler.
  *
  * @see views_handler_area_text
  */
 class ViewsHandlerAreaTextTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Area: Text',
-      'description' => 'Test the core views_handler_area_text handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   public function testAreaText() {
     $view = $this->getBasicView();
 

@@ -1,6 +1,7 @@
 {
   "_config_name": "views.view.comments_recent",
   "name": "comments_recent",
+  "module": "views",
   "description": "Contains a block and a page to list recent comments; the block will automatically link to the page, which displays the comment body as well as a link to the node.",
   "tag": "default",
   "disabled": true,

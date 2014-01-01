@@ -5,19 +5,12 @@
  * Definition of ViewsNodeRevisionRelationsTestCase.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests basic node_revision table integration into views.
  */
-class ViewsNodeRevisionRelationsTestCase extends ViewsSqlTest {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Tests basic node_revision integration',
-      'description' => 'Tests the integration of node_revision table of node module',
-      'group' => 'Views Modules',
-    );
-  }
-
+class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
   /**
    * Create a node with revision and rest result count for both views.
    */

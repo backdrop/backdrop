@@ -5,10 +5,12 @@
  * Definition of viewsPluginStyleJumpMenuTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests jump menu style functionality.
  */
-class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
+class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
 
   /**
    * Stores all created nodes.
@@ -16,15 +18,6 @@ class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
    * @var array
    */
   var $nodes;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Jump menu',
-      'description' => 'Test jump menu style functionality.',
-      'group' => 'Views Plugins',
-    );
-  }
-
 
   public function setUp() {
     parent::setUp();
@@ -39,14 +32,14 @@ class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
 
 
   /**
-   * Tests jump menues with more then one same path but maybe differnet titles.
+   * Tests jump menus with more then one same path but maybe different titles.
    */
   function testDuplicatePaths() {
     $view = $this->getJumpMenuView();
     $view->set_display();
     $view->init_handlers();
 
-    // Setup a [path] which would leed to "duplicate" paths, but still the shouldn't be used for grouping.
+    // Setup a [path] which would lead to "duplicate" paths, but still the shouldn't be used for grouping.
     $view->field['nothing']->options['alter']['text'] = '[path]';
     $view->preview();
     $form = $view->style_plugin->render($view->result);

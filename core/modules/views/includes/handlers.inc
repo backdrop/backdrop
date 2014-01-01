@@ -122,7 +122,7 @@ function views_get_table_join($table, $base_table) {
   }
 
   // DEBUG -- identify missing handlers
-  wathdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
+  watchdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
 }
 
 /**

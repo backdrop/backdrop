@@ -5,19 +5,12 @@
  * Definition of ViewsPluginStyleUnformattedTestCase.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/styles/views_plugin_style_base.test';
+
 /**
  * Tests the default/unformatted row style.
  */
 class ViewsPluginStyleUnformattedTestCase extends ViewsPluginStyleTestBase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Style: unformatted',
-      'description' => 'Test unformatted style functionality.',
-      'group' => 'Views Plugins',
-    );
-  }
-
   /**
    * Take sure that the default css classes works as expected.
    */

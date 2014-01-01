@@ -5,18 +5,12 @@
  * Definition of ViewsArgumentValidatorTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests Views argument validators.
  */
 class ViewsArgumentValidatorTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Argument validator',
-      'group' => 'Views Plugins',
-      'description' => 'Test argument validator tests.',
-    );
-  }
-
   function testArgumentValidatePhp() {
     $string = $this->randomName();
     $view = $this->view_test_argument_validate_php($string);

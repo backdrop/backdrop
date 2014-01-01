@@ -5,19 +5,13 @@
  * Definition of ViewsHandlerFilterStringTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the core views_handler_filter_string handler.
  */
 class ViewsHandlerFilterStringTest extends ViewsSqlTest {
   var $column_map = array();
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter: String',
-      'description' => 'Tests the core views_handler_filter_string handler.',
-      'group' => 'Views Handlers',
-    );
-  }
 
   function setUp() {
     parent::setUp();

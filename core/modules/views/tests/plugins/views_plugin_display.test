@@ -5,19 +5,12 @@
  * Definition of ViewsPluginDisplayTestCase.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  *
  */
 class ViewsPluginDisplayTestCase extends ViewsSqlTest {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Display plugin',
-      'description' => 'Tests the basic display plugin.',
-      'group' => 'Views Plugins',
-    );
-  }
-
   /**
    * Tests the overriding of filter_groups.
    */

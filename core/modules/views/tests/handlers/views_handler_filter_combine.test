@@ -5,19 +5,13 @@
  * Definition of ViewsHandlerFilterCombineTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the combine filter handler.
  */
 class ViewsHandlerFilterCombineTest extends ViewsSqlTest {
   var $column_map = array();
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter: Combine',
-      'description' => 'Tests the combine filter handler.',
-      'group' => 'Views Handlers',
-    );
-  }
 
   function setUp() {
     parent::setUp();

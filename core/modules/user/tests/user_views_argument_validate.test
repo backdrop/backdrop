@@ -2,21 +2,15 @@
 
 /**
  * @file
- * Definition of ViewsUserArgumentValidate.
+ * Definition of UserViewsArgumentValidate.
  */
+
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests views user argument argument handler.
  */
-class ViewsUserArgumentValidate extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Tests user argument validator',
-      'description' => 'Tests user argument validator',
-      'group' => 'Views Plugins',
-    );
-  }
-
+class UserViewsArgumentValidate extends ViewsSqlTest {
   function setUp() {
     parent::setUp('views');
     $this->account = $this->drupalCreateUser();

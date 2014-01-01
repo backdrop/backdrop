@@ -1099,10 +1099,12 @@ function views_module_include($api, $reset = FALSE) {
   $api_cache = views_get_module_apis($reset);
   $included_modules = array();
   foreach ($api_cache as $module => $api_info) {
-    $path = './' . $api_info['path'] . '/' . $api_info['module'] . '.' . $api . '.inc';
-    if (is_file($path)) {
-      $included_modules[$module] = $api_info;
-      include_once($path);
+    if (isset($api_info['path'])) {
+      $path = './' . $api_info['path'] . '/' . $api_info['module'] . '.' . $api . '.inc';
+      if (is_file($path)) {
+        $included_modules[$module] = $api_info;
+        include_once($path);
+      }
     }
   }
   return $included_modules;

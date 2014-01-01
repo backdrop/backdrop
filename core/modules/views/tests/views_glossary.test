@@ -5,20 +5,14 @@
  * Definition of ViewsGlossaryTestCase.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests glossary view ( summary of arguments ).
  */
 class ViewsGlossaryTestCase extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Glossary Test',
-      'description' => 'Tests glossary functionality of views.',
-      'group' => 'Views',
-    );
-  }
-
   public function setUp() {
-    parent::setUp('views');
+    parent::setUp('views', 'views_test');
   }
 
   /**
@@ -47,7 +41,7 @@ class ViewsGlossaryTestCase extends ViewsSqlTest {
     }
 
     // Execute glossary view
-    $view = views_get_view('glossary');
+    $view = views_get_view('test_glossary');
     $view->set_display('attachment');
     $view->execute_display('attachment');
 

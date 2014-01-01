@@ -5,18 +5,12 @@
  * Definition of ViewsHandlerSortTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests for core views_handler_sort handler.
  */
 class ViewsHandlerSortTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Sort: generic',
-      'description' => 'Test the core views_handler_sort handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   /**
    * Tests numeric ordering of the result set.
    */

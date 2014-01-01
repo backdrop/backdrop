@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Tests the fieldapi integration of viewsdata.
+ * Tests the Views integration with Field API.
  */
 
 /**
@@ -16,10 +16,12 @@
  *   - Use relationships between different entity types, for example node and the node author(user).
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Provides some helper methods for testing fieldapi integration into views.
  */
-class ViewsFieldApiTestHelper extends ViewsSqlTest {
+class FieldViewsTestHelper extends ViewsSqlTest {
   /**
    * Stores the field definitions used by the test.
    * @var array
@@ -97,19 +99,11 @@ class ViewsFieldApiTestHelper extends ViewsSqlTest {
 /**
  * Test the produced views_data.
  */
-class viewsFieldApiDataTest extends ViewsFieldApiTestHelper {
+class FieldViewsDataTest extends FieldViewsTestHelper {
   /**
    * Stores the fields for this test case.
    */
   var $fields;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Fieldapi: Views Data',
-      'description' => 'Tests the fieldapi views data.',
-      'group' => 'Views Modules',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -275,16 +269,8 @@ class viewsFieldApiDataTest extends ViewsFieldApiTestHelper {
  *   Check locale:disabled, locale:enabled and locale:enabled with another language
  *   Check revisions
  */
-class viewsHandlerFieldFieldTest extends ViewsFieldApiTestHelper {
+class FieldViewsFieldTest extends FieldViewsTestHelper {
   public $nodes;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Fieldapi: Field handler',
-      'description' => 'Tests the field itself of the fieldapi integration',
-      'group' => 'Views Modules'
-    );
-  }
 
   protected function setUp() {
     parent::setUp();

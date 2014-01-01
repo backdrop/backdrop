@@ -5,18 +5,12 @@
  * Definition of ViewsAccessTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Basic test for pluggable access.
  */
 class ViewsAccessTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Access',
-      'description' => 'Tests pluggable access for views.',
-      'group' => 'Views Plugins'
-    );
-  }
-
   public function setUp() {
     parent::setUp();
 

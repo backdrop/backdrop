@@ -5,23 +5,16 @@
  * Definition of ViewsAnalyzeTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the views analyze system.
  */
 class ViewsAnalyzeTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views Analyze',
-      'description' => 'Test the views analyze system.',
-      'group' => 'Views',
-    );
-  }
-
   public function setUp() {
     parent::setUp('views_ui');
     module_enable(array('views_ui'));
     // @TODO Figure out why it's required to clear the cache here.
-    views_module_include('views_default', TRUE);
     views_get_all_views(TRUE);
     menu_rebuild();
 

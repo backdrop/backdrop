@@ -119,7 +119,7 @@ class views_plugin_cache extends views_plugin {
       case 'results':
         // Values to set: $view->result, $view->total_rows, $view->execute_time,
         // $view->current_page.
-        if ($cache = cache_get($this->get_results_key(), $this->table)) {
+        if ($cache = cache($this->bin)->get($this->get_results_key())) {
           if (!$cutoff || $cache->created > $cutoff) {
             $this->view->result = $cache->data['result'];
             $this->view->total_rows = $cache->data['total_rows'];
@@ -130,7 +130,7 @@ class views_plugin_cache extends views_plugin {
         }
         return FALSE;
       case 'output':
-        if ($cache = cache_get($this->get_output_key(), $this->table)) {
+        if ($cache = cache($this->bin)->get($this->get_output_key())) {
           if (!$cutoff || $cache->created > $cutoff) {
             $this->storage = $cache->data;
             $this->view->display_handler->output = $cache->data['output'];
@@ -277,7 +277,7 @@ class views_plugin_cache extends views_plugin {
         'build_info' => $build_info,
         'roles' => array_keys($user->roles),
         'super-user' => $user->uid == 1, // special caching for super user.
-        'language' => $GLOBALS['language']->language,
+        'language' => $GLOBALS['language_interface']->langcode,
         'base_url' => $GLOBALS['base_url'],
       );
       foreach (array('exposed_info', 'page', 'sort', 'order', 'items_per_page', 'offset') as $key) {
@@ -300,7 +300,7 @@ class views_plugin_cache extends views_plugin {
         'roles' => array_keys($user->roles),
         'super-user' => $user->uid == 1, // special caching for super user.
         'theme' => $GLOBALS['theme'],
-        'language' => $GLOBALS['language']->language,
+        'language' => $GLOBALS['language_interface']->langcode,
         'base_url' => $GLOBALS['base_url'],
       );
 

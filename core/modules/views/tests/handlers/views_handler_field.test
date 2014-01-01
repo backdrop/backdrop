@@ -5,20 +5,14 @@
  * Definition of ViewsHandlerFieldTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the generic field handler
  *
  * @see views_handler_field
  */
 class ViewsHandlerFieldTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field',
-      'description' => 'Test the core views_handler_field handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   protected function setUp() {
     parent::setUp();
     $this->column_map = array(

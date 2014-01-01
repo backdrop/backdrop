@@ -2,23 +2,17 @@
 
 /**
  * @file
- * Definition of viewsHandlerFieldUserNameTest.
+ * Definition of UserViewsHandlerFieldNameTest.
  */
+
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
 
 /**
  * Tests the field username handler.
  *
  * @see views_handler_field_user_name
  */
-class viewsHandlerFieldUserNameTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Tests user: name field',
-      'description' => 'Tests the handler of the user: name field',
-      'group' => 'Views Modules',
-    );
-  }
-
+class UserViewsHandlerFieldNameTest extends ViewsSqlTest {
   function testUserName() {
     $view = $this->view_user_name();
     $view->init_display();

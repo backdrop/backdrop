@@ -5,19 +5,12 @@
  * Tests aggregate functionality of Views.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests aggregate functionality of views, for example count.
  */
 class ViewsQueryGroupByTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Groupby',
-      'description' => 'Tests aggregate functionality of views, for example count.',
-      'group' => 'Views',
-    );
-
-  }
-
   /**
    * Tests aggregate count feature.
    */
@@ -295,14 +288,6 @@ class viewsUiGroupbyTestCase extends DrupalWebTestCase {
     // Create and log in a user with administer views permission.
     $views_admin = $this->drupalCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));
     $this->drupalLogin($views_admin);
-  }
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Groupby UI',
-      'description' => 'Tests UI of aggregate functionality.',
-      'group' => 'Views UI',
-    );
   }
 
   /**

@@ -111,6 +111,8 @@ function views_ui_menu() {
     'title' => 'Delete view',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_delete_form', 4),
+    'access callback' => 'views_ui_menu_action_access',
+    'access arguments' => array(4, 'delete'),
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
@@ -124,6 +126,15 @@ function views_ui_menu() {
     'title' => 'Disable view',
     'page callback' => 'views_ui_toggle_enable_page',
     'page arguments' => array(4, '0'),
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  ) + $base;
+  $items['admin/structure/views/view/%views_ui_cache/revert'] = array(
+    'title' => 'Revert view',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_ui_revert_form', 4),
+    'access callback' => 'views_ui_menu_action_access',
+    'access arguments' => array(4, 'revert'),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   ) + $base;
   $items['admin/structure/views/view/%views_ui_cache/break-lock'] = array(
@@ -321,6 +332,19 @@ function views_ui_cache_load($name) {
   else {
     return $view;
   }
+}
+
+/**
+ * Menu access callback to check access to various views operations.
+ */
+function views_ui_menu_action_access($view, $action, $account = NULL) {
+  if ($action === 'delete') {
+    $access = $view->storage === VIEWS_STORAGE_NORMAL;
+  }
+  if ($action === 'revert') {
+    $access = $view->storage === VIEWS_STORAGE_OVERRIDE;
+  }
+  return $access && user_access('administer views', $account);
 }
 
 /**

@@ -5,18 +5,12 @@
  * Definition of ViewsHandlerRelationshipNodeTermDataTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the relationship_node_term_data handler.
  */
-class ViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Tests handler relationship_node_term_data',
-      'description' => 'Tests the taxonomy term on node relationship handler',
-      'group' => 'Views Modules',
-    );
-  }
-
+class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
   /**
    * Returns a new term with random properties in vocabulary $vid.
    */

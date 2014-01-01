@@ -5,18 +5,12 @@
  * Definition of ViewsArgumentDefaultTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Basic test for pluggable argument default.
  */
 class ViewsArgumentDefaultTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Argument_default',
-      'description' => 'Tests pluggable argument_default for views.',
-      'group' => 'Views Plugins'
-    );
-  }
-
   public function setUp() {
     parent::setUp('views');
 

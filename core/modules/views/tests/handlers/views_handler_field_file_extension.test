@@ -5,18 +5,12 @@
  * Definition of ViewsHandlerFileExtensionTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the views_handler_field_file_extension handler.
  */
 class ViewsHandlerFileExtensionTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field: File extension',
-      'description' => 'Test the views_handler_field_file_extension handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   function dataSet() {
     $data = parent::dataSet();
     $data[0]['name'] = 'file.png';
