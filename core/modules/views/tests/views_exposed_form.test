@@ -11,14 +11,6 @@ require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests exposed forms.
  */
 class ViewsExposedFormTest extends ViewsSqlTest {
-  public function setUp() {
-    parent::setUp('views_ui');
-    module_enable(array('views_ui'));
-    // @TODO Figure out why it's required to clear the cache here.
-    views_get_all_views(TRUE);
-    menu_rebuild();
-  }
-
   /**
    * Tests, whether and how the reset button can be renamed.
    */

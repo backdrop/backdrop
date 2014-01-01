@@ -37,6 +37,7 @@ class ViewsHandlersTest extends ViewsSqlTest {
    * Tests views_break_phrase_string function.
    */
   function test_views_break_phrase_string() {
+    module_load_include('inc', 'views', 'includes/handlers');
     $empty_stdclass = new stdClass();
     $empty_stdclass->operator = 'or';
     $empty_stdclass->value = array();

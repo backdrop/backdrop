@@ -216,7 +216,7 @@ description = Tests the basic display plugin.
 group = Views Plugins
 file = tests/plugins/views_plugin_display.test
 
-[viewsPluginStyleJumpMenuTest]
+[ViewsPluginStyleJumpMenuTest]
 name = Jump menu
 description = Test jump menu style functionality.
 group = Views Plugins

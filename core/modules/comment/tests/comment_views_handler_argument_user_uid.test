@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Definition of viewsHandlerArgumentCommentUserUidTest.
+ * Definition of CommentViewsHandlerArgumentUserUidTest.
  */
 
 require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';

@@ -59,13 +59,13 @@ group = Field API
 file = tests/field.test
 
 [FieldViewsDataTest]
-name = Fieldapi: Views Data
+name = Views integration for Field API
 description = Tests the Field API Views data.
 group = Field API
-file = tests/field/field_views.test
+file = tests/field_views.test
 
 [FieldViewsFieldTest]
-name = Fieldapi: Field handler
+name = Views fields for Field API
 description = Tests the Views field of the Field API integration.
 group = Field API
-file = tests/field/field_views.test
+file = tests/field_views.test

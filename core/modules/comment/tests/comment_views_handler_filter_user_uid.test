@@ -5,12 +5,14 @@
  * Definition of viewsHandlerFilterCommentUserUidTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/comment/tests/comment_views_handler_argument_user_uid.test';
+
 /**
  * Tests the filter_comment_user_uid handler.
  *
  * The actual stuff is done in the parent class.
  */
-class CommentViewsHandlerFilterUserUidTest extends viewsHandlerArgumentCommentUserUidTest {
+class CommentViewsHandlerFilterUserUidTest extends CommentViewsHandlerArgumentUserUidTest {
   /**
    * Override the view from the argument test case to remove the argument and
    * add filter with the uid as the value.
