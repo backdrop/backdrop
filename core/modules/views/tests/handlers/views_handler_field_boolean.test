@@ -5,18 +5,12 @@
  * Definition of ViewsHandlerFieldBooleanTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the core views_handler_field_boolean handler.
  */
 class ViewsHandlerFieldBooleanTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field: Boolean',
-      'description' => 'Test the core views_handler_field_boolean handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   function dataSet() {
     // Use default dataset but remove the age from john and paul
     $data = parent::dataSet();

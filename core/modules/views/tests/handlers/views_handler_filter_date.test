@@ -5,18 +5,12 @@
  * Definition of ViewsHandlerFilterDateTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the core views_handler_filter_date handler.
  */
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter: Date',
-      'description' => 'Test the core views_handler_filter_date handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   function setUp() {
     parent::setUp();
     // Add some basic test nodes.

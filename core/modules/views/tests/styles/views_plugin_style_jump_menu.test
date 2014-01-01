@@ -5,6 +5,8 @@
  * Definition of viewsPluginStyleJumpMenuTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests jump menu style functionality.
  */
@@ -16,15 +18,6 @@ class viewsPluginStyleJumpMenuTest extends ViewsSqlTest {
    * @var array
    */
   var $nodes;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Jump menu',
-      'description' => 'Test jump menu style functionality.',
-      'group' => 'Views Plugins',
-    );
-  }
-
 
   public function setUp() {
     parent::setUp();

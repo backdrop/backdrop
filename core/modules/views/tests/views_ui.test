@@ -23,14 +23,6 @@ class ViewsUIWizardHelper extends DrupalWebTestCase {
  * Tests creating views with the wizard and viewing them on the listing page.
  */
 class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI wizard basic functionality',
-      'description' => 'Test creating basic views with the wizard and viewing them on the listing page.',
-      'group' => 'Views UI',
-    );
-  }
-
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->drupalGet('admin/structure/views');
@@ -46,8 +38,8 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $this->assertText(t('Your view was saved. You may edit it from the list below.'));
     $this->assertText($view1['human_name']);
     $this->assertText($view1['description']);
-    foreach(array('delete', 'clone', 'edit') as $operation) {
-      $this->assertLinkByHref(url('admin/structure/views/view/' . $view1['name'] . '/' . $operation));
+    foreach (array('/delete', '/clone', '') as $operation) {
+      $this->assertLinkByHref(url('admin/structure/views/view/' . $view1['name'] . $operation));
     }
 
     // This view should not have a block.
@@ -143,21 +135,13 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
  * Tests enabling, disabling, and reverting default views via the listing page.
  */
 class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI default views functionality',
-      'description' => 'Test enabling, disabling, and reverting default views via the listing page.',
-      'group' => 'Views UI',
-    );
-  }
-
   /**
    * Tests default views.
    */
   function testDefaultViews() {
     // Make sure the front page view starts off as disabled (does not appear on
     // the listing page).
-    $edit_href = 'admin/structure/views/view/frontpage/edit';
+    $edit_href = 'admin/structure/views/view/frontpage';
     $this->drupalGet('admin/structure/views');
     // TODO: Disabled default views do now appear on the front page. Test this
     // behavior with templates instead.
@@ -169,11 +153,6 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
     $this->assertUrl('admin/structure/views');
     $this->assertLinkByHref($edit_href);
-
-    // It should not be possible to revert the view yet.
-    $this->assertNoLink(t('Revert'));
-    $revert_href = 'admin/structure/views/view/frontpage/revert';
-    $this->assertNoLinkByHref($revert_href);
 
     // Edit the view and change the title. Make sure that the new title is
     // displayed.
@@ -188,21 +167,14 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     // view title we added above no longer is displayed.
     $this->drupalGet('admin/structure/views');
     $this->assertLink(t('Revert'));
+    $revert_href = 'admin/structure/views/view/frontpage/revert';
     $this->assertLinkByHref($revert_href);
     $this->drupalPost($revert_href, array(), t('Revert'));
     $this->drupalGet('frontpage');
     $this->assertNoText($new_title);
 
-    // Now disable the view, and make sure it stops appearing on the main view
-    // listing page but instead goes back to displaying on the disabled views
-    // listing page.
-    // TODO: Test this behavior with templates instead.
-    $this->drupalGet('admin/structure/views');
-    $this->clickViewsOperationLink(t('Disable'), '/frontpage/');
-    // $this->assertUrl('admin/structure/views');
-    // $this->assertNoLinkByHref($edit_href);
-    // The easiest way to verify it appears on the disabled views listing page
-    // is to try to click the "enable" link from there again.
+    // After reverting, the view will be disabled again. Try to click the
+    // "enable" link from there again.
     $this->drupalGet('admin/structure/views/templates');
     $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
     $this->assertUrl('admin/structure/views');
@@ -256,14 +228,6 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
   protected $tag_vocabulary;
   protected $tag_field;
   protected $tag_instance;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI wizard taxonomy functionality',
-      'description' => 'Test the ability of the views wizard to create views filtered by taxonomy.',
-      'group' => 'Views UI',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -419,14 +383,6 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to create views with sorts.
  */
 class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI wizard sorting functionality',
-      'description' => 'Test the ability of the views wizard to create views with sorts.',
-      'group' => 'Views UI',
-    );
-  }
-
   /**
    * Tests the sorting functionality.
    */
@@ -489,14 +445,6 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to specify the number of items per page.
  */
 class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI wizard items per page functionality',
-      'description' => 'Test the ability of the views wizard to specify the number of items per page.',
-      'group' => 'Views UI',
-    );
-  }
-
   /**
    * Tests the number of items per page.
    */
@@ -574,14 +522,6 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to put views in a menu.
  */
 class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI wizard menu functionality',
-      'description' => 'Test the ability of the views wizard to put views in a menu.',
-      'group' => 'Views UI',
-    );
-  }
-
   /**
    * Tests the menu functionality.
    */
@@ -622,14 +562,6 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to create views with a jump menu style plugin.
  */
 class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI wizard jump menu functionality',
-      'description' => 'Test the ability of the views wizard to create views with a jump menu style plugin.',
-      'group' => 'Views UI',
-    );
-  }
-
   /**
    * Tests the jump menu style plugin.
    */
@@ -717,7 +649,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    */
   function createCommentAndGetPath() {
     $node = $this->drupalCreateNode();
-    $comment = (object) array(
+    $comment = entity_create('comment', array(
       'cid' => NULL,
       'nid' => $node->nid,
       'pid' => 0,
@@ -726,7 +658,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
       'subject' => $this->randomName(),
       'language' => LANGUAGE_NONE,
       'comment_body' => array(LANGUAGE_NONE => array($this->randomName())),
-    );
+    ));
     comment_save($comment);
     return entity_uri('comment', $comment);
   }
@@ -783,14 +715,6 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
  * Tests that displays can be correctly overridden via the user interface.
  */
 class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'Views UI overridden displays',
-      'description' => 'Test that displays can be correctly overridden via the user interface.',
-      'group' => 'Views UI',
-    );
-  }
-
   /**
    * Tests that displays can be overridden via the UI.
    */

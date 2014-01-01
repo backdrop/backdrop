@@ -5,18 +5,12 @@
  * Definition of ViewsBasicTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Basic test class for Views query builder tests.
  */
 class ViewsBasicTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Basic query test',
-      'description' => 'A basic query test for Views.',
-      'group' => 'Views'
-    );
-  }
-
   /**
    * Tests a trivial result set.
    */

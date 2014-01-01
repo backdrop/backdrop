@@ -5,18 +5,12 @@
  * Definition of ViewsViewTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Views class tests.
  */
 class ViewsViewTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Test the view class',
-      'description' => 'Tests some  functionality of the view class',
-      'group' => 'Views',
-    );
-  }
-
   /**
    * Tests the deconstructor to be sure that every kind of heavy objects are removed.
    */
@@ -69,7 +63,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $this->assertNotNull($view, 'Make sure that the old view is still in the static cache.');
 
     $view = views_get_view($view->name, TRUE);
-    $this->assertNull($view, "Make sure that the old view gets cleared by the reset parameter.");
+    $this->assertFalse($view, "Make sure that the old view gets cleared by the reset parameter.");
   }
 
   function testValidate() {

@@ -5,18 +5,12 @@
  * Definition of ViewsHandlerFilterInOperator.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the core views_handler_filter_in_operator handler.
  */
 class ViewsHandlerFilterInOperator extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter: in_operator',
-      'description' => 'Test the core views_handler_filter_in_operator handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['age']['filter']['handler'] = 'views_handler_filter_in_operator';

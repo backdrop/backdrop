@@ -5,18 +5,12 @@
  * Definition of ViewsPagerTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the pluggable pager system.
  */
 class ViewsPagerTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Pager',
-      'description' => 'Test the pluggable pager system',
-      'group' => 'Views Plugins',
-    );
-  }
-
   public function setUp() {
     parent::setUp('views', 'views_ui', 'views_test');
   }

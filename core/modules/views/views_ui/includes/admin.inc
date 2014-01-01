@@ -331,10 +331,18 @@ function _views_ui_get_operations(view $view) {
       'query' => array('token' => drupal_get_token($view->name)),
     );
   }
-  $links['delete'] = array(
-    'title' => t('Delete'),
-    'href' => 'admin/structure/views/view/' . $view->name . '/delete',
-  );
+  if ($view->storage == VIEWS_STORAGE_NORMAL) {
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/views/view/' . $view->name . '/delete',
+    );
+  }
+  elseif ($view->storage == VIEWS_STORAGE_OVERRIDE) {
+    $links['revert'] = array(
+      'title' => t('Revert'),
+      'href' => 'admin/structure/views/view/' . $view->name . '/revert',
+    );
+  }
   return $links;
 }
 
@@ -1285,7 +1293,7 @@ function views_ui_render_display_top($view, $display_id) {
   // Let other modules add additional links here.
   drupal_alter('views_ui_display_top_links', $element['extra_actions']['#links'], $view, $display_id);
 
-  if (isset($view->type) && $view->type != t('Default')) {
+  if (isset($view->storage) && $view->storage != VIEWS_STORAGE_DEFAULT) {
     if ($view->type == t('Overridden')) {
       $element['extra_actions']['#links']['revert'] = array(
         'title' => t('revert view'),
@@ -2025,6 +2033,27 @@ function views_ui_delete_form_submit($form, &$form_state) {
   $form_state['view']->delete();
   $form_state['redirect'] = 'admin/structure/views';
   drupal_set_message(t('The view %name has been deleted.', array('%name' => $name)));
+}
+
+/**
+ * Form callback; Delete a view.
+ */
+function views_ui_revert_form($form, &$form_state, view $view) {
+  $form_state['view'] = $view;
+  $question = t('Revert the view @name?', array('@name' => $view->get_human_name()));
+  $path = 'admin/structure/views';
+  $description = t('Reverting the view %name will restore it to the original settings provided by the "@module" module.', array('%name' => $view->get_human_name(), '@module' => $view->module));
+  return confirm_form($form, $question, $path, $description, t('Revert'));
+}
+
+/**
+ * Submit handler for views_ui_delete_form().
+ */
+function views_ui_revert_form_submit($form, &$form_state) {
+  $name = $form_state['view']->get_human_name();
+  $form_state['view']->revert();
+  $form_state['redirect'] = 'admin/structure/views';
+  drupal_set_message(t('The view %name has been reverted to its defaults.', array('%name' => $name)));
 }
 
 /**

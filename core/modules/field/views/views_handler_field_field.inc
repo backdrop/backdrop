@@ -729,7 +729,7 @@ class views_handler_field_field extends views_handler_field {
 
       // Now, transfer the data back into the resultset so it can be easily used.
       foreach ($values as $row_id => &$value) {
-        $value->{'field_' . $this->options['id']} = $this->view->set_items($value, $row_id);
+        $value->{'field_' . $this->options['id']} = $this->set_items($value, $row_id);
       }
     }
   }

@@ -5,6 +5,8 @@
  * Definition of ViewsPluginStyleTestBase.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Provides a base foundation for testing style plugins.
  */

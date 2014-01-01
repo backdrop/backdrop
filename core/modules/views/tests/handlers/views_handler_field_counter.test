@@ -5,18 +5,12 @@
  * Definition of ViewsHandlerFilterCounterTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests the views_handler_field_counter handler.
  */
 class ViewsHandlerFilterCounterTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Field: Counter',
-      'description' => 'Tests the views_handler_field_counter handler.',
-      'group' => 'Views Handlers',
-    );
-  }
-
   function testSimple() {
     $view = $this->getBasicView();
     $view->display['default']->handler->override_option('fields', array(

@@ -5,18 +5,12 @@
  * Definition of ViewsModuleTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Tests basic functions from the Views module.
  */
 class ViewsModuleTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Tests views.module',
-      'description' => 'Tests some basic functions of views.module',
-      'group' => 'Views',
-    );
-  }
-
   public function setUp() {
     parent::setUp();
     drupal_theme_rebuild();
@@ -90,6 +84,10 @@ class ViewsModuleTest extends ViewsSqlTest {
    * Tests the dynamic includes of templates via module feature.
    */
   function testModuleTemplates() {
+    $view = views_get_view('frontpage');
+    $view->disabled = FALSE;
+    $view->save();
+
     $existing = array();
     $type = array();
     $theme = array();
@@ -162,9 +160,9 @@ class ViewsModuleTest extends ViewsSqlTest {
     // This should have triggered a views data rebuild, and written a cache
     // entry for all tables and the requested table but no other tables.
     $this->assertEqual(variable_get('views_test_views_data_count', 0), 1, 'Views data rebuilt once');
-    $this->assertTrue(cache_get('views_data:en', 'cache_views'), 'Cache for all tables written.');
-    $this->assertTrue(cache_get('views_data:views_test:en', 'cache_views'), 'Cache for requested table written.');
-    $this->assertFalse(cache_get('views_data:views_test_previous:en', 'cache_views'), 'No Cache written for not requested table.');
+    $this->assertTrue(cache('views')->get('views_data:en'), 'Cache for all tables written.');
+    $this->assertTrue(cache('views')->get('views_data:views_test:en'), 'Cache for requested table written.');
+    $this->assertFalse(cache('views')->get('views_data:views_test_previous:en'), 'No Cache written for not requested table.');
     $this->assertTrue(drupal_static('_views_fetch_data_fully_loaded'), 'Views data is fully loaded');
 
     $this->resetStaticViewsDataCache();

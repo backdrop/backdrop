@@ -57,3 +57,15 @@ name = Field attach tests (storage-related)
 description = Test storage-related Field Attach API functions.
 group = Field API
 file = tests/field.test
+
+[FieldViewsDataTest]
+name = Fieldapi: Views Data
+description = Tests the Field API Views data.
+group = Field API
+file = tests/field/field_views.test
+
+[FieldViewsFieldTest]
+name = Fieldapi: Field handler
+description = Tests the Views field of the Field API integration.
+group = Field API
+file = tests/field/field_views.test

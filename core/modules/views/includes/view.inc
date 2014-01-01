@@ -85,6 +85,25 @@ class view {
    */
   var $type;
 
+  /**
+   * The module that originally provided this view (if any).
+   *
+   * @var string
+   */
+  var $module;
+
+  /**
+   * The storage state of the view.
+   *
+   * This is the machine-version of the $type variable, which represents whether
+   * this view is has a default, user-created, or overridden configuration.
+   * Possible values for this variable include the constants
+   * VIEWS_STORAGE_NORMAL, VIEWS_STORAGE_OVERRIDE, or VIEWS_STORAGE_DEFAULT.
+   *
+   * @var int
+   */
+  var $storage;
+
   // State variables
   var $built = FALSE;
   var $executed = FALSE;
@@ -267,10 +286,19 @@ class view {
       }
       // Set the view "type".
       if (isset($view_data['module'])) {
-        $this->type = empty($view_data['storage']) || $view_data['storage'] == VIEWS_STORAGE_DEFAULT ? t('Default') : t('Overridden');
+        $this->module = $view_data['module'];
+        if (empty($view_data['storage']) || $view_data['storage'] == VIEWS_STORAGE_DEFAULT) {
+          $this->type = t('Default');
+          $this->storage = VIEWS_STORAGE_DEFAULT;
+        }
+        else {
+          $this->type = t('Overridden');
+          $this->storage = VIEWS_STORAGE_OVERRIDE;
+        }
       }
       else {
         $this->type = t('Normal');
+        $this->storage = VIEWS_STORAGE_NORMAL;
       }
 
       // Convert all stored displays into display objects.
@@ -1764,6 +1792,14 @@ class view {
     $config_data = array(
       'name' => $this->name,
       'description' => $this->description,
+    );
+    // Storage settings are only saved if this view was provided by a module.
+    // Otherwise VIEWS_STORAGE_NORMAL is assumed on load.
+    if ($this->module) {
+      $config_data['module'] = $this->module;
+      $config_data['storage'] = VIEWS_STORAGE_OVERRIDE;
+    }
+    $config_data += array(
       'tag' => $this->tag,
       'disabled' => (boolean) $this->disabled,
       'base_table' => $this->base_table,
@@ -1790,6 +1826,19 @@ class view {
    */
   function delete($clear = TRUE) {
     config('views.view.' . $this->name)->delete();
+    cache('views')->deletePrefix('views_query:' . $this->name);
+
+    if ($clear) {
+      // Clear caches.
+      views_invalidate_cache();
+    }
+  }
+
+  /**
+   * Revert the view based on its module-provided default version (if any).
+   */
+  function revert($clear = TRUE) {
+    config_install_default_config($this->module, 'views.view.' . $this->name);
     cache('views')->deletePrefix('views_query:' . $this->name);
 
     if ($clear) {

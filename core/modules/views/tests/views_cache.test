@@ -5,20 +5,14 @@
  * Definition of ViewsCacheTest.
  */
 
+require_once DRUPAL_ROOT . '/core/modules/views/tests/views_query.test';
+
 /**
  * Basic test for pluggable caching.
  *
  * @see views_plugin_cache
  */
 class ViewsCacheTest extends ViewsSqlTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Cache',
-      'description' => 'Tests pluggable caching for views.',
-      'group' => 'Views Plugins'
-    );
-  }
-
   /**
    * Build and return a basic view of the views_test table.
    *
