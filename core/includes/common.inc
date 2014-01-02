@@ -636,20 +636,23 @@ function drupal_encode_path($path) {
  * callback.
  *
  * @param $path
- *   A Drupal path or a full URL.
+ *   (optional) A Drupal path or a full URL, which will be passed to url() to
+ *   compute the redirect for the URL.
  * @param $options
- *   An associative array of additional URL options to pass to url().
+ *   (optional) An associative array of additional URL options to pass to url().
  * @param $http_response_code
- *   Valid values for an actual "goto" as per RFC 2616 section 10.3 are:
- *   - 301 Moved Permanently (the recommended value for most redirects)
- *   - 302 Found (default in Drupal and PHP, sometimes used for spamming search
- *         engines)
- *   - 303 See Other
- *   - 304 Not Modified
- *   - 305 Use Proxy
- *   - 307 Temporary Redirect (alternative to "503 Site Down for Maintenance")
- *   Note: Other values are defined by RFC 2616, but are rarely used and poorly
- *   supported.
+ *   (optional) The HTTP status code to use for the redirection, defaults to
+ *   302. The valid values for 3xx redirection status codes are defined in
+ *   @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3 RFC 2616 @endlink
+ *   and the
+ *   @link http://tools.ietf.org/html/draft-reschke-http-status-308-07 draft for the new HTTP status codes: @endlink
+ *   - 301: Moved Permanently (the recommended value for most redirects).
+ *   - 302: Found (default in Drupal and PHP, sometimes used for spamming search
+ *     engines).
+ *   - 303: See Other.
+ *   - 304: Not Modified.
+ *   - 305: Use Proxy.
+ *   - 307: Temporary Redirect.
  *
  * @see drupal_get_destination()
  * @see url()
@@ -2020,8 +2023,9 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  * alternative than url().
  *
  * @param $path
- *   The internal path or external URL being linked to, such as "node/34" or
- *   "http://example.com/foo". A few notes:
+ *   (optional) The internal path or external URL being linked to, such as
+ *   "node/34" or "http://example.com/foo". The default value is equivalent to
+ *   passing in '<front>'. A few notes:
  *   - If you provide a full URL, it will be considered an external URL.
  *   - If you provide only the path (e.g. "node/34"), it will be
  *     considered an internal link. In this case, it should be a system URL,
@@ -2037,7 +2041,8 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     include them in $path, or use $options['query'] to let this function
  *     URL encode them.
  * @param $options
- *   An associative array of additional options, with the following elements:
+ *   (optional) An associative array of additional options, with the following
+ *   elements:
  *   - 'query': An array of query key/value-pairs (without any URL-encoding) to
  *     append to the URL.
  *   - 'fragment': A fragment identifier (named anchor) to append to the URL.
@@ -5837,8 +5842,9 @@ function drupal_render_page($page) {
  * any children, it is the responsibility of the theme function to render
  * these children. For elements that are not allowed to have any children,
  * e.g. buttons or textfields, the theme function can be used to render the
- * element itself. If #theme is not present and the element has children, they
- * are rendered and concatenated into a string by drupal_render_children().
+ * element itself. If #theme is not present and the element has children, each
+ * child is itself rendered by a call to drupal_render(), and the results are
+ * concatenated.
  *
  * The #theme_wrappers property contains an array of theme functions which will
  * be called, in order, after #theme has run. These can be used to add further
