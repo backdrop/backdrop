@@ -624,7 +624,8 @@ function field_info_fields() {
  * @return
  *   The field array, as returned by field_read_fields(), with an
  *   additional element 'bundles', whose value is an array of all the bundles
- *   this field belongs to keyed by entity type.
+ *   this field belongs to keyed by entity type. NULL if the field was not
+ *   found.
  *
  * @see field_info_field_by_id()
  */
@@ -712,6 +713,10 @@ function field_info_instances($entity_type = NULL, $bundle_name = NULL) {
  *   The field name for the instance.
  * @param $bundle_name
  *   The bundle name for the instance.
+ *
+ * @return
+ *   An associative array of instance data for the specific field and bundle;
+ *   NULL if the instance does not exist.
  */
 function field_info_instance($entity_type, $field_name, $bundle_name) {
   $info = _field_info_collate_fields();

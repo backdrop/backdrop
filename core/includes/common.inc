@@ -493,6 +493,12 @@ function drupal_http_build_query(array $query, $parent = '') {
  * previous request, that destination is returned. As such, a destination can
  * persist across multiple pages.
  *
+ * @return
+ *   An associative array containing the key:
+ *   - destination: The path provided via the destination query string or, if
+ *     not available, the current path.
+ *
+ * @see current_path()
  * @see drupal_goto()
  */
 function drupal_get_destination() {
@@ -1701,7 +1707,7 @@ function format_xml_elements($array) {
  *   $output = format_plural($update_count,
  *     'Changed the content type of 1 post from %old-type to %new-type.',
  *     'Changed the content type of @count posts from %old-type to %new-type.',
- *     array('%old-type' => $info->old_type, '%new-type' => $info->new_type)));
+ *     array('%old-type' => $info->old_type, '%new-type' => $info->new_type));
  * @endcode
  *
  * @param $count
@@ -3900,7 +3906,8 @@ function drupal_region_class($region) {
  * actually needed.
  *
  * @param $data
- *   (optional) If given, the value depends on the $options parameter:
+ *   (optional) If given, the value depends on the $options parameter, or
+ *   $options['type'] if $options is passed as an associative array:
  *   - 'file': Path to the file relative to base_path().
  *   - 'inline': The JavaScript code that should be placed in the given scope.
  *   - 'external': The absolute path to an external JavaScript file that is not
@@ -5146,6 +5153,11 @@ function drupal_get_private_key() {
  *
  * @param $value
  *   An additional value to base the token on.
+ *
+ * @return string
+ *   A 43-character URL-safe token for validation, based on the user session ID,
+ *   the global $drupal_hash_salt variable from settings.php, and the
+ *   'drupal_private_key' configuration variable.
  */
 function drupal_get_token($value = '') {
   return drupal_hmac_base64($value, session_id() . drupal_get_private_key() . drupal_get_hash_salt());
