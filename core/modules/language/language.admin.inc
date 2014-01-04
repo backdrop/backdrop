@@ -57,20 +57,21 @@ function language_admin_overview_form($form, &$form_state) {
         'class' => array('language-order-weight'),
       ),
     );
+    $links = array();
+    $links['edit'] = array(
+      'title' => t('Edit'),
+      'href' => 'admin/config/regional/language/edit/' . $langcode,
+    );
+    if ($langcode != $default->langcode) {
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/config/regional/language/delete/' . $langcode,
+      );
+    }
     $form['languages'][$langcode]['operations'] = array(
-      '#theme_wrappers' => array('language_admin_operations'),
+      '#type' => 'operations',
+      '#links' => $links,
       '#weight' => 100,
-    );
-    $form['languages'][$langcode]['operations']['edit'] = array(
-      '#type' => 'link',
-      '#title' => t('edit'),
-      '#href' => 'admin/config/regional/language/edit/' . $langcode,
-    );
-    $form['languages'][$langcode]['operations']['delete'] = array(
-      '#type' => 'link',
-      '#title' => t('delete'),
-      '#href' => 'admin/config/regional/language/delete/' . $langcode,
-      '#access' => $langcode != $default->langcode,
     );
   }
 
@@ -81,30 +82,6 @@ function language_admin_overview_form($form, &$form_state) {
   );
 
   return $form;
-}
-
-/**
- * Returns HTML for operation links in language_admin_overview_form() table.
- *
- * @todo Introduce #type '[table_]operations' or just simply #type 'links'.
- */
-function theme_language_admin_operations($variables) {
-  $links = array();
-  foreach (element_children($variables['elements']) as $key) {
-    // Children are only rendered if the current user has access.
-    if (isset($variables['elements'][$key]['#children'])) {
-      $links[$key] = $variables['elements'][$key]['#children'];
-    }
-  }
-  // If there are links, render a link list.
-  if (!empty($links)) {
-    return theme('item_list__operations', array(
-      'items' => $links,
-      'attributes' => array('class' => array('links', 'inline')),
-    ));
-  }
-  // Otherwise, ensure to produce no output.
-  return '';
 }
 
 /**

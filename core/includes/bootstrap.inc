@@ -763,7 +763,7 @@ function drupal_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export the following settings.php variables to the global namespace
-  global $databases, $cookie_domain, $conf, $installed_profile, $update_free_access, $db_url, $db_prefix, $drupal_hash_salt, $is_https, $base_secure_url, $base_insecure_url;
+  global $databases, $cookie_domain, $conf, $installed_profile, $update_free_access, $db_url, $db_prefix, $drupal_hash_salt, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
   $conf = array();
 
   if (file_exists(DRUPAL_ROOT . '/' . conf_path() . '/settings.php')) {
@@ -1340,7 +1340,7 @@ function drupal_page_header() {
  */
 function drupal_serve_page_from_cache(stdClass $cache) {
   // Negotiate whether to use compression.
-  $page_compression = variable_get('page_compression', TRUE) && extension_loaded('zlib');
+  $page_compression = config_get('system.performance', 'page_compression') && extension_loaded('zlib');
   $return_compressed = $page_compression && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE;
 
   // Get headers set in hook_boot(). Keys are lower-case.
@@ -1366,7 +1366,7 @@ function drupal_serve_page_from_cache(stdClass $cache) {
   // max-age > 0, allowing the page to be cached by external proxies, when a
   // session cookie is present unless the Vary header has been replaced or
   // unset in hook_boot().
-  $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? variable_get('page_cache_maximum_age', 0) : 0;
+  $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? config_get('system.performance', 'page_cache_maximum_age') : 0;
   $default_headers['Cache-Control'] = 'public, max-age=' . $max_age;
 
   // Entity tag should change if the output changes.
@@ -2257,6 +2257,17 @@ function _drupal_bootstrap_configuration() {
   timer_start('page');
   // Initialize the configuration, including variables from settings.php.
   drupal_settings_initialize();
+
+  // Load configuration classes and functions.
+  require_once DRUPAL_ROOT . '/core/includes/config.inc';
+
+  // Redirect the user to the installation script if Drupal has not been
+  // installed yet (i.e., if no $databases array has been defined in the
+  // settings.php file) and we are not already installing.
+  if (empty($GLOBALS['databases']) && !drupal_installation_attempted()) {
+    include_once DRUPAL_ROOT . '/core/includes/install.inc';
+    install_goto('core/install.php');
+  }
 }
 
 /**
@@ -2277,7 +2288,7 @@ function _drupal_bootstrap_page_cache() {
   }
   else {
     drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES, FALSE);
-    $cache_enabled = variable_get('cache');
+    $cache_enabled = config_get('system.performance', 'cache');
   }
   // If there is no session cookie and cache is enabled (or forced), try
   // to serve a cached page.
@@ -2318,14 +2329,6 @@ function _drupal_bootstrap_page_cache() {
  * Initializes the database system and registers autoload functions.
  */
 function _drupal_bootstrap_database() {
-  // Redirect the user to the installation script if Drupal has not been
-  // installed yet (i.e., if no $databases array has been defined in the
-  // settings.php file) and we are not already installing.
-  if (empty($GLOBALS['databases']) && !drupal_installation_attempted()) {
-    include_once DRUPAL_ROOT . '/core/includes/install.inc';
-    install_goto('core/install.php');
-  }
-
   // The user agent header is used to pass a database prefix in the request when
   // running tests. However, for security reasons, it is imperative that we
   // validate we ourselves made the request.

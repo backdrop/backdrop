@@ -23,87 +23,6 @@ function image_uninstall() {
 }
 
 /**
- * Implements hook_schema().
- */
-function image_schema() {
-  $schema = array();
-
-  $schema['image_styles'] = array(
-    'description' => 'Stores configuration options for image styles.',
-    'fields' => array(
-      'isid' => array(
-        'description' => 'The primary identifier for an image style.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'name' => array(
-        'description' => 'The style name.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('isid'),
-    'unique keys' => array(
-      'name' => array('name'),
-    ),
-  );
-
-  $schema['image_effects'] = array(
-    'description' => 'Stores configuration options for image effects.',
-    'fields' => array(
-      'ieid' => array(
-        'description' => 'The primary identifier for an image effect.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'isid' => array(
-        'description' => 'The {image_styles}.isid for an image style.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'weight' => array(
-        'description' => 'The weight of the effect in the style.',
-        'type' => 'int',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'name' => array(
-        'description' => 'The unique name of the effect to be executed.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'data' => array(
-        'description' => 'The configuration data for the effect.',
-        'type' => 'blob',
-        'not null' => TRUE,
-        'size' => 'big',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('ieid'),
-    'indexes' => array(
-      'isid' => array('isid'),
-      'weight' => array('weight'),
-    ),
-    'foreign keys' => array(
-      'image_style' => array(
-        'table' => 'image_styles',
-        'columns' => array('isid' => 'isid'),
-      ),
-    ),
-  );
-
-  return $schema;
-}
-
-/**
  * Implements hook_field_schema().
  */
 function image_field_schema($field) {
@@ -187,3 +106,63 @@ function image_requirements($phase) {
 
   return $requirements;
 }
+
+/**
+ * @addtogroup updates-7.x-to-8.x
+ * @{
+ */
+
+/**
+ * Provide default image styles for the Image module.
+ */
+function image_update_8000() {
+  config_install_default_config('image');
+}
+
+/**
+ * Convert available database image styles to configuration files.
+ */
+function image_update_8001() {
+  if (db_table_exists('image_styles')) {
+    $styles = db_query("SELECT * FROM {image_styles}");
+    $style = NULL;
+    foreach ($styles as $style) {
+      $style = (array) $style;
+      $style['effects'] = array();
+      if (!isset($style['label'])) {
+        $style['label'] = $style['name'];
+      }
+      $effects = db_query("SELECT * FROM {image_effects} WHERE isid = :isid ORDER BY weight ASC, ieid ASC", array(':isid' => $style['isid']));
+      foreach ($effects as $effect) {
+        $effect = (array) $effect;
+        $effect['data'] = unserialize($effect['data']);
+        unset($effect['isid']);
+        unset($effect['ieid']);
+        $style['effects'][] = $effect;
+      }
+      unset($style['isid']);
+      $config = config('image.styles.' . $style['name']);
+      $config->setData($style);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Drop image tables that were converted to configuration files.
+ *
+ * This update is separate from image_update_8001 so that other modules may read
+ * the image style tables before they are dropped using
+ * hook_update_dependencies() to come between these two updates.
+ */
+function image_update_8002() {
+  if (db_table_exists('image_styles')) {
+    db_drop_table('image_styles');
+    db_drop_table('image_effects');
+  }
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-8.x"
+ * The next series of updates should start at 9000.
+ */

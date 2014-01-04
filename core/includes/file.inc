@@ -303,6 +303,10 @@ function file_stream_wrapper_uri_normalize($uri) {
  */
 function file_stream_wrapper_get_instance_by_uri($uri) {
   $scheme = file_uri_scheme($uri);
+  if (!$scheme || !file_stream_wrapper_valid_scheme($scheme)) {
+    return FALSE;
+  }
+
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
     $instance = new $class();
@@ -429,7 +433,8 @@ function file_create_url($uri) {
  *   otherwise.
  */
 function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
-  if (!file_stream_wrapper_valid_scheme(file_uri_scheme($directory))) {
+  $scheme = file_uri_scheme($directory);
+  if (!$scheme || !file_stream_wrapper_valid_scheme($scheme)) {
     // Only trim if we're not dealing with a stream.
     $directory = rtrim($directory, '/\\');
   }

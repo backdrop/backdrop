@@ -1477,3 +1477,16 @@ div.admin-panel .description {
   border-top: 1px solid #d6d6d6;
   margin: 0;
 }
+
+/* ---------- Dropbutton ----------- */
+.js .dropbutton-widget {
+  background-color: white;
+  border-radius: 5px;
+}
+.js .dropbutton-widget:hover {
+  background-color: #f8f8f8;
+  border-color: #b8b8b8;
+}
+.js .dropbutton-multiple.open .dropbutton-widget:hover {
+  background-color: white;
+}

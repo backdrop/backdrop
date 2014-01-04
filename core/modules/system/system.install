@@ -1643,6 +1643,21 @@ function system_update_8002() {
 }
 
 /**
+ * Convert performance module settings to use configuration files.
+ */
+function system_update_8003() {
+  config_install_default_config('system', 'system.performance');
+  $config = config('system.performance');
+  $config->set('cache', variable_get('cache', 0));
+  $config->set('cache_lifetime', variable_get('cache_lifetime', '0'));
+  $config->set('page_cache_maximum_age', variable_get('page_cache_maximum_age', '0'));
+  $config->set('page_compression', variable_get('page_compression', 1));
+  $config->set('preprocess_css', variable_get('preprocess_css', 0));
+  $config->set('preprocess_js', variable_get('preprocess_js', 0));
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-8.x"
  * The next series of updates should start at 9000.
  */

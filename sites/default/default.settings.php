@@ -203,6 +203,28 @@
 $databases = array();
 
 /**
+ * Location of the site configuration files.
+ *
+ * By default, Backdrop configuration files are stored in a randomly named
+ * directory under the default public files path. On install the
+ * named directory is created in the default files directory. For enhanced
+ * security, you may set this variable to a location outside your docroot.
+ *
+ * Example:
+ * @code
+  *  $config_directories['active'] = array(
+  *    'path' => '/some/directory/outside/webroot',
+  *    'absolute' => TRUE,
+  *  );
+ *   $config_directories['staging'] => array(
+ *     'path' => '/another/directory/outside/webroot',
+ *     'absolute' => TRUE,
+ *   );
+ * @endcode
+ */
+$config_directories = array();
+
+/**
  * Access control for update.php script.
  *
  * If you are updating your Drupal installation using the update.php script but

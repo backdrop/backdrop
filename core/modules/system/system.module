@@ -437,6 +437,14 @@ function system_element_info() {
     '#default_tab' => '',
     '#process' => array('form_process_vertical_tabs'),
   );
+  $types['dropbutton'] = array(
+    '#pre_render' => array('drupal_pre_render_dropbutton'),
+    '#theme' => 'links__dropbutton',
+  );
+  $types['operations'] = array(
+    '#pre_render' => array('drupal_pre_render_dropbutton'),
+    '#theme' => 'links__dropbutton__operations',
+  );
 
   $types['container'] = array(
     '#theme_wrappers' => array('container'),
@@ -1124,6 +1132,23 @@ function system_library_info() {
     ),
     'dependencies' => array(
       array('system', 'jquery.cookie'),
+    ),
+  );
+
+  // Dropbutton.
+  $libraries['drupal.dropbutton'] = array(
+    'title' => 'Dropbutton',
+    'website' => 'http://drupal.org/node/1608878',
+    'version' => '1.0',
+    'js' => array(
+      'core/misc/dropbutton.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/dropbutton.css' => array(),
+      'core/misc/dropbutton.theme.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.once'),
     ),
   );
 
@@ -3795,6 +3820,17 @@ function system_archiver_info() {
     );
   }
   return $archivers;
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function system_config_info() {
+  $prefixes['system.performance'] = array(
+    'label' => t('System performance'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
 
 /**

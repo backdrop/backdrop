@@ -64,7 +64,7 @@ class LanguageUpgradePathTestCase extends UpgradePathTestCase {
     $this->assertRaw('<td><strong>English</strong> (source)</td>', 'English is the source node of the translation.');
     $this->assertRaw('<td>Chuvash</td>', 'There is a Chuvash translation of the node.');
     $this->assertLinkByHref("node/$translation_nid", 0, 'The translation table links to the Chuvash translation.');
-    $this->assertRaw('<td>Catalan</td><td>n/a</td><td>Not translated</td>', 'There is no Catalan translation of this node.');
+    $this->assertRaw('<td>Catalan</td><td>N/A</td><td>Not translated</td>', 'There is no Catalan translation of this node.');
 
     // Check for node content type settings upgrade.
     $this->drupalGet('node/add/article');

@@ -220,7 +220,7 @@ class LocaleTranslationFunctionalTest extends DrupalWebTestCase {
     $this->assertText($name, t('Search found the name.'));
     $this->assertRaw($language_indicator, t('Name is untranslated.'));
     // Assume this is the only result, given the random name.
-    $this->clickLink(t('edit'));
+    $this->clickLink(t('Edit'));
     // We save the lid from the path.
     $matches = array();
     preg_match('!admin/config/regional/translate/edit/(\d+)!', $this->getUrl(), $matches);
@@ -240,7 +240,7 @@ class LocaleTranslationFunctionalTest extends DrupalWebTestCase {
     $this->assertText($name, t('Search found the name.'));
     $this->assertRaw($language_indicator, t('Name is untranslated.'));
     // Assume this is the only result, given the random name.
-    $this->clickLink(t('edit'));
+    $this->clickLink(t('Edit'));
     $string_edit_url = $this->getUrl();
     $edit = array(
       "translations[$langcode]" => $translation,
@@ -295,7 +295,7 @@ class LocaleTranslationFunctionalTest extends DrupalWebTestCase {
     );
     $this->drupalPost('admin/config/regional/translate/translate', $search, t('Filter'));
     // Assume this is the only result, given the random name.
-    $this->clickLink(t('delete'));
+    $this->clickLink(t('Delete'));
     $this->assertText(t('Are you sure you want to delete the string'), t('"delete" link is correct.'));
     // Delete the string.
     $path = 'admin/config/regional/translate/delete/' . $lid;
@@ -491,7 +491,7 @@ class LocaleTranslationFunctionalTest extends DrupalWebTestCase {
 
     // Add translation.
     // Assume this is the only result, given the random name.
-    $this->clickLink(t('edit'));
+    $this->clickLink(t('Edit'));
     // We save the lid from the path.
     $matches = array();
     preg_match('!admin/config/regional/translate/edit/(\d)+!', $this->getUrl(), $matches);
@@ -2079,7 +2079,7 @@ class LocaleUILanguageNegotiationTest extends DrupalWebTestCase {
     $edit = array( 'string' => $default_string);
     $this->drupalPost('admin/config/regional/translate/translate', $edit, t('Filter'));
     // Should find the string and now click edit to post translated string.
-    $this->clickLink('edit');
+    $this->clickLink('Edit');
     $edit = array(
       "translations[$langcode_browser_fallback]" => $language_browser_fallback_string,
       "translations[$langcode]" => $language_string,
