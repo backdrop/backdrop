@@ -1386,8 +1386,8 @@ function hook_forms($form_id, $args) {
  * used to set up global parameters that are needed later in the request.
  *
  * Only use this hook if your code must run even for cached page views. This
- * hook is called before modules or most include files are loaded into memory.
- * It happens while Drupal is still in bootstrap mode.
+ * hook is called before the theme, modules, or most include files are loaded
+ * into memory. It happens while Drupal is still in bootstrap mode.
  *
  * @see hook_init()
  */
@@ -1402,7 +1402,8 @@ function hook_boot() {
  *
  * This hook is run at the beginning of the page request. It is typically
  * used to set up global parameters that are needed later in the request.
- * When this hook is called, all modules are already loaded in memory.
+ * When this hook is called, the theme and all modules are already loaded in
+ * memory.
  *
  * This hook is not run on cached pages.
  *
@@ -1821,7 +1822,8 @@ function hook_theme_registry_alter(&$theme_registry) {
  * @return
  *   The machine-readable name of the theme that should be used for the current
  *   page request. The value returned from this function will only have an
- *   effect if it corresponds to a currently-active theme on the site.
+ *   effect if it corresponds to a currently-active theme on the site. Do not 
+ *   return a value if you do not wish to set a custom theme.
  */
 function hook_custom_theme() {
   // Allow the user to request a particular theme via a query parameter.
@@ -2481,8 +2483,9 @@ function hook_file_url_alter(&$uri) {
  *     status report page.
  *
  * @return
- *   A keyed array of requirements. Each requirement is itself an array with
- *   the following items:
+ *   An associative array where the keys are arbitrary but must be unique (it
+ *   is suggested to use the module short name as a prefix) and the values are
+ *   themselves associative arrays with the following elements:
  *   - title: The name of the requirement.
  *   - value: The current value (e.g., version, time, level, etc). During
  *     install phase, this should only be used for version numbers, do not set
@@ -2636,6 +2639,8 @@ function hook_schema() {
  *
  * @param $schema
  *   Nested array describing the schemas for all modules.
+ *
+ * @ingroup schemaapi
  */
 function hook_schema_alter(&$schema) {
   // Add field to existing schema.
