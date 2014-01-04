@@ -1252,10 +1252,11 @@ function _drupal_set_preferred_header_name($name = NULL) {
  * Headers are set in drupal_add_http_header(). Default headers are not set
  * if they have been replaced or unset using drupal_add_http_header().
  *
- * @param $default_headers
- *   An array of headers as name/value pairs.
- * @param $single
- *   If TRUE and headers have already be sent, send only the specified header.
+ * @param array $default_headers
+ *   (optional) An array of headers as name/value pairs.
+ * @param bool $only_default
+ *   (optional) If TRUE and headers have already been sent, send only the
+ *   specified headers.
  */
 function drupal_send_headers($default_headers = array(), $only_default = FALSE) {
   $headers_sent = &drupal_static(__FUNCTION__, FALSE);
@@ -1788,22 +1789,37 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 }
 
 /**
- * Sets a message which reflects the status of the performed operation.
+ * Sets a message to display to the user.
  *
- * If the function is called with no arguments, this function returns all set
- * messages without clearing them.
+ * Messages are stored in a session variable and displayed in page.tpl.php via
+ * the $messages theme variable.
  *
- * @param $message
- *   The message to be displayed to the user. For consistency with other
- *   messages, it should begin with a capital letter and end with a period.
- * @param $type
- *   The type of the message. One of the following values are possible:
+ * Example usage:
+ * @code
+ * drupal_set_message(t('An error occurred and processing did not complete.'), 'error');
+ * @endcode
+ *
+ * @param string $message
+ *   (optional) The translated message to be displayed to the user. For
+ *   consistency with other messages, it should begin with a capital letter and
+ *   end with a period.
+ * @param string $type
+ *   (optional) The message's type. Defaults to 'status'. These values are
+ *   supported:
  *   - 'status'
  *   - 'warning'
  *   - 'error'
- * @param $repeat
- *   If this is FALSE and the message is already set, then the message won't
- *   be repeated.
+ * @param bool $repeat
+ *   (optional) If this is FALSE and the message is already set, then the
+ *   message won't be repeated. Defaults to TRUE.
+ *
+ * @return array|null
+ *   A multidimensional array with keys corresponding to the set message types.
+ *   The indexed array values of each contain the set messages for that type.
+ *   Or, if there are no messages set, the function returns NULL.
+ *
+ * @see drupal_get_messages()
+ * @see theme_status_messages()
  */
 function drupal_set_message($message = NULL, $type = 'status', $repeat = TRUE) {
   if ($message) {
@@ -1824,18 +1840,29 @@ function drupal_set_message($message = NULL, $type = 'status', $repeat = TRUE) {
 }
 
 /**
- * Returns all messages that have been set.
+ * Returns all messages that have been set with drupal_set_message().
  *
- * @param $type
- *   (optional) Only return messages of this type.
- * @param $clear_queue
- *   (optional) Set to FALSE if you do not want to clear the messages queue
+ * @param string $type
+ *   (optional) Limit the messages returned by type. Defaults to NULL, meaning
+ *   all types. These values are supported:
+ *   - NULL
+ *   - 'status'
+ *   - 'warning'
+ *   - 'error'
+ * @param bool $clear_queue
+ *   (optional) If this is TRUE, the queue will be cleared of messages of the
+ *   type specified in the $type parameter. Otherwise the queue will be left
+ *   intact. Defaults to TRUE.
  *
- * @return
- *   An associative array, the key is the message type, the value an array
- *   of messages. If the $type parameter is passed, you get only that type,
- *   or an empty array if there are no such messages. If $type is not passed,
- *   all message types are returned, or an empty array if none exist.
+ * @return array
+ *   A multidimensional array with keys corresponding to the set message types.
+ *   The indexed array values of each contain the set messages for that type.
+ *   The messages returned are limited to the type specified in the $type
+ *   parameter. If there are no messages of the specified type, an empty array
+ *   is returned.
+ *
+ * @see drupal_set_message()
+ * @see theme_status_messages()
  */
 function drupal_get_messages($type = NULL, $clear_queue = TRUE) {
   if ($messages = drupal_set_message()) {
