@@ -206,6 +206,16 @@ function image_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function image_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'image') . '/views',
+  );
+}
+
+/**
  * Implements hook_config_info().
  */
 function image_config_info() {

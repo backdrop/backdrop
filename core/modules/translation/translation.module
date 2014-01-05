@@ -80,6 +80,16 @@ function translation_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function translation_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'translation') . '/views',
+  );
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function translation_form_node_type_form_alter(&$form, &$form_state) {

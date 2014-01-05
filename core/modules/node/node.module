@@ -1525,6 +1525,16 @@ function node_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function node_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'node') . '/views',
+  );
+}
+
+/**
  * Gathers the rankings from the the hook_ranking implementations.
  *
  * @param $query

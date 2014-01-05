@@ -1,0 +1,188 @@
+<?php
+
+/**
+ * @file
+ * Contains install and update functions for Views.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function views_install() {
+  if (Database::getConnection()->databaseType() == 'pgsql') {
+    db_query('CREATE OR REPLACE FUNCTION first(anyelement, anyelement) RETURNS anyelement AS \'SELECT COALESCE($1, $2);\' LANGUAGE \'sql\';');
+    db_query("DROP AGGREGATE IF EXISTS first(anyelement)");
+    db_query("CREATE AGGREGATE first(sfunc = first, basetype = anyelement, stype = anyelement);");
+  }
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'views'");
+}
+
+/**
+ * Implements hook_schema().
+ */
+function views_schema() {
+  $schema['cache_views'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_views']['description'] = 'Cache table for Views to store loaded view configurations.';
+
+  $schema['cache_views_data'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_views_data']['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+  $schema['cache_views_data']['fields']['serialized']['default'] = 1;
+
+  // @todo: Replace with key value expire store.
+  // See https://github.com/backdrop/backdrop-issues/issues/136.
+  $schema['views_object_cache'] = array(
+    'description' => 'A special cache used to store objects that are being edited; it serves to save state in an ordinarily stateless environment.',
+    'fields' => array(
+      'sid' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'description' => 'The session ID this cache object belongs to.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '128',
+        'description' => 'The name of the view this cache is attached to.',
+      ),
+      'obj' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'description' => 'The name of the object this cache is attached to; this essentially represents the owner so that several sub-systems can use this cache.',
+      ),
+      'updated' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The time this cache was created or updated.',
+      ),
+      'data' => array(
+        'type' => 'blob',
+        'description' => 'Serialized data being stored.',
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('sid', 'obj', 'name'),
+    'indexes' => array(
+      'updated' => array('updated'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * @addtogroup updates-7.x-to-8.x
+ * @{
+ */
+
+/**
+ * Convert database-based views to configuration files.
+ */
+function views_update_8000() {
+  // Install default views.
+  config_install_default_config('views', 'views.view.comments_recent');
+  config_install_default_config('views', 'views.view.frontpage');
+  config_install_default_config('views', 'views.view.taxonomy_term');
+}
+
+/**
+ * Convert available database image styles to configuration files.
+ */
+function views_update_8001() {
+  if (db_table_exists('views_view')) {
+    $views = db_query("SELECT * FROM {views_view}");
+    foreach ($views as $view) {
+      $view = (array) $view;
+      $view['display'] = array();
+      if (empty($view['human_name'])) {
+        $view['human_name'] = $view['name'];
+      }
+      $displays = db_query("SELECT * FROM {views_display} WHERE vid = :vid ORDER BY position ASC", array(':vid' => $view['vid']));
+      foreach ($displays as $display) {
+        $display = (array) $display;
+        $display['display_options'] = unserialize($display['display_options']);
+        $id = $display['id'];
+        unset($display['id']);
+        unset($display['vid']);
+        unset($display['position']);
+        $view['display'][$id] = $display;
+      }
+      unset($view['vid']);
+      $config = config('views.view.' . $view['name']);
+      $config->setData($view);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Drop Views tables that were converted to configuration files.
+ *
+ * This update is separate from views_update_8001 so that other modules may read
+ * the views_view and views_display tables before they are dropped using
+ * hook_update_dependencies() to come between these two updates.
+ */
+function views_update_8002() {
+  if (db_table_exists('views_view')) {
+    db_drop_table('views_view');
+    db_drop_table('views_display');
+  }
+}
+
+/**
+ * Update Views variables to use configuration files.
+ */
+function views_update_8003() {
+  $update_variables = array(
+    'views_no_javascript' => FALSE,
+    'views_exposed_filter_any_label' => 'new_any',
+    'views_show_additional_queries' => FALSE,
+    'views_sql_signature' => FALSE,
+    'views_devel_output' => FALSE,
+    'views_devel_region' => 'footer',
+    'views_display_extenders' => array(),
+    'views_field_rewrite_elements' => array(
+      '' => t('- Use default -'),
+      '0' => t('- None -'),
+      'div' => 'DIV',
+      'span' => 'SPAN',
+      'h1' => 'H1',
+      'h2' => 'H2',
+      'h3' => 'H3',
+      'h4' => 'H4',
+      'h5' => 'H5',
+      'h6' => 'H6',
+      'p' => 'P',
+      'strong' => 'STRONG',
+      'em' => 'EM',
+    ),
+  );
+
+  // Update the main views module variables.
+  $config = config('views.settings');
+  $current_variables = db_select('variable')
+    ->fields('variable')
+    ->condition('name', array_keys($update_variables), 'IN')
+    ->execute()
+    ->fetchAllAssoc('name');
+  $current_variables = array_map('unserialize', $current_variables);
+  foreach ($update_variables as $name => $default) {
+    $name = str_replace('views_', '', $name);
+    $value = isset($current_variables[$name]) ? $current_variables[$name] : $default;
+    $config->set($name, $value);
+  }
+  $config->save();
+
+  // Delete the updated and unneeded variables.
+  $delete_variables = array_keys($update_variables);
+  $delete_variables[] = 'views_skip_cache';
+  db_delete('variable')
+    ->condition('name', $delete_variables, 'IN')
+    ->execute();
+}
+
+/**
+ * @} End of "addtogroup updates-7.x-to-8.x"
+ * The next series of updates should start at 9000.
+ */

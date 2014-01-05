@@ -96,6 +96,16 @@ function search_permission() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function search_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'search') . '/views',
+  );
+}
+
+/**
  * Implements hook_block_info().
  */
 function search_block_info() {

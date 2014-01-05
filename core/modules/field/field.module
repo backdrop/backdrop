@@ -293,6 +293,16 @@ function field_theme() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function field_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'field') . '/views',
+  );
+}
+
+/**
  * Implements hook_cron().
  */
 function field_cron() {
