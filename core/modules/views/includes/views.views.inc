@@ -99,6 +99,15 @@ function views_views_data() {
     ),
   );
 
+  $data['views']['dropbutton'] = array(
+    'title' => t('Dropbutton'),
+    'help' => t('Display fields in a dropbutton.'),
+    'field' => array(
+      'handler' => 'views_handler_field_dropbutton',
+      'label' => t('Operations'),
+    ),
+  );
+
   $data['views']['expression'] = array(
     'title' => t('Math expression'),
     'help' => t('Evaluates a mathematical expression and displays it.'),

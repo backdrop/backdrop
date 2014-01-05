@@ -76,6 +76,12 @@ description = Test the core views_handler_argument_string handler.
 group = Views Handlers
 file = tests/handlers/views_handler_argument_string.test
 
+[ViewsHandlerFieldDropbuttonTest]
+name = Field: Dropbutton
+description = Tests the dropbutton field handler for Views.
+group = Views Handlers
+file = tests/handlers/views_handler_field_dropbutton.test
+
 [ViewsHandlerFieldBooleanTest]
 name = Field: Boolean
 description = Test the core views_handler_field_boolean handler.
