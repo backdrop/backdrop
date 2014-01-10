@@ -406,6 +406,16 @@ function node_views_data() {
     ),
   );
 
+  $data['node']['bulk_form'] = array(
+    'title' => t('Bulk operations'),
+    'help' => t('Provides a checkbox on each row and a form for executing bulk actions.'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_field_bulk_form',
+      'click sortable' => FALSE,
+    ),
+  );
+
   // ----------------------------------------------------------------------
   // Content revision table
 
