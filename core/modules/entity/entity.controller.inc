@@ -523,14 +523,13 @@ class EntityDatabaseStorageController extends DrupalDefaultEntityController impl
         $return = drupal_write_record($this->entityInfo['base table'], $entity);
         // Reset general caches, but keep caches specific to certain entities.
         $this->resetCache(array());
-
-        $entity->enforceIsNew(FALSE);
         $this->postSave($entity, FALSE);
         $this->invokeHook('insert', $entity);
       }
 
       // Ignore slave server temporarily.
       db_ignore_slave();
+      unset($entity->is_new);
       unset($entity->original);
 
       return $return;
