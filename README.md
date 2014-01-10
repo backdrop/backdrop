@@ -9,7 +9,7 @@ Backdrop aims to provide:
 
 - A full-featured CMS that puts editorial and end-users first.
 - A system that can be utilized out-of-the-box.
-- Code that can be learned and easily developed..
+- Code that can be learned and easily developed.
 - Extensible APIs.
 
 Requirements
@@ -33,28 +33,29 @@ Installation
 
 Bug Reports and Feature Requests
 --------------------------------
-Because of Github restrictions on the use of labels and issue assignment,
-we use a separate issue tracker that is not under the main repository at
-https://github.com/backdrop/backdrop-issues/issues. Please use this tracker
-for reporting all bugs and features.
+Please use this issue tracker for reporting all bugs and features:
+https://github.com/backdrop/backdrop-issues/issues. We use a separate issue
+tracker that is not under the main repository because of Github restrictions on
+the use of labels and issue assignment
 
 Developers
 ----------
-Backdrop is a fork of Drupal. It is an experiment in preserving the legacy
-audience of developers who value ease of use and ease of learning over
-architectural flexibility. You can join Backdrop's developer community by
-forking Backdrop from https://github.com/backdrop/backdrop. If submitting
-a pull request, please open an issue using the
-[issue tracker](https://github.com/backdrop/backdrop-issues/issues) 
+Backdrop is a fork of Drupal. It preserves the legacy audience of developers who
+value ease of use and ease of learning over architectural flexibility. You can
+join Backdrop's developer community by forking Backdrop from
+https://github.com/backdrop/backdrop.
+
+If submitting a pull request, please open an issue using the
+[issue tracker](https://github.com/backdrop/backdrop-issues/issues)
 first and then reference it in the title of the pull request.
 
 [![Build Status](https://travis-ci.org/backdrop/backdrop.png)](https://travis-ci.org/backdrop/backdrop)
 
 Documentation
 -------------
-The [Backdrop Handbook](http://handbook.backdropcms.org/) is where 
-documentation is being worked on. You can contribute to the handbook by
-sending a pull request to [the handbook repository](https://github.com/backdrop/handbook). 
+The [Backdrop Handbook](http://handbook.backdropcms.org/) is the place to find
+documentation. You can contribute to the handbook by sending a pull request to
+[the handbook repository](https://github.com/backdrop/handbook).
 
 License
 -------
@@ -63,10 +64,9 @@ core directory or visit http://www.gnu.org/licenses/gpl-2.0.html for
 complete text. Distributions of this software may relicense it as any
 later version of the GPL.
 
-All Backdrop code is Copyright 2001 - 2013 by the original authors.
+All Backdrop code is Copyright 2001 - 2014 by the original authors.
 
 Backdrop includes works under other copyright notices and distributed
 according to the terms of the GNU General Public License or a compatible
 license. Individual works may have specific copyright information noted within
 their their source code files or directories.
-
