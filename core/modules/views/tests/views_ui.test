@@ -238,10 +238,11 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $this->node_type_without_tags = $this->drupalCreateContentType();
 
     // Create the vocabulary for the tag field.
-    $this->tag_vocabulary = new stdClass();
-    $this->tag_vocabulary->name = 'Views testing tags';
-    $this->tag_vocabulary->machine_name = 'views_testing_tags';
-    taxonomy_vocabulary_save($this->tag_vocabulary);
+    $this->tag_vocabulary = entity_create('taxonomy_vocabulary', array(
+      'name' => 'Views testing tags',
+      'machine_name' => 'views_testing_tags',
+    ));
+    $this->tag_vocabulary->save();
 
     // Create the tag field itself.
     $this->tag_field = array(
@@ -667,14 +668,16 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    * Helper function to create a taxonomy term and return its expected path.
    */
   function createTaxonomyTermAndGetPath() {
-    $vocabulary = new stdClass();
-    $vocabulary->name = $this->randomName();
-    $vocabulary->machine_name = drupal_strtolower($this->randomName());
+    $vocabulary = entity_create('taxonomy_vocabulary', array(
+      'name' => $this->randomName(),
+      'machine_name' => drupal_strtolower($this->randomName()),
+    ));
     taxonomy_vocabulary_save($vocabulary);
 
-    $term = new stdClass();
-    $term->name = $this->randomName();
-    $term->vid = $vocabulary->vid;
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'vid' => $vocabulary->vid,
+    ));
     taxonomy_term_save($term);
 
     return entity_uri('taxonomy_term', $term);

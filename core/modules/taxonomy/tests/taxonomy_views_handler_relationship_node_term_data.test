@@ -15,12 +15,13 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
    * Returns a new term with random properties in vocabulary $vid.
    */
   function createTerm($vocabulary) {
-    $term = new stdClass();
-    $term->name = $this->randomName();
-    $term->description = $this->randomName();
-    // Use the first available text format.
-    $term->format = db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField();
-    $term->vid = $vocabulary->vid;
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      // Use the first available text format.
+      'format' => db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField(),
+      'vid' => $vocabulary->vid,
+    ));
     taxonomy_term_save($term);
     return $term;
   }
