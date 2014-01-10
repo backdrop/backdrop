@@ -2028,13 +2028,6 @@ class CommentFieldsTest extends CommentHelperCase {
  * Tests comment threading.
  */
 class CommentThreadingTestCase extends CommentHelperCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment Threading',
-      'description' => 'Test to make sure the comment number increments properly.',
-      'group' => 'Comment',
-    );
-  }
 
   /**
    * Tests the comment threading.
