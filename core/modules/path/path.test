@@ -2,9 +2,12 @@
 
 /**
  * @file
- * Tests for path.module.
+ * Tests for the Path module.
  */
 
+/**
+ * Provides a base class for testing the Path module.
+ */
 class PathTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('path');
@@ -15,7 +18,7 @@ class PathTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test the path cache.
+   * Tests the path cache.
    */
   function testPathCache() {
     // Create test node.
@@ -40,7 +43,7 @@ class PathTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test alias functionality through the admin interfaces.
+   * Tests alias functionality through the admin interfaces.
    */
   function testAdminAlias() {
     // Create test node.
@@ -99,7 +102,7 @@ class PathTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test alias functionality through the node interfaces.
+   * Tests alias functionality through the node interfaces.
    */
   function testNodeAlias() {
     // Create test node.
@@ -151,13 +154,22 @@ class PathTestCase extends DrupalWebTestCase {
     $this->assertResponse(404);
   }
 
+  /**
+   * Returns the path ID.
+   *
+   * @param $alias
+   *   A string containing an aliased path.
+   *
+   * @return int
+   *   Integer representing the path ID.
+   */
   function getPID($alias) {
     return db_query("SELECT pid FROM {url_alias} WHERE alias = :alias", array(':alias' => $alias))->fetchField();
   }
 }
 
 /**
- * Test URL aliases for taxonomy terms.
+ * Tests URL aliases for taxonomy terms.
  */
 class PathTaxonomyTermTestCase extends DrupalWebTestCase {
   function setUp() {
@@ -169,7 +181,7 @@ class PathTaxonomyTermTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test alias functionality through the admin interfaces.
+   * Tests alias functionality through the admin interfaces.
    */
   function testTermAlias() {
     // Create a term in the default 'Tags' vocabulary with URL alias.
@@ -212,6 +224,9 @@ class PathTaxonomyTermTestCase extends DrupalWebTestCase {
   }
 }
 
+/**
+ * Tests URL aliases for translated nodes.
+ */
 class PathLanguageTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('path', 'locale', 'translation');
