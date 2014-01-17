@@ -783,6 +783,15 @@ function form_label_test_form() {
     '#title_display' => 'attribute',
     '#required' => TRUE,
   );
+  // Test required checkboxes with #title_display attribute and a description.
+  $form['form_checkboxes_test_title_display_attribute'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Checkboxes, #title_display attribute',
+    '#title_display' => 'attribute',
+    '#required' => TRUE,
+    '#description' => 'Required checkboxes with #title_display attribute and a description.',
+    '#options' => drupal_map_assoc(array('foo', 'bar', 'baz')),
+  );
 
   return $form;
 }
