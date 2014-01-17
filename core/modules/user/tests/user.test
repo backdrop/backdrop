@@ -1376,7 +1376,7 @@ class UserAccountLinksUnitTests extends DrupalWebTestCase {
  */
 class UserBlocksUnitTests extends DrupalWebTestCase {
   /**
-   * Test the user login block.
+   * Tests the secondary menu.
    */
   function testUserLoginBlock() {
     // Create a user with some permission that anonymous users lack.
