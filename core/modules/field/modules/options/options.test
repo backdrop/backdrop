@@ -6,6 +6,7 @@
  */
 
 require_once DRUPAL_ROOT . '/core/modules/field/tests/field.test';
+require_once DRUPAL_ROOT . '/core/modules/field/modules/list/tests/list.test';
 
 class OptionsWidgetsTestCase extends FieldTestCase {
   function setUp() {

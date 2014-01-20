@@ -2173,7 +2173,7 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
    */
   function testNodeAccessAdministerField() {
     // Create a page node.
-    $langcode = LANGUAGE_NOT_SPECIFIED;
+    $langcode = LANGUAGE_NONE;
     $field_data = array();
     $value = $field_data[$langcode][0]['value'] = $this->randomName();
     $node = $this->drupalCreateNode(array($this->field_name => $field_data));

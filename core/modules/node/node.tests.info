@@ -169,7 +169,7 @@ file = tests/node.test
 [NodeAccessFieldTestCase]
 name => Node access and fields
 description => Tests the interaction of the node access system with fields.
-group' => Node
+group => Node
 file = tests/node.test
 
 [NodeViewsRevisionRelationsTestCase]

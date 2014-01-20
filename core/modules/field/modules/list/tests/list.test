@@ -163,7 +163,7 @@ class ListDynamicValuesValidationTestCase extends ListDynamicValuesTestCase {
   function testDynamicAllowedValues() {
     // Verify that the test passes against every value we had.
     foreach ($this->test as $key => $value) {
-      $this->entity->test_list[LANGUAGE_NOT_SPECIFIED][0]['value'] = $value;
+      $this->entity->test_list[LANGUAGE_NONE][0]['value'] = $value;
       try {
         field_attach_validate('test_entity', $this->entity);
         $this->pass("$key should pass");
@@ -175,7 +175,7 @@ class ListDynamicValuesValidationTestCase extends ListDynamicValuesTestCase {
     }
     // Now verify that the test does not pass against anything else.
     foreach ($this->test as $key => $value) {
-      $this->entity->test_list[LANGUAGE_NOT_SPECIFIED][0]['value'] = is_numeric($value) ? (100 - $value) : ('X' . $value);
+      $this->entity->test_list[LANGUAGE_NONE][0]['value'] = is_numeric($value) ? (100 - $value) : ('X' . $value);
       $pass = FALSE;
       try {
         field_attach_validate('test_entity', $this->entity);
