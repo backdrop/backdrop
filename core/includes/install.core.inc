@@ -1088,10 +1088,31 @@ function _install_select_profile($profiles) {
     return $profile->name;
   }
   else {
+    $available_profiles = array();
+    $exclusive_profiles = array();
     foreach ($profiles as $profile) {
       if (!empty($_POST['profile']) && ($_POST['profile'] == $profile->name)) {
         return $profile->name;
       }
+
+      $profile_info = install_profile_info($profile->name);
+      // Check for profiles marked as "hidden".
+      if (empty($profile_info['hidden'])) {
+        $available_profiles[] = $profile->name;
+      }
+      // Check for a profile marked as "exclusive".
+      else if (!empty($profile_info['exclusive'])) {
+        $exclusive_profiles[] = $profile->name;
+      }
+    }
+
+    // If there is only one available profile, return it.
+    if (count($available_profiles) == 1) {
+      return reset($available_profiles);
+    }
+    // If there is only one exclusive profile, return it.
+    else if (count($exclusive_profiles) == 1) {
+      return reset($exclusive_profiles);
     }
   }
 }
