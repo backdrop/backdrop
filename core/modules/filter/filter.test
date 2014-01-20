@@ -383,6 +383,18 @@ class FilterAdminTestCase extends DrupalWebTestCase {
     $this->assertFieldByName('filters[' . $second_filter . '][weight]', $edit['filters[' . $second_filter . '][weight]'], t('Changes reverted.'));
     $this->assertFieldByName('filters[' . $first_filter . '][weight]', $edit['filters[' . $first_filter . '][weight]'], t('Changes reverted.'));
   }
+
+  /**
+   * Tests the URL filter settings form is properly validated.
+   */
+  function testUrlFilterAdmin() {
+    // The form does not save with an invalid filter URL length.
+    $edit = array(
+      'filters[filter_url][settings][filter_url_length]' => $this->randomName(4),
+    );
+    $this->drupalPost('admin/config/content/formats/filtered_html', $edit, t('Save configuration'));
+    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+  }
 }
 
 class FilterFormatAccessTestCase extends DrupalWebTestCase {
@@ -1127,6 +1139,11 @@ class FilterUnitTestCase extends DrupalUnitTestCase {
     // - absolute, mail, partial
     // - characters/encoding, surrounding markup, security
 
+    // Create a e-mail that is too long.
+    $long_email = str_repeat('a', 254) . '@example.com';
+    $too_long_email = str_repeat('b', 255) . '@example.com';
+
+
     // Filter selection/pattern matching.
     $tests = array(
       // HTTP URLs.
@@ -1138,10 +1155,12 @@ http://example.com or www.example.com
       ),
       // MAILTO URLs.
       '
-person@example.com or mailto:person2@example.com
+person@example.com or mailto:person2@example.com or ' . $long_email . ' but not ' . $too_long_email . '
 ' => array(
         '<a href="mailto:person@example.com">person@example.com</a>' => TRUE,
         '<a href="mailto:person2@example.com">mailto:person2@example.com</a>' => TRUE,
+        '<a href="mailto:' . $long_email . '">' . $long_email . '</a>' => TRUE,
+        '<a href="mailto:' . $too_long_email . '">' . $too_long_email . '</a>' => FALSE,
       ),
       // URI parts and special characters.
       '
@@ -1759,3 +1778,61 @@ class FilterHooksTestCase extends DrupalWebTestCase {
   }
 }
 
+/**
+ * Tests filter settings.
+ */
+class FilterSettingsTestCase extends DrupalWebTestCase {
+  protected $profile = 'testing';
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Filter settings',
+      'description' => 'Tests filter settings.',
+      'group' => 'Filter',
+    );
+  }
+
+  /**
+   * Tests explicit and implicit default settings for filters.
+   */
+  function testFilterDefaults() {
+    $filter_info = filter_filter_info();
+    $filters = array_fill_keys(array_keys($filter_info), array());
+
+    // Create text format using filter default settings.
+    $filter_defaults_format = (object) array(
+      'format' => 'filter_defaults',
+      'name' => 'Filter defaults',
+      'filters' => $filters,
+    );
+    filter_format_save($filter_defaults_format);
+
+    // Verify that default weights defined in hook_filter_info() were applied.
+    $saved_settings = array();
+    foreach ($filter_defaults_format->filters as $name => $settings) {
+      $expected_weight = (isset($filter_info[$name]['weight']) ? $filter_info[$name]['weight'] : 0);
+      $this->assertEqual($settings['weight'], $expected_weight, format_string('@name filter weight %saved equals %default', array(
+        '@name' => $name,
+        '%saved' => $settings['weight'],
+        '%default' => $expected_weight,
+      )));
+      $saved_settings[$name]['weight'] = $expected_weight;
+    }
+
+    // Re-save the text format.
+    filter_format_save($filter_defaults_format);
+    // Reload it from scratch.
+    filter_formats_reset();
+    $filter_defaults_format = filter_format_load($filter_defaults_format->format);
+    $filter_defaults_format->filters = filter_list_format($filter_defaults_format->format);
+
+    // Verify that saved filter settings have not been changed.
+    foreach ($filter_defaults_format->filters as $name => $settings) {
+      $this->assertEqual($settings->weight, $saved_settings[$name]['weight'], format_string('@name filter weight %saved equals %previous', array(
+        '@name' => $name,
+        '%saved' => $settings->weight,
+        '%previous' => $saved_settings[$name]['weight'],
+      )));
+    }
+  }
+}
