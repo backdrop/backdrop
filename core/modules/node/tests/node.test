@@ -6,6 +6,26 @@
  */
 
 /**
+ * Defines a base class for testing the Node module.
+ */
+class NodeWebTestCase extends DrupalWebTestCase {
+  function setUp() {
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
+    }
+    $modules[] = 'node';
+    parent::setUp($modules);
+
+    // Create Basic page and Article node types.
+    if ($this->profile != 'standard') {
+      $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+      $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    }
+  }
+}
+
+/**
  * Tests the node_load_multiple() function.
  */
 class NodeLoadMultipleUnitTest extends DrupalWebTestCase {
@@ -2130,15 +2150,6 @@ class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
  * Tests the interaction of the node access system with fields.
  */
 class NodeAccessFieldTestCase extends NodeWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Node access and fields',
-      'description' => 'Tests the interaction of the node access system with fields.',
-      'group' => 'Node',
-    );
-  }
-
   public function setUp() {
     parent::setUp('node_access_test', 'field_ui');
     node_access_rebuild();
