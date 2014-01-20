@@ -797,11 +797,14 @@ function system_modules($form, $form_state = array()) {
   foreach ($visible_files as $filename => $module) {
     $extra = array();
     $extra['enabled'] = (bool) $module->status;
-    $extra['core_hide'] = FALSE;
+
+    // Some modules are always required by core and cannot be disabled, e.g.
+    // node, system, entity.
+    $extra['required_by_distribution'] = FALSE;
     if (!empty($module->info['required'] )) {
       $extra['disabled'] = TRUE;
       $extra['required_by'][] = $distribution_name . (!empty($module->info['explanation']) ? ' ('. $module->info['explanation'] .')' : '');
-    $extra['core_hide'] = TRUE;
+      $extra['required_by_distribution'] = TRUE;
     }
 
     // If this module requires other modules, add them to the array.
@@ -956,7 +959,7 @@ function _system_modules_build_row($info, $extra) {
   );
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
-  $form['#core_hide'] = $extra['core_hide'];
+  $form['#required_by_distribution'] = $extra['required_by_distribution'];
 
   // Check the compatibilities.
   $compatible = TRUE;
@@ -2521,7 +2524,9 @@ function theme_system_modules_fieldset($variables) {
     foreach (array('help', 'permissions', 'configure') as $key) {
       $row[] = array('data' => drupal_render($module['links'][$key]), 'class' => array($key));
     }
-    if (!$module["#core_hide"]) {
+
+    // Hide modules that can't be disabled at all.
+    if (!$module["#required_by_distribution"]) {
       $rows[] = $row;
     }
   }
