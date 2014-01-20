@@ -20,4 +20,3 @@ dependencies[] = search
 dependencies[] = toolbar
 dependencies[] = field_ui
 dependencies[] = file
-files[] = standard.profile

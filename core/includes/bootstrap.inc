@@ -68,32 +68,32 @@ const WATCHDOG_EMERGENCY = 0;
 const WATCHDOG_ALERT = 1;
 
 /**
- * Log message severity -- Critical: critical conditions.
+ * Log message severity -- Critical conditions.
  */
 const WATCHDOG_CRITICAL = 2;
 
 /**
- * Log message severity -- Error: error conditions.
+ * Log message severity -- Error conditions.
  */
 const WATCHDOG_ERROR = 3;
 
 /**
- * Log message severity -- Warning: warning conditions.
+ * Log message severity -- Warning conditions.
  */
 const WATCHDOG_WARNING = 4;
 
 /**
- * Log message severity -- Notice: normal but significant condition.
+ * Log message severity -- Normal but significant conditions.
  */
 const WATCHDOG_NOTICE = 5;
 
 /**
- * Log message severity -- Informational: informational messages.
+ * Log message severity -- Informational messages.
  */
 const WATCHDOG_INFO = 6;
 
 /**
- * Log message severity -- Debug: debug-level messages.
+ * Log message severity -- Debug-level messages.
  */
 const WATCHDOG_DEBUG = 7;
 
@@ -286,7 +286,7 @@ const DRUPAL_PHP_FUNCTION_PATTERN = '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*';
  * means that assigning an offset via arrayAccess will only apply while the
  * object is in scope and will not be written back to the persistent cache.
  * This follows a similar pattern to static vs. persistent caching in
- * procedural code. Extending classes may wish to alter this behaviour, for
+ * procedural code. Extending classes may wish to alter this behavior, for
  * example by overriding offsetSet() and adding an automatic call to persist().
  *
  * @see SchemaCache
@@ -1745,8 +1745,16 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
  *   NULL if message is already translated or not possible to
  *   translate.
  * @param $severity
- *   The severity of the message, as per RFC 3164. Possible values are
- *   WATCHDOG_ERROR, WATCHDOG_WARNING, etc.
+ *   The severity of the message; one of the following values as defined in
+ *   @link http://www.faqs.org/rfcs/rfc3164.html RFC 3164: @endlink
+ *   - WATCHDOG_EMERGENCY: Emergency, system is unusable.
+ *   - WATCHDOG_ALERT: Alert, action must be taken immediately.
+ *   - WATCHDOG_CRITICAL: Critical conditions.
+ *   - WATCHDOG_ERROR: Error conditions.
+ *   - WATCHDOG_WARNING: Warning conditions.
+ *   - WATCHDOG_NOTICE: (default) Normal but significant conditions.
+ *   - WATCHDOG_INFO: Informational messages.
+ *   - WATCHDOG_DEBUG: Debug-level messages.
  * @param $link
  *   A link to associate with the message.
  *
@@ -3148,11 +3156,30 @@ function registry_rebuild() {
  * to be called, because it is already known that the list of files in the
  * {system} table matches those in the file system.
  *
+ * @return
+ *   TRUE if the registry was rebuilt, FALSE if another thread was rebuilding
+ *   in parallel and the current thread just waited for completion.
+ *
  * @see registry_rebuild()
  */
 function registry_update() {
+  // install_system_module() calls module_enable() which calls into this
+  // function during initial system installation, so the lock system is neither
+  // loaded nor does its storage exist yet.
+  $in_installer = drupal_installation_attempted();
+  if (!$in_installer && !lock_acquire(__FUNCTION__)) {
+    // Another request got the lock, wait for it to finish.
+    lock_wait(__FUNCTION__);
+    return FALSE;
+  }
+
   require_once DRUPAL_ROOT . '/core/includes/registry.inc';
   _registry_update();
+
+  if (!$in_installer) {
+    lock_release(__FUNCTION__);
+  }
+  return TRUE;
 }
 
 /**
