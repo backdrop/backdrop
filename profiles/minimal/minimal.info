@@ -6,4 +6,3 @@ hidden = TRUE
 dependencies[] = node
 dependencies[] = block
 dependencies[] = dblog
-files[] = minimal.profile

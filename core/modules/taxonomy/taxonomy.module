@@ -581,7 +581,7 @@ function taxonomy_check_vocabulary_hierarchy($vocabulary, $changed_term) {
       $hierarchy = TAXONOMY_HIERARCHY_MULTIPLE;
       break;
     }
-    elseif (count($term->parents) == 1 && 0 !== array_shift($term->parents)) {
+    elseif (count($term->parents) == 1 && !isset($term->parents[0])) {
       $hierarchy = TAXONOMY_HIERARCHY_SINGLE;
     }
   }
@@ -1386,7 +1386,7 @@ function taxonomy_field_widget_info_alter(&$info) {
 /**
  * Implements hook_options_list().
  */
-function taxonomy_options_list($field, $instance) {
+function taxonomy_options_list($field, $instance, $entity_type, $entity) {
   $function = !empty($field['settings']['options_list_callback']) ? $field['settings']['options_list_callback'] : 'taxonomy_allowed_values';
   return $function($field);
 }
@@ -1590,7 +1590,7 @@ function taxonomy_field_formatter_prepare_view($entity_type, $entities, $field, 
           $items[$id][$delta]['taxonomy_term'] = $terms[$item['tid']];
         }
         // Terms to be created are not in $terms, but are still legitimate.
-        else if ($item['tid'] == 'autocreate') {
+        elseif ($item['tid'] == 'autocreate') {
           // Leave the item in place.
         }
         // Otherwise, unset the instance value, since the term does not exist.

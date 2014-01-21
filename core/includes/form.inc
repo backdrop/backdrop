@@ -3002,7 +3002,7 @@ function form_process_radios($element) {
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *     Properties used: #title, #value, #return_value, #description, #required,
- *     #attributes.
+ *     #attributes, #checked.
  *
  * @ingroup themeable
  */
@@ -3059,7 +3059,7 @@ function form_pre_render_conditional_form_element($element) {
     $element['#attributes']['title'] = $element['#title'];
     if (!empty($element['#required'])) {
       // Append an indication that this field is required.
-      $element['#attributes']['title'] .= ' (' . $t('Required') . ')';
+      $element['#attributes']['title'] .= ' (' . t('Required') . ')';
     }
   }
 
@@ -3299,7 +3299,7 @@ function form_process_tableselect($element) {
     $value = is_array($element['#value']) ? $element['#value'] : array();
   }
   else {
-    // Advanced selection behaviour make no sense for radios.
+    // Advanced selection behavior makes no sense for radios.
     $element['#js_select'] = FALSE;
   }
 
@@ -3383,6 +3383,9 @@ function form_process_tableselect($element) {
  *       different character, 'replace_pattern' needs to be set accordingly.
  *     - error: (optional) A custom form error message string to show, if the
  *       machine name contains disallowed characters.
+ *     - standalone: (optional) Whether the live preview should stay in its own
+ *       form element rather than in the suffix of the source element. Defaults
+ *       to FALSE.
  *   - #maxlength: (optional) Should be set to the maximum allowed length of the
  *     machine name. Defaults to 64.
  *   - #disabled: (optional) Should be set to TRUE in case an existing machine
@@ -3394,6 +3397,9 @@ function form_process_machine_name($element, &$form_state) {
     '#title' => t('Machine-readable name'),
     '#description' => t('A unique machine-readable name. Can only contain lowercase letters, numbers, and underscores.'),
     '#machine_name' => array(),
+    '#field_prefix' => '',
+    '#field_suffix' => '',
+    '#suffix' => '',
   );
   // A form element that only wants to set one #machine_name property (usually
   // 'source' only) would leave all other properties undefined, if the defaults
@@ -3404,6 +3410,9 @@ function form_process_machine_name($element, &$form_state) {
     'label' => t('Machine name'),
     'replace_pattern' => '[^a-z0-9_]+',
     'replace' => '_',
+    'standalone' => FALSE,
+    'field_prefix' => $element['#field_prefix'],
+    'field_suffix' => $element['#field_suffix'],
   );
 
   // By default, machine names are restricted to Latin alphanumeric characters.
@@ -3419,7 +3428,7 @@ function form_process_machine_name($element, &$form_state) {
   }
 
   // Retrieve the form element containing the human-readable name from the
-  // complete form in $form_state. By reference, because we need to append
+  // complete form in $form_state. By reference, because we may need to append
   // a #field_suffix that will hold the live preview.
   $key_exists = NULL;
   $source = drupal_array_get_nested_value($form_state['complete_form'], $element['#machine_name']['source'], $key_exists);
@@ -3427,16 +3436,21 @@ function form_process_machine_name($element, &$form_state) {
     return $element;
   }
 
-  // Append a field suffix to the source form element, which will contain
-  // the live preview of the machine name.
   $suffix_id = $source['#id'] . '-machine-name-suffix';
-  $source += array('#field_suffix' => '');
-  $source['#field_suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
-
-  $parents = array_merge($element['#machine_name']['source'], array('#field_suffix'));
-  drupal_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
-
   $element['#machine_name']['suffix'] = '#' . $suffix_id;
+
+  if ($element['#machine_name']['standalone']) {
+    $element['#suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
+  }
+  else {
+    // Append a field suffix to the source form element, which will contain
+    // the live preview of the machine name.
+    $source += array('#field_suffix' => '');
+    $source['#field_suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
+
+    $parents = array_merge($element['#machine_name']['source'], array('#field_suffix'));
+    drupal_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
+  }
 
   $js_settings = array(
     'type' => 'setting',

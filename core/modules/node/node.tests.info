@@ -166,6 +166,12 @@ description = Tests user permissions for node revision operations.
 group = Node
 file = tests/node.test
 
+[NodeAccessFieldTestCase]
+name => Node access and fields
+description => Tests the interaction of the node access system with fields.
+group => Node
+file = tests/node.test
+
 [NodeViewsRevisionRelationsTestCase]
 name = Views node revision relationship
 description = Tests the Views integration of node_revision table of node module.
