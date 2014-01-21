@@ -3267,7 +3267,7 @@ function drupal_pre_render_styles($elements) {
   // browser-caching. The string changes on every update or full cache
   // flush, forcing browsers to load a new copy of the files, as the
   // URL changed.
-  $query_string = variable_get('css_js_query_string', '0');
+  $query_string = state_get('css_js_query_string', '0');
 
   // For inline CSS to validate as XHTML, all CSS containing XHTML needs to be
   // wrapped in CDATA. To make that backwards compatible with HTML 4, we need to
@@ -4231,7 +4231,7 @@ function drupal_pre_render_scripts($elements) {
   // URL changed. Files that should not be cached (see drupal_add_js())
   // get REQUEST_TIME as query-string instead, to enforce reload on every
   // page request.
-  $default_query_string = variable_get('css_js_query_string', '0');
+  $default_query_string = state_get('css_js_query_string', '0');
 
   // For inline JavaScript to validate as XHTML, all JavaScript containing
   // XHTML needs to be wrapped in CDATA. To make that backwards compatible
@@ -5356,7 +5356,7 @@ function drupal_cron_run() {
     }
 
     // Record cron time.
-    variable_set('cron_last', REQUEST_TIME);
+    state_set('cron_last', REQUEST_TIME);
     watchdog('cron', 'Cron run completed.', array(), WATCHDOG_NOTICE);
 
     // Release cron lock.
@@ -7695,7 +7695,7 @@ function drupal_flush_all_caches() {
  */
 function _drupal_flush_css_js() {
   // The timestamp is converted to base 36 in order to make it more compact.
-  variable_set('css_js_query_string', base_convert(REQUEST_TIME, 10, 36));
+  state_set('css_js_query_string', base_convert(REQUEST_TIME, 10, 36));
 }
 
 /**

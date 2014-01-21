@@ -195,7 +195,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * Test the theme callback when the site is in maintenance mode.
    */
   function testThemeCallbackMaintenanceMode() {
-    variable_set('maintenance_mode', TRUE);
+    state_set('maintenance_mode', TRUE);
 
     // For a regular user, the fact that the site is in maintenance mode means
     // we expect the theme callback system to be bypassed entirely.
@@ -216,7 +216,7 @@ class MenuRouterTestCase extends DrupalWebTestCase {
    * @see hook_menu_site_status_alter().
    */
   function testMaintenanceModeLoginPaths() {
-    variable_set('maintenance_mode', TRUE);
+    state_set('maintenance_mode', TRUE);
 
     $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')));
     $this->drupalLogout();

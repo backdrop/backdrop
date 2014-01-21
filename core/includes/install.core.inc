@@ -354,7 +354,7 @@ function install_run_tasks(&$install_state) {
       $install_state['tasks_performed'][] = $task_name;
       $install_state['installation_finished'] = empty($tasks_to_perform);
       if ($install_state['database_tables_exist'] && ($task['run'] == INSTALL_TASK_RUN_IF_NOT_COMPLETED || $install_state['installation_finished'])) {
-        variable_set('install_task', $install_state['installation_finished'] ? 'done' : $task_name);
+        state_set('install_task', $install_state['installation_finished'] ? 'done' : $task_name);
       }
     }
     // Stop when there are no tasks left. In the case of an interactive
@@ -802,7 +802,7 @@ function install_system_module(&$install_state) {
  */
 function install_verify_completed_task() {
   try {
-    if ($result = db_query("SELECT value FROM {variable} WHERE name = :name", array('name' => 'install_task'))) {
+    if ($result = db_query("SELECT value FROM {state} WHERE name = :name", array('name' => 'install_task'))) {
       $task = unserialize($result->fetchField());
     }
   }
@@ -1902,5 +1902,5 @@ function install_configure_form_submit($form, &$form_state) {
   }
 
   // Record when this install ran.
-  variable_set('install_time', $_SERVER['REQUEST_TIME']);
+  state_set('install_time', $_SERVER['REQUEST_TIME']);
 }

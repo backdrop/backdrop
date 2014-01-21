@@ -1067,6 +1067,80 @@ function variable_del($name) {
 }
 
 /**
+ * Retrieves a "state" value from the database.
+ *
+ * States are used for saving long-term values in the database that are
+ * environment-specific. Some examples of values appropriate for utilizing
+ * states include the last time cron was run or the current query string
+ * appended to CSS/JS files. These values should not be copied between
+ * environments, so they are stored in the state system instead of as
+ * configuration files.
+ *
+ * Case-sensitivity of the state_* functions depends on the database
+ * collation used. To avoid problems, always use lower case for persistent
+ * state names.
+ *
+ * @param $name
+ *   The name of the state to return.
+ * @param $default
+ *   The default value to use if this state has never been set.
+ *
+ * @return
+ *   The value of the state. Complex data types such as objects and arrays are
+ *   unserialized when returned.
+ *
+ * @see state_set()
+ * @see state_del()
+ */
+function state_get($name, $default = NULL) {
+  $states = &drupal_static('states', array());
+  if (!isset($states[$name])) {
+    $value = db_query('SELECT value FROM {state} WHERE name = :name', array(':name' => $name))->fetchField();
+    $states[$name] = $value ? unserialize($value) : NULL;
+  }
+  return isset($states[$name]) ? $states[$name] : $default;
+}
+
+/**
+ * Sets a persistent state value.
+ *
+ * @param $name
+ *   The name of the state to set.
+ * @param $value
+ *   The value to set. Complex data types will be serialized upon storage.
+ *
+ * @see state_get()
+ * @see state_del()
+ */
+function state_set($name, $value) {
+  $states = &drupal_static('states', array());
+  db_merge('state')
+    ->key(array('name' => $name))
+    ->fields(array('value' => serialize($value)))
+    ->execute();
+  $states[$name] = $value;
+}
+
+/**
+ * Unsets a persistent state value.
+ *
+ * @param $name
+ *   The name of the state to delete.
+ *
+ * @see state_get()
+ * @see state_set()
+ */
+function state_del($name) {
+  $states = &drupal_static('states', array());
+  db_delete('state')
+    ->condition('name', $name)
+    ->execute();
+  if (array_key_exists($name, $states)) {
+    unset($states[$name]);
+  }
+}
+
+/**
  * Retrieves the current page from the cache.
  *
  * Note: we do not serve cached pages to authenticated users, or to anonymous
