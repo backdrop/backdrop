@@ -1073,7 +1073,7 @@ function variable_del($name) {
  * with state_set().
  */
 function state_initialize() {
-  if ($cached = cache('cache')->get('state')) {
+  if ($cached = cache('cache')->get('states')) {
     $states = $cached->data;
   }
   else {
@@ -1088,7 +1088,7 @@ function state_initialize() {
     else {
       // Proceed with variable rebuild.
       $states = array_map('unserialize', db_query('SELECT name, value FROM {state}')->fetchAllKeyed());
-      cache('cache')->set('state', $states);
+      cache('cache')->set('states', $states);
       lock_release($name);
     }
   }
@@ -1123,8 +1123,8 @@ function state_initialize() {
  * @see state_del()
  */
 function state_get($name, $default = NULL) {
-  $states = &drupal_static('states', array());
-  if (empty($states)) {
+  $states = &drupal_static('states');
+  if (!isset($states)) {
     $states = state_initialize();
   }
   return isset($states[$name]) ? $states[$name] : $default;
@@ -1142,13 +1142,15 @@ function state_get($name, $default = NULL) {
  * @see state_del()
  */
 function state_set($name, $value) {
-  $states = &drupal_static('states', array());
+  $states = &drupal_static('states');
   db_merge('state')
     ->key(array('name' => $name))
     ->fields(array('value' => serialize($value)))
     ->execute();
   cache('cache')->delete('states');
-  $states[$name] = $value;
+  if (isset($states)) {
+    $states[$name] = $value;
+  }
 }
 
 /**
