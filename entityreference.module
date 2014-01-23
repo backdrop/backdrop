@@ -130,7 +130,7 @@ function entityreference_field_is_empty($item, $field) {
  * Get the behavior handlers for a given entityreference field.
  */
 function entityreference_get_behavior_handlers($field, $instance = NULL) {
-  $object_cache = &drupal_static(__FUNCTION__);
+  $object_cache = drupal_static(__FUNCTION__);
   $identifier = $field['field_name'];
   if (!empty($instance)) {
     $identifier .= ':' . $instance['entity_type'] . ':' . $instance['bundle'];
@@ -167,7 +167,7 @@ function entityreference_get_behavior_handlers($field, $instance = NULL) {
  *   The behavior handler name.
  */
 function _entityreference_get_behavior_handler($behavior) {
-  $object_cache = &drupal_static(__FUNCTION__);
+  $object_cache = drupal_static(__FUNCTION__);
 
   if (!isset($object_cache[$behavior])) {
     ctools_include('plugins');
