@@ -1067,6 +1067,36 @@ function variable_del($name) {
 }
 
 /**
+ * Loads the persistent state table.
+ *
+ * The state table is composed of values that have been saved in the table
+ * with state_set().
+ */
+function state_initialize() {
+  if ($cached = cache('cache')->get('state')) {
+    $states = $cached->data;
+  }
+  else {
+    // Cache miss. Avoid a stampede.
+    $name = 'state_init';
+    if (!lock_acquire($name, 1)) {
+      // Another request is building the variable cache.
+      // Wait, then re-run this function.
+      lock_wait($name);
+      return state_initialize();
+    }
+    else {
+      // Proceed with variable rebuild.
+      $states = array_map('unserialize', db_query('SELECT name, value FROM {state}')->fetchAllKeyed());
+      cache('cache')->set('state', $states);
+      lock_release($name);
+    }
+  }
+
+  return $states;
+}
+
+/**
  * Retrieves a "state" value from the database.
  *
  * States are used for saving long-term values in the database that are
@@ -1094,9 +1124,8 @@ function variable_del($name) {
  */
 function state_get($name, $default = NULL) {
   $states = &drupal_static('states', array());
-  if (!isset($states[$name])) {
-    $value = db_query('SELECT value FROM {state} WHERE name = :name', array(':name' => $name))->fetchField();
-    $states[$name] = $value ? unserialize($value) : NULL;
+  if (empty($states)) {
+    $states = state_initialize();
   }
   return isset($states[$name]) ? $states[$name] : $default;
 }
@@ -1118,6 +1147,7 @@ function state_set($name, $value) {
     ->key(array('name' => $name))
     ->fields(array('value' => serialize($value)))
     ->execute();
+  cache('cache')->delete('states');
   $states[$name] = $value;
 }
 
