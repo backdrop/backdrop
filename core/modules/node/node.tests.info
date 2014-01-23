@@ -167,9 +167,9 @@ group = Node
 file = tests/node.test
 
 [NodeAccessFieldTestCase]
-name => Node access and fields
-description => Tests the interaction of the node access system with fields.
-group => Node
+name = Node access and fields
+description = Tests the interaction of the node access system with fields.
+group = Node
 file = tests/node.test
 
 [NodeViewsRevisionRelationsTestCase]
