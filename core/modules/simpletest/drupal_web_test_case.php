@@ -1449,7 +1449,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $user = user_load(1);
 
     // Restore necessary variables.
-    variable_set('install_task', 'done');
+    state_set('install_task', 'done');
     variable_set('clean_url', $clean_url_original);
     variable_set('site_mail', 'simpletest@example.com');
     variable_set('date_default_timezone', date_default_timezone_get());
@@ -2200,7 +2200,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * Runs cron in the Drupal installed by Simpletest.
    */
   protected function cronRun() {
-    $this->drupalGet($GLOBALS['base_url'] . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => variable_get('cron_key', 'drupal'))));
+    $this->drupalGet($GLOBALS['base_url'] . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))));
   }
 
   /**

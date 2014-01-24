@@ -405,7 +405,7 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
   // Store maintenance_mode setting so we can restore it when done.
   $_SESSION['maintenance_mode'] = variable_get('maintenance_mode', FALSE);
   if ($form_state['values']['maintenance_mode'] == TRUE) {
-    variable_set('maintenance_mode', TRUE);
+    state_set('maintenance_mode', TRUE);
   }
 
   if (!empty($_SESSION['update_manager_update_projects'])) {

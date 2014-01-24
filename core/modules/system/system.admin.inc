@@ -1465,7 +1465,7 @@ function system_cron_settings() {
     '#value' => t('Run cron'),
     '#submit' => array('system_run_cron_submit'),
   );
-  $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - variable_get('cron_last')),)) . '</p>';
+  $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
   );
@@ -2092,7 +2092,7 @@ function system_site_maintenance_mode() {
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Put site into maintenance mode'),
-    '#default_value' => variable_get('maintenance_mode', 0),
+    '#default_value' => state_get('maintenance_mode', 0),
     '#description' => t('Visitors will only see the maintenance mode message. Only users with the "Access site in maintenance mode" <a href="@permissions-url">permission</a> will be able to access the site. Authorized users can log in directly via the <a href="@user-login">user login</a> page.', array('@permissions-url' => url('admin/config/people/permissions'), '@user-login' => url('user'))),
   );
   $form['maintenance_mode_message'] = array(
@@ -2101,7 +2101,31 @@ function system_site_maintenance_mode() {
     '#default_value' => variable_get('maintenance_mode_message', t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')))),
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+  return $form;
+}
+
+/**
+ * Submit handler for the system_site_maintenance_mode() form.
+ */
+function system_site_maintenance_mode_submit($form, &$form_state) {
+  state_set('maintenance_mode', (int) $form_state['values']['maintenance_mode']);
+  variable_set('maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
+
+  // Give specific messages on the primary action for this form.
+  if ($form_state['values']['maintenance_mode']) {
+    drupal_set_message(t('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.'), 'warning');
+  }
+  elseif ($form['maintenance_mode']['#default_value'] != $form_state['values']['maintenance_mode']) {
+    drupal_set_message(t('The site is no longer in maintenance mode.'));
+  }
+  else {
+    drupal_set_message(t('The configuration options have been saved.'));
+  }
 }
 
 /**
