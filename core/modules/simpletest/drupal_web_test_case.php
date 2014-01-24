@@ -2745,6 +2745,9 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   An array containing e-mail messages captured during the current test.
    */
   protected function drupalGetMails($filter = array()) {
+    // Ensure this value is always up-to-date.
+    drupal_static_reset('states');
+
     $captured_emails = state_get('test_email_collector', array());
     $filtered_emails = array();
 
