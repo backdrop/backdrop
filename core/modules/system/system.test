@@ -596,7 +596,6 @@ class CronRunTestCase extends DrupalWebTestCase {
     state_set('cron_last', $cron_last);
     variable_set('cron_safe_threshold', $cron_safe_threshold);
     $this->drupalGet('');
-    drupal_static_reset('states');
     $this->assertTrue($cron_last == state_get('cron_last'), t('Cron does not run when the cron threshold is not passed.'));
 
     // Test if cron runs when the cron threshold was passed.
@@ -604,7 +603,6 @@ class CronRunTestCase extends DrupalWebTestCase {
     state_set('cron_last', $cron_last);
     $this->drupalGet('');
     sleep(1);
-    drupal_static_reset('states');
     $this->assertTrue($cron_last < state_get('cron_last'), t('Cron runs when the cron threshold is passed.'));
 
     // Disable the cron threshold through the interface.
@@ -618,7 +616,6 @@ class CronRunTestCase extends DrupalWebTestCase {
     $cron_last = time() - 200;
     state_set('cron_last', $cron_last);
     $this->drupalGet('');
-    drupal_static_reset('states');
     $this->assertTrue($cron_last == state_get('cron_last'), t('Cron does not run when the cron threshold is disabled.'));
   }
 

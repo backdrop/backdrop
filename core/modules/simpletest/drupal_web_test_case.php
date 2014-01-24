@@ -1527,8 +1527,8 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Refresh the in-memory set of variables. Useful after a page request is made
-   * that changes a variable in a different thread.
+   * Refresh the in-memory set of variables and state values. Useful after a
+   * page request is made that changes a variable in a different thread.
    *
    * In other words calling a settings page with $this->drupalPost() with a changed
    * value would update a variable to reflect that change, but in the thread that
@@ -1542,6 +1542,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     global $conf;
     cache('bootstrap')->delete('variables');
     $conf = variable_initialize();
+    drupal_static_reset('states');
   }
 
   /**
@@ -2745,9 +2746,6 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   An array containing e-mail messages captured during the current test.
    */
   protected function drupalGetMails($filter = array()) {
-    // Ensure this value is always up-to-date.
-    drupal_static_reset('states');
-
     $captured_emails = state_get('test_email_collector', array());
     $filtered_emails = array();
 
