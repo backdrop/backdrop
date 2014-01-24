@@ -1555,7 +1555,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // log to pick up any fatal errors.
     simpletest_log_read($this->testId, $this->databasePrefix, get_class($this), TRUE);
 
-    $emailCount = count(variable_get('drupal_test_email_collector', array()));
+    $emailCount = count(state_get('test_email_collector', array()));
     if ($emailCount) {
       $message = format_plural($emailCount, '1 e-mail was sent during this test.', '@count e-mails were sent during this test.');
       $this->pass($message, t('E-mail'));
@@ -2745,7 +2745,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   An array containing e-mail messages captured during the current test.
    */
   protected function drupalGetMails($filter = array()) {
-    $captured_emails = variable_get('drupal_test_email_collector', array());
+    $captured_emails = state_get('test_email_collector', array());
     $filtered_emails = array();
 
     foreach ($captured_emails as $message) {
@@ -3490,7 +3490,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertMail($name, $value = '', $message = '') {
-    $captured_emails = variable_get('drupal_test_email_collector', array());
+    $captured_emails = state_get('test_email_collector', array());
     $email = end($captured_emails);
     return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
   }
