@@ -268,7 +268,7 @@ class Entity implements EntityInterface {
    */
   public function createDuplicate() {
     $duplicate = clone $this;
-    $duplicate->id = NULL;
+    $duplicate->{$this->idKey} = NULL;
     return $duplicate;
   }
 

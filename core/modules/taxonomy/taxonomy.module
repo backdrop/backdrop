@@ -1470,10 +1470,10 @@ function taxonomy_node_insert(Node $node) {
  * The index lists all terms that are related to a given node entity, and is
  * therefore maintained at the entity level.
  *
- * @param Drupal\node\Node $node
+ * @param Node $node
  *   The node entity.
  */
-function taxonomy_build_node_index($node) {
+function taxonomy_build_node_index(Node $node) {
   // We maintain a denormalized table of term/node relationships, containing
   // only data for current, published nodes.
   $status = NULL;
@@ -1553,7 +1553,7 @@ function taxonomy_node_predelete(Node $node) {
 /**
  * Deletes taxonomy index entries for a given node.
  *
- * @param Drupal\node\Node $node
+ * @param Node $node
  *   The node entity.
  */
 function taxonomy_delete_node_index(Node $node) {

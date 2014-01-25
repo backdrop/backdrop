@@ -395,7 +395,7 @@ function node_form_build_preview($form, &$form_state) {
 /**
  * Generates a node preview.
  *
- * @param Drupal\node\Node $node
+ * @param Node $node
  *   The node to preview.
  *
  * @return
@@ -403,7 +403,7 @@ function node_form_build_preview($form, &$form_state) {
  *
  * @see node_form_build_preview()
  */
-function node_preview($node) {
+function node_preview(Node $node) {
   // Clone the node before previewing it to prevent the node itself from being
   // modified.
   $cloned_node = clone $node;
