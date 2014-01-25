@@ -33,6 +33,9 @@ interface EntityInterface {
   /**
    * Returns whether the entity is new.
    *
+   * Usually an entity is new if no ID exists for it yet. However, entities may
+   * be enforced to be new with existing IDs too.
+   *
    * @return
    *   TRUE if the entity is new, or FALSE if the entity has already been saved.
    */
