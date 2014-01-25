@@ -21,8 +21,8 @@ class CommentHelperCase extends DrupalWebTestCase {
   /**
    * Posts a comment.
    *
-   * @param $node
-   *   Node to post comment on.
+   * @param Node|NULL $node
+   *   Node to post comment on or NULL to post to the previusly loaded page.
    * @param $comment
    *   Comment body.
    * @param $subject
@@ -490,7 +490,7 @@ class CommentInterfaceTest extends CommentHelperCase {
         'uid' => $case['comment_uid'],
         'status' => $case['comment_status'],
         'subject' => $this->randomName(),
-        'language' => LANGUAGE_NONE,
+        'langcode' => LANGUAGE_NONE,
         'comment_body' => array(LANGUAGE_NONE => array($this->randomName())),
       ));
       comment_save($comment);

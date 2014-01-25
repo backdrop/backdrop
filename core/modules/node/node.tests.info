@@ -90,7 +90,7 @@ file = tests/node.test
 
 [NodeSaveTestCase]
 name = Node save
-description = Test node_save() for saving content.
+description = Test $node->save() for saving content.
 group = Node
 file = tests/node.test
 

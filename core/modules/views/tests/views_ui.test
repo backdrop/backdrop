@@ -657,7 +657,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
       'uid' => 0,
       'status' => COMMENT_PUBLISHED,
       'subject' => $this->randomName(),
-      'language' => LANGUAGE_NONE,
+      'langcode' => LANGUAGE_NONE,
       'comment_body' => array(LANGUAGE_NONE => array($this->randomName())),
     ));
     comment_save($comment);

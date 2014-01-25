@@ -250,7 +250,7 @@ function hook_node_grants($account, $op) {
  *
  * Note: a deny all grant is not written to the database; denies are implicit.
  *
- * @param $node
+ * @param Node $node
  *   The node that has just been saved.
  *
  * @return
@@ -259,7 +259,7 @@ function hook_node_grants($account, $op) {
  * @see _node_access_write_grants()
  * @ingroup node_access
  */
-function hook_node_access_records($node) {
+function hook_node_access_records(Node $node) {
   // We only care about the node if it has been marked private. If not, it is
   // treated just like any other node and we completely ignore it.
   if ($node->private) {
@@ -310,7 +310,7 @@ function hook_node_access_records($node) {
  *
  * @param $grants
  *   The $grants array returned by hook_node_access_records().
- * @param $node
+ * @param Node $node
  *   The node for which the grants were acquired.
  *
  * The preferred use of this hook is in a module that bridges multiple node
@@ -322,7 +322,7 @@ function hook_node_access_records($node) {
  * @see hook_node_grants_alter()
  * @ingroup node_access
  */
-function hook_node_access_records_alter(&$grants, $node) {
+function hook_node_access_records_alter(&$grants, Node $node) {
   // Our module allows editors to mark specific articles with the 'is_preview'
   // field. If the node being saved has a TRUE value for that field, then only
   // our grants are retained, and other grants are removed. Doing so ensures
@@ -453,14 +453,14 @@ function hook_node_operations() {
  * field_attach_delete() are called, and before the node is removed from the
  * node table in the database.
  *
- * @param $node
+ * @param Node $node
  *   The node that is about to be deleted.
  *
  * @see hook_node_predelete()
  * @see node_delete_multiple()
  * @ingroup node_api_hooks
  */
-function hook_node_predelete($node) {
+function hook_node_predelete(Node $node) {
   db_delete('mytable')
     ->condition('nid', $node->nid)
     ->execute();
@@ -472,14 +472,14 @@ function hook_node_predelete($node) {
  * This hook is invoked from node_delete_multiple() after field_attach_delete()
  * has been called and after the node has been removed from the database.
  *
- * @param $node
+ * @param Node $node
  *   The node that has been deleted.
  *
  * @see hook_node_predelete()
  * @see node_delete_multiple()
  * @ingroup node_api_hooks
  */
-function hook_node_delete($node) {
+function hook_node_delete(Node $node) {
   drupal_set_message(t('Node: @title has been deleted', array('@title' => $node->title)));
 }
 
@@ -490,12 +490,12 @@ function hook_node_delete($node) {
  * removed from the node_revision table, and before
  * field_attach_delete_revision() is called.
  *
- * @param $node
+ * @param Node $node
  *   The node revision (node object) that is being deleted.
  *
  * @ingroup node_api_hooks
  */
-function hook_node_revision_delete($node) {
+function hook_node_revision_delete(Node $node) {
   db_delete('mytable')
     ->condition('vid', $node->vid)
     ->execute();
@@ -508,12 +508,12 @@ function hook_node_revision_delete($node) {
  * node table in the database, after the type-specific hook_insert() is invoked,
  * and after field_attach_insert() is called.
  *
- * @param $node
+ * @param Node $node
  *   The node that is being created.
  *
  * @ingroup node_api_hooks
  */
-function hook_node_insert($node) {
+function hook_node_insert(Node $node) {
   db_insert('mytable')
     ->fields(array(
       'nid' => $node->nid,
@@ -580,8 +580,8 @@ function hook_node_load($nodes, $types) {
  * the default home page at path 'node', a recent content block, etc.) See
  * @link node_access Node access rights @endlink for a full explanation.
  *
- * @param object|string $node
- *   Either a node object or the machine name of the content type on which to
+ * @param Node|string $node
+ *   Either a node entity or the machine name of the content type on which to
  *   perform the access check.
  * @param string $op
  *   The operation to be performed. Possible values:
@@ -631,12 +631,12 @@ function hook_node_access($node, $op, $account) {
  * This hook is invoked from node_object_prepare() after the type-specific
  * hook_prepare() is invoked.
  *
- * @param $node
+ * @param Node $node
  *   The node that is about to be shown on the add/edit form.
  *
  * @ingroup node_api_hooks
  */
-function hook_node_prepare($node) {
+function hook_node_prepare(Node $node) {
   if (!isset($node->comment)) {
     $node->comment = variable_get("comment_$node->type", COMMENT_NODE_OPEN);
   }
@@ -648,7 +648,7 @@ function hook_node_prepare($node) {
  * This hook is invoked from node_search_execute(), after node_load()
  * and node_view() have been called.
  *
- * @param $node
+ * @param Node $node
  *   The node being displayed in a search result.
  *
  * @return array
@@ -662,7 +662,7 @@ function hook_node_prepare($node) {
  *
  * @ingroup node_api_hooks
  */
-function hook_node_search_result($node) {
+function hook_node_search_result(Node $node) {
   $comments = db_query('SELECT comment_count FROM {node_comment_statistics} WHERE nid = :nid', array('nid' => $node->nid))->fetchField();
   return array('comment' => format_plural($comments, '1 comment', '@count comments'));
 }
@@ -673,12 +673,12 @@ function hook_node_search_result($node) {
  * This hook is invoked from node_save() before the node is saved to the
  * database.
  *
- * @param $node
+ * @param Node $node
  *   The node that is being inserted or updated.
  *
  * @ingroup node_api_hooks
  */
-function hook_node_presave($node) {
+function hook_node_presave(Node $node) {
   if ($node->nid && $node->moderate) {
     // Reset votes when node is updated:
     $node->score = 0;
@@ -694,12 +694,12 @@ function hook_node_presave($node) {
  * table in the database, after the type-specific hook_update() is invoked, and
  * after field_attach_update() is called.
  *
- * @param $node
+ * @param Node $node
  *   The node that is being updated.
  *
  * @ingroup node_api_hooks
  */
-function hook_node_update($node) {
+function hook_node_update(Node $node) {
   db_update('mytable')
     ->fields(array('extra' => $node->extra))
     ->condition('nid', $node->nid)
@@ -712,7 +712,7 @@ function hook_node_update($node) {
  * This hook is invoked during search indexing, after node_load(), and after
  * the result of node_view() is added as $node->rendered to the node object.
  *
- * @param $node
+ * @param Node $node
  *   The node being indexed.
  *
  * @return string
@@ -720,7 +720,7 @@ function hook_node_update($node) {
  *
  * @ingroup node_api_hooks
  */
-function hook_node_update_index($node) {
+function hook_node_update_index(Node $node) {
   $text = '';
   $comments = db_query('SELECT subject, comment, format FROM {comment} WHERE nid = :nid AND status = :status', array(':nid' => $node->nid, ':status' => COMMENT_PUBLISHED));
   foreach ($comments as $comment) {
@@ -744,7 +744,7 @@ function hook_node_update_index($node) {
  * hook_node_presave() instead. If it is really necessary to change
  * the node at the validate stage, you can use form_set_value().
  *
- * @param $node
+ * @param Node $node
  *   The node being validated.
  * @param $form
  *   The form being used to edit the node.
@@ -753,7 +753,7 @@ function hook_node_update_index($node) {
  *
  * @ingroup node_api_hooks
  */
-function hook_node_validate($node, $form, &$form_state) {
+function hook_node_validate(Node $node, $form, &$form_state) {
   if (isset($node->end) && isset($node->start)) {
     if ($node->start > $node->end) {
       form_set_error('time', t('An event may not end before it starts.'));
@@ -772,8 +772,8 @@ function hook_node_validate($node, $form, &$form_state) {
  * properties. See hook_field_attach_submit() for customizing field-related
  * properties.
  *
- * @param $node
- *   The node object being updated in response to a form submission.
+ * @param Node $node
+ *   The node entity being updated in response to a form submission.
  * @param $form
  *   The form being used to edit the node.
  * @param $form_state
@@ -781,7 +781,7 @@ function hook_node_validate($node, $form, &$form_state) {
  *
  * @ingroup node_api_hooks
  */
-function hook_node_submit($node, $form, &$form_state) {
+function hook_node_submit(Node $node, $form, &$form_state) {
   // Decompose the selected menu parent option into 'menu_name' and 'plid', if
   // the form used the default parent selection widget.
   if (!empty($form_state['values']['menu']['parent'])) {
@@ -801,7 +801,7 @@ function hook_node_submit($node, $form, &$form_state) {
  * the RSS item generated for this node.
  * For details on how this is used, see node_feed().
  *
- * @param $node
+ * @param Node $node
  *   The node that is being assembled for rendering.
  * @param $view_mode
  *   The $view_mode parameter from node_view().
@@ -813,7 +813,7 @@ function hook_node_submit($node, $form, &$form_state) {
  *
  * @ingroup node_api_hooks
  */
-function hook_node_view($node, $view_mode, $langcode) {
+function hook_node_view(Node $node, $view_mode, $langcode) {
   $node->content['my_additional_field'] = array(
     '#markup' => $additional_field,
     '#weight' => 10,
@@ -1022,12 +1022,12 @@ function hook_node_type_delete($info) {
  * removed from the node table in the database, before hook_node_delete() is
  * invoked, and before field_attach_delete() is called.
  *
- * @param $node
+ * @param Node $node
  *   The node that is being deleted.
  *
  * @ingroup node_api_hooks
  */
-function hook_delete($node) {
+function hook_delete(Node $node) {
   db_delete('mytable')
     ->condition('nid', $node->nid)
     ->execute();
@@ -1042,12 +1042,12 @@ function hook_delete($node) {
  * This hook is invoked from node_object_prepare() before the general
  * hook_node_prepare() is invoked.
  *
- * @param $node
+ * @param Node $node
  *   The node that is about to be shown on the add/edit form.
  *
  * @ingroup node_api_hooks
  */
-function hook_prepare($node) {
+function hook_prepare(Node $node) {
   if ($file = file_check_upload($field_name)) {
     $file = file_save_upload($field_name, _image_filename($file->filename, NULL, TRUE));
     if ($file) {
@@ -1078,7 +1078,7 @@ function hook_prepare($node) {
  * displayed automatically by the node module. This hook just needs to
  * return the node title and form editing fields specific to the node type.
  *
- * @param $node
+ * @param Node $node
  *   The node being added or edited.
  * @param $form_state
  *   The form state array.
@@ -1089,7 +1089,7 @@ function hook_prepare($node) {
  *
  * @ingroup node_api_hooks
  */
-function hook_form($node, &$form_state) {
+function hook_form(Node $node, &$form_state) {
   $type = node_type_get_type($node);
 
   $form['title'] = array(
@@ -1130,12 +1130,12 @@ function hook_form($node, &$form_state) {
  * node table in the database, before field_attach_insert() is called, and
  * before hook_node_insert() is invoked.
  *
- * @param $node
+ * @param Node $node
  *   The node that is being created.
  *
  * @ingroup node_api_hooks
  */
-function hook_insert($node) {
+function hook_insert(Node $node) {
   db_insert('mytable')
     ->fields(array(
       'nid' => $node->nid,
@@ -1188,12 +1188,12 @@ function hook_load($nodes) {
  * node table in the database, before field_attach_update() is called, and
  * before hook_node_update() is invoked.
  *
- * @param $node
+ * @param Node $node
  *   The node that is being updated.
  *
  * @ingroup node_api_hooks
  */
-function hook_update($node) {
+function hook_update(Node $node) {
   db_update('mytable')
     ->fields(array('extra' => $node->extra))
     ->condition('nid', $node->nid)
@@ -1217,7 +1217,7 @@ function hook_update($node) {
  * have no effect.  The preferred method to change a node's content is to use
  * hook_node_presave() instead.
  *
- * @param $node
+ * @param Node $node
  *   The node being validated.
  * @param $form
  *   The form being used to edit the node.
@@ -1226,7 +1226,7 @@ function hook_update($node) {
  *
  * @ingroup node_api_hooks
  */
-function hook_validate($node, $form, &$form_state) {
+function hook_validate(Node $node, $form, &$form_state) {
   if (isset($node->end) && isset($node->start)) {
     if ($node->start > $node->end) {
       form_set_error('time', t('An event may not end before it starts.'));
@@ -1244,7 +1244,7 @@ function hook_validate($node, $form, &$form_state) {
  * so that the node type module can define a custom method for display, or
  * add to the default display.
  *
- * @param $node
+ * @param Node $node
  *   The node to be displayed, as returned by node_load().
  * @param $view_mode
  *   View mode, e.g. 'full', 'teaser', ...
@@ -1263,7 +1263,7 @@ function hook_validate($node, $form, &$form_state) {
  *
  * @ingroup node_api_hooks
  */
-function hook_view($node, $view_mode) {
+function hook_view(Node $node, $view_mode) {
   if ($view_mode == 'full' && node_is_page($node)) {
     $breadcrumb = array();
     $breadcrumb[] = l(t('Home'), NULL);

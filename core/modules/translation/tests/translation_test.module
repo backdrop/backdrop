@@ -8,6 +8,6 @@
 /**
  * Implements hook_node_insert().
  */
-function translation_test_node_insert($node) {
+function translation_test_node_insert(Node $node) {
   drupal_write_record('node', $node, 'nid');
 }

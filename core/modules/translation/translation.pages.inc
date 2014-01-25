@@ -8,15 +8,15 @@
 /**
  * Page callback: Displays a list of a node's translations.
  *
- * @param $node
- *   A node object.
+ * @param Node $node
+ *   A node entity.
  *
  * @return
  *   A render array for a page containing a list of content.
  *
  * @see translation_menu()
  */
-function translation_node_overview($node) {
+function translation_node_overview(Node $node) {
   include_once DRUPAL_ROOT . '/core/includes/language.inc';
 
   if ($node->tnid) {
