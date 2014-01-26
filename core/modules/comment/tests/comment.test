@@ -22,7 +22,7 @@ class CommentHelperCase extends DrupalWebTestCase {
    * Posts a comment.
    *
    * @param Node|NULL $node
-   *   Node to post comment on or NULL to post to the previusly loaded page.
+   *   Node to post comment on or NULL to post to the previously loaded page.
    * @param $comment
    *   Comment body.
    * @param $subject
