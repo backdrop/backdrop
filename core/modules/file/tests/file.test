@@ -36,7 +36,7 @@ class FileFieldTestCase extends DrupalWebTestCase {
     // Add a filesize property to files as would be read by file_load().
     $file->filesize = filesize($file->uri);
 
-    return $file;
+    return entity_create('file', (array) $file);
   }
 
   /**
