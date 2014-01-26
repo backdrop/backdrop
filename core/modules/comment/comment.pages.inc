@@ -17,7 +17,7 @@
  * The node or comment that is being replied to must appear above the comment
  * form to provide the user context while authoring the comment.
  *
- * @param $node
+ * @param Node $node
  *   Every comment belongs to a node. This is that node.
  * @param $pid
  *   (optional) Some comments are replies to other comments. In those cases,
@@ -30,7 +30,7 @@
  *     - comment_parent: If the comment is a reply to another comment.
  *   - comment_form: The comment form as a renderable array.
  */
-function comment_reply($node, $pid = NULL) {
+function comment_reply(Node $node, $pid = NULL) {
   // Set the breadcrumb trail.
   drupal_set_breadcrumb(array(l(t('Home'), NULL), l($node->title, 'node/' . $node->nid)));
   $op = isset($_POST['op']) ? $_POST['op'] : '';
@@ -52,11 +52,8 @@ function comment_reply($node, $pid = NULL) {
     if ($pid) {
       if (user_access('access comments')) {
         // Load the comment whose cid = $pid
-        $comment = db_query('SELECT c.*, u.uid, u.name AS registered_name, u.signature, u.signature_format, u.picture, u.data FROM {comment} c INNER JOIN {users} u ON c.uid = u.uid WHERE c.cid = :cid AND c.status = :status', array(
-          ':cid' => $pid,
-          ':status' => COMMENT_PUBLISHED,
-        ))->fetchObject();
-        if ($comment) {
+        $comment = comment_load($pid);
+        if ($comment && $comment->status == COMMENT_PUBLISHED) {
           // If that comment exists, make sure that the current comment and the
           // parent comment both belong to the same parent node.
           if ($comment->nid != $node->nid) {

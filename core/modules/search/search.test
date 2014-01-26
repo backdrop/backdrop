@@ -744,7 +744,7 @@ class SearchCommentTestCase extends DrupalWebTestCase {
     // Hide comments.
     $this->drupalLogin($this->admin_user);
     $node->comment = 0;
-    node_save($node);
+    $node->save();
 
     // Invoke search index update.
     $this->drupalLogout();
@@ -1174,7 +1174,7 @@ class SearchNumbersTestCase extends DrupalWebTestCase {
       $info = array(
         'body' => array(LANGUAGE_NONE => array(array('value' => $num))),
         'type' => 'page',
-        'language' => LANGUAGE_NONE,
+        'langcode' => LANGUAGE_NONE,
         'title' => $doc . ' number',
       );
       $this->nodes[$doc] = $this->drupalCreateNode($info);
@@ -1248,7 +1248,7 @@ class SearchNumberMatchingTestCase extends DrupalWebTestCase {
       $info = array(
         'body' => array(LANGUAGE_NONE => array(array('value' => $num))),
         'type' => 'page',
-        'language' => LANGUAGE_NONE,
+        'langcode' => LANGUAGE_NONE,
       );
       $this->nodes[] = $this->drupalCreateNode($info);
     }
