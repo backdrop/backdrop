@@ -123,13 +123,11 @@ function node_entity_info() {
       'entity class' => 'Node',
       'base table' => 'node',
       'revision table' => 'node_revision',
-      'uri callback' => 'node_uri',
       'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'nid',
         'revision' => 'vid',
         'bundle' => 'type',
-        'label' => 'title',
       ),
       'bundle keys' => array(
         'bundle' => 'type',
@@ -193,18 +191,6 @@ function node_field_display_node_alter(&$display, $context) {
   if ($context['view_mode'] == 'search_index') {
     $display['label'] = 'hidden';
   }
-}
-
-/**
- * Entity uri callback.
- *
- * @param Node $node
- *   A node entity.
- */
-function node_uri(Node $node) {
-  return array(
-    'path' => 'node/' . $node->nid,
-  );
 }
 
 /**

@@ -81,12 +81,34 @@ class File extends Entity {
   public $timestamp;
 
   /**
-   * Overrides Drupal\entity\Entity::id().
+   * Implements EntityInterface::id().
    */
   public function id() {
-    return $this->fid;
+    return isset($this->fid) ? $this->fid : NULL;
   }
 
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'file';
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->name;
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => $this->uri,
+    );
+  }
 }
 
 /**

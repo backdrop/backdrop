@@ -73,6 +73,36 @@ class Comment extends Entity {
    */
   public $homepage;
 
+  /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return $this->cid;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'comment';
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->subject;
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'comment/' . $this->cid,
+      'options' => array('fragment' => 'comment-' . $this->cid),
+    );
+  }
 }
 
 /**

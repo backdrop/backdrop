@@ -62,12 +62,10 @@ function taxonomy_entity_info() {
       'entity class' => 'TaxonomyTerm',
       'controller class' => 'TaxonomyTermController',
       'base table' => 'taxonomy_term_data',
-      'uri callback' => 'taxonomy_term_uri',
       'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'tid',
         'bundle' => 'vocabulary_machine_name',
-        'label' => 'name',
       ),
       'bundle keys' => array(
         'bundle' => 'machine_name',
@@ -100,7 +98,6 @@ function taxonomy_entity_info() {
     'base table' => 'taxonomy_vocabulary',
     'entity keys' => array(
       'id' => 'vid',
-      'label' => 'name',
     ),
     'fieldable' => FALSE,
   );
@@ -115,15 +112,6 @@ function taxonomy_views_api() {
   return array(
     'api' => '3.0',
     'path' => drupal_get_path('module', 'taxonomy') . '/views',
-  );
-}
-
-/**
- * Entity uri callback.
- */
-function taxonomy_term_uri($term) {
-  return array(
-    'path' => 'taxonomy/term/' . $term->tid,
   );
 }
 

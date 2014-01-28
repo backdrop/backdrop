@@ -340,34 +340,11 @@ function entity_prepare_view($entity_type, $entities) {
  *   the entity, and matching the signature of url(). NULL if the entity has no
  *   uri of its own.
  *
- * @todo
- *   Remove once all entity types are implementing the EntityInterface.
+ * @deprecated
+ *   Deprecated since 1.0.
  */
 function entity_uri($entity_type, $entity) {
-  $info = entity_get_info($entity_type);
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
-
-  // A bundle-specific callback takes precedence over the generic one for the
-  // entity type.
-  if (isset($info['bundles'][$bundle]['uri callback'])) {
-    $uri_callback = $info['bundles'][$bundle]['uri callback'];
-  }
-  elseif (isset($info['uri callback'])) {
-    $uri_callback = $info['uri callback'];
-  }
-  else {
-    return NULL;
-  }
-
-  // Invoke the callback to get the URI. If there is no callback, return NULL.
-  if (isset($uri_callback)) {
-    $uri = $uri_callback($entity);
-    // Pass the entity data to url() so that alter functions do not need to
-    // lookup this entity again.
-    $uri['options']['entity_type'] = $entity_type;
-    $uri['options']['entity'] = $entity;
-    return $uri;
-  }
+  return $entity->uri();
 }
 
 /**
@@ -384,20 +361,11 @@ function entity_uri($entity_type, $entity) {
  * @return
  *   The entity label, or FALSE if not found.
  *
- * @todo
- *   Remove once all entity types are implementing the EntityInterface.
+ * @deprecated
+ *   Deprecated since 1.0.
  */
 function entity_label($entity_type, $entity) {
-  $label = FALSE;
-  $info = entity_get_info($entity_type);
-  if (isset($info['label callback'])) {
-    $label = $info['label callback']($entity_type, $entity);
-  }
-  elseif (!empty($info['entity keys']['label']) && isset($entity->{$info['entity keys']['label']})) {
-    $label = $entity->{$info['entity keys']['label']};
-  }
-
-  return $label;
+  return $entity->label();
 }
 
 /**

@@ -209,7 +209,6 @@ function system_entity_info() {
       'entity class' => 'File',
       'entity keys' => array(
         'id' => 'fid',
-        'label' => 'filename',
       ),
       'static cache' => FALSE,
     ),

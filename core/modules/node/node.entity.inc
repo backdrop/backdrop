@@ -144,7 +144,14 @@ class Node extends Entity {
    * Implements EntityInterface::id().
    */
   public function id() {
-    return $this->nid;
+    return isset($this->nid) ? $this->nid : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'node';
   }
 
   /**
@@ -152,6 +159,23 @@ class Node extends Entity {
    */
   public function bundle() {
     return $this->type;
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->title;
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'node/' . $this->nid,
+      'options' => array(),
+    );
   }
 
   /**

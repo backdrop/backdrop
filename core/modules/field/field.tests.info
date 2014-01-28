@@ -46,12 +46,6 @@ description = Bulk delete fields and instances, and clean up afterwards.
 group = Field API
 file = tests/field.test
 
-[EntityPropertiesTestCase]
-name = Entity properties
-description = Tests entity properties.
-group = Entity API
-file = tests/field.test
-
 [FieldAttachStorageTestCase]
 name = Field attach tests (storage-related)
 description = Test storage-related Field Attach API functions.

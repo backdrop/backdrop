@@ -28,6 +28,7 @@ function field_test_entity_info() {
       'field cache' => FALSE,
       'base table' => 'test_entity',
       'revision table' => 'test_entity_revision',
+      'class' => 'TestEntity',
       'entity keys' => array(
         'id' => 'ftid',
         'revision' => 'ftvid',
@@ -66,6 +67,7 @@ function field_test_entity_info() {
       'name' => t('Test Entity with a specified bundle.'),
       'base table' => 'test_entity_bundle',
       'fieldable' => TRUE,
+      'entity class' => 'TestFieldEntity',
       'controller class' => 'TestEntityBundleController',
       'field cache' => FALSE,
       'entity keys' => array(
@@ -73,48 +75,6 @@ function field_test_entity_info() {
         'bundle' => 'fttype',
       ),
       'bundles' => array('test_entity_2' => array('label' => 'Test entity 2')) + $bundles,
-      'view modes' => $test_entity_modes,
-    ),
-    // @see EntityPropertiesTestCase::testEntityLabel()
-    'test_entity_no_label' => array(
-      'name' => t('Test entity without label'),
-      'fieldable' => TRUE,
-      'field cache' => FALSE,
-      'base table' => 'test_entity',
-      'entity keys' => array(
-        'id' => 'ftid',
-        'revision' => 'ftvid',
-        'bundle' => 'fttype',
-      ),
-      'bundles' => $bundles,
-      'view modes' => $test_entity_modes,
-    ),
-    'test_entity_label' => array(
-      'name' => t('Test entity label'),
-      'fieldable' => TRUE,
-      'field cache' => FALSE,
-      'base table' => 'test_entity',
-      'entity keys' => array(
-        'id' => 'ftid',
-        'revision' => 'ftvid',
-        'bundle' => 'fttype',
-        'label' => 'ftlabel',
-      ),
-      'bundles' => $bundles,
-      'view modes' => $test_entity_modes,
-    ),
-    'test_entity_label_callback' => array(
-      'name' => t('Test entity label callback'),
-      'fieldable' => TRUE,
-      'field cache' => FALSE,
-      'base table' => 'test_entity',
-      'label callback' => 'field_test_entity_label_callback',
-      'entity keys' => array(
-        'id' => 'ftid',
-        'revision' => 'ftvid',
-        'bundle' => 'fttype',
-      ),
-      'bundles' => $bundles,
       'view modes' => $test_entity_modes,
     ),
   );
@@ -473,6 +433,27 @@ function field_test_entity_nested_form_submit($form, &$form_state) {
   field_test_entity_save($entity_2);
 
   drupal_set_message(t('test_entities @id_1 and @id_2 have been updated.', array('@id_1' => $entity_1->ftid, '@id_2' => $entity_2->ftid)));
+}
+
+/**
+ * Test class for the test_entity entity type.
+ */
+class TestFieldEntity extends Entity {
+  function id() {
+    return $this->id;
+  }
+
+  public function entityType() {
+    return 'test_field_entity';
+  }
+
+  function label() {
+    return $this->label;
+  }
+
+  function uri() {
+    return 'test/' . $this->id;
+  }
 }
 
 /**

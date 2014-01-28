@@ -16,10 +16,8 @@ interface EntityInterface {
    * @param $values
    *   An array of values to set, keyed by property name. If the entity type
    *   has bundles, the bundle key has to be specified.
-   * @param $entity_type
-   *   The type of the entity to create.
    */
-  public function __construct(array $values, $entity_type);
+  public function __construct(array $values);
 
   /**
    * Returns the entity identifier (the entity's machine name or numeric ID).
@@ -103,59 +101,16 @@ interface EntityInterface {
    *   it inserts a new entity into the storage system.
    */
   public function createDuplicate();
-
-  /**
-   * Returns the info of the type of the entity.
-   *
-   * @see entity_get_info()
-   */
-  public function entityInfo();
 }
 
 /**
  * Defines a base entity class.
- *
- * Default implementation of EntityInterface.
- *
- * This class can be used as-is by simple entity types. Entity types requiring
- * special handling can extend the class.
  */
-class Entity implements EntityInterface {
-
-  /**
-   * The entity type.
-   *
-   * @var string
-   */
-  protected $entityType;
-
-  /**
-   * Information about the entity's type.
-   *
-   * @var array
-   */
-  protected $entityInfo;
-
-  /**
-   * The entity ID key.
-   *
-   * @var string
-   */
-  protected $idKey;
-
-  /**
-   * The entity bundle key.
-   *
-   * @var string
-   */
-  protected $bundleKey;
-
+abstract class Entity implements EntityInterface {
   /**
    * Constructs a new entity object.
    */
-  public function __construct(array $values = array(), $entity_type) {
-    $this->entityType = $entity_type;
-    $this->setUp();
+  public function __construct(array $values = array()) {
     // Set initial values.
     foreach ($values as $key => $value) {
       $this->$key = $value;
@@ -163,20 +118,9 @@ class Entity implements EntityInterface {
   }
 
   /**
-   * Sets up the object instance on construction or unserialization.
-   */
-  protected function setUp() {
-    $this->entityInfo = entity_get_info($this->entityType);
-    $this->idKey = $this->entityInfo['entity keys']['id'];
-    $this->bundleKey = isset($this->entityInfo['entity keys']['bundle']) ? $this->entityInfo['entity keys']['bundle'] : NULL;
-  }
-
-  /**
    * Implements EntityInterface::id().
    */
-  public function id() {
-    return isset($this->{$this->idKey}) ? $this->{$this->idKey} : NULL;
-  }
+  abstract public function id();
 
   /**
    * Implements EntityInterface::isNew().
@@ -184,21 +128,22 @@ class Entity implements EntityInterface {
   public function isNew() {
     // We support creating entities with pre-defined IDs to ease migrations.
     // For that the "is_new" property may be set to TRUE.
-    return !empty($this->is_new) || empty($this->{$this->idKey});
+    return !empty($this->is_new) || !$this->id();
   }
 
   /**
    * Implements EntityInterface::entityType().
    */
-  public function entityType() {
-    return $this->entityType;
-  }
+  abstract public function entityType();
 
   /**
    * Implements EntityInterface::bundle().
+   *
+   * Entity types that do not support bundles simply return the entity type as
+   * their bundle. Subclasses should override this method if supporting bundles.
    */
   public function bundle() {
-    return isset($this->bundleKey) ? $this->{$this->bundleKey} : $this->entityType;
+    return $this->entityType();
   }
 
   /**
@@ -206,52 +151,20 @@ class Entity implements EntityInterface {
    *
    * @see entity_label()
    */
-  public function label() {
-    $label = FALSE;
-    if (isset($this->entityInfo['label callback']) && function_exists($this->entityInfo['label callback'])) {
-      $label = $this->entityInfo['label callback']($this->entityType, $this);
-    }
-    elseif (!empty($this->entityInfo['entity keys']['label']) && isset($this->{$this->entityInfo['entity keys']['label']})) {
-      $label = $this->{$this->entityInfo['entity keys']['label']};
-    }
-    return $label;
-  }
+  abstract public function label();
 
   /**
    * Implements EntityInterface::uri().
    *
    * @see entity_uri()
    */
-  public function uri() {
-    $bundle = $this->bundle();
-    // A bundle-specific callback takes precedence over the generic one for the
-    // entity type.
-    if (isset($this->entityInfo['bundles'][$bundle]['uri callback'])) {
-      $uri_callback = $this->entityInfo['bundles'][$bundle]['uri callback'];
-    }
-    elseif (isset($this->entityInfo['uri callback'])) {
-      $uri_callback = $this->entityInfo['uri callback'];
-    }
-    else {
-      return NULL;
-    }
-
-    // Invoke the callback to get the URI. If there is no callback, return NULL.
-    if (isset($uri_callback) && function_exists($uri_callback)) {
-      $uri = $uri_callback($this);
-      // Pass the entity data to url() so that alter functions do not need to
-      // look up this entity again.
-      $uri['options']['entity_type'] = $this->entityType;
-      $uri['options']['entity'] = $this;
-      return $uri;
-    }
-  }
+  abstract public function uri();
 
   /**
    * Implements EntityInterface::save().
    */
   public function save() {
-    return entity_get_controller($this->entityType)->save($this);
+    return entity_get_controller($this->entityType())->save($this);
   }
 
   /**
@@ -259,7 +172,7 @@ class Entity implements EntityInterface {
    */
   public function delete() {
     if (!$this->isNew()) {
-      entity_get_controller($this->entityType)->delete(array($this->id()));
+      entity_get_controller($this->entityType())->delete(array($this->id()));
     }
   }
 
@@ -267,37 +180,12 @@ class Entity implements EntityInterface {
    * Implements EntityInterface::createDuplicate().
    */
   public function createDuplicate() {
+    $entity_info = entity_get_info($this->entityType());
     $duplicate = clone $this;
-    $duplicate->{$this->idKey} = NULL;
+    $duplicate->{$entity_info['entity keys']['id']} = NULL;
+    if (isset($entity_info['entity_keys']['revision'])) {
+      $duplicate->{$entity_info['entity keys']['revision']} = NULL;
+    }
     return $duplicate;
-  }
-
-  /**
-   * Implements EntityInterface::entityInfo().
-   */
-  public function entityInfo() {
-    return $this->entityInfo;
-  }
-
-  /**
-   * Serializes only what is necessary.
-   *
-   * See @link http://www.php.net/manual/en/language.oop5.magic.php#language.oop5.magic.sleep PHP Magic Methods @endlink.
-   */
-  public function __sleep() {
-    $vars = get_object_vars($this);
-    unset($vars['entityInfo'], $vars['idKey'], $vars['bundleKey']);
-    // Also key the returned array with the variable names so the method may
-    // be easily overridden and customized.
-    return drupal_map_assoc(array_keys($vars));
-  }
-
-  /**
-   * Invokes setUp() on unserialization.
-   *
-   * See @link http://www.php.net/manual/en/language.oop5.magic.php#language.oop5.magic.sleep PHP Magic Methods @endlink
-   */
-  public function __wakeup() {
-    $this->setUp();
   }
 }

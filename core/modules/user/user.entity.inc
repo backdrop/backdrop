@@ -135,7 +135,36 @@ class User extends Entity {
    * Implements EntityInterface::id().
    */
   public function id() {
-    return $this->uid;
+    return isset($this->uid) ? $this->uid : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'user';
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return user_format_name($this);
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    // Anonymous users do not have a URI.
+    $uri = FALSE;
+    if ($this->uid) {
+      $uri = array(
+        'path' => 'user/' . $this->uid,
+        'options' => array(),
+      );
+    }
+    return $uri;
   }
 }
 
