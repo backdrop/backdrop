@@ -1724,6 +1724,15 @@ function system_update_8005() {
 }
 
 /**
+ * Delete unneeded actions for manually saving comments and nodes.
+ */
+function system_update_8006() {
+  db_delete('actions')
+    ->condition('aid', array('comment_save_action', 'node_save_action'), 'IN')
+    ->execute();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-8.x"
  * The next series of updates should start at 9000.
  */

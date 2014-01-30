@@ -93,7 +93,7 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   function views_form(&$form, &$form_state) {
     // Add the tableselect javascript.
-    $form['#attached']['library'][] = array('system', 'drupal.tableselect');
+    $form['#attached']['js'][] = 'core/misc/tableselect.js';
 
     // Render checkboxes for all rows.
     $form[$this->options['id']]['#tree'] = TRUE;
@@ -104,6 +104,7 @@ class views_handler_field_bulk_form extends views_handler_field {
         // only output a generic label.
         '#title' => t('Update this item'),
         '#title_display' => 'invisible',
+        '#return_value' => $row->{$this->field_alias},
         '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
       );
     }
@@ -144,22 +145,22 @@ class views_handler_field_bulk_form extends views_handler_field {
     if ($form_state['step'] == 'views_form_views_form') {
       $action = $form_state['values']['action'];
       $action = actions_load($action);
+      $action_list = actions_list();
+      $action_info = $action_list[$action->callback];
       $count = 0;
 
       // Filter only selected checkboxes.
       $selected = array_filter($form_state['values'][$this->options['id']]);
-
       if (!empty($selected)) {
         $entity_type = $this->get_entity_type();
         $entities = entity_load($entity_type, $selected);
         foreach ($entities as $entity) {
-          $entity = entity_create($entity_type, (array) $entity);
-
           actions_do($action->aid, $entity);
-          $entity->save();
-          //$storage = new EntityDatabaseStorageController($entity_type);
-          //$storage->save($entity);
 
+          // If changing a property only, save the entity after the change.
+          if (isset($action_info['behavior']) && array_search('changes_property', $action_info['behavior']) !== FALSE) {
+            $entity->save();
+          }
           $count++;
         }
       }
@@ -237,5 +238,4 @@ class views_handler_field_bulk_form extends views_handler_field {
     }
     return FALSE;
   }
-
 }

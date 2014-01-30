@@ -3344,14 +3344,13 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
  *     form for 'node_assign_owner_action' is 'node_assign_owner_action_form'.)
  *     This function takes $context as its only parameter, and is paired with
  *     the usual _submit function, and possibly a _validate function.
- *   - 'triggers': An array of the events (that is, hooks) that can trigger this
- *     action. For example: array('node_insert', 'user_update'). You can also
- *     declare support for any trigger by returning array('any') for this value.
  *   - 'behavior': (optional) A machine-readable array of behaviors of this
  *     action, used to signal additionally required actions that may need to be
  *     triggered. Modules that are processing actions should take special care
  *     for the "presave" hook, in which case a dependent "save" action should
  *     NOT be invoked.
+ *   - 'redirect': (optional) A path to which the user will be redirected after
+ *     this action has been completed.
  *
  * @ingroup actions
  */
@@ -3362,20 +3361,12 @@ function hook_action_info() {
       'label' => t('Unpublish comment'),
       'configurable' => FALSE,
       'behavior' => array('changes_property'),
-      'triggers' => array('comment_presave', 'comment_insert', 'comment_update'),
     ),
     'comment_unpublish_by_keyword_action' => array(
       'type' => 'comment',
       'label' => t('Unpublish comment containing keyword(s)'),
       'configurable' => TRUE,
       'behavior' => array('changes_property'),
-      'triggers' => array('comment_presave', 'comment_insert', 'comment_update'),
-    ),
-    'comment_save_action' => array(
-      'type' => 'comment',
-      'label' => t('Save comment'),
-      'configurable' => FALSE,
-      'triggers' => array('comment_insert', 'comment_update'),
     ),
   );
 }
