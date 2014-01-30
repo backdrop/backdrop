@@ -4,6 +4,9 @@
  * @file
  * Default theme implementation to display a single Drupal page.
  *
+ * The doctype, html, head and body tags are not in this template. Instead they
+ * can be found in the html.tpl.php template in this directory.
+ *
  * Available variables:
  *
  * General utility variables:
@@ -47,7 +50,7 @@
  * - $action_links (array): Actions local to the page, such as 'Add menu' on the
  *   menu administration interface.
  * - $feed_icons: A string of all feed icons for the current page.
- * - $node: The node object, if there is an automatically-loaded node
+ * - $node: The node entity, if there is an automatically-loaded node
  *   associated with the page, and the node ID is the second argument
  *   in the page's path (e.g. node/12345 and node/12345/revisions, but not
  *   comment/reply/12345).
@@ -64,6 +67,7 @@
  * @see template_preprocess()
  * @see template_preprocess_page()
  * @see template_process()
+ * @see html.tpl.php
  */
 ?>
 

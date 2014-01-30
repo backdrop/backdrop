@@ -68,32 +68,32 @@ const WATCHDOG_EMERGENCY = 0;
 const WATCHDOG_ALERT = 1;
 
 /**
- * Log message severity -- Critical: critical conditions.
+ * Log message severity -- Critical conditions.
  */
 const WATCHDOG_CRITICAL = 2;
 
 /**
- * Log message severity -- Error: error conditions.
+ * Log message severity -- Error conditions.
  */
 const WATCHDOG_ERROR = 3;
 
 /**
- * Log message severity -- Warning: warning conditions.
+ * Log message severity -- Warning conditions.
  */
 const WATCHDOG_WARNING = 4;
 
 /**
- * Log message severity -- Notice: normal but significant condition.
+ * Log message severity -- Normal but significant conditions.
  */
 const WATCHDOG_NOTICE = 5;
 
 /**
- * Log message severity -- Informational: informational messages.
+ * Log message severity -- Informational messages.
  */
 const WATCHDOG_INFO = 6;
 
 /**
- * Log message severity -- Debug: debug-level messages.
+ * Log message severity -- Debug-level messages.
  */
 const WATCHDOG_DEBUG = 7;
 
@@ -286,7 +286,7 @@ const DRUPAL_PHP_FUNCTION_PATTERN = '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*';
  * means that assigning an offset via arrayAccess will only apply while the
  * object is in scope and will not be written back to the persistent cache.
  * This follows a similar pattern to static vs. persistent caching in
- * procedural code. Extending classes may wish to alter this behaviour, for
+ * procedural code. Extending classes may wish to alter this behavior, for
  * example by overriding offsetSet() and adding an automatic call to persist().
  *
  * @see SchemaCache
@@ -1067,6 +1067,113 @@ function variable_del($name) {
 }
 
 /**
+ * Loads the persistent state table.
+ *
+ * The state table is composed of values that have been saved in the table
+ * with state_set().
+ */
+function state_initialize() {
+  if ($cached = cache('cache')->get('states')) {
+    $states = $cached->data;
+  }
+  else {
+    // Cache miss. Avoid a stampede.
+    $name = 'state_init';
+    if (!lock_acquire($name, 1)) {
+      // Another request is building the variable cache.
+      // Wait, then re-run this function.
+      lock_wait($name);
+      return state_initialize();
+    }
+    else {
+      // Proceed with variable rebuild.
+      $states = array_map('unserialize', db_query('SELECT name, value FROM {state}')->fetchAllKeyed());
+      cache('cache')->set('states', $states);
+      lock_release($name);
+    }
+  }
+
+  return $states;
+}
+
+/**
+ * Retrieves a "state" value from the database.
+ *
+ * States are used for saving long-term values in the database that are
+ * environment-specific. Some examples of values appropriate for utilizing
+ * states include the last time cron was run or the current query string
+ * appended to CSS/JS files. These values should not be copied between
+ * environments, so they are stored in the state system instead of as
+ * configuration files.
+ *
+ * Case-sensitivity of the state_* functions depends on the database
+ * collation used. To avoid problems, always use lower case for persistent
+ * state names.
+ *
+ * @param $name
+ *   The name of the state to return.
+ * @param $default
+ *   The default value to use if this state has never been set.
+ *
+ * @return
+ *   The value of the state. Complex data types such as objects and arrays are
+ *   unserialized when returned.
+ *
+ * @see state_set()
+ * @see state_del()
+ */
+function state_get($name, $default = NULL) {
+  $states = &drupal_static('states');
+  if (!isset($states)) {
+    $states = state_initialize();
+  }
+  return isset($states[$name]) ? $states[$name] : $default;
+}
+
+/**
+ * Sets a persistent state value.
+ *
+ * @param $name
+ *   The name of the state to set.
+ * @param $value
+ *   The value to set. Complex data types will be serialized upon storage.
+ *
+ * @see state_get()
+ * @see state_del()
+ */
+function state_set($name, $value) {
+  $states = &drupal_static('states');
+  db_merge('state')
+    ->key(array('name' => $name))
+    ->fields(array('value' => serialize($value)))
+    ->execute();
+  cache('cache')->delete('states');
+  if (isset($states)) {
+    $states[$name] = $value;
+  }
+}
+
+/**
+ * Unsets a persistent state value.
+ *
+ * @param $name
+ *   The name of the state to delete.
+ *
+ * @see state_get()
+ * @see state_set()
+ */
+function state_del($name) {
+  $states = &drupal_static('states', array());
+  db_delete('state')
+    ->condition('name', $name)
+    ->execute();
+  cache('cache')->delete('states');
+  if (array_key_exists($name, $states)) {
+    unset($states[$name]);
+  }
+}
+
+/**
  * Retrieves the current page from the cache.
  *
  * Note: we do not serve cached pages to authenticated users, or to anonymous
@@ -1745,8 +1852,16 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
  *   NULL if message is already translated or not possible to
  *   translate.
  * @param $severity
- *   The severity of the message, as per RFC 3164. Possible values are
- *   WATCHDOG_ERROR, WATCHDOG_WARNING, etc.
+ *   The severity of the message; one of the following values as defined in
+ *   @link http://www.faqs.org/rfcs/rfc3164.html RFC 3164: @endlink
+ *   - WATCHDOG_EMERGENCY: Emergency, system is unusable.
+ *   - WATCHDOG_ALERT: Alert, action must be taken immediately.
+ *   - WATCHDOG_CRITICAL: Critical conditions.
+ *   - WATCHDOG_ERROR: Error conditions.
+ *   - WATCHDOG_WARNING: Warning conditions.
+ *   - WATCHDOG_NOTICE: (default) Normal but significant conditions.
+ *   - WATCHDOG_INFO: Informational messages.
+ *   - WATCHDOG_DEBUG: Debug-level messages.
  * @param $link
  *   A link to associate with the message.
  *
@@ -1763,6 +1878,9 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   if (!$in_error_state && function_exists('module_implements')) {
     $in_error_state = TRUE;
 
+    // The user object may not exist in all conditions, so 0 is substituted if needed.
+    $user_uid = isset($user->uid) ? $user->uid : 0;
+
     // Prepare the fields to be logged
     $log_entry = array(
       'type'        => $type,
@@ -1771,6 +1889,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
       'severity'    => $severity,
       'link'        => $link,
       'user'        => $user,
+      'uid'         => $user_uid,
       'request_uri' => $base_root . request_uri(),
       'referer'     => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
       'ip'          => ip_address(),
@@ -2751,7 +2870,7 @@ function request_path() {
     return $path;
   }
 
-  if (isset($_GET['q'])) {
+  if (isset($_GET['q']) && is_string($_GET['q'])) {
     // This is a request with a ?q=foo/bar query string. $_GET['q'] is
     // overwritten in drupal_path_initialize(), but request_path() is called
     // very early in the bootstrap process, so the original value is saved in
@@ -3144,11 +3263,30 @@ function registry_rebuild() {
  * to be called, because it is already known that the list of files in the
  * {system} table matches those in the file system.
  *
+ * @return
+ *   TRUE if the registry was rebuilt, FALSE if another thread was rebuilding
+ *   in parallel and the current thread just waited for completion.
+ *
  * @see registry_rebuild()
  */
 function registry_update() {
+  // install_system_module() calls module_enable() which calls into this
+  // function during initial system installation, so the lock system is neither
+  // loaded nor does its storage exist yet.
+  $in_installer = drupal_installation_attempted();
+  if (!$in_installer && !lock_acquire(__FUNCTION__)) {
+    // Another request got the lock, wait for it to finish.
+    lock_wait(__FUNCTION__);
+    return FALSE;
+  }
+
   require_once DRUPAL_ROOT . '/core/includes/registry.inc';
   _registry_update();
+
+  if (!$in_installer) {
+    lock_release(__FUNCTION__);
+  }
+  return TRUE;
 }
 
 /**

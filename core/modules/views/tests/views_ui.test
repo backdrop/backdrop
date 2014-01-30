@@ -238,10 +238,11 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $this->node_type_without_tags = $this->drupalCreateContentType();
 
     // Create the vocabulary for the tag field.
-    $this->tag_vocabulary = new stdClass();
-    $this->tag_vocabulary->name = 'Views testing tags';
-    $this->tag_vocabulary->machine_name = 'views_testing_tags';
-    taxonomy_vocabulary_save($this->tag_vocabulary);
+    $this->tag_vocabulary = entity_create('taxonomy_vocabulary', array(
+      'name' => 'Views testing tags',
+      'machine_name' => 'views_testing_tags',
+    ));
+    $this->tag_vocabulary->save();
 
     // Create the tag field itself.
     $this->tag_field = array(
@@ -656,7 +657,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
       'uid' => 0,
       'status' => COMMENT_PUBLISHED,
       'subject' => $this->randomName(),
-      'language' => LANGUAGE_NONE,
+      'langcode' => LANGUAGE_NONE,
       'comment_body' => array(LANGUAGE_NONE => array($this->randomName())),
     ));
     comment_save($comment);
@@ -667,14 +668,16 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    * Helper function to create a taxonomy term and return its expected path.
    */
   function createTaxonomyTermAndGetPath() {
-    $vocabulary = new stdClass();
-    $vocabulary->name = $this->randomName();
-    $vocabulary->machine_name = drupal_strtolower($this->randomName());
+    $vocabulary = entity_create('taxonomy_vocabulary', array(
+      'name' => $this->randomName(),
+      'machine_name' => drupal_strtolower($this->randomName()),
+    ));
     taxonomy_vocabulary_save($vocabulary);
 
-    $term = new stdClass();
-    $term->name = $this->randomName();
-    $term->vid = $vocabulary->vid;
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'vid' => $vocabulary->vid,
+    ));
     taxonomy_term_save($term);
 
     return entity_uri('taxonomy_term', $term);
@@ -684,16 +687,16 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    * Helper function to create a file and return its expected path.
    */
   function createFileAndGetPath() {
-    $file = (object) array(
+    $file = entity_create('file', array(
       'uid' => 1,
       'filename' => 'views-ui-jump-menu-test.txt',
       'uri' => 'public://views-ui-jump-menu-test.txt',
       'filemime' => 'text/plain',
       'timestamp' => 1,
       'status' => FILE_STATUS_PERMANENT,
-    );
+    ));
     file_put_contents($file->uri, 'test content');
-    $file = file_save($file);
+    $file->save();
     return file_create_url($file->uri);
   }
 

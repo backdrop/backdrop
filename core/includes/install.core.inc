@@ -354,7 +354,7 @@ function install_run_tasks(&$install_state) {
       $install_state['tasks_performed'][] = $task_name;
       $install_state['installation_finished'] = empty($tasks_to_perform);
       if ($install_state['database_tables_exist'] && ($task['run'] == INSTALL_TASK_RUN_IF_NOT_COMPLETED || $install_state['installation_finished'])) {
-        variable_set('install_task', $install_state['installation_finished'] ? 'done' : $task_name);
+        state_set('install_task', $install_state['installation_finished'] ? 'done' : $task_name);
       }
     }
     // Stop when there are no tasks left. In the case of an interactive
@@ -802,7 +802,7 @@ function install_system_module(&$install_state) {
  */
 function install_verify_completed_task() {
   try {
-    if ($result = db_query("SELECT value FROM {variable} WHERE name = :name", array('name' => 'install_task'))) {
+    if ($result = db_query("SELECT value FROM {state} WHERE name = :name", array('name' => 'install_task'))) {
       $task = unserialize($result->fetchField());
     }
   }
@@ -1088,10 +1088,31 @@ function _install_select_profile($profiles) {
     return $profile->name;
   }
   else {
+    $available_profiles = array();
+    $exclusive_profiles = array();
     foreach ($profiles as $profile) {
       if (!empty($_POST['profile']) && ($_POST['profile'] == $profile->name)) {
         return $profile->name;
       }
+
+      $profile_info = install_profile_info($profile->name);
+      // Check for profiles marked as "hidden".
+      if (empty($profile_info['hidden'])) {
+        $available_profiles[] = $profile->name;
+      }
+      // Check for a profile marked as "exclusive".
+      else if (!empty($profile_info['exclusive'])) {
+        $exclusive_profiles[] = $profile->name;
+      }
+    }
+
+    // If there is only one available profile, return it.
+    if (count($available_profiles) == 1) {
+      return reset($available_profiles);
+    }
+    // If there is only one exclusive profile, return it.
+    else if (count($exclusive_profiles) == 1) {
+      return reset($exclusive_profiles);
     }
   }
 }
@@ -1870,8 +1891,13 @@ function install_configure_form_submit($form, &$form_state) {
 
   // We precreated user 1 with placeholder values. Let's save the real values.
   $account = user_load(1);
-  $merge_data = array('init' => $form_state['values']['account']['mail'], 'roles' => !empty($account->roles) ? $account->roles : array(), 'status' => 1, 'timezone' => $form_state['values']['date_default_timezone']);
-  user_save($account, array_merge($form_state['values']['account'], $merge_data));
+  $account->init = $account->mail = $form_state['values']['account']['mail'];
+  $account->roles = !empty($account->roles) ? $account->roles : array();
+  $account->status = 1;
+  $account->timezone = $form_state['values']['date_default_timezone'];
+  $account->pass = $form_state['values']['account']['pass'];
+  $account->name = $form_state['values']['account']['name'];
+  $account->save();
   // Load global $user and perform final login tasks.
   $user = user_load(1);
   user_login_finalize();
@@ -1881,5 +1907,5 @@ function install_configure_form_submit($form, &$form_state) {
   }
 
   // Record when this install ran.
-  variable_set('install_time', $_SERVER['REQUEST_TIME']);
+  state_set('install_time', $_SERVER['REQUEST_TIME']);
 }

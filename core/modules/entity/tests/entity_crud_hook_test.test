@@ -54,7 +54,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
    * Tests hook invocations for CRUD operations on comments.
    */
   public function testCommentHooks() {
-    $node = (object) array(
+    $node = entity_create('node', array(
       'uid' => 1,
       'type' => 'article',
       'title' => 'Test node',
@@ -62,11 +62,11 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
       'comment' => 2,
       'promote' => 0,
       'sticky' => 0,
-      'language' => LANGUAGE_NONE,
+      'langcode' => LANGUAGE_NONE,
       'created' => REQUEST_TIME,
       'changed' => REQUEST_TIME,
-    );
-    node_save($node);
+    ));
+    $node->save();
     $nid = $node->nid;
 
     $comment = entity_create('comment', array(
@@ -78,7 +78,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
       'created' => REQUEST_TIME,
       'changed' => REQUEST_TIME,
       'status' => 1,
-      'language' => LANGUAGE_NONE,
+      'langcode' => LANGUAGE_NONE,
     ));
 
     $_SESSION['entity_crud_hook_test'] = array();
@@ -127,7 +127,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
   public function testFileHooks() {
     $url = 'public://entity_crud_hook_test.file';
     file_put_contents($url, 'Test test test');
-    $file = (object) array(
+    $file = entity_create('file', array(
       'fid' => NULL,
       'uid' => 1,
       'filename' => 'entity_crud_hook_test.file',
@@ -136,9 +136,9 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
       'filesize' => filesize($url),
       'status' => 1,
       'timestamp' => REQUEST_TIME,
-    );
+    ));
     $_SESSION['entity_crud_hook_test'] = array();
-    file_save($file);
+    $file->save();
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_file_presave called',
@@ -157,7 +157,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
 
     $_SESSION['entity_crud_hook_test'] = array();
     $file->filename = 'new.entity_crud_hook_test.file';
-    file_save($file);
+    $file->save();
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_file_presave called',
@@ -167,7 +167,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
     ));
 
     $_SESSION['entity_crud_hook_test'] = array();
-    file_delete($file);
+    $file->delete();
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_file_predelete called',
@@ -181,7 +181,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
    * Tests hook invocations for CRUD operations on nodes.
    */
   public function testNodeHooks() {
-    $node = (object) array(
+    $node = entity_create('node', array(
       'uid' => 1,
       'type' => 'article',
       'title' => 'Test node',
@@ -189,12 +189,12 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
       'comment' => 2,
       'promote' => 0,
       'sticky' => 0,
-      'language' => LANGUAGE_NONE,
+      'langcode' => LANGUAGE_NONE,
       'created' => REQUEST_TIME,
       'changed' => REQUEST_TIME,
-    );
+    ));
     $_SESSION['entity_crud_hook_test'] = array();
-    node_save($node);
+    $node->save();
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_node_presave called',
@@ -213,7 +213,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
 
     $_SESSION['entity_crud_hook_test'] = array();
     $node->title = 'New title';
-    node_save($node);
+    $node->save();
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_node_presave called',
@@ -237,20 +237,20 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
    * Tests hook invocations for CRUD operations on taxonomy terms.
    */
   public function testTaxonomyTermHooks() {
-    $vocabulary = (object) array(
+    $vocabulary = entity_create('taxonomy_vocabulary', array(
       'name' => 'Test vocabulary',
       'machine_name' => 'test',
       'description' => NULL,
       'module' => 'entity_crud_hook_test',
-    );
+    ));
     taxonomy_vocabulary_save($vocabulary);
 
-    $term = (object) array(
+    $term = entity_create('taxonomy_term', array(
       'vid' => $vocabulary->vid,
       'name' => 'Test term',
       'description' => NULL,
       'format' => 1,
-    );
+    ));
     $_SESSION['entity_crud_hook_test'] = array();
     taxonomy_term_save($term);
 
@@ -295,12 +295,12 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
    * Tests hook invocations for CRUD operations on taxonomy vocabularies.
    */
   public function testTaxonomyVocabularyHooks() {
-    $vocabulary = (object) array(
+    $vocabulary = entity_create('taxonomy_vocabulary', array(
       'name' => 'Test vocabulary',
       'machine_name' => 'test',
       'description' => NULL,
       'module' => 'entity_crud_hook_test',
-    );
+    ));
     $_SESSION['entity_crud_hook_test'] = array();
     taxonomy_vocabulary_save($vocabulary);
 
@@ -345,16 +345,15 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
    * Tests hook invocations for CRUD operations on users.
    */
   public function testUserHooks() {
-    $edit = array(
+    $account = entity_create('user', array(
       'name' => 'Test user',
       'mail' => 'test@example.com',
       'created' => REQUEST_TIME,
       'status' => 1,
       'language' => 'en',
-    );
-    $account = (object) $edit;
+    ));
     $_SESSION['entity_crud_hook_test'] = array();
-    $account = user_save($account, $edit);
+    $account->save();
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_user_presave called',
@@ -364,7 +363,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
     ));
 
     $_SESSION['entity_crud_hook_test'] = array();
-    $account = user_load($account->uid);
+    user_load($account->uid);
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_entity_load called for type user',
@@ -372,8 +371,8 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
     ));
 
     $_SESSION['entity_crud_hook_test'] = array();
-    $edit['name'] = 'New name';
-    $account = user_save($account, $edit);
+    $account->name = 'New name';
+    $account->save();
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_user_presave called',

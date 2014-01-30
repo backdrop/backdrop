@@ -5,7 +5,7 @@ version = VERSION
 core = 8.x
 dependencies[] = options
 dependencies[] = entity
-files[] = taxonomy.module
+files[] = taxonomy.entity.inc
 configure = admin/structure/taxonomy
 
 ; Views handlers.

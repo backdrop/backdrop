@@ -660,7 +660,7 @@ file = tests/file.test
 
 [FileSaveTest]
 name = File saving
-description = Tests the file_save() function.
+description = File saving tests.
 group = File API
 file = tests/file.test
 

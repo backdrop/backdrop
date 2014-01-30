@@ -66,7 +66,7 @@ file = tests/user.test
 
 [UserSaveTestCase]
 name = User save test
-description = Test user_save() for arbitrary new uid.
+description = Test account saving for arbitrary new uid.
 group = User
 file = tests/user.test
 

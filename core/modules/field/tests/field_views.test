@@ -42,23 +42,23 @@ class FieldViewsTestHelper extends ViewsSqlTest {
     }
 
     // Create a user assigned to that role.
-    $edit = array();
-    $edit['name']   = $this->randomName();
-    $edit['mail']   = $edit['name'] . '@example.com';
-    $edit['roles']  = array($rid => $rid);
-    $edit['pass']   = user_password();
-    $edit['status'] = 1;
-    $edit += $extra_edit;
+    $user_name = $this->randomName();
+    $account = entity_create('user', array(
+      'name' => $user_name,
+      'mail' => $user_name . '@example.com',
+      'roles' => array($rid => $rid),
+      'pass' => user_password(),
+      'status' => 1,
+    ) + $extra_edit);
+    $account->save();
 
-    $account = user_save(drupal_anonymous_user(), $edit);
-
-    $this->assertTrue(!empty($account->uid), t('User created with name %name and pass %pass', array('%name' => $edit['name'], '%pass' => $edit['pass'])), t('User login'));
+    $this->assertTrue(!empty($account->uid), t('User created with name %name and pass %pass', array('%name' => $account->name, '%pass' => $account->pass)), t('User login'));
     if (empty($account->uid)) {
       return FALSE;
     }
 
     // Add the raw password so that we can log in as this user.
-    $account->pass_raw = $edit['pass'];
+    $account->pass_raw = $account->pass;
     return $account;
   }
 

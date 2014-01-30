@@ -741,7 +741,7 @@ class CommonCascadingStylesheetsTestCase extends DrupalWebTestCase {
    */
   function testAddCssFileWithQueryString() {
     $this->drupalGet('common-test/query-string');
-    $query_string = variable_get('css_js_query_string', '0');
+    $query_string = state_get('css_js_query_string', '0');
     $this->assertRaw(drupal_get_path('module', 'node') . '/node.admin.css?' . $query_string, t('Query string was appended correctly to css.'));
     $this->assertRaw(drupal_get_path('module', 'node') . '/node-fake.css?arg1=value1&amp;arg2=value2', t('Query string not escaped on a URI.'));
   }
@@ -1238,7 +1238,7 @@ class CommonJavaScriptTestCase extends DrupalWebTestCase {
    * @see drupal_pre_render_conditional_comments()
    */
   function testBrowserConditionalComments() {
-    $default_query_string = variable_get('css_js_query_string', '0');
+    $default_query_string = state_get('css_js_query_string', '0');
 
     drupal_add_js('core/misc/collapse.js', array('browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE)));
     drupal_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
@@ -1265,7 +1265,7 @@ class CommonJavaScriptTestCase extends DrupalWebTestCase {
    * Test JavaScript grouping and aggregation.
    */
   function testAggregation() {
-    $default_query_string = variable_get('css_js_query_string', '0');
+    $default_query_string = state_get('css_js_query_string', '0');
 
     // To optimize aggregation, items with the 'every_page' option are ordered
     // ahead of ones without. The order of JavaScript execution must be the
@@ -1299,6 +1299,48 @@ class CommonJavaScriptTestCase extends DrupalWebTestCase {
       '<script type="text/javascript" src="' . file_create_url(drupal_build_js_cache(array('core/misc/ajax.js' => $js_items['core/misc/ajax.js'], 'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']))) . '"></script>',
     ));
     $this->assertTrue(strpos($javascript, $expected) > 0, t('JavaScript is aggregated in the expected groups and order.'));
+  }
+
+  /**
+   * Tests JavaScript aggregation when files are added to a different scope.
+   */
+  function testAggregationOrder() {
+    // Enable JavaScript aggregation.
+    variable_set('preprocess_js', 1);
+    drupal_static_reset('drupal_add_js');
+
+    // Add two JavaScript files to the current request and build the cache.
+    drupal_add_js('core/misc/ajax.js');
+    drupal_add_js('core/misc/autocomplete.js');
+
+    $js_items = drupal_add_js();
+    drupal_build_js_cache(array(
+      'core/misc/ajax.js' => $js_items['core/misc/ajax.js'],
+      'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']
+    ));
+
+    // Store the expected key for the first item in the cache.
+    $cache = array_keys(variable_get('drupal_js_cache_files', array()));
+    $expected_key = $cache[0];
+
+    // Reset variables and add a file in a different scope first.
+    variable_del('drupal_js_cache_files');
+    drupal_static_reset('drupal_add_js');
+    drupal_add_js('some/custom/javascript_file.js', array('scope' => 'footer'));
+    drupal_add_js('core/misc/ajax.js');
+    drupal_add_js('core/misc/autocomplete.js');
+
+    // Rebuild the cache.
+    $js_items = drupal_add_js();
+    drupal_build_js_cache(array(
+      'core/misc/ajax.js' => $js_items['core/misc/ajax.js'],
+      'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']
+    ));
+
+    // Compare the expected key for the first file to the current one.
+    $cache = array_keys(variable_get('drupal_js_cache_files', array()));
+    $key = $cache[0];
+    $this->assertEqual($key, $expected_key, 'JavaScript aggregation is not affected by ordering in different scopes.');
   }
 
   /**
@@ -1460,7 +1502,7 @@ class CommonJavaScriptTestCase extends DrupalWebTestCase {
    */
   function testAddJsFileWithQueryString() {
     $this->drupalGet('common-test/query-string');
-    $query_string = variable_get('css_js_query_string', '0');
+    $query_string = state_get('css_js_query_string', '0');
     $this->assertRaw(drupal_get_path('module', 'node') . '/node.js?' . $query_string, t('Query string was appended correctly to js.'));
   }
 }

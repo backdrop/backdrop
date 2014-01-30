@@ -910,7 +910,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   (optional) Whether to reset the internal node_load() cache.
    *
    * @return
-   *   A node object matching $title.
+   *   A node entity matching $title.
    */
   function drupalGetNodeByTitle($title, $reset = FALSE) {
     $nodes = node_load_multiple(array(), array('title' => $title), $reset);
@@ -926,7 +926,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   An associative array of settings to change from the defaults, keys are
    *   node properties, for example 'title' => 'Hello, world!'.
    * @return
-   *   Created node object.
+   *   Created node entity.
    */
   protected function drupalCreateNode($settings = array()) {
     // Populate defaults array.
@@ -970,8 +970,8 @@ class DrupalWebTestCase extends DrupalTestCase {
     );
     $settings['body'][$settings['langcode']][0] += $body;
 
-    $node = (object) $settings;
-    node_save($node);
+    $node = entity_create('node', $settings);
+    $node->save();
 
     // Small hack to link revisions to our test user.
     db_update('node_revision')
@@ -1134,7 +1134,8 @@ class DrupalWebTestCase extends DrupalTestCase {
       $edit['roles'] = array($rid => $rid);
     }
 
-    $account = user_save(drupal_anonymous_user(), $edit);
+    $account = entity_create('user', $edit);
+    $account->save();
 
     $this->assertTrue(!empty($account->uid), t('User created with name %name and pass %pass', array('%name' => $edit['name'], '%pass' => $edit['pass'])), t('User login'));
     if (empty($account->uid)) {
@@ -1238,7 +1239,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *
    * @see drupalCreateUser()
    */
-  protected function drupalLogin(stdClass $user) {
+  protected function drupalLogin($user) {
     if ($this->loggedInUser) {
       $this->drupalLogout();
     }
@@ -1449,7 +1450,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $user = user_load(1);
 
     // Restore necessary variables.
-    variable_set('install_task', 'done');
+    state_set('install_task', 'done');
     variable_set('clean_url', $clean_url_original);
     variable_set('site_mail', 'simpletest@example.com');
     variable_set('date_default_timezone', date_default_timezone_get());
@@ -1527,8 +1528,8 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Refresh the in-memory set of variables. Useful after a page request is made
-   * that changes a variable in a different thread.
+   * Refresh the in-memory set of variables and state values. Useful after a
+   * page request is made that changes a variable in a different thread.
    *
    * In other words calling a settings page with $this->drupalPost() with a changed
    * value would update a variable to reflect that change, but in the thread that
@@ -1542,6 +1543,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     global $conf;
     cache('bootstrap')->delete('variables');
     $conf = variable_initialize();
+    drupal_static_reset('states');
   }
 
   /**
@@ -1555,7 +1557,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // log to pick up any fatal errors.
     simpletest_log_read($this->testId, $this->databasePrefix, get_class($this), TRUE);
 
-    $emailCount = count(variable_get('drupal_test_email_collector', array()));
+    $emailCount = count(state_get('test_email_collector', array()));
     if ($emailCount) {
       $message = format_plural($emailCount, '1 e-mail was sent during this test.', '@count e-mails were sent during this test.');
       $this->pass($message, t('E-mail'));
@@ -2200,7 +2202,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * Runs cron in the Drupal installed by Simpletest.
    */
   protected function cronRun() {
-    $this->drupalGet($GLOBALS['base_url'] . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => variable_get('cron_key', 'drupal'))));
+    $this->drupalGet($GLOBALS['base_url'] . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))));
   }
 
   /**
@@ -2745,7 +2747,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   An array containing e-mail messages captured during the current test.
    */
   protected function drupalGetMails($filter = array()) {
-    $captured_emails = variable_get('drupal_test_email_collector', array());
+    $captured_emails = state_get('test_email_collector', array());
     $filtered_emails = array();
 
     foreach ($captured_emails as $message) {
@@ -3490,7 +3492,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertMail($name, $value = '', $message = '') {
-    $captured_emails = variable_get('drupal_test_email_collector', array());
+    $captured_emails = state_get('test_email_collector', array());
     $email = end($captured_emails);
     return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
   }

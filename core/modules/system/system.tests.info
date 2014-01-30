@@ -22,12 +22,6 @@ description = Check module version dependencies.
 group = Module
 file = system.test
 
-[ModuleRequiredTestCase]
-name = Required modules
-description = Attempt disabling of required modules.
-group = Module
-file = system.test
-
 [CronRunTestCase]
 name = Cron run
 description = Test cron run.

@@ -259,9 +259,9 @@ function system_requirements($phase) {
     $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
 
     // Determine when cron last ran.
-    $cron_last = variable_get('cron_last');
+    $cron_last = state_get('cron_last');
     if (!is_numeric($cron_last)) {
-      $cron_last = variable_get('install_time', 0);
+      $cron_last = state_get('install_time', 0);
     }
 
     // Determine severity based on time since cron last ran.
@@ -281,7 +281,7 @@ function system_requirements($phase) {
     }
 
     $description .= ' ' . $t('You can <a href="@cron">run cron manually</a>.', array('@cron' => url('admin/reports/status/run-cron')));
-    $description .= '<br />' . $t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => variable_get('cron_key', 'drupal'))))));
+    $description .= '<br />' . $t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))))));
 
     $requirements['cron'] = array(
       'title' => $t('Cron maintenance tasks'),
@@ -513,7 +513,7 @@ function system_install() {
 
   // Populate the cron key variable.
   $cron_key = drupal_hash_base64(drupal_random_bytes(55));
-  variable_set('cron_key', $cron_key);
+  state_set('cron_key', $cron_key);
 }
 
 /**
@@ -1482,6 +1482,26 @@ function system_schema() {
     ),
   );
 
+  $schema['state'] = array(
+    'description' => 'Stores environment-specific state values.',
+    'fields' => array(
+      'name' => array(
+        'description' => 'The name of the state.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the state.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+
   $schema['system'] = array(
     'description' => "A list of all modules, themes, and theme engines that are or have been installed in Drupal's file system.",
     'fields' => array(
@@ -1655,6 +1675,52 @@ function system_update_8003() {
   $config->set('preprocess_css', variable_get('preprocess_css', 0));
   $config->set('preprocess_js', variable_get('preprocess_js', 0));
   $config->save();
+}
+
+/**
+ * Create the "state" table for the state storage system.
+ */
+function system_update_8004() {
+  if (!db_table_exists('state')) {
+    $schema = array(
+      'description' => 'Stores environment-specific state values.',
+      'fields' => array(
+        'name' => array(
+          'description' => 'The name of the state.',
+          'type' => 'varchar',
+          'length' => 128,
+          'not null' => TRUE,
+          'default' => '',
+        ),
+        'value' => array(
+          'description' => 'The value of the state.',
+          'type' => 'blob',
+          'not null' => TRUE,
+          'size' => 'big',
+        ),
+      ),
+      'primary key' => array('name'),
+    );
+    db_create_table('state', $schema);
+  }
+}
+
+/**
+ * Convert basic system variables to the state system.
+ */
+function system_update_8005() {
+  $variables = array(
+    'install_time' => REQUEST_TIME,
+    'install_task' => 'done',
+    'maintenance_mode' => FALSE,
+    'cron_key' => NULL,
+    'cron_last' => REQUEST_TIME,
+    'css_js_query_string' => '',
+  );
+  foreach ($variables as $name => $default) {
+    state_set($name, variable_get($name, $default));
+    variable_del($name);
+  }
 }
 
 /**

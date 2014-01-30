@@ -6,7 +6,7 @@
  *
  * The doctype, html, head and body tags are not in this template. Instead they
  * can be found in the html.tpl.php template normally located in the
- * modules/system folder.
+ * core/modules/system directory.
  *
  * Available variables:
  *
@@ -57,7 +57,7 @@
  * - $action_links (array): Actions local to the page, such as 'Add menu' on the
  *   menu administration interface.
  * - $feed_icons: A string of all feed icons for the current page.
- * - $node: The node object, if there is an automatically-loaded node
+ * - $node: The node entity, if there is an automatically-loaded node
  *   associated with the page, and the node ID is the second argument
  *   in the page's path (e.g. node/12345 and node/12345/revisions, but not
  *   comment/reply/12345).
@@ -81,6 +81,7 @@
  * @see template_preprocess_page()
  * @see template_process()
  * @see bartik_process_page()
+ * @see html.tpl.php
  */
 ?>
 <div id="page-wrapper"><div id="page">

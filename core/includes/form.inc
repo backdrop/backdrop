@@ -3002,7 +3002,7 @@ function form_process_radios($element) {
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *     Properties used: #title, #value, #return_value, #description, #required,
- *     #attributes.
+ *     #attributes, #checked.
  *
  * @ingroup themeable
  */
@@ -3059,7 +3059,7 @@ function form_pre_render_conditional_form_element($element) {
     $element['#attributes']['title'] = $element['#title'];
     if (!empty($element['#required'])) {
       // Append an indication that this field is required.
-      $element['#attributes']['title'] .= ' (' . $t('Required') . ')';
+      $element['#attributes']['title'] .= ' (' . t('Required') . ')';
     }
   }
 
@@ -3299,7 +3299,7 @@ function form_process_tableselect($element) {
     $value = is_array($element['#value']) ? $element['#value'] : array();
   }
   else {
-    // Advanced selection behaviour make no sense for radios.
+    // Advanced selection behavior makes no sense for radios.
     $element['#js_select'] = FALSE;
   }
 
@@ -3383,6 +3383,9 @@ function form_process_tableselect($element) {
  *       different character, 'replace_pattern' needs to be set accordingly.
  *     - error: (optional) A custom form error message string to show, if the
  *       machine name contains disallowed characters.
+ *     - standalone: (optional) Whether the live preview should stay in its own
+ *       form element rather than in the suffix of the source element. Defaults
+ *       to FALSE.
  *   - #maxlength: (optional) Should be set to the maximum allowed length of the
  *     machine name. Defaults to 64.
  *   - #disabled: (optional) Should be set to TRUE in case an existing machine
@@ -3394,6 +3397,9 @@ function form_process_machine_name($element, &$form_state) {
     '#title' => t('Machine-readable name'),
     '#description' => t('A unique machine-readable name. Can only contain lowercase letters, numbers, and underscores.'),
     '#machine_name' => array(),
+    '#field_prefix' => '',
+    '#field_suffix' => '',
+    '#suffix' => '',
   );
   // A form element that only wants to set one #machine_name property (usually
   // 'source' only) would leave all other properties undefined, if the defaults
@@ -3404,6 +3410,9 @@ function form_process_machine_name($element, &$form_state) {
     'label' => t('Machine name'),
     'replace_pattern' => '[^a-z0-9_]+',
     'replace' => '_',
+    'standalone' => FALSE,
+    'field_prefix' => $element['#field_prefix'],
+    'field_suffix' => $element['#field_suffix'],
   );
 
   // By default, machine names are restricted to Latin alphanumeric characters.
@@ -3419,7 +3428,7 @@ function form_process_machine_name($element, &$form_state) {
   }
 
   // Retrieve the form element containing the human-readable name from the
-  // complete form in $form_state. By reference, because we need to append
+  // complete form in $form_state. By reference, because we may need to append
   // a #field_suffix that will hold the live preview.
   $key_exists = NULL;
   $source = drupal_array_get_nested_value($form_state['complete_form'], $element['#machine_name']['source'], $key_exists);
@@ -3427,16 +3436,21 @@ function form_process_machine_name($element, &$form_state) {
     return $element;
   }
 
-  // Append a field suffix to the source form element, which will contain
-  // the live preview of the machine name.
   $suffix_id = $source['#id'] . '-machine-name-suffix';
-  $source += array('#field_suffix' => '');
-  $source['#field_suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
-
-  $parents = array_merge($element['#machine_name']['source'], array('#field_suffix'));
-  drupal_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
-
   $element['#machine_name']['suffix'] = '#' . $suffix_id;
+
+  if ($element['#machine_name']['standalone']) {
+    $element['#suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
+  }
+  else {
+    // Append a field suffix to the source form element, which will contain
+    // the live preview of the machine name.
+    $source += array('#field_suffix' => '');
+    $source['#field_suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
+
+    $parents = array_merge($element['#machine_name']['source'], array('#field_suffix'));
+    drupal_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
+  }
 
   $js_settings = array(
     'type' => 'setting',
@@ -4343,13 +4357,24 @@ function element_validate_number($element, &$form_state) {
  */
 
 /**
- * Opens a new batch.
+ * Adds a new batch.
  *
- * @param $batch
- *   An array defining the batch. The following keys can be used -- only
- *   'operations' is required, and batch_init() provides default values for
- *   the messages.
- *   - 'operations': Array of function calls to be performed.
+ * Batch operations are added as new batch sets. Batch sets are used to spread
+ * processing (primarily, but not exclusively, forms processing) over several
+ * page requests. This helps to ensure that the processing is not interrupted
+ * due to PHP timeouts, while users are still able to receive feedback on the
+ * progress of the ongoing operations. Combining related operations into
+ * distinct batch sets provides clean code independence for each batch set,
+ * ensuring that two or more batches, submitted independently, can be processed
+ * without mutual interference. Each batch set may specify its own set of
+ * operations and results, produce its own UI messages, and trigger its own
+ * 'finished' callback. Batch sets are processed sequentially, with the progress
+ * bar starting afresh for each new set.
+ *
+ * @param $batch_definition
+ *   An associative array defining the batch, with the following elements (all
+ *   are optional except as noted):
+ *   - operations: (required) Array of function calls to be performed.
  *     Example:
  *     @code
  *     array(
@@ -4357,35 +4382,26 @@ function element_validate_number($element, &$form_state) {
  *       array('my_function_2', array($arg2_1, $arg2_2)),
  *     )
  *     @endcode
- *   - 'title': Title for the progress page. Only safe strings should be passed.
- *     Defaults to t('Processing').
- *   - 'init_message': Message displayed while the processing is initialized.
+ *   - title: A safe, translated string to use as the title for the progress
+ *     page. Defaults to t('Processing').
+ *   - init_message: Message displayed while the processing is initialized.
  *     Defaults to t('Initializing.').
- *   - 'progress_message': Message displayed while processing the batch.
- *     Available placeholders are @current, @remaining, @total, @percentage,
- *     @estimate and @elapsed. Defaults to t('Completed @current of @total.').
- *   - 'error_message': Message displayed if an error occurred while processing
+ *   - progress_message: Message displayed while processing the batch. Available
+ *     placeholders are @current, @remaining, @total, @percentage, @estimate and
+ *     @elapsed. Defaults to t('Completed @current of @total.').
+ *   - error_message: Message displayed if an error occurred while processing
  *     the batch. Defaults to t('An error has occurred.').
- *   - 'finished': Name of a function to be executed after the batch has
- *     completed. This should be used to perform any result massaging that
- *     may be needed, and possibly save data in $_SESSION for display after
- *     final page redirection.
- *   - 'file': Path to the file containing the definitions of the
- *     'operations' and 'finished' functions, for instance if they don't
- *     reside in the main .module file. The path should be relative to
- *     base_path(), and thus should be built using drupal_get_path().
- *   - 'css': Array of paths to CSS files to be used on the progress page.
- *   - 'url_options': options passed to url() when constructing redirect
- *     URLs for the batch.
- *
- * Operations are added as new batch sets. Batch sets are used to ensure
- * clean code independence, ensuring that several batches submitted by
- * different parts of the code (core / contrib modules) can be processed
- * correctly while not interfering or having to cope with each other. Each
- * batch set gets to specify its own UI messages, operates on its own set
- * of operations and results, and triggers its own 'finished' callback.
- * Batch sets are processed sequentially, with the progress bar starting
- * fresh for every new set.
+ *   - finished: Name of a function to be executed after the batch has
+ *     completed. This should be used to perform any result massaging that may
+ *     be needed, and possibly save data in $_SESSION for display after final
+ *     page redirection.
+ *   - file: Path to the file containing the definitions of the 'operations' and
+ *     'finished' functions, for instance if they don't reside in the main
+ *     .module file. The path should be relative to base_path(), and thus should
+ *     be built using drupal_get_path().
+ *   - css: Array of paths to CSS files to be used on the progress page.
+ *   - url_options: options passed to url() when constructing redirect URLs for
+ *     the batch.
  */
 function batch_set($batch_definition) {
   if ($batch_definition) {

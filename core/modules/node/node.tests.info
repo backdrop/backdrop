@@ -90,7 +90,7 @@ file = tests/node.test
 
 [NodeSaveTestCase]
 name = Node save
-description = Test node_save() for saving content.
+description = Test $node->save() for saving content.
 group = Node
 file = tests/node.test
 
@@ -163,6 +163,12 @@ file = tests/node.test
 [NodeRevisionPermissionsTestCase]
 name = Node revision permissions
 description = Tests user permissions for node revision operations.
+group = Node
+file = tests/node.test
+
+[NodeAccessFieldTestCase]
+name = Node access and fields
+description = Tests the interaction of the node access system with fields.
 group = Node
 file = tests/node.test
 

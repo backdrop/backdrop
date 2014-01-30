@@ -131,8 +131,13 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   protected function createFieldSql($name, $spec) {
     $sql = "`" . $name . "` " . $spec['mysql_type'];
 
-    if (in_array($spec['mysql_type'], array('VARCHAR', 'CHAR', 'TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT', 'TEXT')) && isset($spec['length'])) {
-      $sql .= '(' . $spec['length'] . ')';
+    if (in_array($spec['mysql_type'], array('VARCHAR', 'CHAR', 'TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT', 'TEXT'))) {
+      if (isset($spec['length'])) {
+        $sql .= '(' . $spec['length'] . ')';
+      }
+      if (!empty($spec['binary'])) {
+        $sql .= ' BINARY';
+      }
     }
     elseif (isset($spec['precision']) && isset($spec['scale'])) {
       $sql .= '(' . $spec['precision'] . ', ' . $spec['scale'] . ')';
@@ -381,7 +386,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     // Returns one row for each column in the index. Result is string or FALSE.
     // Details at http://dev.mysql.com/doc/refman/5.0/en/show-index.html
     $row = $this->connection->query('SHOW INDEX FROM {' . $table . "} WHERE key_name = '$name'")->fetchAssoc();
-    return isset($row['key_name']);
+    return isset($row['Key_name']);
   }
 
   public function addPrimaryKey($table, $fields) {

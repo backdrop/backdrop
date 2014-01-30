@@ -316,7 +316,14 @@ function menu_get_ancestors($parts) {
   $ancestors = array();
   $length =  $number_parts - 1;
   $end = (1 << $number_parts) - 1;
-  $masks = variable_get('menu_masks', array());
+  $masks = variable_get('menu_masks');
+  // If the optimized menu_masks array is not available use brute force to get
+  // the correct $ancestors and $placeholders returned. Do not use this as the
+  // default value of the menu_masks variable to avoid building such a big
+  // array.
+  if (!$masks) {
+    $masks = range(511, 1);
+  }
   // Only examine patterns that actually exist as router items (the masks).
   foreach ($masks as $i) {
     if ($i > $end) {
@@ -2262,6 +2269,9 @@ function menu_get_active_menu_names() {
  */
 function menu_set_active_item($path) {
   $_GET['q'] = $path;
+  // Since the active item has changed, the active menu trail may also be out
+  // of date.
+  drupal_static_reset('menu_set_active_trail');
 }
 
 /**
@@ -2347,7 +2357,7 @@ function menu_set_active_trail($new_trail = NULL) {
     // appending either the preferred link or the menu router item for the
     // current page. Exclude it if we are on the front page.
     $last = end($trail);
-    if ($last['href'] != $preferred_link['href'] && !drupal_is_front_page()) {
+    if ($preferred_link && $last['href'] != $preferred_link['href'] && !drupal_is_front_page()) {
       $trail[] = $preferred_link;
     }
   }
@@ -3075,7 +3085,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
   // array_intersect_key() with the $item as the first parameter because
   // $item may have additional keys left over from building a router entry.
   // The intersect removes the extra keys, allowing a meaningful comparison.
-  if (!$existing_item || (array_intersect_key($item, $existing_item)) != $existing_item) {
+  if (!$existing_item || (array_intersect_key($item, $existing_item) != $existing_item)) {
     db_update('menu_links')
       ->fields(array(
         'menu_name' => $item['menu_name'],
@@ -3762,7 +3772,7 @@ function _menu_router_save($menu, $masks) {
  */
 function _menu_site_is_offline($check_only = FALSE) {
   // Check if site is in maintenance mode.
-  if (variable_get('maintenance_mode', 0)) {
+  if (state_get('maintenance_mode', 0)) {
     if (user_access('access site in maintenance mode')) {
       // Ensure that the maintenance mode message is displayed only once
       // (allowing for page redirects) and specifically suppress its display on

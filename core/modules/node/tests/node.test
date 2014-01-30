@@ -6,6 +6,26 @@
  */
 
 /**
+ * Defines a base class for testing the Node module.
+ */
+class NodeWebTestCase extends DrupalWebTestCase {
+  function setUp() {
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
+    }
+    $modules[] = 'node';
+    parent::setUp($modules);
+
+    // Create Basic page and Article node types.
+    if ($this->profile != 'standard') {
+      $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
+      $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
+    }
+  }
+}
+
+/**
  * Tests the node_load_multiple() function.
  */
 class NodeLoadMultipleUnitTest extends DrupalWebTestCase {
@@ -186,6 +206,22 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
                         array('%revision-date' => format_date($nodes[1]->revision_timestamp),
                               '@type' => 'Basic page', '%title' => $nodes[1]->title)), t('Revision deleted.'));
     $this->assertTrue(db_query('SELECT COUNT(vid) FROM {node_revision} WHERE nid = :nid and vid = :vid', array(':nid' => $node->nid, ':vid' => $nodes[1]->vid))->fetchField() == 0, t('Revision not found.'));
+
+    // Set the revision timestamp to an older date to make sure that the
+    // confirmation message correctly displays the stored revision date.
+    $old_revision_date = REQUEST_TIME - 86400;
+    db_update('node_revision')
+      ->condition('vid', $nodes[2]->vid)
+      ->fields(array(
+        'timestamp' => $old_revision_date,
+      ))
+      ->execute();
+    $this->drupalPost("node/$node->nid/revisions/{$nodes[2]->vid}/revert", array(), t('Revert'));
+    $this->assertRaw(t('@type %title has been reverted back to the revision from %revision-date.', array(
+      '@type' => 'Basic page',
+      '%title' => $nodes[2]->title,
+      '%revision-date' => format_date($old_revision_date),
+    )));
   }
 
   /**
@@ -201,15 +237,13 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
     // the "log message" field), and check that the original log message is
     // preserved.
     $new_title = $this->randomName(10) . 'testNodeRevisionWithoutLogMessage1';
-    $updated_node = (object) array(
-      'nid' => $node->nid,
-      'vid' => $node->vid,
-      'uid' => $node->uid,
-      'type' => $node->type,
-      'title' => $new_title,
-      'log' => '',
-    );
-    node_save($updated_node);
+
+    $node = clone $node;
+    $node->title = $new_title;
+    $node->log = '';
+    $node->revision = FALSE;
+
+    $node->save();
     $this->drupalGet('node/' . $node->nid);
     $this->assertText($new_title, t('New node title appears on the page.'));
     $node_revision = node_load($node->nid, NULL, TRUE);
@@ -221,15 +255,13 @@ class NodeRevisionsTestCase extends DrupalWebTestCase {
     // Save a new node revision without providing a log message, and check that
     // this revision has an empty log message.
     $new_title = $this->randomName(10) . 'testNodeRevisionWithoutLogMessage2';
-    $updated_node = (object) array(
-      'nid' => $node->nid,
-      'vid' => $node->vid,
-      'uid' => $node->uid,
-      'type' => $node->type,
-      'title' => $new_title,
-      'revision' => 1,
-    );
-    node_save($updated_node);
+
+    $node = clone $node;
+    $node->title = $new_title;
+    $node->revision = TRUE;
+    $node->log = NULL;
+
+    $node->save();
     $this->drupalGet('node/' . $node->nid);
     $this->assertText($new_title, 'New node title appears on the page.');
     $node_revision = node_load($node->nid, NULL, TRUE);
@@ -466,7 +498,7 @@ class NodeCreationTestCase extends DrupalWebTestCase {
     );
 
     try {
-      node_save((object) $edit);
+      entity_create('node', $edit)->save();
       $this->fail(t('Expected exception has not been thrown.'));
     }
     catch (Exception $e) {
@@ -1037,12 +1069,12 @@ class NodeSaveTestCase extends DrupalWebTestCase {
       'nid' => $test_nid,
       'is_new' => TRUE,
     );
-    $node = node_submit((object) $node);
+    $node = node_submit(entity_create('node', $node));
 
     // Verify that node_submit did not overwrite the user ID.
     $this->assertEqual($node->uid, $this->web_user->uid, t('Function node_submit() preserves user ID'));
 
-    node_save($node);
+    $node->save();
     // Test the import.
     $node_by_nid = node_load($test_nid);
     $this->assertTrue($node_by_nid, t('Node load by node ID.'));
@@ -1063,7 +1095,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
       'title' => $this->randomName(8),
     );
 
-    node_save((object) $edit);
+    entity_create('node', $edit)->save();
     $node = $this->drupalGetNodeByTitle($edit['title']);
     $this->assertEqual($node->created, REQUEST_TIME, t('Creating a node sets default "created" timestamp.'));
     $this->assertEqual($node->changed, REQUEST_TIME, t('Creating a node sets default "changed" timestamp.'));
@@ -1072,14 +1104,14 @@ class NodeSaveTestCase extends DrupalWebTestCase {
     $created = $node->created;
     $changed = $node->changed;
 
-    node_save($node);
+    $node->save();
     $node = $this->drupalGetNodeByTitle($edit['title'], TRUE);
     $this->assertEqual($node->created, $created, t('Updating a node preserves "created" timestamp.'));
 
     // Programmatically set the timestamps using hook_node_presave.
     $node->title = 'testing_node_presave';
 
-    node_save($node);
+    $node->save();
     $node = $this->drupalGetNodeByTitle('testing_node_presave', TRUE);
     $this->assertEqual($node->created, 280299600, t('Saving a node uses "created" timestamp set in presave hook.'));
     $this->assertEqual($node->changed, 979534800, t('Saving a node uses "changed" timestamp set in presave hook.'));
@@ -1093,7 +1125,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
       'changed' => 979534800, // Drupal 1.0 release.
     );
 
-    node_save((object) $edit);
+    entity_create('node', $edit)->save();
     $node = $this->drupalGetNodeByTitle($edit['title']);
     $this->assertEqual($node->created, 280299600, t('Creating a node uses user-set "created" timestamp.'));
     $this->assertNotEqual($node->changed, 979534800, t('Creating a node doesn\'t use user-set "changed" timestamp.'));
@@ -1102,7 +1134,7 @@ class NodeSaveTestCase extends DrupalWebTestCase {
     $node->created = 979534800;
     $node->changed = 280299600;
 
-    node_save($node);
+    $node->save();
     $node = $this->drupalGetNodeByTitle($edit['title'], TRUE);
     $this->assertEqual($node->created, 979534800, t('Updating a node uses user-set "created" timestamp.'));
     $this->assertNotEqual($node->changed, 280299600, t('Updating a node doesn\'t use user-set "changed" timestamp.'));
@@ -1114,20 +1146,20 @@ class NodeSaveTestCase extends DrupalWebTestCase {
    */
   function testDeterminingChanges() {
     // Initial creation.
-    $node = (object) array(
+    $node = entity_create('node', array(
       'uid' => $this->web_user->uid,
       'type' => 'article',
       'title' => 'test_changes',
-    );
-    node_save($node);
+    ));
+    $node->save();
 
     // Update the node without applying changes.
-    node_save($node);
+    $node->save();
     $this->assertEqual($node->title, 'test_changes', 'No changes have been determined.');
 
     // Apply changes.
     $node->title = 'updated';
-    node_save($node);
+    $node->save();
 
     // The hook implementations node_test_node_presave() and
     // node_test_node_update() determine changes and change the title.
@@ -2115,7 +2147,6 @@ class NodeRevisionPermissionsTestCase extends DrupalWebTestCase {
     // Test that access is FALSE for a node administrator with an invalid $node
     // or $op parameters.
     $admin_account = $this->accounts['admin'];
-    $this->assertFalse(_node_revision_access(FALSE, 'view', $admin_account), '_node_revision_access() returns FALSE with an invalid node.');
     $this->assertFalse(_node_revision_access($revision, 'invalid-op', $admin_account), '_node_revision_access() returns FALSE with an invalid op.');
 
     // Test that the $account parameter defaults to the "logged in" user.
@@ -2211,5 +2242,70 @@ class NodeAccessPagerTestCase extends DrupalWebTestCase {
     $this->drupalGet('forum/' . $tid);
     $this->assertRaw('page=1', t('Secound page exists.'));
     $this->assertNoRaw('page=2', t('No third page exists.'));
+  }
+}
+
+/*
+ * Tests the interaction of the node access system with fields.
+ */
+class NodeAccessFieldTestCase extends NodeWebTestCase {
+  public function setUp() {
+    parent::setUp('node_access_test', 'field_ui');
+    node_access_rebuild();
+
+    // Create some users.
+    $this->admin_user = $this->drupalCreateUser(array('access content', 'bypass node access'));
+    $this->content_admin_user = $this->drupalCreateUser(array('access content', 'administer content types'));
+
+    // Add a custom field to the page content type.
+    $this->field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $this->field = field_create_field(array('field_name' => $this->field_name, 'type' => 'text'));
+    $this->instance = field_create_instance(array(
+      'field_name' => $this->field_name,
+      'entity_type' => 'node',
+      'bundle' => 'page',
+    ));
+  }
+
+  /**
+   * Tests administering fields when node access is restricted.
+   */
+  function testNodeAccessAdministerField() {
+    // Create a page node.
+    $langcode = LANGUAGE_NONE;
+    $field_data = array();
+    $value = $field_data[$langcode][0]['value'] = $this->randomName();
+    $node = $this->drupalCreateNode(array($this->field_name => $field_data));
+
+    // Log in as the administrator and confirm that the field value is present.
+    $this->drupalLogin($this->admin_user);
+    $this->drupalGet("node/{$node->nid}");
+    $this->assertText($value, 'The saved field value is visible to an administrator.');
+
+    // Log in as the content admin and try to view the node.
+    $this->drupalLogin($this->content_admin_user);
+    $this->drupalGet("node/{$node->nid}");
+    $this->assertText('Access denied', 'Access is denied for the content admin.');
+
+    // Modify the field default as the content admin.
+    $edit = array();
+    $default = 'Sometimes words have two meanings';
+    $edit["{$this->field_name}[$langcode][0][value]"] = $default;
+    $this->drupalPost(
+      "admin/structure/types/manage/page/fields/{$this->field_name}",
+      $edit,
+      t('Save settings')
+    );
+
+    // Log in as the administrator.
+    $this->drupalLogin($this->admin_user);
+
+    // Confirm that the existing node still has the correct field value.
+    $this->drupalGet("node/{$node->nid}");
+    $this->assertText($value, 'The original field value is visible to an administrator.');
+
+    // Confirm that the new default value appears when creating a new node.
+    $this->drupalGet('node/add/page');
+    $this->assertRaw($default, 'The updated default value is displayed when creating a new node.');
   }
 }

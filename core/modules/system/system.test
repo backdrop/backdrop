@@ -556,32 +556,6 @@ class ModuleVersionTestCase extends ModuleTestCase {
   }
 }
 
-/**
- * Test required modules functionality.
- */
-class ModuleRequiredTestCase extends ModuleTestCase {
-  /**
-   * Assert that core required modules cannot be disabled.
-   */
-  function testDisableRequired() {
-    $module_info = system_get_info('module');
-    $this->drupalGet('admin/modules');
-    foreach ($module_info as $module => $info) {
-      // Check to make sure the checkbox for each required module is disabled
-      // and checked (or absent from the page if the module is also hidden).
-      if (!empty($info['required'])) {
-        $field_name = "modules[{$info['package']}][$module][enable]";
-        if (empty($info['hidden'])) {
-          $this->assertFieldByXPath("//input[@name='$field_name' and @disabled='disabled' and @checked='checked']", '', t('Field @name was disabled and checked.', array('@name' => $field_name)));
-        }
-        else {
-          $this->assertNoFieldByName($field_name);
-        }
-      }
-    }
-  }
-}
-
 class CronRunTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper'));
@@ -603,7 +577,7 @@ class CronRunTestCase extends DrupalWebTestCase {
     $this->assertResponse(403);
 
     // Run cron anonymously with the valid cron key.
-    $key = variable_get('cron_key', 'drupal');
+    $key = state_get('cron_key');
     $this->drupalGet($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => $key)));
     $this->assertResponse(200);
   }
@@ -619,17 +593,17 @@ class CronRunTestCase extends DrupalWebTestCase {
     // not passed.
     $cron_last = time();
     $cron_safe_threshold = 100;
-    variable_set('cron_last', $cron_last);
+    state_set('cron_last', $cron_last);
     variable_set('cron_safe_threshold', $cron_safe_threshold);
     $this->drupalGet('');
-    $this->assertTrue($cron_last == variable_get('cron_last', NULL), t('Cron does not run when the cron threshold is not passed.'));
+    $this->assertTrue($cron_last == state_get('cron_last'), t('Cron does not run when the cron threshold is not passed.'));
 
     // Test if cron runs when the cron threshold was passed.
     $cron_last = time() - 200;
-    variable_set('cron_last', $cron_last);
+    state_set('cron_last', $cron_last);
     $this->drupalGet('');
     sleep(1);
-    $this->assertTrue($cron_last < variable_get('cron_last', NULL), t('Cron runs when the cron threshold is passed.'));
+    $this->assertTrue($cron_last < state_get('cron_last'), t('Cron runs when the cron threshold is passed.'));
 
     // Disable the cron threshold through the interface.
     $admin_user = $this->drupalCreateUser(array('administer site configuration'));
@@ -640,17 +614,16 @@ class CronRunTestCase extends DrupalWebTestCase {
 
     // Test if cron does not run when the cron threshold is disabled.
     $cron_last = time() - 200;
-    variable_set('cron_last', $cron_last);
+    state_set('cron_last', $cron_last);
     $this->drupalGet('');
-    $this->assertTrue($cron_last == variable_get('cron_last', NULL), t('Cron does not run when the cron threshold is disabled.'));
+    $this->assertTrue($cron_last == state_get('cron_last'), t('Cron does not run when the cron threshold is disabled.'));
   }
 
   /**
    * Ensure that temporary files are removed.
    *
    * Create files for all the possible combinations of age and status. We are
-   * using UPDATE statements rather than file_save() because it would set the
-   * timestamp.
+   * using UPDATE statements because using the API would set the timestamp.
    */
   function testTempFileCleanup() {
     // Temporary file that is older than DRUPAL_MAXIMUM_TEMP_FILE_AGE.
@@ -843,14 +816,15 @@ class SiteMaintenanceTestCase extends DrupalWebTestCase {
     $edit = array(
       'maintenance_mode' => 1,
     );
-    $this->drupalPost('admin/config/development/maintenance', $edit, t('Save configuration'));
+    $this->drupalPost('admin/config/development/maintenance', $edit, 'Save configuration');
+    $this->assertRaw('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.', 'Maintenance confirmation message shown.');
 
-    $admin_message = t('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance')));
-    $user_message = t('Operating in maintenance mode.');
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')));
+    $admin_message = format_string('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance')));
+    $user_message = 'Operating in maintenance mode.';
+    $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')));
 
     $this->drupalGet('');
-    $this->assertRaw($admin_message, t('Found the site maintenance mode message.'));
+    $this->assertRaw($admin_message, 'Found the site maintenance mode message.');
 
     // Logout and verify that offline message is displayed.
     $this->drupalLogout();
@@ -873,42 +847,51 @@ class SiteMaintenanceTestCase extends DrupalWebTestCase {
       'name' => $this->user->name,
       'pass' => $this->user->pass_raw,
     );
-    $this->drupalPost(NULL, $edit, t('Log in'));
+    $this->drupalPost(NULL, $edit, 'Log in');
     $this->assertText($user_message);
 
     // Log in administrative user and configure a custom site offline message.
     $this->drupalLogout();
     $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/config/development/maintenance');
-    $this->assertNoRaw($admin_message, t('Site maintenance mode message not displayed.'));
+    $this->assertNoRaw($admin_message, 'Site maintenance mode message not displayed.');
 
     $offline_message = 'Sorry, not online.';
     $edit = array(
       'maintenance_mode_message' => $offline_message,
     );
-    $this->drupalPost(NULL, $edit, t('Save configuration'));
+    $this->drupalPost(NULL, $edit, 'Save configuration');
 
     // Logout and verify that custom site offline message is displayed.
     $this->drupalLogout();
     $this->drupalGet('');
-    $this->assertRaw($offline_message, t('Found the site offline message.'));
+    $this->assertRaw($offline_message, 'Found the site offline message.');
 
     // Verify that custom site offline message is not displayed on user/password.
     $this->drupalGet('user/password');
-    $this->assertText(t('Username or e-mail address'), t('Anonymous users can access user/password'));
+    $this->assertText('Username or e-mail address', 'Anonymous users can access user/password');
 
     // Submit password reset form.
     $edit = array(
       'name' => $this->user->name,
     );
-    $this->drupalPost('user/password', $edit, t('E-mail new password'));
+    $this->drupalPost('user/password', $edit, 'E-mail new password');
     $mails = $this->drupalGetMails();
     $start = strpos($mails[0]['body'], 'user/reset/'. $this->user->uid);
     $path = substr($mails[0]['body'], $start, 66 + strlen($this->user->uid));
 
     // Log in with temporary login link.
-    $this->drupalPost($path, array(), t('Log in'));
+    $this->drupalPost($path, array(), 'Log in');
     $this->assertText($user_message);
+    $this->drupalLogout();
+
+    // Disable maintenance mode.
+    $this->drupalLogin($this->admin_user);
+    $edit = array(
+      'maintenance_mode' => FALSE,
+    );
+    $this->drupalPost('admin/config/development/maintenance', $edit, 'Save configuration');
+    $this->assertRaw('The site is no longer in maintenance mode.');
   }
 }
 

@@ -205,6 +205,8 @@ function system_entity_info() {
     'file' => array(
       'label' => t('File'),
       'base table' => 'file_managed',
+      'controller class' => 'FileStorageController',
+      'entity class' => 'File',
       'entity keys' => array(
         'id' => 'fid',
         'label' => 'filename',
@@ -1927,14 +1929,13 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
 }
 
 /**
- * Implements hook_user_insert().
+ * Implements hook_user_presave().
  */
-function system_user_presave(&$edit, $account) {
+function system_user_presave($account) {
   if (variable_get('configurable_timezones', 1) && empty($account->timezone) && !variable_get('user_default_timezone', DRUPAL_USER_TIMEZONE_DEFAULT)) {
     $account->timezone = variable_get('date_default_timezone', '');
   }
 }
-
 
 /**
  * Implements hook_user_login().
@@ -3088,7 +3089,10 @@ function system_cron() {
     if ($file = file_load($row->fid)) {
       $references = file_usage_list($file);
       if (empty($references)) {
-        if (!file_delete($file)) {
+        if (file_exists($file->uri)) {
+          $file->delete();
+        }
+        else {
           watchdog('file system', 'Could not delete temporary file "%path" during garbage collection', array('%path' => $file->uri), WATCHDOG_ERROR);
         }
       }
@@ -3246,7 +3250,7 @@ function system_send_email_action_submit($form, $form_state) {
  * Sends an e-mail message.
  *
  * @param object $entity
- *   An optional node object, which will be added as $context['node'] if
+ *   An optional node entity, which will be added as $context['node'] if
  *   provided.
  * @param array $context
  *   Array with the following elements:
@@ -3320,7 +3324,7 @@ function system_message_action_submit($form, $form_state) {
  * Sends a message to the current user's screen.
  *
  * @param object $entity
- *   An optional node object, which will be added as $context['node'] if
+ *   An optional node entity, which will be added as $context['node'] if
  *   provided.
  * @param array $context
  *   Array with the following elements:
@@ -3547,8 +3551,8 @@ function system_run_automated_cron() {
   // If the site is not fully installed, suppress the automated cron run.
   // Otherwise it could be triggered prematurely by Ajax requests during
   // installation.
-  if (($threshold = variable_get('cron_safe_threshold', DRUPAL_CRON_DEFAULT_THRESHOLD)) > 0 && variable_get('install_task') == 'done') {
-    $cron_last = variable_get('cron_last', NULL);
+  if (($threshold = variable_get('cron_safe_threshold', DRUPAL_CRON_DEFAULT_THRESHOLD)) > 0 && state_get('install_task') == 'done') {
+    $cron_last = state_get('cron_last', NULL);
     if (!isset($cron_last) || (REQUEST_TIME - $cron_last > $threshold)) {
       drupal_cron_run();
     }

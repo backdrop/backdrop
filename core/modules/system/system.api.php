@@ -125,11 +125,11 @@ function hook_admin_paths_alter(&$paths) {
 function hook_cron() {
   // Short-running operation example, not using a queue:
   // Delete all expired records since the last cron run.
-  $expires = variable_get('mymodule_cron_last_run', REQUEST_TIME);
+  $expires = state_get('mymodule_cron_last_run', REQUEST_TIME);
   db_delete('mymodule_table')
     ->condition('expires', $expires, '>=')
     ->execute();
-  variable_set('mymodule_cron_last_run', REQUEST_TIME);
+  state_set('mymodule_cron_last_run', REQUEST_TIME);
 
   // Long-running operation example, leveraging a queue:
   // Fetch feeds from other sites.
@@ -1141,7 +1141,7 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
  *   $page['content']['system_main']['nodes'][$nid]['body']
  *   // Array of links attached to the node (add comments, read more).
  *   $page['content']['system_main']['nodes'][$nid]['links']
- *   // The node object itself.
+ *   // The node entity itself.
  *   $page['content']['system_main']['nodes'][$nid]['#node']
  *   // The results pager.
  *   $page['content']['system_main']['pager']
@@ -1171,7 +1171,7 @@ function hook_page_alter(&$page) {
  * Perform alterations before a form is rendered.
  *
  * One popular use of this hook is to add form elements to the node form. When
- * altering a node form, the node object can be accessed at $form['#node'].
+ * altering a node form, the node entity can be accessed at $form['#node'].
  *
  * In addition to hook_form_alter(), which is called for all forms, there are
  * two more specific form hooks available. The first,
@@ -1843,26 +1843,35 @@ function hook_custom_theme() {
  * This hook allows modules to route log events to custom destinations, such as
  * SMS, Email, pager, syslog, ...etc.
  *
- * @param $log_entry
+ * @param array $log_entry
  *   An associative array containing the following keys:
- *   - type: The type of message for this entry. For contributed modules, this is
- *     normally the module name. Do not use 'debug', use severity WATCHDOG_DEBUG instead.
- *   - user: The user object for the user who was logged in when the event happened.
- *   - request_uri: The Request URI for the page the event happened in.
- *   - referer: The page that referred the use to the page where the event occurred.
+ *   - type: The type of message for this entry.
+ *   - user: The user object for the user who was logged in when the event
+ *     happened.
+ *   - request_uri: The request URI for the page the event happened in.
+ *   - referer: The page that referred the user to the page where the event
+ *     occurred.
  *   - ip: The IP address where the request for the page came from.
- *   - timestamp: The UNIX timestamp of the date/time the event occurred
- *   - severity: One of the following values as defined in RFC 3164 http://www.faqs.org/rfcs/rfc3164.html
- *     WATCHDOG_EMERGENCY    Emergency: system is unusable
- *     WATCHDOG_ALERT    Alert: action must be taken immediately
- *     WATCHDOG_CRITICAL     Critical: critical conditions
- *     WATCHDOG_ERROR      Error: error conditions
- *     WATCHDOG_WARNING  Warning: warning conditions
- *     WATCHDOG_NOTICE   Notice: normal but significant condition
- *     WATCHDOG_INFO     Informational: informational messages
- *     WATCHDOG_DEBUG    Debug: debug-level messages
- *   - link: an optional link provided by the module that called the watchdog() function.
- *   - message: The text of the message to be logged.
+ *   - timestamp: The UNIX timestamp of the date/time the event occurred.
+ *   - severity: The severity of the message; one of the following values as
+ *     defined in @link http://www.faqs.org/rfcs/rfc3164.html RFC 3164: @endlink
+ *     - WATCHDOG_EMERGENCY: Emergency, system is unusable.
+ *     - WATCHDOG_ALERT: Alert, action must be taken immediately.
+ *     - WATCHDOG_CRITICAL: Critical conditions.
+ *     - WATCHDOG_ERROR: Error conditions.
+ *     - WATCHDOG_WARNING: Warning conditions.
+ *     - WATCHDOG_NOTICE: Normal but significant conditions.
+ *     - WATCHDOG_INFO: Informational messages.
+ *     - WATCHDOG_DEBUG: Debug-level messages.
+ *   - link: An optional link provided by the module that called the watchdog()
+ *     function.
+ *   - message: The text of the message to be logged. Variables in the message
+ *     are indicated by using placeholder strings alongside the variables
+ *     argument to declare the value of the placeholders. See t() for
+ *     documentation on how the message and variable parameters interact.
+ *   - variables: An array of variables to be inserted into the message on
+ *     display. Will be NULL or missing if a message is already translated or if
+ *     the message is not possible to translate.
  */
 function hook_watchdog(array $log_entry) {
   global $base_url, $language_interface;
@@ -2190,19 +2199,19 @@ function hook_stream_wrappers_alter(&$wrappers) {
 }
 
 /**
- * Load additional information into file objects.
+ * Load additional information into file entities.
  *
  * file_load_multiple() calls this hook to allow modules to load
  * additional information into each file.
  *
  * @param $files
- *   An array of file objects, indexed by fid.
+ *   An array of file entities, indexed by fid.
  *
  * @see file_load_multiple()
  * @see file_load()
  */
 function hook_file_load($files) {
-  // Add the upload specific data into the file object.
+  // Add the upload specific data into the file entity.
   $result = db_query('SELECT * FROM {upload} u WHERE u.fid IN (:fids)', array(':fids' => array_keys($files)))->fetchAll(PDO::FETCH_ASSOC);
   foreach ($result as $record) {
     foreach ($record as $key => $value) {
@@ -2217,15 +2226,15 @@ function hook_file_load($files) {
  * This hook lets modules perform additional validation on files. They're able
  * to report a failure by returning one or more error messages.
  *
- * @param $file
- *   The file object being validated.
+ * @param File $file
+ *   The file entity being validated.
  * @return
  *   An array of error messages. If there are no problems with the file return
  *   an empty array.
  *
  * @see file_validate()
  */
-function hook_file_validate($file) {
+function hook_file_validate(File $file) {
   $errors = array();
 
   if (empty($file->filename)) {
@@ -2245,12 +2254,10 @@ function hook_file_validate($file) {
  * doesn't distinguish between files created as a result of a copy or those
  * created by an upload.
  *
- * @param $file
- *   The file that has just been created.
- *
- * @see file_save()
+ * @param File $file
+ *   The file entity that is about to be created or updated.
  */
-function hook_file_presave($file) {
+function hook_file_presave(File $file) {
   // Change the file timestamp to an hour prior.
   $file->timestamp -= 3600;
 }
@@ -2262,12 +2269,10 @@ function hook_file_presave($file) {
  * doesn't distinguish between files created as a result of a copy or those
  * created by an upload.
  *
- * @param $file
+ * @param File $file
  *   The file that has been added.
- *
- * @see file_save()
  */
-function hook_file_insert($file) {
+function hook_file_insert(File $file) {
   // Add a message to the log, if the file is a jpg
   $validate = file_validate_extensions($file, 'jpg');
   if (empty($validate)) {
@@ -2278,59 +2283,57 @@ function hook_file_insert($file) {
 /**
  * Respond to a file being updated.
  *
- * This hook is called when file_save() is called on an existing file.
+ * This hook is called when an existing file is saved.
  *
- * @param $file
+ * @param File $file
  *   The file that has just been updated.
- *
- * @see file_save()
  */
-function hook_file_update($file) {
+function hook_file_update(File $file) {
 
 }
 
 /**
  * Respond to a file that has been copied.
  *
- * @param $file
- *   The newly copied file object.
- * @param $source
+ * @param File $file
+ *   The newly copied file entity.
+ * @param File $source
  *   The original file before the copy.
  *
  * @see file_copy()
  */
-function hook_file_copy($file, $source) {
+function hook_file_copy(File $file, File $source) {
 
 }
 
 /**
  * Respond to a file that has been moved.
  *
- * @param $file
- *   The updated file object after the move.
- * @param $source
- *   The original file object before the move.
+ * @param File $file
+ *   The updated file entity after the move.
+ * @param File $source
+ *   The original file entity before the move.
  *
  * @see file_move()
  */
-function hook_file_move($file, $source) {
+function hook_file_move(File $file, File $source) {
 
 }
 
 /**
  * Act prior to file deletion.
  *
- * This hook is invoked from file_delete() before the file is removed from the
+ * This hook is invoked when deleting a file before the file is removed from the
  * filesystem and before its records are removed from the database.
  *
- * @param $file
+ * @param File $file
  *   The file that is about to be deleted.
  *
  * @see hook_file_delete()
- * @see file_delete()
+ * @see FileStorageController::delete()
  * @see upload_file_delete()
  */
-function hook_file_predelete($file) {
+function hook_file_predelete(File $file) {
   // Delete all information associated with the file.
   db_delete('upload')->condition('fid', $file->fid)->execute();
 }
@@ -2338,16 +2341,16 @@ function hook_file_predelete($file) {
 /**
  * Respond to file deletion.
  *
- * This hook is invoked from file_delete() after the file has been removed from
+ * This hook is invoked after the file has been removed from
  * the filesystem and after its records have been removed from the database.
  *
- * @param $file
+ * @param File $file
  *   The file that has just been deleted.
  *
  * @see hook_file_predelete()
- * @see file_delete()
+ * @see FileStorageController::delete()
  */
-function hook_file_delete($file) {
+function hook_file_delete(File $file) {
   // Delete all information associated with the file.
   db_delete('upload')->condition('fid', $file->fid)->execute();
 }
@@ -2528,7 +2531,7 @@ function hook_requirements($phase) {
 
   // Report cron status
   if ($phase == 'runtime') {
-    $cron_last = variable_get('cron_last');
+    $cron_last = state_get('cron_last');
 
     if (is_numeric($cron_last)) {
       $requirements['cron']['value'] = $t('Last run !time ago', array('!time' => format_interval(REQUEST_TIME - $cron_last)));

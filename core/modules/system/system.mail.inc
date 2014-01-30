@@ -124,9 +124,9 @@ class TestingMailSystem extends DefaultMailSystem implements MailSystemInterface
    *   An e-mail message.
    */
   public function mail(array $message) {
-    $captured_emails = variable_get('drupal_test_email_collector', array());
+    $captured_emails = state_get('test_email_collector', array());
     $captured_emails[] = $message;
-    variable_set('drupal_test_email_collector', $captured_emails);
+    state_set('test_email_collector', $captured_emails);
     return TRUE;
   }
 }
