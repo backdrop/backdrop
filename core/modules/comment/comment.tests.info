@@ -70,6 +70,12 @@ description = Tests fields on comments.
 group = Comment
 file = tests/comment.test
 
+[CommentThreadingTestCase]
+name = Comment Threading
+description = Test to make sure the comment number increments properly.
+group = Comment
+file = tests/comment.test
+
 [CommentViewsHandlerArgumentUserUidTest]
 name = Tests handler argument_comment_user_uid
 description = Tests the user posted or commented argument Views handler.
