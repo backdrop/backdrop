@@ -976,7 +976,7 @@ function hook_field_widget_properties_alter(&$widget, $context) {
  *   An associative array containing the current state of the form.
  */
 function hook_field_widget_error($element, $error, $form, &$form_state) {
-  form_error($element['value'], $error['message']);
+  form_error($element, $error['message']);
 }
 
 

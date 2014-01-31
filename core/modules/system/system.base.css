@@ -27,6 +27,7 @@
   color: #000;
   cursor: default;
   white-space: pre;
+  zoom: 1; /* IE7 */
 }
 /* Animated throbber */
 .js input.form-autocomplete {

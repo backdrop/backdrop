@@ -1108,7 +1108,7 @@ function fix_gpc_magic() {
 /**
  * Verifies the syntax of the given e-mail address.
  *
- * Empty e-mail addresses are allowed. See RFC 2822 for details.
+ * See @link http://tools.ietf.org/html/rfc5321 RFC 5321 @endlink for details.
  *
  * @param $mail
  *   A string containing an e-mail address.
@@ -7244,6 +7244,10 @@ function drupal_schema_fields_sql($table, $prefix = NULL) {
 
 /**
  * Saves (inserts or updates) a record to the database based upon the schema.
+ *
+ * Do not use drupal_write_record() within hook_update_N() functions, since the
+ * database schema cannot be relied upon when a user is running a series of
+ * updates. Instead, use db_insert() or db_update() to save the record.
  *
  * @param $table
  *   The name of the table; this must be defined by a hook_schema()
