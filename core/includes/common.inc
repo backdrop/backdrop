@@ -5315,6 +5315,7 @@ function drupal_cron_run() {
   @ignore_user_abort(TRUE);
 
   // Prevent session information from being saved while cron is running.
+  $original_session_saving = drupal_save_session();
   drupal_save_session(FALSE);
 
   // Force the current user to anonymous to ensure consistent permissions on
@@ -5377,7 +5378,7 @@ function drupal_cron_run() {
   }
   // Restore the user.
   $GLOBALS['user'] = $original_user;
-  drupal_save_session(TRUE);
+  drupal_save_session($original_session_saving);
 
   return $return;
 }
