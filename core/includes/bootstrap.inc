@@ -2241,7 +2241,7 @@ function drupal_anonymous_user() {
  * In order to bootstrap Drupal from another PHP script, you can use this code:
  * @code
  *   define('DRUPAL_ROOT', '/path/to/drupal');
- *   require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
+ *   require_once DRUPAL_ROOT . '/core/includes/bootstrap.inc';
  *   drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
  * @endcode
  *
