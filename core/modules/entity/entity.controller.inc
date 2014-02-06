@@ -458,7 +458,7 @@ class EntityDatabaseStorageController extends DrupalDefaultEntityController impl
    */
   public function create(array $values) {
     $class = isset($this->entityInfo['entity class']) ? $this->entityInfo['entity class'] : 'Entity';
-    return new $class($values, $this->entityType);
+    return new $class($values);
   }
 
   /**

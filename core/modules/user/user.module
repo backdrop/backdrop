@@ -101,8 +101,6 @@ function user_entity_info() {
       'label' => t('User'),
       'controller class' => 'UserStorageController',
       'base table' => 'users',
-      'uri callback' => 'user_uri',
-      'label callback' => 'user_label',
       'fieldable' => TRUE,
       'entity class' => 'User',
       'entity keys' => array(
@@ -125,32 +123,6 @@ function user_entity_info() {
       ),
     ),
   );
-}
-
-/**
- * Entity uri callback.
- */
-function user_uri($user) {
-  return array(
-    'path' => 'user/' . $user->uid,
-  );
-}
-
-/**
- * Entity label callback.
- *
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object.
- *
- * @return
- *   The name of the user.
- *
- * @see user_format_name()
- */
-function user_label($entity_type, $entity) {
-  return user_format_name($entity);
 }
 
 /**

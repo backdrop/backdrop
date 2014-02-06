@@ -75,6 +75,37 @@ class TaxonomyTerm extends Entity {
    * @var string
    */
   public $vocabulary_machine_name;
+
+  /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return isset($this->tid) ? $this->tid : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->name;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'taxonomy_term';
+  }
+
+  /**
+   * Implements EntityInterface::uri()
+   */
+  public function uri() {
+    return array(
+      'path' => 'taxonomy/term/' . $this->tid,
+      'options' => array(),
+    );
+  }
 }
 
 /**
@@ -263,6 +294,34 @@ class TaxonomyVocabulary extends Entity {
    * @var integer
    */
   public $weight = 0;
+
+  /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return isset($this->vid) ? $this->vid : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'taxonomy_vocabulary';
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->name;
+  }
+
+  /**
+   * Implements EntityInterface::uri()
+   */
+  public function uri() {
+    return FALSE;
+  }
 }
 
 /**

@@ -2221,15 +2221,17 @@ function drupal_array_merge_deep_array($arrays) {
 /**
  * Generates a default anonymous $user object.
  *
- * @return Object - the user object.
+ * @return User
+ *   An anonymous user entity object.
  */
 function drupal_anonymous_user() {
-  $user = new stdClass();
-  $user->uid = 0;
-  $user->hostname = ip_address();
-  $user->roles = array();
-  $user->roles[DRUPAL_ANONYMOUS_RID] = 'anonymous user';
-  $user->cache = 0;
+  $user = new User(array(
+    'uid' => 0,
+    'name' => NULL,
+    'hostname' => ip_address(),
+    'roles' => array(DRUPAL_ANONYMOUS_RID => 'anonymous user'),
+    'cache' => 0,
+  ));
   return $user;
 }
 

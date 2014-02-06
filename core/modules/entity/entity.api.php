@@ -34,19 +34,6 @@
  *     Defaults to TRUE.
  *   - load hook: The name of the hook which should be invoked by
  *     DrupalDefaultEntityController:attachLoad(), for example 'node_load'.
- *   - uri callback: A function taking an entity as argument and returning the
- *     uri elements of the entity, e.g. 'path' and 'options'. The actual entity
- *     uri can be constructed by passing these elements to url().
- *   - label callback: (optional) A function taking an entity as argument and
- *     returning the label of the entity. The entity label is the main string
- *     associated with an entity; for example, the title of a node or the
- *     subject of a comment. If there is an entity object property that defines
- *     the label, use the 'label' element of the 'entity keys' return
- *     value component to provide this information (see below). If more complex
- *     logic is needed to determine the label of an entity, you can instead
- *     specify a callback function here, which will be called to determine the
- *     entity label. See also the entity_label() function, which implements this
- *     logic.
  *   - fieldable: Set to TRUE if you want your entity type to be fieldable.
  *   - translation: An associative array of modules registered as field
  *     translation handlers. Array keys are the module names, array values
@@ -67,11 +54,6 @@
  *       omitted if this entity type exposes a single bundle (all entities have
  *       the same collection of fields). The name of this single bundle will be
  *       the same as the entity type.
- *     - label: The name of the property that contains the entity label. For
- *       example, if the entity's label is located in $entity->subject, then
- *       'subject' should be specified here. If complex logic is required to
- *       build the label, a 'label callback' should be defined instead (see
- *       the 'label callback' section above for details).
  *   - bundle keys: An array describing how the Field API can extract the
  *     information it needs from the bundle objects for this type (e.g
  *     $vocabulary objects for terms; not applicable for nodes). This entry can
@@ -83,10 +65,6 @@
  *     bundles machine names, as found in the objects' 'bundle' property
  *     (defined in the 'entity keys' entry above). Elements:
  *     - label: The human-readable name of the bundle.
- *     - uri callback: Same as the 'uri callback' key documented above for the
- *       entity type, but for the bundle only. When determining the URI of an
- *       entity, if a 'uri callback' is defined for both the entity type and
- *       the bundle, the one for the bundle is used.
  *     - admin: An array of information that allows Field UI pages to attach
  *       themselves to the existing administration pages for the bundle.
  *       Elements:
@@ -132,7 +110,6 @@ function hook_entity_info() {
       'controller class' => 'NodeController',
       'base table' => 'node',
       'revision table' => 'node_revision',
-      'uri callback' => 'node_uri',
       'fieldable' => TRUE,
       'translation' => array(
         'locale' => TRUE,
