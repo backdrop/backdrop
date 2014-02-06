@@ -3146,25 +3146,21 @@ function system_action_info() {
       'type' => 'system',
       'label' => t('Display a message to the user'),
       'configurable' => TRUE,
-      'triggers' => array('any'),
     ),
     'system_send_email_action' => array(
       'type' => 'system',
       'label' => t('Send e-mail'),
       'configurable' => TRUE,
-      'triggers' => array('any'),
     ),
     'system_block_ip_action' => array(
       'type' => 'user',
       'label' => t('Ban IP address of current user'),
       'configurable' => FALSE,
-      'triggers' => array('any'),
     ),
     'system_goto_action' => array(
       'type' => 'system',
       'label' => t('Redirect to URL'),
       'configurable' => TRUE,
-      'triggers' => array('any'),
     ),
   );
 }

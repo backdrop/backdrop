@@ -37,7 +37,6 @@ function actions_loop_test_action_info() {
       'label' => t('Write a message to the log.'),
       'type' => 'system',
       'configurable' => FALSE,
-      'triggers' => array('any'),
     ),
   );
 }

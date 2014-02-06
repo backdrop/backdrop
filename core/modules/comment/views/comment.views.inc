@@ -527,6 +527,16 @@ function comment_views_data() {
     ),
   );
 
+  $data['comment']['bulk_form'] = array(
+    'title' => t('Bulk operations'),
+    'help' => t('Provides a checkbox on each row and a form for executing bulk actions on comments.'),
+    'real field' => 'cid',
+    'field' => array(
+      'handler' => 'views_handler_field_bulk_form',
+      'click sortable' => FALSE,
+    ),
+  );
+
   return $data;
 }
 
@@ -599,7 +609,6 @@ function comment_views_data_alter(&$data) {
       'handler' => 'views_handler_relationship',
     ),
   );
-
 }
 
 /**

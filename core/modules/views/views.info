@@ -26,6 +26,7 @@ files[] = handlers/views_handler_field_boolean.inc
 files[] = handlers/views_handler_field_contextual_links.inc
 files[] = handlers/views_handler_field_custom.inc
 files[] = handlers/views_handler_field_date.inc
+files[] = handlers/views_handler_field_bulk_form.inc
 files[] = handlers/views_handler_field_dropbutton.inc
 files[] = handlers/views_handler_field_entity.inc
 files[] = handlers/views_handler_field_links.inc

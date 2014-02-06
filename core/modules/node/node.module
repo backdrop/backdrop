@@ -3465,61 +3465,48 @@ function node_action_info() {
       'label' => t('Publish content'),
       'configurable' => FALSE,
       'behavior' => array('changes_property'),
-      'triggers' => array('node_presave', 'comment_insert', 'comment_update', 'comment_delete'),
     ),
     'node_unpublish_action' => array(
       'type' => 'node',
       'label' => t('Unpublish content'),
       'configurable' => FALSE,
       'behavior' => array('changes_property'),
-      'triggers' => array('node_presave', 'comment_insert', 'comment_update', 'comment_delete'),
     ),
     'node_make_sticky_action' => array(
       'type' => 'node',
       'label' => t('Make content sticky'),
       'configurable' => FALSE,
       'behavior' => array('changes_property'),
-      'triggers' => array('node_presave', 'comment_insert', 'comment_update', 'comment_delete'),
     ),
     'node_make_unsticky_action' => array(
       'type' => 'node',
       'label' => t('Make content unsticky'),
       'configurable' => FALSE,
       'behavior' => array('changes_property'),
-      'triggers' => array('node_presave', 'comment_insert', 'comment_update', 'comment_delete'),
     ),
     'node_promote_action' => array(
       'type' => 'node',
       'label' => t('Promote content to front page'),
       'configurable' => FALSE,
       'behavior' => array('changes_property'),
-      'triggers' => array('node_presave', 'comment_insert', 'comment_update', 'comment_delete'),
     ),
     'node_unpromote_action' => array(
       'type' => 'node',
       'label' => t('Remove content from front page'),
       'configurable' => FALSE,
       'behavior' => array('changes_property'),
-      'triggers' => array('node_presave', 'comment_insert', 'comment_update', 'comment_delete'),
     ),
     'node_assign_owner_action' => array(
       'type' => 'node',
       'label' => t('Change the author of content'),
       'configurable' => TRUE,
       'behavior' => array('changes_property'),
-      'triggers' => array('node_presave', 'comment_insert', 'comment_update', 'comment_delete'),
-    ),
-    'node_save_action' => array(
-      'type' => 'node',
-      'label' => t('Save content'),
-      'configurable' => FALSE,
-      'triggers' => array('comment_insert', 'comment_update', 'comment_delete'),
     ),
     'node_unpublish_by_keyword_action' => array(
       'type' => 'node',
       'label' => t('Unpublish content containing keyword(s)'),
       'configurable' => TRUE,
-      'triggers' => array('node_presave', 'node_insert', 'node_update'),
+      'behavior' => array('changes_property'),
     ),
   );
 }
@@ -3618,19 +3605,6 @@ function node_promote_action(Node $node, $context = array()) {
 function node_unpromote_action(Node $node, $context = array()) {
   $node->promote = NODE_NOT_PROMOTED;
   watchdog('action', 'Removed @type %title from front page.', array('@type' => node_type_get_name($node), '%title' => $node->title));
-}
-
-/**
- * Saves a node.
- *
- * @param Node $node
- *   The node to be saved.
- *
- * @ingroup actions
- */
-function node_save_action(Node $node) {
-  $node->save();
-  watchdog('action', 'Saved @type %title', array('@type' => node_type_get_name($node), '%title' => $node->title));
 }
 
 /**
