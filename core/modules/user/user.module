@@ -691,7 +691,7 @@ function user_account_form(&$form, &$form_state) {
     if (!$pass_reset) {
       $protected_values['mail'] = $form['account']['mail']['#title'];
       $protected_values['pass'] = t('Password');
-      $request_new = l(t('Request new password'), 'user/password', array('attributes' => array('title' => t('Request new password via e-mail.'))));
+      $request_new = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
       $current_pass_description = t('Required if you want to change the %mail or %pass below. !request_new.', array('%mail' => $protected_values['mail'], '%pass' => $protected_values['pass'], '!request_new' => $request_new));
     }
     // The user must enter their current password to change to a new one.
@@ -923,7 +923,7 @@ function user_login_block($form) {
   if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
     $items[] = l(t('Create new account'), 'user/register', array('attributes' => array('title' => t('Create a new user account.'))));
   }
-  $items[] = l(t('Request new password'), 'user/password', array('attributes' => array('title' => t('Request new password via e-mail.'))));
+  $items[] = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
   $form['links'] = array('#theme' => 'item_list', '#items' => $items);
   return $form;
 }
@@ -1366,7 +1366,7 @@ function user_menu() {
   );
 
   $items['user/password'] = array(
-    'title' => 'Request new password',
+    'title' => 'Reset password',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_pass'),
     'access callback' => TRUE,
@@ -1375,8 +1375,8 @@ function user_menu() {
   );
   $items['user/reset/%/%/%'] = array(
     'title' => 'Reset password',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('user_pass_reset', 2, 3, 4),
+    'page callback' => 'user_pass_reset',
+    'page arguments' => array(2, 3, 4),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'user.pages.inc',
@@ -1817,7 +1817,7 @@ function user_login_final_validate($form, &$form_state) {
       }
     }
     else {
-      form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password'))));
+      form_set_error('name', t('Sorry, unrecognized username or password. <a href="@password">Have you forgotten your password?</a>', array('@password' => url('user/password', array('query' => array('name' => $form_state['values']['name']))))));
       watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
     }
   }

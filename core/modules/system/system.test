@@ -875,7 +875,7 @@ class SiteMaintenanceTestCase extends DrupalWebTestCase {
     $edit = array(
       'name' => $this->user->name,
     );
-    $this->drupalPost('user/password', $edit, 'E-mail new password');
+    $this->drupalPost('user/password', $edit, 'Reset password');
     $mails = $this->drupalGetMails();
     $start = strpos($mails[0]['body'], 'user/reset/'. $this->user->uid);
     $path = substr($mails[0]['body'], $start, 66 + strlen($this->user->uid));
