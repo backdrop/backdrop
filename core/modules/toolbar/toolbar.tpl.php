@@ -19,6 +19,8 @@
  *
  * @see template_preprocess()
  * @see template_preprocess_toolbar()
+ *
+ * @ingroup themeable
  */
 ?>
 <nav id="toolbar" role="navigation" class="<?php print $classes; ?> clearfix">

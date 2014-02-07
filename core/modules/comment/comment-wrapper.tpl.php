@@ -33,6 +33,8 @@
  *
  * @see template_preprocess_comment_wrapper()
  * @see theme_comment_wrapper()
+ *
+ * @ingroup themeable
  */
 ?>
 <section id="comments" class="<?php print $classes; ?>"<?php print $attributes; ?>>
