@@ -419,14 +419,6 @@ class UserLoginTestCase extends DrupalWebTestCase {
 class UserPasswordResetTestCase extends DrupalWebTestCase {
   protected $profile = 'standard';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Reset password',
-      'description' => 'Ensure that password reset methods work as expected.',
-      'group' => 'User',
-    );
-  }
-
   /**
    * Tests password reset functionality.
    */

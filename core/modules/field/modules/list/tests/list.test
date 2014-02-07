@@ -149,14 +149,6 @@ class ListDynamicValuesTestCase extends FieldTestCase {
  * Tests the List field allowed values function.
  */
 class ListDynamicValuesValidationTestCase extends ListDynamicValuesTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'List field dynamic values',
-      'description' => 'Test the List field allowed values function.',
-      'group' => 'Field types',
-    );
-  }
-
   /**
    * Test that allowed values function gets the entity.
    */

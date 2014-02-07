@@ -15,3 +15,9 @@ name = Upload and extract module functionality
 description = Tests the update module's upload and extraction functionality.
 group = Update
 file = update.test
+
+[UpdateCoreUnitTestCase]
+name = Unit tests
+description = Test update funcionality unrelated to the database.
+group = Update
+file = update.test

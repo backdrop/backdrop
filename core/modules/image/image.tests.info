@@ -28,6 +28,12 @@ description = Tests validation functions such as min/max resolution.
 group = Image
 file = image.test
 
+[ImageFieldDefaultImagesTestCase]
+name = Image field default images tests
+description = Tests setting up default images both to the field and field instance.
+group = Image
+file = image.test
+
 [ImageDimensionsUnitTest]
 name = Image dimensions
 description = Tests that images have correct dimensions when styled.

@@ -4,6 +4,12 @@ description = Test the List field type.
 group = Field types
 file = tests/list.test
 
+[ListDynamicValuesValidationTestCase]
+name = List field dynamic values
+description = Test the List field allowed values function.
+group = Field types
+file = tests/list.test
+
 [ListFieldUITestCase]
 name = List field UI
 description = Test the List field UI functionality.

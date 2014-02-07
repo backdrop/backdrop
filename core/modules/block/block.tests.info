@@ -45,3 +45,9 @@ name = Blocks not in hidden region
 description = Checks that a newly enabled theme does not inherit blocks to its hidden regions.
 group = Block
 file = block.test
+
+[BlockInvalidRegionTestCase]
+name = Blocks in invalid regions
+description = Checks that an active block assigned to a non-existing region triggers the warning message and is disabled.
+group = Block
+file = block.test
