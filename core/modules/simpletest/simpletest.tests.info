@@ -490,6 +490,12 @@ description = Test SQL syntax interpretation.
 group = Database
 file = tests/database_test.test
 
+[DatabaseCaseSensitivityTestCase]
+name = Case sensitivity
+description = Test handling case sensitive collation.
+group = Database
+file = tests/database_test.test
+
 [DatabaseInvalidDataTestCase]
 name = Invalid data
 description = Test handling of some invalid data.

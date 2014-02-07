@@ -16,6 +16,12 @@ description = Ensure that login works as expected.
 group = User
 file = tests/user.test
 
+[UserPasswordResetTestCase]
+name = Reset password
+description = Ensure that password reset methods work as expected.
+group = User
+file = tests/user.test
+
 [UserCancelTestCase]
 name = Cancel account
 description = Ensure that account cancellation methods work as expected.

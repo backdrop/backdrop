@@ -76,6 +76,12 @@ description = Verifies that various taxonomy pages use the expected theme.
 group = Taxonomy
 file = tests/taxonomy.test
 
+[TaxonomyEFQTestCase]
+name = Taxonomy EntityFieldQuery
+description = Verifies operation of a taxonomy-based EntityFieldQuery.
+group = Taxonomy
+file = tests/taxonomy.test
+
 [TaxonomyViewsHandlerRelationshipNodeTermDataTest]
 name = Views taxonomy relationship
 description = Tests the taxonomy term on node relationship handler for Views.

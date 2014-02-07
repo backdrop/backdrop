@@ -700,15 +700,6 @@ class UpdateTestUploadCase extends UpdateTestHelper {
 }
 
 class UpdateCoreUnitTestCase extends DrupalUnitTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => "Unit tests",
-      'description' => 'Test update funcionality unrelated to the database.',
-      'group' => 'Update',
-    );
-  }
-
   function setUp() {
     parent::setUp('update');
     module_load_include('inc', 'update', 'update.fetch');

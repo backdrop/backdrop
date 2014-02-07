@@ -1784,14 +1784,6 @@ class FilterHooksTestCase extends DrupalWebTestCase {
 class FilterSettingsTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Filter settings',
-      'description' => 'Tests filter settings.',
-      'group' => 'Filter',
-    );
-  }
-
   /**
    * Tests explicit and implicit default settings for filters.
    */

@@ -76,6 +76,12 @@ description = Test to make sure the comment number increments properly.
 group = Comment
 file = tests/comment.test
 
+[CommentNodeChangesTestCase]
+name = Comment deletion on node changes
+description = Tests that comments behave correctly when the node is changed.
+group = Comment
+file = tests/comment.test
+
 [CommentViewsHandlerArgumentUserUidTest]
 name = Tests handler argument_comment_user_uid
 description = Tests the user posted or commented argument Views handler.

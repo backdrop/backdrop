@@ -45,3 +45,9 @@ name = Filter format hooks
 description = Test hooks for text formats insert/update/disable.
 group = Filter
 file = filter.test
+
+[FilterSettingsTestCase]
+name = Filter settings
+description = Tests filter settings.
+group = Filter
+file = filter.test

@@ -2900,14 +2900,6 @@ class DatabaseBasicSyntaxTestCase extends DatabaseTestCase {
  * Test case sensitivity handling.
  */
 class DatabaseCaseSensitivityTestCase extends DatabaseTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Case sensitivity',
-      'description' => 'Test handling case sensitive collation.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test BINARY collation in MySQL.
    */

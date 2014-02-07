@@ -2116,15 +2116,6 @@ class CommentThreadingTestCase extends CommentHelperCase {
  * Tests that comments behave correctly when the node is changed.
  */
 class CommentNodeChangesTestCase extends CommentHelperCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Comment deletion on node changes',
-      'description' => 'Tests that comments behave correctly when the node is changed.',
-      'group' => 'Comment',
-    );
-  }
-
   /**
    * Tests that comments are deleted with the node.
    */
