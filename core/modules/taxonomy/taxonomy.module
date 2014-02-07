@@ -386,7 +386,7 @@ function taxonomy_admin_vocabulary_title_callback(TaxonomyVocabulary $vocabulary
  *
  * @return
  *   Status constant indicating whether the vocabulary was inserted (SAVED_NEW)
- *   or updated(SAVED_UPDATED).
+ *   or updated (SAVED_UPDATED).
  */
 function taxonomy_vocabulary_save(TaxonomyVocabulary $vocabulary) {
   return $vocabulary->save();
@@ -761,8 +761,8 @@ function taxonomy_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities 
   $parents = &drupal_static(__FUNCTION__ . ':parents', array());
   $terms = &drupal_static(__FUNCTION__ . ':terms', array());
 
-  // We cache trees, so it's not CPU-intensive to call get_tree() on a term
-  // and its children, too.
+  // We cache trees, so it's not CPU-intensive to call taxonomy_get_tree() on a
+  // term and its children, too.
   if (!isset($children[$vid])) {
     $children[$vid] = array();
     $parents[$vid] = array();
@@ -1564,3 +1564,35 @@ function taxonomy_taxonomy_term_delete(TaxonomyTerm $term) {
 /**
  * @} End of "defgroup taxonomy_index"
  */
+
+/**
+ * Implements hook_entity_query_alter().
+ *
+ * Converts EntityFieldQuery instances on taxonomy terms that have an entity
+ * condition on term bundles (vocabulary machine names). Since the vocabulary
+ * machine name is not present in the {taxonomy_term_data} table itself, we have
+ * to convert the bundle condition into a proprety condition of vocabulary IDs
+ * to match against {taxonomy_term_data}.vid.
+ */
+function taxonomy_entity_query_alter($query) {
+  $conditions = &$query->entityConditions;
+
+  // Alter only taxonomy term queries with bundle conditions.
+  if (isset($conditions['entity_type']) && $conditions['entity_type']['value'] == 'taxonomy_term' && isset($conditions['bundle'])) {
+    // Convert vocabulary machine names to vocabulary IDs.
+    $vocabulary_data = taxonomy_vocabulary_get_names();
+    $vids = array();
+    if (is_array($conditions['bundle']['value'])) {
+      foreach ($conditions['bundle']['value'] as $vocabulary_machine_name) {
+        $vids[] = $vocabulary_data[$vocabulary_machine_name]->vid;
+      }
+    }
+    else {
+      $vocabulary_machine_name = $conditions['bundle']['value'];
+      $vids = $vocabulary_data[$vocabulary_machine_name]->vid;
+    }
+
+    $query->propertyCondition('vid', $vids, $conditions['bundle']['operator']);
+    unset($conditions['bundle']);
+  }
+}
