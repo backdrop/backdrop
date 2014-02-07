@@ -6,7 +6,7 @@
  */
 
 /**
- * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing users.
+ * Menu callback; retrieve a JSON object containing autocomplete suggestions for existing users.
  */
 function user_autocomplete($string = '') {
   $matches = array();
@@ -21,7 +21,7 @@ function user_autocomplete($string = '') {
 }
 
 /**
- * Form builder; Request a password reset.
+ * Form builder; request a password reset.
  *
  * @ingroup forms
  * @see user_pass_validate()
@@ -36,6 +36,7 @@ function user_pass() {
     '#size' => 60,
     '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
     '#required' => TRUE,
+    '#default_value' => (array_key_exists('name', $_GET)) ? $_GET['name'] : '',
   );
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
@@ -48,11 +49,14 @@ function user_pass() {
     );
   }
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('E-mail new password'));
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Reset password'));
 
   return $form;
 }
 
+/**
+ * Validate handler for user_pass().
+ */
 function user_pass_validate($form, &$form_state) {
   $name = trim($form_state['values']['name']);
   // Try to load by email.
@@ -71,6 +75,9 @@ function user_pass_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Submit handler for user_pass().
+ */
 function user_pass_submit($form, &$form_state) {
   global $language_interface;
 
@@ -88,8 +95,15 @@ function user_pass_submit($form, &$form_state) {
 
 /**
  * Menu callback; process one time login link and redirects to the user page on success.
+ *
+ * @param $uid
+ *   User ID for the user who would like their password reset.
+ * @param $timestamp
+ *   Timestamp when the one-time password reset link was generated.
+ * @param $hashed_pass
+ *   Hashed version of the user's password using user_pass_rehash().
  */
-function user_pass_reset($form, &$form_state, $uid, $timestamp, $hashed_pass, $action = NULL) {
+function user_pass_reset($uid, $timestamp, $hashed_pass) {
   global $user;
 
   // When processing the one-time login link, we have to make sure that a user
@@ -103,11 +117,11 @@ function user_pass_reset($form, &$form_state, $uid, $timestamp, $hashed_pass, $a
     else {
       $reset_link_account = user_load($uid);
       if (!empty($reset_link_account)) {
-        drupal_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a one-time link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
+        drupal_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
           array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))));
       } else {
         // Invalid one-time link specifies an unknown user.
-        drupal_set_message(t('The one-time login link you clicked is invalid.'));
+        drupal_set_message(t('The reset password link you clicked is invalid.'));
       }
     }
     drupal_goto();
@@ -122,35 +136,14 @@ function user_pass_reset($form, &$form_state, $uid, $timestamp, $hashed_pass, $a
     if ($timestamp <= $current && $account = reset($users)) {
       // No time out for first time login.
       if ($account->login && $current - $timestamp > $timeout) {
-        drupal_set_message(t('You have tried to use a one-time login link that has expired. Please request a new one using the form below.'));
+        drupal_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'));
         drupal_goto('user/password');
       }
       elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
-        // First stage is a confirmation form, then login
-        if ($action == 'login') {
-          watchdog('user', 'User %name used one-time login link at time %timestamp.', array('%name' => $account->name, '%timestamp' => $timestamp));
-          // Set the new user.
-          $user = $account;
-          // user_login_finalize() also updates the login timestamp of the
-          // user, which invalidates further use of the one-time login link.
-          user_login_finalize();
-          drupal_set_message(t('You have just used your one-time login link. It is no longer necessary to use this link to log in. Please change your password.'));
-          // Let the user's password be changed without the current password check.
-          $token = drupal_hash_base64(drupal_random_bytes(55));
-          $_SESSION['pass_reset_' . $user->uid] = $token;
-          drupal_goto('user/' . $user->uid . '/edit', array('query' => array('pass-reset-token' => $token)));
-        }
-        else {
-          $form['message'] = array('#markup' => t('<p>This is a one-time login for %user_name and will expire on %expiration_date.</p><p>Click on this button to log in to the site and change your password.</p>', array('%user_name' => $account->name, '%expiration_date' => format_date($timestamp + $timeout))));
-          $form['help'] = array('#markup' => '<p>' . t('This login can be used only once.') . '</p>');
-          $form['actions'] = array('#type' => 'actions');
-          $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Log in'));
-          $form['#action'] = url("user/reset/$uid/$timestamp/$hashed_pass/login");
-          return $form;
-        }
+        return drupal_get_form('user_pass_reset_form', $account, $timestamp, $timeout);
       }
       else {
-        drupal_set_message(t('You have tried to use a one-time login link that has either been used or is no longer valid. Please request a new one using the form below.'));
+        drupal_set_message(t('You have tried to use a reset password link that has either been used or is no longer valid. Please request a new one using the form below.'));
         drupal_goto('user/password');
       }
     }
@@ -160,6 +153,50 @@ function user_pass_reset($form, &$form_state, $uid, $timestamp, $hashed_pass, $a
       drupal_access_denied();
     }
   }
+}
+
+/**
+ * Form builder; one time login form with password reset.
+ *
+ * @ingroup forms
+ * @see user_pass_reset_form_submit()
+ */
+function user_pass_reset_form($form, &$form_state, $account, $timestamp, $timeout) {
+  $form['#account'] = $account;
+  $form['message'] = array(
+    '#markup' => t('<p>This is a one-time login for %user_name and will expire on %expiration_date.</p><p>Click on this button to log in to the site.</p>', array('%user_name' => $account->name, '%expiration_date' => format_date($timestamp + $timeout))),
+  );
+  $form['help'] = array(
+    '#markup' => '<p>' . t('This login can be used only once.') . '</p>'
+  );
+  $form['pass'] = array(
+    '#type' => 'password_confirm',
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Log in'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for user_pass_reset_form().
+ */
+function user_pass_reset_form_submit($form, &$form_state) {
+  global $user;
+  $user = $form['#account'];
+  $user->pass = $form_state['values']['pass'];
+  $user->save();
+  // user_login_finalize() also updates the login timestamp of the user, which
+  // invalidates further use of the one-time login link.
+  user_login_finalize();
+  drupal_set_message(t('You have just used your one-time login link. Your password has been updated.'));
+  watchdog('user', 'User %name used one-time login link at time %timestamp.', array('%name' => $form['#account']->name, '%timestamp' => REQUEST_TIME));
+  drupal_goto();
 }
 
 /**
@@ -250,14 +287,14 @@ function user_profile_form($form, &$form_state, $account) {
 }
 
 /**
- * Validation function for the user account and profile editing form.
+ * Validate handler for user_profile_form().
  */
 function user_profile_form_validate($form, &$form_state) {
   entity_form_field_validate('user', $form, $form_state);
 }
 
 /**
- * Submit function for the user account and profile editing form.
+ * Submit handler for user_profile_form().
  */
 function user_profile_form_submit($form, &$form_state) {
   $account = $form_state['user'];
@@ -279,7 +316,7 @@ function user_profile_form_submit($form, &$form_state) {
 }
 
 /**
- * Submit function for the 'Cancel account' button on the user edit form.
+ * Submit handler for user_edit_cancel().
  */
 function user_edit_cancel_submit($form, &$form_state) {
   $destination = array();
@@ -292,10 +329,11 @@ function user_edit_cancel_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; confirm form for cancelling user account.
+ * Form builder; confirm form for canceling user account.
  *
  * @ingroup forms
  * @see user_edit_cancel_submit()
+ * @see user_cancel_confirm_form_submit()
  */
 function user_cancel_confirm_form($form, &$form_state, $account) {
   global $user;
@@ -369,9 +407,8 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
 }
 
 /**
- * Submit handler for the account cancellation confirm form.
+ * Submit handler for user_cancel_confirm_form().
  *
- * @see user_cancel_confirm_form()
  * @see user_multiple_cancel_confirm_submit()
  */
 function user_cancel_confirm_form_submit($form, &$form_state) {
@@ -402,8 +439,6 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
 
 /**
  * Helper function to return available account cancellation methods.
- *
- * See documentation of hook_user_cancel_methods_alter().
  *
  * @return
  *   An array containing all account cancellation methods as form elements.
@@ -452,7 +487,7 @@ function user_cancel_methods() {
 }
 
 /**
- * Menu callback; Cancel a user account via e-mail confirmation link.
+ * Menu callback; cancel a user account via e-mail confirmation link.
  *
  * @see user_cancel_confirm_form()
  * @see user_cancel_url()

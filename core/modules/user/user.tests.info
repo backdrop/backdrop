@@ -16,12 +16,6 @@ description = Ensure that login works as expected.
 group = User
 file = tests/user.test
 
-[UserPasswordResetTestCase]
-name = Reset password
-description = Ensure that password reset methods work as expected.
-group = User
-file = tests/user.test
-
 [UserCancelTestCase]
 name = Cancel account
 description = Ensure that account cancellation methods work as expected.
@@ -135,6 +129,12 @@ name = User entity callback tests
 description = Tests specific parts of the user entity like the URI callback and the label callback.
 group = User
 file = tests/user.test
+
+[UserPasswordResetTest]
+name = Reset password
+description = Ensure that password reset works as expected.
+group = User
+file = tests/user_password_reset.test
 
 [UserViewsHandlerFieldNameTest]
 name = Views "User: name" field
