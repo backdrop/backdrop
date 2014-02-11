@@ -1047,10 +1047,6 @@ class FormStateValuesCleanAdvancedTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('form_test');
-
-    $this->admin_user = $this->drupalCreateUser(array('access vertical_tab_test tabs'));
-    $this->web_user = $this->drupalCreateUser();
-    $this->drupalLogin($this->admin_user);
   }
 
   /**
@@ -1074,23 +1070,6 @@ class FormStateValuesCleanAdvancedTestCase extends DrupalWebTestCase {
     // Expecting a 200 HTTP code.
     $this->assertResponse(200, t('Received a 200 response for posted test file.'));
     $this->assertRaw(t('You WIN!'), t('Found the success message.'));
-  }
-
-  /**
-   * Ensures that the vertical-tabs wrapper markup is not shown if the user
-   * does not have access to any of the tabs.
-   */
-  function testWrapperNotShownWhenEmpty() {
-    // Test admin user can see vertical tabs and wrapper.
-    $this->drupalGet('form_test/vertical-tabs');
-    $wrapper = $this->xpath("//div[@class='vertical-tabs-panes']");
-    $this->assertTrue(isset($wrapper[0]), 'Vertical tab panes found.');
-
-    // Test wrapper markup not present for non-privileged web user.
-    $this->drupalLogin($this->web_user);
-    $this->drupalGet('form_test/vertical-tabs');
-    $wrapper = $this->xpath("//div[@class='vertical-tabs-panes']");
-    $this->assertFalse(isset($wrapper[0]), 'Vertical tab wrappers are not displayed to unprivileged users.');
   }
 }
 
