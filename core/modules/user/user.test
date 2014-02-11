@@ -1339,7 +1339,7 @@ class UserAutocompleteTestCase extends DrupalWebTestCase {
 
 
 /**
- * Test user-links in secondary menu.
+ * Tests user links in the secondary menu.
  */
 class UserAccountLinksUnitTests extends DrupalWebTestCase {
   /**
@@ -1407,6 +1407,10 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
     $this->assertPattern('!<title.*?' . t('Compose tips') . '.*?</title>!', t('Still on the same page after login for allowed page'));
   }
 
+  function setUp() {
+    parent::setUp('menu');
+  }
+
   /**
    * Test the Who's Online block.
    */
@@ -1457,6 +1461,36 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
       ->execute();
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {sessions} WHERE uid = :uid AND sid = :sid AND timestamp = :timestamp", array(':uid' => $fields['uid'], ':sid' => $fields['sid'], ':timestamp' => $fields['timestamp']))->fetchField(), 1, t('Session record inserted.'));
   }
+
+  /**
+   * Tests disabling the 'My account' link.
+   */
+  function testDisabledAccountLink() {
+    // Create an admin user and log in.
+    $this->drupalLogin($this->drupalCreateUser(array('access administration pages', 'administer menu')));
+
+    // Verify that the 'My account' link is enabled.
+    $this->drupalGet('admin/structure/menu/manage/user-menu');
+    $this->assertFieldChecked('edit-mlid2-hidden', "The 'My account' link is enabled by default.");
+
+    // Disable the 'My account' link.
+    $edit = array(
+      'mlid:2[hidden]' => FALSE,
+    );
+    $this->drupalPost('admin/structure/menu/manage/user-menu', $edit, t('Save configuration'));
+
+    // Get the homepage.
+    $this->drupalGet('<front>');
+
+    // Verify that the 'My account' link does not appear when disabled.
+    $link = $this->xpath('//ul[@id=:menu_id]/li/a[contains(@href, :href) and text()=:text]', array(
+      ':menu_id' => 'secondary-menu-links',
+      ':href' => 'user',
+      ':text' => 'My account',
+    ));
+    $this->assertEqual(count($link), 0, 'My account link is not in the secondary menu.');
+  }
+
 }
 
 /**
