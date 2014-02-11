@@ -339,9 +339,11 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     // Join the known base-table.
     $target_type = $this->field['settings']['target_type'];
     $entity_info = entity_get_info($target_type);
+    $target_type_base_table = $entity_info['base table'];
     $id = $entity_info['entity keys']['id'];
+
     // Return the alias of the table.
-    return $query->innerJoin($target_type, NULL, "%alias.$id = $alias.entity_id");
+    return $query->innerJoin($target_type_base_table, NULL, "%alias.$id = $alias.entity_id");
   }
 }
 
