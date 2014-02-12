@@ -4218,7 +4218,7 @@ function _form_set_class(&$element, $class = array()) {
   if (!empty($element['#required'])) {
     $element['#attributes']['class'][] = 'required';
   }
-  if (isset($element['#parents']) && form_get_error($element)) {
+  if (isset($element['#parents']) && form_get_error($element) !== NULL) {
     $element['#attributes']['class'][] = 'error';
   }
 }

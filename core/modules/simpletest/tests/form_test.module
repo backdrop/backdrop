@@ -23,6 +23,13 @@ function form_test_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
+  $items['form-test/validate-required-no-title'] = array(
+    'title' => 'Form #required validation without #title',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_validate_required_form_no_title'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['form-test/limit-validation-errors'] = array(
     'title' => 'Form validation with some error suppression',
     'page callback' => 'drupal_get_form',
@@ -363,6 +370,26 @@ function form_test_validate_form_validate(&$form, &$form_state) {
     // Trigger a form validation error to see our changes.
     form_set_error('');
   }
+}
+
+/**
+ * Form constructor to test the #required property without #title.
+ */
+function form_test_validate_required_form_no_title($form, &$form_state) {
+  $form['textfield'] = array(
+    '#type' => 'textfield',
+    '#required' => TRUE,
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => 'Submit');
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_validate_required_form_no_title().
+ */
+function form_test_validate_required_form_no_title_submit($form, &$form_state) {
+  drupal_set_message('The form_test_validate_required_form_no_title form was submitted successfully.');
 }
 
 /**
