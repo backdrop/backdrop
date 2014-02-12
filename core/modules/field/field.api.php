@@ -834,7 +834,7 @@ function hook_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     '#type' => $instance['widget']['type'],
     '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
   );
-  return $element;
+  return array('value' => $element);
 }
 
 /**
