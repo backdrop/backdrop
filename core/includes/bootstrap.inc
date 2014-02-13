@@ -2230,7 +2230,6 @@ function drupal_anonymous_user() {
     'name' => NULL,
     'hostname' => ip_address(),
     'roles' => array(DRUPAL_ANONYMOUS_RID => 'anonymous user'),
-    'cache' => 0,
   ));
   return $user;
 }

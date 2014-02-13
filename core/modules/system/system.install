@@ -1458,6 +1458,12 @@ function system_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'cache' => array(
+        'description' => "The time of this user's last post. This is used when the site has specified a minimum_cache_lifetime. See Drupal\Core\Cache\CacheBackendInterface::get().",
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'session' => array(
         'description' => 'The serialized contents of $_SESSION, an array of name/value pairs that persists across page requests by this session ID. Drupal loads $_SESSION from here at the start of each request and saves it at the end.',
         'type' => 'blob',
@@ -1730,6 +1736,13 @@ function system_update_8006() {
   db_delete('actions')
     ->condition('aid', array('comment_save_action', 'node_save_action'), 'IN')
     ->execute();
+}
+
+/**
+ * Remove the obsolete {session}.cache column.
+ */
+function system_update_8007() {
+  db_drop_field('session', 'cache');
 }
 
 /**
