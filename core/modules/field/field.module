@@ -1053,7 +1053,7 @@ function template_process_field(&$variables, $hook) {
   }
 }
 /**
- * @} End of "defgroup field"
+ * @} End of "defgroup field".
  */
 
 /**
