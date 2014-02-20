@@ -2230,7 +2230,6 @@ function drupal_anonymous_user() {
     'name' => NULL,
     'hostname' => ip_address(),
     'roles' => array(DRUPAL_ANONYMOUS_RID => 'anonymous user'),
-    'cache' => 0,
   ));
   return $user;
 }
@@ -3015,7 +3014,7 @@ function ip_address() {
 }
 
 /**
- * @ingroup schemaapi
+ * @addtogroup schemaapi
  * @{
  */
 
@@ -3137,12 +3136,12 @@ function drupal_get_complete_schema($rebuild = FALSE) {
 }
 
 /**
- * @} End of "ingroup schemaapi".
+ * @} End of "addtogroup schemaapi".
  */
 
 
 /**
- * @ingroup registry
+ * @addtogroup registry
  * @{
  */
 
@@ -3304,7 +3303,7 @@ function registry_update() {
 }
 
 /**
- * @} End of "ingroup registry".
+ * @} End of "addtogroup registry".
  */
 
 /**

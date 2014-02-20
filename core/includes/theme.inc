@@ -1568,7 +1568,7 @@ function theme_disable($theme_list) {
 }
 
 /**
- * @ingroup themeable
+ * @addtogroup themeable
  * @{
  */
 
@@ -2334,7 +2334,7 @@ function theme_indentation($variables) {
 }
 
 /**
- * @} End of "ingroup themeable".
+ * @} End of "addtogroup themeable".
  */
 
 /**
