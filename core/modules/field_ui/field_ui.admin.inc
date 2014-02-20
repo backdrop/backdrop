@@ -1542,7 +1542,7 @@ function field_ui_existing_field_options($entity_type, $bundle) {
           // - locked fields,
           // - fields already in the current bundle,
           // - fields that cannot be added to the entity type,
-          // - fields that that shoud not be added via user interface.
+          // - fields that should not be added via user interface.
 
           if (empty($field['locked'])
             && !field_info_instance($entity_type, $field['field_name'], $bundle)
@@ -1552,7 +1552,7 @@ function field_ui_existing_field_options($entity_type, $bundle) {
               'type' => $field['type'],
               'type_label' => $field_types[$field['type']]['label'],
               'field' => $field['field_name'],
-              'label' => t($instance['label']),
+              'label' => $instance['label'],
               'widget_type' => $instance['widget']['type'],
             );
           }

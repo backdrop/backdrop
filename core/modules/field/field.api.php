@@ -719,6 +719,9 @@ function hook_field_is_empty($item, $field) {
  *       - FIELD_BEHAVIOR_DEFAULT: (default) If the widget accepts default
  *         values.
  *       - FIELD_BEHAVIOR_NONE: if the widget does not support default values.
+ *   - weight: (optional) An integer to determine the weight of this widget
+ *     relative to other widgets in the Field UI when selecting a widget for a
+ *     given field instance.
  *
  * @see hook_field_widget_info_alter()
  * @see hook_field_widget_form()
@@ -728,7 +731,7 @@ function hook_field_is_empty($item, $field) {
  * @see hook_field_widget_settings_form()
  */
 function hook_field_widget_info() {
-    return array(
+  return array(
     'text_textfield' => array(
       'label' => t('Text field'),
       'field types' => array('text'),
@@ -755,6 +758,8 @@ function hook_field_widget_info() {
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
       ),
+      // As an advanced widget, force it to sink to the bottom of the choices.
+      'weight' => 2,
     ),
   );
 }
@@ -859,7 +864,7 @@ function hook_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     '#type' => $instance['widget']['type'],
     '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
   );
-  return $element;
+  return array('value' => $element);
 }
 
 /**

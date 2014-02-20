@@ -626,7 +626,7 @@ class NodeBlockTestCase extends DrupalWebTestCase {
     $this->drupalLogin($admin_user);
   }
 
-  function testSearchFormBlock() {
+  function testSyndicateBlock() {
     // Set block title to confirm that the interface is available.
     $this->drupalPost('admin/structure/block/manage/node/syndicate/configure', array('title' => $this->randomName(8)), t('Save block'));
     $this->assertText(t('The block configuration has been saved.'), t('Block configuration set.'));
@@ -747,7 +747,11 @@ class NodeRSSContentTestCase extends DrupalWebTestCase {
     // viewing node.
     $this->drupalGet("node/$node->nid");
     $this->assertNoText($rss_only_content, t('Node content designed for RSS doesn\'t appear when viewing node.'));
-
+    
+    // Check that the node feed page does not try to interpret additional path
+    // components as arguments for node_feed() and returns default content.
+    $this->drupalGet('rss.xml/' . $this->randomName() . '/' . $this->randomName());
+    $this->assertText($rss_only_content, t('Ignore page arguments when delivering rss.xml.'));
   }
 }
 
@@ -2271,5 +2275,41 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
     // Confirm that the new default value appears when creating a new node.
     $this->drupalGet('node/add/page');
     $this->assertRaw($default, 'The updated default value is displayed when creating a new node.');
+  }
+}
+
+/**
+ * Tests changing view modes for nodes.
+ */
+class NodeEntityViewModeAlterTest extends NodeWebTestCase {
+  function setUp() {
+    parent::setUp(array('node_test'));
+  }
+
+  /**
+   * Create a "Basic page" node and verify its consistency in the database.
+   */
+  function testNodeViewModeChange() {
+    $web_user = $this->drupalCreateUser(array('create page content', 'edit own page content'));
+    $this->drupalLogin($web_user);
+
+    // Create a node.
+    $edit = array();
+    $langcode = LANGUAGE_NONE;
+    $edit["title"] = $this->randomName(8);
+    $edit["body[$langcode][0][value]"] = t('Data that should appear only in the body for the node.');
+    $edit["body[$langcode][0][summary]"] = t('Extra data that should appear only in the teaser for the node.');
+    $this->drupalPost('node/add/page', $edit, t('Save'));
+
+    $node = $this->drupalGetNodeByTitle($edit["title"]);
+
+    // Set the flag to alter the view mode and view the node.
+    variable_set('node_test_change_view_mode', 'teaser');
+    $this->drupalGet('node/' . $node->nid);
+
+    // Check that teaser mode is viewed.
+    $this->assertText('Extra data that should appear only in the teaser for the node.', 'Teaser text present');
+    // Make sure body text is not present.
+    $this->assertNoText('Data that should appear only in the body for the node.', 'Body text not present');
   }
 }
