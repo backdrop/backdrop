@@ -7203,7 +7203,7 @@ function drupal_common_theme() {
 }
 
 /**
- * @ingroup schemaapi
+ * @addtogroup schemaapi
  * @{
  */
 
@@ -7523,7 +7523,7 @@ function drupal_write_record($table, &$record, $primary_keys = array()) {
 }
 
 /**
- * @} End of "ingroup schemaapi".
+ * @} End of "addtogroup schemaapi".
  */
 
 /**

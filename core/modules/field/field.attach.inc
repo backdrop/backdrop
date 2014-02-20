@@ -65,7 +65,7 @@ const FIELD_STORAGE_UPDATE = 'update';
 const FIELD_STORAGE_INSERT = 'insert';
 
 /**
- * @} End of "defgroup field_storage"
+ * @} End of "defgroup field_storage".
  */
 
 /**
@@ -1409,5 +1409,5 @@ function field_attach_delete_bundle($entity_type, $bundle) {
 
 
 /**
- * @} End of "defgroup field_attach"
+ * @} End of "defgroup field_attach".
  */
