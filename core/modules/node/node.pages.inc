@@ -180,17 +180,18 @@ function node_form($form, &$form_state, Node $node) {
   }
   // @todo D8: Remove. Modules should access the node using $form_state['node'].
   $form['#node'] = $node;
+  $langcode = entity_language('node', $node);
 
   if (variable_get('node_type_language_' . $node->type, 0) && module_exists('language')) {
     $languages = language_list(TRUE);
     $language_options = array();
-    foreach ($languages as $langcode => $language) {
-      $language_options[$langcode] = $language->name;
+    foreach ($languages as $code => $language) {
+      $language_options[$code] = $language->name;
     }
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#default_value' => (isset($node->langcode) ? $node->langcode : ''),
+      '#default_value' => (isset($langcode) ? $langcode : ''),
       '#options' => $language_options,
       '#empty_value' => LANGUAGE_NONE,
     );
@@ -200,7 +201,7 @@ function node_form($form, &$form_state, Node $node) {
       '#type' => 'value',
       // New nodes without multilingual support get the default language, old
       // nodes keep their language if language.module is not available.
-      '#value' => !isset($form['#node']->nid) ? language_default()->langcode : $node->langcode,
+      '#value' => !isset($form['#node']->nid) ? language_default()->langcode : $langcode,
     );
   }
 
@@ -358,7 +359,7 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form += array('#submit' => array());
 
-  field_attach_form('node', $node, $form, $form_state, $node->langcode);
+  field_attach_form('node', $node, $form, $form_state, entity_language('node', $node));
   return $form;
 }
 
