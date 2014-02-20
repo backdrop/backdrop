@@ -280,6 +280,12 @@ function locale_language_from_url($languages) {
 
     case LANGUAGE_NEGOTIATION_URL_DOMAIN:
       $domains = locale_language_negotiation_url_domains();
+      // Get only the host, not the port.
+      $http_host = $_SERVER['HTTP_HOST'];
+      if (strpos($http_host, ':') !== FALSE) {
+        $http_host_tmp = explode(':', $http_host);
+        $http_host = current($http_host_tmp);
+      }
       foreach ($languages as $language) {
         // Skip check if the language doesn't have a domain.
         if (!empty($domains[$language->langcode])) {
@@ -287,7 +293,7 @@ function locale_language_from_url($languages) {
           // Remove protocol and add http:// so parse_url works
           $host = 'http://' . str_replace(array('http://', 'https://'), '', $domains[$language->langcode]);
           $host = parse_url($host, PHP_URL_HOST);
-          if ($_SERVER['HTTP_HOST'] == $host) {
+          if ($http_host == $host) {
             $language_url = $language->langcode;
             break;
           }
