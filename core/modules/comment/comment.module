@@ -82,6 +82,7 @@ function comment_entity_info() {
       'entity keys' => array(
         'id' => 'cid',
         'bundle' => 'node_type',
+        'langcode' => 'language',
       ),
       'bundles' => array(),
       'view modes' => array(

@@ -169,11 +169,11 @@ for ($i = 0; $i < 24; $i++) {
   ++$node_id;
   ++$revision_id;
   $node->title = "node title $node_id rev $revision_id (i=$i)";
-  $node->language = LANGUAGE_NONE;
+  $node->langcode = LANGUAGE_NONE;
   $body_text =  str_repeat("node body ($node->type) - $i", 100);
-  $node->body[$node->language][0]['value'] = $body_text;
-  $node->body[$node->language][0]['summary'] = text_summary($body_text);
-  $node->body[$node->language][0]['format'] = 'filtered_html';
+  $node->body[$node->langcode][0]['value'] = $body_text;
+  $node->body[$node->langcode][0]['summary'] = text_summary($body_text);
+  $node->body[$node->langcode][0]['format'] = 'filtered_html';
   $node->status = intval($i / 4) % 2;
   $node->revision = $i < 12;
   $node->promote = $i % 2;
@@ -195,15 +195,15 @@ for ($i = 0; $i < 24; $i++) {
     $node->{$field_name}[LANGUAGE_NONE][] = array('tid' => $tid);
   }
   $node->path = array('alias' => "content/$node->created");
-  node_save($node);
+  $node->save();
   if ($node->revision) {
     $user = user_load($uid + 3);
     ++$revision_id;
     $node->title .= " rev2 $revision_id";
     $body_text =  str_repeat("node revision body ($node->type) - $i", 100);
-    $node->body[$node->language][0]['value'] = $body_text;
-    $node->body[$node->language][0]['summary'] = text_summary($body_text);
-    $node->body[$node->language][0]['format'] = 'filtered_html';
+    $node->body[$node->langcode][0]['value'] = $body_text;
+    $node->body[$node->langcode][0]['summary'] = text_summary($body_text);
+    $node->body[$node->langcode][0]['format'] = 'filtered_html';
     $node->log = "added $i revision";
     $node_terms = $terms;
     unset($node_terms[$i], $node_terms[47 - $i]);
@@ -211,7 +211,7 @@ for ($i = 0; $i < 24; $i++) {
       $field_name = $term_vocabs[$tid];
       $node->{$field_name}[LANGUAGE_NONE][] = array('tid' => $tid);
     }
-    node_save($node);
+    $node->save();
   }
 }
 
@@ -224,17 +224,17 @@ $node->type = 'post';
 $body_text = str_repeat("node body ($node_type) - 37", 100);
 $node->sticky = 0;
 $node->title = "node title 24";
-$node->language = LANGUAGE_NONE;
-$node->body[$node->language][0]['value'] = $body_text;
-$node->body[$node->language][0]['summary'] = text_summary($body_text);
-$node->body[$node->language][0]['format']  = 'filtered_html';
+$node->langcode = LANGUAGE_NONE;
+$node->body[$node->langcode][0]['value'] = $body_text;
+$node->body[$node->langcode][0]['summary'] = text_summary($body_text);
+$node->body[$node->langcode][0]['format']  = 'filtered_html';
 $node->status = 1;
 $node->revision = 0;
 $node->promote = 0;
 $node->created = 1263769200;
 $node->log = "added a broken node";
 $node->path = array('alias' => "content/1263769200");
-node_save($node);
+$node->save();
 db_update('node')
   ->fields(array(
     'type' => $node_type,
