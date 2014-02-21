@@ -407,10 +407,20 @@ class SkipDotsRecursiveDirectoryIterator extends RecursiveDirectoryIterator {
    */
   function __construct($path) {
     parent::__construct($path);
+    $this->skipdots();
+  }
+
+  function rewind() {
+    parent::rewind();
+    $this->skipdots();
   }
 
   function next() {
     parent::next();
+    $this->skipdots();
+  }
+
+  protected function skipdots() {
     while ($this->isDot()) {
       parent::next();
     }
