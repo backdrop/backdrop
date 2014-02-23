@@ -154,6 +154,12 @@ description = Test the handling of requests containing 'index.php'.
 group = System
 file = system.test
 
+[SystemValidTokenTest]
+name = Token validation
+description = Test the security token validation.
+group = System
+file = system.test
+
 [UuidUnitTestCase]
 name = UUID handling
 description = Test the handling of Universally Unique IDentifiers (UUIDs).
