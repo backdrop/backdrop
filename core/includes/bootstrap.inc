@@ -774,7 +774,6 @@ function drupal_settings_initialize() {
   if (isset($base_url)) {
     // Parse fixed base URL from settings.php.
     $parts = parse_url($base_url);
-    $http_protocol = $parts['scheme'];
     if (!isset($parts['path'])) {
       $parts['path'] = '';
     }
@@ -1893,7 +1892,8 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
       'request_uri' => $base_root . request_uri(),
       'referer'     => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
       'ip'          => ip_address(),
-      'timestamp'   => REQUEST_TIME,
+      // Request time isn't accurate for long processes, use time() instead.
+      'timestamp'   => time(),
     );
 
     // Call the logging hooks to log/process the message

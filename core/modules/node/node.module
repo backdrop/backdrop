@@ -1084,6 +1084,14 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
   // Remove previously built content, if exists.
   $node->content = array();
 
+  // Allow modules to change the view mode.
+  $context = array(
+    'entity_type' => 'node',
+    'entity' => $node,
+    'langcode' => $langcode,
+  );
+  drupal_alter('entity_view_mode', $view_mode, $context);
+
   // The 'view' hook can be implemented to overwrite the default function
   // to display nodes.
   if (node_hook($node, 'view')) {
@@ -1772,6 +1780,9 @@ function node_menu() {
     'page callback' => 'node_feed',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
+    // Pass a FALSE and array argument to ensure that additional path components
+    // are not passed to node_feed().
+    'page arguments' => array(FALSE, array()),
   );
   // @todo Remove this loop when we have a 'description callback' property.
   // Resets the internal static cache of _node_types_build() and forces a

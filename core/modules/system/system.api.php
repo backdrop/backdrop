@@ -60,6 +60,24 @@ function hook_hook_info_alter(&$hooks) {
 }
 
 /**
+ * Change the view mode of an entity that is being displayed.
+ *
+ * @param string $view_mode
+ *   The view_mode that is to be used to display the entity.
+ * @param array $context
+ *   Array with contextual information, including:
+ *   - entity_type: The type of the entity that is being viewed.
+ *   - entity: The entity object.
+ *   - langcode: The langcode the entity is being viewed in.
+ */
+function hook_entity_view_mode_alter(&$view_mode, $context) {
+  // For nodes, change the view mode when it is teaser.
+  if ($context['entity_type'] == 'node' && $view_mode == 'teaser') {
+    $view_mode = 'my_custom_view_mode';
+  }
+}
+
+/**
  * Define administrative paths.
  *
  * Modules may specify whether or not the paths they define in hook_menu() are
@@ -1531,7 +1549,7 @@ function hook_mail_alter(&$message) {
  * purposes of hook_module_implements_alter(), these variants are treated as
  * a single hook. Thus, to ensure that your implementation of
  * hook_form_FORM_ID_alter() is called at the right time, you will have to
- * have to change the order of hook_form_alter() implementation in
+ * change the order of hook_form_alter() implementation in
  * hook_module_implements_alter().
  *
  * @param $implementations
@@ -2484,7 +2502,7 @@ function hook_file_url_alter(&$uri) {
  * The returned 'requirements' will be listed on the status report in the
  * administration section, with indication of the severity level.
  * Moreover, any requirement with a severity of REQUIREMENT_ERROR severity will
- * result in a notice on the the administration overview page.
+ * result in a notice on the administration configuration page.
  *
  * @param $phase
  *   The phase in which requirements are checked:
@@ -2595,44 +2613,48 @@ function hook_schema() {
         'description' => 'The primary identifier for a node.',
         'type' => 'serial',
         'unsigned' => TRUE,
-        'not null' => TRUE),
+        'not null' => TRUE,
+      ),
       'vid' => array(
         'description' => 'The current {node_revision}.vid version identifier.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 0),
+        'default' => 0,
+      ),
       'type' => array(
         'description' => 'The {node_type} of this node.',
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
-        'default' => ''),
+        'default' => '',
+      ),
       'title' => array(
         'description' => 'The title of this node, always treated as non-markup plain text.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'default' => ''),
+        'default' => '',
       ),
+    ),
     'indexes' => array(
       'node_changed'        => array('changed'),
       'node_created'        => array('created'),
-      ),
+    ),
     'unique keys' => array(
       'nid_vid' => array('nid', 'vid'),
       'vid'     => array('vid')
-      ),
+    ),
     'foreign keys' => array(
       'node_revision' => array(
         'table' => 'node_revision',
         'columns' => array('vid' => 'vid'),
-        ),
+      ),
       'node_author' => array(
         'table' => 'users',
-        'columns' => array('uid' => 'uid')
-        ),
-       ),
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
     'primary key' => array('nid'),
   );
   return $schema;

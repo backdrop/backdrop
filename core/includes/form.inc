@@ -861,7 +861,10 @@ function drupal_process_form($form_id, &$form, &$form_state) {
     // cache when a form is processed, so scenarios that result in
     // the form being built behind the scenes and again for the
     // browser don't increment all the element IDs needlessly.
-    drupal_static_reset('drupal_html_id');
+    if (!form_get_errors()) {
+      // In case of errors, do not break HTML IDs of other forms.
+      drupal_static_reset('drupal_html_id');
+    }
 
     if ($form_state['submitted'] && !form_get_errors() && !$form_state['rebuild']) {
       // Execute form submit handlers.
@@ -1267,7 +1270,7 @@ function drupal_redirect_form($form_state) {
         $function($form_state['redirect']);
       }
     }
-    drupal_goto($_GET['q']);
+    drupal_goto(current_path(), array('query' => drupal_get_query_parameters()));
   }
 }
 
@@ -3670,6 +3673,37 @@ function form_pre_render_fieldset($element) {
 /**
  * Creates a group formatted as vertical tabs.
  *
+ * Note that autocomplete callbacks should include special handling as the
+ * user's input may contain forward slashes. If the user-submitted string has a
+ * '/' in the text that is sent in the autocomplete request, the menu system
+ * will split the text and pass it to the callback as multiple arguments.
+ *
+ * Suppose your autocomplete path in the menu system is 'mymodule_autocomplete.'
+ * In your form you have:
+ * @code
+ * '#autocomplete_path' => 'mymodule_autocomplete/' . $some_key . '/' . $some_id,
+ * @endcode
+ * The user types in "keywords" so the full path called is:
+ * 'mymodule_autocomplete/$some_key/$some_id/keywords'
+ *
+ * You should include code similar to the following to handle slashes in the
+ * input:
+ * @code
+ * function mymodule_autocomplete_callback($arg1, $arg2, $keywords) {
+ *   $args = func_get_args();
+ *   // We need to remove $arg1 and $arg2 from the beginning of the array so we
+ *   // are left with the keywords.
+ *   array_shift($args);
+ *   array_shift($args);
+ *   // We store the user's original input in $keywords, including any slashes.
+ *   // Note: A prepended or trailing slash will be removed. For example, if the
+ *   // user enters '/a/few/words/' then $keywords will contain 'a/few/words'.
+ *   $keywords = implode('/', $args);
+ *
+ *   // Your code here.
+ * }
+ * @endcode
+ *
  * @param $element
  *   An associative array containing the properties and children of the
  *   fieldset.
@@ -4264,7 +4298,7 @@ function _form_set_class(&$element, $class = array()) {
   if (!empty($element['#required'])) {
     $element['#attributes']['class'][] = 'required';
   }
-  if (isset($element['#parents']) && form_get_error($element)) {
+  if (isset($element['#parents']) && form_get_error($element) !== NULL) {
     $element['#attributes']['class'][] = 'error';
   }
 }
