@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /**
  * @file
@@ -276,6 +277,9 @@ function simpletest_script_init($server_software) {
     // 'SUDO_COMMAND' is an environment variable set by the sudo program.
     // Extract only the PHP interpreter, not the rest of the command.
     list($php, ) = explode(' ', $sudo, 2);
+  }
+  elseif ($php_exec = exec('which php')) {
+    $php = $php_exec;
   }
   else {
     simpletest_script_print_error('Unable to automatically determine the path to the PHP interpreter. Supply the --php command line argument.');
@@ -612,7 +616,7 @@ function simpletest_script_reporter_display_results() {
     echo "Detailed test results\n";
     echo "---------------------\n";
 
-    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id AND status = 'fail' ORDER BY test_class, message_id", array(':test_id' => $test_id));
+    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id AND (status = 'exception' OR status = 'fail') ORDER BY test_class, message_id", array(':test_id' => $test_id));
     $test_class = '';
     foreach ($results as $result) {
       if (isset($results_map[$result->status])) {
