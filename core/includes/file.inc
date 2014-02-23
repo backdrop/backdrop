@@ -1927,7 +1927,9 @@ function file_download() {
       $function = $module . '_file_download';
       $result = $function($uri);
       if ($result == -1) {
-        return drupal_access_denied();
+        // Throw away the headers received so far.
+        $headers = array();
+        break;
       }
       if (isset($result) && is_array($result)) {
         $headers = array_merge($headers, $result);
@@ -1936,9 +1938,12 @@ function file_download() {
     if (count($headers)) {
       file_transfer($uri, $headers);
     }
-    return drupal_access_denied();
+    drupal_access_denied();
   }
-  return drupal_not_found();
+  else {
+    drupal_not_found();
+  }
+  drupal_exit();
 }
 
 
