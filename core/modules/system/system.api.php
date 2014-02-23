@@ -770,6 +770,10 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     same weight are ordered alphabetically.
  *   - "menu_name": Optional. Set this to a custom menu if you don't want your
  *     item to be placed in Navigation.
+ *   - "expanded": Optional. If set to TRUE, and if a menu link is provided for
+ *     this menu item (as a result of other properties), then the menu link is
+ *     always expanded, equivalent to its 'always expanded' checkbox being set
+ *     in the UI.
  *   - "context": (optional) Defines the context a tab may appear in. By
  *     default, all tabs are only displayed as local tasks when being rendered
  *     in a page context. All tabs that should be accessible as contextual links
@@ -1665,7 +1669,9 @@ function hook_permission() {
  * specify how a particular render array is to be rendered as HTML (this is
  * usually the case if the theme function is assigned to the render array's
  * #theme property), or they return the HTML that should be returned by an
- * invocation of theme().
+ * invocation of theme(). See
+ * @link http://drupal.org/node/933976 Using the theme layer Drupal 7.x @endlink
+ * for more information on how to implement theme hooks.
  *
  * The following parameters are all optional.
  *
@@ -2310,7 +2316,15 @@ function hook_file_insert(File $file) {
  *   The file that has just been updated.
  */
 function hook_file_update(File $file) {
+  $file_user = user_load($file->uid);
+  // Make sure that the file name starts with the owner's user name.
+  if (strpos($file->filename, $file_user->name) !== 0) {
+    $old_filename = $file->filename;
+    $file->filename = $file_user->name . '_' . $file->filename;
+    $file->save();
 
+    watchdog('file', t('%source has been renamed to %destination', array('%source' => $old_filename, '%destination' => $file->filename)));
+  }
 }
 
 /**
@@ -2324,7 +2338,14 @@ function hook_file_update(File $file) {
  * @see file_copy()
  */
 function hook_file_copy(File $file, File $source) {
+  $file_user = user_load($file->uid);
+  // Make sure that the file name starts with the owner's user name.
+  if (strpos($file->filename, $file_user->name) !== 0) {
+    $file->filename = $file_user->name . '_' . $file->filename;
+    $file->save();
 
+    watchdog('file', t('Copied file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
+  }
 }
 
 /**
@@ -2337,8 +2358,19 @@ function hook_file_copy(File $file, File $source) {
  *
  * @see file_move()
  */
+<<<<<<< HEAD
 function hook_file_move(File $file, File $source) {
+=======
+function hook_file_move($file, $source) {
+  $file_user = user_load($file->uid);
+  // Make sure that the file name starts with the owner's user name.
+  if (strpos($file->filename, $file_user->name) !== 0) {
+    $file->filename = $file_user->name . '_' . $file->filename;
+    $file->save();
+>>>>>>> ba9c629672d87a6bf06a4a84a1d78967c40ba0cb
 
+    watchdog('file', t('Moved file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
+  }
 }
 
 /**

@@ -1251,28 +1251,28 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   $account->pass_raw = $pass_raw;
    * @endcode
    *
-   * @param $user
+   * @param $account
    *   User object representing the user to log in.
    *
    * @see drupalCreateUser()
    */
-  protected function drupalLogin($user) {
+  protected function drupalLogin($account) {
     if ($this->loggedInUser) {
       $this->drupalLogout();
     }
 
     $edit = array(
-      'name' => $user->name,
-      'pass' => $user->pass_raw
+      'name' => $account->name,
+      'pass' => $account->pass_raw
     );
     $this->drupalPost('user', $edit, t('Log in'));
 
     // If a "log out" link appears on the page, it is almost certainly because
     // the login was successful.
-    $pass = $this->assertLink(t('Log out'), 0, t('User %name successfully logged in.', array('%name' => $user->name)), t('User login'));
+    $pass = $this->assertLink(t('Log out'), 0, t('User %name successfully logged in.', array('%name' => $account->name)), t('User login'));
 
     if ($pass) {
-      $this->loggedInUser = $user;
+      $this->loggedInUser = $account;
     }
   }
 
@@ -2705,10 +2705,9 @@ class DrupalWebTestCase extends DrupalTestCase {
   /**
    * Follows a link by name.
    *
-   * Will click the first link found with this link text by default, or a
-   * later one if an index is given. Match is case insensitive with
-   * normalized space. The label is translated label. There is an assert
-   * for successful click.
+   * Will click the first link found with this link text by default, or a later
+   * one if an index is given. Match is case sensitive with normalized space.
+   * The label is translated label. There is an assert for successful click.
    *
    * @param $label
    *   Text between the anchor tags.

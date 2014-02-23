@@ -875,7 +875,7 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   $destination = file_destination($destination, $replace);
   if ($destination === FALSE) {
     drupal_set_message(t('The file %file could not be copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
-    watchdog('file', 'File %file could not be copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%destination' => $destination));
+    watchdog('file', 'File %file could not be copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%directory' => $destination));
     return FALSE;
   }
 
@@ -2423,20 +2423,10 @@ function file_directory_temp() {
 function file_get_content_headers(File $file) {
   $name = mime_header_encode($file->filename);
   $type = mime_header_encode($file->filemime);
-  // Serve images, text, and flash content for display rather than download.
-  $inline_types = variable_get('file_inline_types', array('^text/', '^image/', 'flash$'));
-  $disposition = 'attachment';
-  foreach ($inline_types as $inline_type) {
-    // Exclamation marks are used as delimiters to avoid escaping slashes.
-    if (preg_match('!' . $inline_type . '!', $file->filemime)) {
-      $disposition = 'inline';
-    }
-  }
 
   return array(
     'Content-Type' => $type,
     'Content-Length' => $file->filesize,
-    'Content-Disposition' => $disposition . '; filename="' . $name . '"',
     'Cache-Control' => 'private',
   );
 }
