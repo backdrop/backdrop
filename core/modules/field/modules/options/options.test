@@ -526,14 +526,23 @@ class OptionsSelectDynamicValuesTestCase extends ListDynamicValuesTestCase {
     $web_user = $this->drupalCreateUser(array('access field_test content', 'administer field_test content'));
     $this->drupalLogin($web_user);
 
+    // Set the values that are checked by list_test_dynamic_values_callback().
+    $expected_values = array(
+      'foo' => $this->randomName(),
+      'bar' => $this->randomName(),
+      'baz' => $this->randomName(),
+    );
+    state_set('list_test_dynamic_values', $expected_values);
+
     // Display form.
     $this->drupalGet('test-entity/manage/' . $this->entity->ftid . '/edit');
     $options = $this->xpath('//select[@id="edit-test-list-und"]/option');
-    $this->assertEqual(count($options), count($this->test) + 1);
+    $this->assertEqual(count($options), count($expected_values) + 1, 'Expected number of items found in dynamic select list.');
     foreach ($options as $option) {
-      $value = (string) $option['value'];
-      if ($value != '_none') {
-        $this->assertTrue(array_search($value, $this->test));
+      $key = (string) $option['value'];
+      $value = (string) $option;
+      if ($key !== '_none') {
+        $this->assertTrue($expected_values[$key] === $value);
       }
     }
   }
