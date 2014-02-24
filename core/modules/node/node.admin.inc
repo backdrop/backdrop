@@ -478,7 +478,8 @@ function node_admin_nodes() {
   $destination = drupal_get_destination();
   $options = array();
   foreach ($nodes as $node) {
-    $l_options = $node->langcode != LANGUAGE_NONE && isset($languages[$node->langcode]) ? array('language' => $languages[$node->langcode]) : array();
+    $langcode = entity_language('node', $node);
+    $l_options = $langcode != LANGUAGE_NONE && isset($languages[$langcode]) ? array('language' => $languages[$langcode]) : array();
     $options[$node->nid] = array(
       'title' => array(
         'data' => array(
@@ -495,7 +496,7 @@ function node_admin_nodes() {
       'changed' => format_date($node->changed, 'short'),
     );
     if ($multilanguage) {
-      $options[$node->nid]['language_name'] = language_name($node->langcode);
+      $options[$node->nid]['language_name'] = language_name($langcode);
     }
     // Build a list of all the accessible operations for the current node.
     $operations = array();

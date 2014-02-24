@@ -5,8 +5,6 @@
  * Builds placeholder replacement tokens for node-related data.
  */
 
-
-
 /**
  * Implements hook_token_info().
  */
@@ -144,7 +142,8 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
           break;
 
         case 'langcode':
-          $replacements[$original] = $sanitize ? check_plain($node->langcode) : $node->langcode;
+          $langcode = entity_language('node', $node);
+          $replacements[$original] = $sanitize ? check_plain($langcode) : $langcode;
           break;
 
         case 'url':
