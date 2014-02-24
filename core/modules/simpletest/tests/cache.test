@@ -321,26 +321,26 @@ class CacheClearCase extends CacheTestCase {
     $this->drupalLogin($account);
 
     // Set two cache objects in different bins.
-    $data = $this->randomName(100);
-    cache_set($data, $data, 'cache', CACHE_TEMPORARY);
-    $cached = cache_get($data);
+    $data = $key = $this->randomName(100);
+    cache()->set($key, $data, CACHE_TEMPORARY);
+    $cached = cache()->get($key);
     $this->assertTrue(isset($cached->data) && $cached->data === $data, 'Cached item retrieved.');
-    cache_set($data, $data, 'cache_page', CACHE_TEMPORARY);
+    cache('page')->set($key, $data, CACHE_TEMPORARY);
 
     // Expire temporary items in the 'page' bin.
-    cache_clear_all(NULL, 'cache_page');
+    cache('page')->expire();
 
     // Since the database cache uses REQUEST_TIME, set the $_SESSION variable
     // manually to force it to the current time.
     $_SESSION['cache_expiration']['cache_page'] = time();
 
     // Items in the default cache bin should not be expired.
-    $cached = cache_get($data);
+    $cached = cache()->get($key);
     $this->assertTrue(isset($cached->data) && $cached->data == $data, 'Cached item retrieved');
 
     // Despite the minimum cache lifetime, the item in the 'page' bin should
     // be invalidated for the current user.
-    $cached = cache_get($data, 'cache_page');
+    $cached = cache('page')->get($key);
     $this->assertFalse($cached, 'Cached item was invalidated');
   }
 }
