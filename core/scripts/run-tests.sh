@@ -2,7 +2,7 @@
 <?php
 /**
  * @file
- * This script runs Drupal tests from command line.
+ * This script runs Backdrop tests from command line.
  */
 
 const SIMPLETEST_SCRIPT_COLOR_PASS = 32; // Green.
@@ -122,10 +122,10 @@ function simpletest_script_help() {
 
   echo <<<EOF
 
-Run Drupal tests from the shell.
+Run Backdrop tests from the shell.
 
-Usage:        {$args['script']} [OPTIONS] <tests>
-Example:      {$args['script']} Profile
+Usage:        {$args['script']} [OPTIONS] <testClassNames>
+Example:      {$args['script']} --url="http://backdrop" BootstrapPageCacheTestCase
 
 All arguments are long options.
 
@@ -137,7 +137,7 @@ All arguments are long options.
               tests and then exits (no tests are run).
 
   --url       Immediately precedes a URL to set the host and path. You will
-              need this parameter if Drupal is in a subdirectory on your
+              need this parameter if Backdrop is in a subdirectory on your
               localhost and you have not set \$base_url in settings.php. Tests
               can be run under SSL by including https:// in the URL.
 
@@ -151,9 +151,9 @@ All arguments are long options.
 
   --all       Run all available tests.
 
-  --class     Run tests identified by specific class names, instead of group names.
+  --group     Run tests identified by specific group names, instead of class names.
 
-  --file      Run tests identified by specific file names, instead of group names.
+  --file      Run tests identified by specific file names, instead of class names.
               Specify the path and the extension
               (i.e. 'core/modules/user/user.test').
 
@@ -165,24 +165,18 @@ All arguments are long options.
 
   --verbose   Output detailed assertion messages in addition to summary.
 
-  <test1>[,<test2>[,<test3> ...]]
+  <test1>[ <test2>[ <test3> ...]]
 
-              One or more tests to be run. By default, these are interpreted
-              as the names of test groups as shown at
-              ?q=admin/config/development/testing.
-              These group names typically correspond to module names like "User"
-              or "Profile" or "System", but there is also a group "XML-RPC".
-              If --class is specified then these are interpreted as the names of
-              specific test classes whose test methods will be run. Tests must
-              be separated by commas. Ignored if --all is specified.
+              One or more tests classes (or groups names) to be run. Names may
+              be separated by spaces or commas.
 
 To run this script you will normally invoke it from the root directory of your
-Drupal installation as the webserver user (differs per configuration), or root:
+Backdrop installation as the webserver user (differs per configuration), or root:
 
-sudo -u [wwwrun|www-data|etc] php ./core/scripts/{$args['script']}
+sudo -u [wwwrun|www-data|etc ./core/scripts/{$args['script']}
   --url http://example.com/ --all
-sudo -u [wwwrun|www-data|etc] php ./core/scripts/{$args['script']}
-  --url http://example.com/ --class BlockTestCase
+sudo -u [wwwrun|www-data|etc] ./core/scripts/{$args['script']}
+  --url http://example.com/ BlockTestCase
 \n
 EOF;
 }
@@ -220,6 +214,12 @@ function simpletest_script_parse_args() {
 
   $count = 0;
   while ($arg = array_shift($_SERVER['argv'])) {
+    // Separate option values using "=".
+    $arg_value = NULL;
+    if (strpos($arg, '=') !== FALSE) {
+      list($arg, $arg_value) = explode('=', $arg);
+    }
+    // Convert each option into a ordered set of arguments.
     if (preg_match('/--(\S+)/', $arg, $matches)) {
       // Argument found.
       if (array_key_exists($matches[1], $args)) {
@@ -228,11 +228,12 @@ function simpletest_script_parse_args() {
         if (is_bool($args[$previous_arg])) {
           $args[$matches[1]] = TRUE;
         }
+        elseif (!is_null($arg_value)) {
+          $args[$matches[1]] = $arg_value;
+        }
         else {
           $args[$matches[1]] = array_shift($_SERVER['argv']);
         }
-        // Clear extraneous values.
-        $args['test_names'] = array();
         $count++;
       }
       else {
@@ -243,7 +244,7 @@ function simpletest_script_parse_args() {
     }
     else {
       // Values found without an argument should be test names.
-      $args['test_names'] += explode(',', $arg);
+      $args['test_names'] += array_merge($args['test_names'], explode(',', $arg));
       $count++;
     }
   }
@@ -309,7 +310,7 @@ function simpletest_script_init($server_software) {
   $_SERVER['REQUEST_METHOD'] = 'GET';
   $_SERVER['SCRIPT_NAME'] = $path .'/index.php';
   $_SERVER['PHP_SELF'] = $path .'/index.php';
-  $_SERVER['HTTP_USER_AGENT'] = 'Drupal command line';
+  $_SERVER['HTTP_USER_AGENT'] = 'Backdrop command line';
 
   if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
     // Ensure that any and all environment variables are changed to https://.
@@ -374,11 +375,11 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
 }
 
 /**
- * Bootstrap Drupal and run a single test.
+ * Bootstrap Backdrop and run a single test.
  */
 function simpletest_script_run_one_test($test_id, $test_class) {
   try {
-    // Bootstrap Drupal.
+    // Bootstrap Backdrop.
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
     $info = simpletest_test_get_by_class($test_class);
     include_once DRUPAL_ROOT . '/' . $info['file path'] . '/' . $info['file'];
@@ -388,7 +389,7 @@ function simpletest_script_run_one_test($test_id, $test_class) {
     $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
     $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
     $status = ($had_fails || $had_exceptions ? 'fail' : 'pass');
-    simpletest_script_print($info['name'] . ' ' . _simpletest_format_summary_line($test->results) . "\n", $status);
+    simpletest_script_print($info['group'] . ': ' . $info['name'] . ' (' . $test_class . ') ' . _simpletest_format_summary_line($test->results) . "\n", $status);
 
     // Finished, kill this runner.
     exit(0);
@@ -434,15 +435,7 @@ function simpletest_script_get_test_list() {
     $test_list = $all_tests;
   }
   else {
-    if ($args['class']) {
-      // Check for valid class names.
-      foreach ($args['test_names'] as $class_name) {
-        if (in_array($class_name, $all_tests)) {
-          $test_list[] = $class_name;
-        }
-      }
-    }
-    elseif ($args['file']) {
+    if ($args['file']) {
       $files = array();
       foreach ($args['test_names'] as $file) {
         $files[drupal_realpath($file)] = 1;
@@ -457,13 +450,21 @@ function simpletest_script_get_test_list() {
         }
       }
     }
-    else {
+    elseif ($args['group']) {
       // Check for valid group names and get all valid classes in group.
       foreach ($args['test_names'] as $group_name) {
         if (isset($groups[$group_name])) {
           foreach ($groups[$group_name] as $class_name => $info) {
             $test_list[] = $class_name;
           }
+        }
+      }
+    }
+    else {
+      // Check for valid class names.
+      foreach ($args['test_names'] as $class_name) {
+        if (in_array($class_name, $all_tests)) {
+          $test_list[] = $class_name;
         }
       }
     }
@@ -489,7 +490,7 @@ function simpletest_script_reporter_init() {
   );
 
   echo "\n";
-  echo "Drupal test run\n";
+  echo "Backdrop test run\n";
   echo "---------------\n";
   echo "\n";
 
@@ -622,7 +623,11 @@ function simpletest_script_reporter_display_results() {
       if (isset($results_map[$result->status])) {
         if ($result->test_class != $test_class) {
           // Display test class every time results are for new test class.
-          echo "\n\n---- $result->test_class ----\n\n\n";
+          $test_class = $result->test_class;
+          $info = simpletest_test_get_by_class($test_class);
+          $test_group = $info['group'];
+          $test_name = $info['name'];
+          echo "\n\n---- $test_group: $test_name ($test_class) ----\n\n\n";
           $test_class = $result->test_class;
 
           // Print table header.
