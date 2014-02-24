@@ -1,5 +1,5 @@
 Description
------------
+------------
 
 Backdrop is a fully-featured content management system that allows non-technical
 users to manage a wide-variety of content. It can be used to create blogs,
