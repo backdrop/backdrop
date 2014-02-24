@@ -297,12 +297,11 @@ function install_begin_request(&$install_state) {
   else {
     $task = NULL;
 
-    // Since previous versions of Drupal stored database connection information
-    // in the 'db_url' variable, we should never let an installation proceed if
-    // this variable is defined and the settings file was not verified above
-    // (otherwise we risk installing over an existing site whose settings file
-    // has not yet been updated).
-    if (!empty($GLOBALS['db_url'])) {
+    // Do not install over a configured settings.php. Check the 'db_url'
+    // variable in addition to 'databases', since previous versions of Drupal
+    // used that (and we do not want to allow installations on an existing site
+    // whose settings file has not yet been updated).
+    if (!empty($GLOBALS['databases']) || !empty($GLOBALS['db_url'])) {
       throw new Exception(install_already_done_error());
     }
   }
@@ -777,6 +776,15 @@ function install_system_module(&$install_state) {
   // Install system.module.
   drupal_install_system();
 
+  // Call file_ensure_htaccess() to ensure that all of Backdrop's standard
+  // directories (e.g., the public and private files directories) have
+  // appropriate .htaccess files. These directories will have already been
+  // created by this point in the installer, since Backdrop creates them during
+  // the install_verify_requirements() task. Note that we cannot call
+  // file_ensure_htaccess() any earlier than this, since it relies on
+  // system.module in order to work.
+  file_ensure_htaccess();
+
   // Enable the entity and user modules so that sessions can be recorded during
   // the upcoming bootstrap step.
   module_enable(array('entity', 'user'), FALSE);
@@ -1014,7 +1022,7 @@ function install_settings_form_submit($form, &$form_state) {
     'required' => TRUE,
   );
   $settings['drupal_hash_salt'] = array(
-    'value'    => drupal_hash_base64(drupal_random_bytes(55)),
+    'value'    => drupal_random_key(),
     'required' => TRUE,
   );
   drupal_rewrite_settings($settings);

@@ -357,10 +357,14 @@ function user_password($length = 10) {
 
   // Loop the number of times specified by $length.
   for ($i = 0; $i < $length; $i++) {
+    do {
+      // Find a secure random number within the range needed.
+      $index = ord(drupal_random_bytes(1));
+    } while ($index > $len);
 
     // Each iteration, pick a random character from the
     // allowable string and append it to the password:
-    $pass .= $allowable_characters[mt_rand(0, $len)];
+    $pass .= $allowable_characters[$index];
   }
 
   return $pass;
@@ -903,7 +907,7 @@ function user_account_form_validate($form, &$form_state) {
 }
 
 function user_login_block($form) {
-  $form['#action'] = url($_GET['q'], array('query' => drupal_get_destination()));
+  $form['#action'] = url(current_path(), array('query' => drupal_get_destination(), 'external' => FALSE));
   $form['#id'] = 'user-login-form';
   $form['#validate'] = user_login_default_validators();
   $form['#submit'][] = 'user_login_submit';
