@@ -108,7 +108,7 @@ file = tests/user.test
 
 [UserUserSearchTestCase]
 name = User search
-description = Testing that only user with the right permission can see the email address in the user search.
+description = Tests the user search page and verifies that sensitive information is hidden from unauthorized users.
 group = User
 file = tests/user.test
 
