@@ -1815,6 +1815,10 @@ class view {
       );
       $config_data['display'][$display->id] = $display_config_data;
     }
+    // Ensure we don't include the lock information in the saved config.
+    if (property_exists($this, 'locked')) {
+      unset($this->locked);
+    }
     config('views.view.' . $this->name)->setData($config_data)->save();
 
     // Clear caches.

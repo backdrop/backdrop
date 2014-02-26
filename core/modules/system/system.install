@@ -696,8 +696,6 @@ function system_schema() {
   );
   $schema['cache_bootstrap'] = $schema['cache'];
   $schema['cache_bootstrap']['description'] = 'Cache table for data required to bootstrap Drupal, may be routed to a shared memory cache.';
-  $schema['cache_form'] = $schema['cache'];
-  $schema['cache_form']['description'] = 'Cache table for the form system to store recently built forms and their storage data, to be used in subsequent page requests.';
   $schema['cache_page'] = $schema['cache'];
   $schema['cache_page']['description'] = 'Cache table used to store compressed pages for anonymous users, if page caching is enabled.';
   $schema['cache_menu'] = $schema['cache'];
@@ -1604,6 +1602,44 @@ function system_schema() {
     ),
   );
 
+  $schema['tempstore'] = array(
+    'description' => 'Generic temporary key/value storage table with an expiration.',
+    'fields' => array(
+      'collection' => array(
+        'description' => 'A named collection of key and value pairs.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        // KEY is an SQL reserved word, so use 'name' as the key's field name.
+        'description' => 'The key of the key/value pair.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the key/value pair.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'expire' => array(
+        'description' => 'The time since Unix epoch in seconds when this item expires.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('collection', 'name'),
+    'indexes' => array(
+      'all' => array('name', 'collection', 'expire'),
+      'expire' => array('expire'),
+    ),
+  );
+
   $schema['url_alias'] = array(
     'description' => 'A list of URL aliases for Drupal paths; a user may visit either the source or destination path.',
     'fields' => array(
@@ -1763,6 +1799,55 @@ function system_update_8006() {
   db_delete('actions')
     ->condition('aid', array('comment_save_action', 'node_save_action'), 'IN')
     ->execute();
+}
+
+/**
+ * Create the tempstore table and remove the cache_form table.
+ */
+function system_update_8007() {
+  $schema = array(
+    'description' => 'Generic temporary key/value storage table with an expiration.',
+    'fields' => array(
+      'collection' => array(
+        'description' => 'A named collection of key and value pairs.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        // KEY is an SQL reserved word, so use 'name' as the key's field name.
+        'description' => 'The key of the key/value pair.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the key/value pair.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'expire' => array(
+        'description' => 'The time since Unix epoch in seconds when this item expires.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('collection', 'name'),
+    'indexes' => array(
+      'all' => array('name', 'collection', 'expire'),
+      'expire' => array('expire'),
+    ),
+  );
+  if (!db_table_exists('tempstore')) {
+    db_create_table('tempstore', $schema);
+  }
+  if (db_table_exists('cache_form')) {
+    db_drop_table('cache_form');
+  }
 }
 
 /**

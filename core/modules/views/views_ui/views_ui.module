@@ -302,16 +302,15 @@ function views_ui_edit_page_title($view) {
  *   someone else is already editing the view.
  */
 function views_ui_cache_load($name) {
-  views_include('object-cache');
+  global $user;
+
   views_include('view');
-  $view = views_object_cache_get('view', $name);
+  $view = tempstore_get('views.view', $name);
   $original_view = views_get_view($name);
 
   if (empty($view)) {
     $view = $original_view;
     if (!empty($view)) {
-      // Check to see if someone else is already editing this view.
-      $view->locked = views_object_cache_test('view', $view->name);
       // Set a flag to indicate that this view is being edited.
       // This flag will be used e.g. to determine whether strings
       // should be localized.
@@ -322,6 +321,10 @@ function views_ui_cache_load($name) {
     // Keep disabled/enabled status real.
     if ($original_view) {
       $view->disabled = !empty($original_view->disabled);
+    }
+    // Remove the lock if being edited by the user that owns the lock.
+    if (!empty($view->locked) && $view->locked->uid === $user->uid) {
+      unset($view->locked);
     }
   }
 
@@ -352,11 +355,12 @@ function views_ui_menu_action_access($view, $action, $account = NULL) {
  * include, and cache more easily.
  */
 function views_ui_cache_set(&$view) {
+  global $user;
+
   if (!empty($view->locked)) {
     drupal_set_message(t('Changes cannot be made to a locked view.'), 'error');
     return;
   }
-  views_include('object-cache');
   $view->changed = TRUE; // let any future object know that this view has changed.
 
   if (isset($view->current_display)) {
@@ -373,7 +377,14 @@ function views_ui_cache_set(&$view) {
     unset($view->display[$id]->handler);
     unset($view->display[$id]->default_display);
   }
-  views_object_cache_set('view', $view->name, $view);
+
+  // Store the view in the tempstore for up to one week.
+  $view->locked = (object) array(
+    'uid' => $user->uid,
+    'updated' => REQUEST_TIME,
+  );
+  tempstore_set('views.view', $view->name, $view, REQUEST_TIME + 604800);
+  unset($view->locked);
 }
 
 

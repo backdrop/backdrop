@@ -933,7 +933,7 @@ function views_ui_break_lock_confirm($form, &$form_state, $view) {
  * Submit handler to break_lock a view.
  */
 function views_ui_break_lock_confirm_submit(&$form, &$form_state) {
-  views_object_cache_clear_all('view', $form_state['view']->name);
+  tempstore_clear('views.view', $form_state['view']->name);
   $form_state['redirect'] = 'admin/structure/views/view/' . $form_state['view']->name . '/edit';
   drupal_set_message(t('The lock has been broken and you may now edit this view.'));
 }
@@ -1096,6 +1096,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#theme_wrappers' => array('container'),
     '#attributes' => array('class' => array('view-changed', 'messages', 'warning')),
     '#markup' => $message,
+    '#access' => empty($view->locked),
   );
   if (empty($view->changed)) {
     $form['changed']['#attributes']['class'][] = 'js-hide';
@@ -1110,6 +1111,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['actions'] = array(
     '#type' => 'actions',
     '#weight' => 0,
+    '#access' => empty($view->locked),
   );
 
   if (empty($view->changed)) {
@@ -2284,7 +2286,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
   drupal_set_message(t('The view %name has been saved.', array('%name' => $form_state['view']->get_human_name())));
 
   // Remove this view from cache so we can edit it properly.
-  views_object_cache_clear('view', $form_state['view']->name);
+  tempstore_clear('views.view', $form_state['view']->name);
 }
 
 /**
@@ -2292,7 +2294,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
  */
 function views_ui_edit_view_form_cancel($form, &$form_state) {
   // Remove this view from cache so edits will be lost.
-  views_object_cache_clear('view', $form_state['view']->name);
+  tempstore_clear('view', $form_state['view']->name);
   if (empty($form['view']->vid)) {
     // I seem to have to drupal_goto here because I can't get fapi to
     // honor the redirect target. Not sure what I screwed up here.

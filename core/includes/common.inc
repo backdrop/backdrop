@@ -1241,6 +1241,98 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
 }
 
 /**
+ * @defgroup key_value_expire Temporary key-value store functions
+ * @{
+ * Functions to temporarily store arrays or objects.
+ *
+ * A "temp store" can be used to make temporary, non-cache data available across
+ * requests. The data for the temp store is stored in one key/value collection.
+ * Temp store data expires automatically after a given time frame.
+ *
+ * The temp store is different from a cache, because the data in it is not yet
+ * saved permanently and so it cannot be rebuilt. Typically, the temp store
+ * might be used to store work in progress that is later saved permanently
+ * elsewhere, e.g. autosave data, multistep forms, or in-progress changes
+ * to complex configuration that are not ready to be saved..
+ */
+
+/**
+ * Gets an object from the temp store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator. Must be less than 128
+ *   characters.
+ * @param string $name
+ *   The name of the object being stored. Must be less than 128 characters.
+ *
+ * @return
+ *   The data that was stored.
+ */
+function tempstore_get($collection, $name) {
+  $data = db_query('SELECT * FROM {tempstore} WHERE collection = :collection AND name = :name', array(':collection' => $collection, ':name' => $name))->fetchObject();
+  if ($data) {
+    $data = unserialize($data->value);
+  }
+  return $data;
+}
+
+/**
+ * Stores an object in the semi-persistent key-value store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator. Must be less than 128
+ *   characters.
+ * @param string $name
+ *   The name of the object being stored. Must be less than 128 characters.
+ * @param array|object $value
+ *   The data to be stored. This will be serialized prior to writing.
+ * @param int $expire
+ *   The UNIX timestamp at which this value can be deleted.
+ */
+function tempstore_set($collection, $name, $value, $expire) {
+  tempstore_clear($collection, $name);
+  db_insert('tempstore')
+    ->fields(array(
+      'collection' => $collection,
+      'name' => $name,
+      'value' => serialize($value),
+      'expire' => $expire,
+    ))
+    ->execute();
+}
+
+/**
+ * Removes an object from the semi-persistent key-value store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator.
+ * @param string $name
+ *   The name of the object being cleared.
+ */
+function tempstore_clear($collection, $name) {
+  db_delete('tempstore')
+    ->condition('collection', $collection)
+    ->condition('name', $name)
+    ->execute();
+}
+
+/**
+ * Removes an entire group of objects from the semi-persistent key-value store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator.
+ */
+function tempstore_clear_all($collection) {
+  db_delete('tempstore')
+    ->condition('collection', $collection)
+    ->execute();
+}
+
+/**
+ * @} End of "defgroup key_value_expire".
+ */
+
+/**
  * @defgroup sanitization Sanitization functions
  * @{
  * Functions to sanitize values.
@@ -7700,7 +7792,6 @@ function drupal_flush_all_caches() {
   // Synchronize to catch any actions that were added or removed.
   actions_synchronize();
 
-  // Don't clear cache_form - in-progress form submissions may break.
   // Ordered so clearing the page cache will always be the last action.
   $core = array('cache', 'path', 'filter', 'bootstrap', 'page');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
