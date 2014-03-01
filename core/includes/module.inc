@@ -822,6 +822,9 @@ function module_implements_write_cache() {
 /**
  * Invoke a hook in a particular module.
  *
+ * All arguments are passed by value. Use drupal_alter() if you need to pass
+ * arguments by reference.
+ *
  * @param $module
  *   The name of the module (without the .module extension).
  * @param $hook
@@ -831,6 +834,8 @@ function module_implements_write_cache() {
  *
  * @return
  *   The return value of the hook implementation.
+ *
+ * @see drupal_alter()
  */
 function module_invoke($module, $hook) {
   $args = func_get_args();
@@ -844,6 +849,9 @@ function module_invoke($module, $hook) {
 /**
  * Invoke a hook in all enabled modules that implement it.
  *
+ * All arguments are passed by value. Use drupal_alter() if you need to pass
+ * arguments by reference.
+ *
  * @param $hook
  *   The name of the hook to invoke.
  * @param ...
@@ -852,6 +860,8 @@ function module_invoke($module, $hook) {
  * @return
  *   An array of return values of the hook implementations. If modules return
  *   arrays from their implementations, those are merged into one array.
+ *
+ * @see drupal_alter()
  */
 function module_invoke_all($hook) {
   $args = func_get_args();
