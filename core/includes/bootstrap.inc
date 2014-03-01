@@ -1470,6 +1470,7 @@ function drupal_unpack($obj, $field = 'data') {
  * more information, including recommendations on how to break up or not
  * break up strings for translation.
  *
+ * @section sec_translating_vars Translating Variables
  * You should never use t() to translate variables, such as calling
  * @code t($text); @endcode, unless the text that the variable holds has been
  * passed through t() elsewhere (e.g., $text is one of several translated
@@ -1488,6 +1489,7 @@ function drupal_unpack($obj, $field = 'data') {
  * format_string() for details.) Translators can then rearrange the string as
  * necessary for the language (e.g., in Spanish, it might be "blog de @name").
  *
+ * @section sec_alt_funcs_install Use During Installation Phase
  * During the Drupal installation phase, some resources used by t() wil not be
  * available to code that needs localization. See st() and get_t() for
  * alternatives.
