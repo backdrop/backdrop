@@ -4125,14 +4125,16 @@ function theme_form_element($variables) {
   // may not necessarily have been processed by form_builder().
   $element += array(
     '#title_display' => 'before',
+    '#wrapper_attributes' => array(),
   );
+  $attributes = $element['#wrapper_attributes'];
 
   // Add element #id for #type 'item'.
   if (isset($element['#markup']) && !empty($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
   // Add element's #type and #name as class to aid with JS/CSS selectors.
-  $attributes['class'] = array('form-item');
+  $attributes['class'][] = 'form-item';
   if (!empty($element['#type'])) {
     $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
   }
