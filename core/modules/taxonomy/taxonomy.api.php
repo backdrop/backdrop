@@ -20,11 +20,14 @@
  *   An array of taxonomy vocabulary objects.
  */
 function hook_taxonomy_vocabulary_load($vocabularies) {
-  foreach ($vocabularies as $vocabulary) {
-    $vocabulary->synonyms = variable_get('taxonomy_' . $vocabulary->vid . '_synonyms', FALSE);
+  $result = db_select('mytable', 'm')
+    ->fields('m', array('vid', 'foo'))
+    ->condition('m.vid', array_keys($vocabularies), 'IN')
+    ->execute();
+  foreach ($result as $record) {
+    $vocabularies[$record->vid]->foo = $record->foo;
   }
 }
-
 
 /**
  * Act on taxonomy vocabularies before they are saved.
@@ -49,8 +52,8 @@ function hook_taxonomy_vocabulary_presave($vocabulary) {
  *   A taxonomy vocabulary object.
  */
 function hook_taxonomy_vocabulary_insert($vocabulary) {
-  if ($vocabulary->synonyms) {
-    variable_set('taxonomy_' . $vocabulary->vid . '_synonyms', TRUE);
+  if ($vocabulary->machine_name == 'my_vocabulary') {
+    $vocabulary->weight = 100;
   }
 }
 
@@ -63,10 +66,10 @@ function hook_taxonomy_vocabulary_insert($vocabulary) {
  *   A taxonomy vocabulary object.
  */
 function hook_taxonomy_vocabulary_update($vocabulary) {
-  $status = $vocabulary->synonyms ? TRUE : FALSE;
-  if ($vocabulary->synonyms) {
-    variable_set('taxonomy_' . $vocabulary->vid . '_synonyms', $status);
-  }
+  db_update('mytable')
+    ->fields(array('foo' => $vocabulary->foo))
+    ->condition('vid', $vocabulary->vid)
+    ->execute();
 }
 
 /**
@@ -103,9 +106,9 @@ function hook_taxonomy_vocabulary_predelete($vocabulary) {
  * @see taxonomy_vocabulary_delete()
  */
 function hook_taxonomy_vocabulary_delete($vocabulary) {
-  if (variable_get('taxonomy_' . $vocabulary->vid . '_synonyms', FALSE)) {
-    variable_del('taxonomy_' . $vocabulary->vid . '_synonyms');
-  }
+  db_delete('mytable')
+    ->condition('vid', $vocabulary->vid)
+    ->execute();
 }
 
 /**
@@ -125,7 +128,10 @@ function hook_taxonomy_vocabulary_delete($vocabulary) {
  *   An array of term objects, indexed by tid.
  */
 function hook_taxonomy_term_load($terms) {
-  $result = db_query('SELECT tid, foo FROM {mytable} WHERE tid IN (:tids)', array(':tids' => array_keys($terms)));
+  $result = db_select('mytable', 'm')
+    ->fields('m', array('tid', 'foo'))
+    ->condition('m.tid', array_keys($terms), 'IN')
+    ->execute();
   foreach ($result as $record) {
     $terms[$record->tid]->foo = $record->foo;
   }
@@ -154,18 +160,12 @@ function hook_taxonomy_term_presave($term) {
  *   A taxonomy term object.
  */
 function hook_taxonomy_term_insert($term) {
-  if (!empty($term->synonyms)) {
-    foreach (explode ("\n", str_replace("\r", '', $term->synonyms)) as $synonym) {
-      if ($synonym) {
-        db_insert('taxonomy_term_synonym')
-        ->fields(array(
-          'tid' => $term->tid,
-          'name' => rtrim($synonym),
-        ))
-        ->execute();
-      }
-    }
-  }
+  db_insert('mytable')
+    ->fields(array(
+      'tid' => $term->tid,
+      'foo' => $term->foo,
+    ))
+    ->execute();
 }
 
 /**
@@ -177,19 +177,10 @@ function hook_taxonomy_term_insert($term) {
  *   A taxonomy term object.
  */
 function hook_taxonomy_term_update($term) {
-  hook_taxonomy_term_delete($term);
-  if (!empty($term->synonyms)) {
-    foreach (explode ("\n", str_replace("\r", '', $term->synonyms)) as $synonym) {
-      if ($synonym) {
-        db_insert('taxonomy_term_synonym')
-        ->fields(array(
-          'tid' => $term->tid,
-          'name' => rtrim($synonym),
-        ))
-        ->execute();
-      }
-    }
-  }
+  db_update('mytable')
+    ->fields(array('foo' => $term->foo))
+    ->condition('tid', $term->tid)
+    ->execute();
 }
 
 /**
@@ -220,7 +211,9 @@ function hook_taxonomy_term_predelete($term) {
  * @see taxonomy_term_delete()
  */
 function hook_taxonomy_term_delete($term) {
-  db_delete('term_synoynm')->condition('tid', $term->tid)->execute();
+  db_delete('mytable')
+    ->condition('tid', $term->tid)
+    ->execute();
 }
 
 /**
