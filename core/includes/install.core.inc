@@ -392,6 +392,10 @@ function install_run_task($task, &$install_state) {
         // which requires that referenced variables be passed explicitly.
         'build_info' => array('args' => array(&$install_state)),
         'no_redirect' => TRUE,
+        // Form build IDs are used to load prebuilt forms from tempstore.
+        // However, during install these tables don't exist yet. Prevent
+        // setting/checking the database with no_cache property.
+        'no_cache' => TRUE,
       );
       $form = drupal_build_form($function, $form_state);
       // If a successful form submission did not occur, the form needs to be
@@ -896,7 +900,6 @@ function install_config_directories(&$install_state) {
  */
 function install_settings_form($form, &$form_state, &$install_state) {
   global $databases;
-  $profile = $install_state['parameters']['profile'];
 
   drupal_static_reset('conf_path');
   $conf_path = './' . conf_path(FALSE);

@@ -328,7 +328,7 @@ function drupal_build_form($form_id, &$form_state) {
   // form to proceed. In addition, if there is stored form_state data from a
   // previous step, we'll retrieve it so it can be passed on to the form
   // processing code.
-  $check_cache = isset($form_state['input']['form_id']) && $form_state['input']['form_id'] == $form_id && !empty($form_state['input']['form_build_id']);
+  $check_cache = isset($form_state['input']['form_id']) && $form_state['input']['form_id'] == $form_id && !empty($form_state['input']['form_build_id']) && empty($form_state['no_cache']);
   if ($check_cache) {
     $form = form_get_cache($form_state['input']['form_build_id'], $form_state);
   }
