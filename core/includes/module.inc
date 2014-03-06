@@ -633,7 +633,7 @@ function module_disable($module_list, $disable_dependents = TRUE) {
   * @see hooks
   * @see themeable
   *
-  * @} End of "defgroup callbacks".
+  * @}
   */
 
 /**
@@ -817,10 +817,7 @@ function module_hook_info() {
  */
 function module_implements_write_cache() {
   $implementations = &drupal_static('module_implements');
-  // Check whether we need to write the cache. We do not want to cache hooks
-  // which are only invoked on HTTP POST requests since these do not need to be
-  // optimized as tightly, and not doing so keeps the cache entry smaller.
-  if (isset($implementations['#write_cache']) && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'HEAD')) {
+  if (isset($implementations['#write_cache'])) {
     unset($implementations['#write_cache']);
     cache('bootstrap')->set('module_implements', $implementations);
   }
@@ -828,6 +825,9 @@ function module_implements_write_cache() {
 
 /**
  * Invoke a hook in a particular module.
+ *
+ * All arguments are passed by value. Use drupal_alter() if you need to pass
+ * arguments by reference.
  *
  * @param $module
  *   The name of the module (without the .module extension).
@@ -838,6 +838,8 @@ function module_implements_write_cache() {
  *
  * @return
  *   The return value of the hook implementation.
+ *
+ * @see drupal_alter()
  */
 function module_invoke($module, $hook) {
   $args = func_get_args();
@@ -851,6 +853,9 @@ function module_invoke($module, $hook) {
 /**
  * Invoke a hook in all enabled modules that implement it.
  *
+ * All arguments are passed by value. Use drupal_alter() if you need to pass
+ * arguments by reference.
+ *
  * @param $hook
  *   The name of the hook to invoke.
  * @param ...
@@ -859,6 +864,8 @@ function module_invoke($module, $hook) {
  * @return
  *   An array of return values of the hook implementations. If modules return
  *   arrays from their implementations, those are merged into one array.
+ *
+ * @see drupal_alter()
  */
 function module_invoke_all($hook) {
   $args = func_get_args();

@@ -34,6 +34,12 @@ description = Tests setting up default images both to the field and field instan
 group = Image
 file = image.test
 
+[ImageStyleFlushTest]
+name = Image style flushing
+description = Tests flushing of image styles.
+group = Image
+file = image.test
+
 [ImageDimensionsUnitTest]
 name = Image dimensions
 description = Tests that images have correct dimensions when styled.

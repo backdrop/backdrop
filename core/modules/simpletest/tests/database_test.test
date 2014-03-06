@@ -281,15 +281,6 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
  * Test cloning Select queries.
  */
 class DatabaseSelectCloneTest extends DatabaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Select tests, cloning',
-      'description' => 'Test cloning Select queries.',
-      'group' => 'Database',
-    );
-  }
-
   /**
    * Test that subqueries as value within conditions are cloned properly.
    */

@@ -1305,15 +1305,6 @@ class FormsRebuildTestCase extends DrupalWebTestCase {
  * Tests form redirection.
  */
 class FormsRedirectTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Form redirecting',
-      'description' => 'Tests functionality of drupal_redirect_form().',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp(array('form_test'));
   }
@@ -1761,15 +1752,6 @@ class FormEmailTestCase extends DrupalWebTestCase {
  * Tests uniqueness of generated HTML IDs.
  */
 class HTMLIdTestCase extends DrupalWebTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Unique HTML IDs',
-      'description' => 'Tests functionality of drupal_html_id().',
-      'group' => 'Form API',
-    );
-  }
-
   function setUp() {
     parent::setUp('form_test');
   }

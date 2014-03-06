@@ -201,11 +201,13 @@ function hook_block_save($delta = '', $edit = array()) {
  *   within the module, defined in hook_block_info().
  *
  * @return
- *   An array containing the following elements:
+ *   Either an empty array so the block will not be shown or an array containing
+ *   the following elements:
  *   - subject: The default localized title of the block. If the block does not
  *     have a default title, this should be set to NULL.
  *   - content: The content of the block's body. This may be a renderable array
- *     (preferable) or a string containing rendered HTML content.
+ *     (preferable) or a string containing rendered HTML content. If the content
+ *     is empty the block will not be shown.
  *
  * For a detailed usage example, see block_example.module.
  *
@@ -254,8 +256,9 @@ function hook_block_view($delta = '') {
  * specific block.
  *
  * @param $data
- *   An array of data, as returned from the hook_block_view() implementation of
- *   the module that defined the block:
+ *   The data as returned from the hook_block_view() implementation of the
+ *   module that defined the block. This could be an empty array or NULL value
+ *   (if the block is empty) or an array containing:
  *   - subject: The default localized title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
@@ -288,8 +291,9 @@ function hook_block_view_alter(&$data, $block) {
  * specific block, rather than implementing hook_block_view_alter().
  *
  * @param $data
- *   An array of data, as returned from the hook_block_view() implementation of
- *   the module that defined the block:
+ *   The data as returned from the hook_block_view() implementation of the
+ *   module that defined the block. This could be an empty array or NULL value
+ *   (if the block is empty) or an array containing:
  *   - subject: The localized title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying

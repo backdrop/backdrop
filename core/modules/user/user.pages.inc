@@ -36,7 +36,7 @@ function user_pass() {
     '#size' => 60,
     '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
     '#required' => TRUE,
-    '#default_value' => (array_key_exists('name', $_GET)) ? $_GET['name'] : '',
+    '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
   );
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
@@ -519,10 +519,16 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
 }
 
 /**
- * Access callback for path /user.
+ * Page callback: Displays the user page.
  *
  * Displays user profile if user is logged in, or login form for anonymous
  * users.
+ *
+ * @return
+ *   A render array for either a user profile or a login form.
+ *
+ * @see user_view_page()
+ * @see user_login()
  */
 function user_page() {
   global $user;

@@ -334,9 +334,21 @@ description = Make sure that drupal_add_feed() works correctly with various cons
 group = Common
 file = tests/common.test
 
+[ArrayDiffUnitTest]
+name = Array differences
+description = Performs tests on drupal_array_diff_assoc_recursive().
+group = Common
+file = tests/common.test
+
 [DatabaseConnectionTestCase]
 name = Connection tests
 description = Tests of the core database system.
+group = Database
+file = tests/database_test.test
+
+[DatabaseSelectCloneTest]
+name = Select tests, cloning
+description = Test cloning Select queries.
 group = Database
 file = tests/database_test.test
 
@@ -730,6 +742,12 @@ description = Tests various form element validation mechanisms.
 group = Form API
 file = tests/form.test
 
+[FormsRedirectTestCase]
+name = Form redirecting
+description = Tests functionality of drupal_redirect_form().
+group = Form API
+file = tests/form.test
+
 [FormElementTestCase]
 name = Element processing
 description = Tests building and processing of core form elements.
@@ -829,6 +847,12 @@ file = tests/form.test
 [FormEmailTestCase]
 name = Form API email
 description = Tests the form API email element.
+group = Form API
+file = tests/form.test
+
+[HTMLIdTestCase]
+name = Unique HTML IDs
+description = Tests functionality of drupal_html_id().
 group = Form API
 file = tests/form.test
 

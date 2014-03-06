@@ -1516,6 +1516,60 @@ class CommonDrupalRenderTestCase extends DrupalWebTestCase {
   }
 
   /**
+   * Tests the output drupal_render() for some elementary input values.
+   */
+  function testDrupalRenderBasics() {
+    $types = array(
+      array(
+        'name' => 'null',
+        'value' => NULL,
+        'expected' => '',
+      ),
+      array(
+        'name' => 'no value',
+        'expected' => '',
+      ),
+      array(
+        'name' => 'empty string',
+        'value' => '',
+        'expected' => '',
+      ),
+      array(
+        'name' => 'no access',
+        'value' => array(
+          '#markup' => 'foo',
+          '#access' => FALSE,
+        ),
+        'expected' => '',
+      ),
+      array(
+        'name' => 'previously printed',
+        'value' => array(
+          '#markup' => 'foo',
+          '#printed' => TRUE,
+        ),
+        'expected' => '',
+      ),
+      array(
+        'name' => 'printed in prerender',
+        'value' => array(
+          '#markup' => 'foo',
+          '#pre_render' => array('common_test_drupal_render_printing_pre_render'),
+        ),
+        'expected' => '',
+      ),
+      array(
+        'name' => 'basic renderable array',
+        'value' => array('#markup' => 'foo'),
+        'expected' => 'foo',
+      ),
+    );
+    foreach($types as $type) {
+      $this->assertIdentical(drupal_render($type['value']), $type['expected'], '"' . $type['name'] . '" input rendered correctly by drupal_render().');
+    }
+  }
+
+  /**
    * Test sorting by weight.
    */
   function testDrupalRenderSorting() {
@@ -2569,5 +2623,69 @@ class CommonDrupalAddFeedTestCase extends DrupalWebTestCase {
     $url = preg_replace('/([+?.*])/', '[$0]', $url);
     $generated_pattern = '%<link +rel="alternate" +type="application/rss.xml" +title="' . $title . '" +href="' . $url . '" */>%';
     return $generated_pattern;
+  }
+}
+
+/**
+ * Test array diff functions.
+ */
+class ArrayDiffUnitTest extends DrupalUnitTestCase {
+
+  /**
+   * Array to use for testing.
+   *
+   * @var array
+   */
+  protected $array1;
+
+  /**
+   * Array to use for testing.
+   *
+   * @var array
+   */
+  protected $array2;
+
+  function setUp() {
+    parent::setUp();
+
+    $this->array1 = array(
+      'same' => 'yes',
+      'different' => 'no',
+      'array_empty_diff' => array(),
+      'null' => NULL,
+      'int_diff' => 1,
+      'array_diff' => array('same' => 'same', 'array' => array('same' => 'same')),
+      'array_compared_to_string' => array('value'),
+      'string_compared_to_array' => 'value',
+      'new' => 'new',
+    );
+    $this->array2 = array(
+      'same' => 'yes',
+      'different' => 'yes',
+      'array_empty_diff' => array(),
+      'null' => NULL,
+      'int_diff' => '1',
+      'array_diff' => array('same' => 'different', 'array' => array('same' => 'same')),
+      'array_compared_to_string' => 'value',
+      'string_compared_to_array' => array('value'),
+    );
+  }
+
+
+  /**
+   * Tests drupal_array_diff_assoc_recursive().
+   */
+  public function testArrayDiffAssocRecursive() {
+    $expected = array(
+      'different' => 'no',
+      'int_diff' => 1,
+      // The 'array' key should not be returned, as it's the same.
+      'array_diff' => array('same' => 'same'),
+      'array_compared_to_string' => array('value'),
+      'string_compared_to_array' => 'value',
+      'new' => 'new',
+    );
+
+    $this->assertIdentical(drupal_array_diff_assoc_recursive($this->array1, $this->array2), $expected);
   }
 }
