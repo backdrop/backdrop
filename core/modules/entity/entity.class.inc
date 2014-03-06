@@ -118,11 +118,6 @@ abstract class Entity implements EntityInterface {
   }
 
   /**
-   * Implements EntityInterface::id().
-   */
-  abstract public function id();
-
-  /**
    * Implements EntityInterface::isNew().
    */
   public function isNew() {
@@ -130,11 +125,6 @@ abstract class Entity implements EntityInterface {
     // For that the "is_new" property may be set to TRUE.
     return !empty($this->is_new) || !$this->id();
   }
-
-  /**
-   * Implements EntityInterface::entityType().
-   */
-  abstract public function entityType();
 
   /**
    * Implements EntityInterface::bundle().
@@ -145,20 +135,6 @@ abstract class Entity implements EntityInterface {
   public function bundle() {
     return $this->entityType();
   }
-
-  /**
-   * Implements EntityInterface::label().
-   *
-   * @see entity_label()
-   */
-  abstract public function label();
-
-  /**
-   * Implements EntityInterface::uri().
-   *
-   * @see entity_uri()
-   */
-  abstract public function uri();
 
   /**
    * Implements EntityInterface::save().
