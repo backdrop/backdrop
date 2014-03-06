@@ -28,46 +28,6 @@ function views_schema() {
   $schema['cache_views_data']['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
   $schema['cache_views_data']['fields']['serialized']['default'] = 1;
 
-  // @todo: Replace with key value expire store.
-  // See https://github.com/backdrop/backdrop-issues/issues/136.
-  $schema['views_object_cache'] = array(
-    'description' => 'A special cache used to store objects that are being edited; it serves to save state in an ordinarily stateless environment.',
-    'fields' => array(
-      'sid' => array(
-        'type' => 'varchar',
-        'length' => '64',
-        'description' => 'The session ID this cache object belongs to.',
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => '128',
-        'description' => 'The name of the view this cache is attached to.',
-      ),
-      'obj' => array(
-        'type' => 'varchar',
-        'length' => '32',
-        'description' => 'The name of the object this cache is attached to; this essentially represents the owner so that several sub-systems can use this cache.',
-      ),
-      'updated' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'The time this cache was created or updated.',
-      ),
-      'data' => array(
-        'type' => 'blob',
-        'description' => 'Serialized data being stored.',
-        'size' => 'big',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('sid', 'obj', 'name'),
-    'indexes' => array(
-      'updated' => array('updated'),
-    ),
-  );
-
   return $schema;
 }
 

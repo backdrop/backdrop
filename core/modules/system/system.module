@@ -3078,6 +3078,11 @@ function system_cron() {
     ->condition('expiration', REQUEST_TIME, '<')
     ->execute();
 
+  // Cleanup expired tempstore entries.
+  db_delete('tempstore')
+    ->condition('expire', REQUEST_TIME, '<')
+    ->execute();
+
   // Remove temporary files that are older than DRUPAL_MAXIMUM_TEMP_FILE_AGE.
   // Use separate placeholders for the status to avoid a bug in some versions
   // of PHP. See http://drupal.org/node/352956.
@@ -3102,7 +3107,7 @@ function system_cron() {
     }
   }
 
-  $core = array('cache', 'path', 'filter', 'page', 'form', 'menu');
+  $core = array('cache', 'path', 'filter', 'page', 'menu');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
   foreach ($cache_bins as $bin) {
     cache($bin)->expire();
