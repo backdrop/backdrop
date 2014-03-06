@@ -674,7 +674,10 @@ function locale_get_plural($count, $langcode = NULL) {
   if (!isset($plural_indexes[$langcode][$count])) {
     // Retrieve and statically cache the plural formulas for all languages.
     if (empty($plural_formulas)) {
-      $plural_formulas = variable_get('locale_translation_plurals', array());
+      foreach (language_list() as $installed_language) {
+        debug($installed_language);
+        $plural_formulas[$installed_language->langcode] = $installed_language->langcode;
+      }
     }
     // If there is a plural formula for the language, evaluate it for the given
     // $count and statically cache the result for the combination of language
@@ -682,7 +685,7 @@ function locale_get_plural($count, $langcode = NULL) {
     if (!empty($plural_formulas[$langcode])) {
       // $n is used inside the expression in the eval().
       $n = $count;
-      $plural_indexes[$langcode][$count] = @eval('return intval(' . $plural_formulas[$langcode]['formula'] . ');');
+      $plural_indexes[$langcode][$count] = @eval('return intval(' . $plural_formulas[$langcode]['langcode'] . ');');
     }
     // In case there is no plural formula for English (no imported translation
     // for English), use a default formula.
