@@ -288,6 +288,15 @@ function node_form($form, &$form_state, Node $node) {
     '#maxlength' => 25,
     '#description' => t('Format: %time. The date format is YYYY-MM-DD and %timezone is the time zone offset from UTC. Leave blank to use the time of form submission.', array('%time' => !empty($node->date) ? date_format(date_create($node->date), 'Y-m-d H:i:s O') : format_date($node->created, 'custom', 'Y-m-d H:i:s O'), '%timezone' => !empty($node->date) ? date_format(date_create($node->date), 'O') : format_date($node->created, 'custom', 'O'))),
     '#default_value' => !empty($node->date) ? $node->date : '',
+    '#attached' => array(
+      'library' => array(array('system', 'ui.datepicker')),
+      'js' => array(array(
+        'data' => "jQuery(function ($) {
+          $('#edit-date').datepicker();
+        });",
+        'type' => 'inline',
+      ))
+    ),
   );
 
   // Node options for administrators
