@@ -509,6 +509,7 @@ function image_styles() {
       foreach (config_get_names_with_prefix('image.styles') as $config_name) {
         $style = array();
         $config = config($config_name);
+        $style['label'] = $config->get('label');
         $style['name'] = $config->get('name');
         $style['effects'] = array();
         if ($module = $config->get('module')) {
@@ -592,6 +593,7 @@ function image_style_save($style) {
   if (is_null($config->get('name'))) {
     $style['is_new'] = TRUE;
   }
+  $config->set('label', $style['label']);
   $config->set('name', $style['name']);
   $config->set('effects', $style['effects']);
   // Only write storage settings for default and overridden styles.
@@ -648,15 +650,27 @@ function image_style_delete($style, $replacement_style_name = '') {
  *
  * @param $include_empty
  *   If TRUE a <none> option will be inserted in the options array.
+ * @param $output
+ *   Optional flag determining how the options will be sanitized on output.
+ *   Leave this at the default (CHECK_PLAIN) if you are using the output of
+ *   this function directly in an HTML context, such as for checkbox or radio
+ *   button labels, and do not plan to sanitize it on your own. If using the
+ *   output of this function as select list options (its primary use case), you
+ *   should instead set this flag to PASS_THROUGH to avoid double-escaping of
+ *   the output (the form API sanitizes select list options by default).
  * @return
- *   Array of image styles both key and value are set to style name.
+ *   Array of image styles with the machine name as key and the label as value.
  */
-function image_style_options($include_empty = TRUE) {
+function image_style_options($include_empty = TRUE, $output = CHECK_PLAIN) {
   $styles = image_styles();
   $options = array();
   if ($include_empty && !empty($styles)) {
     $options[''] = t('<none>');
   }
+  foreach ($styles as $name => $style) {
+    $options[$name] = ($output == PASS_THROUGH) ? $style['label'] : check_plain($style['label']);
+  }
+
   // Use the array concatenation operator '+' here instead of array_merge(),
   // because the latter loses the datatype of the array keys, turning
   // associative string keys into numeric ones without warning.

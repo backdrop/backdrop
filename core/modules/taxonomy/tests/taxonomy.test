@@ -1780,7 +1780,6 @@ class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
       $term = $this->createTerm($vocabulary2);
       $terms2[$term->tid] = $term;
     }
-
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'taxonomy_term');
     $query->entityCondition('bundle', $vocabulary2->machine_name);

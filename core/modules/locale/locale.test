@@ -80,6 +80,28 @@ class LocaleConfigurationTest extends DrupalWebTestCase {
 }
 
 /**
+ * Tests localization of the JavaScript libraries.
+ *
+ * Currently, only the jQuery datepicker is localized using Drupal translations.
+ */
+class LocaleLibraryInfoAlterTest extends DrupalWebTestCase {
+  function setUp() {
+    parent::setUp('locale', 'locale_test');
+  }
+
+  /**
+   * Verifies that the datepicker can be localized.
+   *
+   * @see locale_library_info_alter()
+   */
+  public function testLibraryInfoAlter() {
+    drupal_add_library('system', 'ui.datepicker');
+    $scripts = drupal_get_js();
+    $this->assertTrue(strpos($scripts, 'locale.datepicker.js'), t('locale.datepicker.js added to scripts.'));
+  }
+}
+
+/**
  * Functional tests for JavaScript parsing for translatable strings.
  */
 class LocaleJavascriptTranslationTest extends DrupalWebTestCase {
@@ -160,6 +182,7 @@ class LocaleJavascriptTranslationTest extends DrupalWebTestCase {
     $this->assertEqual(count($source_strings), count($test_strings), t("Found correct number of source strings."));
   }
 }
+
 /**
  * Functional test for string translation and validation.
  */
@@ -480,10 +503,20 @@ class LocaleTranslationFunctionalTest extends DrupalWebTestCase {
     $this->assertText(t('No strings available.'), t("Search didn't find the string."));
 
     // Ensure untranslated string appears if searching on 'only untranslated
-    // strings'.
+    // strings' in "all" (hasn't been translated to any language).
     $search = array(
       'string' => $name,
       'language' => 'all',
+      'translation' => 'untranslated',
+    );
+    $this->drupalPost('admin/config/regional/translate/translate', $search, t('Filter'));
+    $this->assertNoText(t('No strings available.'), t('Search found the string.'));
+
+    // Ensure untranslated string appears if searching on 'only untranslated
+    // strings' in the custom language (hasn't been translated to that specific language).
+    $search = array(
+      'string' => $name,
+      'language' => $langcode,
       'translation' => 'untranslated',
     );
     $this->drupalPost('admin/config/regional/translate/translate', $search, t('Filter'));
@@ -1301,7 +1334,6 @@ class LocaleUninstallFrenchFunctionalTest extends LocaleUninstallFunctionalTest 
     $this->langcode = 'fr';
   }
 }
-
 
 /**
  * Functional tests for the language switching feature.
