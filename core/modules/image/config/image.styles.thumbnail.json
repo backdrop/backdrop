@@ -2,6 +2,7 @@
   "_config_name": "image.styles.thumbnail.json",
   "overridden": false,
   "module": "image",
+  "label": "Thumbnail (100x100)",
   "name": "thumbnail",
   "effects": [
     {
