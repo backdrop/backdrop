@@ -1664,7 +1664,7 @@ function taxonomy_taxonomy_term_delete(TaxonomyTerm $term) {
 }
 
 /**
- * @} End of "defgroup taxonomy_index"
+ * @} End of "defgroup taxonomy_index".
  */
 
 /**

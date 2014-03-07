@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @ingroup database
+ * @addtogroup database
  * @{
  */
 
@@ -89,5 +89,5 @@ class InsertQuery_mysql extends InsertQuery {
 class TruncateQuery_mysql extends TruncateQuery { }
 
 /**
- * @} End of "ingroup database".
+ * @} End of "addtogroup database".
  */

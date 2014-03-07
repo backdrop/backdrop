@@ -3058,7 +3058,7 @@ function ip_address() {
 }
 
 /**
- * @ingroup schemaapi
+ * @addtogroup schemaapi
  * @{
  */
 
@@ -3180,12 +3180,12 @@ function drupal_get_complete_schema($rebuild = FALSE) {
 }
 
 /**
- * @} End of "ingroup schemaapi".
+ * @} End of "addtogroup schemaapi".
  */
 
 
 /**
- * @ingroup registry
+ * @addtogroup registry
  * @{
  */
 
@@ -3347,7 +3347,7 @@ function registry_update() {
 }
 
 /**
- * @} End of "ingroup registry".
+ * @} End of "addtogroup registry".
  */
 
 /**
