@@ -2530,7 +2530,7 @@ function _template_preprocess_default_variables() {
   $variables = array(
     'attributes_array' => array(),
     'title_attributes_array' => array(),
-    'content_attributes_array' => array(),
+    'content_attributes' => array(),
     'title_prefix' => array(),
     'title_suffix' => array(),
     'user' => $user,
@@ -2577,13 +2577,12 @@ function _template_preprocess_default_variables() {
  * @see template_preprocess()
  */
 function template_process(&$variables, $hook) {
-  // Flatten out attributes, title_attributes, and content_attributes.
+  // Flatten out attributes and title_attributes.
   // Because this function can be called very often, and often with empty
   // attributes, optimize performance by only calling backdrop_attributes() if
   // necessary.
   $variables['attributes'] = $variables['attributes_array'] ? backdrop_attributes($variables['attributes_array']) : '';
   $variables['title_attributes'] = $variables['title_attributes_array'] ? backdrop_attributes($variables['title_attributes_array']) : '';
-  $variables['content_attributes'] = $variables['content_attributes_array'] ? backdrop_attributes($variables['content_attributes_array']) : '';
 }
 
 /**
