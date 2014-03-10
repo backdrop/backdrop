@@ -1015,7 +1015,7 @@ function template_preprocess_field(&$variables, $hook) {
   // backdrop_html_class().
   $variables['field_name_css'] = strtr($element['#field_name'], '_', '-');
   $variables['field_type_css'] = strtr($element['#field_type'], '_', '-');
-  $variables['classes_array'] = array(
+  $variables['classes'] = array(
     'field',
     'field-name-' . $variables['field_name_css'],
     'field-type-' . $variables['field_type_css'],
@@ -1024,7 +1024,7 @@ function template_preprocess_field(&$variables, $hook) {
   // Add a "clearfix" class to the wrapper since we float the label and the
   // field items in field.css if the label is inline.
   if ($element['#label_display'] == 'inline') {
-    $variables['classes_array'][] = 'clearfix';
+    $variables['classes'][] = 'clearfix';
   }
 
   // Add specific suggestions that can override the default implementation.
@@ -1048,7 +1048,7 @@ function template_process_field(&$variables, $hook) {
   // here. For best performance, only call backdrop_attributes() when needed, and
   // note that template_preprocess_field() does not initialize the
   // *_attributes_array variables.
-  $variables['classes'] = implode(' ', $variables['classes_array']);
+
   $variables['attributes'] = empty($variables['attributes_array']) ? '' : backdrop_attributes($variables['attributes_array']);
   $variables['title_attributes'] = empty($variables['title_attributes_array']) ? '' : backdrop_attributes($variables['title_attributes_array']);
   $variables['content_attributes'] = empty($variables['content_attributes_array']) ? '' : backdrop_attributes($variables['content_attributes_array']);

@@ -138,7 +138,7 @@ function hook_preprocess(&$variables, $hook) {
   if (isset($element) && is_array($element) && !empty($element['#contextual_links'])) {
     $variables['title_suffix']['contextual_links'] = contextual_links_view($element);
     if (!empty($variables['title_suffix']['contextual_links'])) {
-      $variables['classes_array'][] = 'contextual-links-region';
+      $variables['classes'][] = 'contextual-links-region';
     }
   }
 }

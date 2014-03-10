@@ -2501,7 +2501,7 @@ function template_preprocess(&$variables, $hook) {
   $variables['directory'] = path_to_theme();
 
   // Initialize html class attribute for the current hook.
-  $variables['classes_array'] = array(backdrop_html_class($hook));
+  $variables['classes'] = array(backdrop_html_class($hook));
 
   // Merge in variables that don't depend on hook and don't change during a
   // single page request.
@@ -2577,9 +2577,6 @@ function _template_preprocess_default_variables() {
  * @see template_preprocess()
  */
 function template_process(&$variables, $hook) {
-  // Flatten out classes.
-  $variables['classes'] = implode(' ', $variables['classes_array']);
-
   // Flatten out attributes, title_attributes, and content_attributes.
   // Because this function can be called very often, and often with empty
   // attributes, optimize performance by only calling backdrop_attributes() if
@@ -2599,22 +2596,22 @@ function template_preprocess_html(&$variables) {
   // Compile a list of classes that are going to be applied to the body element.
   // This allows advanced theming based on context (home page, node of certain type, etc.).
   // Add a class that tells us whether we're on the front page or not.
-  $variables['classes_array'][] = $variables['is_front'] ? 'front' : 'not-front';
+  $variables['classes'][] = $variables['is_front'] ? 'front' : 'not-front';
   // Add a class that tells us whether the page is viewed by an authenticated user or not.
-  $variables['classes_array'][] = $variables['logged_in'] ? 'logged-in' : 'not-logged-in';
+  $variables['classes'][] = $variables['logged_in'] ? 'logged-in' : 'not-logged-in';
 
   // Add information about the number of sidebars.
   if (!empty($variables['page']['sidebar_first']) && !empty($variables['page']['sidebar_second'])) {
-    $variables['classes_array'][] = 'two-sidebars';
+    $variables['classes'][] = 'two-sidebars';
   }
   elseif (!empty($variables['page']['sidebar_first'])) {
-    $variables['classes_array'][] = 'one-sidebar sidebar-first';
+    $variables['classes'][] = 'one-sidebar sidebar-first';
   }
   elseif (!empty($variables['page']['sidebar_second'])) {
-    $variables['classes_array'][] = 'one-sidebar sidebar-second';
+    $variables['classes'][] = 'one-sidebar sidebar-second';
   }
   else {
-    $variables['classes_array'][] = 'no-sidebars';
+    $variables['classes'][] = 'no-sidebars';
   }
 
   // Populate the body classes.
@@ -2631,7 +2628,7 @@ function template_preprocess_html(&$variables) {
 
   // If on an individual node page, add the node type to body classes.
   if ($node = menu_get_object()) {
-    $variables['classes_array'][] = backdrop_html_class('node-type-' . $node->type);
+    $variables['classes'][] = backdrop_html_class('node-type-' . $node->type);
   }
 
   // Initializes attributes which are specific to the html and body elements.
@@ -2819,7 +2816,7 @@ function template_process_html(&$variables) {
  * Generate an array of suggestions from path arguments.
  *
  * This is typically called for adding to the 'theme_hook_suggestions' or
- * 'classes_array' variables from within preprocess functions, when wanting to
+ * 'classes' variables from within preprocess functions, when wanting to
  * base the additional suggestions on the path of the current page.
  *
  * @param $args
@@ -2835,7 +2832,7 @@ function template_process_html(&$variables) {
  * @return
  *   An array of suggestions, suitable for adding to
  *   $variables['theme_hook_suggestions'] within a preprocess function or to
- *   $variables['classes_array'] if the suggestions represent extra CSS classes.
+ *   $variables['classes'] if the suggestions represent extra CSS classes.
  */
 function theme_get_suggestions($args, $base, $delimiter = '__') {
 
@@ -2967,18 +2964,18 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['title']             = backdrop_get_title();
 
   // Compile a list of classes that are going to be applied to the body element.
-  $variables['classes_array'][] = 'in-maintenance';
+  $variables['classes'][] = 'in-maintenance';
   if (isset($variables['db_is_active']) && !$variables['db_is_active']) {
-    $variables['classes_array'][] = 'db-offline';
+    $variables['classes'][] = 'db-offline';
   }
   if ($variables['layout'] == 'both') {
-    $variables['classes_array'][] = 'two-sidebars';
+    $variables['classes'][] = 'two-sidebars';
   }
   elseif ($variables['layout'] == 'none') {
-    $variables['classes_array'][] = 'no-sidebars';
+    $variables['classes'][] = 'no-sidebars';
   }
   else {
-    $variables['classes_array'][] = 'one-sidebar sidebar-' . $variables['layout'];
+    $variables['classes'][] = 'one-sidebar sidebar-' . $variables['layout'];
   }
 
   // Dead databases will show error messages so supplying this template will
