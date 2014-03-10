@@ -2529,7 +2529,6 @@ function _template_preprocess_default_variables() {
   // Variables that don't depend on a database connection.
   $variables = array(
     'attributes_array' => array(),
-    'title_attributes_array' => array(),
     'content_attributes' => array(),
     'title_prefix' => array(),
     'title_suffix' => array(),
@@ -2577,12 +2576,10 @@ function _template_preprocess_default_variables() {
  * @see template_preprocess()
  */
 function template_process(&$variables, $hook) {
-  // Flatten out attributes and title_attributes.
   // Because this function can be called very often, and often with empty
   // attributes, optimize performance by only calling backdrop_attributes() if
   // necessary.
   $variables['attributes'] = $variables['attributes_array'] ? backdrop_attributes($variables['attributes_array']) : '';
-  $variables['title_attributes'] = $variables['title_attributes_array'] ? backdrop_attributes($variables['title_attributes_array']) : '';
 }
 
 /**

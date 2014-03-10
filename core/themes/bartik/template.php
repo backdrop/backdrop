@@ -113,16 +113,6 @@ function bartik_process_maintenance_page(&$variables) {
 }
 
 /**
- * Override or insert variables into the block template.
- */
-function bartik_preprocess_block(&$variables) {
-  // In the header region visually hide block titles.
-  if ($variables['block']->region == 'header') {
-    $variables['title_attributes_array']['class'][] = 'element-invisible';
-  }
-}
-
-/**
  * Implements theme_menu_tree().
  */
 function bartik_menu_tree($variables) {
