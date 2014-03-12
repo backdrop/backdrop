@@ -183,6 +183,7 @@ Drupal.FieldGroup.Effects.processDiv = {
  */
 Drupal.behaviors.fieldGroup = {
   attach: function (context, settings) {
+    settings.field_group = settings.field_group || Drupal.settings.field_group;
     if (settings.field_group == undefined) {
       return;
     }
