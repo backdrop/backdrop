@@ -244,7 +244,7 @@ function field_group_field_attach_delete_bundle($entity_type, $bundle) {
  * Implements hook_field_attach_form().
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
-  $form['field_testte']['#access'] = FALSE;
+
   $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.css';
   field_group_attach_groups($form, 'form', $form_state);
   $form['#pre_render'][] = 'field_group_form_pre_render';
