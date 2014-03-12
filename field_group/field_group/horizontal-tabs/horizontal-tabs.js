@@ -50,7 +50,8 @@ Drupal.behaviors.horizontalTabs = {
       if (!tab_focus) {
         // If the current URL has a fragment and one of the tabs contains an
         // element that matches the URL fragment, activate that tab.
-        if (window.location.hash && window.location.hash !== '#' && $(window.location.hash, this).length) {
+        var hash = window.location.hash.replace(/[=%;,\/]/g, "");
+        if (hash !== '#' && $(hash, this).length) {
           tab_focus = $(window.location.hash, this).closest('.horizontal-tabs-pane');
         }
         else {
