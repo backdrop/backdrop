@@ -244,6 +244,7 @@ function field_group_field_attach_delete_bundle($entity_type, $bundle) {
  * Implements hook_field_attach_form().
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  $form['field_testte']['#access'] = FALSE;
   $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.css';
   field_group_attach_groups($form, 'form', $form_state);
   $form['#pre_render'][] = 'field_group_form_pre_render';
@@ -1064,7 +1065,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
 
   $display = isset($element['#view_mode']);
   $groups = array_keys($element['#groups']);
-
+  dsm($element);
   // Dish the fieldgroups with no fields for non-forms.
   if ($display) {
     field_group_remove_empty_display_groups($element, $groups);
@@ -1093,6 +1094,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
     }
   }
 
+  dsm($element);
 }
 
 /**
@@ -1106,7 +1108,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
  *   Array of group objects.
  */
 function field_group_remove_empty_form_groups($name, & $element, $groups, &$form_groups, $entity) {
-
+  dsm($name);
   $exceptions = array('user__account', 'comment__author');
 
   $children = element_children($element);
@@ -1114,11 +1116,13 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
   $hasChildren = FALSE;
   if (count($children)) {
     foreach ($children as $childname) {
+
       if (in_array($childname, $groups)) {
         field_group_remove_empty_form_groups($childname, $element[$childname], $groups, $form_groups, $entity);
       }
       $exception = $entity . '__' . $childname;
-      $hasChildren = $hasChildren ? TRUE : (isset($element[$childname]['#type']) || in_array($exception, $exceptions));
+      $hasChildren = $hasChildren ? TRUE : (isset($element[$childname]['#type']) || isset($element[$childname]['#markup']) || in_array($exception, $exceptions));
+
     }
   }
 
@@ -1135,7 +1139,7 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
         }
       }
     }
-
+    
     $element['#access'] = FALSE;
 
   }
@@ -1890,7 +1894,7 @@ function field_group_build_entity_groups(&$vars, $type) {
   if ($type == 'form') {
     return $element;
   }
-  
+
   // Put groups inside content if we are rendering an entity_view.
   foreach ($element['#fieldgroups'] as $group) {
     if (!empty($element[$group->group_name]) && $type != 'user_profile') {
