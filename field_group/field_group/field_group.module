@@ -1065,7 +1065,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
 
   $display = isset($element['#view_mode']);
   $groups = array_keys($element['#groups']);
-  dsm($element);
+
   // Dish the fieldgroups with no fields for non-forms.
   if ($display) {
     field_group_remove_empty_display_groups($element, $groups);
@@ -1094,7 +1094,6 @@ function field_group_field_group_build_pre_render_alter(& $element) {
     }
   }
 
-  dsm($element);
 }
 
 /**
@@ -1108,7 +1107,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
  *   Array of group objects.
  */
 function field_group_remove_empty_form_groups($name, & $element, $groups, &$form_groups, $entity) {
-  dsm($name);
+
   $exceptions = array('user__account', 'comment__author');
 
   $children = element_children($element);
@@ -1139,7 +1138,7 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
         }
       }
     }
-    
+
     $element['#access'] = FALSE;
 
   }
