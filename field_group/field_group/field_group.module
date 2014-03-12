@@ -743,7 +743,7 @@ function field_group_pre_render_div(&$element, $group, &$form) {
   else {
     $class_attribute = '';
     if (!empty($group->classes)) {
-      $class_attribute = ' class = "' . $group->classes . '"';
+      $class_attribute = ' class="' . $group->classes . '"';
     }
     $element['#prefix'] = '<div' . $id . $class_attribute . '>';
     if ($show_label) {
