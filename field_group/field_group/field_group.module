@@ -292,7 +292,7 @@ function field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
+        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
       ),
       'div' => array(
         'label' => t('Div'),
@@ -366,7 +366,7 @@ function field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
+        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1),
       ),
       'div' => array(
         'label' => t('Div'),
@@ -502,7 +502,22 @@ function field_group_field_group_format_settings($group) {
         '#type' => 'textfield',
         '#default_value' => isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : $formatter['instance_settings']['element'],
         '#description' => t('E.g. div, section, aside etc.'),
+        '#weight' => 1,
+      );
+
+      $form['instance_settings']['show_label'] = array(
+        '#title' => t('Show label'),
+        '#type' => 'select',
+        '#options' => array(0 => t('No'), 1 => t('Yes')),
+        '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : $formatter['instance_settings']['show_label'],
         '#weight' => 2,
+      );
+
+      $form['instance_settings']['label_element'] = array(
+        '#title' => t('Label element'),
+        '#type' => 'textfield',
+        '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
+        '#weight' => 3,
       );
 
       $form['instance_settings']['attributes'] = array(
@@ -641,7 +656,7 @@ function field_group_field_group_pre_render(& $element, &$group, & $form) {
   );
 
   if (isset($group->format_settings['instance_settings']['id']) && !empty($group->format_settings['instance_settings']['id'])) {
-    $element['#id'] = $group->format_settings['instance_settings']['id'];
+    $element['#id'] = drupal_html_id($group->format_settings['instance_settings']['id']);
   }
 
   $element['#weight'] = $group->weight;
@@ -689,6 +704,8 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
  */
 function field_group_pre_render_html_element(&$element, $group, &$form) {
   $html_element = isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : 'div';
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
+  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'div';
   $attributes = isset($group->format_settings['instance_settings']['attributes']) ? ' ' . $group->format_settings['instance_settings']['attributes'] : '';
   $group->classes = trim($group->classes);
 
@@ -713,6 +730,9 @@ function field_group_pre_render_html_element(&$element, $group, &$form) {
   $attributes = drupal_attributes($element_attributes);
 
   $element['#prefix'] = '<' . $html_element . $attributes . '>';
+  if ($show_label) {
+    $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
+  }
   $element['#suffix'] = '</' . $html_element . '>';
 }
 
