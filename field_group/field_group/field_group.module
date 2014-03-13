@@ -1684,7 +1684,7 @@ function field_group_exists($group_name, $entity_type, $bundle, $mode) {
  *   Field group object.
  */
 function field_group_unpack($packed_group) {
-  if (!isset($packed_group->data)) {
+  if (empty($packed_group->data)) {
     return $packed_group;
   }
 
