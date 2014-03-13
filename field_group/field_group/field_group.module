@@ -1851,7 +1851,7 @@ function field_group_attach_groups(&$element, $view_mode, $form_state = array())
 /**
  * Pre render callback for rendering groups.
  * @see field_group_field_attach_form
- * @param $element Form that is beïng rendered.
+ * @param $element Form that is being rendered.
  */
 function field_group_form_pre_render(&$element) {
   return field_group_build_entity_groups($element, 'form');
@@ -1864,7 +1864,7 @@ function field_group_form_pre_render(&$element) {
  * @see field_group_theme_registry_alter
  * @see field_group_fields_nest()
  * @param $vars preprocess vars or form element
- * @param $type The type of object beïng rendered
+ * @param $type The type of object being rendered
  * @return $element Array with re-arranged fields in forms.
  */
 function field_group_build_entity_groups(&$vars, $type) {
@@ -1918,7 +1918,7 @@ function field_group_build_entity_groups(&$vars, $type) {
  * @param Array $element
  *   The current element to analyse for grouping.
  * @param Array $vars
- *   Rendering vars from the entity beïng viewed.
+ *   Rendering vars from the entity being viewed.
  */
 function field_group_fields_nest(&$element, &$vars = NULL) {
 
