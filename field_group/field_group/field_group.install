@@ -331,3 +331,33 @@ function field_group_update_7006() {
   }
 
 }
+
+/**
+ * Id attributes are now a setting. This update will insert the old id in the setting so old
+ * markup doesn't get broken. If you don't want an attribute, you can delete
+ * them on the fieldgroup settings.
+ */
+function field_group_update_7007() {
+
+  ctools_include("export");
+
+  // Migrate the field groups so they have a unique identifier.
+  $field_groups = ctools_export_load_object("field_group");
+  foreach ($field_groups as $row) {
+    if ($row->data['format_type'] == 'div' || $row->data['format_type'] == 'html5' || $row->data['format_type'] == 'html-element') {
+
+      // If mode is default, we don't know what view mode it was. Take full then.
+      $view_mode = $row->mode == 'default' ? 'full' : $row->mode;
+      $id = $row->entity_type . '_' . $row->bundle . '_' . $view_mode . '_' . $row->group_name;
+      $row->data['format_settings']['instance_settings']['id'] = $id;
+    }
+
+    if ($row->export_type == EXPORT_IN_CODE) {
+      unset($row->id);
+      drupal_write_record('field_group', $row);
+    }
+    else {
+      drupal_write_record('field_group', $row, array('id'));
+    }
+  }
+}
