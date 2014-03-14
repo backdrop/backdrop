@@ -1,12 +1,23 @@
 /* $Id*/
 CHANGELOG for field_group for Drupal 7
 
-Field_group 7.x-1.x-dev
-    o Issue #1095316: Field Groups disappear when Content Type is renamed.
-    o Issue #1095316 by swentel: Support for Entity API.
-    o Issue #1095002 by animelion: Upgrading removes all existing field groups.
-    o Issue #1095130 by willvincent: Features export not working with rc2.
-    
+Field_group 7.x-1.3
+    o Issue #2077695 by FreekVR | ChoY: Fixed field group entity display bug after update.
+    o Issue #2078201 by DeFr, eneko1907 | cmriley: Fixed Started getting a ton of notices.
+    o Issue #2085137 by ar-jan: Fixed Collapse speed no longer works with field_group() 1.2
+    o Issue #2085225 by dtarc: Fixed Featurized Field Groups no longer have classes since marked optional.
+    o Issue #2080645 by bassthiam: Fixed Warning: Illegal string offset 'label' in field_group_unpack() line 1682 of field_group()/field_group().module.
+    o Issue #1942676 by Harlor | El Bandito: Added Change the text 'Mark group for required fields.'.
+    o Issue #1358430 by FriedJam: Fixed JS 'Error: uncaught exception: Syntax error, unrecognized expression:".
+    o Issue #2084999 by activelink: Fixed Empty field groups aren't being suppressed since move to 7.x-1.2.
+    o Issue #1557258 by Mark Trapp | Chris Gillis: Fixed Existing field groups disappear and Add Field Group UI is disabled when no fields are available.
+    o Issue #2000110 by bigjim: Fixed Comments on field_group_read_groups() wrong
+    o Issue #1169146 by ankur, Nephele | jeffrey.dalton: Fixed upgrade from 7.x-1.0-rc2 to 7.x-1.0 deletes all field_groups().
+    o Vertical tabs always appear when children elements have no access
+    o #1966624 Feature 7.x-2.0-beta2 defines fields in a new way
+    o #2090415 Make horizontal tabs not dependent on form.js. Also change drupal_add_x to #attached
+    o
+
 Field_group 7.x-1.0-rc2
     o Ran through coder, minor.
     o Issue #1033036 by Stalski, swentel: Create a field_group.api.php.
@@ -20,7 +31,7 @@ Field_group 7.x-1.0-rc2
     o #1045526 by stalski: Make formatter options more user-friendly and logical.
     o #1041880 by robertgarrigos: duplicated entries in field_group table.
     o #1043834 by amsri: Field Group module just does not work with profiles 2.
-    
+
 Field_group 7.x-1.0-rc1
     o #1006464 Change #groups to #fieldgroups because of name collapsing with form_process_fieldset
     o #1024184 fix collapsible when mode is set to open
@@ -34,7 +45,7 @@ Field_group 7.x-1.0-rc1
     o #961106 Fixed notice on entity type and bundle check.
     o #962072 by mori: Improve CSS for horizontal tabs & accordion.
     o Changed Fieldgroup API: defaults and instance_settings are now merged.
-    o Changed save action so everything is gathered during form_state to 
+    o Changed save action so everything is gathered during form_state to
       postpone saving until the save button is hit.
     o Changed some important variable name, so it makes more sense and easier to read.
     o Add basic crud functions.
