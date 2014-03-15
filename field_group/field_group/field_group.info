@@ -1,5 +1,5 @@
-name = Fieldgroup
-description = Fieldgroup
+name = Field Group
+description = "Provides the ability to group your fields on both form and display."
 package = Fields
 dependencies[] = field
 dependencies[] = ctools

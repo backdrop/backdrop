@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the Field group module.
+ * Hooks provided by the Field Group module.
  *
  * Fieldgroup is a module that will wrap fields and other fieldgroups. Nothing more, nothing less.
  * For this there are formatters we can create on forms and view modes.
