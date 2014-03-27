@@ -375,13 +375,12 @@ function taxonomy_term_access($op, $term) {
  * Returns the sanitized name of a vocabulary.
  *
  * Deprecated. This function was previously used as a menu item title callback
- * but has been replaced by using entity_label() (which does not
- * sanitize the title, since the menu system does that automatically). In
- * Drupal 7, use that function for title callbacks, and call check_plain()
- * directly if you need a sanitized title.
+ * but has been replaced by the label() method which does not sanitize the title
+ * (since the menu system does that automatically). Use the label() method for
+ * title callbacks, and call check_plain() directly if you need it sanitized.
  */
 function taxonomy_admin_vocabulary_title_callback(TaxonomyVocabulary $vocabulary) {
-  return check_plain($vocabulary->name);
+  return check_plain($vocabulary->label());
 }
 
 /**
