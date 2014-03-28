@@ -2741,6 +2741,10 @@ function drupal_language_initialize() {
 
 /**
  * Returns an array of the available language types.
+ *
+ * @return
+ *   An array of all language types where the keys of each are the language
+ *   type name and its value is its configurability (TRUE/FALSE).
  */
 function language_types_get_all() {
   return array_keys(variable_get('language_types', language_types_get_default()));
@@ -2762,6 +2766,9 @@ function language_types_get_default() {
 
 /**
  * Returns TRUE if there is more than one language enabled.
+ *
+ * @return
+ *   TRUE if more than one language is enabled.
  */
 function language_multilingual() {
   // The "language_count" variable stores the number of enabled languages to
