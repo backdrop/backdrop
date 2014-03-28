@@ -2180,7 +2180,7 @@ class LocaleUILanguageNegotiationTest extends DrupalWebTestCase {
     $this->assertResponse(404, "Unknown language path prefix should return 404");
 
     // Setup for domain negotiation, first configure the language to have domain
-    // URL. We use https and a port to make sure that only the domain name is used.
+    // URL. We use HTTPS and a port to make sure that only the domain name is used.
     $edit = array("domain[$langcode]" => "https://$language_domain:99");
     $this->drupalPost("admin/config/regional/language/detection/url", $edit, t('Save configuration'));
     // Set the site to use domain language negotiation.
@@ -2305,7 +2305,7 @@ class LocaleUILanguageNegotiationTest extends DrupalWebTestCase {
     );
     $this->drupalPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
 
-    // Build the link we're going to test based on the clean url setting.
+    // Build the link we're going to test based on the clean URL setting.
     $link = (!empty($GLOBALS['conf']['clean_url'])) ? 'it.example.com/admin' : 'it.example.com/?q=admin';
 
     global $is_https;
@@ -2317,14 +2317,14 @@ class LocaleUILanguageNegotiationTest extends DrupalWebTestCase {
     $correct_link = $url_scheme . $link;
     $this->assertTrue($italian_url == $correct_link, t('The url() function returns the right url (@url) in accordance with the chosen language', array('@url' => $italian_url)));
 
-    // Test https via options.
+    // Test HTTPS via options.
     variable_set('https', TRUE);
     $italian_url = url('admin', array('https' => TRUE, 'language' => $languages['it']));
     $correct_link = 'https://' . $link;
     $this->assertTrue($italian_url == $correct_link, t('The url() function returns the right https url (via options) (@url) in accordance with the chosen language', array('@url' => $italian_url)));
     variable_set('https', FALSE);
 
-    // Test https via current url scheme.
+    // Test HTTPS via current URL scheme.
     $temp_https = $is_https;
     $is_https = TRUE;
     $italian_url = url('admin', array('language' => $languages['it']));

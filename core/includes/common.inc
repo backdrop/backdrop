@@ -97,14 +97,20 @@ const JS_SETTING = 200;
 const HTTP_REQUEST_TIMEOUT = -1;
 
 /**
- * Constants defining cache granularity for blocks and renderable arrays.
+ * @defgroup block_caching Block Caching
+ * @{
+ * Constants that define each block's caching state.
  *
- * Modules specify the caching patterns for their blocks using binary
- * combinations of these constants in their hook_block_info():
- *   $block[delta]['cache'] = DRUPAL_CACHE_PER_ROLE | DRUPAL_CACHE_PER_PAGE;
- * DRUPAL_CACHE_PER_ROLE is used as a default when no caching pattern is
- * specified. Use DRUPAL_CACHE_CUSTOM to disable standard block cache and
- * implement
+ * Modules specify how their blocks can be cached in their hook_block_info()
+ * implementations. Caching can be turned off (DRUPAL_NO_CACHE), managed by the
+ * module declaring the block (DRUPAL_CACHE_CUSTOM), or managed by the core
+ * Block module. If the Block module is managing the cache, you can specify that
+ * the block is the same for every page and user (DRUPAL_CACHE_GLOBAL), or that
+ * it can change depending on the page (DRUPAL_CACHE_PER_PAGE) or by user
+ * (DRUPAL_CACHE_PER_ROLE or DRUPAL_CACHE_PER_USER). Page and user settings can
+ * be combined with a bitwise-binary or operator; for example,
+ * DRUPAL_CACHE_PER_ROLE | DRUPAL_CACHE_PER_PAGE means that the block can change
+ * depending on the user role or page it is on.
  *
  * The block cache is cleared in cache_clear_all(), and uses the same clearing
  * policy than page cache (node, comment, user, taxonomy added or updated...).
@@ -128,9 +134,8 @@ const DRUPAL_NO_CACHE = -1;
 /**
  * The block is handling its own caching in its hook_block_view().
  *
- * From the perspective of the block cache system, this is equivalent to
- * DRUPAL_NO_CACHE. Useful when time based expiration is needed or a site uses
- * a node access which invalidates standard block cache.
+ * This setting is useful when time based expiration is needed or a site uses a
+ * node access which invalidates standard block cache.
  */
 const DRUPAL_CACHE_CUSTOM = -2;
 
@@ -159,6 +164,10 @@ const DRUPAL_CACHE_PER_PAGE = 0x0004;
  * The block or element is the same for every user and page that it is visible.
  */
 const DRUPAL_CACHE_GLOBAL = 0x0008;
+
+/**
+ * @} End of "defgroup block_caching".
+ */
 
 /**
  * Adds content to a specified region.
@@ -431,7 +440,7 @@ function drupal_get_query_parameters(array $query = NULL, array $exclude = array
  *   The query string to split.
  *
  * @return
- *   An array of url decoded couples $param_name => $value.
+ *   An array of URL decoded couples $param_name => $value.
  */
 function drupal_get_query_array($query) {
   $result = array();
@@ -493,12 +502,6 @@ function drupal_http_build_query(array $query, $parent = '') {
  * previous request, that destination is returned. As such, a destination can
  * persist across multiple pages.
  *
- * @return
- *   An associative array containing the key:
- *   - destination: The path provided via the destination query string or, if
- *     not available, the current path.
- *
- * @see current_path()
  * @see drupal_goto()
  */
 function drupal_get_destination() {
@@ -2217,7 +2220,7 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     for the URL. If $options['language'] is omitted, the global $language_url
  *     will be used.
  *   - 'https': Whether this URL should point to a secure location. If not
- *     defined, the current scheme is used, so the user stays on http or https
+ *     defined, the current scheme is used, so the user stays on HTTP or HTTPS
  *     respectively. TRUE enforces HTTPS and FALSE enforces HTTP, but HTTPS can
  *     only be enforced when the variable 'https' is set to TRUE.
  *   - 'base_url': Only used internally, to modify the base URL when a language

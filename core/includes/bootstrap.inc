@@ -26,6 +26,21 @@ const DRUPAL_MINIMUM_PHP = '5.3.2';
 const DRUPAL_MINIMUM_PHP_MEMORY_LIMIT = '32M';
 
 /**
+ * Error reporting level: display no errors.
+ */
+define('ERROR_REPORTING_HIDE', 0);
+
+/**
+ * Error reporting level: display errors and warnings.
+ */
+define('ERROR_REPORTING_DISPLAY_SOME', 1);
+
+/**
+ * Error reporting level: display all messages.
+ */
+define('ERROR_REPORTING_DISPLAY_ALL', 2);
+
+/**
  * Indicates that the item should never be removed unless explicitly selected.
  *
  * The item may be removed using cache()->delete() with a cache ID.
@@ -744,7 +759,7 @@ function drupal_settings_initialize() {
     $base_root = substr($base_url, 0, strlen($base_url) - strlen($parts['path']));
   }
   else {
-    // Create base URL
+    // Create base URL.
     $http_protocol = $is_https ? 'https' : 'http';
     $base_root = $http_protocol . '://' . $_SERVER['HTTP_HOST'];
 
@@ -778,7 +793,7 @@ function drupal_settings_initialize() {
   }
   else {
     // Otherwise use $base_url as session name, without the protocol
-    // to use the same session identifiers across http and https.
+    // to use the same session identifiers across HTTP and HTTPS.
     list( , $session_name) = explode('://', $base_url, 2);
     // HTTP_HOST can be modified by a visitor, but we already sanitized it
     // in drupal_settings_initialize().
