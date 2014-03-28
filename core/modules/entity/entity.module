@@ -328,7 +328,7 @@ function entity_prepare_view($entity_type, $entities) {
 }
 
 /**
- * Returns the uri elements of an entity.
+ * Returns the URI elements of an entity.
  *
  * @param $entity_type
  *   The entity type; e.g. 'node' or 'user'.
@@ -336,9 +336,9 @@ function entity_prepare_view($entity_type, $entities) {
  *   The entity for which to generate a path.
  *
  * @return
- *   An array containing the 'path' and 'options' keys used to build the uri of
+ *   An array containing the 'path' and 'options' keys used to build the URI of
  *   the entity, and matching the signature of url(). NULL if the entity has no
- *   uri of its own.
+ *   URI of its own.
  *
  * @deprecated
  *   Deprecated since 1.0.

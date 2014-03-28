@@ -6,21 +6,6 @@
  */
 
 /**
- * Error reporting level: display no errors.
- */
-const ERROR_REPORTING_HIDE = 0;
-
-/**
- * Error reporting level: display errors and warnings.
- */
-const ERROR_REPORTING_DISPLAY_SOME = 1;
-
-/**
- * Error reporting level: display all messages.
- */
-const ERROR_REPORTING_DISPLAY_ALL = 2;
-
-/**
  * Maps PHP error constants to watchdog severity levels.
  *
  * The error constants are documented at
