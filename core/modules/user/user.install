@@ -315,5 +315,25 @@ function user_update_8000() {
 }
 
 /**
+ * Grant "administer account settings" to roles with "administer users."
+ */
+function user_update_8001() {
+  $rids = db_query("SELECT rid FROM {role_permission} WHERE permission = :perm", array(':perm' => 'administer users'))->fetchCol();
+  // None found.
+  if (empty($rids)) {
+    return;
+  }
+  $insert = db_insert('role_permission')->fields(array('rid', 'permission', 'module'));
+  foreach ($rids as $rid) {
+    $insert->values(array(
+      'rid' => $rid,
+      'permission' => 'administer account settings',
+      'module' => 'user'
+    ));
+  }
+  $insert->execute();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-8.x"
  */
