@@ -1,0 +1,214 @@
+diff --git a/core/modules/field/modules/color_field/color_field.info b/core/modules/field/modules/color_field/color_field.info
+new file mode 100644
+index 0000000..3c724f4
+--- /dev/null
++++ b/core/modules/field/modules/color_field/color_field.info
+@@ -0,0 +1,7 @@
++name = Color field
++description = Defines a field type for colors.
++package = Core
++version = VERSION
++core = 8.x
++dependencies[] = field
++dependencies[] = text
+diff --git a/core/modules/field/modules/color_field/color_field.install b/core/modules/field/modules/color_field/color_field.install
+new file mode 100644
+index 0000000..1508a7a
+--- /dev/null
++++ b/core/modules/field/modules/color_field/color_field.install
+@@ -0,0 +1,22 @@
++<?php
++
++/**
++ * @file
++ * Install, update and uninstall functions for the Color field module.
++ */
++
++/**
++ * Implements hook_field_schema().
++ */
++function color_field_field_schema($field) {
++  $columns = array(
++    'value' => array(
++      'type' => 'varchar',
++      'length' => 7,
++      'not null' => FALSE,
++    ),
++  );
++  return array(
++    'columns' => $columns,
++  );
++}
+diff --git a/core/modules/field/modules/color_field/color_field.module b/core/modules/field/modules/color_field/color_field.module
+new file mode 100644
+index 0000000..fcd1b6d
+--- /dev/null
++++ b/core/modules/field/modules/color_field/color_field.module
+@@ -0,0 +1,71 @@
++<?php
++
++/**
++ * @file
++ * Defines a simple color field type.
++ */
++
++/**
++ * Implements hook_help().
++ */
++function color_field_help($path, $arg) {
++  switch ($path) {
++    case 'admin/help#color_field':
++      $output = '';
++      $output .= '<h3>' . t('About') . '</h3>';
++      $output .= '<p>' . t('The Color field module defines a field for storing color codes, for use with the Field module. Color codes are validated to ensure they match the expected format. See the <a href="@field-help">Field module help page</a> for more information about fields.', array('@field-help' => url('admin/help/field'))) . '</p>';
++      return $output;
++  }
++}
++
++/**
++ * Implements hook_field_info().
++ */
++function color_field_field_info() {
++  return array(
++    'color' => array(
++      'label' => t('Color'),
++      'description' => t('This field stores RGB color codes in the database.'),
++      'default_widget' => 'color_field_default',
++      'default_formatter' => 'text_plain',
++    ),
++  );
++}
++
++/**
++ * Implements hook_field_is_empty().
++ */
++function color_field_field_is_empty($item, $field) {
++  return !isset($item['value']) || $item['value'] === '';
++}
++
++/**
++ * Implements hook_field_widget_info().
++ */
++function color_field_field_widget_info() {
++  return array(
++    'color_field_default' => array(
++      'label' => t('HTML5 color'),
++      'field types' => array('color'),
++    ),
++  );
++}
++
++/**
++ * Implements hook_field_widget_form().
++ */
++function color_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
++  $element['value'] = $element + array(
++    '#type' => 'color',
++    '#default_value' => isset($items[$delta]['value']) ? $items[$delta]['value'] : NULL,
++  );
++  return $element;
++
++}
++
++/**
++ * Implements hook_field_formatter_info_alter().
++ */
++function color_field_field_formatter_info_alter(&$info) {
++  $info['text_plain']['field types'][] = 'color';
++}
+diff --git a/core/modules/field/modules/color_field/lib/Drupal/color_field/Tests/ColorFieldTest.php b/core/modules/field/modules/color_field/lib/Drupal/color_field/Tests/ColorFieldTest.php
+new file mode 100644
+index 0000000..b7d6950
+--- /dev/null
++++ b/core/modules/field/modules/color_field/lib/Drupal/color_field/Tests/ColorFieldTest.php
+@@ -0,0 +1,90 @@
++<?php
++
++/**
++ * @file
++ * Definition of Drupal\color_field\Tests\ColorFieldTest.
++ */
++
++namespace Drupal\color_field\Tests;
++
++use Drupal\simpletest\WebTestBase;
++
++/**
++ * Tests color field functionality.
++ */
++class ColorFieldTest extends WebTestBase {
++
++  /**
++   * Modules to enable.
++   *
++   * @var array
++   */
++  public static $modules = array('node', 'field_test', 'color_field', 'field_ui');
++
++  public static function getInfo() {
++    return array(
++      'name'  => 'Color field',
++      'description'  => 'Tests color field functionality.',
++      'group' => 'Field types',
++    );
++  }
++
++  function setUp() {
++    parent::setUp();
++
++    $this->web_user = $this->drupalCreateUser(array(
++      'access field_test content',
++      'administer field_test content',
++      'administer content types',
++    ));
++    $this->drupalLogin($this->web_user);
++  }
++
++  /**
++   * Tests color field.
++   */
++  function testColorField() {
++    // Create a field with settings to validate.
++    $this->field = array(
++      'field_name' => drupal_strtolower($this->randomName()),
++      'type' => 'color',
++    );
++    field_create_field($this->field);
++    $this->instance = array(
++      'field_name' => $this->field['field_name'],
++      'entity_type' => 'test_entity',
++      'bundle' => 'test_bundle',
++      'widget' => array(
++        'type' => 'color_field_default',
++      ),
++      'display' => array(
++        'full' => array(
++          'type' => 'text_plain',
++        ),
++      ),
++    );
++    field_create_instance($this->instance);
++
++    // Display creation form.
++    $this->drupalGet('test-entity/add/test_bundle');
++    $langcode = LANGUAGE_NOT_SPECIFIED;
++    $this->assertFieldByName("{$this->field['field_name']}[$langcode][0][value]", '', 'Widget found.');
++
++    // Submit a valid color and ensure it is accepted.
++    $value = '#fabada';
++    $edit = array(
++      "{$this->field['field_name']}[$langcode][0][value]" => $value,
++    );
++    $this->drupalPost(NULL, $edit, t('Save'));
++    preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
++    $id = $match[1];
++    $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)));
++    $this->assertRaw($value);
++
++    // Verify that a color value is displayed.
++    $entity = field_test_entity_test_load($id);
++    $entity->content = field_attach_view('test_entity', $entity, 'full');
++    $this->drupalSetContent(drupal_render($entity->content));
++    $this->assertText($value);
++  }
++}

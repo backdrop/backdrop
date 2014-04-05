@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Defines a simple color field type.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function color_field_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#color_field':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Color field module defines a field for storing color codes, for use with the Field module. Color codes are validated to ensure they match the expected format. See the <a href="@field-help">Field module help page</a> for more information about fields.', array('@field-help' => url('admin/help/field'))) . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_field_info().
+ */
+function color_field_field_info() {
+  return array(
+    'color' => array(
+      'label' => t('Color'),
+      'description' => t('This field stores RGB color codes in the database.'),
+      'default_widget' => 'color_field_default',
+      'default_formatter' => 'text_plain',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function color_field_field_is_empty($item, $field) {
+  return !isset($item['value']) || $item['value'] === '';
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function color_field_field_widget_info() {
+  return array(
+    'color_field_default' => array(
+      'label' => t('HTML5 color'),
+      'field types' => array('color'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function color_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element['value'] = $element + array(
+    '#type' => 'color',
+    '#default_value' => isset($items[$delta]['value']) ? $items[$delta]['value'] : NULL,
+  );
+  return $element;
+
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function color_field_field_formatter_info_alter(&$info) {
+  $info['text_plain']['field types'][] = 'color';
+}

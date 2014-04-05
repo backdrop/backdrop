@@ -1,0 +1,7 @@
+name = Color field
+description = Defines a field type for colors.
+package = Core
+version = VERSION
+core = 8.x
+dependencies[] = field
+dependencies[] = text
