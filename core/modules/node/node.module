@@ -259,6 +259,13 @@ function node_tag_new(Node $node) {
 
 /**
  * Retrieves the timestamp for the current user's last view of a specified node.
+ *
+ * @param $nid
+ *   A node ID.
+ *
+ * @return
+ *   If a node has been previously viewed by the user, the timestamp in seconds
+ *   of when the last view occurred; otherwise, zero.
  */
 function node_last_viewed($nid) {
   global $user;
@@ -404,6 +411,8 @@ function node_type_get_name($node) {
  * node_type_save(), and obsolete ones are deleted via a call to
  * node_type_delete(). See _node_types_build() for an explanation of the new
  * and obsolete types.
+ *
+ * @see _node_types_build()
  */
 function node_types_rebuild() {
   _node_types_build(TRUE);
@@ -714,7 +723,8 @@ function node_type_cache_reset() {
  *
  * @param $info
  *   (optional) An object or array containing values to override the defaults.
- *   See hook_node_info() for details on what the array elements mean.
+ *   See hook_node_info() for details on what the array elements mean. Defaults
+ *   to an empty array.
  *
  * @return
  *   A node type object, with missing values in $info set to their defaults.
@@ -790,8 +800,8 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * Loads node entities from the database.
  *
  * This function should be used whenever you need to load more than one node
- * from the database. Nodes are loaded into memory and will not require
- * database access if loaded again during the same page request.
+ * from the database. Nodes are loaded into memory and will not require database
+ * access if loaded again during the same page request.
  *
  * @param $nids
  *   (optional) An array of node IDs.
@@ -843,7 +853,7 @@ function node_load($nid = NULL, $vid = NULL, $reset = FALSE) {
  * type module, and hook_node_prepare() on all modules.
  *
  * @param Node $node
- *   The node entity.
+ *   A node object.
  */
 function node_object_prepare(Node $node) {
   // Set up default values, if required.
@@ -1905,6 +1915,9 @@ function node_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  * @param $type
  *   The node type object.
  *
+ * @return string
+ *   An unsanitized string that is the title of the node type edit form.
+ *
  * @see node_menu()
  */
 function node_type_page_title($type) {
@@ -1916,6 +1929,9 @@ function node_type_page_title($type) {
  *
  * @param Node $node
  *   The node entity.
+ *
+ * @return
+ *   An unsanitized string that is the title of the node.
  *
  * @see node_menu()
  */
@@ -1941,6 +1957,9 @@ function node_last_changed($nid) {
  *
  * @param Node $node
  *   The node entity.
+ *
+ * @return
+ *   An associative array keyed by node revision number.
  */
 function node_revision_list(Node $node) {
   $revisions = array();
@@ -2031,8 +2050,8 @@ function node_block_save($delta = '', $edit = array()) {
  *   (optional) The maximum number of nodes to find. Defaults to 10.
  *
  * @return
- *   An array of node entities or an empty array if there are no recent
- *   nodes visible to the current user.
+ *   An array of node entities or an empty array if there are no recent nodes
+ *   visible to the current user.
  */
 function node_get_recent($number = 10) {
   $query = db_select('node', 'n');
@@ -2376,8 +2395,8 @@ function node_feed($nids = FALSE, $channel = array()) {
  * @param $weight
  *   (optional) Integer representing the weight of the first node in the list.
  * @param $langcode
- *   (optional) A language code to use for rendering. Defaults to the global
- *   content language of the current request.
+ *   (optional) A language code to use for rendering. Defaults to NULL which is
+ *   the global content language of the current request.
  *
  * @return
  *   An array in the format expected by drupal_render().
@@ -2396,7 +2415,10 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
 }
 
 /**
- * Page callback: Generates a listing of promoted nodes.
+ * Menu callback; Generate a listing of promoted nodes.
+ *
+ * @return array
+ *   An array in the format expected by drupal_render().
  *
  * @see node_menu()
  */
@@ -2452,6 +2474,9 @@ function node_page_default() {
  *
  * @param Node $node
  *   The node entity.
+ *
+ * @return
+ *   A page array suitable for use by drupal_render().
  *
  * @see node_menu()
  */
@@ -2662,8 +2687,8 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * @{
  * The node access system determines who can do what to which nodes.
  *
- * In determining access rights for a node, node_access() first checks
- * whether the user has the "bypass node access" permission. Such users have
+ * In determining access rights for a node, node_access() first checks whether
+ * the user has the "bypass node access" permission. Such users have
  * unrestricted access to all nodes. user 1 will always pass this check.
  *
  * Next, all implementations of hook_node_access() will be called. Each
@@ -2884,11 +2909,11 @@ function node_list_permissions($type) {
  *
  * By default, this will include all node types in the system. To exclude a
  * specific node from getting permissions defined for it, set the
- * node_permissions_$type variable to 0. Core does not provide an interface
- * for doing so, however, contrib modules may exclude their own nodes in
+ * node_permissions_$type variable to 0. Core does not provide an interface for
+ * doing so. However, contrib modules may exclude their own nodes in
  * hook_install(). Alternatively, contrib modules may configure all node types
- * at once, or decide to apply some other hook_node_access() implementation
- * to some or all node types.
+ * at once, or decide to apply some other hook_node_access() implementation to
+ * some or all node types.
  *
  * @return
  *   An array of node types managed by this module.
@@ -2910,12 +2935,12 @@ function node_permissions_get_configured_types() {
  * Fetches an array of permission IDs granted to the given user ID.
  *
  * The implementation here provides only the universal "all" grant. A node
- * access module should implement hook_node_grants() to provide a grant
- * list for the user.
+ * access module should implement hook_node_grants() to provide a grant list for
+ * the user.
  *
- * After the default grants have been loaded, we allow modules to alter
- * the grants array by reference. This hook allows for complex business
- * logic to be applied when integrating multiple node access modules.
+ * After the default grants have been loaded, we allow modules to alter the
+ * grants array by reference. This hook allows for complex business logic to be
+ * applied when integrating multiple node access modules.
  *
  * @param $op
  *   The operation that the user is trying to perform.
@@ -3010,11 +3035,10 @@ function node_access_view_all_nodes($account = NULL) {
 /**
  * Implements hook_query_TAG_alter().
  *
- * This is the hook_query_alter() for queries tagged with 'node_access'.
- * It adds node access checks for the user account given by the 'account'
- * meta-data (or global $user if not provided), for an operation given by
- * the 'op' meta-data (or 'view' if not provided; other possible values are
- * 'update' and 'delete').
+ * This is the hook_query_alter() for queries tagged with 'node_access'. It adds
+ * node access checks for the user account given by the 'account' meta-data (or
+ * global $user if not provided), for an operation given by the 'op' meta-data
+ * (or 'view' if not provided; other possible values are 'update' and 'delete').
  */
 function node_query_node_access_alter(QueryAlterableInterface $query) {
   _node_query_node_access_alter($query, 'node');
@@ -3221,15 +3245,15 @@ function node_access_acquire_grants(Node $node, $delete = TRUE) {
  *
  * If a realm is provided, it will only delete grants from that realm, but it
  * will always delete a grant from the 'all' realm. Modules that utilize
- * node_access can use this function when doing mass updates due to widespread
+ * node_access() can use this function when doing mass updates due to widespread
  * permission changes.
  *
  * Note: Don't call this function directly from a contributed module. Call
  * node_access_acquire_grants() instead.
  *
  * @param Node $node
- *   The $node being written to. All that is necessary is that it contains a
- *   nid.
+ *   The node whose grants are being written. All that is necessary is that it
+ *   contains a nid.
  * @param $grants
  *   A list of grants to write. Each grant is an array that must contain the
  *   following keys: realm, gid, grant_view, grant_update, grant_delete.
@@ -3241,7 +3265,7 @@ function node_access_acquire_grants(Node $node, $delete = TRUE) {
  * @param $delete
  *   (optional) If false, does not delete records. This is only for optimization
  *   purposes, and assumes the caller has already performed a mass delete of
- *   some form.
+ *   some form. Defaults to TRUE.
  */
 function _node_access_write_grants(Node $node, $grants, $realm = NULL, $delete = TRUE) {
   if ($delete) {
@@ -3277,7 +3301,7 @@ function _node_access_write_grants(Node $node, $grants, $realm = NULL, $delete =
  * This can be used as an alternative to direct node_access_rebuild calls,
  * allowing administrators to decide when they want to perform the actual
  * (possibly time consuming) rebuild.
- * When unsure the current user is an administrator, node_access_rebuild
+ * When unsure if the current user is an administrator, node_access_rebuild()
  * should be used instead.
  *
  * @param $rebuild
@@ -3285,6 +3309,8 @@ function _node_access_write_grants(Node $node, $grants, $realm = NULL, $delete =
  *
  * @return
  *   The current value of the flag if no value was provided for $rebuild.
+ *
+ * @see node_access_rebuild()
  */
 function node_access_needs_rebuild($rebuild = NULL) {
   if (!isset($rebuild)) {
@@ -3370,11 +3396,14 @@ function node_access_rebuild($batch_mode = FALSE) {
 }
 
 /**
- * Batch operation for node_access_rebuild_batch.
+ * Performs batch operation for node_access_rebuild().
  *
- * This is a multistep operation : we go through all nodes by packs of 20.
- * The batch processing engine interrupts processing and sends progress
- * feedback after 1 second execution time.
+ * This is a multistep operation: we go through all nodes by packs of 20. The
+ * batch processing engine interrupts processing and sends progress feedback
+ * after 1 second execution time.
+ *
+ * @param array $context
+ *   An array of contextual key/value information for rebuild batch process.
  */
 function _node_access_rebuild_batch_operation(&$context) {
   if (empty($context['sandbox'])) {
@@ -3405,7 +3434,14 @@ function _node_access_rebuild_batch_operation(&$context) {
 }
 
 /**
- * Post-processing for node_access_rebuild_batch.
+ * Performs post-processing for node_access_rebuild().
+ *
+ * @param bool $success
+ *   A boolean indicating whether the re-build process has completed.
+ * @param array $results
+ *   An array of results information.
+ * @param array $operations
+ *   An array of function calls (not used in this function).
  */
 function _node_access_rebuild_batch_finished($success, $results, $operations) {
   if ($success) {
@@ -3536,6 +3572,12 @@ function node_action_info() {
  *   (optional) Array of additional information about what triggered the action.
  *   Not used for this action.
  *
+ * @param $node
+ *   A node object.
+ * @param $context
+ *   (optional) Array of additional information about what triggered the action.
+ *   Not used for this action.
+ *
  * @ingroup actions
  */
 function node_publish_action(Node $node, $context = array()) {
@@ -3548,6 +3590,12 @@ function node_publish_action(Node $node, $context = array()) {
  *
  * @param Node $node
  *   A node entity.
+ * @param $context
+ *   (optional) Array of additional information about what triggered the action.
+ *   Not used for this action.
+ *
+ * @param $node
+ *   A node object.
  * @param $context
  *   (optional) Array of additional information about what triggered the action.
  *   Not used for this action.
@@ -3568,6 +3616,12 @@ function node_unpublish_action(Node $node, $context = array()) {
  *   (optional) Array of additional information about what triggered the action.
  *   Not used for this action.
  *
+ * @param $node
+ *   A node object.
+ * @param $context
+ *   (optional) Array of additional information about what triggered the action.
+ *   Not used for this action.
+ *
  * @ingroup actions
  */
 function node_make_sticky_action(Node $node, $context = array()) {
@@ -3580,6 +3634,12 @@ function node_make_sticky_action(Node $node, $context = array()) {
  *
  * @param Node $node
  *   A node entity.
+ * @param $context
+ *   (optional) Array of additional information about what triggered the action.
+ *   Not used for this action.
+ *
+ * @param $node
+ *   A node object.
  * @param $context
  *   (optional) Array of additional information about what triggered the action.
  *   Not used for this action.
@@ -3600,6 +3660,12 @@ function node_make_unsticky_action(Node $node, $context = array()) {
  *   (optional) Array of additional information about what triggered the action.
  *   Not used for this action.
  *
+ * @param $node
+ *   A node object.
+ * @param $context
+ *   (optional) Array of additional information about what triggered the action.
+ *   Not used for this action.
+ *
  * @ingroup actions
  */
 function node_promote_action(Node $node, $context = array()) {
@@ -3612,6 +3678,12 @@ function node_promote_action(Node $node, $context = array()) {
  *
  * @param Node $node
  *   A node entity.
+ * @param $context
+ *   (optional) Array of additional information about what triggered the action.
+ *   Not used for this action.
+ *
+ * @param $node
+ *   A node object.
  * @param $context
  *   (optional) Array of additional information about what triggered the action.
  *   Not used for this action.
@@ -3636,6 +3708,7 @@ function node_unpromote_action(Node $node, $context = array()) {
  * @see node_assign_owner_action_form()
  * @see node_assign_owner_action_validate()
  * @see node_assign_owner_action_submit()
+ *
  * @ingroup actions
  */
 function node_assign_owner_action(Node $node, $context) {
@@ -3654,6 +3727,7 @@ function node_assign_owner_action(Node $node, $context) {
  *
  * @see node_assign_owner_action_submit()
  * @see node_assign_owner_action_validate()
+ *
  * @ingroup form
  */
 function node_assign_owner_action_form($context) {
@@ -3718,6 +3792,14 @@ function node_assign_owner_action_submit($form, $form_state) {
 
 /**
  * Generates settings form for node_unpublish_by_keyword_action().
+ *
+ * @param array $context
+ *   Array of additional information about what triggered this action.
+ *
+ * @return array
+ *   A form array.
+ *
+ * @see node_unpublish_by_keyword_action_submit()
  */
 function node_unpublish_by_keyword_action_form($context) {
   $form['keywords'] = array(
@@ -3749,6 +3831,9 @@ function node_unpublish_by_keyword_action_submit($form, $form_state) {
  *
  * @see node_unpublish_by_keyword_action_form()
  * @see node_unpublish_by_keyword_action_submit()
+ *
+ * @param $node
+ *   The node to be saved.
  *
  * @ingroup actions
  */
