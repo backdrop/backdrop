@@ -3863,13 +3863,7 @@ function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_
 
   // Identifiers cannot start with a digit, two hyphens, or a hyphen followed by a digit.
   $identifier = preg_replace(array('/^[0-9]/', '/^(-[0-9])|^(--)/'), array('_', '__') , $identifier);
-
-  // Identifiers cannot start with a digit, two hyphens, or a hyphen followed by a digit.
-  $identifier = preg_replace(array('/^[0-9]/', '/^(-[0-9])|^(--)/'), array('_', '__') , $identifier);
-
-  // Identifiers cannot start with a digit, two hyphens, or a hyphen followed by a digit.
-  $identifier = preg_replace(array('/^[0-9]/', '/^(-[0-9])|^(--)/'), array('_', '__') , $identifier);
-
+  
   return $identifier;
 }
 
