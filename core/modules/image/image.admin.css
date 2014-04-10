@@ -6,7 +6,7 @@ div.image-style-new,
 div.image-style-new div {
   display: inline;
 }
-div.image-style-preview div.preview-image-wrapper {
+div.image-style-preview .preview-image-wrapper {
   float: left;
   padding-bottom: 2em;
   text-align: center;
@@ -24,6 +24,9 @@ div.image-style-preview div.preview-image div.width {
   left: -1px;
   bottom: -6px;
   position: absolute;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
 }
 div.image-style-preview div.preview-image div.width span {
   position: relative;
@@ -36,6 +39,9 @@ div.image-style-preview div.preview-image div.height {
   right: -6px;
   top: -1px;
   width: 2px;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
 }
 div.image-style-preview div.preview-image div.height span {
   height: 2em;
@@ -51,8 +57,8 @@ div.image-style-preview div.preview-image div.height span {
 table.image-anchor {
   width: auto;
 }
-table.image-anchor tr.even,
-table.image-anchor tr.odd {
+table.image-anchor .even,
+table.image-anchor .odd {
   background: none;
 }
 table.image-anchor td {
