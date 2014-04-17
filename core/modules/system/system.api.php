@@ -141,24 +141,10 @@ function hook_admin_paths_alter(&$paths) {
  * processed to the defined queues.
  */
 function hook_cron() {
-  // Short-running operation example, not using a queue:
-  // Delete all expired records since the last cron run.
-  $expires = state_get('mymodule_cron_last_run', REQUEST_TIME);
-  db_delete('mymodule_table')
-    ->condition('expires', $expires, '>=')
+  // Short-running operation example, not using a queue.
+  db_delete('history')
+    ->condition('timestamp', NODE_NEW_LIMIT, '<')
     ->execute();
-  state_set('mymodule_cron_last_run', REQUEST_TIME);
-
-  // Long-running operation example, leveraging a queue:
-  // Fetch feeds from other sites.
-  $result = db_query('SELECT * FROM {aggregator_feed} WHERE checked + refresh < :time AND refresh <> :never', array(
-    ':time' => REQUEST_TIME,
-    ':never' => AGGREGATOR_CLEAR_NEVER,
-  ));
-  $queue = DrupalQueue::get('aggregator_feeds');
-  foreach ($result as $feed) {
-    $queue->createItem($feed);
-  }
 }
 
 /**
