@@ -17,7 +17,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
    */
   function testSiteWideContact() {
     // Create and login administrative user.
-    $admin_user = $this->drupalCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer users'));
+    $admin_user = $this->drupalCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer account settings'));
     $this->drupalLogin($admin_user);
 
     $flood_limit = 3;
@@ -299,7 +299,7 @@ class ContactPersonalTestCase extends DrupalWebTestCase {
     parent::setUp('contact');
 
     // Create an admin user.
-    $this->admin_user = $this->drupalCreateUser(array('administer contact forms', 'administer users'));
+    $this->admin_user = $this->drupalCreateUser(array('administer contact forms', 'administer users', 'administer account settings'));
 
     // Create some normal users with their contact forms enabled by default.
     variable_set('contact_default_status', TRUE);
