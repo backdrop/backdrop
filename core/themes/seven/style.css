@@ -695,6 +695,7 @@ input.form-file,
 textarea.form-textarea,
 select.form-select {
   padding: 2px;
+  max-width: 100%;
   border: 1px solid #ccc;
   border-top-color: #999;
   background: #fff;
