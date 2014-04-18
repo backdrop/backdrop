@@ -498,6 +498,7 @@ function user_permission() {
     'administer account settings' => array(
       'title' => t('Administer user account settings'),
       'description' => t('Manage settings that apply to all user accounts.'),
+      'restrict access' => TRUE,
     ),
     'access user profiles' => array(
       'title' => t('View user profiles'),
