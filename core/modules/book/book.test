@@ -154,15 +154,18 @@ class BookTestCase extends DrupalWebTestCase {
 
     // Check previous, up, and next links.
     if ($previous) {
-      $this->assertRaw(l('‹ ' . $previous->title, 'node/' . $previous->nid, array('attributes' => array('class' => array('page-previous'), 'title' => t('Go to previous page')))), 'Previous page link found.');
+      $prev_link = '<a href="/node/' . $previous->nid . '" rel="prev" title="Go to previous page"><b>‹</b> ' . $previous->title . '</a>';
+      $this->assertRaw($prev_link, 'Previous page link found.');
     }
 
     if ($up) {
-      $this->assertRaw(l('up', 'node/' . $up->nid, array('attributes' => array('class' => array('page-up'), 'title' => t('Go to parent page')))), 'Up page link found.');
+      $up_link = '<a href="/node/' . $up->nid . '" title="Go to parent page">up</a>';
+      $this->assertRaw($up_link, 'Up page link found.');
     }
 
     if ($next) {
-      $this->assertRaw(l($next->title . ' ›', 'node/' . $next->nid, array('attributes' => array('class' => array('page-next'), 'title' => t('Go to next page')))), 'Next page link found.');
+      $next_link = '<a href="/node/' . $next->nid . '" rel="next" title="Go to next page">' . $next->title . ' <b>›</b></a>';
+      $this->assertRaw($next_link, 'Next page link found.');
     }
 
     // Compute the expected breadcrumb.

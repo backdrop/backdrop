@@ -107,14 +107,14 @@ function hook_language_types_info_alter(array &$language_types) {
 }
 
 /**
- * Define language negotiation methods.
+ * Define language negotiation providers.
  *
  * @return
- *   An associative array of language negotiation method definitions. The keys
- *   are method identifiers, and the values are associative arrays definining
- *   each method, with the following elements:
+ *   An associative array of language negotiation provider definitions. The keys
+ *   are provider identifiers, and the values are associative arrays definining
+ *   each provider, with the following elements:
  *   - types: An array of allowed language types. If a language negotiation
- *     method does not specify which language types it should be used with, it
+ *     provider does not specify which language types it should be used with, it
  *     will be available for all the configurable language types.
  *   - callbacks: An associative array of functions that will be called to
  *     perform various tasks. Possible elements are:
@@ -122,17 +122,17 @@ function hook_language_types_info_alter(array &$language_types) {
  *       the language value.
  *     - language_switch: (optional) Name of the callback function that
  *       determines links for a language switcher block associated with this
- *       method. See language_switcher_url() for an example.
+ *       provider. See language_switcher_url() for an example.
  *     - url_rewrite: (optional) Name of the callback function that provides URL
- *       rewriting, if needed by this method.
+ *       rewriting, if needed by this provider.
  *   - file: The file where callback functions are defined (this file will be
  *     included before the callbacks are invoked).
- *   - weight: The default weight of the method.
- *   - name: The translated human-readable name for the method.
- *   - description: A translated longer description of the method.
- *   - config: An internal path pointing to the method's configuration page.
+ *   - weight: The default weight of the provider.
+ *   - name: The translated human-readable name for the provider.
+ *   - description: A translated longer description of the provider.
+ *   - config: An internal path pointing to the provider's configuration page.
  *   - cache: The value Drupal's page cache should be set to for the current
- *     method to be invoked.
+ *     provider to be invoked.
  *
  * @see hook_language_negotiation_info_alter()
  * @ingroup language_negotiation
@@ -148,18 +148,18 @@ function hook_language_negotiation_info() {
       'file' => drupal_get_path('module', 'custom') . '/custom.module',
       'weight' => -4,
       'types' => array('custom_language_type'),
-      'name' => t('Custom language provider'),
-      'description' => t('This is a custom language provider.'),
+      'name' => t('Custom language negotiation provider'),
+      'description' => t('This is a custom language negotiation provider.'),
       'cache' => 0,
     ),
   );
 }
 
 /**
- * Perform alterations on language providers.
+ * Perform alterations on language negoiation providers.
  *
  * @param $language_providers
- *   Array of language provider definitions.
+ *   Array of language negotiation provider definitions.
  *
  * @see hook_language_negotiation_info()
  * @ingroup language_negotiation

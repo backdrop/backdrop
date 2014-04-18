@@ -20,9 +20,9 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  * The language negotiation API is based on two major concepts:
  * - Language types: types of translatable data (the types of data that a user
  *   can view or request).
- * - Language negotiation methods: functions for determining which language to
+ * - Language negotiation providers: functions for determining which language to
  *   use to present a particular piece of data to the user.
- * Both language types and language negotiation methods are customizable.
+ * Both language types and language negotiation providers are customizable.
  *
  * Drupal defines three built-in language types:
  * - Interface language: The page's main language, used to present translated
@@ -38,7 +38,7 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  * through hook_language_types_info_alter().
  *
  * Language types may be configurable or fixed. The language negotiation
- * methods associated with a configurable language type can be explicitly
+ * providers associated with a configurable language type can be explicitly
  * set through the user interface. A fixed language type has predetermined
  * (module-defined) language negotiation settings and, thus, does not appear in
  * the configuration page. Here is a code snippet that makes the content
@@ -50,28 +50,28 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  * }
  * @endcode
  *
- * Every language type can have a different set of language negotiation methods
- * assigned to it. Different language types often share the same language
- * negotiation settings, but they can have independent settings if needed. If
- * two language types are configured the same way, their language switcher
- * configuration will be functionally identical and the same settings will act
- * on both language types.
+ * Every language type can have a different set of language negotiation
+ * providers assigned to it. Different language types often share the same
+ * language negotiation settings, but they can have independent settings if
+ * needed. If two language types are configured the same way, their language
+ * switcher configuration will be functionally identical and the same settings
+ * will act on both language types.
  *
- * Drupal defines the following built-in language negotiation methods:
+ * Drupal defines the following built-in language negotiation providers:
  * - URL: Determine the language from the URL (path prefix or domain).
  * - Session: Determine the language from a request/session parameter.
  * - User: Follow the user's language preference.
  * - Browser: Determine the language from the browser's language settings.
  * - Default language: Use the default site language.
- * Language negotiation methods are simple callback functions that implement a
- * particular logic to return a language code. For instance, the URL method
+ * Language negotiation providers are simple callback functions that implement a
+ * particular logic to return a language code. For instance, the URL provider
  * searches for a valid path prefix or domain name in the current request URL.
- * If a language negotiation method does not return a valid language code, the
- * next method associated to the language type (based on method weight) is
+ * If a language negotiation provider does not return a valid language code, the
+ * next provider associated to the language type (based on provider weight) is
  * invoked.
  *
- * Modules can define additional language negotiation methods through
- * hook_language_negotiation_info(), and alter existing methods through
+ * Modules can define additional language negotiation providers through
+ * hook_language_negotiation_info(), and alter existing providers through
  * hook_language_negotiation_info_alter(). Here is an example snippet that lets
  * path prefixes be ignored for administrative paths:
  * @code
@@ -83,7 +83,7 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  * }
  *
  * function mymodule_from_url($languages) {
- *   // Use the core URL language negotiation method to get a valid language
+ *   // Use the core URL language negotiation provider to get a valid language
  *   // code.
  *   module_load_include('language', 'inc', 'language.negotiation');
  *   $langcode = language_from_url($languages);
@@ -102,7 +102,7 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  */
 
 /**
- * Chooses a language based on language negotiation method settings.
+ * Chooses a language based on language negotiation provider settings.
  *
  * @param $type
  *   The language type key to find the language for.
@@ -111,8 +111,8 @@ const LANGUAGE_NEGOTIATION_DEFAULT = 'language-default';
  *   The negotiated language object.
  */
 function language_types_initialize($type) {
-  // Execute the language providers in the order they were set up and return the
-  // first valid language found.
+  // Execute the language negotiation providers in the order they were set up
+  // and return the first valid language found.
   $negotiation = variable_get("language_negotiation_$type", array());
 
   foreach ($negotiation as $provider_id => $provider) {
@@ -131,7 +131,7 @@ function language_types_initialize($type) {
 }
 
 /**
- * Returns information about all defined language types.
+ * Returns all the defined language types.
  *
  * @return
  *   An associative array of language type information arrays keyed by type
@@ -155,8 +155,8 @@ function language_types_info() {
  * Returns only the configurable language types.
  *
  * A language type maybe configurable or fixed. A fixed language type is a type
- * whose language negotiation methods are module-defined and not altered through
- * the user interface.
+ * whose language negotiation providers are module-defined and not altered
+ * through the user interface.
  *
  * @param $stored
  *   Optional. By default retrieves values from the 'language_types' variable to
@@ -190,7 +190,7 @@ function language_types_get_configurable($stored = TRUE) {
 }
 
 /**
- * Disable the given language types.
+ * Disables the given language types.
  *
  * @param $types
  *   An array of language types.
@@ -245,16 +245,17 @@ function language_types_set() {
 }
 
 /**
- * Check if a language provider is enabled.
+ * Checks whether a language negotiation provider is enabled for a language type.
  *
  * This has two possible behaviors:
  *  - If $provider_id is given return its ID if enabled, FALSE otherwise.
- *  - If no ID is passed the first enabled language provider is returned.
+ *  - If no ID is passed the first enabled language negotiation provider is
+ *    returned.
  *
  * @param $type
- *   The language negotiation type.
+ *   The language negotiation provider type.
  * @param $provider_id
- *   The language provider ID.
+ *   The language negotiation provider ID.
  *
  * @return
  *   The provider ID if it is enabled, FALSE otherwise.
@@ -278,14 +279,13 @@ function language_negotiation_get($type, $provider_id = NULL) {
 }
 
 /**
- * Check if the given language provider is enabled for any configurable language
- * type.
+ * Checks if the language negotiation provider is enabled for any language type.
  *
  * @param $provider_id
- *   The language provider ID.
+ *   The language negotiation provider ID.
  *
  * @return
- *   TRUE if there is at least one language type for which the give language
+ *   TRUE if there is at least one language type for which the given language
  *   provider is enabled, FALSE otherwise.
  */
 function language_negotiation_get_any($provider_id) {
@@ -299,7 +299,7 @@ function language_negotiation_get_any($provider_id) {
 }
 
 /**
- * Return the language switch links for the given language.
+ * Returns the language switch links for the given language.
  *
  * @param $type
  *   The language negotiation type.
@@ -346,7 +346,7 @@ function language_negotiation_get_switch_links($type, $path) {
 }
 
 /**
- * Checks whether a language negotiation method is enabled for a language type.
+ * Removes any unused language negotiation providers from the configuration.
  */
 function language_negotiation_purge() {
   // Ensure that we are getting the defined language negotiation information. An
@@ -369,12 +369,12 @@ function language_negotiation_purge() {
 }
 
 /**
- * Checks whether a language negotiation method is enabled for a language type.
+ * Saves a list of language negotiation providers.
  *
  * @param $type
  *   The language negotiation type.
  * @param $language_providers
- *   An array of language negotiation method weights keyed by method ID.
+ *   An array of language negotiation provider weights keyed by provider ID.
  *
  * @see language_provider_weight()
  */
@@ -401,7 +401,7 @@ function language_negotiation_set($type, $language_providers) {
       // If the provider does not express any preference about types, make it
       // available for any configurable type.
       $types = array_flip(isset($provider['types']) ? $provider['types'] : $default_types);
-      // Check whether the method is defined and has the right type.
+      // Check whether the provider is defined and has the right type.
       if (isset($types[$type])) {
         $provider_data = array();
         foreach ($provider_fields as $field) {
@@ -418,10 +418,10 @@ function language_negotiation_set($type, $language_providers) {
 }
 
 /**
- * Return all the defined language providers.
+ * Returns all the defined language negotiation providers.
  *
  * @return
- *   An array of language providers.
+ *   An array of language negotiation providers.
  */
 function language_negotiation_info() {
   $language_providers = &drupal_static(__FUNCTION__);
@@ -430,7 +430,7 @@ function language_negotiation_info() {
     // Collect all the module-defined language negotiation providers.
     $language_providers = module_invoke_all('language_negotiation_info');
 
-    // Add the default language provider.
+    // Add the default language negotiation provider.
     $language_providers[LANGUAGE_NEGOTIATION_DEFAULT] = array(
       'callbacks' => array('language' => 'language_from_default'),
       'weight' => 10,
@@ -439,7 +439,7 @@ function language_negotiation_info() {
       'config' => 'admin/config/regional/language',
     );
 
-    // Let other modules alter the list of language providers.
+    // Let other modules alter the list of language negotiation providers.
     drupal_alter('language_negotiation_info', $language_providers);
   }
 
@@ -447,16 +447,17 @@ function language_negotiation_info() {
 }
 
 /**
- * Helper function used to cache the language providers results.
+ * Helper function used to cache the language negotiation providers results.
  *
  * @param $provider_id
- *   The language provider ID.
+ *   The language negotiation provider's identifier.
  * @param $provider
- *   The language provider to be invoked. If not passed it will be explicitly
- *   loaded through language_negotiation_info().
+ *   (optional) An associative array of information about the provider to be
+ *   invoked (see hook_language_negotiation_info() for details). If not passed
+ *   in, it will be loaded through language_negotiation_info().
  *
  * @return
- *   The language provider's return value.
+ *   A language object representing the language chosen by the provider.
  */
 function language_provider_invoke($provider_id, $provider = NULL) {
   $results = &drupal_static(__FUNCTION__);
@@ -476,25 +477,26 @@ function language_provider_invoke($provider_id, $provider = NULL) {
       require_once DRUPAL_ROOT . '/' . $provider['file'];
     }
 
-    // If the language provider has no cache preference or this is satisfied
-    // we can execute the callback.
+    // If the language negotiation provider has no cache preference or this is
+    // satisfied we can execute the callback.
     $cache = !isset($provider['cache']) || $user->uid || $provider['cache'] == config_get('system.performance', 'cache');
     $callback = isset($provider['callbacks']['language']) ? $provider['callbacks']['language'] : FALSE;
     $langcode = $cache && function_exists($callback) ? $callback($languages) : FALSE;
     $results[$provider_id] = isset($languages[$langcode]) ? $languages[$langcode] : FALSE;
   }
 
-  // Since objects are resources we need to return a clone to prevent the
-  // provider cache to be unintentionally altered. The same providers might be
-  // used with different language types based on configuration.
+  // Since objects are resources, we need to return a clone to prevent the
+  // language negotiation provider cache from being unintentionally altered. The
+  // same providers might be used with different language types based on
+  // configuration.
   return !empty($results[$provider_id]) ? clone($results[$provider_id]) : $results[$provider_id];
 }
 
 /**
- * Return the passed language provider weight or a default value.
+ * Returns the passed language negotiation provider weight or a default value.
  *
  * @param $provider
- *   A language provider data structure.
+ *   A language negotiation provider data structure.
  *
  * @return
  *   A numeric weight.
@@ -505,7 +507,7 @@ function language_provider_weight($provider) {
 }
 
 /**
- * Default language provider.
+ * Returns the default language negotiation provider.
  *
  * @return
  *   The default language code.
