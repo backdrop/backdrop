@@ -2,6 +2,7 @@
   "_config_name": "image.styles.medium.json",
   "overridden": false,
   "module": "image",
+  "label": "Medium (220x220)",
   "name": "medium",
   "effects": [
     {

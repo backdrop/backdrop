@@ -168,7 +168,7 @@
  *   displayed while awaiting a response from the callback, and add an optional
  *   message. Possible keys: 'type', 'message', 'url', 'interval'.
  *   More information is available in the
- *   @link http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7 Form API Reference @endlink
+ *   @link forms_api_reference.html Form API Reference @endlink
  *
  * In addition to using Form API for doing in-form modification, Ajax may be
  * enabled by adding classes to buttons and links. By adding the 'use-ajax'
@@ -251,8 +251,8 @@ function ajax_render($commands = array()) {
       //   reliably diffed with array_diff_key(), since the number can change
       //   due to factors unrelated to the inline content, so for now, we strip
       //   the inline items from Ajax responses, and can add support for them
-      //   when drupal_add_css() and drupal_add_js() are changed to using md5()
-      //   or some other hash of the inline content.
+      //   when drupal_add_css() and drupal_add_js() are changed to use a hash
+      //   of the inline content as the array key.
       foreach ($items[$type] as $key => $item) {
         if (is_numeric($key)) {
           unset($items[$type][$key]);

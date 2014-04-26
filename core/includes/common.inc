@@ -97,14 +97,20 @@ const JS_SETTING = 200;
 const HTTP_REQUEST_TIMEOUT = -1;
 
 /**
- * Constants defining cache granularity for blocks and renderable arrays.
+ * @defgroup block_caching Block Caching
+ * @{
+ * Constants that define each block's caching state.
  *
- * Modules specify the caching patterns for their blocks using binary
- * combinations of these constants in their hook_block_info():
- *   $block[delta]['cache'] = DRUPAL_CACHE_PER_ROLE | DRUPAL_CACHE_PER_PAGE;
- * DRUPAL_CACHE_PER_ROLE is used as a default when no caching pattern is
- * specified. Use DRUPAL_CACHE_CUSTOM to disable standard block cache and
- * implement
+ * Modules specify how their blocks can be cached in their hook_block_info()
+ * implementations. Caching can be turned off (DRUPAL_NO_CACHE), managed by the
+ * module declaring the block (DRUPAL_CACHE_CUSTOM), or managed by the core
+ * Block module. If the Block module is managing the cache, you can specify that
+ * the block is the same for every page and user (DRUPAL_CACHE_GLOBAL), or that
+ * it can change depending on the page (DRUPAL_CACHE_PER_PAGE) or by user
+ * (DRUPAL_CACHE_PER_ROLE or DRUPAL_CACHE_PER_USER). Page and user settings can
+ * be combined with a bitwise-binary or operator; for example,
+ * DRUPAL_CACHE_PER_ROLE | DRUPAL_CACHE_PER_PAGE means that the block can change
+ * depending on the user role or page it is on.
  *
  * The block cache is cleared in cache_clear_all(), and uses the same clearing
  * policy than page cache (node, comment, user, taxonomy added or updated...).
@@ -128,9 +134,8 @@ const DRUPAL_NO_CACHE = -1;
 /**
  * The block is handling its own caching in its hook_block_view().
  *
- * From the perspective of the block cache system, this is equivalent to
- * DRUPAL_NO_CACHE. Useful when time based expiration is needed or a site uses
- * a node access which invalidates standard block cache.
+ * This setting is useful when time based expiration is needed or a site uses a
+ * node access which invalidates standard block cache.
  */
 const DRUPAL_CACHE_CUSTOM = -2;
 
@@ -159,6 +164,10 @@ const DRUPAL_CACHE_PER_PAGE = 0x0004;
  * The block or element is the same for every user and page that it is visible.
  */
 const DRUPAL_CACHE_GLOBAL = 0x0008;
+
+/**
+ * @} End of "defgroup block_caching".
+ */
 
 /**
  * Adds content to a specified region.
@@ -431,7 +440,7 @@ function drupal_get_query_parameters(array $query = NULL, array $exclude = array
  *   The query string to split.
  *
  * @return
- *   An array of url decoded couples $param_name => $value.
+ *   An array of URL decoded couples $param_name => $value.
  */
 function drupal_get_query_array($query) {
   $result = array();
@@ -493,12 +502,6 @@ function drupal_http_build_query(array $query, $parent = '') {
  * previous request, that destination is returned. As such, a destination can
  * persist across multiple pages.
  *
- * @return
- *   An associative array containing the key:
- *   - destination: The path provided via the destination query string or, if
- *     not available, the current path.
- *
- * @see current_path()
  * @see drupal_goto()
  */
 function drupal_get_destination() {
@@ -620,7 +623,7 @@ function drupal_encode_path($path) {
 }
 
 /**
- * Sends the user to a different Drupal page.
+ * Sends the user to a different page.
  *
  * This issues an on-site HTTP redirect. The function makes sure the redirected
  * URL is formatted correctly.
@@ -804,10 +807,51 @@ function drupal_http_request($url, array $options = array()) {
     'timeout' => 30.0,
     'context' => NULL,
   );
+
+  // Merge the default headers.
+  $options['headers'] += array(
+    'User-Agent' => 'Drupal (+http://drupal.org/)',
+  );
+
   // stream_socket_client() requires timeout to be a float.
   $options['timeout'] = (float) $options['timeout'];
 
+  // Use a proxy if one is defined and the host is not on the excluded list.
+  $proxy_server = variable_get('proxy_server', '');
+  if ($proxy_server && _drupal_http_use_proxy($uri['host'])) {
+    // Set the scheme so we open a socket to the proxy server.
+    $uri['scheme'] = 'proxy';
+    // Set the path to be the full URL.
+    $uri['path'] = $url;
+    // Since the URL is passed as the path, we won't use the parsed query.
+    unset($uri['query']);
+
+    // Add in username and password to Proxy-Authorization header if needed.
+    if ($proxy_username = variable_get('proxy_username', '')) {
+      $proxy_password = variable_get('proxy_password', '');
+      $options['headers']['Proxy-Authorization'] = 'Basic ' . base64_encode($proxy_username . (!empty($proxy_password) ? ":" . $proxy_password : ''));
+    }
+    // Some proxies reject requests with any User-Agent headers, while others
+    // require a specific one.
+    $proxy_user_agent = variable_get('proxy_user_agent', '');
+    // The default value matches neither condition.
+    if ($proxy_user_agent === NULL) {
+      unset($options['headers']['User-Agent']);
+    }
+    elseif ($proxy_user_agent) {
+      $options['headers']['User-Agent'] = $proxy_user_agent;
+    }
+  }
+
   switch ($uri['scheme']) {
+    case 'proxy':
+      // Make the socket connection to a proxy server.
+      $socket = 'tcp://' . $proxy_server . ':' . variable_get('proxy_port', 8080);
+      // The Host header still needs to match the real request.
+      $options['headers']['Host'] = $uri['host'];
+      $options['headers']['Host'] .= isset($uri['port']) && $uri['port'] != 80 ? ':' . $uri['port'] : '';
+      break;
+
     case 'http':
     case 'feed':
       $port = isset($uri['port']) ? $uri['port'] : 80;
@@ -817,12 +861,14 @@ function drupal_http_request($url, array $options = array()) {
       // checking the host that do not take into account the port number.
       $options['headers']['Host'] = $uri['host'] . ($port != 80 ? ':' . $port : '');
       break;
+
     case 'https':
       // Note: Only works when PHP is compiled with OpenSSL support.
       $port = isset($uri['port']) ? $uri['port'] : 443;
       $socket = 'ssl://' . $uri['host'] . ':' . $port;
       $options['headers']['Host'] = $uri['host'] . ($port != 443 ? ':' . $port : '');
       break;
+
     default:
       $result->error = 'invalid schema ' . $uri['scheme'];
       $result->code = -1003;
@@ -858,11 +904,6 @@ function drupal_http_request($url, array $options = array()) {
   if (isset($uri['query'])) {
     $path .= '?' . $uri['query'];
   }
-
-  // Merge the default headers.
-  $options['headers'] += array(
-    'User-Agent' => 'Drupal (+http://drupal.org/)',
-  );
 
   // Only add Content-Length if we actually have any content or if it is a POST
   // or PUT request. Some non-standard servers get confused by Content-Length in
@@ -1034,6 +1075,18 @@ function drupal_http_request($url, array $options = array()) {
 
   return $result;
 }
+
+/**
+ * Helper function for determining hosts excluded from needing a proxy.
+ *
+ * @return
+ *   TRUE if a proxy should be used for this host.
+ */
+function _drupal_http_use_proxy($host) {
+  $proxy_exceptions = variable_get('proxy_exceptions', array('localhost', '127.0.0.1'));
+  return !in_array(strtolower($host), $proxy_exceptions, TRUE);
+}
+
 /**
  * @} End of "HTTP handling".
  */
@@ -1239,6 +1292,98 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
     ->fetchField();
   return ($number < $threshold);
 }
+
+/**
+ * @defgroup key_value_expire Temporary key-value store functions
+ * @{
+ * Functions to temporarily store arrays or objects.
+ *
+ * A "temp store" can be used to make temporary, non-cache data available across
+ * requests. The data for the temp store is stored in one key/value collection.
+ * Temp store data expires automatically after a given time frame.
+ *
+ * The temp store is different from a cache, because the data in it is not yet
+ * saved permanently and so it cannot be rebuilt. Typically, the temp store
+ * might be used to store work in progress that is later saved permanently
+ * elsewhere, e.g. autosave data, multistep forms, or in-progress changes
+ * to complex configuration that are not ready to be saved..
+ */
+
+/**
+ * Gets an object from the temp store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator. Must be less than 128
+ *   characters.
+ * @param string $name
+ *   The name of the object being stored. Must be less than 128 characters.
+ *
+ * @return
+ *   The data that was stored.
+ */
+function tempstore_get($collection, $name) {
+  $data = db_query('SELECT * FROM {tempstore} WHERE collection = :collection AND name = :name', array(':collection' => $collection, ':name' => $name))->fetchObject();
+  if ($data) {
+    $data = unserialize($data->value);
+  }
+  return $data;
+}
+
+/**
+ * Stores an object in the semi-persistent key-value store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator. Must be less than 128
+ *   characters.
+ * @param string $name
+ *   The name of the object being stored. Must be less than 128 characters.
+ * @param array|object $value
+ *   The data to be stored. This will be serialized prior to writing.
+ * @param int $expire
+ *   The UNIX timestamp at which this value can be deleted.
+ */
+function tempstore_set($collection, $name, $value, $expire) {
+  tempstore_clear($collection, $name);
+  db_insert('tempstore')
+    ->fields(array(
+      'collection' => $collection,
+      'name' => $name,
+      'value' => serialize($value),
+      'expire' => $expire,
+    ))
+    ->execute();
+}
+
+/**
+ * Removes an object from the semi-persistent key-value store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator.
+ * @param string $name
+ *   The name of the object being cleared.
+ */
+function tempstore_clear($collection, $name) {
+  db_delete('tempstore')
+    ->condition('collection', $collection)
+    ->condition('name', $name)
+    ->execute();
+}
+
+/**
+ * Removes an entire group of objects from the semi-persistent key-value store.
+ *
+ * @param string $collection
+ *   A string defining the collection or group indicator.
+ */
+function tempstore_clear_all($collection) {
+  db_delete('tempstore')
+    ->condition('collection', $collection)
+    ->execute();
+}
+
+/**
+ * @} End of "defgroup key_value_expire".
+ */
 
 /**
  * @defgroup sanitization Sanitization functions
@@ -2075,7 +2220,7 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     for the URL. If $options['language'] is omitted, the global $language_url
  *     will be used.
  *   - 'https': Whether this URL should point to a secure location. If not
- *     defined, the current scheme is used, so the user stays on http or https
+ *     defined, the current scheme is used, so the user stays on HTTP or HTTPS
  *     respectively. TRUE enforces HTTPS and FALSE enforces HTTP, but HTTPS can
  *     only be enforced when the variable 'https' is set to TRUE.
  *   - 'base_url': Only used internally, to modify the base URL when a language
@@ -2305,21 +2450,30 @@ function drupal_attributes(array $attributes = array()) {
 /**
  * Formats an internal or external URL link as an HTML anchor tag.
  *
- * This function correctly handles aliased paths, and adds an 'active' class
+ * This function correctly handles aliased paths and adds an 'active' class
  * attribute to links that point to the current page (for theming), so all
  * internal links output by modules should be generated by this function if
  * possible.
  *
- * @param $text
- *   The link text for the anchor tag.
- * @param $path
+ * However, for links enclosed in translatable text you should use t() and
+ * embed the HTML anchor tag directly in the translated string. For example:
+ * @code
+ * t('Visit the <a href="@url">settings</a> page', array('@url' => url('admin')));
+ * @endcode
+ * This keeps the context of the link title ('settings' in the example) for
+ * translators.
+ *
+ * @param string $text
+ *   The translated link text for the anchor tag.
+ * @param string $path
  *   The internal path or external URL being linked to, such as "node/34" or
  *   "http://example.com/foo". After the url() function is called to construct
  *   the URL from $path and $options, the resulting URL is passed through
  *   check_plain() before it is inserted into the HTML anchor tag, to ensure
  *   well-formed HTML. See url() for more information and notes.
  * @param array $options
- *   An associative array of additional options, with the following elements:
+ *   An associative array of additional options. Defaults to an empty array. It
+ *   may contain the following elements.
  *   - 'attributes': An associative array of HTML attributes to apply to the
  *     anchor tag. If element 'class' is included, it must be an array; 'title'
  *     must be a string; other elements are more flexible, as they just need
@@ -2335,7 +2489,7 @@ function drupal_attributes(array $attributes = array()) {
  *     well as the path must match). This element is also used by url().
  *   - Additional $options elements used by the url() function.
  *
- * @return
+ * @return string
  *   An HTML string containing a link to the given path.
  *
  * @see url()
@@ -3786,7 +3940,16 @@ function drupal_html_id($id) {
       // requested id. $_POST['ajax_html_ids'] contains the ids as they were
       // returned by this function, potentially with the appended counter, so
       // we parse that to reconstruct the $seen_ids array.
-      foreach ($_POST['ajax_html_ids'] as $seen_id) {
+      if (is_array($_POST['ajax_html_ids'])) {
+        $ajax_html_ids = $_POST['ajax_html_ids'];
+      }
+      else {
+        // jquery.form.js may send the server a comma-separated string instead
+        // of an array(see http://drupal.org/node/1575060), so we need to
+        // convert it to an array in that case.
+        $ajax_html_ids = explode(',', $_POST['ajax_html_ids']);
+      }
+      foreach ($ajax_html_ids as $seen_id) {
         // We rely on '--' being used solely for separating a base id from the
         // counter, which this function ensures when returning an id.
         $parts = explode('--', $seen_id, 2);
@@ -3986,7 +4149,7 @@ function drupal_region_class($region) {
  *       else being the same, JavaScript added by a call to drupal_add_js() that
  *       happened later in the page request gets added to the page after one for
  *       which drupal_add_js() happened earlier in the page request.
- *   - defer: If set to TRUE, the defer attribute is set on the &lt;script&gt;
+ *   - defer: If set to TRUE, the defer attribute is set on the <script>
  *     tag. Defaults to FALSE.
  *   - cache: If set to FALSE, the JavaScript file is loaded anew on every page
  *     call; in other words, it is not cached. Used only when 'type' references
@@ -5154,7 +5317,7 @@ function drupal_get_hash_salt() {
  */
 function drupal_get_private_key() {
   if (!($key = variable_get('drupal_private_key', 0))) {
-    $key = drupal_hash_base64(drupal_random_bytes(55));
+    $key = drupal_random_key();
     variable_set('drupal_private_key', $key);
   }
   return $key;
@@ -5191,7 +5354,7 @@ function drupal_get_token($value = '') {
  */
 function drupal_valid_token($token, $value = '', $skip_anonymous = FALSE) {
   global $user;
-  return (($skip_anonymous && $user->uid == 0) || ($token == drupal_get_token($value)));
+  return (($skip_anonymous && $user->uid == 0) || ($token === drupal_get_token($value)));
 }
 
 function _drupal_bootstrap_full() {
@@ -5224,6 +5387,10 @@ function _drupal_bootstrap_full() {
   module_load_all();
   // Make sure all stream wrappers are registered.
   file_get_stream_wrappers();
+  // Ensure mt_rand is reseeded, to prevent random values from one page load
+  // being exploited to predict random values in subsequent page loads.
+  $seed = unpack("L", drupal_random_bytes(4));
+  mt_srand($seed[1]);
 
   $test_info = &$GLOBALS['drupal_test_info'];
   if (!empty($test_info['in_child_site'])) {
@@ -5926,23 +6093,23 @@ function drupal_render_page($page) {
  * array to be rendered independently and prevents them from being rendered
  * more than once on subsequent calls to drupal_render() (e.g., as part of a
  * larger array). If the same array or array element is passed more than once
- * to drupal_render(), it simply returns a NULL value.
+ * to drupal_render(), it simply returns an empty string.
  *
- * @param $elements
+ * @param array $elements
  *   The structured array describing the data to be rendered.
  *
- * @return
+ * @return string
  *   The rendered HTML.
  */
 function drupal_render(&$elements) {
   // Early-return nothing if user does not have access.
   if (empty($elements) || (isset($elements['#access']) && !$elements['#access'])) {
-    return;
+    return '';
   }
 
   // Do not print elements twice.
   if (!empty($elements['#printed'])) {
-    return;
+    return '';
   }
 
   // Try to fetch the element's markup from cache and return.
@@ -5976,7 +6143,7 @@ function drupal_render(&$elements) {
 
   // Allow #pre_render to abort rendering.
   if (!empty($elements['#printed'])) {
-    return;
+    return '';
   }
 
   // Get the children of the element, sorted by weight.
@@ -6703,6 +6870,44 @@ function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exi
 }
 
 /**
+ * Recursively computes the difference of arrays with additional index check.
+ *
+ * This is a version of array_diff_assoc() that supports multidimensional
+ * arrays.
+ *
+ * @param array $array1
+ *   The array to compare from.
+ * @param array $array2
+ *   The array to compare to.
+ *
+ * @return array
+ *   Returns an array containing all the values from array1 that are not present
+ *   in array2.
+ */
+function drupal_array_diff_assoc_recursive($array1, $array2) {
+  $difference = array();
+
+  foreach ($array1 as $key => $value) {
+    if (is_array($value)) {
+      if (!array_key_exists($key, $array2) || !is_array($array2[$key])) {
+        $difference[$key] = $value;
+      }
+      else {
+        $new_diff = drupal_array_diff_assoc_recursive($value, $array2[$key]);
+        if (!empty($new_diff)) {
+          $difference[$key] = $new_diff;
+        }
+      }
+    }
+    elseif (!array_key_exists($key, $array2) || $array2[$key] !== $value) {
+      $difference[$key] = $value;
+    }
+  }
+
+  return $difference;
+}
+
+/**
  * Sets a value in a nested array with variable depth.
  *
  * This helper function should be used when the depth of the array element you
@@ -7098,7 +7303,7 @@ function drupal_common_theme() {
 }
 
 /**
- * @ingroup schemaapi
+ * @addtogroup schemaapi
  * @{
  */
 
@@ -7418,7 +7623,7 @@ function drupal_write_record($table, &$record, $primary_keys = array()) {
 }
 
 /**
- * @} End of "ingroup schemaapi".
+ * @} End of "addtogroup schemaapi".
  */
 
 /**
@@ -7687,7 +7892,6 @@ function drupal_flush_all_caches() {
   // Synchronize to catch any actions that were added or removed.
   actions_synchronize();
 
-  // Don't clear cache_form - in-progress form submissions may break.
   // Ordered so clearing the page cache will always be the last action.
   $core = array('cache', 'path', 'filter', 'bootstrap', 'page');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);

@@ -897,7 +897,7 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertTrue(is_file(file_default_scheme() . '://.htaccess'), t('Successfully re-created the .htaccess file in the files directory.'), 'File');
     // Verify contents of .htaccess file.
     $file = file_get_contents(file_default_scheme() . '://.htaccess');
-    $this->assertEqual($file, "SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006\nOptions None\nOptions +FollowSymLinks", t('The .htaccess file contains the proper content.'), 'File');
+    $this->assertEqual($file, file_htaccess_lines(FALSE), 'The .htaccess file contains the proper content.', 'File');
   }
 
   /**
@@ -2360,6 +2360,15 @@ class FileNameMungingTest extends FileTestCase {
     $messages = drupal_get_messages();
     $this->assertTrue(in_array(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $munged_name)), $messages['status']), t('Alert properly set when a file is renamed.'));
     $this->assertNotEqual($munged_name, $this->name, t('The new filename (%munged) has been modified from the original (%original)', array('%munged' => $munged_name, '%original' => $this->name)));
+  }
+
+  /**
+   * Tests munging with a null byte in the filename.
+   */
+  function testMungeNullByte() {
+    $prefix = $this->randomName();
+    $filename = $prefix . '.' . $this->bad_extension . "\0.txt";
+    $this->assertEqual(file_munge_filename($filename, ''), $prefix . '.' . $this->bad_extension . '_.txt', 'A filename with a null byte is correctly munged to remove the null byte.');
   }
 
   /**

@@ -60,6 +60,24 @@ function hook_hook_info_alter(&$hooks) {
 }
 
 /**
+ * Change the view mode of an entity that is being displayed.
+ *
+ * @param string $view_mode
+ *   The view_mode that is to be used to display the entity.
+ * @param array $context
+ *   Array with contextual information, including:
+ *   - entity_type: The type of the entity that is being viewed.
+ *   - entity: The entity object.
+ *   - langcode: The langcode the entity is being viewed in.
+ */
+function hook_entity_view_mode_alter(&$view_mode, $context) {
+  // For nodes, change the view mode when it is teaser.
+  if ($context['entity_type'] == 'node' && $view_mode == 'teaser') {
+    $view_mode = 'my_custom_view_mode';
+  }
+}
+
+/**
  * Define administrative paths.
  *
  * Modules may specify whether or not the paths they define in hook_menu() are
@@ -123,24 +141,10 @@ function hook_admin_paths_alter(&$paths) {
  * processed to the defined queues.
  */
 function hook_cron() {
-  // Short-running operation example, not using a queue:
-  // Delete all expired records since the last cron run.
-  $expires = state_get('mymodule_cron_last_run', REQUEST_TIME);
-  db_delete('mymodule_table')
-    ->condition('expires', $expires, '>=')
+  // Short-running operation example, not using a queue.
+  db_delete('history')
+    ->condition('timestamp', NODE_NEW_LIMIT, '<')
     ->execute();
-  state_set('mymodule_cron_last_run', REQUEST_TIME);
-
-  // Long-running operation example, leveraging a queue:
-  // Fetch feeds from other sites.
-  $result = db_query('SELECT * FROM {aggregator_feed} WHERE checked + refresh < :time AND refresh <> :never', array(
-    ':time' => REQUEST_TIME,
-    ':never' => AGGREGATOR_CLEAR_NEVER,
-  ));
-  $queue = DrupalQueue::get('aggregator_feeds');
-  foreach ($result as $feed) {
-    $queue->createItem($feed);
-  }
 }
 
 /**
@@ -157,8 +161,7 @@ function hook_cron() {
  *   An associative array where the key is the queue name and the value is
  *   again an associative array. Possible keys are:
  *   - 'worker callback': The name of the function to call. It will be called
- *     with one argument, the item created via DrupalQueue::createItem() in
- *     hook_cron().
+ *     with one argument, the item created via DrupalQueue::createItem().
  *   - 'time': (optional) How much time Drupal should spend on calling this
  *     worker in seconds. Defaults to 15.
  *
@@ -192,7 +195,7 @@ function hook_cron_queue_info_alter(&$queues) {
 }
 
 /**
- * Allows modules to declare their own Forms API element types and specify their
+ * Allows modules to declare their own Form API element types and specify their
  * default values.
  *
  * This hook allows modules to declare their own form element types and to
@@ -257,9 +260,10 @@ function hook_element_info_alter(&$type) {
 /**
  * Perform cleanup tasks.
  *
- * This hook is run at the end of each page request. It is often used for
- * page logging and specialized cleanup. This hook MUST NOT print anything
- * because by the time it runs the response is already sent to the browser.
+ * This hook is run at the end of most regular page requests. It is often
+ * used for page logging and specialized cleanup. This hook MUST NOT print
+ * anything because by the time it runs the response is already sent to
+ * the browser.
  *
  * Only use this hook if your code must run even for cached page views.
  * If you have code which must run once on all non-cached pages, use
@@ -506,6 +510,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * paths and whose values are an associative array of properties for each
  * path. (The complete list of properties is in the return value section below.)
  *
+ * @section sec_callback_funcs Callback Functions
  * The definition for each path may include a page callback function, which is
  * invoked when the registered path is requested. If there is no other
  * registered path that fits the requested path better, any further path
@@ -530,6 +535,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * $jkl will be 'foo'. Note that this automatic passing of optional path
  * arguments applies only to page and theme callback functions.
  *
+ * @subsection sub_callback_arguments Callback Arguments
  * In addition to optional path arguments, the page callback and other callback
  * functions may specify argument lists as arrays. These argument lists may
  * contain both fixed/hard-coded argument values and integers that correspond
@@ -572,6 +578,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * @endcode
  * See @link form_api Form API documentation @endlink for details.
  *
+ * @section sec_path_wildcards Wildcards in Paths
+ * @subsection sub_simple_wildcards Simple Wildcards
  * Wildcards within paths also work with integer substitution. For example,
  * your module could register path 'my-module/%/edit':
  * @code
@@ -584,6 +592,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * with 'foo' and passed to the callback function. Note that wildcards may not
  * be used as the first component.
  *
+ * @subsection sub_autoload_wildcards Auto-Loader Wildcards
  * Registered paths may also contain special "auto-loader" wildcard components
  * in the form of '%mymodule_abc', where the '%' part means that this path
  * component is a wildcard, and the 'mymodule_abc' part defines the prefix for a
@@ -615,6 +624,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * return FALSE for the path 'node/999/edit' if a node with a node ID of 999
  * does not exist. The menu routing system will return a 404 error in this case.
  *
+ * @subsection sub_argument_wildcards Argument Wildcards
  * You can also define a %wildcard_to_arg() function (for the example menu
  * entry above this would be 'mymodule_abc_to_arg()'). The _to_arg() function
  * is invoked to retrieve a value that is used in the path in place of the
@@ -639,6 +649,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * are called when the menu system is generating links to related paths, such
  * as the tabs for a set of MENU_LOCAL_TASK items.
  *
+ * @section sec_render_tabs Rendering Menu Items As Tabs
  * You can also make groups of menu items to be rendered (by default) as tabs
  * on a page. To do that, first create one menu item of type MENU_NORMAL_ITEM,
  * with your chosen path, such as 'foo'. Then duplicate that menu item, using a
@@ -752,6 +763,10 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     same weight are ordered alphabetically.
  *   - "menu_name": Optional. Set this to a custom menu if you don't want your
  *     item to be placed in Navigation.
+ *   - "expanded": Optional. If set to TRUE, and if a menu link is provided for
+ *     this menu item (as a result of other properties), then the menu link is
+ *     always expanded, equivalent to its 'always expanded' checkbox being set
+ *     in the UI.
  *   - "context": (optional) Defines the context a tab may appear in. By
  *     default, all tabs are only displayed as local tasks when being rendered
  *     in a page context. All tabs that should be accessible as contextual links
@@ -1531,7 +1546,7 @@ function hook_mail_alter(&$message) {
  * purposes of hook_module_implements_alter(), these variants are treated as
  * a single hook. Thus, to ensure that your implementation of
  * hook_form_FORM_ID_alter() is called at the right time, you will have to
- * have to change the order of hook_form_alter() implementation in
+ * change the order of hook_form_alter() implementation in
  * hook_module_implements_alter().
  *
  * @param $implementations
@@ -1647,7 +1662,9 @@ function hook_permission() {
  * specify how a particular render array is to be rendered as HTML (this is
  * usually the case if the theme function is assigned to the render array's
  * #theme property), or they return the HTML that should be returned by an
- * invocation of theme().
+ * invocation of theme(). See
+ * @link http://drupal.org/node/933976 Using the theme layer Drupal 7.x @endlink
+ * for more information on how to implement theme hooks.
  *
  * The following parameters are all optional.
  *
@@ -2292,7 +2309,15 @@ function hook_file_insert(File $file) {
  *   The file that has just been updated.
  */
 function hook_file_update(File $file) {
+  $file_user = user_load($file->uid);
+  // Make sure that the file name starts with the owner's user name.
+  if (strpos($file->filename, $file_user->name) !== 0) {
+    $old_filename = $file->filename;
+    $file->filename = $file_user->name . '_' . $file->filename;
+    $file->save();
 
+    watchdog('file', t('%source has been renamed to %destination', array('%source' => $old_filename, '%destination' => $file->filename)));
+  }
 }
 
 /**
@@ -2306,7 +2331,14 @@ function hook_file_update(File $file) {
  * @see file_copy()
  */
 function hook_file_copy(File $file, File $source) {
+  $file_user = user_load($file->uid);
+  // Make sure that the file name starts with the owner's user name.
+  if (strpos($file->filename, $file_user->name) !== 0) {
+    $file->filename = $file_user->name . '_' . $file->filename;
+    $file->save();
 
+    watchdog('file', t('Copied file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
+  }
 }
 
 /**
@@ -2319,8 +2351,19 @@ function hook_file_copy(File $file, File $source) {
  *
  * @see file_move()
  */
+<<<<<<< HEAD
 function hook_file_move(File $file, File $source) {
+=======
+function hook_file_move($file, $source) {
+  $file_user = user_load($file->uid);
+  // Make sure that the file name starts with the owner's user name.
+  if (strpos($file->filename, $file_user->name) !== 0) {
+    $file->filename = $file_user->name . '_' . $file->filename;
+    $file->save();
+>>>>>>> ba9c629672d87a6bf06a4a84a1d78967c40ba0cb
 
+    watchdog('file', t('Moved file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
+  }
 }
 
 /**
@@ -2484,7 +2527,7 @@ function hook_file_url_alter(&$uri) {
  * The returned 'requirements' will be listed on the status report in the
  * administration section, with indication of the severity level.
  * Moreover, any requirement with a severity of REQUIREMENT_ERROR severity will
- * result in a notice on the the administration overview page.
+ * result in a notice on the administration configuration page.
  *
  * @param $phase
  *   The phase in which requirements are checked:
@@ -2595,44 +2638,48 @@ function hook_schema() {
         'description' => 'The primary identifier for a node.',
         'type' => 'serial',
         'unsigned' => TRUE,
-        'not null' => TRUE),
+        'not null' => TRUE,
+      ),
       'vid' => array(
         'description' => 'The current {node_revision}.vid version identifier.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 0),
+        'default' => 0,
+      ),
       'type' => array(
         'description' => 'The {node_type} of this node.',
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
-        'default' => ''),
+        'default' => '',
+      ),
       'title' => array(
         'description' => 'The title of this node, always treated as non-markup plain text.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'default' => ''),
+        'default' => '',
       ),
+    ),
     'indexes' => array(
       'node_changed'        => array('changed'),
       'node_created'        => array('created'),
-      ),
+    ),
     'unique keys' => array(
       'nid_vid' => array('nid', 'vid'),
       'vid'     => array('vid')
-      ),
+    ),
     'foreign keys' => array(
       'node_revision' => array(
         'table' => 'node_revision',
         'columns' => array('vid' => 'vid'),
-        ),
+      ),
       'node_author' => array(
         'table' => 'users',
-        'columns' => array('uid' => 'uid')
-        ),
-       ),
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
     'primary key' => array('nid'),
   );
   return $schema;
@@ -2777,33 +2824,30 @@ function hook_install() {
 /**
  * Perform a single update.
  *
- * For each patch which requires a database change add a new hook_update_N()
- * which will be called by update.php. The database updates are numbered
- * sequentially according to the version of Drupal you are compatible with.
+ * For each change that requires one or more actions to be performed when
+ * updating a site, add a new hook_update_N(), which will be called by
+ * update.php. The documentation block preceding this function is stripped of
+ * newlines and used as the description for the update on the pending updates
+ * task list. Schema updates should adhere to the
+ * @link http://drupal.org/node/150215 Schema API. @endlink
  *
- * Schema updates should adhere to the Schema API:
- * @link http://drupal.org/node/150215 http://drupal.org/node/150215 @endlink
- *
- * Database updates consist of 3 parts:
- * - 1 digit for Drupal core compatibility
- * - 1 digit for your module's major release version (e.g. is this the 5.x-1.* (1) or 5.x-2.* (2) series of your module?)
- * - 2 digits for sequential counting starting with 00
- *
- * The 2nd digit should be 0 for initial porting of your module to a new Drupal
- * core API.
+ * Implementations of hook_update_N() are named (module name)_update_(number).
+ * The numbers are composed of three parts:
+ * - 1 digit for Drupal core compatibility.
+ * - 1 digit for your module's major release version (e.g., is this the 7.x-1.*
+ *   (1) or 7.x-2.* (2) series of your module?). This digit should be 0 for
+ *   initial porting of your module to a new Drupal core API.
+ * - 2 digits for sequential counting, starting with 00.
  *
  * Examples:
- * - mymodule_update_5200()
- *   - This is the first update to get the database ready to run mymodule 5.x-2.*.
- * - mymodule_update_6000()
- *   - This is the required update for mymodule to run with Drupal core API 6.x.
- * - mymodule_update_6100()
- *   - This is the first update to get the database ready to run mymodule 6.x-1.*.
- * - mymodule_update_6200()
- *   - This is the first update to get the database ready to run mymodule 6.x-2.*.
- *     Users can directly update from 5.x-2.* to 6.x-2.* and they get all 60XX
- *     and 62XX updates, but not 61XX updates, because those reside in the
- *     6.x-1.x branch only.
+ * - mymodule_update_7000(): This is the required update for mymodule to run
+ *   with Drupal core API 7.x when upgrading from Drupal core API 6.x.
+ * - mymodule_update_7100(): This is the first update to get the database ready
+ *   to run mymodule 7.x-1.*.
+ * - mymodule_update_7200(): This is the first update to get the database ready
+ *   to run mymodule 7.x-2.*. Users can directly update from 6.x-2.* to 7.x-2.*
+ *   and they get all 70xx and 72xx updates, but not 71xx updates, because
+ *   those reside in the 7.x-1.x branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
  * Drupal. See hook_update_last_removed() to notify Drupal about the removals.
@@ -2826,8 +2870,8 @@ function hook_install() {
  * information between successive calls, and the $sandbox['#finished'] value
  * to provide feedback regarding completion level.
  *
- * See the batch operations page for more information on how to use the batch API:
- * @link http://drupal.org/node/180528 http://drupal.org/node/180528 @endlink
+ * See the batch operations page for more information on how to use the
+ * @link http://drupal.org/node/180528 Batch API. @endlink
  *
  * @param $sandbox
  *   Stores information for multipass updates. See above for more information.
@@ -2838,9 +2882,14 @@ function hook_install() {
  *   reason, it will throw a PDOException.
  *
  * @return
- *   Optionally update hooks may return a translated string that will be displayed
- *   to the user. If no message is returned, no message will be presented to the
- *   user.
+ *   Optionally, update hooks may return a translated string that will be
+ *   displayed to the user after the update has completed. If no message is
+ *   returned, no message will be presented to the user.
+ *
+ * @see batch
+ * @see schemaapi
+ * @see hook_update_last_removed()
+ * @see update_get_update_list()
  */
 function hook_update_N(&$sandbox) {
   // For non-multipass updates, the signature can simply be;
@@ -3120,59 +3169,52 @@ function hook_registry_files_alter(&$files, $modules) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   A keyed array of tasks the profile will perform during the final stage of
  *   the installation. Each key represents the name of a function (usually a
  *   function defined by this profile, although that is not strictly required)
  *   that is called when that task is run. The values are associative arrays
  *   containing the following key-value pairs (all of which are optional):
- *     - 'display_name'
- *       The human-readable name of the task. This will be displayed to the
- *       user while the installer is running, along with a list of other tasks
- *       that are being run. Leave this unset to prevent the task from
- *       appearing in the list.
- *     - 'display'
- *       This is a boolean which can be used to provide finer-grained control
- *       over whether or not the task will display. This is mostly useful for
- *       tasks that are intended to display only under certain conditions; for
- *       these tasks, you can set 'display_name' to the name that you want to
- *       display, but then use this boolean to hide the task only when certain
- *       conditions apply.
- *     - 'type'
- *       A string representing the type of task. This parameter has three
- *       possible values:
- *       - 'normal': This indicates that the task will be treated as a regular
- *       callback function, which does its processing and optionally returns
- *       HTML output. This is the default behavior which is used when 'type' is
- *       not set.
- *       - 'batch': This indicates that the task function will return a batch
- *       API definition suitable for batch_set(). The installer will then take
- *       care of automatically running the task via batch processing.
- *       - 'form': This indicates that the task function will return a standard
+ *   - display_name: The human-readable name of the task. This will be
+ *     displayed to the user while the installer is running, along with a list
+ *     of other tasks that are being run. Leave this unset to prevent the task
+ *     from appearing in the list.
+ *   - display: This is a boolean which can be used to provide finer-grained
+ *     control over whether or not the task will display. This is mostly useful
+ *     for tasks that are intended to display only under certain conditions;
+ *     for these tasks, you can set 'display_name' to the name that you want to
+ *     display, but then use this boolean to hide the task only when certain
+ *     conditions apply.
+ *   - type: A string representing the type of task. This parameter has three
+ *     possible values:
+ *     - normal: (default) This indicates that the task will be treated as a
+ *       regular callback function, which does its processing and optionally
+ *       returns HTML output.
+ *     - batch: This indicates that the task function will return a batch API
+ *       definition suitable for batch_set(). The installer will then take care
+ *       of automatically running the task via batch processing.
+ *     - form: This indicates that the task function will return a standard
  *       form API definition (and separately define validation and submit
  *       handlers, as appropriate). The installer will then take care of
  *       automatically directing the user through the form submission process.
- *     - 'run'
- *       A constant representing the manner in which the task will be run. This
- *       parameter has three possible values:
- *       - INSTALL_TASK_RUN_IF_NOT_COMPLETED: This indicates that the task will
- *       run once during the installation of the profile. This is the default
- *       behavior which is used when 'run' is not set.
- *       - INSTALL_TASK_SKIP: This indicates that the task will not run during
+ *   - run: A constant representing the manner in which the task will be run.
+ *     This parameter has three possible values:
+ *     - INSTALL_TASK_RUN_IF_NOT_COMPLETED: (default) This indicates that the
+ *       task will run once during the installation of the profile.
+ *     - INSTALL_TASK_SKIP: This indicates that the task will not run during
  *       the current installation page request. It can be used to skip running
  *       an installation task when certain conditions are met, even though the
  *       task may still show on the list of installation tasks presented to the
  *       user.
- *       - INSTALL_TASK_RUN_IF_REACHED: This indicates that the task will run
- *       on each installation page request that reaches it. This is rarely
+ *     - INSTALL_TASK_RUN_IF_REACHED: This indicates that the task will run on
+ *       each installation page request that reaches it. This is rarely
  *       necessary for an installation profile to use; it is primarily used by
  *       the Drupal installer for bootstrap-related tasks.
- *     - 'function'
- *       Normally this does not need to be set, but it can be used to force the
- *       installer to call a different function when the task is run (rather
- *       than the function whose name is given by the array key). This could be
- *       used, for example, to allow the same function to be called by two
- *       different tasks.
+ *   - function: Normally this does not need to be set, but it can be used to
+ *     force the installer to call a different function when the task is run
+ *     (rather than the function whose name is given by the array key). This
+ *     could be used, for example, to allow the same function to be called by
+ *     two different tasks.
  *
  * @see install_state_defaults()
  * @see batch_set()
@@ -3269,7 +3311,7 @@ function hook_drupal_goto_alter(&$path, &$options, &$http_response_code) {
 function hook_html_head_alter(&$head_elements) {
   foreach ($head_elements as $key => $element) {
     if (isset($element['#attributes']['rel']) && $element['#attributes']['rel'] == 'canonical') {
-      // I want a custom canonical url.
+      // I want a custom canonical URL.
       $head_elements[$key]['#attributes']['href'] = mymodule_canonical_url();
     }
   }

@@ -66,7 +66,6 @@ function theme_node_add_list($variables) {
   return $output;
 }
 
-
 /**
  * Page callback: Provides the node submission form.
  *
@@ -122,6 +121,7 @@ function node_form_validate($form, &$form_state) {
  * @see node_form_validate()
  * @see node_form_submit()
  * @see node_form_submit_build_node()
+ *
  * @ingroup forms
  */
 function node_form($form, &$form_state, Node $node) {
@@ -288,6 +288,15 @@ function node_form($form, &$form_state, Node $node) {
     '#maxlength' => 25,
     '#description' => t('Format: %time. The date format is YYYY-MM-DD and %timezone is the time zone offset from UTC. Leave blank to use the time of form submission.', array('%time' => !empty($node->date) ? date_format(date_create($node->date), 'Y-m-d H:i:s O') : format_date($node->created, 'custom', 'Y-m-d H:i:s O'), '%timezone' => !empty($node->date) ? date_format(date_create($node->date), 'O') : format_date($node->created, 'custom', 'O'))),
     '#default_value' => !empty($node->date) ? $node->date : '',
+    '#attached' => array(
+      'library' => array(array('system', 'ui.datepicker')),
+      'js' => array(array(
+        'data' => "jQuery(function ($) {
+          $('#edit-date').datepicker();
+        });",
+        'type' => 'inline',
+      ))
+    ),
   );
 
   // Node options for administrators
@@ -401,7 +410,7 @@ function node_form_build_preview($form, &$form_state) {
  *   The node to preview.
  *
  * @return
- *   Themed node preview.
+ *   An HTML-formatted string of a node preview.
  *
  * @see node_form_build_preview()
  */
@@ -453,6 +462,7 @@ function node_preview(Node $node) {
  *   - node: The node entity which is being previewed.
  *
  * @see node_preview()
+ *
  * @ingroup themeable
  */
 function theme_node_preview($variables) {
@@ -485,8 +495,8 @@ function theme_node_preview($variables) {
 /**
  * Form submission handler that saves the node for node_form().
  *
- * @see node_form_delete_submit()
  * @see node_form_build_preview()
+ * @see node_form_delete_submit()
  * @see node_form_validate()
  * @see node_form_submit_build_node()
  */
@@ -562,6 +572,7 @@ function node_form_submit_build_node($form, &$form_state) {
  * Page callback: Form constructor for node deletion confirmation form.
  *
  * @see node_menu()
+ * @see node_delete_confirm_submit()
  */
 function node_delete_confirm($form, &$form_state, $node) {
   $form['#node'] = $node;
@@ -578,6 +589,8 @@ function node_delete_confirm($form, &$form_state, $node) {
 
 /**
  * Form submission handler for node_delete_confirm().
+ *
+ * @see node_delete_confirm()
  */
 function node_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
@@ -592,6 +605,12 @@ function node_delete_confirm_submit($form, &$form_state) {
 
 /**
  * Page callback: Generates an overview table of older revisions of a node.
+ *
+ * @param Node $node
+ *   A node object.
+ *
+ * @return array
+ *   An array as expected by drupal_render().
  *
  * @see node_menu()
  */
@@ -657,12 +676,18 @@ function node_revision_overview($node) {
 }
 
 /**
- * Page callback: Form constructor for the reversion confirmation form.
+ * Asks for confirmation of the reversion to prevent against CSRF attacks.
  *
- * This form prevents against CSRF attacks.
+ * @param int $node_revision
+ *   The node revision ID.
+ *
+ * @return array
+ *   An array as expected by drupal_render().
  *
  * @see node_menu()
  * @see node_revision_revert_confirm_submit()
+ *
+ * @ingroup forms
  */
 function node_revision_revert_confirm($form, $form_state, $node_revision) {
   $form['#node_revision'] = $node_revision;
@@ -689,12 +714,20 @@ function node_revision_revert_confirm_submit($form, &$form_state) {
 }
 
 /**
- * Page callback: Form constructor for the revision deletion confirmation form.
+ * Form constructor for the revision deletion confirmation form.
  *
  * This form prevents against CSRF attacks.
  *
+ * @param $node_revision
+ *   The node revision ID.
+ *
+ * @return
+ *   An array as expected by drupal_render().
+ *
  * @see node_menu()
  * @see node_revision_delete_confirm_submit()
+ *
+ * @ingroup forms
  */
 function node_revision_delete_confirm($form, $form_state, $node_revision) {
   $form['#node_revision'] = $node_revision;

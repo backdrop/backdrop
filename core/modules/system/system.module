@@ -1702,16 +1702,27 @@ function _system_themes_access($theme) {
 /**
  * Setup a given callback to run via authorize.php with elevated privileges.
  *
- * To use authorize.php, certain variables must be stashed into $_SESSION.
- * This function sets up all the necessary $_SESSION variables, then returns
- * the full path to authorize.php so the caller can redirect to authorize.php.
- * That initiates the workflow that will eventually lead to the callback being
- * invoked. The callback will be invoked at a low bootstrap level, without all
- * modules being invoked, so it needs to be careful not to assume any code
- * exists.
+ * To use authorize.php, certain variables must be stashed into $_SESSION. This
+ * function sets up all the necessary $_SESSION variables. The calling function
+ * should then redirect to authorize.php, using the full path returned by
+ * system_authorized_get_url(). That initiates the workflow that will eventually
+ * lead to the callback being invoked. The callback will be invoked at a low
+ * bootstrap level, without all modules being invoked, so it needs to be careful
+ * not to assume any code exists. Example (system_authorized_run()):
+ * @code
+ *   system_authorized_init($callback, $file, $arguments, $page_title);
+ *   drupal_goto(system_authorized_get_url());
+ * @endcode
+ * Example (update_manager_install_form_submit()):
+ * @code
+ *  system_authorized_init('update_authorize_run_install',
+ *    drupal_get_path('module', 'update') . '/update.authorize.inc',
+ *    $arguments, t('Update manager'));
+ *  $form_state['redirect'] = system_authorized_get_url();
+ * @endcode
  *
  * @param $callback
- *   The name of the function to invoke one the user authorizes the operation.
+ *   The name of the function to invoke once the user authorizes the operation.
  * @param $file
  *   The full path to the file where the callback function is implemented.
  * @param $arguments
@@ -1747,11 +1758,13 @@ function system_authorized_init($callback, $file, $arguments = array(), $page_ti
  * @param array $options
  *   Optional array of options to pass to url().
  * @return
- *   The full URL to authorize.php, using https if available.
+ *   The full URL to authorize.php, using HTTPS if available.
+ *
+ * @see system_authorized_init()
  */
 function system_authorized_get_url(array $options = array()) {
   global $base_url;
-  // Force https if available, regardless of what the caller specifies.
+  // Force HTTPS if available, regardless of what the caller specifies.
   $options['https'] = TRUE;
   // We prefix with $base_url so we get a full path even if clean URLs are
   // disabled.
@@ -1854,17 +1867,18 @@ function system_init() {
 
   // Ignore slave database servers for this request.
   //
-  // In Drupal's distributed database structure, new data is written to the master
-  // and then propagated to the slave servers.  This means there is a lag
-  // between when data is written to the master and when it is available on the slave.
-  // At these times, we will want to avoid using a slave server temporarily.
-  // For example, if a user posts a new node then we want to disable the slave
-  // server for that user temporarily to allow the slave server to catch up.
-  // That way, that user will see their changes immediately while for other
-  // users we still get the benefits of having a slave server, just with slightly
-  // stale data.  Code that wants to disable the slave server should use the
-  // db_set_ignore_slave() function to set $_SESSION['ignore_slave_server'] to
-  // the timestamp after which the slave can be re-enabled.
+  // In Drupal's distributed database structure, new data is written to the
+  // master and then propagated to the slave servers.  This means there is a
+  // lag between when data is written to the master and when it is available on
+  // the slave. At these times, we will want to avoid using a slave server
+  // temporarily. For example, if a user posts a new node then we want to
+  // disable the slave server for that user temporarily to allow the slave
+  // server to catch up. That way, that user will see their changes immediately
+  // while for other users we still get the benefits of having a slave server,
+  // just with slightly stale data.  Code that wants to disable the slave
+  // server should use the db_ignore_slave() function to set
+  // $_SESSION['ignore_slave_server'] to the timestamp after which the slave
+  // can be re-enabled.
   if (isset($_SESSION['ignore_slave_server'])) {
     if ($_SESSION['ignore_slave_server'] >= REQUEST_TIME) {
       Database::ignoreTarget('default', 'slave');
@@ -2663,7 +2677,17 @@ function system_default_region($theme) {
 }
 
 /**
- * Add default buttons to a form and set its prefix.
+ * Sets up a form to save information automatically.
+ *
+ * This function adds a submit handler and a submit button to a form array. The
+ * submit function saves all the data in the form, using variable_set(), to
+ * variables named the same as the keys in the form array. Note that this means
+ * you should normally prefix your form array keys with your module name, so
+ * that they are unique when passed into variable_set().
+ *
+ * If you need to manipulate the data in a custom manner, you can either put
+ * your own submission handler in the form array before calling this function,
+ * or just use your own submission handler instead of calling this function.
  *
  * @param $form
  *   An associative array containing the structure of the form.
@@ -2672,6 +2696,7 @@ function system_default_region($theme) {
  *   The form structure.
  *
  * @see system_settings_form_submit()
+ *
  * @ingroup forms
  */
 function system_settings_form($form) {
@@ -2690,7 +2715,7 @@ function system_settings_form($form) {
 }
 
 /**
- * Execute the system_settings_form.
+ * Form submission handler for system_settings_form().
  *
  * If you want node type configure style handling of your checkboxes,
  * add an array_filter value to your form.
@@ -3077,6 +3102,11 @@ function system_cron() {
     ->condition('expiration', REQUEST_TIME, '<')
     ->execute();
 
+  // Cleanup expired tempstore entries.
+  db_delete('tempstore')
+    ->condition('expire', REQUEST_TIME, '<')
+    ->execute();
+
   // Remove temporary files that are older than DRUPAL_MAXIMUM_TEMP_FILE_AGE.
   // Use separate placeholders for the status to avoid a bug in some versions
   // of PHP. See http://drupal.org/node/352956.
@@ -3101,7 +3131,7 @@ function system_cron() {
     }
   }
 
-  $core = array('cache', 'path', 'filter', 'page', 'form', 'menu');
+  $core = array('cache', 'path', 'filter', 'page', 'menu');
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
   foreach ($cache_bins as $bin) {
     cache($bin)->expire();
@@ -3834,7 +3864,7 @@ function _system_date_formats_build() {
   }
 
   // Get custom formats added to the database by the end user.
-  $result = db_query('SELECT df.dfid, df.format, df.type, df.locked, dfl.language FROM {date_formats} df LEFT JOIN {date_format_type} dft ON df.type = dft.type LEFT JOIN {date_format_locale} dfl ON df.format = dfl.format AND df.type = dfl.type ORDER BY df.type, df.format');
+  $result = db_query('SELECT df.dfid, df.format, df.type, df.locked, dfl.language FROM {date_formats} df LEFT JOIN {date_format_locale} dfl ON df.format = dfl.format AND df.type = dfl.type ORDER BY df.type, df.format');
   foreach ($result as $record) {
     // If this date type isn't set, initialise the array.
     if (!isset($date_formats[$record->type])) {

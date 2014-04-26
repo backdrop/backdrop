@@ -23,7 +23,7 @@ function field_test_entity_info() {
 
   return array(
     'test_entity' => array(
-      'name' => t('Test Entity'),
+      'label' => t('Test Entity'),
       'fieldable' => TRUE,
       'field cache' => FALSE,
       'base table' => 'test_entity',
@@ -39,7 +39,7 @@ function field_test_entity_info() {
     ),
     // This entity type doesn't get form handling for now...
     'test_cacheable_entity' => array(
-      'name' => t('Test Entity, cacheable'),
+      'label' => t('Test Entity, cacheable'),
       'fieldable' => TRUE,
       'field cache' => TRUE,
       'entity keys' => array(
@@ -51,7 +51,7 @@ function field_test_entity_info() {
       'view modes' => $test_entity_modes,
     ),
     'test_entity_bundle_key' => array(
-      'name' => t('Test Entity with a bundle key.'),
+      'label' => t('Test Entity with a bundle key.'),
       'base table' => 'test_entity_bundle_key',
       'fieldable' => TRUE,
       'field cache' => FALSE,
@@ -64,7 +64,7 @@ function field_test_entity_info() {
     ),
     // In this case, the bundle key is not stored in the database.
     'test_entity_bundle' => array(
-      'name' => t('Test Entity with a specified bundle.'),
+      'label' => t('Test Entity with a specified bundle.'),
       'base table' => 'test_entity_bundle',
       'fieldable' => TRUE,
       'entity class' => 'TestFieldEntity',
@@ -75,6 +75,48 @@ function field_test_entity_info() {
         'bundle' => 'fttype',
       ),
       'bundles' => array('test_entity_2' => array('label' => 'Test entity 2')) + $bundles,
+      'view modes' => $test_entity_modes,
+    ),
+    // @see EntityPropertiesTestCase::testEntityLabel()
+    'test_entity_no_label' => array(
+      'label' => t('Test entity without label'),
+      'fieldable' => TRUE,
+      'field cache' => FALSE,
+      'base table' => 'test_entity',
+      'entity keys' => array(
+        'id' => 'ftid',
+        'revision' => 'ftvid',
+        'bundle' => 'fttype',
+      ),
+      'bundles' => $bundles,
+      'view modes' => $test_entity_modes,
+    ),
+    'test_entity_label' => array(
+      'label' => t('Test entity label'),
+      'fieldable' => TRUE,
+      'field cache' => FALSE,
+      'base table' => 'test_entity',
+      'entity keys' => array(
+        'id' => 'ftid',
+        'revision' => 'ftvid',
+        'bundle' => 'fttype',
+        'label' => 'ftlabel',
+      ),
+      'bundles' => $bundles,
+      'view modes' => $test_entity_modes,
+    ),
+    'test_entity_label_callback' => array(
+      'label' => t('Test entity label callback'),
+      'fieldable' => TRUE,
+      'field cache' => FALSE,
+      'base table' => 'test_entity',
+      'label callback' => 'field_test_entity_label_callback',
+      'entity keys' => array(
+        'id' => 'ftid',
+        'revision' => 'ftvid',
+        'bundle' => 'fttype',
+      ),
+      'bundles' => $bundles,
       'view modes' => $test_entity_modes,
     ),
   );

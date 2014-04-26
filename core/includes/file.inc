@@ -399,8 +399,8 @@ function file_create_url($uri) {
     }
   }
   elseif ($scheme == 'http' || $scheme == 'https') {
-    // Check for http so that we don't have to implement getExternalUrl() for
-    // the http wrapper.
+    // Check for HTTP so that we don't have to implement getExternalUrl() for
+    // the HTTP wrapper.
     return $uri;
   }
   else {
@@ -476,8 +476,11 @@ function file_ensure_htaccess() {
  * @param $private
  *   FALSE indicates that $directory should be an open and public directory.
  *   The default is TRUE which indicates a private and protected directory.
+ * @param $force_overwrite
+ *   Set to TRUE to attempt to overwrite the existing .htaccess file if one is
+ *   already present. Defaults to FALSE.
  */
-function file_save_htaccess($directory, $private = TRUE) {
+function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
   if (file_uri_scheme($directory)) {
     $directory = file_stream_wrapper_uri_normalize($directory);
   }
@@ -486,19 +489,12 @@ function file_save_htaccess($directory, $private = TRUE) {
   }
   $htaccess_path =  $directory . '/.htaccess';
 
-  if (file_exists($htaccess_path)) {
+  if (file_exists($htaccess_path) && !$force_overwrite) {
     // Short circuit if the .htaccess file already exists.
     return;
   }
 
-  if ($private) {
-    // Private .htaccess file.
-    $htaccess_lines = "SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006\nDeny from all\nOptions None\nOptions +FollowSymLinks";
-  }
-  else {
-    // Public .htaccess file.
-    $htaccess_lines = "SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006\nOptions None\nOptions +FollowSymLinks";
-  }
+  $htaccess_lines = file_htaccess_lines($private);
 
   // Write the .htaccess file.
   if (file_put_contents($htaccess_path, $htaccess_lines)) {
@@ -508,6 +504,45 @@ function file_save_htaccess($directory, $private = TRUE) {
     $variables = array('%directory' => $directory, '!htaccess' => '<br />' . nl2br(check_plain($htaccess_lines)));
     watchdog('security', "Security warning: Couldn't write .htaccess file. Please create a .htaccess file in your %directory directory which contains the following lines: <code>!htaccess</code>", $variables, WATCHDOG_ERROR);
   }
+}
+
+/**
+ * Returns the standard .htaccess lines that Drupal writes to file directories.
+ *
+ * @param $private
+ *   (Optional) Set to FALSE to return the .htaccess lines for an open and
+ *   public directory. The default is TRUE, which returns the .htaccess lines
+ *   for a private and protected directory.
+ *
+ * @return
+ *   A string representing the desired contents of the .htaccess file.
+ *
+ * @see file_create_htaccess()
+ */
+function file_htaccess_lines($private = TRUE) {
+  $lines = <<<EOF
+# Turn off all options we don't need.
+Options None
+Options +FollowSymLinks
+
+# Set the catch-all handler to prevent scripts from being executed.
+SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
+<Files *>
+  # Override the handler again if we're run later in the evaluation list.
+  SetHandler Drupal_Security_Do_Not_Remove_See_SA_2013_003
+</Files>
+
+# If we know how to do it safely, disable the PHP engine entirely.
+<IfModule mod_php5.c>
+  php_flag engine off
+</IfModule>
+EOF;
+
+  if ($private) {
+    $lines = "Deny from all\n\n" . $lines;
+  }
+
+  return $lines;
 }
 
 /**
@@ -707,10 +742,11 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
  * stored in the database. This is a powerful function that in many ways
  * performs like an advanced version of copy().
  * - Checks if $source and $destination are valid and readable/writable.
- * - Checks that $source is not equal to $destination; if they are an error
- *   is reported.
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
+ * - If the $source and $destination are equal, the behavior depends on the
+ *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
+ *   will rename the file until the $destination is unique.
  * - Adds the new file to the files database. If the source file is a
  *   temporary file, the resulting file will also be a temporary file. See
  *   file_save_upload() for details on temporary files.
@@ -805,10 +841,11 @@ function file_valid_uri($uri) {
  * This is a powerful function that in many ways performs like an advanced
  * version of copy().
  * - Checks if $source and $destination are valid and readable/writable.
- * - Checks that $source is not equal to $destination; if they are an error
- *   is reported.
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
+ * - If the $source and $destination are equal, the behavior depends on the
+ *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
+ *   will rename the file until the $destination is unique.
  * - Provides a fallback using realpaths if the move fails using stream
  *   wrappers. This can occur because PHP's copy() function does not properly
  *   support streams if safe_mode or open_basedir are enabled. See
@@ -875,7 +912,7 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   $destination = file_destination($destination, $replace);
   if ($destination === FALSE) {
     drupal_set_message(t('The file %file could not be copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
-    watchdog('file', 'File %file could not be copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%destination' => $destination));
+    watchdog('file', 'File %file could not be copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%directory' => $destination));
     return FALSE;
   }
 
@@ -1096,6 +1133,9 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
 
   // Allow potentially insecure uploads for very savvy users and admin
   if (!variable_get('allow_insecure_uploads', 0)) {
+    // Remove any null bytes. See http://php.net/manual/en/security.filesystem.nullbytes.php
+    $filename = str_replace(chr(0), '', $filename);
+
     $whitelist = array_unique(explode(' ', trim($extensions)));
 
     // Split the filename up by periods. The first part becomes the basename
@@ -1927,7 +1967,9 @@ function file_download() {
       $function = $module . '_file_download';
       $result = $function($uri);
       if ($result == -1) {
-        return drupal_access_denied();
+        // Throw away the headers received so far.
+        $headers = array();
+        break;
       }
       if (isset($result) && is_array($result)) {
         $headers = array_merge($headers, $result);
@@ -1936,9 +1978,12 @@ function file_download() {
     if (count($headers)) {
       file_transfer($uri, $headers);
     }
-    return drupal_access_denied();
+    drupal_access_denied();
   }
-  return drupal_not_found();
+  else {
+    drupal_not_found();
+  }
+  drupal_exit();
 }
 
 
@@ -2156,29 +2201,21 @@ function drupal_unlink($uri, $context = NULL) {
 }
 
 /**
- * Returns the absolute local filesystem path of a stream URI.
+ * Resolves the absolute filepath of a local URI or filepath.
  *
- * This function was originally written to ease the conversion of 6.x code to
- * use 7.x stream wrappers. However, it assumes that every URI may be resolved
- * to an absolute local filesystem path, and this assumption fails when stream
- * wrappers are used to support remote file storage. Remote stream wrappers
- * may implement the realpath method by always returning FALSE. The use of
- * drupal_realpath() is discouraged, and is slowly being removed from core
- * functions where possible.
+ * The use of drupal_realpath() is discouraged, because it does not work for
+ * remote URIs. Except in rare cases, URIs should not be manually resolved.
  *
  * Only use this function if you know that the stream wrapper in the URI uses
  * the local file system, and you need to pass an absolute path to a function
  * that is incompatible with stream URIs.
  *
- * @param $uri
- *   A stream wrapper URI or a filesystem path, possibly including one or more
- *   symbolic links.
+ * @param string $uri
+ *   A stream wrapper URI or a filepath, possibly including one or more symbolic
+ *   links.
  *
- * @return
- *   The absolute local filesystem path (with no symbolic links), or FALSE on
- *   failure.
- *
- * @todo This function is deprecated, and should be removed wherever possible.
+ * @return string|false
+ *   The absolute local filepath (with no symbolic links), or FALSE on failure.
  *
  * @see DrupalStreamWrapperInterface::realpath()
  * @see http://php.net/manual/function.realpath.php
@@ -2423,20 +2460,10 @@ function file_directory_temp() {
 function file_get_content_headers(File $file) {
   $name = mime_header_encode($file->filename);
   $type = mime_header_encode($file->filemime);
-  // Serve images, text, and flash content for display rather than download.
-  $inline_types = variable_get('file_inline_types', array('^text/', '^image/', 'flash$'));
-  $disposition = 'attachment';
-  foreach ($inline_types as $inline_type) {
-    // Exclamation marks are used as delimiters to avoid escaping slashes.
-    if (preg_match('!' . $inline_type . '!', $file->filemime)) {
-      $disposition = 'inline';
-    }
-  }
 
   return array(
-    'Content-Type' => $type . '; name="' . $name . '"',
+    'Content-Type' => $type,
     'Content-Length' => $file->filesize,
-    'Content-Disposition' => $disposition . '; filename="' . $name . '"',
     'Cache-Control' => 'private',
   );
 }

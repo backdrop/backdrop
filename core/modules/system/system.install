@@ -6,12 +6,7 @@
  */
 
 /**
- * Test and report Drupal installation requirements.
- *
- * @param $phase
- *   The current system installation phase.
- * @return
- *   An array of system requirements.
+ * Implements hook_requirements().
  */
 function system_requirements($phase) {
   global $base_url;
@@ -199,7 +194,7 @@ function system_requirements($phase) {
     'value' => $memory_limit == -1 ? t('-1 (Unlimited)') : $memory_limit,
   );
 
-  if ($memory_limit && $memory_limit != -1 && parse_size($memory_limit) < parse_size(DRUPAL_MINIMUM_PHP_MEMORY_LIMIT)) {
+  if (!drupal_check_memory_limit(DRUPAL_MINIMUM_PHP_MEMORY_LIMIT, $memory_limit)) {
     $description = '';
     if ($phase == 'install') {
       $description = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the installation process.', array('%memory_minimum_limit' => DRUPAL_MINIMUM_PHP_MEMORY_LIMIT));
@@ -247,6 +242,39 @@ function system_requirements($phase) {
       );
     }
     $requirements['settings.php']['title'] = $t('Configuration file');
+  }
+
+  // Test the contents of the .htaccess files.
+  if ($phase == 'runtime') {
+    // Try to write the .htaccess files first, to prevent false alarms in case
+    // (for example) the /tmp directory was wiped.
+    file_ensure_htaccess();
+    $htaccess_files['public://.htaccess'] = array(
+      'title' => $t('Public files directory'),
+      'directory' => variable_get('file_public_path', conf_path() . '/files'),
+    );
+    if ($private_files_directory = variable_get('file_private_path')) {
+      $htaccess_files['private://.htaccess'] = array(
+        'title' => $t('Private files directory'),
+        'directory' => $private_files_directory,
+      );
+    }
+    $htaccess_files['temporary://.htaccess'] = array(
+      'title' => $t('Temporary files directory'),
+      'directory' => variable_get('file_temporary_path', file_directory_temp()),
+    );
+    foreach ($htaccess_files as $htaccess_file => $info) {
+      // Check for the string which was added to the recommended .htaccess file
+      // in the latest security update.
+      if (!file_exists($htaccess_file) || !($contents = @file_get_contents($htaccess_file)) || strpos($contents, 'Drupal_Security_Do_Not_Remove_See_SA_2013_003') === FALSE) {
+        $requirements[$htaccess_file] = array(
+          'title' => $info['title'],
+          'value' => $t('Not fully protected'),
+          'severity' => REQUIREMENT_ERROR,
+          'description' => $t('See <a href="@url">@url</a> for information about the recommended .htaccess file which should be added to the %directory directory to help protect against arbitrary code execution.', array('@url' => 'http://drupal.org/SA-CORE-2013-003', '%directory' => $info['directory'])),
+        );
+      }
+    }
   }
 
   // Report cron status.
@@ -477,7 +505,7 @@ function system_requirements($phase) {
         'title' => $t('HTTP request status'),
         'value' => $t('Fails'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('Your system or network configuration does not allow Drupal to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates, fetch aggregator feeds, sign in via OpenID, or use other network-dependent services. If you are certain that Drupal can access web pages but you are still seeing this message, you may add <code>$conf[\'drupal_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
+        'description' => $t('Your system or network configuration does not allow Drupal to access web pages, resulting in reduced functionality. This could be due to your webserver configuration or PHP settings, and should be resolved in order to download information about available updates or use other network-dependent services. If you are certain that Drupal can access web pages but you are still seeing this message, you may add <code>$conf[\'drupal_http_request_fails\'] = FALSE;</code> to the bottom of your settings.php file.'),
       );
     }
   }
@@ -512,7 +540,7 @@ function system_install() {
     ->execute();
 
   // Populate the cron key variable.
-  $cron_key = drupal_hash_base64(drupal_random_bytes(55));
+  $cron_key = drupal_random_key();
   state_set('cron_key', $cron_key);
 }
 
@@ -663,8 +691,6 @@ function system_schema() {
   );
   $schema['cache_bootstrap'] = $schema['cache'];
   $schema['cache_bootstrap']['description'] = 'Cache table for data required to bootstrap Drupal, may be routed to a shared memory cache.';
-  $schema['cache_form'] = $schema['cache'];
-  $schema['cache_form']['description'] = 'Cache table for the form system to store recently built forms and their storage data, to be used in subsequent page requests.';
   $schema['cache_page'] = $schema['cache'];
   $schema['cache_page']['description'] = 'Cache table used to store compressed pages for anonymous users, if page caching is enabled.';
   $schema['cache_menu'] = $schema['cache'];
@@ -1571,6 +1597,44 @@ function system_schema() {
     ),
   );
 
+  $schema['tempstore'] = array(
+    'description' => 'Generic temporary key/value storage table with an expiration.',
+    'fields' => array(
+      'collection' => array(
+        'description' => 'A named collection of key and value pairs.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        // KEY is an SQL reserved word, so use 'name' as the key's field name.
+        'description' => 'The key of the key/value pair.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the key/value pair.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'expire' => array(
+        'description' => 'The time since Unix epoch in seconds when this item expires.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('collection', 'name'),
+    'indexes' => array(
+      'all' => array('name', 'collection', 'expire'),
+      'expire' => array('expire'),
+    ),
+  );
+
   $schema['url_alias'] = array(
     'description' => 'A list of URL aliases for Drupal paths; a user may visit either the source or destination path.',
     'fields' => array(
@@ -1730,6 +1794,55 @@ function system_update_8006() {
   db_delete('actions')
     ->condition('aid', array('comment_save_action', 'node_save_action'), 'IN')
     ->execute();
+}
+
+/**
+ * Create the tempstore table and remove the cache_form table.
+ */
+function system_update_8007() {
+  $schema = array(
+    'description' => 'Generic temporary key/value storage table with an expiration.',
+    'fields' => array(
+      'collection' => array(
+        'description' => 'A named collection of key and value pairs.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        // KEY is an SQL reserved word, so use 'name' as the key's field name.
+        'description' => 'The key of the key/value pair.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the key/value pair.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'expire' => array(
+        'description' => 'The time since Unix epoch in seconds when this item expires.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('collection', 'name'),
+    'indexes' => array(
+      'all' => array('name', 'collection', 'expire'),
+      'expire' => array('expire'),
+    ),
+  );
+  if (!db_table_exists('tempstore')) {
+    db_create_table('tempstore', $schema);
+  }
+  if (db_table_exists('cache_form')) {
+    db_drop_table('cache_form');
+  }
 }
 
 /**

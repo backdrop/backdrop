@@ -154,6 +154,7 @@ class ListDynamicValuesValidationTestCase extends ListDynamicValuesTestCase {
    */
   function testDynamicAllowedValues() {
     // Verify that the test passes against every value we had.
+    state_set('list_test_dynamic_values', drupal_map_assoc($this->test));
     foreach ($this->test as $key => $value) {
       $this->entity->test_list[LANGUAGE_NONE][0]['value'] = $value;
       try {

@@ -225,8 +225,7 @@ function list_allowed_values($field, $instance = NULL, $entity_type = NULL, $ent
   if (!isset($allowed_values[$field['id']])) {
     $function = $field['settings']['allowed_values_function'];
     // If $cacheable is FALSE, then the allowed values are not statically
-    // cached. See list_test_dynamic_values_callback() for an example of
-    // generating dynamic and uncached values.
+    // cached.
     $cacheable = TRUE;
     if (!empty($function)) {
       $values = $function($field, $instance, $entity_type, $entity, $cacheable);

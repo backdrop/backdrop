@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @ingroup database
+ * @addtogroup database
  * @{
  */
 
@@ -83,7 +83,7 @@ interface QueryConditionInterface {
 
   /**
    * Sets a condition that the specified subquery returns values.
-   * 
+   *
    * @param SelectQueryInterface $select
    *   The subquery that must contain results.
    *
@@ -91,10 +91,10 @@ interface QueryConditionInterface {
    *   The called object.
    */
   public function exists(SelectQueryInterface $select);
-  
+
   /**
    * Sets a condition that the specified subquery returns no values.
-   * 
+   *
    * @param SelectQueryInterface $select
    *   The subquery that must not contain results.
    *
@@ -102,7 +102,7 @@ interface QueryConditionInterface {
    *   The called object.
    */
   public function notExists(SelectQueryInterface $select);
-  
+
   /**
    * Gets a complete list of all conditions in this conditional clause.
    *
@@ -283,14 +283,14 @@ abstract class Query implements QueryPlaceholderInterface {
 
   /**
    * The target of the connection object.
-   * 
+   *
    * @var string
    */
   protected $connectionTarget;
 
   /**
    * The key of the connection object.
-   * 
+   *
    * @var string
    */
   protected $connectionKey;
@@ -804,7 +804,7 @@ class DeleteQuery extends Query implements QueryConditionInterface {
     $this->condition->notExists($select);
     return $this;
   }
-  
+
   /**
    * Implements QueryConditionInterface::conditions().
    */
@@ -942,7 +942,17 @@ class TruncateQuery extends Query {
     // Create a sanitized comment string to prepend to the query.
     $comments = $this->connection->makeComment($this->comments);
 
-    return $comments . 'TRUNCATE {' . $this->connection->escapeTable($this->table) . '} ';
+    // In most cases, TRUNCATE is not a transaction safe statement as it is a
+    // DDL statement which results in an implicit COMMIT. When we are in a
+    // transaction, fallback to the slower, but transactional, DELETE.
+    // PostgreSQL also locks the entire table for a TRUNCATE strongly reducing
+    // the concurrency with other transactions.
+    if ($this->connection->inTransaction()) {
+      return $comments . 'DELETE FROM {' . $this->connection->escapeTable($this->table) . '}';
+    }
+    else {
+      return $comments . 'TRUNCATE {' . $this->connection->escapeTable($this->table) . '} ';
+    }
   }
 }
 
@@ -1053,7 +1063,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
     $this->condition->notExists($select);
     return $this;
   }
-  
+
   /**
    * Implements QueryConditionInterface::conditions().
    */
@@ -1545,7 +1555,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
     $this->condition->notExists($select);
     return $this;
   }
-  
+
   /**
    * Implements QueryConditionInterface::conditions().
    */
@@ -1759,14 +1769,14 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
   public function exists(SelectQueryInterface $select) {
     return $this->condition('', $select, 'EXISTS');
   }
-  
+
   /**
    * Implements QueryConditionInterface::notExists().
    */
   public function notExists(SelectQueryInterface $select) {
     return $this->condition('', $select, 'NOT EXISTS');
   }
-  
+
   /**
    * Implements QueryConditionInterface::conditions().
    */
@@ -1895,8 +1905,13 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
   function __clone() {
     $this->changed = TRUE;
     foreach ($this->conditions as $key => $condition) {
-      if ($key !== '#conjunction' && $condition['field'] instanceOf QueryConditionInterface) {
-        $this->conditions[$key]['field'] = clone($condition['field']);
+      if ($key !== '#conjunction') {
+        if ($condition['field'] instanceOf QueryConditionInterface) {
+          $this->conditions[$key]['field'] = clone($condition['field']);
+        }
+        if ($condition['value'] instanceOf SelectQueryInterface) {
+          $this->conditions[$key]['value'] = clone($condition['value']);
+        }
       }
     }
   }
@@ -1952,5 +1967,5 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
 }
 
 /**
- * @} End of "ingroup database".
+ * @} End of "addtogroup database".
  */

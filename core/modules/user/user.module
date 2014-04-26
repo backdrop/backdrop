@@ -357,10 +357,14 @@ function user_password($length = 10) {
 
   // Loop the number of times specified by $length.
   for ($i = 0; $i < $length; $i++) {
+    do {
+      // Find a secure random number within the range needed.
+      $index = ord(drupal_random_bytes(1));
+    } while ($index > $len);
 
     // Each iteration, pick a random character from the
     // allowable string and append it to the password:
-    $pass .= $allowable_characters[mt_rand(0, $len)];
+    $pass .= $allowable_characters[$index];
   }
 
   return $pass;
@@ -491,6 +495,11 @@ function user_permission() {
       'title' => t('Administer users'),
       'restrict access' => TRUE,
     ),
+    'administer account settings' => array(
+      'title' => t('Administer user account settings'),
+      'description' => t('Manage settings that apply to all user accounts.'),
+      'restrict access' => TRUE,
+    ),
     'access user profiles' => array(
       'title' => t('View user profiles'),
     ),
@@ -583,14 +592,18 @@ function user_search_execute($keys = NULL, $conditions = NULL) {
   $query = db_select('users')->extend('PagerDefault');
   $query->fields('users', array('uid'));
   if (user_access('administer users')) {
-    // Administrators can also search in the otherwise private email field.
+    // Administrators can also search in the otherwise private email field,
+    // and they don't need to be restricted to only active users.
     $query->fields('users', array('mail'));
     $query->condition(db_or()->
       condition('name', '%' . db_like($keys) . '%', 'LIKE')->
       condition('mail', '%' . db_like($keys) . '%', 'LIKE'));
   }
   else {
-    $query->condition('name', '%' . db_like($keys) . '%', 'LIKE');
+    // Regular users can only search via usernames, and we do not show them
+    // blocked accounts.
+    $query->condition('name', '%' . db_like($keys) . '%', 'LIKE')
+      ->condition('status', 1);
   }
   $uids = $query
     ->limit(15)
@@ -707,6 +720,9 @@ function user_account_form(&$form, &$form_state) {
         '#access' => !empty($protected_values),
         '#description' => $current_pass_description,
         '#weight' => -5,
+        // Do not let web browsers remember this password, since we are
+        // trying to confirm that the person submitting the form actually
+        // knows the current one.
         '#attributes' => array('autocomplete' => 'off'),
       );
       $form['#validate'][] = 'user_validate_current_pass';
@@ -899,7 +915,7 @@ function user_account_form_validate($form, &$form_state) {
 }
 
 function user_login_block($form) {
-  $form['#action'] = url($_GET['q'], array('query' => drupal_get_destination()));
+  $form['#action'] = url(current_path(), array('query' => drupal_get_destination(), 'external' => FALSE));
   $form['#id'] = 'user-login-form';
   $form['#validate'] = user_login_default_validators();
   $form['#submit'][] = 'user_login_submit';
@@ -911,7 +927,6 @@ function user_login_block($form) {
   );
   $form['pass'] = array('#type' => 'password',
     '#title' => t('Password'),
-    '#maxlength' => 60,
     '#size' => 15,
     '#required' => TRUE,
   );
@@ -1271,15 +1286,33 @@ function theme_user_list($variables) {
   return theme('item_list', array('items' => $items, 'title' => $title));
 }
 
+/**
+ * Determines if the current user is anonymous.
+ *
+ * @return bool
+ *   TRUE if the user is anonymous, FALSE if the user is authenticated.
+ */
 function user_is_anonymous() {
   // Menu administrators can see items for anonymous when administering.
   return !$GLOBALS['user']->uid || !empty($GLOBALS['menu_admin']);
 }
 
+/**
+ * Determines if the current user is logged in.
+ *
+ * @return bool
+ *   TRUE if the user is logged in, FALSE if the user is anonymous.
+ */
 function user_is_logged_in() {
   return (bool) $GLOBALS['user']->uid;
 }
 
+/**
+ * Determines if the current user has access to the user registration page.
+ *
+ * @return bool
+ *   TRUE if the user is not already logged in and can register for an account.
+ */
 function user_register_access() {
   return user_is_anonymous() && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
 }
@@ -1475,7 +1508,7 @@ function user_menu() {
     'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_admin_settings'),
-    'access arguments' => array('administer users'),
+    'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
     'weight' => -10,
   );
@@ -1603,7 +1636,7 @@ function user_menu_link_alter(&$link) {
  */
 function user_translated_menu_link_alter(&$link) {
   // Hide the "User account" link for anonymous users.
-  if ($link['link_path'] == 'user' && $link['module'] == 'system' && user_is_anonymous()) {
+  if ($link['link_path'] == 'user' && $link['module'] == 'system' && !$GLOBALS['user']->uid) {
     $link['hidden'] = 1;
   }
 }
@@ -1907,7 +1940,10 @@ function user_login_submit($form, &$form_state) {
  * Generates a unique URL for a user to login and reset their password.
  *
  * @param object $account
- *   An object containing the user account.
+ *   An object containing the user account, which must contain at least the
+ *   following properties:
+ *   - uid: The user ID number.
+ *   - login: The UNIX timestamp of the user's last login.
  *
  * @return
  *   A unique URL that provides a one-time log in for the user, from which
@@ -1924,9 +1960,9 @@ function user_pass_reset_url($account) {
  * @param object $account
  *   The user account object, which must contain at least the following
  *   properties:
- *   - uid: The user uid number.
+ *   - uid: The user ID number.
  *   - pass: The hashed user password string.
- *   - login: The user login name.
+ *   - login: The UNIX timestamp of the user's last login.
  *
  * @return
  *   A unique URL that may be used to confirm the cancellation of the user
@@ -1948,15 +1984,15 @@ function user_cancel_url($account) {
  * order to validate the URL, the same hash can be generated again, from the
  * same information, and compared to the hash value from the URL. The URL
  * normally contains both the time stamp and the numeric user ID. The login
- * name and hashed password are retrieved from the database as necessary. For a
- * usage example, see user_cancel_url() and user_cancel_confirm().
+ * timestamp and hashed password are retrieved from the database as necessary.
+ * For a usage example, see user_cancel_url() and user_cancel_confirm().
  *
- * @param $password
+ * @param string $password
  *   The hashed user account password value.
- * @param $timestamp
- *   A unix timestamp.
- * @param $login
- *   The user account login name.
+ * @param int $timestamp
+ *   A UNIX timestamp, typically REQUEST_TIME.
+ * @param int $login
+ *   The UNIX timestamp of the user's last login.
  *
  * @return
  *   A string that is safe for use in URLs and SQL statements.
@@ -2201,6 +2237,14 @@ function user_build_content($account, $view_mode = 'full', $langcode = NULL) {
   // Remove previously built content, if exists.
   $account->content = array();
 
+  // Allow modules to change the view mode.
+  $context = array(
+    'entity_type' => 'user',
+    'entity' => $account,
+    'langcode' => $langcode,
+  );
+  drupal_alter('entity_view_mode', $view_mode, $context);
+
   // Build fields content.
   field_attach_prepare_view('user', array($account->uid => $account), $view_mode, $langcode);
   entity_prepare_view('user', array($account->uid => $account), $langcode);
@@ -2209,6 +2253,10 @@ function user_build_content($account, $view_mode = 'full', $langcode = NULL) {
   // Populate $account->content with a render() array.
   module_invoke_all('user_view', $account, $view_mode, $langcode);
   module_invoke_all('entity_view', $account, 'user', $view_mode, $langcode);
+
+  // Make sure the current view mode is stored if no module has already
+  // populated the related key.
+  $account->content += array('#view_mode' => $view_mode);
 }
 
 /**
@@ -2399,7 +2447,7 @@ Your account on [site:name] has been canceled.
  *   An associative array of token replacement values. If the 'user' element
  *   exists, it must contain a user account object with the following
  *   properties:
- *   - login: The account login name.
+ *   - login: The UNIX timestamp of the user's last login.
  *   - pass: The hashed account login password.
  * @param $options
  *   Unused parameter required by the token_replace() function.
@@ -2969,7 +3017,7 @@ function user_filters() {
   $options = array();
   foreach (module_implements('permission') as $module) {
     $function = $module . '_permission';
-    if ($permissions = $function('permission')) {
+    if ($permissions = $function()) {
       asort($permissions);
       foreach ($permissions as $permission => $description) {
         $options[t('@module module', array('@module' => $module))][$permission] = t($permission);
@@ -3271,7 +3319,7 @@ function user_block_user_action(&$entity, $context = array()) {
 function user_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
   $instance = $form['#instance'];
 
-  if ($instance['entity_type'] == 'user') {
+  if ($instance['entity_type'] == 'user' && !$form['#field']['locked']) {
     $form['instance']['settings']['user_register_form'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display on user registration form.'),

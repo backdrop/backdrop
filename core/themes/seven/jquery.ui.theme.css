@@ -352,9 +352,9 @@
   border-bottom: 1px solid #b4b4b4;
   border-left-color: #D2D2D2;
   border-right-color: #D2D2D2;
-  background: url(images/buttons.png) 0 0 repeat-x;
   -moz-border-radius: 20px;
   border-radius: 20px;
+  background-color: #e4e4e4;
 }
 .ui-dialog .ui-dialog-buttonpane button:active {
   background: #666;

@@ -23,14 +23,20 @@
  * @see hook_field_extra_fields_alter()
  *
  * @return
- *   A nested array of 'pseudo-field' components. Each list is nested within
- *   the following keys: entity type, bundle name, context (either 'form' or
+ *   A nested array of 'pseudo-field' elements. Each list is nested within the
+ *   following keys: entity type, bundle name, context (either 'form' or
  *   'display'). The keys are the name of the elements as appearing in the
  *   renderable array (either the entity form or the displayed entity). The
  *   value is an associative array:
- *   - label: The human readable name of the component.
- *   - description: A short description of the component contents.
+ *   - label: The human readable name of the element.
+ *   - description: A short description of the element contents.
  *   - weight: The default weight of the element.
+ *   - edit: (optional) String containing markup (normally a link) used as the
+ *     element's 'edit' operation in the administration interface. Only for
+ *     'form' context.
+ *   - delete: (optional) String containing markup (normally a link) used as the
+ *     element's 'delete' operation in the administration interface. Only for
+ *     'form' context.
  */
 function hook_field_extra_fields() {
   $extra['node']['example'] = array(
@@ -96,6 +102,9 @@ function hook_field_extra_fields_alter(&$info) {
 
 /**
  * Define Field API field types.
+ *
+ * Along with this hook, you also need to implement other hooks. See
+ * @link field_types Field Types API @endlink for more information.
  *
  * @return
  *   An array whose keys are field type names and whose values are arrays
@@ -183,8 +192,11 @@ function hook_field_info_alter(&$info) {
 /**
  * Define the Field API schema for a field structure.
  *
- * This hook MUST be defined in .install for it to be detected during
- * installation and upgrade.
+ * This is invoked when a field is created, in order to obtain the database
+ * schema from the module that defines the field's type.
+ *
+ * This hook must be defined in the module's .install file for it to be detected
+ * during installation and upgrade.
  *
  * @param $field
  *   A field structure.
@@ -666,7 +678,7 @@ function hook_field_is_empty($item, $field) {
 }
 
 /**
- * @} End of "defgroup field_types"
+ * @} End of "defgroup field_types".
  */
 
 /**
@@ -680,11 +692,10 @@ function hook_field_is_empty($item, $field) {
  * which widget to use. Widget types are defined by implementing
  * hook_field_widget_info().
  *
- * Widgets are
- * @link http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html Form API @endlink
- * elements with additional processing capabilities. Widget hooks are typically
- * called by the Field Attach API during the creation of the field form
- * structure with field_attach_form().
+ * Widgets are @link forms_api_reference.html Form API @endlink elements with
+ * additional processing capabilities. Widget hooks are typically called by the
+ * Field Attach API during the creation of the field form structure with
+ * field_attach_form().
  *
  * @see field
  * @see field_types
@@ -719,6 +730,9 @@ function hook_field_is_empty($item, $field) {
  *       - FIELD_BEHAVIOR_DEFAULT: (default) If the widget accepts default
  *         values.
  *       - FIELD_BEHAVIOR_NONE: if the widget does not support default values.
+ *   - weight: (optional) An integer to determine the weight of this widget
+ *     relative to other widgets in the Field UI when selecting a widget for a
+ *     given field instance.
  *
  * @see hook_field_widget_info_alter()
  * @see hook_field_widget_form()
@@ -728,7 +742,7 @@ function hook_field_is_empty($item, $field) {
  * @see hook_field_widget_settings_form()
  */
 function hook_field_widget_info() {
-    return array(
+  return array(
     'text_textfield' => array(
       'label' => t('Text field'),
       'field types' => array('text'),
@@ -755,6 +769,8 @@ function hook_field_widget_info() {
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
       ),
+      // As an advanced widget, force it to sink to the bottom of the choices.
+      'weight' => 2,
     ),
   );
 }
@@ -859,7 +875,7 @@ function hook_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     '#type' => $instance['widget']['type'],
     '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
   );
-  return $element;
+  return array('value' => $element);
 }
 
 /**
@@ -981,7 +997,7 @@ function hook_field_widget_error($element, $error, $form, &$form_state) {
 
 
 /**
- * @} End of "defgroup field_widget"
+ * @} End of "defgroup field_widget".
  */
 
 
@@ -1220,7 +1236,7 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
 }
 
 /**
- * @} End of "defgroup field_formatter"
+ * @} End of "defgroup field_formatter".
  */
 
 /**
@@ -1570,11 +1586,11 @@ function hook_field_attach_delete_bundle($entity_type, $bundle, $instances) {
 }
 
 /**
- * @} End of "defgroup field_attach"
+ * @} End of "defgroup field_attach".
  */
 
 /**
- * @ingroup field_storage
+ * @addtogroup field_storage
  * @{
  */
 
@@ -2372,11 +2388,11 @@ function hook_field_widget_properties_ENTITY_TYPE_alter(&$widget, $context) {
 }
 
 /**
- * @} End of "ingroup field_storage"
+ * @} End of "addtogroup field_storage".
  */
 
 /**
- * @ingroup field_crud
+ * @addtogroup field_crud
  * @{
  */
 
@@ -2482,7 +2498,7 @@ function hook_field_delete_field($field) {
  *
  * @param $instance
  *   The instance as it is post-update.
- * @param $prior_$instance
+ * @param $prior_instance
  *   The instance as it was pre-update.
  */
 function hook_field_update_instance($instance, $prior_instance) {
@@ -2625,7 +2641,7 @@ function hook_field_storage_purge($entity_type, $entity, $field, $instance) {
 }
 
 /**
- * @} End of "ingroup field_crud"
+ * @} End of "addtogroup field_crud".
  */
 
 /**
@@ -2656,5 +2672,5 @@ function hook_field_access($op, $field, $entity_type, $entity, $account) {
 }
 
 /**
- * @} End of "addtogroup hooks"
+ * @} End of "addtogroup hooks".
  */

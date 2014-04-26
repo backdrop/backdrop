@@ -1084,7 +1084,7 @@ class UserPictureTestCase extends DrupalWebTestCase {
    * Tests the admin form validates user picture settings.
    */
   function testUserPictureAdminFormValidation() {
-    $this->drupalLogin($this->drupalCreateUser(array('administer users')));
+    $this->drupalLogin($this->drupalCreateUser(array('administer account settings')));
 
     // The default values are valid.
     $this->drupalPost('admin/config/people/accounts', array(), t('Save configuration'));
@@ -1107,7 +1107,7 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->drupalCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer modules', 'administer users'));
+    $this->admin_user = $this->drupalCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer modules'));
 
     // Find the new role ID - it must be the maximum.
     $all_rids = array_keys($this->admin_user->roles);
@@ -1156,12 +1156,12 @@ class UserPermissionsTestCase extends DrupalWebTestCase {
     $edit['user_admin_role'] = $this->rid;
     $this->drupalPost('admin/config/people/accounts', $edit, t('Save configuration'));
 
-    // Enable aggregator module and ensure the 'administer news feeds'
-    // permission is assigned by default.
+    // Enable book module and ensure the 'administer book outlines' permission
+    // is assigned by default.
     $edit = array();
-    $edit['modules[Core][aggregator][enable]'] = TRUE;
+    $edit['modules[Core][book][enable]'] = TRUE;
     $this->drupalPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertTrue(user_access('administer news feeds', $this->admin_user), t('The permission was automatically assigned to the administrator role'));
+    $this->assertTrue(user_access('administer book outlines', $this->admin_user), t('The permission was automatically assigned to the administrator role'));
   }
 
   /**
@@ -1350,7 +1350,7 @@ class UserAutocompleteTestCase extends DrupalWebTestCase {
 
 
 /**
- * Test user-links in secondary menu.
+ * Tests user links in the secondary menu.
  */
 class UserAccountLinksUnitTests extends DrupalWebTestCase {
   /**
@@ -1416,6 +1416,17 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
     $this->drupalPost('filter/tips', $edit, t('Log in'));
     $this->assertNoText(t('User login'), t('Logged in.'));
     $this->assertPattern('!<title.*?' . t('Compose tips') . '.*?</title>!', t('Still on the same page after login for allowed page'));
+
+    // Check that the user login block is not vulnerable to information
+    // disclosure to third party sites.
+    $this->drupalLogout();
+    $this->drupalPost('http://example.com/', $edit, t('Log in'), array('external' => FALSE));
+    // Check that we remain on the site after login.
+    $this->assertEqual(url('user/' . $user->uid, array('absolute' => TRUE)), $this->getUrl(), t('Redirected to user profile page after login from the frontpage'));
+  }
+
+  function setUp() {
+    parent::setUp('menu');
   }
 
   /**
@@ -1468,6 +1479,38 @@ class UserBlocksUnitTests extends DrupalWebTestCase {
       ->execute();
     $this->assertEqual(db_query("SELECT COUNT(*) FROM {sessions} WHERE uid = :uid AND sid = :sid AND timestamp = :timestamp", array(':uid' => $fields['uid'], ':sid' => $fields['sid'], ':timestamp' => $fields['timestamp']))->fetchField(), 1, t('Session record inserted.'));
   }
+
+  /**
+   * Tests disabling the 'My account' link.
+   */
+  function testDisabledAccountLink() {
+    // Create an admin user and log in.
+    $this->drupalLogin($this->drupalCreateUser(array('access administration pages', 'administer menu')));
+
+    // Verify that the 'My account' link is enabled.
+    $this->drupalGet('admin/structure/menu/manage/user-menu');
+    $label = $this->xpath('//label[contains(.,:text)]/@for', array(':text' => 'Enable My account menu link'));
+    $this->assertFieldChecked((string) $label[0], "The 'My account' link is enabled by default.");
+
+    // Disable the 'My account' link.
+    $input = $this->xpath('//input[@id=:field_id]/@name', array(':field_id' => (string)$label[0]));
+    $edit = array(
+      (string) $input[0] => FALSE,
+    );
+    $this->drupalPost('admin/structure/menu/manage/user-menu', $edit, t('Save configuration'));
+
+    // Get the homepage.
+    $this->drupalGet('<front>');
+
+    // Verify that the 'My account' link does not appear when disabled.
+    $link = $this->xpath('//ul[@id=:menu_id]/li/a[contains(@href, :href) and text()=:text]', array(
+      ':menu_id' => 'secondary-menu-links',
+      ':href' => 'user',
+      ':text' => 'My account',
+    ));
+    $this->assertEqual(count($link), 0, 'My account link is not in the secondary menu.');
+  }
+
 }
 
 /**
@@ -1863,10 +1906,28 @@ class UserUserSearchTestCase extends DrupalWebTestCase {
     $edit = array('keys' => $keys);
     $this->drupalPost('search/user/', $edit, t('Search'));
     $this->assertText($keys);
+
+    // Create a blocked user.
+    $blocked_user = $this->drupalCreateUser();
+    $blocked_user->status = 0;
+    $blocked_user->save();
+
+    // Verify that users with "administer users" permissions can see blocked
+    // accounts in search results.
+    $edit = array('keys' => $blocked_user->name);
+    $this->drupalPost('search/user', $edit, t('Search'));
+    $this->assertText($blocked_user->name, 'Blocked users are listed on the user search results for users with the "administer users" permission.');
+
+    // Verify that users without "administer users" permissions do not see
+    // blocked accounts in search results.
+    $this->drupalLogin($user1);
+    $edit = array('keys' => $blocked_user->name);
+    $this->drupalPost('search/user/', $edit, t('Search'));
+    $this->assertNoText($blocked_user->name, 'Blocked users are hidden from the user search results.');
+
     $this->drupalLogout();
   }
 }
-
 
 /**
  * Test role assignment.

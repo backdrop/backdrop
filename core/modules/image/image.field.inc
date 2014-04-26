@@ -310,7 +310,7 @@ function image_field_widget_settings_form($field, $instance) {
   $form['preview_image_style'] = array(
     '#title' => t('Preview image style'),
     '#type' => 'select',
-    '#options' => image_style_options(FALSE),
+    '#options' => image_style_options(FALSE, PASS_THROUGH),
     '#empty_option' => '<' . t('no preview') . '>',
     '#default_value' => $settings['preview_image_style'],
     '#description' => t('The preview image will be shown while editing the content.'),
@@ -350,7 +350,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   if ($field['cardinality'] == 1) {
     // If there's only one field, return it as delta 0.
     if (empty($elements[0]['#default_value']['fid'])) {
-      $elements[0]['#description'] = theme('file_upload_help', array('description' => $instance['description'], 'upload_validators' => $elements[0]['#upload_validators']));
+      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators']));
     }
   }
   else {
@@ -494,7 +494,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
-  $image_styles = image_style_options(FALSE);
+  $image_styles = image_style_options(FALSE, PASS_THROUGH);
   $element['image_style'] = array(
     '#title' => t('Image style'),
     '#type' => 'select',
@@ -527,7 +527,7 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   $summary = array();
 
-  $image_styles = image_style_options(FALSE);
+  $image_styles = image_style_options(FALSE, PASS_THROUGH);
   // Unset possible 'No defined styles' option.
   unset($image_styles['']);
   // Styles could be lost because of enabled/disabled modules that defines

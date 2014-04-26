@@ -23,6 +23,20 @@ function form_test_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
+  $items['form-test/validate-required'] = array(
+    'title' => 'Form #required validation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_validate_required_form'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['form-test/validate-required-no-title'] = array(
+    'title' => 'Form #required validation without #title',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_validate_required_form_no_title'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['form-test/limit-validation-errors'] = array(
     'title' => 'Form validation with some error suppression',
     'page callback' => 'drupal_get_form',
@@ -156,6 +170,14 @@ function form_test_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['form-test/redirect'] = array(
+    'title' => 'Redirect test',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_redirect'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   $items['form_test/form-labels'] = array(
     'title' => 'Form label test',
     'page callback' => 'drupal_get_form',
@@ -191,6 +213,12 @@ function form_test_menu() {
       'type' => MENU_CALLBACK,
     );
   }
+  $items['form-test/double-form'] = array(
+    'title' => 'Double form test',
+    'page callback' => 'form_test_double_form',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
   $items['form-test/load-include-menu'] = array(
     'title' => 'FAPI test loading includes',
@@ -349,6 +377,78 @@ function form_test_validate_form_validate(&$form, &$form_state) {
     // Trigger a form validation error to see our changes.
     form_set_error('');
   }
+}
+
+/**
+ * Form constructor to test the #required property.
+ */
+function form_test_validate_required_form($form, &$form_state) {
+  $options = drupal_map_assoc(array('foo', 'bar'));
+
+  $form['textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Textfield',
+    '#required' => TRUE,
+  );
+  $form['checkboxes'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Checkboxes',
+    '#options' => $options,
+    '#required' => TRUE,
+  );
+  $form['select'] = array(
+    '#type' => 'select',
+    '#title' => 'Select',
+    '#options' => $options,
+    '#required' => TRUE,
+  );
+  $form['radios'] = array(
+    '#type' => 'radios',
+    '#title' => 'Radios',
+    '#options' => $options,
+    '#required' => TRUE,
+  );
+  $form['radios_optional'] = array(
+    '#type' => 'radios',
+    '#title' => 'Radios (optional)',
+    '#options' => $options,
+  );
+  $form['radios_optional_default_value_false'] = array(
+    '#type' => 'radios',
+    '#title' => 'Radios (optional, with a default value of FALSE)',
+    '#options' => $options,
+    '#default_value' => FALSE,
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => 'Submit');
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_validate_required_form().
+ */
+function form_test_validate_required_form_submit($form, &$form_state) {
+  drupal_set_message('The form_test_validate_required_form form was submitted successfully.');
+}
+
+/**
+ * Form constructor to test the #required property without #title.
+ */
+function form_test_validate_required_form_no_title($form, &$form_state) {
+  $form['textfield'] = array(
+    '#type' => 'textfield',
+    '#required' => TRUE,
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => 'Submit');
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_validate_required_form_no_title().
+ */
+function form_test_validate_required_form_no_title_submit($form, &$form_state) {
+  drupal_set_message('The form_test_validate_required_form_no_title form was submitted successfully.');
 }
 
 /**
@@ -1526,6 +1626,15 @@ function form_test_programmatic_form($form, &$form_state) {
     '#default_value' => array(1, 2),
   );
 
+  // This is used to test that programmatic form submissions can bypass #access
+  // restrictions.
+  $form['textfield_no_access'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Textfield no access',
+    '#default_value' => 'default value',
+    '#access' => FALSE,
+  );
+
   $form['field_to_validate'] = array(
     '#type' => 'radios',
     '#title' => 'Field to validate (in the case of limited validation)',
@@ -1663,6 +1772,43 @@ function form_test_clicked_button_submit($form, &$form_state) {
 }
 
 /**
+ * Form builder to detect form redirect.
+ */
+function form_test_redirect($form, &$form_state) {
+  $form['redirection'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use redirection'),
+  );
+  $form['destination'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Redirect destination'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="redirection"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submit handler to test different redirect behaviours.
+ */
+function form_test_redirect_submit(&$form, &$form_state) {
+  if (!empty($form_state['values']['redirection'])) {
+    $form_state['redirect'] = !empty($form_state['values']['destination']) ? $form_state['values']['destination'] : NULL;
+  }
+  else {
+    $form_state['redirect'] = FALSE;
+  }
+}
+
+/**
  * Implements hook_form_FORM_ID_alter() for the registration form.
  */
 function form_test_form_user_register_form_alter(&$form, &$form_state) {
@@ -1762,4 +1908,30 @@ function form_test_checkboxes_zero($form, &$form_state, $json = TRUE) {
 
 function _form_test_checkboxes_zero_no_redirect($form, &$form_state) {
   $form_state['redirect'] = FALSE;
+}
+
+/**
+ * Menu callback returns two instances of the same form.
+ */
+function form_test_double_form() {
+  return array(
+    'form1' => drupal_get_form('form_test_html_id'),
+    'form2' => drupal_get_form('form_test_html_id'),
+  );
+}
+
+/**
+ * Builds a simple form to test duplicate HTML IDs.
+ */
+function form_test_html_id($form, &$form_state) {
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => 'name',
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+  return $form;
 }

@@ -163,6 +163,22 @@ function image_update_8002() {
 }
 
 /**
+ * Add labels to all available styles.
+ */
+function image_update_8003() {
+  $names = config_get_names_with_prefix('image.styles.');
+  foreach ($names as $config_file) {
+    $config = config($config_file);
+    $label = $config->get('label');
+    if (!$label) {
+      $config->set('label', $config->get('name'));
+      $config->save();
+    }
+  }
+  cache('cache')->delete('image_styles');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-8.x"
  * The next series of updates should start at 9000.
  */

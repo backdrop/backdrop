@@ -2,38 +2,43 @@
 
 /**
  * @file
- * Tests for update.module.
+ * This file contains tests for the Update Manager module.
  *
- * This file contains tests for the update module. The overarching methodology
- * of these tests is we need to compare a given state of installed modules and
- * themes (e.g. version, project grouping, timestamps, etc) vs. a current
- * state of what the release history XML files we fetch say is available.  We
- * have dummy XML files (in the 'tests' subdirectory) that describe various
- * scenarios of what's available for different test projects, and we have
- * dummy .info file data (specified via hook_system_info_alter() in the
- * update_test helper module) describing what's currently installed.  Each
- * test case defines a set of projects to install, their current state (via
- * the 'update_test_system_info' variable) and the desired available update
- * data (via the 'update_test_xml_map' variable), and then performs a series
- * of assertions that the report matches our expectations given the specific
- * initial state and availability scenario.
+ * The overarching methodology of these tests is we need to compare a given
+ * state of installed modules and themes (e.g., version, project grouping,
+ * timestamps, etc) against a current state of what the release history XML
+ * files we fetch say is available. We have dummy XML files (in the
+ * modules/update/tests directory) that describe various scenarios of what's
+ * available for different test projects, and we have dummy .info file data
+ * (specified via hook_system_info_alter() in the update_test helper module)
+ * describing what's currently installed. Each test case defines a set of
+ * projects to install, their current state (via the 'update_test_system_info'
+ * variable) and the desired available update data (via the
+ * 'update_test_xml_map' variable), and then performs a series of assertions
+ * that the report matches our expectations given the specific initial state and
+ * availability scenario.
  */
 
 /**
- * Base class to define some shared functions used by all update tests.
+ * Defines some shared functions used by all update tests.
  */
 class UpdateTestHelper extends DrupalWebTestCase {
+
   /**
-   * Refresh the update status based on the desired available update scenario.
+   * Refreshes the update status based on the desired available update scenario.
    *
    * @param $xml_map
-   *   Array that maps project names to availability scenarios to fetch.
-   *   The key '#all' is used if a project-specific mapping is not defined.
+   *   Array that maps project names to availability scenarios to fetch. The key
+   *   '#all' is used if a project-specific mapping is not defined.
+   * @param $url
+   *   (optional) A string containing the URL to fetch update data from.
+   *   Defaults to 'update-test'.
    *
    * @see update_test_mock_page()
    */
   protected function refreshUpdateStatus($xml_map, $url = 'update-test') {
-    // Tell update module to fetch from the URL provided by update_test module.
+    // Tell the Update Manager module to fetch from the URL provided by
+    // update_test module.
     variable_set('update_fetch_url', url($url, array('absolute' => TRUE)));
     // Save the map for update_test_mock_page() to use.
     variable_set('update_test_xml_map', $xml_map);
@@ -42,11 +47,11 @@ class UpdateTestHelper extends DrupalWebTestCase {
   }
 
   /**
-   * Run a series of assertions that are applicable for all update statuses.
+   * Runs a series of assertions that are applicable to all update statuses.
    */
   protected function standardTests() {
     $this->assertRaw('<h3>' . t('Drupal core') . '</h3>');
-    $this->assertRaw(l(t('Drupal'), 'http://example.com/project/drupal'), t('Link to the Drupal project appears.'));
+    $this->assertRaw(l(t('Drupal'), 'http://example.com/project/drupal'), 'Link to the Drupal project appears.');
     $this->assertNoText(t('No available releases found'));
   }
 
@@ -60,7 +65,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Tests the update module when no updates are available.
+   * Tests the Update Manager module when no updates are available.
    */
   function testNoUpdatesAvailable() {
     $this->setSystemInfo7_0();
@@ -72,7 +77,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Tests the update module when one normal update ("7.1") is available.
+   * Tests the Update Manager module when one normal update is available.
    */
   function testNormalUpdateAvailable() {
     $this->setSystemInfo7_0();
@@ -81,13 +86,13 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $this->assertNoText(t('Up to date'));
     $this->assertText(t('Update available'));
     $this->assertNoText(t('Security update required!'));
-    $this->assertRaw(l('7.1', 'http://example.com/drupal-7-1-release'), t('Link to release appears.'));
-    $this->assertRaw(l(t('Download'), 'http://example.com/drupal-7-1.tar.gz'), t('Link to download appears.'));
-    $this->assertRaw(l(t('Release notes'), 'http://example.com/drupal-7-1-release'), t('Link to release notes appears.'));
+    $this->assertRaw(l('7.1', 'http://example.com/drupal-7-1-release'), 'Link to release appears.');
+    $this->assertRaw(l(t('Download'), 'http://example.com/drupal-7-1.tar.gz'), 'Link to download appears.');
+    $this->assertRaw(l(t('Release notes'), 'http://example.com/drupal-7-1-release'), 'Link to release notes appears.');
   }
 
   /**
-   * Tests the update module when a security update ("7.2") is available.
+   * Tests the Update Manager module when a security update is available.
    */
   function testSecurityUpdateAvailable() {
     $this->setSystemInfo7_0();
@@ -96,13 +101,13 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $this->assertNoText(t('Up to date'));
     $this->assertNoText(t('Update available'));
     $this->assertText(t('Security update required!'));
-    $this->assertRaw(l('7.2', 'http://example.com/drupal-7-2-release'), t('Link to release appears.'));
-    $this->assertRaw(l(t('Download'), 'http://example.com/drupal-7-2.tar.gz'), t('Link to download appears.'));
-    $this->assertRaw(l(t('Release notes'), 'http://example.com/drupal-7-2-release'), t('Link to release notes appears.'));
+    $this->assertRaw(l('7.2', 'http://example.com/drupal-7-2-release'), 'Link to release appears.');
+    $this->assertRaw(l(t('Download'), 'http://example.com/drupal-7-2.tar.gz'), 'Link to download appears.');
+    $this->assertRaw(l(t('Release notes'), 'http://example.com/drupal-7-2-release'), 'Link to release notes appears.');
   }
 
   /**
-   * Ensure proper results where there are date mismatches among modules.
+   * Ensures proper results where there are date mismatches among modules.
    */
   function testDatestampMismatch() {
     $system_info = array(
@@ -125,7 +130,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Check that running cron updates the list of available updates.
+   * Checks that running cron updates the list of available updates.
    */
   function testModulePageRunCron() {
     $this->setSystemInfo7_0();
@@ -138,7 +143,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Check the messages at admin/modules when the site is up to date.
+   * Checks the messages at admin/modules when the site is up to date.
    */
   function testModulePageUpToDate() {
     $this->setSystemInfo7_0();
@@ -155,7 +160,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Check the messages at admin/modules when missing an update.
+   * Checks the messages at admin/modules when an update is missing.
    */
   function testModulePageRegularUpdate() {
     $this->setSystemInfo7_0();
@@ -172,7 +177,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Check the messages at admin/modules when missing a security update.
+   * Checks the messages at admin/modules when a security update is missing.
    */
   function testModulePageSecurityUpdate() {
     $this->setSystemInfo7_0();
@@ -207,7 +212,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Tests the update module when the update server returns 503 (Service unavailable) errors.
+   * Tests the Update Manager module when the update server returns 503 errors.
    */
   function testServiceUnavailable() {
     $this->refreshUpdateStatus(array(), '503-error');
@@ -243,6 +248,9 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $this->assertEqual($queue->numberOfItems(), 2, 'Queue contains two items');
   }
 
+  /**
+   * Sets the version to 7.0 when no project-specific mapping is defined.
+   */
   protected function setSystemInfo7_0() {
     $setting = array(
       '#all' => array(
@@ -290,7 +298,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
   }
 
   /**
-   * Test the basic functionality of a contrib module on the status report.
+   * Tests the basic functionality of a contrib module on the status report.
    */
   function testUpdateContribBasic() {
     $system_info = array(
@@ -314,21 +322,21 @@ class UpdateTestContribCase extends UpdateTestHelper {
     $this->assertText(t('Up to date'));
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertNoText(t('Update available'));
-    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), t('Link to aaa_update_test project appears.'));
+    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), 'Link to aaa_update_test project appears.');
   }
 
   /**
-   * Test that contrib projects are ordered by project name.
+   * Tests that contrib projects are ordered by project name.
    *
    * If a project contains multiple modules, we want to make sure that the
-   * available updates report is sorted by the parent project names, not by
-   * the names of the modules included in each project. In this test case, we
-   * have 2 contrib projects, "BBB Update test" and "CCC Update test".
-   * However, we have a module called "aaa_update_test" that's part of the
-   * "CCC Update test" project. We need to make sure that we see the "BBB"
-   * project before the "CCC" project, even though "CCC" includes a module
-   * that's processed first if you sort alphabetically by module name (which
-   * is the order we see things inside system_rebuild_module_data() for example).
+   * available updates report is sorted by the parent project names, not by the
+   * names of the modules included in each project. In this test case, we have
+   * two contrib projects, "BBB Update test" and "CCC Update test". However, we
+   * have a module called "aaa_update_test" that's part of the "CCC Update test"
+   * project. We need to make sure that we see the "BBB" project before the
+   * "CCC" project, even though "CCC" includes a module that's processed first
+   * if you sort alphabetically by module name (which is the order we see things
+   * inside system_rebuild_module_data() for example).
    */
   function testUpdateContribOrder() {
     // We want core to be version 7.0.
@@ -375,10 +383,10 @@ class UpdateTestContribCase extends UpdateTestHelper {
     $this->assertText(t('CCC Update test'));
     // We want aaa_update_test included in the ccc_update_test project, not as
     // its own project on the report.
-    $this->assertNoRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), t('Link to aaa_update_test project does not appear.'));
+    $this->assertNoRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), 'Link to aaa_update_test project does not appear.');
     // The other two should be listed as projects.
-    $this->assertRaw(l(t('BBB Update test'), 'http://example.com/project/bbb_update_test'), t('Link to bbb_update_test project appears.'));
-    $this->assertRaw(l(t('CCC Update test'), 'http://example.com/project/ccc_update_test'), t('Link to bbb_update_test project appears.'));
+    $this->assertRaw(l(t('BBB Update test'), 'http://example.com/project/bbb_update_test'), 'Link to bbb_update_test project appears.');
+    $this->assertRaw(l(t('CCC Update test'), 'http://example.com/project/ccc_update_test'), 'Link to bbb_update_test project appears.');
 
     // We want to make sure we see the BBB project before the CCC project.
     // Instead of just searching for 'BBB Update test' or something, we want
@@ -390,7 +398,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
   }
 
   /**
-   * Test that subthemes are notified about security updates for base themes.
+   * Tests that subthemes are notified about security updates for base themes.
    */
   function testUpdateBaseThemeSecurityUpdate() {
     // Only enable the subtheme, not the base theme.
@@ -427,11 +435,11 @@ class UpdateTestContribCase extends UpdateTestHelper {
     );
     $this->refreshUpdateStatus($xml_mapping);
     $this->assertText(t('Security update required!'));
-    $this->assertRaw(l(t('Update test base theme'), 'http://example.com/project/update_test_basetheme'), t('Link to the Update test base theme project appears.'));
+    $this->assertRaw(l(t('Update test base theme'), 'http://example.com/project/update_test_basetheme'), 'Link to the Update test base theme project appears.');
   }
 
   /**
-   * Test that disabled themes are only shown when desired.
+   * Tests that disabled themes are only shown when desired.
    */
   function testUpdateShowDisabledThemes() {
     // Make sure all the update_test_* themes are disabled.
@@ -480,19 +488,19 @@ class UpdateTestContribCase extends UpdateTestHelper {
       $this->assertNoText(t('Themes'));
       if ($check_disabled) {
         $this->assertText(t('Disabled themes'));
-        $this->assertRaw($base_theme_project_link, t('Link to the Update test base theme project appears.'));
-        $this->assertRaw($sub_theme_project_link, t('Link to the Update test subtheme project appears.'));
+        $this->assertRaw($base_theme_project_link, 'Link to the Update test base theme project appears.');
+        $this->assertRaw($sub_theme_project_link, 'Link to the Update test subtheme project appears.');
       }
       else {
         $this->assertNoText(t('Disabled themes'));
-        $this->assertNoRaw($base_theme_project_link, t('Link to the Update test base theme project does not appear.'));
-        $this->assertNoRaw($sub_theme_project_link, t('Link to the Update test subtheme project does not appear.'));
+        $this->assertNoRaw($base_theme_project_link, 'Link to the Update test base theme project does not appear.');
+        $this->assertNoRaw($sub_theme_project_link, 'Link to the Update test subtheme project does not appear.');
       }
     }
   }
 
   /**
-   * Make sure that if we fetch from a broken URL, sane things happen.
+   * Makes sure that if we fetch from a broken URL, sane things happen.
    */
   function testUpdateBrokenFetchURL() {
     $system_info = array(
@@ -542,9 +550,9 @@ class UpdateTestContribCase extends UpdateTestHelper {
     $this->assertUniqueText(t('Failed to get available update data for one project.'));
 
     // The other two should be listed as projects.
-    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), t('Link to aaa_update_test project appears.'));
-    $this->assertNoRaw(l(t('BBB Update test'), 'http://example.com/project/bbb_update_test'), t('Link to bbb_update_test project does not appear.'));
-    $this->assertRaw(l(t('CCC Update test'), 'http://example.com/project/ccc_update_test'), t('Link to bbb_update_test project appears.'));
+    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), 'Link to aaa_update_test project appears.');
+    $this->assertNoRaw(l(t('BBB Update test'), 'http://example.com/project/bbb_update_test'), 'Link to bbb_update_test project does not appear.');
+    $this->assertRaw(l(t('CCC Update test'), 'http://example.com/project/ccc_update_test'), 'Link to bbb_update_test project appears.');
   }
 
   /**
@@ -553,8 +561,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
    * We provide the same external data as if aaa_update_test 8.x-1.0 were
    * installed and that was the latest release. Then we use
    * hook_update_status_alter() to try to mark this as missing a security
-   * update, then assert if we see the appropriate warnings on the right
-   * pages.
+   * update, then assert if we see the appropriate warnings on the right pages.
    */
   function testHookUpdateStatusAlter() {
     variable_set('allow_authorize_operations', TRUE);
@@ -587,7 +594,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     $this->drupalGet('admin/reports/updates');
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertText(t('Security update required!'));
-    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), t('Link to aaa_update_test project appears.'));
+    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), 'Link to aaa_update_test project appears.');
 
     // Visit the reports page again without the altering and make sure the
     // status is back to normal.
@@ -595,7 +602,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     $this->drupalGet('admin/reports/updates');
     $this->assertRaw('<h3>' . t('Modules') . '</h3>');
     $this->assertNoText(t('Security update required!'));
-    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), t('Link to aaa_update_test project appears.'));
+    $this->assertRaw(l(t('AAA Update test'), 'http://example.com/project/aaa_update_test'), 'Link to aaa_update_test project appears.');
 
     // Turn the altering back on and visit the Update manager UI.
     variable_set('update_test_update_status', $update_status);
@@ -647,18 +654,18 @@ class UpdateTestUploadCase extends UpdateTestHelper {
   }
 
   /**
-   * Ensure that archiver extensions are properly merged in the UI.
+   * Ensures that archiver extensions are properly merged in the UI.
    */
   function testFileNameExtensionMerging() {
     $this->drupalGet('admin/modules/install');
     // Make sure the bogus extension supported by update_test.module is there.
-    $this->assertPattern('/file extensions are supported:.*update-test-extension/', t("Found 'update-test-extension' extension"));
+    $this->assertPattern('/file extensions are supported:.*update-test-extension/', "Found 'update-test-extension' extension");
     // Make sure it didn't clobber the first option from core.
-    $this->assertPattern('/file extensions are supported:.*tar/', t("Found 'tar' extension"));
+    $this->assertPattern('/file extensions are supported:.*tar/', "Found 'tar' extension");
   }
 
   /**
-   * Check the messages on Update manager pages when missing a security update.
+   * Checks the messages on update manager pages when missing a security update.
    */
   function testUpdateManagerCoreSecurityUpdateMessages() {
     $setting = array(
@@ -699,6 +706,9 @@ class UpdateTestUploadCase extends UpdateTestHelper {
 
 }
 
+/**
+ * Tests update functionality unrelated to the database.
+ */
 class UpdateCoreUnitTestCase extends DrupalUnitTestCase {
   function setUp() {
     parent::setUp('update');
@@ -706,7 +716,7 @@ class UpdateCoreUnitTestCase extends DrupalUnitTestCase {
   }
 
   /**
-   * Tests _update_build_fetch_url according to issue 1481156
+   * Tests that _update_build_fetch_url() builds the URL correctly.
    */
   function testUpdateBuildFetchUrl() {
     //first test that we didn't break the trivial case
@@ -714,6 +724,7 @@ class UpdateCoreUnitTestCase extends DrupalUnitTestCase {
     $project['project_type'] = '';
     $project['info']['version'] = '';
     $project['info']['project status url'] = 'http://www.example.com';
+    $project['includes'] = array('module1' => 'Module 1', 'module2' => 'Module 2');
     $site_key = '';
     $expected = 'http://www.example.com/' . $project['name'] . '/' . DRUPAL_CORE_COMPATIBILITY;
     $url = _update_build_fetch_url($project, $site_key);
@@ -730,14 +741,16 @@ class UpdateCoreUnitTestCase extends DrupalUnitTestCase {
     $project['project_type'] = '';
     $expected = 'http://www.example.com/' . $project['name'] . '/' . DRUPAL_CORE_COMPATIBILITY;
     $expected .= '?site_key=site_key';
+    $expected .= '&list=' . rawurlencode('module1,module2');
     $url = _update_build_fetch_url($project, $site_key);
     $this->assertEqual($url, $expected, "When site_key provided, '$url' should be '$expected'.");
 
-    // http://drupal.org/node/1481156 test incorrect logic when url contains
+    // http://drupal.org/node/1481156 test incorrect logic when URL contains
     // a question mark.
     $project['info']['project status url'] = 'http://www.example.com/?project=';
     $expected = 'http://www.example.com/?project=/' . $project['name'] . '/' . DRUPAL_CORE_COMPATIBILITY;
     $expected .= '&site_key=site_key';
+    $expected .= '&list=' . rawurlencode('module1,module2');
     $url = _update_build_fetch_url($project, $site_key);
     $this->assertEqual($url, $expected, "When ? is present, '$url' should be '$expected'.");
 

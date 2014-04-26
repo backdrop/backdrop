@@ -5,13 +5,14 @@
  * Default theme implementation to display a term.
  *
  * Available variables:
- * - $name: the (sanitized) name of the term.
+ * - $name: (deprecated) The unsanitized name of the term. Use $term_name
+ *   instead.
  * - $content: An array of items for the content of the term (fields and
  *   description). Use render($content) to print them all, or print a subset
  *   such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
  *   given element.
- * - $term_url: Direct url of the current term.
+ * - $term_url: Direct URL of the current term.
  * - $term_name: Name of the current term.
  * - $classes: String of classes that can be used to style contextually through
  *   CSS. It can be manipulated through the variable $classes_array from

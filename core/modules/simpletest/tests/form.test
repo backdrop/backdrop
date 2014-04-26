@@ -76,6 +76,10 @@ class FormsTestCase extends DrupalWebTestCase {
           $form_state['input'][$element] = $empty;
           $form_state['input']['form_id'] = $form_id;
           $form_state['method'] = 'post';
+
+          // The form token CSRF protection should not interfere with this test,
+          // so we bypass it by marking this test form as programmed.
+          $form_state['programmed'] = TRUE;
           drupal_prepare_form($form_id, $form, $form_state);
           drupal_process_form($form_id, $form, $form_state);
           $errors = form_get_errors();
@@ -113,6 +117,106 @@ class FormsTestCase extends DrupalWebTestCase {
     }
     // Clear the expected form error messages so they don't appear as exceptions.
     drupal_get_messages();
+  }
+
+  /**
+   * Tests validation for required checkbox, select, and radio elements.
+   *
+   * Submits a test form containing several types of form elements. The form
+   * is submitted twice, first without values for required fields and then
+   * with values. Each submission is checked for relevant error messages.
+   *
+   * @see form_test_validate_required_form()
+   */
+  function testRequiredCheckboxesRadio() {
+    $form = $form_state = array();
+    $form = form_test_validate_required_form($form, $form_state);
+
+    // Attempt to submit the form with no required fields set.
+    $edit = array();
+    $this->drupalPost('form-test/validate-required', $edit, 'Submit');
+
+    // The only error messages that should appear are the relevant 'required'
+    // messages for each field.
+    $expected = array();
+    foreach (array('textfield', 'checkboxes', 'select', 'radios') as $key) {
+      $expected[] = t('!name field is required.', array('!name' => $form[$key]['#title']));
+    }
+
+    // Check the page for error messages.
+    $errors = $this->xpath('//div[contains(@class, "error")]//li');
+    foreach ($errors as $error) {
+      $expected_key = array_search($error[0], $expected);
+      // If the error message is not one of the expected messages, fail.
+      if ($expected_key === FALSE) {
+        $this->fail(format_string("Unexpected error message: @error", array('@error' => $error[0])));
+      }
+      // Remove the expected message from the list once it is found.
+      else {
+        unset($expected[$expected_key]);
+      }
+    }
+
+    // Fail if any expected messages were not found.
+    foreach ($expected as $not_found) {
+      $this->fail(format_string("Found error message: @error", array('@error' => $not_found)));
+    }
+
+    // Verify that input elements are still empty.
+    $this->assertFieldByName('textfield', '');
+    $this->assertNoFieldChecked('edit-checkboxes-foo');
+    $this->assertNoFieldChecked('edit-checkboxes-bar');
+    $this->assertOptionSelected('edit-select', '');
+    $this->assertNoFieldChecked('edit-radios-foo');
+    $this->assertNoFieldChecked('edit-radios-bar');
+    $this->assertNoFieldChecked('edit-radios-optional-foo');
+    $this->assertNoFieldChecked('edit-radios-optional-bar');
+    $this->assertNoFieldChecked('edit-radios-optional-default-value-false-foo');
+    $this->assertNoFieldChecked('edit-radios-optional-default-value-false-bar');
+
+    // Submit again with required fields set and verify that there are no
+    // error messages.
+    $edit = array(
+      'textfield' => $this->randomString(),
+      'checkboxes[foo]' => TRUE,
+      'select' => 'foo',
+      'radios' => 'bar',
+    );
+    $this->drupalPost(NULL, $edit, 'Submit');
+    $this->assertNoFieldByXpath('//div[contains(@class, "error")]', FALSE, 'No error message is displayed when all required fields are filled.');
+    $this->assertRaw("The form_test_validate_required_form form was submitted successfully.", 'Validation form submitted successfully.');
+  }
+
+  /**
+   * Tests validation for required textfield element without title.
+   *
+   * Submits a test form containing a textfield form elements without title.
+   * The form is submitted twice, first without value for the required field
+   * and then with value. Each submission is checked for relevant error
+   * messages.
+   *
+   * @see form_test_validate_required_form_no_title()
+   */
+  function testRequiredTextfieldNoTitle() {
+    $form = $form_state = array();
+    $form = form_test_validate_required_form_no_title($form, $form_state);
+
+    // Attempt to submit the form with no required field set.
+    $edit = array();
+    $this->drupalPost('form-test/validate-required-no-title', $edit, 'Submit');
+    $this->assertNoRaw("The form_test_validate_required_form_no_title form was submitted successfully.", 'Validation form submitted successfully.');
+
+    // Check the page for the error class on the textfield.
+    $this->assertFieldByXPath('//input[contains(@class, "error")]', FALSE, 'Error input form element class found.');
+
+    // Submit again with required fields set and verify that there are no
+    // error messages.
+    $edit = array(
+      'textfield' => $this->randomString(),
+    );
+    $this->drupalPost(NULL, $edit, 'Submit');
+    $this->assertNoFieldByXpath('//input[contains(@class, "error")]', FALSE, 'No error input form element class found.');
+    $this->assertRaw("The form_test_validate_required_form_no_title form was submitted successfully.", 'Validation form submitted successfully.');
   }
 
   /**
@@ -507,6 +611,18 @@ class FormValidationTestCase extends DrupalWebTestCase {
     $this->drupalPost(NULL, array(), 'Save');
     $this->assertNoFieldByName('name', t('Form element was hidden.'));
     $this->assertText('Name value: element_validate_access', t('Value for inaccessible form element exists.'));
+
+    // Verify that #validate handlers don't run if the CSRF token is invalid.
+    $this->drupalLogin($this->drupalCreateUser());
+    $this->drupalGet('form-test/validate');
+    $edit = array(
+      'name' => 'validate',
+      'form_token' => 'invalid token'
+    );
+    $this->drupalPost(NULL, $edit, 'Save');
+    $this->assertNoFieldByName('name', '#value changed by #validate', 'Form element #value was not altered.');
+    $this->assertNoText('Name value: value changed by form_set_value() in #validate', 'Form element value in $form_state was not altered.');
+    $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
   }
 
   /**
@@ -549,6 +665,17 @@ class FormValidationTestCase extends DrupalWebTestCase {
     $this->drupalPost($path, $edit, t('Full validate'));
     $this->assertText(t('!name field is required.', array('!name' => 'Title')));
     $this->assertText('Test element is invalid');
+  }
+
+  /**
+   *  Tests error border of multiple fields with same name in a page.
+   */
+  function testMultiFormSameNameErrorClass() {
+    $this->drupalGet('form-test/double-form');
+    $edit = array();
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertFieldByXpath('//input[@id="edit-name" and contains(@class, "error")]', NULL, 'Error input form element class found for first element.');
+    $this->assertNoFieldByXpath('//input[@id="edit-name--2" and contains(@class, "error")]', NULL, 'No error input form element class found for second element.');
   }
 }
 
@@ -809,6 +936,10 @@ class FormsElementsTableSelectFunctionalTest extends DrupalWebTestCase {
 
     $form_state['input'] = $edit;
     $form_state['input']['form_id'] = $form_id;
+
+    // The form token CSRF protection should not interfere with this test,
+    // so we bypass it by marking this test form as programmed.
+    $form_state['programmed'] = TRUE;
 
     drupal_prepare_form($form_id, $form, $form_state);
 
@@ -1171,6 +1302,72 @@ class FormsRebuildTestCase extends DrupalWebTestCase {
 }
 
 /**
+ * Tests form redirection.
+ */
+class FormsRedirectTestCase extends DrupalWebTestCase {
+  function setUp() {
+    parent::setUp(array('form_test'));
+  }
+
+  /**
+   * Tests form redirection.
+   */
+  function testRedirect() {
+    $path = 'form-test/redirect';
+    $options = array('query' => array('foo' => 'bar'));
+    $options['absolute'] = TRUE;
+
+    // Test basic redirection.
+    $edit = array(
+      'redirection' => TRUE,
+      'destination' => $this->randomName(),
+    );
+    $this->drupalPost($path, $edit, t('Submit'));
+    $this->assertUrl($edit['destination'], array(), 'Basic redirection works.');
+
+
+    // Test without redirection.
+    $edit = array(
+      'redirection' => FALSE,
+    );
+    $this->drupalPost($path, $edit, t('Submit'));
+    $this->assertUrl($path, array(), 'When redirect is set to FALSE, there should be no redirection.');
+
+    // Test redirection with query parameters.
+    $edit = array(
+      'redirection' => TRUE,
+      'destination' => $this->randomName(),
+    );
+    $this->drupalPost($path, $edit, t('Submit'), $options);
+    $this->assertUrl($edit['destination'], array(), 'Redirection with query parameters works.');
+
+    // Test without redirection but with query parameters.
+    $edit = array(
+      'redirection' => FALSE,
+    );
+    $this->drupalPost($path, $edit, t('Submit'), $options);
+    $this->assertUrl($path, $options, 'When redirect is set to FALSE, there should be no redirection, and the query parameters should be passed along.');
+
+    // Test redirection back to the original path.
+    $edit = array(
+      'redirection' => TRUE,
+      'destination' => '',
+    );
+    $this->drupalPost($path, $edit, t('Submit'));
+    $this->assertUrl($path, array(), 'When using an empty redirection string, there should be no redirection.');
+
+    // Test redirection back to the original path with query parameters.
+    $edit = array(
+      'redirection' => TRUE,
+      'destination' => '',
+    );
+    $this->drupalPost($path, $edit, t('Submit'), $options);
+    $this->assertUrl($path, $options, 'When using an empty redirection string, there should be no redirection, and the query parameters should be passed along.');
+  }
+
+}
+
+/**
  * Test the programmatic form submission behavior.
  */
 class FormsProgrammaticTestCase extends DrupalWebTestCase {
@@ -1201,6 +1398,16 @@ class FormsProgrammaticTestCase extends DrupalWebTestCase {
     $this->submitForm(array('textfield' => 'dummy value', 'checkboxes' => array(1 => NULL, 2 => 2)), TRUE);
     $this->submitForm(array('textfield' => 'dummy value', 'checkboxes' => array(1 => NULL, 2 => NULL)), TRUE);
 
+    // Test that a programmatic form submission can successfully submit values
+    // even for fields where the #access property is FALSE.
+    $this->submitForm(array('textfield' => 'dummy value', 'textfield_no_access' => 'test value'), TRUE);
+    // Test that #access is respected for programmatic form submissions when
+    // requested to do so.
+    $submitted_values = array('textfield' => 'dummy value', 'textfield_no_access' => 'test value');
+    $expected_values = array('textfield' => 'dummy value', 'textfield_no_access' => 'default value');
+    $form_state = array('programmed_bypass_access_check' => FALSE);
+    $this->submitForm($submitted_values, TRUE, $expected_values, $form_state);
+
     // Test that a programmatic form submission can correctly click a button
     // that limits validation errors based on user input. Since we do not
     // submit any values for "textfield" here and the textfield is required, we
@@ -1223,10 +1430,18 @@ class FormsProgrammaticTestCase extends DrupalWebTestCase {
    * @param $valid_input
    *   A boolean indicating whether or not the form submission is expected to
    *   be valid.
+   * @param $expected_values
+   *   (Optional) An array of field values that are expected to be stored by
+   *   the form submit handler. If not set, the submitted $values are assumed
+   *   to also be the expected stored values.
+   * @param $form_state
+   *   (Optional) A keyed array containing the state of the form, to be sent in
+   *   the call to drupal_form_submit(). The $values parameter is added to
+   *   $form_state['values'] by default, if it is not already set.
    */
-  private function submitForm($values, $valid_input) {
+  private function submitForm($values, $valid_input, $expected_values = NULL, $form_state = array()) {
     // Programmatically submit the given values.
-    $form_state = array('values' => $values);
+    $form_state += array('values' => $values);
     drupal_form_submit('form_test_programmatic_form', $form_state);
 
     // Check that the form returns an error when expected, and vice versa.
@@ -1243,7 +1458,10 @@ class FormsProgrammaticTestCase extends DrupalWebTestCase {
       // By fetching the values from $form_state['storage'] we ensure that the
       // submission handler was properly executed.
       $stored_values = $form_state['storage']['programmatic_form_submit'];
-      foreach ($values as $key => $value) {
+      if (!isset($expected_values)) {
+        $expected_values = $values;
+      }
+      foreach ($expected_values as $key => $value) {
         $this->assertTrue(isset($stored_values[$key]) && $stored_values[$key] == $value, t('Submission handler correctly executed: %stored_key is %stored_value', array('%stored_key' => $key, '%stored_value' => print_r($value, TRUE))));
       }
     }
@@ -1527,5 +1745,27 @@ class FormEmailTestCase extends DrupalWebTestCase {
     $values = drupal_json_decode($this->drupalPost('form-test/email', $edit, 'Submit'));
     $this->assertEqual($values['email'], 'foo@example.com');
     $this->assertEqual($values['email_required'], 'example@drupal.org');
+  }
+}
+
+/**
+ * Tests uniqueness of generated HTML IDs.
+ */
+class HTMLIdTestCase extends DrupalWebTestCase {
+  function setUp() {
+    parent::setUp('form_test');
+  }
+
+  /**
+   * Tests that HTML IDs do not get duplicated when form validation fails.
+   */
+  function testHTMLId() {
+    $this->drupalGet('form-test/double-form');
+    $this->assertNoDuplicateIds('There are no duplicate IDs');
+
+    // Submit second form with empty title.
+    $edit = array();
+    $this->drupalPost(NULL, $edit, 'Save', array(), array(), 'form-test-html-id--2');
+    $this->assertNoDuplicateIds('There are no duplicate IDs');
   }
 }
