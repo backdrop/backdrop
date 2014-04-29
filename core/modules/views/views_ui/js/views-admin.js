@@ -774,14 +774,14 @@ Drupal.behaviors.viewsFilterConfigSelectAll.attach = function(context) {
     var checked = $(this).is(':checked');
     // Update all checkbox beside the select all checkbox.
     $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function() {
-      $(this).attr('checked', checked);
+      $(this).prop('checked', checked);
     });
   });
   // Uncheck the select all checkbox if any of the others are unchecked.
   $('#views-ui-config-item-form div.form-type-checkbox').not($('.form-item-options-value-all')).find('input[type=checkbox]').each(function() {
     $(this).click(function() {
       if ($(this).is('checked') == 0) {
-        $('#edit-options-value-all').removeAttr('checked');
+        $('#edit-options-value-all').prop('checked', false);
       }
     });
   });
@@ -934,7 +934,7 @@ Drupal.viewsUi.resizeModal = function (e, no_shrink) {
   var $ = jQuery;
   var $modal = $('.views-ui-dialog');
   var $scroll = $('.scroll', $modal);
-  if ($modal.size() == 0 || $modal.css('display') == 'none') {
+  if ($modal.length == 0 || $modal.css('display') == 'none') {
     return;
   }
 
