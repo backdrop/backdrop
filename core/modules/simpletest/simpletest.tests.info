@@ -100,6 +100,12 @@ description = Various tests of AJAX behavior
 group = AJAX
 file = tests/ajax.test
 
+[AJAXDialogTest]
+name = AJAX dialog commands
+description = APerforms tests on opening and manipulating dialogs via AJAX commands.
+group = AJAX
+file = tests/ajax.test
+
 [BatchProcessingTestCase]
 name = Batch processing
 description = Test batch processing in form and non-form workflow.

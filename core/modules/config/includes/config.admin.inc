@@ -13,6 +13,10 @@ function config_sync_form(array $form, array &$form_state) {
   $modified_times = config_get_modified_times();
   $config_file_errors = array();
 
+  // Add the AJAX library to the form for dialog support.
+  $form['#attached']['library'][] = array('system', 'drupal.ajax');
+  $form['#attached']['css'][] = drupal_get_path('module', 'config') . '/config.admin.css';
+
   $form['description'] = array(
     '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p>',
   );
@@ -37,6 +41,11 @@ function config_sync_form(array $form, array &$form_state) {
         '#type' => 'link',
         '#title' => t('View differences'),
         '#href' => 'admin/config/development/configuration/sync/diff/' . $config_file,
+        '#attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => 'true',
+          'data-dialog-options' => '{"dialogClass": "config-diff"}',
+        ),
       );
       $row = array(
         'name' => $config_file,
@@ -139,18 +148,19 @@ function config_diff_page($config_file) {
       array('data' => t('New'), 'colspan' => '2'),
     ),
     '#rows' => $diff,
+    '#sticky' => FALSE,
   );
 
   $build['back'] = array(
     '#type' => 'link',
-    '#attributes' => array(
-      'class' => array(
-        'dialog-cancel',
-      ),
-    ),
-    '#title' => "Back to 'Synchronize configuration' page.",
+    '#title' => t('Back to "Synchronize configuration" page.'),
     '#href' => 'admin/config/development/configuration',
   );
+
+  if (backdrop_is_dialog()) {
+    $build['back']['#attributes']['class'][] = 'dialog-cancel';
+    $build['back']['#title'] = t('Close');
+  }
 
   return $build;
 }

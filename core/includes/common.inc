@@ -2611,7 +2611,7 @@ function drupal_deliver_page($page_callback_result, $default_delivery_callback =
   $delivery_callback = !empty($default_delivery_callback) ? $default_delivery_callback : 'drupal_deliver_html_page';
   // Give modules a chance to alter the delivery callback used, based on
   // request-time context (e.g., HTTP request headers).
-  drupal_alter('page_delivery_callback', $delivery_callback);
+  drupal_alter('page_delivery_callback', $delivery_callback, $page_callback_result);
   if (function_exists($delivery_callback)) {
     $delivery_callback($page_callback_result);
   }

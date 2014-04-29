@@ -486,6 +486,36 @@ function ajax_deliver($page_callback_result) {
 }
 
 /**
+ * Delivers the content of a page as a dialog.
+ */
+function ajax_deliver_dialog($page_callback_result) {
+  if (isset($page_callback_result['#title'])) {
+    $title = $page_callback_result['#title'];
+  }
+  else {
+    $title = drupal_get_title();
+  }
+  $html = drupal_render($page_callback_result);
+
+  $dialog_options = isset($_POST['dialogOptions']) ? $_POST['dialogOptions'] : array('modal' => TRUE);
+  if (isset($dialog_options['target'])) {
+    $selector = $dialog_options['target'];
+  }
+  else {
+    $selector = '#backdrop-modal';
+    $dialog_options['modal'] = TRUE;
+  }
+
+  $commands = array();
+  $commands[] = ajax_command_open_dialog($selector, $title, $html, $dialog_options);
+  $return = array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+  ajax_deliver($return);
+}
+
+/**
  * Converts the return value of a page callback into an Ajax commands array.
  *
  * @param $page_callback_result
@@ -623,8 +653,8 @@ function ajax_pre_render_element($element) {
   // Initialize #ajax_processed, so we do not process this element again.
   $element['#ajax_processed'] = FALSE;
 
-  // Nothing to do if there is neither a callback nor a path.
-  if (!(isset($element['#ajax']['callback']) || isset($element['#ajax']['path']))) {
+  // Nothing to do if there are no Ajax settings.
+  if (empty($element['#ajax'])) {
     return $element;
   }
 
@@ -684,9 +714,18 @@ function ajax_pre_render_element($element) {
 
     $settings = $element['#ajax'];
 
-    // Assign default settings.
+    // Assign default settings. When 'path' is set to NULL, ajax.js submits the
+    // Ajax request to the same URL as the form or link destination is for
+    // someone with JavaScript disabled. This is generally preferred as a way to
+    // ensure consistent server processing for js and no-js users, and Drupal's
+    // content negotiation takes care of formatting the response appropriately.
+    // However, 'path' and 'options' may be set when wanting server processing
+    // to be substantially different for a JavaScript triggered submission.
+    // One such substantial difference is form elements that use
+    // #ajax['callback'] for determining which part of the form needs
+    // re-rendering. For that, we have a special 'system/ajax' route.
     $settings += array(
-      'path' => 'system/ajax',
+      'path' => isset($settings['callback']) ? 'system/ajax' : NULL,
       'options' => array(),
     );
 
@@ -696,7 +735,7 @@ function ajax_pre_render_element($element) {
     }
 
     // Change path to URL.
-    $settings['url'] = url($settings['path'], $settings['options']);
+    $settings['url'] = isset($settings['path']) ? url($settings['path'], $settings['options']) : NULL;
     unset($settings['path'], $settings['options']);
 
     // Add special data to $settings['submit'] so that when this element
@@ -1207,5 +1246,145 @@ function ajax_command_restripe($selector) {
   return array(
     'command' => 'restripe',
     'selector' => $selector,
+  );
+}
+
+/**
+ * Provides an AJAX command to open content in a dialog.
+ *
+ * This command is implemented by Drupal.ajax.prototype.commands.openDialog()
+ * defined in misc/dialog.ajax.js.
+ *
+ * @param string $selector
+ *   The selector of the dialog.
+ * @param string $title
+ *   The title of the dialog.
+ * @param string $html
+ *   HTML that will be placed in the dialog.
+ * @param array $dialog_options
+ *   (optional) Options to be passed to the dialog implementation. Any
+ *   jQuery UI option can be used. See http://api.jqueryui.com/dialog.
+ * @return array
+ *   An array suitable for use with the ajax_render() function.
+ */
+function ajax_command_open_dialog($selector, $title, $html, array $dialog_options = array()) {
+  // Add the library for handling the dialog in the response.
+  drupal_add_library('system', 'backdrop.dialog.ajax');
+
+  $dialog_options['title'] = $title;
+
+  // For consistency ensure the modal option is set to TRUE or FALSE.
+  $dialog_options['modal'] = isset($dialog_options['modal']) && $dialog_options['modal'];
+
+  return array(
+    'command' => 'openDialog',
+    'selector' => $selector,
+    'data' => $html,
+    'dialogOptions' => $dialog_options,
+  );
+}
+
+/**
+ * Provides an AJAX command to open content in a modal dialog.
+ *
+ * The modal dialog differs from the normal modal provided by
+ * ajax_command_open_dialog() in that a modal prevents other interactions on the
+ * page until the modal has been completed. Drupal provides a built-in modal for
+ * this purpose, so no selector needs to be provided.
+ *
+ * @see ajax_command_open_dialog()
+ */
+function ajax_command_open_modal_dialog($title, $html, array $dialog_options = array()) {
+  $dialog_options['modal'] = TRUE;
+  return ajax_command_open_dialog('#backdrop-modal', $title, $html, $dialog_options);
+}
+
+/**
+ * Provides an AJAX command to close an open dialog.
+ *
+ * This command is implemented by Drupal.ajax.prototype.commands.closeDialog()
+ * defined in misc/dialog.ajax.js.
+ *
+ * @param $selector
+ *   A jQuery selector string for the dialog to be closed.
+ *
+ * @return array
+ *   An array suitable for use with the ajax_render() function.
+ */
+function ajax_command_close_dialog($selector) {
+  return array(
+    'command' => 'closeDialog',
+    'selector' => $selector,
+  );
+}
+
+/**
+ * Provides a shortcut command for closing a modal dialog.
+ *
+ * @see ajax_command_close_dialog()
+ */
+function ajax_command_close_modal_dialog() {
+  return ajax_command_close_dialog('#backdrop-modal');
+}
+
+/**
+ * Provides an AJAX command that sets jQuery UI dialog properties.
+ *
+ * This command is implemented by Drupal.ajax.prototype.commands.setDialogOption()
+ * defined in misc/dialog.ajax.js.
+ *
+ * @param string $selector
+ *   The selector of the dialog whose title will be set. If set to an empty
+ *   value, the default modal dialog will be selected.
+ * @param string $option_name
+ *   The name of the option to set. May be any jQuery UI dialog option.
+ *   See http://api.jqueryui.com/dialog.
+ * @param mixed $option_value
+ *   The value of the option to be passed to the dialog.
+ * @return array
+ *   An array suitable for use with the ajax_render() function.
+ */
+function ajax_command_set_dialog_option($selector, $option_name, $option_value) {
+  $selector = empty($selector) ? '#backdrop-modal' : $selector;
+
+  return array(
+    'command' => 'setDialogOption',
+    'selector' => $selector,
+    'optionName' => $option_name,
+    'optionValue' => $option_value,
+  );
+}
+
+/**
+ * Provides an AJAX command that sets a dialog title.
+ *
+ * @param string $selector
+ *   The selector of the dialog whose title will be set. If set to an empty
+ *   value, the default modal dialog will be selected.
+ * @param string $title
+ *   The title that will be set on the dialog.
+ * @return array
+ *   An array suitable for use with the ajax_render() function.
+ */
+function ajax_command_set_dialog_title($selector, $title) {
+  return ajax_command_set_dialog_option($selector, 'title', $title);
+}
+
+/**
+ * Provides an AJAX command to set the window.location, loading that URL.
+ *
+ * This command is implemented by Drupal.ajax.prototype.commands.redirect()
+ * defined in misc/ajax.js.
+ *
+ * @param string $url
+ *   The URL that will be loaded into window.location. This should be a full
+ *   URL, one that has already been run through the url() function.
+ * @return array
+ *   An array suitable for use with the ajax_render() function.
+ */
+function ajax_command_redirect($url) {
+  return array(
+    'command' => 'redirect',
+    'url' => $url,
   );
 }
