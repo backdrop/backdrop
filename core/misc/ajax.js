@@ -356,7 +356,7 @@ Drupal.ajax.prototype.beforeSend = function (xmlhttprequest, options) {
   // interaction while the Ajax request is in progress. ajax.ajaxing prevents
   // the element from triggering a new request, but does not prevent the user
   // from changing its value.
-  $(this.element).addClass('progress-disabled').attr('disabled', true);
+  $(this.element).addClass('progress-disabled').prop('disabled', true);
 
   // Insert progressbar or throbber.
   if (this.progress.type == 'bar') {
@@ -391,7 +391,7 @@ Drupal.ajax.prototype.success = function (response, status) {
   if (this.progress.object) {
     this.progress.object.stopMonitoring();
   }
-  $(this.element).removeClass('progress-disabled').removeAttr('disabled');
+  $(this.element).removeClass('progress-disabled').prop('disabled', false);
 
   Drupal.freezeHeight();
 
