@@ -1987,6 +1987,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * Retrieve a Drupal path or an absolute path and JSON decode the result.
    */
   protected function drupalGetAJAX($path, array $options = array(), array $headers = array()) {
+    $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     return drupal_json_decode($this->drupalGet($path, $options, $headers));
   }
 
@@ -2240,6 +2241,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     }
 
     // Submit the POST request.
+    $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     $return = drupal_json_decode($this->drupalPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
 
     // Change the page content by applying the returned commands.

@@ -1027,6 +1027,27 @@ function _system_batch_theme() {
 }
 
 /**
+ * Implements hook_page_delivery_callback_alter().
+ *
+ * Enables the ability to display arbitrary pages as dialogs based on the
+ * HTTP request header.
+ */
+function system_page_delivery_callback_alter(&$delivery_callback, $page_output) {
+  // For all ajax.js initiated requests, deliver as JSON.
+  if (backdrop_is_ajax()) {
+    $delivery_callback = 'ajax_deliver';
+  }
+  // For links with the data-dialog attribute, deliver as dialog JSON.
+  elseif (backdrop_is_dialog()) {
+    $delivery_callback = 'ajax_deliver_dialog';
+  }
+  // If the page response is a set of AJAX commands, deliver as JSON.
+  elseif (isset($page_output['#type']) && $page_output['#type'] === 'ajax') {
+    $delivery_callback = 'ajax_deliver';
+  }
+}
+
+/**
  * Implements hook_library_info().
  */
 function system_library_info() {
@@ -1070,6 +1091,36 @@ function system_library_info() {
     'version' => VERSION,
     'js' => array(
       'core/misc/form.js' => array('group' => JS_LIBRARY, 'weight' => 1),
+    ),
+  );
+
+  // Backdrop's dialog component.
+  $libraries['backdrop.dialog'] = array(
+    'title' => 'Backdrop dialog',
+    'version' => VERSION,
+    'js' => array(
+      'core/misc/dialog.js' => array('group' => JS_LIBRARY),
+    ),
+    'css' => array(
+      'core/misc/dialog.theme.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+      array('system', 'ui.dialog'),
+    ),
+  );
+
+  // Backdrop's integration between AJAX and dialogs.
+  $libraries['backdrop.dialog.ajax'] = array(
+    'title' => 'Backdrop dialog AJAX integration',
+    'version' => VERSION,
+    'js' => array(
+      'core/misc/dialog.ajax.js' => array('group' => JS_LIBRARY, 'weight' => 3),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+      array('system', 'drupal.ajax'),
+      array('system', 'backdrop.dialog'),
     ),
   );
 
