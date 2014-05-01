@@ -1,0 +1,165 @@
+diff --git a/includes/language.inc b/includes/language.inc
+index 8319596..803a630 100644
+--- a/includes/language.inc
++++ b/includes/language.inc
+@@ -313,7 +313,7 @@ function language_negotiation_get_switch_links($type, $path) {
+ }
+ 
+ /**
+- * Removes any unused language negotation providers from the configuration.
++ * Removes any unused language negotiation providers from the configuration.
+  */
+ function language_negotiation_purge() {
+   // Ensure that we are getting the defined language negotiation information. An
+diff --git a/modules/aggregator/aggregator.test b/modules/aggregator/aggregator.test
+index 8b95d6e..18d5b33 100644
+--- a/modules/aggregator/aggregator.test
++++ b/modules/aggregator/aggregator.test
+@@ -931,7 +931,7 @@ class AggregatorRenderingTestCase extends AggregatorTestCase {
+     // up.
+     $feed->block = 0;
+     aggregator_save_feed((array) $feed);
+-    // It is nescessary to flush the cache after saving the number of items.
++    // It is necessary to flush the cache after saving the number of items.
+     drupal_flush_all_caches();
+     // Check that the block is no longer displayed.
+     $this->drupalGet('node');
+diff --git a/modules/dblog/dblog.test b/modules/dblog/dblog.test
+index f1d1034..bf409c9 100644
+--- a/modules/dblog/dblog.test
++++ b/modules/dblog/dblog.test
+@@ -11,7 +11,7 @@
+ class DBLogTestCase extends DrupalWebTestCase {
+ 
+   /**
+-   * A user with some relevent administrative permissions.
++   * A user with some relevant administrative permissions.
+    *
+    * @var object
+    */
+diff --git a/modules/field/modules/options/options.test b/modules/field/modules/options/options.test
+index 44b3caf..7183311 100644
+--- a/modules/field/modules/options/options.test
++++ b/modules/field/modules/options/options.test
+@@ -359,7 +359,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
+ 
+     // Test the 'None' option.
+ 
+-    // Check that the 'none' option has no efect if actual options are selected
++    // Check that the 'none' option has no effect if actual options are selected
+     // as well.
+     $edit = array("card_2[$langcode][]" => array('_none' => '_none', 0 => 0));
+     $this->drupalPost('test-entity/manage/' . $entity->ftid . '/edit', $edit, t('Save'));
+diff --git a/modules/field/tests/field_test.install b/modules/field/tests/field_test.install
+index a224520..eaf1390 100644
+--- a/modules/field/tests/field_test.install
++++ b/modules/field/tests/field_test.install
+@@ -60,7 +60,7 @@ function field_test_schema() {
+     'description' => 'The base table for test entities with a bundle key.',
+     'fields' => array(
+       'ftid' => array(
+-        'description' => 'The primary indentifier for a test_entity_bundle_key.',
++        'description' => 'The primary identifier for a test_entity_bundle_key.',
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+@@ -79,7 +79,7 @@ function field_test_schema() {
+     'description' => 'The base table for test entities with a bundle.',
+     'fields' => array(
+       'ftid' => array(
+-        'description' => 'The primary indentifier for a test_entity_bundle.',
++        'description' => 'The primary identifier for a test_entity_bundle.',
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+diff --git a/modules/field_ui/field_ui.module b/modules/field_ui/field_ui.module
+index 5f8bc45..ed833fe 100644
+--- a/modules/field_ui/field_ui.module
++++ b/modules/field_ui/field_ui.module
+@@ -318,7 +318,7 @@ function field_ui_field_attach_create_bundle($entity_type, $bundle) {
+ }
+ 
+ /**
+- * Determines the adminstration path for a bundle.
++ * Determines the administration path for a bundle.
+  */
+ function _field_ui_bundle_admin_path($entity_type, $bundle_name) {
+   $bundles = field_info_bundles($entity_type);
+diff --git a/modules/image/image.test b/modules/image/image.test
+index 7db68e6..6a8928a 100644
+--- a/modules/image/image.test
++++ b/modules/image/image.test
+@@ -216,10 +216,10 @@ class ImageStylesPathAndUrlTestCase extends DrupalWebTestCase {
+     }
+     // Add some extra chars to the token.
+     $this->drupalGet(str_replace(IMAGE_DERIVATIVE_TOKEN . '=', IMAGE_DERIVATIVE_TOKEN . '=Zo', $generate_url));
+-    $this->assertResponse(403, 'Image was inaccessible at the URL wih an invalid token.');
++    $this->assertResponse(403, 'Image was inaccessible at the URL with an invalid token.');
+     // Change the parameter name so the token is missing.
+     $this->drupalGet(str_replace(IMAGE_DERIVATIVE_TOKEN . '=', 'wrongparam=', $generate_url));
+-    $this->assertResponse(403, 'Image was inaccessible at the URL wih a missing token.');
++    $this->assertResponse(403, 'Image was inaccessible at the URL with a missing token.');
+ 
+     // Fetch the URL that generates the file.
+     $this->drupalGet($generate_url);
+@@ -268,7 +268,7 @@ class ImageStylesPathAndUrlTestCase extends DrupalWebTestCase {
+     elseif ($clean_url) {
+       // Add some extra chars to the token.
+       $this->drupalGet(str_replace(IMAGE_DERIVATIVE_TOKEN . '=', IMAGE_DERIVATIVE_TOKEN . '=Zo', $generate_url));
+-      $this->assertResponse(200, 'Existing image was accessible at the URL wih an invalid token.');
++      $this->assertResponse(200, 'Existing image was accessible at the URL with an invalid token.');
+     }
+ 
+     // Allow insecure image derivatives to be created for the remainder of this
+diff --git a/modules/locale/locale.test b/modules/locale/locale.test
+index edf72e4..9ffec9f 100644
+--- a/modules/locale/locale.test
++++ b/modules/locale/locale.test
+@@ -1685,7 +1685,7 @@ class LocaleBrowserDetectionTest extends DrupalUnitTestCase {
+     );
+ 
+     $test_cases = array(
+-      // Equal qvalue for each language, choose the site prefered one.
++      // Equal qvalue for each language, choose the site preferred one.
+       'en,en-US,fr-CA,fr,es-MX' => 'en',
+       'en-US,en,fr-CA,fr,es-MX' => 'en',
+       'fr,en' => 'en',
+diff --git a/modules/simpletest/tests/file.test b/modules/simpletest/tests/file.test
+index 7802be3..20dd273 100644
+--- a/modules/simpletest/tests/file.test
++++ b/modules/simpletest/tests/file.test
+@@ -2388,7 +2388,7 @@ class FileDownloadTest extends FileTestCase {
+     $this->assertEqual($headers['x-foo'], 'Bar', 'Found header set by file_test module on private download.');
+     $this->assertResponse(200, 'Correctly allowed access to a file when file_test provides headers.');
+ 
+-    // Test that the file transfered correctly.
++    // Test that the file transferred correctly.
+     $this->assertEqual($contents, $this->content, 'Contents of the file are correct.');
+ 
+     // Deny access to all downloads via a -1 header.
+diff --git a/modules/system/language.api.php b/modules/system/language.api.php
+index f8e6a25..40bb3f3 100644
+--- a/modules/system/language.api.php
++++ b/modules/system/language.api.php
+@@ -111,7 +111,7 @@ function hook_language_types_info_alter(array &$language_types) {
+  *
+  * @return
+  *   An associative array of language negotiation provider definitions. The keys
+- *   are provider identifiers, and the values are associative arrays definining
++ *   are provider identifiers, and the values are associative arrays defining
+  *   each provider, with the following elements:
+  *   - types: An array of allowed language types. If a language negotiation
+  *     provider does not specify which language types it should be used with, it
+diff --git a/modules/update/update.fetch.inc b/modules/update/update.fetch.inc
+index bf0039f..9dd2f0b 100644
+--- a/modules/update/update.fetch.inc
++++ b/modules/update/update.fetch.inc
+@@ -289,7 +289,7 @@ function _update_build_fetch_url($project, $site_key = '') {
+   $url = _update_get_fetch_url_base($project);
+   $url .= '/' . $name . '/' . DRUPAL_CORE_COMPATIBILITY;
+ 
+-  // Only append usage infomation if we have a site key and the project is
++  // Only append usage information if we have a site key and the project is
+   // enabled. We do not want to record usage statistics for disabled projects.
+   if (!empty($site_key) && (strpos($project['project_type'], 'disabled') === FALSE)) {
+     // Append the site key.

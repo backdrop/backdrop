@@ -2188,7 +2188,7 @@ class FileDownloadTest extends FileTestCase {
     $this->assertEqual($headers['x-foo'], 'Bar', t('Found header set by file_test module on private download.'));
     $this->assertResponse(200, t('Correctly allowed access to a file when file_test provides headers.'));
 
-    // Test that the file transfered correctly.
+    // Test that the file transferred correctly.
     $this->assertEqual($contents, $this->content, t('Contents of the file are correct.'));
 
     // Deny access to all downloads via a -1 header.
