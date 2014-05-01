@@ -18,7 +18,7 @@ Drupal.tableSelect = function () {
   var strings = { 'selectAll': Drupal.t('Select all rows in this table'), 'selectNone': Drupal.t('Deselect all rows in this table') };
   var updateSelectAll = function (state) {
     // Update table's select-all checkbox (and sticky header's if available).
-    $(table).prev('table.sticky-header').andSelf().find('th.select-all input:checkbox').each(function() {
+    $(table).prev('table.sticky-header').addBack().find('th.select-all input:checkbox').each(function() {
       $(this).attr('title', state ? strings.selectNone : strings.selectAll);
       this.checked = state;
     });

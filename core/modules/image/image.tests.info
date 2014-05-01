@@ -47,7 +47,13 @@ group = Image
 file = image.test
 
 [ImageDimensionsScaleTestCase]
-name = image_dimensions_scale()
+name = Image dimensions scale
 description = Tests all control flow branches in image_dimensions_scale().
+group = Image
+file = image.test
+
+[ImageThemeFunctionWebTestCase]
+name = Image theme functions
+description = Test that the image theme functions work correctly.
 group = Image
 file = image.test

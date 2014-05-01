@@ -202,7 +202,7 @@
       if (!this.collapseReplaced && Drupal.collapseScrollIntoView) {
         this.collapseReplaced = true;
         Drupal.collapseScrollIntoView = function (node) {
-          for (var $parent = $(node); $parent.get(0) != document && $parent.size() != 0; $parent = $parent.parent()) {
+          for (var $parent = $(node); $parent.get(0) != document && $parent.length != 0; $parent = $parent.parent()) {
             if ($parent.css('overflow') == 'scroll' || $parent.css('overflow') == 'auto') {
               if (Drupal.viewsUi.resizeModal) {
                 // If the modal is already at the max height, don't bother with

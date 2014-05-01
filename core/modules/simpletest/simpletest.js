@@ -76,14 +76,14 @@ Drupal.behaviors.simpleTestSelectAll = {
             }
           });
         }
-        $(groupCheckbox).attr('checked', (checkedTests == testCheckboxes.length));
+        $(groupCheckbox).prop('checked', (checkedTests == testCheckboxes.length));
       };
 
       // Have the single-test checkboxes follow the group checkbox.
       groupCheckbox.change(function () {
-        var checked = !!($(this).attr('checked'));
+        var checked = !!($(this).prop('checked'));
         for (var i = 0; i < testCheckboxes.length; i++) {
-          $('#' + testCheckboxes[i]).attr('checked', checked);
+          $('#' + testCheckboxes[i]).prop('checked', checked);
         }
       });
 

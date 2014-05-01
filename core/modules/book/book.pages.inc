@@ -6,7 +6,10 @@
  */
 
 /**
- * Page callback: Prints a listing of all books.
+ * Menu callback: Prints a listing of all books.
+ *
+ * @return string
+ *   A HTML-formatted string with the listing of all books content.
  *
  * @see book_menu()
  */
@@ -103,6 +106,9 @@ function book_export_html($nid) {
  *
  * @param Node $node
  *   The book node for which to show the outline.
+ *
+ * @return string
+ *   A HTML-formatted string with the outline form for a single node.
  *
  * @see book_menu()
  */

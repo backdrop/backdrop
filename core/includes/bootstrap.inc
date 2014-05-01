@@ -3503,6 +3503,20 @@ function drupal_is_cli() {
 }
 
 /**
+ * Detects if this is an AJAX HTTP request.
+ */
+function backdrop_is_ajax() {
+  return strpos($_SERVER['HTTP_ACCEPT'], 'application/vnd.backdrop-ajax') === 0;
+}
+
+/**
+ * Detects if this is a dialog HTTP request.
+ */
+function backdrop_is_dialog() {
+  return strpos($_SERVER['HTTP_ACCEPT'], 'application/vnd.backdrop-dialog') === 0;
+}
+
+/**
  * Formats text for emphasized display in a placeholder inside a sentence.
  *
  * Used automatically by format_string().

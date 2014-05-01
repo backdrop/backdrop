@@ -764,7 +764,14 @@ function module_implements_reset() {
 }
 
 /**
- * Retrieves a list of what hooks are explicitly declared.
+ * Retrieves a list of hooks that are declared through hook_hook_info().
+ *
+ * @return
+ *   An associative array whose keys are hook names and whose values are an
+ *   associative array containing a group name. The structure of the array
+ *   is the same as the return value of hook_hook_info().
+ *
+ * @see hook_hook_info()
  */
 function module_hook_info() {
   // This function is indirectly invoked from bootstrap_invoke_all(), in which
@@ -898,7 +905,7 @@ function drupal_required_modules() {
   $files = drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.info$/', 'modules', 'name', 0);
   $required = array();
 
-  // An install profile is required and one must always be loaded.
+  // An installation profile is required and one must always be loaded.
   $required[] = drupal_get_profile();
 
   foreach ($files as $name => $file) {
