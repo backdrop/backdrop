@@ -254,27 +254,34 @@
   /* We need this so the button is visible. */
   overflow: visible;
   position: fixed;
+  max-width: 80%;
 }
 
-.views-ui-dialog .ui-dialog-titlebar-close {
-  border: 1px solid transparent;
-  display: block;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  right: 0;
-  top: 2px;
-  /* Make sure this is in front of the modal backdrop. */
-  z-index: 1002;
+.views-ui-dialog {
+  max-width: 95%;
+}
+@media only screen and (min-width: 768px) {
+  .views-ui-dialog {
+    max-width: 600px;
+  }
 }
 
 .views-ui-dialog .ui-dialog-titlebar {
-  padding: 0;
-  margin: 0;
+  border-bottom: none;
 }
 
-.views-ui-dialog .ui-dialog-title {
-  display: none;
+.views-ui-dialog .ui-dialog-content {
+  padding: 0;
+  overflow: hidden;
+}
+
+.views-ui-dialog .ui-dialog-content .form-actions {
+  border: 0;
+  height: 0;
+}
+
+.views-ui-dialog .ui-dialog-buttonpane {
+  margin-top: 0;
 }
 
 .views-ui-dialog #views-ajax-popup {
@@ -295,6 +302,10 @@
 .views-ui-dialog .scroll {
   max-height: 400px;
   overflow: auto;
+  padding: 20px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #views-filterable-options-controls {

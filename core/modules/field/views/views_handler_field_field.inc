@@ -435,7 +435,7 @@ class views_handler_field_field extends views_handler_field {
       '#options' => $formatters,
       '#default_value' => $this->options['type'],
       '#ajax' => array(
-        'path' => views_ui_build_form_url($form_state),
+        'path' => views_ui_build_form_path($form_state),
       ),
       '#submit' => array('views_ui_config_item_form_submit_temporary'),
       '#executes_submit_callback' => TRUE,
@@ -487,7 +487,7 @@ class views_handler_field_field extends views_handler_field {
       // Set the other fields to their default values.
       // @see _field_write_instance().
       'required' => FALSE,
-      'label' => $field_name,
+      'label' => $field['field_name'],
       'description' => '',
       'deleted' => 0,
     );

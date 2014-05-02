@@ -24,22 +24,15 @@ function views_ui_get_admin_css() {
   $theme_key = $GLOBALS['theme'];
   while ($theme_key) {
     // Try to find the admin css file for non-core themes.
-    if (!in_array($theme_key, array('garland', 'seven', 'bartik'))) {
-      $theme_path = drupal_get_path('theme', $theme_key);
-      // First search in the css directory, then in the root folder of the theme.
-      if (file_exists($theme_path . "/css/views-admin.$theme_key.css")) {
-        $list[$theme_path . "/css/views-admin.$theme_key.css"] = array(
-          'group' => CSS_THEME,
-        );
-      }
-      else if (file_exists($theme_path . "/views-admin.$theme_key.css")) {
-        $list[$theme_path . "/views-admin.$theme_key.css"] = array(
-          'group' => CSS_THEME,
-        );
-      }
+    $theme_path = drupal_get_path('theme', $theme_key);
+    // First search in the css directory, then in the root folder of the theme.
+    if (file_exists($theme_path . "/css/views-admin.$theme_key.css")) {
+      $list[$theme_path . "/css/views-admin.$theme_key.css"] = array(
+        'group' => CSS_THEME,
+      );
     }
-    else {
-      $list[$module_path . "/css/views-admin.$theme_key.css"] = array(
+    else if (file_exists($theme_path . "/views-admin.$theme_key.css")) {
+      $list[$theme_path . "/views-admin.$theme_key.css"] = array(
         'group' => CSS_THEME,
       );
     }
@@ -1614,7 +1607,7 @@ function views_ui_get_display_tab_details($view, $display) {
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_enable_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<li class="enable">',
-          "#suffix" => '</li>',
+          '#suffix' => '</li>',
         );
       }
       // Add a link to view the page.
@@ -1627,7 +1620,7 @@ function views_ui_get_display_tab_details($view, $display) {
             '#options' => array('alt' => array(t("Go to the real page for this display"))),
             '#href' => $path,
             '#prefix' => '<li class="view">',
-            "#suffix" => '</li>',
+            '#suffix' => '</li>',
           );
         }
       }
@@ -1638,7 +1631,7 @@ function views_ui_get_display_tab_details($view, $display) {
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<li class="duplicate">',
-          "#suffix" => '</li>',
+          '#suffix' => '</li>',
         );
       }
       if ($is_deletable) {
@@ -1648,7 +1641,7 @@ function views_ui_get_display_tab_details($view, $display) {
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<li class="delete">',
-          "#suffix" => '</li>',
+          '#suffix' => '</li>',
         );
       }
       if ($is_enabled) {
@@ -1669,7 +1662,7 @@ function views_ui_get_display_tab_details($view, $display) {
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
         '#prefix' => '<li class="undo-delete">',
-        "#suffix" => '</li>',
+        '#suffix' => '</li>',
       );
     }
     $build['top']['actions']['suffix']['#markup'] = '</ul>';
@@ -2548,9 +2541,8 @@ function views_ui_add_microweights(&$build) {
  * docblock outdated?
  */
 function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = NULL, $third = NULL, $submit = NULL) {
-  $form['buttons'] = array(
-    '#prefix' => '<div class="clearfix"><div class="form-buttons">',
-    '#suffix' => '</div></div>',
+  $form['actions'] = array(
+    '#type' => 'actions',
   );
 
   if (empty($name)) {
@@ -2562,18 +2554,27 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     $names = array(t('Apply'), t('Apply and continue'));
   }
 
+  // Views provides its own custom handling of AJAX form submissions. Usually
+  // this happens at the same path, but custom paths may be specified in
+  // $form_state.
+  $form_path = empty($form_state['path']) ? current_path() : $form_state['path'];
+
   // Forms that are purely informational set an ok_button flag, so we know not
   // to create an "Apply" button for them.
   if (empty($form_state['ok_button'])) {
-    $form['buttons']['submit'] = array(
+    $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $name,
+      '#id' => 'edit-submit-' . drupal_html_id($form_id),
       // The regular submit handler ($form_id . '_submit') does not apply if
       // we're updating the default display. It does apply if we're updating
       // the current display. Since we have no way of knowing at this point
       // which display the user wants to update, views_ui_standard_submit will
       // take care of running the regular submit handler as appropriate.
       '#submit' => array('views_ui_standard_submit'),
+      '#ajax' => array(
+        'path' => $form_path,
+      ),
     );
     // Form API button click detection requires the button's #value to be the
     // same between the form build of the initial page request, and the initial
@@ -2584,22 +2585,25 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     // we compensate by extending button click detection code to support any of
     // the possible button labels.
     if (isset($names)) {
-      $form['buttons']['submit']['#values'] = $names;
-      $form['buttons']['submit']['#process'] = array_merge(array('views_ui_form_button_was_clicked'), element_info_property($form['buttons']['submit']['#type'], '#process', array()));
+      $form['actions']['submit']['#values'] = $names;
+      $form['actions']['submit']['#process'] = array_merge(array('views_ui_form_button_was_clicked'), element_info_property($form['actions']['submit']['#type'], '#process', array()));
     }
     // If a validation handler exists for the form, assign it to this button.
     if (function_exists($form_id . '_validate')) {
-      $form['buttons']['submit']['#validate'][] = $form_id . '_validate';
+      $form['actions']['submit']['#validate'][] = $form_id . '_validate';
     }
   }
 
   // Create a "Cancel" button. For purely informational forms, label it "OK".
   $cancel_submit = function_exists($form_id . '_cancel') ? $form_id . '_cancel' : 'views_ui_standard_cancel';
-  $form['buttons']['cancel'] = array(
+  $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => empty($form_state['ok_button']) ? t('Cancel') : t('Ok'),
     '#submit' => array($cancel_submit),
     '#validate' => array(),
+    '#ajax' => array(
+      'path' => $form_path,
+    ),
   );
 
   // Some forms specify a third button, with a name and submit handler.
@@ -2609,11 +2613,14 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
     }
     $third_submit = function_exists($form_id . '_' . $submit) ? $form_id . '_' . $submit : 'views_ui_standard_cancel';
 
-    $form['buttons'][$submit] = array(
+    $form['actions'][$submit] = array(
       '#type' => 'submit',
       '#value' => $third,
       '#validate' => array(),
       '#submit' => array($third_submit),
+      '#ajax' => array(
+        'path' => $form_path,
+      ),
     );
   }
 
@@ -2627,9 +2634,6 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   }
   if (isset($form['#help_module'])) {
     $form_state['help_module'] = $form['#help_module'];
-  }
-  if (isset($form['#url'])) {
-    $form_state['url'] = $form['#url'];
   }
   if (isset($form['#section'])) {
     $form_state['#section'] = $form['#section'];
@@ -2945,18 +2949,18 @@ function views_ui_build_form_state($js, $key, &$view, $display_id, $args) {
 }
 
 /**
- * Create the URL for one of our standard AJAX forms based upon known
+ * Create the menu path for one of our standard AJAX forms based upon known
  * information about the form.
  */
-function views_ui_build_form_url($form_state) {
+function views_ui_build_form_path($form_state) {
   $form = views_ui_ajax_forms($form_state['form_key']);
   $ajax = empty($form_state['ajax']) ? 'nojs' : 'ajax';
   $name = $form_state['view']->name;
-  $url = "admin/structure/views/$ajax/$form_state[form_key]/$name/$form_state[display_id]";
+  $path = "admin/structure/views/$ajax/$form_state[form_key]/$name/$form_state[display_id]";
   foreach ($form['args'] as $arg) {
-    $url .= '/' . $form_state[$arg];
+    $path .= '/' . $form_state[$arg];
   }
-  return $url;
+  return $path;
 }
 
 /**
@@ -3014,6 +3018,13 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
     unset($_POST['ajax_html_ids']);
   }
 
+  // AJAX requests may not have the triggering element set in POST, but ajax.js
+  // adds a triggering element. Add to POST to ensure the correct button submit
+  // handlers fire.
+  if (isset($_POST['_triggering_element_name']) && isset($_POST['_triggering_element_value'])) {
+    $_POST[$_POST['_triggering_element_name']] = $_POST['_triggering_element_value'];
+  }
+
   $form = views_ui_ajax_forms($key);
   if (empty($form)) {
     return MENU_NOT_FOUND;
@@ -3066,9 +3077,9 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
       $top[0] = $js;
       $form_state = call_user_func_array('views_ui_build_form_state', $top);
       $form_state['input'] = array();
-      $form_state['url'] = url(views_ui_build_form_url($form_state));
+      $form_state['path'] = views_ui_build_form_path($form_state);
       if (!$js) {
-        return drupal_goto(views_ui_build_form_url($form_state));
+        return drupal_goto(views_ui_build_form_path($form_state));
       }
       $output = views_ajax_form_wrapper($form_state['form_id'], $form_state);
     }
@@ -3078,7 +3089,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
     }
     else {
       $output = array();
-      $output[] = views_ajax_command_dismiss_form();
+      $output[] = ajax_command_close_modal_dialog();
       $output[] = views_ajax_command_show_buttons();
       $output[] = views_ajax_command_trigger_preview();
       if (!empty($form_state['#page_title'])) {
@@ -3608,7 +3619,7 @@ function theme_views_ui_rearrange_form($variables) {
 
   $header = array('', t('Weight'), t('Remove'));
   $output = drupal_render($form['override']);
-  $output .= '<div class="scroll">';
+  $output .= '<div class="scroll" data-drupal-views-scroll>';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
   $output .= '</div>';
   $output .= drupal_render_children($form);
@@ -3855,6 +3866,9 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
           'class' => array('views-remove-group'),
         ),
         '#group' => $id,
+        '#ajax' => array(
+          'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+        ),
       );
     }
     $group_options[$id] = $id == 1 ? t('Default group') : t('Group @group', array('@group' => $id));
@@ -3928,11 +3942,14 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
   }
 
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_rearrange_filter_form');
-  $form['buttons']['add_group'] = array(
+  $form['actions']['add_group'] = array(
     '#type' => 'submit',
     '#value' => t('Create new filter group'),
     '#id' => 'views-add-group',
     '#group' => 'add',
+    '#ajax' => array(
+      'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+    ),
   );
 
   return $form;
@@ -4024,7 +4041,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
 
   // When JavaScript is enabled, the button for adding a new group should be
   // hidden, since it will be replaced by a link on the client side.
-  $form['buttons']['add_group']['#attributes']['class'][] = 'js-hide';
+  $form['actions']['add_group']['#attributes']['class'][] = 'js-hide';
 
   // Render the rest of the form and return.
   $output .= drupal_render_children($form);
@@ -4149,7 +4166,7 @@ function views_ui_add_item_form($form, &$form_state) {
   $form = array(
     'options' => array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('scroll')),
+      '#attributes' => array('class' => array('scroll'), 'data-drupal-views-scroll' => TRUE),
     ),
   );
 
@@ -4228,6 +4245,7 @@ function views_ui_add_item_form($form, &$form_state) {
     }
 
     foreach ($grouped_options as $group => $group_options) {
+      $form['options']['name'][$group . '_start']['#markup'] = '<div class="views-filterable-group views-filterable-group-' . $group . '">';
       $zebra = 0;
       foreach ($group_options as $key => $option) {
         $zebra_class = ($zebra % 2) ? 'odd' : 'even';
@@ -4241,6 +4259,7 @@ function views_ui_add_item_form($form, &$form_state) {
         );
         $zebra++;
       }
+      $form['options']['name'][$group . '_end']['#markup'] = '</div>';
     }
 
     $form['options']['controls']['group']['#options'] = $groups;
@@ -4256,13 +4275,16 @@ function views_ui_add_item_form($form, &$form_state) {
     '#markup' => '<div class="views-selected-options"></div>',
     '#title' => t('Selected') . ':',
     '#theme_wrappers' => array('form_element', 'views_container'),
-    '#attributes' => array('class' => array('container-inline', 'views-add-form-selected')),
+    '#attributes' => array(
+      'class' => array('container-inline', 'views-add-form-selected'),
+      'data-drupal-views-offset' => 'bottom',
+    ),
   );
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $ltitle)));
 
   // Remove the default submit function.
-  $form['buttons']['submit']['#submit'] = array_diff($form['buttons']['submit']['#submit'], array('views_ui_standard_submit'));
-  $form['buttons']['submit']['#submit'][] = 'views_ui_add_item_form_submit';
+  $form['actions']['submit']['#submit'] = array_diff($form['actions']['submit']['#submit'], array('views_ui_standard_submit'));
+  $form['actions']['submit']['#submit'][] = 'views_ui_add_item_form_submit';
 
   return $form;
 }
@@ -4385,7 +4407,7 @@ function views_ui_config_item_form($form, &$form_state) {
     'options' => array(
       '#tree' => TRUE,
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('scroll')),
+      '#attributes' => array('class' => array('scroll'), 'data-drupal-views-scroll' => TRUE),
     ),
   );
   if (!$view->set_display($display_id)) {
@@ -4494,7 +4516,7 @@ function views_ui_config_item_form($form, &$form_state) {
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_item_form', $name, t('Remove'), 'remove');
     // Only validate the override values, because this values are required for
     // the override selection.
-    $form['buttons']['remove']['#limit_validation_errors'] = array(array('override'));
+    $form['actions']['remove']['#limit_validation_errors'] = array(array('override'));
   }
 
   return $form;
