@@ -255,7 +255,7 @@ function language_negotiation_get_switch_links($type, $path) {
 }
 
 /**
- * Updates language configuration to remove any language provider that is no longer defined.
+ * Removes any unused language negotiation providers from the configuration.
  */
 function language_negotiation_purge() {
   // Ensure that we are getting the defined language negotiation information. An
