@@ -17,8 +17,9 @@ function contact_site_form($form, &$form_state) {
   global $user;
 
   // Check if flood control has been activated for sending e-mails.
-  $limit = variable_get('contact_threshold_limit', 5);
-  $window = variable_get('contact_threshold_window', 3600);
+  $config = config('contact.settings');
+  $limit = $config->get('contact_threshold_limit');
+  $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms')) {
     drupal_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
     drupal_access_denied();
@@ -158,7 +159,8 @@ function contact_site_form_submit($form, &$form_state) {
     drupal_mail('contact', 'page_autoreply', $from, $language_interface, $values, $to);
   }
 
-  flood_register_event('contact', variable_get('contact_threshold_window', 3600));
+  $config = config('contact.settings');
+  flood_register_event('contact', $config->get('contact_threshold_window'));
   watchdog('mail', '%sender-name (@sender-from) sent an e-mail regarding %category.', array('%sender-name' => $values['name'], '@sender-from' => $from, '%category' => $values['category']['category']));
 
   // Jump to home page rather than back to contact page to avoid
@@ -179,8 +181,9 @@ function contact_personal_form($form, &$form_state, $recipient) {
   global $user;
 
   // Check if flood control has been activated for sending e-mails.
-  $limit = variable_get('contact_threshold_limit', 5);
-  $window = variable_get('contact_threshold_window', 3600);
+  $config = config('contact.settings');
+  $limit = $config->get('contact_threshold_limit');
+  $window = $config->get('contact_threshold_window');
   if (!flood_is_allowed('contact', $limit, $window) && !user_access('administer contact forms') && !user_access('administer users')) {
     drupal_set_message(t("You cannot send more than %limit messages in @interval. Try again later.", array('%limit' => $limit, '@interval' => format_interval($window))), 'error');
     drupal_access_denied();
@@ -274,7 +277,8 @@ function contact_personal_form_submit($form, &$form_state) {
     drupal_mail('contact', 'user_copy', $from, $language_interface, $values, $from);
   }
 
-  flood_register_event('contact', variable_get('contact_threshold_window', 3600));
+  $config = config('contact.settings');
+  flood_register_event('contact', $config->get('contact_threshold_window'));
   watchdog('mail', '%sender-name (@sender-from) sent %recipient-name an e-mail.', array('%sender-name' => $values['name'], '@sender-from' => $from, '%recipient-name' => $values['recipient']->name));
 
   // Jump to the contacted user's profile page.
