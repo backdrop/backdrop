@@ -658,6 +658,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
+  $items['admin/config/administration'] = array(
+    'title' => 'Administration',
+    'description' => 'Administration tools.',
+    'position' => 'left',
+    'weight' => -12,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+  );
   // Media settings.
   $items['admin/config/media'] = array(
     'title' => 'Media',

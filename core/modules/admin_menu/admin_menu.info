@@ -1,0 +1,6 @@
+name = Administration menu
+description = "Provides a dropdown menu to most administrative tasks and other common destinations."
+package = Core
+core = 8.x
+configure = admin/config/administration/admin-menu
+version = VERSION

@@ -1846,6 +1846,21 @@ function system_update_8007() {
 }
 
 /**
+ * Enable Admin Menu module.
+ */
+function system_update_8008() {
+  update_module_enable(array('admin_menu'));
+
+  // Install default config.
+  config_install_default_config('admin_menu', 'admin_menu.settings');
+
+  // Manually install schema, as update_module_enable() does not do this for us.
+  $cache_admin_menu = drupal_get_schema_unprocessed('system', 'cache');
+  $cache_admin_menu['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
+  db_create_table('cache_admin_menu', $cache_admin_menu);
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-8.x"
  * The next series of updates should start at 9000.
  */
