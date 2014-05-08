@@ -3010,6 +3010,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
     'module' => 'menu',
     'customized' => 0,
     'updated' => 0,
+    'langcode' => 'und'
   );
   if (isset($item['mlid'])) {
     if (!$existing_item) {
@@ -3051,6 +3052,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
         'options' => serialize($item['options']),
         'customized' => $item['customized'],
         'updated' => $item['updated'],
+        'langcode' => $item['langcode']
       ))
       ->execute();
   }
@@ -3124,6 +3126,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
         'link_title' => $item['link_title'],
         'options' => serialize($item['options']),
         'customized' => $item['customized'],
+        'langcode' => $item['langcode']
       ))
       ->condition('mlid', $item['mlid'])
       ->execute();

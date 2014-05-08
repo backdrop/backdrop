@@ -33,6 +33,12 @@ function menu_schema() {
         'description' => 'Menu description.',
         'translatable' => TRUE,
       ),
+      'localize_item_list' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Localisation mode of the menu where 0=all menu items and 1=each language has a separate list of items'
+      )
     ),
     'primary key' => array('menu_name'),
   );
@@ -57,6 +63,7 @@ function menu_install() {
       'menu_name' => $menu_name,
       'title' => $t($title),
       'description' => $descriptions[$menu_name],
+      'localize_item_list' => 0
     );
     menu_save($menu);
   }
@@ -68,4 +75,3 @@ function menu_install() {
 function menu_uninstall() {
   menu_rebuild();
 }
-

@@ -63,15 +63,21 @@ function theme_menu_admin_overview($variables) {
  * Shows for one menu the menu links accessible to the current user and
  * relevant operations.
  */
-function menu_overview_form($form, &$form_state, $menu) {
+function menu_overview_form($form, &$form_state, $menu, $langcode = false) {
   global $menu_admin;
+
+  if (!$langcode) {
+    $language = language_default();
+    $langcode = $language->langcode;
+  }
+
   $form['#attached']['css'] = array(drupal_get_path('module', 'menu') . '/menu.css');
   $sql = "
-    SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
-    FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
-    WHERE ml.menu_name = :menu
+    SELECT mr.load_functions, mr.to_arg_functions, mr.access_callback, mr.access_arguments, mr.page_callback, mr.page_arguments, mr.delivery_callback, mr.title, mr.title_callback, mr.title_arguments, mr.type, mr.description, ml.*
+    FROM {menu_links} ml LEFT JOIN {menu_router} mr ON mr.path = ml.router_path JOIN {menu_custom} mc ON mc.menu_name = ml.menu_name
+    WHERE ml.menu_name = :menu AND ((mc.localize_item_list = 1 AND (ml.langcode = :langcode OR ml.langcode = 'und')) OR (mc.localize_item_list = 0))
     ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
-  $result = db_query($sql, array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
+  $result = db_query($sql, array(':menu' => $menu['menu_name'], ':langcode' => $langcode), array('fetch' => PDO::FETCH_ASSOC));
   $links = array();
   foreach ($result as $item) {
     $links[] = $item;
@@ -503,6 +509,14 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
     '#title' => t('Description'),
     '#default_value' => $menu['description'],
   );
+
+  $form['localize_item_list'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Localize item list'),
+    '#default_value' => $menu['localize_item_list'],
+    '#description' => t('Select this if you want to manage items for each language separately.')
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',

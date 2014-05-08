@@ -237,6 +237,7 @@ function menu_save($menu) {
     ->fields(array(
       'title' => $menu['title'],
       'description' => $menu['description'],
+      'localize_item_list' => $menu['localize_item_list']
     ))
     ->execute();
   menu_cache_clear_all();
@@ -517,6 +518,11 @@ function menu_node_save(Node $node) {
         // from the menu link.
         unset($link['options']['attributes']['title']);
       }
+
+      if (isset($node->path['langcode'])) {
+        $link['langcode'] = $node->path['langcode'];
+      }
+
       if (!menu_link_save($link)) {
         drupal_set_message(t('There was an error saving the menu link.'), 'error');
       }

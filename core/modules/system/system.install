@@ -1284,6 +1284,13 @@ function system_schema() {
         'default' => 0,
         'size' => 'small',
       ),
+      'langcode' => array(
+        'description' => 'Language code of the item',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'und',
+      ),
     ),
     'indexes' => array(
       'path_menu' => array(array('link_path', 128), 'menu_name'),
