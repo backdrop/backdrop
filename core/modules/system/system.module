@@ -1027,6 +1027,27 @@ function _system_batch_theme() {
 }
 
 /**
+ * Implements hook_page_delivery_callback_alter().
+ *
+ * Enables the ability to display arbitrary pages as dialogs based on the
+ * HTTP request header.
+ */
+function system_page_delivery_callback_alter(&$delivery_callback, $page_output) {
+  // For all ajax.js initiated requests, deliver as JSON.
+  if (backdrop_is_ajax()) {
+    $delivery_callback = 'ajax_deliver';
+  }
+  // For links with the data-dialog attribute, deliver as dialog JSON.
+  elseif (backdrop_is_dialog()) {
+    $delivery_callback = 'ajax_deliver_dialog';
+  }
+  // If the page response is a set of AJAX commands, deliver as JSON.
+  elseif (isset($page_output['#type']) && $page_output['#type'] === 'ajax') {
+    $delivery_callback = 'ajax_deliver';
+  }
+}
+
+/**
  * Implements hook_library_info().
  */
 function system_library_info() {
@@ -1070,6 +1091,36 @@ function system_library_info() {
     'version' => VERSION,
     'js' => array(
       'core/misc/form.js' => array('group' => JS_LIBRARY, 'weight' => 1),
+    ),
+  );
+
+  // Backdrop's dialog component.
+  $libraries['backdrop.dialog'] = array(
+    'title' => 'Backdrop dialog',
+    'version' => VERSION,
+    'js' => array(
+      'core/misc/dialog.js' => array('group' => JS_LIBRARY),
+    ),
+    'css' => array(
+      'core/misc/dialog.theme.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+      array('system', 'ui.dialog'),
+    ),
+  );
+
+  // Backdrop's integration between AJAX and dialogs.
+  $libraries['backdrop.dialog.ajax'] = array(
+    'title' => 'Backdrop dialog AJAX integration',
+    'version' => VERSION,
+    'js' => array(
+      'core/misc/dialog.ajax.js' => array('group' => JS_LIBRARY, 'weight' => 3),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+      array('system', 'drupal.ajax'),
+      array('system', 'backdrop.dialog'),
     ),
   );
 
@@ -1126,7 +1177,7 @@ function system_library_info() {
   $libraries['jquery'] = array(
     'title' => 'jQuery',
     'website' => 'http://jquery.com',
-    'version' => '1.7.0',
+    'version' => '1.11.0',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
     ),
@@ -1146,12 +1197,9 @@ function system_library_info() {
   $libraries['jquery.form'] = array(
     'title' => 'jQuery Form Plugin',
     'website' => 'http://malsup.com/jquery/form/',
-    'version' => '2.87',
+    'version' => '3.50.0',
     'js' => array(
       'core/misc/jquery.form.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery.cookie'),
     ),
   );
 
@@ -1239,7 +1287,7 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.8.16',
+    'version' => '1.10.4',
     'js' => array(
       'core/misc/ui/jquery.ui.core.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
     ),
@@ -1250,7 +1298,7 @@ function system_library_info() {
   );
   $libraries['ui.accordion'] = array(
     'title' => 'jQuery UI: Accordion',
-    'website' => 'http://jqueryui.com/demos/accordion/',
+    'website' => 'http://jqueryui.com/accordion/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.accordion.min.js' => array(),
@@ -1264,7 +1312,7 @@ function system_library_info() {
   );
   $libraries['ui.autocomplete'] = array(
     'title' => 'jQuery UI: Autocomplete',
-    'website' => 'http://jqueryui.com/demos/autocomplete/',
+    'website' => 'http://jqueryui.com/autocomplete/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.autocomplete.min.js' => array(),
@@ -1275,11 +1323,12 @@ function system_library_info() {
     'dependencies' => array(
       array('system', 'ui.widget'),
       array('system', 'ui.position'),
+      array('system', 'ui.menu'),
     ),
   );
   $libraries['ui.button'] = array(
     'title' => 'jQuery UI: Button',
-    'website' => 'http://jqueryui.com/demos/button/',
+    'website' => 'http://jqueryui.com/button/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.button.min.js' => array(),
@@ -1293,7 +1342,7 @@ function system_library_info() {
   );
   $libraries['ui.datepicker'] = array(
     'title' => 'jQuery UI: Date Picker',
-    'website' => 'http://jqueryui.com/demos/datepicker/',
+    'website' => 'http://jqueryui.com/datepicker/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.datepicker.min.js' => array(),
@@ -1307,7 +1356,7 @@ function system_library_info() {
   );
   $libraries['ui.dialog'] = array(
     'title' => 'jQuery UI: Dialog',
-    'website' => 'http://jqueryui.com/demos/dialog/',
+    'website' => 'http://jqueryui.com/dialog/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.dialog.min.js' => array(),
@@ -1326,7 +1375,7 @@ function system_library_info() {
   );
   $libraries['ui.draggable'] = array(
     'title' => 'jQuery UI: Draggable',
-    'website' => 'http://jqueryui.com/demos/draggable/',
+    'website' => 'http://jqueryui.com/draggable/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.draggable.min.js' => array(),
@@ -1338,7 +1387,7 @@ function system_library_info() {
   );
   $libraries['ui.droppable'] = array(
     'title' => 'jQuery UI: Droppable',
-    'website' => 'http://jqueryui.com/demos/droppable/',
+    'website' => 'http://jqueryui.com/droppable/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.droppable.min.js' => array(),
@@ -1349,9 +1398,24 @@ function system_library_info() {
       array('system', 'ui.draggable'),
     ),
   );
+  $libraries['ui.menu'] = array(
+    'title' => 'jQuery UI: Mouse',
+    'website' => 'http://jqueryui.com/menu/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.menu.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.menu.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.position'),
+    ),
+  );
   $libraries['ui.mouse'] = array(
     'title' => 'jQuery UI: Mouse',
-    'website' => 'http://docs.jquery.com/UI/Mouse',
+    'website' => 'http://jqueryui.com/mouse/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.mouse.min.js' => array(),
@@ -1362,7 +1426,7 @@ function system_library_info() {
   );
   $libraries['ui.position'] = array(
     'title' => 'jQuery UI: Position',
-    'website' => 'http://jqueryui.com/demos/position/',
+    'website' => 'http://jqueryui.com/position/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.position.min.js' => array(),
@@ -1370,7 +1434,7 @@ function system_library_info() {
   );
   $libraries['ui.progressbar'] = array(
     'title' => 'jQuery UI: Progress Bar',
-    'website' => 'http://jqueryui.com/demos/progressbar/',
+    'website' => 'http://jqueryui.com/progressbar/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.progressbar.min.js' => array(),
@@ -1384,7 +1448,7 @@ function system_library_info() {
   );
   $libraries['ui.resizable'] = array(
     'title' => 'jQuery UI: Resizable',
-    'website' => 'http://jqueryui.com/demos/resizable/',
+    'website' => 'http://jqueryui.com/resizable/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.resizable.min.js' => array(),
@@ -1399,7 +1463,7 @@ function system_library_info() {
   );
   $libraries['ui.selectable'] = array(
     'title' => 'jQuery UI: Selectable',
-    'website' => 'http://jqueryui.com/demos/selectable/',
+    'website' => 'http://jqueryui.com/selectable/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.selectable.min.js' => array(),
@@ -1414,7 +1478,7 @@ function system_library_info() {
   );
   $libraries['ui.slider'] = array(
     'title' => 'jQuery UI: Slider',
-    'website' => 'http://jqueryui.com/demos/slider/',
+    'website' => 'http://jqueryui.com/slider/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.slider.min.js' => array(),
@@ -1429,7 +1493,7 @@ function system_library_info() {
   );
   $libraries['ui.sortable'] = array(
     'title' => 'jQuery UI: Sortable',
-    'website' => 'http://jqueryui.com/demos/sortable/',
+    'website' => 'http://jqueryui.com/sortable/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.sortable.min.js' => array(),
@@ -1439,9 +1503,24 @@ function system_library_info() {
       array('system', 'ui.mouse'),
     ),
   );
+  $libraries['ui.spinner'] = array(
+    'title' => 'jQuery UI: Spinner',
+    'website' => 'http://jqueryui.com/spinner/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.spinner.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.spinner.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+      array('system', 'ui.button'),
+    ),
+  );
   $libraries['ui.tabs'] = array(
     'title' => 'jQuery UI: Tabs',
-    'website' => 'http://jqueryui.com/demos/tabs/',
+    'website' => 'http://jqueryui.com/tabs/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.tabs.min.js' => array(),
@@ -1455,7 +1534,7 @@ function system_library_info() {
   );
   $libraries['ui.widget'] = array(
     'title' => 'jQuery UI: Widget',
-    'website' => 'http://docs.jquery.com/UI/Widget',
+    'website' => 'http://jqueryui.com/widget/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
@@ -1466,18 +1545,18 @@ function system_library_info() {
   );
   $libraries['effects'] = array(
     'title' => 'jQuery UI: Effects',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.core.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
     ),
   );
   $libraries['effects.blind'] = array(
     'title' => 'jQuery UI: Effects Blind',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.blind.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-blind.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1485,10 +1564,10 @@ function system_library_info() {
   );
   $libraries['effects.bounce'] = array(
     'title' => 'jQuery UI: Effects Bounce',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.bounce.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-bounce.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1496,10 +1575,10 @@ function system_library_info() {
   );
   $libraries['effects.clip'] = array(
     'title' => 'jQuery UI: Effects Clip',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.clip.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-clip.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1507,10 +1586,10 @@ function system_library_info() {
   );
   $libraries['effects.drop'] = array(
     'title' => 'jQuery UI: Effects Drop',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.drop.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-drop.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1518,10 +1597,10 @@ function system_library_info() {
   );
   $libraries['effects.explode'] = array(
     'title' => 'jQuery UI: Effects Explode',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.explode.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-explode.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1529,10 +1608,10 @@ function system_library_info() {
   );
   $libraries['effects.fade'] = array(
     'title' => 'jQuery UI: Effects Fade',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.fade.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-fade.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1540,10 +1619,10 @@ function system_library_info() {
   );
   $libraries['effects.fold'] = array(
     'title' => 'jQuery UI: Effects Fold',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.fold.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-fold.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1551,10 +1630,10 @@ function system_library_info() {
   );
   $libraries['effects.highlight'] = array(
     'title' => 'jQuery UI: Effects Highlight',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.highlight.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-highlight.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1562,10 +1641,10 @@ function system_library_info() {
   );
   $libraries['effects.pulsate'] = array(
     'title' => 'jQuery UI: Effects Pulsate',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.pulsate.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-pulsate.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1573,10 +1652,10 @@ function system_library_info() {
   );
   $libraries['effects.scale'] = array(
     'title' => 'jQuery UI: Effects Scale',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.scale.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-scale.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1584,10 +1663,10 @@ function system_library_info() {
   );
   $libraries['effects.shake'] = array(
     'title' => 'jQuery UI: Effects Shake',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.shake.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-shake.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1595,10 +1674,10 @@ function system_library_info() {
   );
   $libraries['effects.slide'] = array(
     'title' => 'jQuery UI: Effects Slide',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.slide.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-slide.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1606,10 +1685,10 @@ function system_library_info() {
   );
   $libraries['effects.transfer'] = array(
     'title' => 'jQuery UI: Effects Transfer',
-    'website' => 'http://jqueryui.com/demos/effect/',
+    'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.effects.transfer.min.js' => array(),
+      'core/misc/ui/jquery.ui.effect-transfer.min.js' => array(),
     ),
     'dependencies' => array(
       array('system', 'effects'),
@@ -1702,16 +1781,27 @@ function _system_themes_access($theme) {
 /**
  * Setup a given callback to run via authorize.php with elevated privileges.
  *
- * To use authorize.php, certain variables must be stashed into $_SESSION.
- * This function sets up all the necessary $_SESSION variables, then returns
- * the full path to authorize.php so the caller can redirect to authorize.php.
- * That initiates the workflow that will eventually lead to the callback being
- * invoked. The callback will be invoked at a low bootstrap level, without all
- * modules being invoked, so it needs to be careful not to assume any code
- * exists.
+ * To use authorize.php, certain variables must be stashed into $_SESSION. This
+ * function sets up all the necessary $_SESSION variables. The calling function
+ * should then redirect to authorize.php, using the full path returned by
+ * system_authorized_get_url(). That initiates the workflow that will eventually
+ * lead to the callback being invoked. The callback will be invoked at a low
+ * bootstrap level, without all modules being invoked, so it needs to be careful
+ * not to assume any code exists. Example (system_authorized_run()):
+ * @code
+ *   system_authorized_init($callback, $file, $arguments, $page_title);
+ *   drupal_goto(system_authorized_get_url());
+ * @endcode
+ * Example (update_manager_install_form_submit()):
+ * @code
+ *  system_authorized_init('update_authorize_run_install',
+ *    drupal_get_path('module', 'update') . '/update.authorize.inc',
+ *    $arguments, t('Update manager'));
+ *  $form_state['redirect'] = system_authorized_get_url();
+ * @endcode
  *
  * @param $callback
- *   The name of the function to invoke one the user authorizes the operation.
+ *   The name of the function to invoke once the user authorizes the operation.
  * @param $file
  *   The full path to the file where the callback function is implemented.
  * @param $arguments
@@ -1748,6 +1838,8 @@ function system_authorized_init($callback, $file, $arguments = array(), $page_ti
  *   Optional array of options to pass to url().
  * @return
  *   The full URL to authorize.php, using HTTPS if available.
+ *
+ * @see system_authorized_init()
  */
 function system_authorized_get_url(array $options = array()) {
   global $base_url;
@@ -2306,14 +2398,14 @@ function _system_rebuild_module_data() {
   // Find modules
   $modules = drupal_system_listing('/^' . DRUPAL_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
 
-  // Include the install profile in modules that are loaded.
+  // Include the installation profile in modules that are loaded.
   $profile = drupal_get_profile();
   $modules[$profile] = new stdClass();
   $modules[$profile]->name = $profile;
   $modules[$profile]->uri = 'profiles/' . $profile . '/' . $profile . '.profile';
   $modules[$profile]->filename = $profile . '.profile';
 
-  // Install profile hooks are always executed last.
+  // Installation profile hooks are always executed last.
   $modules[$profile]->weight = 1000;
 
   // Set defaults for module info.
@@ -2354,7 +2446,7 @@ function _system_rebuild_module_data() {
       $module->info['scripts'] = _system_info_add_path($module->info['scripts'], $path);
     }
 
-    // Install profiles are hidden by default, unless explicitly specified
+    // Installation profiles are hidden by default, unless explicitly specified
     // otherwise in the .info file.
     if ($key == $profile && !isset($modules[$key]->info['hidden'])) {
       $modules[$key]->info['hidden'] = TRUE;
@@ -2367,7 +2459,7 @@ function _system_rebuild_module_data() {
   }
 
   if (isset($modules[$profile])) {
-    // The install profile is required, if it's a valid module.
+    // The installation profile is required, if it's a valid module.
     $modules[$profile]->info['required'] = TRUE;
     // Add a default distribution name if the profile did not provide one. This
     // matches the default value used in install_profile_info().

@@ -194,8 +194,8 @@ Drupal.behaviors.color = {
       // Add lock.
       var i = inputs.length;
       if (inputs.length) {
-        var lock = $('<div class="lock"></div>').toggle(
-          function () {
+        var lock = $('<div class="lock"></div>').bind('click', function() {
+          if (!$(this).hasClass('unlocked')) {
             $(this).addClass('unlocked');
             $(hooks[i - 1]).attr('class',
               locks[i - 2] && $(locks[i - 2]).is(':not(.unlocked)') ? 'hook up' : 'hook'
@@ -203,8 +203,8 @@ Drupal.behaviors.color = {
             $(hooks[i]).attr('class',
               locks[i] && $(locks[i]).is(':not(.unlocked)') ? 'hook down' : 'hook'
             );
-          },
-          function () {
+          }
+          else {
             $(this).removeClass('unlocked');
             $(hooks[i - 1]).attr('class',
               locks[i - 2] && $(locks[i - 2]).is(':not(.unlocked)') ? 'hook both' : 'hook down'
@@ -213,7 +213,7 @@ Drupal.behaviors.color = {
               locks[i] && $(locks[i]).is(':not(.unlocked)') ? 'hook both' : 'hook up'
             );
           }
-        );
+        });
         $(this).after(lock);
         locks.push(lock);
       };

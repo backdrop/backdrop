@@ -20,7 +20,7 @@ Drupal.behaviors.viewsTabs = {
     $('a.views-remove-link').once('views-processed').click(function(event) {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
-      $('#views-removed-' + id).attr('checked', true);
+      $('#views-removed-' + id).prop('checked', true);
       event.preventDefault();
    });
   /**
@@ -32,7 +32,7 @@ Drupal.behaviors.viewsTabs = {
     .click(function() {
       var id = $(this).attr('id').replace('display-remove-link-', '');
       $('#display-row-' + id).hide();
-      $('#display-removed-' + id).attr('checked', true);
+      $('#display-removed-' + id).prop('checked', true);
       return false;
   });
   }

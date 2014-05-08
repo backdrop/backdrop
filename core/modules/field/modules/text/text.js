@@ -23,18 +23,17 @@ Drupal.behaviors.textSummary = {
         }
 
         // Setup the edit/hide summary link.
-        var $link = $('<span class="field-edit-link">(<a class="link-edit-summary" href="#">' + Drupal.t('Hide summary') + '</a>)</span>').toggle(
-          function () {
+        var $link = $('<span class="field-edit-link">(<a class="link-edit-summary" href="#">' + Drupal.t('Hide summary') + '</a>)</span>').bind('click', function(e) {
+          if ($summary.css('display') !== 'none') {
             $summary.hide();
             $(this).find('a').html(Drupal.t('Edit summary')).end().appendTo($fullLabel);
-            return false;
-          },
-          function () {
+          }
+          else {
             $summary.show();
             $(this).find('a').html(Drupal.t('Hide summary')).end().appendTo($summaryLabel);
-            return false;
           }
-        ).appendTo($summaryLabel);
+          e.preventDefault();
+        }).appendTo($summaryLabel);
 
         // If no summary is set, hide the summary field.
         if ($(this).find('.text-summary').val() == '') {

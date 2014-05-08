@@ -495,6 +495,11 @@ function user_permission() {
       'title' => t('Administer users'),
       'restrict access' => TRUE,
     ),
+    'administer account settings' => array(
+      'title' => t('Administer user account settings'),
+      'description' => t('Manage settings that apply to all user accounts.'),
+      'restrict access' => TRUE,
+    ),
     'access user profiles' => array(
       'title' => t('View user profiles'),
     ),
@@ -1503,7 +1508,7 @@ function user_menu() {
     'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_admin_settings'),
-    'access arguments' => array('administer users'),
+    'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
     'weight' => -10,
   );
@@ -2248,6 +2253,10 @@ function user_build_content($account, $view_mode = 'full', $langcode = NULL) {
   // Populate $account->content with a render() array.
   module_invoke_all('user_view', $account, $view_mode, $langcode);
   module_invoke_all('entity_view', $account, 'user', $view_mode, $langcode);
+
+  // Make sure the current view mode is stored if no module has already
+  // populated the related key.
+  $account->content += array('#view_mode' => $view_mode);
 }
 
 /**

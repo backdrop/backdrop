@@ -15,11 +15,11 @@ form .field-multiple-table {
 form .field-multiple-table th.field-label {
   padding-left: 0; /*LTR*/
 }
-form .field-multiple-table td.field-multiple-drag {
+form .field-multiple-table .field-multiple-drag {
   width: 30px;
   padding-right: 0; /*LTR*/
 }
-form .field-multiple-table td.field-multiple-drag a.tabledrag-handle {
+form .field-multiple-table .field-multiple-drag .tabledrag-handle {
   padding-right: .5em; /*LTR*/
 }
 

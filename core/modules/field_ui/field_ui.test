@@ -688,7 +688,7 @@ class FieldUIAlterTestCase extends DrupalWebTestCase {
     parent::setUp(array('field_test'));
 
     // Create test user.
-    $admin_user = $this->drupalCreateUser(array('access content', 'administer content types', 'administer users'));
+    $admin_user = $this->drupalCreateUser(array('access content', 'administer content types', 'administer users', 'administer account settings'));
     $this->drupalLogin($admin_user);
   }
 

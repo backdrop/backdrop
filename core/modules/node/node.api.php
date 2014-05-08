@@ -11,8 +11,8 @@
  * Functions to define and modify content types.
  *
  * Each content type is maintained by a primary module, which is either
- * node.module (for content types created in the user interface) or the
- * module that implements hook_node_info() to define the content type.
+ * node.module (for content types created in the user interface) or the module
+ * that implements hook_node_info() to define the content type.
  *
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
@@ -20,9 +20,10 @@
  * - Node-type-specific hooks: These hooks are only invoked on the primary
  *   module, using the "base" return component of hook_node_info() as the
  *   function prefix.
- * - All-module hooks: This set of hooks is invoked on all implementing
- *   modules, to allow other modules to modify what the primary node module is
- *   doing.
+ * - All-module hooks: This set of hooks is invoked on all implementing modules,
+ *   to allow other modules to modify what the primary node module is doing. For
+ *   example, hook_node_insert() is invoked on all modules when creating a book
+ *   node.
  * - Field hooks: Hooks related to the fields attached to the node. These are
  *   invoked from the field operations functions described below, and can be
  *   either field-type-specific or all-module hooks.
@@ -53,16 +54,15 @@
  *   - hook_entity_update() (all)
  *   - hook_node_access_records() (all)
  *   - hook_node_access_records_alter() (all)
- * - Loading a node (calling node_load(), node_load_multiple(), or
- *   entity_load() with $entity_type of 'node'):
+ * - Loading a node (calling node_load(), node_load_multiple() or entity_load()
+ *   with $entity_type of 'node'):
  *   - Node and revision information is read from database.
  *   - hook_load() (node-type-specific)
  *   - field_attach_load_revision() and field_attach_load()
  *   - hook_entity_load() (all)
  *   - hook_node_load() (all)
  * - Viewing a single node (calling node_view() - note that the input to
- *   node_view() is a loaded node, so the Loading steps above are already
- *   done):
+ *   node_view() is a loaded node, so the Loading steps above are already done):
  *   - hook_view() (node-type-specific)
  *   - field_attach_prepare_view()
  *   - hook_entity_prepare_view() (all)
@@ -96,9 +96,8 @@
  *   - Revision information is deleted from database
  *   - hook_node_revision_delete() (all)
  *   - field_attach_delete_revision()
- * - Preparing a node for editing (calling node_form() - note that if it's
- *   an existing node, it will already be loaded; see the Loading section
- *   above):
+ * - Preparing a node for editing (calling node_form() - note that if it is an
+ *   existing node, it will already be loaded; see the Loading section above):
  *   - hook_prepare() (node-type-specific)
  *   - hook_node_prepare() (all)
  *   - hook_form() (node-type-specific)
@@ -136,16 +135,16 @@
  * associated with permission to view, edit, and delete individual nodes.
  *
  * The realms and grant IDs can be arbitrarily defined by your node access
- * module; it is common to use role IDs as grant IDs, but that is not
- * required. Your module could instead maintain its own list of users, where
- * each list has an ID. In that case, the return value of this hook would be
- * an array of the list IDs that this user is a member of.
+ * module; it is common to use role IDs as grant IDs, but that is not required.
+ * Your module could instead maintain its own list of users, where each list has
+ * an ID. In that case, the return value of this hook would be an array of the
+ * list IDs that this user is a member of.
  *
- * A node access module may implement as many realms as necessary to
- * properly define the access privileges for the nodes. Note that the system
- * makes no distinction between published and unpublished nodes. It is the
- * module's responsibility to provide appropriate realms to limit access to
- * unpublished content.
+ * A node access module may implement as many realms as necessary to properly
+ * define the access privileges for the nodes. Note that the system makes no
+ * distinction between published and unpublished nodes. It is the module's
+ * responsibility to provide appropriate realms to limit access to unpublished
+ * content.
  *
  * Node access records are stored in the {node_access} table and define which
  * grants are required to access a node. There is a special case for the view
@@ -179,7 +178,7 @@
  * @param $account
  *   The user object whose grants are requested.
  * @param $op
- *   The node operation to be performed, such as "view", "update", or "delete".
+ *   The node operation to be performed, such as 'view', 'update', or 'delete'.
  *
  * @return
  *   An array whose keys are "realms" of grants, and whose values are arrays of
@@ -339,20 +338,19 @@ function hook_node_access_records_alter(&$grants, Node $node) {
  * Alter user access rules when trying to view, edit or delete a node.
  *
  * Node access modules establish rules for user access to content.
- * hook_node_grants() defines permissions for a user to view, edit or
- * delete nodes by building a $grants array that indicates the permissions
- * assigned to the user by each node access module. This hook is called to allow
- * modules to modify the $grants array by reference, so the interaction of
- * multiple node access modules can be altered or advanced business logic can be
- * applied.
+ * hook_node_grants() defines permissions for a user to view, edit or delete
+ * nodes by building a $grants array that indicates the permissions assigned to
+ * the user by each node access module. This hook is called to allow modules to
+ * modify the $grants array by reference, so the interaction of multiple node
+ * access modules can be altered or advanced business logic can be applied.
  *
  * The resulting grants are then checked against the records stored in the
  * {node_access} table to determine if the operation may be completed.
  *
  * A module may deny all access to a user by setting $grants to an empty array.
  *
- * Developers may use this hook to either add additional grants to a user
- * or to remove existing grants. These rules are typically based on either the
+ * Developers may use this hook to either add additional grants to a user or to
+ * remove existing grants. These rules are typically based on either the
  * permissions assigned to a user role, or specific attributes of a user
  * account.
  *
@@ -399,10 +397,10 @@ function hook_node_grants_alter(&$grants, $account, $op) {
  * @return
  *   An array of operations. Each operation is an associative array that may
  *   contain the following key-value pairs:
- *   - 'label': Required. The label for the operation, displayed in the dropdown
+ *   - label: (required) The label for the operation, displayed in the dropdown
  *     menu.
- *   - 'callback': Required. The function to call for the operation.
- *   - 'callback arguments': Optional. An array of additional arguments to pass
+ *   - callback: (required) The function to call for the operation.
+ *   - callback arguments: (optional) An array of additional arguments to pass
  *     to the callback function.
  */
 function hook_node_operations() {
@@ -534,11 +532,10 @@ function hook_node_insert(Node $node) {
 /**
  * Act on arbitrary nodes being loaded from the database.
  *
- * This hook should be used to add information that is not in the node or
- * node revisions table, not to replace information that is in these tables
- * (which could interfere with the entity cache). For performance reasons,
- * information for all available nodes should be loaded in a single query where
- * possible.
+ * This hook should be used to add information that is not in the node or node
+ * revisions table, not to replace information that is in these tables (which
+ * could interfere with the entity cache). For performance reasons, information
+ * for all available nodes should be loaded in a single query where possible.
  *
  * This hook is invoked during node loading, which is handled by entity_load(),
  * via classes NodeController and DrupalDefaultEntityController. After the node
@@ -578,15 +575,15 @@ function hook_node_load($nodes, $types) {
  * Modules may implement this hook if they want to have a say in whether or not
  * a given user has access to perform a given operation on a node.
  *
- * The administrative account (user ID #1) always passes any access check,
- * so this hook is not called in that case. Users with the "bypass node access"
+ * The administrative account (user ID #1) always passes any access check, so
+ * this hook is not called in that case. Users with the "bypass node access"
  * permission may always view and edit content through the administrative
  * interface.
  *
- * Note that not all modules will want to influence access on all
- * node types. If your module does not want to actively grant or
- * block access, return NODE_ACCESS_IGNORE or simply return nothing.
- * Blindly returning FALSE will break other node access modules.
+ * Note that not all modules will want to influence access on all node types. If
+ * your module does not want to actively grant or block access, return
+ * NODE_ACCESS_IGNORE or simply return nothing. Blindly returning FALSE will
+ * break other node access modules.
  *
  * Also note that this function isn't called for node listings (e.g., RSS feeds,
  * the default home page at path 'node', a recent content block, etc.) See
@@ -609,6 +606,7 @@ function hook_node_load($nodes, $types) {
  *   - NODE_ACCESS_DENY: if the operation is to be denied.
  *   - NODE_ACCESS_IGNORE: to not affect this operation at all.
  *
+ * @see hook_node_access_records_alter()
  * @ingroup node_access
  */
 function hook_node_access($node, $op, $account) {
@@ -657,17 +655,17 @@ function hook_node_prepare(Node $node) {
 /**
  * Act on a node being displayed as a search result.
  *
- * This hook is invoked from node_search_execute(), after node_load()
- * and node_view() have been called.
+ * This hook is invoked from node_search_execute(), after node_load() and
+ * node_view() have been called.
  *
  * @param Node $node
  *   The node being displayed in a search result.
  *
  * @return array
  *   Extra information to be displayed with search result. This information
- *   should be presented as an associative array. It will be concatenated
- *   with the post information (last updated, author) in the default search
- *   result theming.
+ *   should be presented as an associative array. It will be concatenated with
+ *   the post information (last updated, author) in the default search result
+ *   theming.
  *
  * @see template_preprocess_search_result()
  * @see search-result.tpl.php
@@ -730,8 +728,8 @@ function hook_node_update(Node $node) {
 /**
  * Act on a node being indexed for searching.
  *
- * This hook is invoked during search indexing, after node_load(), and after
- * the result of node_view() is added as $node->rendered to the node object.
+ * This hook is invoked during search indexing, after node_load(), and after the
+ * result of node_view() is added as $node->rendered to the node object.
  *
  * @param Node $node
  *   The node being indexed.
@@ -762,8 +760,8 @@ function hook_node_update_index(Node $node) {
  *
  * Note: Changes made to the $node object within your hook implementation will
  * have no effect.  The preferred method to change a node's content is to use
- * hook_node_presave() instead. If it is really necessary to change
- * the node at the validate stage, you can use form_set_value().
+ * hook_node_presave() instead. If it is really necessary to change the node at
+ * the validate stage, you can use form_set_value().
  *
  * @param Node $node
  *   The node being validated.
@@ -889,22 +887,22 @@ function hook_node_view_alter(&$build) {
  *   contains a sub-array for each node type, with the the machine name of a
  *   content type as the key. Each sub-array has up to 10 attributes.
  *   Possible attributes:
- *   - "name": the human-readable name of the node type. Required.
- *   - "base": the base string used to construct callbacks corresponding to
- *      this node type.
- *      (i.e. if base is defined as example_foo, then example_foo_insert will
- *      be called when inserting a node of that type). This string is usually
- *      the name of the module, but not always. Required.
- *   - "description": a brief description of the node type. Required.
- *   - "help": help information shown to the user when creating a node of
- *      this type.. Optional (defaults to '').
- *   - "has_title": boolean indicating whether or not this node type has a title
- *      field. Optional (defaults to TRUE).
- *   - "title_label": the label for the title field of this content type.
- *      Optional (defaults to 'Title').
- *   - "locked": boolean indicating whether the administrator can change the
- *      machine name of this type. FALSE = changeable (not locked),
- *      TRUE = unchangeable (locked). Optional (defaults to TRUE).
+ *   - name: (required) The human-readable name of the node type.
+ *   - base: (required) The base string used to construct callbacks
+ *     corresponding to this node type (for example, if base is defined as
+ *     example_foo, then example_foo_insert will be called when inserting a node
+ *     of that type). This string is usually the name of the module, but not
+ *     always.
+ *   - description: (required) A brief description of the node type.
+ *   - help: (optional) Help information shown to the user when creating a node
+ *     of this type.
+ *   - has_title: (optional) A Boolean indicating whether or not this node type
+ *     has a title field.
+ *   - title_label: (optional) The label for the title field of this content
+ *     type.
+ *   - locked: (optional) A Boolean indicating whether the administrator can
+ *     change the machine name of this type. FALSE = changeable (not locked),
+ *     TRUE = unchangeable (locked).
  *
  * The machine name of a node type should contain only letters, numbers, and
  * underscores. Underscores will be converted into hyphens for the purpose of
@@ -953,20 +951,20 @@ function hook_node_info() {
  *   corresponding to the internal name of the ranking mechanism, such as
  *   'recent', or 'comments'. The values should be arrays themselves, with the
  *   following keys available:
- *   - "title": the human readable name of the ranking mechanism. Required.
- *   - "join": part of a query string to join to any additional necessary
- *     table. This is not necessary if the table required is already joined to
- *     by the base query, such as for the {node} table. Other tables should use
- *     the full table name as an alias to avoid naming collisions. Optional.
- *   - "score": part of a query string to calculate the score for the ranking
- *     mechanism based on values in the database. This does not need to be
- *     wrapped in parentheses, as it will be done automatically; it also does
- *     not need to take the weighted system into account, as it will be done
- *     automatically. It does, however, need to calculate a decimal between
+ *   - title: (required) The human readable name of the ranking mechanism.
+ *   - join: (optional) The part of a query string to join to any additional
+ *     necessary table. This is not necessary if the table required is already
+ *     joined to by the base query, such as for the {node} table. Other tables
+ *     should use the full table name as an alias to avoid naming collisions.
+ *   - score: (required) The part of a query string to calculate the score for
+ *     the ranking mechanism based on values in the database. This does not need
+ *     to be wrapped in parentheses, as it will be done automatically; it also
+ *     does not need to take the weighted system into account, as it will be
+ *     done automatically. It does, however, need to calculate a decimal between
  *     0 and 1; be careful not to cast the entire score to an integer by
- *     inadvertently introducing a variable argument. Required.
- *   - "arguments": if any arguments are required for the score, they can be
- *     specified in an array here.
+ *     inadvertently introducing a variable argument.
+ *   - arguments: (optional) If any arguments are required for the score, they
+ *     can be specified in an array here.
  *
  * @ingroup node_api_hooks
  */
@@ -993,8 +991,8 @@ function hook_ranking() {
 /**
  * Respond to node type creation.
  *
- * This hook is invoked from node_type_save() after the node type is added
- * to the database.
+ * This hook is invoked from node_type_save() after the node type is added to
+ * the database.
  *
  * @param $info
  *   The node type object that is being created.
@@ -1006,8 +1004,8 @@ function hook_node_type_insert($info) {
 /**
  * Respond to node type updates.
  *
- * This hook is invoked from node_type_save() after the node type is updated
- * in the database.
+ * This hook is invoked from node_type_save() after the node type is updated in
+ * the database.
  *
  * @param $info
  *   The node type object that is being updated.
@@ -1261,9 +1259,9 @@ function hook_validate(Node $node, $form, &$form_state) {
  * This hook is invoked only on the module that defines the node's content type
  * (use hook_node_view() to act on all node views).
  *
- * This hook is invoked during node viewing after the node is fully loaded,
- * so that the node type module can define a custom method for display, or
- * add to the default display.
+ * This hook is invoked during node viewing after the node is fully loaded, so
+ * that the node type module can define a custom method for display, or add to
+ * the default display.
  *
  * @param Node $node
  *   The node to be displayed, as returned by node_load().
@@ -1271,16 +1269,15 @@ function hook_validate(Node $node, $form, &$form_state) {
  *   View mode, e.g. 'full', 'teaser', ...
  *
  * @return
- *   The passed $node parameter should be modified as necessary and
- *   returned so it can be properly presented. Nodes are prepared for display
- *   by assembling a structured array, formatted as in the Form API, in
- *   $node->content. As with Form API arrays, the #weight property can be
- *   used to control the relative positions of added elements. After this
- *   hook is invoked, node_view() calls field_attach_view() to add field
- *   views to $node->content, and then invokes hook_node_view() and
- *   hook_node_view_alter(), so if you want to affect the final
- *   view of the node, you might consider implementing one of these hooks
- *   instead.
+ *   The passed $node parameter should be modified as necessary and returned so
+ *   it can be properly presented. Nodes are prepared for display by assembling
+ *   a structured array, formatted as in the Form API, in $node->content. As
+ *   with Form API arrays, the #weight property can be used to control the
+ *   relative positions of added elements. After this hook is invoked,
+ *   node_view() calls field_attach_view() to add field views to $node->content,
+ *   and then invokes hook_node_view() and hook_node_view_alter(), so if you
+ *   want to affect the final view of the node, you might consider implementing
+ *   one of these hooks instead.
  *
  * @ingroup node_api_hooks
  */
