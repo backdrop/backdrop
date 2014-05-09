@@ -33,11 +33,18 @@ function menu_schema() {
         'description' => 'Menu description.',
         'translatable' => TRUE,
       ),
-      'localize_item_list' => array(
+      'multilingual_mode' => array(
         'type' => 'int',
         'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Localisation mode of the menu where 0=all menu items and 1=each language has a separate list of items'
+        'default' => MENU_MULTILINGUAL_DISABLED,
+        'description' => 'Multilingual mode of the menu. Disabled, Enabled (specific language), Translated (link translation sets)'
+      ),
+      'langcode' => array(
+        'type' => 'varchar',
+        'length' => '12',
+        'not null' => TRUE,
+        'default' => LANGUAGE_NONE,
+        'description' => 'Language if the menu item is translatable.'
       )
     ),
     'primary key' => array('menu_name'),
@@ -63,7 +70,8 @@ function menu_install() {
       'menu_name' => $menu_name,
       'title' => $t($title),
       'description' => $descriptions[$menu_name],
-      'localize_item_list' => 0
+      'multilingual_mode' => MENU_MULTILINGUAL_DISABLED,
+      'langcode' => LANGUAGE_NONE
     );
     menu_save($menu);
   }

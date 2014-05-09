@@ -1291,6 +1291,12 @@ function system_schema() {
         'not null' => TRUE,
         'default' => 'und',
       ),
+      'tsid' => array(
+        'description' => 'Translation set id (source mlid)',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'indexes' => array(
       'path_menu' => array(array('link_path', 128), 'menu_name'),

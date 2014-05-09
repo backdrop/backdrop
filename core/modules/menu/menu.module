@@ -18,6 +18,12 @@
 const MENU_MAX_MENU_NAME_LENGTH_UI = 27;
 
 /**
+ * Menu multilingual modes.
+ */
+const MENU_MULTILINGUAL_DISABLED = 0;
+const MENU_MULTILINGUAL_ENABLED = 1;
+
+/**
  * Implements hook_permission().
  */
 function menu_permission() {
@@ -237,7 +243,8 @@ function menu_save($menu) {
     ->fields(array(
       'title' => $menu['title'],
       'description' => $menu['description'],
-      'localize_item_list' => $menu['localize_item_list']
+      'multilingual_mode' => $menu['multilingual_mode'],
+      'langcode' => $menu['langcode']
     ))
     ->execute();
   menu_cache_clear_all();

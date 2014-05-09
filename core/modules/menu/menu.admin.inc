@@ -9,12 +9,34 @@
  * Menu callback which shows an overview page of all the custom menus and their descriptions.
  */
 function menu_overview_page() {
-  $result = db_query("SELECT * FROM {menu_custom} ORDER BY title", array(), array('fetch' => PDO::FETCH_ASSOC));
-  $header = array(t('Title'), t('Operations'));
+  $menus = menu_load_all();
+
+  if (language_multilingual()) {
+    $header = array(t('Title'), t('Language'), t('Operations'));
+  }
+  else {
+    $header = array(t('Title'), t('Operations'));
+  }
   $rows = array();
-  foreach ($result as $menu) {
+
+  foreach ($menus as $menu) {
+
+    if ($menu['multilingual_mode'] > MENU_MULTILINGUAL_DISABLED ) {
+      $menu['title'] = t($menu['title']);
+      $menu['description'] = t($menu['description']);
+    }
+
     $row = array();
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
+
+    $language = language_load($menu['langcode']);
+    if ($language) {
+      $row[] = $language->name;
+    }
+    else {
+      $row[] = '';
+    }
+
     $links = array();
     $links['list'] = array(
       'title' => t('List links'),
@@ -63,25 +85,77 @@ function theme_menu_admin_overview($variables) {
  * Shows for one menu the menu links accessible to the current user and
  * relevant operations.
  */
-function menu_overview_form($form, &$form_state, $menu, $langcode = false) {
+function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
-
-  if (!$langcode) {
-    $language = language_default();
-    $langcode = $language->langcode;
-  }
+  global $language_interface;
 
   $form['#attached']['css'] = array(drupal_get_path('module', 'menu') . '/menu.css');
-  $sql = "
-    SELECT mr.load_functions, mr.to_arg_functions, mr.access_callback, mr.access_arguments, mr.page_callback, mr.page_arguments, mr.delivery_callback, mr.title, mr.title_callback, mr.title_arguments, mr.type, mr.description, ml.*
-    FROM {menu_links} ml LEFT JOIN {menu_router} mr ON mr.path = ml.router_path JOIN {menu_custom} mc ON mc.menu_name = ml.menu_name
-    WHERE ml.menu_name = :menu AND ((mc.localize_item_list = 1 AND (ml.langcode = :langcode OR ml.langcode = 'und')) OR (mc.localize_item_list = 0))
-    ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
-  $result = db_query($sql, array(':menu' => $menu['menu_name'], ':langcode' => $langcode), array('fetch' => PDO::FETCH_ASSOC));
-  $links = array();
-  foreach ($result as $item) {
-    $links[] = $item;
+
+  $select = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC))
+    ->fields('ml')
+    ->condition('ml.menu_name', $menu['menu_name']);
+
+  $select->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
+  $select->fields('m', array(
+    'load_functions',
+    'to_arg_functions',
+    'access_callback',
+    'access_arguments',
+    'page_callback',
+    'page_arguments',
+    'delivery_callback',
+    'title',
+    'title_callback',
+    'title_arguments',
+    'type',
+    'description',
+  ));
+  for ($i = 1; $i <= MENU_MAX_DEPTH; $i++) {
+    $select->orderBy('p' . $i, 'ASC');
   }
+
+  if (language_multilingual() && $menu['multilingual_mode'] != MENU_MULTILINGUAL_DISABLED) {
+
+    if ($menu['langcode'] != LANGUAGE_NONE) {
+      $langcode = $menu['langcode'];
+    }
+    else {
+      if (isset($form_state['values']['langcode']) && $form_state['values']['langcode'] != LANGUAGE_NONE) {
+        $langcode = $form_state['values']['langcode'];
+      }
+      else {
+        $language = $language_interface;
+        $langcode = $language->langcode;
+      }
+
+      // Show a select box;
+      $languages = language_list(TRUE);
+      $language_options = array();
+      foreach ($languages as $lcode => $language) {
+        $language_options[$lcode] = $language->name;
+      }
+
+      $form['langcode'] = array(
+        '#type' => 'select',
+        '#description' => 'This menu is multilingual, select a language to edit that menu localisation.',
+        '#default_value' => $langcode,
+        '#options' => $language_options,
+        '#empty_value' => LANGUAGE_NONE,
+        '#ajax' => array(
+          'wrapper' => 'menu_overview_form_wrapper'
+        )
+      );
+    }
+
+    $language_condition = db_or();
+    $language_condition->condition('ml.langcode', $langcode);
+    $language_condition->condition('ml.langcode', LANGUAGE_NONE);
+
+    $select->condition($language_condition);
+  }
+
+  $links = $select->execute()->fetchAll();
+
   $tree = menu_tree_data($links);
   $node_links = array();
   menu_tree_collect_node_links($tree, $node_links);
@@ -181,6 +255,10 @@ function _menu_overview_tree_form($tree) {
       _menu_overview_tree_form($data['below']);
     }
   }
+
+  $form['#prefix'] = '<div id="menu_overview_form_wrapper">';
+  $form['#suffix'] = '</div>';
+
   return $form;
 }
 
@@ -510,12 +588,41 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
     '#default_value' => $menu['description'],
   );
 
-  $form['localize_item_list'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Localize item list'),
-    '#default_value' => $menu['localize_item_list'],
-    '#description' => t('Select this if you want to manage items for each language separately.')
-  );
+  if (language_multilingual()) {
+    $form['multilingual_mode'] = array(
+      '#type' => 'radios',
+      '#title' => t('Multilingual support'),
+      '#default_value' => $menu['multilingual_mode'],
+      '#description' => '
+        <ul>
+          <li><strong>Disabled</strong>: The menu will show all links of all languages.</li>
+          <li><strong>Enabled</strong>: The menu will show links in the current language. You may also select an optional fixed language. The menu will then only be visible in the selected language and show only links in this language. New links will be saved using the selected language.</li>
+        </ul>',
+      '#options' => array(
+        MENU_MULTILINGUAL_DISABLED => 'Disabled',
+        MENU_MULTILINGUAL_ENABLED => 'Enabled',
+      )
+    );
+
+    $languages = language_list(TRUE);
+    $language_options = array();
+    foreach ($languages as $lcode => $language) {
+      $language_options[$lcode] = $language->name;
+    }
+    $form['langcode'] = array(
+      '#type' => 'select',
+      '#title' => t('Language'),
+      '#description' => 'Provide a fixed language for this menu. The menu will only be visible in this language. New links will be saved using this language.<br>When selecting none, the links will be shown based on the current language. New links will then be saved without a language setting.',
+      '#default_value' => $menu['langcode'],
+      '#states' => array(
+        'visible' => array(
+          ':input[name="multilingual_mode"]' => array('!value' => (string) MENU_MULTILINGUAL_DISABLED),
+        ),
+      ),
+      '#options' => $language_options,
+      '#empty_value' => LANGUAGE_NONE,
+    );
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
