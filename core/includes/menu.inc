@@ -2910,27 +2910,21 @@ function menu_multilingual_condition($select, $joined = FALSE) {
 
     $select->condition(db_or()
       ->condition(db_and()
-        ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED, '!=')
-        ->condition(db_or()
-          ->condition(db_and()
+        ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED, '<>')
+        ->condition(db_and()
+          ->condition(db_or()
             ->condition('mc.langcode', LANGUAGE_NONE)
-            ->condition(db_or()
-              ->condition('ml.langcode', $language_interface->langcode)
-              ->condition('ml.langcode', LANGUAGE_NONE)
-            )
+            ->condition('mc.langcode', $language_interface->langcode)
           )
           ->condition(db_or()
-            ->condition('ml.langcode', 'mc.langcode')
             ->condition('ml.langcode', LANGUAGE_NONE)
+            ->condition('ml.langcode', $language_interface->langcode)
           )
         )
       )
-      ->condition(db_and()
-        ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED)
-      )
+      ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED)
     );
   }
-
   return $select;
 }
 
