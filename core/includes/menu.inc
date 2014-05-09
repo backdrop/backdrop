@@ -1284,8 +1284,6 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
                 ->fields('menu_links', array('mlid'))
                 ->condition('menu_name', $menu_name);
 
-              //menu_multilingual_condition($query);
-
               $result = $query
                 ->condition('expanded', 1)
                 ->condition('has_children', 1)
@@ -2440,11 +2438,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     // Weight must be taken from {menu_links}, not {menu_router}.
     $query->addField('ml', 'weight', 'link_weight');
     $query->fields('m');
-
     $query->condition('ml.link_path', $path_candidates, 'IN');
-
-    //menu_multilingual_condition($query);
-
     // Sort candidates by link path and menu name.
     $candidates = array();
     foreach ($query->execute() as $candidate) {
@@ -2883,16 +2877,12 @@ function menu_links_clone($links, $menu_name = NULL) {
  *   An array of menu links.
  */
 function menu_load_links($menu_name) {
-  $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC))
+  $links = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC))
     ->fields('ml')
     ->condition('ml.menu_name', $menu_name)
     // Order by weight so as to be helpful for menus that are only one level
     // deep.
-    ->orderBy('weight');
-
-  //menu_multilingual_condition($query);
-
-  $links = $query
+    ->orderBy('weight')
     ->execute()
     ->fetchAll();
 
@@ -2918,66 +2908,26 @@ function menu_multilingual_condition($select, $joined = FALSE) {
       $select->join('menu_custom', 'mc', 'mc.menu_name = ml.menu_name');
     }
 
-
-
-/*
-WHERE
-  (ml.link_path IN (:db_condition_placeholder_0))
-  AND
-  (
-    (
-      (mc.multilingual_mode != 0
-      AND
-      (
-        (
-          (mc.langcode = 'und'
-          AND
-          (
-            (ml.langcode = 'nl')
-            OR
-            (ml.langcode = 'und'
+    $select->condition(db_or()
+      ->condition(db_and()
+        ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED, '!=')
+        ->condition(db_or()
+          ->condition(db_and()
+            ->condition('mc.langcode', LANGUAGE_NONE)
+            ->condition(db_or()
+              ->condition('ml.langcode', $language_interface->langcode)
+              ->condition('ml.langcode', LANGUAGE_NONE)
+            )
+          )
+          ->condition(db_or()
+            ->condition('ml.langcode', 'mc.langcode')
+            ->condition('ml.langcode', LANGUAGE_NONE)
           )
         )
-        OR
-        (
-          (ml.langcode = mc.langcode)
-          OR
-          (ml.langcode = 'und'
-        )
       )
-    )
-    OR
-    (
-      (mc.multilingual_mode = 0
-    )
-  )
-
-*/
-
-
-
-
-
-    $select->condition(db_or()
-        ->condition(db_and()
-            ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED, '!=')
-            ->condition(db_or()
-                ->condition(db_and()
-                    ->condition('mc.langcode', LANGUAGE_NONE)
-                    ->condition(db_or()
-                        ->condition('ml.langcode', $language_interface->langcode)
-                        ->condition('ml.langcode', LANGUAGE_NONE)
-                    )
-                )
-                ->condition(db_or()
-                    ->condition('ml.langcode', 'mc.langcode')
-                    ->condition('ml.langcode', LANGUAGE_NONE)
-                )
-            )
-        )
-        ->condition(db_and()
-            ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED)
-        )
+      ->condition(db_and()
+        ->condition('mc.multilingual_mode', MENU_MULTILINGUAL_DISABLED)
+      )
     );
   }
 
@@ -3306,9 +3256,6 @@ function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
     // We always respect the link's 'menu_name'; inheritance for router items is
     // ensured in _menu_router_build().
     $query->condition('menu_name', $menu_link['menu_name']);
-
-    //menu_multilingual_condition($query);
-
     // Find the parent - it must be unique.
     $parent_path = $menu_link['link_path'];
     do {
@@ -3464,8 +3411,6 @@ function menu_link_children_relative_depth($item) {
     $query->condition($p, $item[$p]);
     $p = 'p' . ++$i;
   }
-
-  //menu_multilingual_condition($query);
 
   $max_depth = $query->execute()->fetchField();
 
