@@ -45,7 +45,14 @@ function menu_schema() {
         'not null' => TRUE,
         'default' => LANGUAGE_NONE,
         'description' => 'Language if the menu item is translatable.'
-      )
+      ),
+      'tmenu_name' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Translation source id. Used to link menus together in a translation set.',
+      ),
     ),
     'primary key' => array('menu_name'),
   );

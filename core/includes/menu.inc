@@ -3022,6 +3022,9 @@ function _menu_delete_item($item, $force = FALSE) {
  *     to insert a new link.
  *   - plid: (optional) The mlid of the parent.
  *   - router_path: (optional) The path of the relevant router item.
+ *   - langcode: (optional) The language of the link item. Defaults to LANGUAGE_NONE
+ *   - tsid: (optional) The source id of the translation set. Defaults to 0.
+ *
  * @param $existing_item
  *   Optional, the current record from the {menu_links} table as an array.
  * @param $parent_candidates
@@ -3050,7 +3053,8 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
     'module' => 'menu',
     'customized' => 0,
     'updated' => 0,
-    'langcode' => 'und'
+    'langcode' => LANGUAGE_NONE,
+    'tsid' => 0
   );
   if (isset($item['mlid'])) {
     if (!$existing_item) {
@@ -3092,7 +3096,8 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
         'options' => serialize($item['options']),
         'customized' => $item['customized'],
         'updated' => $item['updated'],
-        'langcode' => $item['langcode']
+        'langcode' => $item['langcode'],
+        'tsid' => $item['tsid']
       ))
       ->execute();
   }

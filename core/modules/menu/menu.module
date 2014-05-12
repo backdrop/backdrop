@@ -22,6 +22,7 @@ const MENU_MAX_MENU_NAME_LENGTH_UI = 27;
  */
 const MENU_MULTILINGUAL_DISABLED = 0;
 const MENU_MULTILINGUAL_ENABLED = 1;
+const MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION = 3;
 
 /**
  * Implements hook_permission().
@@ -113,6 +114,20 @@ function menu_menu() {
     'access arguments' => array('administer menu'),
     'file' => 'menu.admin.inc',
   );
+
+  if(language_multilingual()) {
+    $items['admin/structure/menu/manage/%menu/translate'] = array(
+      'title' => 'Translate menu',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('menu_translate_menu', 4),
+      'access callback' => 'menu_translate_access',
+      'access arguments' => array('administer menu', 4),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+      'file' => 'menu.admin.inc',
+    );
+  }
+
   $items['admin/structure/menu/item/%menu_link/edit'] = array(
     'title' => 'Edit menu link',
     'page callback' => 'drupal_get_form',
@@ -135,6 +150,26 @@ function menu_menu() {
     'file' => 'menu.admin.inc',
   );
   return $items;
+}
+
+/**
+ * Access callback implementation for translation tab when editing a menu.
+ *
+ * Only visible if the menu multilingual mode is set to enabled. When disabled
+ * the normal user access is checked.
+ *
+ * @param $permission
+ * @param $menu
+ *
+ * @return bool
+ */
+function menu_translate_access($permission, $menu) {
+  if ($menu['multilingual_mode'] == MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION) {
+    return user_access($permission);
+  }
+  else {
+    return FALSE;
+  }
 }
 
 /**
@@ -231,6 +266,9 @@ function menu_load_all() {
  *     letters, numbers, and hyphens).
  *   - title: The human readable menu title.
  *   - description: The custom menu description.
+ *   - multilingual_mode: Multilingual support mode (disabled, enabled or enabled with translations)
+ *   - langcode: The Language code in case the menu is associated with a fixed language
+ *   - tmenu_name: The translation set source id (menu name of the source menu)
  *
  * Modules should always pass a fully populated $menu when saving a custom
  * menu, so other modules are able to output proper status or watchdog messages.
@@ -244,7 +282,8 @@ function menu_save($menu) {
       'title' => $menu['title'],
       'description' => $menu['description'],
       'multilingual_mode' => $menu['multilingual_mode'],
-      'langcode' => $menu['langcode']
+      'langcode' => $menu['langcode'],
+      'tmenu_name' => $menu['tmenu_name']
     ))
     ->execute();
   menu_cache_clear_all();
