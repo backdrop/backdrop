@@ -829,3 +829,46 @@ function menu_preprocess_block(&$variables) {
     $variables['attributes_array']['role'] = 'navigation';
   }
 }
+
+/**
+ * Retrieve the translation set of a menu.
+ *
+ * @param $menu_name
+ * @return array
+ */
+function menu_get_menu_translation_set($menu_name) {
+
+  $query = db_select('menu_custom');
+  $query->fields('menu_custom');
+  $query->condition('tmenu_name', $menu_name);
+  $translations = $query->execute()->fetchAllAssoc('langcode', PDO::FETCH_ASSOC);
+
+  return $translations;
+}
+
+/**
+ * Get the translated version of a menu in a specific language.
+ * If the langcode parameter is not set, the current interface language will be used.
+ *
+ * @param string $menu_name
+ * @param  string $langcode
+ * @return array
+ */
+function menu_get_menu_translation($menu_name, $langcode = LANGUAGE_NONE) {
+
+  $menu = menu_load($menu_name);
+
+  if($menu['multilingual_mode'] == MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION) {
+    $translations = menu_get_menu_translation_set($menu['tmenu_name']);
+
+    if($langcode == LANGUAGE_NONE) {
+      $langcode = $GLOBALS['language_interface']->langcode;
+    }
+
+    if (isset($translations[$langcode])) {
+      return $translations[$langcode];
+    }
+  }
+
+  return $menu;
+}

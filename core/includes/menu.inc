@@ -1099,10 +1099,12 @@ function menu_tree_output($tree) {
 function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
   $tree = &drupal_static(__FUNCTION__, array());
 
+  $menu = menu_get_menu_translation($menu_name);
+
   // Use $mlid as a flag for whether the data being loaded is for the whole tree.
   $mlid = isset($link['mlid']) ? $link['mlid'] : 0;
   // Generate a cache ID (cid) specific for this $menu_name, $link, $language, and depth.
-  $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $GLOBALS['language_interface']->langcode . ':' . (int) $max_depth;
+  $cid = 'links:' . $menu['menu_name'] . ':all:' . $mlid . ':' . $GLOBALS['language_interface']->langcode . ':' . (int) $max_depth;
 
   if (!isset($tree[$cid])) {
     // If the static variable doesn't have the data, check {cache_menu}.
@@ -1138,7 +1140,7 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
 
     // Build the tree using the parameters; the resulting tree will be cached
     // by _menu_build_tree()).
-    $tree[$cid] = menu_build_tree($menu_name, $tree_parameters);
+    $tree[$cid] = menu_build_tree($menu['menu_name'], $tree_parameters);
   }
 
   return $tree[$cid];
@@ -1208,15 +1210,17 @@ function menu_tree_get_path($menu_name) {
 function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail = FALSE) {
   $tree = &drupal_static(__FUNCTION__, array());
 
+  $menu = menu_get_menu_translation($menu_name);
+
   // Check if the active trail has been overridden for this menu tree.
-  $active_path = menu_tree_get_path($menu_name);
+  $active_path = menu_tree_get_path($menu['menu_name']);
   // Load the menu item corresponding to the current page.
   if ($item = menu_get_item($active_path)) {
     if (isset($max_depth)) {
       $max_depth = min($max_depth, MENU_MAX_DEPTH);
     }
     // Generate a cache ID (cid) specific for this page.
-    $cid = 'links:' . $menu_name . ':page:' . $item['href'] . ':' . $GLOBALS['language_interface']->langcode . ':' . (int) $item['access'] . ':' . (int) $max_depth;
+    $cid = 'links:' . $menu['menu_name'] . ':page:' . $item['href'] . ':' . $GLOBALS['language_interface']->langcode . ':' . (int) $item['access'] . ':' . (int) $max_depth;
     // If we are asked for the active trail only, and $menu_name has not been
     // built and cached for this page yet, then this likely means that it
     // won't be built anymore, as this function is invoked from
@@ -1252,12 +1256,12 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
         if ($item['access']) {
           // Find a menu link corresponding to the current path. If $active_path
           // is NULL, let menu_link_get_preferred() determine the path.
-          if ($active_link = menu_link_get_preferred($active_path, $menu_name)) {
+          if ($active_link = menu_link_get_preferred($active_path, $menu['menu_name'])) {
             // The active link may only be taken into account to build the
             // active trail, if it resides in the requested menu. Otherwise,
             // we'd needlessly re-run _menu_build_tree() queries for every menu
             // on every page.
-            if ($active_link['menu_name'] == $menu_name) {
+            if ($active_link['menu_name'] == $menu['menu_name']) {
               // Use all the coordinates, except the last one because there
               // can be no child beyond the last column.
               for ($i = 1; $i < MENU_MAX_DEPTH; $i++) {
@@ -1276,13 +1280,13 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
 
           $expanded = variable_get('menu_expanded', array());
           // Check whether the current menu has any links set to be expanded.
-          if (!$only_active_trail && in_array($menu_name, $expanded)) {
+          if (!$only_active_trail && in_array($menu['menu_name'], $expanded)) {
             // Collect all the links set to be expanded, and then add all of
             // their children to the list as well.
             do {
               $query = db_select('menu_links', NULL, array('fetch' => PDO::FETCH_ASSOC))
                 ->fields('menu_links', array('mlid'))
-                ->condition('menu_name', $menu_name);
+                ->condition('menu_name', $menu['menu_name']);
 
               $result = $query
                 ->condition('expanded', 1)
@@ -1311,7 +1315,7 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
 
       // Build the tree using the parameters; the resulting tree will be cached
       // by _menu_build_tree().
-      $tree[$cid] = menu_build_tree($menu_name, $tree_parameters);
+      $tree[$cid] = menu_build_tree($menu['menu_name'], $tree_parameters);
     }
     return $tree[$cid];
   }
@@ -2927,6 +2931,13 @@ function menu_multilingual_condition($select, $joined = FALSE) {
   }
   return $select;
 }
+
+function menu_translate_name($menu_name) {
+  $menu = db_select('menu_');
+
+
+}
+
 
 /**
  * Deletes all links for a menu.

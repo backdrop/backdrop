@@ -185,7 +185,7 @@ function menu_overview_form($form, &$form_state, $menu)
   $form = array_merge($form, _menu_overview_tree_form($tree, $menu));
   $form['#menu'] = $menu;
 
-  if (element_children($form)) {
+  if (count($links)) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -405,7 +405,7 @@ function theme_menu_overview_form($variables)
   }
   $output = '';
   if (empty($rows)) {
-    $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '7'));
+    $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => count($header)));
   }
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'menu-overview')));
   $output .= drupal_render_children($form);
@@ -665,8 +665,19 @@ function menu_edit_item_submit($form, &$form_state)
 /**
  * Menu callback; Build the form that handles the adding/editing of a custom menu.
  */
-function menu_edit_menu($form, &$form_state, $type, $menu = array())
+function menu_edit_menu($form, &$form_state, $type, $menu = array(), $target = NULL)
 {
+  if ($type == 'add') {
+    $query = drupal_get_query_parameters();
+    if (isset($query['translation'])) {
+      $menu = array(
+        'tmenu_name' => $query['translation'],
+        'langcode' => $query['target'],
+        'multilingual_mode' => MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION
+      );
+    }
+  }
+
   $system_menus = menu_list_system_menus();
   $menu += array(
     'menu_name' => '',
@@ -996,4 +1007,166 @@ function menu_configure()
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Menu callback; Translate the menu form.
+ */
+function menu_translate_menu($form, &$form_state, $menu)
+{
+  if(strlen($menu['tmenu_name'])>0) {
+    // Already part of a set, grab the set
+    $translations = menu_get_menu_translation_set($menu['tmenu_name']);
+  }
+  else {
+    // We have no translation source nid, this could be a new set, emulate that.
+    $menu['tmenu_name'] = $menu['menu_name'];
+    $translations = array(
+      $menu['langcode'] => $menu
+    );
+  }
+
+  $form['translation_set'] = array('#type' => 'value', '#value' => $translations);
+  $header = array(t('Language'), t('Title'), t('Status'), t('Operations'));
+
+  $menus = menu_load_all();
+  $form['translations'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Translations'),
+    '#tree' => TRUE,
+    '#weight' => 50,
+    '#description' => t('Select existing menus that will be considered as translations of each other. Only menus with multilingual support enabled are listed here.'),
+  );
+
+  foreach (language_list() as $langcode => $language) {
+    $options = array();
+    $language_name = $language->name;
+    $status = '';
+
+    if (isset($translations[$langcode])) {
+      // Existing translation in the translation set: display status.
+      // We load the full menu to check whether the user can edit it.
+      $translation_menu = menu_load($translations[$langcode]['menu_name']);
+      $title = $translation_menu['title'];
+      $path = 'admin/structure/menu/manage/' . $translation_menu['menu_name'] . '/edit';
+
+      $options['edit'] = array(
+        'title' => t('Edit menu'),
+        'href' => $path
+      );
+
+      if ($translation_menu['menu_name'] == $menu['tmenu_name']) {
+        $language_name = t('<strong>@language_name</strong> (source)', array('@language_name' => $language_name));
+
+        // We've got a predefined item for this language
+        $form['translations'][$langcode] = array(
+          '#type' => 'value',
+          '#value' => $translation_menu['menu_name']
+        );
+        $form['translations']['display'] = array(
+          '#type' => 'item',
+          '#title' => $language->name,
+          '#markup' => check_plain($translation_menu['title']),
+        );
+      }
+    }
+    else {
+      // No such translation in the set yet: help user to create it.
+      $title = t('N/A');
+      $options['add'] = array(
+        'title' => t('Add translation'),
+        'href' => 'admin/structure/menu/add',
+        'query' => array('translation' => $menu['menu_name'], 'target' => $langcode)
+      );
+
+      $status = t('Not translated');
+    }
+
+    if (!isset($form['translations'][$langcode])) {
+      // Generate a list of possible translation candidates (not including this menu).
+      $translation_options = array();
+      foreach($menus as $candidate) {
+        if ( ($candidate['menu_name'] != $menu['menu_name']
+          && $candidate['multilingual_mode'] > MENU_MULTILINGUAL_DISABLED
+          && ($candidate['langcode'] == LANGUAGE_NONE || $candidate['langcode'] == $langcode))
+        || ($candidate['menu_name'] == $menu['menu_name'] && $langcode == $menu['langcode'])
+        ) {
+          $translation_options[$candidate['menu_name']] = $candidate['title'];
+        }
+      }
+
+      $default = isset($translations[$langcode]) ? $translations[$langcode]['menu_name'] : 'navigation';
+      if (!isset($translation_options[$default])) {
+        $default = 'navigation';
+      }
+      $form['translations'][$langcode] = array(
+        '#type' => 'select',
+        '#title' => $language->name,
+        '#default_value' => $default,
+        '#options' => $translation_options,
+        '#description' => t('Select the :language menu.', array(':language'=>$language->name)),
+        '#attributes' => array('class' => array('menu-title-select')),
+        '#empty_value' => '',
+      );
+    }
+
+    $row = array();
+    $row[] = $language_name;
+    $row[] = $title;
+    $row[] = $status;
+    $row[] = array(
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => $options,
+      ),
+    );
+    $rows[] = $row;
+  }
+
+  drupal_set_title(t('Translations of %title', array('%title' => $menu['title'])), PASS_THROUGH);
+
+  $form['translation_node_overview'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['update'] = array('#type' => 'submit', '#value' => t('Save'));
+
+  return $form;
+}
+
+/**
+ * Callback for the translation menu edit form.
+ * @param $form
+ * @param $form_state
+ */
+function menu_translate_menu_submit($form, &$form_state) {
+
+  switch ($form_state['values']['op']) {
+    case t('Save'):
+      $translations = $form_state['values']['translation_set'];
+
+      // Reset the translations.
+      foreach($translations as $langcode => $menu) {
+        $source_name = $menu['tmenu_name'];
+        $menu['tmenu_name'] = '';
+        menu_save($menu);
+      }
+
+      // Save the new ones.
+      $menu_names = array_filter($form_state['values']['translations']);
+      foreach ($menu_names as $langcode => $menu_name) {
+        $menu = menu_load($menu_name);
+        $menu['multilingual_mode'] = MENU_MULTILINGUAL_ENABLED_WITH_TRANSLATION;
+        $menu['langcode'] = $langcode;
+        $menu['tmenu_name'] = $source_name;
+        menu_save($menu);
+      }
+      drupal_set_message(t('The menu translations have been saved.'));
+
+      break;
+  }
+
 }
