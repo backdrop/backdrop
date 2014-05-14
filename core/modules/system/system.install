@@ -1871,9 +1871,11 @@ function system_update_8009() {
   config_install_default_config('admin_menu', 'admin_menu.settings');
 
   // Manually install schema, as update_module_enable() does not do this for us.
-  $cache_admin_menu = drupal_get_schema_unprocessed('system', 'cache');
-  $cache_admin_menu['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
-  db_create_table('cache_admin_menu', $cache_admin_menu);
+  if (!db_table_exists('cache_admin_menu')) {
+    $cache_admin_menu = drupal_get_schema_unprocessed('system', 'cache');
+    $cache_admin_menu['description'] = 'Cache table for Administration menu to store client-side caching hashes.';
+    db_create_table('cache_admin_menu', $cache_admin_menu);
+  }
 }
 
 /**
