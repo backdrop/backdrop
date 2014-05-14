@@ -710,10 +710,11 @@ class InsertQuery extends Query {
       // first call to fields() does have an effect.
       $this->fields(array_merge(array_keys($this->fromQuery->getFields()), array_keys($this->fromQuery->getExpressions())));
     }
-
-    // Don't execute query without fields.
-    if (count($this->insertFields) + count($this->defaultFields) == 0) {
-      throw new NoFieldsException('There are no fields available to insert with.');
+    else {
+      // Don't execute query without fields.
+      if (count($this->insertFields) + count($this->defaultFields) == 0) {
+        throw new NoFieldsException('There are no fields available to insert with.');
+      }
     }
 
     // If no values have been added, silently ignore this query. This can happen
@@ -1605,55 +1606,43 @@ class MergeQuery extends Query implements QueryConditionInterface {
   }
 
   public function execute() {
-    // Wrap multiple queries in a transaction, if the database supports it.
-    $transaction = $this->connection->startTransaction();
-    try {
-      if (!count($this->condition)) {
-        throw new InvalidMergeQueryException(t('Invalid merge query: no conditions'));
+    if (!count($this->condition)) {
+      throw new InvalidMergeQueryException(t('Invalid merge query: no conditions'));
+    }
+    $select = $this->connection->select($this->conditionTable)
+      ->condition($this->condition);
+    $select->addExpression('1');
+    if (!$select->execute()->fetchField()) {
+      try {
+        $insert = $this->connection->insert($this->table)->fields($this->insertFields);
+        if ($this->defaultFields) {
+          $insert->useDefaults($this->defaultFields);
+        }
+        $insert->execute();
+        return self::STATUS_INSERT;
       }
-      $select = $this->connection->select($this->conditionTable)
-        ->condition($this->condition)
-        ->forUpdate();
-      $select->addExpression('1');
-      if (!$select->execute()->fetchField()) {
-        try {
-          $insert = $this->connection->insert($this->table)->fields($this->insertFields);
-          if ($this->defaultFields) {
-            $insert->useDefaults($this->defaultFields);
-          }
-          $insert->execute();
-          return MergeQuery::STATUS_INSERT;
+      catch (Exception $e) {
+        // The insert query failed, maybe it's because a racing insert query
+        // beat us in inserting the same row. Retry the select query, if it
+        // returns a row, ignore the error and continue with the update
+        // query below.
+        if (!$select->execute()->fetchField()) {
+          throw $e;
         }
-        catch (Exception $e) {
-          // The insert query failed, maybe it's because a racing insert query
-          // beat us in inserting the same row. Retry the select query, if it
-          // returns a row, ignore the error and continue with the update
-          // query below.
-          if (!$select->execute()->fetchField()) {
-            throw $e;
-          }
-        }
-      }
-      if ($this->needsUpdate) {
-        $update = $this->connection->update($this->table)
-          ->fields($this->updateFields)
-          ->condition($this->condition);
-        if ($this->expressionFields) {
-          foreach ($this->expressionFields as $field => $data) {
-            $update->expression($field, $data['expression'], $data['arguments']);
-          }
-        }
-        $update->execute();
-        return MergeQuery::STATUS_UPDATE;
       }
     }
-    catch (Exception $e) {
-      // Something really wrong happened here, bubble up the exception to the
-      // caller.
-      $transaction->rollback();
-      throw $e;
-    }
-    // Transaction commits here where $transaction looses scope.
+    if ($this->needsUpdate) {
+      $update = $this->connection->update($this->table)
+        ->fields($this->updateFields)
+        ->condition($this->condition);
+      if ($this->expressionFields) {
+        foreach ($this->expressionFields as $field => $data) {
+          $update->expression($field, $data['expression'], $data['arguments']);
+        }
+      }
+      $update->execute();
+      return self::STATUS_UPDATE;
+     }
   }
 }
 
