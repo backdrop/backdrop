@@ -117,3 +117,9 @@ name = Search and node access
 description = Tests search functionality with node access control.
 group = Search
 file = search.test
+
+[SearchSetLocaleTest]
+name = Search with numeric locale set
+description = Check that search works with numeric locale settings.
+group  = Search
+file = search.test

@@ -3611,14 +3611,6 @@ class ConnectionUnitTest extends DrupalUnitTestCase {
   protected $monitor;
   protected $originalCount;
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Connection unit tests',
-      'description' => 'Tests management of database connections.',
-      'group' => 'Database',
-    );
-  }
-
   function setUp() {
     parent::setUp();
 
