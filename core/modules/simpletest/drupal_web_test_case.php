@@ -609,7 +609,7 @@ abstract class DrupalTestCase {
    * where the content is not restricted.
    *
    * Do not use this method when special characters are not possible (e.g., in
-   * machine or file names that have already been validated); instead,
+   * machine or file names that have already been validated); instead, use
    * use DrupalWebTestCase::randomName().
    *
    * @param $length
