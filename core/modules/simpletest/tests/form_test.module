@@ -133,6 +133,12 @@ function form_test_menu() {
     'page arguments' => array('form_test_placeholder_test'),
     'access callback' => TRUE,
   );
+  $items['form-test/number'] = array(
+    'title' => 'Number',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_number'),
+    'access callback' => TRUE,
+  );
   $items['form-test/checkboxes-radios'] = array(
     'title' => t('Checkboxes, Radios'),
     'page callback' => 'drupal_get_form',
@@ -1351,6 +1357,15 @@ function _form_test_disabled_elements($form, &$form_state) {
     '#default_value' => 10,
     '#test_hijack_value' => 5,
     '#disabled' => TRUE,
+  );
+
+  // Number.
+  $form['number'] = array(
+    '#type' => 'number',
+    '#title' => 'number',
+    '#disabled' => TRUE,
+    '#default_value' => 1,
+    '#test_hijack_value' => 2,
   );
 
   // Date.
