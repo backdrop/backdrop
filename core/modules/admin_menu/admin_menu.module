@@ -417,6 +417,9 @@ function admin_menu_admin_menu_output_build(&$content) {
   ));
   $links = admin_menu_links_menu($tree);
   if (!empty($links)) {
+    $key = key($links);
+    $links[$key]['#weight'] = -100;
+
     // If the user has access to the top-level "Content" category, insert the
     // "Add content" link tree there.
     if (isset($content['menu']['menu']['admin/content'])) {
@@ -424,8 +427,6 @@ function admin_menu_admin_menu_output_build(&$content) {
     }
     // Otherwise make insert "Add content" as top-level category.
     else {
-      $key = key($links);
-      $links[$key]['#weight'] = -100;
       $content['menu']['menu'] += $links;
     }
   }
