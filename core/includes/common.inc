@@ -916,7 +916,7 @@ function drupal_http_request($url, array $options = array()) {
 
   // If the server URL has a user then attempt to use basic authentication.
   if (isset($uri['user'])) {
-    $options['headers']['Authorization'] = 'Basic ' . base64_encode($uri['user'] . (isset($uri['pass']) ? ':' . $uri['pass'] : ''));
+    $options['headers']['Authorization'] = 'Basic ' . base64_encode($uri['user'] . (isset($uri['pass']) ? ':' . $uri['pass'] : ':'));
   }
 
   // If the database prefix is being used by SimpleTest to run the tests in a copied
@@ -3748,7 +3748,7 @@ function drupal_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRUE)
  */
 function drupal_load_stylesheet_content($contents, $optimize = FALSE) {
   // Remove multiple charset declarations for standards compliance (and fixing Safari problems).
-  $contents = preg_replace('/^@charset\s+[\'"](\S*)\b[\'"];/i', '', $contents);
+  $contents = preg_replace('/^@charset\s+[\'"](\S*?)\b[\'"];/i', '', $contents);
 
   if ($optimize) {
     // Perform some safe CSS optimizations.
@@ -3885,7 +3885,14 @@ function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_
  *   The cleaned class name.
  */
 function drupal_html_class($class) {
-  return drupal_clean_css_identifier(drupal_strtolower($class));
+  // The output of this function will never change, so this uses a normal
+  // static instead of drupal_static().
+  static $classes = array();
+
+  if (!isset($classes[$class])) {
+    $classes[$class] = drupal_clean_css_identifier(drupal_strtolower($class));
+  }
+  return $classes[$class];
 }
 
 /**
@@ -5329,6 +5336,11 @@ function drupal_get_private_key() {
  * @param $value
  *   An additional value to base the token on.
  *
+ * The generated token is based on the session ID of the current user. Normally,
+ * anonymous users do not have a session, so the generated token will be
+ * different on every page request. To generate a token for users without a
+ * session, manually start a session prior to calling this function.
+ *
  * @return string
  *   A 43-character URL-safe token for validation, based on the user session ID,
  *   the global $drupal_hash_salt variable from settings.php, and the
@@ -5535,6 +5547,10 @@ function drupal_cron_run() {
   }
 
   foreach ($queues as $queue_name => $info) {
+    if (!empty($info['skip on cron'])) {
+      // Do not run if queue wants to skip.
+      continue;
+    }
     $function = $info['worker callback'];
     $end = time() + (isset($info['time']) ? $info['time'] : 15);
     $queue = DrupalQueue::get($queue_name);
@@ -6212,14 +6228,16 @@ function drupal_render(&$elements) {
 /**
  * Renders children of an element and concatenates them.
  *
- * This renders all children of an element using drupal_render() and then
- * joins them together into a single string.
- *
- * @param $element
+ * @param array $element
  *   The structured array whose children shall be rendered.
- * @param $children_keys
- *   If the keys of the element's children are already known, they can be passed
- *   in to save another run of element_children().
+ * @param array $children_keys
+ *   (optional) If the keys of the element's children are already known, they
+ *   can be passed in to save another run of element_children().
+ *
+ * @return string
+ *   The rendered HTML of all children of the element.
+
+ * @see drupal_render()
  */
 function drupal_render_children(&$element, $children_keys = NULL) {
   if ($children_keys === NULL) {

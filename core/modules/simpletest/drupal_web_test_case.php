@@ -569,6 +569,15 @@ abstract class DrupalTestCase {
         E_RECOVERABLE_ERROR => 'Recoverable error',
       );
 
+      // PHP 5.3 adds new error logging constants. Add these conditionally for
+      // backwards compatibility with PHP 5.2.
+      if (defined('E_DEPRECATED')) {
+        $error_map += array(
+          E_DEPRECATED => 'Deprecated',
+          E_USER_DEPRECATED => 'User deprecated',
+        );
+      }
+
       $backtrace = debug_backtrace();
       $this->error($message, $error_map[$severity], _drupal_get_last_caller($backtrace));
     }
@@ -762,6 +771,10 @@ class DrupalUnitTestCase extends DrupalTestCase {
     // subsequently will fail as the database is not accessible.
     $module_list = module_list();
     if (isset($module_list['locale'])) {
+      // Transform the list into the format expected as input to module_list().
+      foreach ($module_list as &$module) {
+        $module = array('filename' => drupal_get_filename('module', $module));
+      }
       $this->originalModuleList = $module_list;
       unset($module_list['locale']);
       module_list(TRUE, FALSE, FALSE, $module_list);
@@ -2106,7 +2119,14 @@ class DrupalWebTestCase extends DrupalTestCase {
             foreach ($upload as $key => $file) {
               $file = drupal_realpath($file);
               if ($file && is_file($file)) {
-                $post[$key] = '@' . $file;
+                // Use the new CurlFile class for file uploads when using PHP
+                // 5.5 or higher.
+                if (class_exists('CurlFile')) {
+                  $post[$key] = curl_file_create($file);
+                }
+                else {
+                  $post[$key] = '@' . $file;
+                }
               }
             }
           }

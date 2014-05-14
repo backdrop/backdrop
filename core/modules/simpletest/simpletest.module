@@ -297,7 +297,7 @@ function simpletest_test_get_all() {
 
   if (!$groups) {
     // Load test information from cache if available, otherwise retrieve the
-    // information from each tests getInfo() method.
+    // information from each module's *.tests.info file.
     if ($cache = cache()->get('simpletest')) {
       $groups = $cache->data;
     }

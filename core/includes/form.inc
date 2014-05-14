@@ -16,10 +16,9 @@
  * reference the form builder function using \@see. For examples, of this see
  * system_modules_uninstall() or user_pass(), the latter of which has the
  * following in its doxygen documentation:
- *
- * \@ingroup forms
- * \@see user_pass_validate().
- * \@see user_pass_submit().
+ * - \@ingroup forms
+ * - \@see user_pass_validate()
+ * - \@see user_pass_submit()
  *
  * @} End of "defgroup forms".
  */
@@ -3073,8 +3072,7 @@ function form_process_radios($element) {
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #title, #value, #return_value, #description, #required,
- *     #attributes, #checked.
+ *     Properties used: #id, #name, #attributes, #checked, #return_value.
  *
  * @ingroup themeable
  */
@@ -4355,7 +4353,7 @@ function element_validate_number($element, &$form_state) {
  * returns any user input in the 'results' or 'message' keys of $context,
  * it must also sanitize them first.
  *
- * Sample batch operations:
+ * Sample callback_batch_operation():
  * @code
  * // Simple and artificial: load a node of a given type for a given user
  * function my_function_1($uid, $type, &$context) {
@@ -4407,7 +4405,7 @@ function element_validate_number($element, &$form_state) {
  * }
  * @endcode
  *
- * Sample 'finished' callback:
+ * Sample callback_batch_finished():
  * @code
  * function batch_test_finished($success, $results, $operations) {
  *   // The 'success' parameter means no fatal PHP errors were detected. All
@@ -4446,12 +4444,14 @@ function element_validate_number($element, &$form_state) {
  * @param $batch_definition
  *   An associative array defining the batch, with the following elements (all
  *   are optional except as noted):
- *   - operations: (required) Array of function calls to be performed.
+ *   - operations: (required) Array of operations to be performed, where each
+ *     item is an array consisting of the name of an implementation of
+ *     callback_batch_operation() and an array of parameter.
  *     Example:
  *     @code
  *     array(
- *       array('my_function_1', array($arg1)),
- *       array('my_function_2', array($arg2_1, $arg2_2)),
+ *       array('callback_batch_operation_1', array($arg1)),
+ *       array('callback_batch_operation_2', array($arg2_1, $arg2_2)),
  *     )
  *     @endcode
  *   - title: A safe, translated string to use as the title for the progress
@@ -4463,10 +4463,10 @@ function element_validate_number($element, &$form_state) {
  *     @elapsed. Defaults to t('Completed @current of @total.').
  *   - error_message: Message displayed if an error occurred while processing
  *     the batch. Defaults to t('An error has occurred.').
- *   - finished: Name of a function to be executed after the batch has
- *     completed. This should be used to perform any result massaging that may
- *     be needed, and possibly save data in $_SESSION for display after final
- *     page redirection.
+ *   - finished: Name of an implementation of callback_batch_finished(). This is
+ *     executed after the batch has completed. This should be used to perform
+ *     any result massaging that may be needed, and possibly save data in
+ *     $_SESSION for display after final page redirection.
  *   - file: Path to the file containing the definitions of the 'operations' and
  *     'finished' functions, for instance if they don't reside in the main
  *     .module file. The path should be relative to base_path(), and thus should
