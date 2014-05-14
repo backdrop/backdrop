@@ -165,9 +165,9 @@
   <?php endif; ?>
 
   <?php if ($page['featured']): ?>
-    <div id="featured"><div class="section clearfix">
+    <aside id="featured" role="complementary"><div class="section clearfix">
       <?php print render($page['featured']); ?>
-    </div></div> <!-- /.section, /#featured -->
+    </div></aside> <!-- /.section, /#featured -->
   <?php endif; ?>
 
   <div id="main-wrapper" class="clearfix"><div id="main" class="clearfix">
@@ -175,13 +175,13 @@
     <?php print $breadcrumb; ?>
 
     <?php if ($page['sidebar_first']): ?>
-      <div id="sidebar-first" class="column sidebar"><div class="section">
+      <div id="sidebar-first" class="column sidebar"><aside class="section" role="complementary">
         <?php print render($page['sidebar_first']); ?>
       </div></div> <!-- /.section, /#sidebar-first -->
     <?php endif; ?>
 
     <div id="content" class="column"><div class="section">
-      <?php if ($page['highlighted']): ?><div id="highlighted"><?php print render($page['highlighted']); ?></div><?php endif; ?>
+      <?php if ($page['highlighted']): ?> <div id="sidebar-second" class="column sidebar"><aside class="section" role="complementary">
       <a id="main-content"></a>
       <?php print render($title_prefix); ?>
       <?php if ($title): ?>
@@ -214,7 +214,7 @@
   </div></div> <!-- /#main, /#main-wrapper -->
 
   <?php if ($page['triptych_first'] || $page['triptych_middle'] || $page['triptych_last']): ?>
-    <div id="triptych-wrapper"><div id="triptych" class="clearfix">
+    <div id="triptych-wrapper"><aside id="triptych" class="clearfix" role="complementary">
       <?php print render($page['triptych_first']); ?>
       <?php print render($page['triptych_middle']); ?>
       <?php print render($page['triptych_last']); ?>
