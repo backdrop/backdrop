@@ -2,5 +2,5 @@ name = "System incompatible core version test"
 description = "Support module for testing system dependencies."
 package = Testing
 version = BACKDROP_VERSION
-core = 5.x
+backdrop = 0.x
 hidden = TRUE

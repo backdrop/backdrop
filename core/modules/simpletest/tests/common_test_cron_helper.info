@@ -2,5 +2,5 @@ name = "Common Test Cron Helper"
 description = "Helper module for CronRunTestCase::testCronExceptions()."
 package = Testing
 version = BACKDROP_VERSION
-core = 7.x
+backdrop = 1.x
 hidden = TRUE

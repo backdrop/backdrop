@@ -1106,7 +1106,7 @@ function system_library_info() {
   // Backdrop's dialog component.
   $libraries['backdrop.dialog'] = array(
     'title' => 'Backdrop dialog',
-    'version' => VERSION,
+    'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/dialog.js' => array('group' => JS_LIBRARY),
     ),
@@ -1122,7 +1122,7 @@ function system_library_info() {
   // Backdrop's integration between AJAX and dialogs.
   $libraries['backdrop.dialog.ajax'] = array(
     'title' => 'Backdrop dialog AJAX integration',
-    'version' => VERSION,
+    'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/dialog.ajax.js' => array('group' => JS_LIBRARY, 'weight' => 3),
     ),
@@ -1176,7 +1176,7 @@ function system_library_info() {
   // Autosubmit for forms.
   $libraries['drupal.autosubmit'] = array(
     'title' => 'Drupal autosubmit',
-    'version' => VERSION,
+    'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
     ),
@@ -1249,7 +1249,7 @@ function system_library_info() {
   // Jump menu.
   $libraries['jump-menu'] = array(
     'title' => 'Jump Menu',
-    'version' => VERSION,
+    'version' => BACKDROP_VERSION,
     'js' => array(
       drupal_get_path('module', 'system') . '/system.jump-menu.js' => array('group' => JS_DEFAULT),
     ),
