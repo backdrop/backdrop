@@ -80,9 +80,18 @@ function contact_install() {
 }
 
 /**
- * Implements hook_uninstall().
+ * Convert contact module settings to use configuration files.
  */
-function contact_uninstall() {
+function contact_update_8000() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'contact.settings');
+  // Migrate variables if any.
+  $config = config('contact.settings');
+  $config->set('contact_default_status', variable_get('contact_default_status', 1));
+  $config->set('contact_threshold_limit', variable_get('contact_threshold_limit', 5));
+  $config->set('contact_threshold_window', variable_get('contact_threshold_window', 3600));
+  $config->save();
+  // Delete variables.
   variable_del('contact_default_status');
   variable_del('contact_threshold_limit');
   variable_del('contact_threshold_window');

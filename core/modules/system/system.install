@@ -827,6 +827,7 @@ function system_schema() {
       'filesize' => array(
         'description' => 'The size of the file in bytes.',
         'type' => 'int',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
@@ -1846,9 +1847,24 @@ function system_update_8007() {
 }
 
 /**
- * Enable Admin Menu module.
+ * Convert the 'filesize' column in {file_managed} to a bigint.
  */
 function system_update_8008() {
+  $spec = array(
+    'description' => 'The size of the file in bytes.',
+    'type' => 'int',
+    'size' => 'big',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_change_field('file_managed', 'filesize', 'filesize', $spec);
+}
+
+/**
+ * Enable Admin Menu module.
+ */
+function system_update_8009() {
   update_module_enable(array('admin_menu'));
 
   // Install default config.
