@@ -1873,13 +1873,22 @@ function menu_local_tasks($level = 0) {
     }
 
     // Get all tabs (also known as local tasks) and the root page.
-    $result = db_select('menu_router', NULL, array('fetch' => PDO::FETCH_ASSOC))
-      ->fields('menu_router')
-      ->condition('tab_root', $router_item['tab_root'])
-      ->condition('context', MENU_CONTEXT_INLINE, '<>')
-      ->orderBy('weight')
-      ->orderBy('title')
-      ->execute();
+    $cid = 'local_tasks:' . $router_item['tab_root'];
+    $cache_menu = cache('menu');
+    if ($cache = $cache_menu->get($cid)) {
+      $result = $cache->data;
+    }
+    else {
+      $result = db_select('menu_router', NULL, array('fetch' => PDO::FETCH_ASSOC))
+        ->fields('menu_router')
+        ->condition('tab_root', $router_item['tab_root'])
+        ->condition('context', MENU_CONTEXT_INLINE, '<>')
+        ->orderBy('weight')
+        ->orderBy('title')
+        ->execute()
+        ->fetchAll();
+      $cache_menu->set($cid, $result);
+    }
     $map = $router_item['original_map'];
     $children = array();
     $tasks = array();
