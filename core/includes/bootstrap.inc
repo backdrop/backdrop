@@ -8,12 +8,12 @@
 /**
  * The current system version.
  */
-const VERSION = '8.0-dev';
+const BACKDROP_VERSION = '1.0-dev';
 
 /**
  * Core API compatibility.
  */
-const DRUPAL_CORE_COMPATIBILITY = '8.x';
+const BACKDROP_CORE_COMPATIBILITY = '1.x';
 
 /**
  * Minimum supported version of PHP.
@@ -747,8 +747,11 @@ function drupal_settings_initialize() {
   if (file_exists(DRUPAL_ROOT . '/' . conf_path() . '/settings.php')) {
     include_once DRUPAL_ROOT . '/' . conf_path() . '/settings.php';
   }
-  $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
+  if (isset($conf['backdrop_drupal_compatibility'])) {
+    require_once DRUPAL_ROOT . '/core/includes/drupal.inc';
+  }
 
+  $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
   if (isset($base_url)) {
     // Parse fixed base URL from settings.php.
     $parts = parse_url($base_url);

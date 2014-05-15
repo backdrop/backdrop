@@ -1,6 +1,6 @@
 name = Block test theme
 description = Theme for testing the block system
-core = 8.x
+backdrop = 1.x
 hidden = TRUE
 
 regions[sidebar_first] = Left sidebar

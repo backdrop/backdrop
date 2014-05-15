@@ -2,8 +2,8 @@ name = Content Translation
 description = Allows content to be translated into different languages.
 dependencies[] = locale
 package = Core
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 
 ; Views handlers.
 files[] = views/views_handler_argument_node_tnid.inc

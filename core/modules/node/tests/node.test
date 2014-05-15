@@ -1654,7 +1654,7 @@ class NodeTitleTestCase extends DrupalWebTestCase {
     $this->assertEqual(current($this->xpath($xpath)), $node->title, 'Node breadcrumb is equal to node title.', 'Node');
 
     // Test node title in comment preview.
-    $this->assertEqual(current($this->xpath('//div[@id=:id]/h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
+    $this->assertEqual(current($this->xpath('//article[@id=:id]/header/h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
 
     // Test node title is clickable on teaser list (/node).
     $this->drupalGet('node');

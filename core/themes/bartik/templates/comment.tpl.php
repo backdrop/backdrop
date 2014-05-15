@@ -57,28 +57,21 @@
  * @see theme_comment()
  */
 ?>
-<div class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
+<article class="<?php print $classes; ?> clearfix"<?php print $attributes; ?> role="article">
+  <header class="comment-header">
+    <div class="attribution">
+      <?php print $user_picture; ?>
 
-  <div class="attribution">
-
-    <?php print $user_picture; ?>
-
-    <div class="submitted">
-      <p class="commenter-name">
-        <?php print $author; ?>
-      </p>
-      <p class="comment-time">
-        <?php print $created; ?>
-      </p>
-      <p class="comment-permalink">
-        <?php print $permalink; ?>
-      </p>
-    </div>
-  </div>
+      <div class="submitted">
+        <p class="commenter-name"><?php print $author; ?></p>
+        <p class="comment-time"><?php print $created; ?></p>
+        <p class="comment-permalink"><?php print $permalink; ?></p>
+      </div>
+    </div> <!-- /.attribution -->
+  </header> <!-- /.comment-header -->
 
   <div class="comment-text">
     <div class="comment-arrow"></div>
-
     <?php if ($new): ?>
       <span class="new"><?php print $new; ?></span>
     <?php endif; ?>
@@ -93,13 +86,17 @@
         hide($content['links']);
         print render($content);
       ?>
+    </div> <!-- /.content -->
+
+    <footer class="comment-footer">
       <?php if ($signature): ?>
       <div class="user-signature clearfix">
         <?php print $signature; ?>
       </div>
       <?php endif; ?>
-    </div> <!-- /.content -->
 
-    <?php print render($content['links']); ?>
+      <nav><?php print render($content['links']); ?></nav>
+    </footer> <!-- /.comment-footer -->
+
   </div> <!-- /.comment-text -->
-</div>
+</article>
