@@ -244,6 +244,13 @@ function form_test_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['form-test/required-attribute'] = array(
+    'title' => 'Required',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_required_attribute'),
+    'access callback' => TRUE,
+  );
+
   return $items;
 }
 
@@ -1933,5 +1940,20 @@ function form_test_html_id($form, &$form_state) {
     '#type' => 'submit',
     '#value' => 'Save',
   );
+  return $form;
+}
+
+/**
+ * Builds a form to test the required attribute.
+ */
+function form_test_required_attribute($form, &$form_state) {
+  foreach (array('textfield', 'textarea', 'password') as $type) {
+    $form[$type] = array(
+      '#type' => $type,
+      '#required' => TRUE,
+      '#title' => $type,
+    );
+  }
+
   return $form;
 }
