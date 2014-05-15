@@ -40,6 +40,6 @@ function update_script_test_requirements($phase) {
 /**
  * Dummy update function to run during the tests.
  */
-function update_script_test_update_8000() {
-  return t('The update_script_test_update_8000() update was executed successfully.');
+function update_script_test_update_1000() {
+  return t('The update_script_test_update_1000() update was executed successfully.');
 }

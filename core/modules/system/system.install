@@ -403,8 +403,9 @@ function system_requirements($phase) {
     foreach (module_list() as $module) {
       $updates = drupal_get_schema_versions($module);
       if ($updates !== FALSE) {
-        $default = drupal_get_installed_schema_version($module);
-        if (max($updates) > $default) {
+        $current_schema = drupal_get_installed_schema_version($module);
+        $latest_schema = end($updates);
+        if ($current_schema < $latest_schema) {
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
           $requirements['update']['value'] = $t('Out of date');
           $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'core/update.php'));
@@ -1684,22 +1685,22 @@ function system_update_last_removed() {
 }
 
 /**
- * @defgroup updates-7.x-to-8.x Updates from 7.x to 8.x
+ * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
  * @{
- * Update functions from 7.x to 8.x.
+ * Update functions from Drupal 7.x to Backdrop CMS 1.x.
  */
 
 /**
  * Enable entity module.
  */
-function system_update_8000() {
+function system_update_1000() {
   update_module_enable(array('entity'));
 }
 
 /**
  * Move from the Garland theme.
  */
-function system_update_8001() {
+function system_update_1001() {
   $themes = array('theme_default', 'maintenance_theme', 'admin_theme');
   foreach ($themes as $theme) {
     if (variable_get($theme) == 'garland') {
@@ -1720,7 +1721,7 @@ function system_update_8001() {
  *
  * @see http://drupal.org/node/1181776
  */
-function system_update_8002() {
+function system_update_1002() {
   $theme = variable_get('theme_default');
   if (!isset($theme)) {
     variable_set('theme_default', 'bartik');
@@ -1730,7 +1731,7 @@ function system_update_8002() {
 /**
  * Convert performance module settings to use configuration files.
  */
-function system_update_8003() {
+function system_update_1003() {
   config_install_default_config('system', 'system.performance');
   $config = config('system.performance');
   $config->set('cache', variable_get('cache', 0));
@@ -1745,7 +1746,7 @@ function system_update_8003() {
 /**
  * Create the "state" table for the state storage system.
  */
-function system_update_8004() {
+function system_update_1004() {
   if (!db_table_exists('state')) {
     $schema = array(
       'description' => 'Stores environment-specific state values.',
@@ -1773,7 +1774,7 @@ function system_update_8004() {
 /**
  * Convert basic system variables to the state system.
  */
-function system_update_8005() {
+function system_update_1005() {
   $variables = array(
     'install_time' => REQUEST_TIME,
     'install_task' => 'done',
@@ -1791,7 +1792,7 @@ function system_update_8005() {
 /**
  * Delete unneeded actions for manually saving comments and nodes.
  */
-function system_update_8006() {
+function system_update_1006() {
   db_delete('actions')
     ->condition('aid', array('comment_save_action', 'node_save_action'), 'IN')
     ->execute();
@@ -1800,7 +1801,7 @@ function system_update_8006() {
 /**
  * Create the tempstore table and remove the cache_form table.
  */
-function system_update_8007() {
+function system_update_1007() {
   $schema = array(
     'description' => 'Generic temporary key/value storage table with an expiration.',
     'fields' => array(
@@ -1849,7 +1850,7 @@ function system_update_8007() {
 /**
  * Convert the 'filesize' column in {file_managed} to a bigint.
  */
-function system_update_8008() {
+function system_update_1008() {
   $spec = array(
     'description' => 'The size of the file in bytes.',
     'type' => 'int',
@@ -1864,7 +1865,7 @@ function system_update_8008() {
 /**
  * Enable Admin Menu module.
  */
-function system_update_8009() {
+function system_update_1009() {
   update_module_enable(array('admin_menu'));
 
   // Install default config.
@@ -1879,6 +1880,6 @@ function system_update_8009() {
 }
 
 /**
- * @} End of "defgroup updates-7.x-to-8.x"
- * The next series of updates should start at 9000.
+ * @} End of "defgroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
  */

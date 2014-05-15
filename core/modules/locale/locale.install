@@ -218,7 +218,7 @@ function locale_schema() {
  * never used textgroups for anything, so it is not our job to find place
  * for the data elsewhere.
  */
-function locale_update_8000() {
+function locale_update_1000() {
   $subquery = db_select('locales_source', 'ls')
     ->fields('ls', array('lid'))
     ->condition('ls.textgroup', 'default', '<>');
@@ -234,7 +234,7 @@ function locale_update_8000() {
 /**
  * Language type 'language' renamed to 'language_interface'.
  */
-function locale_update_8001() {
+function locale_update_1001() {
   // Only change language_types if we had this setting saved. Keep order
   // of types because that is significant for value dependency.
   $types = variable_get('language_types', NULL);
@@ -292,7 +292,7 @@ function locale_update_8001() {
  * Aggressively removes duplicates that has not already been removed by
  * locale_update_7004() in Drupal 7.x.
  */
-function locale_update_8002() {
+function locale_update_1002() {
   // Look up all duplicates.
   $results = db_query("SELECT source, context FROM {locales_source} GROUP BY source, context HAVING COUNT(*) > 1");
 
@@ -317,6 +317,6 @@ function locale_update_8002() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-8.x"
- * The next series of updates should start at 9000.
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
  */

@@ -2,14 +2,14 @@
 
 
 /**
- * @addtogroup updates-7.x-to-8.x
+ * @addtogroup updates-7.x-to-1.x
  * @{
  */
 
 /**
  * Update Views UI variables to use configuration files.
  */
-function views_ui_update_8000() {
+function views_ui_update_1000() {
   $update_variables = array(
     'views_ui_show_master_display' => FALSE,
     'views_ui_show_sql_query' => FALSE,
@@ -45,6 +45,6 @@ function views_ui_update_8000() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-8.x"
- * The next series of updates should start at 9000.
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
  */
