@@ -3912,8 +3912,8 @@ function form_validate_email(&$element, &$form_state) {
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #title, #value, #description, #size, #maxlength,
- *     #placeholder, #required, #attributes, #autocomplete_path.
+ *     Properties used: #title, #value, #description, #min, #max, #placeholder,
+ *     #required, #attributes, #step.
  *
  * @ingroup themeable
  */

@@ -133,10 +133,23 @@ function form_test_menu() {
     'page arguments' => array('form_test_placeholder_test'),
     'access callback' => TRUE,
   );
+<<<<<<< HEAD
   $items['form-test/color'] = array(
     'title' => 'Color',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('form_test_color'),
+=======
+  $items['form-test/range']= array(
+    'title' => 'Range',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_range'),
+    'access callback' => TRUE,
+  );
+  $items['form-test/range/invalid'] = array(
+    'title' => 'Invalid range',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('form_test_range_invalid'),
+>>>>>>> Issue #1540174 by Niklas Fiekas, attiks: Fixed Some attributes not allowed for the new HTML5 input elements.
     'access callback' => TRUE,
   );
   $items['form-test/checkboxes-radios'] = array(
@@ -1181,6 +1194,7 @@ function form_test_select_submit($form, &$form_state) {
 }
 
 /**
+<<<<<<< HEAD
  * Form constructor for testing #type 'color' elements.
  *
  * @see form_test_color_submit()
@@ -1190,6 +1204,45 @@ function form_test_color($form, &$form_state) {
   $form['color'] = array(
     '#type' => 'color',
     '#title' => 'Color',
+=======
+ * Form constructor for testing #type 'range' elements.
+ *
+ * @see form_test_range_submit()
+ * @ingroup forms
+ */
+function form_test_range($form, &$form_state) {
+  $form['with_default_value'] = array(
+    '#type' => 'range',
+    '#title' => 'Range with default value',
+    '#min' => 10,
+    '#max' => 20,
+    '#step' => 2,
+    '#default_value' => 18,
+    '#description' => 'The default value is 18.',
+  );
+  $form['float'] = array(
+    '#type' => 'range',
+    '#title' => 'Float',
+    '#min' => 10,
+    '#max' => 11,
+    '#step' => 'any',
+    '#description' => 'Floating point number between 10 and 11.',
+  );
+  $form['integer'] = array(
+    '#type' => 'range',
+    '#title' => 'Integer',
+    '#min' => 2,
+    '#max' => 8,
+    '#step' => 2,
+    '#description' => 'Even integer between 2 and 8.',
+  );
+  $form['offset'] = array(
+    '#type' => 'range',
+    '#title' => 'Offset',
+    '#min' => 2.9,
+    '#max' => 10.9,
+    '#description' => 'Value between 2.9 and 10.9.',
+>>>>>>> Issue #1540174 by Niklas Fiekas, attiks: Fixed Some attributes not allowed for the new HTML5 input elements.
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -1199,14 +1252,43 @@ function form_test_color($form, &$form_state) {
 }
 
 /**
+<<<<<<< HEAD
  * Form submission handler for form_test_color().
  */
 function form_test_color_submit($form, &$form_state) {
+=======
+ * Form submission handler for form_test_range().
+ */
+function form_test_range_submit($form, &$form_state) {
+>>>>>>> Issue #1540174 by Niklas Fiekas, attiks: Fixed Some attributes not allowed for the new HTML5 input elements.
   drupal_json_output($form_state['values']);
   exit;
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * Form constructor for testing invalid #type 'range' elements.
+ *
+ * @ingroup forms
+ */
+function form_test_range_invalid($form, &$form_state) {
+  $form['minmax'] = array(
+    '#type' => 'range',
+    '#min' => 10,
+    '#max' => 5,
+    '#title' => 'Invalid range',
+    '#description' => 'Minimum greater than maximum.',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;
+}
+
+/**
+>>>>>>> Issue #1540174 by Niklas Fiekas, attiks: Fixed Some attributes not allowed for the new HTML5 input elements.
  * Builds a form to test the placeholder attribute.
  */
 function form_test_placeholder_test($form, &$form_state) {
