@@ -435,11 +435,23 @@ class TranslationTestCase extends DrupalWebTestCase {
         $message = t('[%page_language] Language switch item not found for %translation_language language in the %type page area.', $args);
       }
 
-      if (!empty($translation->nid)) {
-        $xpath = '//div[contains(@class, :type)]//a[@href=:url]';
+      if ($type == 'node') {
+        // Nodes use article tags, so need a different xpath expression.
+        if (!empty($translation->nid)) {
+          $xpath = '//article[contains(@class, :type)]//a[@href=:url]';
+        }
+        else {
+          $xpath = '//article[contains(@class, :type)]//span[contains(@class, "locale-untranslated")]';
+        }
       }
       else {
-        $xpath = '//div[contains(@class, :type)]//span[contains(@class, "locale-untranslated")]';
+        // Blocks and most other types use a div.
+        if (!empty($translation->nid)) {
+          $xpath = '//div[contains(@class, :type)]//a[@href=:url]';
+        }
+        else {
+          $xpath = '//div[contains(@class, :type)]//span[contains(@class, "locale-untranslated")]';
+        }
       }
 
       $found = $this->findContentByXPath($xpath, array(':type' => $type, ':url' => $url), $translation_language->name);
