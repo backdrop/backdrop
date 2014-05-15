@@ -1,8 +1,8 @@
 name = Taxonomy
 description = Enables the categorization of content.
 package = Core
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 dependencies[] = options
 dependencies[] = entity
 files[] = taxonomy.entity.inc

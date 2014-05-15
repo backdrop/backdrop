@@ -1,6 +1,6 @@
 name = Update Manager
 description = Checks for available updates, and can securely install or update modules and themes via a web interface.
-version = VERSION
+version = BACKDROP_VERSION
 package = Core
-core = 8.x
+backdrop = 1.x
 configure = admin/reports/updates/settings
