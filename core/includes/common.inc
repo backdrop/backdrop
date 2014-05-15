@@ -326,7 +326,7 @@ function _drupal_default_html_head() {
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'Generator',
-      'content' => 'Backdrop ' . $version . ' (http://backdropcms.org)',
+      'content' => 'Backdrop CMS ' . $version . ' (http://backdropcms.org)',
     ),
   );
   // Also send the generator in the HTTP header.

@@ -685,7 +685,7 @@ class AdminMetaTagTestCase extends DrupalWebTestCase {
    */
   public function testMetaTag() {
     list($version, ) = explode('.', BACKDROP_VERSION);
-    $string = '<meta name="Generator" content="Backdrop ' . $version . ' (http://backdropcms.org)" />';
+    $string = '<meta name="Generator" content="Backdrop CMS ' . $version . ' (http://backdropcms.org)" />';
     $this->drupalGet('node');
     $this->assertRaw($string, t('Fingerprinting meta tag generated correctly.'), t('System'));
   }

@@ -17,7 +17,7 @@ function system_requirements($phase) {
   // Report Backdrop version
   if ($phase == 'runtime') {
     $requirements['backdrop'] = array(
-      'title' => $t('Backdrop'),
+      'title' => $t('Backdrop CMS'),
       'value' => BACKDROP_VERSION,
       'severity' => REQUIREMENT_INFO,
       'weight' => -10,

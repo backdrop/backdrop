@@ -2353,16 +2353,12 @@ function hook_file_copy(File $file, File $source) {
  *
  * @see file_move()
  */
-<<<<<<< HEAD
 function hook_file_move(File $file, File $source) {
-=======
-function hook_file_move($file, $source) {
   $file_user = user_load($file->uid);
   // Make sure that the file name starts with the owner's user name.
   if (strpos($file->filename, $file_user->name) !== 0) {
     $file->filename = $file_user->name . '_' . $file->filename;
     $file->save();
->>>>>>> ba9c629672d87a6bf06a4a84a1d78967c40ba0cb
 
     watchdog('file', t('Moved file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
   }
@@ -2561,7 +2557,7 @@ function hook_requirements($phase) {
   // Report Backdrop version
   if ($phase == 'runtime') {
     $requirements['backdrop'] = array(
-      'title' => $t('Backdrop'),
+      'title' => $t('Backdrop CMS'),
       'value' => BACKDROP_VERSION,
       'severity' => REQUIREMENT_INFO
     );

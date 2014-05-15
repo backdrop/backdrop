@@ -969,8 +969,8 @@ function _system_modules_build_row($info, $extra) {
   // Check the core compatibility.
   if (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
     $compatible = FALSE;
-    $status_short .= t('Incompatible with this version of Backdrop core.');
-    $status_long .= t('This version is not compatible with Backdrop !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY));
+    $status_short .= t('Incompatible with this version of Backdrop CMS.');
+    $status_long .= t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY));
   }
 
   // Ensure this module is compatible with the currently installed version of PHP.
@@ -2665,7 +2665,7 @@ function theme_system_themes_page($variables) {
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
-        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
+        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
       }
       elseif (!empty($theme->incompatible_php)) {
         if (substr_count($theme->info['php'], '.') < 2) {
