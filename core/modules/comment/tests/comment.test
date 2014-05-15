@@ -430,7 +430,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertNoLink(t('@count comments', array('@count' => 0)));
     $this->assertNoLink(t('@count new comments', array('@count' => 0)));
     $this->assertLink(t('Read more'));
-    $count = $this->xpath('//div[@id=:id]/div[@class=:class]/ul/li', array(':id' => 'node-' . $this->node->nid, ':class' => 'link-wrapper'));
+    $count = $this->xpath('//article[@id=:id]/footer[@class=:class]/ul/li', array(':id' => 'node-' . $this->node->nid, ':class' => 'link-wrapper'));
     $this->assertTrue(count($count) == 1, 'One child found');
 
     // Create a new comment. This helper function may be run with different
@@ -464,7 +464,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertLink(t('Read more'));
     $this->assertNoLink(t('1 new comment'));
     $this->assertNoLink(t('@count new comments', array('@count' => 0)));
-    $count = $this->xpath('//div[@id=:id]/div[@class=:class]/ul/li', array(':id' => 'node-' . $this->node->nid, ':class' => 'link-wrapper'));
+    $count = $this->xpath('//article[@id=:id]/footer[@class=:class]/ul/li', array(':id' => 'node-' . $this->node->nid, ':class' => 'link-wrapper'));
     $this->assertTrue(count($count) == 2, print_r($count, TRUE));
   }
 
@@ -990,7 +990,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->assertLink($test_signature);
 
     // Check that the user picture is displayed.
-    $this->assertFieldByXPath("//div[contains(@class, 'comment-preview')]//div[contains(@class, 'user-picture')]//img", NULL, 'User picture displayed.');
+    $this->assertFieldByXPath("//article[contains(@class, 'comment-preview')]//div[contains(@class, 'user-picture')]//img", NULL, 'User picture displayed.');
   }
 
   /**
