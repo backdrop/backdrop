@@ -2629,12 +2629,39 @@ function template_preprocess_page(&$variables) {
   $variables['language']          = $GLOBALS['language_interface'];
   $variables['language']->dir     = $GLOBALS['language_interface']->direction ? 'rtl' : 'ltr';
   $variables['logo']              = theme_get_setting('logo');
-  $variables['main_menu']         = theme_get_setting('toggle_main_menu') ? menu_main_menu() : array();
-  $variables['secondary_menu']    = theme_get_setting('toggle_secondary_menu') ? menu_secondary_menu() : array();
   $variables['action_links']      = menu_local_actions();
   $variables['site_name']         = (theme_get_setting('toggle_name') ? filter_xss_admin(variable_get('site_name', 'Drupal')) : '');
   $variables['site_slogan']       = (theme_get_setting('toggle_slogan') ? filter_xss_admin(variable_get('site_slogan', '')) : '');
   $variables['tabs']              = menu_local_tabs();
+
+  $variables['main_menu'] = theme_get_setting('toggle_main_menu') ? menu_main_menu() : array();
+  $variables['secondary_menu'] = theme_get_setting('toggle_secondary_menu') ? menu_secondary_menu() : array();
+  
+  // Pass the main menu and secondary menu to the template as render arrays.
+  if (!empty($variables['main_menu'])) {
+    $variables['main_menu'] = array(
+      '#theme' =>'links__system_main_menu',
+      '#links' => $variables['main_menu'],
+      '#heading' => array(
+        'text' => t('Main menu'),
+        'class' => array('element-invisible'),
+      ),
+      '#set_active_class' => TRUE,
+    );
+  }
+  if (!empty($variables['secondary_menu'])) {
+    $variables['secondary_menu'] = array(
+      '#theme' =>'links__system_secondary_menu',
+      '#links' => $variables['secondary_menu'],
+      '#heading' => array(
+        'text' => t('Secondary menu'),
+        'level' => 'h2',
+        'class' => array('element-invisible'),
+      ),
+      '#set_active_class' => TRUE,
+    );
+  }
+
 
   if ($node = menu_get_object()) {
     $variables['node'] = $node;
