@@ -73,6 +73,16 @@
       <p class="comment-permalink">
         <?php print $permalink; ?>
       </p>
+      <?php
+        // Indicate the semantic relationship between parent and child comments
+        // for accessibility. The list is difficult to navigate in a screen
+        // reader without this information.
+        if ($parent):
+      ?>
+      <p class="comment-parent element-invisible">
+        <?php print $parent; ?>
+      </p>
+      <?php endif; ?>
     </div>
   </div>
 
