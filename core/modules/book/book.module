@@ -67,6 +67,15 @@ function book_views_api() {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function book_autoload_info() {
+  return array(
+    'views_plugin_argument_default_book_root' => 'views/views_plugin_argument_default_book_root.inc',
+  );
+}
+
+/**
  * Adds relevant book links to the node's links.
  *
  * @param Node $node

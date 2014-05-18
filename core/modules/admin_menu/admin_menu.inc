@@ -780,7 +780,6 @@ function system_admin_menu_cache_info() {
     'assets' => t('CSS and JavaScript'),
     'cache' => t('Page and else'),
     'menu' => t('Menu'),
-    'registry' => t('Class registry'),
     'theme' => t('Theme registry'),
   );
   foreach ($caches as $name => $cache) {
@@ -821,10 +820,6 @@ function _admin_menu_flush_cache($name = NULL) {
       menu_rebuild();
       break;
 
-    case 'registry':
-      registry_rebuild();
-      // Fall-through to clear cache tables, since registry information is
-      // usually the base for other data that is cached (e.g. SimpleTests).
     case 'cache':
       // Don't clear cache_form - in-progress form submissions may break.
       // Ordered so clearing the page cache will always be the last action.

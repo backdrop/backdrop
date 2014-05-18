@@ -1516,8 +1516,6 @@ class DrupalWebTestCase extends DrupalTestCase {
     include_once DRUPAL_ROOT . '/core/includes/install.inc';
     drupal_install_system();
 
-    $this->preloadRegistry();
-
     // Set path variables.
     variable_set('file_public_path', $this->public_files_directory);
     variable_set('file_private_path', $this->private_files_directory);
@@ -1588,42 +1586,6 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     drupal_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
-  }
-
-  /**
-   * Preload the registry from the testing site.
-   *
-   * This method is called by DrupalWebTestCase::setUp(), and preloads the
-   * registry from the testing site to cut down on the time it takes to
-   * set up a clean environment for the current test run.
-   */
-  protected function preloadRegistry() {
-    // Use two separate queries, each with their own connections: copy the
-    // {registry} and {registry_file} tables over from the parent installation
-    // to the child installation.
-    $original_connection = Database::getConnection('default', 'simpletest_original_default');
-    $test_connection = Database::getConnection();
-
-    foreach (array('registry', 'registry_file') as $table) {
-      // Find the records from the parent database.
-      $source_query = $original_connection
-        ->select($table, array(), array('fetch' => PDO::FETCH_ASSOC))
-        ->fields($table);
-
-      $dest_query = $test_connection->insert($table);
-
-      $first = TRUE;
-      foreach ($source_query->execute() as $row) {
-        if ($first) {
-          $dest_query->fields(array_keys($row));
-          $first = FALSE;
-        }
-        // Insert the records into the child database.
-        $dest_query->values($row);
-      }
-
-      $dest_query->execute();
-    }
   }
 
   /**

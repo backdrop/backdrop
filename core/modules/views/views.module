@@ -1176,10 +1176,8 @@ function views_include_handlers($reset = FALSE) {
     return;
   }
 
-  views_include('base');
-  views_include('handlers');
+  views_include('utility');
   views_include('cache');
-  views_include('plugins');
   views_module_include('views', $reset);
   $finished = TRUE;
 }
@@ -1209,7 +1207,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
 
   $data = views_fetch_data($table, FALSE);
   $handler = NULL;
-  views_include('handlers');
+  views_include('utility');
 
   // Support old views_data entries conversion.
 
@@ -1340,7 +1338,7 @@ function views_fetch_plugin_names($type, $key = NULL, $base = array()) {
  * The created plugin object.
  */
 function views_get_plugin($type, $plugin, $reset = FALSE) {
-  views_include('handlers');
+  views_include('utility');
   $definition = views_fetch_plugin_data($type, $plugin, $reset);
   if (!empty($definition)) {
     return _views_create_handler($definition, $type);
@@ -1358,7 +1356,6 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
  *   it can be successfully saved.
  */
 function views_new_view() {
-  views_include('view');
   $view = new view();
   $view->add_display('default');
 
@@ -2148,61 +2145,77 @@ function views_process_check_options($element, &$form_state) {
 }
 
 /**
- * Trim the field down to the specified length.
- *
- * @param $alter
- *   - max_length: Maximum lenght of the string, the rest gets truncated.
- *   - word_boundary: Trim only on a word boundary.
- *   - ellipsis: Show an ellipsis (...) at the end of the trimmed string.
- *   - html: Take sure that the html is correct.
- *
- * @param $value
- *   The string which should be trimmed.
+ * Provide a list of views object types used in a view.
  */
-function views_trim_text($alter, $value) {
-  if (drupal_strlen($value) > $alter['max_length']) {
-    $value = drupal_substr($value, 0, $alter['max_length']);
-    if (!empty($alter['word_boundary'])) {
-      $regex = "(.*)\b.+";
-      if (function_exists('mb_ereg')) {
-        mb_regex_encoding('UTF-8');
-        $found = mb_ereg($regex, $value, $matches);
-      }
-      else {
-        $found = preg_match("/$regex/us", $value, $matches);
-      }
-      if ($found) {
-        $value = $matches[1];
-      }
-    }
-    // Remove scraps of HTML entities from the end of a strings
-    $value = rtrim(preg_replace('/(?:<(?!.+>)|&(?!.+;)).*$/us', '', $value));
+function views_object_types() {
+  static $retval = NULL;
 
-    if (!empty($alter['ellipsis'])) {
-      $value .= t('...');
-    }
-  }
-  if (!empty($alter['html'])) {
-    $value = _filter_htmlcorrector($value);
+  // Statically cache this so t() doesn't run a bajillion times.
+  if (!isset($retval)) {
+    $retval = array(
+      'field' => array(
+        'title' => t('Fields'), // title
+        'ltitle' => t('fields'), // lowercase title for mid-sentence
+        'stitle' => t('Field'), // singular title
+        'lstitle' => t('field'), // singular lowercase title for mid sentence
+        'plural' => 'fields',
+      ),
+      'argument' => array(
+        'title' => t('Contextual filters'),
+        'ltitle' => t('contextual filters'),
+        'stitle' => t('Contextual filter'),
+        'lstitle' => t('contextual filter'),
+        'plural' => 'arguments',
+      ),
+      'sort' => array(
+        'title' => t('Sort criteria'),
+        'ltitle' => t('sort criteria'),
+        'stitle' => t('Sort criterion'),
+        'lstitle' => t('sort criterion'),
+        'plural' => 'sorts',
+      ),
+      'filter' => array(
+        'title' => t('Filter criteria'),
+        'ltitle' => t('filter criteria'),
+        'stitle' => t('Filter criterion'),
+        'lstitle' => t('filter criterion'),
+        'plural' => 'filters',
+      ),
+      'relationship' => array(
+        'title' => t('Relationships'),
+        'ltitle' => t('relationships'),
+        'stitle' => t('Relationship'),
+        'lstitle' => t('Relationship'),
+        'plural' => 'relationships',
+      ),
+      'header' => array(
+        'title' => t('Header'),
+        'ltitle' => t('header'),
+        'stitle' => t('Header'),
+        'lstitle' => t('Header'),
+        'plural' => 'header',
+        'type' => 'area',
+      ),
+      'footer' => array(
+        'title' => t('Footer'),
+        'ltitle' => t('footer'),
+        'stitle' => t('Footer'),
+        'lstitle' => t('Footer'),
+        'plural' => 'footer',
+        'type' => 'area',
+      ),
+      'empty' => array(
+        'title' => t('No results behavior'),
+        'ltitle' => t('no results behavior'),
+        'stitle' => t('No results behavior'),
+        'lstitle' => t('No results behavior'),
+        'plural' => 'empty',
+        'type' => 'area',
+      ),
+    );
   }
 
-  return $value;
-}
-
-/**
- * Adds one to each key of the array.
- *
- * For example array(0 => 'foo') would be array(1 => 'foo').
- */
-function views_array_key_plus($array) {
-  $keys = array_keys($array);
-  rsort($keys);
-  foreach ($keys as $key) {
-    $array[$key+1] = $array[$key];
-    unset($array[$key]);
-  }
-  asort($array);
-  return $array;
+  return $retval;
 }
 
 /**
@@ -2213,5 +2226,131 @@ function views_views_api() {
     // In your modules do *not* use views_api_version()!!!
     'api' => views_api_version(),
     'path' => drupal_get_path('module', 'views') . '/includes',
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function views_autoload_info() {
+  return array(
+    // Handlers
+    'views_handler_area' => 'handlers/views_handler_area.inc',
+    'views_handler_area_broken' => 'handlers/views_handler_area.inc',
+    'views_handler_area_result' => 'handlers/views_handler_area_result.inc',
+    'views_handler_area_text' => 'handlers/views_handler_area_text.inc',
+    'views_handler_area_text_custom' => 'handlers/views_handler_area_text_custom.inc',
+    'views_handler_area_view' => 'handlers/views_handler_area_view.inc',
+    'views_handler_argument' => 'handlers/views_handler_argument.inc',
+    'views_handler_argument_broken' => 'handlers/views_handler_argument.inc',
+    'views_handler_argument_date' => 'handlers/views_handler_argument_date.inc',
+    'views_handler_argument_formula' => 'handlers/views_handler_argument_formula.inc',
+    'views_handler_argument_many_to_one' => 'handlers/views_handler_argument_many_to_one.inc',
+    'views_handler_argument_null' => 'handlers/views_handler_argument_null.inc',
+    'views_handler_argument_numeric' => 'handlers/views_handler_argument_numeric.inc',
+    'views_handler_argument_string' => 'handlers/views_handler_argument_string.inc',
+    'views_handler_argument_group_by_numeric' => 'handlers/views_handler_argument_group_by_numeric.inc',
+    'views_handler_field' => 'handlers/views_handler_field.inc',
+    'views_handler_field_counter' => 'handlers/views_handler_field_counter.inc',
+    'views_handler_field_boolean' => 'handlers/views_handler_field_boolean.inc',
+    'views_handler_field_contextual_links' => 'handlers/views_handler_field_contextual_links.inc',
+    'views_handler_field_custom' => 'handlers/views_handler_field_custom.inc',
+    'views_handler_field_date' => 'handlers/views_handler_field_date.inc',
+    'views_handler_field_bulk_form' => 'handlers/views_handler_field_bulk_form.inc',
+    'views_handler_field_dropbutton' => 'handlers/views_handler_field_dropbutton.inc',
+    'views_handler_field_entity' => 'handlers/views_handler_field_entity.inc',
+    'views_handler_field_links' => 'handlers/views_handler_field_links.inc',
+    'views_handler_field_markup' => 'handlers/views_handler_field_markup.inc',
+    'views_handler_field_math' => 'handlers/views_handler_field_math.inc',
+    'views_handler_field_numeric' => 'handlers/views_handler_field_numeric.inc',
+    'views_handler_field_prerender_list' => 'handlers/views_handler_field_prerender_list.inc',
+    'views_handler_field_time_interval' => 'handlers/views_handler_field_time_interval.inc',
+    'views_handler_field_serialized' => 'handlers/views_handler_field_serialized.inc',
+    'views_handler_field_machine_name' => 'handlers/views_handler_field_machine_name.inc',
+    'views_handler_field_url' => 'handlers/views_handler_field_url.inc',
+    'views_handler_filter' => 'handlers/views_handler_filter.inc',
+    'views_handler_filter_broken' => 'handlers/views_handler_filter.inc',
+    'views_handler_filter_boolean_operator' => 'handlers/views_handler_filter_boolean_operator.inc',
+    'views_handler_filter_boolean_operator_string' => 'handlers/views_handler_filter_boolean_operator_string.inc',
+    'views_handler_filter_combine' => 'handlers/views_handler_filter_combine.inc',
+    'views_handler_filter_date' => 'handlers/views_handler_filter_date.inc',
+    'views_handler_filter_equality' => 'handlers/views_handler_filter_equality.inc',
+    'views_handler_filter_entity_bundle' => 'handlers/views_handler_filter_entity_bundle.inc',
+    'views_handler_filter_group_by_numeric' => 'handlers/views_handler_filter_group_by_numeric.inc',
+    'views_handler_filter_in_operator' => 'handlers/views_handler_filter_in_operator.inc',
+    'views_handler_filter_many_to_one' => 'handlers/views_handler_filter_many_to_one.inc',
+    'views_handler_filter_numeric' => 'handlers/views_handler_filter_numeric.inc',
+    'views_handler_filter_string' => 'handlers/views_handler_filter_string.inc',
+    'views_handler_filter_fields_compare' => 'handlers/views_handler_filter_fields_compare.inc',
+    'views_handler_relationship' => 'handlers/views_handler_relationship.inc',
+    'views_handler_relationship_broken' => 'handlers/views_handler_relationship.inc',
+    'views_handler_relationship_groupwise_max' => 'handlers/views_handler_relationship_groupwise_max.inc',
+    'views_handler_sort' => 'handlers/views_handler_sort.inc',
+    'views_handler_sort_broken' => 'handlers/views_handler_sort.inc',
+    'views_handler_sort_date' => 'handlers/views_handler_sort_date.inc',
+    'views_handler_sort_formula' => 'handlers/views_handler_sort_formula.inc',
+    'views_handler_sort_group_by_numeric' => 'handlers/views_handler_sort_group_by_numeric.inc',
+    'views_handler_sort_menu_hierarchy' => 'handlers/views_handler_sort_menu_hierarchy.inc',
+    'views_handler_sort_random' => 'handlers/views_handler_sort_random.inc',
+    // Includes.
+    'views_object' => 'includes/base.inc',
+    'views_handler' => 'includes/handlers.inc',
+    'views_many_to_one_helper' => 'includes/handlers.inc',
+    'views_join' => 'includes/handlers.inc',
+    'views_join_subquery' => 'includes/handlers.inc',
+    'views_plugin' => 'includes/plugin.inc',
+    'view' => 'includes/view.inc',
+    'views_display' => 'includes/view.inc',
+    // Plugins
+    'views_plugin_access' => 'plugins/views_plugin_access.inc',
+    'views_plugin_access_none' => 'plugins/views_plugin_access_none.inc',
+    'views_plugin_access_perm' => 'plugins/views_plugin_access_perm.inc',
+    'views_plugin_access_role' => 'plugins/views_plugin_access_role.inc',
+    'views_plugin_argument_default' => 'plugins/views_plugin_argument_default.inc',
+    'views_plugin_argument_default_php' => 'plugins/views_plugin_argument_default_php.inc',
+    'views_plugin_argument_default_fixed' => 'plugins/views_plugin_argument_default_fixed.inc',
+    'views_plugin_argument_default_raw' => 'plugins/views_plugin_argument_default_raw.inc',
+    'views_plugin_argument_validate' => 'plugins/views_plugin_argument_validate.inc',
+    'views_plugin_argument_validate_numeric' => 'plugins/views_plugin_argument_validate_numeric.inc',
+    'views_plugin_argument_validate_php' => 'plugins/views_plugin_argument_validate_php.inc',
+    'views_plugin_cache' => 'plugins/views_plugin_cache.inc',
+    'views_plugin_cache_none' => 'plugins/views_plugin_cache_none.inc',
+    'views_plugin_cache_time' => 'plugins/views_plugin_cache_time.inc',
+    'views_plugin_display' => 'plugins/views_plugin_display.inc',
+    'views_plugin_display_attachment' => 'plugins/views_plugin_display_attachment.inc',
+    'views_plugin_display_block' => 'plugins/views_plugin_display_block.inc',
+    'views_plugin_display_default' => 'plugins/views_plugin_display_default.inc',
+    'views_plugin_display_embed' => 'plugins/views_plugin_display_embed.inc',
+    'views_plugin_display_extender' => 'plugins/views_plugin_display_extender.inc',
+    'views_plugin_display_feed' => 'plugins/views_plugin_display_feed.inc',
+    'views_plugin_display_page' => 'plugins/views_plugin_display_page.inc',
+    'views_plugin_exposed_form_basic' => 'plugins/views_plugin_exposed_form_basic.inc',
+    'views_plugin_exposed_form' => 'plugins/views_plugin_exposed_form.inc',
+    'views_plugin_exposed_form_input_required' => 'plugins/views_plugin_exposed_form_input_required.inc',
+    'views_plugin_pager' => 'plugins/views_plugin_pager.inc',
+    'views_plugin_pager_full' => 'plugins/views_plugin_pager_full.inc',
+    'views_plugin_pager_mini' => 'plugins/views_plugin_pager_mini.inc',
+    'views_plugin_pager_none' => 'plugins/views_plugin_pager_none.inc',
+    'views_plugin_pager_some' => 'plugins/views_plugin_pager_some.inc',
+    'views_plugin_query' => 'plugins/views_plugin_query.inc',
+    'views_plugin_query_default' => 'plugins/views_plugin_query_default.inc',
+    'views_plugin_row' => 'plugins/views_plugin_row.inc',
+    'views_plugin_row_fields' => 'plugins/views_plugin_row_fields.inc',
+    'views_plugin_row_rss_fields' => 'plugins/views_plugin_row_rss_fields.inc',
+    'views_plugin_style' => 'plugins/views_plugin_style.inc',
+    'views_plugin_style_default' => 'plugins/views_plugin_style_default.inc',
+    'views_plugin_style_grid' => 'plugins/views_plugin_style_grid.inc',
+    'views_plugin_style_list' => 'plugins/views_plugin_style_list.inc',
+    'views_plugin_style_jump_menu' => 'plugins/views_plugin_style_jump_menu.inc',
+    'views_plugin_style_mapping' => 'plugins/views_plugin_style_mapping.inc',
+    'views_plugin_style_rss' => 'plugins/views_plugin_style_rss.inc',
+    'views_plugin_style_summary' => 'plugins/views_plugin_style_summary.inc',
+    'views_plugin_style_summary_jump_menu' => 'plugins/views_plugin_style_summary_jump_menu.inc',
+    'views_plugin_style_summary_unformatted' => 'plugins/views_plugin_style_summary_unformatted.inc',
+    'views_plugin_style_table' => 'plugins/views_plugin_style_table.inc',
+    // Tests. These are used as base classes so frequently its easiest to
+    // include them in the registry rather than include them manually.
+    'ViewsTestCase' => 'tests/views_query.inc',
+    'ViewsSqlTest' => 'tests/views_query.inc',
   );
 }

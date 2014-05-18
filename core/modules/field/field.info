@@ -3,16 +3,7 @@ description = Field API to add fields to entities like nodes and users.
 package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
-files[] = field.module
-files[] = field.attach.inc
 dependencies[] = field_sql_storage
 dependencies[] = entity
 required = TRUE
 stylesheets[all][] = theme/field.css
-
-; Views handlers.
-files[] = views/views_handler_field_field.inc
-files[] = views/views_handler_relationship_entity_reverse.inc
-files[] = views/views_handler_argument_field_list.inc
-files[] = views/views_handler_argument_field_list_string.inc
-files[] = views/views_handler_filter_field_list.inc

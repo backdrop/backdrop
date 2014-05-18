@@ -987,6 +987,35 @@ function taxonomy_term_load_multiple_by_name($name, $vocabulary = NULL) {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function taxonomy_autoload_info() {
+  return array(
+    'TaxonomyTerm' => 'taxonomy.entity.inc',
+    'TaxonomyTermController' => 'taxonomy.entity.inc',
+    'TaxonomyVocabulary' => 'taxonomy.entity.inc',
+    'TaxonomyVocabularyController' => 'taxonomy.entity.inc',
+    // Views handlers.
+    'views_handler_argument_taxonomy' => 'views/views_handler_argument_taxonomy.inc',
+    'views_handler_argument_term_node_tid' => 'views/views_handler_argument_term_node_tid.inc',
+    'views_handler_argument_term_node_tid_depth' => 'views/views_handler_argument_term_node_tid_depth.inc',
+    'views_handler_argument_term_node_tid_depth_modifier' => 'views/views_handler_argument_term_node_tid_depth_modifier.inc',
+    'views_handler_argument_vocabulary_vid' => 'views/views_handler_argument_vocabulary_vid.inc',
+    'views_handler_argument_vocabulary_machine_name' => 'views/views_handler_argument_vocabulary_machine_name.inc',
+    'views_handler_field_taxonomy' => 'views/views_handler_field_taxonomy.inc',
+    'views_handler_field_term_node_tid' => 'views/views_handler_field_term_node_tid.inc',
+    'views_handler_field_term_link_edit' => 'views/views_handler_field_term_link_edit.inc',
+    'views_handler_filter_term_node_tid' => 'views/views_handler_filter_term_node_tid.inc',
+    'views_handler_filter_term_node_tid_depth' => 'views/views_handler_filter_term_node_tid_depth.inc',
+    'views_handler_filter_vocabulary_vid' => 'views/views_handler_filter_vocabulary_vid.inc',
+    'views_handler_filter_vocabulary_machine_name' => 'views/views_handler_filter_vocabulary_machine_name.inc',
+    'views_handler_relationship_node_term_data' => 'views/views_handler_relationship_node_term_data.inc',
+    'views_plugin_argument_validate_taxonomy_term' => 'views/views_plugin_argument_validate_taxonomy_term.inc',
+    'views_plugin_argument_default_taxonomy_tid' => 'views/views_plugin_argument_default_taxonomy_tid.inc',
+  );
+}
+
+/**
  * Load multiple taxonomy terms based on certain conditions.
  *
  * This function should be used whenever you need to load more than one term
