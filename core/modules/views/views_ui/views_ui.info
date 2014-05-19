@@ -1,7 +1,8 @@
 name = Views UI
 description = Administrative interface to views. Without this module, you cannot create or edit your views.
 package = Views
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 configure = admin/structure/views
 dependencies[] = views
 files[] = wizards/views_ui_base_views_wizard.php

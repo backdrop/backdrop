@@ -78,22 +78,24 @@
  * @see template_process()
  */
 ?>
-<div id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
+<article id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?> role="article">
 
-  <?php print render($title_prefix); ?>
-  <?php if (!$page): ?>
-    <h2<?php print $title_attributes; ?>>
-      <a href="<?php print $node_url; ?>"><?php print $title; ?></a>
-    </h2>
-  <?php endif; ?>
-  <?php print render($title_suffix); ?>
+  <header>
+    <?php print render($title_prefix); ?>
+    <?php if (!$page): ?>
+      <h2<?php print $title_attributes; ?>>
+        <a href="<?php print $node_url; ?>"><?php print $title; ?></a>
+      </h2>
+    <?php endif; ?>
+    <?php print render($title_suffix); ?>
 
-  <?php if ($display_submitted): ?>
-    <div class="meta submitted">
-      <?php print $user_picture; ?>
-      <?php print $submitted; ?>
-    </div>
-  <?php endif; ?>
+    <?php if ($display_submitted): ?>
+      <div class="meta submitted">
+        <?php print $user_picture; ?>
+        <?php print $submitted; ?>
+      </div>
+    <?php endif; ?>
+  </header>
 
   <div class="content clearfix"<?php print $content_attributes; ?>>
     <?php
@@ -110,15 +112,15 @@
     if ($teaser || !empty($content['comments']['comment_form'])) {
       unset($content['links']['comment']['#links']['comment-add']);
     }
-    // Only display the wrapper div if there are links.
+    // Only display the footer if there are links.
     $links = render($content['links']);
     if ($links):
   ?>
-    <div class="link-wrapper">
+    <footer class="link-wrapper">
       <?php print $links; ?>
-    </div>
+    </footer>
   <?php endif; ?>
 
   <?php print render($content['comments']); ?>
 
-</div>
+</article>

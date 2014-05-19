@@ -164,6 +164,8 @@ function hook_cron() {
  *     with one argument, the item created via DrupalQueue::createItem().
  *   - 'time': (optional) How much time Drupal should spend on calling this
  *     worker in seconds. Defaults to 15.
+ *   - 'skip on cron': (optional) Set to TRUE to avoid being processed during
+ *     cron runs. i.e. you want to control all queue execution manually.
  *
  * @see hook_cron()
  * @see hook_cron_queue_info_alter()
@@ -426,7 +428,7 @@ function hook_css_alter(&$css) {
  *
  * @see ajax_render()
  */
-function hook_ajax_render_alter($commands) {
+function hook_ajax_render_alter(&$commands) {
   // Inject any new status messages into the content area.
   $commands[] = ajax_command_prepend('#block-system-main .content', theme('status_messages'));
 }
@@ -2351,16 +2353,12 @@ function hook_file_copy(File $file, File $source) {
  *
  * @see file_move()
  */
-<<<<<<< HEAD
 function hook_file_move(File $file, File $source) {
-=======
-function hook_file_move($file, $source) {
   $file_user = user_load($file->uid);
   // Make sure that the file name starts with the owner's user name.
   if (strpos($file->filename, $file_user->name) !== 0) {
     $file->filename = $file_user->name . '_' . $file->filename;
     $file->save();
->>>>>>> ba9c629672d87a6bf06a4a84a1d78967c40ba0cb
 
     watchdog('file', t('Moved file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
   }
@@ -2556,11 +2554,11 @@ function hook_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Drupal version
+  // Report Backdrop version
   if ($phase == 'runtime') {
-    $requirements['drupal'] = array(
-      'title' => $t('Drupal'),
-      'value' => VERSION,
+    $requirements['backdrop'] = array(
+      'title' => $t('Backdrop CMS'),
+      'value' => BACKDROP_VERSION,
       'severity' => REQUIREMENT_INFO
     );
   }

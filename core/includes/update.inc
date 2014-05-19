@@ -59,8 +59,8 @@ function update_check_incompatibility($name, $type = 'module') {
     $file = $themes[$name];
   }
   if (!isset($file)
-      || !isset($file->info['core'])
-      || $file->info['core'] != DRUPAL_CORE_COMPATIBILITY
+      || !isset($file->info['backdrop'])
+      || $file->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY
       || version_compare(phpversion(), $file->info['php']) < 0) {
     return TRUE;
   }

@@ -547,3 +547,13 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * Remove the leading hash signs to disable.
  */
  // $conf['allow_authorize_operations'] = FALSE;
+
+/**
+ * Drupal backwards compatibility.
+ *
+ * By default, Backdrop 1.0 includes a compatibility layer to keep it compatible
+ * with Drupal 7 APIs. Backdrop core itself does not use this compatibility
+ * layer however. You may disable it if all the modules you're running were
+ * built for Backdrop.
+ */
+$conf['backdrop_drupal_compatibility'] = TRUE;

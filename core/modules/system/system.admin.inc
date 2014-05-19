@@ -150,7 +150,7 @@ function system_themes_page() {
      // Ensure this theme is compatible with this version of core.
      // Require the 'content' region to make sure the main page
      // content has a common place in all themes.
-      $theme->incompatible_core = !isset($theme->info['core']) || ($theme->info['core'] != DRUPAL_CORE_COMPATIBILITY) || (!isset($theme->info['regions']['content']));
+      $theme->incompatible_core = !isset($theme->info['backdrop']) || ($theme->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) || (!isset($theme->info['regions']['content']));
       $theme->incompatible_php = version_compare(phpversion(), $theme->info['php']) < 0;
     }
     $query['token'] = drupal_get_token('system-theme-operation-link');
@@ -817,7 +817,7 @@ function system_modules($form, $form_state = array()) {
       elseif (isset($visible_files[$requires])) {
         $requires_name = $files[$requires]->info['name'];
         // Disable this module if it is incompatible with the dependency's version.
-        if ($incompatible_version = drupal_check_incompatibility($v, str_replace(DRUPAL_CORE_COMPATIBILITY . '-', '', $files[$requires]->info['version']))) {
+        if ($incompatible_version = drupal_check_incompatibility($v, str_replace(BACKDROP_CORE_COMPATIBILITY . '-', '', $files[$requires]->info['version']))) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> version @version)', array(
             '@module' => $requires_name . $incompatible_version,
             '@version' => $files[$requires]->info['version'],
@@ -826,7 +826,7 @@ function system_modules($form, $form_state = array()) {
         }
         // Disable this module if the dependency is incompatible with this
         // version of Drupal core.
-        elseif ($files[$requires]->info['core'] != DRUPAL_CORE_COMPATIBILITY) {
+        elseif ($files[$requires]->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> this version of Drupal core)', array(
             '@module' => $requires_name,
           ));
@@ -967,10 +967,10 @@ function _system_modules_build_row($info, $extra) {
   $status_long = '';
 
   // Check the core compatibility.
-  if (!isset($info['core']) || $info['core'] != DRUPAL_CORE_COMPATIBILITY) {
+  if (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
     $compatible = FALSE;
-    $status_short .= t('Incompatible with this version of Drupal core.');
-    $status_long .= t('This version is not compatible with Drupal !core_version and should be replaced.', array('!core_version' => DRUPAL_CORE_COMPATIBILITY));
+    $status_short .= t('Incompatible with this version of Backdrop CMS.');
+    $status_long .= t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY));
   }
 
   // Ensure this module is compatible with the currently installed version of PHP.
@@ -1481,6 +1481,7 @@ function system_cron_settings() {
   $form['cron']['cron_safe_threshold'] = array(
     '#type' => 'select',
     '#title' => t('Run cron every'),
+    '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
     '#default_value' => variable_get('cron_safe_threshold', DRUPAL_CRON_DEFAULT_THRESHOLD),
     '#options' => array(0 => t('Never')) + drupal_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
@@ -2495,7 +2496,7 @@ function theme_status_report($variables) {
 
   foreach ($requirements as $requirement) {
     if (empty($requirement['#type'])) {
-      $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : 0];
+      $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
       $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
 
       // Output table row(s)
@@ -2664,7 +2665,7 @@ function theme_system_themes_page($variables) {
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
-        $output .= '<div class="incompatible">' . t('This version is not compatible with Drupal !core_version and should be replaced.', array('!core_version' => DRUPAL_CORE_COMPATIBILITY)) . '</div>';
+        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
       }
       elseif (!empty($theme->incompatible_php)) {
         if (substr_count($theme->info['php'], '.') < 2) {

@@ -16,6 +16,16 @@ function seven_preprocess_maintenance_page(&$vars) {
  * Override or insert variables into the html template.
  */
 function seven_preprocess_html(&$vars) {
+  // Add viewport setting for mobile.
+  $viewport = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'viewport',
+      'content' => 'width=device-width, initial-scale=1',
+    ),
+  );
+  drupal_add_html_head($viewport, 'viewport');
+
   // Add conditional CSS for IE8 and below.
   drupal_add_css(path_to_theme() . '/ie.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE), 'weight' => 999, 'preprocess' => FALSE));
 }
