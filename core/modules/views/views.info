@@ -1,7 +1,8 @@
 name = Views
 description = Create customized lists and queries from your database.
 package = Views
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 
 ; Always available CSS
 stylesheets[all][] = css/views.css

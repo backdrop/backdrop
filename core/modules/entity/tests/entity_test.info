@@ -1,8 +1,8 @@
 name = Entity CRUD test module
 description = Provides entity types based upon the CRUD API.
 package = Testing
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 dependencies[] = entity
 files[] = entity_test.entity.inc
 hidden = TRUE

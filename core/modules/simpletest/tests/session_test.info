@@ -1,6 +1,6 @@
 name = "Session test"
 description = "Support module for session data testing."
 package = Testing
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 hidden = TRUE

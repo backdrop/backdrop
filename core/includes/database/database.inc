@@ -28,18 +28,21 @@
  * Most Drupal database SELECT queries are performed by a call to db_query() or
  * db_query_range(). Module authors should also consider using the PagerDefault
  * Extender for queries that return results that need to be presented on
- * multiple pages, and the Tablesort Extender for generating appropriate queries
- * for sortable tables.
+ * multiple pages (see https://drupal.org/node/508796), and the TableSort
+ * Extender for generating appropriate queries for sortable tables
+ * (see https://drupal.org/node/1848372).
  *
  * For example, one might wish to return a list of the most recent 10 nodes
  * authored by a given user. Instead of directly issuing the SQL query
  * @code
- * SELECT n.nid, n.title, n.created FROM node n WHERE n.uid = $uid LIMIT 0, 10;
+ * SELECT n.nid, n.title, n.created FROM node n WHERE n.uid = $uid
+ *   ORDER BY n.created DESC LIMIT 0, 10;
  * @endcode
  * one would instead call the Drupal functions:
  * @code
  * $result = db_query_range('SELECT n.nid, n.title, n.created
- *   FROM {node} n WHERE n.uid = :uid', 0, 10, array(':uid' => $uid));
+ *   FROM {node} n WHERE n.uid = :uid
+ *   ORDER BY n.created DESC', 0, 10, array(':uid' => $uid));
  * foreach ($result as $record) {
  *   // Perform operations on $record->title, etc. here.
  * }

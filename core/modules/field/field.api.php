@@ -1302,6 +1302,13 @@ function hook_field_attach_load($entity_type, $entities, $age, $options) {
  * This hook is invoked after the field module has performed the operation.
  *
  * See field_attach_validate() for details and arguments.
+ *
+ * @param $entity_type
+ *   The type of $entity; e.g., 'node' or 'user'.
+ * @param $entity
+ *   The entity with fields to validate.
+ * @param array $errors
+ *   An associative array of errors keyed by field_name, language, delta.
  */
 function hook_field_attach_validate($entity_type, $entity, &$errors) {
   // @todo Needs function body.
@@ -1571,7 +1578,7 @@ function hook_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_new)
  * @param $entity_type
  *   The type of entity; for example, 'node' or 'user'.
  * @param $bundle
- *   The bundle that was just deleted.
+ *   The name of the bundle that was just deleted.
  * @param $instances
  *   An array of all instances that existed for the bundle before it was
  *   deleted.

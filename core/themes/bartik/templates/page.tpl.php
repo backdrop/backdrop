@@ -124,35 +124,13 @@
 
     <?php if ($main_menu): ?>
       <div id="main-menu" class="navigation">
-        <?php print theme('links__system_main_menu', array(
-          'links' => $main_menu,
-          'attributes' => array(
-            'id' => 'main-menu-links',
-            'class' => array('links', 'clearfix'),
-          ),
-          'heading' => array(
-            'text' => t('Main menu'),
-            'level' => 'h2',
-            'class' => array('element-invisible'),
-          ),
-        )); ?>
+        <?php print render($main_menu); ?>
       </div> <!-- /#main-menu -->
     <?php endif; ?>
 
     <?php if ($secondary_menu): ?>
       <div id="secondary-menu" class="navigation">
-        <?php print theme('links__system_secondary_menu', array(
-          'links' => $secondary_menu,
-          'attributes' => array(
-            'id' => 'secondary-menu-links',
-            'class' => array('links', 'inline', 'clearfix'),
-          ),
-          'heading' => array(
-            'text' => t('Secondary menu'),
-            'level' => 'h2',
-            'class' => array('element-invisible'),
-          ),
-        )); ?>
+        <?php print render($secondary_menu); ?>
       </div> <!-- /#secondary-menu -->
     <?php endif; ?>
 
@@ -180,7 +158,7 @@
       </div></div> <!-- /.section, /#sidebar-first -->
     <?php endif; ?>
 
-    <div id="content" class="column"><div class="section">
+    <main id="content" class="column" role="main"><section class="section">
       <?php if ($page['highlighted']): ?><div id="highlighted"><?php print render($page['highlighted']); ?></div><?php endif; ?>
       <a id="main-content"></a>
       <?php print render($title_prefix); ?>
@@ -203,7 +181,7 @@
       <?php print render($page['content']); ?>
       <?php print $feed_icons; ?>
 
-    </div></div> <!-- /.section, /#content -->
+    </div></main> <!-- /.section, /#content -->
 
     <?php if ($page['sidebar_second']): ?>
       <div id="sidebar-second" class="column sidebar"><div class="section">
