@@ -518,7 +518,7 @@ abstract class DrupalTestCase {
    */
   public function run(array $methods = array()) {
     // Initialize verbose debugging.
-    simpletest_verbose(NULL, variable_get('file_public_path', conf_path() . '/files'), get_class($this));
+    simpletest_verbose(NULL, variable_get('file_public_path', 'files'), get_class($this));
 
     // HTTP auth settings (<username>:<password>) for the simpletest browser
     // when sending requests to the test site.
@@ -772,7 +772,7 @@ class DrupalUnitTestCase extends DrupalTestCase {
     global $conf;
 
     // Store necessary current values before switching to the test environment.
-    $this->originalFileDirectory = variable_get('file_public_path', conf_path() . '/files');
+    $this->originalFileDirectory = variable_get('file_public_path', 'files');
 
     $this->prepareDatabasePrefix();
 
@@ -1129,7 +1129,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       $original = drupal_get_path('module', 'simpletest') . '/files';
       $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
       foreach ($files as $file) {
-        file_unmanaged_copy($file->uri, variable_get('file_public_path', conf_path() . '/files'));
+        file_unmanaged_copy($file->uri, variable_get('file_public_path', 'files'));
       }
 
       $this->generatedTestFiles = TRUE;
@@ -1401,7 +1401,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $this->originalLanguage = $language_interface;
     $this->originalLanguageDefault = variable_get('language_default');
     $this->originalConfigDirectories = $config_directories;
-    $this->originalFileDirectory = variable_get('file_public_path', conf_path() . '/files');
+    $this->originalFileDirectory = variable_get('file_public_path', 'files');
     $this->originalProfile = drupal_get_profile();
     $this->originalCleanUrl = variable_get('clean_url', 0);
     $this->originalUser = $user;
@@ -1440,17 +1440,9 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Set the new config directories. During test execution, these values are
     // manually set directly in config_get_config_directory().
-    $config_base_path = conf_path() . '/files/simpletest/' . substr($this->databasePrefix, 10) . '/config_';
-    $config_directories = array(
-      'active' => array(
-        'path' => $config_base_path . 'active',
-        'absolute' => TRUE,
-      ),
-      'staging' => array(
-        'path' => $config_base_path . 'staging',
-        'absolute' => TRUE,
-      ),
-    );
+    $config_base_path = 'files/simpletest/' . substr($this->databasePrefix, 10) . '/config_';
+    $config_directories['active'] = $config_base_path . 'active';
+    $config_directories['staging'] = $config_base_path . 'staging';
     $active_directory = config_get_config_directory('active');
     $staging_directory = config_get_config_directory('staging');
     file_prepare_directory($active_directory, FILE_CREATE_DIRECTORY);

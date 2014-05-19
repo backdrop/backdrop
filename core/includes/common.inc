@@ -2658,7 +2658,7 @@ function drupal_deliver_html_page($page_callback_result) {
         watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
 
         // Check for and return a fast 404 page if configured.
-        drupal_fast_404();
+        fast_404();
 
         // Keep old path for reference, and to allow forms to redirect to it.
         if (!isset($_GET['destination'])) {
@@ -5306,10 +5306,10 @@ function drupal_json_output($var = NULL) {
  *   A salt based on information in settings.php, not in the database.
  */
 function drupal_get_hash_salt() {
-  global $drupal_hash_salt, $databases;
-  // If the $drupal_hash_salt variable is empty, a hash of the serialized
+  global $hash_salt, $databases;
+  // If the $hash_salt variable is empty, a hash of the serialized
   // database credentials is used as a fallback salt.
-  return empty($drupal_hash_salt) ? hash('sha256', serialize($databases)) : $drupal_hash_salt;
+  return empty($hash_salt) ? hash('sha256', serialize($databases)) : $hash_salt;
 }
 
 /**
@@ -5339,7 +5339,7 @@ function drupal_get_private_key() {
  *
  * @return string
  *   A 43-character URL-safe token for validation, based on the user session ID,
- *   the global $drupal_hash_salt variable from settings.php, and the
+ *   the global $hash_salt variable from settings.php, and the
  *   'drupal_private_key' configuration variable.
  */
 function drupal_get_token($value = '') {
@@ -5660,7 +5660,7 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
   }
 
   $searchdir[] = $directory;
-  if (file_exists("$config/$directory")) {
+  if ($config !== '.' && file_exists("$config/$directory")) {
     $searchdir[] = "$config/$directory";
   }
 

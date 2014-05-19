@@ -518,7 +518,7 @@ function timer_stop($name) {
  *
  * Returns the configuration path based on the site's hostname, port, and
  * pathname. Uses find_conf_path() to find the current configuration directory.
- * See default.settings.php for examples on how the URL is converted to a
+ * See sites/sites.php for examples on how the URL is converted to a
  * directory.
  *
  * @param bool $require_settings
@@ -533,7 +533,7 @@ function timer_stop($name) {
  * @return
  *   The path of the matching directory.
  *
- * @see default.settings.php
+ * @see settings.php
  */
 function conf_path($require_settings = TRUE, $reset = FALSE) {
   $conf = &drupal_static(__FUNCTION__, '');
@@ -554,6 +554,10 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
 /**
  * Finds the appropriate configuration directory for a given host and path.
  *
+ * This function is the heart of Backdrop's multisite functionality, determining
+ * which directory should be used based on the hostname. If not using multisite,
+ * the path returned will be a single period (indicating the current directory).
+ *
  * @param $http_host
  *   The hostname and optional port number, e.g. "www.example.com" or
  *   "www.example.com:8080".
@@ -561,34 +565,36 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
  *   The part of the url following the hostname, including the leading slash.
  *
  * @return
- *   The path of the matching configuration directory.
+ *   The relative path of the matching configuration directory.
  *
  * @see conf_path()
  */
 function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
-  $confdir = 'sites';
-
+  $conf = '.';
   $sites = array();
-  if (file_exists(DRUPAL_ROOT . '/' . $confdir . '/sites.php')) {
-    // This will overwrite $sites with the desired mappings.
-    include(DRUPAL_ROOT . '/' . $confdir . '/sites.php');
+
+  // This will overwrite $sites with any multisite mappings.
+  if (file_exists(DRUPAL_ROOT . '/sites/sites.php')) {
+    include DRUPAL_ROOT . '/sites/sites.php';
   }
 
-  $uri = explode('/', $script_name);
-  $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
-  for ($i = count($uri) - 1; $i > 0; $i--) {
-    for ($j = count($server); $j > 0; $j--) {
-      $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
-      if (isset($sites[$dir]) && file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $sites[$dir])) {
-        $dir = $sites[$dir];
-      }
-      if (file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $dir . '/settings.php') || (!$require_settings && file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $dir))) {
-        $conf = "$confdir/$dir";
-        return $conf;
+  if ($sites) {
+    $uri = explode('/', $script_name);
+    $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
+    for ($i = count($uri) - 1; $i > 0; $i--) {
+      for ($j = count($server); $j > 0; $j--) {
+        $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
+        if (isset($sites[$dir]) && file_exists(DRUPAL_ROOT . '/sites/' . $sites[$dir])) {
+          $dir = $sites[$dir];
+        }
+        if (file_exists(DRUPAL_ROOT . '/sites/' . $dir . '/settings.php') || (!$require_settings && file_exists(DRUPAL_ROOT . '/sites/' . $dir))) {
+          $conf = './sites/' . $dir;
+          return $conf;
+        }
       }
     }
   }
-  $conf = "$confdir/default";
+
   return $conf;
 }
 
@@ -605,7 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
  * variable is sufficient, and it can therefore be called without passing in
  * any input. However, command line scripts running on a multisite installation
  * (or on any installation that has settings.php stored somewhere other than
- * the sites/default folder) need to pass in the URL of the site to allow
+ * the root folder) need to pass in the URL of the site to allow
  * Drupal to detect the correct location of the settings.php file. Passing in
  * the 'url' parameter is also required for functions like request_uri() to
  * return the expected values.
@@ -693,7 +699,7 @@ function drupal_environment_initialize() {
   error_reporting(E_STRICT | E_ALL | error_reporting());
 
   // Override PHP settings required for Drupal to work properly.
-  // sites/default/default.settings.php contains more runtime settings.
+  // settings.php contains more runtime settings.
   // The .htaccess file contains settings that cannot be changed at runtime.
 
   // Don't escape quotes when reading files from the database, disk, etc.
@@ -731,14 +737,29 @@ function drupal_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $installed_profile, $update_free_access, $db_url, $db_prefix, $drupal_hash_salt, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $installed_profile, $update_free_access, $db_url, $db_prefix, $hash_salt, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
   $conf = array();
 
-  if (file_exists(DRUPAL_ROOT . '/' . conf_path() . '/settings.php')) {
-    include_once DRUPAL_ROOT . '/' . conf_path() . '/settings.php';
+  $conf_path = conf_path();
+  if (file_exists($conf_path . '/settings.php')) {
+    require_once $conf_path . '/settings.php';
   }
-  if (isset($conf['backdrop_drupal_compatibility'])) {
-    require_once DRUPAL_ROOT . '/core/includes/drupal.inc';
+  if (!empty($conf['backdrop_drupal_compatibility'])) {
+    require_once './core/includes/drupal.inc';
+  }
+
+  // Convert simplified database settings into the full databases array.
+  if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
+    $database_parts = parse_url($database);
+    $databases['default']['default'] = array(
+      'driver' => $database_parts['scheme'],
+      'database' => substr($database_parts['path'], 1), // Remove leading slash.
+      'username' => isset($database_parts['user']) ? $database_parts['user'] : '',
+      'password' => isset($database_parts['pass']) ? $database_parts['pass'] : '',
+      'host' => $database_parts['host'],
+      'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
+      'prefix' => !empty($database_prefix) ? $database_prefix : '',
+    );
   }
 
   $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
@@ -2590,7 +2611,7 @@ function drupal_get_bootstrap_phase() {
  *   HMAC and timestamp.
  */
 function drupal_valid_test_ua() {
-  global $drupal_hash_salt;
+  global $hash_salt;
   // No reason to reset this.
   static $test_prefix;
 
@@ -2604,7 +2625,7 @@ function drupal_valid_test_ua() {
     // We use the salt from settings.php to make the HMAC key, since
     // the database is not yet initialized and we can't access any Drupal variables.
     // The file properties add more entropy not easily accessible to others.
-    $key = $drupal_hash_salt . filectime(__FILE__) . fileinode(__FILE__);
+    $key = $hash_salt . filectime(__FILE__) . fileinode(__FILE__);
     $time_diff = REQUEST_TIME - $time;
     // Since we are making a local request a 5 second time window is allowed,
     // and the HMAC must match.
@@ -2622,14 +2643,14 @@ function drupal_valid_test_ua() {
  * Generates a user agent string with a HMAC and timestamp for simpletest.
  */
 function drupal_generate_test_ua($prefix) {
-  global $drupal_hash_salt;
+  global $hash_salt;
   static $key;
 
   if (!isset($key)) {
     // We use the salt from settings.php to make the HMAC key, since
     // the database is not yet initialized and we can't access any Drupal variables.
     // The file properties add more entropy not easily accessible to others.
-    $key = $drupal_hash_salt . filectime(__FILE__) . fileinode(__FILE__);
+    $key = $hash_salt . filectime(__FILE__) . fileinode(__FILE__);
   }
   // Generate a moderately secure HMAC based on the database credentials.
   $salt = uniqid('', TRUE);
@@ -2664,7 +2685,7 @@ function drupal_maintenance_theme() {
  * Paths to dynamically-generated content, such as image styles, should also be
  * accounted for in this function.
  */
-function drupal_fast_404() {
+function fast_404() {
   $exclude_paths = variable_get('404_fast_paths_exclude', FALSE);
   if ($exclude_paths && !preg_match($exclude_paths, $_GET['q'])) {
     $fast_paths = variable_get('404_fast_paths', FALSE);

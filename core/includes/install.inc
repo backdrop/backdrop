@@ -601,16 +601,13 @@ class DatabaseTaskException extends Exception {
  *
  * @param $settings
  *   An array of settings that need to be updated.
+ * @return bool
+ *   TRUE if the settings file was rewritten successfully. FALSE otherwise.
  */
 function drupal_rewrite_settings($settings = array()) {
-  $default_settings = 'sites/default/default.settings.php';
   drupal_static_reset('conf_path');
   $settings_file = conf_path(FALSE) . '/settings.php';
-
-  // If an existing settings file exists, update it instead of using defaults.
-  if (file_exists($settings_file)) {
-    $default_settings = $settings_file;
-  }
+  $additions = '';
 
   // Build list of setting names and insert the values into the global namespace.
   $keys = array();
@@ -621,7 +618,7 @@ function drupal_rewrite_settings($settings = array()) {
 
   $buffer = NULL;
   $first = TRUE;
-  if ($fp = fopen(DRUPAL_ROOT . '/' . $default_settings, 'r')) {
+  if ($fp = fopen($settings_file, 'r')) {
     // Step line by line through settings.php.
     while (!feof($fp)) {
       $line = fgets($fp);
@@ -629,27 +626,16 @@ function drupal_rewrite_settings($settings = array()) {
         $buffer = "<?php\n\n";
       }
       $first = FALSE;
-      // Check for constants.
-      if (substr($line, 0, 7) == 'define(') {
-        preg_match('/define\(\s*[\'"]([A-Z_-]+)[\'"]\s*,(.*?)\);/', $line, $variable);
-        if (in_array($variable[1], $keys)) {
-          $setting = $settings[$variable[1]];
-          $buffer .= str_replace($variable[2], " '" . $setting['value'] . "'", $line);
-          unset($settings[$variable[1]]);
-          unset($settings[$variable[2]]);
-        }
-        else {
-          $buffer .= $line;
-        }
-      }
       // Check for variables.
-      elseif (substr($line, 0, 1) == '$') {
-        preg_match('/\$([^ ]*) /', $line, $variable);
+      if (substr($line, 0, 1) == '$') {
+        preg_match('/\$([^ =]*) /', $line, $variable);
         if (in_array($variable[1], $keys)) {
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
           $setting = $settings[$variable[1]];
-          $buffer .= '$' . $variable[1] . " = " . var_export($setting['value'], TRUE) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
+          $new_line = '$' . $variable[1] . " = " . var_export($setting['value'], TRUE) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
+          $buffer .= $new_line;
+          $additions .= $new_line;
           unset($settings[$variable[1]]);
         }
         else {
@@ -665,17 +651,19 @@ function drupal_rewrite_settings($settings = array()) {
     // Add required settings that were missing from settings.php.
     foreach ($settings as $setting => $data) {
       if ($data['required']) {
-        $buffer .= "\$$setting = " . var_export($data['value'], TRUE) . ";\n";
+        $new_line = "\$$setting = " . var_export($data['value'], TRUE) . ";\n";
+        $buffer .= $new_line;
+        $additions .= $new_line;
       }
     }
 
-    $fp = fopen(DRUPAL_ROOT . '/' . $settings_file, 'w');
-    if ($fp && fwrite($fp, $buffer) === FALSE) {
-      throw new Exception(st('Failed to modify %settings. Verify the file permissions.', array('%settings' => $settings_file)));
+    $fp = @fopen(DRUPAL_ROOT . '/' . $settings_file, 'w');
+    if (!$fp || fwrite($fp, $buffer) === FALSE) {
+      throw new Exception(st('Failed to open %settings. Check that this file exists and is writable by the web server then load this page again.', array('%settings' => $settings_file)));
     }
   }
   else {
-    throw new Exception(st('Failed to open %settings. Verify the file permissions.', array('%settings' => $default_settings)));
+    throw new Exception(st('Failed to open %settings. Check that this file exists and is writable by the web server then load this page again.', array('%settings' => $settings_file)));
   }
 }
 
@@ -691,22 +679,24 @@ function backdrop_install_config_directories() {
   // Add a randomized config directory name to settings.php, unless it was
   // manually defined in the existing already.
   if (empty($config_directories)) {
-    $config_directories_hash = drupal_hash_base64(drupal_random_bytes(55));
-    $settings['config_directories'] = array(
-      'value' => array(
-        'active' => array(
-          'path' => 'config_' . $config_directories_hash . '/active',
-        ),
-        'staging' => array(
-          'path' => 'config_' . $config_directories_hash . '/staging',
-        ),
-      ),
+    $config_directories_hash = md5(drupal_random_bytes(55));
+    $settings["config_directories['active']"] = array(
+      'value' => 'files/config_' . $config_directories_hash . '/active',
+      'required' => TRUE,
+    );
+    $settings["config_directories['staging']"] = array(
+      'value' => 'files/config_' . $config_directories_hash . '/staging',
       'required' => TRUE,
     );
 
-    // Rewrite settings.php, which also sets the value as global variable.
+    // Rewrite settings.php.
     drupal_rewrite_settings($settings);
   }
+
+  // Reload the settings.php file from scratch to update the config directories
+  // global variable.
+  $settings_file = conf_path(FALSE) . '/settings.php';
+  include $settings_file;
 
   // Ensure the config directories exist or can be created, and are writable.
   foreach (array('active', 'staging') as $config_type) {
@@ -953,32 +943,32 @@ function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
             }
             break;
           case FILE_READABLE:
-            if (!is_readable($file) && !drupal_install_fix_file($file, $mask)) {
+            if (!is_readable($file)) {
               $return = FALSE;
             }
             break;
           case FILE_WRITABLE:
-            if (!is_writable($file) && !drupal_install_fix_file($file, $mask)) {
+            if (!is_writable($file)) {
               $return = FALSE;
             }
             break;
           case FILE_EXECUTABLE:
-            if (!is_executable($file) && !drupal_install_fix_file($file, $mask)) {
+            if (!is_executable($file)) {
               $return = FALSE;
             }
             break;
           case FILE_NOT_READABLE:
-            if (is_readable($file) && !drupal_install_fix_file($file, $mask)) {
+            if (is_readable($file)) {
               $return = FALSE;
             }
             break;
           case FILE_NOT_WRITABLE:
-            if (is_writable($file) && !drupal_install_fix_file($file, $mask)) {
+            if (is_writable($file)) {
               $return = FALSE;
             }
             break;
           case FILE_NOT_EXECUTABLE:
-            if (is_executable($file) && !drupal_install_fix_file($file, $mask)) {
+            if (is_executable($file)) {
               $return = FALSE;
             }
             break;
@@ -1022,89 +1012,6 @@ function drupal_install_mkdir($file, $mask, $message = TRUE) {
   }
 
   if (@drupal_mkdir($file, $mod)) {
-    return TRUE;
-  }
-  else {
-    return FALSE;
-  }
-}
-
-/**
- * Attempts to fix file permissions.
- *
- * The general approach here is that, because we do not know the security
- * setup of the webserver, we apply our permission changes to all three
- * digits of the file permission (i.e. user, group and all).
- *
- * To ensure that the values behave as expected (and numbers don't carry
- * from one digit to the next) we do the calculation on the octal value
- * using bitwise operations. This lets us remove, for example, 0222 from
- * 0700 and get the correct value of 0500.
- *
- * @param $file
- *  The name of the file with permissions to fix.
- * @param $mask
- *  The desired permissions for the file.
- * @param $message
- *  (optional) Whether to output messages. Defaults to TRUE.
- *
- * @return
- *  TRUE/FALSE whether or not we were able to fix the file's permissions.
- */
-function drupal_install_fix_file($file, $mask, $message = TRUE) {
-  // If $file does not exist, fileperms() issues a PHP warning.
-  if (!file_exists($file)) {
-    return FALSE;
-  }
-
-  $mod = fileperms($file) & 0777;
-  $masks = array(FILE_READABLE, FILE_WRITABLE, FILE_EXECUTABLE, FILE_NOT_READABLE, FILE_NOT_WRITABLE, FILE_NOT_EXECUTABLE);
-
-  // FILE_READABLE, FILE_WRITABLE, and FILE_EXECUTABLE permission strings
-  // can theoretically be 0400, 0200, and 0100 respectively, but to be safe
-  // we set all three access types in case the administrator intends to
-  // change the owner of settings.php after installation.
-  foreach ($masks as $m) {
-    if ($mask & $m) {
-      switch ($m) {
-        case FILE_READABLE:
-          if (!is_readable($file)) {
-            $mod |= 0444;
-          }
-          break;
-        case FILE_WRITABLE:
-          if (!is_writable($file)) {
-            $mod |= 0222;
-          }
-          break;
-        case FILE_EXECUTABLE:
-          if (!is_executable($file)) {
-            $mod |= 0111;
-          }
-          break;
-        case FILE_NOT_READABLE:
-          if (is_readable($file)) {
-            $mod &= ~0444;
-          }
-          break;
-        case FILE_NOT_WRITABLE:
-          if (is_writable($file)) {
-            $mod &= ~0222;
-          }
-          break;
-        case FILE_NOT_EXECUTABLE:
-          if (is_executable($file)) {
-            $mod &= ~0111;
-          }
-          break;
-      }
-    }
-  }
-
-  // chmod() will work if the web server is running as owner of the file.
-  // If PHP safe_mode is enabled the currently executing script must also
-  // have the same owner.
-  if (@chmod($file, $mod)) {
     return TRUE;
   }
   else {
@@ -1382,7 +1289,7 @@ function install_profile_info($profile, $langcode = 'en') {
     $defaults = array(
       'dependencies' => array(),
       'description' => '',
-      'distribution_name' => 'Drupal',
+      'distribution_name' => 'Backdrop CMS',
       'version' => NULL,
       'hidden' => FALSE,
       'php' => DRUPAL_MINIMUM_PHP,

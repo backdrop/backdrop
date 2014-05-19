@@ -548,13 +548,13 @@ function install_tasks($install_state) {
     'install_verify_requirements' => array(
       'display_name' => st('Verify requirements'),
     ),
-    'install_config_directories' => array(
-      'run' => $install_state['config_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_REACHED,
-    ),
     'install_settings_form' => array(
       'display_name' => st('Set up database'),
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
+    ),
+    'install_config_directories' => array(
+      'run' => $install_state['config_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_system_module' => array(
     ),
@@ -871,7 +871,7 @@ function install_verify_settings() {
   if (!empty($databases) && install_verify_pdo()) {
     $database = $databases['default']['default'];
     drupal_static_reset('conf_path');
-    $settings_file = './' . conf_path(FALSE) . '/settings.php';
+    $settings_file = conf_path(FALSE) . '/settings.php';
     $errors = install_database_errors($database, $settings_file);
     if (empty($errors)) {
       return TRUE;
@@ -914,8 +914,7 @@ function install_settings_form($form, &$form_state, &$install_state) {
   global $databases;
 
   drupal_static_reset('conf_path');
-  $conf_path = './' . conf_path(FALSE);
-  $settings_file = $conf_path . '/settings.php';
+  $settings_file = conf_path(FALSE) . '/settings.php';
   $database = isset($databases['default']['default']) ? $databases['default']['default'] : array();
 
   drupal_set_title(st('Database configuration'));
@@ -978,11 +977,6 @@ function install_settings_form_validate($form, &$form_state) {
   $database = $form_state['values'][$driver];
   $database['driver'] = $driver;
 
-  // TODO: remove when PIFR will be updated to use 'db_prefix' instead of
-  // 'prefix' in the database settings form.
-  $database['prefix'] = $database['db_prefix'];
-  unset($database['db_prefix']);
-
   $form_state['storage']['database'] = $database;
   $errors = install_database_errors($database, $form_state['values']['settings_file']);
   foreach ($errors as $name => $message) {
@@ -1036,12 +1030,16 @@ function install_settings_form_submit($form, &$form_state) {
   global $install_state;
 
   // Update global settings array and save.
-  $settings['databases'] = array(
-    'value'    => array('default' => array('default' => $form_state['storage']['database'])),
+  $db_settings = $form_state['storage']['database'];
+  $settings['database'] = array(
+    'value' => $db_settings['driver'] . '://' . $db_settings['username'] . ':' . $db_settings['password'] . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . $db_settings['database'],
     'required' => TRUE,
   );
-  $settings['drupal_hash_salt'] = array(
-    'value'    => drupal_random_key(),
+  $settings['database_prefix'] = array(
+    'value' => $db_settings['db_prefix'],
+  );
+  $settings['hash_salt'] = array(
+    'value' => drupal_random_key(),
     'required' => TRUE,
   );
   drupal_rewrite_settings($settings);
@@ -1247,7 +1245,7 @@ function install_find_translations() {
  * @see file_scan_directory()
  */
 function install_find_translation_files($langcode = NULL) {
-  $directory = variable_get('locale_translate_file_directory', conf_path() . '/files/translations');
+  $directory = variable_get('locale_translate_file_directory', 'files/translations');
   $files = file_scan_directory($directory, '!install\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
@@ -1287,7 +1285,7 @@ function install_select_language(&$install_state) {
     // is doing.
     if (count($files) == 1) {
       if ($install_state['interactive']) {
-        $directory = variable_get('locale_translate_file_directory', conf_path() . '/files/translations');
+        $directory = variable_get('locale_translate_file_directory', 'files/translations');
 
         drupal_set_title(st('Choose language'));
         if (!empty($install_state['parameters']['translate'])) {
@@ -1540,20 +1538,6 @@ function install_import_translations(&$install_state) {
 function install_configure_form($form, &$form_state, &$install_state) {
   drupal_set_title(st('Configure site'));
 
-  // Warn about settings.php permissions risk
-  $settings_dir = conf_path();
-  $settings_file = $settings_dir . '/settings.php';
-  // Check that $_POST is empty so we only show this message when the form is
-  // first displayed, not on the next page after it is submitted. (We do not
-  // want to repeat it multiple times because it is a general warning that is
-  // not related to the rest of the installation process; it would also be
-  // especially out of place on the last page of the installer, where it would
-  // distract from the message that the Drupal installation has completed
-  // successfully.)
-  if (empty($_POST) && (!drupal_verify_install_file(DRUPAL_ROOT . '/' . $settings_file, FILE_EXIST|FILE_READABLE|FILE_NOT_WRITABLE) || !drupal_verify_install_file(DRUPAL_ROOT . '/' . $settings_dir, FILE_NOT_WRITABLE, 'dir'))) {
-    drupal_set_message(st('All necessary changes to %dir and %file have been made, so you should remove write permissions to them now in order to avoid security risks. If you are unsure how to do so, consult the <a href="@handbook_url">online handbook</a>.', array('%dir' => $settings_dir, '%file' => $settings_file, '@handbook_url' => 'http://drupal.org/server-permissions')), 'warning');
-  }
-
   drupal_add_js(drupal_get_path('module', 'system') . '/system.js');
   // Add JavaScript time zone detection.
   drupal_add_js('core/misc/timezone.js');
@@ -1609,11 +1593,6 @@ function install_import_translations_remaining(&$install_state) {
  *   A message informing the user that the installation is complete.
  */
 function install_finished(&$install_state) {
-  drupal_set_title(st('@drupal installation complete', array('@drupal' => drupal_install_profile_distribution_name())), PASS_THROUGH);
-  $messages = drupal_set_message();
-  $output = '<p>' . st('Congratulations, you installed @drupal!', array('@drupal' => drupal_install_profile_distribution_name())) . '</p>';
-  $output .= '<p>' . (isset($messages['error']) ? st('Review the messages above before visiting <a href="@url">your new site</a>.', array('@url' => url(''))) : st('<a href="@url">Visit your new site</a>.', array('@url' => url('')))) . '</p>';
-
   // Flush all caches to ensure that any full bootstraps during the installer
   // do not leave stale cached data, and that any content types or other items
   // registered by the installation profile are registered correctly.
@@ -1637,7 +1616,16 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   drupal_cron_run();
 
-  return $output;
+  $message = '<strong>' . st('Congratulations, you installed @profile!', array('@profile' => drupal_install_profile_distribution_name())) . '</strong>';
+
+  // Warn about settings.php permissions risk.
+  $settings_file = conf_path() . '/settings.php';
+  if (drupal_verify_install_file($settings_file, FILE_WRITABLE)) {
+    $message .= ' ' . st('Now that installation is complete, you should remove write permissions to the settings.php file. See the site <a href="!status-report">status report</a> for more information.', array('%file' => $settings_file, '!status-report' => url('admin/reports/status')));
+  }
+
+  drupal_set_message($message);
+  drupal_goto('<front>');
 }
 
 /**
@@ -1671,76 +1659,19 @@ function install_check_requirements($install_state) {
   // Check the profile requirements.
   $requirements = drupal_check_profile($profile);
 
-  // If Drupal is not set up already, we need to create a settings file.
+  // If Backdrop is not set up already, we need to update the settings file.
   if (!$install_state['settings_verified']) {
     $writable = FALSE;
-    $conf_path = './' . conf_path(FALSE, TRUE);
+    $conf_path = conf_path(FALSE, TRUE);
     $settings_file = $conf_path . '/settings.php';
-    $default_settings_file = './sites/default/default.settings.php';
-    $file = $conf_path;
     $exists = FALSE;
     // Verify that the directory exists.
     if (drupal_verify_install_file($conf_path, FILE_EXIST, 'dir')) {
       // Check if a settings.php file already exists.
-      $file = $settings_file;
       if (drupal_verify_install_file($settings_file, FILE_EXIST)) {
         // If it does, make sure it is writable.
         $writable = drupal_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
         $exists = TRUE;
-      }
-    }
-
-    // If default.settings.php does not exist, or is not readable, throw an
-    // error.
-    if (!drupal_verify_install_file($default_settings_file, FILE_EXIST|FILE_READABLE)) {
-      $requirements['default settings file exists'] = array(
-        'title'       => st('Default settings file'),
-        'value'       => st('The default settings file does not exist.'),
-        'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The @drupal installer requires that the %default-file file not be modified in any way from the original download.', array('@drupal' => drupal_install_profile_distribution_name(), '%default-file' => $default_settings_file)),
-      );
-    }
-    // Otherwise, if settings.php does not exist yet, we can try to copy
-    // default.settings.php to create it.
-    elseif (!$exists) {
-      $copied = drupal_verify_install_file($conf_path, FILE_EXIST|FILE_WRITABLE, 'dir') && @copy($default_settings_file, $settings_file);
-      if ($copied) {
-        // If the new settings file has the same owner as default.settings.php,
-        // this means default.settings.php is owned by the webserver user.
-        // This is an inherent security weakness because it allows a malicious
-        // webserver process to append arbitrary PHP code and then execute it.
-        // However, it is also a common configuration on shared hosting, and
-        // there is nothing Drupal can do to prevent it. In this situation,
-        // having settings.php also owned by the webserver does not introduce
-        // any additional security risk, so we keep the file in place.
-        if (fileowner($default_settings_file) === fileowner($settings_file)) {
-          $writable = drupal_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
-          $exists = TRUE;
-        }
-        // If settings.php and default.settings.php have different owners, this
-        // probably means the server is set up "securely" (with the webserver
-        // running as its own user, distinct from the user who owns all the
-        // Drupal PHP files), although with either a group or world writable
-        // sites directory. Keeping settings.php owned by the webserver would
-        // therefore introduce a security risk. It would also cause a usability
-        // problem, since site owners who do not have root access to the file
-        // system would be unable to edit their settings file later on. We
-        // therefore must delete the file we just created and force the
-        // administrator to log on to the server and create it manually.
-        else {
-          $deleted = @drupal_unlink($settings_file);
-          // We expect deleting the file to be successful (since we just
-          // created it ourselves above), but if it fails somehow, we set a
-          // variable so we can display a one-time error message to the
-          // administrator at the bottom of the requirements list. We also try
-          // to make the file writable, to eliminate any conflicting error
-          // messages in the requirements list.
-          $exists = !$deleted;
-          if ($exists) {
-            $settings_file_ownership_error = TRUE;
-            $writable = drupal_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
-          }
-        }
       }
     }
 
@@ -1750,37 +1681,29 @@ function install_check_requirements($install_state) {
         'title'       => st('Settings file'),
         'value'       => st('The settings file does not exist.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The @drupal installer requires that you create a settings file as part of the installation process. Copy the %default_file file to %file. More details about installing Drupal are available in <a href="@install_txt">INSTALL.txt</a>.', array('@drupal' => drupal_install_profile_distribution_name(), '%file' => $file, '%default_file' => $default_settings_file, '@install_txt' => base_path() . 'core/INSTALL.txt')),
+        'description' => st('The @profile installer could not find a settings.php file. Please place copy of this file into @file.', array('@profile' => drupal_install_profile_distribution_name(), '@file' => $settings_file)),
       );
     }
     else {
       $requirements['settings file exists'] = array(
         'title'       => st('Settings file'),
-        'value'       => st('The %file file exists.', array('%file' => $file)),
+        'value'       => st('The %file file exists.', array('%file' => $settings_file)),
       );
-      // If settings.php is not writable, throw an error.
-      if (!$writable) {
-        $requirements['settings file writable'] = array(
-          'title'       => st('Settings file'),
-          'value'       => st('The settings file is not writable.'),
-          'severity'    => REQUIREMENT_ERROR,
-          'description' => st('The @drupal installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">online handbook</a>.', array('@drupal' => drupal_install_profile_distribution_name(), '%file' => $file, '@handbook_url' => 'http://drupal.org/server-permissions')),
-        );
-      }
-      else {
-        $requirements['settings file'] = array(
-          'title'       => st('Settings file'),
-          'value'       => st('The settings file is writable.'),
-        );
-      }
-      if (!empty($settings_file_ownership_error)) {
-        $requirements['settings file ownership'] = array(
-          'title'       => st('Settings file'),
-          'value'       => st('The settings file is owned by the web server.'),
-          'severity'    => REQUIREMENT_ERROR,
-          'description' => st('The @drupal installer failed to create a settings file with proper file ownership. Log on to your web server, remove the existing %file file, and create a new one by copying the %default_file file to %file. More details about installing Drupal are available in <a href="@install_txt">INSTALL.txt</a>. If you have problems with the file permissions on your server, consult the <a href="@handbook_url">online handbook</a>.', array('@drupal' => drupal_install_profile_distribution_name(), '%file' => $file, '%default_file' => $default_settings_file, '@install_txt' => base_path() . 'core/INSTALL.txt', '@handbook_url' => 'http://drupal.org/server-permissions')),
-        );
-      }
+    }
+    // If settings.php is not writable, throw an error.
+    if (!$writable) {
+      $requirements['settings file writable'] = array(
+        'title'       => st('Settings file'),
+        'value'       => st('The settings file is not writable.'),
+        'severity'    => REQUIREMENT_ERROR,
+        'description' => st('The @profile installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">online handbook</a>.', array('@profile' => drupal_install_profile_distribution_name(), '%file' => $settings_file, '@handbook_url' => 'http://drupal.org/server-permissions')),
+      );
+    }
+    else {
+      $requirements['settings file'] = array(
+        'title'       => st('Settings file'),
+        'value'       => st('The settings file is writable.'),
+      );
     }
   }
   return $requirements;
