@@ -532,9 +532,9 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // Another branch compatibility.
       'common_test (>=2.x)',
       // Nonsense, misses a dash. Incompatible with everything.
-      'common_test (=8.x2.x, >=2.4)',
+      'common_test (=1.x2.x, >=2.4)',
       // Core version is optional. Compatible.
-      'common_test (=8.x-2.x, >=2.4-alpha2)',
+      'common_test (=1.x-2.x, >=2.4-alpha2)',
       // Test !=, explicitly incompatible.
       'common_test (=2.x, !=2.4-beta3)',
       // Three operations. Compatible.
@@ -684,8 +684,8 @@ class AdminMetaTagTestCase extends DrupalWebTestCase {
    * Verify that the meta tag HTML is generated correctly.
    */
   public function testMetaTag() {
-    list($version, ) = explode('.', VERSION);
-    $string = '<meta name="Generator" content="Drupal ' . $version . ' (http://drupal.org)" />';
+    list($version, ) = explode('.', BACKDROP_VERSION);
+    $string = '<meta name="Generator" content="Backdrop CMS ' . $version . ' (http://backdropcms.org)" />';
     $this->drupalGet('node');
     $this->assertRaw($string, t('Fingerprinting meta tag generated correctly.'), t('System'));
   }
@@ -1432,7 +1432,10 @@ class SystemThemeFunctionalTest extends DrupalWebTestCase {
 
       // Verify the actual 'src' attribute of the logo being output.
       $this->drupalGet('');
-      $elements = $this->xpath('//*[@id=:id]/img', array(':id' => 'logo'));
+      $elements = $this->xpath('//header/a[@rel=:rel]/img', array(
+          ':rel' => 'home',
+        )
+      );
       $this->assertEqual((string) $elements[0]['src'], $expected['src']);
     }
 
@@ -1481,7 +1484,10 @@ class SystemThemeFunctionalTest extends DrupalWebTestCase {
     $uploaded_filename = 'public://' . $fields[0]['value'];
 
     $this->drupalGet('');
-    $elements = $this->xpath('//*[@id=:id]/img', array(':id' => 'logo'));
+    $elements = $this->xpath('//header/a[@rel=:rel]/img', array(
+        ':rel' => 'home',
+      )
+    );
     $this->assertEqual($elements[0]['src'], file_create_url($uploaded_filename));
   }
 

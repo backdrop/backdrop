@@ -8,12 +8,12 @@
 /**
  * The current system version.
  */
-const VERSION = '8.0-dev';
+const BACKDROP_VERSION = '1.0-dev';
 
 /**
  * Core API compatibility.
  */
-const DRUPAL_CORE_COMPATIBILITY = '8.x';
+const BACKDROP_CORE_COMPATIBILITY = '1.x';
 
 /**
  * Minimum supported version of PHP.
@@ -714,7 +714,8 @@ function drupal_environment_initialize() {
   ini_set('session.use_only_cookies', '1');
   ini_set('session.use_trans_sid', '0');
   // Don't send HTTP headers using PHP's session handler.
-  ini_set('session.cache_limiter', 'none');
+  // An empty string is used here to disable the cache limiter.
+  ini_set('session.cache_limiter', '');
   // Use httponly session cookies.
   ini_set('session.cookie_httponly', '1');
 
@@ -746,8 +747,11 @@ function drupal_settings_initialize() {
   if (file_exists(DRUPAL_ROOT . '/' . conf_path() . '/settings.php')) {
     include_once DRUPAL_ROOT . '/' . conf_path() . '/settings.php';
   }
-  $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
+  if (isset($conf['backdrop_drupal_compatibility'])) {
+    require_once DRUPAL_ROOT . '/core/includes/drupal.inc';
+  }
 
+  $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
   if (isset($base_url)) {
     // Parse fixed base URL from settings.php.
     $parts = parse_url($base_url);

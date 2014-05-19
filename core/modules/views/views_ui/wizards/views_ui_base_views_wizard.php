@@ -474,7 +474,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->human_name = $form_state['values']['human_name'];
     $view->description = $form_state['values']['description'];
     $view->tag = 'default';
-    $view->core = VERSION;
+    $view->core = BACKDROP_VERSION;
     $view->base_table = $this->base_table;
 
     // Build all display options for this view.

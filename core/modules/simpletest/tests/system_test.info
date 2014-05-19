@@ -1,7 +1,7 @@
 name = System test
 description = Support module for system testing.
 package = Testing
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 files[] = system_test.module
 hidden = TRUE

@@ -1,7 +1,7 @@
 name = "File test"
 description = "Support module for file handling tests."
 package = Testing
-version = VERSION
-core = 8.x
+version = BACKDROP_VERSION
+backdrop = 1.x
 files[] = file_test.module
 hidden = TRUE
