@@ -1396,6 +1396,7 @@ class SearchConfigSettingsForm extends DrupalWebTestCase {
       // Run a search from the correct search URL.
       $this->drupalGet('search/' . $info['path'] . '/' . $info['keys']);
       $this->assertNoText('no results', $info['title'] . ' search found results');
+      debug($info);
       $this->assertText($info['text'], 'Correct search text found');
 
       // Verify that other module search tab titles are not visible.
@@ -1720,20 +1721,18 @@ class SearchEmbedForm extends DrupalWebTestCase {
   function testEmbeddedForm() {
     // First verify we can submit the form from the module's page.
     $this->drupalPost('search_embedded_form',
-      array('name' => 'John'),
-      t('Send away'));
-    $this->assertText(t('Test form was submitted'), 'Form message appears');
+      array('name' => 'John'),'Send away');
+    $this->assertText('Test form was submitted', 'Form message appears');
     $count = variable_get('search_embedded_form_submitted', 0);
     $this->assertEqual($this->submit_count + 1, $count, 'Form submission count is correct');
     $this->submit_count = $count;
 
     // Now verify that we can see and submit the form from the search results.
     $this->drupalGet('search/node/' . $this->node->title);
-    $this->assertText(t('Your name'), 'Form is visible');
+    $this->assertText('Your name', 'Form is visible');
     $this->drupalPost('search/node/' . $this->node->title,
-      array('name' => 'John'),
-      t('Send away'));
-    $this->assertText(t('Test form was submitted'), 'Form message appears');
+      array('name' => 'John'), 'Send away');
+    $this->assertText('Test form was submitted', 'Form message appears');
     $count = variable_get('search_embedded_form_submitted', 0);
     $this->assertEqual($this->submit_count + 1, $count, 'Form submission count is correct');
     $this->submit_count = $count;

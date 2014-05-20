@@ -79,56 +79,52 @@ function search_view($module = NULL, $keys = '') {
  * @see search-results.tpl.php
  */
 function template_preprocess_search_results(&$variables) {
-  $variables['search_results'] = '';
+  debug('first');
+
+  global $language_interface;
+  $variables['search_results'] = array();
   if (!empty($variables['module'])) {
     $variables['module'] = check_plain($variables['module']);
   }
   foreach ($variables['results'] as $result) {
-    $variables['search_results'] .= theme('search_result', array('result' => $result, 'module' => $variables['module']));
-  }
-  $variables['pager'] = theme('pager', array('tags' => NULL));
-  $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
-}
+    $info = array();
+    if (empty($result['attributes']))  {
+      $attributes = '';
+    }
+    else {
+      $attributes = implode(' ', $result['attributes']);
+    }
+    if (!empty($result['module'])) {
+      $info['module'] = check_plain($result['module']);
+    }
+    if (!empty($result['user'])) {
+      $info['user'] = $result['user'];
+    }
+    if (!empty($result['date'])) {
+      $info['date'] = format_date($result['date'], 'short');
+    }
+    if (isset($result['extra']) && is_array($result['extra'])) {
+      $info = array_merge($info, $result['extra']);
+    }
 
-/**
- * Process variables for search-result.tpl.php.
- *
- * The $variables array contains the following arguments:
- * - $result
- * - $module
- *
- * @see search-result.tpl.php
- */
-function template_preprocess_search_result(&$variables) {
-  global $language_interface;
-
-  $result = $variables['result'];
-  $variables['url'] = check_url($result['link']);
-  $variables['title'] = check_plain($result['title']);
-  if (isset($result['language']) && $result['language'] != $language_interface->langcode && $result['language'] != LANGUAGE_NONE) {
-    $variables['title_attributes_array']['lang'] = $result['language'];
-    $variables['content_attributes_array']['lang'] = $result['language'];
+    $variables['search_results'][] = array(
+      'result' => $result, 
+      'module' => $variables['module'],
+      'url' => check_url($result['link']),
+      'title' => check_plain($result['title']),
+      'snippet' => isset($result['snippet']) ? $result['snippet'] : '',
+      'info_split' => $info,
+      'info' => implode(' - ', $info),
+      'attributes' => $attributes,
+    );
+    
+    if (isset($result['language']) && $result['language'] != $language_interface->langcode && $result['language'] != LANGUAGE_NONE) {
+      $variables['title_attributes_array']['lang'] = $result['language'];
+      $variables['content_attributes_array']['lang'] = $result['language'];
+    }
   }
-
-  $info = array();
-  if (!empty($result['module'])) {
-    $info['module'] = check_plain($result['module']);
-  }
-  if (!empty($result['user'])) {
-    $info['user'] = $result['user'];
-  }
-  if (!empty($result['date'])) {
-    $info['date'] = format_date($result['date'], 'short');
-  }
-  if (isset($result['extra']) && is_array($result['extra'])) {
-    $info = array_merge($info, $result['extra']);
-  }
-  // Check for existence. User search does not include snippets.
-  $variables['snippet'] = isset($result['snippet']) ? $result['snippet'] : '';
-  // Provide separated and grouped meta information..
-  $variables['info_split'] = $info;
-  $variables['info'] = implode(' - ', $info);
-  $variables['theme_hook_suggestions'][] = 'search_result__' . $variables['module'];
+    $variables['pager'] = theme('pager', array('tags' => NULL));
+    $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
 }
 
 /**

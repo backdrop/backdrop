@@ -64,7 +64,13 @@ function search_embedded_form_form_submit($form, &$form_state) {
 /**
  * Adds the test form to search results.
  */
-function search_embedded_form_preprocess_search_result(&$variables) {
-  $form = drupal_get_form('search_embedded_form_form');
-  $variables['snippet'] .= drupal_render($form);
+function search_embedded_form_preprocess_search_results(&$variables) {
+  
+
+  foreach ($variables['search_results'] as $key => $result)  {
+    $form = drupal_get_form('search_embedded_form_form');
+    $snippet = '<p>' . $variables['search_results'][$key]['snippet'] . '</p>';
+    $snippet .= drupal_render($form);
+    $variables['search_results'][$key]['snippet'] = $snippet;
+  }
 }
