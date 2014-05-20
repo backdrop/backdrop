@@ -897,7 +897,7 @@ ul.links {
 #triptych-last #block-node-syndicate {
   text-align: right;
 }
-#triptych #block-search-form .form-type-textfield input {
+#triptych #block-search-form .form-type-search input {
   width: 185px;
 }
 #triptych-middle #block-system-powered-by {
@@ -1330,6 +1330,7 @@ input.form-email,
 input.form-url,
 input.form-color,
 input.form-number,
+input.form-search,
 textarea.form-textarea,
 select.form-select {
   border: 1px solid #ccc;
@@ -1536,13 +1537,23 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
 #block-search-form .content {
   margin-top: 0;
 }
+#search-form input[type="search"],
+#block-search-form input[type="search"] {
+  box-sizing: border-box;
+  padding: 4px;
+  -webkit-appearance: textfield;
+}
+#search-form input[type="search"]::-webkit-search-decoration,
+#block-search-form input[type="search"]::-webkit-search-decoration {
+  display: none;
+}
 #search-form input#edit-keys,
 #block-search-form .form-item-search-block-form input {
   float: left; /* LTR */
   font-size: 1em;
   height: 1.143em;
-  margin-right: 5px; /* LTR */
   width: 9em;
+  margin-right: 5px; /* LTR */
 }
 [dir="rtl"] #search-form input#edit-keys,
 [dir="rtl"] #block-search-form .form-item-search-block-form input {
