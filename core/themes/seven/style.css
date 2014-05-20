@@ -1,104 +1,7 @@
 
 /**
- * Generic elements.
+ * Menus and lists.
  */
-body {
-  color: #000;
-  background: #fff;
-  font: normal 81.3%/1.538em "Lucida Grande", "Lucida Sans Unicode", sans-serif;
-}
-a {
-  color: #0074bd;
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-hr {
-  margin: 0;
-  padding: 0;
-  border: none;
-  height: 1px;
-  background: #cccccc;
-}
-legend {
-  font-weight: bold;
-}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: bold;
-  margin: 10px 0;
-}
-h1 {
-  font-size: 1.538em;
-}
-h2 {
-  font-size: 1.385em;
-}
-h3 {
-  font-size: 1.231em;
-}
-h4 {
-  font-size: 1.154em;
-}
-h5,
-h6 {
-  font-size: 1.077em;
-}
-p {
-  margin: 1em 0;
-}
-dl {
-  margin: 0 0 20px;
-}
-dl dd,
-dl dl {
-  margin-left: 20px; /* LTR */
-  margin-bottom: 10px;
-}
-blockquote {
-  margin: 1em 40px;
-}
-address {
-  font-style: italic;
-}
-u,
-ins {
-  text-decoration: underline;
-}
-s,
-strike,
-del {
-  text-decoration: line-through;
-}
-big {
-  font-size: larger;
-}
-small {
-  font-size: smaller;
-}
-sub {
-  vertical-align: sub;
-  font-size: smaller;
-  line-height: normal;
-}
-sup {
-  vertical-align: super;
-  font-size: smaller;
-  line-height: normal;
-}
-nobr {
-  white-space: nowrap;
-}
-abbr,
-acronym {
-  border-bottom: dotted 1px;
-}
-ul,
 .block ul,
 .item-list ul {
   list-style-type: disc;
@@ -117,34 +20,16 @@ ul.menu li {
 ul.menu li {
   margin: 0;
 }
-ol {
-  list-style-type: decimal;
-  margin: 0.25em 0 0.25em 2em; /* LTR */
-}
 .item-list ul li.collapsed,
 ul.menu li.collapsed {
-  list-style-image:url(../../misc/menu-collapsed.png);
-  list-style-type:disc;
+  list-style-image: url(../../misc/menu-collapsed.png);
+  list-style-type: disc;
 }
 .item-list ul li.expanded,
 ul.menu li.expanded {
-  list-style-image:url(../../misc/menu-expanded.png);
-  list-style-type:circle;
+  list-style-image: url(../../misc/menu-expanded.png);
+  list-style-type: circle;
 }
-quote,
-code {
-  margin: .5em 0;
-}
-code,
-pre,
-kbd {
-  font-size: 1.231em;
-}
-pre {
-  margin: 0.5em 0;
-  white-space: pre-wrap;
-}
-
 /**
  * Skip link.
  */
