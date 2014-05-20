@@ -503,7 +503,7 @@ function theme_node_preview($variables) {
 function node_form_submit($form, &$form_state) {
   $node = node_form_submit_build_node($form, $form_state);
   $insert = empty($node->nid);
-  $node->save();
+  node_save($node);
   $node_link = l(t('view'), 'node/' . $node->nid);
   $watchdog_args = array('@type' => $node->type, '%title' => $node->title);
   $t_args = array('@type' => node_type_get_name($node), '%title' => $node->title);

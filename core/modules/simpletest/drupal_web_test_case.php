@@ -1001,7 +1001,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $settings['body'][$settings['langcode']][0] += $body;
 
     $node = entity_create('node', $settings);
-    $node->save();
+    node_save($node);
 
     // Small hack to link revisions to our test user.
     db_update('node_revision')
@@ -1178,7 +1178,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Internal helper function; Create a role with specified permissions.
+   * Creates a role with specified permissions.
    *
    * @param $permissions
    *   Array of permission names to assign to role.

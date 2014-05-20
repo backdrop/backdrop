@@ -71,8 +71,8 @@ function locale_translate_import_form($form, &$form_state) {
  */
 function locale_translate_import_form_submit($form, &$form_state) {
   $validators = array('file_validate_extensions' => array('po'));
-  // Ensure we have the file uploaded
-  if ($file = file_save_upload('file', $validators)) {
+  // Ensure we have the file uploaded.
+  if ($file = file_save_upload('file', $form['file']['#upload_validators'], 'translations://', 0)) {
 
     // Add language, if not yet supported
     drupal_static_reset('language_list');

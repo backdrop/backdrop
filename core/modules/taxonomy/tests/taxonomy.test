@@ -1136,7 +1136,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
     unset($node->{$this->field_name_2});
 
     // Update the article with no term changed.
-    $node->save();
+    node_save($node);
 
     // Check that the index was not changed.
     $index_count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid = :nid AND tid = :tid', array(
@@ -1152,7 +1152,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
 
     // Update the article to change one term.
     $node->{$this->field_name_1}[$langcode] = array(array('tid' => $term_1->tid));
-    $node->save();
+    node_save($node);
 
     // Check that both terms are indexed.
     $index_count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid = :nid AND tid = :tid', array(
@@ -1168,7 +1168,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
 
     // Update the article to change another term.
     $node->{$this->field_name_2}[$langcode] = array(array('tid' => $term_1->tid));
-    $node->save();
+    node_save($node);
 
     // Check that only one term is indexed.
     $index_count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid = :nid AND tid = :tid', array(

@@ -13,8 +13,7 @@
  * @ingroup themeable
  */
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php print $language->langcode ?>" lang="<?php print $language->langcode ?>" dir="<?php print $language->dir ?>">
 
 <head>
@@ -24,72 +23,61 @@
   <?php print $scripts; ?>
 </head>
 <body class="<?php print $classes; ?>">
-  <div id="page">
-    <div id="header">
-      <div id="logo-title">
+  <div class="l-container">
 
-        <?php if (!empty($logo)): ?>
-          <a href="<?php print $base_path; ?>" title="<?php print t('Home'); ?>" rel="home" id="logo">
-            <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
-          </a>
-        <?php endif; ?>
+    <header role="banner">
+      <?php if (!empty($logo)): ?>
+        <a href="<?php print $base_path; ?>" title="<?php print t('Home'); ?>" rel="home">
+          <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
+        </a>
+      <?php endif; ?>
 
-        <div id="name-and-slogan">
-          <?php if (!empty($site_name)): ?>
-            <h1 id="site-name">
+      <?php if ($site_name || $site_slogan): ?>
+        <div class="name-and-slogan">
+          <?php if ($site_name): ?>
+            <strong class="site-name">
               <a href="<?php print $base_path ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
-            </h1>
+            </strong>
           <?php endif; ?>
 
-          <?php if (!empty($site_slogan)): ?>
-            <div id="site-slogan"><?php print $site_slogan; ?></div>
+          <?php if ($site_slogan): ?>
+            <div class="site-slogan"><?php print $site_slogan; ?></div>
           <?php endif; ?>
-        </div> <!-- /name-and-slogan -->
-      </div> <!-- /logo-title -->
-
-      <?php if (!empty($header)): ?>
-        <div id="header-region">
-          <?php print $header; ?>
-        </div>
+        </div> <!-- /.name-and-slogan -->
       <?php endif; ?>
 
-    </div> <!-- /header -->
+      <?php print $header; ?>
+    </header>
 
-    <div id="container" class="clearfix">
-
-      <?php if (!empty($sidebar_first)): ?>
-        <div id="sidebar-first" class="column sidebar">
-          <?php print $sidebar_first; ?>
-        </div> <!-- /sidebar-first -->
+    <main role="main">
+      <?php if (!empty($title)): ?>
+        <h1><?php print $title; ?></h1>
       <?php endif; ?>
 
-      <div id="main" class="column"><div id="main-squeeze">
+      <?php if (!empty($messages)): print $messages; endif; ?>
 
-        <div id="content">
-          <?php if (!empty($title)): ?><h1 class="title" id="page-title"><?php print $title; ?></h1><?php endif; ?>
-          <?php if (!empty($messages)): print $messages; endif; ?>
-          <div id="content-content" class="clearfix">
-            <?php print $content; ?>
-          </div> <!-- /content-content -->
-        </div> <!-- /content -->
+      <?php print $content; ?>
+    </main>
 
-      </div></div> <!-- /main-squeeze /main -->
+    <?php if (!empty($sidebar_first)): ?>
+      <aside class="l-sidebar-first" role="complementary">
+        <?php print $sidebar_first; ?>
+      </aside> <!-- /.l-sidebar-first -->
+    <?php endif; ?>
 
-      <?php if (!empty($sidebar_second)): ?>
-        <div id="sidebar-second" class="column sidebar">
-          <?php print $sidebar_second; ?>
-        </div> <!-- /sidebar-second -->
-      <?php endif; ?>
+    <?php if (!empty($sidebar_second)): ?>
+      <aside class="l-sidebar-second" role="complementary">
+        <?php print $sidebar_second; ?>
+      </aside> <!-- /.l-sidebar-second -->
+    <?php endif; ?>
 
-    </div> <!-- /container -->
+    <?php if (!empty($footer)): ?>
+      <footer role="contentinfo">
+        <?php print $footer; ?>
+      </footer>
+    <?php endif; ?>
 
-    <div id="footer-wrapper">
-      <div id="footer">
-        <?php if (!empty($footer)): print $footer; endif; ?>
-      </div> <!-- /footer -->
-    </div> <!-- /footer-wrapper -->
-
-  </div> <!-- /page -->
+  </div> <!-- /.l-container -->
 
 </body>
 </html>

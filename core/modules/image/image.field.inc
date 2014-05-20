@@ -59,7 +59,7 @@ function image_field_settings_form($field, $instance) {
     '#title' => t('Default image'),
     '#type' => 'managed_file',
     '#description' => t('If no image is uploaded, this image will be shown on display.'),
-    '#default_value' => $field['settings']['default_image'],
+    '#default_value' => empty($field['settings']['default_image']) ? array() : array($field['settings']['default_image']),
     '#upload_location' => $settings['uri_scheme'] . '://default_images/',
   );
 
@@ -158,7 +158,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Default image'),
     '#type' => 'managed_file',
     '#description' => t("If no image is uploaded, this image will be shown on display and will override the field's default image."),
-    '#default_value' => $settings['default_image'],
+    '#default_value' => empty($settings['default_image']) ? array() : array($settings['default_image']),
     '#upload_location' => $field['settings']['uri_scheme'] . '://default_images/',
   );
 
@@ -202,18 +202,18 @@ function image_field_prepare_view($entity_type, $entities, $field, $instances, $
   // If there are no files specified at all, use the default.
   foreach ($entities as $id => $entity) {
     if (empty($items[$id])) {
-      $fid = 0;
+      $fid = array();
       // Use the default for the instance if one is available.
       if (!empty($instances[$id]['settings']['default_image'])) {
-        $fid = $instances[$id]['settings']['default_image'];
+        $fid = array($instances[$id]['settings']['default_image']);
       }
       // Otherwise, use the default for the field.
       elseif ($field['settings']['default_image']) {
-        $fid = $field['settings']['default_image'];
+        $fid = array($field['settings']['default_image']);
       }
 
       // Add the default image if one is found.
-      if ($fid && ($file = file_load($fid))) {
+      if ($fid && ($file = file_load($fid[0]))) {
         $items[$id][0] = (array) $file + array(
           'is_default' => TRUE,
           'alt' => '',
@@ -349,12 +349,12 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   if ($field['cardinality'] == 1) {
     // If there's only one field, return it as delta 0.
-    if (empty($elements[0]['#default_value']['fid'])) {
-      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators']));
+    if (empty($elements[0]['#default_value']['fids'])) {
+      $elements[0]['#description'] = theme('file_upload_help', array('description' => $this->instance['description'], 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $this->field['cardinality']));
     }
   }
   else {
-    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $this->field['cardinality']));
   }
   return $elements;
 }
@@ -389,7 +389,7 @@ function image_field_widget_process($element, &$form_state, $form) {
       $variables['height'] = $element['#value']['height'];
     }
     else {
-      $info = image_get_info($element['#file']->uri);
+      $info = image_get_info($file->uri);
 
       if (is_array($info)) {
         $variables['width'] = $info['width'];
@@ -462,8 +462,9 @@ function theme_image_widget($variables) {
   }
 
   $output .= '<div class="image-widget-data">';
-  if ($element['fid']['#value'] != 0) {
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
+  if (!empty($element['fids']['#value'])) {
+    $file = reset($element['#files']);
+    $element['file_' . $file->fid]['filename']['#markup'] .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span> ';
   }
   $output .= drupal_render_children($element);
   $output .= '</div>';

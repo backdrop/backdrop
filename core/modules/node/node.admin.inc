@@ -325,7 +325,7 @@ function _node_mass_update_helper($nid, $updates) {
   foreach ($updates as $name => $value) {
     $node->$name = $value;
   }
-  $node->save();
+  node_save($node);
   return $node;
 }
 
