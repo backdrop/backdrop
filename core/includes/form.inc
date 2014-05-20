@@ -4302,16 +4302,6 @@ function element_validate_integer_positive($element, &$form_state) {
 }
 
 /**
- * Form element validation handler for number elements.
- */
-function element_validate_number($element, &$form_state) {
-  $value = $element['#value'];
-  if ($value != '' && !is_numeric($value)) {
-    form_error($element, t('%name must be a number.', array('%name' => $element['#title'])));
-  }
-}
-
-/**
  * @} End of "defgroup form_api".
  */
 
