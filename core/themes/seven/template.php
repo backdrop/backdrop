@@ -16,6 +16,9 @@ function seven_preprocess_maintenance_page(&$vars) {
  * Override or insert variables into the html template.
  */
 function seven_preprocess_html(&$vars) {
+  // @todo Once core CSS is updated and fully tested for Normalize, remove
+  // Seven's reset.css and replace with the Normalize library in core.
+  // drupal_add_library('system', 'normalize');
   // Add viewport setting for mobile.
   $viewport = array(
     '#tag' => 'meta',
