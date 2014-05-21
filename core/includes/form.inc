@@ -4094,6 +4094,29 @@ function form_validate_number(&$element, &$form_state) {
 }
 
 /**
+ * Returns HTML for a range form element.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #title, #value, #description, #min, #max, #placeholder,
+ *     #required, #attributes, #step.
+ *
+ * @ingroup themeable
+ */
+function theme_range($variables) {
+  $element = $variables['element'];
+
+  $element['#attributes']['type'] = 'range';
+  element_set_attributes($element, array('id', 'name', 'value', 'step', 'min', 'max', 'placeholder'));
+  _form_set_class($element, array('form-range'));
+
+  $output = '<input' . drupal_attributes($element['#attributes']) . ' />';
+
+  return $output;
+}
+
+/**
  * Returns HTML for a form.
  *
  * @param $variables

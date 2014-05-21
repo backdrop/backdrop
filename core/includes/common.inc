@@ -7338,6 +7338,9 @@ function drupal_common_theme() {
     'number' => array(
       'render element' => 'element',
     ),
+    'range' => array(
+      'render element' => 'element',
+    ),
     'form' => array(
       'render element' => 'element',
     ),
