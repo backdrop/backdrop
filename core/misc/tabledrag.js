@@ -14,7 +14,7 @@
 Drupal.behaviors.tableDrag = {
   attach: function (context, settings) {
     function initTableDrag(table, base) {
-       if (table.length) {
+      if (table.length) {
         // Create the new tableDrag instance. Save in the Drupal variable
         // to allow other scripts access to the object.
         Drupal.tableDrag[base] = new Drupal.tableDrag(table[0], settings.tableDrag[base]);
@@ -28,38 +28,6 @@ Drupal.behaviors.tableDrag = {
     }
   }
 };
-
-/**
-  * Mark cells that have colspan so we can adjust the colspan
-  * instead of hiding them altogether.
-  */
- Drupal.tableDrag.prototype.addColspanClass = function(columnIndex) {
-   return function () {
-     // Get the columnIndex and adjust for any colspans in this row.
-     var $row = $(this);
-     var index = columnIndex;
-     var cells = $row.children();
-     var cell;
-     cells.each(function (n) {
-       if (n < index && this.colSpan && this.colSpan > 1) {
-         index -= this.colSpan - 1;
-       }
-     });
-     if (index > 0) {
-       cell = cells.filter(':nth-child(' + index + ')');
-       if (cell[0].colSpan && cell[0].colSpan > 1) {
-         // If this cell has a colspan, mark it so we can reduce the colspan.
-         cell.addClass('tabledrag-has-colspan');
-       }
-       else {
-         // Mark this cell so we can hide it.
-         cell.addClass('tabledrag-hide');
-       }
-     }
-   };
- };
- 
- /**
 
 /**
  * Constructor for the tableDrag object. Provides table and field manipulation.
@@ -181,11 +149,47 @@ Drupal.tableDrag.prototype.initColumns = function () {
          // Match immediate children of the parent element to allow nesting.
          columnIndex = cell.parent().find('> td').index(cell.get(0)) + 1;
          $table.find('> thead > tr, > tbody > tr, > tr').each(this.addColspanClass(columnIndex));
-       }
-          }
         }
-        this.displayColumns(showWeight);
-      };
+      }
+    }
+    this.displayColumns(showWeight);
+  };
+
+  /**
+ * Mark cells that have colspan so we can adjust the colspan
+ * instead of hiding them altogether.
+ */
+Drupal.tableDrag.prototype.addColspanClass = function(columnIndex) {
+  return function () {
+    // Get the columnIndex and adjust for any colspans in this row.
+    var $row = $(this);
+    var index = columnIndex;
+    var cells = $row.children();
+    var cell;
+    cells.each(function (n) {
+      if (n < index && this.colSpan && this.colSpan > 1) {
+        index -= this.colSpan - 1;
+      }
+    });
+    if (index > 0) {
+      cell = cells.filter(':nth-child(' + index + ')');
+      if (cell[0].colSpan && cell[0].colSpan > 1) {
+        // If this cell has a colspan, mark it so we can reduce the colspan.
+        cell.addClass('tabledrag-has-colspan');
+      }
+      else {
+        // Mark this cell so we can hide it.
+        cell.addClass('tabledrag-hide');
+      }
+    }
+  };
+};
+
+/**
+  * Hide or display weight columns. Triggers an event on change.
+  *
+  * @param bool displayWeight
+  */
     
 
 
@@ -213,7 +217,8 @@ Drupal.tableDrag.prototype.initColumns = function () {
 /**
  * Hide the columns containing weight/parent form elements.
  * Undo showColumns().
- */
+ **/
+ 
 Drupal.tableDrag.prototype.hideColumns = function () {
   // Hide weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', 'none');
@@ -339,6 +344,7 @@ Drupal.tableDrag.prototype.makeDraggable = function (item) {
     if (self.oldRowElement) {
       $(self.oldRowElement).removeClass('drag-previous');
     }
+  };
 
     // Hack for Konqueror, prevent the blur handler from firing.
     // Konqueror always gives links focus, even after returning false on mousedown.
@@ -640,7 +646,6 @@ Drupal.tableDrag.prototype.findDropTargetRow = function (x, y) {
   var rows = $(this.table.tBodies[0].rows).not(':hidden');
   for (var n = 0; n < rows.length; n++) {
     var row = rows[n];
-    var indentDiff = 0;
     var rowY = $(row).offset().top;
     var rowHeight;
     // Because Safari does not report offsetHeight on table rows, but does on
