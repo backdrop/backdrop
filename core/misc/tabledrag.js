@@ -35,6 +35,7 @@ Drupal.tableDrag = function (table, tableSettings) {
   var self = this;
 
   // Required object variables.
+  this.$table = $(table);
   this.table = table;
   this.tableSettings = tableSettings;
   this.dragObject = null; // Used to hold information about a current drag operation.
