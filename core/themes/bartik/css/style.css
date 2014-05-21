@@ -1329,6 +1329,7 @@ input.form-tel,
 input.form-email,
 input.form-url,
 input.form-color,
+input.form-number,
 textarea.form-textarea,
 select.form-select {
   border: 1px solid #ccc;

@@ -2414,6 +2414,7 @@ class DrupalWebTestCase extends DrupalTestCase {
           case 'number':
           case 'range':
           case 'color':
+          case 'number':
           case 'hidden':
           case 'password':
           case 'email':
