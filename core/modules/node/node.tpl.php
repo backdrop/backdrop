@@ -43,7 +43,6 @@
  * Other variables:
  * - $node: Full node entity. Contains data that may not be safe.
  * - $type: Node type; for example, article, basic page, blog, etc.
- * - $comment_count: Number of comments attached to the node.
  * - $uid: User ID of the node author.
  * - $created: Time the node was published formatted in Unix timestamp.
  * - $classes_array: Array of html class attribute values. It is flattened
@@ -51,6 +50,15 @@
  * - $zebra: Outputs either "even" or "odd". Useful for zebra striping in
  *   teaser listings.
  * - $id: Position of the node. Increments each time it's output.
+ * - $comment_count: Number of comments attached to the node.
+ * - $comments: The comment-related elements for the node. Contains two values
+ *   that are both arrays that need to be rendered through a render() call:
+ *   - $comments['comments']: Comments for this node.
+ *   - $comments['comment_form']: Form for adding a new comment.
+ * - $comment_display_mode: Whether comments are threaded or not, one of the
+ *   following PHP constants:
+ *   - COMMENT_MODE_FLAT
+ *   - COMMENT_MODE_THREADED
  *
  * Node status variables:
  * - $view_mode: View mode; for example, "full", "teaser".
@@ -97,14 +105,26 @@
 
   <div class="content"<?php print $content_attributes; ?>>
     <?php
-      // We hide the comments and links now so that we can render them later.
-      hide($content['comments']);
+      // We hide the links now so that we can render them later.
       hide($content['links']);
       print render($content);
     ?>
   </div>
 
   <?php print render($content['links']); ?>
-  <?php print render($content['comments']); ?>
+
+  <?php if ($page && !empty($comments)): ?>
+    <section class="comments">  
+      <?php if ($comments['comments']): ?>
+        <h2 class="title"><?php print t('Comments'); ?></h2>
+        <?php print render($comments['comments']); ?>
+      <?php endif; ?>
+
+      <?php if ($comments['comment_form']): ?>
+        <h2 class="title comment-form"><?php print t('Add new comment'); ?></h2>
+        <?php print render($comments['comment_form']); ?>
+      <?php endif; ?>
+    </section>
+  <?php endif; ?>
 
 </article>

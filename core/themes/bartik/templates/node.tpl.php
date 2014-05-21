@@ -10,6 +10,9 @@
  *   or print a subset such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
  *   given element.
+ * - $comments: The comment-related elements for the node.
+ *   - $comments['comments']: Rendered comments for this node.
+ *   - $comments['comment_form']: Form for adding a new comment.
  * - $user_picture: The node author's picture from user-picture.tpl.php.
  * - $date: Formatted creation date. Preprocess functions can reformat it by
  *   calling format_date() with the desired parameters on the $created variable.
@@ -99,8 +102,7 @@
 
   <div class="content clearfix"<?php print $content_attributes; ?>>
     <?php
-      // We hide the comments and links now so that we can render them later.
-      hide($content['comments']);
+      // We hide the comments and links now so that we can render them later.     
       hide($content['links']);
       print render($content);
     ?>
@@ -109,7 +111,7 @@
   <?php
     // Remove the "Add new comment" link on the teaser page or if the comment
     // form is being displayed on the same page.
-    if ($teaser || !empty($content['comments']['comment_form'])) {
+    if ($teaser || !empty($comments['comment_form'])) {
       unset($content['links']['comment']['#links']['comment-add']);
     }
     // Only display the footer if there are links.
@@ -121,6 +123,18 @@
     </footer>
   <?php endif; ?>
 
-  <?php print render($content['comments']); ?>
+  <?php if ($page && !empty($comments)): ?>
+    <section class="comments">  
+      <?php if ($comments['comments']): ?>
+        <h2 class="title"><?php print t('Comments'); ?></h2>
+        <?php print render($comments['comments']); ?>
+      <?php endif; ?>
+
+      <?php if ($comments['comment_form']): ?>
+        <h2 class="title comment-form"><?php print t('Add new comment'); ?></h2>
+        <?php print render($comments['comment_form']); ?>
+      <?php endif; ?>
+    </section>
+  <?php endif; ?>
 
 </article>

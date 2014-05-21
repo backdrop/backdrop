@@ -185,10 +185,6 @@ function comment_theme() {
     'comment_post_forbidden' => array(
       'variables' => array('node' => NULL),
     ),
-    'comment_wrapper' => array(
-      'template' => 'comment-wrapper',
-      'render element' => 'content',
-    ),
   );
 }
 
@@ -707,7 +703,7 @@ function comment_node_view(Node $node, $view_mode) {
     // appended to other nodes shown on the page, for example a node_reference
     // displayed in 'full' view mode within another node.
     if ($node->comment && $view_mode == 'full' && node_is_page($node) && empty($node->in_preview)) {
-      $node->content['comments'] = comment_node_page_additions($node);
+      $node->comments = comment_node_page_additions($node);
     }
   }
 }
@@ -723,7 +719,10 @@ function comment_node_view(Node $node, $view_mode) {
  *   node.
  */
 function comment_node_page_additions(Node $node) {
-  $additions = array();
+  $additions = array(
+    'comments' => array(),
+    'comment_form' => array(),
+  );
 
   // Only attempt to render comments if the node has visible comments.
   // Unpublished comments are not included in $node->comment_count, so show
@@ -744,15 +743,6 @@ function comment_node_page_additions(Node $node) {
   if (user_access('post comments') && $node->comment == COMMENT_NODE_OPEN && (variable_get('comment_form_location_' . $node->type, COMMENT_FORM_BELOW) == COMMENT_FORM_BELOW)) {
     $comment = entity_create('comment', array('nid' => $node->nid));
     $additions['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
-  }
-
-  if ($additions) {
-    $additions += array(
-      '#theme' => 'comment_wrapper__node_' . $node->type,
-      '#node' => $node,
-      'comments' => array(),
-      'comment_form' => array(),
-    );
   }
 
   return $additions;
@@ -2099,6 +2089,33 @@ function comment_preprocess_block(&$variables) {
 }
 
 /**
+ * Prepares variables for comment.tpl.php
+ *
+ * @param $variables
+ *   An array containing the following arguments:
+ *   - $node
+ *   - $view_mode
+ *   - $page
+ *
+ * @see comment.tpl.php
+ */
+function comment_preprocess_node(&$variables) {
+  $node = $variables['node'];
+  if (array_key_exists('comments', $variables) && !empty($variables['comments'])) {
+    if (!array_key_exists('comments', $variables['comments'])) {
+      $variables['comments']['comments'] = FALSE;
+    }
+    if (!array_key_exists('comment_form', $variables['comments'])) {
+      $variables['comments']['comment_form'] = FALSE;
+    }
+  }
+  else {
+    $variables['comments'] = FALSE;
+  }
+  $variables['comment_display_mode'] = variable_get('comment_default_mode_' . $node->type, COMMENT_MODE_THREADED);
+}
+
+/**
  * Preprocesses variables for comment.tpl.php.
  *
  * @see comment.tpl.php
@@ -2213,19 +2230,6 @@ function theme_comment_post_forbidden($variables) {
       }
     }
   }
-}
-
-/**
- * Preprocesses variables for comment-wrapper.tpl.php.
- *
- * @see comment-wrapper.tpl.php
- */
-function template_preprocess_comment_wrapper(&$variables) {
-  // Provide contextual information.
-  $variables['node'] = $variables['content']['#node'];
-  $variables['display_mode'] = variable_get('comment_default_mode_' . $variables['node']->type, COMMENT_MODE_THREADED);
-  // The comment form is optional and may not exist.
-  $variables['content'] += array('comment_form' => array());
 }
 
 /**
