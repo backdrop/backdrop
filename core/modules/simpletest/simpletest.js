@@ -67,21 +67,19 @@ Drupal.behaviors.simpleTestSelectAll = {
 
       // Each time a single-test checkbox is checked or unchecked, make sure
       // that the associated group checkbox gets the right state too.
-      var updateGroupCheckbox = function () {
+      function updateGroupCheckbox() {
         var checkedTests = 0;
         for (var i = 0; i < testCheckboxes.length; i++) {
-          $('#' + testCheckboxes[i]).each(function () {
-            if (($(this).attr('checked'))) {
-              checkedTests++;
-            }
-          });
+          if ($('#' + testCheckboxes[i]).prop('checked')) {
+             checkedTests++;
+           }
         }
-        $(groupCheckbox).prop('checked', (checkedTests == testCheckboxes.length));
-      };
+        $(groupCheckbox).prop('checked', (checkedTests === testCheckboxes.length));
+      }
 
       // Have the single-test checkboxes follow the group checkbox.
       groupCheckbox.change(function () {
-        var checked = !!($(this).prop('checked'));
+        var checked = $(this).prop('checked');
         for (var i = 0; i < testCheckboxes.length; i++) {
           $('#' + testCheckboxes[i]).prop('checked', checked);
         }
@@ -89,9 +87,7 @@ Drupal.behaviors.simpleTestSelectAll = {
 
       // Have the group checkbox follow the single-test checkboxes.
       for (var i = 0; i < testCheckboxes.length; i++) {
-        $('#' + testCheckboxes[i]).change(function () {
-          updateGroupCheckbox();
-        });
+        $('#' + testCheckboxes[i]).change(updateGroupCheckbox);
       }
 
       // Initialize status for the group checkbox correctly.
