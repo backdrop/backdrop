@@ -3,11 +3,11 @@
  * Attaches the behaviors for the Color module.
  */
 
-(function ($) {
+(function ($, Drupal) {
 
 Drupal.behaviors.color = {
   attach: function (context, settings) {
-    var i, j, colors, field_name;
+    var i, j, colors;
     // This behavior attaches by ID, so is only valid once on a page.
     var form = $('#system-theme-settings .color-form', context).once('color');
     if (form.length == 0) {
@@ -25,7 +25,9 @@ Drupal.behaviors.color = {
     // Decode reference colors to HSL.
     var reference = settings.color.reference;
     for (i in reference) {
-      reference[i] = farb.RGBToHSL(farb.unpack(reference[i]));
+      if (reference.hasOwnProperty(i)) {
+        reference[i] = farb.RGBToHSL(farb.unpack(reference[i]));
+      }
     }
 
     // Build a preview.
@@ -33,18 +35,20 @@ Drupal.behaviors.color = {
     var width = [];
     // Loop through all defined gradients.
     for (i in settings.gradients) {
-      // Add element to display the gradient.
-      $('#preview').once('color').append('<div id="gradient-' + i + '"></div>');
-      var gradient = $('#preview #gradient-' + i);
-      // Add height of current gradient to the list (divided by 10).
-      height.push(parseInt(gradient.css('height'), 10) / 10);
-      // Add width of current gradient to the list (divided by 10).
-      width.push(parseInt(gradient.css('width'), 10) / 10);
-      // Add rows (or columns for horizontal gradients).
-      // Each gradient line should have a height (or width for horizontal
-      // gradients) of 10px (because we divided the height/width by 10 above).
-      for (j = 0; j < (settings.gradients[i]['direction'] == 'vertical' ? height[i] : width[i]); ++j) {
-        gradient.append('<div class="gradient-line"></div>');
+      if (settings.gradients.hasOwnProperty(i)) {
+         // Add element to display the gradient.
+         $('#preview').once('color').append('<div id="gradient-' + i + '"></div>');
+         var gradient = $('#preview #gradient-' + i);
+         // Add height of current gradient to the list (divided by 10).
+         height.push(parseInt(gradient.css('height'), 10) / 10);
+         // Add width of current gradient to the list (divided by 10).
+         width.push(parseInt(gradient.css('width'), 10) / 10);
+         // Add rows (or columns for horizontal gradients).
+         // Each gradient line should have a height (or width for horizontal
+         // gradients) of 10px (because we divided the height/width by 10 above).
+         for (j = 0; j < (settings.gradients[i].direction === 'vertical' ? height[i] : width[i]); ++j) {
+           gradient.append('<div class="gradient-line"></div>');
+         }
       }
     }
 
@@ -54,8 +58,10 @@ Drupal.behaviors.color = {
       if (colorScheme != '' && schemes[colorScheme]) {
         // Get colors of active scheme.
         colors = schemes[colorScheme];
-        for (field_name in colors) {
-          callback($('#edit-palette-' + field_name), colors[field_name], false, true);
+        for (var fieldName in colors) {
+          if (colors.hasOwnProperty(fieldName)) {
+            callback($('#edit-palette-' + fieldName), colors[fieldName], false, true);
+          }
         }
         preview();
       }
@@ -78,6 +84,7 @@ Drupal.behaviors.color = {
      * shift_color(d, b, a) == c.
      */
     function shift_color(given, ref1, ref2) {
+      var d;
       // Convert to HSL.
       given = farb.RGBToHSL(farb.unpack(given));
 
@@ -89,7 +96,7 @@ Drupal.behaviors.color = {
         given[1] = ref2[1];
       }
       else {
-        var d = ref1[1] / ref2[1];
+        d = ref1[1] / ref2[1];
         if (d > 1) {
           given[1] /= d;
         }
@@ -103,7 +110,7 @@ Drupal.behaviors.color = {
         given[2] = ref2[2];
       }
       else {
-        var d = ref1[2] / ref2[2];
+        d = ref1[2] / ref2[2];
         if (d > 1) {
           given[2] /= d;
         }
@@ -134,12 +141,16 @@ Drupal.behaviors.color = {
         if (propagate) {
           i = input.i;
           for (j = i + 1; ; ++j) {
-            if (!locks[j - 1] || $(locks[j - 1]).is('.unlocked')) break;
+            if (!locks[j - 1] || $(locks[j - 1]).is('.unlocked')) {
+              break;
+            }
             matched = shift_color(color, reference[input.key], reference[inputs[j].key]);
             callback(inputs[j], matched, false);
           }
           for (j = i - 1; ; --j) {
-            if (!locks[j] || $(locks[j]).is('.unlocked')) break;
+            if (!locks[j] || $(locks[j]).is('.unlocked')) {
+              break;
+            }
             matched = shift_color(color, reference[input.key], reference[inputs[j].key]);
             callback(inputs[j], matched, false);
           }
@@ -167,17 +178,19 @@ Drupal.behaviors.color = {
     /**
      * Focuses Farbtastic on a particular field.
      */
-    function focus() {
-      var input = this;
+    function focus(e) {
+      var input = e.target;
       // Remove old bindings.
-      focused && $(focused).unbind('keyup', farb.updateValue)
+      if (focused) {
+        $(focused).unbind('keyup', farb.updateValue)
           .unbind('keyup', preview).unbind('keyup', resetScheme)
           .parent().removeClass('item-selected');
+      }
 
       // Add new bindings.
-      focused = this;
+      focused = input;
       farb.linkTo(function (color) { callback(input, color, true, false); });
-      farb.setColor(this.value);
+      farb.setColor(input.value);
       $(focused).keyup(farb.updateValue).keyup(preview).keyup(resetScheme)
         .parent().addClass('item-selected');
     }
@@ -216,7 +229,7 @@ Drupal.behaviors.color = {
         });
         $(this).after(lock);
         locks.push(lock);
-      };
+      }
 
       // Add hook.
       var hook = $('<div class="hook"></div>');
@@ -232,11 +245,11 @@ Drupal.behaviors.color = {
     $('#palette label', form);
 
     // Focus first color.
-    focus.call(inputs[0]);
+    inputs[0].focus();
 
     // Render preview.
     preview();
   }
 };
 
-})(jQuery);
+})(jQuery, Drupal);
