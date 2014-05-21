@@ -26,7 +26,6 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $config->set('contact_threshold_window', 600);
     $config->save();
 
-
     // Set settings.
     $edit = array();
     $edit['contact_default_status'] = TRUE;
@@ -51,7 +50,7 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $invalid_recipients = array('invalid', 'invalid@', 'invalid@site.', '@site.', '@site.com');
     foreach ($invalid_recipients as $invalid_recipient) {
       $this->addCategory($this->randomName(16), $invalid_recipient, '', FALSE);
-      $this->assertRaw(t('%recipient is an invalid e-mail address.', array('%recipient' => $invalid_recipient)), t('Caught invalid recipient (' . $invalid_recipient . ').'));
+      $this->assertRaw(t('%recipient is an invalid e-mail address.', array('%recipient' => $invalid_recipient)), t('Caught invalid recipient (%recipient\).' , array('%recipient' => $invalid_recipient)));
     }
 
     // Test validation of empty category and recipients fields.
@@ -70,16 +69,17 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     // Test update contact form category.
     $categories = $this->getCategories();
     $category_id = $this->updateCategory($categories, $category = $this->randomName(16), $recipients_str = implode(',', array($recipients[0], $recipients[1])), $reply = $this->randomName(30), FALSE);
-    $category_array = db_query("SELECT category, recipients, reply, selected FROM {contact} WHERE cid = :cid", array(':cid' => $category_id))->fetchAssoc();
+    $category_array = contact_load($category_id);
+    $test_category = array_shift($categories);
     $this->assertEqual($category_array['category'], $category);
     $this->assertEqual($category_array['recipients'], $recipients_str);
     $this->assertEqual($category_array['reply'], $reply);
-    $this->assertFalse($category_array['selected']);
     $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), t('Category successfully saved.'));
 
     // Ensure that the contact form is shown without a category selection input.
     user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access site-wide contact form'));
     $this->drupalLogout();
+
     $this->drupalGet('contact');
     $this->assertText(t('Your e-mail address'), t('Contact form is shown when there is one category.'));
     $this->assertNoText(t('Category'), t('When there is only one category, the category selection element is hidden.'));
@@ -114,25 +114,24 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
     $this->assertResponse(200, t('Access granted to anonymous user with permission.'));
 
     // Submit contact form with invalid values.
-    $this->submitContact('', $recipients[0], $this->randomName(16), $categories[0], $this->randomName(64));
+    $this->submitContact('', $recipients[0], $this->randomName(16), $test_category, $this->randomName(64));
     $this->assertText(t('Your name field is required.'), t('Name required.'));
-
-    $this->submitContact($this->randomName(16), '', $this->randomName(16), $categories[0], $this->randomName(64));
+    $this->submitContact($this->randomName(16), '', $this->randomName(16), $test_category, $this->randomName(64));
     $this->assertText(t('Your e-mail address field is required.'), t('E-mail required.'));
-
-    $this->submitContact($this->randomName(16), $invalid_recipients[0], $this->randomName(16), $categories[0], $this->randomName(64));
+    $this->submitContact($this->randomName(16), $invalid_recipients[0], $this->randomName(16), $test_category, $this->randomName(64));
     $this->assertRaw(t('The e-mail address %mail is not valid.', array('%mail' => 'invalid')), 'Valid e-mail required.');
-
-    $this->submitContact($this->randomName(16), $recipients[0], '', $categories[0], $this->randomName(64));
+    $this->submitContact($this->randomName(16), $recipients[0], '', $test_category, $this->randomName(64));
     $this->assertText(t('Subject field is required.'), t('Subject required.'));
-
-    $this->submitContact($this->randomName(16), $recipients[0], $this->randomName(16), $categories[0], '');
+    $this->submitContact($this->randomName(16), $recipients[0], $this->randomName(16), $test_category, '');
     $this->assertText(t('Message field is required.'), t('Message required.'));
 
-    // Test contact form with no default category selected.
-    db_update('contact')
-      ->fields(array('selected' => 0))
-      ->execute();
+    // Set contact_default_category to none
+    $config_data = contact_config_data();
+    $config_data['contact_default_category'] = 0;
+    $config = config('contact.categories');
+    $config->setData($config_data);
+    $config->save();
+
     $this->drupalGet('contact');
     $this->assertRaw(t('- Please choose -'), t('Without selected categories the visitor is asked to chose a category.'));
 
@@ -142,14 +141,14 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
 
     // Submit contact form with correct values and check flood interval.
     for ($i = 0; $i < $flood_limit; $i++) {
-      $this->submitContact($this->randomName(16), $recipients[0], $this->randomName(16), $categories[0], $this->randomName(64));
+      $this->submitContact($this->randomName(16), $recipients[0], $this->randomName(16), $test_category, $this->randomName(64));
       $this->assertText(t('Your message has been sent.'), t('Message sent.'));
     }
     // Submit contact form one over limit.
     $this->drupalGet('contact');
     $this->assertResponse(403, t('Access denied to anonymous user after reaching message treshold.'));
     $config = config('contact.settings');
-    $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' => $config->get('contact_threshold_limit'), '@interval' => format_interval(600))), t('Message threshold reached.'));
+    $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' =>    $config->get('contact_threshold_limit'), '@interval' => format_interval(600))), t('Message threshold reached.'));
 
     // Delete created categories.
     $this->drupalLogin($admin_user);
@@ -271,10 +270,11 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
    * Deletes all categories.
    */
   function deleteCategories() {
-    $categories = $this->getCategories();
-    foreach ($categories as $category) {
-      $category_name = db_query("SELECT category FROM {contact} WHERE cid = :cid", array(':cid' => $category))->fetchField();
-      $this->drupalPost('admin/structure/contact/delete/' . $category, array(), t('Delete'));
+    $category_ids = $this->getCategories();
+    foreach ($category_ids as $cid) {
+      $category = contact_load($cid);
+      $category_name = $category['category'];
+      $this->drupalPost('admin/structure/contact/delete/' . $cid, array(), t('Delete'));
       $this->assertRaw(t('Category %category has been deleted.', array('%category' => $category_name)), t('Category deleted successfully.'));
     }
   }
@@ -286,8 +286,12 @@ class ContactSitewideTestCase extends DrupalWebTestCase {
    *   A list of the category IDs.
    */
   function getCategories() {
-    $categories = db_query('SELECT cid FROM {contact}')->fetchCol();
-    return $categories;
+    $config_data = contact_config_data();
+    $categories = $config_data['categories'];
+    foreach ($categories as $cat) {
+      $cids[] = $cat['cid'];
+    }
+    return $cids;
   }
 }
 
@@ -401,7 +405,7 @@ class ContactPersonalTestCase extends DrupalWebTestCase {
     }
 
     // Submit contact form one over limit.
-    $this->drupalGet('user/' . $this->contact_user->uid. '/contact');
+    $this->drupalGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' => $flood_limit, '@interval' => format_interval($config->get('contact_threshold_window')))), 'Normal user denied access to flooded contact form.');
 
     // Test that the admin user can still access the contact form even though
