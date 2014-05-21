@@ -605,10 +605,8 @@ function image_rotate_form($data) {
     '#description' => t('The number of degrees the image should be rotated. Positive numbers are clockwise, negative are counter-clockwise.'),
     '#field_suffix' => '&deg;',
     '#required' => TRUE,
-    '#size' => 6,
-    '#maxlength' => 4,
-    '#element_validate' => array('image_effect_integer_validate'),
-    '#allow_negative' => TRUE,
+    '#min' => -360,
+    '#max' => 360,
   );
   $form['bgcolor'] = array(
     '#type' => 'textfield',
@@ -625,6 +623,7 @@ function image_rotate_form($data) {
     '#title' => t('Randomize'),
     '#description' => t('Randomize the rotation angle for each image. The angle specified above is used as a maximum.'),
   );
+
   return $form;
 }
 
