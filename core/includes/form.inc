@@ -4211,7 +4211,7 @@ function form_process_weight($element) {
   else {
     $element['#type'] = 'number';
     // Use a field big enough to fit most weights.
-    $element['#size'] = 10;
+    $element['#max'] = 1000000;
     $element += element_info('number');
   }
 

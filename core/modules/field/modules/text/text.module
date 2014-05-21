@@ -59,8 +59,7 @@ function text_field_settings_form($field, $instance, $has_data) {
       '#required' => TRUE,
       '#description' => t('The maximum length of the field in characters.'),
       '#min' => 1,
-      // @todo: If $has_data, add a validate handler that only allows
-      // max_length to increase.
+      '#max' => 1000000000,
       '#disabled' => $has_data,
     );
   }
@@ -212,7 +211,7 @@ function text_field_formatter_settings_form($field, $instance, $view_mode, $form
     $element['trim_length'] = array(
       '#title' => t('Trim length'),
       '#type' => 'number',
-      '#size' => 10,
+      '#max' => 1000000,
       '#default_value' => $settings['trim_length'],
       '#min' => 1,
       '#required' => TRUE,
