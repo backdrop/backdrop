@@ -31,7 +31,7 @@
  * - $classes_array: Array of html class attribute values. It is flattened
  *   into a string within the variable $classes.
  *
- * @see template_preprocess_comment_wrapper()
+ * @see template_preprocess_comments()
  *
  * @ingroup themeable
  */
@@ -43,8 +43,39 @@
     <?php print render($title_suffix); ?>
   <?php endif; ?>
 
-  <?php print render($content['comments']); ?>
+  <?php foreach ($content as $comment):   ?>
+    <article class="<?php print $comment['classes']; ?> clearfix"<?php print $comment['attributes']; ?>>
 
+      <?php print render($comment['title_prefix']); ?>
+      <?php if ($comment['new']): ?>
+        <mark class="new"><?php print $comment['new']; ?></mark>
+      <?php endif; ?>
+      <h3<?php print $comment['title_attributes']; ?>><?php print $comment['title']; ?></h3>
+      <?php print render($comment['title_suffix']); ?>
+
+      <footer>
+        <?php print $comment['user_picture']; ?>
+        <p class="submitted"><?php print $comment['submitted']; ?></p>
+        <?php print $comment['permalink']; ?>
+      </footer>
+
+      <div class="content"<?php print $comment['content_attributes']; ?>>
+        <?php
+          // We hide the links now so that we can render them later.
+          hide($comment['content']['links']);
+          print render($comment['content']);
+        ?>
+        <?php if ($comment['signature']): ?>
+        <div class="user-signature">
+          <?php print $comment['signature']; ?>
+        </div>
+        <?php endif; ?>
+      </div>
+
+      <?php print render($comment['content']['links']) ?>
+    </article>
+  <?php endforeach; ?>
+  
   <?php if ($content['comment_form']): ?>
     <h2 class="title comment-form"><?php print t('Add new comment'); ?></h2>
     <?php print render($content['comment_form']); ?>
