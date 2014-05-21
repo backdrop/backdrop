@@ -1001,7 +1001,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $settings['body'][$settings['langcode']][0] += $body;
 
     $node = entity_create('node', $settings);
-    $node->save();
+    node_save($node);
 
     // Small hack to link revisions to our test user.
     db_update('node_revision')

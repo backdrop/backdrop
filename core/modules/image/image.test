@@ -885,7 +885,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
 
     // Remove default image from the field and make sure it is no longer used.
     $edit = array(
-      'field[settings][default_image][fid]' => 0,
+      'field[settings][default_image][fids]' => 0,
     );
     $this->drupalPost('admin/structure/types/manage/article/fields/' . $field_name, $edit, t('Save settings'));
     // Clear field info cache so the new default image is detected.
@@ -1337,7 +1337,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     // Confirm the defaults are present on the article field admin form.
     $this->drupalGet("admin/structure/types/manage/article/fields/$field_name");
     $this->assertFieldByXpath(
-      '//input[@name="field[settings][default_image][fid]"]',
+      '//input[@name="field[settings][default_image][fids]"]',
       $default_images['field']->fid,
       format_string(
         'Article image field default equals expected file ID of @fid.',
@@ -1345,7 +1345,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
       )
     );
     $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
+      '//input[@name="instance[settings][default_image][fids]"]',
       $default_images['instance']->fid,
       format_string(
         'Article image field instance default equals expected file ID of @fid.',
@@ -1356,7 +1356,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     // Confirm the defaults are present on the page field admin form.
     $this->drupalGet("admin/structure/types/manage/page/fields/$field_name");
     $this->assertFieldByXpath(
-      '//input[@name="field[settings][default_image][fid]"]',
+      '//input[@name="field[settings][default_image][fids]"]',
       $default_images['field']->fid,
       format_string(
         'Page image field default equals expected file ID of @fid.',
@@ -1364,7 +1364,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
       )
     );
     $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
+      '//input[@name="instance[settings][default_image][fids]"]',
       $default_images['instance2']->fid,
       format_string(
         'Page image field instance default equals expected file ID of @fid.',
@@ -1439,7 +1439,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     // admin form.
     $this->drupalGet("admin/structure/types/manage/article/fields/$field_name");
     $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
+      '//input[@name="instance[settings][default_image][fids]"]',
       $default_images['instance_new']->fid,
       format_string(
         'Updated article image field instance default equals expected file ID of @fid.',
@@ -1471,13 +1471,13 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     );
 
     // Remove the instance default from articles.
-    $instance['settings']['default_image'] = NULL;
+    $instance['settings']['default_image'] = 0;
     field_update_instance($instance);
 
     // Confirm the article field instance default has been removed.
     $this->drupalGet("admin/structure/types/manage/article/fields/$field_name");
     $this->assertFieldByXpath(
-      '//input[@name="instance[settings][default_image][fid]"]',
+      '//input[@name="instance[settings][default_image][fids]"]',
       '',
       'Updated article image field instance default has been successfully removed.'
     );

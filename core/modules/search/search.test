@@ -744,7 +744,7 @@ class SearchCommentTestCase extends DrupalWebTestCase {
     // Hide comments.
     $this->drupalLogin($this->admin_user);
     $node->comment = 0;
-    $node->save();
+    node_save($node);
 
     // Invoke search index update.
     $this->drupalLogout();

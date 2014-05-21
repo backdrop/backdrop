@@ -4069,6 +4069,17 @@ function theme_file($variables) {
 }
 
 /**
+ * Processes a file upload element, make use of #multiple if present.
+ */
+function form_process_file($element) {
+  if ($element['#multiple']) {
+    $element['#attributes'] = array('multiple' => 'multiple');
+    $element['#name'] .= '[]';
+  }
+  return $element;
+}
+
+/**
  * Returns HTML for a form element.
  *
  * Each form element is wrapped in a DIV container having the following CSS

@@ -66,7 +66,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
       'created' => REQUEST_TIME,
       'changed' => REQUEST_TIME,
     ));
-    $node->save();
+    node_save($node);
     $nid = $node->nid;
 
     $comment = entity_create('comment', array(
@@ -194,7 +194,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
       'changed' => REQUEST_TIME,
     ));
     $_SESSION['entity_crud_hook_test'] = array();
-    $node->save();
+    node_save($node);
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_node_presave called',
@@ -213,7 +213,7 @@ class EntityCrudHookTestCase extends DrupalWebTestCase {
 
     $_SESSION['entity_crud_hook_test'] = array();
     $node->title = 'New title';
-    $node->save();
+    node_save($node);
 
     $this->assertHookMessageOrder(array(
       'entity_crud_hook_test_node_presave called',

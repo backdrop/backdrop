@@ -1068,7 +1068,7 @@ function hook_delete(Node $node) {
  */
 function hook_prepare(Node $node) {
   if ($file = file_check_upload($field_name)) {
-    $file = file_save_upload($field_name, _image_filename($file->filename, NULL, TRUE));
+    $file = file_save_upload($field_name, _image_filename($file->filename, NULL, TRUE), FALSE, 0);
     if ($file) {
       if (!image_get_info($file->uri)) {
         form_set_error($field_name, t('Uploaded file is not a valid image'));
