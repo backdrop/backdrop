@@ -3663,7 +3663,6 @@ function system_page_alter(&$page) {
   $regions = system_region_list($GLOBALS['theme']);
   foreach (array_keys($regions) as $region) {
     if (!empty($page[$region])) {
-      $page[$region]['#theme_wrappers'][] = 'region';
       $page[$region]['#region'] = $region;
     }
   }
