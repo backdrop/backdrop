@@ -20,6 +20,9 @@ Drupal.behaviors.contentTypes = {
     });
     $('fieldset#edit-display', context).drupalSetSummary(function(context) {
       var vals = [];
+
+      vals.push($(".form-item-language-configuration-langcode select option:selected", context).text());
+      
       $('input:checked', context).next('label').each(function() {
         vals.push(Drupal.checkPlain($(this).text()));
       });
