@@ -874,6 +874,12 @@ description = Tests functionality of drupal_html_id().
 group = Form API
 file = tests/form.test
 
+[FormUrlTestCase]
+name = Form API url
+description = Tests the form API url element.
+group = Form API
+file = tests/form.test
+
 [GraphUnitTest]
 name = Graph
 description = Graph handling unit tests.
