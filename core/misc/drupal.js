@@ -1,5 +1,5 @@
 
-window.Drupal = Drupal || { 'settings': {}, 'behaviors': {}, 'locale': {} };
+window.Drupal = window.Drupal || { 'settings': {}, 'behaviors': {}, 'locale': {} };
 
 // Allow other JavaScript libraries to use $.
 jQuery.noConflict();
