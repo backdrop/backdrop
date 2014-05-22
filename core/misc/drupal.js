@@ -1,5 +1,5 @@
 
-var Drupal = Drupal || { 'settings': {}, 'behaviors': {}, 'locale': {} };
+window.Drupal = Drupal || { 'settings': {}, 'behaviors': {}, 'locale': {} };
 
 // Allow other JavaScript libraries to use $.
 jQuery.noConflict();
@@ -156,7 +156,6 @@ Drupal.formatString = function(str, args) {
       case '!':
         break;
       // Escaped and placeholder.
-      case '%':
       default:
         args[key] = Drupal.theme('placeholder', args[key]);
         break;
