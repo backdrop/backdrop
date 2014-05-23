@@ -1897,13 +1897,9 @@ function _install_configure_form($form, &$form_state, &$install_state) {
 }
 
 /**
-<<<<<<< HEAD
- * Form API validate for the site configuration form.
-=======
  * Form validation handler for install_configure_form().
  *
  * @see install_configure_form_submit()
->>>>>>> 3aa9522210c52bcf674cd220b1d0c9b360e590c0
  */
 function install_configure_form_validate($form, &$form_state) {
   if ($error = user_validate_name($form_state['values']['account']['name'])) {
@@ -1912,13 +1908,9 @@ function install_configure_form_validate($form, &$form_state) {
 }
 
 /**
-<<<<<<< HEAD
- * Form API submit for the site configuration form.
-=======
  * Form submission handler for install_configure_form().
  *
  * @see install_configure_form_validate()
->>>>>>> 3aa9522210c52bcf674cd220b1d0c9b360e590c0
  */
 function install_configure_form_submit($form, &$form_state) {
   global $user;
