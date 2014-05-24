@@ -7900,7 +7900,7 @@ function drupal_flush_all_caches() {
 
   entity_info_cache_clear();
 
-  // @todo D8: Split cache flushing from rebuilding.
+  // @todo Split cache flushing from rebuilding.
   // @see http://drupal.org/node/996236
   if (module_exists('node')) {
     node_types_rebuild();

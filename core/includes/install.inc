@@ -89,11 +89,16 @@ function drupal_load_updates() {
 /**
  * Returns an array of available schema versions for a module.
  *
+ * This function contains backwards-compatibility code to order schema versions
+ * such that updates between 7000 and 8999 (inclusive) run before all other
+ * updates. This is to allow users to upgrade from Drupal 7, where the last
+ * installed schema will likely be in the 7xxx range.
+ *
  * @param $module
  *   A module name.
- * @return
- *   If the module has updates, an array of available updates sorted by version.
- *   Otherwise, FALSE.
+ * @return array|FALSE
+ *   If the module has updates, an unindexed array of available updates sorted
+ *   by the order they should be executed. Otherwise, FALSE.
  */
 function drupal_get_schema_versions($module) {
   $updates = &drupal_static(__FUNCTION__, NULL);
@@ -121,9 +126,19 @@ function drupal_get_schema_versions($module) {
         $updates[$matches['module']][] = $matches['version'];
       }
     }
-    // Ensure that updates are applied in numerical order.
+    // Ensure that updates are applied in numerical order. Updates are ordered
+    // 7000 to 8999, then 0 to 6999. This is to ensure compatibility of the
+    // schema updates from Drupal 7 to Backdrop CMS 1.
     foreach ($updates as &$module_updates) {
-      sort($module_updates, SORT_NUMERIC);
+      usort($module_updates, function($a, $b) {
+        if ($a >= 7000 && $a < 9000) {
+          $a -= 9000;
+        }
+        if ($b >= 7000 && $b < 9000) {
+          $b -= 9000;
+        }
+        return ($a == $b) ? 0 : ($a > $b ? 1 : -1);
+      });
     }
   }
   return empty($updates[$module]) ? FALSE : $updates[$module];
@@ -668,7 +683,7 @@ function drupal_rewrite_settings($settings = array()) {
  * Creates the config directory and ensures it is operational.
  *
  * @see install_config_directories()
- * @see update_prepare_d8_bootstrap()
+ * @see update_prepare_bootstrap()
  */
 function backdrop_install_config_directories() {
   global $config_directories;
@@ -804,7 +819,7 @@ function drupal_install_system() {
   module_invoke('system', 'install');
 
   $system_versions = drupal_get_schema_versions('system');
-  $system_version = $system_versions ? max($system_versions) : SCHEMA_INSTALLED;
+  $system_version = $system_versions ? end($system_versions) : SCHEMA_INSTALLED;
   db_insert('system')
     ->fields(array('filename', 'name', 'type', 'owner', 'status', 'schema_version', 'bootstrap'))
     ->values(array(

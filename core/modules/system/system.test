@@ -1993,7 +1993,7 @@ class UpdateScriptFunctionalTest extends DrupalWebTestCase {
     $this->assertNoText('This is a requirements warning provided by the update_script_test module.');
     $this->drupalPost(NULL, array(), t('Continue'));
     $this->drupalPost(NULL, array(), t('Apply pending updates'));
-    $this->assertText(t('The update_script_test_update_8000() update was executed successfully.'), t('End of update process was reached.'));
+    $this->assertText(t('The update_script_test_update_1000() update was executed successfully.'), t('End of update process was reached.'));
     // Confirm that all caches were cleared.
     $this->assertText(t('hook_flush_caches() invoked for update_script_test.module.'), 'Caches were cleared after resolving a requirements warning and applying updates.');
 

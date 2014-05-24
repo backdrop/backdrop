@@ -461,7 +461,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         // Set the schema version to the number of the last update provided
         // by the module.
         $versions = drupal_get_schema_versions($module);
-        $version = $versions ? max($versions) : SCHEMA_INSTALLED;
+        $version = $versions ? end($versions) : SCHEMA_INSTALLED;
 
         // Copy any default configuration data to the system config directory/
         config_install_default_config($module);
@@ -469,8 +469,8 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         // If the module has no current updates, but has some that were
         // previously removed, set the version to the value of
         // hook_update_last_removed().
-        if ($last_removed = module_invoke($module, 'update_last_removed')) {
-          $version = max($version, $last_removed);
+        if (empty($versions) && ($last_removed = module_invoke($module, 'update_last_removed'))) {
+          $version = $last_removed;
         }
         drupal_set_installed_schema_version($module, $version);
         // Allow the module to perform install tasks.

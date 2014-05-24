@@ -243,6 +243,6 @@ function taxonomy_field_schema($field) {
 /**
  * Remove the {taxonomy_vocabulary}.module field.
  */
-function taxonomy_update_8000() {
+function taxonomy_update_1000() {
   db_drop_field('taxonomy_vocabulary', 'module');
 }

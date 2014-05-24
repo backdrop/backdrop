@@ -2824,39 +2824,52 @@ function hook_install() {
  *
  * For each change that requires one or more actions to be performed when
  * updating a site, add a new hook_update_N(), which will be called by
- * update.php. The documentation block preceding this function is stripped of
- * newlines and used as the description for the update on the pending updates
- * task list. Schema updates should adhere to the
+ * update.php. The documentation block preceding the update function is used as
+ * the description for the update on the pending updates at update.php. Schema
+ * updates should adhere to the
  * @link http://drupal.org/node/150215 Schema API. @endlink
+ *
+ * Implementations of this hook should be placed in a mymodule.install file in
+ * the same directory as mymodule.module. Backdrop core's updates are implemented
+ * using the system module as a name and stored in database/updates.inc.
  *
  * Implementations of hook_update_N() are named (module name)_update_(number).
  * The numbers are composed of three parts:
- * - 1 digit for Drupal core compatibility.
- * - 1 digit for your module's major release version (e.g., is this the 7.x-1.*
- *   (1) or 7.x-2.* (2) series of your module?). This digit should be 0 for
- *   initial porting of your module to a new Drupal core API.
+ * - 1 digit for Backdrop core compatibility.
+ * - 1 digit for your module's major release version (e.g., is this the 1.x-1.*
+ *   (1) or 1.x-2.* (2) series of your module?). This digit should be 0 for
+ *   initial porting of your module to a new Backdrop core API.
  * - 2 digits for sequential counting, starting with 00.
  *
+ * Backdrop includes special considerations for updating from Drupal 7 websites.
+ * While Drupal 7 updates should be numbered 7xxx, Backdrop 1.x updates are
+ * numbered 1xxx. For the sake of compatibility, Backdrop will run any
+ * remaining 7xxx updates before running 1xxx updates. For the safest upgrade
+ * path possible, it's recommended Drupal 7 modules are running their latest
+ * version before attempting to upgrade to Backdrop equivalents. This upgrade
+ * compatibility also means that adhering to the naming convention of 1xxx for
+ * Backdrop updates is extremely important. Backdrop updates numbered greater
+ * than 6999 will have unexpected behavior, as they are reserved for Drupal 7
+ * compatibility.
+ *
  * Examples:
- * - mymodule_update_7000(): This is the required update for mymodule to run
- *   with Drupal core API 7.x when upgrading from Drupal core API 6.x.
- * - mymodule_update_7100(): This is the first update to get the database ready
- *   to run mymodule 7.x-1.*.
- * - mymodule_update_7200(): This is the first update to get the database ready
- *   to run mymodule 7.x-2.*. Users can directly update from 6.x-2.* to 7.x-2.*
- *   and they get all 70xx and 72xx updates, but not 71xx updates, because
- *   those reside in the 7.x-1.x branch only.
+ * - mymodule_update_1000(): This is the required update for mymodule to run
+ *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
+ * - mymodule_update_1100(): This is the first update to get the database ready
+ *   to run mymodule 1.x-1.*.
+ * - mymodule_update_1200(): This is the first update to get the database ready
+ *   to run mymodule 7.x-2.*. Users can directly update from 1.x-2.* to 2.x-2.*
+ *   and they get all 10xx and 12xx updates, but not 11xx updates, because
+ *   those reside in the 1.x-1.x branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
- * Drupal. See hook_update_last_removed() to notify Drupal about the removals.
- * For further information about releases and release numbers see:
- * @link http://drupal.org/node/711070 Maintaining a drupal.org project with Git @endlink
+ * Backdrop. See hook_update_last_removed() to notify Backdrop about the
+ * removals. For further information about releases and release numbers see the
+ * @link http://backdropcms.org/about/releases Backdrop CMS Release Cycle handbook page @endlink
  *
- * Never renumber update functions.
- *
- * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module. Drupal core's updates are implemented
- * using the system module as a name and stored in database/updates.inc.
+ * Because Backdrop keeps track of the last ran update based on the function
+ * name, you should never renumber update functions. It may result in updates
+ * being either skipped or run twice.
  *
  * Not all module functions are available from within a hook_update_N() function.
  * In order to call a function from your mymodule.module or an include file,
@@ -2970,21 +2983,21 @@ function hook_update_N(&$sandbox) {
  * @see hook_update_N()
  */
 function hook_update_dependencies() {
-  // Indicate that the mymodule_update_8000() function provided by this module
-  // must run after the another_module_update_8002() function provided by the
+  // Indicate that the mymodule_update_1000() function provided by this module
+  // must run after the another_module_update_1002() function provided by the
   // 'another_module' module.
-  $dependencies['mymodule'][8000] = array(
-    'another_module' => 8002,
+  $dependencies['mymodule'][1000] = array(
+    'another_module' => 1002,
   );
-  // Indicate that the mymodule_update_8001() function provided by this module
-  // must run before the yet_another_module_update_8004() function provided by
+  // Indicate that the mymodule_update_1001() function provided by this module
+  // must run before the yet_another_module_update_1004() function provided by
   // the 'yet_another_module' module. (Note that declaring dependencies in this
   // direction should be done only in rare situations, since it can lead to the
   // following problem: If a site has already run the yet_another_module
   // module's database updates before it updates its codebase to pick up the
   // newest mymodule code, then the dependency declared here will be ignored.)
-  $dependencies['yet_another_module'][8004] = array(
-    'mymodule' => 8001,
+  $dependencies['yet_another_module'][1004] = array(
+    'mymodule' => 1001,
   );
   return $dependencies;
 }
@@ -2993,22 +3006,29 @@ function hook_update_dependencies() {
  * Return a number which is no longer available as hook_update_N().
  *
  * If you remove some update functions from your mymodule.install file, you
- * should notify Drupal of those missing functions. This way, Drupal can
+ * should notify Backdrop of those missing functions. This way, Backdrop can
  * ensure that no update is accidentally skipped.
  *
  * Implementations of this hook should be placed in a mymodule.install file in
  * the same directory as mymodule.module.
  *
- * @return
+ * If upgrading from a Drupal 7 module where the last removed update was a
+ * update function numbering in the 7xxx values, that update number should still
+ * be returned even though it is a higher number than the first Backdrop module
+ * update (which should start at hook_update_1000). When comparing update
+ * numbers, Backdrop will consider 1xxx updates to come after 7xxx updates.
+ *
+ * @return int
  *   An integer, corresponding to hook_update_N() which has been removed from
  *   mymodule.install.
  *
  * @see hook_update_N()
  */
 function hook_update_last_removed() {
-  // We've removed the 5.x-1.x version of mymodule, including database updates.
-  // The next update function is mymodule_update_5200().
-  return 5103;
+  // We've removed the 1.x-1.x version of mymodule, including database updates.
+  // For the 1.x-2.x version of the module, the next update function would be
+  // mymodule_update_1200().
+  return 1103;
 }
 
 /**

@@ -1399,7 +1399,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // Set to English to prevent exceptions from utf8_truncate() from t()
     // during install if the current language is not 'en'.
     // The following array/object conversion is copied from language_default().
-    $language = (object) array(
+    $language_interface = (object) array(
       'langcode' => 'en',
       'name' => 'English',
       'direction' => 0,
@@ -1528,6 +1528,9 @@ class DrupalWebTestCase extends DrupalTestCase {
     // @see drupal_system_listing()
     // @todo This may need to be primed like 'install_profile' above.
     variable_set('simpletest_parent_profile', $this->originalProfile);
+
+    // Ensure schema versions are recalculated.
+    drupal_static_reset('drupal_get_schema_versions');
 
     // Include the testing profile.
     variable_set('install_profile', $this->profile);
