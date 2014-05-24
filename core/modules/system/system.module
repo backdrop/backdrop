@@ -548,6 +548,14 @@ function system_menu() {
     'weight' => -18,
     'file' => 'system.admin.inc',
   );
+  $types['dropbutton'] = array(
+    '#theme' => 'links__dropbutton',
+    '#pre_render' => array('drupal_pre_render_dropbutton'),
+  );
+  $types['operations'] = array(
+    '#theme' => 'links__dropbutton__operations',
+    '#pre_render' => array('drupal_pre_render_dropbutton'),
+  );
 
   // Menu items that are basically just menu blocks.
   $items['admin/structure'] = array(
@@ -1235,6 +1243,26 @@ function system_library_info() {
       'core/misc/dropbutton.theme.css' => array(),
     ),
     'dependencies' => array(
+      array('system', 'jquery.once'),
+    ),
+  );
+
+  // Dropbutton.
+  $libraries['drupal.dropbutton'] = array(
+    'title' => 'Dropbutton',
+    'website' => 'http://drupal.org/node/1608878',
+    'version' => '1.0',
+    'js' => array(
+      'core/misc/dropbutton/dropbutton.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/dropbutton/dropbutton.base.css' => array(),
+      'core/misc/dropbutton/dropbutton.theme.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+      array('system', 'drupal'),
+      array('system', 'drupalSettings'),
       array('system', 'jquery.once'),
     ),
   );
