@@ -587,25 +587,19 @@ function update_get_update_list() {
         continue;
       }
 
-      // For schemas in the 8000s, reduce them by 7000 so that 8010 would be
-      // followed by 1011. This provides compatibility for existing Backdrop
-      // installations during the 1.x development cycle.
-      // @todo Remove this for the Backdrop 1.0 release.
-      if ($schema_version >= 8000 && $schema_version < 9000) {
+      // Reduce schema versions by 7000 for legacy updates.
+      if ($schema_version >= 7000 && $schema_version < 9000) {
         $schema_version -= 7000;
       }
 
-      // Find the current schema version index to run all subsequent updates.
-      $current_schema_index = array_search($schema_version, $updates);
-
-      // If the current schema is not found, start from -1 so the 0-index value
-      // will be included in the list of updates.
-      if ($current_schema_index === FALSE) {
-        $current_schema_index = -1;
-      }
-
-      foreach ($updates as $update_index => $update) {
-        if ($update_index > $current_schema_index) {
+      foreach ($updates as $update) {
+        // Reduce update versions by 7000 for legacy update comparisons. Note
+        // that the original update version is still queued for execution.
+        $compare_version = $update;
+        if ($update >= 7000 && $update < 9000) {
+          $compare_version -= 7000;
+        }
+        if ($compare_version > $schema_version) {
           // The description for an update comes from its Doxygen.
           $func = new ReflectionFunction($module . '_update_' . $update);
           $description = str_replace(array("\n", '*', '/'), '', $func->getDocComment());
