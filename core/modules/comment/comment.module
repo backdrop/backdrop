@@ -2443,3 +2443,38 @@ function comment_file_download_access($field, $entity_type, $entity) {
     return FALSE;
   }
 }
+
+/**
+ * Implements hook_autoload_info().
+ */
+function comment_autoload_info() {
+  return array(
+    'Comment' => 'comment.entity.inc',
+    'CommentStorageController' => 'comment.entity.inc',
+
+    // Views handlers:
+    'views_handler_argument_comment_user_uid' => 'views/views_handler_argument_comment_user_uid.inc',
+    'views_handler_field_comment' => 'views/views_handler_field_comment.inc',
+    'views_handler_field_comment_depth' => 'views/views_handler_field_comment_depth.inc',
+    'views_handler_field_comment_link' => 'views/views_handler_field_comment_link.inc',
+    'views_handler_field_comment_link_approve' => 'views/views_handler_field_comment_link_approve.inc',
+    'views_handler_field_comment_link_delete' => 'views/views_handler_field_comment_link_delete.inc',
+    'views_handler_field_comment_link_edit' => 'views/views_handler_field_comment_link_edit.inc',
+    'views_handler_field_comment_link_reply' => 'views/views_handler_field_comment_link_reply.inc',
+    'views_handler_field_comment_node_link' => 'views/views_handler_field_comment_node_link.inc',
+    'views_handler_field_comment_username' => 'views/views_handler_field_comment_username.inc',
+    'views_handler_field_comment_username' => 'views/views_handler_field_ncs_last_comment_name.inc',
+    'views_handler_field_ncs_last_updated' => 'views/views_handler_field_ncs_last_updated.inc',
+    'views_handler_field_node_comment' => 'views/views_handler_field_node_comment.inc',
+    'views_handler_field_node_new_comments' => 'views/views_handler_field_node_new_comments.inc',
+    'views_handler_field_last_comment_timestamp' => 'views/views_handler_field_last_comment_timestamp.inc',
+    'views_handler_filter_comment_user_uid' => 'views/views_handler_filter_comment_user_uid.inc',
+    'views_handler_filter_ncs_last_updated' => 'views/views_handler_filter_ncs_last_updated.inc',
+    'views_handler_filter_node_comment' => 'views/views_handler_filter_node_comment.inc',
+    'views_handler_sort_comment_thread' => 'views/views_handler_sort_comment_thread.inc',
+    'views_handler_sort_ncs_last_comment_name' => 'views/views_handler_sort_ncs_last_comment_name.inc',
+    'views_handler_sort_ncs_last_updated' => 'views/views_handler_sort_ncs_last_updated.inc',
+    'views_plugin_row_comment_rss' => 'views/views_plugin_row_comment_rss.inc',
+    'views_plugin_row_comment_view' => 'views/views_plugin_row_comment_view.inc',
+  );
+}

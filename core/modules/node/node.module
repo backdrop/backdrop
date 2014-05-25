@@ -3929,6 +3929,44 @@ function node_modules_disabled($modules) {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function node_autoload_info() {
+  return array(
+    'Node' => 'node.entity.inc',
+    'NodeStorageController' => 'node.entity.inc',
+
+    // Views handlers.
+    'views_handler_argument_dates_various' => 'views/views_handler_argument_dates_various.inc',
+    'views_handler_argument_node_language' => 'views/views_handler_argument_node_language.inc',
+    'views_handler_argument_node_nid' => 'views/views_handler_argument_node_nid.inc',
+    'views_handler_argument_node_type' => 'views/views_handler_argument_node_type.inc',
+    'views_handler_argument_node_vid' => 'views/views_handler_argument_node_vid.inc',
+    'views_handler_argument_node_uid_revision' => 'views/views_handler_argument_node_uid_revision.inc',
+    'views_handler_field_history_user_timestamp' => 'views/views_handler_field_history_user_timestamp.inc',
+    'views_handler_field_node' => 'views/views_handler_field_node.inc',
+    'views_handler_field_node_link' => 'views/views_handler_field_node_link.inc',
+    'views_handler_field_node_link_delete' => 'views/views_handler_field_node_link_delete.inc',
+    'views_handler_field_node_link_edit' => 'views/views_handler_field_node_link_edit.inc',
+    'views_handler_field_node_revision' => 'views/views_handler_field_node_revision.inc',
+    'views_handler_field_node_revision_link' => 'views/views_handler_field_node_revision_link.inc',
+    'views_handler_field_node_revision_link_delete' => 'views/views_handler_field_node_revision_link_delete.inc',
+    'views_handler_field_node_revision_link_revert' => 'views/views_handler_field_node_revision_link_revert.inc',
+    'views_handler_field_node_path' => 'views/views_handler_field_node_path.inc',
+    'views_handler_field_node_type' => 'views/views_handler_field_node_type.inc',
+    'views_handler_filter_history_user_timestamp' => 'views/views_handler_filter_history_user_timestamp.inc',
+    'views_handler_filter_node_access' => 'views/views_handler_filter_node_access.inc',
+    'views_handler_filter_node_status' => 'views/views_handler_filter_node_status.inc',
+    'views_handler_filter_node_type' => 'views/views_handler_filter_node_type.inc',
+    'views_handler_filter_node_uid_revision' => 'views/views_handler_filter_node_uid_revision.inc',
+    'views_plugin_argument_default_node' => 'views/views_plugin_argument_default_node.inc',
+    'views_plugin_argument_validate_node' => 'views/views_plugin_argument_validate_node.inc',
+    'views_plugin_row_node_rss' => 'views/views_plugin_row_node_rss.inc',
+    'views_plugin_row_node_view' => 'views/views_plugin_row_node_view.inc',
+  );
+}
+
+/**
  * Implements hook_file_download_access().
  */
 function node_file_download_access($field, $entity_type, $entity) {

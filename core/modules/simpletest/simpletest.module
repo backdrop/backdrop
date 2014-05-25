@@ -70,6 +70,17 @@ function simpletest_theme() {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function simpletest_autoload_info() {
+  return array(
+    'DrupalTestCase' => 'drupal_web_test_case.php',
+    'DrupalUnitTestCase' => 'drupal_web_test_case.php',
+    'DrupalWebTestCase' => 'drupal_web_test_case.php',
+  );
+}
+
+/**
  * Implements hook_js_alter().
  */
 function simpletest_js_alter(&$javascript) {
@@ -413,7 +424,6 @@ function simpletest_clean_environment() {
   }
 
   // Detect test classes that have been added, renamed or deleted.
-  registry_rebuild();
   cache()->delete('simpletest');
 }
 

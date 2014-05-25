@@ -1895,7 +1895,7 @@ class SearchSetLocaleTest extends DrupalWebTestCase {
     // An exception will be thrown if a float in the wrong format occurs in the
     // query to the database, so an assertion is not necessary here.
     db_select('search_index', 'i')
-      ->extend('searchquery')
+      ->extend('SearchQuery')
       ->searchexpression('tapir', 'node')
       ->execute();
   }

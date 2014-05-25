@@ -1018,18 +1018,6 @@ description = Tests that path_save() exposes the previous alias value.
 group = Path API
 file = tests/path.test
 
-[RegistryParseFilesTestCase]
-name = Registry parse files test
-description = Read two a simple files from disc, and check that their resources are saved to the database.
-group = System
-file = tests/registry.test
-
-[RegistryParseFileTestCase]
-name = Registry parse file test
-description = Parse a simple file and check that its resources are saved to the database.
-group = System
-file = tests/registry.test
-
 [SchemaTestCase]
 name = Schema API
 description = Tests table creation and modification via the schema API.

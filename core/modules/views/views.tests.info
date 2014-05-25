@@ -173,8 +173,6 @@ group = Views Handlers
 file = tests/handlers/views_handler_filter_numeric.test
 
 [ViewsHandlerFilterStringTest]
-  var $column_map = array();
-
 name = Filter: String
 description = Tests the core views_handler_filter_string handler.
 group = Views Handlers
@@ -200,15 +198,15 @@ file = tests/handlers/views_handler_sort.test
 
 [ViewsHandlersTest]
 name = Handlers test
-description = test abstract handler definitions
+description = Test abstract handler definitions.
 group = Views
-file = tests/handlers/views_handlers.test
+file = tests/views_handlers.test
 
 [ViewsModuleTest]
 name = Tests views.module
-description = Tests some basic functions of views.module
+description = Tests some basic functions of views.module.
 group = Views
-file = tests/handlers/views_module.test
+file = tests/views_module.test
 
 [ViewsPagerTest]
 name = Pager
@@ -302,6 +300,6 @@ file = tests/views_upgrade.test
 
 [ViewsViewTest]
 name = Test the view class
-description = Tests some  functionality of the view class
+description = Tests some  functionality of the view class.
 group = Views
-file = tests/user/views_view.test
+file = tests/views_view.test

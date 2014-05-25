@@ -2112,7 +2112,6 @@ function views_ui_import_page($form, &$form_state) {
  */
 function views_ui_import_validate($form, &$form_state) {
   $view = '';
-  views_include('view');
   // Be forgiving if someone pastes views code that starts with '<?php'.
   if (substr($form_state['values']['view'], 0, 5) == '<?php') {
     $form_state['values']['view'] = substr($form_state['values']['view'], 5);
@@ -4052,6 +4051,7 @@ function theme_views_ui_rearrange_filter_form(&$vars) {
  * Submit handler for rearranging form
  */
 function views_ui_rearrange_filter_form_submit($form, &$form_state) {
+  views_include('utility');
   $types = views_object_types();
   $display = &$form_state['view']->display[$form_state['display_id']];
   $remember_groups = array();
@@ -5194,8 +5194,6 @@ function views_ui_edit_display_form_change_theme($form, &$form_state) {
  */
 function views_ui_autocomplete_tag($string = '') {
   $matches = array();
-  // get matches from default views:
-  views_include('view');
   $views = views_get_all_views();
   foreach ($views as $view) {
     if (!empty($view->tag) && strpos($view->tag, $string) === 0) {

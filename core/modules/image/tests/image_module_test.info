@@ -3,5 +3,4 @@ description = Provides hook implementations for testing Image module functionali
 package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
-files[] = image_module_test.module
 hidden = TRUE

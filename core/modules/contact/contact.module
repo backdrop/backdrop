@@ -128,6 +128,15 @@ function _contact_personal_tab_access($account) {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function contact_autoload_info() {
+  return array(
+    'views_handler_field_contact_link' => 'views/views_handler_field_contact_link.inc',
+  );
+}
+
+/**
  * Loads a contact category.
  *
  * @param $cid

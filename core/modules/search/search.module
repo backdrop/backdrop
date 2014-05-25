@@ -1305,3 +1305,19 @@ function search_forms() {
   );
   return $forms;
 }
+
+/**
+ * Implements hook_autoload_info().
+ */
+function search_autoload_info() {
+  return array(
+    'SearchQuery' => 'search.extender.inc',
+
+    // Views handlers.
+    'views_handler_argument_search' => 'views/views_handler_argument_search.inc',
+    'views_handler_field_search_score' => 'views/views_handler_field_search_score.inc',
+    'views_handler_filter_search' => 'views/views_handler_filter_search.inc',
+    'views_handler_sort_search_score' => 'views/views_handler_sort_search_score.inc',
+    'views_plugin_row_search_view' => 'views/views_plugin_row_search_view.inc',
+  );
+}
