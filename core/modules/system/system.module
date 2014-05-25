@@ -316,6 +316,16 @@ function system_element_info() {
     '#theme' => 'email',
     '#theme_wrappers' => array('form_element'),
   );
+  $types['url'] = array(
+    '#input' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#autocomplete_path' => FALSE,
+    '#process' => array('ajax_process_form'),
+    '#element_validate' => array('form_validate_url'),
+    '#theme' => 'url',
+    '#theme_wrappers' => array('form_element'),
+  );
   $types['machine_name'] = array(
     '#input' => TRUE,
     '#default_value' => NULL,
@@ -4109,6 +4119,41 @@ function system_archiver_info() {
     );
   }
   return $archivers;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function system_autoload_info() {
+  return array(
+    'ArchiverTar' => 'system.archiver.inc',
+    'ArchiverZip' => 'system.archiver.inc',
+    'DefaultMailSystem' => 'system.mail.inc',
+    'TestingMailSystem' => 'system.mail.inc',
+    'DrupalQueue' => 'system.queue.inc',
+    'DrupalQueueInterface' => 'system.queue.inc',
+    'DrupalReliableQueueInterface' => 'system.queue.inc',
+    'SystemQueue' => 'system.queue.inc',
+    'MemoryQueue' => 'system.queue.inc',
+    'Archive_Tar' => 'system.tar.inc',
+    'ModuleUpdater' => 'system.updater.inc',
+    'ThemeUpdater' => 'system.updater.inc',
+
+    // @todo: Move file entities to File module.
+    // https://github.com/backdrop/backdrop-issues/issues/213
+    'File' => 'file.entity.inc',
+    'FileStorageController' => 'file.entity.inc',
+
+    // Views handlers.
+    'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
+    'views_handler_field_file' => 'views/views_handler_field_file.inc',
+    'views_handler_field_file_extension' => 'views/views_handler_field_file_extension.inc',
+    'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
+    'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
+    'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
+    'views_handler_filter_file_status' => 'views/views_handler_filter_file_status.inc',
+    'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
+  );
 }
 
 /**

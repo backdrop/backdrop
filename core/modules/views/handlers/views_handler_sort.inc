@@ -125,6 +125,9 @@ class views_handler_sort extends views_handler {
         '#type' => 'submit',
         '#value' => t('Hide sort'),
         '#submit' => array('views_ui_config_item_form_expose'),
+        '#ajax' => array(
+          'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+        ),
       );
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 1;
     }

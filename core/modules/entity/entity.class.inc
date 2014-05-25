@@ -165,3 +165,8 @@ abstract class Entity implements EntityInterface {
     return $duplicate;
   }
 }
+
+/**
+ * Defines an exception thrown when a malformed entity is passed.
+ */
+class EntityMalformedException extends Exception { }

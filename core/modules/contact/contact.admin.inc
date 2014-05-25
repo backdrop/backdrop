@@ -61,7 +61,7 @@ function contact_category_list() {
     $rows[] = array(array(
       'data' => t('No categories available.'),
       'colspan' => 5,
-      ));
+    ));
   }
 
   $build['category_table'] = array(
@@ -222,20 +222,23 @@ function contact_category_edit_form_submit($form, &$form_state) {
   $config_data = $form_state['categories_data'];
   $default_category = $config_data['contact_default_category'];
   $categories = $config_data['categories'];
-  $max_cid = 0;
-
-  if ($categories) {
-    foreach ($categories as $cat) {
-      $cids[] = $cat['cid'];
-    }
-    $max_cid = max($cids);
-  }
 
   if (isset($cid)) {
-    $c = array_search($cid, $cids);
-    $categories[$c] = $contact; // *************************************
+    foreach ($categories as $key => $val) {
+      if ($val['cid'] == $cid) {
+        $categories[$key] = $contact;
+      }
+    }
   }
   else {
+    $max_cid = 0;
+    if ($categories) {
+      foreach ($categories as $key => $cat) {
+        $cids[] = $cat['cid'];
+      }
+      $max_cid = max($cids);
+    }
+
     $cid = $max_cid + 1;
     $contact['cid'] = $cid;
     $categories[] = $contact;
@@ -244,14 +247,13 @@ function contact_category_edit_form_submit($form, &$form_state) {
   // If selected set variable contact_default_category.
   if ($form_state['values']['selected']) {
     $config_data['contact_default_category'] = $cid;
-
   }
   elseif ($cid == $default_category) {
     // If not selected but is set as default then set default back to 0.
     $config_data['contact_default_category'] = 0;
   }
 
-  $config_data['categories'] = $categories;
+  $config_data['categories'] = array_values($categories);
 
   $config = config('contact.categories');
   $config->setData($config_data);

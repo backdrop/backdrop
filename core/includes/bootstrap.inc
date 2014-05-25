@@ -239,16 +239,6 @@ const CHECK_PLAIN = 0;
 const PASS_THROUGH = -1;
 
 /**
- * Signals that the registry lookup cache should be reset.
- */
-const REGISTRY_RESET_LOOKUP_CACHE = 1;
-
-/**
- * Signals that the registry lookup cache should be written to storage.
- */
-const REGISTRY_WRITE_LOOKUP_CACHE = 2;
-
-/**
  * Regular expression to match PHP function names.
  *
  * @see http://php.net/manual/en/language.functions.php
@@ -2249,12 +2239,11 @@ function drupal_array_merge_deep_array($arrays) {
  *   An anonymous user entity object.
  */
 function drupal_anonymous_user() {
-  $user = new User(array(
-    'uid' => 0,
-    'name' => NULL,
+  // Because this is called early in the bootstrap (starting the session) it
+  // must not use the autoloader, so it's pulled in manually.
+  require_once DRUPAL_ROOT . '/core/includes/anonymous.inc';
+  $user = new AnonymousUser(array(
     'hostname' => ip_address(),
-    'roles' => array(DRUPAL_ANONYMOUS_RID => 'anonymous user'),
-    'cache' => 0,
   ));
   return $user;
 }
@@ -2549,8 +2538,7 @@ function _drupal_bootstrap_database() {
   // The database autoload routine comes first so that we can load the database
   // system without hitting the database. That is especially important during
   // the install or upgrade process.
-  spl_autoload_register('drupal_autoload_class');
-  spl_autoload_register('drupal_autoload_interface');
+  spl_autoload_register('backdrop_autoload');
 }
 
 /**
@@ -3171,33 +3159,11 @@ function drupal_get_complete_schema($rebuild = FALSE) {
  * @} End of "addtogroup schemaapi".
  */
 
-
-/**
- * @addtogroup registry
- * @{
- */
-
-/**
- * Confirms that an interface is available.
- *
- * This function is rarely called directly. Instead, it is registered as an
- * spl_autoload()  handler, and PHP calls it for us when necessary.
- *
- * @param $interface
- *   The name of the interface to check or load.
- *
- * @return
- *   TRUE if the interface is currently available, FALSE otherwise.
- */
-function drupal_autoload_interface($interface) {
-  return _registry_check_code('interface', $interface);
-}
-
 /**
  * Confirms that a class is available.
  *
  * This function is rarely called directly. Instead, it is registered as an
- * spl_autoload()  handler, and PHP calls it for us when necessary.
+ * spl_autoload_function() handler, and PHP calls it for us when necessary.
  *
  * @param $class
  *   The name of the class to check or load.
@@ -3205,138 +3171,34 @@ function drupal_autoload_interface($interface) {
  * @return
  *   TRUE if the class is currently available, FALSE otherwise.
  */
-function drupal_autoload_class($class) {
-  return _registry_check_code('class', $class);
-}
+function backdrop_autoload($class) {
+  $class_registry = &drupal_static(__FUNCTION__, NULL);
 
-/**
- * Checks for a resource in the registry.
- *
- * @param $type
- *   The type of resource we are looking up, or one of the constants
- *   REGISTRY_RESET_LOOKUP_CACHE or REGISTRY_WRITE_LOOKUP_CACHE, which
- *   signal that we should reset or write the cache, respectively.
- * @param $name
- *   The name of the resource, or NULL if either of the REGISTRY_* constants
- *   is passed in.
- *
- * @return
- *   TRUE if the resource was found, FALSE if not.
- *   NULL if either of the REGISTRY_* constants is passed in as $type.
- */
-function _registry_check_code($type, $name = NULL) {
-  static $lookup_cache, $cache_update_needed;
-
-  if ($type == 'class' && class_exists($name) || $type == 'interface' && interface_exists($name)) {
-    return TRUE;
-  }
-
-  if (!isset($lookup_cache)) {
-    $lookup_cache = array();
-    if ($cache = cache('bootstrap')->get('lookup_cache')) {
-      $lookup_cache = $cache->data;
+  if (!isset($class_registry)) {
+    include_once DRUPAL_ROOT . '/core/includes/bootstrap.classes.inc';
+    $class_registry = backdrop_class_list();
+    // Loop through all modules to build the list of classes. We avoid
+    // module_invoke_all() because it uses array_merge_recursive(), which is an
+    // expensive O(n^2) operation. Instead we use module_implements() and merge
+    // the array manually, which is O(n).
+    foreach (module_implements('autoload_info') as $module) {
+      $module_classes = module_invoke($module, 'autoload_info');
+      $module_path = drupal_get_path('module', $module);
+      foreach ($module_classes as $module_class => $relative_path) {
+        $class_registry[$module_class] = DRUPAL_ROOT . '/' . $module_path . '/' . $relative_path;
+      }
     }
+    drupal_alter('autoload_info', $class_registry);
   }
 
-  // When we rebuild the registry, we need to reset this cache so
-  // we don't keep lookups for resources that changed during the rebuild.
-  if ($type == REGISTRY_RESET_LOOKUP_CACHE) {
-    $cache_update_needed = TRUE;
-    $lookup_cache = NULL;
-    return;
-  }
-
-  // Called from drupal_page_footer, we write to permanent storage if there
-  // changes to the lookup cache for this request.
-  if ($type == REGISTRY_WRITE_LOOKUP_CACHE) {
-    if ($cache_update_needed) {
-      cache('bootstrap')->set('lookup_cache', $lookup_cache);
-    }
-    return;
-  }
-
-  // $type is either 'interface' or 'class', so we only need the first letter to
-  // keep the cache key unique.
-  $cache_key = $type[0] . $name;
-  if (isset($lookup_cache[$cache_key])) {
-    if ($lookup_cache[$cache_key]) {
-      require_once DRUPAL_ROOT . '/' . $lookup_cache[$cache_key];
-    }
-    return (bool) $lookup_cache[$cache_key];
-  }
-
-  // This function may get called when the default database is not active, but
-  // there is no reason we'd ever want to not use the default database for
-  // this query.
-  $file = Database::getConnection('default', 'default')->query("SELECT filename FROM {registry} WHERE name = :name AND type = :type", array(
-      ':name' => $name,
-      ':type' => $type,
-    ))
-    ->fetchField();
-
-  // Flag that we've run a lookup query and need to update the cache.
-  $cache_update_needed = TRUE;
-
-  // Misses are valuable information worth caching, so cache even if
-  // $file is FALSE.
-  $lookup_cache[$cache_key] = $file;
-
-  if ($file) {
-    require_once DRUPAL_ROOT . '/' . $file;
+  if (isset($class_registry[$class])) {
+    require_once $class_registry[$class];
     return TRUE;
   }
   else {
     return FALSE;
   }
 }
-
-/**
- * Rescans all enabled modules and rebuilds the registry.
- *
- * Rescans all code in modules or includes directories, storing the location of
- * each interface or class in the database.
- */
-function registry_rebuild() {
-  system_rebuild_module_data();
-  registry_update();
-}
-
-/**
- * Updates the registry based on the latest files listed in the database.
- *
- * This function should be used when system_rebuild_module_data() does not need
- * to be called, because it is already known that the list of files in the
- * {system} table matches those in the file system.
- *
- * @return
- *   TRUE if the registry was rebuilt, FALSE if another thread was rebuilding
- *   in parallel and the current thread just waited for completion.
- *
- * @see registry_rebuild()
- */
-function registry_update() {
-  // install_system_module() calls module_enable() which calls into this
-  // function during initial system installation, so the lock system is neither
-  // loaded nor does its storage exist yet.
-  $in_installer = drupal_installation_attempted();
-  if (!$in_installer && !lock_acquire(__FUNCTION__)) {
-    // Another request got the lock, wait for it to finish.
-    lock_wait(__FUNCTION__);
-    return FALSE;
-  }
-
-  require_once DRUPAL_ROOT . '/core/includes/registry.inc';
-  _registry_update();
-
-  if (!$in_installer) {
-    lock_release(__FUNCTION__);
-  }
-  return TRUE;
-}
-
-/**
- * @} End of "addtogroup registry".
- */
 
 /**
  * Provides central static variable storage.

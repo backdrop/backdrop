@@ -27,9 +27,14 @@ function contact_install() {
 }
 
 /**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */
+
+/**
  * Convert contact module settings to use configuration files.
  */
-function contact_update_8000() {
+function contact_update_1000() {
   // Copy config file to site config folder.
   config_install_default_config('module', 'contact.settings');
   // Migrate variables if any.
@@ -45,9 +50,10 @@ function contact_update_8000() {
 }
 
 /**
+<<<<<<< HEAD
  * Convert available database contact categories to configuration files.
  */
-function contact_update_8001() {
+function contact_update_1001() {
   // Copy config file to site config folder.
   config_install_default_config('module', 'contact.categories');
   // Migrate categories if any.

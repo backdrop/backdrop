@@ -85,13 +85,13 @@ drupal_set_time_limit(0);
 simpletest_script_reporter_init();
 
 // Setup database for test results.
-$test_id = db_insert('simpletest_test_id')->useDefaults(array('test_id'))->execute();
+$test_id = db_query("SELECT MAX(test_id) FROM {simpletest_prefix}")->fetchField() + 1;
 
 // Execute tests.
 simpletest_script_execute_batch($test_id, simpletest_script_get_test_list());
 
 // Retrieve the last database prefix used for testing and the last test class
-// that was run from. Use the information to read the lgo file in case any
+// that was run from. Use the information to read the log file in case any
 // fatal errors caused the test to crash.
 list($last_prefix, $last_test_class) = simpletest_last_test_get($test_id);
 simpletest_log_read($test_id, $last_prefix, $last_test_class);

@@ -8,13 +8,62 @@
 "use strict";
 
 Drupal.behaviors.dialog = {
-  attach: function () {
+  attach: function (context) {
     // Provide a known 'backdrop-modal' DOM element for Backdrop-based modal
     // dialogs. Non-modal dialogs are responsible for creating their own
     // elements, since there can be multiple non-modal dialogs at a time.
     if (!$('#backdrop-modal').length) {
       $('<div id="backdrop-modal" />').hide().appendTo('body');
     }
+
+    // Special behaviors specific when attaching content within a dialog.
+    // These behaviors usually fire after a validation error inside a dialog.
+    var $dialog = $(context).closest('.ui-dialog-content');
+    if ($dialog.length) {
+      // Remove and replace the dialog buttons with those from the new form.
+      if ($dialog.dialog('option', 'drupalAutoButtons')) {
+        // Trigger an event to detect/sync changes to buttons.
+        $dialog.trigger('dialogButtonsChange');
+      }
+
+      // Force focus on the modal when the behavior is run.
+      $dialog.dialog('widget').trigger('focus');
+    }
+  },
+
+  /**
+   * Scan a dialog for any primary buttons and move them to the button area.
+   *
+   * @param $dialog
+   *   An jQuery object containing the element that is the dialog target.
+   * @return
+   *   An array of buttons that need to be added to the button area.
+   */
+  prepareDialogButtons: function ($dialog) {
+    var buttons = [];
+    var $buttons = $dialog.find('.form-actions input[type=submit]');
+    $buttons.each(function () {
+      // Hidden form buttons need special attention. For browser consistency,
+      // the button needs to be "visible" in order to have the enter key fire
+      // the form submit event. So instead of a simple "hide" or
+      // "display: none", we set its dimensions to zero.
+      // See http://mattsnider.com/how-forms-submit-when-pressing-enter/
+      var $originalButton = $(this).css({
+        width: 0,
+        height: 0,
+        padding: 0,
+        border: 0
+      });
+      buttons.push({
+        'text': $originalButton.html() || $originalButton.attr('value'),
+        'class': $originalButton.attr('class'),
+        'click': function (e) {
+          $originalButton.trigger('mousedown').trigger('click').trigger('mouseup');
+          e.preventDefault();
+        }
+      });
+    });
+    return buttons;
   }
 };
 
@@ -40,6 +89,18 @@ Drupal.ajax.prototype.commands.openDialog = function (ajax, response, status) {
   response.method = 'html';
   ajax.commands.insert(ajax, response, status);
 
+  // Move the buttons to the jQuery UI dialog buttons area.
+  if (!response.dialogOptions.buttons) {
+    response.dialogOptions.drupalAutoButtons = true;
+    response.dialogOptions.buttons = Drupal.behaviors.dialog.prepareDialogButtons($dialog);
+  }
+
+  // Bind dialogButtonsChange
+  $dialog.on('dialogButtonsChange', function () {
+    var buttons = Drupal.behaviors.dialog.prepareDialogButtons($dialog);
+    $dialog.dialog('option', 'buttons', buttons);
+  });
+
   // Open the dialog itself.
   response.dialogOptions = response.dialogOptions || {};
   var dialog = Drupal.dialog($dialog, response.dialogOptions);
@@ -49,6 +110,9 @@ Drupal.ajax.prototype.commands.openDialog = function (ajax, response, status) {
   else {
     dialog.show();
   }
+
+  // Add the standard Backdrop class for buttons for style consistency.
+  $dialog.parent().find('.ui-dialog-buttonset').addClass('form-actions');
 };
 
 /**
@@ -61,6 +125,9 @@ Drupal.ajax.prototype.commands.closeDialog = function (ajax, response, status) {
   if ($dialog.length) {
     Drupal.dialog($dialog).close();
   }
+
+  // Unbind dialogButtonsChange
+  $dialog.off('dialogButtonsChange');
 };
 
 /**

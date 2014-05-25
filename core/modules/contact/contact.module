@@ -143,6 +143,15 @@ function _contact_personal_tab_access($account) {
 }
 
 /**
+ * Implements hook_autoload_info().
+ */
+function contact_autoload_info() {
+  return array(
+    'views_handler_field_contact_link' => 'views/views_handler_field_contact_link.inc',
+  );
+}
+
+/**
  * Loads a contact category.
  *
  * @param int $cid
@@ -167,10 +176,10 @@ function contact_load($cid) {
 }
 
 /**
- * Loads an array of all contact category.
+ * Loads an array of all contact categories.
  *
  * @return array
- *   An array of contact category's data.
+ *   An array of contact categoryies data.
  */
 function contact_config_data() {
 
@@ -185,9 +194,9 @@ function contact_config_data() {
   // Sort the categories by weight then category.
   if ($categories) {
     uasort($categories, function ($a, $b) {
-                          if ($a['weight'] == $b['weight']) {
-                            return $a['category'] < $b['category'] ? -1 : 1;
-                          }
+      if ($a['weight'] == $b['weight']) {
+        return $a['category'] < $b['category'] ? -1 : 1;
+      }
       return $a['weight'] < $b['weight'] ? -1 : 1;
     });
   }

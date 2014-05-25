@@ -4,6 +4,3 @@ package = Core
 version = BACKDROP_VERSION
 backdrop = 1.x
 required = TRUE
-files[] = entity.class.inc
-files[] = entity.query.inc
-files[] = entity.controller.inc

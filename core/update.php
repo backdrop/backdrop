@@ -136,7 +136,7 @@ function update_script_selection_form($form, &$form_state) {
   }
   else {
     $form['help'] = array(
-      '#markup' => '<p>The version of Drupal you are updating from has been automatically detected.</p>',
+      '#markup' => '<p>Updates have been found that need to be applied. You may review the updates below before executing them.</p>',
       '#weight' => -5,
     );
     if ($incompatible_count) {
@@ -401,7 +401,7 @@ require_once DRUPAL_ROOT . '/core/includes/update.inc';
 require_once DRUPAL_ROOT . '/core/includes/common.inc';
 require_once DRUPAL_ROOT . '/core/includes/file.inc';
 require_once DRUPAL_ROOT . '/core/includes/unicode.inc';
-update_prepare_d8_bootstrap();
+update_prepare_bootstrap();
 
 // Determine if the current user has access to run update.php.
 drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
@@ -442,13 +442,13 @@ if (empty($op) && update_access_allowed()) {
   install_goto('core/update.php?op=info');
 }
 
-// update_fix_d8_requirements() needs to run before bootstrapping beyond path.
+// update_fix_requirements() needs to run before bootstrapping beyond path.
 // So bootstrap to DRUPAL_BOOTSTRAP_LANGUAGE then include unicode.inc.
 
 drupal_bootstrap(DRUPAL_BOOTSTRAP_LANGUAGE);
 include_once DRUPAL_ROOT . '/core/includes/unicode.inc';
 
-update_fix_d8_requirements();
+update_fix_requirements();
 
 // Now proceed with a full bootstrap.
 

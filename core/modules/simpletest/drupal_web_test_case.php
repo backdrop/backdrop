@@ -117,6 +117,41 @@ abstract class DrupalTestCase {
   }
 
   /**
+   * Generates a database prefix for running tests.
+   *
+   * The generated database table prefix is used for the Drupal installation
+   * being performed for the test. It is also used as user agent HTTP header
+   * value by the cURL-based browser of DrupalWebTestCase, which is sent
+   * to the Drupal installation of the test. During early Drupal bootstrap, the
+   * user agent HTTP header is parsed, and if it matches, all database queries
+   * use the database table prefix that has been generated here.
+   *
+   * @see DrupalWebTestCase::curlInitialize()
+   * @see drupal_valid_test_ua()
+   * @see DrupalWebTestCase::setUp()
+   */
+  protected function prepareDatabasePrefix() {
+    // Generate a temporary prefixed database to ensure that tests have a clean
+    // starting point and confirm that random prefix isn't already in use.
+    db_transaction();
+    do {
+      $prefix = 'simpletest' . mt_rand(100000, 999999);
+      $prefix_exists = db_query("SELECT COUNT(*) FROM {simpletest_prefix} WHERE prefix = :prefix", array(':prefix' => $prefix))->fetchField();
+    } while ($prefix_exists);
+    $this->databasePrefix = $prefix;
+
+    // As soon as the database prefix is set, the test might start to execute.
+    // All assertions as well as the SimpleTest batch operations are associated
+    // with the testId, so the database prefix has to be associated with it.
+    db_insert('simpletest_prefix')
+      ->fields(array(
+        'test_id' => $this->testId,
+        'prefix' => $this->databasePrefix,
+      ))
+      ->execute();
+  }
+
+  /**
    * Internal helper: stores the assert.
    *
    * @param $status
@@ -739,12 +774,7 @@ class DrupalUnitTestCase extends DrupalTestCase {
     // Store necessary current values before switching to the test environment.
     $this->originalFileDirectory = variable_get('file_public_path', conf_path() . '/files');
 
-    // Generate a temporary prefixed database to ensure that tests have a clean starting point.
-    $this->databasePrefix = 'simpletest' . mt_rand(1000, 1000000);
-    db_update('simpletest_test_id')
-      ->fields(array('last_prefix' => $this->databasePrefix))
-      ->condition('test_id', $this->testId)
-      ->execute();
+    $this->prepareDatabasePrefix();
 
     // Reset all statics so that test is performed with a clean environment.
     drupal_static_reset();
@@ -788,6 +818,12 @@ class DrupalUnitTestCase extends DrupalTestCase {
     // Get back to the original connection.
     Database::removeConnection('default');
     Database::renameConnection('simpletest_original_default', 'default');
+
+    // Delete the database table prefix record.
+    db_delete('simpletest_prefix')
+      ->condition('test_id', $this->testId)
+      ->condition('prefix', $this->databasePrefix)
+      ->execute();
 
     $conf['file_public_path'] = $this->originalFileDirectory;
     // Restore modules if necessary.
@@ -1315,32 +1351,6 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Generates a database prefix for running tests.
-   * The generated database table prefix is used for the Drupal installation
-   * being performed for the test. It is also used as user agent HTTP header
-   * value by the cURL-based browser of DrupalWebTestCase, which is sent
-   * to the Drupal installation of the test. During early Drupal bootstrap, the
-   * user agent HTTP header is parsed, and if it matches, all database queries
-   * use the database table prefix that has been generated here.
-   *
-   * @see DrupalWebTestCase::curlInitialize()
-   * @see drupal_valid_test_ua()
-   * @see DrupalWebTestCase::setUp()
-   */
-  protected function prepareDatabasePrefix() {
-
-    // Generate a temporary prefixed database to ensure that tests have a clean starting point.
-    $this->databasePrefix = 'simpletest' . mt_rand(1000, 1000000);
-    // As soon as the database prefix is set, the test might start to execute.
-    // All assertions as well as the SimpleTest batch operations are associated
-    // with the testId, so the database prefix has to be associated with it.
-    db_update('simpletest_test_id')
-      ->fields(array('last_prefix' => $this->databasePrefix))
-      ->condition('test_id', $this->testId)
-      ->execute();
-  }
-
-  /**
    * Changes the database connection to the prefixed one.
    *
    * @see DrupalWebTestCase::setUp()
@@ -1399,7 +1409,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     // Set to English to prevent exceptions from utf8_truncate() from t()
     // during install if the current language is not 'en'.
     // The following array/object conversion is copied from language_default().
-    $language = (object) array(
+    $language_interface = (object) array(
       'langcode' => 'en',
       'name' => 'English',
       'direction' => 0,
@@ -1516,8 +1526,6 @@ class DrupalWebTestCase extends DrupalTestCase {
     include_once DRUPAL_ROOT . '/core/includes/install.inc';
     drupal_install_system();
 
-    $this->preloadRegistry();
-
     // Set path variables.
     variable_set('file_public_path', $this->public_files_directory);
     variable_set('file_private_path', $this->private_files_directory);
@@ -1528,6 +1536,9 @@ class DrupalWebTestCase extends DrupalTestCase {
     // @see drupal_system_listing()
     // @todo This may need to be primed like 'install_profile' above.
     variable_set('simpletest_parent_profile', $this->originalProfile);
+
+    // Ensure schema versions are recalculated.
+    drupal_static_reset('drupal_get_schema_versions');
 
     // Include the testing profile.
     variable_set('install_profile', $this->profile);
@@ -1585,42 +1596,6 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     drupal_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
-  }
-
-  /**
-   * Preload the registry from the testing site.
-   *
-   * This method is called by DrupalWebTestCase::setUp(), and preloads the
-   * registry from the testing site to cut down on the time it takes to
-   * set up a clean environment for the current test run.
-   */
-  protected function preloadRegistry() {
-    // Use two separate queries, each with their own connections: copy the
-    // {registry} and {registry_file} tables over from the parent installation
-    // to the child installation.
-    $original_connection = Database::getConnection('default', 'simpletest_original_default');
-    $test_connection = Database::getConnection();
-
-    foreach (array('registry', 'registry_file') as $table) {
-      // Find the records from the parent database.
-      $source_query = $original_connection
-        ->select($table, array(), array('fetch' => PDO::FETCH_ASSOC))
-        ->fields($table);
-
-      $dest_query = $test_connection->insert($table);
-
-      $first = TRUE;
-      foreach ($source_query->execute() as $row) {
-        if ($first) {
-          $dest_query->fields(array_keys($row));
-          $first = FALSE;
-        }
-        // Insert the records into the child database.
-        $dest_query->values($row);
-      }
-
-      $dest_query->execute();
-    }
   }
 
   /**
@@ -1708,6 +1683,12 @@ class DrupalWebTestCase extends DrupalTestCase {
     // Get back to the original connection.
     Database::removeConnection('default');
     Database::renameConnection('simpletest_original_default', 'default');
+
+    // Delete the database table prefix record.
+    db_delete('simpletest_prefix')
+      ->condition('test_id', $this->testId)
+      ->condition('prefix', $this->databasePrefix)
+      ->execute();
 
     // Set the configuration direcotires back to the originals.
     $config_directories = $this->originalConfigDirectories;
