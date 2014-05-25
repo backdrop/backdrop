@@ -11,6 +11,11 @@
  * @see contact_menu()
  */
 function contact_category_list() {
+
+  $config_data = contact_config_data();
+  $selected_category = $config_data['contact_default_category'];
+  $categories = $config_data['categories'];
+
   $header = array(
     t('Category'),
     t('Recipients'),
@@ -19,37 +24,37 @@ function contact_category_list() {
   );
   $rows = array();
 
-  // Get all the contact categories from the database.
-  $categories = db_select('contact', 'c')
-    ->addTag('translatable')
-    ->fields('c', array('cid', 'category', 'recipients', 'selected'))
-    ->orderBy('weight')
-    ->orderBy('category')
-    ->execute()
-    ->fetchAll();
-
   // Loop through the categories and add them to the table.
-  foreach ($categories as $category) {
-    $row = array();
-    $row[] = check_plain($category->category);
-    $row[] = check_plain($category->recipients);
-    $row[] = ($category->selected ? t('Yes') : t('No'));
-    $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'admin/structure/contact/edit/' . $category->cid,
-    );
-    $links['delete'] = array(
-      'title' => t('Delete'),
-      'href' => 'admin/structure/contact/delete/' . $category->cid,
-    );
-    $row[] = array(
-      'data' => array(
-        '#type' => 'operations',
-        '#links' => $links,
-      ),
-    );
-    $rows[] = $row;
+  if ($categories) {
+    foreach ($categories as $cat) {
+      $row = array();
+      $row[] = check_plain($cat['category']);
+      $row[] = check_plain($cat['recipients']);
+
+      if ($cat['cid'] == $selected_category) {
+        $row[] = t('Yes');
+      }
+      else {
+        $row[] = t('No');
+      }
+
+      $links = array();
+      $links['edit'] = array(
+        'title' => t('Edit'),
+        'href' => 'admin/structure/contact/edit/' . $cat['cid'],
+      );
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/structure/contact/delete/' . $cat['cid'],
+      );
+      $row[] = array(
+        'data' => array(
+          '#type' => 'operations',
+          '#links' => $links,
+        ),
+      );
+      $rows[] = $row;
+    }
   }
 
   if (!$rows) {
@@ -70,7 +75,7 @@ function contact_category_list() {
 /**
  * Form constructor for the category edit form.
  *
- * @param $category
+ * @param array $category
  *   An array describing the category to be edited. May be empty for new
  *   categories. Recognized array keys are:
  *   - category: The name of the category.
@@ -96,6 +101,16 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     'selected' => 0,
     'cid' => NULL,
   );
+
+  // Get contact_default_category.
+  $config_data = contact_config_data();
+  $default_category = $config_data['contact_default_category'];
+
+  // Check if selected.
+  $selected = 0;
+  if (isset($category['cid']) AND $default_category == $category['cid']) {
+    $selected = 1;
+  }
 
   $form['category'] = array(
     '#type' => 'textfield',
@@ -131,11 +146,11 @@ function contact_category_edit_form($form, &$form_state, array $category = array
       0 => t('No'),
       1 => t('Yes'),
     ),
-    '#default_value' => $category['selected'],
+    '#default_value' => $selected,
     '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
   );
   $form['cid'] = array(
-    '#type' => 'value',
+    '#type' => 'hidden',
     '#value' => $category['cid'],
   );
   $form['actions'] = array('#type' => 'actions');
@@ -159,14 +174,22 @@ function contact_category_edit_form_validate($form, &$form_state) {
   // When creating a new contact form, or renaming the category on an existing
   // contact form, make sure that the given category is unique.
   $category = $form_state['values']['category'];
-  $query = db_select('contact', 'c')->condition('c.category', $category, '=');
-  if (!empty($form_state['values']['cid'])) {
-    $query->condition('c.cid', $form_state['values']['cid'], '<>');
-  }
-  if ($query->countQuery()->execute()->fetchField()) {
-    form_set_error('category', t('A contact form with category %category already exists.', array('%category' => $category)));
+
+  // Get Categories Data.
+  $config_data = contact_config_data();
+  $categories = $config_data['categories'];
+
+  if ($categories) {
+    foreach ($categories as $cat) {
+      if ($form_state['values']['cid'] != $cat['cid'] AND $category == $cat['category']) {
+        if (empty($form_state['values']['cid'])) {
+          form_set_error('category', t('A contact form with category %category already exists.', array('%category' => $category)));
+        }
+      }
+    }
   }
 
+  // Check recipients are valid email.
   foreach ($recipients as &$recipient) {
     $recipient = trim($recipient);
     if (!valid_email_address($recipient)) {
@@ -174,6 +197,8 @@ function contact_category_edit_form_validate($form, &$form_state) {
     }
   }
   $form_state['values']['recipients'] = implode(',', $recipients);
+  // Store $config_data in $form_state for use in form_submit().
+  $form_state['categories_data'] = $config_data;
 }
 
 /**
@@ -182,19 +207,57 @@ function contact_category_edit_form_validate($form, &$form_state) {
  * @see contact_category_edit_form_validate()
  */
 function contact_category_edit_form_submit($form, &$form_state) {
-  if ($form_state['values']['selected']) {
-    // Unselect all other contact categories.
-    db_update('contact')
-      ->fields(array('selected' => '0'))
-      ->execute();
-  }
 
-  if (empty($form_state['values']['cid'])) {
-    drupal_write_record('contact', $form_state['values']);
+  $cid = $form_state['values']['cid'];
+
+  $contact = array(
+    'cid' => $cid,
+    'category' => $form_state['values']['category'],
+    'recipients' => $form_state['values']['recipients'],
+    'reply' => $form_state['values']['reply'],
+    'weight' => $form_state['values']['weight'],
+  );
+
+  // Get Categories Data stored in $form_state.
+  $config_data = $form_state['categories_data'];
+  $default_category = $config_data['contact_default_category'];
+  $categories = $config_data['categories'];
+
+  if (isset($cid)) {
+    foreach ($categories as $key => $val) {
+      if ($val['cid'] == $cid) {
+        $categories[$key] = $contact;
+      }
+    }
   }
   else {
-    drupal_write_record('contact', $form_state['values'], array('cid'));
+    $max_cid = 0;
+    if ($categories) {
+      foreach ($categories as $key => $cat) {
+        $cids[] = $cat['cid'];
+      }
+      $max_cid = max($cids);
+    }
+
+    $cid = $max_cid + 1;
+    $contact['cid'] = $cid;
+    $categories[] = $contact;
   }
+
+  // If selected set variable contact_default_category.
+  if ($form_state['values']['selected']) {
+    $config_data['contact_default_category'] = $cid;
+  }
+  elseif ($cid == $default_category) {
+    // If not selected but is set as default then set default back to 0.
+    $config_data['contact_default_category'] = 0;
+  }
+
+  $config_data['categories'] = array_values($categories);
+
+  $config = config('contact.categories');
+  $config->setData($config_data);
+  $config->save();
 
   drupal_set_message(t('Category %category has been saved.', array('%category' => $form_state['values']['category'])));
   watchdog('contact', 'Category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Edit'), 'admin/structure/contact/edit/' . $form_state['values']['cid']));
@@ -204,7 +267,7 @@ function contact_category_edit_form_submit($form, &$form_state) {
 /**
  * Form constructor for the contact category deletion form.
  *
- * @param $contact
+ * @param array $contact
  *   Array describing the contact category to be deleted. See the documentation
  *   of contact_category_edit_form() for the recognized keys.
  *
@@ -231,11 +294,32 @@ function contact_category_delete_form($form, &$form_state, array $contact) {
  * Form submission handler for contact_category_delete_form().
  */
 function contact_category_delete_form_submit($form, &$form_state) {
+
   $contact = $form['contact']['#value'];
 
-  db_delete('contact')
-    ->condition('cid', $contact['cid'])
-    ->execute();
+  // Get Categories Data.
+  $config_data = contact_config_data();
+  $default_catageory = $config_data['contact_default_category'];
+  $categories = $config_data['categories'];
+
+  foreach ($categories as $key => $cat) {
+    if ($cat['cid'] == $contact['cid']) {
+
+      unset($categories[$key]);
+
+      if ($cat['cid'] == $default_catageory) {
+        $config_data['contact_default_category'] = 0;
+      }
+
+      break;
+    }
+  }
+
+  $config_data['categories'] = array_values($categories);
+
+  $config = config('contact.categories');
+  $config->setData($config_data);
+  $config->save();
 
   drupal_set_message(t('Category %category has been deleted.', array('%category' => $contact['category'])));
   watchdog('contact', 'Category %category has been deleted.', array('%category' => $contact['category']), WATCHDOG_NOTICE);

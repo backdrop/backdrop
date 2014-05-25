@@ -26,15 +26,10 @@ function contact_site_form($form, &$form_state) {
     drupal_exit();
   }
 
-  // Get an array of the categories and the current default category.
-  $categories = db_select('contact', 'c')
-    ->addTag('translatable')
-    ->fields('c', array('cid', 'category'))
-    ->orderBy('weight')
-    ->orderBy('category')
-    ->execute()
-    ->fetchAllKeyed();
-  $default_category = db_query("SELECT cid FROM {contact} WHERE selected = 1")->fetchField();
+  // Get an array of the categories.
+  $config_data = contact_config_data();
+  $categories = $config_data['categories'];
+  $default_category = $config_data['contact_default_category'];
 
   // If there are no categories, do not display the form.
   if (!$categories) {
@@ -47,11 +42,16 @@ function contact_site_form($form, &$form_state) {
     }
   }
 
+  $options = array();
+  foreach ($categories as $cat) {
+    $options[$cat['cid']] = $cat['category'];
+  }
+
   // If there is more than one category available and no default category has
   // been selected, prepend a default placeholder value.
-  if (!$default_category) {
-    if (count($categories) > 1) {
-      $categories = array(0 => t('- Please choose -')) + $categories;
+  if ($default_category == 0) {
+    if (count($options) > 1) {
+      $options = array(0 => t('- Please choose -')) + $options;
     }
     else {
       $default_category = key($categories);
@@ -83,13 +83,14 @@ function contact_site_form($form, &$form_state) {
     '#maxlength' => 255,
     '#required' => TRUE,
   );
+
   $form['cid'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#default_value' => $default_category,
-    '#options' => $categories,
+    '#options' => $options,
     '#required' => TRUE,
-    '#access' => count($categories) > 1,
+    '#access' => count($options) > 1,
   );
   $form['message'] = array(
     '#type' => 'textarea',
@@ -161,7 +162,12 @@ function contact_site_form_submit($form, &$form_state) {
 
   $config = config('contact.settings');
   flood_register_event('contact', $config->get('contact_threshold_window'));
-  watchdog('mail', '%sender-name (@sender-from) sent an e-mail regarding %category.', array('%sender-name' => $values['name'], '@sender-from' => $from, '%category' => $values['category']['category']));
+  watchdog('mail', '%sender-name (@sender-from) sent an e-mail regarding %category.',
+    array(
+      '%sender-name' => $values['name'],
+      '@sender-from' => $from,
+      '%category' => $values['category']['category'],
+    ));
 
   // Jump to home page rather than back to contact page to avoid
   // contradictory messages if flood control has been activated.
@@ -279,7 +285,12 @@ function contact_personal_form_submit($form, &$form_state) {
 
   $config = config('contact.settings');
   flood_register_event('contact', $config->get('contact_threshold_window'));
-  watchdog('mail', '%sender-name (@sender-from) sent %recipient-name an e-mail.', array('%sender-name' => $values['name'], '@sender-from' => $from, '%recipient-name' => $values['recipient']->name));
+  watchdog('mail', '%sender-name (@sender-from) sent %recipient-name an e-mail.',
+    array(
+      '%sender-name' => $values['name'],
+      '@sender-from' => $from,
+      '%recipient-name' => $values['recipient']->name,
+    ));
 
   // Jump to the contacted user's profile page.
   drupal_set_message(t('Your message has been sent.'));
