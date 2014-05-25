@@ -6,77 +6,24 @@
  */
 
 /**
- * Implements hook_schema().
- */
-function contact_schema() {
-  $schema['contact'] = array(
-    'description' => 'Contact form category settings.',
-    'fields' => array(
-      'cid' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Primary Key: Unique category ID.',
-      ),
-      'category' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Category name.',
-        'translatable' => TRUE,
-      ),
-      'recipients' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'size' => 'big',
-        'description' => 'Comma-separated list of recipient e-mail addresses.',
-      ),
-      'reply' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'size' => 'big',
-        'description' => 'Text of the auto-reply message.',
-      ),
-      'weight' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => "The category's weight.",
-      ),
-      'selected' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny',
-        'description' => 'Flag to indicate whether or not category is selected by default. (1 = Yes, 0 = No)',
-      ),
-    ),
-    'primary key' => array('cid'),
-    'unique keys' => array(
-      'category' => array('category'),
-    ),
-    'indexes' => array(
-      'list' => array('weight', 'category'),
-    ),
-  );
-
-  return $schema;
-}
-
-/**
  * Implements hook_install().
  */
 function contact_install() {
   // Insert a default contact category.
-  db_insert('contact')
-    ->fields(array(
-      'category' => 'Website feedback',
-      'recipients' => variable_get('site_mail', ini_get('sendmail_from')),
-      'selected' => 1,
-      'reply' => '',
-    ))
-    ->execute();
+  $contact = array(
+    'cid' => 1,
+    'category' => 'Website feedback',
+    'recipients' => variable_get('site_mail', ini_get('sendmail_from')),
+    'reply' => '',
+    'weight' => 1,
+  );
+
+  $config_data['categories'][] = $contact;
+  $config_data['contact_default_category'] = 1;
+
+  $config = config('contact.categories');
+  $config->setData($config_data);
+  $config->save();
 }
 
 /**
@@ -103,6 +50,38 @@ function contact_update_1000() {
 }
 
 /**
+ * Convert available database contact categories to configuration files.
+ */
+function contact_update_1001() {
+  // Copy config file to site config folder.
+  config_install_default_config('module', 'contact.categories');
+  // Migrate categories if any.
+  if (db_table_exists('contact')) {
+    $contacts = db_query("SELECT * FROM {contact}");
+
+    foreach ($contacts as $contact) {
+
+      if ($contact->selected == 1) {
+        // Add selected category to config.
+        $config_data['contact_default_category'] = $contact->cid;
+      }
+
+      unset($contact->selected);
+      $categories[] = (array) $contact;
+    }
+
+    $config_data['categories'] = $categories;
+
+    $config = config('contact.categories');
+    $config->setData($config_data);
+    $config->save();
+
+    db_drop_table('contact');
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
+ 

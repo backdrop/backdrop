@@ -33,6 +33,21 @@ function contact_views_api() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function contact_config_info() {
+  $prefixes['contact.settings'] = array(
+    'label' => t('Contact settings'),
+    'group' => t('Contact'),
+  );
+  $prefixes['contact.categories'] = array(
+    'label' => t('Contact categories'),
+    'group' => t('Contact'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_menu().
  */
 function contact_menu() {
@@ -90,7 +105,7 @@ function contact_menu() {
 /**
  * Access callback: Checks access for a user's personal contact form.
  *
- * @param $account
+ * @param User $account
  *   The user object of the user whose contact form is being requested.
  *
  * @see contact_menu()
@@ -139,19 +154,55 @@ function contact_autoload_info() {
 /**
  * Loads a contact category.
  *
- * @param $cid
- *   The contact category ID.
+ * @param int $cid
+ *   The contact category id.
  *
- * @return
+ * @return array
  *   An array with the contact category's data.
  */
 function contact_load($cid) {
-  return db_select('contact', 'c')
-    ->addTag('translatable')
-    ->fields('c')
-    ->condition('cid', $cid)
-    ->execute()
-    ->fetchAssoc();
+  $cat_data = contact_config_data();
+  $categories = $cat_data['categories'];
+
+  if ($categories) {
+    foreach ($categories as $key => $cat) {
+      if ($cid == $cat['cid']) {
+        $contact = $categories[$key];
+        return $contact;
+      }
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Loads an array of all contact categories.
+ *
+ * @return array
+ *   An array of contact categoryies data.
+ */
+function contact_config_data() {
+
+  $categories = array();
+  $config_data = array();
+
+  $config = config('contact.categories');
+  $config_data['contact_default_category'] = $config->get('contact_default_category');
+
+  $categories = $config->get('categories');
+
+  // Sort the categories by weight then category.
+  if ($categories) {
+    uasort($categories, function ($a, $b) {
+      if ($a['weight'] == $b['weight']) {
+        return $a['category'] < $b['category'] ? -1 : 1;
+      }
+      return $a['weight'] < $b['weight'] ? -1 : 1;
+    });
+  }
+  $config_data['categories'] = $categories;
+
+  return $config_data;
 }
 
 /**
