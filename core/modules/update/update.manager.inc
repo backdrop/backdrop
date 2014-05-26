@@ -447,10 +447,10 @@ function update_manager_update_ready_form_submit($form, &$form_state) {
     }
 
     // If the owner of the last directory we extracted is the same as the
-    // owner of our configuration directory (e.g. sites/default) where we're
-    // trying to install the code, there's no need to prompt for FTP/SSH
-    // credentials. Instead, we instantiate a FileTransferLocal and invoke
-    // update_authorize_run_update() directly.
+    // owner of our configuration directory where we're trying to install the
+    // code, there's no need to prompt for FTP/SSH credentials. Instead, we
+    // instantiate a FileTransferLocal and invoke update_authorize_run_update()
+    // directly.
     if (fileowner($project_real_location) == fileowner(conf_path())) {
       module_load_include('inc', 'update', 'update.authorize');
       $filetransfer = new FileTransferLocal(DRUPAL_ROOT);
@@ -720,10 +720,10 @@ function update_manager_install_form_submit($form, &$form_state) {
   );
 
   // If the owner of the directory we extracted is the same as the
-  // owner of our configuration directory (e.g. sites/default) where we're
-  // trying to install the code, there's no need to prompt for FTP/SSH
-  // credentials. Instead, we instantiate a FileTransferLocal and invoke
-  // update_authorize_run_install() directly.
+  // owner of our configuration directory where we're trying to install the
+  // code, there's no need to prompt for FTP/SSH credentials. Instead, we
+  // instantiate a FileTransferLocal and invoke update_authorize_run_install()
+  // directly.
   if (fileowner($project_real_location) == fileowner(conf_path())) {
     module_load_include('inc', 'update', 'update.authorize');
     $filetransfer = new FileTransferLocal(DRUPAL_ROOT);
@@ -901,10 +901,10 @@ function update_manager_batch_project_get($project, $url, &$context) {
  * Determines if file transfers will be performed locally.
  *
  * If the server is configured such that webserver-created files have the same
- * owner as the configuration directory (e.g., sites/default) where new code
- * will eventually be installed, the update manager can transfer files entirely
- * locally, without changing their ownership (in other words, without prompting
- * the user for FTP, SSH or other credentials).
+ * owner as the configuration directory where new code will eventually be
+ * installed, the update manager can transfer files entirely locally, without
+ * changing their ownership (in other words, without prompting the user for FTP,
+ * SSH or other credentials).
  *
  * This server configuration is an inherent security weakness because it allows
  * a malicious webserver process to append arbitrary PHP code and then execute
