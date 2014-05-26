@@ -105,7 +105,7 @@ function contact_menu() {
 /**
  * Access callback: Checks access for a user's personal contact form.
  *
- * @param object $account
+ * @param User $account
  *   The user object of the user whose contact form is being requested.
  *
  * @see contact_menu()

@@ -27,6 +27,11 @@ function contact_install() {
 }
 
 /**
+ * @addtogroup updates-7.x-to-1.x
+ * @{
+ */
+
+/**
  * Convert contact module settings to use configuration files.
  */
 function contact_update_1000() {
@@ -74,3 +79,9 @@ function contact_update_1001() {
     db_drop_table('contact');
   }
 }
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */
+ 
