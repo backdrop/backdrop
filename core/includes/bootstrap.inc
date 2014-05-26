@@ -2462,6 +2462,14 @@ function _drupal_bootstrap_configuration() {
     include_once DRUPAL_ROOT . '/core/includes/install.inc';
     install_goto('core/install.php');
   }
+
+  // Check that the config directory is not empty.
+  if (!empty($GLOBALS['config_directories']['active']) && !drupal_installation_attempted()) {
+    $directory = $GLOBALS['config_directories']['active'];
+    if (!is_file($directory . '/system.performance.json')) {
+      throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
+    }
+  }
 }
 
 /**

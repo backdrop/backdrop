@@ -686,18 +686,14 @@ function module_implements($hook, $sort = FALSE) {
   // Use the advanced drupal_static() pattern, since this is called very often.
   static $drupal_static_fast;
   if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['implementations'] = &drupal_static(__FUNCTION__);
+    $drupal_static_fast['implementations'] = &drupal_static(__FUNCTION__, array());
   }
   $implementations = &$drupal_static_fast['implementations'];
 
   // Fetch implementations from cache.
-  if (empty($implementations)) {
-    $implementations = cache('bootstrap')->get('module_implements');
-    if ($implementations === FALSE) {
-      $implementations = array();
-    }
-    else {
-      $implementations = $implementations->data;
+  if (empty($implementations) && function_exists('cache')) {
+    if ($implementation_cache = cache('bootstrap')->get('module_implements')) {
+      $implementations = $implementation_cache->data;
     }
   }
 
